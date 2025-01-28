@@ -5,9 +5,12 @@
 import 'template.dart';
 
 class DatePickerTemplate extends TokenTemplate {
-  const DatePickerTemplate(super.blockName, super.fileName, super.tokens, {
+  const DatePickerTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
+    super.textThemePrefix = '_textTheme.',
   });
 
   String _layerOpacity(String layerToken) {
@@ -26,9 +29,9 @@ class DatePickerTemplate extends TokenTemplate {
   String _stateColor(String componentToken, String? type, String state) {
     final String baseColor = color(
       type != null
-        ? '$componentToken.$type.$state.state-layer.color'
-        : '$componentToken.$state.state-layer.color',
-      ''
+          ? '$componentToken.$type.$state.state-layer.color'
+          : '$componentToken.$state.state-layer.color',
+      '',
     );
     if (baseColor.isEmpty) {
       return 'null';
@@ -44,6 +47,9 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
     : super(
         elevation: ${elevation("md.comp.date-picker.modal.container")},
         shape: ${shape("md.comp.date-picker.modal.container")},
+        // TODO(tahatesser): Update this to use token when gen_defaults
+        // supports `CircleBorder` for fully rounded corners.
+        dayShape: const MaterialStatePropertyAll<OutlinedBorder>(CircleBorder()),
         rangePickerElevation: ${elevation("md.comp.date-picker.modal.range-selection.container")},
         rangePickerShape: ${shape("md.comp.date-picker.modal.range-selection.container")},
       );

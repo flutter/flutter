@@ -30,8 +30,8 @@ class AppStateModel extends Model {
   // Totaled prices of the items in the cart.
   double get subtotalCost {
     return _productsInCart.keys
-      .map((int id) => _availableProducts![id].price * _productsInCart[id]!)
-      .fold(0.0, (double sum, int e) => sum + e);
+        .map((int id) => _availableProducts![id].price * _productsInCart[id]!)
+        .fold(0.0, (double sum, int e) => sum + e);
   }
 
   // Total shipping cost for the items in the cart.
@@ -54,36 +54,26 @@ class AppStateModel extends Model {
     if (_selectedCategory == Category.all) {
       return List<Product>.from(_availableProducts!);
     } else {
-      return _availableProducts!
-        .where((Product p) => p.category == _selectedCategory)
-        .toList();
+      return _availableProducts!.where((Product p) => p.category == _selectedCategory).toList();
     }
   }
 
   // Adds a product to the cart.
   void addProductToCart(int productId) {
-    final int? value = _productsInCart[productId];
-    if (value == null) {
-      _productsInCart[productId] = 1;
-    } else {
-      _productsInCart[productId] = value+1;
-    }
+    final int value = _productsInCart[productId] ?? 0;
+    _productsInCart[productId] = value + 1;
 
     notifyListeners();
   }
 
   // Removes an item from the cart.
   void removeItemFromCart(int productId) {
-    final int? value = _productsInCart[productId];
-
-    if (value != null) {
-      if (_productsInCart[productId] == 1) {
+    switch (_productsInCart[productId]) {
+      case 1:
         _productsInCart.remove(productId);
-      } else {
+      case final int value:
         _productsInCart[productId] = value - 1;
-      }
     }
-
     notifyListeners();
   }
 

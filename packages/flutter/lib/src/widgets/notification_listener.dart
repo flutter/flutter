@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'layout_builder.dart';
+/// @docImport 'nested_scroll_view.dart';
+/// @docImport 'scroll_notification.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'size_changed_layout_notifier.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -78,7 +86,7 @@ abstract class Notification {
   /// method, as in `super.debugFillDescription(description)`.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) { }
+  void debugFillDescription(List<String> description) {}
 }
 
 /// A widget that listens for [Notification]s bubbling up the tree.
@@ -91,11 +99,7 @@ abstract class Notification {
 /// To dispatch notifications, use the [Notification.dispatch] method.
 class NotificationListener<T extends Notification> extends ProxyWidget {
   /// Creates a widget that listens for notifications.
-  const NotificationListener({
-    super.key,
-    required super.child,
-    this.onNotification,
-  });
+  const NotificationListener({super.key, required super.child, this.onNotification});
 
   /// Called when a notification of the appropriate type arrives at this
   /// location in the tree.
@@ -120,7 +124,8 @@ class NotificationListener<T extends Notification> extends ProxyWidget {
 }
 
 /// An element used to host [NotificationListener] elements.
-class _NotificationElement<T extends Notification> extends ProxyElement with NotifiableElementMixin {
+class _NotificationElement<T extends Notification> extends ProxyElement
+    with NotifiableElementMixin {
   _NotificationElement(NotificationListener<T> super.widget);
 
   @override

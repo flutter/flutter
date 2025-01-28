@@ -5,7 +5,10 @@
 import 'template.dart';
 
 class BottomAppBarTemplate extends TokenTemplate {
-  const BottomAppBarTemplate(super.blockName, super.fileName, super.tokens, {
+  const BottomAppBarTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
@@ -26,7 +29,7 @@ class _${blockName}DefaultsM3 extends BottomAppBarTheme {
   Color? get color => ${componentColor('md.comp.bottom-app-bar.container')};
 
   @override
-  Color? get surfaceTintColor => ${componentColor('md.comp.bottom-app-bar.container.surface-tint-layer')};
+  Color? get surfaceTintColor => ${colorOrTransparent('md.comp.bottom-app-bar.container.surface-tint-layer')};
 
   @override
   Color? get shadowColor => Colors.transparent;

@@ -10,7 +10,7 @@ class HotReloadWithAssetProject extends Project {
   final String pubspec = '''
 name: test
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   flutter:
@@ -49,10 +49,7 @@ class MyApp extends StatelessWidget {
 ''';
 
   void uncommentHotReloadPrint() {
-    final String newMainContents = main.replaceAll(
-      'LOADED DATA',
-      'SECOND DATA',
-    );
+    final String newMainContents = main.replaceAll('LOADED DATA', 'SECOND DATA');
     writeFile(
       fileSystem.path.join(dir.path, 'lib', 'main.dart'),
       newMainContents,

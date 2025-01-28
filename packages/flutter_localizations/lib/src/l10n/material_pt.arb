@@ -146,5 +146,7 @@
   "menuDismissLabel": "Dispensar menu",
   "lookUpButtonLabel": "Pesquisar",
   "searchWebButtonLabel": "Pesquisar na Web",
-  "shareButtonLabel": "Compartilhar…"
+  "shareButtonLabel": "Compartilhar",
+  "clearButtonTooltip": "Limpar texto",
+  "selectedDateLabel": "Selecionada"
 }

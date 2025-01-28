@@ -33,11 +33,7 @@ external Document get document;
 @JS()
 external Window get window;
 
-@JS('CSSStyleDeclaration')
-@staticInterop
-class CSSStyleDeclaration {}
-
-extension CSSStyleDeclarationExtension on CSSStyleDeclaration {
+extension type CSSStyleDeclaration._(JSObject _) implements JSObject {
   external set backgroundColor(String value);
   external String get backgroundColor;
   external set border(String value);
@@ -48,159 +44,97 @@ extension CSSStyleDeclarationExtension on CSSStyleDeclaration {
   external String get width;
 }
 
-@JS('CSSStyleSheet')
-@staticInterop
-class CSSStyleSheet {}
-
-extension CSSStyleSheetExtension on CSSStyleSheet {
-  external int insertRule(
-    String rule, [
-    int index,
-  ]);
+extension type CSSStyleSheet._(JSObject _) implements JSObject {
+  external int insertRule(String rule, [int index]);
 }
 
-@JS('Document')
-@staticInterop
-class Document implements Node {}
-
-extension DocumentExtension on Document {
-  external Element createElement(
-    String localName, [
-    JSAny options,
-  ]);
+extension type Document._(JSObject _) implements JSObject {
+  external Element createElement(String localName, [JSAny options]);
   external Range createRange();
   external HTMLHeadElement? get head;
 }
 
-@JS('DOMTokenList')
-@staticInterop
-class DOMTokenList {}
-
-extension DOMTokenListExtension on DOMTokenList {
+extension type DOMTokenList._(JSObject _) implements JSObject {
   external void add(String tokens);
 }
 
-@JS('Element')
-@staticInterop
-class Element implements Node {}
-
-extension ElementExtension on Element {
+extension type Element._(JSObject _) implements Node, JSObject {
   external DOMTokenList get classList;
   external void append(JSAny nodes);
+  external void remove();
 }
 
-@JS('Event')
-@staticInterop
-class Event {}
+extension type Event._(JSObject _) implements JSObject {}
 
-@JS('EventTarget')
-@staticInterop
-class EventTarget {}
-
-extension EventTargetExtension on EventTarget {
-  external void addEventListener(
-    String type,
-    EventListener? callback, [
-    JSAny options,
-  ]);
+extension type EventTarget._(JSObject _) implements JSObject {
+  external void addEventListener(String type, EventListener? callback, [JSAny options]);
 }
 
-@JS('HTMLElement')
-@staticInterop
-class HTMLElement implements Element {}
-
-extension HTMLElementExtension on HTMLElement {
+extension type HTMLElement._(JSObject _) implements Element, JSObject {
+  external String get innerText;
   external set innerText(String value);
   external CSSStyleDeclaration get style;
+  external HTMLElement cloneNode(bool deep);
 }
 
-@JS('HTMLHeadElement')
-@staticInterop
-class HTMLHeadElement implements HTMLElement {}
+extension type HTMLHeadElement._(JSObject _) implements HTMLElement, JSObject {}
 
-@JS('HTMLStyleElement')
-@staticInterop
-class HTMLStyleElement implements HTMLElement {}
-
-extension HTMLStyleElementExtension on HTMLStyleElement {
+extension type HTMLStyleElement._(JSObject _) implements HTMLElement, JSObject {
   external CSSStyleSheet? get sheet;
 }
 
-@JS('MediaQueryList')
-@staticInterop
-class MediaQueryList {}
+extension type HTMLImageElement._(JSObject _) implements HTMLElement, JSObject {
+  external String get src;
+  external set src(String value);
+  external num get naturalWidth;
+  external num get naturalHeight;
+  external JSPromise<JSAny?> decode();
+}
 
-extension MediaQueryListExtension on MediaQueryList {
+extension type HTMLCanvasElement._(JSObject _) implements HTMLElement, JSObject {
+  external int get width;
+  external set width(int value);
+  external int get height;
+  external set height(int value);
+  external String toDataURL();
+}
+
+extension type MediaQueryList._(JSObject _) implements EventTarget, JSObject {
   external bool get matches;
 }
 
-@JS('MouseEvent')
-@staticInterop
-class MouseEvent {}
-
-extension MouseEventExtension on MouseEvent {
+extension type MouseEvent._(JSObject _) implements JSObject {
   external num get offsetX;
   external num get offsetY;
   external int get button;
 }
 
-@JS('Navigator')
-@staticInterop
-class Navigator {}
-
-extension NavigatorExtension on Navigator {
+extension type Navigator._(JSObject _) implements JSObject {
   external String get platform;
 }
 
-@JS('Node')
-@staticInterop
-class Node implements EventTarget {}
+extension type Node._(JSObject _) implements EventTarget, JSObject {}
 
-@JS('Range')
-@staticInterop
-class Range {}
-
-extension RangeExtension on Range {
+extension type Range._(JSObject _) implements JSObject {
   external void selectNode(Node node);
 }
 
-@JS('Selection')
-@staticInterop
-class Selection {}
-
-extension SelectionExtension on Selection {
+extension type Selection._(JSObject _) implements JSObject {
   external void addRange(Range range);
   external void removeAllRanges();
 }
 
-@JS('Window')
-@staticInterop
-class Window {}
-
-extension WindowExtension on Window {
+extension type Window._(JSObject _) implements EventTarget, JSObject {
   external Navigator get navigator;
   external MediaQueryList matchMedia(String query);
   external Selection? getSelection();
+  external String get origin;
 }
 
-@JS('XMLHttpRequest')
-@staticInterop
-class XMLHttpRequest implements XMLHttpRequestEventTarget {
+extension type XMLHttpRequest._(JSObject _) implements XMLHttpRequestEventTarget, JSObject {
   external factory XMLHttpRequest();
-}
-
-extension XMLHttpRequestExtension on XMLHttpRequest {
-  external void open(
-    String method,
-    String url, [
-    bool async,
-    String? username,
-    String? password,
-  ]);
-  external void setRequestHeader(
-    String name,
-    String value,
-  );
+  external void open(String method, String url, [bool async, String? username, String? password]);
+  external void setRequestHeader(String name, String value);
   external void send([JSAny? body]);
   external int get status;
   external set responseType(XMLHttpRequestResponseType value);
@@ -208,6 +142,4 @@ extension XMLHttpRequestExtension on XMLHttpRequest {
   external JSAny? get response;
 }
 
-@JS('XMLHttpRequestEventTarget')
-@staticInterop
-class XMLHttpRequestEventTarget implements EventTarget {}
+extension type XMLHttpRequestEventTarget._(JSObject _) implements EventTarget, JSObject {}

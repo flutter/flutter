@@ -14,7 +14,7 @@ const Set<String> kGCRootEvents = <String>{
   'StartConcurrentMark',
 };
 
-/// Summarizes [TimelineEvents]s corresponding to [kGCRootEvents] category.
+/// Summarizes [TimelineEvent]s corresponding to [kGCRootEvents] category.
 ///
 /// A sample event (some fields have been omitted for brevity):
 /// ```json
@@ -42,8 +42,10 @@ class GCSummarizer {
         lastGCBeginEvent = event;
       } else if (lastGCBeginEvent != null) {
         // These events must not overlap.
-        assert(event.name == lastGCBeginEvent.name,
-            'Expected "${lastGCBeginEvent.name}" got "${event.name}"');
+        assert(
+          event.name == lastGCBeginEvent.name,
+          'Expected "${lastGCBeginEvent.name}" got "${event.name}"',
+        );
         final double st = lastGCBeginEvent.timestampMicros!.toDouble();
         final double end = event.timestampMicros!.toDouble();
         lastGCBeginEvent = null;

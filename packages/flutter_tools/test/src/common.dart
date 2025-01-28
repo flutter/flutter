@@ -17,7 +17,6 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test/test.dart' as test_package show test;
 import 'package:test/test.dart' hide test;
-import 'package:unified_analytics/src/enums.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'fakes.dart';
@@ -52,14 +51,19 @@ String getFlutterRoot() {
     return platform.environment['FLUTTER_ROOT']!;
   }
 
-  Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
+  Error invalidScript() => StateError(
+    'Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.',
+  );
 
   Uri scriptUri;
   switch (platform.script.scheme) {
     case 'file':
       scriptUri = platform.script;
     case 'data':
-      final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
+      final RegExp flutterTools = RegExp(
+        r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)',
+        multiLine: true,
+      );
       final Match? match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
       if (match == null) {
         throw invalidScript();
@@ -81,12 +85,17 @@ String getFlutterRoot() {
 /// Capture console print events into a string buffer.
 Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
   final StringBuffer buffer = StringBuffer();
-  await runZoned<Future<void>>(() async {
-    // Service the event loop.
-    await body();
-  }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-    buffer.writeln(line);
-  }));
+  await runZoned<Future<void>>(
+    () async {
+      // Service the event loop.
+      await body();
+    },
+    zoneSpecification: ZoneSpecification(
+      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+        buffer.writeln(line);
+      },
+    ),
+  );
   return buffer;
 }
 
@@ -96,7 +105,7 @@ final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
 /// Matcher for functions that throw [ToolExit].
 ///
 /// [message] is matched using the [contains] matcher.
-Matcher throwsToolExit({ int? exitCode, Pattern? message }) {
+Matcher throwsToolExit({int? exitCode, Pattern? message}) {
   TypeMatcher<ToolExit> result = const TypeMatcher<ToolExit>();
 
   if (exitCode != null) {
@@ -110,7 +119,7 @@ Matcher throwsToolExit({ int? exitCode, Pattern? message }) {
 }
 
 /// Matcher for functions that throw [UsageException].
-Matcher throwsUsageException({Pattern? message }) {
+Matcher throwsUsageException({Pattern? message}) {
   Matcher matcher = _isUsageException;
   if (message != null) {
     matcher = allOf(matcher, (UsageException e) => e.message.contains(message));
@@ -122,7 +131,7 @@ Matcher throwsUsageException({Pattern? message }) {
 final TypeMatcher<UsageException> _isUsageException = isA<UsageException>();
 
 /// Matcher for functions that throw [ProcessException].
-Matcher throwsProcessException({ Pattern? message }) {
+Matcher throwsProcessException({Pattern? message}) {
   Matcher matcher = _isProcessException;
   if (message != null) {
     matcher = allOf(matcher, (ProcessException e) => e.message.contains(message));
@@ -139,8 +148,9 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
     fail('ToolExit expected, but nothing thrown');
   } on ToolExit catch (e) {
     expect(e.message, messageMatcher);
-  // Catch all exceptions to give a better test failure message.
-  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
+    // Catch all exceptions to give a better test failure message.
+  } catch (e, trace) {
+    // ignore: avoid_catches_without_on_clauses
     fail('ToolExit expected, got $e\n$trace');
   }
 }
@@ -148,26 +158,26 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
 Future<void> expectReturnsNormallyLater(Future<dynamic> future) async {
   try {
     await future;
-  // Catch all exceptions to give a better test failure message.
-  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
+    // Catch all exceptions to give a better test failure message.
+  } catch (e, trace) {
+    // ignore: avoid_catches_without_on_clauses
     fail('Expected to run with no exceptions, got $e\n$trace');
   }
 }
 
 Matcher containsIgnoringWhitespace(String toSearch) {
-  return predicate(
-    (String source) {
-      return collapseWhitespace(source).contains(collapseWhitespace(toSearch));
-    },
-    'contains "$toSearch" ignoring whitespace.',
-  );
+  return predicate((String source) {
+    return collapseWhitespace(source).contains(collapseWhitespace(toSearch));
+  }, 'contains "$toSearch" ignoring whitespace.');
 }
 
 /// The tool overrides `test` to ensure that files created under the
 /// system temporary directory are deleted after each test by calling
 /// `LocalFileSystem.dispose()`.
 @isTest
-void test(String description, FutureOr<void> Function() body, {
+void test(
+  String description,
+  FutureOr<void> Function() body, {
   String? testOn,
   dynamic skip,
   List<String>? tags,
@@ -203,7 +213,9 @@ void test(String description, FutureOr<void> Function() body, {
 ///
 /// For more information, see https://github.com/flutter/flutter/issues/47161
 @isTest
-void testWithoutContext(String description, FutureOr<void> Function() body, {
+void testWithoutContext(
+  String description,
+  FutureOr<void> Function() body, {
   String? testOn,
   dynamic skip,
   List<String>? tags,
@@ -211,10 +223,9 @@ void testWithoutContext(String description, FutureOr<void> Function() body, {
   int? retry,
 }) {
   return test(
-    description, () async {
-      return runZoned(body, zoneValues: <Object, Object>{
-        contextKey: const _NoContext(),
-      });
+    description,
+    () async {
+      return runZoned(body, zoneValues: <Object, Object>{contextKey: const _NoContext()});
     },
     skip: skip,
     tags: tags,
@@ -240,7 +251,7 @@ class _NoContext implements AppContext {
     throw UnsupportedError(
       'context.get<$T> is not supported in test methods. '
       'Use Testbed or testUsingContext if accessing Zone injected '
-      'values.'
+      'values.',
     );
   }
 
@@ -264,7 +275,7 @@ class _NoContext implements AppContext {
 ///
 /// Example use:
 ///
-/// ```
+/// ```dart
 /// void main() {
 ///   var handler = FileExceptionHandler();
 ///   var fs = MemoryFileSystem(opHandle: handler.opHandle);
@@ -276,7 +287,8 @@ class _NoContext implements AppContext {
 /// }
 /// ```
 class FileExceptionHandler {
-  final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors = <String, Map<FileSystemOp, FileSystemException>>{};
+  final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors =
+      <String, Map<FileSystemOp, FileSystemException>>{};
   final Map<FileSystemOp, FileSystemException> _tempErrors = <FileSystemOp, FileSystemException>{};
   static final RegExp _tempDirectoryEnd = RegExp('rand[0-9]+');
 
@@ -319,31 +331,27 @@ class FileExceptionHandler {
 /// instance, then a second instance will be generated and returned. This second
 /// instance will be cleared to send events.
 FakeAnalytics getInitializedFakeAnalyticsInstance({
-  required FileSystem fs,
+  required MemoryFileSystem fs,
   required FakeFlutterVersion fakeFlutterVersion,
   String? clientIde,
   String? enabledFeatures,
 }) {
   final Directory homeDirectory = fs.directory('/');
-  final FakeAnalytics initialAnalytics = FakeAnalytics(
+  final FakeAnalytics initialAnalytics = Analytics.fake(
     tool: DashTool.flutterTool,
     homeDirectory: homeDirectory,
     dartVersion: fakeFlutterVersion.dartSdkVersion,
-    platform: DevicePlatform.linux,
     fs: fs,
-    surveyHandler: SurveyHandler(homeDirectory: homeDirectory, fs: fs),
     flutterChannel: fakeFlutterVersion.channel,
     flutterVersion: fakeFlutterVersion.getVersionString(),
   );
   initialAnalytics.clientShowedMessage();
 
-  return FakeAnalytics(
+  return Analytics.fake(
     tool: DashTool.flutterTool,
     homeDirectory: homeDirectory,
     dartVersion: fakeFlutterVersion.dartSdkVersion,
-    platform: DevicePlatform.linux,
     fs: fs,
-    surveyHandler: SurveyHandler(homeDirectory: homeDirectory, fs: fs),
     flutterChannel: fakeFlutterVersion.channel,
     flutterVersion: fakeFlutterVersion.getVersionString(),
     clientIde: clientIde,

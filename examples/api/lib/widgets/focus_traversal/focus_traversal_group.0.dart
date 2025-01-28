@@ -13,9 +13,7 @@ class FocusTraversalGroupExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: FocusTraversalGroupExample(),
-    );
+    return const MaterialApp(home: FocusTraversalGroupExample());
   }
 }
 
@@ -45,10 +43,7 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
   @override
   void initState() {
     super.initState();
-    focusNode = FocusNode(
-      debugLabel: widget.name,
-      canRequestFocus: widget.canRequestFocus,
-    );
+    focusNode = FocusNode(debugLabel: widget.name, canRequestFocus: widget.canRequestFocus);
   }
 
   @override
@@ -71,29 +66,10 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
 
   @override
   Widget build(BuildContext context) {
-    FocusOrder order;
-    if (widget.order is num) {
-      order = NumericFocusOrder((widget.order as num).toDouble());
-    } else {
-      order = LexicalFocusOrder(widget.order.toString());
-    }
-
-    Color? overlayColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.focused)) {
-        return Colors.red;
-      }
-      if (states.contains(MaterialState.hovered)) {
-        return Colors.blue;
-      }
-      return null; // defer to the default overlayColor
-    }
-
-    Color? foregroundColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.focused) || states.contains(MaterialState.hovered)) {
-        return Colors.white;
-      }
-      return null; // defer to the default foregroundColor
-    }
+    final FocusOrder order = switch (widget.order) {
+      final num number => NumericFocusOrder(number.toDouble()),
+      final Object? object => LexicalFocusOrder(object.toString()),
+    };
 
     return FocusTraversalOrder(
       order: order,
@@ -102,9 +78,24 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
         child: OutlinedButton(
           focusNode: focusNode,
           autofocus: widget.autofocus,
-          style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>(overlayColor),
-            foregroundColor: MaterialStateProperty.resolveWith<Color?>(foregroundColor),
+          style: const ButtonStyle(
+            overlayColor: WidgetStateProperty<Color?>.fromMap(
+              // If neither of these states is active, the property will
+              // resolve to null, deferring to the default overlay color.
+              <WidgetState, Color>{
+                WidgetState.focused: Colors.red,
+                WidgetState.hovered: Colors.blue,
+              },
+            ),
+            foregroundColor: WidgetStateProperty<Color?>.fromMap(
+              // "WidgetState.focused | WidgetState.hovered" could be used
+              // instead of separate map keys, but this setup allows setting
+              // the button style to a constant value for improved efficiency.
+              <WidgetState, Color>{
+                WidgetState.focused: Colors.white,
+                WidgetState.hovered: Colors.white,
+              },
+            ),
           ),
           onPressed: () => _handleOnPressed(),
           child: Text(widget.name),
@@ -148,10 +139,7 @@ class FocusTraversalGroupExample extends StatelessWidget {
                 children: List<Widget>.generate(3, (int index) {
                   // Order as "C" "B", "A".
                   final String order = String.fromCharCode('A'.codeUnitAt(0) + (2 - index));
-                  return OrderedButton<String>(
-                    name: 'String: $order',
-                    order: order,
-                  );
+                  return OrderedButton<String>(name: 'String: $order', order: order);
                 }),
               ),
             ),
@@ -166,10 +154,7 @@ class FocusTraversalGroupExample extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List<Widget>.generate(3, (int index) {
-                  return OrderedButton<num>(
-                    name: 'ignored num: ${3 - index}',
-                    order: 3 - index,
-                  );
+                  return OrderedButton<num>(name: 'ignored num: ${3 - index}', order: 3 - index);
                 }),
               ),
             ),

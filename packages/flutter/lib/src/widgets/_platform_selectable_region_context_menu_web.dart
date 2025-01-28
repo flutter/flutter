@@ -14,7 +14,7 @@ import 'platform_view.dart';
 import 'selection_container.dart';
 
 const String _viewType = 'Browser__WebContextMenuViewType__';
-const String _kClassName = 'web-electable-region-context-menu';
+const String _kClassName = 'web-selectable-region-context-menu';
 // These css rules hides the dom element with the class name.
 const String _kClassSelectionRule = '.$_kClassName::selection { background: transparent; }';
 const String _kClassRule = '''
@@ -38,10 +38,7 @@ typedef RegisterViewFactory = void Function(String, Object Function(int viewId),
 /// documentation.
 class PlatformSelectableRegionContextMenu extends StatelessWidget {
   /// See `_platform_selectable_region_context_menu_io.dart`.
-  PlatformSelectableRegionContextMenu({
-    required this.child,
-    super.key,
-  }) {
+  PlatformSelectableRegionContextMenu({required this.child, super.key}) {
     if (_registeredViewType == null) {
       _register();
     }
@@ -81,7 +78,10 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   // Registers the view factories for the interceptor widgets.
   static void _register() {
     assert(_registeredViewType == null);
-    _registeredViewType = _registerWebSelectionCallback((web.HTMLElement element, web.MouseEvent event) {
+    _registeredViewType = _registerWebSelectionCallback((
+      web.HTMLElement element,
+      web.MouseEvent event,
+    ) {
       final SelectionContainerDelegate? client = _activeClient;
       if (client != null) {
         // Converts the html right click event to flutter coordinate.
@@ -94,13 +94,11 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
         element.innerText = client.getSelectedContent()?.plainText ?? '';
 
         // Programmatically select the dom element in browser.
-        final web.Range range = web.document.createRange();
-        range.selectNode(element);
-        final web.Selection? selection = web.window.getSelection();
-        if (selection != null) {
-          selection.removeAllRanges();
-          selection.addRange(range);
-        }
+        final web.Range range = web.document.createRange()..selectNode(element);
+
+        web.window.getSelection()
+          ?..removeAllRanges()
+          ..addRange(range);
       }
     });
   }
@@ -114,19 +112,23 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
         ..classList.add(_kClassName);
 
       // Create css style for _kClassName.
-      final web.HTMLStyleElement styleElement = web.document.createElement('style') as web.HTMLStyleElement;
+      final web.HTMLStyleElement styleElement =
+          web.document.createElement('style') as web.HTMLStyleElement;
       web.document.head!.append(styleElement as JSAny);
       final web.CSSStyleSheet sheet = styleElement.sheet!;
       sheet.insertRule(_kClassRule, 0);
       sheet.insertRule(_kClassSelectionRule, 1);
 
-      htmlElement.addEventListener('mousedown', (web.Event event) {
-        final web.MouseEvent mouseEvent = event as web.MouseEvent;
-        if (mouseEvent.button != _kRightClickButton) {
-          return;
-        }
-        callback(htmlElement, mouseEvent);
-      }.toJS);
+      htmlElement.addEventListener(
+        'mousedown',
+        (web.Event event) {
+          final web.MouseEvent mouseEvent = event as web.MouseEvent;
+          if (mouseEvent.button != _kRightClickButton) {
+            return;
+          }
+          callback(htmlElement, mouseEvent);
+        }.toJS,
+      );
       return htmlElement;
     }, isVisible: false);
     return _viewType;
@@ -135,15 +137,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      alignment: Alignment.center,
-      children: <Widget>[
-        const Positioned.fill(
-          child: HtmlElementView(
-            viewType: _viewType,
-          ),
-        ),
-        child,
-      ],
+      children: <Widget>[const Positioned.fill(child: HtmlElementView(viewType: _viewType)), child],
     );
   }
 }

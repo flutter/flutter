@@ -7,9 +7,11 @@ import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 import '../convert.dart';
+import 'platform.dart';
 
 /// A path jointer for URL paths.
 final path.Context urlContext = path.url;
@@ -18,9 +20,10 @@ final path.Context urlContext = path.url;
 String camelCase(String str) {
   int index = str.indexOf('_');
   while (index != -1 && index < str.length - 2) {
-    str = str.substring(0, index) +
-      str.substring(index + 1, index + 2).toUpperCase() +
-      str.substring(index + 2);
+    str =
+        str.substring(0, index) +
+        str.substring(index + 1, index + 2).toUpperCase() +
+        str.substring(index + 2);
     index = str.indexOf('_');
   }
   return str;
@@ -28,15 +31,22 @@ String camelCase(String str) {
 
 /// Convert `fooBar` to `foo-bar`.
 String kebabCase(String str) {
-  return snakeCase(str, '-');
+  return _reCase(str, '-');
 }
 
 final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
-String snakeCase(String str, [ String sep = '_' ]) {
-  return str.replaceAllMapped(_upperRegex,
-      (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}');
+String snakeCase(String str) {
+  return _reCase(str, '_');
+}
+
+/// Convert `fooBar` to `foo[sep]bar`.
+String _reCase(String str, String sep) {
+  return str.replaceAllMapped(
+    _upperRegex,
+    (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}',
+  );
 }
 
 abstract interface class CliEnum implements Enum {
@@ -45,9 +55,7 @@ abstract interface class CliEnum implements Enum {
 
   static Map<String, String> allowedHelp<T extends CliEnum>(List<T> values) =>
       Map<String, String>.fromEntries(
-        values.map(
-          (T e) => MapEntry<String, String>(e.cliName, e.helpText),
-        ),
+        values.map((T e) => MapEntry<String, String>(e.cliName, e.helpText)),
       );
 }
 
@@ -88,18 +96,24 @@ String getElapsedAsMilliseconds(Duration duration) {
   return '${kMillisecondsFormat.format(duration.inMilliseconds)}ms';
 }
 
-/// Return a String - with units - for the size in MB of the given number of bytes.
-String getSizeAsMB(int bytesLength) {
-  return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
+/// Return a platform-appropriate [String] representing the size of the given number of bytes.
+String getSizeAsPlatformMB(
+  int bytesLength, {
+  @visibleForTesting Platform platform = const LocalPlatform(),
+}) {
+  // Because Windows displays 'MB' but actually reports MiB, we calculate MiB
+  // accordingly on Windows.
+  final int bytesInPlatformMB = platform.isWindows ? 1024 * 1024 : 1000 * 1000;
+  return '${(bytesLength / bytesInPlatformMB).toStringAsFixed(1)}MB';
 }
 
 /// A class to maintain a list of items, fire events when items are added or
 /// removed, and calculate a diff of changes when a new list of items is
 /// available.
 class ItemListNotifier<T> {
-  ItemListNotifier(): _items = <T>{};
+  ItemListNotifier() : _items = <T>{}, _isPopulated = false;
 
-  ItemListNotifier.from(List<T> items) : _items = Set<T>.of(items);
+  ItemListNotifier.from(List<T> items) : _items = Set<T>.of(items), _isPopulated = true;
 
   Set<T> _items;
 
@@ -111,6 +125,11 @@ class ItemListNotifier<T> {
 
   List<T> get items => _items.toList();
 
+  bool _isPopulated;
+
+  /// Returns whether the list has been populated.
+  bool get isPopulated => _isPopulated;
+
   void updateWithNewList(List<T> updatedList) {
     final Set<T> updatedSet = Set<T>.of(updatedList);
 
@@ -118,9 +137,10 @@ class ItemListNotifier<T> {
     final Set<T> removedItems = _items.difference(updatedSet);
 
     _items = updatedSet;
+    _isPopulated = true;
 
-    addedItems.forEach(_addedController.add);
     removedItems.forEach(_removedController.add);
+    addedItems.forEach(_addedController.add);
   }
 
   void removeItem(T item) {
@@ -152,17 +172,19 @@ class SettingsFile {
     }
   }
 
-  factory SettingsFile.parseFromFile(File file) {
-    return SettingsFile.parse(file.readAsStringSync());
-  }
+  SettingsFile.parseFromFile(File file) : this.parse(file.readAsStringSync());
 
   final Map<String, String> values = <String, String>{};
 
   void writeContents(File file) {
     file.parent.createSync(recursive: true);
-    file.writeAsStringSync(values.keys.map<String>((String key) {
-      return '$key=${values[key]}';
-    }).join('\n'));
+    file.writeAsStringSync(
+      values.keys
+          .map<String>((String key) {
+            return '$key=${values[key]}';
+          })
+          .join('\n'),
+    );
   }
 }
 
@@ -199,7 +221,7 @@ const int kMinColumnWidth = 10;
 /// ```
 ///
 /// yields:
-/// ```
+/// ```none
 ///   Usage: app main_command <subcommand>
 ///          [arguments]
 /// ```
@@ -211,7 +233,8 @@ const int kMinColumnWidth = 10;
 /// If the amount of indentation (from the text, [indent], and [hangingIndent])
 /// is such that less than [kMinColumnWidth] characters can fit in the
 /// [columnWidth], then the indent is truncated to allow the text to fit.
-String wrapText(String text, {
+String wrapText(
+  String text, {
   required int columnWidth,
   required bool shouldWrap,
   int? hangingIndent,
@@ -241,11 +264,13 @@ String wrapText(String text, {
       notIndented = <String>[firstLineWrap.removeAt(0)];
       trimmedText = trimmedText.substring(notIndented[0].length).trimLeft();
       if (trimmedText.isNotEmpty) {
-        notIndented.addAll(_wrapTextAsLines(
-          trimmedText,
-          columnWidth: columnWidth - leadingWhitespace.length - indent - hangingIndent,
-          shouldWrap: shouldWrap,
-        ));
+        notIndented.addAll(
+          _wrapTextAsLines(
+            trimmedText,
+            columnWidth: columnWidth - leadingWhitespace.length - indent - hangingIndent,
+            shouldWrap: shouldWrap,
+          ),
+        );
       }
     } else {
       notIndented = _wrapTextAsLines(
@@ -256,21 +281,24 @@ String wrapText(String text, {
     }
     String? hangingIndentString;
     final String indentString = ' ' * indent;
-    result.addAll(notIndented.map<String>(
-      (String line) {
+    result.addAll(
+      notIndented.map<String>((String line) {
         // Don't return any lines with just whitespace on them.
         if (line.isEmpty) {
           return '';
         }
         String truncatedIndent = '$indentString${hangingIndentString ?? ''}$leadingWhitespace';
         if (truncatedIndent.length > columnWidth - kMinColumnWidth) {
-          truncatedIndent = truncatedIndent.substring(0, math.max(columnWidth - kMinColumnWidth, 0));
+          truncatedIndent = truncatedIndent.substring(
+            0,
+            math.max(columnWidth - kMinColumnWidth, 0),
+          );
         }
         final String result = '$truncatedIndent$line';
         hangingIndentString ??= ' ' * hangingIndent!;
         return result;
-      },
-    ));
+      }),
+    );
   }
   return result.join('\n');
 }
@@ -301,7 +329,8 @@ class _AnsiRun {
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
-List<String> _wrapTextAsLines(String text, {
+List<String> _wrapTextAsLines(
+  String text, {
   int start = 0,
   required int columnWidth,
   required bool shouldWrap,
@@ -342,7 +371,7 @@ List<String> _wrapTextAsLines(String text, {
     return result;
   }
 
-  String joinRun(List<_AnsiRun> list, int start, [ int? end ]) {
+  String joinRun(List<_AnsiRun> list, int start, [int? end]) {
     return list.sublist(start, end).map<String>((_AnsiRun run) => run.original).join().trim();
   }
 
@@ -460,7 +489,10 @@ String interpolateString(String toInterpolate, Map<String, String> replacementVa
 /// final interpolated2 = _interpolateString(['ping', '-n', '1', r'${_host}'], {'host': 'raspberrypi'});
 /// print(interpolated2); // will print '[ping, -n, 1, ]'
 /// ```
-List<String> interpolateStringList(List<String> toInterpolate, Map<String, String> replacementValues) {
+List<String> interpolateStringList(
+  List<String> toInterpolate,
+  Map<String, String> replacementValues,
+) {
   return toInterpolate.map((String s) => interpolateString(s, replacementValues)).toList();
 }
 
@@ -478,4 +510,39 @@ Match? firstMatchInFile(File file, RegExp regExp) {
     }
   }
   return null;
+}
+
+/// Tests for shallow equality on two sets.
+bool setEquals<T>(Set<T>? a, Set<T>? b) {
+  if (a == null) {
+    return b == null;
+  }
+  if (b == null || a.length != b.length) {
+    return false;
+  }
+  if (identical(a, b)) {
+    return true;
+  }
+  for (final T value in a) {
+    if (!b.contains(value)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/// Tests for shallow equality on two lists.
+bool listEquals<T>(List<T> a, List<T> b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+  for (int index = 0; index < a.length; index++) {
+    if (a[index] != b[index]) {
+      return false;
+    }
+  }
+  return true;
 }

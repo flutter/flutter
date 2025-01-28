@@ -2,6 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:typed_data';
+///
+/// @docImport 'package:flutter/semantics.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'clipboard.dart';
+/// @docImport 'haptic_feedback.dart';
+/// @docImport 'platform_views.dart';
+/// @docImport 'raw_keyboard.dart';
+/// @docImport 'raw_keyboard_android.dart';
+/// @docImport 'raw_keyboard_fuchsia.dart';
+/// @docImport 'scribe.dart';
+/// @docImport 'system_chrome.dart';
+/// @docImport 'system_navigator.dart';
+/// @docImport 'system_sound.dart';
+/// @docImport 'text_input.dart';
+library;
+
 import 'dart:ui';
 
 import 'message_codecs.dart';
@@ -54,9 +73,28 @@ abstract final class SystemChannels {
   ///    [Navigator.replace], utilize this channel's methods to send route
   ///    change information from framework to engine.
   static const MethodChannel navigation = OptionalMethodChannel(
-      'flutter/navigation',
-      JSONMethodCodec(),
+    'flutter/navigation',
+    JSONMethodCodec(),
   );
+
+  /// A [MethodChannel] for handling predictive back gestures.
+  ///
+  /// Currently, this feature is only available on Android U and above.
+  ///
+  /// No outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]).
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]):
+  ///
+  ///  * `startBackGesture`: The user has started a predictive back gesture.
+  ///  * `updateBackGestureProgress`: The user has continued dragging the
+  ///    predictive back gesture.
+  ///  * `commitBackGesture`: The user has finished a predictive back gesture,
+  ///    indicating that the current route should be popped.
+  ///  * `cancelBackGesture`: The user has canceled a predictive back gesture,
+  ///    indicating that no navigation should occur.
+  static const MethodChannel backGesture = OptionalMethodChannel('flutter/backgesture');
 
   /// A JSON [MethodChannel] for invoking miscellaneous platform methods.
   ///
@@ -140,17 +178,15 @@ abstract final class SystemChannels {
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel platform = OptionalMethodChannel(
-      'flutter/platform',
-      JSONMethodCodec(),
+    'flutter/platform',
+    JSONMethodCodec(),
   );
 
   /// A [MethodChannel] for handling text processing actions.
   ///
   /// This channel exposes the text processing feature for supported platforms.
   /// Currently supported on Android only.
-  static const MethodChannel processText = OptionalMethodChannel(
-      'flutter/processtext',
-  );
+  static const MethodChannel processText = OptionalMethodChannel('flutter/processtext');
 
   /// A JSON [MethodChannel] for handling text input.
   ///
@@ -234,9 +270,35 @@ abstract final class SystemChannels {
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel textInput = OptionalMethodChannel(
-      'flutter/textinput',
-      JSONMethodCodec(),
+    'flutter/textinput',
+    JSONMethodCodec(),
   );
+
+  /// A [MethodChannel] for handling Android Scribe stylus handwriting input.
+  ///
+  /// Android's Scribe feature allows writing directly on top of a text input
+  /// using a stylus.
+  ///
+  /// The following methods are defined for this channel:
+  ///
+  ///  * `Scribe.startStylusHandwriting`: Indicates that stylus input has been
+  ///  detected and Android should start handwriting input.
+  ///  * `Scribe.isStylusHandwritingAvailable`: Returns a boolean representing
+  ///  whether or not the device currently supports accepting stylus handwriting
+  ///  input. Throws if the device's API level is not sufficient.
+  ///  * `Scribe.isFeatureAvailable`: Returns a boolean representing whether or
+  ///  not the device currently supports accepting stylus handwriting input.
+  ///  Returns false and does not throw if the device's API level is not
+  ///  sufficient.
+  ///
+  /// See also:
+  ///
+  ///  * [Scribe], which uese this channel.
+  ///  * [ScribbleClient], which implements the iOS version of this feature,
+  ///    [Scribble](https://support.apple.com/guide/ipad/enter-text-with-scribble-ipad355ab2a7/ipados).
+  ///  * <https://developer.android.com/develop/ui/views/touch-and-input/stylus-input/stylus-input-in-text-fields>,
+  ///    which is the Android documentation explaining the Scribe feature.
+  static const MethodChannel scribe = OptionalMethodChannel('flutter/scribe', JSONMethodCodec());
 
   /// A [MethodChannel] for handling spell check for text input.
   ///
@@ -256,9 +318,7 @@ abstract final class SystemChannels {
   ///     representing the spell check results of the text or null if the request
   ///     was canceled. The arguments are the [String] to be spell checked
   ///     and the [Locale] for the text to be spell checked with.
-  static const MethodChannel spellCheck = OptionalMethodChannel(
-      'flutter/spellcheck',
-  );
+  static const MethodChannel spellCheck = OptionalMethodChannel('flutter/spellcheck');
 
   /// A JSON [MethodChannel] for handling undo events.
   static const MethodChannel undoManager = OptionalMethodChannel(
@@ -287,8 +347,8 @@ abstract final class SystemChannels {
   ///  * [RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
   ///    subclasses mentioned above.
   static const BasicMessageChannel<Object?> keyEvent = BasicMessageChannel<Object?>(
-      'flutter/keyevent',
-      JSONMessageCodec(),
+    'flutter/keyevent',
+    JSONMessageCodec(),
   );
 
   /// A string [BasicMessageChannel] for lifecycle events.
@@ -302,8 +362,8 @@ abstract final class SystemChannels {
   ///  * [WidgetsBindingObserver.didChangeAppLifecycleState], which triggers
   ///    whenever a message is received on this channel.
   static const BasicMessageChannel<String?> lifecycle = BasicMessageChannel<String?>(
-      'flutter/lifecycle',
-      StringCodec(),
+    'flutter/lifecycle',
+    StringCodec(),
   );
 
   /// A JSON [BasicMessageChannel] for system events.
@@ -318,8 +378,8 @@ abstract final class SystemChannels {
   ///    [WidgetsBindingObserver.didHaveMemoryPressure], which triggers whenever
   ///    a message is received on this channel.
   static const BasicMessageChannel<Object?> system = BasicMessageChannel<Object?>(
-      'flutter/system',
-      JSONMessageCodec(),
+    'flutter/system',
+    JSONMessageCodec(),
   );
 
   /// A [BasicMessageChannel] for accessibility events.
@@ -339,9 +399,7 @@ abstract final class SystemChannels {
   /// See also:
   ///
   ///  * [PlatformViewsService] for the available operations on this channel.
-  static const MethodChannel platform_views = MethodChannel(
-    'flutter/platform_views',
-  );
+  static const MethodChannel platform_views = MethodChannel('flutter/platform_views');
 
   /// A [MethodChannel] for configuring the Skia graphics library.
   ///
@@ -350,10 +408,7 @@ abstract final class SystemChannels {
   ///
   ///  * `Skia.setResourceCacheMaxBytes`: Set the maximum number of bytes that
   ///    can be held in the GPU resource cache.
-  static const MethodChannel skia = MethodChannel(
-    'flutter/skia',
-    JSONMethodCodec(),
-  );
+  static const MethodChannel skia = MethodChannel('flutter/skia', JSONMethodCodec());
 
   /// A [MethodChannel] for configuring mouse cursors.
   ///
@@ -364,9 +419,7 @@ abstract final class SystemChannels {
   ///  * `activateSystemCursor`: Request to set the cursor of a pointer
   ///    device to a system cursor. The parameters are
   ///    integer `device`, and string `kind`.
-  static const MethodChannel mouseCursor = OptionalMethodChannel(
-    'flutter/mousecursor',
-  );
+  static const MethodChannel mouseCursor = OptionalMethodChannel('flutter/mousecursor');
 
   /// A [MethodChannel] for synchronizing restoration data with the engine.
   ///
@@ -394,9 +447,7 @@ abstract final class SystemChannels {
   ///
   ///  * [RestorationManager], which uses this channel and also describes how
   ///    restoration data is used in Flutter.
-  static const MethodChannel restoration = OptionalMethodChannel(
-    'flutter/restoration',
-  );
+  static const MethodChannel restoration = OptionalMethodChannel('flutter/restoration');
 
   /// A [MethodChannel] for installing and managing deferred components.
   ///
@@ -419,9 +470,7 @@ abstract final class SystemChannels {
   ///    assets and files) may occur at a later time. However, once uninstallation
   ///    is requested, the deferred component should not be used anymore until
   ///    `installDeferredComponent` or `loadLibrary` is called again.
-  static const MethodChannel deferredComponent = OptionalMethodChannel(
-    'flutter/deferredcomponent',
-  );
+  static const MethodChannel deferredComponent = OptionalMethodChannel('flutter/deferredcomponent');
 
   /// A JSON [MethodChannel] for localization.
   ///
@@ -519,7 +568,5 @@ abstract final class SystemChannels {
   ///
   ///  * [HardwareKeyboard.syncKeyboardState], which uses this channel to synchronize
   ///    the `HardwareKeyboard` pressed state.
-  static const MethodChannel keyboard = OptionalMethodChannel(
-    'flutter/keyboard',
-  );
+  static const MethodChannel keyboard = OptionalMethodChannel('flutter/keyboard');
 }

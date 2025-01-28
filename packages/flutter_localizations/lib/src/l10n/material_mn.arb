@@ -146,5 +146,7 @@
   "menuDismissLabel": "Цэсийг хаах",
   "lookUpButtonLabel": "Дээшээ харах",
   "searchWebButtonLabel": "Вебээс хайх",
-  "shareButtonLabel": "Хуваалцах..."
+  "shareButtonLabel": "Хуваалцах",
+  "clearButtonTooltip": "Текстийг арилгах",
+  "selectedDateLabel": "Сонгосон"
 }

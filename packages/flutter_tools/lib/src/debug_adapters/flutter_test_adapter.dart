@@ -52,7 +52,13 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     ];
 
     // Handle customTool and deletion of any arguments for it.
-    final String executable = args.customTool ?? fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String executable =
+        args.customTool ??
+        fileSystem.path.join(
+          Cache.flutterRoot!,
+          'bin',
+          platform.isWindows ? 'flutter.bat' : 'flutter',
+        );
     final int? removeArgs = args.customToolReplacesArgs;
     if (args.customTool != null && removeArgs != null) {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
@@ -65,11 +71,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
       ...?args.args,
     ];
 
-    await launchAsProcess(
-      executable: executable,
-      processArgs: processArgs,
-      env: args.env,
-    );
+    await launchAsProcess(executable: executable, processArgs: processArgs, env: args.env);
 
     // Delay responding until the debugger is connected.
     if (debug) {
@@ -105,9 +107,9 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
   }
 
   @override
-  void handleStderr(List<int> data) {
+  void handleStderr(String data) {
     logger?.call('stderr: $data');
-    sendOutput('stderr', utf8.decode(data));
+    sendOutput('stderr', data);
   }
 
   /// Handles stdout from the `flutter test --machine` process, decoding the JSON and calling the appropriate handlers.
@@ -132,11 +134,10 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     }
 
     // Check for valid flutter_tools JSON output (1) first.
-    final Map<String, Object?>? flutterPayload = jsonData is List &&
-            jsonData.length == 1 &&
-            jsonData.first is Map<String, Object?>
-        ? jsonData.first as Map<String, Object?>
-        : null;
+    final Map<String, Object?>? flutterPayload =
+        jsonData is List && jsonData.length == 1 && jsonData.first is Map<String, Object?>
+            ? jsonData.first as Map<String, Object?>
+            : null;
     final Object? event = flutterPayload?['event'];
     final Object? params = flutterPayload?['params'];
 

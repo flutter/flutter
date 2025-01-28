@@ -4,13 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 void main() {
-  testWidgets('TrackingScrollController saves offset',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
     final TrackingScrollController controller = TrackingScrollController();
     addTearDown(controller.dispose);
     const double listItemHeight = 100.0;
@@ -22,13 +18,11 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return ListView(
               controller: controller,
-              children: List<Widget>.generate(
-                10,
-                (int i) => SizedBox(
-                  height: listItemHeight,
-                  child: Text('Page$index-Item$i'),
-                ),
-              ).toList(),
+              children:
+                  List<Widget>.generate(
+                    10,
+                    (int i) => SizedBox(height: listItemHeight, child: Text('Page$index-Item$i')),
+                  ).toList(),
             );
           },
         ),
@@ -64,36 +58,37 @@ void main() {
     expect(controller.initialScrollOffset, 0.0);
   });
 
-  testWidgets('TrackingScrollController saves offset',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
     int attach = 0;
     int detach = 0;
     final TrackingScrollController controller = TrackingScrollController(
-      onAttach: (_) { attach++; },
-      onDetach: (_) { detach++; },
+      onAttach: (_) {
+        attach++;
+      },
+      onDetach: (_) {
+        detach++;
+      },
     );
     addTearDown(controller.dispose);
     const double listItemHeight = 100.0;
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: PageView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          return ListView(
-            controller: controller,
-            children: List<Widget>.generate(
-              10,
-              (int i) => SizedBox(
-                height: listItemHeight,
-                child: Text('Page$index-Item$i'),
-              ),
-            ).toList(),
-          );
-        },
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            return ListView(
+              controller: controller,
+              children:
+                  List<Widget>.generate(
+                    10,
+                    (int i) => SizedBox(height: listItemHeight, child: Text('Page$index-Item$i')),
+                  ).toList(),
+            );
+          },
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     expect(attach, 1);

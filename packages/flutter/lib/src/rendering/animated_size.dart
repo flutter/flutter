@@ -94,10 +94,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         markNeedsLayout();
       }
     });
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: curve,
-    );
+    _animation = CurvedAnimation(parent: _controller, curve: curve);
     _onEnd = onEnd;
   }
 
@@ -274,8 +271,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     size = constraints.constrain(_animatedSize!);
     alignChild();
 
-    if (size.width < _sizeTween.end!.width ||
-        size.height < _sizeTween.end!.height) {
+    if (size.width < _sizeTween.end!.width || size.height < _sizeTween.end!.height) {
       _hasVisualOverflow = true;
     }
   }
@@ -381,12 +377,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   void _animationStatusListener(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.completed:
-        _onEnd?.call();
-      case AnimationStatus.dismissed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
+    if (status.isCompleted) {
+      _onEnd?.call();
     }
   }
 

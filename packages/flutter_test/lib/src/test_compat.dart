@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:test_api/backend.dart';
+/// @docImport 'package:test_api/scaffolding.dart';
+library;
+
 import 'dart:async';
 
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -19,7 +23,6 @@ import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_impo
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/test.dart'; // ignore: implementation_imports
 
-// ignore: deprecated_member_use
 export 'package:test_api/fake.dart' show Fake;
 
 Declarer? _localDeclarer;
@@ -45,7 +48,12 @@ Declarer get _declarer {
   return _localDeclarer!;
 }
 
-Future<void> _runGroup(Suite suiteConfig, Group group, List<Group> parents, _Reporter reporter) async {
+Future<void> _runGroup(
+  Suite suiteConfig,
+  Group group,
+  List<Group> parents,
+  _Reporter reporter,
+) async {
   parents.add(group);
   try {
     final bool skipGroup = group.metadata.skip;
@@ -78,7 +86,12 @@ Future<void> _runGroup(Suite suiteConfig, Group group, List<Group> parents, _Rep
   }
 }
 
-Future<void> _runLiveTest(Suite suiteConfig, LiveTest liveTest, _Reporter reporter, { bool countSuccess = true }) async {
+Future<void> _runLiveTest(
+  Suite suiteConfig,
+  LiveTest liveTest,
+  _Reporter reporter, {
+  bool countSuccess = true,
+}) async {
   reporter._onTestStarted(liveTest);
   // Schedule a microtask to ensure that [onTestStarted] fires before the
   // first [LiveTest.onStateChange] event.
@@ -94,8 +107,13 @@ Future<void> _runLiveTest(Suite suiteConfig, LiveTest liveTest, _Reporter report
   }
 }
 
-Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, _Reporter reporter) async {
-  final LocalTest skipped = LocalTest(test.name, test.metadata, () { }, trace: test.trace);
+Future<void> _runSkippedTest(
+  Suite suiteConfig,
+  Test test,
+  List<Group> parents,
+  _Reporter reporter,
+) async {
+  final LocalTest skipped = LocalTest(test.name, test.metadata, () {}, trace: test.trace);
   if (skipped.metadata.skipReason != null) {
     reporter.log('Skip: ${skipped.metadata.skipReason}');
   }
@@ -187,7 +205,7 @@ void test(
 /// should explain why the group is skipped; this reason will be printed instead
 /// of running the group's tests.
 @isTestGroup
-void group(Object description, void Function() body, { dynamic skip, int? retry }) {
+void group(Object description, void Function() body, {dynamic skip, int? retry}) {
   _maybeConfigureTearDownForTestFile();
   _declarer.group(description.toString(), body, skip: skip, retry: retry);
 }
@@ -286,7 +304,7 @@ Future<void> _tearDownForTestFile() async {
 
 /// A reporter that prints each test on its own line.
 ///
-/// This is currently used in place of [CompactReporter] by `lib/test.dart`,
+/// This is currently used in place of `CompactReporter` by `lib/test.dart`,
 /// which can't transitively import `dart:io` but still needs access to a runner
 /// so that test files can be run directly. This means that until issue 6943 is
 /// fixed, this must not import `dart:io`.
@@ -357,16 +375,24 @@ class _Reporter {
       _stopwatch.start();
     }
     _progressLine(_description(liveTest));
-    _subscriptions.add(liveTest.onStateChange.listen((State state) => _onStateChange(liveTest, state)));
-    _subscriptions.add(liveTest.onError.listen((AsyncError error) => _onError(liveTest, error.error, error.stackTrace)));
-    _subscriptions.add(liveTest.onMessage.listen((Message message) {
-      _progressLine(_description(liveTest));
-      String text = message.text;
-      if (message.type == MessageType.skip) {
-        text = '  $_yellow$text$_noColor';
-      }
-      log(text);
-    }));
+    _subscriptions.add(
+      liveTest.onStateChange.listen((State state) => _onStateChange(liveTest, state)),
+    );
+    _subscriptions.add(
+      liveTest.onError.listen(
+        (AsyncError error) => _onError(liveTest, error.error, error.stackTrace),
+      ),
+    );
+    _subscriptions.add(
+      liveTest.onMessage.listen((Message message) {
+        _progressLine(_description(liveTest));
+        String text = message.text;
+        if (message.type == MessageType.skip) {
+          text = '  $_yellow$text$_noColor';
+        }
+        log(text);
+      }),
+    );
   }
 
   /// A callback called when [liveTest]'s state becomes [state].
@@ -403,7 +429,7 @@ class _Reporter {
   /// [message] goes after the progress report. If [color] is passed, it's used
   /// as the color for [message]. If [suffix] is passed, it's added to the end
   /// of [message].
-  void _progressLine(String message, { String? color, String? suffix }) {
+  void _progressLine(String message, {String? color, String? suffix}) {
     // Print nothing if nothing has changed since the last progress line.
     if (passed.length == _lastProgressPassed &&
         skipped.length == _lastProgressSkipped &&
@@ -482,12 +508,12 @@ class _Reporter {
   }
 }
 
-String _indent(String string, { int? size, String? first }) {
+String _indent(String string, {int? size, String? first}) {
   size ??= first == null ? 2 : first.length;
   return _prefixLines(string, ' ' * size, first: first);
 }
 
-String _prefixLines(String text, String prefix, { String? first, String? last, String? single }) {
+String _prefixLines(String text, String prefix, {String? first, String? last, String? single}) {
   first ??= prefix;
   last ??= prefix;
   single ??= first;

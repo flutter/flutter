@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # For details regarding the *Flutter Fix* feature, see
-# https://flutter.dev/docs/development/tools/flutter-fix
+# https://flutter.dev/to/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -23,6 +23,7 @@
 #     * SliverAppBar: fix_sliver_app_bar.yaml
 #     * TextTheme: fix_text_theme.yaml
 #     * ThemeData: fix_theme_data.yaml
+#     * WidgetState: fix_widget_state.yaml
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/86198

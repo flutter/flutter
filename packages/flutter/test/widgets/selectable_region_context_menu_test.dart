@@ -14,20 +14,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
 extension on web.HTMLCollection {
-  Iterable<web.Element> get iterable => _genIterable(this);
-}
-extension on web.CSSRuleList {
-  Iterable<web.CSSRule> get iterable => _genIterable(this);
+  Iterable<web.Element?> get iterable =>
+      Iterable<web.Element?>.generate(length, (int index) => item(index));
 }
 
-Iterable<T> _genIterable<T>(dynamic jsCollection) {
-  // ignore: avoid_dynamic_calls
-  return Iterable<T>.generate(jsCollection.length as int, (int index) => jsCollection.item(index) as T,);
+extension on web.CSSRuleList {
+  Iterable<web.CSSRule?> get iterable =>
+      Iterable<web.CSSRule?>.generate(length, (int index) => item(index));
 }
 
 void main() {
   web.HTMLElement? element;
-  PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
+  PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = (
+    String viewType,
+    Object Function(int viewId) fn, {
+    bool isVisible = true,
+  }) {
     element = fn(0) as web.HTMLElement;
     // The element needs to be attached to the document body to receive mouse
     // events.
@@ -46,13 +48,14 @@ void main() {
 
     expect(web.document.head!.children.iterable, isNotEmpty);
     bool foundStyle = false;
-    for (final web.Element element in web.document.head!.children.iterable) {
-      if (element.tagName != 'STYLE') {
+    for (final web.Element? element in web.document.head!.children.iterable) {
+      expect(element, isNotNull);
+      if (element!.tagName != 'STYLE') {
         continue;
       }
       final web.CSSRuleList? rules = (element as web.HTMLStyleElement).sheet?.rules;
       if (rules != null) {
-        foundStyle = rules.iterable.any((web.CSSRule rule) => rule.cssText.contains(className));
+        foundStyle = rules.iterable.any((web.CSSRule? rule) => rule!.cssText.contains(className));
       }
       if (foundStyle) {
         break;
@@ -66,13 +69,13 @@ void main() {
     addTearDown(focusNode.dispose);
     final UniqueKey spy = UniqueKey();
     await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            focusNode: focusNode,
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
-        )
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionControls,
+          child: SelectionSpy(key: spy),
+        ),
+      ),
     );
     expect(element, isNotNull);
 
@@ -81,16 +84,11 @@ void main() {
 
     // Dispatch right click.
     element!.dispatchEvent(
-      web.MouseEvent(
-        'mousedown',
-        web.MouseEventInit(
-          button: 2,
-          clientX: 200,
-          clientY: 300,
-        ),
-      ),
+      web.MouseEvent('mousedown', web.MouseEventInit(button: 2, clientX: 200, clientY: 300)),
     );
-    final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
+    final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(
+      find.byKey(spy),
+    );
     expect(renderSelectionSpy.events, isNotEmpty);
 
     SelectWordSelectionEvent? selectWordEvent;
@@ -107,26 +105,19 @@ void main() {
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
-  const SelectionSpy({
-    super.key,
-  });
+  const SelectionSpy({super.key});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderSelectionSpy(
-      SelectionContainer.maybeOf(context),
-    );
+    return RenderSelectionSpy(SelectionContainer.maybeOf(context));
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) { }
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {}
 }
 
-class RenderSelectionSpy extends RenderProxyBox
-    with Selectable, SelectionRegistrant {
-  RenderSelectionSpy(
-      SelectionRegistrar? registrar,
-      ) {
+class RenderSelectionSpy extends RenderProxyBox with Selectable, SelectionRegistrant {
+  RenderSelectionSpy(SelectionRegistrar? registrar) {
     this.registrar = registrar;
   }
 
@@ -166,6 +157,14 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
+  SelectedContentRange? getSelection() {
+    return null;
+  }
+
+  @override
+  int get contentLength => 1;
+
+  @override
   final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
@@ -182,5 +181,5 @@ class RenderSelectionSpy extends RenderProxyBox
   );
 
   @override
-  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
 }

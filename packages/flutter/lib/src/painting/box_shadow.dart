@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show Shadow, lerpDouble;
 
@@ -44,6 +48,9 @@ class BoxShadow extends ui.Shadow {
   /// The [BlurStyle] to use for this shadow.
   ///
   /// Defaults to [BlurStyle.normal].
+  ///
+  /// When [debugDisableShadows] is true, [toPaint] ignores the [blurStyle] and
+  /// acts as if [BlurStyle.normal] was used.
   final BlurStyle blurStyle;
 
   /// Create the [Paint] object that corresponds to this shadow description.
@@ -52,11 +59,18 @@ class BoxShadow extends ui.Shadow {
   /// To honor those as well, the shape should be inflated by [spreadRadius] pixels
   /// in every direction and then translated by [offset] before being filled using
   /// this [Paint].
+  ///
+  /// The [blurStyle] is ignored if [debugDisableShadows] is true. This causes
+  /// an especially significant change to the rendering when [BlurStyle.outer]
+  /// is used; the caller is responsible for adjusting for that case if
+  /// necessary. (This only matters when using [debugDisableShadows], e.g. in
+  /// tests that use [matchesGoldenFile].)
   @override
   Paint toPaint() {
-    final Paint result = Paint()
-      ..color = color
-      ..maskFilter = MaskFilter.blur(blurStyle, blurSigma);
+    final Paint result =
+        Paint()
+          ..color = color
+          ..maskFilter = MaskFilter.blur(blurStyle, blurSigma);
     assert(() {
       if (debugDisableShadows) {
         result.maskFilter = null;
@@ -66,7 +80,8 @@ class BoxShadow extends ui.Shadow {
     return result;
   }
 
-  /// Returns a new box shadow with its offset, blurRadius, and spreadRadius scaled by the given factor.
+  /// Returns a new box shadow with its offset, blurRadius, and spreadRadius
+  /// scaled by the given factor.
   @override
   BoxShadow scale(double factor) {
     return BoxShadow(
@@ -75,6 +90,24 @@ class BoxShadow extends ui.Shadow {
       blurRadius: blurRadius * factor,
       spreadRadius: spreadRadius * factor,
       blurStyle: blurStyle,
+    );
+  }
+
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  BoxShadow copyWith({
+    Color? color,
+    Offset? offset,
+    double? blurRadius,
+    double? spreadRadius,
+    BlurStyle? blurStyle,
+  }) {
+    return BoxShadow(
+      color: color ?? this.color,
+      offset: offset ?? this.offset,
+      blurRadius: blurRadius ?? this.blurRadius,
+      spreadRadius: spreadRadius ?? this.spreadRadius,
+      blurStyle: blurStyle ?? this.blurStyle,
     );
   }
 
@@ -131,17 +164,18 @@ class BoxShadow extends ui.Shadow {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is BoxShadow
-        && other.color == color
-        && other.offset == offset
-        && other.blurRadius == blurRadius
-        && other.spreadRadius == spreadRadius
-        && other.blurStyle == blurStyle;
+    return other is BoxShadow &&
+        other.color == color &&
+        other.offset == offset &&
+        other.blurRadius == blurRadius &&
+        other.spreadRadius == spreadRadius &&
+        other.blurStyle == blurStyle;
   }
 
   @override
   int get hashCode => Object.hash(color, offset, blurRadius, spreadRadius, blurStyle);
 
   @override
-  String toString() => 'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)}, $blurStyle)';
+  String toString() =>
+      'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)}, $blurStyle)';
 }

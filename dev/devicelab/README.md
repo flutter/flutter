@@ -28,7 +28,7 @@ DeviceLab tests are run against physical devices in Flutter's lab (the
 
 Tasks specify the type of device they are to run on (`linux_android`, `mac_ios`,
 `mac_android`, `windows_android`, etc). When a device in the lab is free, it
-will pickup tasks that need to be completed.
+will pick up tasks that need to be completed.
 
 1. If the task succeeds, the test runner reports the success and uploads its
 performance metrics to Flutter's infrastructure. Not all tasks record
@@ -59,6 +59,10 @@ You can find where your Android SDK is using `flutter doctor -v`.
 Running the devicelab will do things to your environment.
 
 Notably, it will start and stop Gradle, for instance.
+
+### Running tests in `test/...`
+
+`dart test test/{NAME_OF_TEST}`
 
 ### Running specific tests
 
@@ -217,7 +221,7 @@ _TASK_- the name of your test that also matches the name of the
   file in `bin/tasks` without the `.dart` extension.
 
 1. Add target to
-   [.ci.yaml](https://github.com/flutter/flutter/blob/master/.ci.yaml)
+   [.ci.yaml](https://github.com/flutter/flutter/blob/main/.ci.yaml)
    * Mirror an existing one that has the recipe `devicelab_drone`
 
 If your test needs to run on multiple operating systems, create a separate
@@ -237,7 +241,7 @@ and the test will run based on the artifact against a testbed with a device.
 
 Steps:
 
-1. Update the task class to extend [`BuildTestTask`](https://github.com/flutter/flutter/blob/master/dev/devicelab/lib/tasks/build_test_task.dart)
+1. Update the task class to extend [`BuildTestTask`](https://github.com/flutter/flutter/blob/main/dev/devicelab/lib/tasks/build_test_task.dart)
    - Override function `getBuildArgs`
    - Override function `getTestArgs`
    - Override function `parseTaskResult`

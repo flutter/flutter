@@ -5,9 +5,12 @@
 import 'dart:async';
 
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'artifacts.dart';
 import 'asset.dart';
+import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -15,8 +18,9 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
-import 'build_system/targets/scene_importer.dart';
-import 'build_system/targets/shader_compiler.dart';
+import 'build_system/tools/asset_transformer.dart';
+import 'build_system/tools/scene_importer.dart';
+import 'build_system/tools/shader_compiler.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
@@ -26,6 +30,7 @@ const String _kFontManifest = 'FontManifest.json';
 class DevFSConfig {
   /// Should DevFS assume that symlink targets are stable?
   bool cacheSymlinks = false;
+
   /// Should DevFS assume that there are no symlinks to directories?
   bool noDirectorySymlinks = false;
 }
@@ -49,9 +54,7 @@ abstract class DevFSContent {
 
   Stream<List<int>> contentsAsStream();
 
-  Stream<List<int>> contentsAsCompressedStream(
-    OperatingSystemUtils osUtils,
-  ) {
+  Stream<List<int>> contentsAsCompressedStream(OperatingSystemUtils osUtils) {
     return osUtils.gzipLevel1Stream(contentsAsStream());
   }
 }
@@ -113,7 +116,9 @@ class DevFSFileContent extends DevFSContent {
     if (oldFileStat == null && newFileStat == null) {
       return false;
     }
-    return oldFileStat == null || newFileStat == null || newFileStat.modified.isAfter(oldFileStat.modified);
+    return oldFileStat == null ||
+        newFileStat == null ||
+        newFileStat.modified.isAfter(oldFileStat.modified);
   }
 
   @override
@@ -124,9 +129,7 @@ class DevFSFileContent extends DevFSContent {
     if (oldFileStat == null && newFileStat == null) {
       return false;
     }
-    return oldFileStat == null
-        || newFileStat == null
-        || newFileStat.modified.isAfter(time);
+    return oldFileStat == null || newFileStat == null || newFileStat.modified.isAfter(time);
   }
 
   @override
@@ -149,18 +152,11 @@ class DevFSFileContent extends DevFSContent {
 class DevFSByteContent extends DevFSContent {
   DevFSByteContent(this._bytes);
 
-  List<int> _bytes;
-
+  final List<int> _bytes;
+  final DateTime _creationTime = DateTime.now();
   bool _isModified = true;
-  DateTime _modificationTime = DateTime.now();
 
   List<int> get bytes => _bytes;
-
-  set bytes(List<int> value) {
-    _bytes = value;
-    _isModified = true;
-    _modificationTime = DateTime.now();
-  }
 
   /// Return true only once so that the content is written to the device only once.
   @override
@@ -172,7 +168,7 @@ class DevFSByteContent extends DevFSContent {
 
   @override
   bool isModifiedAfter(DateTime time) {
-    return _modificationTime.isAfter(time);
+    return _creationTime.isAfter(time);
   }
 
   @override
@@ -182,29 +178,16 @@ class DevFSByteContent extends DevFSContent {
   Future<List<int>> contentsAsBytes() async => _bytes;
 
   @override
-  Stream<List<int>> contentsAsStream() =>
-      Stream<List<int>>.fromIterable(<List<int>>[_bytes]);
+  Stream<List<int>> contentsAsStream() => Stream<List<int>>.fromIterable(<List<int>>[_bytes]);
 }
 
 /// String content to be copied to the device.
 class DevFSStringContent extends DevFSByteContent {
-  DevFSStringContent(String string)
-    : _string = string,
-      super(utf8.encode(string));
+  DevFSStringContent(String string) : _string = string, super(utf8.encode(string));
 
-  String _string;
+  final String _string;
 
   String get string => _string;
-
-  set string(String value) {
-    _string = value;
-    super.bytes = utf8.encode(_string);
-  }
-
-  @override
-  set bytes(List<int> value) {
-    string = utf8.decode(value);
-  }
 }
 
 /// A string compressing DevFSContent.
@@ -218,18 +201,16 @@ class DevFSStringContent extends DevFSByteContent {
 /// The `hintString` parameter is a zlib dictionary hinting mechanism to suggest
 /// the most common string occurrences to potentially assist with compression.
 class DevFSStringCompressingBytesContent extends DevFSContent {
-  DevFSStringCompressingBytesContent(this._string, { String? hintString })
+  DevFSStringCompressingBytesContent(this._string, {String? hintString})
     : _compressor = ZLibEncoder(
-      dictionary: hintString == null
-          ? null
-          : utf8.encode(hintString),
-      gzip: true,
-      level: 9,
-    );
+        dictionary: hintString == null ? null : utf8.encode(hintString),
+        gzip: true,
+        level: 9,
+      );
 
   final String _string;
   final ZLibEncoder _compressor;
-  final DateTime _modificationTime = DateTime.now();
+  final DateTime _creationTime = DateTime.now();
 
   bool _isModified = true;
 
@@ -245,7 +226,7 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 
   @override
   bool isModifiedAfter(DateTime time) {
-    return _modificationTime.isAfter(time);
+    return _creationTime.isAfter(time);
   }
 
   @override
@@ -289,12 +270,11 @@ class _DevFSHttpWriter implements DevFSWriter {
     required HttpClient httpClient,
     required Logger logger,
     Duration? uploadRetryThrottle,
-  })
-    : httpAddress = serviceProtocol.httpAddress,
-      _client = httpClient,
-      _osUtils = osUtils,
-      _uploadRetryThrottle = uploadRetryThrottle,
-      _logger = logger;
+  }) : httpAddress = serviceProtocol.httpAddress,
+       _client = httpClient,
+       _osUtils = osUtils,
+       _uploadRetryThrottle = uploadRetryThrottle,
+       _logger = logger;
 
   final HttpClient _client;
   final OperatingSystemUtils _osUtils;
@@ -343,27 +323,23 @@ class _DevFSHttpWriter implements DevFSWriter {
     }
   }
 
-  Future<void> _startWrite(
-    Uri deviceUri,
-    DevFSContent content, {
-    int retry = 0,
-  }) async {
+  Future<void> _startWrite(Uri deviceUri, DevFSContent content, {int retry = 0}) async {
     while (true) {
       try {
         final HttpClientRequest request = await _client.putUrl(httpAddress!);
         request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
         request.headers.add('dev_fs_name', fsName);
         request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceUri')));
-        final Stream<List<int>> contents = content.contentsAsCompressedStream(
-          _osUtils,
-        );
+        final Stream<List<int>> contents = content.contentsAsCompressedStream(_osUtils);
         await request.addStream(contents);
         // Once the bug in Dart is solved we can remove the timeout
         // (https://github.com/dart-lang/sdk/issues/43525).
         try {
           final HttpClientResponse response = await request.close().timeout(
-            const Duration(seconds: 60));
-          response.listen((_) {},
+            const Duration(seconds: 60),
+          );
+          response.listen(
+            (_) {},
             onError: (dynamic error) {
               _logger.printTrace('error: $error');
             },
@@ -453,31 +429,51 @@ class DevFS {
     required OperatingSystemUtils osUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
+    required BuildMode buildMode,
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+    Config? config,
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
        _httpWriter = _DevFSHttpWriter(
-        fsName,
-        serviceProtocol,
-        osUtils: osUtils,
-        logger: logger,
-        uploadRetryThrottle: uploadRetryThrottle,
-        httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
-          ? HttpClient()
-          : context.get<HttpClientFactory>()!())),
-       _stopwatchFactory = stopwatchFactory;
+         fsName,
+         serviceProtocol,
+         osUtils: osUtils,
+         logger: logger,
+         uploadRetryThrottle: uploadRetryThrottle,
+         httpClient:
+             httpClient ??
+             ((context.get<HttpClientFactory>() == null)
+                 ? HttpClient()
+                 : context.get<HttpClientFactory>()!()),
+       ),
+       _stopwatchFactory = stopwatchFactory,
+       _config = config,
+       _assetTransformer = DevelopmentAssetTransformer(
+         transformer: AssetTransformer(
+           processManager: processManager,
+           fileSystem: fileSystem,
+           dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+           buildMode: buildMode,
+         ),
+         fileSystem: fileSystem,
+         logger: logger,
+       );
 
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
   final StopwatchFactory _stopwatchFactory;
+  final Config? _config;
+  final DevelopmentAssetTransformer _assetTransformer;
 
   final String fsName;
-  final Directory? rootDirectory;
+  final Directory rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
   final Set<String> shaderPathsToEvict = <String>{};
   final Set<String> scenePathsToEvict = <String>{};
@@ -501,7 +497,7 @@ class DevFS {
     final String baseUriString = baseUri.toString();
     if (deviceUriString.startsWith(baseUriString)) {
       final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
-      return rootDirectory!.uri.resolve(deviceUriSuffix);
+      return rootDirectory.uri.resolve(deviceUriSuffix);
     }
     return deviceUri;
   }
@@ -512,7 +508,8 @@ class DevFS {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
       _baseUri = Uri.parse(response.json!['uri'] as String);
     } on vm_service.RPCError catch (rpcException) {
-      if (rpcException.code == RPCErrorCodes.kServiceDisappeared) {
+      if (rpcException.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          rpcException.message.contains('Service connection disposed')) {
         // This can happen if the device has been disconnected, so translate to
         // a DevFSException, which the caller will handle.
         throw DevFSException('Service disconnected', rpcException);
@@ -567,10 +564,8 @@ class DevFS {
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
-    String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
     final DateTime candidateCompileTime = DateTime.now();
@@ -593,19 +588,21 @@ class DevFS {
     // Await the compiler response after checking if the bundle is updated. This allows the file
     // stating to be done while waiting for the frontend_server response.
     final Stopwatch compileTimer = _stopwatchFactory.createStopwatch('compile')..start();
-    final Future<CompilerOutput?> pendingCompilerOutput = generator.recompile(
-      mainUri,
-      invalidatedFiles,
-      outputPath: dillOutputPath,
-      fs: _fileSystem,
-      projectRootPath: projectRootPath,
-      packageConfig: packageConfig,
-      checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
-      dartPluginRegistrant: dartPluginRegistrant,
-    ).then((CompilerOutput? result) {
-      compileTimer.stop();
-      return result;
-    });
+    final Future<CompilerOutput?> pendingCompilerOutput = generator
+        .recompile(
+          mainUri,
+          invalidatedFiles,
+          outputPath: dillOutputPath,
+          fs: _fileSystem,
+          projectRootPath: rootDirectory.path,
+          packageConfig: packageConfig,
+          checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
+          dartPluginRegistrant: dartPluginRegistrant,
+        )
+        .then((CompilerOutput? result) {
+          compileTimer.stop();
+          return result;
+        });
 
     if (bundle != null) {
       // Mark processing of bundle started for testability of starting the compile
@@ -616,16 +613,18 @@ class DevFS {
 
       // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
-      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-      final String assetDirectory = getAssetBuildDirectory();
-      bundle.entries.forEach((String archivePath, DevFSContent content) {
+      final String assetDirectory = getAssetBuildDirectory(_config, _fileSystem);
+      final String assetBuildDirPrefix = _asUriPath(assetDirectory);
+      bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
         // If the content is backed by a real file, isModified will file stat and return true if
         // it was modified since the last time this was called.
-        if (!content.isModified || bundleFirstUpload) {
+        if (!entry.content.isModified || bundleFirstUpload) {
           return;
         }
         // Modified shaders must be recompiled per-target platform.
-        final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
+        final Uri deviceUri = _fileSystem.path.toUri(
+          _fileSystem.path.join(assetDirectory, archivePath),
+        );
         if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
           archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
         }
@@ -634,10 +633,10 @@ class DevFS {
         if (archivePath == _kFontManifest) {
           didUpdateFontManifest = true;
         }
-
-        switch (bundle.entryKinds[archivePath]) {
+        final AssetKind? kind = bundle.entries[archivePath]?.kind;
+        switch (kind) {
           case AssetKind.shader:
-            final Future<DevFSContent?> pending = shaderCompiler.recompileShader(content);
+            final Future<DevFSContent?> pending = shaderCompiler.recompileShader(entry.content);
             pendingAssetBuilds.add(pending);
             pending.then((DevFSContent? content) {
               if (content == null) {
@@ -654,7 +653,7 @@ class DevFS {
             if (sceneImporter == null) {
               break;
             }
-            final Future<DevFSContent?> pending = sceneImporter.reimportScene(content);
+            final Future<DevFSContent?> pending = sceneImporter.reimportScene(entry.content);
             pendingAssetBuilds.add(pending);
             pending.then((DevFSContent? content) {
               if (content == null) {
@@ -670,11 +669,31 @@ class DevFS {
           case AssetKind.regular:
           case AssetKind.font:
           case null:
-            dirtyEntries[deviceUri] = content;
-            syncedBytes += content.size;
-            if (!bundleFirstUpload) {
-              assetPathsToEvict.add(archivePath);
-            }
+            final Future<DevFSContent?> pending =
+                (() async {
+                  if (entry.transformers.isEmpty || kind != AssetKind.regular) {
+                    return entry.content;
+                  }
+                  return _assetTransformer.retransformAsset(
+                    inputAssetKey: archivePath,
+                    inputAssetContent: entry.content,
+                    transformerEntries: entry.transformers,
+                    workingDirectory: rootDirectory.path,
+                  );
+                })();
+
+            pendingAssetBuilds.add(pending);
+            pending.then((DevFSContent? content) {
+              if (content == null) {
+                assetBuildFailed = true;
+                return;
+              }
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+              if (!bundleFirstUpload) {
+                assetPathsToEvict.add(archivePath);
+              }
+            });
         }
       });
 
@@ -711,6 +730,7 @@ class DevFS {
       return UpdateFSReport();
     }
 
+    _logger.printTrace('Pending asset builds completed. Writing dirty entries.');
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri!, _httpWriter);
     }
@@ -738,9 +758,7 @@ class DevFS {
 ///
 /// Requires that the file system is the same for both the tool and application.
 class LocalDevFSWriter implements DevFSWriter {
-  LocalDevFSWriter({
-    required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem;
+  LocalDevFSWriter({required FileSystem fileSystem}) : _fileSystem = fileSystem;
 
   final FileSystem _fileSystem;
 

@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
+import 'dart:js_interop';
+
+import 'package:web/web.dart' as web;
+
 Future<void> main() async {
-  const String response = 'CLOSE?version=1';
-  await html.HttpRequest.getString(response);
-  html.document.body?.appendHtml(response);
+  final JSString response = 'CLOSE?version=1'.toJS;
+  await web.window.fetch(response).toDart;
+  web.document.body?.append(response);
 }

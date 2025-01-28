@@ -7,7 +7,6 @@ import 'dart:io';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
-
 Future<void> main() async {
   late FlutterDriver driver;
 
@@ -28,15 +27,20 @@ Future<void> main() async {
     // to be verified.
     final Future<String> inputEventWasVerified = driver.requestData('input_was_verified');
 
-    // Keep issueing taps until we get the requested data. The actual setup
+    // Keep issuing taps until we get the requested data. The actual setup
     // of the platform view is asynchronous so we might have to tap more than
     // once to  get a response.
     bool stop = false;
     inputEventWasVerified.whenComplete(() => stop = true);
     while (!stop) {
       // We must use the Android input tool to get verified input events.
-      final ProcessResult result =
-          await Process.run('adb', <String>['shell', 'input', 'tap', '${offset.dx}', '${offset.dy}']);
+      final ProcessResult result = await Process.run('adb', <String>[
+        'shell',
+        'input',
+        'tap',
+        '${offset.dx}',
+        '${offset.dy}',
+      ]);
       expect(result.exitCode, equals(0));
     }
     // Input

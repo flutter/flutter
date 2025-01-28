@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'hardware_keyboard.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_maps.g.dart';
@@ -153,7 +156,8 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 
   // Android only reports a single code point for the key label.
   @override
-  String get keyLabel => plainCodePoint == 0 ? '' : String.fromCharCode(plainCodePoint & _kCombiningCharacterMask);
+  String get keyLabel =>
+      plainCodePoint == 0 ? '' : String.fromCharCode(plainCodePoint & _kCombiningCharacterMask);
 
   @override
   PhysicalKeyboardKey get physicalKey {
@@ -199,7 +203,8 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     // plane.
     if (keyLabel.isNotEmpty && !LogicalKeyboardKey.isControlCharacter(keyLabel)) {
       final int combinedCodePoint = plainCodePoint & _kCombiningCharacterMask;
-      final int keyId = LogicalKeyboardKey.unicodePlane | (combinedCodePoint & LogicalKeyboardKey.valueMask);
+      final int keyId =
+          LogicalKeyboardKey.unicodePlane | (combinedCodePoint & LogicalKeyboardKey.valueMask);
       return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(keyId);
     }
 
@@ -216,40 +221,47 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     if (metaState & anyMask == 0) {
       return false;
     }
-    switch (side) {
-      case KeyboardSide.any:
-        return true;
-      case KeyboardSide.all:
-        return metaState & leftMask != 0 && metaState & rightMask != 0;
-      case KeyboardSide.left:
-        return metaState & leftMask != 0;
-      case KeyboardSide.right:
-        return metaState & rightMask != 0;
-    }
+    return switch (side) {
+      KeyboardSide.any => true,
+      KeyboardSide.all => (metaState & leftMask != 0) && (metaState & rightMask != 0),
+      KeyboardSide.left => metaState & leftMask != 0,
+      KeyboardSide.right => metaState & rightMask != 0,
+    };
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
-    switch (key) {
-      case ModifierKey.controlModifier:
-        return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
-      case ModifierKey.shiftModifier:
-        return _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift);
-      case ModifierKey.altModifier:
-        return _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt);
-      case ModifierKey.metaModifier:
-        return _isLeftRightModifierPressed(side, modifierMeta, modifierLeftMeta, modifierRightMeta);
-      case ModifierKey.capsLockModifier:
-        return metaState & modifierCapsLock != 0;
-      case ModifierKey.numLockModifier:
-        return metaState & modifierNumLock != 0;
-      case ModifierKey.scrollLockModifier:
-        return metaState & modifierScrollLock != 0;
-      case ModifierKey.functionModifier:
-        return metaState & modifierFunction != 0;
-      case ModifierKey.symbolModifier:
-        return metaState & modifierSym != 0;
-    }
+  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
+    return switch (key) {
+      ModifierKey.controlModifier => _isLeftRightModifierPressed(
+        side,
+        modifierControl,
+        modifierLeftControl,
+        modifierRightControl,
+      ),
+      ModifierKey.shiftModifier => _isLeftRightModifierPressed(
+        side,
+        modifierShift,
+        modifierLeftShift,
+        modifierRightShift,
+      ),
+      ModifierKey.altModifier => _isLeftRightModifierPressed(
+        side,
+        modifierAlt,
+        modifierLeftAlt,
+        modifierRightAlt,
+      ),
+      ModifierKey.metaModifier => _isLeftRightModifierPressed(
+        side,
+        modifierMeta,
+        modifierLeftMeta,
+        modifierRightMeta,
+      ),
+      ModifierKey.capsLockModifier => metaState & modifierCapsLock != 0,
+      ModifierKey.numLockModifier => metaState & modifierNumLock != 0,
+      ModifierKey.scrollLockModifier => metaState & modifierScrollLock != 0,
+      ModifierKey.functionModifier => metaState & modifierFunction != 0,
+      ModifierKey.symbolModifier => metaState & modifierSym != 0,
+    };
   }
 
   @override
@@ -303,31 +315,24 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is RawKeyEventDataAndroid
-        && other.flags == flags
-        && other.codePoint == codePoint
-        && other.plainCodePoint == plainCodePoint
-        && other.keyCode == keyCode
-        && other.scanCode == scanCode
-        && other.metaState == metaState;
+    return other is RawKeyEventDataAndroid &&
+        other.flags == flags &&
+        other.codePoint == codePoint &&
+        other.plainCodePoint == plainCodePoint &&
+        other.keyCode == keyCode &&
+        other.scanCode == scanCode &&
+        other.metaState == metaState;
   }
 
   @override
-  int get hashCode => Object.hash(
-    flags,
-    codePoint,
-    plainCodePoint,
-    keyCode,
-    scanCode,
-    metaState,
-  );
+  int get hashCode => Object.hash(flags, codePoint, plainCodePoint, keyCode, scanCode, metaState);
 
   // Modifier key masks.
 

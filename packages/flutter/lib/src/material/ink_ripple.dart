@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button_style.dart';
+/// @docImport 'ink_highlight.dart';
+/// @docImport 'ink_splash.dart';
+/// @docImport 'theme.dart';
+/// @docImport 'theme_data.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -18,7 +25,11 @@ const Duration _kCancelDuration = Duration(milliseconds: 75);
 // The fade out begins 225ms after the _fadeOutController starts. See confirm().
 const double _kFadeOutIntervalStart = 225.0 / 375.0;
 
-RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback) {
+RectCallback? _getClipCallback(
+  RenderBox referenceBox,
+  bool containedInkWell,
+  RectCallback? rectCallback,
+) {
   if (rectCallback != null) {
     assert(containedInkWell);
     return rectCallback;
@@ -29,7 +40,12 @@ RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, Re
   return null;
 }
 
-double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback, Offset position) {
+double _getTargetRadius(
+  RenderBox referenceBox,
+  bool containedInkWell,
+  RectCallback? rectCallback,
+  Offset position,
+) {
   final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
   final double d1 = size.bottomRight(Offset.zero).distance;
   final double d2 = (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
@@ -122,42 +138,36 @@ class InkRipple extends InteractiveInkFeature {
   }) : _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _textDirection = textDirection,
-       _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
+       _targetRadius =
+           radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, color: color) {
-
     // Immediately begin fading-in the initial splash.
-    _fadeInController = AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
-      ..addListener(controller.markNeedsPaint)
-      ..forward();
-    _fadeIn = _fadeInController.drive(IntTween(
-      begin: 0,
-      end: color.alpha,
-    ));
+    _fadeInController =
+        AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
+          ..addListener(controller.markNeedsPaint)
+          ..forward();
+    _fadeIn = _fadeInController.drive(IntTween(begin: 0, end: color.alpha));
 
     // Controls the splash radius and its center. Starts upon confirm.
-    _radiusController = AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
-      ..addListener(controller.markNeedsPaint)
-      ..forward();
-     // Initial splash diameter is 60% of the target diameter, final
-     // diameter is 10dps larger than the target diameter.
+    _radiusController =
+        AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
+          ..addListener(controller.markNeedsPaint)
+          ..forward();
+    // Initial splash diameter is 60% of the target diameter, final
+    // diameter is 10dps larger than the target diameter.
     _radius = _radiusController.drive(
-      Tween<double>(
-        begin: _targetRadius * 0.30,
-        end: _targetRadius + 5.0,
-      ).chain(_easeCurveTween),
+      Tween<double>(begin: _targetRadius * 0.30, end: _targetRadius + 5.0).chain(_easeCurveTween),
     );
 
     // Controls the splash radius and its center. Starts upon confirm however its
     // Interval delays changes until the radius expansion has completed.
-    _fadeOutController = AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
-      ..addListener(controller.markNeedsPaint)
-      ..addStatusListener(_handleAlphaStatusChanged);
+    _fadeOutController =
+        AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
+          ..addListener(controller.markNeedsPaint)
+          ..addStatusListener(_handleAlphaStatusChanged);
     _fadeOut = _fadeOutController.drive(
-      IntTween(
-        begin: color.alpha,
-        end: 0,
-      ).chain(_fadeOutIntervalTween),
+      IntTween(begin: color.alpha, end: 0).chain(_fadeOutIntervalTween),
     );
 
     controller.addInkFeature(this);
@@ -183,7 +193,9 @@ class InkRipple extends InteractiveInkFeature {
   static const InteractiveInkFeatureFactory splashFactory = _InkRippleFactory();
 
   static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.ease);
-  static final Animatable<double> _fadeOutIntervalTween = CurveTween(curve: const Interval(_kFadeOutIntervalStart, 1.0));
+  static final Animatable<double> _fadeOutIntervalTween = CurveTween(
+    curve: const Interval(_kFadeOutIntervalStart, 1.0),
+  );
 
   @override
   void confirm() {
@@ -209,7 +221,7 @@ class InkRipple extends InteractiveInkFeature {
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
+    if (status.isCompleted) {
       dispose();
     }
   }
@@ -226,16 +238,14 @@ class InkRipple extends InteractiveInkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final int alpha = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
     final Paint paint = Paint()..color = color.withAlpha(alpha);
-    Rect? rect;
-    if (_clipCallback != null) {
-       rect = _clipCallback();
-    }
+    final Rect? rect = _clipCallback?.call();
     // Splash moves to the center of the reference box.
-    final Offset center = Offset.lerp(
-      _position,
-      rect != null ? rect.center : referenceBox.size.center(Offset.zero),
-      Curves.ease.transform(_radiusController.value),
-    )!;
+    final Offset center =
+        Offset.lerp(
+          _position,
+          rect != null ? rect.center : referenceBox.size.center(Offset.zero),
+          Curves.ease.transform(_radiusController.value),
+        )!;
     paintInkCircle(
       canvas: canvas,
       transform: transform,

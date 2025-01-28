@@ -5,7 +5,11 @@
 import 'template.dart';
 
 class ButtonTemplate extends TokenTemplate {
-  const ButtonTemplate(this.tokenGroup, super.blockName, super.fileName, super.tokens, {
+  const ButtonTemplate(
+    this.tokenGroup,
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
@@ -124,6 +128,29 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<Size>(Size(64.0, ${getToken("$tokenGroup.container.height")}));
 
   // No default fixedSize
+
+  @override
+  MaterialStateProperty<double>? get iconSize =>
+    const MaterialStatePropertyAll<double>(${getToken("$tokenGroup.with-icon.icon.size")});
+
+  @override
+  MaterialStateProperty<Color>? get iconColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return ${color('$tokenGroup.with-icon.disabled.icon.color')}.withOpacity(${opacity("$tokenGroup.with-icon.disabled.icon.opacity")});
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return ${color('$tokenGroup.with-icon.pressed.icon.color')};
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return ${color('$tokenGroup.with-icon.hover.icon.color')};
+      }
+      if (states.contains(MaterialState.focused)) {
+        return ${color('$tokenGroup.with-icon.focus.icon.color')};
+      }
+      return ${color('$tokenGroup.with-icon.icon.color')};
+    });
+  }
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>

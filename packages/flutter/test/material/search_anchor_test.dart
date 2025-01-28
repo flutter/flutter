@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -26,6 +28,7 @@ void main() {
       }
       child.visitChildren(recursiveFinder);
     }
+
     root.visitChildren(recursiveFinder);
     expect(renderEditable, isNotNull);
     return renderEditable;
@@ -33,23 +36,18 @@ void main() {
 
   List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
     return points.map<TextSelectionPoint>((TextSelectionPoint point) {
-      return TextSelectionPoint(
-        box.localToGlobal(point.point),
-        point.direction,
-      );
+      return TextSelectionPoint(box.localToGlobal(point.point), point.direction);
     }).toList();
   }
 
   Offset textOffsetToPosition(WidgetTester tester, int offset, {int index = 0}) {
     final RenderEditable renderEditable = findRenderEditable(tester, index: index);
     final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(
-        TextSelection.collapsed(offset: offset),
-      ),
+      renderEditable.getEndpointsForSelection(TextSelection.collapsed(offset: offset)),
       renderEditable,
     );
     expect(endpoints.length, 1);
-    return endpoints[0].point + const Offset(kIsWeb? 1.0 : 0.0, -2.0);
+    return endpoints[0].point + const Offset(kIsWeb ? 1.0 : 0.0, -2.0);
   }
 
   testWidgets('SearchBar defaults', (WidgetTester tester) async {
@@ -57,14 +55,7 @@ void main() {
     final ColorScheme colorScheme = theme.colorScheme;
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: const Material(
-          child: SearchBar(
-            hintText: 'hint text',
-          )
-        ),
-      ),
+      MaterialApp(theme: theme, home: const Material(child: SearchBar(hintText: 'hint text'))),
     );
 
     final Finder searchBarMaterial = find.descendant(
@@ -81,15 +72,7 @@ void main() {
     final TextEditingController controller = TextEditingController(text: defaultText);
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SearchBar(
-            controller: controller,
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(controller: controller))));
 
     expect(controller.value.text, defaultText);
     expect(find.text(defaultText), findsOneWidget);
@@ -105,15 +88,7 @@ void main() {
     final FocusNode node = FocusNode();
     addTearDown(node.dispose);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SearchBar(
-            focusNode: node,
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(focusNode: node))));
 
     expect(node.hasFocus, false);
 
@@ -130,15 +105,7 @@ void main() {
     final FocusNode node1 = FocusNode();
     addTearDown(node1.dispose);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SearchBar(
-            focusNode: node1,
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(focusNode: node1))));
 
     expect(node1.hasFocus, isFalse);
 
@@ -153,15 +120,7 @@ void main() {
     final FocusNode node2 = FocusNode();
     addTearDown(node2.dispose);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SearchBar(
-            focusNode: node2,
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(focusNode: node2))));
 
     expect(node1.hasFocus, isFalse);
     expect(node2.hasFocus, isFalse);
@@ -176,13 +135,7 @@ void main() {
     expect(node1.hasFocus, isFalse);
     expect(node2.hasFocus, isFalse);
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: SearchBar(),
-        ),
-      ),
-    );
+    await tester.pumpWidget(const MaterialApp(home: Material(child: SearchBar())));
 
     expect(node1.hasFocus, isFalse);
     expect(node2.hasFocus, isFalse);
@@ -198,16 +151,8 @@ void main() {
       MaterialApp(
         home: Center(
           child: SearchBar(
-            leading: IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {},
-            ),
-            trailing: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {},
-              )
-            ],
+            leading: IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+            trailing: <Widget>[IconButton(icon: const Icon(Icons.menu), onPressed: () {})],
           ),
         ),
       ),
@@ -230,23 +175,17 @@ void main() {
     expect(trailingIcon.right, equals(barRect.right - 8.0));
   });
 
-  testWidgets('SearchBar has correct default layout and padding - RTL', (WidgetTester tester) async {
+  testWidgets('SearchBar has correct default layout and padding - RTL', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Center(
             child: SearchBar(
-              leading: IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {},
-              ),
-              trailing: <Widget>[
-                IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () {},
-                )
-              ],
+              leading: IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+              trailing: <Widget>[IconButton(icon: const Icon(Icons.menu), onPressed: () {})],
             ),
           ),
         ),
@@ -273,13 +212,7 @@ void main() {
   testWidgets('SearchBar respects hintText property', (WidgetTester tester) async {
     const String hintText = 'hint text';
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: SearchBar(
-            hintText: hintText,
-          ),
-        ),
-      ),
+      const MaterialApp(home: Material(child: SearchBar(hintText: hintText))),
     );
 
     expect(find.text(hintText), findsOneWidget);
@@ -291,12 +224,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: SearchBar(
-            leading: IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {},
-            ),
-          ),
+          child: SearchBar(leading: IconButton(icon: const Icon(Icons.search), onPressed: () {})),
         ),
       ),
     );
@@ -313,12 +241,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: SearchBar(
-            trailing: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {},
-              ),
-            ],
+            trailing: <Widget>[IconButton(icon: const Icon(Icons.menu), onPressed: () {})],
           ),
         ),
       ),
@@ -341,10 +264,10 @@ void main() {
                   setState(() {
                     tapCount++;
                   });
-                }
+                },
               ),
             );
-          }
+          },
         ),
       ),
     );
@@ -367,10 +290,10 @@ void main() {
                   setState(() {
                     changeCount++;
                   });
-                }
+                },
               ),
             );
-          }
+          },
         ),
       ),
     );
@@ -405,15 +328,7 @@ void main() {
   testWidgets('SearchBar respects constraints property', (WidgetTester tester) async {
     const BoxConstraints constraints = BoxConstraints(maxWidth: 350.0, minHeight: 80);
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Center(
-          child: Material(
-            child: SearchBar(
-              constraints: constraints,
-            ),
-          ),
-        ),
-      ),
+      const MaterialApp(home: Center(child: Material(child: SearchBar(constraints: constraints)))),
     );
 
     final Rect barRect = tester.getRect(find.byType(SearchBar));
@@ -437,13 +352,12 @@ void main() {
       }
       return defaultElevation;
     }
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
           child: Material(
-            child: SearchBar(
-              elevation: MaterialStateProperty.resolveWith<double>(getElevation),
-            ),
+            child: SearchBar(elevation: MaterialStateProperty.resolveWith<double>(getElevation)),
           ),
         ),
       ),
@@ -483,9 +397,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: Material(
-            child: SearchBar(
-              backgroundColor: MaterialStateProperty.resolveWith<Color>(_getColor),
-            ),
+            child: SearchBar(backgroundColor: MaterialStateProperty.resolveWith<Color>(_getColor)),
           ),
         ),
       ),
@@ -525,9 +437,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: Material(
-            child: SearchBar(
-              shadowColor: MaterialStateProperty.resolveWith<Color>(_getColor),
-            ),
+            child: SearchBar(shadowColor: MaterialStateProperty.resolveWith<Color>(_getColor)),
           ),
         ),
       ),
@@ -567,9 +477,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: Material(
-            child: SearchBar(
-              surfaceTintColor: MaterialStateProperty.resolveWith<Color>(_getColor),
-            ),
+            child: SearchBar(surfaceTintColor: MaterialStateProperty.resolveWith<Color>(_getColor)),
           ),
         ),
       ),
@@ -621,7 +529,9 @@ void main() {
       ),
     );
 
-    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
+    );
 
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
@@ -632,8 +542,15 @@ void main() {
     await tester.pumpAndSettle();
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
     await tester.pumpAndSettle();
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect()..rect(color: pressedColor.withOpacity(1.0)));
+    inkFeatures = tester.allRenderObjects.firstWhere(
+      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
+    );
+    expect(
+      inkFeatures,
+      paints
+        ..rect()
+        ..rect(color: pressedColor.withOpacity(1.0)),
+    );
 
     // On focused.
     await tester.pumpAndSettle();
@@ -642,8 +559,15 @@ void main() {
     // Remove the pointer so we are no longer hovering.
     await gesture.removePointer();
     await tester.pump();
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect()..rect(color: focusedColor.withOpacity(1.0)));
+    inkFeatures = tester.allRenderObjects.firstWhere(
+      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
+    );
+    expect(
+      inkFeatures,
+      paints
+        ..rect()
+        ..rect(color: focusedColor.withOpacity(1.0)),
+    );
   });
 
   testWidgets('SearchBar respects side and shape properties', (WidgetTester tester) async {
@@ -668,6 +592,7 @@ void main() {
       }
       return defaultSide;
     }
+
     OutlinedBorder getShape(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return pressedShape;
@@ -680,6 +605,7 @@ void main() {
       }
       return defaultShape;
     }
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -730,9 +656,7 @@ void main() {
             child: SearchBar(
               leading: Icon(Icons.search),
               padding: MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(16.0)),
-              trailing: <Widget>[
-                Icon(Icons.menu),
-              ]
+              trailing: <Widget>[Icon(Icons.menu)],
             ),
           ),
         ),
@@ -828,15 +752,10 @@ void main() {
   testWidgets('SearchBar respects textCapitalization property', (WidgetTester tester) async {
     Widget buildSearchBar(TextCapitalization textCapitalization) {
       return MaterialApp(
-        home: Center(
-          child: Material(
-            child: SearchBar(
-              textCapitalization: textCapitalization,
-            ),
-          ),
-        ),
+        home: Center(child: Material(child: SearchBar(textCapitalization: textCapitalization))),
       );
     }
+
     await tester.pumpWidget(buildSearchBar(TextCapitalization.characters));
     await tester.pump();
     TextField textField = tester.widget(find.byType(TextField));
@@ -881,13 +800,14 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildSearchAnchor(TextCapitalization.characters));
     await tester.pump();
     await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
     await tester.pumpAndSettle();
     TextField textField = tester.widget(find.byType(TextField));
     expect(textField.textCapitalization, TextCapitalization.characters);
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pump();
 
     await tester.pumpWidget(buildSearchAnchor(TextCapitalization.none));
@@ -898,13 +818,16 @@ void main() {
     expect(textField.textCapitalization, TextCapitalization.none);
   });
 
-  testWidgets('SearchAnchor respects viewOnChanged and viewOnSubmitted properties', (WidgetTester tester) async {
+  testWidgets('SearchAnchor respects viewOnChanged and viewOnSubmitted properties', (
+    WidgetTester tester,
+  ) async {
     final SearchController controller = SearchController();
     addTearDown(controller.dispose);
     int onChangedCalled = 0;
     int onSubmittedCalled = 0;
-    await tester.pumpWidget(MaterialApp(
-      home: StatefulBuilder(
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Center(
               child: Material(
@@ -936,16 +859,17 @@ void main() {
                 ),
               ),
             );
-          }
+          },
+        ),
       ),
-    ));
+    );
     await tester.tap(find.byType(SearchBar)); // Open search view.
     await tester.pumpAndSettle();
     expect(controller.isOpen, true);
 
     final Finder barOnView = find.descendant(
-        of: findViewContent(),
-        matching: find.byType(TextField)
+      of: findViewContent(),
+      matching: find.byType(TextField),
     );
     await tester.enterText(barOnView, 'a');
     expect(onChangedCalled, 1);
@@ -972,59 +896,67 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildSearchAnchor(TextCapitalization.characters));
     await tester.pump();
     await tester.tap(find.byType(SearchBar)); // Open search view.
     await tester.pumpAndSettle();
-    final Finder textFieldFinder = find.descendant(of: findViewContent(), matching: find.byType(TextField));
+    final Finder textFieldFinder = find.descendant(
+      of: findViewContent(),
+      matching: find.byType(TextField),
+    );
     final TextField textFieldInView = tester.widget<TextField>(textFieldFinder);
     expect(textFieldInView.textCapitalization, TextCapitalization.characters);
     // Close search view.
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pumpAndSettle();
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.textCapitalization, TextCapitalization.characters);
   });
 
-  testWidgets('SearchAnchor.bar respects onChanged and onSubmitted properties', (WidgetTester tester) async {
+  testWidgets('SearchAnchor.bar respects onChanged and onSubmitted properties', (
+    WidgetTester tester,
+  ) async {
     final SearchController controller = SearchController();
     addTearDown(controller.dispose);
     int onChangedCalled = 0;
     int onSubmittedCalled = 0;
-    await tester.pumpWidget(MaterialApp(
-      home: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Center(
-            child: Material(
-              child: SearchAnchor.bar(
-                searchController: controller,
-                onSubmitted: (String value) {
-                  setState(() {
-                    onSubmittedCalled = onSubmittedCalled + 1;
-                  });
-                  controller.closeView(value);
-                },
-                onChanged: (String value) {
-                  setState(() {
-                    onChangedCalled = onChangedCalled + 1;
-                  });
-                },
-                suggestionsBuilder: (BuildContext context, SearchController controller) {
-                  return <Widget>[];
-                },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: Material(
+                child: SearchAnchor.bar(
+                  searchController: controller,
+                  onSubmitted: (String value) {
+                    setState(() {
+                      onSubmittedCalled = onSubmittedCalled + 1;
+                    });
+                    controller.closeView(value);
+                  },
+                  onChanged: (String value) {
+                    setState(() {
+                      onChangedCalled = onChangedCalled + 1;
+                    });
+                  },
+                  suggestionsBuilder: (BuildContext context, SearchController controller) {
+                    return <Widget>[];
+                  },
+                ),
               ),
-            ),
-          );
-        }
+            );
+          },
+        ),
       ),
-    ));
+    );
     await tester.tap(find.byType(SearchBar)); // Open search view.
     await tester.pumpAndSettle();
     expect(controller.isOpen, true);
 
     final Finder barOnView = find.descendant(
       of: findViewContent(),
-      matching: find.byType(TextField)
+      matching: find.byType(TextField),
     );
     await tester.enterText(barOnView, 'a');
     expect(onChangedCalled, 1);
@@ -1077,16 +1009,14 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/127092.
-  testWidgets('The text is still centered when SearchBar text field is smaller than 48', (WidgetTester tester) async {
+  testWidgets('The text is still centered when SearchBar text field is smaller than 48', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: const Center(
-          child: Material(
-            child: SearchBar(
-              constraints: BoxConstraints.tightFor(height: 35.0),
-            ),
-          ),
+          child: Material(child: SearchBar(constraints: BoxConstraints.tightFor(height: 35.0))),
         ),
       ),
     );
@@ -1128,17 +1058,19 @@ void main() {
     await tester.pumpAndSettle();
     final Material material = getSearchViewMaterial(tester);
     expect(material.elevation, 6.0);
-    expect(material.color, colorScheme.surface);
-    expect(material.surfaceTintColor, colorScheme.surfaceTint);
+    expect(material.color, colorScheme.surfaceContainerHigh);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.clipBehavior, Clip.antiAlias);
 
     final Finder findDivider = find.byType(Divider);
-    final Container dividerContainer = tester.widget<Container>(find.descendant(of: findDivider, matching: find.byType(Container)).first);
+    final Container dividerContainer = tester.widget<Container>(
+      find.descendant(of: findDivider, matching: find.byType(Container)).first,
+    );
     final BoxDecoration decoration = dividerContainer.decoration! as BoxDecoration;
     expect(decoration.border!.bottom.color, colorScheme.outline);
 
     // Default search view has a leading back button on the start of the header.
-    expect(find.widgetWithIcon(IconButton, Icons.arrow_back), findsOneWidget);
+    expect(find.backButton(), findsOneWidget);
 
     final Text helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, colorScheme.onSurfaceVariant);
@@ -1181,24 +1113,35 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.fuchsia ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+    ]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      final SizedBox sizedBox = tester.widget<SizedBox>(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
-      expect(sizedBox.width, 800.0);
-      expect(sizedBox.height, 600.0);
+      final Size size = tester.getSize(
+        find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+      );
+      expect(size.width, 800.0);
+      expect(size.height, 600.0);
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.linux, TargetPlatform.windows ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    ]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      final SizedBox sizedBox = tester.widget<SizedBox>(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
-      expect(sizedBox.width, 360.0);
-      expect(sizedBox.height, 400.0);
+      final Size size = tester.getSize(
+        find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+      );
+      expect(size.width, 360.0);
+      expect(size.height, 400.0);
     }
   });
 
@@ -1227,14 +1170,19 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.linux, TargetPlatform.windows ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    ]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      final SizedBox sizedBox = tester.widget<SizedBox>(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
-      expect(sizedBox.width, 800.0);
-      expect(sizedBox.height, 600.0);
+      final Size size = tester.getSize(
+        find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+      );
+      expect(size.width, 800.0);
+      expect(size.height, 600.0);
     }
   });
 
@@ -1250,9 +1198,12 @@ void main() {
           child: SearchAnchor(
             searchController: controller,
             builder: (BuildContext context, SearchController controller) {
-              return IconButton(icon: const Icon(Icons.search), onPressed: () {
-                controller.openView();
-              },);
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
             },
             suggestionsBuilder: (BuildContext context, SearchController controller) {
               return <Widget>[];
@@ -1274,10 +1225,13 @@ void main() {
     expect(find.text(updatedText), findsOneWidget);
   });
 
-  testWidgets('SearchAnchor attaches and detaches controllers property', (WidgetTester tester) async {
-    Widget builder(BuildContext context, SearchController controller)  {
+  testWidgets('SearchAnchor attaches and detaches controllers property', (
+    WidgetTester tester,
+  ) async {
+    Widget builder(BuildContext context, SearchController controller) {
       return const Icon(Icons.search);
     }
+
     List<Widget> suggestionsBuilder(BuildContext context, SearchController controller) {
       return const <Widget>[];
     }
@@ -1304,10 +1258,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: SearchAnchor(
-            builder: builder,
-            suggestionsBuilder: suggestionsBuilder,
-          ),
+          child: SearchAnchor(builder: builder, suggestionsBuilder: suggestionsBuilder),
         ),
       ),
     );
@@ -1337,10 +1288,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: SearchAnchor(
-            builder: builder,
-            suggestionsBuilder: suggestionsBuilder,
-          ),
+          child: SearchAnchor(builder: builder, suggestionsBuilder: suggestionsBuilder),
         ),
       ),
     );
@@ -1356,9 +1304,12 @@ void main() {
           child: SearchAnchor(
             viewBuilder: viewBuilder,
             builder: (BuildContext context, SearchController controller) {
-              return IconButton(icon: const Icon(Icons.search), onPressed: () {
-                controller.openView();
-              },);
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
             },
             suggestionsBuilder: (BuildContext context, SearchController controller) {
               return <Widget>[];
@@ -1375,10 +1326,48 @@ void main() {
     expect(find.byType(ListView), findsOneWidget);
 
     await tester.pumpWidget(Container());
-    await tester.pumpWidget(buildAnchor(viewBuilder: (Iterable<Widget> suggestions)
-      => GridView.count(crossAxisCount: 5, children: suggestions.toList(),)
-    ));
+    await tester.pumpWidget(
+      buildAnchor(
+        viewBuilder:
+            (Iterable<Widget> suggestions) =>
+                GridView.count(crossAxisCount: 5, children: suggestions.toList()),
+      ),
+    );
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+    expect(find.byType(ListView), findsNothing);
+    expect(find.byType(GridView), findsOneWidget);
+  });
+
+  testWidgets('SearchAnchor.bar respects viewBuilder property', (WidgetTester tester) async {
+    Widget buildAnchor({ViewBuilder? viewBuilder}) {
+      return MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            viewBuilder: viewBuilder,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildAnchor());
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    // Default is a ListView.
+    expect(find.byType(ListView), findsOneWidget);
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(
+      buildAnchor(
+        viewBuilder:
+            (Iterable<Widget> suggestions) =>
+                GridView.count(crossAxisCount: 5, children: suggestions.toList()),
+      ),
+    );
+    await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
     expect(find.byType(ListView), findsNothing);
     expect(find.byType(GridView), findsOneWidget);
@@ -1391,9 +1380,12 @@ void main() {
           child: SearchAnchor(
             viewLeading: viewLeading,
             builder: (BuildContext context, SearchController controller) {
-              return IconButton(icon: const Icon(Icons.search), onPressed: () {
-                controller.openView();
-              },);
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
             },
             suggestionsBuilder: (BuildContext context, SearchController controller) {
               return <Widget>[];
@@ -1407,13 +1399,13 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
     // Default is a icon button with arrow_back.
-    expect(find.widgetWithIcon(IconButton, Icons.arrow_back), findsOneWidget);
+    expect(find.backButton(), findsOneWidget);
 
     await tester.pumpWidget(Container());
     await tester.pumpWidget(buildAnchor(viewLeading: const Icon(Icons.history)));
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.arrow_back), findsNothing);
+    expect(find.backButton(), findsNothing);
     expect(find.byIcon(Icons.history), findsOneWidget);
   });
 
@@ -1424,9 +1416,12 @@ void main() {
           child: SearchAnchor(
             viewTrailing: viewTrailing,
             builder: (BuildContext context, SearchController controller) {
-              return IconButton(icon: const Icon(Icons.search), onPressed: () {
-                controller.openView();
-              },);
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
             },
             suggestionsBuilder: (BuildContext context, SearchController controller) {
               return <Widget>[];
@@ -1453,42 +1448,52 @@ void main() {
   });
 
   testWidgets('SearchAnchor respects viewHintText property', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          viewHintText: 'hint text',
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(icon: const Icon(Icons.search), onPressed: () {
-              controller.openView();
-            },);
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
-          },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            viewHintText: 'hint text',
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
         ),
       ),
-    ));
+    );
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
     expect(find.text('hint text'), findsOneWidget);
   });
 
   testWidgets('SearchAnchor respects viewBackgroundColor property', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          viewBackgroundColor: Colors.purple,
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(icon: const Icon(Icons.search), onPressed: () {
-              controller.openView();
-            },);
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
-          },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            viewBackgroundColor: Colors.purple,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
@@ -1496,21 +1501,26 @@ void main() {
   });
 
   testWidgets('SearchAnchor respects viewElevation property', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          viewElevation: 3.0,
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(icon: const Icon(Icons.search), onPressed: () {
-              controller.openView();
-            },);
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
-          },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            viewElevation: 3.0,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
@@ -1518,21 +1528,26 @@ void main() {
   });
 
   testWidgets('SearchAnchor respects viewSurfaceTint property', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          viewSurfaceTintColor: Colors.purple,
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(icon: const Icon(Icons.search), onPressed: () {
-              controller.openView();
-            },);
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
-          },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            viewSurfaceTintColor: Colors.purple,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
@@ -1541,48 +1556,61 @@ void main() {
 
   testWidgets('SearchAnchor respects viewSide property', (WidgetTester tester) async {
     const BorderSide side = BorderSide(color: Colors.purple, width: 5.0);
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          isFullScreen: false,
-          viewSide: side,
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(icon: const Icon(Icons.search), onPressed: () {
-              controller.openView();
-            },);
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
-          },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            isFullScreen: false,
+            viewSide: side,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
-    expect(getSearchViewMaterial(tester).shape, RoundedRectangleBorder(side: side, borderRadius: BorderRadius.circular(28.0)));
+    expect(
+      getSearchViewMaterial(tester).shape,
+      RoundedRectangleBorder(side: side, borderRadius: BorderRadius.circular(28.0)),
+    );
   });
 
   testWidgets('SearchAnchor respects viewShape property', (WidgetTester tester) async {
     const BorderSide side = BorderSide(color: Colors.purple, width: 5.0);
     const OutlinedBorder shape = StadiumBorder(side: side);
 
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          isFullScreen: false,
-          viewShape: shape,
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(icon: const Icon(Icons.search), onPressed: () {
-              controller.openView();
-            },);
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
-          },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            isFullScreen: false,
+            viewShape: shape,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
@@ -1590,21 +1618,26 @@ void main() {
   });
 
   testWidgets('SearchAnchor respects headerTextStyle property', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          headerTextStyle: theme.textTheme.bodyLarge?.copyWith(color: Colors.red),
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(icon: const Icon(Icons.search), onPressed: () {
-              controller.openView();
-            },);
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
-          },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            headerTextStyle: theme.textTheme.bodyLarge?.copyWith(color: Colors.red),
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
@@ -1616,22 +1649,27 @@ void main() {
   });
 
   testWidgets('SearchAnchor respects headerHintStyle property', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          viewHintText: 'hint text',
-          headerHintStyle: theme.textTheme.bodyLarge?.copyWith(color: Colors.orange),
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(icon: const Icon(Icons.search), onPressed: () {
-              controller.openView();
-            },);
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
-          },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            viewHintText: 'hint text',
+            headerHintStyle: theme.textTheme.bodyLarge?.copyWith(color: Colors.orange),
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
@@ -1640,43 +1678,20 @@ void main() {
     expect(inputText.style?.color, Colors.orange);
   });
 
-  testWidgets('SearchAnchor respects dividerColor property', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: SearchAnchor(
-          dividerColor: Colors.red,
-          builder: (BuildContext context, SearchController controller) {
-            return IconButton(icon: const Icon(Icons.search), onPressed: () {
-              controller.openView();
-            },);
-          },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return <Widget>[];
-          },
-        ),
-      ),
-    ));
-
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
-    await tester.pumpAndSettle();
-
-    final Finder findDivider = find.byType(Divider);
-    final Container dividerContainer = tester.widget<Container>(find.descendant(of: findDivider, matching: find.byType(Container)).first);
-    final BoxDecoration decoration = dividerContainer.decoration! as BoxDecoration;
-    expect(decoration.border!.bottom.color, Colors.red);
-  });
-
-  testWidgets('SearchAnchor respects viewConstraints property', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
+  testWidgets('SearchAnchor respects viewPadding property', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
           child: SearchAnchor(
             isFullScreen: false,
-            viewConstraints: BoxConstraints.tight(const Size(280.0, 390.0)),
+            viewPadding: const EdgeInsets.all(16.0),
             builder: (BuildContext context, SearchController controller) {
-              return IconButton(icon: const Icon(Icons.search), onPressed: () {
-                controller.openView();
-              },);
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
             },
             suggestionsBuilder: (BuildContext context, SearchController controller) {
               return <Widget>[];
@@ -1684,14 +1699,204 @@ void main() {
           ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
 
-    final SizedBox sizedBox = tester.widget<SizedBox>(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
-    expect(sizedBox.width, 280.0);
-    expect(sizedBox.height, 390.0);
+    final Padding padding = tester.widget<Padding>(
+      find.descendant(of: findViewContent(), matching: find.byType(Padding)).first,
+    );
+    expect(padding.padding, const EdgeInsets.all(16.0));
+  });
+
+  testWidgets('SearchAnchor ignores viewPadding property if full screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            isFullScreen: true,
+            viewPadding: const EdgeInsets.all(16.0),
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Padding padding = tester.widget<Padding>(
+      find.descendant(of: findViewContent(), matching: find.byType(Padding)).first,
+    );
+    expect(padding.padding, EdgeInsets.zero);
+  });
+
+  testWidgets('SearchAnchor respects shrinkWrap property', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            isFullScreen: false,
+            shrinkWrap: true,
+            viewConstraints: const BoxConstraints(),
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return List<Widget>.generate(
+                controller.text.length,
+                (int index) => ListTile(title: Text('Item $index')),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Finder findDivider = find.descendant(
+      of: findViewContent(),
+      matching: find.byType(Divider),
+    );
+
+    // Divider should not be shown if there are no suggestions
+    expect(findDivider, findsNothing);
+
+    final Finder findMaterial =
+        find.descendant(of: findViewContent(), matching: find.byType(Material)).first;
+    final Rect materialRectWithoutSuggestions = tester.getRect(findMaterial);
+    expect(materialRectWithoutSuggestions, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0)));
+
+    await tester.enterText(find.byType(SearchBar), 'a');
+    await tester.pumpAndSettle();
+
+    expect(findDivider, findsOneWidget);
+
+    final Rect materialRectWithSuggestions = tester.getRect(findMaterial);
+    expect(materialRectWithSuggestions, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 113.0)));
+  });
+
+  testWidgets('SearchAnchor respects dividerColor property', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            dividerColor: Colors.red,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Finder findDivider = find.byType(Divider);
+    final Container dividerContainer = tester.widget<Container>(
+      find.descendant(of: findDivider, matching: find.byType(Container)).first,
+    );
+    final BoxDecoration decoration = dividerContainer.decoration! as BoxDecoration;
+    expect(decoration.border!.bottom.color, Colors.red);
+  });
+
+  testWidgets('SearchAnchor respects viewConstraints property', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor(
+              isFullScreen: false,
+              viewConstraints: BoxConstraints.tight(const Size(280.0, 390.0)),
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Size size = tester.getSize(
+      find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+    );
+    expect(size.width, 280.0);
+    expect(size.height, 390.0);
+  });
+
+  testWidgets('SearchAnchor respects viewBarPadding property', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor(
+              viewBarPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Finder findSearchBar =
+        find.descendant(of: findViewContent(), matching: find.byType(SearchBar)).first;
+    final Padding padding = tester.widget<Padding>(
+      find.descendant(of: findSearchBar, matching: find.byType(Padding)).first,
+    );
+    expect(padding.padding, const EdgeInsets.symmetric(horizontal: 16.0));
   });
 
   testWidgets('SearchAnchor respects builder property - LTR', (WidgetTester tester) async {
@@ -1712,10 +1917,11 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildAnchor(
-      builder: (BuildContext context, SearchController controller)
-        => const Icon(Icons.search)
-    ));
+    await tester.pumpWidget(
+      buildAnchor(
+        builder: (BuildContext context, SearchController controller) => const Icon(Icons.search),
+      ),
+    );
     final Rect anchorRect = tester.getRect(find.byIcon(Icons.search));
     expect(anchorRect.size, const Size(24.0, 24.0));
     expect(anchorRect, equals(const Rect.fromLTRB(388.0, 0.0, 412.0, 24.0)));
@@ -1723,7 +1929,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(
+      find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+    );
     expect(searchViewRect, equals(const Rect.fromLTRB(388.0, 0.0, 748.0, 400.0)));
 
     // Search view top left should be the same as the anchor top left
@@ -1751,8 +1959,11 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildAnchor(builder: (BuildContext context, SearchController controller)
-    => const Icon(Icons.search)));
+    await tester.pumpWidget(
+      buildAnchor(
+        builder: (BuildContext context, SearchController controller) => const Icon(Icons.search),
+      ),
+    );
     final Rect anchorRect = tester.getRect(find.byIcon(Icons.search));
     expect(anchorRect.size, const Size(24.0, 24.0));
     expect(anchorRect, equals(const Rect.fromLTRB(388.0, 0.0, 412.0, 24.0)));
@@ -1760,7 +1971,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(
+      find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+    );
     expect(searchViewRect, equals(const Rect.fromLTRB(52.0, 0.0, 412.0, 400.0)));
 
     // Search view top right should be the same as the anchor top right
@@ -1772,34 +1985,37 @@ void main() {
     addTearDown(controller.dispose);
     const String suggestion = 'suggestion text';
 
-    await tester.pumpWidget(MaterialApp(
-      home: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Material(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: SearchAnchor(
-                searchController: controller,
-                builder: (BuildContext context, SearchController controller) {
-                  return const Icon(Icons.search);
-                },
-                suggestionsBuilder: (BuildContext context, SearchController controller) {
-                  return <Widget>[
-                    ListTile(
-                      title: const Text(suggestion),
-                      onTap: () {
-                        setState(() {
-                          controller.closeView(suggestion);
-                        });
-                    }),
-                  ];
-                },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: SearchAnchor(
+                  searchController: controller,
+                  builder: (BuildContext context, SearchController controller) {
+                    return const Icon(Icons.search);
+                  },
+                  suggestionsBuilder: (BuildContext context, SearchController controller) {
+                    return <Widget>[
+                      ListTile(
+                        title: const Text(suggestion),
+                        onTap: () {
+                          setState(() {
+                            controller.closeView(suggestion);
+                          });
+                        },
+                      ),
+                    ];
+                  },
+                ),
               ),
-            ),
-          );
-        }
+            );
+          },
+        ),
       ),
-    ));
+    );
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
@@ -1812,55 +2028,55 @@ void main() {
     expect(controller.value.text, suggestion);
   });
 
-  testWidgets('SearchAnchor should update suggestions on changes to search controller', (WidgetTester tester) async {
+  testWidgets('SearchAnchor should update suggestions on changes to search controller', (
+    WidgetTester tester,
+  ) async {
     final SearchController controller = SearchController();
-    const List<String> suggestions = <String>['foo','far','bim'];
+    const List<String> suggestions = <String>['foo', 'far', 'bim'];
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(MaterialApp(
-      home: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Material(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: SearchAnchor(
-                searchController: controller,
-                builder: (BuildContext context, SearchController controller) {
-                  return const Icon(Icons.search);
-                },
-                suggestionsBuilder: (BuildContext context, SearchController controller) {
-                  final String searchText = controller.text.toLowerCase();
-                  if (searchText.isEmpty) {
-                    return const <Widget>[
-                      Center(
-                        child: Text('No Search'),
-                      ),
-                    ];
-                  }
-                  final Iterable<String> filterSuggestions = suggestions.where(
-                    (String suggestion) => suggestion.toLowerCase().contains(searchText),
-                  );
-                  return filterSuggestions.map((String suggestion) {
-                    return ListTile(
-                      title: Text(suggestion),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.call_missed),
-                        onPressed: () {
-                          controller.text = suggestion;
-                        },
-                      ),
-                      onTap: () {
-                        controller.closeView(suggestion);
-                      },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: SearchAnchor(
+                  searchController: controller,
+                  builder: (BuildContext context, SearchController controller) {
+                    return const Icon(Icons.search);
+                  },
+                  suggestionsBuilder: (BuildContext context, SearchController controller) {
+                    final String searchText = controller.text.toLowerCase();
+                    if (searchText.isEmpty) {
+                      return const <Widget>[Center(child: Text('No Search'))];
+                    }
+                    final Iterable<String> filterSuggestions = suggestions.where(
+                      (String suggestion) => suggestion.toLowerCase().contains(searchText),
                     );
-                  }).toList();
-                },
+                    return filterSuggestions.map((String suggestion) {
+                      return ListTile(
+                        title: Text(suggestion),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.call_missed),
+                          onPressed: () {
+                            controller.text = suggestion;
+                          },
+                        ),
+                        onTap: () {
+                          controller.closeView(suggestion);
+                        },
+                      );
+                    }).toList();
+                  },
+                ),
               ),
-            ),
-          );
-        }
+            );
+          },
+        ),
       ),
-    ));
+    );
 
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
@@ -1869,16 +2085,19 @@ void main() {
     final Finder listTile2 = find.widgetWithText(ListTile, 'far');
     final Finder listTile3 = find.widgetWithText(ListTile, 'bim');
     final Finder textWidget = find.widgetWithText(Center, 'No Search');
-    final Finder iconInListTile1 = find.descendant(of: listTile1, matching: find.byIcon(Icons.call_missed));
+    final Finder iconInListTile1 = find.descendant(
+      of: listTile1,
+      matching: find.byIcon(Icons.call_missed),
+    );
 
-    expect(textWidget,findsOneWidget);
+    expect(textWidget, findsOneWidget);
     expect(listTile1, findsNothing);
     expect(listTile2, findsNothing);
     expect(listTile3, findsNothing);
 
     await tester.enterText(find.byType(SearchBar), 'f');
     await tester.pumpAndSettle();
-    expect(textWidget,findsNothing);
+    expect(textWidget, findsNothing);
     expect(listTile1, findsOneWidget);
     expect(listTile2, findsOneWidget);
     expect(listTile3, findsNothing);
@@ -1886,7 +2105,7 @@ void main() {
     await tester.tap(iconInListTile1);
     await tester.pumpAndSettle();
     expect(controller.value.text, 'foo');
-    expect(textWidget,findsNothing);
+    expect(textWidget, findsNothing);
     expect(listTile1, findsOneWidget);
     expect(listTile2, findsNothing);
     expect(listTile3, findsNothing);
@@ -1895,46 +2114,50 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.isOpen, false);
     expect(controller.value.text, 'foo');
-    expect(textWidget,findsNothing);
+    expect(textWidget, findsNothing);
     expect(listTile1, findsNothing);
     expect(listTile2, findsNothing);
     expect(listTile3, findsNothing);
   });
 
-  testWidgets('SearchAnchor suggestionsBuilder property could be async', (WidgetTester tester) async {
+  testWidgets('SearchAnchor suggestionsBuilder property could be async', (
+    WidgetTester tester,
+  ) async {
     final SearchController controller = SearchController();
     addTearDown(controller.dispose);
     const String suggestion = 'suggestion text';
 
-    await tester.pumpWidget(MaterialApp(
-      home: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Material(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: SearchAnchor(
-                searchController: controller,
-                builder: (BuildContext context, SearchController controller) {
-                  return const Icon(Icons.search);
-                },
-                suggestionsBuilder: (BuildContext context, SearchController controller) async {
-                  return <Widget>[
-                    ListTile(
-                      title: const Text(suggestion),
-                      onTap: () {
-                        setState(() {
-                          controller.closeView(suggestion);
-                        });
-                      },
-                    ),
-                  ];
-                },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: SearchAnchor(
+                  searchController: controller,
+                  builder: (BuildContext context, SearchController controller) {
+                    return const Icon(Icons.search);
+                  },
+                  suggestionsBuilder: (BuildContext context, SearchController controller) async {
+                    return <Widget>[
+                      ListTile(
+                        title: const Text(suggestion),
+                        onTap: () {
+                          setState(() {
+                            controller.closeView(suggestion);
+                          });
+                        },
+                      ),
+                    ];
+                  },
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
-    ));
+    );
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
@@ -1947,19 +2170,23 @@ void main() {
     expect(controller.value.text, suggestion);
   });
 
-  testWidgets('SearchAnchor.bar has a default search bar as the anchor', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: SearchAnchor.bar(
-            isFullScreen: false,
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
-            },
+  testWidgets('SearchAnchor.bar has a default search bar as the anchor', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SearchAnchor.bar(
+              isFullScreen: false,
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
           ),
         ),
-      ),),
+      ),
     );
 
     expect(find.byType(SearchBar), findsOneWidget);
@@ -1970,7 +2197,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(
+      find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+    );
     expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 400.0)));
 
     // Search view has same width with the default anchor(search bar).
@@ -1994,7 +2223,7 @@ void main() {
                   onTap: () {
                     controller.closeView('item 0');
                   },
-                )
+                ),
               ];
             },
           ),
@@ -2049,7 +2278,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(
+      find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+    );
     expect(searchViewRect, equals(const Rect.fromLTRB(440.0, 200.0, 800.0, 600.0)));
   });
 
@@ -2090,11 +2321,15 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(
+      find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+    );
     expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 200.0, 360.0, 600.0)));
   });
 
-  testWidgets('Search view becomes smaller if the window size is smaller than the view size', (WidgetTester tester) async {
+  testWidgets('Search view becomes smaller if the window size is smaller than the view size', (
+    WidgetTester tester,
+  ) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(200.0, 200.0);
     tester.view.devicePixelRatio = 1.0;
@@ -2137,7 +2372,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(
+      find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+    );
     expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
 
     // Test RTL text direction.
@@ -2152,11 +2389,15 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRectRTL = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRectRTL = tester.getRect(
+      find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+    );
     expect(searchViewRectRTL, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
   });
 
-  testWidgets('Docked search view route is popped if the window size changes', (WidgetTester tester) async {
+  testWidgets('Docked search view route is popped if the window size changes', (
+    WidgetTester tester,
+  ) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(500.0, 600.0);
     tester.view.devicePixelRatio = 1.0;
@@ -2188,16 +2429,18 @@ void main() {
     // Open the search view
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+    expect(find.backButton(), findsOneWidget);
 
     // Change window size
     tester.view.physicalSize = const Size(250.0, 200.0);
     tester.view.devicePixelRatio = 1.0;
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.arrow_back), findsNothing);
+    expect(find.backButton(), findsNothing);
   });
 
-  testWidgets('Full-screen search view route should stay if the window size changes', (WidgetTester tester) async {
+  testWidgets('Full-screen search view route should stay if the window size changes', (
+    WidgetTester tester,
+  ) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(500.0, 600.0);
     tester.view.devicePixelRatio = 1.0;
@@ -2229,16 +2472,18 @@ void main() {
     // Open a full-screen search view
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+    expect(find.backButton(), findsOneWidget);
 
     // Change window size
     tester.view.physicalSize = const Size(250.0, 200.0);
     tester.view.devicePixelRatio = 1.0;
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+    expect(find.backButton(), findsOneWidget);
   });
 
-  testWidgets('Search view route does not throw exception during pop animation', (WidgetTester tester) async {
+  testWidgets('Search view route does not throw exception during pop animation', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/126590.
     await tester.pumpWidget(
       MaterialApp(
@@ -2263,7 +2508,8 @@ void main() {
                     onTap: () {},
                   );
                 });
-              }),
+              },
+            ),
           ),
         ),
       ),
@@ -2274,24 +2520,21 @@ void main() {
     await tester.pumpAndSettle();
 
     // Pop search view route
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pumpAndSettle();
 
     // No exception.
   });
 
-  testWidgets('Docked search should position itself correctly based on closest navigator', (WidgetTester tester) async {
+  testWidgets('Docked search should position itself correctly based on closest navigator', (
+    WidgetTester tester,
+  ) async {
     const double rootSpacing = 100.0;
 
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
-          return Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(rootSpacing),
-              child: child,
-            ),
-          );
+          return Scaffold(body: Padding(padding: const EdgeInsets.all(rootSpacing), child: child));
         },
         home: Material(
           child: SearchAnchor(
@@ -2315,11 +2558,15 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(
+      find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+    );
     expect(searchViewRect.topLeft, equals(const Offset(rootSpacing, rootSpacing)));
   });
 
-  testWidgets('Docked search view with nested navigator does not go off the screen', (WidgetTester tester) async {
+  testWidgets('Docked search view with nested navigator does not go off the screen', (
+    WidgetTester tester,
+  ) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(400.0, 400.0);
     tester.view.devicePixelRatio = 1.0;
@@ -2329,12 +2576,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
-          return Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(rootSpacing),
-              child: child,
-            ),
-          );
+          return Scaffold(body: Padding(padding: const EdgeInsets.all(rootSpacing), child: child));
         },
         home: Material(
           child: Align(
@@ -2361,7 +2603,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(
+      find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first,
+    );
     expect(searchViewRect.bottomRight, equals(const Offset(300.0, 300.0)));
   });
 
@@ -2467,7 +2711,8 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle(kDoubleTapTimeout);
 
-      final Offset targetPositionAfterViewOpened = textOffsetToPosition(tester, 4, index: 1) + const Offset(0.0, -9.0);
+      final Offset targetPositionAfterViewOpened =
+          textOffsetToPosition(tester, 4, index: 1) + const Offset(0.0, -9.0);
       await gesture.down(targetPositionAfterViewOpened);
       await tester.pumpAndSettle();
       await gesture.up();
@@ -2510,7 +2755,8 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle(kDoubleTapTimeout);
 
-      final Offset targetPositionAfterViewOpened = textOffsetToPosition(tester, 4, index: 1) + const Offset(0.0, -9.0);
+      final Offset targetPositionAfterViewOpened =
+          textOffsetToPosition(tester, 4, index: 1) + const Offset(0.0, -9.0);
       await gesture.down(targetPositionAfterViewOpened);
       await tester.pump();
       await gesture.up();
@@ -2532,7 +2778,6 @@ void main() {
 
   // Regression tests for https://github.com/flutter/flutter/issues/126623
   group('Overall InputDecorationTheme does not impact SearchBar and SearchView', () {
-
     const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(
       focusColor: Colors.green,
       hoverColor: Colors.blue,
@@ -2553,7 +2798,7 @@ void main() {
     );
     final ThemeData theme = ThemeData(
       useMaterial3: true,
-      inputDecorationTheme: inputDecorationTheme
+      inputDecorationTheme: inputDecorationTheme,
     );
 
     void checkDecorationInSearchBar(WidgetTester tester) {
@@ -2581,11 +2826,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: const Center(
-            child: Material(
-              child: SearchBar(hintText: 'hint text'),
-            ),
-          ),
+          home: const Center(child: Material(child: SearchBar(hintText: 'hint text'))),
         ),
       );
 
@@ -2633,10 +2874,13 @@ void main() {
       checkDecorationInSearchBar(tester);
 
       // Check search bar defaults in search view route.
-      final Finder searchBarMaterial = find.descendant(
-        of: find.descendant(of: findViewContent(), matching: find.byType(SearchBar)),
-        matching: find.byType(Material),
-      ).first;
+      final Finder searchBarMaterial =
+          find
+              .descendant(
+                of: find.descendant(of: findViewContent(), matching: find.byType(SearchBar)),
+                matching: find.byType(Material),
+              )
+              .first;
 
       final Material material = tester.widget<Material>(searchBarMaterial);
       expect(material.color, Colors.transparent);
@@ -2684,7 +2928,7 @@ void main() {
 
     // Test the search view background color.
     Material material = getSearchViewMaterial(tester);
-    expect(material.color, theme.colorScheme.surface);
+    expect(material.color, theme.colorScheme.surfaceContainerHigh);
 
     // Change the theme brightness.
     theme = ThemeData(brightness: Brightness.dark);
@@ -2693,7 +2937,7 @@ void main() {
 
     // Test the search view background color.
     material = getSearchViewMaterial(tester);
-    expect(material.color, theme.colorScheme.surface);
+    expect(material.color, theme.colorScheme.surfaceContainerHigh);
   });
 
   testWidgets('Search view widgets can inherit local themes', (WidgetTester tester) async {
@@ -2701,11 +2945,9 @@ void main() {
     final ThemeData localTheme = ThemeData(
       colorSchemeSeed: Colors.green,
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          backgroundColor: const Color(0xffffff00)
-        ),
+        style: IconButton.styleFrom(backgroundColor: const Color(0xffffff00)),
       ),
-      cardTheme: const CardTheme(color: Color(0xff00ffff)),
+      cardTheme: const CardThemeData(color: Color(0xff00ffff)),
     );
     Widget buildSearchAnchor() {
       return MaterialApp(
@@ -2719,18 +2961,13 @@ void main() {
                   child: SearchAnchor.bar(
                     suggestionsBuilder: (BuildContext context, SearchController controller) {
                       return <Widget>[
-                        Card(
-                          child: ListTile(
-                            onTap: () {},
-                            title: const Text('Item 1'),
-                          ),
-                        ),
+                        Card(child: ListTile(onTap: () {}, title: const Text('Item 1'))),
                       ];
                     },
                   ),
                 ),
               );
-            }
+            },
           ),
         ),
       );
@@ -2744,36 +2981,32 @@ void main() {
 
     // Test the search view background color.
     final Material searchViewMaterial = getSearchViewMaterial(tester);
-    expect(searchViewMaterial.color, localTheme.colorScheme.surface);
+    expect(searchViewMaterial.color, localTheme.colorScheme.surfaceContainerHigh);
 
     // Test the search view icons background color.
-    final Material iconButtonMaterial = tester.widget<Material>(find.descendant(
-      of: find.byType(IconButton),
-      matching: find.byType(Material),
-    ).first);
+    final Material iconButtonMaterial = tester.widget<Material>(
+      find.descendant(of: find.byType(IconButton), matching: find.byType(Material)).first,
+    );
     expect(find.byWidget(iconButtonMaterial), findsOneWidget);
-    expect(iconButtonMaterial.color, localTheme.iconButtonTheme.style?.backgroundColor?.resolve(<MaterialState>{}));
+    expect(
+      iconButtonMaterial.color,
+      localTheme.iconButtonTheme.style?.backgroundColor?.resolve(<MaterialState>{}),
+    );
 
     // Test the suggestion card color.
-    final Material suggestionMaterial = tester.widget<Material>(find.descendant(
-      of: find.byType(Card),
-      matching: find.byType(Material),
-    ).first);
+    final Material suggestionMaterial = tester.widget<Material>(
+      find.descendant(of: find.byType(Card), matching: find.byType(Material)).first,
+    );
     expect(suggestionMaterial.color, localTheme.cardTheme.color);
   });
 
   testWidgets('SearchBar respects keyboardType property', (WidgetTester tester) async {
     Widget buildSearchBar(TextInputType keyboardType) {
       return MaterialApp(
-        home: Center(
-          child: Material(
-            child: SearchBar(
-              keyboardType: keyboardType,
-            ),
-          ),
-        ),
+        home: Center(child: Material(child: SearchBar(keyboardType: keyboardType))),
       );
     }
+
     await tester.pumpWidget(buildSearchBar(TextInputType.number));
     await tester.pump();
     TextField textField = tester.widget(find.byType(TextField));
@@ -2808,13 +3041,14 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildSearchAnchor(TextInputType.number));
     await tester.pump();
     await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
     await tester.pumpAndSettle();
     TextField textField = tester.widget(find.byType(TextField));
     expect(textField.keyboardType, TextInputType.number);
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pump();
 
     await tester.pumpWidget(buildSearchAnchor(TextInputType.phone));
@@ -2840,15 +3074,19 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildSearchAnchor(TextInputType.number));
     await tester.pump();
     await tester.tap(find.byType(SearchBar)); // Open search view.
     await tester.pumpAndSettle();
-    final Finder textFieldFinder = find.descendant(of: findViewContent(), matching: find.byType(TextField));
+    final Finder textFieldFinder = find.descendant(
+      of: findViewContent(),
+      matching: find.byType(TextField),
+    );
     final TextField textFieldInView = tester.widget<TextField>(textFieldFinder);
     expect(textFieldInView.keyboardType, TextInputType.number);
     // Close search view.
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pumpAndSettle();
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.keyboardType, TextInputType.number);
@@ -2857,15 +3095,10 @@ void main() {
   testWidgets('SearchBar respects textInputAction property', (WidgetTester tester) async {
     Widget buildSearchBar(TextInputAction textInputAction) {
       return MaterialApp(
-        home: Center(
-          child: Material(
-            child: SearchBar(
-              textInputAction: textInputAction,
-            ),
-          ),
-        ),
+        home: Center(child: Material(child: SearchBar(textInputAction: textInputAction))),
       );
     }
+
     await tester.pumpWidget(buildSearchBar(TextInputAction.previous));
     await tester.pump();
     TextField textField = tester.widget(find.byType(TextField));
@@ -2900,13 +3133,14 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildSearchAnchor(TextInputAction.previous));
     await tester.pump();
     await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
     await tester.pumpAndSettle();
     TextField textField = tester.widget(find.byType(TextField));
     expect(textField.textInputAction, TextInputAction.previous);
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pump();
 
     await tester.pumpWidget(buildSearchAnchor(TextInputAction.send));
@@ -2932,15 +3166,19 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildSearchAnchor(TextInputAction.previous));
     await tester.pump();
     await tester.tap(find.byType(SearchBar)); // Open search view.
     await tester.pumpAndSettle();
-    final Finder textFieldFinder = find.descendant(of: findViewContent(), matching: find.byType(TextField));
+    final Finder textFieldFinder = find.descendant(
+      of: findViewContent(),
+      matching: find.byType(TextField),
+    );
     final TextField textFieldInView = tester.widget<TextField>(textFieldFinder);
     expect(textFieldInView.textInputAction, TextInputAction.previous);
     // Close search view.
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.tap(find.backButton());
     await tester.pumpAndSettle();
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.textInputAction, TextInputAction.previous);
@@ -2953,10 +3191,30 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        home: Material(child: Center(child: SearchBar(controller: controller, enabled: false))),
+      ),
+    );
+
+    const String testValue = 'abcdefghi';
+    await tester.enterText(find.byType(SearchBar), testValue);
+    expect(controller.value.text, initValue);
+  });
+
+  testWidgets('Block entering text on disabled widget with SearchAnchor.bar', (
+    WidgetTester tester,
+  ) async {
+    const String initValue = 'init';
+    final TextEditingController controller = TextEditingController(text: initValue);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
         home: Material(
           child: Center(
-            child: SearchBar(
-              controller: controller,
+            child: SearchAnchor.bar(
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
               enabled: false,
             ),
           ),
@@ -2969,21 +3227,16 @@ void main() {
     expect(controller.value.text, initValue);
   });
 
-  testWidgets('Disabled SearchBar semantics node still contains value', (WidgetTester tester) async {
+  testWidgets('Disabled SearchBar semantics node still contains value', (
+    WidgetTester tester,
+  ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = TextEditingController(text: 'text');
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(
-          child: Center(
-            child: SearchBar(
-              controller: controller,
-              enabled: false,
-            ),
-          ),
-        ),
+        home: Material(child: Center(child: SearchBar(controller: controller, enabled: false))),
       ),
     );
 
@@ -2993,15 +3246,7 @@ void main() {
 
   testWidgets('Check SearchBar opacity when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: Center(
-            child: SearchBar(
-              enabled: false,
-            ),
-          ),
-        ),
-      ),
+      const MaterialApp(home: Material(child: Center(child: SearchBar(enabled: false)))),
     );
 
     final Finder searchBarFinder = find.byType(SearchBar);
@@ -3015,68 +3260,180 @@ void main() {
     expect(opacityWidget.opacity, 0.38);
   });
 
-  testWidgets('SearchAnchor respects headerHeight', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Center(
-        child: Material(
-          child: SearchAnchor(
-            isFullScreen: true,
-            builder: (BuildContext context, SearchController controller) {
-              return const Icon(Icons.search);
-            },
-            headerHeight: 32,
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
-            },
+  testWidgets('Check SearchAnchor opacity when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor(
+              enabled: false,
+              builder: (BuildContext context, SearchController controller) {
+                return const Icon(Icons.search);
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
           ),
         ),
       ),
-    ));
+    );
+
+    final Finder searchBarFinder = find.byType(SearchAnchor);
+    expect(searchBarFinder, findsOneWidget);
+    final Finder opacityFinder = find.descendant(
+      of: searchBarFinder,
+      matching: find.byType(AnimatedOpacity),
+    );
+    expect(opacityFinder, findsOneWidget);
+    final AnimatedOpacity opacityWidget = tester.widget<AnimatedOpacity>(opacityFinder);
+    expect(opacityWidget.opacity, 0.38);
+  });
+
+  testWidgets('SearchAnchor tap failed when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor(
+              enabled: false,
+              builder: (BuildContext context, SearchController controller) {
+                return const Icon(Icons.search);
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder searchBarFinder = find.byType(SearchAnchor);
+    expect(searchBarFinder, findsOneWidget);
+    expect(searchBarFinder.hitTestable().tryEvaluate(), false);
+  });
+
+  testWidgets('SearchAnchor respects headerHeight', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor(
+              isFullScreen: true,
+              builder: (BuildContext context, SearchController controller) {
+                return const Icon(Icons.search);
+              },
+              headerHeight: 32,
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
     await tester.pump();
     await tester.tap(find.byIcon(Icons.search)); // Open search view.
     await tester.pumpAndSettle();
-    final Finder findHeader = find.descendant(of: findViewContent(), matching: find.byType(SearchBar));
+    final Finder findHeader = find.descendant(
+      of: findViewContent(),
+      matching: find.byType(SearchBar),
+    );
     expect(tester.getSize(findHeader).height, 32);
   });
 
   testWidgets('SearchAnchor.bar respects viewHeaderHeight', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Center(
-        child: Material(
-          child: SearchAnchor.bar(
-            isFullScreen: true,
-            viewHeaderHeight: 32,
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
-            },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor.bar(
+              isFullScreen: true,
+              viewHeaderHeight: 32,
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
           ),
         ),
       ),
-    ));
+    );
     await tester.pump();
     await tester.tap(find.byType(SearchBar)); // Open search view.
     await tester.pumpAndSettle();
-    final Finder findHeader = find.descendant(of: findViewContent(), matching: find.byType(SearchBar));
+    final Finder findHeader = find.descendant(
+      of: findViewContent(),
+      matching: find.byType(SearchBar),
+    );
     final RenderBox box = tester.renderObject(findHeader);
     expect(box.size.height, 32);
   });
 
+  testWidgets(
+    'Tapping outside searchbar should unfocus the searchbar on mobile',
+    (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
+                return SearchBar(
+                  controller: controller,
+                  onTap: () {
+                    controller.openView();
+                  },
+                  onTapOutside: (PointerDownEvent event) {
+                    focusNode.unfocus();
+                  },
+                  onChanged: (_) {
+                    controller.openView();
+                  },
+                  autoFocus: true,
+                  focusNode: focusNode,
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return List<ListTile>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(title: Text(item));
+                });
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await tester.tapAt(const Offset(50, 50));
+      await tester.pump();
+
+      expect(focusNode.hasPrimaryFocus, isFalse);
+    },
+    variant: TargetPlatformVariant.mobile(),
+  );
+
   testWidgets('The default clear button only shows when text input is not empty '
       'on the search view', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Center(
-        child: Material(
-          child: SearchAnchor(
-            builder: (BuildContext context, SearchController controller) {
-              return const Icon(Icons.search);
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
-            },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
+                return const Icon(Icons.search);
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
           ),
         ),
       ),
-    ));
+    );
     await tester.pump();
     await tester.tap(find.byIcon(Icons.search)); // Open search view.
     await tester.pumpAndSettle();
@@ -3089,17 +3446,404 @@ void main() {
     await tester.pump();
     expect(find.widgetWithIcon(IconButton, Icons.close), findsNothing);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/139880.
+  testWidgets('suggestionsBuilder with Future is not called twice on layout resize', (
+    WidgetTester tester,
+  ) async {
+    int suggestionsLoadingCount = 0;
+
+    Future<List<String>> createListData() async {
+      return List<String>.generate(1000, (int index) {
+        return 'Hello World - $index';
+      });
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
+                return const Icon(Icons.search);
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[
+                  FutureBuilder<List<String>>(
+                    future: createListData(),
+                    builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return const LinearProgressIndicator();
+                      }
+                      final List<String>? result = snapshot.data;
+                      if (result == null) {
+                        return const LinearProgressIndicator();
+                      }
+                      suggestionsLoadingCount++;
+                      return SingleChildScrollView(
+                        child: Column(
+                          children:
+                              result.map((String text) {
+                                return ListTile(title: Text(text));
+                              }).toList(),
+                        ),
+                      );
+                    },
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    // Simulate the keyboard opening resizing the view.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+    addTearDown(tester.view.reset);
+    await tester.pumpAndSettle();
+
+    expect(suggestionsLoadingCount, 1);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/139880.
+  testWidgets('suggestionsBuilder is not called when the search value does not change', (
+    WidgetTester tester,
+  ) async {
+    int suggestionsBuilderCalledCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
+                return const Icon(Icons.search);
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                suggestionsBuilderCalledCount++;
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    // Simulate the keyboard opening resizing the view.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+    addTearDown(tester.view.reset);
+    // Show the keyboard.
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(suggestionsBuilderCalledCount, 2);
+
+    // Remove the viewInset, as if the keyboard were hidden.
+    tester.view.resetViewInsets();
+    // Hide the keyboard.
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+
+    expect(suggestionsBuilderCalledCount, 2);
+  });
+
+  testWidgets('Suggestions gets refreshed after long API call', (WidgetTester tester) async {
+    Timer? debounceTimer;
+    const Duration apiCallDuration = Duration(seconds: 1);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
+                return const Icon(Icons.search);
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) async {
+                final Completer<List<String>> completer = Completer<List<String>>();
+                debounceTimer?.cancel();
+                debounceTimer = Timer(apiCallDuration, () {
+                  completer.complete(List<String>.generate(10, (int index) => 'Item - $index'));
+                });
+                final List<String> options = await completer.future;
+
+                final List<Widget> suggestions = List<Widget>.generate(options.length, (int index) {
+                  final String item = options[index];
+                  return ListTile(title: Text(item));
+                });
+                return suggestions;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    // Simulate the keyboard opening resizing the view.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+    addTearDown(tester.view.reset);
+
+    // Show the keyboard.
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.pumpAndSettle(apiCallDuration);
+
+    expect(find.text('Item - 1'), findsOneWidget);
+  });
+
+  testWidgets('SearchBar.scrollPadding is passed through to EditableText', (
+    WidgetTester tester,
+  ) async {
+    const EdgeInsets scrollPadding = EdgeInsets.zero;
+    await tester.pumpWidget(
+      const MaterialApp(home: Material(child: SearchBar(scrollPadding: scrollPadding))),
+    );
+
+    expect(find.byType(EditableText), findsOneWidget);
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.scrollPadding, scrollPadding);
+  });
+
+  testWidgets('SearchAnchor.bar.scrollPadding is passed through to EditableText', (
+    WidgetTester tester,
+  ) async {
+    const EdgeInsets scrollPadding = EdgeInsets.zero;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+            scrollPadding: scrollPadding,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(EditableText), findsOneWidget);
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.scrollPadding, scrollPadding);
+  });
+
+  group('contextMenuBuilder', () {
+    setUp(() async {
+      if (!kIsWeb) {
+        return;
+      }
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.contextMenu,
+        (MethodCall call) {
+          // Just complete successfully, so that BrowserContextMenu thinks that
+          // the engine successfully received its call.
+          return Future<void>.value();
+        },
+      );
+      await BrowserContextMenu.disableContextMenu();
+    });
+
+    tearDown(() async {
+      if (!kIsWeb) {
+        return;
+      }
+      await BrowserContextMenu.enableContextMenu();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.contextMenu,
+        null,
+      );
+    });
+
+    testWidgets('SearchAnchor.bar.contextMenuBuilder is passed through to EditableText', (
+      WidgetTester tester,
+    ) async {
+      Widget contextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+        return const Placeholder();
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SearchAnchor.bar(
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+              contextMenuBuilder: contextMenuBuilder,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(EditableText), findsOneWidget);
+      final EditableText editableText = tester.widget(find.byType(EditableText));
+      expect(editableText.contextMenuBuilder, contextMenuBuilder);
+
+      expect(find.byType(Placeholder), findsNothing);
+
+      await tester.tap(find.byType(SearchBar), buttons: kSecondaryButton);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Placeholder), findsOneWidget);
+    });
+  });
+
+  testWidgets('SearchAnchor does not dispose external SearchController', (
+    WidgetTester tester,
+  ) async {
+    final SearchController controller = SearchController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            searchController: controller,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                onPressed: () async {
+                  controller.openView();
+                },
+                icon: const Icon(Icons.search),
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(const MaterialApp(home: Material(child: Text('disposed'))));
+    expect(tester.takeException(), isNull);
+    ChangeNotifier.debugAssertNotDisposed(controller);
+  });
+
+  testWidgets('SearchAnchor gracefully closes its search view when disposed', (
+    WidgetTester tester,
+  ) async {
+    bool disposed = false;
+    late StateSetter setState;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter stateSetter) {
+              setState = stateSetter;
+              if (disposed) {
+                return const Text('disposed');
+              }
+              return SearchAnchor(
+                builder: (BuildContext context, SearchController controller) {
+                  return IconButton(
+                    onPressed: () async {
+                      controller.openView();
+                    },
+                    icon: const Icon(Icons.search),
+                  );
+                },
+                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  return <Widget>[const Text('suggestion')];
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    setState(() {
+      disposed = true;
+    });
+    await tester.pump();
+    // The search menu starts to close but is not disposed yet.
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    final TextEditingController controller = editableText.controller;
+    ChangeNotifier.debugAssertNotDisposed(controller);
+
+    await tester.pumpAndSettle();
+    // The search menu and the internal search controller are now disposed.
+    expect(tester.takeException(), isNull);
+    expect(find.byType(TextField), findsNothing);
+    FlutterError? error;
+    try {
+      ChangeNotifier.debugAssertNotDisposed(controller);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error, isFlutterError);
+    expect(
+      error!.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A SearchController was used after being disposed.\n'
+        '   Once you have called dispose() on a SearchController, it can no\n'
+        '   longer be used.\n',
+      ),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/155180.
+  testWidgets('disposing SearchAnchor during search view exit animation does not crash', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: key,
+        home: Material(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                onPressed: () async {
+                  controller.openView();
+                },
+                icon: const Icon(Icons.search),
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[const Text('suggestion')];
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    key.currentState!.pop();
+    await tester.pump();
+    await tester.pumpWidget(
+      MaterialApp(navigatorKey: key, home: const Material(child: Text('disposed'))),
+    );
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
 }
 
-Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme, Material material) async {
+Future<void> checkSearchBarDefaults(
+  WidgetTester tester,
+  ColorScheme colorScheme,
+  Material material,
+) async {
   expect(material.animationDuration, const Duration(milliseconds: 200));
   expect(material.borderOnForeground, true);
   expect(material.borderRadius, null);
   expect(material.clipBehavior, Clip.none);
-  expect(material.color, colorScheme.surface);
+  expect(material.color, colorScheme.surfaceContainerHigh);
   expect(material.elevation, 6.0);
   expect(material.shadowColor, colorScheme.shadow);
-  expect(material.surfaceTintColor, colorScheme.surfaceTint);
+  expect(material.surfaceTintColor, Colors.transparent);
   expect(material.shape, const StadiumBorder());
 
   final Text helperText = tester.widget(find.text('hint text'));
@@ -3118,10 +3862,7 @@ Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme
 }
 
 Finder findTextField() {
-  return find.descendant(
-    of: find.byType(SearchBar),
-    matching: find.byType(TextField)
-  );
+  return find.descendant(of: find.byType(SearchBar), matching: find.byType(TextField));
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
@@ -3169,15 +3910,14 @@ TextStyle? _getTextStyle(Set<MaterialState> states) {
 
 Future<TestGesture> _pointGestureToSearchBar(WidgetTester tester) async {
   final Offset center = tester.getCenter(find.byType(SearchBar));
-  final TestGesture gesture = await tester.createGesture(
-    kind: PointerDeviceKind.mouse,
-  );
+  final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
 
   // On hovered.
   await gesture.addPointer();
   await gesture.moveTo(center);
   return gesture;
 }
+
 Finder findViewContent() {
   return find.byWidgetPredicate((Widget widget) {
     return widget.runtimeType.toString() == '_ViewContent';
@@ -3185,5 +3925,7 @@ Finder findViewContent() {
 }
 
 Material getSearchViewMaterial(WidgetTester tester) {
-  return tester.widget<Material>(find.descendant(of: findViewContent(), matching: find.byType(Material)).first);
+  return tester.widget<Material>(
+    find.descendant(of: findViewContent(), matching: find.byType(Material)).first,
+  );
 }

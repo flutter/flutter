@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'time_picker.dart';
+library;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 import 'material_localizations.dart';
-
 
 /// Whether the [TimeOfDay] is before or after noon.
 enum DayPeriod {
@@ -45,26 +47,24 @@ enum DayPeriod {
 ///  * [DateTime], which represents date and time, and is subject to eras and
 ///    time zones.
 @immutable
-class TimeOfDay {
+class TimeOfDay implements Comparable<TimeOfDay> {
   /// Creates a time of day.
   ///
   /// The [hour] argument must be between 0 and 23, inclusive. The [minute]
   /// argument must be between 0 and 59, inclusive.
-  const TimeOfDay({ required this.hour, required this.minute });
+  const TimeOfDay({required this.hour, required this.minute});
 
   /// Creates a time of day based on the given time.
   ///
   /// The [hour] is set to the time's hour and the [minute] is set to the time's
   /// minute in the timezone of the given [DateTime].
-  TimeOfDay.fromDateTime(DateTime time)
-    : hour = time.hour,
-      minute = time.minute;
+  TimeOfDay.fromDateTime(DateTime time) : hour = time.hour, minute = time.minute;
 
   /// Creates a time of day based on the current time.
   ///
   /// The [hour] is set to the current hour and the [minute] is set to the
   /// current minute in the local time zone.
-  factory TimeOfDay.now() { return TimeOfDay.fromDateTime(DateTime.now()); }
+  TimeOfDay.now() : this.fromDateTime(DateTime.now());
 
   /// The number of hours in one day, i.e. 24.
   static const int hoursPerDay = 24;
@@ -76,7 +76,7 @@ class TimeOfDay {
   static const int minutesPerHour = 60;
 
   /// Returns a new TimeOfDay with the hour and/or minute replaced.
-  TimeOfDay replacing({ int? hour, int? minute }) {
+  TimeOfDay replacing({int? hour, int? minute}) {
     assert(hour == null || (hour >= 0 && hour < hoursPerDay));
     assert(minute == null || (minute >= 0 && minute < minutesPerHour));
     return TimeOfDay(hour: hour ?? this.hour, minute: minute ?? this.minute);
@@ -112,11 +112,42 @@ class TimeOfDay {
     );
   }
 
+  /// Whether this [TimeOfDay] occurs earlier than [other].
+  ///
+  /// Does not account for day or sub-minute differences. This means
+  /// that "00:00" of the next day is still before "23:00" of this day.
+  bool isBefore(TimeOfDay other) => compareTo(other) < 0;
+
+  /// Whether this [TimeOfDay] occurs later than [other].
+  ///
+  /// Does not account for day or sub-minute differences. This means
+  /// that "00:00" of the next day is still before "23:00" of this day.
+  bool isAfter(TimeOfDay other) => compareTo(other) > 0;
+
+  /// Whether this [TimeOfDay] occurs at the same time as [other].
+  ///
+  /// Does not account for day or sub-minute differences. This means
+  /// that "00:00" of the next day is still before "23:00" of this day.
+  bool isAtSameTimeAs(TimeOfDay other) => compareTo(other) == 0;
+
+  /// Compares this [TimeOfDay] object to [other] independent of date.
+  ///
+  /// Does not account for day or sub-minute differences. This means
+  /// that "00:00" of the next day is still before "23:00" of this day.
+  ///
+  /// A [compareTo] function returns:
+  ///  * a negative value if this TimeOfDay [isBefore] [other].
+  ///  * `0` if this DateTime [isAtSameTimeAs] [other], and
+  ///  * a positive value otherwise (when this TimeOfDay [isAfter] [other]).
+  @override
+  int compareTo(TimeOfDay other) {
+    final int hourComparison = hour.compareTo(other.hour);
+    return hourComparison == 0 ? minute.compareTo(other.minute) : hourComparison;
+  }
+
   @override
   bool operator ==(Object other) {
-    return other is TimeOfDay
-        && other.hour == hour
-        && other.minute == minute;
+    return other is TimeOfDay && other.hour == hour && other.minute == minute;
   }
 
   @override
@@ -162,10 +193,7 @@ class RestorableTimeOfDay extends RestorableValue<TimeOfDay> {
   @override
   TimeOfDay fromPrimitives(Object? data) {
     final List<Object?> timeData = data! as List<Object?>;
-    return TimeOfDay(
-      minute: timeData[0]! as int,
-      hour: timeData[1]! as int,
-    );
+    return TimeOfDay(minute: timeData[0]! as int, hour: timeData[1]! as int);
   }
 
   @override
@@ -238,7 +266,7 @@ enum HourFormat {
 }
 
 /// The [HourFormat] used for the given [TimeOfDayFormat].
-HourFormat hourFormat({ required TimeOfDayFormat of }) {
+HourFormat hourFormat({required TimeOfDayFormat of}) {
   switch (of) {
     case TimeOfDayFormat.h_colon_mm_space_a:
     case TimeOfDayFormat.a_space_h_colon_mm:

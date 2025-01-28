@@ -6,7 +6,7 @@ Android, the Android and Flutter components are built with Android Studio or
 Gradle.
 
 You can read more about
-[accessing platform and third-party services in Flutter](https://flutter.dev/platform-services/).
+[accessing platform and third-party services in Flutter](https://flutter.dev/to/platform-channels/).
 
 ## iOS
 

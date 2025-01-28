@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'placeholder_span.dart';
+library;
+
 import 'dart:ui' as ui show ParagraphBuilder, StringAttribute;
 
 import 'package:flutter/foundation.dart';
@@ -33,6 +40,7 @@ class Accumulator {
     _value += addend;
   }
 }
+
 /// Called on each span as [InlineSpan.visitChildren] walks the [InlineSpan] tree.
 ///
 /// Returns true when the walk should continue, and false to stop visiting further
@@ -63,7 +71,10 @@ class InlineSpanSemanticsInformation {
        requiresOwnNode = isPlaceholder || recognizer != null;
 
   /// The text info for a [PlaceholderSpan].
-  static const InlineSpanSemanticsInformation placeholder = InlineSpanSemanticsInformation('\uFFFC', isPlaceholder: true);
+  static const InlineSpanSemanticsInformation placeholder = InlineSpanSemanticsInformation(
+    '\uFFFC',
+    isPlaceholder: true,
+  );
 
   /// The text value, if any. For [PlaceholderSpan]s, this will be the unicode
   /// placeholder value.
@@ -89,37 +100,42 @@ class InlineSpanSemanticsInformation {
 
   @override
   bool operator ==(Object other) {
-    return other is InlineSpanSemanticsInformation
-        && other.text == text
-        && other.semanticsLabel == semanticsLabel
-        && other.recognizer == recognizer
-        && other.isPlaceholder == isPlaceholder
-        && listEquals<ui.StringAttribute>(other.stringAttributes, stringAttributes);
+    return other is InlineSpanSemanticsInformation &&
+        other.text == text &&
+        other.semanticsLabel == semanticsLabel &&
+        other.recognizer == recognizer &&
+        other.isPlaceholder == isPlaceholder &&
+        listEquals<ui.StringAttribute>(other.stringAttributes, stringAttributes);
   }
 
   @override
   int get hashCode => Object.hash(text, semanticsLabel, recognizer, isPlaceholder);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'InlineSpanSemanticsInformation')}{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
+  String toString() =>
+      '${objectRuntimeType(this, 'InlineSpanSemanticsInformation')}{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
 }
 
 /// Combines _semanticsInfo entries where permissible.
 ///
 /// Consecutive inline spans can be combined if their
 /// [InlineSpanSemanticsInformation.requiresOwnNode] return false.
-List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanticsInformation> infoList) {
+List<InlineSpanSemanticsInformation> combineSemanticsInfo(
+  List<InlineSpanSemanticsInformation> infoList,
+) {
   final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
   String workingText = '';
   String workingLabel = '';
   List<ui.StringAttribute> workingAttributes = <ui.StringAttribute>[];
   for (final InlineSpanSemanticsInformation info in infoList) {
     if (info.requiresOwnNode) {
-      combined.add(InlineSpanSemanticsInformation(
-        workingText,
-        semanticsLabel: workingLabel,
-        stringAttributes: workingAttributes,
-      ));
+      combined.add(
+        InlineSpanSemanticsInformation(
+          workingText,
+          semanticsLabel: workingLabel,
+          stringAttributes: workingAttributes,
+        ),
+      );
       workingText = '';
       workingLabel = '';
       workingAttributes = <ui.StringAttribute>[];
@@ -138,14 +154,15 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanti
         );
       }
       workingLabel += effectiveLabel;
-
     }
   }
-  combined.add(InlineSpanSemanticsInformation(
-    workingText,
-    semanticsLabel: workingLabel,
-    stringAttributes: workingAttributes,
-  ));
+  combined.add(
+    InlineSpanSemanticsInformation(
+      workingText,
+      semanticsLabel: workingLabel,
+      stringAttributes: workingAttributes,
+    ),
+  );
   return combined;
 }
 
@@ -154,7 +171,7 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanti
 ///  * The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
 ///  * The subclass [PlaceholderSpan] represents a placeholder that may be
 ///    filled with non-text content. [PlaceholderSpan] itself defines a
-///    [ui.PlaceholderAlignment] and a [TextBaseline]. To be useful,
+///    [PlaceholderAlignment] and a [TextBaseline]. To be useful,
 ///    [PlaceholderSpan] must be extended to define content. An instance of
 ///    this is the [WidgetSpan] class in the widgets library.
 ///  * The subclass [WidgetSpan] specifies embedded inline widgets.
@@ -195,9 +212,7 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanti
 @immutable
 abstract class InlineSpan extends DiagnosticableTree {
   /// Creates an [InlineSpan] with the given values.
-  const InlineSpan({
-    this.style,
-  });
+  const InlineSpan({this.style});
 
   /// The [TextStyle] to apply to this span.
   ///
@@ -217,7 +232,8 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// in the same order as defined in the [InlineSpan] tree.
   ///
   /// [Paragraph] objects can be drawn on [Canvas] objects.
-  void build(ui.ParagraphBuilder builder, {
+  void build(
+    ui.ParagraphBuilder builder, {
     TextScaler textScaler = TextScaler.noScaling,
     List<PlaceholderDimensions>? dimensions,
   });
@@ -285,7 +301,11 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// represented as a 0xFFFC 'object replacement character'.
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     final StringBuffer buffer = StringBuffer();
-    computeToPlainText(buffer, includeSemanticsLabels: includeSemanticsLabels, includePlaceholders: includePlaceholders);
+    computeToPlainText(
+      buffer,
+      includeSemanticsLabels: includeSemanticsLabels,
+      includePlaceholders: includePlaceholders,
+    );
     return buffer.toString();
   }
 
@@ -326,7 +346,11 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// This method will then recursively call [computeToPlainText] on its children
   /// [InlineSpan]s if available.
   @protected
-  void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true});
+  void computeToPlainText(
+    StringBuffer buffer, {
+    bool includeSemanticsLabels = true,
+    bool includePlaceholders = true,
+  });
 
   /// Returns the UTF-16 code unit at the given `index` in the flattened string.
   ///
@@ -386,8 +410,7 @@ abstract class InlineSpan extends DiagnosticableTree {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is InlineSpan
-        && other.style == style;
+    return other is InlineSpan && other.style == style;
   }
 
   @override

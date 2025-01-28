@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:flutter/material.dart';
+
+import 'package:web/web.dart' as web;
 
 void main() => runApp(const MyApp());
 
@@ -39,21 +39,18 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: Text(widget.title)),
       body: ListView.builder(
         itemCount: 1000,
-        itemBuilder: (BuildContext context, int index) => Padding(
-          padding: const EdgeInsets.all(20),
-          child: Container(
-            height: 100,
-            color: Colors.lightBlue,
-            child: Center(
-              child: Text('Item $index'),
+        itemBuilder:
+            (BuildContext context, int index) => Padding(
+              padding: const EdgeInsets.all(20),
+              child: Container(
+                height: 100,
+                color: Colors.lightBlue,
+                child: Center(child: Text('Item $index')),
+              ),
             ),
-          ),
-        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('scroll-button'),
@@ -77,31 +74,27 @@ abstract class DeltaMode {
   static const int kLine = 0x01;
 }
 
-void dispatchMouseWheelEvent(int mouseX, int mouseY,
-    int deltaMode, double deltaX, double deltaY) {
-  final html.EventTarget target = html.document.elementFromPoint(mouseX, mouseY)!;
+void dispatchMouseWheelEvent(int mouseX, int mouseY, int deltaMode, double deltaX, double deltaY) {
+  final web.EventTarget target = web.document.elementFromPoint(mouseX, mouseY)!;
 
-  target.dispatchEvent(html.MouseEvent('mouseover',
-    screenX: mouseX,
-    screenY: mouseY,
-    clientX: mouseX,
-    clientY: mouseY,
-  ));
+  target.dispatchEvent(
+    web.MouseEvent(
+      'mouseover',
+      web.MouseEventInit(screenX: mouseX, screenY: mouseY, clientX: mouseX, clientY: mouseY),
+    ),
+  );
 
-  target.dispatchEvent(html.MouseEvent('mousemove',
-    screenX: mouseX,
-    screenY: mouseY,
-    clientX: mouseX,
-    clientY: mouseY,
-  ));
+  target.dispatchEvent(
+    web.MouseEvent(
+      'mousemove',
+      web.MouseEventInit(screenX: mouseX, screenY: mouseY, clientX: mouseX, clientY: mouseY),
+    ),
+  );
 
-  target.dispatchEvent(html.WheelEvent('wheel',
-    screenX: mouseX,
-    screenY: mouseY,
-    clientX: mouseX,
-    clientY: mouseY,
-    deltaMode: deltaMode,
-    deltaX : deltaX,
-    deltaY : deltaY,
-  ));
+  target.dispatchEvent(
+    web.WheelEvent(
+      'wheel',
+      web.WheelEventInit(deltaMode: deltaMode, deltaX: deltaX, deltaY: deltaY),
+    ),
+  );
 }

@@ -1,14 +1,15 @@
 {
-  "version": "v0_162",
+  "version": "6_1_0",
 
-  "md.comp.sheet.bottom.docked.container.color": "surface",
+  "md.comp.sheet.bottom.docked.container.color": "surfaceContainerLow",
   "md.comp.sheet.bottom.docked.container.shape": "md.sys.shape.corner.extra-large.top",
-  "md.comp.sheet.bottom.docked.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.sheet.bottom.docked.drag-handle.color": "onSurfaceVariant",
   "md.comp.sheet.bottom.docked.drag-handle.height": 4.0,
-  "md.comp.sheet.bottom.docked.drag-handle.opacity": 0.4,
   "md.comp.sheet.bottom.docked.drag-handle.width": 32.0,
   "md.comp.sheet.bottom.docked.minimized.container.shape": "md.sys.shape.corner.none",
   "md.comp.sheet.bottom.docked.modal.container.elevation": "md.sys.elevation.level1",
-  "md.comp.sheet.bottom.docked.standard.container.elevation": "md.sys.elevation.level1"
+  "md.comp.sheet.bottom.docked.standard.container.elevation": "md.sys.elevation.level1",
+  "md.comp.sheet.bottom.focus.indicator.color": "secondary",
+  "md.comp.sheet.bottom.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.sheet.bottom.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness"
 }

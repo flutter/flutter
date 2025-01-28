@@ -17,9 +17,7 @@ abstract class WindowsApp extends ApplicationPackage {
 
   /// Creates a new [WindowsApp] from a windows sub project.
   factory WindowsApp.fromWindowsProject(WindowsProject project) {
-    return BuildableWindowsApp(
-      project: project,
-    );
+    return BuildableWindowsApp(project: project);
   }
 
   /// Creates a new [WindowsApp] from an existing executable or a zip archive.
@@ -52,12 +50,10 @@ abstract class WindowsApp extends ApplicationPackage {
       globals.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
       return null;
     }
-    final List<FileSystemEntity> exeFilesFound = <FileSystemEntity>[];
-    for (final FileSystemEntity file in tempDir.listSync()) {
-      if (file.basename.endsWith('.exe')) {
-        exeFilesFound.add(file);
-      }
-    }
+    final List<FileSystemEntity> exeFilesFound = <FileSystemEntity>[
+      for (final FileSystemEntity file in tempDir.listSync())
+        if (file.basename.endsWith('.exe')) file,
+    ];
 
     if (exeFilesFound.isEmpty) {
       globals.printError('Cannot find .exe files in the zip archive.');
@@ -78,20 +74,18 @@ abstract class WindowsApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String executable(BuildMode buildMode);
+  String executable(BuildMode buildMode, TargetPlatform targetPlatform);
 }
 
 class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackage {
-  PrebuiltWindowsApp({
-    required String executable,
-    required this.applicationPackage,
-  }) : _executable = executable,
-       super(projectBundleId: executable);
+  PrebuiltWindowsApp({required String executable, required this.applicationPackage})
+    : _executable = executable,
+      super(projectBundleId: executable);
 
   final String _executable;
 
   @override
-  String executable(BuildMode buildMode) => _executable;
+  String executable(BuildMode buildMode, TargetPlatform targetPlatform) => _executable;
 
   @override
   String get name => _executable;
@@ -101,20 +95,19 @@ class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackag
 }
 
 class BuildableWindowsApp extends WindowsApp {
-  BuildableWindowsApp({
-    required this.project,
-  }) : super(projectBundleId: project.parent.manifest.appName);
+  BuildableWindowsApp({required this.project})
+    : super(projectBundleId: project.parent.manifest.appName);
 
   final WindowsProject project;
 
   @override
-  String executable(BuildMode buildMode) {
+  String executable(BuildMode buildMode, TargetPlatform targetPlatform) {
     final String? binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
-        getWindowsBuildDirectory(TargetPlatform.windows_x64),
-        'runner',
-        sentenceCase(buildMode.cliName),
-        '$binaryName.exe',
+      getWindowsBuildDirectory(targetPlatform),
+      'runner',
+      sentenceCase(buildMode.cliName),
+      '$binaryName.exe',
     );
   }
 

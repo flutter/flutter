@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'monodrag.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'velocity_tracker.dart';
@@ -20,10 +23,8 @@ export 'velocity_tracker.dart' show Velocity;
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragDownDetails {
   /// Creates details for a [GestureDragDownCallback].
-  DragDownDetails({
-    this.globalPosition = Offset.zero,
-    Offset? localPosition,
-  }) : localPosition = localPosition ?? globalPosition;
+  DragDownDetails({this.globalPosition = Offset.zero, Offset? localPosition})
+    : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   ///
@@ -133,9 +134,9 @@ class DragUpdateDetails {
     required this.globalPosition,
     Offset? localPosition,
   }) : assert(
-         primaryDelta == null
-           || (primaryDelta == delta.dx && delta.dy == 0.0)
-           || (primaryDelta == delta.dy && delta.dx == 0.0),
+         primaryDelta == null ||
+             (primaryDelta == delta.dx && delta.dy == 0.0) ||
+             (primaryDelta == delta.dy && delta.dx == 0.0),
        ),
        localPosition = localPosition ?? globalPosition;
 
@@ -214,11 +215,14 @@ class DragEndDetails {
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
+    this.globalPosition = Offset.zero,
+    Offset? localPosition,
   }) : assert(
-         primaryVelocity == null
-           || (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0)
-           || (primaryVelocity == velocity.pixelsPerSecond.dy && velocity.pixelsPerSecond.dx == 0),
-       );
+         primaryVelocity == null ||
+             (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0) ||
+             (primaryVelocity == velocity.pixelsPerSecond.dy && velocity.pixelsPerSecond.dx == 0),
+       ),
+       localPosition = localPosition ?? globalPosition;
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///
@@ -236,6 +240,23 @@ class DragEndDetails {
   ///
   /// Defaults to null if not specified in the constructor.
   final double? primaryVelocity;
+
+  /// The global position the pointer is located at when the drag
+  /// gesture has been completed.
+  ///
+  /// Defaults to the origin if not specified in the constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [localPosition], which is the [globalPosition] transformed to the
+  ///    coordinate space of the event receiver.
+  final Offset globalPosition;
+
+  /// The local position in the coordinate system of the event receiver when
+  /// the drag gesture has been completed.
+  ///
+  /// Defaults to [globalPosition] if not specified in the constructor.
+  final Offset localPosition;
 
   @override
   String toString() => '${objectRuntimeType(this, 'DragEndDetails')}($velocity)';

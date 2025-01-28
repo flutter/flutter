@@ -14,13 +14,7 @@ import 'package:path/path.dart' as path;
 
 import 'common.dart';
 
-/// Flutter Driver test output directory.
-///
-/// Tests should write any output files to this directory. Defaults to the path
-/// set in the FLUTTER_TEST_OUTPUTS_DIR environment variable, or `build` if
-/// unset.
-String testOutputsDirectory =
-    Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? 'build';
+export 'package:flutter_driver/flutter_driver.dart' show testOutputsDirectory;
 
 /// The callback type to handle [Response.data] after the test
 /// succeeds.
@@ -37,10 +31,7 @@ Future<void> writeResponseData(
 }) async {
   destinationDirectory ??= testOutputsDirectory;
   await fs.directory(destinationDirectory).create(recursive: true);
-  final File file = fs.file(path.join(
-    destinationDirectory,
-    '$testOutputFilename.json',
-  ));
+  final File file = fs.file(path.join(destinationDirectory, '$testOutputFilename.json'));
   final String resultString = _encodeJson(data, true);
   await file.writeAsString(resultString);
 }

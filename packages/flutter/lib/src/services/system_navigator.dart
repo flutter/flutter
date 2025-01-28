@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:io';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
@@ -116,22 +119,21 @@ abstract final class SystemNavigator {
   static Future<void> routeInformationUpdated({
     @Deprecated(
       'Pass Uri.parse(location) to uri parameter instead. '
-      'This feature was deprecated after v3.8.0-3.0.pre.'
+      'This feature was deprecated after v3.8.0-3.0.pre.',
     )
     String? location,
     Uri? uri,
     Object? state,
     bool replace = false,
   }) {
-    assert((location != null) != (uri != null), 'One of uri or location must be provided, but not both.');
+    assert(
+      (location != null) != (uri != null),
+      'One of uri or location must be provided, but not both.',
+    );
     uri ??= Uri.parse(location!);
     return SystemChannels.navigation.invokeMethod<void>(
       'routeInformationUpdated',
-      <String, dynamic>{
-        'uri': uri.toString(),
-        'state': state,
-        'replace': replace,
-      },
+      <String, dynamic>{'uri': uri.toString(), 'state': state, 'replace': replace},
     );
   }
 }

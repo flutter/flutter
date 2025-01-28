@@ -21,16 +21,23 @@ class TestSingleChildLayoutDelegate extends SingleChildLayoutDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    assert(!RenderObject.debugCheckingIntrinsics);
-    constraintsFromGetConstraintsForChild = constraints;
-    return const BoxConstraints(minWidth: 100.0, maxWidth: 150.0, minHeight: 200.0, maxHeight: 400.0);
+    if (!RenderObject.debugCheckingIntrinsics) {
+      constraintsFromGetConstraintsForChild = constraints;
+    }
+    return const BoxConstraints(
+      minWidth: 100.0,
+      maxWidth: 150.0,
+      minHeight: 200.0,
+      maxHeight: 400.0,
+    );
   }
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    assert(!RenderObject.debugCheckingIntrinsics);
-    sizeFromGetPositionForChild = size;
-    childSizeFromGetPositionForChild = childSize;
+    if (!RenderObject.debugCheckingIntrinsics) {
+      sizeFromGetPositionForChild = size;
+      childSizeFromGetPositionForChild = childSize;
+    }
     return Offset.zero;
   }
 
@@ -84,12 +91,7 @@ class NotifierLayoutDelegate extends SingleChildLayoutDelegate {
 }
 
 Widget buildFrame(SingleChildLayoutDelegate delegate) {
-  return Center(
-    child: CustomSingleChildLayout(
-      delegate: delegate,
-      child: Container(),
-    ),
-  );
+  return Center(child: CustomSingleChildLayout(delegate: delegate, child: Container()));
 }
 
 void main() {
@@ -115,8 +117,7 @@ void main() {
   });
 
   testWidgets('Test SingleChildDelegate shouldRelayout method', (WidgetTester tester) async {
-    TestSingleChildLayoutDelegate delegate =
-        TestSingleChildLayoutDelegate();
+    TestSingleChildLayoutDelegate delegate = TestSingleChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
     // Layout happened because the delegate was set.

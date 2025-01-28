@@ -150,5 +150,7 @@
   "menuDismissLabel": "Закрити меню",
   "lookUpButtonLabel": "Шукати",
   "searchWebButtonLabel": "Пошук в Інтернеті",
-  "shareButtonLabel": "Поділитися…"
+  "shareButtonLabel": "Поділитися",
+  "clearButtonTooltip": "Видалити текст",
+  "selectedDateLabel": "Вибрано"
 }

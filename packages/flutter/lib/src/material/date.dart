@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'calendar_date_picker.dart';
+/// @docImport 'date_picker.dart';
+/// @docImport 'text_field.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'material_localizations.dart';
@@ -26,18 +31,13 @@ abstract final class DateUtils {
   /// Returns true if the two [DateTime] objects have the same day, month, and
   /// year, or are both null.
   static bool isSameDay(DateTime? dateA, DateTime? dateB) {
-    return
-      dateA?.year == dateB?.year &&
-      dateA?.month == dateB?.month &&
-      dateA?.day == dateB?.day;
+    return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
   }
 
   /// Returns true if the two [DateTime] objects have the same month and
   /// year, or are both null.
   static bool isSameMonth(DateTime? dateA, DateTime? dateB) {
-    return
-      dateA?.year == dateB?.year &&
-      dateA?.month == dateB?.month;
+    return dateA?.year == dateB?.year && dateA?.month == dateB?.month;
   }
 
   /// Determines the number of months between two [DateTime] objects.
@@ -139,7 +139,7 @@ abstract final class DateUtils {
 /// Mode of date entry method for the date picker dialog.
 ///
 /// In [calendar] mode, a calendar grid is displayed and the user taps the
-/// day they wish to select. In [input] mode a TextField] is displayed and
+/// day they wish to select. In [input] mode, a [TextField] is displayed and
 /// the user types in the date they wish to select.
 ///
 /// [calendarOnly] and [inputOnly] are variants of the above that don't
@@ -205,10 +205,7 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 @immutable
 class DateTimeRange {
   /// Creates a date range for the given start and end [DateTime].
-  DateTimeRange({
-    required this.start,
-    required this.end,
-  }) : assert(!start.isAfter(end));
+  DateTimeRange({required this.start, required this.end}) : assert(!start.isAfter(end));
 
   /// The start of the range of dates.
   final DateTime start;
@@ -226,9 +223,7 @@ class DateTimeRange {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DateTimeRange
-      && other.start == start
-      && other.end == end;
+    return other is DateTimeRange && other.start == start && other.end == end;
   }
 
   @override

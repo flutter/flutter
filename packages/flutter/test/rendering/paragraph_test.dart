@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Paragraph, TextBox;
 
-import 'package:flutter/foundation.dart' show isCanvasKit, kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -12,7 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
+const String _kText =
+    "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
 
 void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
   int index = 0;
@@ -23,9 +23,10 @@ void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
     }
 
     final RenderBox box = inlineRenderBoxes[index];
-    box.parentData = TextParentData()
-                      ..span = span
-                      ..previousSibling = previousBox;
+    box.parentData =
+        TextParentData()
+          ..span = span
+          ..previousSibling = previousBox;
     (previousBox?.parentData as TextParentData?)?.nextSibling = box;
     index += 1;
     previousBox = box;
@@ -116,12 +117,12 @@ void main() {
 
   test('getFullHeightForCaret control test', () {
     final RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(text: _kText,style: TextStyle(fontSize: 10.0)),
+      const TextSpan(text: _kText, style: TextStyle(fontSize: 10.0)),
       textDirection: TextDirection.ltr,
     );
     layout(paragraph);
 
-    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5))!;
+    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5));
     expect(height5, equals(10.0));
   });
 
@@ -155,9 +156,7 @@ void main() {
 
     expect(boxes.length, equals(1));
 
-    boxes = paragraph.getBoxesForSelection(
-      const TextSelection(baseOffset: 25, extentOffset: 50),
-    );
+    boxes = paragraph.getBoxesForSelection(const TextSelection(baseOffset: 25, extentOffset: 50));
 
     expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
     expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
@@ -206,7 +205,7 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
     // 'fifth':
     expect(boxes[3], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/61016
+  });
 
   test('getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -270,19 +269,16 @@ void main() {
   test('overflow test', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
-        text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
-              'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
+        text:
+            'This\n' // 4 characters * 10px font size = 40px width on the first line
+            'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
         style: TextStyle(fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
       maxLines: 1,
     );
 
-    void relayoutWith({
-      int? maxLines,
-      required bool softWrap,
-      required TextOverflow overflow,
-    }) {
+    void relayoutWith({int? maxLines, required bool softWrap, required TextOverflow overflow}) {
       paragraph
         ..maxLines = maxLines
         ..softWrap = softWrap
@@ -291,7 +287,10 @@ void main() {
     }
 
     // Lay out in a narrow box to force wrapping.
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0)); // enough to fit "This" but not "This is"
+    layout(
+      paragraph,
+      constraints: const BoxConstraints(maxWidth: 50.0),
+    ); // enough to fit "This" but not "This is"
     final double lineHeight = paragraph.size.height;
 
     relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.clip);
@@ -349,9 +348,10 @@ void main() {
   test('maxLines', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
-        text: "How do you write like you're running out of time? Write day and night like you're running out of time?",
-            // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
-            // 0          1          2       3       4      5     6         7         8    9       10      11     12
+        text:
+            "How do you write like you're running out of time? Write day and night like you're running out of time?",
+        // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
+        // 0          1          2       3       4      5     6         7         8    9       10      11     12
         style: TextStyle(fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
@@ -374,6 +374,31 @@ void main() {
     layoutAt(3);
     expect(paragraph.size.height, 30.0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
+
+  test('textAlign triggers TextPainter relayout in the paint method', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: 'A', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
+    );
+
+    Rect getRectForA() =>
+        paragraph
+            .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
+            .single
+            .toRect();
+
+    layout(paragraph, constraints: const BoxConstraints.tightFor(width: 100.0));
+
+    expect(getRectForA(), const Rect.fromLTWH(0, 0, 10, 10));
+
+    paragraph.textAlign = TextAlign.right;
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isTrue);
+
+    paragraph.paint(MockPaintingContext(), Offset.zero);
+    expect(getRectForA(), const Rect.fromLTWH(90, 0, 10, 10));
+  });
 
   group('didExceedMaxLines', () {
     RenderParagraph createRenderParagraph({
@@ -412,10 +437,7 @@ void main() {
 
   test('changing color does not do layout', () {
     final RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(
-        text: 'Hello',
-        style: TextStyle(color: Color(0xFF000000)),
-      ),
+      const TextSpan(text: 'Hello', style: TextStyle(color: Color(0xFF000000))),
       textDirection: TextDirection.ltr,
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0), phase: EnginePhase.paint);
@@ -444,28 +466,20 @@ void main() {
   test('nested TextSpans in paragraph handle linear textScaler correctly.', () {
     const TextSpan testSpan = TextSpan(
       text: 'a',
-      style: TextStyle(
-        fontSize: 10.0,
-      ),
+      style: TextStyle(fontSize: 10.0),
       children: <TextSpan>[
         TextSpan(
           text: 'b',
-          children: <TextSpan>[
-            TextSpan(text: 'c'),
-          ],
-          style: TextStyle(
-            fontSize: 20.0,
-          ),
+          children: <TextSpan>[TextSpan(text: 'c')],
+          style: TextStyle(fontSize: 20.0),
         ),
-        TextSpan(
-          text: 'd',
-        ),
+        TextSpan(text: 'd'),
       ],
     );
     final RenderParagraph paragraph = RenderParagraph(
-        testSpan,
-        textDirection: TextDirection.ltr,
-        textScaler: const TextScaler.linear(1.3),
+      testSpan,
+      textDirection: TextDirection.ltr,
+      textScaler: const TextScaler.linear(1.3),
     );
     paragraph.layout(const BoxConstraints());
     expect(paragraph.size.width, 78.0);
@@ -475,9 +489,7 @@ void main() {
     // Test the sizes of nested spans.
     final List<ui.TextBox> boxes = <ui.TextBox>[
       for (int i = 0; i < length; ++i)
-        ...paragraph.getBoxesForSelection(
-          TextSelection(baseOffset: i, extentOffset: i + 1),
-        ),
+        ...paragraph.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)),
     ];
     expect(boxes, hasLength(4));
 
@@ -660,12 +672,12 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
     expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
     // Wraps
-    expect(boxes[4], const TextBox.fromLTRBD(0.0, 14.0, 14.0, 28.0 , TextDirection.ltr));
+    expect(boxes[4], const TextBox.fromLTRBD(0.0, 14.0, 14.0, 28.0, TextDirection.ltr));
     expect(boxes[5], const TextBox.fromLTRBD(14.0, 14.0, 28.0, 28.0, TextDirection.ltr));
     expect(boxes[6], const TextBox.fromLTRBD(28.0, 14.0, 42.0, 28.0, TextDirection.ltr));
     // Wraps
     expect(boxes[7], const TextBox.fromLTRBD(0.0, 28.0, 14.0, 42.0, TextDirection.ltr));
-    expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
+    expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0, TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
   test('Does not include the semantics node of truncated rendering children', () {
@@ -673,15 +685,12 @@ void main() {
     const double screenWidth = 100;
     const String sentence = 'truncated';
     final List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(
-          const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
     ];
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: 'a long line to be truncated.',
-        children: <InlineSpan>[
-          WidgetSpan(child: Text(sentence)),
-        ],
+        children: <InlineSpan>[WidgetSpan(child: Text(sentence))],
       ),
       overflow: TextOverflow.ellipsis,
       children: renderBoxes,
@@ -692,7 +701,9 @@ void main() {
     final SemanticsNode result = SemanticsNode();
     final SemanticsNode truncatedChild = SemanticsNode();
     truncatedChild.tags = <SemanticsTag>{const PlaceholderSpanIndexSemanticsTag(0)};
-    paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[truncatedChild]);
+    paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[
+      truncatedChild,
+    ]);
     // It should only contain the semantics node of the TextSpan.
     expect(result.childrenCount, 1);
     result.visitChildren((SemanticsNode node) {
@@ -703,11 +714,14 @@ void main() {
 
   test('Supports gesture recognizer semantics', () {
     final RenderParagraph paragraph = RenderParagraph(
-      TextSpan(text: _kText, children: <InlineSpan>[
-        TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
-        TextSpan(text: 'two', recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
-        TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()..onDoubleTap = () {}),
-      ]),
+      TextSpan(
+        text: _kText,
+        children: <InlineSpan>[
+          TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
+          TextSpan(text: 'two', recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
+          TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()..onDoubleTap = () {}),
+        ],
+      ),
       textDirection: TextDirection.rtl,
     );
     layout(paragraph);
@@ -740,9 +754,12 @@ void main() {
 
   test('Asserts on unsupported gesture recognizer', () {
     final RenderParagraph paragraph = RenderParagraph(
-      TextSpan(text: _kText, children: <InlineSpan>[
-        TextSpan(text: 'three', recognizer: MultiTapGestureRecognizer()..onTap = (int id) {}),
-      ]),
+      TextSpan(
+        text: _kText,
+        children: <InlineSpan>[
+          TextSpan(text: 'three', recognizer: MultiTapGestureRecognizer()..onTap = (int id) {}),
+        ],
+      ),
       textDirection: TextDirection.rtl,
     );
     layout(paragraph);
@@ -759,11 +776,14 @@ void main() {
 
   test('assembleSemanticsNode handles text spans that do not yield selection boxes', () {
     final RenderParagraph paragraph = RenderParagraphWithEmptySelectionBoxList(
-      TextSpan(text: '', children: <InlineSpan>[
-        TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
-        TextSpan(text: 'B', recognizer: TapGestureRecognizer()..onTap = () {}),
-        TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
-      ]),
+      TextSpan(
+        text: '',
+        children: <InlineSpan>[
+          TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
+          TextSpan(text: 'B', recognizer: TapGestureRecognizer()..onTap = () {}),
+          TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
+        ],
+      ),
       textDirection: TextDirection.rtl,
       emptyListSelection: const TextSelection(baseOffset: 0, extentOffset: 1),
     );
@@ -774,27 +794,34 @@ void main() {
     expect(node.childrenCount, 2);
   });
 
-  test('assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes', () {
-    final TextSpan text = TextSpan(text: '', children: <InlineSpan>[
-      TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
-      const WidgetSpan(child: SizedBox.shrink()),
-      TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
-    ]);
-    final List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
-    ];
-    final RenderParagraph paragraph = RenderParagraphWithEmptyBoxListForWidgetSpan(
-      text,
-      children: renderBoxes,
-      textDirection: TextDirection.ltr,
-    );
-    _applyParentData(renderBoxes, paragraph.text);
-    layout(paragraph);
+  test(
+    'assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes',
+    () {
+      final TextSpan text = TextSpan(
+        text: '',
+        children: <InlineSpan>[
+          TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
+          const WidgetSpan(child: SizedBox.shrink()),
+          TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
+        ],
+      );
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      ];
+      final RenderParagraph paragraph = RenderParagraphWithEmptyBoxListForWidgetSpan(
+        text,
+        children: renderBoxes,
+        textDirection: TextDirection.ltr,
+      );
+      _applyParentData(renderBoxes, paragraph.text);
+      layout(paragraph);
 
-    final SemanticsNode node = SemanticsNode();
-    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
-    expect(node.childrenCount, 2);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+      final SemanticsNode node = SemanticsNode();
+      paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+      expect(node.childrenCount, 2);
+    },
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+  );
 
   test('Basic TextSpan Hit testing', () {
     final TextSpan textSpanA = TextSpan(text: 'A' * 10);
@@ -812,41 +839,93 @@ void main() {
 
     // Hit-testing the first line
     // First A
-    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+    expect(
+      paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)),
+      isTrue,
+    );
+    expect(
+      result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(),
+      <TextSpan>[textSpanA],
+    );
     // The last A.
-    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+    expect(
+      paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)),
+      isTrue,
+    );
+    expect(
+      result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(),
+      <TextSpan>[textSpanA],
+    );
     // Far away from the line.
-    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(200.0, 5.0)), isFalse);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
+    expect(
+      paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(200.0, 5.0)),
+      isFalse,
+    );
+    expect(
+      result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(),
+      <TextSpan>[],
+    );
 
     // Hit-testing the second line
     // Tapping on B (startX = letter-spacing / 2 = 13.0).
-    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(18.0, 15.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
+    expect(
+      paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(18.0, 15.0)),
+      isTrue,
+    );
+    expect(
+      result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(),
+      <TextSpan>[textSpanBC],
+    );
 
     // Between B and C, with large letter-spacing.
-    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(31.0, 15.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
+    expect(
+      paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(31.0, 15.0)),
+      isTrue,
+    );
+    expect(
+      result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(),
+      <TextSpan>[textSpanBC],
+    );
 
     // On C.
-    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(54.0, 15.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
+    expect(
+      paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(54.0, 15.0)),
+      isTrue,
+    );
+    expect(
+      result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(),
+      <TextSpan>[textSpanBC],
+    );
 
     // After C.
-    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(100.0, 15.0)), isFalse);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
+    expect(
+      paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(100.0, 15.0)),
+      isFalse,
+    );
+    expect(
+      result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(),
+      <TextSpan>[],
+    );
 
     // Not even remotely close.
-    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(9999.0, 9999.0)), isFalse);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
+    expect(
+      paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(9999.0, 9999.0)),
+      isFalse,
+    );
+    expect(
+      result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(),
+      <TextSpan>[],
+    );
   });
 
   test('TextSpan Hit testing with text justification', () {
-    const TextSpan textSpanA = TextSpan(text: 'A ');      // The space is a word break.
-    const TextSpan textSpanB = TextSpan(text: 'B\u200B'); // The zero-width space is used as a line break.
-    final TextSpan textSpanC = TextSpan(text: 'C' * 10);  // The third span starts a new line since it's too long for the first line.
+    const TextSpan textSpanA = TextSpan(text: 'A '); // The space is a word break.
+    const TextSpan textSpanB = TextSpan(
+      text: 'B\u200B',
+    ); // The zero-width space is used as a line break.
+    final TextSpan textSpanC = TextSpan(
+      text: 'C' * 10,
+    ); // The third span starts a new line since it's too long for the first line.
 
     // The text should look like:
     // A        B
@@ -857,26 +936,49 @@ void main() {
       children: <InlineSpan>[textSpanA, textSpanB, textSpanC],
     );
 
-    final RenderParagraph paragraph = RenderParagraph(text, textDirection: TextDirection.ltr, textAlign: TextAlign.justify);
+    final RenderParagraph paragraph = RenderParagraph(
+      text,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.justify,
+    );
     layout(paragraph, constraints: const BoxConstraints.tightFor(width: 100.0));
     BoxHitTestResult result;
 
     // Tapping on A.
-    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+    expect(
+      paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)),
+      isTrue,
+    );
+    expect(
+      result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(),
+      <TextSpan>[textSpanA],
+    );
 
     // Between A and B.
-    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(50.0, 5.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+    expect(
+      paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(50.0, 5.0)),
+      isTrue,
+    );
+    expect(
+      result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(),
+      <TextSpan>[textSpanA],
+    );
 
     // On B.
-    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanB]);
+    expect(
+      paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)),
+      isTrue,
+    );
+    expect(
+      result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(),
+      <TextSpan>[textSpanB],
+    );
   });
 
   group('Selection', () {
     void selectionParagraph(RenderParagraph paragraph, TextPosition start, TextPosition end) {
-      for (final Selectable selectable in (paragraph.registrar! as TestSelectionRegistrar).selectables) {
+      for (final Selectable selectable
+          in (paragraph.registrar! as TestSelectionRegistrar).selectables) {
         selectable.dispatchSelectionEvent(
           SelectionEdgeUpdateEvent.forStart(
             globalPosition: paragraph.getOffsetForCaret(start, Rect.zero) + const Offset(0, 5),
@@ -923,7 +1025,7 @@ void main() {
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(14.0, 0.0, 56.0, 14.0));
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
       // Selection highlight is painted before text.
       expect(paintingContext.canvas.drawnItemTypes, <Type>[Rect, ui.Paragraph]);
 
@@ -931,10 +1033,10 @@ void main() {
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(28.0, 0.0, 28.0, 14.0));
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
     });
 
-// Regression test for https://github.com/flutter/flutter/issues/126652.
+    // Regression test for https://github.com/flutter/flutter/issues/126652.
     test('paints selection when tap at chinese character', () async {
       final TestSelectionRegistrar registrar = TestSelectionRegistrar();
       const Color selectionColor = Color(0xAF6694e8);
@@ -950,21 +1052,30 @@ void main() {
       expect(paintingContext.canvas.drawnRect, isNull);
       expect(paintingContext.canvas.drawnRectPaint, isNull);
 
-      for (final Selectable selectable in (paragraph.registrar! as TestSelectionRegistrar).selectables) {
-        selectable.dispatchSelectionEvent(const SelectWordSelectionEvent(globalPosition: Offset(7, 0)));
+      for (final Selectable selectable
+          in (paragraph.registrar! as TestSelectionRegistrar).selectables) {
+        selectable.dispatchSelectionEvent(
+          const SelectWordSelectionEvent(globalPosition: Offset(7, 0)),
+        );
       }
 
       paintingContext.canvas.clear();
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect!.isEmpty, false);
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
     test('getPositionForOffset works', () async {
-      final RenderParagraph paragraph = RenderParagraph(const TextSpan(text: '1234567'), textDirection: TextDirection.ltr);
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(text: '1234567'),
+        textDirection: TextDirection.ltr,
+      );
       layout(paragraph);
-      expect(paragraph.getPositionForOffset(const Offset(42.0, 14.0)), const TextPosition(offset: 3));
+      expect(
+        paragraph.getPositionForOffset(const Offset(42.0, 14.0)),
+        const TextPosition(offset: 3),
+      );
     });
 
     test('can handle select all when contains widget span', () async {
@@ -978,7 +1089,7 @@ void main() {
             TextSpan(text: 'before the span'),
             WidgetSpan(child: Text('widget')),
             TextSpan(text: 'after the span'),
-          ]
+          ],
         ),
         textDirection: TextDirection.ltr,
         registrar: registrar,
@@ -1006,11 +1117,7 @@ void main() {
       final TestSelectionRegistrar registrar = TestSelectionRegistrar();
       final List<RenderBox> renderBoxes = <RenderBox>[];
       final RenderParagraph paragraph = RenderParagraph(
-        const TextSpan(
-            children: <InlineSpan>[
-              TextSpan(text: 'how are you\nI am fine\nThank you'),
-            ]
-        ),
+        const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
         children: renderBoxes,
@@ -1053,11 +1160,7 @@ void main() {
       final TestSelectionRegistrar registrar = TestSelectionRegistrar();
       final List<RenderBox> renderBoxes = <RenderBox>[];
       final RenderParagraph paragraph = RenderParagraph(
-        const TextSpan(
-            children: <InlineSpan>[
-              TextSpan(text: 'how are you\nI am fine\nThank you'),
-            ]
-        ),
+        const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
         children: renderBoxes,
@@ -1111,11 +1214,7 @@ void main() {
       final TestSelectionRegistrar registrar = TestSelectionRegistrar();
       final List<RenderBox> renderBoxes = <RenderBox>[];
       final RenderParagraph paragraph = RenderParagraph(
-        const TextSpan(
-            children: <InlineSpan>[
-              TextSpan(text: 'how are you\nI am fine\nThank you'),
-            ]
-        ),
+        const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
         children: renderBoxes,
@@ -1158,11 +1257,7 @@ void main() {
       final TestSelectionRegistrar registrar = TestSelectionRegistrar();
       final List<RenderBox> renderBoxes = <RenderBox>[];
       final RenderParagraph paragraph = RenderParagraph(
-        const TextSpan(
-            children: <InlineSpan>[
-              TextSpan(text: 'how are you\nI am fine\nThank you'),
-            ]
-        ),
+        const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
         children: renderBoxes,
@@ -1213,11 +1308,7 @@ void main() {
       final TestSelectionRegistrar registrar = TestSelectionRegistrar();
       final List<RenderBox> renderBoxes = <RenderBox>[];
       final RenderParagraph paragraph = RenderParagraph(
-        const TextSpan(
-            children: <InlineSpan>[
-              TextSpan(text: 'how are you\nI am fine\nThank you'),
-            ]
-        ),
+        const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
         children: renderBoxes,
@@ -1243,9 +1334,7 @@ void main() {
       expect(selection.end, 3);
 
       // Remove selection
-      registrar.selectables[0].dispatchSelectionEvent(
-        const ClearSelectionEvent(),
-      );
+      registrar.selectables[0].dispatchSelectionEvent(const ClearSelectionEvent());
       expect(paragraph.selections.length, 0);
 
       // Equivalent to sending shift + alt + left.
@@ -1268,11 +1357,7 @@ void main() {
       final TestSelectionRegistrar registrar = TestSelectionRegistrar();
       final List<RenderBox> renderBoxes = <RenderBox>[];
       final RenderParagraph paragraph = RenderParagraph(
-        const TextSpan(
-            children: <InlineSpan>[
-              TextSpan(text: 'how are you\nI am fine\nThank you'),
-            ]
-        ),
+        const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
         children: renderBoxes,
@@ -1289,10 +1374,11 @@ void main() {
       expect(selection.end, 15);
 
       final Matrix4 transform = registrar.selectables[0].getTransformTo(null);
-      final double baseline = MatrixUtils.transformPoint(
-        transform,
-        registrar.selectables[0].value.endSelectionPoint!.localPosition,
-      ).dx;
+      final double baseline =
+          MatrixUtils.transformPoint(
+            transform,
+            registrar.selectables[0].value.endSelectionPoint!.localPosition,
+          ).dx;
 
       // Equivalent to sending shift + arrow-down.
       registrar.selectables[0].dispatchSelectionEvent(
@@ -1329,11 +1415,7 @@ void main() {
       final TestSelectionRegistrar registrar = TestSelectionRegistrar();
       final List<RenderBox> renderBoxes = <RenderBox>[];
       final RenderParagraph paragraph = RenderParagraph(
-        const TextSpan(
-            children: <InlineSpan>[
-              TextSpan(text: 'how are you\nI am fine\nThank you'),
-            ]
-        ),
+        const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
         children: renderBoxes,
@@ -1344,10 +1426,11 @@ void main() {
       expect(paragraph.selections.length, 0);
 
       final Matrix4 transform = registrar.selectables[0].getTransformTo(null);
-      final double baseline = MatrixUtils.transformPoint(
-        transform,
-        Offset(registrar.selectables[0].size.width / 2, 0),
-      ).dx;
+      final double baseline =
+          MatrixUtils.transformPoint(
+            transform,
+            Offset(registrar.selectables[0].size.width / 2, 0),
+          ).dx;
 
       // Equivalent to sending shift + arrow-down.
       registrar.selectables[0].dispatchSelectionEvent(
@@ -1364,9 +1447,7 @@ void main() {
       expect(selection.start, 0);
       expect(selection.end, 6);
 
-      registrar.selectables[0].dispatchSelectionEvent(
-        const ClearSelectionEvent(),
-      );
+      registrar.selectables[0].dispatchSelectionEvent(const ClearSelectionEvent());
       expect(paragraph.selections.length, 0);
 
       // Equivalent to sending shift + arrow-up.
@@ -1394,11 +1475,10 @@ void main() {
     );
 
     int semanticsUpdateCount = 0;
-    TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
-      listener: () {
-        ++semanticsUpdateCount;
-      },
-    );
+    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
+    TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
+      ++semanticsUpdateCount;
+    });
 
     layout(paragraph);
 
@@ -1415,7 +1495,8 @@ void main() {
     expect(data.hasAction(SemanticsAction.longPress), false);
     expect(data.hasAction(SemanticsAction.tap), true);
 
-    final LongPressGestureRecognizer recognizerAfter = LongPressGestureRecognizer()..onLongPress = () {};
+    final LongPressGestureRecognizer recognizerAfter =
+        LongPressGestureRecognizer()..onLongPress = () {};
     paragraph.text = TextSpan(text: 'How are you \n', recognizer: recognizerAfter);
 
     pumpFrame(phase: EnginePhase.flushSemantics);
@@ -1432,13 +1513,15 @@ void main() {
     data = children.single.getSemanticsData();
     expect(data.hasAction(SemanticsAction.longPress), true);
     expect(data.hasAction(SemanticsAction.tap), false);
+
+    semanticsHandle.dispose();
   });
 }
 
 class MockCanvas extends Fake implements Canvas {
   Rect? drawnRect;
   Paint? drawnRectPaint;
-  List<Type> drawnItemTypes=<Type>[];
+  List<Type> drawnItemTypes = <Type>[];
 
   @override
   void drawRect(Rect rect, Paint paint) {
@@ -1451,6 +1534,7 @@ class MockCanvas extends Fake implements Canvas {
   void drawParagraph(ui.Paragraph paragraph, Offset offset) {
     drawnItemTypes.add(ui.Paragraph);
   }
+
   void clear() {
     drawnRect = null;
     drawnRectPaint = null;
@@ -1474,5 +1558,4 @@ class TestSelectionRegistrar extends SelectionRegistrar {
   void remove(Selectable selectable) {
     expect(selectables.remove(selectable), isTrue);
   }
-
 }

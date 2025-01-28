@@ -17,13 +17,13 @@ import '../cmake_project.dart';
 /// ```
 class CmakeNativeAssetsMigration extends ProjectMigrator {
   CmakeNativeAssetsMigration(CmakeBasedProject project, this.os, super.logger)
-      : _cmakeFile = project.managedCmakeFile;
+    : _cmakeFile = project.managedCmakeFile;
 
   final File _cmakeFile;
   final String os;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     if (!_cmakeFile.existsSync()) {
       logger.printTrace('CMake project not found, skipping install() NATIVE_ASSETS_DIR migration.');
       return;

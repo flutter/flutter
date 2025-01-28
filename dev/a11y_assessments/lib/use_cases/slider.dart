@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class SliderUseCase extends UseCase {
-
   @override
   String get name => 'Slider';
 
@@ -27,26 +26,31 @@ class MainWidget extends StatefulWidget {
 
 class MainWidgetState extends State<MainWidget> {
   double currentSliderValue = 20;
+  static const String accessibilityLabel = 'Accessibility Test Slider';
+
+  String pageTitle = getUseCaseName(SliderUseCase());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Slider'),
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle demo')),
       ),
       body: Center(
-        child: Slider(
-          autofocus: true,
-          value: currentSliderValue,
-          max: 100,
-          divisions: 5,
-          label: currentSliderValue.round().toString(),
-          onChanged: (double value) {
-            setState(() {
-              currentSliderValue = value;
-            });
-          },
+        child: Semantics(
+          label: accessibilityLabel,
+          child: Slider(
+            value: currentSliderValue,
+            max: 100,
+            divisions: 5,
+            label: currentSliderValue.round().toString(),
+            onChanged: (double value) {
+              setState(() {
+                currentSliderValue = value;
+              });
+            },
+          ),
         ),
       ),
     );

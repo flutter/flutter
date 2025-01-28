@@ -22,9 +22,7 @@ Future<void> main() async {
     await tester.pumpWidget(
       MaterialApp(
         home: Image(image: fakeImageProvider, excludeFromSemantics: true, key: imageKey),
-        routes: <String, WidgetBuilder>{
-          '/page': (BuildContext context) => Container(),
-        },
+        routes: <String, WidgetBuilder>{'/page': (BuildContext context) => Container()},
       ),
     );
     final RenderImage renderImage = tester.renderObject(find.byType(Image));
@@ -43,5 +41,6 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 100));
     final ui.Image? image4 = renderImage.image;
     expect(image3, same(image4));
+    imageCache.clear();
   });
 }

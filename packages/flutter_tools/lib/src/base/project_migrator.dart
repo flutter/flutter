@@ -16,7 +16,7 @@ abstract class ProjectMigrator {
   @protected
   final Logger logger;
 
-  void migrate();
+  Future<void> migrate();
 
   /// Return null if the line should be deleted.
   @protected
@@ -61,7 +61,9 @@ abstract class ProjectMigrator {
     }
 
     final String projectContentsWithMigratedLines = newProjectContents.toString();
-    final String projectContentsWithMigratedContents = migrateFileContents(projectContentsWithMigratedLines);
+    final String projectContentsWithMigratedContents = migrateFileContents(
+      projectContentsWithMigratedLines,
+    );
     if (projectContentsWithMigratedLines != projectContentsWithMigratedContents) {
       logger.printTrace('Migrating $basename contents');
       _migrationRequired = true;
@@ -79,9 +81,9 @@ class ProjectMigration {
 
   final List<ProjectMigrator> migrators;
 
-  void run() {
+  Future<void> run() async {
     for (final ProjectMigrator migrator in migrators) {
-      migrator.migrate();
+      await migrator.migrate();
     }
   }
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'package:package_config/package_config_types.dart';
 
 import 'artifacts.dart';
@@ -12,7 +14,6 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
-import 'web/compile.dart';
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;
@@ -36,17 +37,18 @@ class BuildInfo {
     List<String>? dartDefines,
     this.bundleSkSLPath,
     List<String>? dartExperiments,
-    this.webRenderer = WebRendererMode.auto,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
+    required this.packageConfigPath,
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
+    this.androidSkipBuildDependencyValidation = false,
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
+    this.useLocalCanvasKit = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -75,7 +77,7 @@ class BuildInfo {
   ///
   /// This is used by package:package_config to locate the actual package_config.json
   /// file. If not provided, defaults to `.dart_tool/package_config.json`.
-  final String packagesPath;
+  final String packageConfigPath;
 
   final List<String> fileSystemRoots;
   final String? fileSystemScheme;
@@ -130,9 +132,6 @@ class BuildInfo {
   /// A list of Dart experiments.
   final List<String> dartExperiments;
 
-  /// When compiling to web, which web renderer mode we are using (html, canvaskit, auto)
-  final WebRendererMode webRenderer;
-
   /// The name of a file where flutter assemble will output performance
   /// information in a JSON format.
   ///
@@ -158,6 +157,10 @@ class BuildInfo {
   /// The Gradle daemon may also be disabled in the Android application's properties file.
   final bool androidGradleDaemon;
 
+  /// Whether to skip checking of individual versions of our Android build time
+  /// dependencies.
+  final bool androidSkipBuildDependencyValidation;
+
   /// Additional key value pairs that are passed directly to the gradle project via the `-P`
   /// flag.
   final List<String> androidProjectArgs;
@@ -180,10 +183,50 @@ class BuildInfo {
   /// If set, builds native assets with `build.dart` from all packages.
   final bool buildNativeAssets;
 
-  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
-  static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
-  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
-  static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  /// If set, web builds will use the locally built CanvasKit instead of using the CDN
+  final bool useLocalCanvasKit;
+
+  /// Can be used when the actual information is not needed.
+  static const BuildInfo dummy = BuildInfo(
+    BuildMode.debug,
+    null,
+    trackWidgetCreation: true,
+    treeShakeIcons: false,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo debug = BuildInfo(
+    BuildMode.debug,
+    null,
+    trackWidgetCreation: true,
+    treeShakeIcons: false,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo profile = BuildInfo(
+    BuildMode.profile,
+    null,
+    treeShakeIcons: kIconTreeShakerEnabledDefault,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo jitRelease = BuildInfo(
+    BuildMode.jitRelease,
+    null,
+    treeShakeIcons: kIconTreeShakerEnabledDefault,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo release = BuildInfo(
+    BuildMode.release,
+    null,
+    treeShakeIcons: kIconTreeShakerEnabledDefault,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
 
   /// Returns whether a debug build is requested.
   ///
@@ -222,6 +265,17 @@ class BuildInfo {
   /// so the uncapitalized flavor name is used to compute the output file name
   String? get uncapitalizedFlavor => _uncapitalize(flavor);
 
+  /// The module system DDC is targeting, or null if not using DDC or the
+  /// associated flag isn't present.
+  // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
+  DdcModuleFormat? get ddcModuleFormat =>
+      _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).ddcModuleFormat;
+
+  /// Whether to enable canary features when using DDC, or null if not using
+  /// DDC or the associated flag isn't present.
+  bool? get canaryFeatures =>
+      _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).canaryFeatures;
+
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
   ///
@@ -231,34 +285,24 @@ class BuildInfo {
     // the Environment map.
     return <String, String>{
       kBuildMode: mode.cliName,
-      if (dartDefines.isNotEmpty)
-        kDartDefines: encodeDartDefines(dartDefines),
+      if (dartDefines.isNotEmpty) kDartDefines: encodeDartDefines(dartDefines),
       kDartObfuscation: dartObfuscation.toString(),
-      if (frontendServerStarterPath != null)
-        kFrontendServerStarterPath: frontendServerStarterPath!,
-      if (extraFrontEndOptions.isNotEmpty)
-        kExtraFrontEndOptions: extraFrontEndOptions.join(','),
+      if (frontendServerStarterPath != null) kFrontendServerStarterPath: frontendServerStarterPath!,
+      if (extraFrontEndOptions.isNotEmpty) kExtraFrontEndOptions: extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
-      if (splitDebugInfoPath != null)
-        kSplitDebugInfo: splitDebugInfoPath!,
+      if (splitDebugInfoPath != null) kSplitDebugInfo: splitDebugInfoPath!,
       kTrackWidgetCreation: trackWidgetCreation.toString(),
       kIconTreeShakerFlag: treeShakeIcons.toString(),
-      if (bundleSkSLPath != null)
-        kBundleSkSLPath: bundleSkSLPath!,
-      if (codeSizeDirectory != null)
-        kCodeSizeDirectory: codeSizeDirectory!,
-      if (fileSystemRoots.isNotEmpty)
-        kFileSystemRoots: fileSystemRoots.join(','),
-      if (fileSystemScheme != null)
-        kFileSystemScheme: fileSystemScheme!,
-      if (buildName != null)
-        kBuildName: buildName!,
-      if (buildNumber != null)
-        kBuildNumber: buildNumber!,
+      if (bundleSkSLPath != null) kBundleSkSLPath: bundleSkSLPath!,
+      if (codeSizeDirectory != null) kCodeSizeDirectory: codeSizeDirectory!,
+      if (fileSystemRoots.isNotEmpty) kFileSystemRoots: fileSystemRoots.join(','),
+      if (fileSystemScheme != null) kFileSystemScheme: fileSystemScheme!,
+      if (buildName != null) kBuildName: buildName!,
+      if (buildNumber != null) kBuildNumber: buildNumber!,
+      if (useLocalCanvasKit) kUseLocalCanvasKitFlag: useLocalCanvasKit.toString(),
     };
   }
-
 
   /// Convert to a structured string encoded structure appropriate for usage as
   /// environment variables or to embed in other scripts.
@@ -266,8 +310,7 @@ class BuildInfo {
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
     return <String, String>{
-      if (dartDefines.isNotEmpty)
-        'DART_DEFINES': encodeDartDefines(dartDefines),
+      if (dartDefines.isNotEmpty) 'DART_DEFINES': encodeDartDefines(dartDefines),
       'DART_OBFUSCATION': dartObfuscation.toString(),
       if (frontendServerStarterPath != null)
         'FRONTEND_SERVER_STARTER_PATH': frontendServerStarterPath!,
@@ -275,19 +318,15 @@ class BuildInfo {
         'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
-      if (splitDebugInfoPath != null)
-        'SPLIT_DEBUG_INFO': splitDebugInfoPath!,
+      if (splitDebugInfoPath != null) 'SPLIT_DEBUG_INFO': splitDebugInfoPath!,
       'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
       'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
       if (performanceMeasurementFile != null)
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
-      if (bundleSkSLPath != null)
-        'BUNDLE_SKSL_PATH': bundleSkSLPath!,
-      'PACKAGE_CONFIG': packagesPath,
-      if (codeSizeDirectory != null)
-        'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
-      if (flavor != null)
-        'FLAVOR': flavor!,
+      if (bundleSkSLPath != null) 'BUNDLE_SKSL_PATH': bundleSkSLPath!,
+      'PACKAGE_CONFIG': packageConfigPath,
+      if (codeSizeDirectory != null) 'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
+      if (flavor != null) 'FLAVOR': flavor!,
     };
   }
 
@@ -296,8 +335,7 @@ class BuildInfo {
   List<String> toGradleConfig() {
     // PACKAGE_CONFIG not currently supported.
     return <String>[
-      if (dartDefines.isNotEmpty)
-        '-Pdart-defines=${encodeDartDefines(dartDefines)}',
+      if (dartDefines.isNotEmpty) '-Pdart-defines=${encodeDartDefines(dartDefines)}',
       '-Pdart-obfuscation=$dartObfuscation',
       if (frontendServerStarterPath != null)
         '-Pfrontend-server-starter-path=$frontendServerStarterPath',
@@ -305,18 +343,14 @@ class BuildInfo {
         '-Pextra-front-end-options=${extraFrontEndOptions.join(',')}',
       if (extraGenSnapshotOptions.isNotEmpty)
         '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions.join(',')}',
-      if (splitDebugInfoPath != null)
-        '-Psplit-debug-info=$splitDebugInfoPath',
+      if (splitDebugInfoPath != null) '-Psplit-debug-info=$splitDebugInfoPath',
       '-Ptrack-widget-creation=$trackWidgetCreation',
       '-Ptree-shake-icons=$treeShakeIcons',
       if (performanceMeasurementFile != null)
         '-Pperformance-measurement-file=$performanceMeasurementFile',
-      if (bundleSkSLPath != null)
-        '-Pbundle-sksl-path=$bundleSkSLPath',
-      if (codeSizeDirectory != null)
-        '-Pcode-size-directory=$codeSizeDirectory',
-      for (final String projectArg in androidProjectArgs)
-        '-P$projectArg',
+      if (bundleSkSLPath != null) '-Pbundle-sksl-path=$bundleSkSLPath',
+      if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
+      for (final String projectArg in androidProjectArgs) '-P$projectArg',
     ];
   }
 }
@@ -332,7 +366,6 @@ class AndroidBuildInfo {
     ],
     this.splitPerAbi = false,
     this.fastStart = false,
-    this.multidexEnabled = false,
   });
 
   // The build info containing the mode and flavor.
@@ -348,11 +381,10 @@ class AndroidBuildInfo {
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
 
+  bool get containsX86Target => targetArchs.contains(AndroidArch.x86);
+
   /// Whether to bootstrap an empty application.
   final bool fastStart;
-
-  /// Whether to enable multidex support for apps with more than 64k methods.
-  final bool multidexEnabled;
 }
 
 /// A summary of the compilation strategy used for Dart.
@@ -370,19 +402,12 @@ enum BuildMode {
   jitRelease;
 
   factory BuildMode.fromCliName(String value) => values.singleWhere(
-        (BuildMode element) => element.cliName == value,
-        orElse: () =>
-            throw ArgumentError('$value is not a supported build mode'),
-      );
+    (BuildMode element) => element.cliName == value,
+    orElse: () => throw ArgumentError('$value is not a supported build mode'),
+  );
 
-  static const Set<BuildMode> releaseModes = <BuildMode>{
-    release,
-    jitRelease,
-  };
-  static const Set<BuildMode> jitModes = <BuildMode>{
-    debug,
-    jitRelease,
-  };
+  static const Set<BuildMode> releaseModes = <BuildMode>{release, jitRelease};
+  static const Set<BuildMode> jitModes = <BuildMode>{debug, jitRelease};
 
   /// Whether this mode is considered release.
   ///
@@ -403,34 +428,34 @@ enum BuildMode {
 }
 
 /// Environment type of the target device.
-enum EnvironmentType {
-  physical,
-  simulator,
-}
+enum EnvironmentType { physical, simulator }
 
-String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String? buildNumber, Logger logger) {
+String? validatedBuildNumberForPlatform(
+  TargetPlatform targetPlatform,
+  String? buildNumber,
+  Logger logger,
+) {
   if (buildNumber == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios ||
-      targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
     if (tmpBuildNumber.isEmpty) {
       return null;
     }
-    final List<String> segments = tmpBuildNumber
-        .split('.')
-        .where((String segment) => segment.isNotEmpty)
-        .toList();
+    final List<String> segments =
+        tmpBuildNumber.split('.').where((String segment) => segment.isNotEmpty).toList();
     if (segments.isEmpty) {
       segments.add('0');
     }
     tmpBuildNumber = segments.join('.');
     if (tmpBuildNumber != buildNumber) {
-      logger.printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
-          'See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
+      logger.printTrace(
+        'Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
+        'See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html',
+      );
     }
     return tmpBuildNumber;
   }
@@ -447,37 +472,42 @@ String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String? b
     }
     tmpBuildNumberStr = tmpBuildNumberInt.toString();
     if (tmpBuildNumberStr != buildNumber) {
-      logger.printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
-          'See versionCode at https://developer.android.com/studio/publish/versioning');
+      logger.printTrace(
+        'Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
+        'See versionCode at https://developer.android.com/studio/publish/versioning',
+      );
     }
     return tmpBuildNumberStr;
   }
   return buildNumber;
 }
 
-String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? buildName, Logger logger) {
+String? validatedBuildNameForPlatform(
+  TargetPlatform targetPlatform,
+  String? buildName,
+  Logger logger,
+) {
   if (buildName == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios ||
-      targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
     if (tmpBuildName.isEmpty) {
       return null;
     }
-    final List<String> segments = tmpBuildName
-        .split('.')
-        .where((String segment) => segment.isNotEmpty)
-        .toList();
+    final List<String> segments =
+        tmpBuildName.split('.').where((String segment) => segment.isNotEmpty).toList();
     while (segments.length < 3) {
       segments.add('0');
     }
     tmpBuildName = segments.join('.');
     if (tmpBuildName != buildName) {
-      logger.printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
-          'See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
+      logger.printTrace(
+        'Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
+        'See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html',
+      );
     }
     return tmpBuildName;
   }
@@ -513,6 +543,7 @@ enum TargetPlatform {
   linux_x64,
   linux_arm64,
   windows_x64,
+  windows_arm64,
   fuchsia_arm64,
   fuchsia_x64,
   tester,
@@ -544,6 +575,7 @@ enum TargetPlatform {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         throw UnsupportedError('Unexpected Fuchsia platform $this');
     }
   }
@@ -555,6 +587,7 @@ enum TargetPlatform {
       case TargetPlatform.windows_x64:
         return 'x64';
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.windows_arm64:
         return 'arm64';
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
@@ -589,7 +622,7 @@ enum DarwinArch {
     return switch (this) {
       DarwinArch.armv7 => 'armv7',
       DarwinArch.arm64 => 'arm64',
-      DarwinArch.x86_64 => 'x64'
+      DarwinArch.x86_64 => 'x64',
     };
   }
 }
@@ -601,23 +634,19 @@ enum AndroidArch {
   x86,
   x86_64;
 
-  String get archName {
-    return switch (this) {
-      AndroidArch.armeabi_v7a => 'armeabi-v7a',
-      AndroidArch.arm64_v8a => 'arm64-v8a',
-      AndroidArch.x86_64 => 'x86_64',
-      AndroidArch.x86 => 'x86'
-    };
-  }
+  String get archName => switch (this) {
+    AndroidArch.armeabi_v7a => 'armeabi-v7a',
+    AndroidArch.arm64_v8a => 'arm64-v8a',
+    AndroidArch.x86_64 => 'x86_64',
+    AndroidArch.x86 => 'x86',
+  };
 
-  String get platformName {
-    return switch (this) {
-      AndroidArch.armeabi_v7a => 'android-arm',
-      AndroidArch.arm64_v8a => 'android-arm64',
-      AndroidArch.x86_64 => 'android-x64',
-      AndroidArch.x86 => 'android-x86'
-    };
-  }
+  String get platformName => switch (this) {
+    AndroidArch.armeabi_v7a => 'android-arm',
+    AndroidArch.arm64_v8a => 'android-arm64',
+    AndroidArch.x86_64 => 'android-x64',
+    AndroidArch.x86 => 'android-x86',
+  };
 }
 
 /// The default set of iOS device architectures to build for.
@@ -630,20 +659,15 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
   if (localEngineInfo != null) {
     final String localEngineName = localEngineInfo.localTargetName;
     if (localEngineName.contains('_arm64')) {
-      return <DarwinArch>[ DarwinArch.arm64 ];
+      return <DarwinArch>[DarwinArch.arm64];
     }
     if (localEngineName.contains('_sim')) {
-      return <DarwinArch>[ DarwinArch.x86_64 ];
+      return <DarwinArch>[DarwinArch.x86_64];
     }
   } else if (environmentType == EnvironmentType.simulator) {
-    return <DarwinArch>[
-      DarwinArch.x86_64,
-      DarwinArch.arm64,
-    ];
+    return <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
   }
-  return <DarwinArch>[
-    DarwinArch.arm64,
-  ];
+  return <DarwinArch>[DarwinArch.arm64];
 }
 
 /// The default set of macOS device architectures to build for.
@@ -652,14 +676,11 @@ List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
     if (localEngineInfo.localTargetName.contains('_arm64')) {
-      return <DarwinArch>[ DarwinArch.arm64 ];
+      return <DarwinArch>[DarwinArch.arm64];
     }
-    return <DarwinArch>[ DarwinArch.x86_64 ];
+    return <DarwinArch>[DarwinArch.x86_64];
   }
-  return <DarwinArch>[
-    DarwinArch.x86_64,
-    DarwinArch.arm64,
-  ];
+  return <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
 }
 
 DarwinArch getIOSArchForName(String arch) {
@@ -678,109 +699,84 @@ DarwinArch getIOSArchForName(String arch) {
 }
 
 DarwinArch getDarwinArchForName(String arch) {
-  switch (arch) {
-    case 'arm64':
-      return DarwinArch.arm64;
-    case 'x86_64':
-      return DarwinArch.x86_64;
-  }
-  throw Exception('Unsupported MacOS arch name "$arch"');
+  return switch (arch) {
+    'arm64' => DarwinArch.arm64,
+    'x86_64' => DarwinArch.x86_64,
+    _ => throw Exception('Unsupported MacOS arch name "$arch"'),
+  };
 }
 
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
-  switch (platform) {
-    case TargetPlatform.android_arm:
-      return 'android-arm';
-    case TargetPlatform.android_arm64:
-      return 'android-arm64';
-    case TargetPlatform.android_x64:
-      return 'android-x64';
-    case TargetPlatform.android_x86:
-      return 'android-x86';
-    case TargetPlatform.ios:
-      if (darwinArch != null) {
-        return 'ios-${darwinArch.name}';
-      }
-      return 'ios';
-    case TargetPlatform.darwin:
-      if (darwinArch != null) {
-        return 'darwin-${darwinArch.name}';
-      }
-      return 'darwin';
-    case TargetPlatform.linux_x64:
-      return 'linux-x64';
-    case TargetPlatform.linux_arm64:
-      return 'linux-arm64';
-    case TargetPlatform.windows_x64:
-      return 'windows-x64';
-    case TargetPlatform.fuchsia_arm64:
-      return 'fuchsia-arm64';
-    case TargetPlatform.fuchsia_x64:
-      return 'fuchsia-x64';
-    case TargetPlatform.tester:
-      return 'flutter-tester';
-    case TargetPlatform.web_javascript:
-      return 'web-javascript';
-    case TargetPlatform.android:
-      return 'android';
-  }
+  return switch (platform) {
+    TargetPlatform.ios when darwinArch != null => 'ios-${darwinArch.name}',
+    TargetPlatform.darwin when darwinArch != null => 'darwin-${darwinArch.name}',
+    TargetPlatform.ios => 'ios',
+    TargetPlatform.darwin => 'darwin',
+    TargetPlatform.android_arm => 'android-arm',
+    TargetPlatform.android_arm64 => 'android-arm64',
+    TargetPlatform.android_x64 => 'android-x64',
+    TargetPlatform.android_x86 => 'android-x86',
+    TargetPlatform.linux_x64 => 'linux-x64',
+    TargetPlatform.linux_arm64 => 'linux-arm64',
+    TargetPlatform.windows_x64 => 'windows-x64',
+    TargetPlatform.windows_arm64 => 'windows-arm64',
+    TargetPlatform.fuchsia_arm64 => 'fuchsia-arm64',
+    TargetPlatform.fuchsia_x64 => 'fuchsia-x64',
+    TargetPlatform.tester => 'flutter-tester',
+    TargetPlatform.web_javascript => 'web-javascript',
+    TargetPlatform.android => 'android',
+  };
 }
 
 TargetPlatform getTargetPlatformForName(String platform) {
-  switch (platform) {
-    case 'android':
-      return TargetPlatform.android;
-    case 'android-arm':
-      return TargetPlatform.android_arm;
-    case 'android-arm64':
-      return TargetPlatform.android_arm64;
-    case 'android-x64':
-      return TargetPlatform.android_x64;
-    case 'android-x86':
-      return TargetPlatform.android_x86;
-    case 'fuchsia-arm64':
-      return TargetPlatform.fuchsia_arm64;
-    case 'fuchsia-x64':
-      return TargetPlatform.fuchsia_x64;
-    case 'ios':
-      return TargetPlatform.ios;
-    case 'darwin':
+  return switch (platform) {
+    'android' => TargetPlatform.android,
+    'android-arm' => TargetPlatform.android_arm,
+    'android-arm64' => TargetPlatform.android_arm64,
+    'android-x64' => TargetPlatform.android_x64,
+    'android-x86' => TargetPlatform.android_x86,
+    'fuchsia-arm64' => TargetPlatform.fuchsia_arm64,
+    'fuchsia-x64' => TargetPlatform.fuchsia_x64,
+    'ios' => TargetPlatform.ios,
     // For backward-compatibility and also for Tester, where it must match
     // host platform name (HostPlatform.darwin_x64)
-    case 'darwin-x64':
-    case 'darwin-arm64':
-      return TargetPlatform.darwin;
-    case 'linux-x64':
-      return TargetPlatform.linux_x64;
-   case 'linux-arm64':
-      return TargetPlatform.linux_arm64;
-    case 'windows-x64':
-      return TargetPlatform.windows_x64;
-    case 'web-javascript':
-      return TargetPlatform.web_javascript;
-    case 'flutter-tester':
-      return TargetPlatform.tester;
-  }
-  throw Exception('Unsupported platform name "$platform"');
+    'darwin' || 'darwin-x64' || 'darwin-arm64' => TargetPlatform.darwin,
+    'linux-x64' => TargetPlatform.linux_x64,
+    'linux-arm64' => TargetPlatform.linux_arm64,
+    'windows-x64' => TargetPlatform.windows_x64,
+    'windows-arm64' => TargetPlatform.windows_arm64,
+    'web-javascript' => TargetPlatform.web_javascript,
+    'flutter-tester' => TargetPlatform.tester,
+    _ => throw Exception('Unsupported platform name "$platform"'),
+  };
 }
 
 AndroidArch getAndroidArchForName(String platform) {
-  switch (platform) {
-    case 'android-arm':
-      return AndroidArch.armeabi_v7a;
-    case 'android-arm64':
-      return AndroidArch.arm64_v8a;
-    case 'android-x64':
-      return AndroidArch.x86_64;
-    case 'android-x86':
-      return AndroidArch.x86;
-  }
-  throw Exception('Unsupported Android arch name "$platform"');
+  return switch (platform) {
+    'android-arm' => AndroidArch.armeabi_v7a,
+    'android-arm64' => AndroidArch.arm64_v8a,
+    'android-x64' => AndroidArch.x86_64,
+    'android-x86' => AndroidArch.x86,
+    _ => throw Exception('Unsupported Android arch name "$platform"'),
+  };
+}
+
+DarwinArch getCurrentDarwinArch() {
+  return switch (globals.os.hostPlatform) {
+    HostPlatform.darwin_arm64 => DarwinArch.arm64,
+    HostPlatform.darwin_x64 => DarwinArch.x86_64,
+    final HostPlatform unsupported =>
+      throw Exception('Unsupported Darwin host platform "$unsupported"'),
+  };
 }
 
 HostPlatform getCurrentHostPlatform() {
   if (globals.platform.isMacOS) {
-    return HostPlatform.darwin_x64;
+    return switch (getCurrentDarwinArch()) {
+      DarwinArch.arm64 => HostPlatform.darwin_arm64,
+      DarwinArch.x86_64 => HostPlatform.darwin_x64,
+      DarwinArch.armv7 => throw Exception('Unsupported macOS arch "amv7"'),
+    };
   }
   if (globals.platform.isLinux) {
     // support x64 and arm64 architecture.
@@ -795,12 +791,9 @@ HostPlatform getCurrentHostPlatform() {
   return HostPlatform.linux_x64;
 }
 
-FileSystemEntity getWebPlatformBinariesDirectory(Artifacts artifacts, WebRendererMode webRenderer) {
-  return artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder);
-}
-
 /// Returns the top-level build output directory.
 String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
+  // TODO(andrewkolos): Prefer required parameters instead of falling back to globals.
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
   final Config localConfig = config ?? globals.config;
@@ -808,8 +801,7 @@ String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
 
   final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
   if (localFilesystem.path.isAbsolute(buildDir)) {
-    throw Exception(
-        'build-dir config setting in ${globals.config.configPath} must be relative');
+    throw Exception('build-dir config setting in ${globals.config.configPath} must be relative');
   }
   return buildDir;
 }
@@ -826,8 +818,11 @@ String getAotBuildDirectory() {
 }
 
 /// Returns the asset build output directory.
-String getAssetBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'flutter_assets');
+String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
+  return (fileSystem ?? globals.fs).path.join(
+    getBuildDirectory(config, fileSystem),
+    'flutter_assets',
+  );
 }
 
 /// Returns the iOS build output directory.
@@ -841,15 +836,14 @@ String getMacOSBuildDirectory() {
 }
 
 /// Returns the web build output directory.
-String getWebBuildDirectory([bool isWasm = false]) {
-  return globals.fs.path.join(getBuildDirectory(), isWasm ? 'web_wasm' : 'web');
+String getWebBuildDirectory() {
+  return globals.fs.path.join(getBuildDirectory(), 'web');
 }
 
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
-  final String arch = (targetPlatform == null) ?
-      _getCurrentHostPlatformArchName() :
-      targetPlatform.simpleName;
+  final String arch =
+      (targetPlatform == null) ? _getCurrentHostPlatformArchName() : targetPlatform.simpleName;
   final String subDirs = 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
@@ -978,6 +972,9 @@ const String kCodesignIdentity = 'CodesignIdentity';
 /// only the glyphs used by the application.
 const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
+/// Controls whether a web build should use local canvaskit or the CDN
+const String kUseLocalCanvasKitFlag = 'UseLocalCanvasKit';
+
 /// The input key for an SkSL bundle path.
 const String kBundleSkSLPath = 'BundleSkSLPath';
 
@@ -994,6 +991,12 @@ const String kBuildNumber = 'BuildNumber';
 ///
 /// Will be "build" when building and "install" when archiving.
 const String kXcodeAction = 'Action';
+
+/// The define of the Xcode build Pre-action.
+///
+/// Will be "PrepareFramework" when copying the Flutter/FlutterMacOS framework
+/// to the BUILT_PRODUCTS_DIR prior to the build.
+const String kXcodePreAction = 'PreBuildAction';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
@@ -1017,10 +1020,7 @@ List<String> decodeCommaSeparated(Map<String, String> environmentDefines, String
   if (!environmentDefines.containsKey(key) || environmentDefines[key]!.isEmpty) {
     return <String>[];
   }
-  return environmentDefines[key]!
-    .split(',')
-    .cast<String>()
-    .toList();
+  return environmentDefines[key]!.split(',').cast<String>().toList();
 }
 
 /// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
@@ -1029,18 +1029,43 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
     return <String>[];
   }
   return environmentDefines[key]!
-    .split(',')
-    .map<Object>(_defineDecoder.convert)
-    .cast<String>()
-    .toList();
+      .split(',')
+      .map<Object>(_defineDecoder.convert)
+      .cast<String>()
+      .toList();
 }
 
 /// The null safety runtime mode the app should be built in.
 enum NullSafetyMode {
   sound,
   unsound,
+
   /// The null safety mode was not detected. Only supported for 'flutter test'.
   autodetect,
+}
+
+/// Indicates the module system DDC is targeting.
+enum DdcModuleFormat { amd, ddc }
+
+// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
+({DdcModuleFormat? ddcModuleFormat, bool? canaryFeatures})
+_ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(List<String>? extraFrontEndArgs) {
+  DdcModuleFormat? ddcModuleFormat;
+  bool? canaryFeatures;
+  if (extraFrontEndArgs != null) {
+    const String ddcModuleFormatArg = '--dartdevc-module-format=';
+    const String canaryFeaturesArg = '--dartdevc-canary';
+    for (final String flag in extraFrontEndArgs) {
+      if (flag.startsWith(ddcModuleFormatArg)) {
+        final String moduleFormatString = flag.substring(ddcModuleFormatArg.length, flag.length);
+        assert(ddcModuleFormat == null);
+        ddcModuleFormat = DdcModuleFormat.values.byName(moduleFormatString);
+      } else if (flag == canaryFeaturesArg) {
+        canaryFeatures = true;
+      }
+    }
+  }
+  return (ddcModuleFormat: ddcModuleFormat, canaryFeatures: canaryFeatures);
 }
 
 String _getCurrentHostPlatformArchName() {

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'semantics.dart';
+library;
+
 import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
@@ -44,7 +49,10 @@ mixin SemanticsBinding on BindingBase {
     assert(_semanticsEnabled.value == (_outstandingHandles > 0));
     return _semanticsEnabled.value;
   }
-  late final ValueNotifier<bool> _semanticsEnabled = ValueNotifier<bool>(platformDispatcher.semanticsEnabled);
+
+  late final ValueNotifier<bool> _semanticsEnabled = ValueNotifier<bool>(
+    platformDispatcher.semanticsEnabled,
+  );
 
   /// Adds a `listener` to be called when [semanticsEnabled] changes.
   ///
@@ -113,9 +121,10 @@ mixin SemanticsBinding on BindingBase {
 
   void _handleSemanticsActionEvent(ui.SemanticsActionEvent action) {
     final Object? arguments = action.arguments;
-    final ui.SemanticsActionEvent decodedAction = arguments is ByteData
-      ? action.copyWith(arguments: const StandardMessageCodec().decodeMessage(arguments))
-      : action;
+    final ui.SemanticsActionEvent decodedAction =
+        arguments is ByteData
+            ? action.copyWith(arguments: const StandardMessageCodec().decodeMessage(arguments))
+            : action;
     performSemanticsAction(decodedAction);
   }
 
@@ -128,13 +137,13 @@ mixin SemanticsBinding on BindingBase {
   ///
   /// Bindings that mixin the [SemanticsBinding] must implement this method and
   /// perform the given `action` on the [SemanticsNode] specified by
-  /// [SemanticsActionEvent.nodeId].
+  /// [ui.SemanticsActionEvent.nodeId].
   ///
   /// See [dart:ui.PlatformDispatcher.onSemanticsActionEvent].
   @protected
   void performSemanticsAction(ui.SemanticsActionEvent action);
 
-  /// The currently active set of [AccessibilityFeatures].
+  /// The currently active set of [ui.AccessibilityFeatures].
   ///
   /// This is set when the binding is first initialized and updated whenever a
   /// flag is changed.

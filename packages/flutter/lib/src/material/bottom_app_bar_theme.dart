@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_app_bar.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -39,8 +43,6 @@ class BottomAppBarTheme with Diagnosticable {
   });
 
   /// Overrides the default value for [BottomAppBar.color].
-  ///
-  /// If null, [BottomAppBar] uses [ThemeData.bottomAppBarColor].
   final Color? color;
 
   /// Overrides the default value for [BottomAppBar.elevation].
@@ -111,15 +113,8 @@ class BottomAppBarTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hash(
-    color,
-    elevation,
-    shape,
-    height,
-    surfaceTintColor,
-    shadowColor,
-    padding,
-  );
+  int get hashCode =>
+      Object.hash(color, elevation, shape, height, surfaceTintColor, shadowColor, padding);
 
   @override
   bool operator ==(Object other) {
@@ -129,14 +124,14 @@ class BottomAppBarTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is BottomAppBarTheme
-        && other.color == color
-        && other.elevation == elevation
-        && other.shape == shape
-        && other.height == height
-        && other.surfaceTintColor == surfaceTintColor
-        && other.shadowColor == shadowColor
-        && other.padding == padding;
+    return other is BottomAppBarTheme &&
+        other.color == color &&
+        other.elevation == elevation &&
+        other.shape == shape &&
+        other.height == height &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.shadowColor == shadowColor &&
+        other.padding == padding;
   }
 
   @override

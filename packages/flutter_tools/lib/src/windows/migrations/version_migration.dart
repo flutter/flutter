@@ -63,13 +63,14 @@ const String _resourceFileAfter = '''
 /// See https://github.com/flutter/flutter/issues/73652.
 class VersionMigration extends ProjectMigrator {
   VersionMigration(WindowsProject project, super.logger)
-    : _cmakeFile = project.runnerCmakeFile, _resourceFile = project.runnerResourceFile;
+    : _cmakeFile = project.runnerCmakeFile,
+      _resourceFile = project.runnerResourceFile;
 
   final File _cmakeFile;
   final File _resourceFile;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     // Skip this migration if the affected files do not exist. This indicates
     // the app has done non-trivial changes to its runner and this migration
     // might not work as expected if applied.
@@ -103,7 +104,9 @@ This indicates non-trivial changes have been made to the Windows runner in the
       _cmakeFileAfter,
     );
     if (originalCmakeContents != newCmakeContents) {
-      logger.printStatus('windows/runner/CMakeLists.txt does not define version information, updating.');
+      logger.printStatus(
+        'windows/runner/CMakeLists.txt does not define version information, updating.',
+      );
       _cmakeFile.writeAsStringSync(newCmakeContents);
     }
 

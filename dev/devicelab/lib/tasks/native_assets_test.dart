@@ -15,11 +15,7 @@ import '../framework/utils.dart';
 
 const String _packageName = 'package_with_native_assets';
 
-const List<String> _buildModes = <String>[
-  'debug',
-  'profile',
-  'release',
-];
+const List<String> _buildModes = <String>['debug', 'profile', 'release'];
 
 TaskFunction createNativeAssetsTest({
   String? deviceIdOverride,
@@ -41,7 +37,9 @@ TaskFunction createNativeAssetsTest({
       }
       final TaskResult buildModeResult = await inTempDir((Directory tempDirectory) async {
         final Directory packageDirectory = await createTestProject(_packageName, tempDirectory);
-        final Directory exampleDirectory = dir(packageDirectory.uri.resolve('example/').toFilePath());
+        final Directory exampleDirectory = dir(
+          packageDirectory.uri.resolve('example/').toFilePath(),
+        );
 
         final List<String> options = <String>[
           '-d',
@@ -54,11 +52,14 @@ TaskFunction createNativeAssetsTest({
         ];
         int transitionCount = 0;
         bool done = false;
+        bool error = false;
 
         await inDirectory<void>(exampleDirectory, () async {
           final int runFlutterResult = await runFlutter(
             options: options,
             onLine: (String line, Process process) {
+              error |= line.contains('EXCEPTION CAUGHT BY WIDGETS LIBRARY');
+              error |= line.contains("Invalid argument(s): Couldn't resolve native function 'sum'");
               if (done) {
                 return;
               }
@@ -108,6 +109,9 @@ TaskFunction createNativeAssetsTest({
             '(expected $expectedNumberOfTransitions)',
           );
         }
+        if (error) {
+          return TaskResult.failure('Error during hot reload or hot restart.');
+        }
         return TaskResult.success(null);
       });
       if (buildModeResult.failed) {
@@ -122,22 +126,21 @@ Future<int> runFlutter({
   required List<String> options,
   required void Function(String, Process) onLine,
 }) async {
-  final Process process = await startFlutter(
-    'run',
-    options: options,
-  );
+  final Process process = await startFlutter('run', options: options);
 
   final Completer<void> stdoutDone = Completer<void>();
   final Completer<void> stderrDone = Completer<void>();
-  process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+  process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((
+    String line,
+  ) {
     onLine(line, process);
     print('stdout: $line');
   }, onDone: stdoutDone.complete);
 
-  process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(
-        (String line) => print('stderr: $line'),
-        onDone: stderrDone.complete,
-      );
+  process.stderr
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen((String line) => print('stderr: $line'), onDone: stderrDone.complete);
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
@@ -148,52 +151,29 @@ final String _flutterBin = path.join(flutterDirectory.path, 'bin', 'flutter');
 
 Future<void> enableNativeAssets() async {
   print('Enabling configs for native assets...');
-  final int configResult = await exec(
-      _flutterBin,
-      <String>[
-        'config',
-        '-v',
-        '--enable-native-assets',
-      ],
-      canFail: true);
+  final int configResult = await exec(_flutterBin, <String>[
+    'config',
+    '-v',
+    '--enable-native-assets',
+  ], canFail: true);
   if (configResult != 0) {
     print('Failed to enable configuration, tasks may not run.');
   }
 }
 
-Future<Directory> createTestProject(
-  String packageName,
-  Directory tempDirectory,
-) async {
-  await exec(
-    _flutterBin,
-    <String>[
-      'create',
-      '--no-pub',
-      '--template=package_ffi',
-      packageName,
-    ],
-    workingDirectory: tempDirectory.path,
-  );
+Future<Directory> createTestProject(String packageName, Directory tempDirectory) async {
+  await exec(_flutterBin, <String>[
+    'create',
+    '--no-pub',
+    '--template=package_ffi',
+    packageName,
+  ], workingDirectory: tempDirectory.path);
 
-  final Directory packageDirectory = Directory(
-    path.join(tempDirectory.path, packageName),
-  );
-  await _pinDependencies(
-    File(path.join(packageDirectory.path, 'pubspec.yaml')),
-  );
-  await _pinDependencies(
-    File(path.join(packageDirectory.path, 'example', 'pubspec.yaml')),
-  );
+  final Directory packageDirectory = Directory(path.join(tempDirectory.path, packageName));
+  await _pinDependencies(File(path.join(packageDirectory.path, 'pubspec.yaml')));
+  await _pinDependencies(File(path.join(packageDirectory.path, 'example', 'pubspec.yaml')));
 
-  await exec(
-    _flutterBin,
-    <String>[
-      'pub',
-      'get',
-    ],
-    workingDirectory: packageDirectory.path,
-  );
+  await exec(_flutterBin, <String>['pub', 'get'], workingDirectory: packageDirectory.path);
 
   return packageDirectory;
 }
@@ -204,12 +184,17 @@ Future<void> _pinDependencies(File pubspecFile) async {
   await pubspecFile.writeAsString(newPubspec);
 }
 
-
 Future<T> inTempDir<T>(Future<T> Function(Directory tempDirectory) fun) async {
-  final Directory tempDirectory = dir(Directory.systemTemp.createTempSync().resolveSymbolicLinksSync());
+  final Directory tempDirectory = dir(
+    Directory.systemTemp.createTempSync().resolveSymbolicLinksSync(),
+  );
   try {
     return await fun(tempDirectory);
   } finally {
-    tempDirectory.deleteSync(recursive: true);
+    try {
+      tempDirectory.deleteSync(recursive: true);
+    } catch (_) {
+      // Ignore failures to delete a temporary directory.
+    }
   }
 }

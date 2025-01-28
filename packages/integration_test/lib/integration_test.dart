@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
+///
+/// @docImport 'integration_test_driver_extended.dart';
+library;
+
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:io' show HttpClient, SocketException, WebSocket;
@@ -19,6 +24,8 @@ import 'src/callback.dart' as driver_actions;
 import 'src/channel.dart';
 import 'src/extension.dart';
 
+export 'src/vm_service_golden_client.dart';
+
 const String _success = 'success';
 
 /// Whether results should be reported to the native side over the method
@@ -35,7 +42,8 @@ const bool _shouldReportResultsToNative = bool.fromEnvironment(
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
-class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding implements IntegrationTestResults {
+class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
+    implements IntegrationTestResults {
   /// Sets up a listener to report that the tests are finished when everything is
   /// torn down.
   IntegrationTestWidgetsFlutterBinding() {
@@ -52,17 +60,14 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
       }
 
       try {
-        await integrationTestChannel.invokeMethod<void>(
-          'allTestsFinished',
-          <String, dynamic>{
-            'results': results.map<String, dynamic>((String name, Object result) {
-              if (result is Failure) {
-                return MapEntry<String, dynamic>(name, result.details);
-              }
-              return MapEntry<String, Object>(name, result);
-            }),
-          },
-        );
+        await integrationTestChannel.invokeMethod<void>('allTestsFinished', <String, dynamic>{
+          'results': results.map<String, dynamic>((String name, Object result) {
+            if (result is Failure) {
+              return MapEntry<String, dynamic>(name, result.details);
+            }
+            return MapEntry<String, Object>(name, result);
+          }),
+        });
       } on MissingPluginException {
         debugPrint(r'''
 Warning: integration_test plugin was not detected.
@@ -75,14 +80,13 @@ If you're running the tests with Android instrumentation or XCTest, this means
 that you are not capturing test results properly! See the following link for
 how to set up the integration_test plugin:
 
-https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
+https://docs.flutter.dev/testing/integration-tests
 ''');
       }
     });
 
     final TestExceptionReporter oldTestExceptionReporter = reportTestException;
-    reportTestException =
-        (FlutterErrorDetails details, String testDescription) {
+    reportTestException = (FlutterErrorDetails details, String testDescription) {
       results[testDescription] = Failure(testDescription, details.toString());
       oldTestExceptionReporter(details, testDescription);
     };
@@ -204,8 +208,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// The callback function to response the driver side input.
   @visibleForTesting
   Future<Map<String, dynamic>> callback(Map<String, String> params) async {
-    return callbackManager.callback(
-        params, this /* as IntegrationTestResults */);
+    return callbackManager.callback(params, this /* as IntegrationTestResults */);
   }
 
   // Emulates the Flutter driver extension, returning 'pass' or 'fail'.
@@ -227,17 +230,18 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     String description = '',
     @Deprecated(
       'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
+      'This feature was deprecated after v2.6.0-1.0.pre.',
     )
     Duration? timeout,
   }) async {
-    await super.runTest(
-      testBody,
-      invariantTester,
-      description: description,
-    );
+    await super.runTest(testBody, invariantTester, description: description);
     results[description] ??= _success;
   }
+
+  // Do not paint a description label because it could show up in screenshots
+  // of the integration test.
+  @override
+  void setLabel(String value) {}
 
   vm.VmService? _vmService;
 
@@ -312,8 +316,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// [reportData] with `reportKey`. The [reportData] contains extra information
   /// from the test other than test success/fail. It will be passed back to the
   /// host and be processed by the [ResponseDataCallback] defined in
-  /// [integration_test_driver.integrationDriver]. By default it will be written
-  /// to `build/integration_response_data.json` with the key `timeline`.
+  /// [integrationDriver]. By default it will be written to
+  /// `build/integration_response_data.json` with the key `timeline`.
   ///
   /// For tests with multiple calls of this method, `reportKey` needs to be a
   /// unique key, otherwise the later result will override earlier one. Tests
@@ -364,21 +368,17 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
       return const _GarbageCollectionInfo();
     }
 
-    final vm.Timeline timeline = await traceTimeline(
-      action,
-      streams: <String>['GC'],
-    );
+    final vm.Timeline timeline = await traceTimeline(action, streams: <String>['GC']);
 
-    final int oldGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
-      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectOldGeneration';
-    }).length;
-    final int newGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
-      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectNewGeneration';
-    }).length;
-    return _GarbageCollectionInfo(
-      oldCount: oldGenGCCount,
-      newCount: newGenGCCount,
-    );
+    final int oldGenGCCount =
+        timeline.traceEvents!.where((vm.TimelineEvent event) {
+          return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectOldGeneration';
+        }).length;
+    final int newGenGCCount =
+        timeline.traceEvents!.where((vm.TimelineEvent event) {
+          return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectNewGeneration';
+        }).length;
+    return _GarbageCollectionInfo(oldCount: oldGenGCCount, newCount: newGenGCCount);
   }
 
   /// Watches the [FrameTiming] during `action` and report it to the binding
@@ -437,14 +437,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   Timeout defaultTestTimeout = Timeout.none;
 
   @override
-  Widget wrapWithDefaultView(Widget rootWidget) {
-    // This is a workaround where screenshots of root widgets have incorrect
-    // bounds.
-    // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    return super.wrapWithDefaultView(RepaintBoundary(child: rootWidget));
-  }
-
-  @override
   void reportExceptionNoticed(FlutterErrorDetails exception) {
     // This method is called to log errors as they happen, and they will also
     // be eventually logged again at the end of the tests. The superclass
@@ -473,10 +465,7 @@ class _GarbageCollectionInfo {
 // Copied from vm_service_io so that we can pass a custom [HttpClient] for
 // testing. Currently, the WebSocket API reuses an HttpClient that
 // is created before the test can change the HttpOverrides.
-Future<vm.VmService> _vmServiceConnectUri(
-  String wsUri, {
-  HttpClient? httpClient,
-}) async {
+Future<vm.VmService> _vmServiceConnectUri(String wsUri, {HttpClient? httpClient}) async {
   final WebSocket socket = await WebSocket.connect(wsUri, customClient: httpClient);
   final StreamController<dynamic> controller = StreamController<dynamic>();
   final Completer<void> streamClosedCompleter = Completer<void>();

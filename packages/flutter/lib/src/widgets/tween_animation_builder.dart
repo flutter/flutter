@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/foundation.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'animated_size.dart';
+/// @docImport 'transitions.dart';
+library;
+
 import 'package:flutter/animation.dart';
 
 import 'framework.dart';
@@ -90,6 +97,11 @@ import 'value_listenable_builder.dart';
 /// [AnimatedBuilder], which can be used similarly to this
 /// [TweenAnimationBuilder], but unlike the latter it is powered by a
 /// developer-managed [AnimationController].
+///
+/// See also:
+///
+/// * [ValueListenableBuilder], a widget whose content stays synced with a
+///   [ValueListenable] instead of a [Tween].
 class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget {
   /// Creates a [TweenAnimationBuilder].
   ///
@@ -165,7 +177,8 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
   }
 }
 
-class _TweenAnimationBuilderState<T extends Object?> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
+class _TweenAnimationBuilderState<T extends Object?>
+    extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
   Tween<T>? _currentTween;
 
   @override
@@ -184,10 +197,14 @@ class _TweenAnimationBuilderState<T extends Object?> extends AnimatedWidgetBaseS
       widget.tween.end != null,
       'Tween provided to TweenAnimationBuilder must have non-null Tween.end value.',
     );
-    _currentTween = visitor(_currentTween, widget.tween.end, (dynamic value) {
-      assert(false);
-      throw StateError('Constructor will never be called because null is never provided as current tween.');
-    }) as Tween<T>?;
+    _currentTween =
+        visitor(_currentTween, widget.tween.end, (dynamic value) {
+              assert(false);
+              throw StateError(
+                'Constructor will never be called because null is never provided as current tween.',
+              );
+            })
+            as Tween<T>?;
   }
 
   @override

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:ui' show Color, Rect, Size;
 
 import 'package:flutter/foundation.dart';
@@ -21,7 +24,7 @@ export 'curves.dart' show Curve;
 /// from a callback.
 typedef AnimatableCallback<T> = T Function(double value);
 
-/// An object that can produce a value of type `T` given an [Animation<double>]
+/// An object that can produce a value of type [T] given an [Animation<double>]
 /// as input.
 ///
 /// Typically, the values of the input animation are nominally in the range 0.0
@@ -82,9 +85,15 @@ abstract class Animatable<T> {
   }
 
   /// Returns a new [Animatable] whose value is determined by first evaluating
-  /// the given parent and then evaluating this object.
+  /// the given parent and then evaluating this object at the result.
   ///
-  /// This allows [Tween]s to be chained before obtaining an [Animation].
+  /// This method represents function composition on [transform]:
+  /// the [transform] method of the returned [Animatable] is the result of
+  /// composing this object's [transform] method with
+  /// the given parent's [transform] method.
+  ///
+  /// This allows [Tween]s to be chained before obtaining an [Animation],
+  /// without allocating an [Animation] for the intermediate result.
   Animatable<T> chain(Animatable<double> parent) {
     return _ChainedEvaluation<T>(parent, this);
   }
@@ -149,11 +158,12 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// [animate] method and pass it the [Animation] object that you want to
 /// modify.
 ///
-/// You can chain [Tween] objects together using the [chain] method, so that a
-/// single [Animation] object is configured by multiple [Tween] objects called
-/// in succession. This is different than calling the [animate] method twice,
-/// which results in two separate [Animation] objects, each configured with a
-/// single [Tween].
+/// You can chain [Tween] objects together using the [chain] method,
+/// producing the function composition of their [transform] methods.
+/// Configuring a single [Animation] object by calling [animate] on the
+/// resulting [Tween] produces the same result as calling the [animate] method
+/// on each [Tween] separately in succession, but more efficiently because
+/// it avoids creating [Animation] objects for the intermediate results.
 ///
 /// {@tool snippet}
 ///
@@ -260,10 +270,7 @@ class Tween<T extends Object?> extends Animatable<T> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  Tween({
-    this.begin,
-    this.end,
-  });
+  Tween({this.begin, this.end});
 
   /// The value this variable has at the beginning of the animation.
   ///
@@ -369,8 +376,7 @@ class Tween<T extends Object?> extends Animatable<T> {
 /// A [Tween] that evaluates its [parent] in reverse.
 class ReverseTween<T extends Object?> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
-  ReverseTween(this.parent)
-    : super(begin: parent.end, end: parent.begin);
+  ReverseTween(this.parent) : super(begin: parent.end, end: parent.begin);
 
   /// This tween's value is the same as the parent's value evaluated in reverse.
   ///
@@ -402,7 +408,7 @@ class ColorTween extends Tween<Color?> {
   /// or [end] if you want the effect of fading in or out of transparent.
   /// Instead prefer null. [Colors.transparent] refers to black transparent and
   /// thus will fade out of or into black which is likely unwanted.
-  ColorTween({ super.begin, super.end });
+  ColorTween({super.begin, super.end});
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -422,7 +428,7 @@ class SizeTween extends Tween<Size?> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an empty size.
-  SizeTween({ super.begin, super.end });
+  SizeTween({super.begin, super.end});
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -443,7 +449,7 @@ class RectTween extends Tween<Rect?> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an empty rect at the top left corner.
-  RectTween({ super.begin, super.end });
+  RectTween({super.begin, super.end});
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -470,7 +476,7 @@ class IntTween extends Tween<int> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  IntTween({ super.begin, super.end });
+  IntTween({super.begin, super.end});
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
@@ -498,7 +504,7 @@ class StepTween extends Tween<int> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  StepTween({ super.begin, super.end });
+  StepTween({super.begin, super.end});
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
@@ -547,7 +553,7 @@ class ConstantTween<T> extends Tween<T> {
 ///    [AnimationController].
 class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
-  CurveTween({ required this.curve });
+  CurveTween({required this.curve});
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;

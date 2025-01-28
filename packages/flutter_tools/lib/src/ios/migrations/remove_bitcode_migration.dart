@@ -8,22 +8,18 @@ import '../../xcode_project.dart';
 
 /// Remove deprecated bitcode build setting.
 class RemoveBitcodeMigration extends ProjectMigrator {
-  RemoveBitcodeMigration(
-    IosProject project,
-    super.logger,
-  )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
+  RemoveBitcodeMigration(IosProject project, super.logger)
+    : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
 
   final File _xcodeProjectInfoFile;
 
   @override
-  bool migrate() {
+  Future<void> migrate() async {
     if (_xcodeProjectInfoFile.existsSync()) {
       processFileLines(_xcodeProjectInfoFile);
     } else {
       logger.printTrace('Xcode project not found, skipping removing bitcode migration.');
     }
-
-    return true;
   }
 
   @override
@@ -31,7 +27,9 @@ class RemoveBitcodeMigration extends ProjectMigrator {
     if (line.contains('ENABLE_BITCODE = YES;')) {
       if (!migrationRequired) {
         // Only print for the first discovered change found.
-        logger.printWarning('Disabling deprecated bitcode Xcode build setting. See https://github.com/flutter/flutter/issues/107887 for additional details.');
+        logger.printWarning(
+          'Disabling deprecated bitcode Xcode build setting. See https://github.com/flutter/flutter/issues/107887 for additional details.',
+        );
       }
       return line.replaceAll('ENABLE_BITCODE = YES', 'ENABLE_BITCODE = NO');
     }

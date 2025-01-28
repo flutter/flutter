@@ -18,6 +18,8 @@ import 'package:intl/intl.dart' as intl;
 
 @(messageClassImports)
 
+// ignore_for_file: type=lint
+
 /// Callers can lookup localized strings with an instance of @(class)
 /// returned by `@(class).of(context)`.
 ///
@@ -121,9 +123,11 @@ const String numberFormatNamedTemplate = '''
 ''';
 
 const String dateFormatTemplate = '''
-    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName);
+    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName)@(addedFormats);
     final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
 ''';
+
+const String dateFormatAddFormatTemplate = '''.add_@(format)()''';
 
 const String dateFormatCustomTemplate = '''
     final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat(@(format), localeName);
@@ -169,7 +173,11 @@ const String dateVariableTemplate = '''
     String @(varName) = intl.DateFormat.@(formatType)(localeName).format(@(argument));''';
 
 const String classFileTemplate = '''
-@(header)@(requiresIntlImport)import '@(fileName)';
+@(header)// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import '@(fileName)';
+
+// ignore_for_file: type=lint
 
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {
@@ -268,7 +276,8 @@ const String lookupBodyTemplate = '''
 
 const String switchClauseTemplate = '''case '@(case)': return @(localeClass)();''';
 
-const String switchClauseDeferredLoadingTemplate = '''case '@(case)': return @(library).loadLibrary().then((dynamic _) => @(library).@(localeClass)());''';
+const String switchClauseDeferredLoadingTemplate =
+    '''case '@(case)': return @(library).loadLibrary().then((dynamic _) => @(library).@(localeClass)());''';
 
 const String nestedSwitchTemplate = '''
 case '@(languageCode)': {

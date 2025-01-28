@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'basic.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -69,7 +72,12 @@ class _ColorFilterRenderObject extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    layer = context.pushColorFilter(offset, colorFilter, super.paint, oldLayer: layer as ColorFilterLayer?);
+    layer = context.pushColorFilter(
+      offset,
+      colorFilter,
+      super.paint,
+      oldLayer: layer as ColorFilterLayer?,
+    );
     assert(() {
       layer!.debugCreator = debugCreator;
       return true;

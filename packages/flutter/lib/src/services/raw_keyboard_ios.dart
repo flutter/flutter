@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'hardware_keyboard.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_maps.g.dart';
@@ -72,7 +75,8 @@ class RawKeyEventDataIos extends RawKeyEventData {
   String get keyLabel => charactersIgnoringModifiers;
 
   @override
-  PhysicalKeyboardKey get physicalKey => kIosToPhysicalKey[keyCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.iosPlane + keyCode);
+  PhysicalKeyboardKey get physicalKey =>
+      kIosToPhysicalKey[keyCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.iosPlane + keyCode);
 
   @override
   LogicalKeyboardKey get logicalKey {
@@ -145,21 +149,19 @@ class RawKeyEventDataIos extends RawKeyEventData {
     if (modifiers & anyMask == 0) {
       return false;
     }
-    // If only the "anyMask" bit is set, then we respond true for requests of
-    // whether either left or right is pressed. Handles the case where iOS
-    // supplies just the "either" modifier flag, but not the left/right flag.
-    // (e.g. modifierShift but not modifierLeftShift).
-    final bool anyOnly = modifiers & (leftMask | rightMask | anyMask) == anyMask;
-    switch (side) {
-      case KeyboardSide.any:
-        return true;
-      case KeyboardSide.all:
-        return modifiers & leftMask != 0 && modifiers & rightMask != 0 || anyOnly;
-      case KeyboardSide.left:
-        return modifiers & leftMask != 0 || anyOnly;
-      case KeyboardSide.right:
-        return modifiers & rightMask != 0 || anyOnly;
+    if (modifiers & (leftMask | rightMask | anyMask) == anyMask) {
+      // If only the "anyMask" bit is set, then we respond true for requests of
+      // whether either left or right is pressed. Handles the case where iOS
+      // supplies just the "either" modifier flag, but not the left/right flag.
+      // (e.g. modifierShift but not modifierLeftShift).
+      return true;
     }
+    return switch (side) {
+      KeyboardSide.any => true,
+      KeyboardSide.all => modifiers & leftMask != 0 && modifiers & rightMask != 0,
+      KeyboardSide.left => modifiers & leftMask != 0,
+      KeyboardSide.right => modifiers & rightMask != 0,
+    };
   }
 
   @override
@@ -168,19 +170,39 @@ class RawKeyEventDataIos extends RawKeyEventData {
     bool result;
     switch (key) {
       case ModifierKey.controlModifier:
-        result = _isLeftRightModifierPressed(side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);
+        result = _isLeftRightModifierPressed(
+          side,
+          independentModifier & modifierControl,
+          modifierLeftControl,
+          modifierRightControl,
+        );
       case ModifierKey.shiftModifier:
-        result = _isLeftRightModifierPressed(side, independentModifier & modifierShift, modifierLeftShift, modifierRightShift);
+        result = _isLeftRightModifierPressed(
+          side,
+          independentModifier & modifierShift,
+          modifierLeftShift,
+          modifierRightShift,
+        );
       case ModifierKey.altModifier:
-        result = _isLeftRightModifierPressed(side, independentModifier & modifierOption, modifierLeftOption, modifierRightOption);
+        result = _isLeftRightModifierPressed(
+          side,
+          independentModifier & modifierOption,
+          modifierLeftOption,
+          modifierRightOption,
+        );
       case ModifierKey.metaModifier:
-        result = _isLeftRightModifierPressed(side, independentModifier & modifierCommand, modifierLeftCommand, modifierRightCommand);
+        result = _isLeftRightModifierPressed(
+          side,
+          independentModifier & modifierCommand,
+          modifierLeftCommand,
+          modifierRightCommand,
+        );
       case ModifierKey.capsLockModifier:
         result = independentModifier & modifierCapsLock != 0;
-    // On iOS, the function modifier bit is set for any function key, like F1,
-    // F2, etc., but the meaning of ModifierKey.modifierFunction in Flutter is
-    // that of the Fn modifier key, so there's no good way to emulate that on
-    // iOS.
+      // On iOS, the function modifier bit is set for any function key, like F1,
+      // F2, etc., but the meaning of ModifierKey.modifierFunction in Flutter is
+      // that of the Fn modifier key, so there's no good way to emulate that on
+      // iOS.
       case ModifierKey.functionModifier:
       case ModifierKey.numLockModifier:
       case ModifierKey.symbolModifier:
@@ -188,7 +210,10 @@ class RawKeyEventDataIos extends RawKeyEventData {
         // These modifier masks are not used in iOS keyboards.
         result = false;
     }
-    assert(!result || getModifierSide(key) != null, "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
+    assert(
+      !result || getModifierSide(key) != null,
+      "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.",
+    );
     return result;
   }
 
@@ -232,34 +257,31 @@ class RawKeyEventDataIos extends RawKeyEventData {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-        properties.add(DiagnosticsProperty<String>('characters', characters));
-        properties.add(DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers));
-        properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
-        properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+    properties.add(DiagnosticsProperty<String>('characters', characters));
+    properties.add(
+      DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers),
+    );
+    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+    properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is RawKeyEventDataIos
-        && other.characters == characters
-        && other.charactersIgnoringModifiers == charactersIgnoringModifiers
-        && other.keyCode == keyCode
-        && other.modifiers == modifiers;
+    return other is RawKeyEventDataIos &&
+        other.characters == characters &&
+        other.charactersIgnoringModifiers == charactersIgnoringModifiers &&
+        other.keyCode == keyCode &&
+        other.modifiers == modifiers;
   }
 
   @override
-  int get hashCode => Object.hash(
-    characters,
-    charactersIgnoringModifiers,
-    keyCode,
-    modifiers,
-  );
+  int get hashCode => Object.hash(characters, charactersIgnoringModifiers, keyCode, modifiers);
 
   // Modifier key masks. See Apple's UIKey documentation
   // https://developer.apple.com/documentation/uikit/uikeymodifierflags?language=objc

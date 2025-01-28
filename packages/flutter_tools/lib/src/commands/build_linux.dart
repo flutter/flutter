@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
@@ -12,7 +11,6 @@ import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../linux/build_linux.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
@@ -26,18 +24,22 @@ class BuildLinuxCommand extends BuildSubCommand {
        super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     final String defaultTargetPlatform =
-        (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64) ?
-            'linux-arm64' : 'linux-x64';
-    argParser.addOption('target-platform',
+        (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64)
+            ? 'linux-arm64'
+            : 'linux-x64';
+    argParser.addOption(
+      'target-platform',
       defaultsTo: defaultTargetPlatform,
       allowed: <String>['linux-arm64', 'linux-x64'],
       help: 'The target platform for which the app is compiled.',
     );
-    argParser.addOption('target-sysroot',
+    argParser.addOption(
+      'target-sysroot',
       defaultsTo: '/',
-      help: 'The root filesystem path of target platform for which '
-            'the app is compiled. This option is valid only '
-            'if the current host and target architectures are different.',
+      help:
+          'The root filesystem path of target platform for which '
+          'the app is compiled. This option is valid only '
+          'if the current host and target architectures are different.',
     );
   }
 
@@ -60,15 +62,14 @@ class BuildLinuxCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final FlutterProject flutterProject = FlutterProject.current();
-    final TargetPlatform targetPlatform =
-        getTargetPlatformForName(stringArg('target-platform')!);
+    final TargetPlatform targetPlatform = getTargetPlatformForName(stringArg('target-platform')!);
     final bool needCrossBuild =
-        _operatingSystemUtils.hostPlatform.platformName
-            != targetPlatform.simpleName;
+        _operatingSystemUtils.hostPlatform.platformName != targetPlatform.simpleName;
 
     if (!featureFlags.isLinuxEnabled) {
-      throwToolExit('"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".');
+      throwToolExit(
+        '"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".',
+      );
     }
     if (!globals.platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
@@ -82,20 +83,16 @@ class BuildLinuxCommand extends BuildSubCommand {
     if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 &&
         targetPlatform == TargetPlatform.linux_arm64) {
       throwToolExit(
-          'Cross-build from Linux x64 host to Linux arm64 target is not currently supported.');
+        'Cross-build from Linux x64 host to Linux arm64 target is not currently supported.',
+      );
     }
     displayNullSafetyMode(buildInfo);
     final Logger logger = globals.logger;
     await buildLinux(
-      flutterProject.linux,
+      project.linux,
       buildInfo,
       target: targetFile,
-      sizeAnalyzer: SizeAnalyzer(
-        fileSystem: globals.fs,
-        logger: logger,
-        flutterUsage: globals.flutterUsage,
-        analytics: analytics,
-      ),
+      sizeAnalyzer: SizeAnalyzer(fileSystem: globals.fs, logger: logger, analytics: analytics),
       needCrossBuild: needCrossBuild,
       targetPlatform: targetPlatform,
       targetSysroot: stringArg('target-sysroot')!,

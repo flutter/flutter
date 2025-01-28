@@ -9,12 +9,12 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'package:integration_test_example/main.dart' as app;
+import 'package:web/web.dart' as web;
 
 void main() {
   final IntegrationTestWidgetsFlutterBinding binding =
@@ -36,9 +36,7 @@ void main() {
       // could look up environment variables in this test that were passed to
       // the run command via `--dart-define=`, and then pass the values to the
       // [integrationDriver.onScreenshot] handler through this 'args' map.
-      <String, Object?>{
-        'someArgumentKey': 'someArgumentValue',
-      },
+      <String, Object?>{'someArgumentKey': 'someArgumentValue'},
     );
 
     // Verify that platform is retrieved.
@@ -46,8 +44,7 @@ void main() {
       find.byWidgetPredicate(
         (Widget widget) =>
             widget is Text &&
-            widget.data!
-                .startsWith('Platform: ${html.window.navigator.platform}\n'),
+            widget.data!.startsWith('Platform: ${web.window.navigator.platform}\n'),
       ),
       findsOneWidget,
     );
@@ -72,9 +69,7 @@ void main() {
       // could look up environment variables in this test that were passed to
       // the run command via `--dart-define=`, and then pass the values to the
       // [integrationDriver.onScreenshot] handler through this 'args' map.
-      <String, Object?>{
-        'someArgumentKey': 'someArgumentValue',
-      },
+      <String, Object?>{'someArgumentKey': 'someArgumentValue'},
     );
   });
 }

@@ -12,6 +12,9 @@ import 'pop_scope.dart';
 /// Typically wraps a nested [Navigator] widget and allows it to handle system
 /// back gestures in the [onPop] callback.
 ///
+/// The type parameter `<T>` indicates the type of the [Route]'s return value,
+/// which is passed to [onPopWithResult.
+///
 /// {@tool dartpad}
 /// This sample demonstrates how to use this widget to properly handle system
 /// back gestures when using nested [Navigator]s.
@@ -33,14 +36,20 @@ import 'pop_scope.dart';
 ///    handle pops.
 ///  * [NavigationNotification], which indicates whether a [Navigator] in a
 ///    subtree can handle pops.
-class NavigatorPopHandler extends StatefulWidget {
+@optionalTypeArgs
+class NavigatorPopHandler<T> extends StatefulWidget {
   /// Creates an instance of [NavigatorPopHandler].
   const NavigatorPopHandler({
     super.key,
+    @Deprecated(
+      'Use onPopWithResult instead. '
+      'This feature was deprecated after v3.26.0-0.1.pre.',
+    )
     this.onPop,
+    this.onPopWithResult,
     this.enabled = true,
     required this.child,
-  });
+  }) : assert(onPop == null || onPopWithResult == null);
 
   /// The widget to place below this in the widget tree.
   ///
@@ -68,26 +77,43 @@ class NavigatorPopHandler extends StatefulWidget {
   ///
   /// Typically this is used to pop the [Navigator] in [child]. See the sample
   /// code on [NavigatorPopHandler] for a full example of this.
+  @Deprecated(
+    'Use onPopWithResult instead. '
+    'This feature was deprecated after v3.26.0-0.1.pre.',
+  )
   final VoidCallback? onPop;
 
+  /// Called when a handleable pop event happens.
+  ///
+  /// For example, a pop is handleable when a [Navigator] in [child] has
+  /// multiple routes on its stack. It's not handleable when it has only a
+  /// single route, and so [onPop] will not be called.
+  ///
+  /// Typically this is used to pop the [Navigator] in [child]. See the sample
+  /// code on [NavigatorPopHandler] for a full example of this.
+  ///
+  /// The passed `result` is the result of the popped [Route].
+  final PopResultCallback<T>? onPopWithResult;
+
   @override
-  State<NavigatorPopHandler> createState() => _NavigatorPopHandlerState();
+  State<NavigatorPopHandler<T>> createState() => _NavigatorPopHandlerState<T>();
 }
 
-class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
+class _NavigatorPopHandlerState<T> extends State<NavigatorPopHandler<T>> {
   bool _canPop = true;
 
   @override
   Widget build(BuildContext context) {
     // When the widget subtree indicates it can handle a pop, disable popping
     // here, so that it can be manually handled in canPop.
-    return PopScope(
+    return PopScope<T>(
       canPop: !widget.enabled || _canPop,
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, T? result) {
         if (didPop) {
           return;
         }
         widget.onPop?.call();
+        widget.onPopWithResult?.call(result);
       },
       // Listen to changes in the navigation stack in the widget subtree.
       child: NotificationListener<NavigationNotification>(
@@ -108,3 +134,6 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
     );
   }
 }
+
+/// A signature for a function that is passed the result of a [Route].
+typedef PopResultCallback<T> = void Function(T? result);

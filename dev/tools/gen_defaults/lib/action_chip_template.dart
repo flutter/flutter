@@ -5,9 +5,12 @@
 import 'template.dart';
 
 class ActionChipTemplate extends TokenTemplate {
-  const ActionChipTemplate(super.blockName, super.fileName, super.tokens, {
+  const ActionChipTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
+    super.textThemePrefix = '_textTheme.',
   });
 
   static const String tokenGroup = 'md.comp.assist-chip';
@@ -38,7 +41,11 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   double? get pressElevation => ${elevation("$tokenGroup$elevatedVariant.pressed.container")};
 
   @override
-  TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")};
+  TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")}?.copyWith(
+    color: isEnabled
+      ? ${color("$tokenGroup.label-text.color")}
+      : ${color("$tokenGroup.disabled.label-text.color")},
+  );
 
   @override
   MaterialStateProperty<Color?>? get color =>
@@ -48,7 +55,9 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
           ? ${componentColor("$tokenGroup$flatVariant.disabled.container")}
           : ${componentColor("$tokenGroup$elevatedVariant.disabled.container")};
       }
-      return ${componentColor("$tokenGroup$flatVariant.container")};
+      return _chipVariant == _ChipVariant.flat
+        ? ${componentColor("$tokenGroup$flatVariant.container")}
+        : ${componentColor("$tokenGroup$elevatedVariant.container")};
     });
 
   @override
@@ -60,10 +69,10 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  Color? get checkmarkColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
+  Color? get checkmarkColor => null;
 
   @override
-  Color? get deleteIconColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
+  Color? get deleteIconColor => null;
 
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat

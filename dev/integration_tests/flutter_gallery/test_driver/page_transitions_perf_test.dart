@@ -16,7 +16,7 @@ void main() {
     });
 
     tearDownAll(() async {
-        driver.close();
+      driver.close();
     });
 
     test('measure', () async {
@@ -30,7 +30,7 @@ void main() {
           await driver.tap(find.byTooltip('Back'));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
-      });
+      }, retainPriorEvents: true);
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('page_transition_perf', pretty: true);

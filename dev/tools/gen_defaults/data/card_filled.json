@@ -1,7 +1,7 @@
 {
-  "version": "v0_162",
+  "version": "6_1_0",
 
-  "md.comp.filled-card.container.color": "surfaceVariant",
+  "md.comp.filled-card.container.color": "surfaceContainerHighest",
   "md.comp.filled-card.container.elevation": "md.sys.elevation.level0",
   "md.comp.filled-card.container.shadow-color": "shadow",
   "md.comp.filled-card.container.shape": "md.sys.shape.corner.medium",
@@ -12,6 +12,9 @@
   "md.comp.filled-card.dragged.state-layer.color": "onSurface",
   "md.comp.filled-card.dragged.state-layer.opacity": "md.sys.state.dragged.state-layer-opacity",
   "md.comp.filled-card.focus.container.elevation": "md.sys.elevation.level0",
+  "md.comp.filled-card.focus.indicator.color": "secondary",
+  "md.comp.filled-card.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.filled-card.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.filled-card.focus.state-layer.color": "onSurface",
   "md.comp.filled-card.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
   "md.comp.filled-card.hover.container.elevation": "md.sys.elevation.level1",

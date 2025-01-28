@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -14,19 +15,15 @@ import 'test_utils.dart';
 void main() {
   late Directory tempDir;
   late Directory projectRoot;
-  late String flutterBin;
   late Directory releaseDir;
   late File exeFile;
 
   group('flutter build windows command', () {
     setUpAll(() {
       tempDir = createResolvedTempDirectorySync('build_windows_test.');
-      flutterBin = fileSystem.path.join(
-        getFlutterRoot(),
-        'bin',
-        'flutter',
-      );
-      ProcessResult result = processManager.runSync(<String>[flutterBin, 'config',
+      ProcessResult result = processManager.runSync(<String>[
+        flutterBin,
+        'config',
         '--enable-windows-desktop',
       ]);
       expect(result, const ProcessResultMatcher());
@@ -41,19 +38,18 @@ void main() {
 
       projectRoot = tempDir.childDirectory('hello');
 
-      releaseDir = fileSystem.directory(fileSystem.path.join(
-        projectRoot.path,
-        'build',
-        'windows',
-        'x64',
-        'runner',
-        'Release',
-      ));
+      final String arch;
+      if (Abi.current() == Abi.windowsArm64) {
+        arch = 'arm64';
+      } else {
+        arch = 'x64';
+      }
 
-      exeFile = fileSystem.file(fileSystem.path.join(
-        releaseDir.path,
-        'hello.exe',
-      ));
+      releaseDir = fileSystem.directory(
+        fileSystem.path.join(projectRoot.path, 'build', 'windows', arch, 'runner', 'Release'),
+      );
+
+      exeFile = fileSystem.file(fileSystem.path.join(releaseDir.path, 'hello.exe'));
     });
 
     tearDownAll(() {
@@ -131,7 +127,7 @@ String _getFileVersion(File file) {
     '\$v = [System.Diagnostics.FileVersionInfo]::GetVersionInfo(\\"${file.path}\\"); '
     r'Write-Output \"$($v.FileMajorPart).$($v.FileMinorPart).$($v.FileBuildPart).$($v.FilePrivatePart)\" '
     '"',
-    <String>[]
+    <String>[],
   );
 
   expect(result, const ProcessResultMatcher());
@@ -144,7 +140,7 @@ String _getFileVersion(File file) {
 String _getProductVersion(File file) {
   final ProcessResult result = Process.runSync(
     'powershell.exe -command "[System.Diagnostics.FileVersionInfo]::GetVersionInfo(\\"${file.path}\\").ProductVersion"',
-    <String>[]
+    <String>[],
   );
 
   expect(result, const ProcessResultMatcher());

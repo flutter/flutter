@@ -16,25 +16,27 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
+import 'globals.dart' as globals;
+import 'macos/macos_device.dart';
 import 'protocol_discovery.dart';
+import 'vmservice.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
 /// from, containing implementations that are common to all desktop devices.
 abstract class DesktopDevice extends Device {
-  DesktopDevice(super.id, {
-      required PlatformType super.platformType,
-      required super.ephemeral,
-      required Logger logger,
-      required ProcessManager processManager,
-      required FileSystem fileSystem,
-      required OperatingSystemUtils operatingSystemUtils,
-    }) : _logger = logger,
-         _processManager = processManager,
-         _fileSystem = fileSystem,
-         _operatingSystemUtils = operatingSystemUtils,
-         super(
-          category: Category.desktop,
-        );
+  DesktopDevice(
+    super.id, {
+    required PlatformType super.platformType,
+    required super.ephemeral,
+    required super.logger,
+    required ProcessManager processManager,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+  }) : _logger = logger,
+       _processManager = processManager,
+       _fileSystem = fileSystem,
+       _operatingSystemUtils = operatingSystemUtils,
+       super(category: Category.desktop);
 
   final Logger _logger;
   final ProcessManager _processManager;
@@ -51,10 +53,7 @@ abstract class DesktopDevice extends Device {
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
   @override
-  Future<bool> isAppInstalled(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async => true;
+  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -64,18 +63,12 @@ abstract class DesktopDevice extends Device {
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
   @override
-  Future<bool> installApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async => true;
+  Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
   // to uninstall the application.
   @override
-  Future<bool> uninstallApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async => true;
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async => true;
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -93,10 +86,7 @@ abstract class DesktopDevice extends Device {
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
   @override
-  DeviceLogReader getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
-  }) {
+  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
     assert(!includePastLogs, 'Past log reading not supported on desktop.');
     return _deviceLogReader;
   }
@@ -112,13 +102,13 @@ abstract class DesktopDevice extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs = const <String, dynamic>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     if (!prebuiltApplication) {
       await buildForDevice(
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
+        usingCISystem: debuggingOptions.usingCISystem,
       );
     }
 
@@ -132,10 +122,7 @@ abstract class DesktopDevice extends Device {
     }
 
     Process process;
-    final List<String> command = <String>[
-      executable,
-      ...debuggingOptions.dartEntrypointArgs,
-    ];
+    final List<String> command = <String>[executable, ...debuggingOptions.dartEntrypointArgs];
     try {
       process = await _processManager.start(
         command,
@@ -152,15 +139,50 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
-    final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_deviceLogReader,
+    final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(
+      _deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
-      ipv6: ipv6,
+      ipv6: debuggingOptions.ipv6,
       logger: _logger,
     );
     try {
+      Timer? timer;
+      if (this is MacOSDevice) {
+        if (await globals.isRunningOnBot) {
+          const int defaultTimeout = 5;
+          timer = Timer(const Duration(minutes: defaultTimeout), () {
+            // As of macOS 14, if sandboxing is enabled and the app is not codesigned,
+            // a dialog will prompt the user to allow the app to run. This will
+            // cause tests in CI to hang. In CI, we workaround this by setting
+            // the CODE_SIGN_ENTITLEMENTS build setting to a version with
+            // sandboxing disabled.
+            final String sandboxingMessage;
+            if (debuggingOptions.usingCISystem) {
+              sandboxingMessage =
+                  'Ensure sandboxing is disabled by checking '
+                  'the set CODE_SIGN_ENTITLEMENTS.';
+            } else {
+              sandboxingMessage =
+                  'Consider codesigning your app or disabling '
+                  'sandboxing. Flutter will attempt to disable sandboxing if '
+                  'the `--ci` flag is provided.';
+            }
+            _logger.printError(
+              'The Dart VM Service was not discovered after $defaultTimeout '
+              'minutes. If the app has sandboxing enabled and is not '
+              'codesigned or codesigning changed, this may be caused by a '
+              'system prompt asking for access. $sandboxingMessage\n'
+              'See https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox '
+              'for more information.',
+            );
+          });
+        }
+      }
+
       final Uri? vmServiceUri = await vmServiceDiscovery.uri;
       if (vmServiceUri != null) {
+        timer?.cancel();
         onAttached(package, buildInfo, process);
         return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
@@ -177,10 +199,7 @@ abstract class DesktopDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
-  }) async {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     bool succeeded = true;
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
@@ -199,6 +218,7 @@ abstract class DesktopDevice extends Device {
   Future<void> buildForDevice({
     required BuildInfo buildInfo,
     String? mainPath,
+    bool usingCISystem = false,
   });
 
   /// Returns the path to the executable to run for [package] on this device for
@@ -216,7 +236,11 @@ abstract class DesktopDevice extends Device {
   /// The format of the environment variables is:
   ///   * FLUTTER_ENGINE_SWITCHES to the number of switches.
   ///   * FLUTTER_ENGINE_SWITCH_<N> (indexing from 1) to the individual switches.
-  Map<String, String> _computeEnvironment(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
+  Map<String, String> _computeEnvironment(
+    DebuggingOptions debuggingOptions,
+    bool traceStartup,
+    String? route,
+  ) {
     int flags = 0;
     final Map<String, String> environment = <String, String>{};
 
@@ -224,6 +248,7 @@ abstract class DesktopDevice extends Device {
       flags += 1;
       environment['FLUTTER_ENGINE_SWITCH_$flags'] = value;
     }
+
     void finish() {
       environment['FLUTTER_ENGINE_SWITCHES'] = flags.toString();
     }
@@ -315,12 +340,8 @@ class DesktopLogReader extends DeviceLogReader {
 
   /// Begin listening to the stdout and stderr streams of the provided [process].
   void initializeProcess(Process process) {
-    final StreamSubscription<List<int>> stdoutSub = process.stdout.listen(
-      _inputController.add,
-    );
-    final StreamSubscription<List<int>> stderrSub = process.stderr.listen(
-      _inputController.add,
-    );
+    final StreamSubscription<List<int>> stdoutSub = process.stdout.listen(_inputController.add);
+    final StreamSubscription<List<int>> stderrSub = process.stderr.listen(_inputController.add);
     final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
       stdoutSub.asFuture<void>(),
       stderrSub.asFuture<void>(),
@@ -338,9 +359,7 @@ class DesktopLogReader extends DeviceLogReader {
 
   @override
   Stream<String> get logLines {
-    return _inputController.stream
-      .transform(utf8.decoder)
-      .transform(const LineSplitter());
+    return _inputController.stream.transform(utf8.decoder).transform(const LineSplitter());
   }
 
   @override
@@ -350,4 +369,7 @@ class DesktopLogReader extends DeviceLogReader {
   void dispose() {
     // Nothing to dispose.
   }
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
 }

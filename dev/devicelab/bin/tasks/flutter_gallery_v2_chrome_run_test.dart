@@ -9,8 +9,6 @@ import 'dart:io';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/versions/gallery.dart' show galleryVersion;
-import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(const NewGalleryChromeRunTest().run);
@@ -34,78 +32,70 @@ class NewGalleryChromeRunTest {
 
   /// Runs the test.
   Future<TaskResult> run() async {
-    final Directory galleryParentDir =
-        Directory.systemTemp.createTempSync('flutter_gallery_v2_chrome_run.');
-    final Directory galleryDir =
-        Directory(path.join(galleryParentDir.path, 'gallery'));
+    final TaskResult result = await inDirectory<TaskResult>(
+      '${flutterDirectory.path}/dev/integration_tests/new_gallery/',
+      () async {
+        await flutter(
+          'create',
+          options: <String>['--platforms', 'web,android,ios', '--no-overwrite', '.'],
+        );
+        await flutter('doctor');
+        await flutter('packages', options: <String>['get']);
 
-    await getNewGallery(galleryVersion, galleryDir);
+        await flutter('build', options: <String>['web', '-v', '--release', '--no-pub']);
 
-    final TaskResult result = await inDirectory<TaskResult>(galleryDir, () async {
-      await flutter('doctor');
-      await flutter('packages', options: <String>['get']);
+        final List<String> options = <String>['-d', 'chrome', '--verbose', '--resident'];
+        final Process process = await startFlutter('run', options: options);
 
-      await flutter('build', options: <String>[
-        'web',
-        '-v',
-        '--release',
-        '--no-pub',
-      ]);
+        final Completer<void> stdoutDone = Completer<void>();
+        final Completer<void> stderrDone = Completer<void>();
 
-      final List<String> options = <String>['-d', 'chrome', '--verbose', '--resident'];
-      final Process process = await startFlutter(
-        'run',
-        options: options,
-      );
+        bool success = true;
 
-      final Completer<void> stdoutDone = Completer<void>();
-      final Completer<void> stderrDone = Completer<void>();
+        process.stdout
+            .transform<String>(utf8.decoder)
+            .transform<String>(const LineSplitter())
+            .listen(
+              (String line) {
+                if (line.contains(successfullyLoadedString)) {
+                  // Successfully started.
+                  Future<void>.delayed(durationToWaitForError, () {
+                    process.stdin.write('q');
+                  });
+                }
+                if (line.contains(exceptionString)) {
+                  success = false;
+                }
+                print('stdout: $line');
+              },
+              onDone: () {
+                stdoutDone.complete();
+              },
+            );
 
-      bool success = true;
+        process.stderr
+            .transform<String>(utf8.decoder)
+            .transform<String>(const LineSplitter())
+            .listen(
+              (String line) {
+                print('stderr: $line');
+              },
+              onDone: () {
+                stderrDone.complete();
+              },
+            );
 
-      process.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        if (line.contains(successfullyLoadedString)) {
-          // Successfully started.
-          Future<void>.delayed(
-            durationToWaitForError,
-            () {process.stdin.write('q');}
-          );
+        await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
+
+        await process.exitCode;
+
+        if (success) {
+          return TaskResult.success(<String, dynamic>{});
+        } else {
+          return TaskResult.failure('An exception was thrown.');
         }
-        if (line.contains(exceptionString)) {
-          success = false;
-        }
-        print('stdout: $line');
-      }, onDone: () {
-        stdoutDone.complete();
-      });
-
-      process.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        print('stderr: $line');
-      }, onDone: () {
-        stderrDone.complete();
-      });
-
-      await Future.wait<void>(<Future<void>>[
-        stdoutDone.future,
-        stderrDone.future,
-      ]);
-
-      await process.exitCode;
-
-      if (success) {
-        return TaskResult.success(<String, dynamic>{});
-      } else {
-        return TaskResult.failure('An exception was thrown.');
-      }
-    });
-
-    rmTree(galleryParentDir);
+      },
+    );
 
     return result;
   }

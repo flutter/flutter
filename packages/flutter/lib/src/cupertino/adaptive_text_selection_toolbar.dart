@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -109,7 +112,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
          onLookUp: onLookUp,
          onSearchWeb: onSearchWeb,
          onShare: onShare,
-         onLiveTextInput: onLiveTextInput
+         onLiveTextInput: onLiveTextInput,
        );
 
   /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] with the
@@ -152,6 +155,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
          selectionGeometry: selectionGeometry,
          onCopy: onCopy,
          onSelectAll: onSelectAll,
+         onShare: null, // See https://github.com/flutter/flutter/issues/141775.
        );
 
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.anchors}
@@ -182,23 +186,22 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which is the Material
   ///   equivalent of this class and builds only the Material buttons. It
   ///   includes a live example of using `getAdaptiveButtons`.
-  static Iterable<Widget> getAdaptiveButtons(BuildContext context, List<ContextMenuButtonItem> buttonItems) {
+  static Iterable<Widget> getAdaptiveButtons(
+    BuildContext context,
+    List<ContextMenuButtonItem> buttonItems,
+  ) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
-          return CupertinoTextSelectionToolbarButton.buttonItem(
-            buttonItem: buttonItem,
-          );
+          return CupertinoTextSelectionToolbarButton.buttonItem(buttonItem: buttonItem);
         });
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.macOS:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
-          return CupertinoDesktopTextSelectionToolbarButton.buttonItem(
-            buttonItem: buttonItem,
-          );
+          return CupertinoDesktopTextSelectionToolbarButton.buttonItem(buttonItem: buttonItem);
         });
     }
   }
@@ -210,8 +213,8 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final List<Widget> resultChildren = children
-        ?? getAdaptiveButtons(context, buttonItems!).toList();
+    final List<Widget> resultChildren =
+        children ?? getAdaptiveButtons(context, buttonItems!).toList();
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:

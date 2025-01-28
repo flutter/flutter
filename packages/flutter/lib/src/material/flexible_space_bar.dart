@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app_bar.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -30,7 +34,7 @@ enum StretchMode {
   /// The background widget will expand to fill the extra space.
   zoomBackground,
 
-  /// The background will blur using a [ImageFilter.blur] effect.
+  /// The background will blur using a [ui.ImageFilter.blur] effect.
   blurBackground,
 
   /// The title will fade away as the user over-scrolls.
@@ -185,32 +189,24 @@ class FlexibleSpaceBar extends StatefulWidget {
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   bool _getEffectiveCenterTitle(ThemeData theme) {
-    if (widget.centerTitle != null) {
-      return widget.centerTitle!;
-    }
-    switch (theme.platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return false;
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return true;
-    }
+    return widget.centerTitle ??
+        switch (theme.platform) {
+          TargetPlatform.android ||
+          TargetPlatform.fuchsia ||
+          TargetPlatform.linux ||
+          TargetPlatform.windows => false,
+          TargetPlatform.iOS || TargetPlatform.macOS => true,
+        };
   }
 
   Alignment _getTitleAlignment(bool effectiveCenterTitle) {
     if (effectiveCenterTitle) {
       return Alignment.bottomCenter;
     }
-    final TextDirection textDirection = Directionality.of(context);
-    switch (textDirection) {
-      case TextDirection.rtl:
-        return Alignment.bottomRight;
-      case TextDirection.ltr:
-        return Alignment.bottomLeft;
-    }
+    return switch (Directionality.of(context)) {
+      TextDirection.rtl => Alignment.bottomRight,
+      TextDirection.ltr => Alignment.bottomLeft,
+    };
   }
 
   double _getCollapsePadding(double t, FlexibleSpaceBarSettings settings) {
@@ -229,7 +225,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
+        final FlexibleSpaceBarSettings settings =
+            context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
 
         final List<Widget> children = <Widget>[];
 
@@ -237,7 +234,11 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
         // 0.0 -> Expanded
         // 1.0 -> Collapsed to toolbar
-        final double t = clampDouble(1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent, 0.0, 1.0);
+        final double t = clampDouble(
+          1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent,
+          0.0,
+          1.0,
+        );
 
         // background
         if (widget.background != null) {
@@ -246,46 +247,46 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           assert(fadeStart <= fadeEnd);
           // If the min and max extent are the same, the app bar cannot collapse
           // and the content should be visible, so opacity = 1.
-          final double opacity = settings.maxExtent == settings.minExtent
-              ? 1.0
-              : 1.0 - Interval(fadeStart, fadeEnd).transform(t);
+          final double opacity =
+              settings.maxExtent == settings.minExtent
+                  ? 1.0
+                  : 1.0 - Interval(fadeStart, fadeEnd).transform(t);
           double height = settings.maxExtent;
 
           // StretchMode.zoomBackground
           if (widget.stretchModes.contains(StretchMode.zoomBackground) &&
-            constraints.maxHeight > height) {
+              constraints.maxHeight > height) {
             height = constraints.maxHeight;
           }
           final double topPadding = _getCollapsePadding(t, settings);
-          children.add(Positioned(
-            top: topPadding,
-            left: 0.0,
-            right: 0.0,
-            height: height,
-            child: _FlexibleSpaceHeaderOpacity(
-              // IOS is relying on this semantics node to correctly traverse
-              // through the app bar when it is collapsed.
-              alwaysIncludeSemantics: true,
-              opacity: opacity,
-              child: widget.background
+          children.add(
+            Positioned(
+              top: topPadding,
+              left: 0.0,
+              right: 0.0,
+              height: height,
+              child: _FlexibleSpaceHeaderOpacity(
+                // IOS is relying on this semantics node to correctly traverse
+                // through the app bar when it is collapsed.
+                alwaysIncludeSemantics: true,
+                opacity: opacity,
+                child: widget.background,
+              ),
             ),
-          ));
+          );
 
           // StretchMode.blurBackground
           if (widget.stretchModes.contains(StretchMode.blurBackground) &&
-            constraints.maxHeight > settings.maxExtent) {
+              constraints.maxHeight > settings.maxExtent) {
             final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
-            children.add(Positioned.fill(
-              child: BackdropFilter(
-                filter: ui.ImageFilter.blur(
-                  sigmaX: blurAmount,
-                  sigmaY: blurAmount,
-                ),
-                child: Container(
-                  color: Colors.transparent,
+            children.add(
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: blurAmount, sigmaY: blurAmount),
+                  child: const ColoredBox(color: Colors.transparent),
                 ),
               ),
-            ));
+            );
           }
         }
 
@@ -302,65 +303,61 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             case TargetPlatform.fuchsia:
             case TargetPlatform.linux:
             case TargetPlatform.windows:
-              title = Semantics(
-                namesRoute: true,
-                child: widget.title,
-              );
+              title = Semantics(namesRoute: true, child: widget.title);
           }
 
           // StretchMode.fadeTitle
           if (widget.stretchModes.contains(StretchMode.fadeTitle) &&
-            constraints.maxHeight > settings.maxExtent) {
-            final double stretchOpacity = 1 -
-                clampDouble(
-                    (constraints.maxHeight - settings.maxExtent) / 100,
-                    0.0,
-                    1.0);
-            title = Opacity(
-              opacity: stretchOpacity,
-              child: title,
-            );
+              constraints.maxHeight > settings.maxExtent) {
+            final double stretchOpacity =
+                1 - clampDouble((constraints.maxHeight - settings.maxExtent) / 100, 0.0, 1.0);
+            title = Opacity(opacity: stretchOpacity, child: title);
           }
 
           final double opacity = settings.toolbarOpacity;
           if (opacity > 0.0) {
-            TextStyle titleStyle = theme.useMaterial3 ? theme.textTheme.titleLarge! : theme.primaryTextTheme.titleLarge!;
-            titleStyle = titleStyle.copyWith(
-              color: titleStyle.color!.withOpacity(opacity),
-            );
+            TextStyle titleStyle =
+                theme.useMaterial3
+                    ? theme.textTheme.titleLarge!
+                    : theme.primaryTextTheme.titleLarge!;
+            titleStyle = titleStyle.copyWith(color: titleStyle.color!.withOpacity(opacity));
             final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
             final double leadingPadding = (settings.hasLeading ?? true) ? 72.0 : 0.0;
-            final EdgeInsetsGeometry padding = widget.titlePadding ??
-              EdgeInsetsDirectional.only(
-                start: effectiveCenterTitle ? 0.0 : leadingPadding,
-                bottom: 16.0,
-              );
-            final double scaleValue = Tween<double>(begin: widget.expandedTitleScale, end: 1.0).transform(t);
-            final Matrix4 scaleTransform = Matrix4.identity()
-              ..scale(scaleValue, scaleValue, 1.0);
+            final EdgeInsetsGeometry padding =
+                widget.titlePadding ??
+                EdgeInsetsDirectional.only(
+                  start: effectiveCenterTitle ? 0.0 : leadingPadding,
+                  bottom: 16.0,
+                );
+            final double scaleValue = Tween<double>(
+              begin: widget.expandedTitleScale,
+              end: 1.0,
+            ).transform(t);
+            final Matrix4 scaleTransform = Matrix4.identity()..scale(scaleValue, scaleValue, 1.0);
             final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
-            children.add(Container(
-              padding: padding,
-              child: Transform(
-                alignment: titleAlignment,
-                transform: scaleTransform,
-                child: Align(
+            children.add(
+              Padding(
+                padding: padding,
+                child: Transform(
                   alignment: titleAlignment,
-                  child: DefaultTextStyle(
-                    style: titleStyle,
-                    child: LayoutBuilder(
-                      builder: (BuildContext context, BoxConstraints constraints) {
-                        return Container(
-                          width: constraints.maxWidth / scaleValue,
-                          alignment: titleAlignment,
-                          child: title,
-                        );
-                      },
+                  transform: scaleTransform,
+                  child: Align(
+                    alignment: titleAlignment,
+                    child: DefaultTextStyle(
+                      style: titleStyle,
+                      child: LayoutBuilder(
+                        builder: (BuildContext context, BoxConstraints constraints) {
+                          return SizedBox(
+                            width: constraints.maxWidth / scaleValue,
+                            child: Align(alignment: titleAlignment, child: title),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
               ),
-            ));
+            );
           }
         }
 
@@ -414,7 +411,7 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   /// True if the FlexibleSpaceBar overlaps the primary scrollable's contents.
   ///
   /// This value is used by the [AppBar] to resolve
-  /// [AppBar.backgroundColor] against [MaterialState.scrolledUnder],
+  /// [AppBar.backgroundColor] against [WidgetState.scrolledUnder],
   /// i.e. to enable apps to specify different colors when content
   /// has been scrolled up and behind the app bar.
   ///
@@ -434,12 +431,12 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
 
   @override
   bool updateShouldNotify(FlexibleSpaceBarSettings oldWidget) {
-    return toolbarOpacity != oldWidget.toolbarOpacity
-        || minExtent != oldWidget.minExtent
-        || maxExtent != oldWidget.maxExtent
-        || currentExtent != oldWidget.currentExtent
-        || isScrolledUnder != oldWidget.isScrolledUnder
-        || hasLeading != oldWidget.hasLeading;
+    return toolbarOpacity != oldWidget.toolbarOpacity ||
+        minExtent != oldWidget.minExtent ||
+        maxExtent != oldWidget.maxExtent ||
+        currentExtent != oldWidget.currentExtent ||
+        isScrolledUnder != oldWidget.isScrolledUnder ||
+        hasLeading != oldWidget.hasLeading;
   }
 }
 
@@ -448,18 +445,28 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
 // lead to repainting.
 // see: https://github.com/flutter/flutter/issues/127836
 class _FlexibleSpaceHeaderOpacity extends SingleChildRenderObjectWidget {
-  const _FlexibleSpaceHeaderOpacity({required this.opacity, required super.child, required this.alwaysIncludeSemantics});
+  const _FlexibleSpaceHeaderOpacity({
+    required this.opacity,
+    required super.child,
+    required this.alwaysIncludeSemantics,
+  });
 
   final double opacity;
   final bool alwaysIncludeSemantics;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderFlexibleSpaceHeaderOpacity(opacity: opacity, alwaysIncludeSemantics: alwaysIncludeSemantics);
+    return _RenderFlexibleSpaceHeaderOpacity(
+      opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
+    );
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderFlexibleSpaceHeaderOpacity renderObject) {
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderFlexibleSpaceHeaderOpacity renderObject,
+  ) {
     renderObject
       ..alwaysIncludeSemantics = alwaysIncludeSemantics
       ..opacity = opacity;
@@ -482,7 +489,12 @@ class _RenderFlexibleSpaceHeaderOpacity extends RenderOpacity {
       return;
     }
     assert(needsCompositing);
-    layer = context.pushOpacity(offset, (opacity * 255).round(), super.paint, oldLayer: layer as OpacityLayer?);
+    layer = context.pushOpacity(
+      offset,
+      (opacity * 255).round(),
+      super.paint,
+      oldLayer: layer as OpacityLayer?,
+    );
     assert(() {
       layer!.debugCreator = debugCreator;
       return true;

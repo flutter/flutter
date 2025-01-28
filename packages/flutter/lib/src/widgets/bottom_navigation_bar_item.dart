@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'icon.dart';
+/// @docImport 'icon_theme.dart';
+/// @docImport 'image_icon.dart';
+/// @docImport 'text.dart';
+library;
+
 import 'dart:ui' show Color;
 
 import 'framework.dart';
@@ -17,7 +26,7 @@ import 'framework.dart';
 ///  * [BottomNavigationBar]
 ///  * <https://material.io/design/components/bottom-navigation.html>
 ///  * [CupertinoTabBar]
-///  * <https://developer.apple.com/ios/human-interface-guidelines/bars/tab-bars>
+///  * <https://developer.apple.com/design/human-interface-guidelines/tab-bars/>
 class BottomNavigationBarItem {
   /// Creates an item that is used with [BottomNavigationBar.items].
   ///

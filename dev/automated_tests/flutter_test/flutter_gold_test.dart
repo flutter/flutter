@@ -14,29 +14,97 @@ import 'package:platform/platform.dart';
 
 // 1x1 colored pixel
 const List<int> _kFailPngBytes = <int>[
-  137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0,
-  13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137,
-  0, 0, 0, 13, 73, 68, 65, 84, 120, 1, 99, 249, 207, 240, 255, 63, 0, 7, 18, 3,
-  2, 164, 147, 160, 197, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130,
+  137,
+  80,
+  78,
+  71,
+  13,
+  10,
+  26,
+  10,
+  0,
+  0,
+  0,
+  13,
+  73,
+  72,
+  68,
+  82,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  1,
+  8,
+  6,
+  0,
+  0,
+  0,
+  31,
+  21,
+  196,
+  137,
+  0,
+  0,
+  0,
+  13,
+  73,
+  68,
+  65,
+  84,
+  120,
+  1,
+  99,
+  249,
+  207,
+  240,
+  255,
+  63,
+  0,
+  7,
+  18,
+  3,
+  2,
+  164,
+  147,
+  160,
+  197,
+  0,
+  0,
+  0,
+  0,
+  73,
+  69,
+  78,
+  68,
+  174,
+  66,
+  96,
+  130,
 ];
 
 void main() {
+  final List<String> log = <String>[];
   final MemoryFileSystem fs = MemoryFileSystem();
-  final Directory basedir = fs.directory('flutter/test/library/')
-    ..createSync(recursive: true);
-  final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient()
-    ..expectationForTestValues['flutter.new_golden_test.1'] = '';
+  final Directory basedir = fs.directory('flutter/test/library/')..createSync(recursive: true);
+  final FakeSkiaGoldClient fakeSkiaClient =
+      FakeSkiaGoldClient()..expectationForTestValues['flutter.new_golden_test.1'] = '';
   final FlutterLocalFileComparator comparator = FlutterLocalFileComparator(
     basedir.uri,
     fakeSkiaClient,
     fs: fs,
     platform: FakePlatform(
       environment: <String, String>{'FLUTTER_ROOT': '/flutter'},
-      operatingSystem: 'macos'
+      operatingSystem: 'macos',
     ),
+    log: log.add,
   );
 
   test('Local passes non-existent baseline for new test, null expectation', () async {
+    log.clear();
     expect(
       await comparator.compare(
         Uint8List.fromList(_kFailPngBytes),
@@ -44,9 +112,15 @@ void main() {
       ),
       isTrue,
     );
+    const String expectation =
+        'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1.png. '
+        'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
+        'Validate image output found at flutter/test/library/';
+    expect(log, const <String>[expectation]);
   });
 
   test('Local passes non-existent baseline for new test, empty expectation', () async {
+    log.clear();
     expect(
       await comparator.compare(
         Uint8List.fromList(_kFailPngBytes),
@@ -54,6 +128,11 @@ void main() {
       ),
       isTrue,
     );
+    const String expectation =
+        'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.2.png. '
+        'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
+        'Validate image output found at flutter/test/library/';
+    expect(log, const <String>[expectation]);
   });
 }
 

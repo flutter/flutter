@@ -2,20 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(bkonyi): remove this file when ready to serve DevTools from DDS.
+//
+// See https://github.com/flutter/flutter/issues/150044
+
 import 'dart:async';
 
-import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
 
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
+import 'web/chrome.dart';
 
-typedef ResidentDevtoolsHandlerFactory = ResidentDevtoolsHandler Function(DevtoolsLauncher?, ResidentRunner, Logger);
+typedef ResidentDevtoolsHandlerFactory =
+    ResidentDevtoolsHandler Function(DevtoolsLauncher?, ResidentRunner, Logger, ChromiumLauncher);
 
-ResidentDevtoolsHandler createDefaultHandler(DevtoolsLauncher? launcher, ResidentRunner runner, Logger logger) {
-  return FlutterResidentDevtoolsHandler(launcher, runner, logger);
+ResidentDevtoolsHandler createDefaultHandler(
+  DevtoolsLauncher? launcher,
+  ResidentRunner runner,
+  Logger logger,
+  ChromiumLauncher chromiumLauncher,
+) {
+  return FlutterResidentDevtoolsHandler(launcher, runner, logger, chromiumLauncher);
 }
 
 /// Helper class to manage the life-cycle of devtools and its interaction with
@@ -23,6 +34,19 @@ ResidentDevtoolsHandler createDefaultHandler(DevtoolsLauncher? launcher, Residen
 abstract class ResidentDevtoolsHandler {
   /// The current devtools server, or null if one is not running.
   DevToolsServerAddress? get activeDevToolsServer;
+
+  /// The Dart Tooling Daemon (DTD) URI for the DTD instance being hosted by
+  /// DevTools server.
+  ///
+  /// This will be null if the DevTools server is not served through Flutter
+  /// tools (e.g. if it is served from an IDE).
+  Uri? get dtdUri;
+
+  /// Whether to print the Dart Tooling Daemon URI.
+  ///
+  /// This will always return false when there is not a DTD instance being
+  /// served from the DevTools server.
+  bool get printDtdUri;
 
   /// Whether it's ok to announce the [activeDevToolsServer].
   ///
@@ -44,15 +68,20 @@ abstract class ResidentDevtoolsHandler {
 }
 
 class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
-  FlutterResidentDevtoolsHandler(this._devToolsLauncher, this._residentRunner, this._logger);
+  FlutterResidentDevtoolsHandler(
+    this._devToolsLauncher,
+    this._residentRunner,
+    this._logger,
+    this._chromiumLauncher,
+  );
 
   static const Duration launchInBrowserTimeout = Duration(seconds: 15);
 
   final DevtoolsLauncher? _devToolsLauncher;
   final ResidentRunner _residentRunner;
+  final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
   bool _shutdown = false;
-  bool _served = false;
 
   @visibleForTesting
   bool launchedInBrowser = false;
@@ -62,6 +91,12 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     assert(!_readyToAnnounce || _devToolsLauncher?.activeDevToolsServer != null);
     return _devToolsLauncher?.activeDevToolsServer;
   }
+
+  @override
+  Uri? get dtdUri => _devToolsLauncher?.dtdUri;
+
+  @override
+  bool get printDtdUri => _devToolsLauncher?.printDtdUri ?? false;
 
   @override
   bool get readyToAnnounce => _readyToAnnounce;
@@ -82,7 +117,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       _devToolsLauncher.devToolsUrl = devToolsServerAddress;
     } else {
       await _devToolsLauncher.serve();
-      _served = true;
     }
     await _devToolsLauncher.ready;
     // Do not attempt to print debugger list if the connection has failed or if we're shutting down.
@@ -91,26 +125,14 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       return;
     }
 
-    final Uri? devToolsUrl = _devToolsLauncher.devToolsUrl;
-    if (devToolsUrl != null) {
-      for (final FlutterDevice? device in flutterDevices) {
-        if (device == null) {
-          continue;
-        }
-        // Notify the DDS instances that there's a DevTools instance available so they can correctly
-        // redirect DevTools related requests.
-        device.device?.dds.setExternalDevToolsUri(devToolsUrl);
-      }
-    }
-
     Future<void> callServiceExtensions() async {
-      final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
-      await Future.wait(
-        <Future<void>>[
-          _maybeCallDevToolsUriServiceExtension(devicesWithExtension),
-          _callConnectedVmServiceUriExtension(devicesWithExtension)
-        ]
+      final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(
+        flutterDevices,
       );
+      await Future.wait(<Future<void>>[
+        _maybeCallDevToolsUriServiceExtension(devicesWithExtension),
+        _callConnectedVmServiceUriExtension(devicesWithExtension),
+      ]);
     }
 
     // If the application is starting paused, we can't invoke service extensions
@@ -150,9 +172,11 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
     if (_devToolsLauncher.devToolsUrl == null) {
       _logger.startProgress('Waiting for Flutter DevTools to be served...');
-      unawaited(_devToolsLauncher.ready.then((_) {
-        _launchDevToolsForDevices(flutterDevices);
-      }));
+      unawaited(
+        _devToolsLauncher.ready.then((_) {
+          _launchDevToolsForDevices(flutterDevices);
+        }),
+      );
     } else {
       _launchDevToolsForDevices(flutterDevices);
     }
@@ -162,18 +186,25 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   void _launchDevToolsForDevices(List<FlutterDevice?> flutterDevices) {
     assert(activeDevToolsServer != null);
     for (final FlutterDevice? device in flutterDevices) {
-      final String devToolsUrl = activeDevToolsServer!.uri!.replace(
-        queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
-      ).toString();
+      final String devToolsUrl =
+          activeDevToolsServer!.uri!
+              .replace(
+                queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
+              )
+              .toString();
       _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
-      unawaited(Chrome.start(<String>[devToolsUrl]));
+
+      _chromiumLauncher.launch(devToolsUrl).catchError((Object e) {
+        _logger.printError('Failed to launch web browser: $e');
+        throw ProcessException('Chrome', <String>[
+          devToolsUrl,
+        ], 'Failed to launch browser for dev tools');
+      }).ignore();
     }
     launchedInBrowser = true;
   }
 
-  Future<void> _maybeCallDevToolsUriServiceExtension(
-    List<FlutterDevice?> flutterDevices,
-  ) async {
+  Future<void> _maybeCallDevToolsUriServiceExtension(List<FlutterDevice?> flutterDevices) async {
     if (_devToolsLauncher?.activeDevToolsServer == null) {
       return;
     }
@@ -183,22 +214,20 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     ]);
   }
 
-  Future<void> _callDevToolsUriExtension(
-    FlutterDevice device,
-  ) async {
+  Future<void> _callDevToolsUriExtension(FlutterDevice device) async {
     try {
       await _invokeRpcOnFirstView(
         'ext.flutter.activeDevToolsServerAddress',
         device: device,
-        params: <String, dynamic>{
-          'value': _devToolsLauncher!.activeDevToolsServer!.uri.toString(),
-        },
+        params: <String, dynamic>{'value': _devToolsLauncher!.activeDevToolsServer!.uri.toString()},
       );
     } on Exception catch (e) {
-      _logger.printError(
-        'Failed to set DevTools server address: $e. Deep links to'
-        ' DevTools will not show in Flutter errors.',
-      );
+      if (!_shutdown) {
+        _logger.printError(
+          'Failed to set DevTools server address: $e. Deep links to'
+          ' DevTools will not show in Flutter errors.',
+        );
+      }
     }
   }
 
@@ -212,9 +241,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   Future<FlutterDevice?> _waitForExtensionsForDevice(FlutterDevice flutterDevice) async {
     const String extension = 'ext.flutter.connectedVmServiceUri';
     try {
-      await flutterDevice.vmService?.findExtensionIsolate(
-        extension,
-      );
+      await flutterDevice.vmService?.findExtensionIsolate(extension);
       return flutterDevice;
     } on VmServiceDisappearedException {
       _logger.printTrace(
@@ -242,16 +269,16 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       await _invokeRpcOnFirstView(
         'ext.flutter.connectedVmServiceUri',
         device: device,
-        params: <String, dynamic>{
-          'value': uri.toString(),
-        },
+        params: <String, dynamic>{'value': uri.toString()},
       );
     } on Exception catch (e) {
-      _logger.printError(e.toString());
-      _logger.printError(
-        'Failed to set vm service URI: $e. Deep links to DevTools'
-        ' will not show in Flutter errors.',
-      );
+      if (!_shutdown) {
+        _logger.printError(e.toString());
+        _logger.printError(
+          'Failed to set vm service URI: $e. Deep links to DevTools'
+          ' will not show in Flutter errors.',
+        );
+      }
     }
   }
 
@@ -261,10 +288,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     required Map<String, dynamic> params,
   }) async {
     if (device.targetPlatform == TargetPlatform.web_javascript) {
-      await device.vmService!.callMethodWrapper(
-        method,
-        args: params,
-      );
+      await device.vmService!.callMethodWrapper(method, args: params);
       return;
     }
     final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -289,17 +313,22 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   @override
   Future<void> shutdown() async {
-    if (_devToolsLauncher == null || _shutdown || !_served) {
+    _shutdown = true;
+    if (_devToolsLauncher == null) {
       return;
     }
-    _shutdown = true;
     _readyToAnnounce = false;
     await _devToolsLauncher.close();
   }
 }
 
 @visibleForTesting
-NoOpDevtoolsHandler createNoOpHandler(DevtoolsLauncher? launcher, ResidentRunner runner, Logger logger) {
+NoOpDevtoolsHandler createNoOpHandler(
+  DevtoolsLauncher? launcher,
+  ResidentRunner runner,
+  Logger logger,
+  ChromiumLauncher? chromiumLauncher,
+) {
   return NoOpDevtoolsHandler();
 }
 
@@ -337,14 +366,22 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
     wasShutdown = true;
     return;
   }
+
+  @override
+  Uri? get dtdUri => null;
+
+  @override
+  bool get printDtdUri => false;
 }
 
 /// Convert a [URI] with query parameters into a display format instead
 /// of the default URI encoding.
 String urlToDisplayString(Uri uri) {
-  final StringBuffer base = StringBuffer(uri.replace(
-    queryParameters: <String, String>{},
-  ).toString());
-  base.write(uri.queryParameters.keys.map((String key) => '$key=${uri.queryParameters[key]}').join('&'));
+  final StringBuffer base = StringBuffer(
+    uri.replace(queryParameters: <String, String>{}).toString(),
+  );
+  base.write(
+    uri.queryParameters.keys.map((String key) => '$key=${uri.queryParameters[key]}').join('&'),
+  );
   return base.toString();
 }

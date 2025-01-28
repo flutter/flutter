@@ -10,8 +10,8 @@ import '../model/app_state_model.dart';
 import '../model/product.dart';
 
 class ProductCard extends StatelessWidget {
-  const ProductCard({ super.key, this.imageAspectRatio = 33 / 49, this.product })
-      : assert(imageAspectRatio > 0);
+  const ProductCard({super.key, this.imageAspectRatio = 33 / 49, this.product})
+    : assert(imageAspectRatio > 0);
 
   final double imageAspectRatio;
   final Product? product;
@@ -33,6 +33,11 @@ class ProductCard extends StatelessWidget {
       fit: BoxFit.cover,
     );
 
+    // The fontSize to use for computing the heuristic UI scaling factor.
+    const double defaultFontSize = 14.0;
+    final double containerScalingFactor =
+        MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
+
     return ScopedModelDescendant<AppStateModel>(
       builder: (BuildContext context, Widget? child, AppStateModel model) {
         return GestureDetector(
@@ -47,13 +52,9 @@ class ProductCard extends StatelessWidget {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              AspectRatio(
-                aspectRatio: imageAspectRatio,
-                child: imageWidget,
-              ),
+              AspectRatio(aspectRatio: imageAspectRatio, child: imageWidget),
               SizedBox(
-                // ignore: deprecated_member_use, https://github.com/flutter/flutter/issues/128825
-                height: kTextBoxHeight * MediaQuery.textScalerOf(context).textScaleFactor,
+                height: kTextBoxHeight * containerScalingFactor,
                 width: 121.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -75,10 +76,7 @@ class ProductCard extends StatelessWidget {
               ),
             ],
           ),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Icon(Icons.add_shopping_cart),
-          ),
+          const Padding(padding: EdgeInsets.all(16.0), child: Icon(Icons.add_shopping_cart)),
         ],
       ),
     );

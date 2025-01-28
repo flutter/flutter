@@ -36,85 +36,75 @@ void main() {
     });
 
     test('getBranchName does not call git if env LUCI_BRANCH provided', () {
-      setUpWithEnvironment(
-        <String, String>{
-          'LUCI_BRANCH': branchName,
-        },
+      setUpWithEnvironment(<String, String>{'LUCI_BRANCH': branchName});
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <Pattern>['flutter', '--version', '--machine'],
+          stdout: testVersionInfo,
+        ),
       );
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['flutter', '--version', '--machine'],
-        stdout: testVersionInfo,
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'rev-parse', 'HEAD'],
-      ));
-      expect(
-        apidocs.FlutterInformation.instance.getBranchName(),
-        branchName,
+      fakeProcessManager.addCommand(
+        const FakeCommand(command: <Pattern>['git', 'rev-parse', 'HEAD']),
       );
+      expect(apidocs.FlutterInformation.instance.getBranchName(), branchName);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     test('getBranchName calls git if env LUCI_BRANCH not provided', () {
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['flutter', '--version', '--machine'],
-        stdout: testVersionInfo,
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'status', '-b', '--porcelain'],
-        stdout: '## $branchName',
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'rev-parse', 'HEAD'],
-      ));
-
-      expect(
-        apidocs.FlutterInformation.instance.getBranchName(),
-        branchName,
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <Pattern>['flutter', '--version', '--machine'],
+          stdout: testVersionInfo,
+        ),
       );
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+      );
+      fakeProcessManager.addCommand(
+        const FakeCommand(command: <Pattern>['git', 'rev-parse', 'HEAD']),
+      );
+
+      expect(apidocs.FlutterInformation.instance.getBranchName(), branchName);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     test('getBranchName calls git if env LUCI_BRANCH is empty', () {
-      setUpWithEnvironment(
-        <String, String>{
-          'LUCI_BRANCH': '',
-        },
+      setUpWithEnvironment(<String, String>{'LUCI_BRANCH': ''});
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <Pattern>['flutter', '--version', '--machine'],
+          stdout: testVersionInfo,
+        ),
       );
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['flutter', '--version', '--machine'],
-        stdout: testVersionInfo,
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'status', '-b', '--porcelain'],
-        stdout: '## $branchName',
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'rev-parse', 'HEAD'],
-      ));
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+      );
+      fakeProcessManager.addCommand(
+        const FakeCommand(command: <Pattern>['git', 'rev-parse', 'HEAD']),
+      );
 
-      expect(
-        apidocs.FlutterInformation.instance.getBranchName(),
-        branchName,
-      );
+      expect(apidocs.FlutterInformation.instance.getBranchName(), branchName);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     test("runPubProcess doesn't use the pub binary", () {
       final Platform platform = FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_ROOT': '/flutter',
-        },
+        environment: <String, String>{'FLUTTER_ROOT': '/flutter'},
       );
-      final ProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[
-          const FakeCommand(
-            command: <String>['/flutter/bin/flutter', 'pub', '--one', '--two'],
-          ),
-        ],
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['/flutter/bin/flutter', 'pub', '--one', '--two']),
+      ]);
+      apidocs.FlutterInformation.instance = apidocs.FlutterInformation(
+        platform: platform,
+        processManager: processManager,
+        filesystem: memoryFileSystem,
       );
-      apidocs.FlutterInformation.instance =
-          apidocs.FlutterInformation(platform: platform, processManager: processManager, filesystem: memoryFileSystem);
 
       apidocs.runPubProcess(
         arguments: <String>['--one', '--two'],
@@ -126,48 +116,56 @@ void main() {
     });
 
     test('calls out to flutter if FLUTTER_VERSION is not set', () async {
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['flutter', '--version', '--machine'],
-        stdout: testVersionInfo,
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'status', '-b', '--porcelain'],
-        stdout: '## $branchName',
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'rev-parse', 'HEAD'],
-      ));
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <Pattern>['flutter', '--version', '--machine'],
+          stdout: testVersionInfo,
+        ),
+      );
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+      );
+      fakeProcessManager.addCommand(
+        const FakeCommand(command: <Pattern>['git', 'rev-parse', 'HEAD']),
+      );
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(info['frameworkVersion'], equals(Version.parse('2.5.0')));
     });
     test("doesn't call out to flutter if FLUTTER_VERSION is set", () async {
-      setUpWithEnvironment(<String, String>{
-        'FLUTTER_VERSION': testVersionInfo,
-      });
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'status', '-b', '--porcelain'],
-        stdout: '## $branchName',
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'rev-parse', 'HEAD'],
-      ));
+      setUpWithEnvironment(<String, String>{'FLUTTER_VERSION': testVersionInfo});
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+      );
+      fakeProcessManager.addCommand(
+        const FakeCommand(command: <Pattern>['git', 'rev-parse', 'HEAD']),
+      );
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(info['frameworkVersion'], equals(Version.parse('2.5.0')));
     });
     test('getFlutterRoot calls out to flutter if FLUTTER_ROOT is not set', () async {
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['flutter', '--version', '--machine'],
-        stdout: testVersionInfo,
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'status', '-b', '--porcelain'],
-        stdout: '## $branchName',
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'rev-parse', 'HEAD'],
-      ));
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <Pattern>['flutter', '--version', '--machine'],
+          stdout: testVersionInfo,
+        ),
+      );
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+      );
+      fakeProcessManager.addCommand(
+        const FakeCommand(command: <Pattern>['git', 'rev-parse', 'HEAD']),
+      );
       final Directory root = flutterInformation.getFlutterRoot();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(root.path, equals('/home/user/flutter'));
@@ -185,9 +183,7 @@ void main() {
           command: <Pattern>['git', 'status', '-b', '--porcelain'],
           stdout: '## $branchName',
         ),
-        const FakeCommand(
-          command: <String>['git', 'rev-parse', 'HEAD'],
-        ),
+        const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD']),
       ]);
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(info['frameworkVersion'], isNotNull);
@@ -215,13 +211,179 @@ void main() {
           command: <Pattern>['git', 'status', '-b', '--porcelain'],
           stdout: '## $branchName',
         ),
-        const FakeCommand(
-          command: <String>['git', 'rev-parse', 'HEAD'],
-        ),
+        const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD']),
       ]);
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(info['engineRealm'], equals('realm'));
+    });
+  });
+
+  group('Configurator', () {
+    late MemoryFileSystem fs;
+    late FakeProcessManager fakeProcessManager;
+    late Directory publishRoot;
+    late Directory packageRoot;
+    late Directory docsRoot;
+    late File searchTemplate;
+    late apidocs.Configurator configurator;
+    late FakePlatform fakePlatform;
+    late apidocs.FlutterInformation flutterInformation;
+
+    void setUpWithEnvironment(Map<String, String> environment) {
+      fakePlatform = FakePlatform(environment: environment);
+      flutterInformation = apidocs.FlutterInformation(
+        filesystem: fs,
+        processManager: fakeProcessManager,
+        platform: fakePlatform,
+      );
+      apidocs.FlutterInformation.instance = flutterInformation;
+    }
+
+    setUp(() {
+      fs = MemoryFileSystem.test();
+      publishRoot = fs.directory('/path/to/publish');
+      packageRoot = fs.directory('/path/to/package');
+      docsRoot = fs.directory('/path/to/docs');
+      searchTemplate = docsRoot.childDirectory('lib').childFile('opensearch.xml');
+      fs.directory('/home/user/flutter/packages').createSync(recursive: true);
+      fakeProcessManager = FakeProcessManager.empty();
+      setUpWithEnvironment(<String, String>{});
+      publishRoot.createSync(recursive: true);
+      packageRoot.createSync(recursive: true);
+      docsRoot.createSync(recursive: true);
+      final List<String> files = <String>[
+        'README.md',
+        'analysis_options.yaml',
+        'dartdoc_options.yaml',
+        searchTemplate.path,
+        publishRoot.childFile('opensearch.xml').path,
+      ];
+      for (final String file in files) {
+        docsRoot.childFile(file).createSync(recursive: true);
+      }
+      searchTemplate.writeAsStringSync('{SITE_URL}');
+      configurator = apidocs.Configurator(
+        docsRoot: docsRoot,
+        packageRoot: packageRoot,
+        publishRoot: publishRoot,
+        filesystem: fs,
+        processManager: fakeProcessManager,
+        platform: fakePlatform,
+      );
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['flutter', '--version', '--machine'],
+          stdout: testVersionInfo,
+        ),
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+        const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD']),
+        const FakeCommand(command: <String>['/flutter/bin/flutter', 'pub', 'global', 'list']),
+        FakeCommand(
+          command: <Pattern>[
+            '/flutter/bin/flutter',
+            'pub',
+            'global',
+            'run',
+            '--enable-asserts',
+            'dartdoc',
+            '--output',
+            '/path/to/publish/flutter',
+            '--allow-tools',
+            '--json',
+            '--validate-links',
+            '--link-to-source-excludes',
+            '/flutter/bin/cache',
+            '--link-to-source-root',
+            '/flutter',
+            '--link-to-source-uri-template',
+            'https://github.com/flutter/flutter/blob/main/%f%#L%l%',
+            '--inject-html',
+            '--use-base-href',
+            '--header',
+            '/path/to/docs/styles.html',
+            '--header',
+            '/path/to/docs/analytics-header.html',
+            '--header',
+            '/path/to/docs/survey.html',
+            '--header',
+            '/path/to/docs/snippets.html',
+            '--header',
+            '/path/to/docs/opensearch.html',
+            '--footer',
+            '/path/to/docs/analytics-footer.html',
+            '--footer-text',
+            '/path/to/package/footer.html',
+            '--allow-warnings-in-packages',
+            // match package names
+            RegExp(r'^(\w+,)+(\w+)$'),
+            '--exclude-packages',
+            RegExp(r'^(\w+,)+(\w+)$'),
+            '--exclude',
+            // match dart package URIs
+            RegExp(r'^([\w\/:.]+,)+([\w\/:.]+)$'),
+            '--favicon',
+            '/path/to/docs/favicon.ico',
+            '--package-order',
+            'flutter,Dart,${apidocs.kPlatformIntegrationPackageName},flutter_test,flutter_driver',
+            '--auto-include-dependencies',
+          ],
+        ),
+      ]);
+    });
+
+    test('.generateConfiguration generates pubspec.yaml', () async {
+      configurator.generateConfiguration();
+      expect(packageRoot.childFile('pubspec.yaml').existsSync(), isTrue);
+      expect(packageRoot.childFile('pubspec.yaml').readAsStringSync(), contains('flutter_gpu:'));
+      expect(
+        packageRoot.childFile('pubspec.yaml').readAsStringSync(),
+        contains('dependency_overrides:'),
+      );
+      expect(
+        packageRoot.childFile('pubspec.yaml').readAsStringSync(),
+        contains('platform_integration:'),
+      );
+    });
+
+    test('.generateConfiguration generates fake lib', () async {
+      configurator.generateConfiguration();
+      expect(packageRoot.childDirectory('lib').existsSync(), isTrue);
+      expect(packageRoot.childDirectory('lib').childFile('temp_doc.dart').existsSync(), isTrue);
+      expect(
+        packageRoot.childDirectory('lib').childFile('temp_doc.dart').readAsStringSync(),
+        contains('library temp_doc;'),
+      );
+      expect(
+        packageRoot.childDirectory('lib').childFile('temp_doc.dart').readAsStringSync(),
+        contains("import 'package:flutter_gpu/gpu.dart';"),
+      );
+    });
+
+    test('.generateConfiguration generates page footer', () async {
+      configurator.generateConfiguration();
+      expect(packageRoot.childFile('footer.html').existsSync(), isTrue);
+      expect(
+        packageRoot.childFile('footer.html').readAsStringSync(),
+        contains('<script src="footer.js">'),
+      );
+      expect(publishRoot.childDirectory('flutter').childFile('footer.js').existsSync(), isTrue);
+      expect(
+        publishRoot.childDirectory('flutter').childFile('footer.js').readAsStringSync(),
+        contains(RegExp(r'Flutter 2.5.0 •.*• stable')),
+      );
+    });
+
+    test('.generateConfiguration generates search metadata', () async {
+      configurator.generateConfiguration();
+      expect(publishRoot.childFile('opensearch.xml').existsSync(), isTrue);
+      expect(
+        publishRoot.childFile('opensearch.xml').readAsStringSync(),
+        contains('https://api.flutter.dev/'),
+      );
     });
   });
 
@@ -247,9 +409,7 @@ void main() {
       apidocs.FlutterInformation.instance = apidocs.FlutterInformation(
         filesystem: fs,
         processManager: processManager,
-        platform: FakePlatform(environment: <String, String>{
-          'FLUTTER_ROOT': repoRoot.path,
-        }),
+        platform: FakePlatform(environment: <String, String>{'FLUTTER_ROOT': repoRoot.path}),
       );
     });
 
@@ -264,12 +424,8 @@ void main() {
           command: <Pattern>['git', 'status', '-b', '--porcelain'],
           stdout: '## $branchName',
         ),
-        const FakeCommand(
-          command: <String>['git', 'rev-parse', 'HEAD'],
-        ),
-        const FakeCommand(
-          command: <String>['/flutter/bin/flutter', 'pub', 'global', 'list'],
-        ),
+        const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD']),
+        const FakeCommand(command: <String>['/flutter/bin/flutter', 'pub', 'global', 'list']),
         FakeCommand(
           command: <Pattern>[
             '/flutter/bin/flutter',
@@ -288,7 +444,7 @@ void main() {
             '--link-to-source-root',
             '/flutter',
             '--link-to-source-uri-template',
-            'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
+            'https://github.com/flutter/flutter/blob/main/%f%#L%l%',
             '--inject-html',
             '--use-base-href',
             '--header',
@@ -329,7 +485,11 @@ void main() {
           isA<Exception>().having(
             (Exception e) => e.toString(),
             'message',
-            contains(RegExp(r'Missing .* which probably means the documentation failed to build correctly.')),
+            contains(
+              RegExp(
+                r'Missing .* which probably means the documentation failed to build correctly.',
+              ),
+            ),
           ),
         ),
       );
@@ -348,12 +508,8 @@ void main() {
           command: <Pattern>['git', 'status', '-b', '--porcelain'],
           stdout: '## $branchName',
         ),
-        const FakeCommand(
-          command: <String>['git', 'rev-parse', 'HEAD'],
-        ),
-        const FakeCommand(
-          command: <String>['/flutter/bin/flutter', 'pub', 'global', 'list'],
-        ),
+        const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD']),
+        const FakeCommand(command: <String>['/flutter/bin/flutter', 'pub', 'global', 'list']),
         FakeCommand(
           command: <Pattern>[
             '/flutter/bin/flutter',
@@ -372,7 +528,7 @@ void main() {
             '--link-to-source-root',
             '/flutter',
             '--link-to-source-uri-template',
-            'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
+            'https://github.com/flutter/flutter/blob/main/%f%#L%l%',
             '--inject-html',
             '--use-base-href',
             '--header',
@@ -403,7 +559,7 @@ void main() {
             'flutter,Dart,${apidocs.kPlatformIntegrationPackageName},flutter_test,flutter_driver',
             '--auto-include-dependencies',
           ],
-          onRun: () {
+          onRun: (_) {
             for (final File canary in generator.canaries) {
               canary.createSync(recursive: true);
             }
@@ -411,28 +567,26 @@ void main() {
               publishRoot.childDirectory('flutter').childFile(path).createSync(recursive: true);
             }
             for (final String path in dartdocDirectiveCanaryLibraries) {
-              publishRoot.childDirectory('flutter').childDirectory(path).createSync(recursive: true);
+              publishRoot
+                  .childDirectory('flutter')
+                  .childDirectory(path)
+                  .createSync(recursive: true);
             }
             publishRoot.childDirectory('flutter').childFile('index.html').createSync();
 
             final Directory widgetsDir = publishRoot
-                .childDirectory('flutter')
-                .childDirectory('widgets')
-                ..createSync(recursive: true);
+              .childDirectory('flutter')
+              .childDirectory('widgets')..createSync(recursive: true);
             widgetsDir.childFile('showGeneralDialog.html').writeAsStringSync('''
 <pre id="longSnippet1">
   <code class="language-dart">
     import &#39;package:flutter&#47;material.dart&#39;;
   </code>
 </pre>
-''',
-            );
+''');
             expect(publishRoot.childDirectory('flutter').existsSync(), isTrue);
-            (widgetsDir
-              .childDirectory('ModalRoute')
-              ..createSync(recursive: true))
-              .childFile('barrierColor.html')
-              .writeAsStringSync('''
+            (widgetsDir.childDirectory('ModalRoute')
+              ..createSync(recursive: true)).childFile('barrierColor.html').writeAsStringSync('''
 <pre id="sample-code">
   <code class="language-dart">
     class FooClass {
@@ -441,12 +595,13 @@ void main() {
   </code>
 </pre>
 ''');
-            const String queryParams = 'split=1&run=true&sample_id=widgets.Listener.123&sample_channel=master&channel=master';
+            const String queryParams =
+                'split=1&run=true&sample_id=widgets.Listener.123&channel=main';
             widgetsDir.childFile('Listener-class.html').writeAsStringSync('''
 <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?$queryParams">
 </iframe>
 ''');
-          }
+          },
         ),
       ]);
 

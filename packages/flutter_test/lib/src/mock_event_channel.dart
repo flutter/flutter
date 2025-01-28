@@ -16,14 +16,14 @@ import 'package:flutter/services.dart';
 /// - [MockStreamHandlerEventSink.endOfStream] sends an end of stream event.
 abstract class MockStreamHandler {
   /// Create a new [MockStreamHandler].
-  MockStreamHandler();
+  const MockStreamHandler();
 
   /// Create a new inline [MockStreamHandler] with the given [onListen] and
   /// [onCancel] handlers.
-  factory MockStreamHandler.inline({
+  const factory MockStreamHandler.inline({
     required MockStreamHandlerOnListenCallback onListen,
     MockStreamHandlerOnCancelCallback? onCancel,
-  }) => _InlineMockStreamHandler(onListen: onListen, onCancel: onCancel);
+  }) = _InlineMockStreamHandler;
 
   /// Handler for the listen event.
   void onListen(Object? arguments, MockStreamHandlerEventSink events);
@@ -33,23 +33,25 @@ abstract class MockStreamHandler {
 }
 
 /// Typedef for the inline onListen callback.
-typedef MockStreamHandlerOnListenCallback = void Function(Object? arguments, MockStreamHandlerEventSink events);
+typedef MockStreamHandlerOnListenCallback =
+    void Function(Object? arguments, MockStreamHandlerEventSink events);
 
 /// Typedef for the inline onCancel callback.
 typedef MockStreamHandlerOnCancelCallback = void Function(Object? arguments);
 
 class _InlineMockStreamHandler extends MockStreamHandler {
-  _InlineMockStreamHandler({
+  const _InlineMockStreamHandler({
     required MockStreamHandlerOnListenCallback onListen,
     MockStreamHandlerOnCancelCallback? onCancel,
-  })  : _onListenInline = onListen,
-        _onCancelInline = onCancel;
+  }) : _onListenInline = onListen,
+       _onCancelInline = onCancel;
 
   final MockStreamHandlerOnListenCallback _onListenInline;
   final MockStreamHandlerOnCancelCallback? _onCancelInline;
 
   @override
-  void onListen(Object? arguments, MockStreamHandlerEventSink events) => _onListenInline(arguments, events);
+  void onListen(Object? arguments, MockStreamHandlerEventSink events) =>
+      _onListenInline(arguments, events);
 
   @override
   void onCancel(Object? arguments) => _onCancelInline?.call(arguments);
@@ -68,11 +70,8 @@ class MockStreamHandlerEventSink {
   void success(Object? event) => _sink.add(event);
 
   /// Send an error event.
-  void error({
-    required String code,
-    String? message,
-    Object? details,
-  }) => _sink.addError(PlatformException(code: code, message: message, details: details));
+  void error({required String code, String? message, Object? details}) =>
+      _sink.addError(PlatformException(code: code, message: message, details: details));
 
   /// Send an end of stream event.
   void endOfStream() => _sink.close();

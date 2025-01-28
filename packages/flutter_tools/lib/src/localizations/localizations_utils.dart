@@ -8,6 +8,7 @@ import 'package:yaml/yaml.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../features.dart';
 import '../runner/flutter_command.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
@@ -15,7 +16,7 @@ import 'language_subtag_registry.dart';
 typedef HeaderGenerator = String Function(String regenerateInstructions);
 typedef ConstructorGenerator = String Function(LocaleInfo locale);
 
-int sortFilesByPath (File a, File b) {
+int sortFilesByPath(File a, File b) {
   return a.path.compareTo(b.path);
 }
 
@@ -38,7 +39,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   ///
   /// When `deriveScriptCode` is true, if [scriptCode] was unspecified, it will
   /// be derived from the [languageCode] and [countryCode] if possible.
-  factory LocaleInfo.fromString(String locale, { bool deriveScriptCode = false }) {
+  factory LocaleInfo.fromString(String locale, {bool deriveScriptCode = false}) {
     final List<String> codes = locale.split('_'); // [language, script, country]
     assert(codes.isNotEmpty && codes.length < 4);
     final String languageCode = codes[0];
@@ -64,29 +65,12 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     /// across various countries. For example, we know Taiwan uses traditional (Hant)
     /// script, so it is safe to apply (Hant) to Taiwanese languages.
     if (deriveScriptCode && scriptCode == null) {
-      switch (languageCode) {
-        case 'zh': {
-          if (countryCode == null) {
-            scriptCode = 'Hans';
-          }
-          switch (countryCode) {
-            case 'CN':
-            case 'SG':
-              scriptCode = 'Hans';
-            case 'TW':
-            case 'HK':
-            case 'MO':
-              scriptCode = 'Hant';
-          }
-          break;
-        }
-        case 'sr': {
-          if (countryCode == null) {
-            scriptCode = 'Cyrl';
-          }
-          break;
-        }
-      }
+      scriptCode = switch ((languageCode, countryCode)) {
+        ('zh', 'CN' || 'SG' || null) => 'Hans',
+        ('zh', 'TW' || 'HK' || 'MO') => 'Hant',
+        ('sr', null) => 'Cyrl',
+        _ => null,
+      };
       // Increment length if we were able to assume a scriptCode.
       if (scriptCode != null) {
         length += 1;
@@ -113,20 +97,21 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   final String languageCode;
   final String? scriptCode;
   final String? countryCode;
-  final int length;             // The number of fields. Ranges from 1-3.
-  final String originalString;  // Original un-parsed locale string.
+  final int length; // The number of fields. Ranges from 1-3.
+  final String originalString; // Original un-parsed locale string.
 
   String camelCase() {
     return originalString
-      .split('_')
-      .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
-      .join();
+        .split('_')
+        .map<String>(
+          (String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase(),
+        )
+        .join();
   }
 
   @override
   bool operator ==(Object other) {
-    return other is LocaleInfo
-        && other.originalString == originalString;
+    return other is LocaleInfo && other.originalString == originalString;
   }
 
   @override
@@ -178,12 +163,19 @@ const String kParentheticalPrefix = ' (';
 /// The data is obtained from the official IANA registry.
 void precacheLanguageAndRegionTags() {
   final List<Map<String, List<String>>> sections =
-      languageSubtagRegistry.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
+      languageSubtagRegistry
+          .split('%%')
+          .skip(1)
+          .map<Map<String, List<String>>>(_parseSection)
+          .toList();
   for (final Map<String, List<String>> section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type']!.single;
     if (type == 'language' || type == 'region' || type == 'script') {
-      assert(section.containsKey('Subtag') && section.containsKey('Description'), section.toString());
+      assert(
+        section.containsKey('Subtag') && section.containsKey('Description'),
+        section.toString(),
+      );
       final String subtag = section['Subtag']!.single;
       String description = section['Description']!.join(' ');
       if (description.startsWith('United ')) {
@@ -245,7 +237,7 @@ String describeLocale(String tag) {
 
 /// Return the input string as a Dart-parsable string.
 ///
-/// ```
+/// ```none
 /// foo => 'foo'
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
@@ -257,7 +249,7 @@ String describeLocale(String tag) {
 /// in JSON files are escaped. For example, the backspace character (\b)
 /// has to be properly escaped by this function so that the generated
 /// Dart code correctly represents this character:
-/// ```
+/// ```none
 /// foo\bar => 'foo\\bar'
 /// foo\nbar => 'foo\\nbar'
 /// foo\\nbar => 'foo\\\\nbar'
@@ -271,23 +263,23 @@ String generateString(String value) {
     !value.contains(backslash),
     'Input string cannot contain the sequence: '
     '"__BACKSLASH__", as it is used as part of '
-    'backslash character processing.'
+    'backslash character processing.',
   );
 
   value = value
-    // Replace backslashes with a placeholder for now to properly parse
-    // other special characters.
-    .replaceAll(r'\', backslash)
-    .replaceAll(r'$', r'\$')
-    .replaceAll("'", r"\'")
-    .replaceAll('"', r'\"')
-    .replaceAll('\n', r'\n')
-    .replaceAll('\f', r'\f')
-    .replaceAll('\t', r'\t')
-    .replaceAll('\r', r'\r')
-    .replaceAll('\b', r'\b')
-    // Reintroduce escaped backslashes into generated Dart string.
-    .replaceAll(backslash, r'\\');
+      // Replace backslashes with a placeholder for now to properly parse
+      // other special characters.
+      .replaceAll(r'\', backslash)
+      .replaceAll(r'$', r'\$')
+      .replaceAll("'", r"\'")
+      .replaceAll('"', r'\"')
+      .replaceAll('\n', r'\n')
+      .replaceAll('\f', r'\f')
+      .replaceAll('\t', r'\t')
+      .replaceAll('\r', r'\r')
+      .replaceAll('\b', r'\b')
+      // Reintroduce escaped backslashes into generated Dart string.
+      .replaceAll(backslash, r'\\');
 
   return value;
 }
@@ -311,7 +303,7 @@ String generateString(String value) {
 /// 3. If one string in [expressions] is an interpolation and the next begins
 ///    with an alphanumeric character, then the former interpolation should be
 ///    wrapped in braces e.g. ["'$expr1'", "'another'"] -> "'${expr1}another'".
-String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = false }) {
+String generateReturnExpr(List<String> expressions, {bool isSingleStringVar = false}) {
   if (expressions.isEmpty) {
     return "''";
   } else if (isSingleStringVar) {
@@ -323,7 +315,8 @@ String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = f
         return expression + string;
       }
       final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
-      if (alphanumeric.hasMatch(expression.substring(1)) && !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
+      if (alphanumeric.hasMatch(expression.substring(1)) &&
+          !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
         return '$expression$string';
       } else {
         return '\${${expression.substring(1)}}$string';
@@ -378,7 +371,6 @@ class LocalizationOptions {
   ///
   /// The directory where all output localization files should be generated.
   final String? outputDir;
-
 
   /// The `--template-arb-file` argument.
   ///
@@ -488,6 +480,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
   required File file,
   required Logger logger,
   required String defaultArbDir,
+  required bool defaultSyntheticPackage,
 }) {
   final String contents = file.readAsStringSync();
   if (contents.trim().isEmpty) {
@@ -514,7 +507,8 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     headerFile: _tryReadUri(yamlNode, 'header-file', logger)?.path,
     useDeferredLoading: _tryReadBool(yamlNode, 'use-deferred-loading', logger),
     preferredSupportedLocales: _tryReadStringList(yamlNode, 'preferred-supported-locales', logger),
-    syntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger),
+    syntheticPackage:
+        _tryReadBool(yamlNode, 'synthetic-package', logger) ?? defaultSyntheticPackage,
     requiredResourceAttributes: _tryReadBool(yamlNode, 'required-resource-attributes', logger),
     nullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger),
     format: _tryReadBool(yamlNode, 'format', logger),
@@ -530,6 +524,15 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
   required FlutterCommand command,
   required String defaultArbDir,
 }) {
+  // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/102983.
+  final bool syntheticPackage;
+  if (command.argResults!.wasParsed('synthetic-package')) {
+    // If provided explicitly, use the explicit value.
+    syntheticPackage = command.boolArg('synthetic-package');
+  } else {
+    // Otherwise, inherit from whatever the reverse of flutter config --explicit-package-dependencies.
+    syntheticPackage = !featureFlags.isExplicitPackageDependenciesEnabled;
+  }
   return LocalizationOptions(
     arbDir: command.stringArg('arb-dir') ?? defaultArbDir,
     outputDir: command.stringArg('output-dir'),
@@ -541,7 +544,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     headerFile: command.stringArg('header-file'),
     useDeferredLoading: command.boolArg('use-deferred-loading'),
     genInputsAndOutputsList: command.stringArg('gen-inputs-and-outputs-list'),
-    syntheticPackage: command.boolArg('synthetic-package'),
+    syntheticPackage: syntheticPackage,
     projectDir: command.stringArg('project-dir'),
     requiredResourceAttributes: command.boolArg('required-resource-attributes'),
     nullableGetter: command.boolArg('nullable-getter'),

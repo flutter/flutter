@@ -2,107 +2,42 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
+import 'tabs_utils.dart';
 
-Widget boilerplate({ Widget? child, TextDirection textDirection = TextDirection.ltr, bool? useMaterial3, TabBarTheme? tabBarTheme }) {
+Widget boilerplate({
+  Widget? child,
+  TextDirection textDirection = TextDirection.ltr,
+  ThemeData? theme,
+  TabBarThemeData? tabBarTheme,
+  bool? useMaterial3,
+}) {
   return Theme(
-    data: ThemeData(useMaterial3: useMaterial3, tabBarTheme: tabBarTheme),
+    data: theme ?? ThemeData(useMaterial3: useMaterial3, tabBarTheme: tabBarTheme),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultMaterialLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-      child: Directionality(
-        textDirection: textDirection,
-        child: Material(
-          child: child,
-        ),
-      ),
+      child: Directionality(textDirection: textDirection, child: Material(child: child)),
     ),
   );
-}
-
-class StateMarker extends StatefulWidget {
-  const StateMarker({ super.key, this.child });
-
-  final Widget? child;
-
-  @override
-  StateMarkerState createState() => StateMarkerState();
-}
-
-class StateMarkerState extends State<StateMarker> {
-  String? marker;
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.child != null) {
-      return widget.child!;
-    }
-    return Container();
-  }
-}
-
-class AlwaysKeepAliveWidget extends StatefulWidget {
-  const AlwaysKeepAliveWidget({ super.key});
-  static String text = 'AlwaysKeepAlive';
-  @override
-  AlwaysKeepAliveState createState() => AlwaysKeepAliveState();
-}
-
-class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return Text(AlwaysKeepAliveWidget.text);
-  }
-}
-
-class _NestedTabBarContainer extends StatelessWidget {
-  const _NestedTabBarContainer({
-    this.tabController,
-  });
-
-  final TabController? tabController;
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Colors.blue,
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            controller: tabController,
-            tabs: const <Tab>[
-              Tab(text: 'Yellow'),
-              Tab(text: 'Grey'),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: tabController,
-              children: <Widget>[
-                Container(color: Colors.yellow),
-                Container(color: Colors.grey),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 Widget buildFrame({
@@ -116,7 +51,8 @@ Widget buildFrame({
   EdgeInsetsGeometry? padding,
   TextDirection textDirection = TextDirection.ltr,
   TabAlignment? tabAlignment,
-  TabBarTheme? tabBarTheme,
+  TabBarThemeData? tabBarTheme,
+  Decoration? indicator,
   bool? useMaterial3,
 }) {
   if (secondaryTabBar) {
@@ -155,55 +91,18 @@ Widget buildFrame({
         indicatorColor: indicatorColor,
         padding: padding,
         tabAlignment: tabAlignment,
+        indicator: indicator,
       ),
     ),
   );
 }
 
-typedef TabControllerFrameBuilder = Widget Function(BuildContext context, TabController controller);
-
-class TabControllerFrame extends StatefulWidget {
-  const TabControllerFrame({
-    super.key,
-    required this.length,
-    this.initialIndex = 0,
-    required this.builder,
-  });
-
-  final int length;
-  final int initialIndex;
-  final TabControllerFrameBuilder builder;
-
-  @override
-  TabControllerFrameState createState() => TabControllerFrameState();
-}
-
-class TabControllerFrameState extends State<TabControllerFrame> with SingleTickerProviderStateMixin {
-  late TabController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TabController(
-      vsync: this,
-      length: widget.length,
-      initialIndex: widget.initialIndex,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.builder(context, _controller);
-  }
-}
-
-Widget buildLeftRightApp({required List<String> tabs, required String value, bool automaticIndicatorColorAdjustment = true, ThemeData? themeData}) {
+Widget buildLeftRightApp({
+  required List<String> tabs,
+  required String value,
+  bool automaticIndicatorColorAdjustment = true,
+  ThemeData? themeData,
+}) {
   return MaterialApp(
     theme: themeData ?? ThemeData(platform: TargetPlatform.android),
     home: DefaultTabController(
@@ -218,63 +117,11 @@ Widget buildLeftRightApp({required List<String> tabs, required String value, boo
           ),
         ),
         body: const TabBarView(
-          children: <Widget>[
-            Center(child: Text('LEFT CHILD')),
-            Center(child: Text('RIGHT CHILD')),
-          ],
+          children: <Widget>[Center(child: Text('LEFT CHILD')), Center(child: Text('RIGHT CHILD'))],
         ),
       ),
     ),
   );
-}
-
-class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
-  TabIndicatorRecordingCanvas(this.indicatorColor);
-
-  final Color indicatorColor;
-  late Rect indicatorRect;
-
-  @override
-  void drawLine(Offset p1, Offset p2, Paint paint) {
-    // Assuming that the indicatorWeight is 2.0, the default.
-    const double indicatorWeight = 2.0;
-    if (paint.color == indicatorColor) {
-      indicatorRect = Rect.fromPoints(p1, p2).inflate(indicatorWeight / 2.0);
-    }
-  }
-}
-
-class TestScrollPhysics extends ScrollPhysics {
-  const TestScrollPhysics({ super.parent });
-
-  @override
-  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return TestScrollPhysics(parent: buildParent(ancestor));
-  }
-
-  @override
-  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
-    return offset == 10 ? 20 : offset;
-  }
-
-  static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
-    mass: 0.5,
-    stiffness: 500.0,
-    ratio: 1.1,
-  );
-
-  @override
-  SpringDescription get spring => _kDefaultSpring;
-}
-
-RenderParagraph _getText(WidgetTester tester, String text) {
-  return  tester.renderObject<RenderParagraph>(find.text(text));
-}
-
-TabController _tabController({required int length, required TickerProvider vsync, int initialIndex = 0, Duration? animationDuration}) {
-  final TabController result = TabController(length: length, vsync: vsync, initialIndex: initialIndex, animationDuration: animationDuration);
-  addTearDown(result.dispose);
-  return result;
 }
 
 void main() {
@@ -287,40 +134,47 @@ void main() {
     const Tab tab = Tab(text: 'A');
     const EdgeInsets indicatorPadding = EdgeInsets.only(left: 7.0, right: 7.0);
 
-    await tester.pumpWidget(boilerplate(
-      child: const DefaultTabController(
-        length: 1,
-        child: TabBar(
-          tabs: <Tab>[tab],
-          indicatorPadding: indicatorPadding,
+    await tester.pumpWidget(
+      boilerplate(
+        child: const DefaultTabController(
+          length: 1,
+          child: TabBar(tabs: <Tab>[tab], indicatorPadding: indicatorPadding),
         ),
       ),
-    ));
+    );
 
     // Change the indicatorPadding
-    await tester.pumpWidget(boilerplate(
-      child: DefaultTabController(
-        length: 1,
-        child: TabBar(
-          tabs: const <Tab>[tab],
-          indicatorPadding: indicatorPadding + const EdgeInsets.all(7.0),
+    await tester.pumpWidget(
+      boilerplate(
+        child: DefaultTabController(
+          length: 1,
+          child: TabBar(
+            tabs: const <Tab>[tab],
+            indicatorPadding: indicatorPadding + const EdgeInsets.all(7.0),
+          ),
         ),
       ),
-    ), duration: Duration.zero, phase: EnginePhase.build);
+      duration: Duration.zero,
+      phase: EnginePhase.build,
+    );
 
     expect(tester.renderObject(find.byType(CustomPaint)).debugNeedsPaint, true);
   });
 
   testWidgets('Tab sizing - icon', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0))))),
+      const MaterialApp(
+        home: Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0)))),
+      ),
     );
     expect(tester.getSize(find.byType(Tab)), const Size(10.0, 46.0));
   });
 
   testWidgets('Tab sizing - child', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Center(child: Material(child: Tab(child: SizedBox(width: 10.0, height: 10.0))))),
+      const MaterialApp(
+        home: Center(child: Material(child: Tab(child: SizedBox(width: 10.0, height: 10.0)))),
+      ),
     );
     expect(tester.getSize(find.byType(Tab)), const Size(10.0, 46.0));
   });
@@ -331,7 +185,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(theme: theme, home: const Center(child: Material(child: Tab(text: 'x')))),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
+    expect(
+      tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily,
+      'FlutterTest',
+    );
     expect(
       tester.getSize(find.byType(Tab)),
       material3 ? const Size(14.25, 46.0) : const Size(14.0, 46.0),
@@ -342,12 +199,21 @@ void main() {
     final ThemeData theme = ThemeData(fontFamily: 'FlutterTest');
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
-      MaterialApp(theme: theme, home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), text: 'x')))),
+      MaterialApp(
+        theme: theme,
+        home: const Center(
+          child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), text: 'x')),
+        ),
+      ),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
+    expect(
+      tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily,
+      'FlutterTest',
+    );
     expect(
       tester.getSize(find.byType(Tab)),
-      material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0));
+      material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0),
+    );
   });
 
   testWidgets('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
@@ -357,20 +223,18 @@ void main() {
         home: const Center(
           child: Material(
             child: Tab(
-              icon: SizedBox(
-                width: 10.0,
-                height: 10.0,
-              ),
-              iconMargin: EdgeInsets.symmetric(
-                horizontal: 100.0,
-              ),
+              icon: SizedBox(width: 10.0, height: 10.0),
+              iconMargin: EdgeInsets.symmetric(horizontal: 100.0),
               text: 'x',
             ),
           ),
         ),
       ),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
+    expect(
+      tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily,
+      'FlutterTest',
+    );
     expect(tester.getSize(find.byType(Tab)), const Size(210.0, 72.0));
   });
 
@@ -378,24 +242,30 @@ void main() {
     final ThemeData theme = ThemeData(fontFamily: 'FlutterTest');
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
-      MaterialApp(theme: theme, home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), child: Text('x'))))),
+      MaterialApp(
+        theme: theme,
+        home: const Center(
+          child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), child: Text('x'))),
+        ),
+      ),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
+    expect(
+      tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily,
+      'FlutterTest',
+    );
     expect(
       tester.getSize(find.byType(Tab)),
-      material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0));
+      material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0),
+    );
   });
 
   testWidgets('Material2 - Default Tab iconMargin', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: false),
-      home: const Material(
-        child: Tab(
-          icon: Icon(Icons.house),
-          text: 'x',
-        ),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Material(child: Tab(icon: Icon(Icons.house), text: 'x')),
       ),
-    ));
+    );
 
     double getIconMargin() {
       final Rect iconRect = tester.getRect(find.byIcon(Icons.house));
@@ -407,14 +277,9 @@ void main() {
   });
 
   testWidgets('Material3 - Default Tab iconMargin', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Material(
-        child: Tab(
-          icon: Icon(Icons.house),
-          text: 'x',
-        ),
-      ),
-    ));
+    await tester.pumpWidget(
+      const MaterialApp(home: Material(child: Tab(icon: Icon(Icons.house), text: 'x'))),
+    );
 
     double getIconMargin() {
       final Rect iconRect = tester.getRect(find.byIcon(Icons.house));
@@ -428,34 +293,52 @@ void main() {
   testWidgets('Tab color - normal', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(fontFamily: 'FlutterTest');
     final bool material3 = theme.useMaterial3;
-    final Widget tabBar = TabBar(tabs: const <Widget>[SizedBox.shrink()], controller: _tabController(length: 1, vsync: tester));
-    await tester.pumpWidget(
-      MaterialApp(theme: theme, home: Material(child: tabBar)),
+    final Widget tabBar = TabBar(
+      tabs: const <Widget>[SizedBox.shrink()],
+      controller: createTabController(length: 1, vsync: tester),
     );
-    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.blue[500]));
+    await tester.pumpWidget(MaterialApp(theme: theme, home: Material(child: tabBar)));
+    expect(
+      find.byType(TabBar),
+      paints..line(color: material3 ? theme.colorScheme.outlineVariant : Colors.blue[500]),
+    );
   });
 
   testWidgets('Tab color - match', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final bool material3 = theme.useMaterial3;
-    final Widget tabBar = TabBar(tabs: const <Widget>[SizedBox.shrink()], controller: _tabController(length: 1, vsync: tester));
+    final Widget tabBar = TabBar(
+      tabs: const <Widget>[SizedBox.shrink()],
+      controller: createTabController(length: 1, vsync: tester),
+    );
     await tester.pumpWidget(
       MaterialApp(theme: theme, home: Material(color: const Color(0xff2196f3), child: tabBar)),
     );
-    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.white));
+    expect(
+      find.byType(TabBar),
+      paints..line(color: material3 ? theme.colorScheme.outlineVariant : Colors.white),
+    );
   });
 
   testWidgets('Tab color - transparency', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final bool material3 = theme.useMaterial3;
-    final Widget tabBar = TabBar(tabs: const <Widget>[SizedBox.shrink()], controller: _tabController(length: 1, vsync: tester));
+    final Widget tabBar = TabBar(
+      tabs: const <Widget>[SizedBox.shrink()],
+      controller: createTabController(length: 1, vsync: tester),
+    );
     await tester.pumpWidget(
       MaterialApp(theme: theme, home: Material(type: MaterialType.transparency, child: tabBar)),
     );
-    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.blue[500]));
+    expect(
+      find.byType(TabBar),
+      paints..line(color: material3 ? theme.colorScheme.outlineVariant : Colors.blue[500]),
+    );
   });
 
-  testWidgets('TabBar default selected/unselected label style (primary)', (WidgetTester tester) async {
+  testWidgets('TabBar default selected/unselected label style (primary)', (
+    WidgetTester tester,
+  ) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
@@ -469,114 +352,138 @@ void main() {
     expect(find.text('C'), findsOneWidget);
 
     // Test selected label text style.
-    final RenderParagraph selectedLabel = _getText(tester, selectedValue);
+    final RenderParagraph selectedLabel = getTabText(tester, selectedValue);
     expect(selectedLabel.text.style!.fontFamily, 'Roboto');
     expect(selectedLabel.text.style!.fontSize, 14.0);
     expect(selectedLabel.text.style!.color, theme.colorScheme.primary);
 
     // Test unselected label text style.
-    final RenderParagraph unselectedLabel = _getText(tester, unselectedValue);
+    final RenderParagraph unselectedLabel = getTabText(tester, unselectedValue);
     expect(unselectedLabel.text.style!.fontFamily, 'Roboto');
     expect(unselectedLabel.text.style!.fontSize, 14.0);
     expect(unselectedLabel.text.style!.color, theme.colorScheme.onSurfaceVariant);
   });
 
-  testWidgets('TabBar default selected/unselected label style (secondary)', (WidgetTester tester) async {
+  testWidgets('TabBar default selected/unselected label style (secondary)', (
+    WidgetTester tester,
+  ) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
     const String selectedValue = 'A';
     const String unselectedValue = 'C';
     await tester.pumpWidget(
-      buildFrame(tabs: tabs, value: selectedValue, secondaryTabBar: true, useMaterial3: theme.useMaterial3),
+      buildFrame(
+        tabs: tabs,
+        value: selectedValue,
+        secondaryTabBar: true,
+        useMaterial3: theme.useMaterial3,
+      ),
     );
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
 
     // Test selected label text style.
-    final RenderParagraph selectedLabel = _getText(tester, selectedValue);
+    final RenderParagraph selectedLabel = getTabText(tester, selectedValue);
     expect(selectedLabel.text.style!.fontFamily, 'Roboto');
     expect(selectedLabel.text.style!.fontSize, 14.0);
     expect(selectedLabel.text.style!.color, theme.colorScheme.onSurface);
 
     // Test unselected label text style.
-    final RenderParagraph unselectedLabel = _getText(tester, unselectedValue);
+    final RenderParagraph unselectedLabel = getTabText(tester, unselectedValue);
     expect(unselectedLabel.text.style!.fontFamily, 'Roboto');
     expect(unselectedLabel.text.style!.fontSize, 14.0);
     expect(unselectedLabel.text.style!.color, theme.colorScheme.onSurfaceVariant);
   });
 
   testWidgets('TabBar default tab indicator (primary)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
       return Tab(text: 'Tab $index');
     });
-
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
+    const double indicatorWeightLabel = 3.0;
+    const double indicatorWeightTab = 2.0;
 
-    await tester.pumpWidget(
-      MaterialApp(
+    Widget buildTab({TabBarIndicatorSize? indicatorSize}) {
+      return MaterialApp(
         home: boilerplate(
-          useMaterial3: theme.useMaterial3,
+          theme: theme,
           child: Container(
             alignment: Alignment.topLeft,
-            child: TabBar(
-              controller: controller,
-              tabs: tabs,
-            ),
+            child: TabBar(indicatorSize: indicatorSize, controller: controller, tabs: tabs),
           ),
         ),
-      ),
-    );
+      );
+    }
 
-    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    // Test default tab indicator (TabBarIndicatorSize.label).
+    await tester.pumpWidget(buildTab());
+
+    RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox.size.height, 48.0);
 
-    const double indicatorWeight = 3.0;
-
+    // Check tab indicator size and color.
     final RRect rrect = RRect.fromLTRBAndCorners(
       64.75,
-      tabBarBox.size.height - indicatorWeight,
+      tabBarBox.size.height - indicatorWeightLabel,
       135.25,
       tabBarBox.size.height,
       topLeft: const Radius.circular(3.0),
       topRight: const Radius.circular(3.0),
     );
+    expect(tabBarBox, paints..rrect(color: theme.colorScheme.primary, rrect: rrect));
 
+    // Test default tab indicator (TabBarIndicatorSize.tab).
+    await tester.pumpWidget(buildTab(indicatorSize: TabBarIndicatorSize.tab));
+    await tester.pumpAndSettle();
+
+    tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 48.0);
+
+    const double indicatorY = 48 - (indicatorWeightTab / 2.0);
+    const double indicatorLeft = indicatorWeightTab / 2.0;
+    const double indicatorRight = 200.0 - (indicatorWeightTab / 2.0);
+
+    // Check tab indicator size and color.
     expect(
       tabBarBox,
       paints
-        ..rrect(
+        // Divider.
+        ..line(color: theme.colorScheme.outlineVariant)
+        // Tab indicator.
+        ..line(
           color: theme.colorScheme.primary,
-          rrect: rrect,
-    ));
+          strokeWidth: indicatorWeightTab,
+          p1: const Offset(indicatorLeft, indicatorY),
+          p2: const Offset(indicatorRight, indicatorY),
+        ),
+    );
   });
 
   testWidgets('TabBar default tab indicator (secondary)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
       return Tab(text: 'Tab $index');
     });
-
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
+    const double indicatorWeight = 2.0;
 
+    // Test default tab indicator.
     await tester.pumpWidget(
       MaterialApp(
         home: boilerplate(
-          useMaterial3: theme.useMaterial3,
+          theme: theme,
           child: Container(
             alignment: Alignment.topLeft,
-            child: TabBar.secondary(
-              controller: controller,
-              tabs: tabs,
-            ),
+            child: TabBar.secondary(controller: controller, tabs: tabs),
           ),
         ),
       ),
@@ -585,26 +492,24 @@ void main() {
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox.size.height, 48.0);
 
-    const double indicatorWeight = 2.0;
     const double indicatorY = 48 - (indicatorWeight / 2.0);
-    const double indicatorLeft =  indicatorWeight / 2.0;
+    const double indicatorLeft = indicatorWeight / 2.0;
     const double indicatorRight = 200.0 - (indicatorWeight / 2.0);
 
+    // Check tab indicator size and color.
     expect(
       tabBarBox,
       paints
-        // Divider
-        ..line(
-          color: theme.colorScheme.surfaceVariant,
-        )
-        // Tab indicator
+        // Divider.
+        ..line(color: theme.colorScheme.outlineVariant)
+        // Tab indicator.
         ..line(
           color: theme.colorScheme.primary,
           strokeWidth: indicatorWeight,
           p1: const Offset(indicatorLeft, indicatorY),
           p2: const Offset(indicatorRight, indicatorY),
         ),
-      );
+    );
   });
 
   testWidgets('TabBar default overlay (primary)', (WidgetTester tester) async {
@@ -618,7 +523,9 @@ void main() {
     );
 
     RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+      return tester.allRenderObjects.firstWhere(
+        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
+      );
     }
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -629,7 +536,12 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    expect(
+      overlayColor(),
+      paints
+        ..rect()
+        ..rect(color: theme.colorScheme.primary.withOpacity(0.1)),
+    );
     await gesture.up();
     await tester.pumpAndSettle();
 
@@ -639,7 +551,12 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    expect(
+      overlayColor(),
+      paints
+        ..rect()
+        ..rect(color: theme.colorScheme.primary.withOpacity(0.1)),
+    );
     await gesture.up();
     await tester.pumpAndSettle();
   });
@@ -651,11 +568,18 @@ void main() {
     const String selectedValue = 'A';
     const String unselectedValue = 'B';
     await tester.pumpWidget(
-      buildFrame(tabs: tabs, value: selectedValue, secondaryTabBar: true, useMaterial3: theme.useMaterial3),
+      buildFrame(
+        tabs: tabs,
+        value: selectedValue,
+        secondaryTabBar: true,
+        useMaterial3: theme.useMaterial3,
+      ),
     );
 
     RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+      return tester.allRenderObjects.firstWhere(
+        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
+      );
     }
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -666,7 +590,12 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(
+      overlayColor(),
+      paints
+        ..rect()
+        ..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+    );
     await gesture.up();
     await tester.pumpAndSettle();
 
@@ -676,7 +605,12 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(
+      overlayColor(),
+      paints
+        ..rect()
+        ..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+    );
   });
 
   testWidgets('TabBar tap selects tab', (WidgetTester tester) async {
@@ -739,16 +673,33 @@ void main() {
     expect(controller.index, 0);
   });
 
-  testWidgets('Material2 - Scrollable TabBar tap centers selected tab', (WidgetTester tester) async {
-    final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
+  testWidgets('Material2 - Scrollable TabBar tap centers selected tab', (
+    WidgetTester tester,
+  ) async {
+    final List<String> tabs = <String>[
+      'AAAAAA',
+      'BBBBBB',
+      'CCCCCC',
+      'DDDDDD',
+      'EEEEEE',
+      'FFFFFF',
+      'GGGGGG',
+      'HHHHHH',
+      'IIIIII',
+      'JJJJJJ',
+      'KKKKKK',
+      'LLLLLL',
+    ];
     const Key tabBarKey = Key('TabBar');
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'AAAAAA',
-      isScrollable: true,
-      tabBarKey: tabBarKey,
-      useMaterial3: false,
-    ));
+    await tester.pumpWidget(
+      buildFrame(
+        tabs: tabs,
+        value: 'AAAAAA',
+        isScrollable: true,
+        tabBarKey: tabBarKey,
+        useMaterial3: false,
+      ),
+    );
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
@@ -764,16 +715,33 @@ void main() {
     expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(400.0, epsilon: 1.0));
   });
 
-  testWidgets('Material3 - Scrollable TabBar tap centers selected tab', (WidgetTester tester) async {
-    final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
+  testWidgets('Material3 - Scrollable TabBar tap centers selected tab', (
+    WidgetTester tester,
+  ) async {
+    final List<String> tabs = <String>[
+      'AAAAAA',
+      'BBBBBB',
+      'CCCCCC',
+      'DDDDDD',
+      'EEEEEE',
+      'FFFFFF',
+      'GGGGGG',
+      'HHHHHH',
+      'IIIIII',
+      'JJJJJJ',
+      'KKKKKK',
+      'LLLLLL',
+    ];
     const Key tabBarKey = Key('TabBar');
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'AAAAAA',
-      isScrollable: true,
-      tabBarKey: tabBarKey,
-      useMaterial3: true,
-    ));
+    await tester.pumpWidget(
+      buildFrame(
+        tabs: tabs,
+        value: 'AAAAAA',
+        isScrollable: true,
+        tabBarKey: tabBarKey,
+        useMaterial3: true,
+      ),
+    );
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
@@ -789,19 +757,36 @@ void main() {
     expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(452.0, epsilon: 1.0));
   });
 
-  testWidgets('Material2 - Scrollable TabBar, with padding, tap centers selected tab', (WidgetTester tester) async {
+  testWidgets('Material2 - Scrollable TabBar, with padding, tap centers selected tab', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/112776
-    final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
+    final List<String> tabs = <String>[
+      'AAAAAA',
+      'BBBBBB',
+      'CCCCCC',
+      'DDDDDD',
+      'EEEEEE',
+      'FFFFFF',
+      'GGGGGG',
+      'HHHHHH',
+      'IIIIII',
+      'JJJJJJ',
+      'KKKKKK',
+      'LLLLLL',
+    ];
     const Key tabBarKey = Key('TabBar');
     const EdgeInsetsGeometry padding = EdgeInsets.only(right: 30, left: 60);
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'AAAAAA',
-      isScrollable: true,
-      tabBarKey: tabBarKey,
-      padding: padding,
-      useMaterial3: false,
-    ));
+    await tester.pumpWidget(
+      buildFrame(
+        tabs: tabs,
+        value: 'AAAAAA',
+        isScrollable: true,
+        tabBarKey: tabBarKey,
+        padding: padding,
+        useMaterial3: false,
+      ),
+    );
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
@@ -817,19 +802,36 @@ void main() {
     expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(400.0, epsilon: 1.0));
   });
 
-  testWidgets('Material3 - Scrollable TabBar, with padding, tap centers selected tab', (WidgetTester tester) async {
+  testWidgets('Material3 - Scrollable TabBar, with padding, tap centers selected tab', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/112776
-    final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
+    final List<String> tabs = <String>[
+      'AAAAAA',
+      'BBBBBB',
+      'CCCCCC',
+      'DDDDDD',
+      'EEEEEE',
+      'FFFFFF',
+      'GGGGGG',
+      'HHHHHH',
+      'IIIIII',
+      'JJJJJJ',
+      'KKKKKK',
+      'LLLLLL',
+    ];
     const Key tabBarKey = Key('TabBar');
     const EdgeInsetsGeometry padding = EdgeInsets.only(right: 30, left: 60);
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'AAAAAA',
-      isScrollable: true,
-      tabBarKey: tabBarKey,
-      padding: padding,
-      useMaterial3: true,
-    ));
+    await tester.pumpWidget(
+      buildFrame(
+        tabs: tabs,
+        value: 'AAAAAA',
+        isScrollable: true,
+        tabBarKey: tabBarKey,
+        padding: padding,
+        useMaterial3: true,
+      ),
+    );
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
@@ -845,74 +847,127 @@ void main() {
     expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(452.0, epsilon: 1.0));
   });
 
-  testWidgets('Material2 - Scrollable TabBar, with padding and TextDirection.rtl, tap centers selected tab', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/112776
-    final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
+  testWidgets(
+    'Material2 - Scrollable TabBar, with padding and TextDirection.rtl, tap centers selected tab',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/112776
+      final List<String> tabs = <String>[
+        'AAAAAA',
+        'BBBBBB',
+        'CCCCCC',
+        'DDDDDD',
+        'EEEEEE',
+        'FFFFFF',
+        'GGGGGG',
+        'HHHHHH',
+        'IIIIII',
+        'JJJJJJ',
+        'KKKKKK',
+        'LLLLLL',
+      ];
+      const Key tabBarKey = Key('TabBar');
+      const EdgeInsetsGeometry padding = EdgeInsets.only(right: 30, left: 60);
+      await tester.pumpWidget(
+        buildFrame(
+          tabs: tabs,
+          value: 'AAAAAA',
+          isScrollable: true,
+          tabBarKey: tabBarKey,
+          padding: padding,
+          textDirection: TextDirection.rtl,
+          useMaterial3: false,
+        ),
+      );
+      final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
+      expect(controller, isNotNull);
+      expect(controller.index, 0);
+
+      expect(tester.getSize(find.byKey(tabBarKey)).width, equals(800.0));
+      // The center of the FFFFFF item is to the left of the TabBar's center
+      expect(tester.getCenter(find.text('FFFFFF')).dx, lessThan(401.0));
+
+      await tester.tap(find.text('FFFFFF'));
+      await tester.pumpAndSettle();
+      expect(controller.index, 5);
+      // The center of the FFFFFF item is now at the TabBar's center
+      expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(400.0, epsilon: 1.0));
+    },
+  );
+
+  testWidgets(
+    'Material3 - Scrollable TabBar, with padding and TextDirection.rtl, tap centers selected tab',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/112776
+      final List<String> tabs = <String>[
+        'AAAAAA',
+        'BBBBBB',
+        'CCCCCC',
+        'DDDDDD',
+        'EEEEEE',
+        'FFFFFF',
+        'GGGGGG',
+        'HHHHHH',
+        'IIIIII',
+        'JJJJJJ',
+        'KKKKKK',
+        'LLLLLL',
+      ];
+      const Key tabBarKey = Key('TabBar');
+      const EdgeInsetsGeometry padding = EdgeInsets.only(right: 30, left: 60);
+      await tester.pumpWidget(
+        buildFrame(
+          tabs: tabs,
+          value: 'AAAAAA',
+          isScrollable: true,
+          tabBarKey: tabBarKey,
+          padding: padding,
+          textDirection: TextDirection.rtl,
+          useMaterial3: true,
+        ),
+      );
+      final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
+      expect(controller, isNotNull);
+      expect(controller.index, 0);
+
+      expect(tester.getSize(find.byKey(tabBarKey)).width, equals(800.0));
+      // The center of the FFFFFF item is to the left of the TabBar's center
+      expect(tester.getCenter(find.text('FFFFFF')).dx, lessThan(401.0));
+
+      await tester.tap(find.text('FFFFFF'));
+      await tester.pumpAndSettle();
+      expect(controller.index, 5);
+      // The center of the FFFFFF item is now at the TabBar's center
+      expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(348.0, epsilon: 1.0));
+    },
+  );
+
+  testWidgets('Material2 - TabBar can be scrolled independent of the selection', (
+    WidgetTester tester,
+  ) async {
+    final List<String> tabs = <String>[
+      'AAAA',
+      'BBBB',
+      'CCCC',
+      'DDDD',
+      'EEEE',
+      'FFFF',
+      'GGGG',
+      'HHHH',
+      'IIII',
+      'JJJJ',
+      'KKKK',
+      'LLLL',
+    ];
     const Key tabBarKey = Key('TabBar');
-    const EdgeInsetsGeometry padding = EdgeInsets.only(right: 30, left: 60);
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'AAAAAA',
-      isScrollable: true,
-      tabBarKey: tabBarKey,
-      padding: padding,
-      textDirection: TextDirection.rtl,
-      useMaterial3: false,
-    ));
-    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
-    expect(controller, isNotNull);
-    expect(controller.index, 0);
-
-    expect(tester.getSize(find.byKey(tabBarKey)).width, equals(800.0));
-    // The center of the FFFFFF item is to the left of the TabBar's center
-    expect(tester.getCenter(find.text('FFFFFF')).dx, lessThan(401.0));
-
-    await tester.tap(find.text('FFFFFF'));
-    await tester.pumpAndSettle();
-    expect(controller.index, 5);
-    // The center of the FFFFFF item is now at the TabBar's center
-    expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(400.0, epsilon: 1.0));
-  });
-
-  testWidgets('Material3 - Scrollable TabBar, with padding and TextDirection.rtl, tap centers selected tab', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/112776
-    final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
-    const Key tabBarKey = Key('TabBar');
-    const EdgeInsetsGeometry padding = EdgeInsets.only(right: 30, left: 60);
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'AAAAAA',
-      isScrollable: true,
-      tabBarKey: tabBarKey,
-      padding: padding,
-      textDirection: TextDirection.rtl,
-      useMaterial3: true,
-    ));
-    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
-    expect(controller, isNotNull);
-    expect(controller.index, 0);
-
-    expect(tester.getSize(find.byKey(tabBarKey)).width, equals(800.0));
-    // The center of the FFFFFF item is to the left of the TabBar's center
-    expect(tester.getCenter(find.text('FFFFFF')).dx, lessThan(401.0));
-
-    await tester.tap(find.text('FFFFFF'));
-    await tester.pumpAndSettle();
-    expect(controller.index, 5);
-    // The center of the FFFFFF item is now at the TabBar's center
-    expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(348.0, epsilon: 1.0));
-  });
-
-  testWidgets('Material2 - TabBar can be scrolled independent of the selection', (WidgetTester tester) async {
-    final List<String> tabs = <String>['AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF', 'GGGG', 'HHHH', 'IIII', 'JJJJ', 'KKKK', 'LLLL'];
-    const Key tabBarKey = Key('TabBar');
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'AAAA',
-      isScrollable: true,
-      tabBarKey: tabBarKey,
-      useMaterial3: false,
-    ));
+    await tester.pumpWidget(
+      buildFrame(
+        tabs: tabs,
+        value: 'AAAA',
+        isScrollable: true,
+        tabBarKey: tabBarKey,
+        useMaterial3: false,
+      ),
+    );
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
@@ -928,16 +983,33 @@ void main() {
     expect(controller.index, 0);
   });
 
-  testWidgets('Material3 - TabBar can be scrolled independent of the selection', (WidgetTester tester) async {
-    final List<String> tabs = <String>['AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF', 'GGGG', 'HHHH', 'IIII', 'JJJJ', 'KKKK', 'LLLL'];
+  testWidgets('Material3 - TabBar can be scrolled independent of the selection', (
+    WidgetTester tester,
+  ) async {
+    final List<String> tabs = <String>[
+      'AAAA',
+      'BBBB',
+      'CCCC',
+      'DDDD',
+      'EEEE',
+      'FFFF',
+      'GGGG',
+      'HHHH',
+      'IIII',
+      'JJJJ',
+      'KKKK',
+      'LLLL',
+    ];
     const Key tabBarKey = Key('TabBar');
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'AAAA',
-      isScrollable: true,
-      tabBarKey: tabBarKey,
-      useMaterial3: true,
-    ));
+    await tester.pumpWidget(
+      buildFrame(
+        tabs: tabs,
+        value: 'AAAA',
+        isScrollable: true,
+        tabBarKey: tabBarKey,
+        useMaterial3: true,
+      ),
+    );
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
@@ -963,18 +1035,17 @@ void main() {
           initialIndex: tabs.indexOf(value),
           length: tabs.length,
           child: TabBarView(
-            children: tabs.map<Widget>((String name) {
-              return StateMarker(
-                child: Text(name),
-              );
-            }).toList(),
+            children:
+                tabs.map<Widget>((String name) {
+                  return TabStateMarker(child: Text(name));
+                }).toList(),
           ),
         ),
       );
     }
 
-    StateMarkerState findStateMarkerState(String name) {
-      return tester.state(find.widgetWithText(StateMarker, name, skipOffstage: false));
+    TabStateMarkerState findStateMarkerState(String name) {
+      return tester.state(find.widgetWithText(TabStateMarker, name, skipOffstage: false));
     }
 
     await tester.pumpWidget(builder());
@@ -1014,7 +1085,7 @@ void main() {
     gesture = await tester.startGesture(tester.getCenter(find.text(tabs[2])));
     await gesture.moveBy(const Offset(600.0, 0.0));
     await tester.pump();
-    final StateMarkerState markerState = findStateMarkerState(tabs[1]);
+    final TabStateMarkerState markerState = findStateMarkerState(tabs[1]);
     expect(markerState.marker, isNull);
     markerState.marker = 'marked';
     await gesture.up();
@@ -1133,7 +1204,9 @@ void main() {
   });
 
   // A regression test for https://github.com/flutter/flutter/pull/88878.
-  testWidgets('TabController notifies the index to change when left flinging', (WidgetTester tester) async {
+  testWidgets('TabController notifies the index to change when left flinging', (
+    WidgetTester tester,
+  ) async {
     final List<String> tabs = <String>['A', 'B', 'C'];
     late TabController tabController;
 
@@ -1161,11 +1234,13 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(TabControllerFrame(
-      builder: buildTabControllerFrame,
-      length: tabs.length,
-      initialIndex: tabs.indexOf('C'),
-    ));
+    await tester.pumpWidget(
+      TabControllerFrame(
+        builder: buildTabControllerFrame,
+        length: tabs.length,
+        initialIndex: tabs.indexOf('C'),
+      ),
+    );
     expect(tabController.index, tabs.indexOf('C'));
 
     tabController.addListener(() {
@@ -1179,7 +1254,20 @@ void main() {
 
   // A regression test for https://github.com/flutter/flutter/issues/7133
   testWidgets('TabBar fling velocity', (WidgetTester tester) async {
-    final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
+    final List<String> tabs = <String>[
+      'AAAAAA',
+      'BBBBBB',
+      'CCCCCC',
+      'DDDDDD',
+      'EEEEEE',
+      'FFFFFF',
+      'GGGGGG',
+      'HHHHHH',
+      'IIIIII',
+      'JJJJJJ',
+      'KKKKKK',
+      'LLLLLL',
+    ];
     int index = 0;
 
     await tester.pumpWidget(
@@ -1277,11 +1365,9 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(TabControllerFrame(
-      builder: buildTabControllerFrame,
-      length: tabs.length,
-      initialIndex: 1,
-    ));
+    await tester.pumpWidget(
+      TabControllerFrame(builder: buildTabControllerFrame, length: tabs.length, initialIndex: 1),
+    );
 
     expect(find.text('LEFT'), findsOneWidget);
     expect(find.text('RIGHT'), findsOneWidget);
@@ -1337,10 +1423,9 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(TabControllerFrame(
-      builder: buildTabControllerFrame,
-      length: tabs.length,
-    ));
+    await tester.pumpWidget(
+      TabControllerFrame(builder: buildTabControllerFrame, length: tabs.length),
+    );
 
     tabController.animation!.addListener(() {
       if (tabController.animation!.status == AnimationStatus.forward) {
@@ -1361,10 +1446,7 @@ void main() {
   });
 
   testWidgets('TabBar unselectedLabelColor control test', (WidgetTester tester) async {
-    final TabController controller = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+    final TabController controller = createTabController(vsync: const TestVSync(), length: 2);
 
     late Color firstColor;
     late Color secondColor;
@@ -1398,16 +1480,13 @@ void main() {
   });
 
   testWidgets('TabBarView page left and right test', (WidgetTester tester) async {
-    final TabController controller = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+    final TabController controller = createTabController(vsync: const TestVSync(), length: 2);
 
     await tester.pumpWidget(
       boilerplate(
         child: TabBarView(
           controller: controller,
-          children: const <Widget>[ Text('First'), Text('Second') ],
+          children: const <Widget>[Text('First'), Text('Second')],
         ),
       ),
     );
@@ -1457,11 +1536,15 @@ void main() {
     expect(find.text('Second'), findsNothing);
   });
 
-  testWidgets('TabBar animationDuration sets indicator animation duration', (WidgetTester tester) async {
+  testWidgets('TabBar animationDuration sets indicator animation duration', (
+    WidgetTester tester,
+  ) async {
     const Duration animationDuration = Duration(milliseconds: 100);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: animationDuration));
+    await tester.pumpWidget(
+      buildFrame(tabs: tabs, value: 'B', animationDuration: animationDuration),
+    );
     final TabController controller = DefaultTabController.of(tester.element(find.text('A')));
 
     await tester.tap(find.text('A'));
@@ -1474,7 +1557,9 @@ void main() {
     expect(controller.indexIsChanging, false);
 
     //Test when index diff is greater than 1
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: animationDuration));
+    await tester.pumpWidget(
+      buildFrame(tabs: tabs, value: 'B', animationDuration: animationDuration),
+    );
     await tester.tap(find.text('C'));
     await tester.pump();
     expect(controller.indexIsChanging, true);
@@ -1489,34 +1574,36 @@ void main() {
     const Duration animationDuration = Duration(milliseconds: 100);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
-    final TabController tabController = _tabController(
+    final TabController tabController = createTabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: tabs.length,
       animationDuration: animationDuration,
     );
-    await tester.pumpWidget(boilerplate(
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            controller: tabController,
-          ),
-          SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
               controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
-              ],
             ),
-          ),
-        ],
+            SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     expect(tabController.index, 1);
 
@@ -1539,33 +1626,35 @@ void main() {
     const Duration animationDuration = Duration(seconds: 2);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
-    final TabController tabController = _tabController(
+    final TabController tabController = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
       animationDuration: animationDuration,
     );
-    await tester.pumpWidget(boilerplate(
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            controller: tabController,
-          ),
-          SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
               controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
-              ],
             ),
-          ),
-        ],
+            SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     expect(tabController.index, 0);
 
@@ -1594,39 +1683,43 @@ void main() {
     await tester.pumpAndSettle(); // Finish the animation.
   });
 
-  testWidgets('TabBarView viewportFraction sets PageView viewport fraction', (WidgetTester tester) async {
+  testWidgets('TabBarView viewportFraction sets PageView viewport fraction', (
+    WidgetTester tester,
+  ) async {
     const Duration animationDuration = Duration(milliseconds: 100);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
-    final TabController tabController = _tabController(
+    final TabController tabController = createTabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: tabs.length,
       animationDuration: animationDuration,
     );
-    await tester.pumpWidget(boilerplate(
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            controller: tabController,
-          ),
-          SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
-              viewportFraction: 0.8,
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
               controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
-              ],
             ),
-          ),
-        ],
+            SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                viewportFraction: 0.8,
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     expect(tabController.index, 1);
 
@@ -1642,34 +1735,36 @@ void main() {
     const Duration animationDuration = Duration(milliseconds: 100);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
-    final TabController tabController = _tabController(
+    final TabController tabController = createTabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: tabs.length,
       animationDuration: animationDuration,
     );
-    await tester.pumpWidget(boilerplate(
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            controller: tabController,
-          ),
-          SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
               controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
-              ],
             ),
-          ),
-        ],
+            SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     expect(tabController.index, 1);
 
@@ -1687,7 +1782,7 @@ void main() {
     TabController? controller;
 
     Widget buildFrame(double viewportFraction) {
-      controller = _tabController(
+      controller = createTabController(
         vsync: const TestVSync(),
         length: tabs.length,
         initialIndex: 1,
@@ -1734,12 +1829,7 @@ void main() {
 
     Widget builder() {
       return boilerplate(
-        child: DefaultTabController(
-          length: tabs.length,
-          child: TabBarView(
-            children: tabs,
-          ),
-        ),
+        child: DefaultTabController(length: tabs.length, child: TabBarView(children: tabs)),
       );
     }
 
@@ -1755,10 +1845,7 @@ void main() {
       return boilerplate(
         child: DefaultTabController(
           length: tabs.length,
-          child: TabBarView(
-            clipBehavior: Clip.none,
-            children: tabs,
-          ),
+          child: TabBarView(clipBehavior: Clip.none, children: tabs),
         ),
       );
     }
@@ -1768,11 +1855,21 @@ void main() {
     expect(pageView.clipBehavior, Clip.none);
   });
 
-  testWidgets('TabBar tap skips indicator animation when disabled in controller', (WidgetTester tester) async {
+  testWidgets('TabBar tap skips indicator animation when disabled in controller', (
+    WidgetTester tester,
+  ) async {
     final List<String> tabs = <String>['A', 'B'];
 
     const Color indicatorColor = Color(0xFFFF0000);
-    await tester.pumpWidget(buildFrame(useMaterial3: false, tabs: tabs, value: 'A', indicatorColor: indicatorColor, animationDuration: Duration.zero));
+    await tester.pumpWidget(
+      buildFrame(
+        useMaterial3: false,
+        tabs: tabs,
+        value: 'A',
+        indicatorColor: indicatorColor,
+        animationDuration: Duration.zero,
+      ),
+    );
 
     final RenderBox box = tester.renderObject(find.byType(TabBar));
     final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
@@ -1793,7 +1890,9 @@ void main() {
     expect(indicatorRect2.height, 2.0);
   });
 
-  testWidgets('TabBar tap changes index instantly when animation is disabled in controller', (WidgetTester tester) async {
+  testWidgets('TabBar tap changes index instantly when animation is disabled in controller', (
+    WidgetTester tester,
+  ) async {
     final List<String> tabs = <String>['A', 'B', 'C'];
 
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: Duration.zero));
@@ -1821,7 +1920,9 @@ void main() {
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);
   });
 
-  testWidgets('TabBar should not throw when animation is disabled in controller', (WidgetTester tester) async {
+  testWidgets('TabBar should not throw when animation is disabled in controller', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/102600
     final List<String> tabs = <String>['A'];
 
@@ -1838,10 +1939,7 @@ void main() {
               ),
               Flexible(
                 child: TabBarView(
-                  children: List<Widget>.generate(
-                    tabs.length,
-                    (int index) => Text('Tab $index'),
-                  ),
+                  children: List<Widget>.generate(tabs.length, (int index) => Text('Tab $index')),
                 ),
               ),
             ],
@@ -1866,36 +1964,40 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('TabBarView skips animation when disabled in controller', (WidgetTester tester) async {
+  testWidgets('TabBarView skips animation when disabled in controller', (
+    WidgetTester tester,
+  ) async {
     final List<String> tabs = <String>['A', 'B', 'C'];
-    final TabController tabController = _tabController(
+    final TabController tabController = createTabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: tabs.length,
       animationDuration: Duration.zero,
     );
-    await tester.pumpWidget(boilerplate(
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            controller: tabController,
-          ),
-          SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
               controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
-              ],
             ),
-          ),
-        ],
+            SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     expect(tabController.index, 1);
 
@@ -1911,35 +2013,39 @@ void main() {
     expect(position.pixels, 800);
   });
 
-  testWidgets('TabBarView skips animation when disabled in controller - skip tabs', (WidgetTester tester) async {
+  testWidgets('TabBarView skips animation when disabled in controller - skip tabs', (
+    WidgetTester tester,
+  ) async {
     final List<String> tabs = <String>['A', 'B', 'C'];
-    final TabController tabController = _tabController(
+    final TabController tabController = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
       animationDuration: Duration.zero,
     );
-    await tester.pumpWidget(boilerplate(
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            controller: tabController,
-          ),
-          SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
               controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
-              ],
             ),
-          ),
-        ],
+            SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     expect(tabController.index, 0);
 
@@ -1955,36 +2061,40 @@ void main() {
     expect(position.pixels, 800);
   });
 
-  testWidgets('TabBarView skips animation when disabled in controller - skip tabs twice', (WidgetTester tester) async {
+  testWidgets('TabBarView skips animation when disabled in controller - skip tabs twice', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/110970
     final List<String> tabs = <String>['A', 'B', 'C'];
-    final TabController tabController = _tabController(
+    final TabController tabController = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
       animationDuration: Duration.zero,
     );
-    await tester.pumpWidget(boilerplate(
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            controller: tabController,
-          ),
-          SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
               controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
-              ],
             ),
-          ),
-        ],
+            SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     expect(tabController.index, 0);
 
@@ -2004,87 +2114,93 @@ void main() {
     expect(position.pixels, 0);
   });
 
-  testWidgets('TabBarView skips animation when disabled in controller - skip tabs followed by single tab navigation', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/110970
-    final List<String> tabs = <String>['A', 'B', 'C'];
-    final TabController tabController = _tabController(
-      vsync: const TestVSync(),
-      length: tabs.length,
-      animationDuration: Duration.zero,
-    );
-    await tester.pumpWidget(boilerplate(
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            controller: tabController,
+  testWidgets(
+    'TabBarView skips animation when disabled in controller - skip tabs followed by single tab navigation',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/110970
+      final List<String> tabs = <String>['A', 'B', 'C'];
+      final TabController tabController = createTabController(
+        vsync: const TestVSync(),
+        length: tabs.length,
+        animationDuration: Duration.zero,
+      );
+      await tester.pumpWidget(
+        boilerplate(
+          child: Column(
+            children: <Widget>[
+              TabBar(
+                tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                controller: tabController,
+              ),
+              SizedBox(
+                width: 400.0,
+                height: 400.0,
+                child: TabBarView(
+                  controller: tabController,
+                  children: const <Widget>[
+                    Center(child: Text('0')),
+                    Center(child: Text('1')),
+                    Center(child: Text('2')),
+                  ],
+                ),
+              ),
+            ],
           ),
-          SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
-              controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ));
+        ),
+      );
 
-    expect(tabController.index, 0);
+      expect(tabController.index, 0);
 
-    final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller!;
-    final ScrollPosition position = pageController.position;
+      final PageView pageView = tester.widget(find.byType(PageView));
+      final PageController pageController = pageView.controller!;
+      final ScrollPosition position = pageController.position;
 
-    // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
-    // page 1 is at 400.0, page 2 is at 800.0.
-    expect(position.pixels, 0);
-    await tester.tap(find.text('C'));
-    await tester.pump();
-    expect(position.pixels, 800);
+      // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
+      // page 1 is at 400.0, page 2 is at 800.0.
+      expect(position.pixels, 0);
+      await tester.tap(find.text('C'));
+      await tester.pump();
+      expect(position.pixels, 800);
 
-    await tester.tap(find.text('B'));
-    await tester.pump();
-    expect(position.pixels, 400);
+      await tester.tap(find.text('B'));
+      await tester.pump();
+      expect(position.pixels, 400);
 
-    await tester.tap(find.text('A'));
-    await tester.pump();
-    expect(position.pixels, 0);
-  });
+      await tester.tap(find.text('A'));
+      await tester.pump();
+      expect(position.pixels, 0);
+    },
+  );
 
-  testWidgets('TabBarView skips animation when disabled in controller - two tabs', (WidgetTester tester) async {
+  testWidgets('TabBarView skips animation when disabled in controller - two tabs', (
+    WidgetTester tester,
+  ) async {
     final List<String> tabs = <String>['A', 'B'];
-    final TabController tabController = _tabController(
+    final TabController tabController = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
       animationDuration: Duration.zero,
     );
-    await tester.pumpWidget(boilerplate(
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            controller: tabController,
-          ),
-          SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
               controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-              ],
             ),
-          ),
-        ],
+            SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[Center(child: Text('0')), Center(child: Text('1'))],
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     expect(tabController.index, 0);
 
@@ -2106,7 +2222,9 @@ void main() {
     final List<String> tabs = <String>['A', 'B'];
 
     const Color indicatorColor = Color(0xFFFF0000);
-    await tester.pumpWidget(buildFrame(useMaterial3: false, tabs: tabs, value: 'A', indicatorColor: indicatorColor));
+    await tester.pumpWidget(
+      buildFrame(useMaterial3: false, tabs: tabs, value: 'A', indicatorColor: indicatorColor),
+    );
 
     final RenderBox box = tester.renderObject(find.byType(TabBar));
     final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
@@ -2139,17 +2257,14 @@ void main() {
     // This is a regression test for this patch:
     // https://github.com/flutter/flutter/pull/9015
 
-    final TabController controller = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+    final TabController controller = createTabController(vsync: const TestVSync(), length: 2);
 
     Widget buildFrame() {
       return boilerplate(
         child: TabBar(
           key: UniqueKey(),
           controller: controller,
-          tabs: const <Widget>[ Text('A'), Text('B') ],
+          tabs: const <Widget>[Text('A'), Text('B')],
         ),
       );
     }
@@ -2164,9 +2279,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
   });
 
-
   group('TabBarView children updated', () {
-
     Widget buildFrameWithMarker(List<String> log, String marker) {
       return MaterialApp(
         home: DefaultTabController(
@@ -2174,13 +2287,7 @@ void main() {
           length: 3,
           child: Scaffold(
             appBar: AppBar(
-              bottom: const TabBar(
-                tabs: <Widget>[
-                  Tab(text: 'A'),
-                  Tab(text: 'B'),
-                  Tab(text: 'C'),
-                ],
-              ),
+              bottom: const TabBar(tabs: <Widget>[Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C')]),
               title: const Text('Tabs Test'),
             ),
             body: TabBarView(
@@ -2195,7 +2302,9 @@ void main() {
       );
     }
 
-    testWidgets('TabBarView children can be updated during animation to an adjacent tab', (WidgetTester tester) async {
+    testWidgets('TabBarView children can be updated during animation to an adjacent tab', (
+      WidgetTester tester,
+    ) async {
       // Regression test for https://github.com/flutter/flutter/issues/107399
       final List<String> log = <String>[];
 
@@ -2224,7 +2333,9 @@ void main() {
       expect(find.text('1-$updatedMarker'), findsOneWidget);
     });
 
-    testWidgets('TabBarView children can be updated during animation to a non adjacent tab', (WidgetTester tester) async {
+    testWidgets('TabBarView children can be updated during animation to a non adjacent tab', (
+      WidgetTester tester,
+    ) async {
       final List<String> log = <String>[];
 
       const String initialMarker = 'before';
@@ -2256,31 +2367,33 @@ void main() {
   testWidgets('TabBarView scrolls end close to a new page', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/9375
 
-    final TabController tabController = _tabController(
+    final TabController tabController = createTabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: 3,
     );
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: SizedBox.expand(
-        child: Center(
-          child: SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
-              controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
-              ],
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox.expand(
+          child: Center(
+            child: SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(tabController.index, 1);
 
@@ -2310,34 +2423,41 @@ void main() {
     expect(tabController.index, 0);
   });
 
-  testWidgets('On going TabBarView animation can be interrupted by a new animation', (WidgetTester tester) async {
+  testWidgets('On going TabBarView animation can be interrupted by a new animation', (
+    WidgetTester tester,
+  ) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/132293.
 
     final List<String> tabs = <String>['A', 'B', 'C'];
-    final TabController tabController = _tabController(length: tabs.length, vsync: const TestVSync());
+    final TabController tabController = createTabController(
+      length: tabs.length,
+      vsync: const TestVSync(),
+    );
 
-    await tester.pumpWidget(boilerplate(
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            controller: tabController,
-          ),
-          SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
               controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
-              ],
             ),
-          ),
-        ],
+            SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     // First page is visible.
     expect(tabController.index, 0);
@@ -2359,10 +2479,18 @@ void main() {
     expect(find.text('1'), findsNothing);
   });
 
-  testWidgets('Can switch to non-neighboring tab in nested TabBarView without crashing', (WidgetTester tester) async {
+  testWidgets('Can switch to non-neighboring tab in nested TabBarView without crashing', (
+    WidgetTester tester,
+  ) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/18756
-    final TabController mainTabController = _tabController(length: 4, vsync: const TestVSync());
-    final TabController nestedTabController = _tabController(length: 2, vsync: const TestVSync());
+    final TabController mainTabController = createTabController(
+      length: 4,
+      vsync: const TestVSync(),
+    );
+    final TabController nestedTabController = createTabController(
+      length: 2,
+      vsync: const TestVSync(),
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2383,7 +2511,26 @@ void main() {
             controller: mainTabController,
             children: <Widget>[
               Container(color: Colors.red),
-              _NestedTabBarContainer(tabController: nestedTabController),
+              ColoredBox(
+                color: Colors.blue,
+                child: Column(
+                  children: <Widget>[
+                    TabBar(
+                      controller: nestedTabController,
+                      tabs: const <Tab>[Tab(text: 'Yellow'), Tab(text: 'Grey')],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        controller: nestedTabController,
+                        children: <Widget>[
+                          Container(color: Colors.yellow),
+                          Container(color: Colors.grey),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Container(color: Colors.green),
               Container(color: Colors.indigo),
             ],
@@ -2403,12 +2550,11 @@ void main() {
     expect(mainTabController.index, 2);
   });
 
-  testWidgets('TabBarView can warp when child is kept alive and contains ink', (WidgetTester tester) async {
+  testWidgets('TabBarView can warp when child is kept alive and contains ink', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/57662.
-    final TabController controller = _tabController(
-      vsync: const TestVSync(),
-      length: 3,
-    );
+    final TabController controller = createTabController(vsync: const TestVSync(), length: 3);
 
     await tester.pumpWidget(
       boilerplate(
@@ -2417,7 +2563,7 @@ void main() {
           children: const <Widget>[
             Text('Page 1'),
             Text('Page 2'),
-            KeepAliveInk('Page 3'),
+            TabKeepAliveInk(title: 'Page 3'),
           ],
         ),
       ),
@@ -2440,33 +2586,37 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('TabBarView scrolls end close to a new page with custom physics', (WidgetTester tester) async {
-    final TabController tabController = _tabController(
+  testWidgets('TabBarView scrolls end close to a new page with custom physics', (
+    WidgetTester tester,
+  ) async {
+    final TabController tabController = createTabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: 3,
     );
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: SizedBox.expand(
-        child: Center(
-          child: SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
-              controller: tabController,
-              physics: const TestScrollPhysics(),
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
-              ],
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox.expand(
+          child: Center(
+            child: SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                physics: const TabBarTestScrollPhysics(),
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(tabController.index, 1);
 
@@ -2501,7 +2651,7 @@ void main() {
       return Tab(text: 'TAB #$index');
     });
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
       initialIndex: tabs.length - 1,
@@ -2513,38 +2663,34 @@ void main() {
           isScrollable: true,
           controller: controller,
           tabs: tabs,
-          physics: const TestScrollPhysics(),
+          physics: const TabBarTestScrollPhysics(),
         ),
       ),
     );
 
     final TabBar tabBar = tester.widget(find.byType(TabBar));
-    final double position = tabBar.physics!.applyPhysicsToUserOffset(MockScrollMetrics(), 10);
+    final double position = tabBar.physics!.applyPhysicsToUserOffset(TabMockScrollMetrics(), 10);
 
     expect(position, equals(20));
   });
 
-  testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (WidgetTester tester) async {
+  testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (
+    WidgetTester tester,
+  ) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/9374
 
     final List<Tab> tabs = List<Tab>.generate(20, (int index) {
       return Tab(text: 'TAB #$index');
     });
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
       initialIndex: tabs.length - 1,
     );
 
     await tester.pumpWidget(
-      boilerplate(
-        child: TabBar(
-          isScrollable: true,
-          controller: controller,
-          tabs: tabs,
-        ),
-      ),
+      boilerplate(child: TabBar(isScrollable: true, controller: controller, tabs: tabs)),
     );
 
     // The initialIndex tab should be visible and right justified
@@ -2557,6 +2703,71 @@ void main() {
     expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, moreOrLessEquals(tabRight));
   });
 
+  testWidgets('Indicator elastic animation', (WidgetTester tester) async {
+    const double indicatorWidth = 50.0;
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(key: ValueKey<int>(index), child: const SizedBox(width: indicatorWidth));
+    });
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(controller: controller, tabs: tabs),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 48.0);
+
+    const Rect currentRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    const Rect fromRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    Rect toRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.0),
+      ),
+    );
+
+    controller.offset = 0.2;
+    await tester.pump();
+    toRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.2),
+      ),
+    );
+
+    controller.offset = 0.5;
+    await tester.pump();
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.5),
+      ),
+    );
+
+    controller.offset = 1;
+    await tester.pump();
+    // When the animation is completed, no stretch is applied.
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 1.0),
+      ),
+    );
+  });
+
   testWidgets('TabBar with indicatorWeight, indicatorPadding (LTR)', (WidgetTester tester) async {
     const Color indicatorColor = Color(0xFF00FF00);
     const double indicatorWeight = 8.0;
@@ -2567,7 +2778,7 @@ void main() {
       return Tab(text: 'Tab $index');
     });
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -2595,12 +2806,15 @@ void main() {
     double indicatorLeft = padLeft + indicatorWeight / 2.0;
     double indicatorRight = 200.0 - (padRight + indicatorWeight / 2.0);
 
-    expect(tabBarBox, paints..line(
-      color: indicatorColor,
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        color: indicatorColor,
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
 
     // Select tab 3
     controller.index = 3;
@@ -2609,12 +2823,15 @@ void main() {
     indicatorLeft = 600.0 + padLeft + indicatorWeight / 2.0;
     indicatorRight = 800.0 - (padRight + indicatorWeight / 2.0);
 
-    expect(tabBarBox, paints..line(
-      color: indicatorColor,
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        color: indicatorColor,
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
   });
 
   testWidgets('TabBar with indicatorWeight, indicatorPadding (RTL)', (WidgetTester tester) async {
@@ -2627,7 +2844,7 @@ void main() {
       return Tab(text: 'Tab $index');
     });
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -2657,26 +2874,32 @@ void main() {
     double indicatorLeft = 600.0 + padLeft + indicatorWeight / 2.0;
     double indicatorRight = 800.0 - padRight - indicatorWeight / 2.0;
 
-    expect(tabBarBox, paints..line(
-      color: indicatorColor,
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        color: indicatorColor,
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
 
     // Select tab 3
     controller.index = 3;
     await tester.pumpAndSettle();
 
     indicatorLeft = padLeft + indicatorWeight / 2.0;
-    indicatorRight = 200.0 - padRight -  indicatorWeight / 2.0;
+    indicatorRight = 200.0 - padRight - indicatorWeight / 2.0;
 
-    expect(tabBarBox, paints..line(
-      color: indicatorColor,
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        color: indicatorColor,
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
   });
 
   testWidgets('TabBar changes indicator attributes', (WidgetTester tester) async {
@@ -2684,7 +2907,7 @@ void main() {
       return Tab(text: 'Tab $index');
     });
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -2719,12 +2942,15 @@ void main() {
     double indicatorLeft = padLeft + indicatorWeight / 2.0;
     double indicatorRight = 200.0 - (padRight + indicatorWeight / 2.0);
 
-    expect(tabBarBox, paints..line(
-      color: indicatorColor,
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        color: indicatorColor,
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
 
     indicatorColor = const Color(0xFF0000FF);
     indicatorWeight = 4.0;
@@ -2739,12 +2965,15 @@ void main() {
     indicatorLeft = padLeft + indicatorWeight / 2.0;
     indicatorRight = 200.0 - (padRight + indicatorWeight / 2.0);
 
-    expect(tabBarBox, paints..line(
-      color: indicatorColor,
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        color: indicatorColor,
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
   });
 
   testWidgets('TabBar with directional indicatorPadding (LTR)', (WidgetTester tester) async {
@@ -2756,7 +2985,7 @@ void main() {
 
     const double indicatorWeight = 2.0; // the default
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -2777,7 +3006,7 @@ void main() {
     );
 
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    const double tabBarHeight = 50.0 + indicatorWeight;  // 50 = max tab height
+    const double tabBarHeight = 50.0 + indicatorWeight; // 50 = max tab height
     expect(tabBarBox.size.height, tabBarHeight);
 
     // Tab0 width = 130, height = 30
@@ -2788,7 +3017,6 @@ void main() {
     Rect tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
     expect(tester.getRect(find.byKey(tabs[0].key!)), tabRect);
 
-
     // Tab1 width = 140, height = 40
     tabLeft = tabRight + kTabLabelPadding.right + kTabLabelPadding.left;
     tabRight = tabLeft + 140.0;
@@ -2796,7 +3024,6 @@ void main() {
     tabBottom = tabTop + 40.0;
     tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
     expect(tester.getRect(find.byKey(tabs[1].key!)), tabRect);
-
 
     // Tab2 width = 150, height = 50
     tabLeft = tabRight + kTabLabelPadding.right + kTabLabelPadding.left;
@@ -2810,11 +3037,14 @@ void main() {
     const double indicatorLeft = 100.0 + indicatorWeight / 2.0;
     final double indicatorRight = 130.0 + kTabLabelPadding.horizontal - indicatorWeight / 2.0;
     final double indicatorY = tabBottom + indicatorWeight / 2.0;
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
   });
 
   testWidgets('TabBar with directional indicatorPadding (RTL)', (WidgetTester tester) async {
@@ -2826,7 +3056,7 @@ void main() {
 
     const double indicatorWeight = 2.0; // the default
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -2848,7 +3078,7 @@ void main() {
     );
 
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    const double tabBarHeight = 50.0 + indicatorWeight;  // 50 = max tab height
+    const double tabBarHeight = 50.0 + indicatorWeight; // 50 = max tab height
     expect(tabBarBox.size.height, tabBarHeight);
 
     // Tab2 width = 150, height = 50
@@ -2879,14 +3109,19 @@ void main() {
     final double indicatorLeft = tabLeft - kTabLabelPadding.left + indicatorWeight / 2.0;
     final double indicatorRight = tabRight + kTabLabelPadding.left - indicatorWeight / 2.0 - 100.0;
     const double indicatorY = 50.0 + indicatorWeight / 2.0;
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
   });
 
-  testWidgets('TabBar with custom indicator and indicatorPadding(LTR)', (WidgetTester tester) async {
+  testWidgets('TabBar with custom indicator and indicatorPadding(LTR)', (
+    WidgetTester tester,
+  ) async {
     const Color indicatorColor = Color(0xFF00FF00);
     const double padTop = 10.0;
     const double padBottom = 12.0;
@@ -2898,7 +3133,7 @@ void main() {
       return Tab(text: 'Tab $index');
     });
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -2910,8 +3145,7 @@ void main() {
           alignment: Alignment.topLeft,
           child: TabBar(
             indicator: indicator,
-            indicatorPadding:
-            const EdgeInsets.fromLTRB(padLeft, padTop, padRight, padBottom),
+            indicatorPadding: const EdgeInsets.fromLTRB(padLeft, padTop, padRight, padBottom),
             controller: controller,
             tabs: tabs,
           ),
@@ -2919,8 +3153,7 @@ void main() {
       ),
     );
 
-    final RenderBox tabBarBox =
-    tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox.size.height, 48.0);
     // 48 = _kTabHeight(46) + indicatorWeight(2.0) ~default
 
@@ -2929,15 +3162,13 @@ void main() {
     double indicatorLeft = padLeft;
     double indicatorRight = 200.0 - padRight;
 
-    expect(tabBarBox, paints..rect(
-      rect: Rect.fromLTRB(
-        indicatorLeft,
-        indicatorTop,
-        indicatorRight,
-        indicatorBottom,
+    expect(
+      tabBarBox,
+      paints..rect(
+        rect: Rect.fromLTRB(indicatorLeft, indicatorTop, indicatorRight, indicatorBottom),
+        color: indicatorColor,
       ),
-      color: indicatorColor,
-    ));
+    );
 
     // Select tab 3
     controller.index = 3;
@@ -2946,18 +3177,18 @@ void main() {
     indicatorLeft = 600.0 + padLeft;
     indicatorRight = 800.0 - padRight;
 
-    expect(tabBarBox, paints..rect(
-      rect: Rect.fromLTRB(
-        indicatorLeft,
-        indicatorTop,
-        indicatorRight,
-        indicatorBottom,
+    expect(
+      tabBarBox,
+      paints..rect(
+        rect: Rect.fromLTRB(indicatorLeft, indicatorTop, indicatorRight, indicatorBottom),
+        color: indicatorColor,
       ),
-      color: indicatorColor,
-    ));
+    );
   });
 
-  testWidgets('TabBar with custom indicator and indicatorPadding (RTL)', (WidgetTester tester) async {
+  testWidgets('TabBar with custom indicator and indicatorPadding (RTL)', (
+    WidgetTester tester,
+  ) async {
     const Color indicatorColor = Color(0xFF00FF00);
     const double padTop = 10.0;
     const double padBottom = 12.0;
@@ -2969,7 +3200,7 @@ void main() {
       return Tab(text: 'Tab $index');
     });
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -2981,17 +3212,16 @@ void main() {
         child: Container(
           alignment: Alignment.topLeft,
           child: TabBar(
-          indicator: indicator,
-          indicatorPadding: const EdgeInsets.fromLTRB(padLeft, padTop, padRight, padBottom),
-          controller: controller,
-          tabs: tabs,
+            indicator: indicator,
+            indicatorPadding: const EdgeInsets.fromLTRB(padLeft, padTop, padRight, padBottom),
+            controller: controller,
+            tabs: tabs,
           ),
         ),
       ),
     );
 
-    final RenderBox tabBarBox =
-    tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox.size.height, 48.0);
     // 48 = _kTabHeight(46) + indicatorWeight(2.0) ~default
     expect(tabBarBox.size.width, 800.0);
@@ -3000,15 +3230,13 @@ void main() {
     double indicatorLeft = 600.0 + padLeft;
     double indicatorRight = 800.0 - padRight;
 
-    expect(tabBarBox, paints..rect(
-      rect: Rect.fromLTRB(
-        indicatorLeft,
-        indicatorTop,
-        indicatorRight,
-        indicatorBottom,
+    expect(
+      tabBarBox,
+      paints..rect(
+        rect: Rect.fromLTRB(indicatorLeft, indicatorTop, indicatorRight, indicatorBottom),
+        color: indicatorColor,
       ),
-      color: indicatorColor,
-    ));
+    );
 
     // Select tab 3
     controller.index = 3;
@@ -3017,19 +3245,19 @@ void main() {
     indicatorLeft = padLeft;
     indicatorRight = 200.0 - padRight;
 
-    expect(tabBarBox,paints..rect(
-      rect: Rect.fromLTRB(
-        indicatorLeft,
-        indicatorTop,
-        indicatorRight,
-        indicatorBottom,
+    expect(
+      tabBarBox,
+      paints..rect(
+        rect: Rect.fromLTRB(indicatorLeft, indicatorTop, indicatorRight, indicatorBottom),
+        color: indicatorColor,
       ),
-      color: indicatorColor,
-    ));
+    );
   });
 
-  testWidgets('TabBar with custom indicator - directional indicatorPadding (LTR)', (WidgetTester tester) async {
-    final List<Widget > tabs = <Widget>[
+  testWidgets('TabBar with custom indicator - directional indicatorPadding (LTR)', (
+    WidgetTester tester,
+  ) async {
+    final List<Widget> tabs = <Widget>[
       SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
       SizedBox(key: UniqueKey(), width: 140.0, height: 40.0),
       SizedBox(key: UniqueKey(), width: 150.0, height: 50.0),
@@ -3042,7 +3270,7 @@ void main() {
     const Decoration indicator = BoxDecoration(color: indicatorColor);
     const double indicatorWeight = 2.0; // the default
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -3054,7 +3282,12 @@ void main() {
           alignment: Alignment.topLeft,
           child: TabBar(
             indicator: indicator,
-            indicatorPadding: const EdgeInsetsDirectional.fromSTEB(padStart, padTop, padEnd, padBottom),
+            indicatorPadding: const EdgeInsetsDirectional.fromSTEB(
+              padStart,
+              padTop,
+              padEnd,
+              padBottom,
+            ),
             isScrollable: true,
             controller: controller,
             tabs: tabs,
@@ -3096,18 +3329,18 @@ void main() {
     final double indicatorRight = 130.0 + kTabLabelPadding.horizontal - padEnd;
     const double indicatorTop = padTop;
     const double indicatorBottom = tabBarHeight - padBottom;
-    expect(tabBarBox, paints..rect(
-      rect: Rect.fromLTRB(
-        indicatorLeft,
-        indicatorTop,
-        indicatorRight,
-        indicatorBottom,
+    expect(
+      tabBarBox,
+      paints..rect(
+        rect: Rect.fromLTRB(indicatorLeft, indicatorTop, indicatorRight, indicatorBottom),
+        color: indicatorColor,
       ),
-      color: indicatorColor,
-    ));
+    );
   });
 
-  testWidgets('TabBar with custom indicator - directional indicatorPadding (RTL)', (WidgetTester tester) async {
+  testWidgets('TabBar with custom indicator - directional indicatorPadding (RTL)', (
+    WidgetTester tester,
+  ) async {
     final List<Widget> tabs = <Widget>[
       SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
       SizedBox(key: UniqueKey(), width: 140.0, height: 40.0),
@@ -3121,7 +3354,7 @@ void main() {
     const Decoration indicator = BoxDecoration(color: indicatorColor);
     const double indicatorWeight = 2.0; // the default
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -3134,7 +3367,12 @@ void main() {
           alignment: Alignment.topLeft,
           child: TabBar(
             indicator: indicator,
-            indicatorPadding: const EdgeInsetsDirectional.fromSTEB(padStart, padTop, padEnd, padBottom),
+            indicatorPadding: const EdgeInsetsDirectional.fromSTEB(
+              padStart,
+              padTop,
+              padEnd,
+              padBottom,
+            ),
             isScrollable: true,
             controller: controller,
             tabs: tabs,
@@ -3143,8 +3381,7 @@ void main() {
       ),
     );
 
-    final RenderBox tabBarBox =
-    tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     const double tabBarHeight = 50.0 + indicatorWeight; // 50 = max tab height
     expect(tabBarBox.size.height, tabBarHeight);
 
@@ -3178,18 +3415,16 @@ void main() {
     const double indicatorTop = padTop;
     const double indicatorBottom = tabBarHeight - padBottom;
 
-    expect(tabBarBox, paints..rect(
-      rect: Rect.fromLTRB(
-        indicatorLeft,
-        indicatorTop,
-        indicatorRight,
-        indicatorBottom,
+    expect(
+      tabBarBox,
+      paints..rect(
+        rect: Rect.fromLTRB(indicatorLeft, indicatorTop, indicatorRight, indicatorBottom),
+        color: indicatorColor,
       ),
-      color: indicatorColor,
-    ));
+    );
   });
 
-   testWidgets('TabBar with padding isScrollable: false', (WidgetTester tester) async {
+  testWidgets('TabBar with padding isScrollable: false', (WidgetTester tester) async {
     const double indicatorWeight = 2.0; // default indicator weight
     const EdgeInsets padding = EdgeInsets.only(left: 3.0, top: 7.0, right: 5.0, bottom: 3.0);
 
@@ -3198,7 +3433,7 @@ void main() {
       SizedBox(key: UniqueKey(), width: double.infinity, height: 40.0),
     ];
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -3218,7 +3453,8 @@ void main() {
     );
 
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    final double tabBarHeight = 40.0 + indicatorWeight + padding.top + padding.bottom;  // 40 = max tab height
+    final double tabBarHeight =
+        40.0 + indicatorWeight + padding.top + padding.bottom; // 40 = max tab height
     expect(tabBarBox.size.height, tabBarHeight);
 
     final double tabSize = (tabBarBox.size.width - padding.horizontal) / 2.0;
@@ -3254,7 +3490,7 @@ void main() {
       SizedBox(key: UniqueKey(), width: 150.0, height: 50.0),
     ];
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -3276,7 +3512,8 @@ void main() {
     );
 
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    final double tabBarHeight = 50.0 + indicatorWeight + padding.top + padding.bottom;  // 50 = max tab height
+    final double tabBarHeight =
+        50.0 + indicatorWeight + padding.top + padding.bottom; // 50 = max tab height
     expect(tabBarBox.size.height, tabBarHeight);
 
     // Tab0 width = 130, height = 30
@@ -3304,7 +3541,10 @@ void main() {
     expect(tester.getRect(find.byKey(tabs[2].key!)), tabRect);
 
     tabRight += padding.right;
-    expect(tabBarBox.size.width, tabRight + 320.0); // Right tab + remaining space of the stretched tab bar.
+    expect(
+      tabBarBox.size.width,
+      tabRight + 320.0,
+    ); // Right tab + remaining space of the stretched tab bar.
   });
 
   testWidgets('TabBar with labelPadding', (WidgetTester tester) async {
@@ -3318,7 +3558,7 @@ void main() {
       SizedBox(key: UniqueKey(), width: 150.0, height: 50.0),
     ];
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -3340,7 +3580,7 @@ void main() {
     );
 
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    const double tabBarHeight = 50.0 + indicatorWeight;  // 50 = max tab height
+    const double tabBarHeight = 50.0 + indicatorWeight; // 50 = max tab height
     expect(tabBarBox.size.height, tabBarHeight);
 
     // Tab0 width = 130, height = 30
@@ -3369,13 +3609,17 @@ void main() {
 
     // Tab 0 selected, indicatorPadding == labelPadding
     final double indicatorLeft = indicatorPadding.left + indicatorWeight / 2.0;
-    final double indicatorRight = 130.0 + labelPadding.horizontal - indicatorPadding.right - indicatorWeight / 2.0;
+    final double indicatorRight =
+        130.0 + labelPadding.horizontal - indicatorPadding.right - indicatorWeight / 2.0;
     final double indicatorY = tabBottom + indicatorWeight / 2.0;
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
   });
 
   testWidgets('TabBar with labelPadding(TabBarIndicatorSize.label)', (WidgetTester tester) async {
@@ -3389,7 +3633,7 @@ void main() {
       SizedBox(key: UniqueKey(), width: 150.0, height: 50.0),
     ];
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -3412,7 +3656,7 @@ void main() {
     );
 
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    const double tabBarHeight = 50.0 + indicatorWeight;  // 50 = max tab height
+    const double tabBarHeight = 50.0 + indicatorWeight; // 50 = max tab height
     expect(tabBarBox.size.height, tabBarHeight);
 
     // Tab0 width = 130, height = 30
@@ -3441,23 +3685,28 @@ void main() {
 
     // Tab 0 selected
     final double indicatorLeft = indicatorPadding.left + labelPadding.left + indicatorWeight / 2.0;
-    final double indicatorRight = labelPadding.left + 130.0 - indicatorPadding.right - indicatorWeight / 2.0;
+    final double indicatorRight =
+        labelPadding.left + 130.0 - indicatorPadding.right - indicatorWeight / 2.0;
     final double indicatorY = tabBottom + indicatorWeight / 2.0;
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
   });
 
   testWidgets('Overflowing RTL tab bar', (WidgetTester tester) async {
-    final List<Widget> tabs = List<Widget>.filled(100,
+    final List<Widget> tabs = List<Widget>.filled(
+      100,
       // For convenience padded width of each tab will equal 100:
       // 68 + kTabLabelPadding.horizontal(32)
       SizedBox(key: UniqueKey(), width: 68.0, height: 40.0),
     );
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -3470,49 +3719,60 @@ void main() {
         textDirection: TextDirection.rtl,
         child: Container(
           alignment: Alignment.topLeft,
-          child: TabBar(
-            isScrollable: true,
-            controller: controller,
-            tabs: tabs,
-          ),
+          child: TabBar(isScrollable: true, controller: controller, tabs: tabs),
         ),
       ),
     );
 
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    const double tabBarHeight = 40.0 + indicatorWeight;  // 40 = tab height
+    const double tabBarHeight = 40.0 + indicatorWeight; // 40 = tab height
     expect(tabBarBox.size.height, tabBarHeight);
 
     // Tab 0 out of 100 selected
     double indicatorLeft = 99.0 * 100.0 + indicatorWeight / 2.0;
     double indicatorRight = 100.0 * 100.0 - indicatorWeight / 2.0;
     const double indicatorY = 40.0 + indicatorWeight / 2.0;
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
 
-    controller.animateTo(tabs.length - 1, duration: const Duration(seconds: 1), curve: Curves.linear);
+    controller.animateTo(
+      tabs.length - 1,
+      duration: const Duration(seconds: 1),
+      curve: Curves.linear,
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: const Offset(4951.0, indicatorY),
-      p2: const Offset(5049.0, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        // In RTL, the elastic tab animation expands the width of the tab with a negative offset
+        // when jumping from the first tab to the last tab in a scrollable tab bar.
+        p1: const Offset(-480149, indicatorY),
+        p2: const Offset(-480051, indicatorY),
+      ),
+    );
 
     await tester.pump(const Duration(milliseconds: 501));
 
-    // Tab 99 out of 100 selected, appears on the far left because RTL
+    // Tab 99 out of 100 selected, appears on the far left because RTL.
     indicatorLeft = indicatorWeight / 2.0;
     indicatorRight = 100.0 - indicatorWeight / 2.0;
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
   });
 
   testWidgets('Tab indicator animation test', (WidgetTester tester) async {
@@ -3522,7 +3782,7 @@ void main() {
       return Tab(text: 'Tab $index');
     });
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -3532,11 +3792,7 @@ void main() {
         useMaterial3: false,
         child: Container(
           alignment: Alignment.topLeft,
-          child: TabBar(
-            indicatorWeight: indicatorWeight,
-            controller: controller,
-            tabs: tabs,
-          ),
+          child: TabBar(indicatorWeight: indicatorWeight, controller: controller, tabs: tabs),
         ),
       ),
     );
@@ -3548,11 +3804,14 @@ void main() {
     double indicatorLeft = indicatorWeight / 2.0;
     double indicatorRight = 200.0 - (indicatorWeight / 2.0);
 
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
 
     // Select tab 1.
     controller.animateTo(1, duration: const Duration(milliseconds: 1000), curve: Curves.linear);
@@ -3561,11 +3820,14 @@ void main() {
     indicatorLeft = 100.0 + indicatorWeight / 2.0;
     indicatorRight = 300.0 - (indicatorWeight / 2.0);
 
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
 
     // Select tab 2 when animation is running.
     controller.animateTo(2, duration: const Duration(milliseconds: 1000), curve: Curves.linear);
@@ -3574,22 +3836,28 @@ void main() {
     indicatorLeft = 250.0 + indicatorWeight / 2.0;
     indicatorRight = 450.0 - (indicatorWeight / 2.0);
 
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
 
     // Final indicator position.
     await tester.pumpAndSettle();
     indicatorLeft = 400.0 + indicatorWeight / 2.0;
     indicatorRight = 600.0 - (indicatorWeight / 2.0);
 
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
   });
 
   testWidgets('correct semantics', (WidgetTester tester) async {
@@ -3599,7 +3867,7 @@ void main() {
       return Tab(text: 'TAB #$index');
     });
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -3609,11 +3877,7 @@ void main() {
         useMaterial3: false,
         child: Semantics(
           container: true,
-          child: TabBar(
-            isScrollable: true,
-            controller: controller,
-            tabs: tabs,
-          ),
+          child: TabBar(isScrollable: true, controller: controller, tabs: tabs),
         ),
       ),
     );
@@ -3629,30 +3893,43 @@ void main() {
               rect: TestSemantics.fullScreen,
               children: <TestSemantics>[
                 TestSemantics(
-                    id: 3,
-                    rect: TestSemantics.fullScreen,
-                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        id: 4,
-                        actions: <SemanticsAction>[SemanticsAction.tap],
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.isSelected,
-                          SemanticsFlag.isFocusable,
-                        ],
-                        label: 'TAB #0\nTab 1 of 2',
-                        rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
-                        transform: Matrix4.translationValues(0.0, 276.0, 0.0),
-                      ),
-                      TestSemantics(
-                        id: 5,
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
-                        label: 'TAB #1\nTab 2 of 2',
-                        rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
-                        transform: Matrix4.translationValues(116.0, 276.0, 0.0),
-                      ),
-                    ],
+                  id: 3,
+                  rect: TestSemantics.fullScreen,
+                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 4,
+                      rect: const Rect.fromLTRB(0.0, 0.0, 232.0, 600.0),
+                      role: SemanticsRole.tabBar,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 5,
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isSelected,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          label: 'TAB #0${kIsWeb ? '' : '\nTab 1 of 2'}',
+                          rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                          role: SemanticsRole.tab,
+                          transform: Matrix4.translationValues(0.0, 276.0, 0.0),
+                        ),
+                        TestSemantics(
+                          id: 6,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'TAB #1${kIsWeb ? '' : '\nTab 2 of 2'}',
+                          rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                          role: SemanticsRole.tab,
+                          transform: Matrix4.translationValues(116.0, 276.0, 0.0),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -3673,7 +3950,7 @@ void main() {
       return Tab(text: 'This is a very wide tab #$index');
     });
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -3682,20 +3959,25 @@ void main() {
       boilerplate(
         child: Semantics(
           container: true,
-          child: TabBar(
-            isScrollable: true,
-            controller: controller,
-            tabs: tabs,
-          ),
+          child: TabBar(isScrollable: true, controller: controller, tabs: tabs),
         ),
       ),
     );
 
-    const String tab0title = 'This is a very wide tab #0\nTab 1 of 20';
-    const String tab10title = 'This is a very wide tab #10\nTab 11 of 20';
+    const String tab0title = 'This is a very wide tab #0${kIsWeb ? '' : '\nTab 1 of 20'}';
+    const String tab10title = 'This is a very wide tab #10${kIsWeb ? '' : '\nTab 11 of 20'}';
 
-    const List<SemanticsFlag> hiddenFlags = <SemanticsFlag>[SemanticsFlag.isHidden, SemanticsFlag.isFocusable];
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+    const List<SemanticsFlag> hiddenFlags = <SemanticsFlag>[
+      SemanticsFlag.isHidden,
+      SemanticsFlag.isFocusable,
+      SemanticsFlag.hasSelectedState,
+    ];
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollToOffset],
+      ),
+    );
     expect(semantics, includesNodeWith(label: tab0title));
     expect(semantics, includesNodeWith(label: tab10title, flags: hiddenFlags));
 
@@ -3703,18 +3985,37 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(semantics, includesNodeWith(label: tab0title, flags: hiddenFlags));
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight]));
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[
+          SemanticsAction.scrollLeft,
+          SemanticsAction.scrollRight,
+          SemanticsAction.scrollToOffset,
+        ],
+      ),
+    );
     expect(semantics, includesNodeWith(label: tab10title));
 
     controller.index = 19;
     await tester.pumpAndSettle();
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollRight]));
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[SemanticsAction.scrollRight, SemanticsAction.scrollToOffset],
+      ),
+    );
 
     controller.index = 0;
     await tester.pumpAndSettle();
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollToOffset],
+      ),
+    );
     expect(semantics, includesNodeWith(label: tab0title));
     expect(semantics, includesNodeWith(label: tab10title, flags: hiddenFlags));
 
@@ -3722,25 +4023,14 @@ void main() {
   });
 
   testWidgets('TabBar etc with zero tabs', (WidgetTester tester) async {
-    final TabController controller = _tabController(
-      vsync: const TestVSync(),
-      length: 0,
-    );
+    final TabController controller = createTabController(vsync: const TestVSync(), length: 0);
 
     await tester.pumpWidget(
       boilerplate(
         child: Column(
           children: <Widget>[
-            TabBar(
-              controller: controller,
-              tabs: const <Widget>[],
-            ),
-            Flexible(
-              child: TabBarView(
-                controller: controller,
-                children: const <Widget>[],
-              ),
-            ),
+            TabBar(controller: controller, tabs: const <Widget>[]),
+            Flexible(child: TabBarView(controller: controller, children: const <Widget>[])),
           ],
         ),
       ),
@@ -3762,24 +4052,15 @@ void main() {
   });
 
   testWidgets('TabBar etc with one tab', (WidgetTester tester) async {
-    final TabController controller = _tabController(
-      vsync: const TestVSync(),
-      length: 1,
-    );
+    final TabController controller = createTabController(vsync: const TestVSync(), length: 1);
 
     await tester.pumpWidget(
       boilerplate(
         child: Column(
           children: <Widget>[
-            TabBar(
-              controller: controller,
-              tabs: const <Widget>[Tab(text: 'TAB')],
-            ),
+            TabBar(controller: controller, tabs: const <Widget>[Tab(text: 'TAB')]),
             Flexible(
-              child: TabBarView(
-                controller: controller,
-                children: const <Widget>[Text('PAGE')],
-              ),
+              child: TabBarView(controller: controller, children: const <Widget>[Text('PAGE')]),
             ),
           ],
         ),
@@ -3816,11 +4097,10 @@ void main() {
     expect(find.text('PAGE'), findsOneWidget);
   });
 
-  testWidgets('can tap on indicator at very bottom of TabBar to switch tabs', (WidgetTester tester) async {
-    final TabController controller = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+  testWidgets('can tap on indicator at very bottom of TabBar to switch tabs', (
+    WidgetTester tester,
+  ) async {
+    final TabController controller = createTabController(vsync: const TestVSync(), length: 2);
 
     await tester.pumpWidget(
       boilerplate(
@@ -3859,14 +4139,12 @@ void main() {
       return Tab(
         child: Semantics(
           label: 'Semantics override $index',
-          child: ExcludeSemantics(
-            child: Text('TAB #$index'),
-          ),
+          child: ExcludeSemantics(child: Text('TAB #$index')),
         ),
       );
     });
 
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -3876,11 +4154,7 @@ void main() {
         useMaterial3: false,
         child: Semantics(
           container: true,
-          child: TabBar(
-            isScrollable: true,
-            controller: controller,
-            tabs: tabs,
-          ),
+          child: TabBar(isScrollable: true, controller: controller, tabs: tabs),
         ),
       ),
     );
@@ -3896,30 +4170,43 @@ void main() {
               rect: TestSemantics.fullScreen,
               children: <TestSemantics>[
                 TestSemantics(
-                    id: 3,
-                    rect: TestSemantics.fullScreen,
-                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        id: 4,
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.isSelected,
-                          SemanticsFlag.isFocusable,
-                        ],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
-                        label: 'Semantics override 0\nTab 1 of 2',
-                        rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
-                        transform: Matrix4.translationValues(0.0, 276.0, 0.0),
-                      ),
-                      TestSemantics(
-                        id: 5,
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
-                        label: 'Semantics override 1\nTab 2 of 2',
-                        rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
-                        transform: Matrix4.translationValues(116.0, 276.0, 0.0),
-                      ),
-                    ],
+                  id: 3,
+                  rect: TestSemantics.fullScreen,
+                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 4,
+                      rect: const Rect.fromLTRB(0.0, 0.0, 232.0, 600.0),
+                      role: SemanticsRole.tabBar,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 5,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isSelected,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'Semantics override 0${kIsWeb ? '' : '\nTab 1 of 2'}',
+                          rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                          role: SemanticsRole.tab,
+                          transform: Matrix4.translationValues(0.0, 276.0, 0.0),
+                        ),
+                        TestSemantics(
+                          id: 6,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'Semantics override 1${kIsWeb ? '' : '\nTab 2 of 2'}',
+                          rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                          role: SemanticsRole.tab,
+                          transform: Matrix4.translationValues(116.0, 276.0, 0.0),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -3936,10 +4223,7 @@ void main() {
   testWidgets('can be notified of TabBar onTap behavior', (WidgetTester tester) async {
     int tabIndex = -1;
 
-    Widget buildFrame({
-      required TabController controller,
-      required List<String> tabs,
-    }) {
+    Widget buildFrame({required TabController controller, required List<String> tabs}) {
       return boilerplate(
         child: TabBar(
           controller: controller,
@@ -3952,7 +4236,7 @@ void main() {
     }
 
     final List<String> tabs = <String>['A', 'B', 'C'];
-    final TabController controller = _tabController(
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
       initialIndex: tabs.indexOf('C'),
@@ -4020,41 +4304,54 @@ void main() {
 
   testWidgets('Tabs changes mouse cursor when a tab is hovered', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B'];
-    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
-        length: tabs.length,
-        child: Scaffold(
-          body: MouseRegion(
-            cursor: SystemMouseCursors.forbidden,
-            child: TabBar(
-              mouseCursor: SystemMouseCursors.text,
-              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: tabs.length,
+          child: Scaffold(
+            body: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: TabBar(
+                mouseCursor: SystemMouseCursors.text,
+                tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
     await gesture.addPointer(location: tester.getCenter(find.byType(Tab).first));
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
 
     // Test default cursor
-    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
-        length: tabs.length,
-        child: Scaffold(
-          body: MouseRegion(
-            cursor: SystemMouseCursors.forbidden,
-            child: TabBar(
-              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: tabs.length,
+          child: Scaffold(
+            body: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: TabBar(tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList()),
             ),
           ),
         ),
       ),
-    ));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    );
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.click,
+    );
   });
 
   testWidgets('TabController changes', (WidgetTester tester) async {
@@ -4067,24 +4364,15 @@ void main() {
           alignment: Alignment.topLeft,
           child: TabBar(
             controller: controller,
-            tabs: const <Tab>[
-              Tab(text: 'LEFT'),
-              Tab(text: 'RIGHT'),
-            ],
+            tabs: const <Tab>[Tab(text: 'LEFT'), Tab(text: 'RIGHT')],
           ),
         ),
       );
     }
 
-    final TabController controller1 = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+    final TabController controller1 = createTabController(vsync: const TestVSync(), length: 2);
 
-    final TabController controller2 = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+    final TabController controller2 = createTabController(vsync: const TestVSync(), length: 2);
 
     await tester.pumpWidget(buildFrame(controller1));
     await tester.pumpWidget(buildFrame(controller2));
@@ -4098,11 +4386,14 @@ void main() {
     const double indicatorY = 48.0 - indicatorWeight / 2.0;
     double indicatorLeft = indicatorWeight / 2.0;
     double indicatorRight = 400.0 - indicatorWeight / 2.0; // 400 = screen_width / 2
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
 
     await tester.tap(find.text('RIGHT'));
     await tester.pumpAndSettle();
@@ -4114,18 +4405,20 @@ void main() {
 
     indicatorLeft = 400.0 + indicatorWeight / 2.0;
     indicatorRight = 800.0 - indicatorWeight / 2.0;
-    expect(tabBarBox, paints..line(
-      strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
-    ));
+    expect(
+      tabBarBox,
+      paints..line(
+        strokeWidth: indicatorWeight,
+        p1: Offset(indicatorLeft, indicatorY),
+        p2: Offset(indicatorRight, indicatorY),
+      ),
+    );
   });
 
   testWidgets('TabController changes while flinging', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/34744
 
     Widget buildFrame(TabController controller) {
-
       return MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: Scaffold(
@@ -4136,8 +4429,7 @@ void main() {
               tabs: <Tab>[
                 const Tab(text: 'A'),
                 const Tab(text: 'B'),
-                if (controller.length == 3)
-                  const Tab(text: 'C'),
+                if (controller.length == 3) const Tab(text: 'C'),
               ],
             ),
           ),
@@ -4146,23 +4438,16 @@ void main() {
             children: <Widget>[
               const Center(child: Text('CHILD A')),
               const Center(child: Text('CHILD B')),
-              if (controller.length == 3)
-                const Center(child: Text('CHILD C')),
+              if (controller.length == 3) const Center(child: Text('CHILD C')),
             ],
           ),
         ),
       );
     }
 
-    final TabController controller1 = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+    final TabController controller1 = createTabController(vsync: const TestVSync(), length: 2);
 
-    final TabController controller2 = _tabController(
-      vsync: const TestVSync(),
-      length: 3,
-    );
+    final TabController controller2 = createTabController(vsync: const TestVSync(), length: 3);
 
     expect(controller1.index, 0);
     expect(controller2.index, 0);
@@ -4188,7 +4473,7 @@ void main() {
     TabController? controller;
 
     Widget buildFrame(int length) {
-      controller = _tabController(
+      controller = createTabController(
         vsync: const TestVSync(),
         length: length,
         initialIndex: length - 1,
@@ -4198,18 +4483,12 @@ void main() {
           labelPadding: EdgeInsets.zero,
           controller: controller,
           isScrollable: true,
-          tabs: List<Widget>.generate(
-            length,
-            (int index) {
-              return SizedBox(
-                width: 100,
-                child: Tab(
-                  key: index == length - 1 ? lastTabKey : null,
-                  text: 'Tab $index',
-                ),
-              );
-            },
-          ),
+          tabs: List<Widget>.generate(length, (int index) {
+            return SizedBox(
+              width: 100,
+              child: Tab(key: index == length - 1 ? lastTabKey : null, text: 'Tab $index'),
+            );
+          }),
         ),
       );
     }
@@ -4225,7 +4504,9 @@ void main() {
     expect(tester.getCenter(find.byKey(lastTabKey)).dx, equals(750.0));
   });
 
-  testWidgets('DefaultTabController changes does not recreate PageController', (WidgetTester tester) async {
+  testWidgets('DefaultTabController changes does not recreate PageController', (
+    WidgetTester tester,
+  ) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/134253.
     Widget buildFrame(int length) {
       return boilerplate(
@@ -4233,13 +4514,10 @@ void main() {
           length: length,
           initialIndex: length - 1,
           child: TabBarView(
-            physics: const TestScrollPhysics(),
-            children: List<Widget>.generate(
-              length,
-              (int index) {
-                return Center(child: Text('Page $index'));
-              },
-            ),
+            physics: const TabBarTestScrollPhysics(),
+            children: List<Widget>.generate(length, (int index) {
+              return Center(child: Text('Page $index'));
+            }),
           ),
         ),
       );
@@ -4263,69 +4541,77 @@ void main() {
     expect(pageController1, equals(pageController2));
   });
 
-  testWidgets('Do not throw when switching between a scrollable TabBar and a non-scrollable TabBar', (WidgetTester tester) async {
-    // This is a regression test for https://github.com/flutter/flutter/issues/120649
-    final TabController controller1 = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
-    final TabController controller2 = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+  testWidgets(
+    'Do not throw when switching between a scrollable TabBar and a non-scrollable TabBar',
+    (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/120649
+      final TabController controller1 = createTabController(vsync: const TestVSync(), length: 2);
+      final TabController controller2 = createTabController(vsync: const TestVSync(), length: 2);
 
-    Widget buildFrame(TabController controller, bool isScrollable) {
-      return boilerplate(
-        child: Container(
-          alignment: Alignment.topLeft,
-          child: TabBar(
-            controller: controller,
-            isScrollable: isScrollable,
-            tabs: const <Tab>[
-              Tab(text: 'LEFT'),
-              Tab(text: 'RIGHT'),
-            ],
+      Widget buildFrame(TabController controller, bool isScrollable) {
+        return boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              controller: controller,
+              isScrollable: isScrollable,
+              tabs: const <Tab>[Tab(text: 'LEFT'), Tab(text: 'RIGHT')],
+            ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
-    // Show both controllers once.
-    await tester.pumpWidget(buildFrame(controller1, false));
-    await tester.pumpWidget(buildFrame(controller2, true));
+      // Show both controllers once.
+      await tester.pumpWidget(buildFrame(controller1, false));
+      await tester.pumpWidget(buildFrame(controller2, true));
 
-    // Switch back to the first controller.
-    await tester.pumpWidget(buildFrame(controller1, false));
-    expect(tester.takeException(), null);
+      // Switch back to the first controller.
+      await tester.pumpWidget(buildFrame(controller1, false));
+      expect(tester.takeException(), null);
 
-    // Switch back to the second controller.
-    await tester.pumpWidget(buildFrame(controller2, true));
-    expect(tester.takeException(), null);
-  });
+      // Switch back to the second controller.
+      await tester.pumpWidget(buildFrame(controller2, true));
+      expect(tester.takeException(), null);
+    },
+  );
 
-  testWidgets('Default tab indicator color is white in M2 and surfaceVariant in M3', (WidgetTester tester) async {
+  testWidgets('Default tab indicator color is white in M2 and surfaceVariant in M3', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/15958
     final List<String> tabs = <String>['LEFT', 'RIGHT'];
     final ThemeData theme = ThemeData(platform: TargetPlatform.android);
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(buildLeftRightApp(themeData: theme, tabs: tabs, value: 'LEFT'));
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    expect(tabBarBox, paints..line(
-      color: material3 ? theme.colorScheme.surfaceVariant : Colors.white,
-    ));
+    expect(
+      tabBarBox,
+      paints..line(color: material3 ? theme.colorScheme.outlineVariant : Colors.white),
+    );
   });
 
-  testWidgets('Tab indicator color should not be adjusted when disable [automaticIndicatorColorAdjustment]', (WidgetTester tester) async {
-     // Regression test for https://github.com/flutter/flutter/issues/68077
-     final List<String> tabs = <String>['LEFT', 'RIGHT'];
-     final ThemeData theme = ThemeData(platform: TargetPlatform.android);
-     final bool material3 = theme.useMaterial3;
-     await tester.pumpWidget(buildLeftRightApp(themeData: theme, tabs: tabs, value: 'LEFT', automaticIndicatorColorAdjustment: false));
-     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-     expect(tabBarBox, paints..line(
-       color: material3 ? theme.colorScheme.surfaceVariant : const Color(0xff2196f3),
-     ));
-  });
+  testWidgets(
+    'Tab indicator color should not be adjusted when disable [automaticIndicatorColorAdjustment]',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/68077
+      final List<String> tabs = <String>['LEFT', 'RIGHT'];
+      final ThemeData theme = ThemeData(platform: TargetPlatform.android);
+      final bool material3 = theme.useMaterial3;
+      await tester.pumpWidget(
+        buildLeftRightApp(
+          themeData: theme,
+          tabs: tabs,
+          value: 'LEFT',
+          automaticIndicatorColorAdjustment: false,
+        ),
+      );
+      final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+      expect(
+        tabBarBox,
+        paints..line(color: material3 ? theme.colorScheme.outlineVariant : const Color(0xff2196f3)),
+      );
+    },
+  );
 
   group('Tab feedback', () {
     late FeedbackTester feedback;
@@ -4341,14 +4627,7 @@ void main() {
     testWidgets('Tab feedback is enabled (default)', (WidgetTester tester) async {
       await tester.pumpWidget(
         boilerplate(
-          child: const DefaultTabController(
-            length: 1,
-            child: TabBar(
-              tabs: <Tab>[
-                Tab(text: 'A'),
-              ],
-            ),
-          ),
+          child: const DefaultTabController(length: 1, child: TabBar(tabs: <Tab>[Tab(text: 'A')])),
         ),
       );
       await tester.tap(find.byType(InkWell), pointer: 1);
@@ -4367,12 +4646,7 @@ void main() {
         boilerplate(
           child: const DefaultTabController(
             length: 1,
-            child: TabBar(
-              tabs: <Tab>[
-                Tab(text: 'A'),
-              ],
-              enableFeedback: false,
-            ),
+            child: TabBar(tabs: <Tab>[Tab(text: 'A')], enableFeedback: false),
           ),
         ),
       );
@@ -4389,26 +4663,24 @@ void main() {
   });
 
   group('Tab overlayColor affects ink response', () {
-    testWidgets("Tab's ink well changes color on hover with Tab overlayColor", (WidgetTester tester) async {
+    testWidgets("Tab's ink well changes color on hover with Tab overlayColor", (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         boilerplate(
           child: DefaultTabController(
             length: 1,
             child: TabBar(
-              tabs: const <Tab>[
-                Tab(text: 'A'),
-              ],
-              overlayColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-                 if (states.contains(MaterialState.hovered)) {
-                   return const Color(0xff00ff00);
-                 }
-                  if (states.contains(MaterialState.pressed)) {
-                    return const Color(0xf00fffff);
-                  }
-                  return const Color(0xffbadbad); // Shouldn't happen.
-                },
-              ),
+              tabs: const <Tab>[Tab(text: 'A')],
+              overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                if (states.contains(MaterialState.hovered)) {
+                  return const Color(0xff00ff00);
+                }
+                if (states.contains(MaterialState.pressed)) {
+                  return const Color(0xf00fffff);
+                }
+                return const Color(0xffbadbad); // Shouldn't happen.
+              }),
             ),
           ),
         ),
@@ -4417,8 +4689,16 @@ void main() {
       await gesture.addPointer();
       await gesture.moveTo(tester.getCenter(find.byType(Tab)));
       await tester.pumpAndSettle();
-      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-      expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0.0, 276.0, 800.0, 324.0), color: const Color(0xff00ff00)));
+      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
+      );
+      expect(
+        inkFeatures,
+        paints..rect(
+          rect: const Rect.fromLTRB(0.0, 276.0, 800.0, 324.0),
+          color: const Color(0xff00ff00),
+        ),
+      );
     });
 
     testWidgets(
@@ -4431,28 +4711,28 @@ void main() {
             child: DefaultTabController(
               length: 1,
               child: TabBar(
-                tabs: const <Tab>[
-                  Tab(text: 'A'),
-                ],
-                overlayColor: MaterialStateProperty.resolveWith<Color>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered)) {
-                      return const Color(0xff00ff00);
-                    }
-                    if (states.contains(MaterialState.pressed)) {
-                      return splashColor;
-                    }
-                    return const Color(0xffbadbad); // Shouldn't happen.
-                  },
-                ),
+                tabs: const <Tab>[Tab(text: 'A')],
+                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.hovered)) {
+                    return const Color(0xff00ff00);
+                  }
+                  if (states.contains(MaterialState.pressed)) {
+                    return splashColor;
+                  }
+                  return const Color(0xffbadbad); // Shouldn't happen.
+                }),
               ),
             ),
           ),
         );
         await tester.pumpAndSettle();
-        final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+        final TestGesture gesture = await tester.startGesture(
+          tester.getRect(find.byType(InkWell)).center,
+        );
         await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
-        final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+        final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+          (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
+        );
         expect(inkFeatures, paints..circle(x: 400, y: 24, color: splashColor));
         await gesture.up();
       },
@@ -4461,13 +4741,8 @@ void main() {
 
   testWidgets('Skipping tabs with global key does not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/24660
-    final List<String> tabs = <String>[
-      'Tab1',
-      'Tab2',
-      'Tab3',
-      'Tab4',
-    ];
-    final TabController controller = _tabController(
+    final List<String> tabs = <String>['Tab1', 'Tab2', 'Tab3', 'Tab4'];
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -4511,14 +4786,8 @@ void main() {
 
   testWidgets('Skipping tabs with a KeepAlive child works', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/11895
-    final List<String> tabs = <String>[
-      'Tab1',
-      'Tab2',
-      'Tab3',
-      'Tab4',
-      'Tab5',
-    ];
-    final TabController controller = _tabController(
+    final List<String> tabs = <String>['Tab1', 'Tab2', 'Tab3', 'Tab4', 'Tab5'];
+    final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
@@ -4540,7 +4809,7 @@ void main() {
               body: TabBarView(
                 controller: controller,
                 children: <Widget>[
-                  AlwaysKeepAliveWidget(key: UniqueKey()),
+                  TabAlwaysKeepAliveWidget(key: UniqueKey()),
                   const Text('2'),
                   const Text('3'),
                   const Text('4'),
@@ -4552,76 +4821,66 @@ void main() {
         ),
       ),
     );
-    expect(find.text(AlwaysKeepAliveWidget.text), findsOneWidget);
+    expect(find.text(TabAlwaysKeepAliveWidget.text), findsOneWidget);
     expect(find.text('4'), findsNothing);
     await tester.tap(find.text('Tab4'));
     await tester.pumpAndSettle();
     await tester.pump();
     expect(controller.index, 3);
-    expect(find.text(AlwaysKeepAliveWidget.text, skipOffstage: false), findsOneWidget);
+    expect(find.text(TabAlwaysKeepAliveWidget.text, skipOffstage: false), findsOneWidget);
     expect(find.text('4'), findsOneWidget);
   });
 
-  testWidgets('tabbar does not scroll when viewport dimensions initially change from zero to non-zero', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/10531.
+  testWidgets(
+    'tabbar does not scroll when viewport dimensions initially change from zero to non-zero',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/10531.
 
-    const List<Widget> tabs = <Widget>[
-      Tab(text: 'NEW MEXICO'),
-      Tab(text: 'GABBA'),
-      Tab(text: 'HEY'),
-    ];
-    final TabController controller = _tabController(vsync: const TestVSync(), length: tabs.length);
+      const List<Widget> tabs = <Widget>[
+        Tab(text: 'NEW MEXICO'),
+        Tab(text: 'GABBA'),
+        Tab(text: 'HEY'),
+      ];
+      final TabController controller = createTabController(
+        vsync: const TestVSync(),
+        length: tabs.length,
+      );
 
-    Widget buildTestWidget({double? width, double? height}) {
-      return MaterialApp(
-        home: Center(
-          child: SizedBox(
-            height: height,
-            width: width,
-            child: Scaffold(
-              appBar: AppBar(
-                title: const Text('AppBarBug'),
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(30.0),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                    child: Align(
-                      alignment: FractionalOffset.center,
-                      child: TabBar(
-                        controller: controller,
-                        isScrollable: true,
-                        tabs: tabs,
+      Widget buildTestWidget({double? width, double? height}) {
+        return MaterialApp(
+          home: Center(
+            child: SizedBox(
+              height: height,
+              width: width,
+              child: Scaffold(
+                appBar: AppBar(
+                  title: const Text('AppBarBug'),
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(30.0),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Align(
+                        alignment: FractionalOffset.center,
+                        child: TabBar(controller: controller, isScrollable: true, tabs: tabs),
                       ),
                     ),
                   ),
                 ),
-              ),
-              body: const Center(
-                child: Text('Hello World'),
+                body: const Center(child: Text('Hello World')),
               ),
             ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
-    await tester.pumpWidget(
-      buildTestWidget(
-        width: 0.0,
-        height: 0.0,
-      ),
-    );
+      await tester.pumpWidget(buildTestWidget(width: 0.0, height: 0.0));
 
-    await tester.pumpWidget(
-      buildTestWidget(
-        width: 300.0,
-        height: 400.0,
-      ),
-    );
+      await tester.pumpWidget(buildTestWidget(width: 300.0, height: 400.0));
 
-    expect(tester.hasRunningAnimations, isFalse);
-    expect(await tester.pumpAndSettle(), 1); // no more frames are scheduled.
-  });
+      expect(tester.hasRunningAnimations, isFalse);
+      expect(await tester.pumpAndSettle(), 1); // no more frames are scheduled.
+    },
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/20292.
   testWidgets('Number of tabs can be updated dynamically', (WidgetTester tester) async {
@@ -4634,12 +4893,11 @@ void main() {
         child: DefaultTabController(
           key: key,
           length: tabs.length,
-          child: TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-          ),
+          child: TabBar(tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList()),
         ),
       );
     }
+
     TabController getController() => DefaultTabController.of(tester.element(find.text('A')));
 
     await tester.pumpWidget(buildTabs(threeTabs));
@@ -4675,16 +4933,18 @@ void main() {
     const Color selectedTabColor = Color(0x00000001);
     const Color unselectedTabColor = Color(0x00000002);
 
-    await tester.pumpWidget(boilerplate(
-      child: const DefaultTabController(
-        length: 1,
-        child: TabBar(
-          tabs: <Tab>[tab],
-          labelColor: selectedTabColor,
-          unselectedLabelColor: unselectedTabColor,
+    await tester.pumpWidget(
+      boilerplate(
+        child: const DefaultTabController(
+          length: 1,
+          child: TabBar(
+            tabs: <Tab>[tab],
+            labelColor: selectedTabColor,
+            unselectedLabelColor: unselectedTabColor,
+          ),
         ),
       ),
-    ));
+    );
 
     final IconThemeData iconTheme = IconTheme.of(tester.element(find.text('A')));
     expect(iconTheme.color, equals(selectedTabColor));
@@ -4696,7 +4956,9 @@ void main() {
 
     const Color selectedColor = Color(0xff00ff00);
     const Color unselectedColor = Color(0xffff0000);
-    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((
+      Set<MaterialState> states,
+    ) {
       if (states.contains(MaterialState.selected)) {
         return selectedColor;
       }
@@ -4704,23 +4966,21 @@ void main() {
     });
 
     // Test labelColor correctly resolves material states.
-    await tester.pumpWidget(boilerplate(
-      child: DefaultTabController(
-        length: 2,
-        child: TabBar(
-          labelColor: labelColor,
-          tabs: const <Widget>[
-            Text(tab1),
-            Text(tab2),
-          ],
+    await tester.pumpWidget(
+      boilerplate(
+        child: DefaultTabController(
+          length: 2,
+          child: TabBar(labelColor: labelColor, tabs: const <Widget>[Text(tab1), Text(tab2)]),
         ),
       ),
-    ));
+    );
 
     final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
     final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
-    final TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
-    final TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+    final TextStyle selectedTextStyle =
+        tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
+    final TextStyle unselectedTextStyle =
+        tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
 
     expect(selectedTabIcon.color, selectedColor);
     expect(unselectedTabIcon.color, unselectedColor);
@@ -4728,13 +4988,17 @@ void main() {
     expect(unselectedTextStyle.color, unselectedColor);
   });
 
-  testWidgets('labelColor & unselectedLabelColor override material state labelColor', (WidgetTester tester) async {
+  testWidgets('labelColor & unselectedLabelColor override material state labelColor', (
+    WidgetTester tester,
+  ) async {
     const String tab1 = 'Tab 1';
     const String tab2 = 'Tab 2';
 
     const Color selectedStateColor = Color(0xff00ff00);
     const Color unselectedStateColor = Color(0xffff0000);
-    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((
+      Set<MaterialState> states,
+    ) {
       if (states.contains(MaterialState.selected)) {
         return selectedStateColor;
       }
@@ -4743,19 +5007,17 @@ void main() {
     const Color selectedColor = Color(0xff00ffff);
     const Color unselectedColor = Color(0xffff12ff);
 
-    Widget buildTabBar({ bool stateColor = true }){
+    Widget buildTabBar({bool stateColor = true}) {
       return boilerplate(
-      child: DefaultTabController(
-        length: 2,
-        child: TabBar(
-          labelColor: stateColor ? labelColor : selectedColor,
-          unselectedLabelColor: stateColor ? null : unselectedColor,
-          tabs: const <Widget>[
-            Text(tab1),
-            Text(tab2),
-          ],
+        child: DefaultTabController(
+          length: 2,
+          child: TabBar(
+            labelColor: stateColor ? labelColor : selectedColor,
+            unselectedLabelColor: stateColor ? null : unselectedColor,
+            tabs: const <Widget>[Text(tab1), Text(tab2)],
+          ),
         ),
-      ));
+      );
     }
 
     // Test material state label color.
@@ -4764,7 +5026,8 @@ void main() {
     IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
     IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
     TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
-    TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+    TextStyle unselectedTextStyle =
+        tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
 
     expect(selectedTabIcon.color, selectedStateColor);
     expect(unselectedTabIcon.color, unselectedStateColor);
@@ -4785,7 +5048,9 @@ void main() {
     expect(unselectedTextStyle.color, unselectedColor);
   });
 
-  testWidgets('Replacing the tabController after disposing the old one', (WidgetTester tester) async {
+  testWidgets('Replacing the tabController after disposing the old one', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/32428
     TabController controller = TabController(vsync: const TestVSync(), length: 2);
 
@@ -4797,7 +5062,10 @@ void main() {
               appBar: AppBar(
                 bottom: TabBar(
                   controller: controller,
-                  tabs: List<Widget>.generate(controller.length, (int index) => Tab(text: 'Tab$index')),
+                  tabs: List<Widget>.generate(
+                    controller.length,
+                    (int index) => Tab(text: 'Tab$index'),
+                  ),
                 ),
                 actions: <Widget>[
                   TextButton(
@@ -4805,7 +5073,7 @@ void main() {
                     onPressed: () {
                       setState(() {
                         controller.dispose();
-                        controller = _tabController(vsync: const TestVSync(), length: 3);
+                        controller = createTabController(vsync: const TestVSync(), length: 3);
                       });
                     },
                   ),
@@ -4813,7 +5081,10 @@ void main() {
               ),
               body: TabBarView(
                 controller: controller,
-                children: List<Widget>.generate(controller.length, (int index) => Center(child: Text('Tab $index'))),
+                children: List<Widget>.generate(
+                  controller.length,
+                  (int index) => Center(child: Text('Tab $index')),
+                ),
               ),
             );
           },
@@ -4836,7 +5107,9 @@ void main() {
     expect(find.text('Tab2'), findsOneWidget);
   });
 
-  testWidgets('DefaultTabController should allow for a length of zero', (WidgetTester tester) async {
+  testWidgets('DefaultTabController should allow for a length of zero', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/20292.
     List<String> tabTextContent = <String>[];
 
@@ -4849,18 +5122,26 @@ void main() {
               child: Scaffold(
                 appBar: AppBar(
                   title: const Text('Default TabBar Preview'),
-                  bottom: tabTextContent.isNotEmpty
-                    ? TabBar(
-                        isScrollable: true,
-                        tabs: tabTextContent.map((String textContent) => Tab(text: textContent)).toList(),
-                      )
-                    : null,
+                  bottom:
+                      tabTextContent.isNotEmpty
+                          ? TabBar(
+                            isScrollable: true,
+                            tabs:
+                                tabTextContent
+                                    .map((String textContent) => Tab(text: textContent))
+                                    .toList(),
+                          )
+                          : null,
                 ),
-                body: tabTextContent.isNotEmpty
-                  ? TabBarView(
-                      children: tabTextContent.map((String textContent) => Tab(text: "$textContent's view")).toList(),
-                    )
-                  : const Center(child: Text('No tabs')),
+                body:
+                    tabTextContent.isNotEmpty
+                        ? TabBarView(
+                          children:
+                              tabTextContent
+                                  .map((String textContent) => Tab(text: "$textContent's view"))
+                                  .toList(),
+                        )
+                        : const Center(child: Text('No tabs')),
                 bottomNavigationBar: BottomAppBar(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -4880,8 +5161,7 @@ void main() {
                         icon: const Icon(Icons.delete),
                         onPressed: () {
                           setState(() {
-                            tabTextContent = List<String>.from(tabTextContent)
-                              ..removeLast();
+                            tabTextContent = List<String>.from(tabTextContent)..removeLast();
                           });
                         },
                       ),
@@ -4908,7 +5188,9 @@ void main() {
     expect(find.text('No tabs'), findsOneWidget);
   });
 
-  testWidgets('DefaultTabController should allow dynamic length of tabs', (WidgetTester tester) async {
+  testWidgets('DefaultTabController should allow dynamic length of tabs', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/94504.
     final List<String> tabTitles = <String>[];
 
@@ -4948,9 +5230,7 @@ void main() {
                     preferredSize: const Size.fromHeight(40.0),
                     child: Expanded(
                       child: TabBar(
-                        tabs: tabTitles
-                            .map((String title) => Tab(text: title))
-                            .toList(),
+                        tabs: tabTitles.map((String title) => Tab(text: title)).toList(),
                       ),
                     ),
                   ),
@@ -4985,19 +5265,22 @@ void main() {
   testWidgets('TabBar - updating to and from zero tabs', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/68962.
     final List<String> tabTitles = <String>[];
-    TabController tabController = _tabController(length: tabTitles.length, vsync: const TestVSync());
+    TabController tabController = createTabController(
+      length: tabTitles.length,
+      vsync: const TestVSync(),
+    );
 
     void onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
-        tabController = _tabController(length: tabTitles.length, vsync: const TestVSync());
+        tabController = createTabController(length: tabTitles.length, vsync: const TestVSync());
       });
     }
 
     void onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
-        tabController = _tabController(length: tabTitles.length, vsync: const TestVSync());
+        tabController = createTabController(length: tabTitles.length, vsync: const TestVSync());
       });
     }
 
@@ -5024,9 +5307,7 @@ void main() {
                   child: Expanded(
                     child: TabBar(
                       controller: tabController,
-                      tabs: tabTitles
-                        .map((String title) => Tab(text: title))
-                        .toList(),
+                      tabs: tabTitles.map((String title) => Tab(text: title)).toList(),
                     ),
                   ),
                 ),
@@ -5048,125 +5329,127 @@ void main() {
     expect(find.text('Tab 1'), findsNothing);
   });
 
-   testWidgets('TabBar expands vertically to accommodate the Icon and child Text() pair the same amount it would expand for Icon and text pair.', (WidgetTester tester) async {
-    const List<Widget> tabListWithText = <Widget>[
-      Tab(icon: Icon(Icons.notifications), text: 'Test'),
-    ];
-    const List<Widget> tabListWithTextChild = <Widget>[
-      Tab(icon: Icon(Icons.notifications), child: Text('Test')),
-    ];
+  testWidgets(
+    'TabBar expands vertically to accommodate the Icon and child Text() pair the same amount it would expand for Icon and text pair.',
+    (WidgetTester tester) async {
+      const List<Widget> tabListWithText = <Widget>[
+        Tab(icon: Icon(Icons.notifications), text: 'Test'),
+      ];
+      const List<Widget> tabListWithTextChild = <Widget>[
+        Tab(icon: Icon(Icons.notifications), child: Text('Test')),
+      ];
 
-    const TabBar tabBarWithText = TabBar(tabs: tabListWithText);
-    const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild);
+      const TabBar tabBarWithText = TabBar(tabs: tabListWithText);
+      const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild);
 
-    expect(tabBarWithText.preferredSize, tabBarWithTextChild.preferredSize);
-   });
+      expect(tabBarWithText.preferredSize, tabBarWithTextChild.preferredSize);
+    },
+  );
 
-  testWidgets('Setting TabController index should make TabBar indicator immediately pop into the position', (WidgetTester tester) async {
-    const List<Tab> tabs = <Tab>[
-      Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C'),
-    ];
-    const Color indicatorColor = Color(0xFFFF0000);
-    late TabController tabController;
+  testWidgets(
+    'Setting TabController index should make TabBar indicator immediately pop into the position',
+    (WidgetTester tester) async {
+      const List<Tab> tabs = <Tab>[Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C')];
+      const Color indicatorColor = Color(0xFFFF0000);
+      late TabController tabController;
 
-    Widget buildTabControllerFrame(BuildContext context, TabController controller) {
-      tabController = controller;
-      return MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Scaffold(
-          appBar: AppBar(
-            bottom: TabBar(
+      Widget buildTabControllerFrame(BuildContext context, TabController controller) {
+        tabController = controller;
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(controller: controller, tabs: tabs, indicatorColor: indicatorColor),
+            ),
+            body: TabBarView(
               controller: controller,
-              tabs: tabs,
-              indicatorColor: indicatorColor,
+              children:
+                  tabs.map((Tab tab) {
+                    return Center(child: Text(tab.text!));
+                  }).toList(),
             ),
           ),
-          body: TabBarView(
-            controller: controller,
-            children: tabs.map((Tab tab) {
-              return Center(child: Text(tab.text!));
-            }).toList(),
+        );
+      }
+
+      await tester.pumpWidget(
+        TabControllerFrame(builder: buildTabControllerFrame, length: tabs.length),
+      );
+
+      final RenderBox box = tester.renderObject(find.byType(TabBar));
+      final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
+      final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
+
+      box.paint(context, Offset.zero);
+      double expectedIndicatorLeft = canvas.indicatorRect.left;
+
+      final PageView pageView = tester.widget(find.byType(PageView));
+      final PageController pageController = pageView.controller!;
+      void pageControllerListener() {
+        // Whenever TabBarView scrolls due to changing TabController's index,
+        // check if indicator stays idle in its expectedIndicatorLeft
+        box.paint(context, Offset.zero);
+        expect(canvas.indicatorRect.left, expectedIndicatorLeft);
+      }
+
+      // Moving from index 0 to 2 (distanced tabs)
+      tabController.index = 2;
+      box.paint(context, Offset.zero);
+      expectedIndicatorLeft = canvas.indicatorRect.left;
+      pageController.addListener(pageControllerListener);
+      await tester.pumpAndSettle();
+
+      // Moving from index 2 to 1 (neighboring tabs)
+      tabController.index = 1;
+      box.paint(context, Offset.zero);
+      expectedIndicatorLeft = canvas.indicatorRect.left;
+      await tester.pumpAndSettle();
+      pageController.removeListener(pageControllerListener);
+    },
+  );
+
+  testWidgets(
+    'Setting BouncingScrollPhysics on TabBarView does not include ClampingScrollPhysics',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/57708
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DefaultTabController(
+            length: 10,
+            child: Scaffold(
+              body: TabBarView(
+                physics: const BouncingScrollPhysics(),
+                children: List<Widget>.generate(10, (int i) => Center(child: Text('index $i'))),
+              ),
+            ),
           ),
         ),
       );
-    }
 
-    await tester.pumpWidget(TabControllerFrame(
-      builder: buildTabControllerFrame,
-      length: tabs.length,
-    ));
-
-    final RenderBox box = tester.renderObject(find.byType(TabBar));
-    final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
-    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
-
-    box.paint(context, Offset.zero);
-    double expectedIndicatorLeft = canvas.indicatorRect.left;
-
-    final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller!;
-    void pageControllerListener() {
-      // Whenever TabBarView scrolls due to changing TabController's index,
-      // check if indicator stays idle in its expectedIndicatorLeft
-      box.paint(context, Offset.zero);
-      expect(canvas.indicatorRect.left, expectedIndicatorLeft);
-    }
-
-    // Moving from index 0 to 2 (distanced tabs)
-    tabController.index = 2;
-    box.paint(context, Offset.zero);
-    expectedIndicatorLeft = canvas.indicatorRect.left;
-    pageController.addListener(pageControllerListener);
-    await tester.pumpAndSettle();
-
-    // Moving from index 2 to 1 (neighboring tabs)
-    tabController.index = 1;
-    box.paint(context, Offset.zero);
-    expectedIndicatorLeft = canvas.indicatorRect.left;
-    await tester.pumpAndSettle();
-    pageController.removeListener(pageControllerListener);
-  });
-
-  testWidgets('Setting BouncingScrollPhysics on TabBarView does not include ClampingScrollPhysics', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/57708
-    await tester.pumpWidget(MaterialApp(
-      home: DefaultTabController(
-        length: 10,
-        child: Scaffold(
-          body: TabBarView(
-            physics: const BouncingScrollPhysics(),
-            children: List<Widget>.generate(10, (int i) => Center(child: Text('index $i'))),
-          ),
-        ),
-      ),
-    ));
-
-    final PageView pageView = tester.widget<PageView>(find.byType(PageView));
-    expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
-  });
+      final PageView pageView = tester.widget<PageView>(find.byType(PageView));
+      expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
+    },
+  );
 
   testWidgets('TabController.offset changes reflect labelColor', (WidgetTester tester) async {
-    final TabController controller = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+    final TabController controller = createTabController(vsync: const TestVSync(), length: 2);
 
     late Color firstColor;
     late Color secondColor;
 
-    Widget buildTabBar({ bool stateColor = false }) {
-      final Color labelColor = stateColor
-        ? MaterialStateColor
-          .resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.selected)) {
-              return Colors.white;
-            } else {
-              // this is a third color to also test if unselectedLabelColor
-              // is ignored when labelColor is MaterialStateColor
-              return Colors.transparent;
-            }
-          })
-        : Colors.white;
+    Widget buildTabBar({bool stateColor = false}) {
+      final Color labelColor =
+          stateColor
+              ? MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.white;
+                } else {
+                  // this is a third color to also test if unselectedLabelColor
+                  // is ignored when labelColor is MaterialStateColor
+                  return Colors.transparent;
+                }
+              })
+              : Colors.white;
 
       return boilerplate(
         child: TabBar(
@@ -5174,14 +5457,18 @@ void main() {
           labelColor: labelColor,
           unselectedLabelColor: Colors.black,
           tabs: <Widget>[
-            Builder(builder: (BuildContext context) {
-              firstColor = DefaultTextStyle.of(context).style.color!;
-              return const Text('First');
-            }),
-            Builder(builder: (BuildContext context) {
-              secondColor = DefaultTextStyle.of(context).style.color!;
-              return const Text('Second');
-            }),
+            Builder(
+              builder: (BuildContext context) {
+                firstColor = DefaultTextStyle.of(context).style.color!;
+                return const Text('First');
+              },
+            ),
+            Builder(
+              builder: (BuildContext context) {
+                secondColor = DefaultTextStyle.of(context).style.color!;
+                return const Text('Second');
+              },
+            ),
           ],
         ),
       );
@@ -5230,92 +5517,125 @@ void main() {
     await testLabelColor(selectedColor: Colors.white, unselectedColor: Colors.transparent);
   });
 
-  testWidgets('Crash on dispose', (WidgetTester tester) async {
-    await tester.pumpWidget(const Padding(padding: EdgeInsets.only(right: 200.0), child: TabBarDemo()));
-    await tester.tap(find.byIcon(Icons.directions_bike));
-    // There was a time where this would throw an exception
-    // because we tried to send a notification on dispose.
-  });
-
-  testWidgets("TabController's animation value should be in sync with TabBarView's scroll value when user interrupts ballistic scroll", (WidgetTester tester) async {
-    final TabController tabController = _tabController(
-      vsync: const TestVSync(),
-      length: 3,
-    );
-
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: SizedBox.expand(
-        child: Center(
-          child: SizedBox(
-            width: 400.0,
-            height: 400.0,
-            child: TabBarView(
-              controller: tabController,
-              children: const <Widget>[
-                Center(child: Text('0')),
-                Center(child: Text('1')),
-                Center(child: Text('2')),
+  testWidgets('No crash on dispose', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: const TabBar(
+                tabs: <Widget>[
+                  Tab(icon: Icon(Icons.directions_car)),
+                  Tab(icon: Icon(Icons.directions_transit)),
+                  Tab(icon: Icon(Icons.directions_bike)),
+                ],
+              ),
+              title: const Text('Tabs Demo'),
+            ),
+            body: const TabBarView(
+              children: <Widget>[
+                Icon(Icons.directions_car),
+                Icon(Icons.directions_transit),
+                Icon(Icons.directions_bike),
               ],
             ),
           ),
         ),
       ),
-    ));
-
-    final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller!;
-    final ScrollPosition position = pageController.position;
-
-    expect(tabController.index, 0);
-    expect(position.pixels, 0.0);
-
-    pageController.jumpTo(300.0);
-    await tester.pump();
-    expect(tabController.animation!.value, pageController.page);
-
-    // Touch TabBarView while ballistic scrolling is happening and
-    // check if tabController's animation value properly follows page value.
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
-    await tester.pump();
-    expect(tabController.animation!.value, pageController.page);
-
-    // Finish gesture to release resources.
-    await gesture.up();
-    await tester.pumpAndSettle();
+    );
+    await tester.tap(find.byIcon(Icons.directions_bike));
+    // No crash on dispose.
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Does not instantiate intermediate tabs during animation', (WidgetTester tester) async {
+  testWidgets(
+    "TabController's animation value should be in sync with TabBarView's scroll value when user interrupts ballistic scroll",
+    (WidgetTester tester) async {
+      final TabController tabController = createTabController(vsync: const TestVSync(), length: 3);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox.expand(
+            child: Center(
+              child: SizedBox(
+                width: 400.0,
+                height: 400.0,
+                child: TabBarView(
+                  controller: tabController,
+                  children: const <Widget>[
+                    Center(child: Text('0')),
+                    Center(child: Text('1')),
+                    Center(child: Text('2')),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final PageView pageView = tester.widget(find.byType(PageView));
+      final PageController pageController = pageView.controller!;
+      final ScrollPosition position = pageController.position;
+
+      expect(tabController.index, 0);
+      expect(position.pixels, 0.0);
+
+      pageController.jumpTo(300.0);
+      await tester.pump();
+      expect(tabController.animation!.value, pageController.page);
+
+      // Touch TabBarView while ballistic scrolling is happening and
+      // check if tabController's animation value properly follows page value.
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byType(PageView)),
+      );
+      await tester.pump();
+      expect(tabController.animation!.value, pageController.page);
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets('Does not instantiate intermediate tabs during animation', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/14316.
     final List<String> log = <String>[];
-    await tester.pumpWidget(MaterialApp(
-      home: DefaultTabController(
-        length: 5,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(
-              tabs: <Widget>[
-                Tab(text: 'car'),
-                Tab(text: 'transit'),
-                Tab(text: 'bike'),
-                Tab(text: 'boat'),
-                Tab(text: 'bus'),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 5,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: const TabBar(
+                tabs: <Widget>[
+                  Tab(text: 'car'),
+                  Tab(text: 'transit'),
+                  Tab(text: 'bike'),
+                  Tab(text: 'boat'),
+                  Tab(text: 'bus'),
+                ],
+              ),
+              title: const Text('Tabs Test'),
+            ),
+            body: TabBarView(
+              children: <Widget>[
+                TabBody(index: 0, log: log),
+                TabBody(index: 1, log: log),
+                TabBody(index: 2, log: log),
+                TabBody(index: 3, log: log),
+                TabBody(index: 4, log: log),
               ],
             ),
-            title: const Text('Tabs Test'),
-          ),
-          body: TabBarView(
-            children: <Widget>[
-              TabBody(index: 0, log: log),
-              TabBody(index: 1, log: log),
-              TabBody(index: 2, log: log),
-              TabBody(index: 3, log: log),
-              TabBody(index: 4, log: log),
-            ],
           ),
         ),
       ),
-    ));
+    );
 
     expect(find.text('0'), findsOneWidget);
     expect(find.text('3'), findsNothing);
@@ -5331,61 +5651,63 @@ void main() {
     expect(log, <String>['init: 0', 'init: 3', 'dispose: 0']);
   });
 
-  testWidgets("TabController's animation value should be updated when TabController's index >= tabs's length", (WidgetTester tester) async {
-    // This is a regression test for the issue brought up here
-    // https://github.com/flutter/flutter/issues/79226
+  testWidgets(
+    "TabController's animation value should be updated when TabController's index >= tabs's length",
+    (WidgetTester tester) async {
+      // This is a regression test for the issue brought up here
+      // https://github.com/flutter/flutter/issues/79226
 
-    final List<String> tabs = <String>['A', 'B', 'C'];
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return DefaultTabController(
-              length: tabs.length,
-              child: Scaffold(
-                appBar: AppBar(
-                  bottom: TabBar(
-                    tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+      final List<String> tabs = <String>['A', 'B', 'C'];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return DefaultTabController(
+                length: tabs.length,
+                child: Scaffold(
+                  appBar: AppBar(
+                    bottom: TabBar(tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList()),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Remove Last Tab'),
+                        onPressed: () {
+                          setState(() {
+                            tabs.removeLast();
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                  actions: <Widget>[
-                    TextButton(
-                      child: const Text('Remove Last Tab'),
-                      onPressed: () {
-                        setState(() {
-                          tabs.removeLast();
-                        });
-                      },
-                    ),
-                  ],
+                  body: TabBarView(
+                    children:
+                        tabs.map<Widget>((String tab) => Tab(text: 'Tab child $tab')).toList(),
+                  ),
                 ),
-                body: TabBarView(
-                  children: tabs.map<Widget>((String tab) => Tab(text: 'Tab child $tab')).toList(),
-                ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    TabController getController() => DefaultTabController.of(tester.element(find.text('B')));
-    TabController controller = getController();
+      TabController getController() => DefaultTabController.of(tester.element(find.text('B')));
+      TabController controller = getController();
 
-    controller.animateTo(2, duration: const Duration(milliseconds: 200), curve: Curves.linear);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+      controller.animateTo(2, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
-    controller = getController();
-    expect(controller.index, 2);
-    expect(controller.animation!.value, 2);
+      controller = getController();
+      expect(controller.index, 2);
+      expect(controller.animation!.value, 2);
 
-    await tester.tap(find.text('Remove Last Tab'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Remove Last Tab'));
+      await tester.pumpAndSettle();
 
-    controller = getController();
-    expect(controller.index, 1);
-    expect(controller.animation!.value, 1);
-  });
+      controller = getController();
+      expect(controller.index, 1);
+      expect(controller.animation!.value, 1);
+    },
+  );
 
   testWidgets('Tab preferredSize gives correct value', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -5411,60 +5733,74 @@ void main() {
     expect(thirdTab.preferredSize, const Size.fromHeight(72.0));
   });
 
-  testWidgets('TabBar preferredSize gives correct value when there are both icon and text in tabs', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: DefaultTabController(
-        length: 5,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(
-              tabs: <Widget>[
-                Tab(text: 'car'),
-                Tab(text: 'transit'),
-                Tab(text: 'bike'),
-                Tab(text: 'boat', icon: Icon(Icons.message)),
-                Tab(text: 'bus'),
-              ],
+  testWidgets(
+    'TabBar preferredSize gives correct value when there are both icon and text in tabs',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DefaultTabController(
+            length: 5,
+            child: Scaffold(
+              appBar: AppBar(
+                bottom: const TabBar(
+                  tabs: <Widget>[
+                    Tab(text: 'car'),
+                    Tab(text: 'transit'),
+                    Tab(text: 'bike'),
+                    Tab(text: 'boat', icon: Icon(Icons.message)),
+                    Tab(text: 'bus'),
+                  ],
+                ),
+                title: const Text('Tabs Test'),
+              ),
             ),
-            title: const Text('Tabs Test'),
+          ),
+        ),
+      );
+
+      final TabBar tabBar = tester.widget(find.widgetWithText(TabBar, 'car'));
+
+      expect(tabBar.preferredSize, const Size.fromHeight(74.0));
+    },
+  );
+
+  testWidgets('TabBar preferredSize gives correct value when there is only icon or text in tabs', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 5,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: const TabBar(
+                tabs: <Widget>[
+                  Tab(text: 'car'),
+                  Tab(icon: Icon(Icons.message)),
+                  Tab(text: 'bike'),
+                  Tab(icon: Icon(Icons.chat)),
+                  Tab(text: 'bus'),
+                ],
+              ),
+              title: const Text('Tabs Test'),
+            ),
           ),
         ),
       ),
-    ));
-
-    final TabBar tabBar = tester.widget(find.widgetWithText(TabBar, 'car'));
-
-    expect(tabBar.preferredSize, const Size.fromHeight(74.0));
-  });
-
-  testWidgets('TabBar preferredSize gives correct value when there is only icon or text in tabs', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: DefaultTabController(
-        length: 5,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(
-              tabs: <Widget>[
-                Tab(text: 'car'),
-                Tab(icon: Icon(Icons.message)),
-                Tab(text: 'bike'),
-                Tab(icon: Icon(Icons.chat)),
-                Tab(text: 'bus'),
-              ],
-            ),
-            title: const Text('Tabs Test'),
-          ),
-        ),
-      ),
-    ));
+    );
 
     final TabBar tabBar = tester.widget(find.widgetWithText(TabBar, 'car'));
 
     expect(tabBar.preferredSize, const Size.fromHeight(48.0));
   });
 
-  testWidgets('Tabs are given uniform padding in case of few tabs having both text and icon', (WidgetTester tester) async {
-    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(vertical: 13.0, horizontal: 16.0);
+  testWidgets('Tabs are given uniform padding in case of few tabs having both text and icon', (
+    WidgetTester tester,
+  ) async {
+    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(
+      vertical: 13.0,
+      horizontal: 16.0,
+    );
     const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(horizontal: 16.0);
 
     await tester.pumpWidget(
@@ -5472,7 +5808,7 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
-              controller: _tabController(length: 3, vsync: const TestVSync()),
+              controller: createTabController(length: 3, vsync: const TestVSync()),
               tabs: const <Widget>[
                 Tab(text: 'Tab 1', icon: Icon(Icons.plus_one)),
                 Tab(text: 'Tab 2'),
@@ -5493,10 +5829,18 @@ void main() {
     expect(tabThree.padding, expectedPaddingAdjusted);
   });
 
-  testWidgets('Tabs are given uniform padding when labelPadding is given', (WidgetTester tester) async {
+  testWidgets('Tabs are given uniform padding when labelPadding is given', (
+    WidgetTester tester,
+  ) async {
     const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
-    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(vertical: 23.0, horizontal: 20.0);
-    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
+    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(
+      vertical: 23.0,
+      horizontal: 20.0,
+    );
+    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(
+      vertical: 10.0,
+      horizontal: 20.0,
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -5504,7 +5848,7 @@ void main() {
           appBar: AppBar(
             bottom: TabBar(
               labelPadding: labelPadding,
-              controller: _tabController(length: 3, vsync: const TestVSync()),
+              controller: createTabController(length: 3, vsync: const TestVSync()),
               tabs: const <Widget>[
                 Tab(text: 'Tab 1', icon: Icon(Icons.plus_one)),
                 Tab(text: 'Tab 2'),
@@ -5525,20 +5869,26 @@ void main() {
     expect(tabThree.padding, expectedPaddingAdjusted);
   });
 
-  testWidgets('Tabs are given uniform padding TabBarTheme.labelPadding is given', (WidgetTester tester) async {
+  testWidgets('Tabs are given uniform padding TabBarTheme.labelPadding is given', (
+    WidgetTester tester,
+  ) async {
     const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(vertical: 15.0, horizontal: 20);
-    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(vertical: 28.0, horizontal: 20.0);
-    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0);
+    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(
+      vertical: 28.0,
+      horizontal: 20.0,
+    );
+    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(
+      vertical: 15.0,
+      horizontal: 20.0,
+    );
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          tabBarTheme: const TabBarTheme(labelPadding: labelPadding),
-        ),
+        theme: ThemeData(tabBarTheme: const TabBarThemeData(labelPadding: labelPadding)),
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
-              controller: _tabController(length: 3, vsync: const TestVSync()),
+              controller: createTabController(length: 3, vsync: const TestVSync()),
               tabs: const <Widget>[
                 Tab(text: 'Tab 1', icon: Icon(Icons.plus_one)),
                 Tab(text: 'Tab 2'),
@@ -5560,41 +5910,34 @@ void main() {
   });
 
   testWidgets('Change tab bar height', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: false),
-      home: DefaultTabController(
-        length: 4,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(
-              tabs: <Widget>[
-                Tab(
-                  icon: Icon(Icons.check,size: 40),
-                  height: 85,
-                  child: Text('1 - OK',style: TextStyle(fontSize: 25),),
-                ), // icon and child
-                Tab(
-                  height: 85,
-                  child: Text('2 - OK',style: TextStyle(fontSize: 25),),
-                ), // child
-                Tab(
-                  icon: Icon(Icons.done,size: 40),
-                  height: 85,
-                ), // icon
-                Tab(
-                  text: '4 - OK',
-                  height: 85,
-                ), // text
-              ],
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: DefaultTabController(
+          length: 4,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: const TabBar(
+                tabs: <Widget>[
+                  Tab(
+                    icon: Icon(Icons.check, size: 40),
+                    height: 85,
+                    child: Text('1 - OK', style: TextStyle(fontSize: 25)),
+                  ), // icon and child
+                  Tab(height: 85, child: Text('2 - OK', style: TextStyle(fontSize: 25))), // child
+                  Tab(icon: Icon(Icons.done, size: 40), height: 85), // icon
+                  Tab(text: '4 - OK', height: 85), // text
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
     final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.check));
-    final Tab secTab = tester.widget(find.widgetWithText(Tab, '2 - OK' ));
+    final Tab secTab = tester.widget(find.widgetWithText(Tab, '2 - OK'));
     final Tab thirdTab = tester.widget(find.widgetWithIcon(Tab, Icons.done));
-    final Tab fourthTab = tester.widget(find.widgetWithText(Tab, '4 - OK' ));
+    final Tab fourthTab = tester.widget(find.widgetWithText(Tab, '4 - OK'));
     expect(firstTab.preferredSize.height, 85);
     expect(firstTab.height, 85);
     expect(secTab.height, 85);
@@ -5603,24 +5946,26 @@ void main() {
   });
 
   testWidgets('Change tab bar height 2', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: DefaultTabController(
-        length: 1,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(
-              tabs: <Widget>[
-                Tab(
-                  icon: Icon(Icons.check,size: 40),
-                  text: '1 - OK',
-                  height: 85,
-                ), // icon and text
-              ],
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 1,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: const TabBar(
+                tabs: <Widget>[
+                  Tab(
+                    icon: Icon(Icons.check, size: 40),
+                    text: '1 - OK',
+                    height: 85,
+                  ), // icon and text
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
     final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.check));
     expect(firstTab.height, 85);
   });
@@ -5628,10 +5973,7 @@ void main() {
   testWidgets('Test semantics of TabPageSelector', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final TabController controller = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+    final TabController controller = createTabController(vsync: const TestVSync(), length: 2);
 
     await tester.pumpWidget(
       boilerplate(
@@ -5648,11 +5990,7 @@ void main() {
                 children: const <Widget>[Text('PAGE1'), Text('PAGE2')],
               ),
             ),
-            Expanded(
-              child: TabPageSelector(
-                controller: controller
-              )
-            ),
+            Expanded(child: TabPageSelector(controller: controller)),
           ],
         ),
       ),
@@ -5664,20 +6002,27 @@ void main() {
           label: 'Tab 1 of 2',
           id: 1,
           rect: TestSemantics.fullScreen,
+          role: SemanticsRole.tabBar,
           children: <TestSemantics>[
             TestSemantics(
-              label: 'TAB1\nTab 1 of 2',
-              flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.isSelected],
+              label: 'TAB1${kIsWeb ? '' : '\nTab 1 of 2'}',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.isSelected,
+                SemanticsFlag.hasSelectedState,
+              ],
               id: 2,
               rect: TestSemantics.fullScreen,
-              actions: 1,
+              actions: 1 | SemanticsAction.focus.index,
+              role: SemanticsRole.tab,
             ),
             TestSemantics(
-              label: 'TAB2\nTab 2 of 2',
-              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+              label: 'TAB2${kIsWeb ? '' : '\nTab 2 of 2'}',
+              flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
               id: 3,
               rect: TestSemantics.fullScreen,
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+              role: SemanticsRole.tab,
             ),
             TestSemantics(
               id: 4,
@@ -5691,7 +6036,8 @@ void main() {
                     TestSemantics(
                       id: 5,
                       rect: TestSemantics.fullScreen,
-                      label: 'PAGE1'
+                      label: 'PAGE1',
+                      role: SemanticsRole.tabPanel,
                     ),
                   ],
                 ),
@@ -5707,79 +6053,75 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Change the TabController should make both TabBar and TabBarView return to the initial index.', (WidgetTester tester) async {
-    // This is a regression test for https://github.com/flutter/flutter/issues/93237
+  testWidgets(
+    'Change the TabController should make both TabBar and TabBarView return to the initial index.',
+    (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/93237
 
-    Widget buildFrame(TabController controller, {required bool showLast}) {
-      return boilerplate(
-        child: Column(
-          children: <Widget>[
-            TabBar(
-              controller: controller,
-              tabs: <Tab>[
-                const Tab(text: 'one'),
-                const Tab(text: 'two'),
-                if (showLast) const Tab(text: 'three'),
-              ],
-            ),
-            Flexible(
-              child: TabBarView(
+      Widget buildFrame(TabController controller, {required bool showLast}) {
+        return boilerplate(
+          child: Column(
+            children: <Widget>[
+              TabBar(
                 controller: controller,
-                children: <Widget>[
-                  const Text('PAGE1'),
-                  const Text('PAGE2'),
-                  if (showLast) const Text('PAGE3'),
+                tabs: <Tab>[
+                  const Tab(text: 'one'),
+                  const Tab(text: 'two'),
+                  if (showLast) const Tab(text: 'three'),
                 ],
               ),
-            ),
-          ],
-        ),
-      );
-    }
+              Flexible(
+                child: TabBarView(
+                  controller: controller,
+                  children: <Widget>[
+                    const Text('PAGE1'),
+                    const Text('PAGE2'),
+                    if (showLast) const Text('PAGE3'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
 
-    final TabController controller1 = _tabController(
-      vsync: const TestVSync(),
-      length: 3,
-    );
+      final TabController controller1 = createTabController(vsync: const TestVSync(), length: 3);
 
-    final TabController controller2 = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+      final TabController controller2 = createTabController(vsync: const TestVSync(), length: 2);
 
-    final TabController controller3 = _tabController(
-      vsync: const TestVSync(),
-      length: 3,
-    );
+      final TabController controller3 = createTabController(vsync: const TestVSync(), length: 3);
 
-    await tester.pumpWidget(buildFrame(controller1, showLast: true));
-    final PageView pageView = tester.widget(find.byType(PageView));
-    final PageController pageController = pageView.controller!;
-    await tester.tap(find.text('three'));
-    await tester.pumpAndSettle();
-    expect(controller1.index, 2);
-    expect(pageController.page, 2);
+      await tester.pumpWidget(buildFrame(controller1, showLast: true));
+      final PageView pageView = tester.widget(find.byType(PageView));
+      final PageController pageController = pageView.controller!;
+      await tester.tap(find.text('three'));
+      await tester.pumpAndSettle();
+      expect(controller1.index, 2);
+      expect(pageController.page, 2);
 
-    // Change TabController from 3 items to 2.
-    await tester.pumpWidget(buildFrame(controller2, showLast: false));
-    await tester.pumpAndSettle();
-    expect(controller2.index, 0);
-    expect(pageController.page, 0);
+      // Change TabController from 3 items to 2.
+      await tester.pumpWidget(buildFrame(controller2, showLast: false));
+      await tester.pumpAndSettle();
+      expect(controller2.index, 0);
+      expect(pageController.page, 0);
 
-    // Change TabController from 2 items to 3.
-    await tester.pumpWidget(buildFrame(controller3, showLast: true));
-    await tester.pumpAndSettle();
-    expect(controller3.index, 0);
-    expect(pageController.page, 0);
+      // Change TabController from 2 items to 3.
+      await tester.pumpWidget(buildFrame(controller3, showLast: true));
+      await tester.pumpAndSettle();
+      expect(controller3.index, 0);
+      expect(pageController.page, 0);
 
-    await tester.tap(find.text('three'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('three'));
+      await tester.pumpAndSettle();
 
-    expect(controller3.index, 2);
-    expect(pageController.page, 2);
-  });
+      expect(controller3.index, 2);
+      expect(pageController.page, 2);
+    },
+  );
 
-  testWidgets('Do not crash when the new TabController.index is longer than the old length.', (WidgetTester tester) async {
+  testWidgets('Do not crash when the new TabController.index is longer than the old length.', (
+    WidgetTester tester,
+  ) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/97441
 
     Widget buildFrame(TabController controller, {required bool showLast}) {
@@ -5809,15 +6151,9 @@ void main() {
       );
     }
 
-    final TabController controller1 = _tabController(
-      vsync: const TestVSync(),
-      length: 3,
-    );
+    final TabController controller1 = createTabController(vsync: const TestVSync(), length: 3);
 
-    final TabController controller2 = _tabController(
-      vsync: const TestVSync(),
-      length: 2,
-    );
+    final TabController controller2 = createTabController(vsync: const TestVSync(), length: 2);
 
     await tester.pumpWidget(buildFrame(controller1, showLast: true));
     PageView pageView = tester.widget(find.byType(PageView));
@@ -5854,18 +6190,14 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light().copyWith(
-          tabBarTheme: TabBarTheme(
-            splashFactory: splashFactory,
-            overlayColor: overlayColor,
-          )),
+          tabBarTheme: TabBarThemeData(splashFactory: splashFactory, overlayColor: overlayColor),
+        ),
         home: DefaultTabController(
           length: 1,
           child: Scaffold(
             appBar: AppBar(
               bottom: TabBar(
-                tabs: <Widget>[
-                  Container(width: 100, height: 100, color: Colors.green),
-                ],
+                tabs: <Widget>[Container(width: 100, height: 100, color: Colors.green)],
               ),
             ),
           ),
@@ -5886,9 +6218,7 @@ void main() {
               bottom: TabBar(
                 splashFactory: splashFactory,
                 overlayColor: overlayColor,
-                tabs: <Widget>[
-                  Container(width: 100, height: 100, color: Colors.green),
-                ],
+                tabs: <Widget>[Container(width: 100, height: 100, color: Colors.green)],
               ),
             ),
           ),
@@ -5908,97 +6238,70 @@ void main() {
         child: DefaultTabController(
           length: 1,
           child: TabBar(
-            overlayColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
-                  return hoverColor;
-                }
-                return Colors.black54;
-              },
-            ),
+            overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return hoverColor;
+              }
+              return Colors.black54;
+            }),
             splashBorderRadius: BorderRadius.circular(radius),
-            tabs: const <Widget>[
-              Tab(
-                child: Text(''),
-              ),
-            ],
+            tabs: const <Widget>[Tab(child: Text(''))],
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
     await gesture.moveTo(tester.getCenter(find.byType(Tab)));
     await tester.pumpAndSettle();
-    final RenderObject object = tester.allRenderObjects.firstWhere((RenderObject element) => element.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject object = tester.allRenderObjects.firstWhere(
+      (RenderObject element) => element.runtimeType.toString() == '_RenderInkFeatures',
+    );
     expect(
       object,
       paints..rrect(
         color: hoverColor,
         rrect: RRect.fromRectAndRadius(
           tester.getRect(find.byType(InkWell)),
-          const Radius.circular(radius)
+          const Radius.circular(radius),
         ),
       ),
     );
     gesture.removePointer();
   });
 
-  testWidgets('Do not crash if the controller and TabBarView are updated at different phases(build and layout) of the same frame', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/104994.
-    List<String> tabTextContent = <String>[];
+  testWidgets('No crash if TabBar build called before didUpdateWidget with SliverAppBar', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/154484.
+    final List<String> tabs = <String>[];
 
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return DefaultTabController(
-              length: tabTextContent.length,
+              length: tabs.length,
               child: Scaffold(
-                appBar: AppBar(
-                  title: const Text('Default TabBar Preview'),
-                  bottom: tabTextContent.isNotEmpty
-                      ? TabBar(
-                    isScrollable: true,
-                    tabs: tabTextContent.map((String textContent) => Tab(text: textContent)).toList(),
-                  )
-                      : null,
-                ),
-                body: LayoutBuilder(
-                  builder: (_, __) {
-                    return tabTextContent.isNotEmpty
-                      ? TabBarView(
-                        children: tabTextContent.map((String textContent) => Tab(text: "$textContent's view")).toList(),
-                      )
-                      : const Center(child: Text('No tabs'));
-                  },
-                ),
-                bottomNavigationBar: BottomAppBar(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      IconButton(
-                        key: const Key('Add tab'),
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          setState(() {
-                            tabTextContent = List<String>.from(tabTextContent)
-                              ..add('Tab ${tabTextContent.length + 1}');
-                          });
-                        },
-                      ),
-                      IconButton(
-                        key: const Key('Delete tab'),
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          setState(() {
-                            tabTextContent = List<String>.from(tabTextContent)
-                              ..removeLast();
-                          });
-                        },
-                      ),
-                    ],
-                  ),
+                body: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverAppBar(
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Add Tab'),
+                          onPressed: () {
+                            setState(() {
+                              tabs.add('Tab ${tabs.length + 1}');
+                            });
+                          },
+                        ),
+                      ],
+                      bottom: TabBar(tabs: tabs.map((String tab) => Tab(text: tab)).toList()),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -6007,20 +6310,106 @@ void main() {
       ),
     );
 
-    // Initializes with zero tabs properly
-    expect(find.text('No tabs'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('Add tab')));
+    // Initializes with zero tabs.
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Tab 2'), findsNothing);
+
+    // No crash after tabs added.
+    await tester.tap(find.text('Add Tab'));
     await tester.pumpAndSettle();
     expect(find.text('Tab 1'), findsOneWidget);
-    expect(find.text("Tab 1's view"), findsOneWidget);
-
-    // Dynamically updates to zero tabs properly
-    await tester.tap(find.byKey(const Key('Delete tab')));
-    await tester.pumpAndSettle();
-    expect(find.text('No tabs'), findsOneWidget);
+    expect(find.text('Tab 2'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets("Throw if the controller's length mismatch the tabs count", (WidgetTester tester) async {
+  testWidgets(
+    'Do not crash if the controller and TabBarView are updated at different phases(build and layout) of the same frame',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/104994.
+      List<String> tabTextContent = <String>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return DefaultTabController(
+                length: tabTextContent.length,
+                child: Scaffold(
+                  appBar: AppBar(
+                    title: const Text('Default TabBar Preview'),
+                    bottom:
+                        tabTextContent.isNotEmpty
+                            ? TabBar(
+                              isScrollable: true,
+                              tabs:
+                                  tabTextContent
+                                      .map((String textContent) => Tab(text: textContent))
+                                      .toList(),
+                            )
+                            : null,
+                  ),
+                  body: LayoutBuilder(
+                    builder: (_, _) {
+                      return tabTextContent.isNotEmpty
+                          ? TabBarView(
+                            children:
+                                tabTextContent
+                                    .map((String textContent) => Tab(text: "$textContent's view"))
+                                    .toList(),
+                          )
+                          : const Center(child: Text('No tabs'));
+                    },
+                  ),
+                  bottomNavigationBar: BottomAppBar(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        IconButton(
+                          key: const Key('Add tab'),
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            setState(() {
+                              tabTextContent = List<String>.from(tabTextContent)
+                                ..add('Tab ${tabTextContent.length + 1}');
+                            });
+                          },
+                        ),
+                        IconButton(
+                          key: const Key('Delete tab'),
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            setState(() {
+                              tabTextContent = List<String>.from(tabTextContent)..removeLast();
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Initializes with zero tabs properly
+      expect(find.text('No tabs'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('Add tab')));
+      await tester.pumpAndSettle();
+      expect(find.text('Tab 1'), findsOneWidget);
+      expect(find.text("Tab 1's view"), findsOneWidget);
+
+      // Dynamically updates to zero tabs properly
+      await tester.tap(find.byKey(const Key('Delete tab')));
+      await tester.pumpAndSettle();
+      expect(find.text('No tabs'), findsOneWidget);
+    },
+  );
+
+  testWidgets("Throw if the controller's length mismatch the tabs count", (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: DefaultTabController(
@@ -6028,9 +6417,7 @@ void main() {
           child: Scaffold(
             appBar: AppBar(
               bottom: TabBar(
-                tabs: <Widget>[
-                  Container(width: 100, height: 100, color: Colors.green),
-                ],
+                tabs: <Widget>[Container(width: 100, height: 100, color: Colors.green)],
               ),
             ),
           ),
@@ -6041,7 +6428,9 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets("Throw if the controller's length mismatch the TabBarView‘s children count", (WidgetTester tester) async {
+  testWidgets("Throw if the controller's length mismatch the TabBarView‘s children count", (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: DefaultTabController(
@@ -6049,9 +6438,7 @@ void main() {
           child: Scaffold(
             appBar: AppBar(
               bottom: TabBar(
-                tabs: <Widget>[
-                  Container(width: 100, height: 100, color: Colors.green),
-                ],
+                tabs: <Widget>[Container(width: 100, height: 100, color: Colors.green)],
               ),
             ),
             body: const TabBarView(
@@ -6074,49 +6461,26 @@ void main() {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', useMaterial3: theme.useMaterial3),
-    );
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', useMaterial3: theme.useMaterial3));
 
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(
-      inkFeatures,
-      isNot(paints
-        ..rect(
-          color: theme.colorScheme.onSurface.withOpacity(0.08),
-        ))
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
     );
-    expect(
-      inkFeatures,
-      isNot(paints
-        ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.08),
-        ))
-    );
+    expect(inkFeatures, isNot(paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08))));
+    expect(inkFeatures, isNot(paints..rect(color: theme.colorScheme.primary.withOpacity(0.08))));
 
     // Start hovering unselected tab.
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.byType(Tab).first));
     await tester.pumpAndSettle();
-    expect(
-      inkFeatures,
-      paints
-        ..rect(
-          color: theme.colorScheme.onSurface.withOpacity(0.08),
-        )
-    );
+    expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
 
     // Start hovering selected tab.
     await gesture.moveTo(tester.getCenter(find.byType(Tab).last));
     await tester.pumpAndSettle();
-    expect(
-      inkFeatures,
-      paints
-        ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.08),
-        ),
-    );
+    expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)));
   });
 
   testWidgets('Tab has correct selected/unselected focus color', (WidgetTester tester) async {
@@ -6124,80 +6488,46 @@ void main() {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
-    await tester.pumpWidget(MaterialApp(
-        home: buildFrame(tabs: tabs, value: 'B', useMaterial3: theme.useMaterial3),
-      ),
+    await tester.pumpWidget(
+      MaterialApp(home: buildFrame(tabs: tabs, value: 'B', useMaterial3: theme.useMaterial3)),
     );
 
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(
-      inkFeatures,
-      isNot(paints
-        ..rect(
-          color: theme.colorScheme.onSurface.withOpacity(0.12),
-        ))
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
     );
-    expect(
-      inkFeatures,
-      isNot(paints
-        ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
-        ))
-    );
+    expect(inkFeatures, isNot(paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.1))));
+    expect(inkFeatures, isNot(paints..rect(color: theme.colorScheme.primary.withOpacity(0.1))));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
     expect(tester.binding.focusManager.primaryFocus?.hasPrimaryFocus, isTrue);
-    expect(
-      inkFeatures,
-      paints
-        ..rect(
-          color: theme.colorScheme.onSurface.withOpacity(0.12),
-        ),
-    );
+    expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
     expect(tester.binding.focusManager.primaryFocus?.hasPrimaryFocus, isTrue);
-    expect(
-      inkFeatures,
-      paints
-        ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
-        ),
-    );
+    expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
   });
 
   testWidgets('Tab has correct selected/unselected pressed color', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
-    await tester.pumpWidget(MaterialApp(
-        home: buildFrame(tabs: tabs, value: 'B', useMaterial3: theme.useMaterial3),
-      ),
+    await tester.pumpWidget(
+      MaterialApp(home: buildFrame(tabs: tabs, value: 'B', useMaterial3: theme.useMaterial3)),
     );
 
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(
-      inkFeatures,
-      isNot(paints
-        ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
-        ))
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
     );
+    expect(inkFeatures, isNot(paints..rect(color: theme.colorScheme.primary.withOpacity(0.1))));
 
     // Press unselected tab.
     TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
     await tester.pumpAndSettle(); // Let the press highlight animation finish.
-    expect(
-      inkFeatures,
-      paints
-        ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
-        ),
-    );
+    expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
 
     // Release pressed gesture.
     await gesture.up();
@@ -6206,13 +6536,7 @@ void main() {
     // Press selected tab.
     gesture = await tester.startGesture(tester.getCenter(find.text('B')));
     await tester.pumpAndSettle(); // Let the press highlight animation finish.
-    expect(
-      inkFeatures,
-      paints
-        ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
-        ),
-    );
+    expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
   });
 
   testWidgets('Material3 - Default TabAlignment', (WidgetTester tester) async {
@@ -6233,12 +6557,9 @@ void main() {
     expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
 
     // Test default TabAlignment when isScrollable is true.
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'B',
-      isScrollable: true,
-      useMaterial3: true,
-    ));
+    await tester.pumpWidget(
+      buildFrame(tabs: tabs, value: 'B', isScrollable: true, useMaterial3: true),
+    );
 
     tabOneRect = tester.getRect(find.byType(Tab).first);
     tabTwoRect = tester.getRect(find.byType(Tab).last);
@@ -6246,73 +6567,111 @@ void main() {
     // Tabs should be aligned to the start of the TabBar.
     tabOneLeft = kTabLabelPadding.left + tabStartOffset;
     expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
-    tabTwoRight = kTabLabelPadding.horizontal + tabStartOffset + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+    tabTwoRight =
+        kTabLabelPadding.horizontal +
+        tabStartOffset +
+        tabOneRect.width +
+        kTabLabelPadding.left +
+        tabTwoRect.width;
     expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
   });
 
-  testWidgets('TabAlignment.fill only supports non-scrollable tab bar', (WidgetTester tester) async {
+  testWidgets('TabAlignment.fill only supports non-scrollable tab bar', (
+    WidgetTester tester,
+  ) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final List<String> tabs = <String>['A', 'B'];
 
     // Test TabAlignment.fill with non-scrollable tab bar.
-    await tester.pumpWidget(MaterialApp(
-      theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.fill),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: buildFrame(tabs: tabs, value: 'B', tabAlignment: TabAlignment.fill),
+      ),
+    );
 
     expect(tester.takeException(), isNull);
 
     // Test TabAlignment.fill with scrollable tab bar.
-    await tester.pumpWidget(MaterialApp(
-      theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.fill, isScrollable: true),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: buildFrame(
+          tabs: tabs,
+          value: 'B',
+          tabAlignment: TabAlignment.fill,
+          isScrollable: true,
+        ),
+      ),
+    );
 
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('TabAlignment.start & TabAlignment.startOffset only supports scrollable tab bar', (WidgetTester tester) async {
+  testWidgets('TabAlignment.start & TabAlignment.startOffset only supports scrollable tab bar', (
+    WidgetTester tester,
+  ) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final List<String> tabs = <String>['A', 'B'];
 
     // Test TabAlignment.start with scrollable tab bar.
-    await tester.pumpWidget(MaterialApp(
-      theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.start, isScrollable: true),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: buildFrame(
+          tabs: tabs,
+          value: 'B',
+          tabAlignment: TabAlignment.start,
+          isScrollable: true,
+        ),
+      ),
+    );
 
     expect(tester.takeException(), isNull);
 
     // Test TabAlignment.start with non-scrollable tab bar.
-    await tester.pumpWidget(MaterialApp(
-      theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.start),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: buildFrame(tabs: tabs, value: 'B', tabAlignment: TabAlignment.start),
+      ),
+    );
 
     expect(tester.takeException(), isAssertionError);
 
     // Test TabAlignment.startOffset with scrollable tab bar.
-    await tester.pumpWidget(MaterialApp(
-      theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.startOffset, isScrollable: true),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: buildFrame(
+          tabs: tabs,
+          value: 'B',
+          tabAlignment: TabAlignment.startOffset,
+          isScrollable: true,
+        ),
+      ),
+    );
 
     expect(tester.takeException(), isNull);
 
     // Test TabAlignment.startOffset with non-scrollable tab bar.
-    await tester.pumpWidget(MaterialApp(
-      theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.startOffset),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: buildFrame(tabs: tabs, value: 'B', tabAlignment: TabAlignment.startOffset),
+      ),
+    );
 
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('Material3 - TabAlignment updates tabs alignment (non-scrollable TabBar)', (WidgetTester tester) async {
+  testWidgets('Material3 - TabAlignment updates tabs alignment (non-scrollable TabBar)', (
+    WidgetTester tester,
+  ) async {
     final List<String> tabs = <String>['A', 'B'];
 
     // Test TabAlignment.fill (default) when isScrollable is false.
-    await tester.pumpWidget(buildFrame(tabs: tabs,  value: 'B', useMaterial3: true));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', useMaterial3: true));
 
     const double availableWidth = 800.0;
     Rect tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6325,12 +6684,9 @@ void main() {
     expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
 
     // Test TabAlignment.center when isScrollable is false.
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'B',
-      tabAlignment: TabAlignment.center,
-      useMaterial3: true,
-    ));
+    await tester.pumpWidget(
+      buildFrame(tabs: tabs, value: 'B', tabAlignment: TabAlignment.center, useMaterial3: true),
+    );
     await tester.pumpAndSettle();
 
     tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6339,21 +6695,21 @@ void main() {
     // Tabs should not fill the width of the TabBar.
     tabOneLeft = kTabLabelPadding.left;
     expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
-    tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+    tabTwoRight =
+        kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
     expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
   });
 
-  testWidgets('Material3 - TabAlignment updates tabs alignment (scrollable TabBar)', (WidgetTester tester) async {
+  testWidgets('Material3 - TabAlignment updates tabs alignment (scrollable TabBar)', (
+    WidgetTester tester,
+  ) async {
     final List<String> tabs = <String>['A', 'B'];
     const double tabStartOffset = 52.0;
 
     // Test TabAlignment.startOffset (default) when isScrollable is true.
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'B',
-      isScrollable: true,
-      useMaterial3: true,
-    ));
+    await tester.pumpWidget(
+      buildFrame(tabs: tabs, value: 'B', isScrollable: true, useMaterial3: true),
+    );
 
     final Rect tabBar = tester.getRect(find.byType(TabBar));
     Rect tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6363,18 +6719,24 @@ void main() {
     // an horizontal offset of 52.0 pixels.
     double tabOneLeft = kTabLabelPadding.left + tabStartOffset;
     expect(tabOneRect.left, equals(tabOneLeft));
-    double tabTwoRight = tabStartOffset + kTabLabelPadding.horizontal + tabOneRect.width
-      + kTabLabelPadding.left + tabTwoRect.width;
+    double tabTwoRight =
+        tabStartOffset +
+        kTabLabelPadding.horizontal +
+        tabOneRect.width +
+        kTabLabelPadding.left +
+        tabTwoRect.width;
     expect(tabTwoRect.right, equals(tabTwoRight));
 
     // Test TabAlignment.start when isScrollable is true.
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'B',
-      isScrollable: true,
-      tabAlignment: TabAlignment.start,
-      useMaterial3: true,
-    ));
+    await tester.pumpWidget(
+      buildFrame(
+        tabs: tabs,
+        value: 'B',
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        useMaterial3: true,
+      ),
+    );
     await tester.pumpAndSettle();
 
     tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6383,17 +6745,20 @@ void main() {
     // Tabs should be aligned to the start of the TabBar.
     tabOneLeft = kTabLabelPadding.left;
     expect(tabOneRect.left, equals(tabOneLeft));
-    tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+    tabTwoRight =
+        kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
     expect(tabTwoRect.right, equals(tabTwoRight));
 
     // Test TabAlignment.center when isScrollable is true.
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'B',
-      isScrollable: true,
-      tabAlignment: TabAlignment.center,
-      useMaterial3: true,
-    ));
+    await tester.pumpWidget(
+      buildFrame(
+        tabs: tabs,
+        value: 'B',
+        isScrollable: true,
+        tabAlignment: TabAlignment.center,
+        useMaterial3: true,
+      ),
+    );
     await tester.pumpAndSettle();
 
     tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6406,13 +6771,15 @@ void main() {
     expect(tabTwoRect.right, equals(tabTwoRight));
 
     // Test TabAlignment.startOffset when isScrollable is true.
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'B',
-      isScrollable: true,
-      tabAlignment: TabAlignment.startOffset,
-      useMaterial3: true,
-    ));
+    await tester.pumpWidget(
+      buildFrame(
+        tabs: tabs,
+        value: 'B',
+        isScrollable: true,
+        tabAlignment: TabAlignment.startOffset,
+        useMaterial3: true,
+      ),
+    );
     await tester.pumpAndSettle();
 
     tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6422,97 +6789,122 @@ void main() {
     // horizontal offset of 52.0 pixels.
     tabOneLeft = kTabLabelPadding.left + tabStartOffset;
     expect(tabOneRect.left, equals(tabOneLeft));
-    tabTwoRight = tabStartOffset + kTabLabelPadding.horizontal + tabOneRect.width
-      + kTabLabelPadding.left + tabTwoRect.width;
+    tabTwoRight =
+        tabStartOffset +
+        kTabLabelPadding.horizontal +
+        tabOneRect.width +
+        kTabLabelPadding.left +
+        tabTwoRect.width;
     expect(tabTwoRect.right, equals(tabTwoRight));
   });
 
-  testWidgets('Material3 - TabAlignment.start & TabAlignment.startOffset respects TextDirection.rtl', (WidgetTester tester) async {
-    final List<String> tabs = <String>['A', 'B'];
-    const double tabStartOffset = 52.0;
+  testWidgets(
+    'Material3 - TabAlignment.start & TabAlignment.startOffset respects TextDirection.rtl',
+    (WidgetTester tester) async {
+      final List<String> tabs = <String>['A', 'B'];
+      const double tabStartOffset = 52.0;
 
-    // Test TabAlignment.startOffset (default) when isScrollable is true.
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'B',
-      isScrollable: true,
-      textDirection: TextDirection.rtl,
-      useMaterial3: true,
-    ));
+      // Test TabAlignment.startOffset (default) when isScrollable is true.
+      await tester.pumpWidget(
+        buildFrame(
+          tabs: tabs,
+          value: 'B',
+          isScrollable: true,
+          textDirection: TextDirection.rtl,
+          useMaterial3: true,
+        ),
+      );
 
-    final Rect tabBar = tester.getRect(find.byType(TabBar));
-    Rect tabOneRect = tester.getRect(find.byType(Tab).first);
-    Rect tabTwoRect = tester.getRect(find.byType(Tab).last);
+      final Rect tabBar = tester.getRect(find.byType(TabBar));
+      Rect tabOneRect = tester.getRect(find.byType(Tab).first);
+      Rect tabTwoRect = tester.getRect(find.byType(Tab).last);
 
-    // Tabs should be aligned to the start of the TabBar with an
-    // horizontal offset of 52.0 pixels.
-    double tabOneRight = tabBar.width - kTabLabelPadding.right - tabStartOffset;
-    expect(tabOneRect.right, equals(tabOneRight));
-    double tabTwoLeft = tabBar.width - tabStartOffset - kTabLabelPadding.horizontal - tabOneRect.width
-      - kTabLabelPadding.right - tabTwoRect.width;
-    expect(tabTwoRect.left, equals(tabTwoLeft));
+      // Tabs should be aligned to the start of the TabBar with an
+      // horizontal offset of 52.0 pixels.
+      double tabOneRight = tabBar.width - kTabLabelPadding.right - tabStartOffset;
+      expect(tabOneRect.right, equals(tabOneRight));
+      double tabTwoLeft =
+          tabBar.width -
+          tabStartOffset -
+          kTabLabelPadding.horizontal -
+          tabOneRect.width -
+          kTabLabelPadding.right -
+          tabTwoRect.width;
+      expect(tabTwoRect.left, equals(tabTwoLeft));
 
-    // Test TabAlignment.start when isScrollable is true.
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'B',
-      isScrollable: true,
-      tabAlignment: TabAlignment.start,
-      textDirection: TextDirection.rtl,
-      useMaterial3: true,
-    ));
-    await tester.pumpAndSettle();
+      // Test TabAlignment.start when isScrollable is true.
+      await tester.pumpWidget(
+        buildFrame(
+          tabs: tabs,
+          value: 'B',
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          textDirection: TextDirection.rtl,
+          useMaterial3: true,
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    tabOneRect = tester.getRect(find.byType(Tab).first);
-    tabTwoRect = tester.getRect(find.byType(Tab).last);
+      tabOneRect = tester.getRect(find.byType(Tab).first);
+      tabTwoRect = tester.getRect(find.byType(Tab).last);
 
-    // Tabs should be aligned to the start of the TabBar.
-    tabOneRight = tabBar.width - kTabLabelPadding.right;
-    expect(tabOneRect.right, equals(tabOneRight));
-    tabTwoLeft = tabBar.width - kTabLabelPadding.horizontal - tabOneRect.width
-      - kTabLabelPadding.left - tabTwoRect.width;
-    expect(tabTwoRect.left, equals(tabTwoLeft));
+      // Tabs should be aligned to the start of the TabBar.
+      tabOneRight = tabBar.width - kTabLabelPadding.right;
+      expect(tabOneRect.right, equals(tabOneRight));
+      tabTwoLeft =
+          tabBar.width -
+          kTabLabelPadding.horizontal -
+          tabOneRect.width -
+          kTabLabelPadding.left -
+          tabTwoRect.width;
+      expect(tabTwoRect.left, equals(tabTwoLeft));
 
-    // Test TabAlignment.startOffset when isScrollable is true.
-    await tester.pumpWidget(buildFrame(
-      tabs: tabs,
-      value: 'B',
-      isScrollable: true,
-      tabAlignment: TabAlignment.startOffset,
-      textDirection: TextDirection.rtl,
-      useMaterial3: true,
-    ));
-    await tester.pumpAndSettle();
+      // Test TabAlignment.startOffset when isScrollable is true.
+      await tester.pumpWidget(
+        buildFrame(
+          tabs: tabs,
+          value: 'B',
+          isScrollable: true,
+          tabAlignment: TabAlignment.startOffset,
+          textDirection: TextDirection.rtl,
+          useMaterial3: true,
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    tabOneRect = tester.getRect(find.byType(Tab).first);
-    tabTwoRect = tester.getRect(find.byType(Tab).last);
+      tabOneRect = tester.getRect(find.byType(Tab).first);
+      tabTwoRect = tester.getRect(find.byType(Tab).last);
 
-    // Tabs should be aligned to the start of the TabBar with an
-    // horizontal offset of 52.0 pixels.
-    tabOneRight = tabBar.width - kTabLabelPadding.right - tabStartOffset;
-    expect(tabOneRect.right, equals(tabOneRight));
-    tabTwoLeft = tabBar.width - tabStartOffset - kTabLabelPadding.horizontal - tabOneRect.width
-      - kTabLabelPadding.right - tabTwoRect.width;
-    expect(tabTwoRect.left, equals(tabTwoLeft));
-  });
+      // Tabs should be aligned to the start of the TabBar with an
+      // horizontal offset of 52.0 pixels.
+      tabOneRight = tabBar.width - kTabLabelPadding.right - tabStartOffset;
+      expect(tabOneRect.right, equals(tabOneRight));
+      tabTwoLeft =
+          tabBar.width -
+          tabStartOffset -
+          kTabLabelPadding.horizontal -
+          tabOneRect.width -
+          kTabLabelPadding.right -
+          tabTwoRect.width;
+      expect(tabTwoRect.left, equals(tabTwoLeft));
+    },
+  );
 
-  testWidgets('Material3 - TabBar inherits the dividerColor of TabBarTheme', (WidgetTester tester) async {
+  testWidgets('Material3 - TabBar inherits the dividerColor of TabBarTheme', (
+    WidgetTester tester,
+  ) async {
     const Color dividerColor = Colors.yellow;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
-          tabBarTheme: const TabBarTheme(dividerColor: dividerColor),
+          tabBarTheme: const TabBarThemeData(dividerColor: dividerColor),
         ),
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
-              controller: _tabController(length: 3, vsync: const TestVSync()),
-              tabs: const <Widget>[
-                Tab(text: 'Tab 1'),
-                Tab(text: 'Tab 2'),
-                Tab(text: 'Tab 3'),
-              ],
+              controller: createTabController(length: 3, vsync: const TestVSync()),
+              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
             ),
           ),
         ),
@@ -6531,7 +6923,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
-          tabBarTheme: const TabBarTheme(dividerColor: dividerColor),
+          tabBarTheme: const TabBarThemeData(dividerColor: dividerColor),
         ),
         home: Scaffold(
           body: DefaultTabController(
@@ -6544,12 +6936,9 @@ void main() {
                   child: const TabBar.secondary(
                     tabAlignment: TabAlignment.start,
                     isScrollable: true,
-                    tabs: <Widget>[
-                      Tab(text: 'Test 1'),
-                      Tab(text: 'Test 2'),
-                    ],
+                    tabs: <Widget>[Tab(text: 'Test 1'), Tab(text: 'Test 2')],
                   ),
-                )
+                ),
               ),
             ),
           ),
@@ -6563,38 +6952,38 @@ void main() {
     expect(tester.getSize(find.byType(CustomPaint).at(1)).width, 360);
   });
 
-  testWidgets('TabBar labels use colors from labelStyle & unselectedLabelStyle', (WidgetTester tester) async {
+  testWidgets('TabBar labels use colors from labelStyle & unselectedLabelStyle', (
+    WidgetTester tester,
+  ) async {
     const String tab1 = 'Tab 1';
     const String tab2 = 'Tab 2';
 
-    const TextStyle labelStyle = TextStyle(
-      color: Color(0xff0000ff),
-      fontStyle: FontStyle.italic,
-    );
+    const TextStyle labelStyle = TextStyle(color: Color(0xff0000ff), fontStyle: FontStyle.italic);
     const TextStyle unselectedLabelStyle = TextStyle(
       color: Color(0x950000ff),
       fontStyle: FontStyle.italic,
     );
 
     // Test tab bar with labelStyle & unselectedLabelStyle.
-    await tester.pumpWidget(boilerplate(
-      child: const DefaultTabController(
-        length: 2,
-        child: TabBar(
-          labelStyle: labelStyle,
-          unselectedLabelStyle: unselectedLabelStyle,
-          tabs: <Widget>[
-            Tab(text: tab1),
-            Tab(text: tab2),
-          ],
+    await tester.pumpWidget(
+      boilerplate(
+        child: const DefaultTabController(
+          length: 2,
+          child: TabBar(
+            labelStyle: labelStyle,
+            unselectedLabelStyle: unselectedLabelStyle,
+            tabs: <Widget>[Tab(text: tab1), Tab(text: tab2)],
+          ),
         ),
       ),
-    ));
+    );
 
     final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
     final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
-    final TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
-    final TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+    final TextStyle selectedTextStyle =
+        tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
+    final TextStyle unselectedTextStyle =
+        tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
 
     // Selected tab should use the labelStyle color.
     expect(selectedTabIcon.color, labelStyle.color);
@@ -6606,82 +6995,81 @@ void main() {
     expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
   });
 
-  testWidgets('labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors', (WidgetTester tester) async {
-    const String tab1 = 'Tab 1';
-    const String tab2 = 'Tab 2';
+  testWidgets(
+    'labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors',
+    (WidgetTester tester) async {
+      const String tab1 = 'Tab 1';
+      const String tab2 = 'Tab 2';
 
-    const Color labelColor = Color(0xfff00000);
-    const Color unselectedLabelColor = Color(0x95ff0000);
-    const TextStyle labelStyle = TextStyle(
-      color: Color(0xff0000ff),
-      fontStyle: FontStyle.italic,
-    );
-    const TextStyle unselectedLabelStyle = TextStyle(
-      color: Color(0x950000ff),
-      fontStyle: FontStyle.italic,
-    );
-
-    Widget buildTabBar({ Color? labelColor, Color? unselectedLabelColor }) {
-      return boilerplate(
-        child: DefaultTabController(
-          length: 2,
-          child: TabBar(
-            labelColor: labelColor,
-            unselectedLabelColor: unselectedLabelColor,
-            labelStyle: labelStyle,
-            unselectedLabelStyle: unselectedLabelStyle,
-            tabs: const <Widget>[
-              Tab(text: tab1),
-              Tab(text: tab2),
-            ],
-          ),
-        ),
+      const Color labelColor = Color(0xfff00000);
+      const Color unselectedLabelColor = Color(0x95ff0000);
+      const TextStyle labelStyle = TextStyle(color: Color(0xff0000ff), fontStyle: FontStyle.italic);
+      const TextStyle unselectedLabelStyle = TextStyle(
+        color: Color(0x950000ff),
+        fontStyle: FontStyle.italic,
       );
-    }
 
-    // Test tab bar with labelStyle & unselectedLabelStyle.
-    await tester.pumpWidget(buildTabBar());
+      Widget buildTabBar({Color? labelColor, Color? unselectedLabelColor}) {
+        return boilerplate(
+          child: DefaultTabController(
+            length: 2,
+            child: TabBar(
+              labelColor: labelColor,
+              unselectedLabelColor: unselectedLabelColor,
+              labelStyle: labelStyle,
+              unselectedLabelStyle: unselectedLabelStyle,
+              tabs: const <Widget>[Tab(text: tab1), Tab(text: tab2)],
+            ),
+          ),
+        );
+      }
 
-    IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
-    IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
-    TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
-    TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+      // Test tab bar with labelStyle & unselectedLabelStyle.
+      await tester.pumpWidget(buildTabBar());
 
-    // Selected tab should use labelStyle color.
-    expect(selectedTabIcon.color, labelStyle.color);
-    expect(selectedTextStyle.color, labelStyle.color);
-    expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
-    // Unselected tab should use unselectedLabelStyle color.
-    expect(unselectedTabIcon.color, unselectedLabelStyle.color);
-    expect(unselectedTextStyle.color, unselectedLabelStyle.color);
-    expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
+      IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
+      IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
+      TextStyle selectedTextStyle =
+          tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
+      TextStyle unselectedTextStyle =
+          tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
 
-    // Update tab bar with labelColor & unselectedLabelColor.
-    await tester.pumpWidget(buildTabBar(labelColor: labelColor, unselectedLabelColor: unselectedLabelColor));
-    await tester.pumpAndSettle();
+      // Selected tab should use labelStyle color.
+      expect(selectedTabIcon.color, labelStyle.color);
+      expect(selectedTextStyle.color, labelStyle.color);
+      expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
+      // Unselected tab should use unselectedLabelStyle color.
+      expect(unselectedTabIcon.color, unselectedLabelStyle.color);
+      expect(unselectedTextStyle.color, unselectedLabelStyle.color);
+      expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
 
-    selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
-    unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
-    selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
-    unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+      // Update tab bar with labelColor & unselectedLabelColor.
+      await tester.pumpWidget(
+        buildTabBar(labelColor: labelColor, unselectedLabelColor: unselectedLabelColor),
+      );
+      await tester.pumpAndSettle();
 
-    // Selected tab should use the labelColor.
-    expect(selectedTabIcon.color, labelColor);
-    expect(selectedTextStyle.color, labelColor);
-    expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
-    // Unselected tab should use the unselectedLabelColor.
-    expect(unselectedTabIcon.color, unselectedLabelColor);
-    expect(unselectedTextStyle.color, unselectedLabelColor);
-    expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
-  });
+      selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
+      unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
+      selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
+      unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+
+      // Selected tab should use the labelColor.
+      expect(selectedTabIcon.color, labelColor);
+      expect(selectedTextStyle.color, labelColor);
+      expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
+      // Unselected tab should use the unselectedLabelColor.
+      expect(unselectedTabIcon.color, unselectedLabelColor);
+      expect(unselectedTextStyle.color, unselectedLabelColor);
+      expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
+    },
+  );
 
   // This is a regression test for https://github.com/flutter/flutter/issues/140338.
-  testWidgets('Material3 - Scrollable TabBar without a divider does not expand to full width', (WidgetTester tester) async {
-    Widget buildTabBar({
-      Color? dividerColor,
-      double? dividerHeight,
-      TabAlignment? tabAlignment,
-     }) {
+  testWidgets('Material3 - Scrollable TabBar without a divider does not expand to full width', (
+    WidgetTester tester,
+  ) async {
+    Widget buildTabBar({Color? dividerColor, double? dividerHeight, TabAlignment? tabAlignment}) {
       return boilerplate(
         child: Center(
           child: DefaultTabController(
@@ -6691,11 +7079,7 @@ void main() {
               dividerHeight: dividerHeight,
               tabAlignment: tabAlignment,
               isScrollable: true,
-              tabs: const <Widget>[
-                Tab(text: 'Tab 1'),
-                Tab(text: 'Tab 2'),
-                Tab(text: 'Tab 3'),
-              ],
+              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
             ),
           ),
         ),
@@ -6719,50 +7103,19 @@ void main() {
 
     // Test default tab bar width when the divider height is set to 0.0
     // and tabAlignment is set to startOffset.
-    await tester.pumpWidget(buildTabBar(
-      dividerHeight: 0.0,
-      tabAlignment: TabAlignment.startOffset,
-    ));
+    await tester.pumpWidget(
+      buildTabBar(dividerHeight: 0.0, tabAlignment: TabAlignment.startOffset),
+    );
     expect(tester.getSize(find.byType(TabBar)).width, 359.5);
 
     // Test default tab bar width when the divider height is set to 0.0
     // and tabAlignment is set to start.
-    await tester.pumpWidget(buildTabBar(
-      dividerHeight: 0.0,
-      tabAlignment: TabAlignment.start,
-    ));
+    await tester.pumpWidget(buildTabBar(dividerHeight: 0.0, tabAlignment: TabAlignment.start));
     expect(tester.getSize(find.byType(TabBar)).width, 307.5);
 
     // Test default tab bar width when the divider height is set to 0.0
     // and tabAlignment is set to center.
-    await tester.pumpWidget(buildTabBar(
-      dividerHeight: 0.0,
-      tabAlignment: TabAlignment.center,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to startOffset.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.startOffset,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 359.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to start.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.start,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to center.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.center,
-    ));
+    await tester.pumpWidget(buildTabBar(dividerHeight: 0.0, tabAlignment: TabAlignment.center));
     expect(tester.getSize(find.byType(TabBar)).width, 307.5);
   });
 
@@ -6783,23 +7136,37 @@ void main() {
       expect(find.text('C'), findsOneWidget);
 
       // Test selected label text style.
-      expect(tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontFamily, 'Roboto');
-      expect(tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontSize, 14.0);
-      expect(tester.renderObject<RenderParagraph>(
-        find.text(selectedValue)).text.style!.color,
+      expect(
+        tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontFamily,
+        'Roboto',
+      );
+      expect(
+        tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontSize,
+        14.0,
+      );
+      expect(
+        tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.color,
         theme.primaryTextTheme.bodyLarge!.color,
       );
 
       // Test unselected label text style.
-      expect(tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontFamily, 'Roboto');
-      expect(tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontSize, 14.0);
-      expect(tester.renderObject<RenderParagraph>(
-        find.text(unSelectedValue)).text.style!.color,
-        theme.primaryTextTheme.bodyLarge!.color!.withAlpha(0xB2) // 70% alpha,
+      expect(
+        tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontFamily,
+        'Roboto',
+      );
+      expect(
+        tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontSize,
+        14.0,
+      );
+      expect(
+        tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.color,
+        theme.primaryTextTheme.bodyLarge!.color!.withAlpha(0xB2), // 70% alpha,
       );
     });
 
-    testWidgets('TabBar default unselectedLabelColor inherits labelColor with 70% opacity', (WidgetTester tester) async {
+    testWidgets('TabBar default unselectedLabelColor inherits labelColor with 70% opacity', (
+      WidgetTester tester,
+    ) async {
       // This is a regression test for https://github.com/flutter/flutter/pull/116273
       final List<String> tabs = <String>['A', 'B', 'C'];
 
@@ -6807,22 +7174,27 @@ void main() {
       const String unSelectedValue = 'C';
       const Color labelColor = Color(0xff0000ff);
       await tester.pumpWidget(
-        buildFrame(tabs: tabs, value: selectedValue, useMaterial3: false, tabBarTheme: const TabBarTheme(labelColor: labelColor)),
+        buildFrame(
+          tabs: tabs,
+          value: selectedValue,
+          useMaterial3: false,
+          tabBarTheme: const TabBarThemeData(labelColor: labelColor),
+        ),
       );
       expect(find.text('A'), findsOneWidget);
       expect(find.text('B'), findsOneWidget);
       expect(find.text('C'), findsOneWidget);
 
       // Test selected label color.
-      expect(tester.renderObject<RenderParagraph>(
-        find.text(selectedValue)).text.style!.color,
+      expect(
+        tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.color,
         labelColor,
       );
 
       // Test unselected label color.
-      expect(tester.renderObject<RenderParagraph>(
-        find.text(unSelectedValue)).text.style!.color,
-        labelColor.withAlpha(0xB2) // 70% alpha,
+      expect(
+        tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.color,
+        labelColor.withAlpha(0xB2), // 70% alpha,
       );
     });
 
@@ -6830,7 +7202,7 @@ void main() {
       final List<String> tabs = <String>['A', 'B'];
 
       // Test default TabAlignment when isScrollable is false.
-      await tester.pumpWidget(buildFrame(tabs: tabs,  value: 'B', useMaterial3: false));
+      await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', useMaterial3: false));
 
       final Rect tabBar = tester.getRect(find.byType(TabBar));
       Rect tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6843,12 +7215,9 @@ void main() {
       expect(tabTwoRect.right, equals(tabTwoRight));
 
       // Test default TabAlignment when isScrollable is true.
-      await tester.pumpWidget(buildFrame(
-        tabs: tabs,
-        value: 'B',
-        isScrollable: true,
-        useMaterial3: false,
-      ));
+      await tester.pumpWidget(
+        buildFrame(tabs: tabs, value: 'B', isScrollable: true, useMaterial3: false),
+      );
 
       tabOneRect = tester.getRect(find.byType(Tab).first);
       tabTwoRect = tester.getRect(find.byType(Tab).last);
@@ -6856,7 +7225,8 @@ void main() {
       // Tabs should be aligned to the start of the TabBar.
       tabOneLeft = kTabLabelPadding.left;
       expect(tabOneRect.left, equals(tabOneLeft));
-      tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+      tabTwoRight =
+          kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
       expect(tabTwoRect.right, equals(tabTwoRight));
     });
 
@@ -6866,7 +7236,7 @@ void main() {
         return Tab(text: 'Tab $index');
       });
 
-      final TabController controller = _tabController(
+      final TabController controller = createTabController(
         vsync: const TestVSync(),
         length: tabs.length,
       );
@@ -6877,10 +7247,7 @@ void main() {
             useMaterial3: theme.useMaterial3,
             child: Container(
               alignment: Alignment.topLeft,
-              child: TabBar(
-                controller: controller,
-                tabs: tabs,
-              ),
+              child: TabBar(controller: controller, tabs: tabs),
             ),
           ),
         ),
@@ -6891,18 +7258,17 @@ void main() {
 
       const double indicatorWeight = 2.0;
       const double indicatorY = 48 - (indicatorWeight / 2.0);
-      const double indicatorLeft =  indicatorWeight / 2.0;
+      const double indicatorLeft = indicatorWeight / 2.0;
       const double indicatorRight = 200.0 - (indicatorWeight / 2.0);
 
       expect(
         tabBarBox,
-        paints
-          ..line(
-            color: theme.indicatorColor,
-            strokeWidth: indicatorWeight,
-            p1: const Offset(indicatorLeft, indicatorY),
-            p2: const Offset(indicatorRight, indicatorY),
-          ),
+        paints..line(
+          color: theme.indicatorColor,
+          strokeWidth: indicatorWeight,
+          p1: const Offset(indicatorLeft, indicatorY),
+          p2: const Offset(indicatorRight, indicatorY),
+        ),
       );
     });
 
@@ -6912,7 +7278,7 @@ void main() {
         return Tab(text: 'Tab $index');
       });
 
-      final TabController controller = _tabController(
+      final TabController controller = createTabController(
         vsync: const TestVSync(),
         length: tabs.length,
       );
@@ -6923,10 +7289,7 @@ void main() {
             useMaterial3: theme.useMaterial3,
             child: Container(
               alignment: Alignment.topLeft,
-              child: TabBar.secondary(
-                controller: controller,
-                tabs: tabs,
-              ),
+              child: TabBar.secondary(controller: controller, tabs: tabs),
             ),
           ),
         ),
@@ -6937,18 +7300,17 @@ void main() {
 
       const double indicatorWeight = 2.0;
       const double indicatorY = 48 - (indicatorWeight / 2.0);
-      const double indicatorLeft =  indicatorWeight / 2.0;
+      const double indicatorLeft = indicatorWeight / 2.0;
       const double indicatorRight = 200.0 - (indicatorWeight / 2.0);
 
       expect(
         tabBarBox,
-        paints
-          ..line(
-              color: theme.indicatorColor,
-              strokeWidth: indicatorWeight,
-              p1: const Offset(indicatorLeft, indicatorY),
-              p2: const Offset(indicatorRight, indicatorY),
-            ),
+        paints..line(
+          color: theme.indicatorColor,
+          strokeWidth: indicatorWeight,
+          p1: const Offset(indicatorLeft, indicatorY),
+          p2: const Offset(indicatorRight, indicatorY),
+        ),
       );
     });
 
@@ -6962,7 +7324,7 @@ void main() {
         SizedBox(key: UniqueKey(), width: 150.0, height: 50.0),
       ];
 
-      final TabController controller = _tabController(
+      final TabController controller = createTabController(
         vsync: const TestVSync(),
         length: tabs.length,
       );
@@ -6984,13 +7346,15 @@ void main() {
       );
 
       final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-      final double tabBarHeight = 50.0 + indicatorWeight + padding.top + padding.bottom;  // 50 = max tab height
+      final double tabBarHeight =
+          50.0 + indicatorWeight + padding.top + padding.bottom; // 50 = max tab height
       expect(tabBarBox.size.height, tabBarHeight);
 
       // Tab0 width = 130, height = 30
       double tabLeft = padding.left;
       double tabRight = tabLeft + 130.0;
-      double tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 30.0) / 2.0;
+      double tabTop =
+          (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 30.0) / 2.0;
       double tabBottom = tabTop + 30.0;
       Rect tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
       expect(tester.getRect(find.byKey(tabs[0].key!)), tabRect);
@@ -7015,15 +7379,14 @@ void main() {
       expect(tabBarBox.size.width, tabRight);
     });
 
-    testWidgets('Material2 - TabAlignment updates tabs alignment (non-scrollable TabBar)', (WidgetTester tester) async {
+    testWidgets('Material2 - TabAlignment updates tabs alignment (non-scrollable TabBar)', (
+      WidgetTester tester,
+    ) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
       final List<String> tabs = <String>['A', 'B'];
 
       // Test TabAlignment.fill (default) when isScrollable is false.
-      await tester.pumpWidget(MaterialApp(
-        theme: theme,
-        home: buildFrame(tabs: tabs,  value: 'B'),
-      ));
+      await tester.pumpWidget(MaterialApp(theme: theme, home: buildFrame(tabs: tabs, value: 'B')));
 
       final Rect tabBar = tester.getRect(find.byType(TabBar));
       Rect tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -7036,10 +7399,12 @@ void main() {
       expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
 
       // Test TabAlignment.center when isScrollable is false.
-      await tester.pumpWidget(MaterialApp(
-        theme: theme,
-        home: buildFrame(tabs: tabs, value: 'B', tabAlignment: TabAlignment.center),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: buildFrame(tabs: tabs, value: 'B', tabAlignment: TabAlignment.center),
+        ),
+      );
       await tester.pumpAndSettle();
 
       tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -7048,105 +7413,665 @@ void main() {
       // Tabs should not fill the width of the TabBar.
       tabOneLeft = kTabLabelPadding.left;
       expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
-      tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+      tabTwoRight =
+          kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
       expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
     });
   });
-}
 
-class KeepAliveInk extends StatefulWidget {
-  const KeepAliveInk(this.title, {super.key});
-  final String title;
-  @override
-  State<StatefulWidget> createState() {
-    return _KeepAliveInkState();
-  }
-}
+  testWidgets('does not crash if switching to a newly added tab', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/144087.
+    Widget buildTabs(int tabCount) {
+      return boilerplate(
+        child: DefaultTabController(
+          length: tabCount,
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Flutter Demo Click Counter'),
+              bottom: TabBar(
+                tabAlignment: TabAlignment.start,
+                isScrollable: true,
+                tabs: List<Widget>.generate(tabCount, (int i) => Tab(text: 'Tab $i')),
+              ),
+            ),
+            body: TabBarView(children: List<Widget>.generate(tabCount, (int i) => Text('View $i'))),
+          ),
+        ),
+      );
+    }
 
-class _KeepAliveInkState extends State<KeepAliveInk> with AutomaticKeepAliveClientMixin {
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return Ink(
-      child: Text(widget.title),
-    );
-  }
+    await tester.pumpWidget(buildTabs(1));
+    expect(tester.widgetList(find.byType(Tab)), hasLength(1));
 
-  @override
-  bool get wantKeepAlive => true;
-}
+    await tester.pumpWidget(buildTabs(2));
+    expect(tester.widgetList(find.byType(Tab)), hasLength(2));
 
-class TabBarDemo extends StatelessWidget {
-  const TabBarDemo({super.key});
+    await tester.pumpWidget(buildTabs(3));
+    expect(tester.widgetList(find.byType(Tab)), hasLength(3));
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(
-              tabs: <Widget>[
-                Tab(icon: Icon(Icons.directions_car)),
-                Tab(icon: Icon(Icons.directions_transit)),
-                Tab(icon: Icon(Icons.directions_bike)),
+    expect(find.text('View 0'), findsOneWidget);
+    expect(find.text('View 2'), findsNothing);
+    await tester.tap(find.text('Tab 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('View 0'), findsNothing);
+    expect(find.text('View 2'), findsOneWidget);
+  });
+
+  testWidgets('Tab indicator painter image configuration', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+    final TestIndicatorDecoration decoration = TestIndicatorDecoration();
+
+    Widget buildTabs({TextDirection textDirection = TextDirection.ltr, double ratio = 1.0}) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(devicePixelRatio: ratio),
+          child: Directionality(
+            textDirection: textDirection,
+            child: DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  bottom: TabBar(
+                    indicator: decoration,
+                    tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabs());
+
+    ImageConfiguration config = decoration.painters.last.lastConfiguration!;
+    expect(config.size?.width, closeTo(14.1, 0.1));
+    expect(config.size?.height, equals(48.0));
+    expect(config.textDirection, TextDirection.ltr);
+    expect(config.devicePixelRatio, 1.0);
+
+    await tester.pumpWidget(buildTabs(textDirection: TextDirection.rtl, ratio: 2.33));
+
+    config = decoration.painters.last.lastConfiguration!;
+    expect(config.size?.width, closeTo(14.1, 0.1));
+    expect(config.size?.height, equals(48.0));
+    expect(config.textDirection, TextDirection.rtl);
+    expect(config.devicePixelRatio, 2.33);
+  });
+
+  testWidgets(
+    'TabBar.textScaler overrides tab label text scale, textScaleFactor = noScaling, 1.75, 2.0',
+    (WidgetTester tester) async {
+      final List<String> tabs = <String>['Tab 1', 'Tab 2'];
+
+      Widget buildTabs({TextScaler? textScaler}) {
+        return MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(textScaler: TextScaler.linear(3.0)),
+            child: DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  bottom: TabBar(
+                    textScaler: textScaler,
+                    tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildTabs(textScaler: TextScaler.noScaling));
+
+      Size labelSize = tester.getSize(find.text('Tab 1'));
+      expect(labelSize, equals(const Size(70.5, 20.0)));
+
+      await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(1.75)));
+
+      labelSize = tester.getSize(find.text('Tab 1'));
+      expect(labelSize, equals(const Size(123.0, 35.0)));
+
+      await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(2.0)));
+
+      labelSize = tester.getSize(find.text('Tab 1'));
+      expect(labelSize, equals(const Size(140.5, 40.0)));
+    },
+  );
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/150000.
+  testWidgets('Scrollable TabBar does not jitter in the middle position', (
+    WidgetTester tester,
+  ) async {
+    final List<String> tabs = List<String>.generate(20, (int index) => 'Tab $index');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: tabs.length,
+          initialIndex: 10,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                isScrollable: true,
+                tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+              ),
+            ),
+            body: TabBarView(
+              children: <Widget>[
+                for (int i = 0; i < tabs.length; i++) Center(child: Text('Page $i')),
               ],
             ),
-            title: const Text('Tabs Demo'),
           ),
-          body: const TabBarView(
-            children: <Widget>[
-              Icon(Icons.directions_car),
-              Icon(Icons.directions_transit),
-              Icon(Icons.directions_bike),
+        ),
+      ),
+    );
+
+    final SingleChildScrollView scrollable = tester.widget(find.byType(SingleChildScrollView));
+    expect(find.text('Page 10'), findsOneWidget);
+    expect(find.text('Page 11'), findsNothing);
+    expect(scrollable.controller!.position.pixels, closeTo(683.2, 0.1));
+
+    // Drag the TabBarView to the left.
+    await tester.drag(find.byType(TabBarView), const Offset(-800, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Page 10'), findsNothing);
+    expect(find.text('Page 11'), findsOneWidget);
+    expect(scrollable.controller!.position.pixels, closeTo(799.8, 0.1));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/150000.
+  testWidgets('Scrollable TabBar does not jitter when the tab bar reaches the start', (
+    WidgetTester tester,
+  ) async {
+    final List<String> tabs = List<String>.generate(20, (int index) => 'Tab $index');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: tabs.length,
+          initialIndex: 4,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                isScrollable: true,
+                tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+              ),
+            ),
+            body: TabBarView(
+              children: <Widget>[
+                for (int i = 0; i < tabs.length; i++) Center(child: Text('Page $i')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final SingleChildScrollView scrollable = tester.widget(find.byType(SingleChildScrollView));
+
+    expect(find.text('Page 4'), findsOneWidget);
+    expect(find.text('Page 3'), findsNothing);
+    expect(scrollable.controller!.position.pixels, closeTo(61.25, 0.1));
+
+    // Drag the TabBarView to the right.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Page 4')));
+    await gesture.moveBy(const Offset(600.0, 0.0));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Page 4'), findsOneWidget);
+    expect(find.text('Page 3'), findsOneWidget);
+    expect(scrollable.controller!.position.pixels, closeTo(0.2, 0.1));
+
+    await tester.pumpAndSettle();
+    expect(find.text('Page 4'), findsNothing);
+    expect(find.text('Page 3'), findsOneWidget);
+    expect(scrollable.controller!.position.pixels, equals(0.0));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/150316.
+  testWidgets('Scrollable TabBar with transparent divider expands to full width', (
+    WidgetTester tester,
+  ) async {
+    Widget buildTabBar({Color? dividerColor, TabAlignment? tabAlignment}) {
+      return boilerplate(
+        child: Center(
+          child: DefaultTabController(
+            length: 3,
+            child: TabBar(
+              dividerColor: dividerColor,
+              tabAlignment: tabAlignment,
+              isScrollable: true,
+              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to startOffset.
+    await tester.pumpWidget(
+      buildTabBar(dividerColor: Colors.transparent, tabAlignment: TabAlignment.startOffset),
+    );
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to start.
+    await tester.pumpWidget(
+      buildTabBar(dividerColor: Colors.transparent, tabAlignment: TabAlignment.start),
+    );
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to center.
+    await tester.pumpWidget(
+      buildTabBar(dividerColor: Colors.transparent, tabAlignment: TabAlignment.center),
+    );
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+  });
+
+  testWidgets('TabBar.indicatorAnimation can customize tab indicator animation', (
+    WidgetTester tester,
+  ) async {
+    const double indicatorWidth = 50.0;
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(key: ValueKey<int>(index), child: const SizedBox(width: indicatorWidth));
+    });
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTab({TabIndicatorAnimation? indicatorAnimation}) {
+      return MaterialApp(
+        home: boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: indicatorAnimation,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test tab indicator animation with TabIndicatorAnimation.linear.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.linear));
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+
+    // Idle at tab 0.
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          75.0,
+          45.0,
+          125.0,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    // Start moving tab indicator.
+    controller.offset = 0.2;
+    await tester.pump();
+
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          115.0,
+          45.0,
+          165.0,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    // Reset tab controller offset.
+    controller.offset = 0.0;
+
+    // Test tab indicator animation with TabIndicatorAnimation.elastic.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.elastic));
+    await tester.pumpAndSettle();
+
+    // Idle at tab 0.
+    const Rect currentRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    const Rect fromRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    Rect toRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.0),
+      ),
+    );
+
+    controller.offset = 0.2;
+    await tester.pump();
+    toRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.2),
+      ),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/155518.
+  testWidgets('Tabs icon respects ambient icon theme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      iconTheme: const IconThemeData(color: Color(0xffff0000), size: 38.0),
+    );
+    const IconData selectedIcon = Icons.ac_unit;
+    const IconData unselectedIcon = Icons.access_alarm;
+    await tester.pumpWidget(
+      boilerplate(
+        theme: theme,
+        child: const DefaultTabController(
+          length: 2,
+          child: TabBar(
+            tabs: <Widget>[
+              Tab(icon: Icon(selectedIcon), text: 'Tab 1'),
+              Tab(icon: Icon(unselectedIcon), text: 'Tab 2'),
             ],
           ),
         ),
       ),
     );
-  }
-}
 
-class MockScrollMetrics extends Fake implements ScrollMetrics { }
+    TextStyle iconStyle(WidgetTester tester, IconData icon) {
+      final RichText iconRichText = tester.widget<RichText>(
+        find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+      );
+      return iconRichText.text.style!;
+    }
 
-class TabBody extends StatefulWidget {
-  const TabBody({ super.key, required this.index, required this.log, this.marker = '' });
+    // The iconTheme color isn't applied to the selected icon.
+    expect(iconStyle(tester, selectedIcon).color, equals(theme.colorScheme.primary));
+    // The iconTheme color is applied to the unselected icon.
+    expect(iconStyle(tester, unselectedIcon).color, equals(theme.iconTheme.color));
 
-  final int index;
-  final List<String> log;
-  final String marker;
-
-  @override
-  State<TabBody> createState() => TabBodyState();
-}
-
-class TabBodyState extends State<TabBody> {
-  @override
-  void initState() {
-    widget.log.add('init: ${widget.index}');
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(TabBody oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // To keep the logging straight, widgets must not change their index.
-    assert(oldWidget.index == widget.index);
-  }
-
-  @override
-  void dispose() {
-    widget.log.add('dispose: ${widget.index}');
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: widget.marker.isEmpty
-        ? Text('${widget.index}')
-        : Text('${widget.index}-${widget.marker}'),
+    // Both selected and unselected icons should have the iconTheme size.
+    expect(
+      tester.getSize(find.byIcon(selectedIcon)),
+      Size(theme.iconTheme.size!, theme.iconTheme.size!),
     );
-  }
+    expect(
+      tester.getSize(find.byIcon(unselectedIcon)),
+      Size(theme.iconTheme.size!, theme.iconTheme.size!),
+    );
+  });
+
+  testWidgets('Elastic Tab animation with various size tabs - LTR', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+      frameSize: const Size(800, 100),
+    );
+    addTearDown(animationSheet.dispose);
+
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Medium'),
+      const Tab(text: 'Extremely Very Long Label'),
+      const Tab(text: 'C'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget target() {
+      return animationSheet.record(
+        boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: TabIndicatorAnimation.elastic,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+
+    await tester.tap(find.text('Extremely Very Long Label'));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('C'));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+
+    await expectLater(
+      animationSheet.collate(1),
+      matchesGoldenFile('tab_indicator.elastic_animation.various_size_tabs.ltr.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgets('Elastic Tab animation with various size tabs in a scrollable tab bar - LTR', (
+    WidgetTester tester,
+  ) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+      frameSize: const Size(800, 100),
+    );
+    addTearDown(animationSheet.dispose);
+
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Medium'),
+      const Tab(text: 'Extremely Very Long Label'),
+      const Tab(text: 'C'),
+      const Tab(text: 'Medium'),
+      const Tab(text: 'Extremely Very Long Label'),
+      const Tab(text: 'C'),
+      const Tab(text: 'Medium'),
+      const Tab(text: 'Extremely Very Long Label'),
+      const Tab(text: 'C'),
+      const Tab(text: 'Medium'),
+      const Tab(text: 'Extremely Very Long Label'),
+      const Tab(text: 'C'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget target() {
+      return animationSheet.record(
+        boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: TabIndicatorAnimation.elastic,
+              isScrollable: true,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+
+    controller.animateTo(tabs.length - 1);
+    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+
+    controller.animateTo(0);
+    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+
+    await expectLater(
+      animationSheet.collate(1),
+      matchesGoldenFile('tab_indicator.elastic_animation.various_size_tabs.scrollable.ltr.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgets('Elastic Tab animation with various size tabs - RTL', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+      frameSize: const Size(800, 100),
+    );
+    addTearDown(animationSheet.dispose);
+
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Medium'),
+      const Tab(text: 'Extremely Very Long Label'),
+      const Tab(text: 'C'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget target() {
+      return animationSheet.record(
+        boilerplate(
+          textDirection: TextDirection.rtl,
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: TabIndicatorAnimation.elastic,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+
+    await tester.tap(find.text('Extremely Very Long Label'));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('C'));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+
+    await expectLater(
+      animationSheet.collate(1),
+      matchesGoldenFile('tab_indicator.elastic_animation.various_size_tabs.rtl.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgets('Elastic Tab animation with various size tabs in a scrollable tab bar - RTL', (
+    WidgetTester tester,
+  ) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+      frameSize: const Size(800, 100),
+    );
+    addTearDown(animationSheet.dispose);
+
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Medium'),
+      const Tab(text: 'Extremely Very Long Label'),
+      const Tab(text: 'C'),
+      const Tab(text: 'Medium'),
+      const Tab(text: 'Extremely Very Long Label'),
+      const Tab(text: 'C'),
+      const Tab(text: 'Medium'),
+      const Tab(text: 'Extremely Very Long Label'),
+      const Tab(text: 'C'),
+      const Tab(text: 'Medium'),
+      const Tab(text: 'Extremely Very Long Label'),
+      const Tab(text: 'C'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget target() {
+      return animationSheet.record(
+        boilerplate(
+          textDirection: TextDirection.rtl,
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: TabIndicatorAnimation.elastic,
+              isScrollable: true,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+
+    controller.animateTo(tabs.length - 1);
+    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+
+    controller.animateTo(0);
+    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+
+    await expectLater(
+      animationSheet.collate(1),
+      matchesGoldenFile('tab_indicator.elastic_animation.various_size_tabs.scrollable.rtl.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  // Regression test for https://github.com/flutter/flutter/issues/160631
+  testWidgets('Elastic Tab animation when skipping tabs', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+      frameSize: const Size(800, 100),
+    );
+    addTearDown(animationSheet.dispose);
+
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Medium'),
+      const Tab(text: 'Extremely Very Long Label'),
+      const Tab(text: 'C'),
+      const Tab(text: 'Short'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget target() {
+      return animationSheet.record(
+        boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: TabIndicatorAnimation.elastic,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+
+    await tester.tap(find.text('C'));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('Medium'));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+
+    await expectLater(
+      animationSheet.collate(1),
+      matchesGoldenFile('tab_indicator.elastic_animation.skipping_tabs.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 }

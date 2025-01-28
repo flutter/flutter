@@ -1,10 +1,13 @@
 {
-  "version": "v0_162",
+  "version": "6_1_0",
 
   "md.comp.text-button.container.height": 40.0,
   "md.comp.text-button.container.shape": "md.sys.shape.corner.full",
   "md.comp.text-button.disabled.label-text.color": "onSurface",
   "md.comp.text-button.disabled.label-text.opacity": 0.38,
+  "md.comp.text-button.focus.indicator.color": "secondary",
+  "md.comp.text-button.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.text-button.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.text-button.focus.label-text.color": "primary",
   "md.comp.text-button.focus.state-layer.color": "primary",
   "md.comp.text-button.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",

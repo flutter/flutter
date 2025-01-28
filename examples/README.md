@@ -22,7 +22,7 @@ Available examples include:
 
 - **Platform Channel** The [platform channel app](platform_channel) demonstrates
   how to connect a Flutter app to platform-specific APIs. For documentation, see
-  <https://flutter.dev/platform-channels/>.
+  <https://flutter.dev/to/platform-channels/>.
 
 - **Platform Channel Swift** The [platform channel swift
   app](platform_channel_swift) is the same as [platform

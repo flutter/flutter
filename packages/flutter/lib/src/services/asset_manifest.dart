@@ -19,7 +19,7 @@ const String _kAssetManifestFilename = 'AssetManifest.bin';
 const String _kAssetManifestWebFilename = 'AssetManifest.bin.json';
 
 /// Contains details about available assets and their variants.
-/// See [Resolution-aware image assets](https://docs.flutter.dev/ui/assets-and-images#resolution-aware)
+/// See [Resolution-aware image assets](https://flutter.dev/to/resolution-aware-images)
 /// to learn about asset variants and how to declare them.
 abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
@@ -35,13 +35,18 @@ abstract class AssetManifest {
       // json+base64-decoded to get to the binary data.
       return bundle.loadStructuredData(_kAssetManifestWebFilename, (String jsonData) async {
         // Decode the manifest JSON file to the underlying BIN, and convert to ByteData.
-        final ByteData message = ByteData.sublistView(base64.decode(json.decode(jsonData) as String));
+        final ByteData message = ByteData.sublistView(
+          base64.decode(json.decode(jsonData) as String),
+        );
         // Now we can keep operating as usual.
         return _AssetManifestBin.fromStandardMessageCodecMessage(message);
       });
     }
     // On every other platform, the binary file contents are used directly.
-    return bundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
+    return bundle.loadStructuredBinaryData(
+      _kAssetManifestFilename,
+      _AssetManifestBin.fromStandardMessageCodecMessage,
+    );
   }
 
   /// Lists the keys of all main assets. This does not include assets
@@ -50,8 +55,8 @@ abstract class AssetManifest {
   /// The logical key maps to the path of an asset specified in the pubspec.yaml
   /// file at build time.
   ///
-  /// See [Specifying assets](https://docs.flutter.dev/development/ui/assets-and-images#specifying-assets)
-  /// and [Loading assets](https://docs.flutter.dev/development/ui/assets-and-images#loading-assets)
+  /// See [Specifying assets](https://docs.flutter.dev/ui/assets/assets-and-images#specifying-assets)
+  /// and [Loading assets](https://docs.flutter.dev/ui/assets/assets-and-images#loading-assets)
   /// for more information.
   List<String> listAssets();
 
@@ -76,7 +81,7 @@ abstract class AssetManifest {
 // New fields could be added to this object schema to support new asset variation
 // features, such as themes, locale/region support, reading directions, and so on.
 class _AssetManifestBin implements AssetManifest {
-  _AssetManifestBin(Map<Object?, Object?> standardMessageData): _data = standardMessageData;
+  _AssetManifestBin(Map<Object?, Object?> standardMessageData) : _data = standardMessageData;
 
   factory _AssetManifestBin.fromStandardMessageCodecMessage(ByteData message) {
     final dynamic data = const StandardMessageCodec().decodeMessage(message);
@@ -96,18 +101,18 @@ class _AssetManifestBin implements AssetManifest {
       if (variantData == null) {
         return null;
       }
-      _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as Iterable<Object?>)
-        .cast<Map<Object?, Object?>>()
-        .map((Map<Object?, Object?> data) {
-          final String asset = data['asset']! as String;
-          final Object? dpr = data['dpr'];
-          return AssetMetadata(
-            key: data['asset']! as String,
-            targetDevicePixelRatio: dpr as double?,
-            main: key == asset,
-          );
-        })
-        .toList();
+      _typeCastedData[key] =
+          ((_data[key] ?? <Object?>[]) as Iterable<Object?>).cast<Map<Object?, Object?>>().map((
+            Map<Object?, Object?> data,
+          ) {
+            final String asset = data['asset']! as String;
+            final Object? dpr = data['dpr'];
+            return AssetMetadata(
+              key: data['asset']! as String,
+              targetDevicePixelRatio: dpr as double?,
+              main: key == asset,
+            );
+          }).toList();
 
       _data.remove(key);
     }
@@ -139,7 +144,7 @@ class AssetMetadata {
   /// This will be null if the parent folder name is not a ratio value followed
   /// by an "x".
   ///
-  /// See [Resolution-aware image assets](https://docs.flutter.dev/development/ui/assets-and-images#resolution-aware)
+  /// See [Resolution-aware image assets](https://flutter.dev/to/resolution-aware-images)
   /// for more information.
   final double? targetDevicePixelRatio;
 

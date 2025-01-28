@@ -27,7 +27,6 @@ const String kHeavyGridViewRouteName = '/heavy_gridview';
 const String kRasterCacheUseMemory = '/raster_cache_use_memory';
 const String kShaderMaskCacheRouteName = '/shader_mask_cache';
 const String kSimpleScrollRouteName = '/simple_scroll';
-const String kStackSizeRouteName = '/stack_size';
 const String kAnimationWithMicrotasksRouteName = '/animation_with_microtasks';
 const String kAnimatedImageRouteName = '/animated_image';
 const String kOpacityPeepholeRouteName = '/opacity_peephole';
@@ -41,25 +40,33 @@ const String kDrawPointsPageRougeName = '/draw_points';
 const String kDrawVerticesPageRouteName = '/draw_vertices';
 const String kDrawAtlasPageRouteName = '/draw_atlas';
 const String kAnimatedAdvancedBlend = '/animated_advanced_blend';
+const String kRRectBlurRouteName = '/rrect_blur';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
-const String kOpacityPeepholeColumnOfOpacityRouteName = '$kOpacityPeepholeRouteName/column_of_opacity';
-const String kOpacityPeepholeOpacityOfCachedChildRouteName = '$kOpacityPeepholeRouteName/opacity_of_cached_child';
-const String kOpacityPeepholeOpacityOfColumnRouteName = '$kOpacityPeepholeRouteName/opacity_of_column';
+const String kOpacityPeepholeColumnOfOpacityRouteName =
+    '$kOpacityPeepholeRouteName/column_of_opacity';
+const String kOpacityPeepholeOpacityOfCachedChildRouteName =
+    '$kOpacityPeepholeRouteName/opacity_of_cached_child';
+const String kOpacityPeepholeOpacityOfColumnRouteName =
+    '$kOpacityPeepholeRouteName/opacity_of_column';
 const String kOpacityPeepholeGridOfOpacityRouteName = '$kOpacityPeepholeRouteName/grid_of_opacity';
 const String kOpacityPeepholeOpacityOfGridRouteName = '$kOpacityPeepholeRouteName/opacity_of_grid';
-const String kOpacityPeepholeOpacityOfColOfRowsRouteName = '$kOpacityPeepholeRouteName/opacity_of_col_of_rows';
-const String kOpacityPeepholeFadeTransitionTextRouteName = '$kOpacityPeepholeRouteName/fade_transition_text';
-const String kOpacityPeepholeGridOfRectsWithAlphaRouteName = '$kOpacityPeepholeRouteName/grid_of_rects_with_alpha';
-const String kOpacityPeepholeGridOfAlphaSaveLayerRectsRouteName = '$kOpacityPeepholeRouteName/grid_of_alpha_savelayer_rects';
-const String kOpacityPeepholeColumnOfAlphaSaveLayerRowsOfRectsRouteName = '$kOpacityPeepholeRouteName/column_of_alpha_save_layer_rows_of_rects';
+const String kOpacityPeepholeOpacityOfColOfRowsRouteName =
+    '$kOpacityPeepholeRouteName/opacity_of_col_of_rows';
+const String kOpacityPeepholeFadeTransitionTextRouteName =
+    '$kOpacityPeepholeRouteName/fade_transition_text';
+const String kOpacityPeepholeGridOfRectsWithAlphaRouteName =
+    '$kOpacityPeepholeRouteName/grid_of_rects_with_alpha';
+const String kOpacityPeepholeGridOfAlphaSaveLayerRectsRouteName =
+    '$kOpacityPeepholeRouteName/grid_of_alpha_savelayer_rects';
+const String kOpacityPeepholeColumnOfAlphaSaveLayerRowsOfRectsRouteName =
+    '$kOpacityPeepholeRouteName/column_of_alpha_save_layer_rows_of_rects';
 
 const String kGradientPerfRecreateDynamicRouteName = '$kGradientPerfRouteName/recreate_dynamic';
-const String kGradientPerfRecreateConsistentRouteName = '$kGradientPerfRouteName/recreate_consistent';
+const String kGradientPerfRecreateConsistentRouteName =
+    '$kGradientPerfRouteName/recreate_consistent';
 const String kGradientPerfStaticConsistentRouteName = '$kGradientPerfRouteName/static_consistent';
 
 const String kScrollableName = '/macrobenchmark_listview';
 const String kOpacityScrollableName = '$kOpacityPeepholeRouteName/listview';
 const String kGradientPerfScrollableName = '$kGradientPerfRouteName/listview';
-
-const String kStackSizeKey = 'stack_size';

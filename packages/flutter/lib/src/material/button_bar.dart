@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'card.dart';
+/// @docImport 'dropdown.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'theme_data.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -79,11 +87,19 @@ import 'dialog.dart';
 ///  * [Card], at the bottom of which it is common to place a [ButtonBar].
 ///  * [Dialog], which uses a [ButtonBar] for its actions.
 ///  * [ButtonBarTheme], which configures the [ButtonBar].
+@Deprecated(
+  'Use OverflowBar instead. '
+  'This feature was deprecated after v3.21.0-10.0.pre.',
+)
 class ButtonBar extends StatelessWidget {
   /// Creates a button bar.
   ///
   /// Both [buttonMinWidth] and [buttonHeight] must be non-negative if they
   /// are not null.
+  @Deprecated(
+    'Use OverflowBar instead. '
+    'This feature was deprecated after v3.21.0-10.0.pre.',
+  )
   const ButtonBar({
     super.key,
     this.alignment,
@@ -204,7 +220,8 @@ class ButtonBar extends StatelessWidget {
       textTheme: buttonTextTheme ?? barTheme.buttonTextTheme ?? ButtonTextTheme.primary,
       minWidth: buttonMinWidth ?? barTheme.buttonMinWidth ?? 64.0,
       height: buttonHeight ?? barTheme.buttonHeight ?? 36.0,
-      padding: buttonPadding ?? barTheme.buttonPadding ?? const EdgeInsets.symmetric(horizontal: 8.0),
+      padding:
+          buttonPadding ?? barTheme.buttonPadding ?? const EdgeInsets.symmetric(horizontal: 8.0),
       alignedDropdown: buttonAlignedDropdown ?? barTheme.buttonAlignedDropdown ?? false,
       layoutBehavior: layoutBehavior ?? barTheme.layoutBehavior ?? ButtonBarLayoutBehavior.padded,
     );
@@ -216,31 +233,28 @@ class ButtonBar extends StatelessWidget {
       child: _ButtonBarRow(
         mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.end,
         mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
-        overflowDirection: overflowDirection ?? barTheme.overflowDirection ?? VerticalDirection.down,
+        overflowDirection:
+            overflowDirection ?? barTheme.overflowDirection ?? VerticalDirection.down,
         overflowButtonSpacing: overflowButtonSpacing,
-        children: children.map<Widget>((Widget child) {
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: paddingUnit),
-            child: child,
-          );
-        }).toList(),
+        children:
+            children.map<Widget>((Widget child) {
+              return Padding(padding: EdgeInsets.symmetric(horizontal: paddingUnit), child: child);
+            }).toList(),
       ),
     );
     switch (buttonTheme.layoutBehavior) {
       case ButtonBarLayoutBehavior.padded:
         return Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: 2.0 * paddingUnit,
-            horizontal: paddingUnit,
-          ),
+          padding: EdgeInsets.symmetric(vertical: 2.0 * paddingUnit, horizontal: paddingUnit),
           child: child,
         );
       case ButtonBarLayoutBehavior.constrained:
-        return Container(
-          padding: EdgeInsets.symmetric(horizontal: paddingUnit),
+        return ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 52.0),
-          alignment: Alignment.center,
-          child: child,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: paddingUnit),
+            child: Center(child: child),
+          ),
         );
     }
   }
@@ -269,10 +283,7 @@ class _ButtonBarRow extends Flex {
     super.mainAxisAlignment,
     VerticalDirection overflowDirection = VerticalDirection.down,
     this.overflowButtonSpacing,
-  }) : super(
-    direction: Axis.horizontal,
-    verticalDirection: overflowDirection,
-  );
+  }) : super(direction: Axis.horizontal, verticalDirection: overflowDirection);
 
   final double? overflowButtonSpacing;
 
@@ -383,14 +394,11 @@ class _RenderButtonBarRow extends RenderFlex {
       super.performLayout();
     } else {
       final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
-      RenderBox? child;
       double currentHeight = 0.0;
-      switch (verticalDirection) {
-        case VerticalDirection.down:
-          child = firstChild;
-        case VerticalDirection.up:
-          child = lastChild;
-      }
+      RenderBox? child = switch (verticalDirection) {
+        VerticalDirection.down => firstChild,
+        VerticalDirection.up => lastChild,
+      };
 
       while (child != null) {
         final FlexParentData childParentData = child.parentData! as FlexParentData;
@@ -410,7 +418,10 @@ class _RenderButtonBarRow extends RenderFlex {
                 final double midpoint = (constraints.maxWidth - child.size.width) / 2.0;
                 childParentData.offset = Offset(midpoint, currentHeight);
               case MainAxisAlignment.end:
-                childParentData.offset = Offset(constraints.maxWidth - child.size.width, currentHeight);
+                childParentData.offset = Offset(
+                  constraints.maxWidth - child.size.width,
+                  currentHeight,
+                );
               case MainAxisAlignment.spaceAround:
               case MainAxisAlignment.spaceBetween:
               case MainAxisAlignment.spaceEvenly:
@@ -428,16 +439,17 @@ class _RenderButtonBarRow extends RenderFlex {
               case MainAxisAlignment.spaceBetween:
               case MainAxisAlignment.spaceEvenly:
               case MainAxisAlignment.start:
-                childParentData.offset = Offset(constraints.maxWidth - child.size.width, currentHeight);
+                childParentData.offset = Offset(
+                  constraints.maxWidth - child.size.width,
+                  currentHeight,
+                );
             }
         }
         currentHeight += child.size.height;
-        switch (verticalDirection) {
-          case VerticalDirection.down:
-            child = childParentData.nextSibling;
-          case VerticalDirection.up:
-            child = childParentData.previousSibling;
-        }
+        child = switch (verticalDirection) {
+          VerticalDirection.down => childParentData.nextSibling,
+          VerticalDirection.up => childParentData.previousSibling,
+        };
 
         if (overflowButtonSpacing != null && child != null) {
           currentHeight += overflowButtonSpacing!;

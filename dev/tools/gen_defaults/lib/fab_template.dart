@@ -5,7 +5,10 @@
 import 'template.dart';
 
 class FABTemplate extends TokenTemplate {
-  const FABTemplate(super.blockName, super.fileName, super.tokens, {
+  const FABTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
     super.textThemePrefix = '_textTheme.',
   });
@@ -53,28 +56,20 @@ class _${blockName}DefaultsM3 extends FloatingActionButtonThemeData {
   @override Color? get hoverColor => ${componentColor("md.comp.fab.primary.hover.state-layer")};
 
   @override
-  ShapeBorder? get shape {
-    switch (type) {
-      case _FloatingActionButtonType.regular:
-       return ${shape("md.comp.fab.primary.container")};
-      case _FloatingActionButtonType.small:
-       return ${shape("md.comp.fab.primary.small.container")};
-      case _FloatingActionButtonType.large:
-       return ${shape("md.comp.fab.primary.large.container")};
-      case _FloatingActionButtonType.extended:
-       return ${shape("md.comp.extended-fab.primary.container")};
-     }
-  }
+  ShapeBorder? get shape => switch (type) {
+    _FloatingActionButtonType.regular  => ${shape("md.comp.fab.primary.container")},
+    _FloatingActionButtonType.small    => ${shape("md.comp.fab.primary.small.container")},
+    _FloatingActionButtonType.large    => ${shape("md.comp.fab.primary.large.container")},
+    _FloatingActionButtonType.extended => ${shape("md.comp.extended-fab.primary.container")},
+  };
 
   @override
-  double? get iconSize {
-    switch (type) {
-      case _FloatingActionButtonType.regular: return ${getToken("md.comp.fab.primary.icon.size")};
-      case _FloatingActionButtonType.small: return  ${getToken("md.comp.fab.primary.small.icon.size")};
-      case _FloatingActionButtonType.large: return ${getToken("md.comp.fab.primary.large.icon.size")};
-      case _FloatingActionButtonType.extended: return ${getToken("md.comp.extended-fab.primary.icon.size")};
-    }
-  }
+  double? get iconSize => switch (type) {
+    _FloatingActionButtonType.regular  => ${getToken("md.comp.fab.primary.icon.size")},
+    _FloatingActionButtonType.small    => ${getToken("md.comp.fab.primary.small.icon.size")},
+    _FloatingActionButtonType.large    => ${getToken("md.comp.fab.primary.large.icon.size")},
+    _FloatingActionButtonType.extended => ${getToken("md.comp.extended-fab.primary.icon.size")},
+  };
 
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
   @override TextStyle? get extendedTextStyle => ${textStyle("md.comp.extended-fab.primary.label-text")};

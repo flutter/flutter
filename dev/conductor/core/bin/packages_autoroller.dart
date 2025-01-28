@@ -29,20 +29,12 @@ Future<void> run(
   ProcessManager processManager = const LocalProcessManager(),
 }) async {
   final ArgParser parser = ArgParser();
-  parser.addOption(
-    kTokenOption,
-    help: 'Path to GitHub access token file.',
-    mandatory: true,
-  );
+  parser.addOption(kTokenOption, help: 'Path to GitHub access token file.', mandatory: true);
   parser.addOption(
     kGithubClient,
-    help: 'Path to GitHub CLI client. If not provided, it is assumed `gh` is '
+    help:
+        'Path to GitHub CLI client. If not provided, it is assumed `gh` is '
         'present on the PATH.',
-  );
-  // TODO(fujino): delete after recipe has been migrated to stop passing this
-  parser.addOption(
-    'mirror-remote',
-    help: '(Deprecated) this is now a no-op. To change the account, edit this tool.',
   );
   parser.addOption(
     kUpstreamRemote,
@@ -81,7 +73,7 @@ ${parser.usage}
 
   final FrameworkRepository framework = FrameworkRepository(
     _localCheckouts(token),
-    mirrorRemote: Remote.mirror(mirrorUrl),
+    mirrorRemote: const Remote.mirror(mirrorUrl),
     upstreamRemote: Remote.upstream(upstreamUrl),
   );
 
@@ -144,6 +136,4 @@ Directory get _localFlutterRoot {
 }
 
 @visibleForTesting
-void validateTokenFile(String filePath, [FileSystem fs = const LocalFileSystem()]) {
-
-}
+void validateTokenFile(String filePath, [FileSystem fs = const LocalFileSystem()]) {}

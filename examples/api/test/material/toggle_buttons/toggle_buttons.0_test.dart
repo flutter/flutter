@@ -7,25 +7,19 @@ import 'package:flutter_api_samples/material/toggle_buttons/toggle_buttons.0.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   testWidgets('Single-select ToggleButtons', (WidgetTester tester) async {
     TextButton findButton(String text) {
       return tester.widget<TextButton>(find.widgetWithText(TextButton, text));
     }
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.ToggleButtonsExampleApp(),
-        ),
-      ),
-    );
+
+    await tester.pumpWidget(const example.ToggleButtonsExampleApp());
 
     TextButton firstButton = findButton('Apple');
     TextButton secondButton = findButton('Banana');
     TextButton thirdButton = findButton('Orange');
 
     const Color selectedColor = Color(0xffef9a9a);
-    const Color unselectedColor = Color(0x00fffbfe);
+    const Color unselectedColor = Color(0x00fef7ff);
 
     /// First button is selected.
     expect(firstButton.style!.backgroundColor!.resolve(enabled), selectedColor);
@@ -50,20 +44,15 @@ void main() {
     TextButton findButton(String text) {
       return tester.widget<TextButton>(find.widgetWithText(TextButton, text));
     }
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.ToggleButtonsExampleApp(),
-        ),
-      ),
-    );
+
+    await tester.pumpWidget(const example.ToggleButtonsExampleApp());
 
     TextButton firstButton = findButton('Tomatoes');
     TextButton secondButton = findButton('Potatoes');
     TextButton thirdButton = findButton('Carrots');
 
     const Color selectedColor = Color(0xffa5d6a7);
-    const Color unselectedColor = Color(0x00fffbfe);
+    const Color unselectedColor = Color(0x00fef7ff);
 
     /// Second button is selected.
     expect(firstButton.style!.backgroundColor!.resolve(enabled), unselectedColor);
@@ -89,21 +78,15 @@ void main() {
     TextButton findButton(IconData iconData) {
       return tester.widget<TextButton>(find.widgetWithIcon(TextButton, iconData));
     }
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.ToggleButtonsExampleApp(),
-        ),
-      ),
-    );
+
+    await tester.pumpWidget(const example.ToggleButtonsExampleApp());
 
     TextButton firstButton = findButton(Icons.sunny);
     TextButton secondButton = findButton(Icons.cloud);
     TextButton thirdButton = findButton(Icons.ac_unit);
 
-    const Color selectedColor =  Color(0xff90caf9);
-    const Color unselectedColor = Color(0x00fffbfe);
-
+    const Color selectedColor = Color(0xff90caf9);
+    const Color unselectedColor = Color(0x00fef7ff);
 
     /// Third button is selected.
     expect(firstButton.style!.backgroundColor!.resolve(enabled), unselectedColor);
@@ -125,4 +108,4 @@ void main() {
   });
 }
 
-Set<MaterialState> enabled = <MaterialState>{ };
+Set<MaterialState> enabled = <MaterialState>{};

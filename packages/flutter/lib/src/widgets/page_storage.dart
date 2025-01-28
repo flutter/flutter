@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'routes.dart';
+/// @docImport 'scroll_controller.dart';
+/// @docImport 'scroll_position.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'single_child_scroll_view.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -40,8 +50,8 @@ class _StorageEntryIdentifier {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _StorageEntryIdentifier
-        && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
+    return other is _StorageEntryIdentifier &&
+        listEquals<PageStorageKey<dynamic>>(other.keys, keys);
   }
 
   @override
@@ -91,7 +101,7 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then the `data` is not saved.
-  void writeState(BuildContext context, dynamic data, { Object? identifier }) {
+  void writeState(BuildContext context, dynamic data, {Object? identifier}) {
     _storage ??= <Object, dynamic>{};
     if (identifier != null) {
       _storage![identifier] = data;
@@ -111,7 +121,7 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
-  dynamic readState(BuildContext context, { Object? identifier }) {
+  dynamic readState(BuildContext context, {Object? identifier}) {
     if (_storage == null) {
       return null;
     }
@@ -159,11 +169,7 @@ class PageStorageBucket {
 ///  * [ModalRoute], which includes this class.
 class PageStorage extends StatelessWidget {
   /// Creates a widget that provides a storage bucket for its descendants.
-  const PageStorage({
-    super.key,
-    required this.bucket,
-    required this.child,
-  });
+  const PageStorage({super.key, required this.bucket, required this.child});
 
   /// The widget below this widget in the tree.
   ///

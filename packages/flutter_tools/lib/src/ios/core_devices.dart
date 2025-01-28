@@ -27,10 +27,10 @@ class IOSCoreDeviceControl {
     required ProcessManager processManager,
     required Xcode xcode,
     required FileSystem fileSystem,
-  })  : _logger = logger,
-        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-        _xcode = xcode,
-        _fileSystem = fileSystem;
+  }) : _logger = logger,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+       _xcode = xcode,
+       _fileSystem = fileSystem;
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -57,8 +57,9 @@ class IOSCoreDeviceControl {
     Duration validTimeout = timeout;
     if (timeout.inSeconds < _minimumTimeoutInSeconds) {
       _logger.printError(
-          'Timeout of ${timeout.inSeconds} seconds is below the minimum timeout value '
-          'for devicectl. Changing the timeout to the minimum value of $_minimumTimeoutInSeconds.');
+        'Timeout of ${timeout.inSeconds} seconds is below the minimum timeout value '
+        'for devicectl. Changing the timeout to the minimum value of $_minimumTimeoutInSeconds.',
+      );
       validTimeout = const Duration(seconds: _minimumTimeoutInSeconds);
     }
 
@@ -78,8 +79,32 @@ class IOSCoreDeviceControl {
     ];
 
     try {
-      await _processUtils.run(command, throwOnError: true);
+      final RunResult result = await _processUtils.run(command, throwOnError: true);
+      bool isToolPossiblyShutdown = false;
+      if (_fileSystem is ErrorHandlingFileSystem) {
+        final FileSystem delegate = _fileSystem.fileSystem;
+        if (delegate is LocalFileSystem) {
+          isToolPossiblyShutdown = delegate.disposed;
+        }
+      }
 
+      // It's possible that the tool is in the process of shutting down, which
+      // could result in the temp directory being deleted after the shutdown hooks run
+      // before we check if `output` exists. If this happens, we shouldn't crash
+      // but just carry on as if no devices were found as the tool will exit on
+      // its own.
+      //
+      // See https://github.com/flutter/flutter/issues/141892 for details.
+      if (!isToolPossiblyShutdown && !output.existsSync()) {
+        _logger.printError('After running the command ${command.join(' ')} the file');
+        _logger.printError('${output.path} was expected to exist, but it did not.');
+        _logger.printError('The process exited with code ${result.exitCode} and');
+        _logger.printError('Stdout:\n\n${result.stdout.trim()}\n');
+        _logger.printError('Stderr:\n\n${result.stderr.trim()}');
+        throw StateError('Expected the file ${output.path} to exist but it did not');
+      } else if (isToolPossiblyShutdown) {
+        return <Object?>[];
+      }
       final String stringOutput = output.readAsStringSync();
       _logger.printTrace(stringOutput);
 
@@ -109,24 +134,18 @@ class IOSCoreDeviceControl {
   Future<List<IOSCoreDevice>> getCoreDevices({
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
   }) async {
-    final List<IOSCoreDevice> devices = <IOSCoreDevice>[];
-
     final List<Object?> devicesSection = await _listCoreDevices(timeout: timeout);
-    for (final Object? deviceObject in devicesSection) {
-      if (deviceObject is Map<String, Object?>) {
-        devices.add(IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger));
-      }
-    }
-    return devices;
+    return <IOSCoreDevice>[
+      for (final Object? deviceObject in devicesSection)
+        if (deviceObject is Map<String, Object?>)
+          IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger),
+    ];
   }
 
   /// Executes `devicectl` command to get list of apps installed on the device.
   /// If [bundleId] is provided, it will only return apps matching the bundle
   /// identifier exactly.
-  Future<List<Object?>> _listInstalledApps({
-    required String deviceId,
-    String? bundleId,
-  }) async {
+  Future<List<Object?>> _listInstalledApps({required String deviceId, String? bundleId}) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
       return <Object?>[];
@@ -144,9 +163,8 @@ class IOSCoreDeviceControl {
       'apps',
       '--device',
       deviceId,
-      if (bundleId != null)
-        '--bundle-id',
-        bundleId!,
+      if (bundleId != null) '--bundle-id',
+      bundleId!,
       '--json-output',
       output.path,
     ];
@@ -184,21 +202,14 @@ class IOSCoreDeviceControl {
     required String deviceId,
     String? bundleId,
   }) async {
-    final List<IOSCoreDeviceInstalledApp> apps = <IOSCoreDeviceInstalledApp>[];
-
     final List<Object?> appsData = await _listInstalledApps(deviceId: deviceId, bundleId: bundleId);
-    for (final Object? appObject in appsData) {
-      if (appObject is Map<String, Object?>) {
-        apps.add(IOSCoreDeviceInstalledApp.fromBetaJson(appObject));
-      }
-    }
-    return apps;
+    return <IOSCoreDeviceInstalledApp>[
+      for (final Object? appObject in appsData)
+        if (appObject is Map<String, Object?>) IOSCoreDeviceInstalledApp.fromBetaJson(appObject),
+    ];
   }
 
-  Future<bool> isAppInstalled({
-    required String deviceId,
-    required String bundleId,
-  }) async {
+  Future<bool> isAppInstalled({required String deviceId, required String bundleId}) async {
     final List<IOSCoreDeviceInstalledApp> apps = await getInstalledApps(
       deviceId: deviceId,
       bundleId: bundleId,
@@ -209,10 +220,7 @@ class IOSCoreDeviceControl {
     return false;
   }
 
-  Future<bool> installApp({
-    required String deviceId,
-    required String bundlePath,
-  }) async {
+  Future<bool> installApp({required String deviceId, required String bundlePath}) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
       return false;
@@ -261,10 +269,7 @@ class IOSCoreDeviceControl {
 
   /// Uninstalls the app from the device. Will succeed even if the app is not
   /// currently installed on the device.
-  Future<bool> uninstallApp({
-    required String deviceId,
-    required String bundleId,
-  }) async {
+  Future<bool> uninstallApp({required String deviceId, required String bundleId}) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
       return false;
@@ -389,23 +394,16 @@ class IOSCoreDevice {
   ///   "identifier" : "123456BB5-AEDE-7A22-B890-1234567890DD",
   ///   "visibilityClass" : "default"
   /// }
-  factory IOSCoreDevice.fromBetaJson(
-    Map<String, Object?> data, {
-    required Logger logger,
-  }) {
-    final List<_IOSCoreDeviceCapability> capabilitiesList = <_IOSCoreDeviceCapability>[];
-    if (data['capabilities'] is List<Object?>) {
-      final List<Object?> capabilitiesData = data['capabilities']! as List<Object?>;
-      for (final Object? capabilityData in capabilitiesData) {
-        if (capabilityData != null && capabilityData is Map<String, Object?>) {
-          capabilitiesList.add(_IOSCoreDeviceCapability.fromBetaJson(capabilityData));
-        }
-      }
-    }
+  factory IOSCoreDevice.fromBetaJson(Map<String, Object?> data, {required Logger logger}) {
+    final List<_IOSCoreDeviceCapability> capabilitiesList = <_IOSCoreDeviceCapability>[
+      if (data case {'capabilities': final List<Object?> capabilitiesData})
+        for (final Object? capabilityData in capabilitiesData)
+          if (capabilityData != null && capabilityData is Map<String, Object?>)
+            _IOSCoreDeviceCapability.fromBetaJson(capabilityData),
+    ];
 
     _IOSCoreDeviceConnectionProperties? connectionProperties;
-    if (data['connectionProperties'] is Map<String, Object?>) {
-      final Map<String, Object?> connectionPropertiesData = data['connectionProperties']! as Map<String, Object?>;
+    if (data case {'connectionProperties': final Map<String, Object?> connectionPropertiesData}) {
       connectionProperties = _IOSCoreDeviceConnectionProperties.fromBetaJson(
         connectionPropertiesData,
         logger: logger,
@@ -413,14 +411,12 @@ class IOSCoreDevice {
     }
 
     IOSCoreDeviceProperties? deviceProperties;
-    if (data['deviceProperties'] is Map<String, Object?>) {
-      final Map<String, Object?> devicePropertiesData = data['deviceProperties']! as Map<String, Object?>;
+    if (data case {'deviceProperties': final Map<String, Object?> devicePropertiesData}) {
       deviceProperties = IOSCoreDeviceProperties.fromBetaJson(devicePropertiesData);
     }
 
     _IOSCoreDeviceHardwareProperties? hardwareProperties;
-    if (data['hardwareProperties'] is Map<String, Object?>) {
-      final Map<String, Object?> hardwarePropertiesData = data['hardwareProperties']! as Map<String, Object?>;
+    if (data case {'hardwareProperties': final Map<String, Object?> hardwarePropertiesData}) {
       hardwareProperties = _IOSCoreDeviceHardwareProperties.fromBetaJson(
         hardwarePropertiesData,
         logger: logger,
@@ -440,15 +436,11 @@ class IOSCoreDevice {
   String? get udid => hardwareProperties?.udid;
 
   DeviceConnectionInterface? get connectionInterface {
-    final String? transportType = connectionProperties?.transportType;
-    if (transportType != null) {
-      if (transportType.toLowerCase() == 'localnetwork') {
-        return DeviceConnectionInterface.wireless;
-      } else if (transportType.toLowerCase() == 'wired') {
-        return DeviceConnectionInterface.attached;
-      }
-    }
-    return null;
+    return switch (connectionProperties?.transportType?.toLowerCase()) {
+      'localnetwork' => DeviceConnectionInterface.wireless,
+      'wired' => DeviceConnectionInterface.attached,
+      _ => null,
+    };
   }
 
   @visibleForTesting
@@ -466,12 +458,8 @@ class IOSCoreDevice {
   final String? visibilityClass;
 }
 
-
 class _IOSCoreDeviceCapability {
-  _IOSCoreDeviceCapability._({
-    required this.featureIdentifier,
-    required this.name,
-  });
+  _IOSCoreDeviceCapability._({required this.featureIdentifier, required this.name});
 
   /// Parse `capabilities` section of JSON from `devicectl list devices --json-output`
   /// while it's in beta preview mode.
@@ -540,8 +528,7 @@ class _IOSCoreDeviceConnectionProperties {
     required Logger logger,
   }) {
     List<String>? localHostnames;
-    if (data['localHostnames'] is List<Object?>) {
-      final List<Object?> values = data['localHostnames']! as List<Object?>;
+    if (data case {'localHostnames': final List<Object?> values}) {
       try {
         localHostnames = List<String>.from(values);
       } on TypeError {
@@ -550,8 +537,7 @@ class _IOSCoreDeviceConnectionProperties {
     }
 
     List<String>? potentialHostnames;
-    if (data['potentialHostnames'] is List<Object?>) {
-      final List<Object?> values = data['potentialHostnames']! as List<Object?>;
+    if (data case {'potentialHostnames': final List<Object?> values}) {
       try {
         potentialHostnames = List<String>.from(values);
       } on TypeError {
@@ -560,7 +546,8 @@ class _IOSCoreDeviceConnectionProperties {
     }
     return _IOSCoreDeviceConnectionProperties._(
       authenticationType: data['authenticationType']?.toString(),
-      isMobileDeviceOnly: data['isMobileDeviceOnly'] is bool? ? data['isMobileDeviceOnly'] as bool? : null,
+      isMobileDeviceOnly:
+          data['isMobileDeviceOnly'] is bool? ? data['isMobileDeviceOnly'] as bool? : null,
       lastConnectionDate: data['lastConnectionDate']?.toString(),
       localHostnames: localHostnames,
       pairingState: data['pairingState']?.toString(),
@@ -619,16 +606,22 @@ class IOSCoreDeviceProperties {
   /// }
   factory IOSCoreDeviceProperties.fromBetaJson(Map<String, Object?> data) {
     return IOSCoreDeviceProperties._(
-      bootedFromSnapshot: data['bootedFromSnapshot'] is bool? ? data['bootedFromSnapshot'] as bool? : null,
+      bootedFromSnapshot:
+          data['bootedFromSnapshot'] is bool? ? data['bootedFromSnapshot'] as bool? : null,
       bootedSnapshotName: data['bootedSnapshotName']?.toString(),
       bootState: data['bootState']?.toString(),
-      ddiServicesAvailable: data['ddiServicesAvailable'] is bool? ? data['ddiServicesAvailable'] as bool? : null,
+      ddiServicesAvailable:
+          data['ddiServicesAvailable'] is bool? ? data['ddiServicesAvailable'] as bool? : null,
       developerModeStatus: data['developerModeStatus']?.toString(),
-      hasInternalOSBuild: data['hasInternalOSBuild'] is bool? ? data['hasInternalOSBuild'] as bool? : null,
+      hasInternalOSBuild:
+          data['hasInternalOSBuild'] is bool? ? data['hasInternalOSBuild'] as bool? : null,
       name: data['name']?.toString(),
       osBuildUpdate: data['osBuildUpdate']?.toString(),
       osVersionNumber: data['osVersionNumber']?.toString(),
-      rootFileSystemIsWritable: data['rootFileSystemIsWritable'] is bool? ? data['rootFileSystemIsWritable'] as bool? : null,
+      rootFileSystemIsWritable:
+          data['rootFileSystemIsWritable'] is bool?
+              ? data['rootFileSystemIsWritable'] as bool?
+              : null,
       screenViewingURL: data['screenViewingURL']?.toString(),
     );
   }
@@ -705,25 +698,20 @@ class _IOSCoreDeviceHardwareProperties {
     required Logger logger,
   }) {
     _IOSCoreDeviceCPUType? cpuType;
-    if (data['cpuType'] is Map<String, Object?>) {
-      cpuType = _IOSCoreDeviceCPUType.fromBetaJson(data['cpuType']! as Map<String, Object?>);
+    if (data case {'cpuType': final Map<String, Object?> betaJson}) {
+      cpuType = _IOSCoreDeviceCPUType.fromBetaJson(betaJson);
     }
 
     List<_IOSCoreDeviceCPUType>? supportedCPUTypes;
-    if (data['supportedCPUTypes'] is List<Object?>) {
-      final List<Object?> values = data['supportedCPUTypes']! as List<Object?>;
-      final List<_IOSCoreDeviceCPUType> cpuTypes = <_IOSCoreDeviceCPUType>[];
-      for (final Object? cpuTypeData in values) {
-        if (cpuTypeData is Map<String, Object?>) {
-          cpuTypes.add(_IOSCoreDeviceCPUType.fromBetaJson(cpuTypeData));
-        }
-      }
-      supportedCPUTypes = cpuTypes;
+    if (data case {'supportedCPUTypes': final List<Object?> values}) {
+      supportedCPUTypes = <_IOSCoreDeviceCPUType>[
+        for (final Object? cpuTypeData in values)
+          if (cpuTypeData is Map<String, Object?>) _IOSCoreDeviceCPUType.fromBetaJson(cpuTypeData),
+      ];
     }
 
     List<int>? supportedDeviceFamilies;
-    if (data['supportedDeviceFamilies'] is List<Object?>) {
-      final List<Object?> values = data['supportedDeviceFamilies']! as List<Object?>;
+    if (data case {'supportedDeviceFamilies': final List<Object?> values}) {
       try {
         supportedDeviceFamilies = List<int>.from(values);
       } on TypeError {
@@ -736,7 +724,8 @@ class _IOSCoreDeviceHardwareProperties {
       deviceType: data['deviceType']?.toString(),
       ecid: data['ecid'] is int? ? data['ecid'] as int? : null,
       hardwareModel: data['hardwareModel']?.toString(),
-      internalStorageCapacity: data['internalStorageCapacity'] is int? ? data['internalStorageCapacity'] as int? : null,
+      internalStorageCapacity:
+          data['internalStorageCapacity'] is int? ? data['internalStorageCapacity'] as int? : null,
       marketingName: data['marketingName']?.toString(),
       platform: data['platform']?.toString(),
       productType: data['productType']?.toString(),
@@ -764,11 +753,7 @@ class _IOSCoreDeviceHardwareProperties {
 }
 
 class _IOSCoreDeviceCPUType {
-  _IOSCoreDeviceCPUType._({
-    this.name,
-    this.subType,
-    this.cpuType,
-  });
+  _IOSCoreDeviceCPUType._({this.name, this.subType, this.cpuType});
 
   /// Parse `hardwareProperties.cpuType` and `hardwareProperties.supportedCPUTypes`
   /// sections of JSON from `devicectl list devices --json-output` while it's in beta preview mode.
@@ -828,7 +813,8 @@ class IOSCoreDeviceInstalledApp {
   factory IOSCoreDeviceInstalledApp.fromBetaJson(Map<String, Object?> data) {
     return IOSCoreDeviceInstalledApp._(
       appClip: data['appClip'] is bool? ? data['appClip'] as bool? : null,
-      builtByDeveloper: data['builtByDeveloper'] is bool? ? data['builtByDeveloper'] as bool? : null,
+      builtByDeveloper:
+          data['builtByDeveloper'] is bool? ? data['builtByDeveloper'] as bool? : null,
       bundleIdentifier: data['bundleIdentifier']?.toString(),
       bundleVersion: data['bundleVersion']?.toString(),
       defaultApp: data['defaultApp'] is bool? ? data['defaultApp'] as bool? : null,

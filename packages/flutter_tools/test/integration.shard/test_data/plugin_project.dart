@@ -9,21 +9,20 @@ import 'deferred_components_project.dart';
 /// Project which can load native plugins
 class PluginProject extends BasicProject {
   @override
-  final DeferredComponentsConfig? deferredComponents =
-      PluginDeferredComponentsConfig();
+  final DeferredComponentsConfig? deferredComponents = PluginDeferredComponentsConfig();
 }
 
 class PluginDeferredComponentsConfig extends BasicDeferredComponentsConfig {
   @override
   String get androidBuild => r'''
 buildscript {
-    ext.kotlin_version = '1.7.10'
+    ext.kotlin_version = '2.1.0'
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath 'com.android.tools.build:gradle:8.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
     configurations.classpath {
@@ -36,9 +35,9 @@ allprojects {
         mavenCentral()
     }
 }
-rootProject.buildDir = '../build'
+rootProject.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir("../../build").get())
 subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
+    project.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir(project.name).get())
 }
 subprojects {
     project.evaluationDependsOn(':app')
@@ -51,7 +50,7 @@ subprojects {
     }
 }
 tasks.register("clean", Delete) {
-    delete rootProject.buildDir
+    delete rootProject.layout.buildDirectory
 }
 ''';
 
@@ -72,8 +71,7 @@ apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gra
 
   @override
   String get appManifest => r'''
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.yourcompany.flavors">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:name="${applicationName}"

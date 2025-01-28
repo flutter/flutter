@@ -1,5 +1,5 @@
 {
-  "version": "v0_162",
+  "version": "6_1_0",
 
   "md.comp.outlined-text-field.caret.color": "primary",
   "md.comp.outlined-text-field.container.shape": "md.sys.shape.corner.extra-small",
@@ -17,6 +17,7 @@
   "md.comp.outlined-text-field.disabled.trailing-icon.color": "onSurface",
   "md.comp.outlined-text-field.disabled.trailing-icon.opacity": 0.38,
   "md.comp.outlined-text-field.error.focus.caret.color": "error",
+  "md.comp.outlined-text-field.error.focus.indicator.outline.color": "error",
   "md.comp.outlined-text-field.error.focus.input-text.color": "onSurface",
   "md.comp.outlined-text-field.error.focus.label-text.color": "error",
   "md.comp.outlined-text-field.error.focus.leading-icon.color": "onSurfaceVariant",
@@ -35,6 +36,8 @@
   "md.comp.outlined-text-field.error.outline.color": "error",
   "md.comp.outlined-text-field.error.supporting-text.color": "error",
   "md.comp.outlined-text-field.error.trailing-icon.color": "error",
+  "md.comp.outlined-text-field.focus.indicator.outline.color": "secondary",
+  "md.comp.outlined-text-field.focus.indicator.outline.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.outlined-text-field.focus.input-text.color": "onSurface",
   "md.comp.outlined-text-field.focus.label-text.color": "primary",
   "md.comp.outlined-text-field.focus.leading-icon.color": "onSurfaceVariant",

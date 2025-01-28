@@ -24,7 +24,7 @@
   "closeButtonLabel": "닫기",
   "continueButtonLabel": "계속",
   "copyButtonLabel": "복사",
-  "cutButtonLabel": "잘라냄",
+  "cutButtonLabel": "잘라내기",
   "scanTextButtonLabel": "텍스트 스캔",
   "okButtonLabel": "확인",
   "pasteButtonLabel": "붙여넣기",
@@ -144,5 +144,7 @@
   "menuDismissLabel": "메뉴 닫기",
   "lookUpButtonLabel": "찾기",
   "searchWebButtonLabel": "웹 검색",
-  "shareButtonLabel": "공유..."
+  "shareButtonLabel": "공유",
+  "clearButtonTooltip": "텍스트 삭제",
+  "selectedDateLabel": "선택됨"
 }
