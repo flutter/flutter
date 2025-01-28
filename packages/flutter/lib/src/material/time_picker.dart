@@ -3151,19 +3151,13 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet} Show a dialog with time unconditionally displayed in 24 hour
-/// format.
+/// {@tool snippet} Show a dialog with time displayed in 24 hour format.
 ///
 /// ```dart
 /// Future<TimeOfDay?> selectedTime24Hour = showTimePicker(
 ///   context: context,
+///   show24HourFormat: true,
 ///   initialTime: const TimeOfDay(hour: 10, minute: 47),
-///   builder: (BuildContext context, Widget? child) {
-///     return MediaQuery(
-///       data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-///       child: child!,
-///     );
-///   },
 /// );
 /// ```
 /// {@end-tool}
