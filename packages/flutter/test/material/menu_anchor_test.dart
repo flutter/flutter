@@ -2678,196 +2678,180 @@ void main() {
         controller.close();
         await tester.pump();
 
-        // The menu should go away,
-        expect(closed, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
-        expect(opened, isEmpty);
-      });
-    },
-    // https://github.com/flutter/flutter/issues/145527
-    skip: kIsWeb && !isCanvasKit,
-  );
+      // The menu should go away,
+      expect(closed, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
+      expect(opened, isEmpty);
+    });
+  });
 
   group('MenuItemButton', () {
-    testWidgets(
-      'Shortcut mnemonics are displayed',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: MenuBar(
-                controller: controller,
-                children: createTestMenus(
-                  shortcuts: <TestMenu, MenuSerializableShortcut>{
-                    TestMenu.subSubMenu110: const SingleActivator(
-                      LogicalKeyboardKey.keyA,
-                      control: true,
-                    ),
-                    TestMenu.subSubMenu111: const SingleActivator(
-                      LogicalKeyboardKey.keyB,
-                      shift: true,
-                    ),
-                    TestMenu.subSubMenu112: const SingleActivator(
-                      LogicalKeyboardKey.keyC,
-                      alt: true,
-                    ),
-                    TestMenu.subSubMenu113: const SingleActivator(
-                      LogicalKeyboardKey.keyD,
-                      meta: true,
-                    ),
-                  },
-                ),
+    testWidgets('Shortcut mnemonics are displayed', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu110: const SingleActivator(
+                    LogicalKeyboardKey.keyA,
+                    control: true,
+                  ),
+                  TestMenu.subSubMenu111: const SingleActivator(
+                    LogicalKeyboardKey.keyB,
+                    shift: true,
+                  ),
+                  TestMenu.subSubMenu112: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
+                  TestMenu.subSubMenu113: const SingleActivator(
+                    LogicalKeyboardKey.keyD,
+                    meta: true,
+                  ),
+                },
               ),
             ),
           ),
-        );
+        ),
+      );
 
-        // Open a menu initially.
-        await tester.tap(find.text(TestMenu.mainMenu1.label));
-        await tester.pump();
+      // Open a menu initially.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
 
-        await tester.tap(find.text(TestMenu.subMenu11.label));
-        await tester.pump();
+      await tester.tap(find.text(TestMenu.subMenu11.label));
+      await tester.pump();
 
-        Text mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
-        Text mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
-        Text mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
-        Text mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
+      Text mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
+      Text mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
+      Text mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
+      Text mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
 
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-            expect(mnemonic0.data, equals('Ctrl+A'));
-            expect(mnemonic1.data, equals('Shift+B'));
-            expect(mnemonic2.data, equals('Alt+C'));
-            expect(mnemonic3.data, equals('Meta+D'));
-          case TargetPlatform.windows:
-            expect(mnemonic0.data, equals('Ctrl+A'));
-            expect(mnemonic1.data, equals('Shift+B'));
-            expect(mnemonic2.data, equals('Alt+C'));
-            expect(mnemonic3.data, equals('Win+D'));
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            expect(mnemonic0.data, equals('⌃ A'));
-            expect(mnemonic1.data, equals('⇧ B'));
-            expect(mnemonic2.data, equals('⌥ C'));
-            expect(mnemonic3.data, equals('⌘ D'));
-        }
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+          expect(mnemonic0.data, equals('Ctrl+A'));
+          expect(mnemonic1.data, equals('Shift+B'));
+          expect(mnemonic2.data, equals('Alt+C'));
+          expect(mnemonic3.data, equals('Meta+D'));
+        case TargetPlatform.windows:
+          expect(mnemonic0.data, equals('Ctrl+A'));
+          expect(mnemonic1.data, equals('Shift+B'));
+          expect(mnemonic2.data, equals('Alt+C'));
+          expect(mnemonic3.data, equals('Win+D'));
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(mnemonic0.data, equals('⌃ A'));
+          expect(mnemonic1.data, equals('⇧ B'));
+          expect(mnemonic2.data, equals('⌥ C'));
+          expect(mnemonic3.data, equals('⌘ D'));
+      }
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: MenuBar(
-                controller: controller,
-                children: createTestMenus(
-                  includeExtraGroups: true,
-                  shortcuts: <TestMenu, MenuSerializableShortcut>{
-                    TestMenu.subSubMenu110: const SingleActivator(LogicalKeyboardKey.arrowRight),
-                    TestMenu.subSubMenu111: const SingleActivator(LogicalKeyboardKey.arrowLeft),
-                    TestMenu.subSubMenu112: const SingleActivator(LogicalKeyboardKey.arrowUp),
-                    TestMenu.subSubMenu113: const SingleActivator(LogicalKeyboardKey.arrowDown),
-                  },
-                ),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(
+                includeExtraGroups: true,
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu110: const SingleActivator(LogicalKeyboardKey.arrowRight),
+                  TestMenu.subSubMenu111: const SingleActivator(LogicalKeyboardKey.arrowLeft),
+                  TestMenu.subSubMenu112: const SingleActivator(LogicalKeyboardKey.arrowUp),
+                  TestMenu.subSubMenu113: const SingleActivator(LogicalKeyboardKey.arrowDown),
+                },
               ),
             ),
           ),
-        );
-        await tester.pumpAndSettle();
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
-        expect(mnemonic0.data, equals('→'));
-        mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
-        expect(mnemonic1.data, equals('←'));
-        mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
-        expect(mnemonic2.data, equals('↑'));
-        mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
-        expect(mnemonic3.data, equals('↓'));
+      mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
+      expect(mnemonic0.data, equals('→'));
+      mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
+      expect(mnemonic1.data, equals('←'));
+      mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
+      expect(mnemonic2.data, equals('↑'));
+      mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
+      expect(mnemonic3.data, equals('↓'));
 
-        // Try some weirder ones.
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: MenuBar(
-                controller: controller,
-                children: createTestMenus(
-                  shortcuts: <TestMenu, MenuSerializableShortcut>{
-                    TestMenu.subSubMenu110: const SingleActivator(LogicalKeyboardKey.escape),
-                    TestMenu.subSubMenu111: const SingleActivator(LogicalKeyboardKey.fn),
-                    TestMenu.subSubMenu112: const SingleActivator(LogicalKeyboardKey.enter),
-                  },
-                ),
+      // Try some weirder ones.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu110: const SingleActivator(LogicalKeyboardKey.escape),
+                  TestMenu.subSubMenu111: const SingleActivator(LogicalKeyboardKey.fn),
+                  TestMenu.subSubMenu112: const SingleActivator(LogicalKeyboardKey.enter),
+                },
               ),
             ),
           ),
-        );
-        await tester.pumpAndSettle();
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
-        expect(mnemonic0.data, equals('Esc'));
-        mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
-        expect(mnemonic1.data, equals('Fn'));
-        mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
-        expect(mnemonic2.data, equals('↵'));
-      },
-      variant: TargetPlatformVariant.all(),
-      // https://github.com/flutter/flutter/issues/145527
-      skip: kIsWeb && !isCanvasKit,
-    );
+      mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
+      expect(mnemonic0.data, equals('Esc'));
+      mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
+      expect(mnemonic1.data, equals('Fn'));
+      mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
+      expect(mnemonic2.data, equals('↵'));
+    }, variant: TargetPlatformVariant.all());
 
     // Regression test for https://github.com/flutter/flutter/issues/145040.
-    testWidgets(
-      'CharacterActivator shortcut mnemonics include modifiers',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: MenuBar(
-                controller: controller,
-                children: createTestMenus(
-                  shortcuts: <TestMenu, MenuSerializableShortcut>{
-                    TestMenu.subSubMenu110: const CharacterActivator('A', control: true),
-                    TestMenu.subSubMenu111: const CharacterActivator('B', alt: true),
-                    TestMenu.subSubMenu112: const CharacterActivator('C', meta: true),
-                  },
-                ),
+    testWidgets('CharacterActivator shortcut mnemonics include modifiers', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu110: const CharacterActivator('A', control: true),
+                  TestMenu.subSubMenu111: const CharacterActivator('B', alt: true),
+                  TestMenu.subSubMenu112: const CharacterActivator('C', meta: true),
+                },
               ),
             ),
           ),
-        );
+        ),
+      );
 
-        // Open a menu initially.
-        await tester.tap(find.text(TestMenu.mainMenu1.label));
-        await tester.pump();
+      // Open a menu initially.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
 
-        await tester.tap(find.text(TestMenu.subMenu11.label));
-        await tester.pump();
+      await tester.tap(find.text(TestMenu.subMenu11.label));
+      await tester.pump();
 
-        final Text mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
-        final Text mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
-        final Text mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
+      final Text mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
+      final Text mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
+      final Text mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
 
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-            expect(mnemonic0.data, equals('Ctrl+A'));
-            expect(mnemonic1.data, equals('Alt+B'));
-            expect(mnemonic2.data, equals('Meta+C'));
-          case TargetPlatform.windows:
-            expect(mnemonic0.data, equals('Ctrl+A'));
-            expect(mnemonic1.data, equals('Alt+B'));
-            expect(mnemonic2.data, equals('Win+C'));
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            expect(mnemonic0.data, equals('⌃ A'));
-            expect(mnemonic1.data, equals('⌥ B'));
-            expect(mnemonic2.data, equals('⌘ C'));
-        }
-      },
-      variant: TargetPlatformVariant.all(),
-      // https://github.com/flutter/flutter/issues/145527
-      skip: kIsWeb && !isCanvasKit,
-    );
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+          expect(mnemonic0.data, equals('Ctrl+A'));
+          expect(mnemonic1.data, equals('Alt+B'));
+          expect(mnemonic2.data, equals('Meta+C'));
+        case TargetPlatform.windows:
+          expect(mnemonic0.data, equals('Ctrl+A'));
+          expect(mnemonic1.data, equals('Alt+B'));
+          expect(mnemonic2.data, equals('Win+C'));
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(mnemonic0.data, equals('⌃ A'));
+          expect(mnemonic1.data, equals('⌥ B'));
+          expect(mnemonic2.data, equals('⌘ C'));
+      }
+    }, variant: TargetPlatformVariant.all());
 
     testWidgets('leadingIcon is used when set', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2958,11 +2942,8 @@ void main() {
         await tester.tap(find.text(TestMenu.mainMenu0.label));
         await tester.pump();
 
-        expect(find.text('trailingIcon'), findsOneWidget);
-      },
-      // https://github.com/flutter/flutter/issues/145527
-      skip: kIsWeb && !isCanvasKit,
-    );
+      expect(find.text('trailingIcon'), findsOneWidget);
+    });
 
     testWidgets('SubmenuButton uses supplied controller', (WidgetTester tester) async {
       final MenuController submenuController = MenuController();
@@ -3196,18 +3177,15 @@ void main() {
         );
         expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 120.0));
 
-        // Test a long MenuItemButton in a constrained layout with horizontal overflow axis.
-        await tester.pumpWidget(
-          buildMenuButton(overflowAxis: Axis.horizontal, constrainedLayout: true),
-        );
-        expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 48.0));
-        // This should throw an error.
-        final AssertionError exception = tester.takeException() as AssertionError;
-        expect(exception, isAssertionError);
-      },
-      // https://github.com/flutter/flutter/issues/99933
-      skip: kIsWeb && !isCanvasKit,
-    );
+      // Test a long MenuItemButton in a constrained layout with horizontal overflow axis.
+      await tester.pumpWidget(
+        buildMenuButton(overflowAxis: Axis.horizontal, constrainedLayout: true),
+      );
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 48.0));
+      // This should throw an error.
+      final AssertionError exception = tester.takeException() as AssertionError;
+      expect(exception, isAssertionError);
+    });
 
     testWidgets('MenuItemButton.styleFrom overlayColor overrides default overlay color', (
       WidgetTester tester,
@@ -4052,13 +4030,10 @@ void main() {
           await tester.tap(find.text(TestMenu.mainMenu0.label));
           await tester.pump();
 
-          expect(find.text(allExpected), findsOneWidget);
-          expect(find.text(charExpected), findsOneWidget);
-        }, variant: TargetPlatformVariant.all());
-      },
-      // https://github.com/flutter/flutter/issues/145527
-      skip: kIsWeb && !isCanvasKit,
-    );
+      expect(find.text(allExpected), findsOneWidget);
+      expect(find.text(charExpected), findsOneWidget);
+    }, variant: TargetPlatformVariant.all());
+  });
 
     group('CheckboxMenuButton', () {
       testWidgets('tapping toggles checkbox', (WidgetTester tester) async {
@@ -4475,23 +4450,20 @@ void main() {
         await tester.tap(find.text(TestMenu.mainMenu1.label));
         await tester.pump();
 
-        // Test menu item text style uses the TextTheme.labelLarge.
-        buttonMaterial =
-            find
-                .descendant(
-                  of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
-                  matching: find.byType(Material),
-                )
-                .first;
-        material = tester.widget<Material>(buttonMaterial);
-        expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
-        expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
-        expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
-        expect(material.textStyle?.decoration, menuTextStyle.decoration);
-      },
-      // https://github.com/flutter/flutter/issues/145527
-      skip: kIsWeb && !isCanvasKit,
-    );
+    // Test menu item text style uses the TextTheme.labelLarge.
+    buttonMaterial =
+        find
+            .descendant(
+              of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
+              matching: find.byType(Material),
+            )
+            .first;
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
+    expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
+    expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
+    expect(material.textStyle?.decoration, menuTextStyle.decoration);
+  });
 
     testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
