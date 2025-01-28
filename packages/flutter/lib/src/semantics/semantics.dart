@@ -115,9 +115,7 @@ typedef DebugSemanticsRoleCheck = FlutterError? Function(SemanticsNode node);
 /// When adding a new [SemanticsRole], one must also add a corresponding check
 /// to [kChecks].
 @visibleForTesting
-class DebugSemanticsRoleChecks {
-  DebugSemanticsRoleChecks._();
-
+sealed class DebugSemanticsRoleChecks {
   /// A map to map each [SemanticsRole] to its check.
   static const Map<SemanticsRole, DebugSemanticsRoleCheck> kChecks =
       <SemanticsRole, DebugSemanticsRoleCheck>{
