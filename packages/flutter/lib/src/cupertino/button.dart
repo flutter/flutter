@@ -204,13 +204,13 @@ class CupertinoButton extends StatefulWidget {
   /// If [onPressed] and [onLongPress] callbacks are null, then the button will be disabled.
   final VoidCallback? onLongPress;
 
-  /// Minimum width of the button.
+  /// The minimum width of the button.
   ///
   /// Defaults to [kMinInteractiveDimensionCupertino], which the iOS Human
   /// Interface Guidelines recommends as the minimum tappable area.
   final double? minWidth;
 
-  /// Minimum height of the button.
+  /// The minimum height of the button.
   ///
   /// Defaults to [kMinInteractiveDimensionCupertino], which the iOS Human
   /// Interface Guidelines recommends as the minimum tappable area.
