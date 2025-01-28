@@ -1524,13 +1524,17 @@ abstract class FlutterCommand extends Command<void> {
 
     for (final String dartDefine in flutterVersionDartDefines) {
       if (globals.platform.environment[dartDefine] != null) {
-        throwToolExit('$dartDefine is used by the framework and cannot be set in the environment. '
-          'Use FlutterVersion to access it in Flutter code');
+        throwToolExit(
+          '$dartDefine is used by the framework and cannot be set in the environment. '
+          'Use FlutterVersion to access it in Flutter code',
+        );
       }
       if (dartDefines.any((String define) => define.startsWith(dartDefine))) {
-        throwToolExit('$dartDefine is used by the framework and cannot be '
+        throwToolExit(
+          '$dartDefine is used by the framework and cannot be '
           'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}. '
-          'Use FlutterVersion to access it in Flutter code');
+          'Use FlutterVersion to access it in Flutter code',
+        );
       }
     }
 
