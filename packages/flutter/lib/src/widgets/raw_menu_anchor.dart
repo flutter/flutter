@@ -27,6 +27,7 @@ import 'tap_region.dart';
 // Examples can assume:
 // late BuildContext context;
 // late List<Widget> menuItems;
+// late RawMenuOverlayInfo info;
 
 const bool _kDebugMenus = false;
 
@@ -220,7 +221,7 @@ class RawMenuAnchor extends _RawMenuAnchor {
   ///
   /// ```dart
   /// TapRegion(
-  ///   groupId: position.tapRegionGroupId,
+  ///   groupId: info.tapRegionGroupId,
   ///   onTapOutside: (PointerDownEvent event) {
   ///     MenuController.maybeOf(context)?.close();
   ///   },
