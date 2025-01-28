@@ -297,13 +297,14 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ScrollPosition? _scrollPosition;
   Size? _viewSize;
 
+  /// Whether this [_RawMenuAnchorBaseMixin] is the top node of the menu tree.
   @protected
   bool get isRoot => _parent == null;
 
-  /// The [MenuController] that is used by the [RawMenuAnchor].
+  /// The [MenuController] that is used by the [_RawMenuAnchorBaseMixin].
   ///
   /// If an overridding widget does not provide a [MenuController], then
-  /// [RawMenuAnchor] will create and manage its own.
+  /// [_RawMenuAnchorBaseMixin] will create and manage its own.
   @nonVirtual
   MenuController get menuController {
     return externalMenuController ?? (_internalMenuController ??= MenuController());
@@ -331,7 +332,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     assert(externalMenuController == null || _internalMenuController == null);
   }
 
-  /// Whether the menu is open.
+  /// Whether this menu layer is open.
   @protected
   bool get isOpen;
 
@@ -440,6 +441,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   @protected
   void open({Offset? position});
 
+  /// Close the menu.
   @protected
   void close({bool inDispose = false});
 
@@ -453,6 +455,9 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
+  /// Handles taps outside of the menu surface.
+  ///
+  /// By default, this closes this submenu's children.
   @protected
   void handleOutsideTap(PointerDownEvent pointerDownEvent) {
     assert(_debugMenuInfo('Tapped Outside $menuController'));
