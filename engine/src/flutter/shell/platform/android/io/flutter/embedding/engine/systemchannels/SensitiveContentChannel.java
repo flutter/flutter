@@ -11,7 +11,6 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
-import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -30,7 +29,8 @@ public class SensitiveContentChannel {
         @Override
         public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
           if (sensitiveContentMethodHandler == null) {
-            // No SensitiveContentChannel registered, call not forwarded to sensitive content API.");
+            // No SensitiveContentChannel registered, call not forwarded to sensitive content
+            // API.");
             return;
           }
           String method = call.method;
@@ -48,9 +48,8 @@ public class SensitiveContentChannel {
               }
               break;
             default:
-                Log.v(
-                TAG,
-                "Method " + method + " is not implemented for the SensitiveContentChannel.");
+              Log.v(
+                  TAG, "Method " + method + " is not implemented for the SensitiveContentChannel.");
               result.notImplemented();
               break;
           }
