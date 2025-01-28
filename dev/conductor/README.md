@@ -97,6 +97,6 @@ finished successfully. The SDK compressed archives will not be available from
 the website until the packaging build has finished. The conductor will produce
 links to the dashboards for monitoring CI builds.
 
-### Post verificaion steps (mostly communication) 
+### Post verificaion steps (mostly communication)
 
 Googler instructions for post release documented at go/flutter-release-workflow#notify
