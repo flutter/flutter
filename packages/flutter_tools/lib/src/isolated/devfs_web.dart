@@ -159,7 +159,6 @@ class WebAssetServer implements AssetReader {
   /// ids to the file system that can then be consumed by the hot restart
   /// callback.
   void performRestart(List<String> modules, {required bool writeRestartScripts}) {
-    final Set<String> srcs = <String>{};
     for (final String module in modules) {
       // We skip computing the digest by using the hashCode of the underlying buffer.
       // Whenever a file is updated, the corresponding Uint8List.view it corresponds
@@ -169,11 +168,10 @@ class WebAssetServer implements AssetReader {
       final String path = moduleName.replaceAll('.js', '');
       _modules[name] = path;
       _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
-      srcs.add(moduleName);
     }
     if (writeRestartScripts && _hotRestartGeneration > 0) {
       final List<Map<String, String>> srcIdsList = <Map<String, String>>[];
-      for (final String src in srcs) {
+      for (final String src in modules) {
         srcIdsList.add(<String, String>{'src': '$src?gen=$_hotRestartGeneration', 'id': src});
       }
       writeFile('main.dart.js.restartScripts', json.encode(srcIdsList));
