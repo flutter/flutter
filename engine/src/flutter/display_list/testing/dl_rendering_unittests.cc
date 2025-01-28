@@ -44,9 +44,6 @@
 namespace flutter {
 namespace testing {
 
-using ClipOp = DlCanvas::ClipOp;
-using PointMode = DlCanvas::PointMode;
-
 constexpr int kTestWidth = 200;
 constexpr int kTestHeight = 200;
 constexpr int kRenderWidth = 100;
@@ -1223,7 +1220,7 @@ class CanvasCompareTester {
                    },
                    [=](const DlSetupContext& ctx) {
                      ctx.canvas->Save();
-                     ctx.canvas->ClipRect(clip, ClipOp::kIntersect, false);
+                     ctx.canvas->ClipRect(clip, DlClipOp::kIntersect, false);
                      DlPaint p2;
                      ctx.canvas->DrawRect(rect, p2);
                      p2.setBlendMode(DlBlendMode::kClear);
@@ -2079,7 +2076,7 @@ class CanvasCompareTester {
                      ctx.canvas->clipRect(r_clip, SkClipOp::kIntersect, false);
                    },
                    [=](const DlSetupContext& ctx) {
-                     ctx.canvas->ClipRect(r_clip, ClipOp::kIntersect, false);
+                     ctx.canvas->ClipRect(r_clip, DlClipOp::kIntersect, false);
                    }));
     RenderWith(testP, env, intersect_tolerance,
                CaseParameters(
@@ -2088,7 +2085,7 @@ class CanvasCompareTester {
                      ctx.canvas->clipRect(r_clip, SkClipOp::kIntersect, true);
                    },
                    [=](const DlSetupContext& ctx) {
-                     ctx.canvas->ClipRect(r_clip, ClipOp::kIntersect, true);
+                     ctx.canvas->ClipRect(r_clip, DlClipOp::kIntersect, true);
                    }));
     RenderWith(testP, env, diff_tolerance,
                CaseParameters(
@@ -2097,7 +2094,7 @@ class CanvasCompareTester {
                      ctx.canvas->clipRect(r_clip, SkClipOp::kDifference, false);
                    },
                    [=](const DlSetupContext& ctx) {
-                     ctx.canvas->ClipRect(r_clip, ClipOp::kDifference, false);
+                     ctx.canvas->ClipRect(r_clip, DlClipOp::kDifference, false);
                    })
                    .with_diff_clip());
     // Skia lacks clipOval and requires us to make an oval SkRRect
@@ -2110,7 +2107,7 @@ class CanvasCompareTester {
                                            false);
                    },
                    [=](const DlSetupContext& ctx) {
-                     ctx.canvas->ClipOval(r_clip, ClipOp::kIntersect, false);
+                     ctx.canvas->ClipOval(r_clip, DlClipOp::kIntersect, false);
                    }));
     RenderWith(testP, env, intersect_tolerance,
                CaseParameters(
@@ -2120,7 +2117,7 @@ class CanvasCompareTester {
                                            true);
                    },
                    [=](const DlSetupContext& ctx) {
-                     ctx.canvas->ClipOval(r_clip, ClipOp::kIntersect, true);
+                     ctx.canvas->ClipOval(r_clip, DlClipOp::kIntersect, true);
                    }));
     RenderWith(testP, env, diff_tolerance,
                CaseParameters(
@@ -2130,7 +2127,7 @@ class CanvasCompareTester {
                                            false);
                    },
                    [=](const DlSetupContext& ctx) {
-                     ctx.canvas->ClipOval(r_clip, ClipOp::kDifference, false);
+                     ctx.canvas->ClipOval(r_clip, DlClipOp::kDifference, false);
                    })
                    .with_diff_clip());
     // This test RR clip used to use very small radii, but due to
@@ -2139,16 +2136,16 @@ class CanvasCompareTester {
     // "clip overruns" by the clip OOB pixel testing code. Using less
     // abusively small radii fixes the problem.
     SkRRect rr_clip = SkRRect::MakeRectXY(r_clip, 9, 9);
-    RenderWith(testP, env, intersect_tolerance,
-               CaseParameters(
-                   "Hard ClipRRect with radius of 15.4",
-                   [=](const SkSetupContext& ctx) {
-                     ctx.canvas->clipRRect(rr_clip, SkClipOp::kIntersect,
-                                           false);
-                   },
-                   [=](const DlSetupContext& ctx) {
-                     ctx.canvas->ClipRRect(rr_clip, ClipOp::kIntersect, false);
-                   }));
+    RenderWith(
+        testP, env, intersect_tolerance,
+        CaseParameters(
+            "Hard ClipRRect with radius of 15.4",
+            [=](const SkSetupContext& ctx) {
+              ctx.canvas->clipRRect(rr_clip, SkClipOp::kIntersect, false);
+            },
+            [=](const DlSetupContext& ctx) {
+              ctx.canvas->ClipRRect(rr_clip, DlClipOp::kIntersect, false);
+            }));
     RenderWith(testP, env, intersect_tolerance,
                CaseParameters(
                    "AntiAlias ClipRRect with radius of 15.4",
@@ -2156,43 +2153,43 @@ class CanvasCompareTester {
                      ctx.canvas->clipRRect(rr_clip, SkClipOp::kIntersect, true);
                    },
                    [=](const DlSetupContext& ctx) {
-                     ctx.canvas->ClipRRect(rr_clip, ClipOp::kIntersect, true);
+                     ctx.canvas->ClipRRect(rr_clip, DlClipOp::kIntersect, true);
                    }));
-    RenderWith(testP, env, diff_tolerance,
-               CaseParameters(
-                   "Hard ClipRRect Diff, with radius of 15.4",
-                   [=](const SkSetupContext& ctx) {
-                     ctx.canvas->clipRRect(rr_clip, SkClipOp::kDifference,
-                                           false);
-                   },
-                   [=](const DlSetupContext& ctx) {
-                     ctx.canvas->ClipRRect(rr_clip, ClipOp::kDifference, false);
-                   })
-                   .with_diff_clip());
+    RenderWith(
+        testP, env, diff_tolerance,
+        CaseParameters(
+            "Hard ClipRRect Diff, with radius of 15.4",
+            [=](const SkSetupContext& ctx) {
+              ctx.canvas->clipRRect(rr_clip, SkClipOp::kDifference, false);
+            },
+            [=](const DlSetupContext& ctx) {
+              ctx.canvas->ClipRRect(rr_clip, DlClipOp::kDifference, false);
+            })
+            .with_diff_clip());
     SkPath path_clip = SkPath();
     path_clip.setFillType(SkPathFillType::kEvenOdd);
     path_clip.addRect(r_clip);
     path_clip.addCircle(kRenderCenterX, kRenderCenterY, 1.0);
-    RenderWith(testP, env, intersect_tolerance,
-               CaseParameters(
-                   "Hard ClipPath inset by 15.4",
-                   [=](const SkSetupContext& ctx) {
-                     ctx.canvas->clipPath(path_clip, SkClipOp::kIntersect,
-                                          false);
-                   },
-                   [=](const DlSetupContext& ctx) {
-                     ctx.canvas->ClipPath(path_clip, ClipOp::kIntersect, false);
-                   }));
-    RenderWith(testP, env, intersect_tolerance,
-               CaseParameters(
-                   "AntiAlias ClipPath inset by 15.4",
-                   [=](const SkSetupContext& ctx) {
-                     ctx.canvas->clipPath(path_clip, SkClipOp::kIntersect,
-                                          true);
-                   },
-                   [=](const DlSetupContext& ctx) {
-                     ctx.canvas->ClipPath(path_clip, ClipOp::kIntersect, true);
-                   }));
+    RenderWith(
+        testP, env, intersect_tolerance,
+        CaseParameters(
+            "Hard ClipPath inset by 15.4",
+            [=](const SkSetupContext& ctx) {
+              ctx.canvas->clipPath(path_clip, SkClipOp::kIntersect, false);
+            },
+            [=](const DlSetupContext& ctx) {
+              ctx.canvas->ClipPath(path_clip, DlClipOp::kIntersect, false);
+            }));
+    RenderWith(
+        testP, env, intersect_tolerance,
+        CaseParameters(
+            "AntiAlias ClipPath inset by 15.4",
+            [=](const SkSetupContext& ctx) {
+              ctx.canvas->clipPath(path_clip, SkClipOp::kIntersect, true);
+            },
+            [=](const DlSetupContext& ctx) {
+              ctx.canvas->ClipPath(path_clip, DlClipOp::kIntersect, true);
+            }));
     RenderWith(
         testP, env, diff_tolerance,
         CaseParameters(
@@ -2201,7 +2198,7 @@ class CanvasCompareTester {
               ctx.canvas->clipPath(path_clip, SkClipOp::kDifference, false);
             },
             [=](const DlSetupContext& ctx) {
-              ctx.canvas->ClipPath(path_clip, ClipOp::kDifference, false);
+              ctx.canvas->ClipPath(path_clip, DlClipOp::kDifference, false);
             })
             .with_diff_clip());
   }
@@ -3240,7 +3237,7 @@ TEST_F(DisplayListRendering, DrawPointsAsPoints) {
             ctx.canvas->drawPoints(mode, count, points, p);
           },
           [=](const DlRenderContext& ctx) {
-            auto mode = PointMode::kPoints;
+            auto mode = DlPointMode::kPoints;
             ctx.canvas->DrawPoints(mode, count, points, ctx.paint);
           },
           kDrawPointsAsPointsFlags)
@@ -3292,7 +3289,7 @@ TEST_F(DisplayListRendering, DrawPointsAsLines) {
             ctx.canvas->drawPoints(mode, count, points, p);
           },
           [=](const DlRenderContext& ctx) {
-            auto mode = PointMode::kLines;
+            auto mode = DlPointMode::kLines;
             ctx.canvas->DrawPoints(mode, count, points, ctx.paint);
           },
           kDrawPointsAsLinesFlags));
@@ -3327,7 +3324,7 @@ TEST_F(DisplayListRendering, DrawPointsAsPolygon) {
             ctx.canvas->drawPoints(mode, count1, points1, p);
           },
           [=](const DlRenderContext& ctx) {
-            auto mode = PointMode::kPolygon;
+            auto mode = DlPointMode::kPolygon;
             ctx.canvas->DrawPoints(mode, count1, points1, ctx.paint);
           },
           kDrawPointsAsPolygonFlags));
@@ -3492,9 +3489,9 @@ TEST_F(DisplayListRendering, DrawImageRectNearest) {
                 &ctx.paint, SkCanvas::kFast_SrcRectConstraint);
           },
           [=](const DlRenderContext& ctx) {
-            ctx.canvas->DrawImageRect(
-                ctx.image, src, dst, DlImageSampling::kNearestNeighbor,
-                &ctx.paint, DlCanvas::SrcRectConstraint::kFast);
+            ctx.canvas->DrawImageRect(ctx.image, src, dst,
+                                      DlImageSampling::kNearestNeighbor,
+                                      &ctx.paint, DlSrcRectConstraint::kFast);
           },
           kDrawImageRectWithPaintFlags));
 }
@@ -3510,9 +3507,9 @@ TEST_F(DisplayListRendering, DrawImageRectNearestNoPaint) {
                 nullptr, SkCanvas::kFast_SrcRectConstraint);
           },
           [=](const DlRenderContext& ctx) {
-            ctx.canvas->DrawImageRect(
-                ctx.image, src, dst, DlImageSampling::kNearestNeighbor,  //
-                nullptr, DlCanvas::SrcRectConstraint::kFast);
+            ctx.canvas->DrawImageRect(ctx.image, src, dst,
+                                      DlImageSampling::kNearestNeighbor,  //
+                                      nullptr, DlSrcRectConstraint::kFast);
           },
           kDrawImageRectFlags));
 }
@@ -3528,9 +3525,9 @@ TEST_F(DisplayListRendering, DrawImageRectLinear) {
                 &ctx.paint, SkCanvas::kFast_SrcRectConstraint);
           },
           [=](const DlRenderContext& ctx) {  //
-            ctx.canvas->DrawImageRect(
-                ctx.image, src, dst, DlImageSampling::kLinear,  //
-                &ctx.paint, DlCanvas::SrcRectConstraint::kFast);
+            ctx.canvas->DrawImageRect(ctx.image, src, dst,
+                                      DlImageSampling::kLinear,  //
+                                      &ctx.paint, DlSrcRectConstraint::kFast);
           },
           kDrawImageRectWithPaintFlags));
 }
@@ -3584,7 +3581,15 @@ TEST_F(DisplayListRendering, DrawImageNineLinear) {
 }
 
 TEST_F(DisplayListRendering, DrawAtlasNearest) {
-  const SkRSXform xform[] = {
+  const SkRSXform sk_xform[] = {
+      // clang-format off
+      { 1.2f,  0.0f, kRenderLeft,  kRenderTop},
+      { 0.0f,  1.2f, kRenderRight, kRenderTop},
+      {-1.2f,  0.0f, kRenderRight, kRenderBottom},
+      { 0.0f, -1.2f, kRenderLeft,  kRenderBottom},
+      // clang-format on
+  };
+  const DlRSTransform dl_xform[] = {
       // clang-format off
       { 1.2f,  0.0f, kRenderLeft,  kRenderTop},
       { 0.0f,  1.2f, kRenderRight, kRenderTop},
@@ -3617,20 +3622,28 @@ TEST_F(DisplayListRendering, DrawAtlasNearest) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), xform, tex, sk_colors, 4,
+            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, tex, sk_colors, 4,
                                   SkBlendMode::kSrcOver, sk_sampling, nullptr,
                                   &ctx.paint);
           },
           [=](const DlRenderContext& ctx) {
-            ctx.canvas->DrawAtlas(ctx.image, xform, tex, dl_colors, 4,
-                                  DlBlendMode::kSrcOver, dl_sampling, nullptr,
-                                  &ctx.paint);
+            ctx.canvas->DrawAtlas(ctx.image, dl_xform, ToDlRects(tex),
+                                  dl_colors, 4, DlBlendMode::kSrcOver,
+                                  dl_sampling, nullptr, &ctx.paint);
           },
           kDrawAtlasWithPaintFlags));
 }
 
 TEST_F(DisplayListRendering, DrawAtlasNearestNoPaint) {
-  const SkRSXform xform[] = {
+  const SkRSXform sk_xform[] = {
+      // clang-format off
+      { 1.2f,  0.0f, kRenderLeft,  kRenderTop},
+      { 0.0f,  1.2f, kRenderRight, kRenderTop},
+      {-1.2f,  0.0f, kRenderRight, kRenderBottom},
+      { 0.0f, -1.2f, kRenderLeft,  kRenderBottom},
+      // clang-format on
+  };
+  const DlRSTransform dl_xform[] = {
       // clang-format off
       { 1.2f,  0.0f, kRenderLeft,  kRenderTop},
       { 0.0f,  1.2f, kRenderRight, kRenderTop},
@@ -3663,20 +3676,28 @@ TEST_F(DisplayListRendering, DrawAtlasNearestNoPaint) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), xform, tex, sk_colors, 4,
+            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, tex, sk_colors, 4,
                                   SkBlendMode::kSrcOver, sk_sampling,  //
                                   nullptr, nullptr);
           },
           [=](const DlRenderContext& ctx) {
-            ctx.canvas->DrawAtlas(ctx.image, xform, tex, dl_colors, 4,
-                                  DlBlendMode::kSrcOver, dl_sampling,  //
-                                  nullptr, nullptr);
+            ctx.canvas->DrawAtlas(ctx.image, dl_xform, ToDlRects(tex),
+                                  dl_colors, 4, DlBlendMode::kSrcOver,
+                                  dl_sampling, nullptr, nullptr);
           },
           kDrawAtlasFlags));
 }
 
 TEST_F(DisplayListRendering, DrawAtlasLinear) {
-  const SkRSXform xform[] = {
+  const SkRSXform sk_xform[] = {
+      // clang-format off
+      { 1.2f,  0.0f, kRenderLeft,  kRenderTop},
+      { 0.0f,  1.2f, kRenderRight, kRenderTop},
+      {-1.2f,  0.0f, kRenderRight, kRenderBottom},
+      { 0.0f, -1.2f, kRenderLeft,  kRenderBottom},
+      // clang-format on
+  };
+  const DlRSTransform dl_xform[] = {
       // clang-format off
       { 1.2f,  0.0f, kRenderLeft,  kRenderTop},
       { 0.0f,  1.2f, kRenderRight, kRenderTop},
@@ -3709,14 +3730,14 @@ TEST_F(DisplayListRendering, DrawAtlasLinear) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), xform, tex, sk_colors, 2,
+            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, tex, sk_colors, 2,
                                   SkBlendMode::kSrcOver, sk_sampling,  //
                                   nullptr, &ctx.paint);
           },
           [=](const DlRenderContext& ctx) {
-            ctx.canvas->DrawAtlas(ctx.image, xform, tex, dl_colors, 2,
-                                  DlBlendMode::kSrcOver, dl_sampling,  //
-                                  nullptr, &ctx.paint);
+            ctx.canvas->DrawAtlas(ctx.image, dl_xform, ToDlRects(tex),
+                                  dl_colors, 2, DlBlendMode::kSrcOver,
+                                  dl_sampling, nullptr, &ctx.paint);
           },
           kDrawAtlasWithPaintFlags));
 }
@@ -3908,7 +3929,7 @@ TEST_F(DisplayListRendering, SaveLayerClippedContentStillFilters) {
         DlPaint layer_paint;
         layer_paint.setImageFilter(layer_filter);
         ctx.canvas->Save();
-        ctx.canvas->ClipRect(kRenderBounds, ClipOp::kIntersect, false);
+        ctx.canvas->ClipRect(kRenderBounds, DlClipOp::kIntersect, false);
         ctx.canvas->SaveLayer(&kTestBounds2, &layer_paint);
         ctx.canvas->DrawRect(draw_rect, ctx.paint);
         ctx.canvas->Restore();
