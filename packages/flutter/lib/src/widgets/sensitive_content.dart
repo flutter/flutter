@@ -155,6 +155,15 @@ class SensitiveContentSetting {
 
 /// Widget to set the [ContentSensitivity] level of content in a particular
 /// Flutter view.
+///
+/// See also:
+///
+///  * [ContentSensitivity] to understand each of the content sensitivity levels
+///     and how [SensitiveContent] widgets with each level may interact with each other,
+///     e.g. two `SensitiveContent` widgets in the same tree where one has [sensitivitLevel]
+///     [ContentSensitivity.notSensitive] and the other [ContentSensitivity.senstive] will cause
+///     the Flutter view to remain marked sensitive in accordance with [ContentSensitivity.sensitive]
+///     as this is the more severe setting.
 class SensitiveContent extends StatefulWidget {
   /// Creates a [SensitiveContent].
   const SensitiveContent({

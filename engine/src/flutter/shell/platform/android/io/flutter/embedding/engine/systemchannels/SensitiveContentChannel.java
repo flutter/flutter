@@ -12,6 +12,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * {@link SensitiveContentChannel} is a platform channel that is used by the framework to set the
@@ -33,13 +34,12 @@ public class SensitiveContentChannel {
             return;
           }
           String method = call.method;
-          Object args = call.arguments;
+          Map<String, Object> args = call.arguments();
           Log.v(TAG, "Received '" + method + "' message.");
           switch (method) {
             case "SensitiveContent.setContentSensitivity":
-              final ArrayList<Object> argumentList = (ArrayList<Object>) args;
-              final int flutterViewId = (int) argumentList.get(0);
-              final int contentSensitivityLevel = (int) argumentList.get(1);
+              final int flutterViewId = (int) args.get("flutterViewId");
+              final int contentSensitivityLevel = (int) args.get("contentSensitivityLevel");
               try {
                 sensitiveContentMethodHandler.setContentSensitivity(
                     flutterViewId, contentSensitivityLevel, result);
@@ -50,7 +50,7 @@ public class SensitiveContentChannel {
             default:
                 Log.v(
                 TAG,
-                "Method " method + " is not implemented for the SensitiveContentChannel.");
+                "Method " + method + " is not implemented for the SensitiveContentChannel.");
               result.notImplemented();
               break;
           }

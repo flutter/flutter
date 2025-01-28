@@ -43,7 +43,7 @@ public class SensitiveContentPlugin
       @NonNull int flutterViewId,
       @NonNull int requestedContentSensitivity,
       @NonNull MethodChannel.Result result) {
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_35) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
       // This feature is only available on > API 35.
       return;
     }

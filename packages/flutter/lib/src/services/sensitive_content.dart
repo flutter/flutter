@@ -12,6 +12,20 @@ import 'system_channels.dart';
 /// The level of sensitivity that content in a particular Flutter view
 /// contains.
 ///
+/// There are only three levels and can be set on a Flutter view via a
+/// [SensitiveContent] widget. [ContentSensitivity.sensitive] is the most
+/// severe setting and if set on a view with a `SensitiveContent` widget,
+/// will cause the view to remain marked sensitive even if there are other
+/// `SensitiveContent` widget in the tree. [ContentSensitivity.autoSensitive]
+/// is the second most severe setting and will cause the view to remain marked
+/// auto-sensitive if there are only other auto-sensitive or not sensitive
+/// `SensitiveContent` widgets in the tree. [ContentSensitive.notSensitive]
+/// is the least severe setting and will cause the view to remain marked not
+/// sensitive as long ase there are only other not sensitive `SensitiveContent`
+/// widgets in the tree. If there are no `SensitiveContent` widget in the tree,
+/// the default setting will be used. This could be set by a Flutter developer in
+/// the engine; otherwise, Android uses [ContentSensitivity.autoSensitive] by default.
+///
 /// * See [SensitiveContent] for how to set a [ContentSensitivity] level
 ///   in order for sensitive content to be obscured when the Flutter screen
 ///   is shared.
@@ -27,7 +41,7 @@ enum ContentSensitivity {
   // TODO(camsim99): Implement `autoSensitive` mode that matches the behavior
   // of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented based on autofill hints.
   // See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO.
-  autoSensitive,
+  autoSensitive(id: 0),
 
   /// The view displays sensitive content.
   ///
@@ -36,7 +50,7 @@ enum ContentSensitivity {
   /// projection session.
   ///
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_SENSITIVE.
-  sensitive,
+  sensitive(id: 1),
 
   /// The view does not display sensitive content.
   ///
@@ -45,7 +59,14 @@ enum ContentSensitivity {
   /// widgets in the Flutter app with the [sensitive] level are present in the widget tree.
   ///
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
-  notSensitive,
+  notSensitive(id: 2);
+
+  const ContentSensitivity({
+    required this.id,
+  });
+
+  /// Identifier for each sensitivity level.
+  final int id;
 }
 
 /// Service for setting the content sensitivity of native Flutter views.
@@ -65,9 +86,9 @@ class SensitiveContentService {
    /// [contentSensitivity] via a call to the native embedder.
   void setContentSensitivity(int flutterViewId, ContentSensitivity contentSensitivity) {
     try {
-      sensitiveContentChannel.invokeMethod(
+      sensitiveContentChannel.invokeMethod<void>(
         'SensitiveContent.setContentSensitivity',
-        <int>[flutterViewId, contentSensitivity.index],
+        <String, dynamic>{'flutterViewId': flutterViewId, 'contentSensitivityLevel': contentSensitivity.id},
       );
     } catch (e) {
       // Content sensitivity failed to be set.
