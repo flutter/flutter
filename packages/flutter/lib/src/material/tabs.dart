@@ -1924,6 +1924,7 @@ class _TabBarState extends State<TabBar> {
 
     Widget tabBar = Semantics(
       role: SemanticsRole.tabBar,
+      explicitChildNodes: true,
       child: CustomPaint(
         painter: _indicatorPainter,
         child: _TabStyle(
