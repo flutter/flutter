@@ -140,7 +140,7 @@ class CustomMenu extends StatelessWidget {
         return Positioned(
           top: info.anchorRect.bottom + 4,
           left: info.anchorRect.left,
-          // The overlay will treated as a dialog. SemanticsProperties.label can
+          // The overlay will be treated as a dialog. SemanticsProperties.label can
           // be set to a localized string to describe the dialog.
           child: Semantics.fromProperties(
             explicitChildNodes: true,

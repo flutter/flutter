@@ -21,9 +21,9 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for a [RawMenuAnchor.node] that demonstrates
+/// Flutter code sample for a [RawMenuAnchorGroup] that demonstrates
 /// how to create a menu bar for a document editor.
-// void main() => runApp(const MenuNodeApp());
+void main() => runApp(const RawMenuAnchorGroupApp());
 
 class MenuItem {
   const MenuItem(this.label, {this.leading, this.children});
@@ -203,7 +203,7 @@ class CustomSubmenu extends StatelessWidget {
         return Positioned(
           top: info.anchorRect.bottom + 4,
           left: info.anchorRect.left,
-          // The overlay will treated as a dialog. SemanticsProperties.label can
+          // The overlay will be treated as a dialog. SemanticsProperties.label can
           // be set to a localized string to describe the dialog.
           child: Semantics.fromProperties(
             explicitChildNodes: true,
