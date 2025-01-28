@@ -2607,76 +2607,74 @@ void main() {
     }, variant: const TargetPlatformVariant(apple));
   });
 
-  group(
-    'MenuController',
-    () {
-      testWidgets('Moving a controller to a new instance works', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: MenuBar(key: UniqueKey(), controller: controller, children: createTestMenus()),
+  group('MenuController', () {
+    testWidgets('Moving a controller to a new instance works', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(key: UniqueKey(), controller: controller, children: createTestMenus()),
+          ),
+        ),
+      );
+
+      // Open a menu initially.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+
+      await tester.tap(find.text(TestMenu.subMenu11.label));
+      await tester.pump();
+
+      // Now pump a new menu with a different UniqueKey to dispose of the opened
+      // menu's node, but keep the existing controller.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              key: UniqueKey(),
+              controller: controller,
+              children: createTestMenus(includeExtraGroups: true),
             ),
           ),
-        );
+        ),
+      );
+      await tester.pumpAndSettle();
+    });
 
-        // Open a menu initially.
-        await tester.tap(find.text(TestMenu.mainMenu1.label));
-        await tester.pump();
-
-        await tester.tap(find.text(TestMenu.subMenu11.label));
-        await tester.pump();
-
-        // Now pump a new menu with a different UniqueKey to dispose of the opened
-        // menu's node, but keep the existing controller.
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: MenuBar(
-                key: UniqueKey(),
-                controller: controller,
-                children: createTestMenus(includeExtraGroups: true),
+    testWidgets('closing via controller works', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(
+                onPressed: onPressed,
+                onOpen: onOpen,
+                onClose: onClose,
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu110: const SingleActivator(
+                    LogicalKeyboardKey.keyA,
+                    control: true,
+                  ),
+                },
               ),
             ),
           ),
-        );
-        await tester.pumpAndSettle();
-      });
+        ),
+      );
 
-      testWidgets('closing via controller works', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: MenuBar(
-                controller: controller,
-                children: createTestMenus(
-                  onPressed: onPressed,
-                  onOpen: onOpen,
-                  onClose: onClose,
-                  shortcuts: <TestMenu, MenuSerializableShortcut>{
-                    TestMenu.subSubMenu110: const SingleActivator(
-                      LogicalKeyboardKey.keyA,
-                      control: true,
-                    ),
-                  },
-                ),
-              ),
-            ),
-          ),
-        );
+      // Open a menu initially.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
 
-        // Open a menu initially.
-        await tester.tap(find.text(TestMenu.mainMenu1.label));
-        await tester.pump();
+      await tester.tap(find.text(TestMenu.subMenu11.label));
+      await tester.pump();
+      expect(opened, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
+      opened.clear();
+      closed.clear();
 
-        await tester.tap(find.text(TestMenu.subMenu11.label));
-        await tester.pump();
-        expect(opened, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
-        opened.clear();
-        closed.clear();
-
-        // Close menus using the controller.
-        controller.close();
-        await tester.pump();
+      // Close menus using the controller.
+      controller.close();
+      await tester.pump();
 
       // The menu should go away,
       expect(closed, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
@@ -2915,32 +2913,30 @@ void main() {
       expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu0.label}"))'));
     });
 
-    testWidgets(
-      'trailingIcon is used when set',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: MenuBar(
-                controller: controller,
-                children: <Widget>[
-                  SubmenuButton(
-                    menuChildren: <Widget>[
-                      MenuItemButton(
-                        trailingIcon: const Text('trailingIcon'),
-                        child: Text(TestMenu.subMenu00.label),
-                      ),
-                    ],
-                    child: Text(TestMenu.mainMenu0.label),
-                  ),
-                ],
-              ),
+    testWidgets('trailingIcon is used when set', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: <Widget>[
+                SubmenuButton(
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      trailingIcon: const Text('trailingIcon'),
+                      child: Text(TestMenu.subMenu00.label),
+                    ),
+                  ],
+                  child: Text(TestMenu.mainMenu0.label),
+                ),
+              ],
             ),
           ),
-        );
+        ),
+      );
 
-        await tester.tap(find.text(TestMenu.mainMenu0.label));
-        await tester.pump();
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
+      await tester.pump();
 
       expect(find.text('trailingIcon'), findsOneWidget);
     });
@@ -3143,39 +3139,35 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets(
-      'MenuItemButton layout is updated by overflowAxis',
-      (WidgetTester tester) async {
-        Widget buildMenuButton({required Axis overflowAxis, bool constrainedLayout = false}) {
-          return MaterialApp(
-            home: Scaffold(
-              body: SizedBox(
-                width: constrainedLayout ? 200 : null,
-                child: MenuItemButton(
-                  overflowAxis: overflowAxis,
-                  onPressed: () {},
-                  child: const Text(
-                    'This is a very long text that will wrap to the multiple lines.',
-                  ),
-                ),
+    testWidgets('MenuItemButton layout is updated by overflowAxis', (WidgetTester tester) async {
+      Widget buildMenuButton({required Axis overflowAxis, bool constrainedLayout = false}) {
+        return MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: constrainedLayout ? 200 : null,
+              child: MenuItemButton(
+                overflowAxis: overflowAxis,
+                onPressed: () {},
+                child: const Text('This is a very long text that will wrap to the multiple lines.'),
               ),
             ),
-          );
-        }
-
-        // Test a long MenuItemButton in an unconstrained layout with vertical overflow axis.
-        await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.vertical));
-        expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
-
-        // Test a long MenuItemButton in an unconstrained layout with horizontal overflow axis.
-        await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.horizontal));
-        expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
-
-        // Test a long MenuItemButton in a constrained layout with vertical overflow axis.
-        await tester.pumpWidget(
-          buildMenuButton(overflowAxis: Axis.vertical, constrainedLayout: true),
+          ),
         );
-        expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 120.0));
+      }
+
+      // Test a long MenuItemButton in an unconstrained layout with vertical overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.vertical));
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
+
+      // Test a long MenuItemButton in an unconstrained layout with horizontal overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.horizontal));
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
+
+      // Test a long MenuItemButton in a constrained layout with vertical overflow axis.
+      await tester.pumpWidget(
+        buildMenuButton(overflowAxis: Axis.vertical, constrainedLayout: true),
+      );
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 120.0));
 
       // Test a long MenuItemButton in a constrained layout with horizontal overflow axis.
       await tester.pumpWidget(
@@ -3943,97 +3935,92 @@ void main() {
       },
     );
 
-    group(
-      'LocalizedShortcutLabeler',
-      () {
-        testWidgets('getShortcutLabel returns the right labels', (WidgetTester tester) async {
-          String expectedMeta;
-          String expectedCtrl;
-          String expectedAlt;
-          String expectedSeparator;
-          String expectedShift;
-          switch (defaultTargetPlatform) {
-            case TargetPlatform.android:
-            case TargetPlatform.fuchsia:
-            case TargetPlatform.linux:
-            case TargetPlatform.windows:
-              expectedCtrl = 'Ctrl';
-              expectedMeta = defaultTargetPlatform == TargetPlatform.windows ? 'Win' : 'Meta';
-              expectedAlt = 'Alt';
-              expectedShift = 'Shift';
-              expectedSeparator = '+';
-            case TargetPlatform.iOS:
-            case TargetPlatform.macOS:
-              expectedCtrl = '⌃';
-              expectedMeta = '⌘';
-              expectedAlt = '⌥';
-              expectedShift = '⇧';
-              expectedSeparator = ' ';
-          }
+    group('LocalizedShortcutLabeler', () {
+      testWidgets('getShortcutLabel returns the right labels', (WidgetTester tester) async {
+        String expectedMeta;
+        String expectedCtrl;
+        String expectedAlt;
+        String expectedSeparator;
+        String expectedShift;
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            expectedCtrl = 'Ctrl';
+            expectedMeta = defaultTargetPlatform == TargetPlatform.windows ? 'Win' : 'Meta';
+            expectedAlt = 'Alt';
+            expectedShift = 'Shift';
+            expectedSeparator = '+';
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            expectedCtrl = '⌃';
+            expectedMeta = '⌘';
+            expectedAlt = '⌥';
+            expectedShift = '⇧';
+            expectedSeparator = ' ';
+        }
 
-          const SingleActivator allModifiers = SingleActivator(
-            LogicalKeyboardKey.keyA,
-            control: true,
-            meta: true,
-            shift: true,
-            alt: true,
-          );
-          late String allExpected;
-          switch (defaultTargetPlatform) {
-            case TargetPlatform.android:
-            case TargetPlatform.fuchsia:
-            case TargetPlatform.linux:
-            case TargetPlatform.windows:
-              allExpected = <String>[
-                expectedAlt,
-                expectedCtrl,
-                expectedMeta,
-                expectedShift,
-                'A',
-              ].join(expectedSeparator);
-            case TargetPlatform.iOS:
-            case TargetPlatform.macOS:
-              allExpected = <String>[
-                expectedCtrl,
-                expectedAlt,
-                expectedShift,
-                expectedMeta,
-                'A',
-              ].join(expectedSeparator);
-          }
-          const CharacterActivator charShortcuts = CharacterActivator('ñ');
-          const String charExpected = 'ñ';
-          await tester.pumpWidget(
-            MaterialApp(
-              home: Material(
-                child: MenuBar(
-                  controller: controller,
-                  children: <Widget>[
-                    SubmenuButton(
-                      menuChildren: <Widget>[
-                        MenuItemButton(
-                          shortcut: allModifiers,
-                          child: Text(TestMenu.subMenu10.label),
-                        ),
-                        MenuItemButton(
-                          shortcut: charShortcuts,
-                          child: Text(TestMenu.subMenu11.label),
-                        ),
-                      ],
-                      child: Text(TestMenu.mainMenu0.label),
-                    ),
-                  ],
-                ),
+        const SingleActivator allModifiers = SingleActivator(
+          LogicalKeyboardKey.keyA,
+          control: true,
+          meta: true,
+          shift: true,
+          alt: true,
+        );
+        late String allExpected;
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            allExpected = <String>[
+              expectedAlt,
+              expectedCtrl,
+              expectedMeta,
+              expectedShift,
+              'A',
+            ].join(expectedSeparator);
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            allExpected = <String>[
+              expectedCtrl,
+              expectedAlt,
+              expectedShift,
+              expectedMeta,
+              'A',
+            ].join(expectedSeparator);
+        }
+        const CharacterActivator charShortcuts = CharacterActivator('ñ');
+        const String charExpected = 'ñ';
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: MenuBar(
+                controller: controller,
+                children: <Widget>[
+                  SubmenuButton(
+                    menuChildren: <Widget>[
+                      MenuItemButton(shortcut: allModifiers, child: Text(TestMenu.subMenu10.label)),
+                      MenuItemButton(
+                        shortcut: charShortcuts,
+                        child: Text(TestMenu.subMenu11.label),
+                      ),
+                    ],
+                    child: Text(TestMenu.mainMenu0.label),
+                  ),
+                ],
               ),
             ),
-          );
-          await tester.tap(find.text(TestMenu.mainMenu0.label));
-          await tester.pump();
+          ),
+        );
+        await tester.tap(find.text(TestMenu.mainMenu0.label));
+        await tester.pump();
 
-      expect(find.text(allExpected), findsOneWidget);
-      expect(find.text(charExpected), findsOneWidget);
-    }, variant: TargetPlatformVariant.all());
-  });
+        expect(find.text(allExpected), findsOneWidget);
+        expect(find.text(charExpected), findsOneWidget);
+      }, variant: TargetPlatformVariant.all());
+    });
 
     group('CheckboxMenuButton', () {
       testWidgets('tapping toggles checkbox', (WidgetTester tester) async {
@@ -4413,57 +4400,53 @@ void main() {
     });
 
     // This is a regression test for https://github.com/flutter/flutter/issues/131676.
-    testWidgets(
-      'Material3 - Menu uses correct text styles',
-      (WidgetTester tester) async {
-        const TextStyle menuTextStyle = TextStyle(
-          fontSize: 18.5,
-          fontStyle: FontStyle.italic,
-          wordSpacing: 1.2,
-          decoration: TextDecoration.lineThrough,
-        );
-        final ThemeData themeData = ThemeData(
-          textTheme: const TextTheme(labelLarge: menuTextStyle),
-        );
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: themeData,
-            home: Material(
-              child: MenuBar(
-                controller: controller,
-                children: createTestMenus(onPressed: onPressed, onOpen: onOpen, onClose: onClose),
-              ),
+    testWidgets('Material3 - Menu uses correct text styles', (WidgetTester tester) async {
+      const TextStyle menuTextStyle = TextStyle(
+        fontSize: 18.5,
+        fontStyle: FontStyle.italic,
+        wordSpacing: 1.2,
+        decoration: TextDecoration.lineThrough,
+      );
+      final ThemeData themeData = ThemeData(textTheme: const TextTheme(labelLarge: menuTextStyle));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(onPressed: onPressed, onOpen: onOpen, onClose: onClose),
             ),
           ),
-        );
+        ),
+      );
 
-        // Test menu button text style uses the TextTheme.labelLarge.
-        Finder buttonMaterial =
-            find.descendant(of: find.byType(TextButton), matching: find.byType(Material)).first;
-        Material material = tester.widget<Material>(buttonMaterial);
-        expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
-        expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
-        expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
-        expect(material.textStyle?.decoration, menuTextStyle.decoration);
+      // Test menu button text style uses the TextTheme.labelLarge.
+      Finder buttonMaterial =
+          find.descendant(of: find.byType(TextButton), matching: find.byType(Material)).first;
+      Material material = tester.widget<Material>(buttonMaterial);
+      expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
+      expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
+      expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
+      expect(material.textStyle?.decoration, menuTextStyle.decoration);
 
-        // Open the menu.
-        await tester.tap(find.text(TestMenu.mainMenu1.label));
-        await tester.pump();
+      // Open the menu.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
 
-    // Test menu item text style uses the TextTheme.labelLarge.
-    buttonMaterial =
-        find
-            .descendant(
-              of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
-              matching: find.byType(Material),
-            )
-            .first;
-    material = tester.widget<Material>(buttonMaterial);
-    expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
-    expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
-    expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
-    expect(material.textStyle?.decoration, menuTextStyle.decoration);
-  });
+      // Test menu item text style uses the TextTheme.labelLarge.
+      buttonMaterial =
+          find
+              .descendant(
+                of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
+                matching: find.byType(Material),
+              )
+              .first;
+      material = tester.widget<Material>(buttonMaterial);
+      expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
+      expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
+      expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
+      expect(material.textStyle?.decoration, menuTextStyle.decoration);
+    });
 
     testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
