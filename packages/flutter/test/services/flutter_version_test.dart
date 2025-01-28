@@ -19,7 +19,10 @@ void main() {
   });
 
   test('FlutterVersion.frameworkRevision contains the current framework revision', () async {
-    expect(FlutterVersion.frameworkRevision, const String.fromEnvironment('FLUTTER_FRAMEWORK_REVISION'));
+    expect(
+      FlutterVersion.frameworkRevision,
+      const String.fromEnvironment('FLUTTER_FRAMEWORK_REVISION'),
+    );
   });
 
   test('FlutterVersion.engineRevision contains the current engine revision', () async {
