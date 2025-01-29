@@ -137,7 +137,10 @@ Future<void> main(List<String> args) async {
       'web_skwasm_tests': webTestsSuite.runWebSkwasmUnitTests,
       // All web integration tests
       'web_long_running_tests': webTestsSuite.webLongRunningTestsRunner,
-      'android_engine_tests': runAndroidEngineTests,
+      'android_engine_vulkan_tests':
+          () => runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
+      'android_engine_opengles_tests':
+          () => runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,

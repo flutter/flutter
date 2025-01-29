@@ -3753,10 +3753,8 @@ void main() {
       tabBarBox,
       paints..line(
         strokeWidth: indicatorWeight,
-        // In RTL, the elastic tab animation expands the width of the tab with a negative offset
-        // when jumping from the first tab to the last tab in a scrollable tab bar.
-        p1: const Offset(-480149, indicatorY),
-        p2: const Offset(-480051, indicatorY),
+        p1: const Offset(4951.0, indicatorY),
+        p2: const Offset(5049.0, indicatorY),
       ),
     );
 
@@ -7539,7 +7537,6 @@ void main() {
       labelSize = tester.getSize(find.text('Tab 1'));
       expect(labelSize, equals(const Size(140.5, 40.0)));
     },
-    skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/87543
   );
 
   // This is a regression test for https://github.com/flutter/flutter/issues/150000.
@@ -7825,9 +7822,14 @@ void main() {
     addTearDown(animationSheet.dispose);
 
     final List<Widget> tabs = <Widget>[
-      const Tab(text: 'Medium'),
-      const Tab(text: 'Extremely Very Long Label'),
-      const Tab(text: 'C'),
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
     ];
 
     final TabController controller = createTabController(
@@ -7835,7 +7837,7 @@ void main() {
       length: tabs.length,
     );
 
-    Widget target() {
+    Widget buildTabBar() {
       return animationSheet.record(
         boilerplate(
           child: Container(
@@ -7850,17 +7852,196 @@ void main() {
       );
     }
 
-    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 50));
 
-    await tester.tap(find.text('Extremely Very Long Label'));
-    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
 
-    await tester.tap(find.text('C'));
-    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+    await tester.tap(find.byType(Tab).at(3));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(5));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(4));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
 
     await expectLater(
       animationSheet.collate(1),
       matchesGoldenFile('tab_indicator.elastic_animation.various_size_tabs.ltr.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgets('Elastic Tab animation with various size tabs - RTL', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+      frameSize: const Size(800, 100),
+    );
+    addTearDown(animationSheet.dispose);
+
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return animationSheet.record(
+        boilerplate(
+          textDirection: TextDirection.rtl,
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: TabIndicatorAnimation.elastic,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(3));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(5));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(4));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await expectLater(
+      animationSheet.collate(1),
+      matchesGoldenFile('tab_indicator.elastic_animation.various_size_tabs.rtl.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgets('Linear Tab animation with various size tabs - LTR', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+      frameSize: const Size(800, 100),
+    );
+    addTearDown(animationSheet.dispose);
+
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return animationSheet.record(
+        boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: TabIndicatorAnimation.linear,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(3));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(5));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(4));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await expectLater(
+      animationSheet.collate(1),
+      matchesGoldenFile('tab_indicator.linear_animation.various_size_tabs.ltr.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgets('Linear Tab animation with various size tabs - RTL', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+      frameSize: const Size(800, 100),
+    );
+    addTearDown(animationSheet.dispose);
+
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return animationSheet.record(
+        boilerplate(
+          textDirection: TextDirection.rtl,
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: TabIndicatorAnimation.linear,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(3));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(5));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(4));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await expectLater(
+      animationSheet.collate(1),
+      matchesGoldenFile('tab_indicator.linear_animation.various_size_tabs.rtl.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
@@ -7873,18 +8054,14 @@ void main() {
     addTearDown(animationSheet.dispose);
 
     final List<Widget> tabs = <Widget>[
-      const Tab(text: 'Medium'),
-      const Tab(text: 'Extremely Very Long Label'),
-      const Tab(text: 'C'),
-      const Tab(text: 'Medium'),
-      const Tab(text: 'Extremely Very Long Label'),
-      const Tab(text: 'C'),
-      const Tab(text: 'Medium'),
-      const Tab(text: 'Extremely Very Long Label'),
-      const Tab(text: 'C'),
-      const Tab(text: 'Medium'),
-      const Tab(text: 'Extremely Very Long Label'),
-      const Tab(text: 'C'),
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
     ];
 
     final TabController controller = createTabController(
@@ -7892,14 +8069,14 @@ void main() {
       length: tabs.length,
     );
 
-    Widget target() {
+    Widget buildTabBar() {
       return animationSheet.record(
         boilerplate(
           child: Container(
             alignment: Alignment.topLeft,
             child: TabBar(
-              indicatorAnimation: TabIndicatorAnimation.elastic,
               isScrollable: true,
+              indicatorAnimation: TabIndicatorAnimation.elastic,
               controller: controller,
               tabs: tabs,
             ),
@@ -7908,64 +8085,26 @@ void main() {
       );
     }
 
-    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
 
     controller.animateTo(tabs.length - 1);
-    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
 
     controller.animateTo(0);
-    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
 
     await expectLater(
       animationSheet.collate(1),
       matchesGoldenFile('tab_indicator.elastic_animation.various_size_tabs.scrollable.ltr.png'),
-    );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
-
-  testWidgets('Elastic Tab animation with various size tabs - RTL', (WidgetTester tester) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(800, 100),
-    );
-    addTearDown(animationSheet.dispose);
-
-    final List<Widget> tabs = <Widget>[
-      const Tab(text: 'Medium'),
-      const Tab(text: 'Extremely Very Long Label'),
-      const Tab(text: 'C'),
-    ];
-
-    final TabController controller = createTabController(
-      vsync: const TestVSync(),
-      length: tabs.length,
-    );
-
-    Widget target() {
-      return animationSheet.record(
-        boilerplate(
-          textDirection: TextDirection.rtl,
-          child: Container(
-            alignment: Alignment.topLeft,
-            child: TabBar(
-              indicatorAnimation: TabIndicatorAnimation.elastic,
-              controller: controller,
-              tabs: tabs,
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
-
-    await tester.tap(find.text('Extremely Very Long Label'));
-    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
-
-    await tester.tap(find.text('C'));
-    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
-
-    await expectLater(
-      animationSheet.collate(1),
-      matchesGoldenFile('tab_indicator.elastic_animation.various_size_tabs.rtl.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
@@ -7978,18 +8117,14 @@ void main() {
     addTearDown(animationSheet.dispose);
 
     final List<Widget> tabs = <Widget>[
-      const Tab(text: 'Medium'),
-      const Tab(text: 'Extremely Very Long Label'),
-      const Tab(text: 'C'),
-      const Tab(text: 'Medium'),
-      const Tab(text: 'Extremely Very Long Label'),
-      const Tab(text: 'C'),
-      const Tab(text: 'Medium'),
-      const Tab(text: 'Extremely Very Long Label'),
-      const Tab(text: 'C'),
-      const Tab(text: 'Medium'),
-      const Tab(text: 'Extremely Very Long Label'),
-      const Tab(text: 'C'),
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
     ];
 
     final TabController controller = createTabController(
@@ -7997,15 +8132,15 @@ void main() {
       length: tabs.length,
     );
 
-    Widget target() {
+    Widget buildTabBar() {
       return animationSheet.record(
         boilerplate(
           textDirection: TextDirection.rtl,
           child: Container(
             alignment: Alignment.topLeft,
             child: TabBar(
-              indicatorAnimation: TabIndicatorAnimation.elastic,
               isScrollable: true,
+              indicatorAnimation: TabIndicatorAnimation.elastic,
               controller: controller,
               tabs: tabs,
             ),
@@ -8014,17 +8149,153 @@ void main() {
       );
     }
 
-    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
 
     controller.animateTo(tabs.length - 1);
-    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
 
     controller.animateTo(0);
-    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
 
     await expectLater(
       animationSheet.collate(1),
       matchesGoldenFile('tab_indicator.elastic_animation.various_size_tabs.scrollable.rtl.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgets('Linear Tab animation with various size tabs in a scrollable tab bar - LTR', (
+    WidgetTester tester,
+  ) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+      frameSize: const Size(800, 100),
+    );
+    addTearDown(animationSheet.dispose);
+
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return animationSheet.record(
+        boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              isScrollable: true,
+              indicatorAnimation: TabIndicatorAnimation.linear,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    controller.animateTo(tabs.length - 1);
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    controller.animateTo(0);
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await expectLater(
+      animationSheet.collate(1),
+      matchesGoldenFile('tab_indicator.linear_animation.various_size_tabs.scrollable.ltr.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgets('Linear Tab animation with various size tabs in a scrollable tab bar - RTL', (
+    WidgetTester tester,
+  ) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+      frameSize: const Size(800, 100),
+    );
+    addTearDown(animationSheet.dispose);
+
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return animationSheet.record(
+        boilerplate(
+          textDirection: TextDirection.rtl,
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              isScrollable: true,
+              indicatorAnimation: TabIndicatorAnimation.linear,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    controller.animateTo(tabs.length - 1);
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    controller.animateTo(0);
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await expectLater(
+      animationSheet.collate(1),
+      matchesGoldenFile('tab_indicator.linear_animation.various_size_tabs.scrollable.rtl.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
@@ -8035,19 +8306,14 @@ void main() {
     );
     addTearDown(animationSheet.dispose);
 
-    final List<Widget> tabs = <Widget>[
-      const Tab(text: 'Medium'),
-      const Tab(text: 'Extremely Very Long Label'),
-      const Tab(text: 'C'),
-      const Tab(text: 'Short'),
-    ];
+    final List<Widget> tabs = List<Widget>.generate(10, (int index) => Tab(text: 'Tab $index'));
 
     final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
 
-    Widget target() {
+    Widget buildTabBar() {
       return animationSheet.record(
         boilerplate(
           child: Container(
@@ -8062,17 +8328,72 @@ void main() {
       );
     }
 
-    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 50));
 
-    await tester.tap(find.text('C'));
-    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+    await tester.tap(find.text('Tab 2'));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
 
-    await tester.tap(find.text('Medium'));
-    await tester.pumpFrames(target(), const Duration(milliseconds: 500));
+    await tester.tap(find.text('Tab 1'));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('Tab 4'));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('Tab 5'));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
 
     await expectLater(
       animationSheet.collate(1),
       matchesGoldenFile('tab_indicator.elastic_animation.skipping_tabs.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  // Regression test for https://github.com/flutter/flutter/issues/162098
+  testWidgets('Linear Tab animation when skipping tab', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+      frameSize: const Size(800, 100),
+    );
+    addTearDown(animationSheet.dispose);
+
+    final List<Widget> tabs = List<Widget>.generate(10, (int index) => Tab(text: 'Tab $index'));
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return animationSheet.record(
+        boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              indicatorAnimation: TabIndicatorAnimation.linear,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 50));
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('Tab 1'));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('Tab 4'));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('Tab 5'));
+    await tester.pumpFrames(buildTabBar(), const Duration(milliseconds: 500));
+
+    await expectLater(
+      animationSheet.collate(1),
+      matchesGoldenFile('tab_indicator.linear_animation.skipping_tabs.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 }
