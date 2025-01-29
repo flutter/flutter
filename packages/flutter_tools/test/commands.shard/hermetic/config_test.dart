@@ -227,6 +227,23 @@ void main() {
       },
     );
 
+    testUsingContext(
+      'analytics flag enables/disables analytics',
+      () async {
+        final ConfigCommand configCommand = ConfigCommand();
+        final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+        expect(fakeAnalytics.telemetryEnabled, true);
+
+        await commandRunner.run(<String>['config', '--no-analytics']);
+        expect(fakeAnalytics.telemetryEnabled, false);
+
+        await commandRunner.run(<String>['config', '--analytics']);
+        expect(fakeAnalytics.telemetryEnabled, true);
+      },
+      overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
+    );
+
     testUsingContext('analytics reported with help usages', () async {
       final ConfigCommand configCommand = ConfigCommand();
       createTestCommandRunner(configCommand);
