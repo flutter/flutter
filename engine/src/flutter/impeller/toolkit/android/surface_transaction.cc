@@ -11,7 +11,11 @@
 namespace impeller::android {
 
 SurfaceTransaction::SurfaceTransaction()
-    : transaction_(GetProcTable().ASurfaceTransaction_create()) {}
+    : transaction_(GetProcTable().ASurfaceTransaction_create(),
+                   /*owned=*/true) {}
+
+SurfaceTransaction::SurfaceTransaction(ASurfaceTransaction* transaction)
+    : transaction_(WrappedSurfaceTransaction{transaction, /*owned=*/false}) {}
 
 SurfaceTransaction::~SurfaceTransaction() = default;
 

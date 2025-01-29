@@ -23,6 +23,9 @@ class HardwareBuffer;
 /// interop.
 struct WrappedSurfaceTransaction {
   ASurfaceTransaction* tx;
+
+  /// Whether this SurfaceTransaction was created by the engine or imported from
+  /// Java.
   bool owned;
 
   constexpr bool operator==(const WrappedSurfaceTransaction& other) const {
