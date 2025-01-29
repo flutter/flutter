@@ -255,7 +255,7 @@ class ResidentWebRunner extends ResidentRunner {
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     _logger.printStatus(
       'Launching ${getDisplayPath(target, _fileSystem)} '
-      'on ${device!.device!.name} in $modeName mode...',
+      'on ${device!.device!.displayName} in $modeName mode...',
     );
     if (device!.device is ChromiumDevice) {
       _chromiumLauncher = (device!.device! as ChromiumDevice).chromeLauncher;
@@ -314,10 +314,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
+          canaryFeatures: debuggingOptions.buildInfo.canaryFeatures ?? false,
           webRenderer: debuggingOptions.webRenderer,
           isWasm: debuggingOptions.webUseWasm,
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
+          isWindows: globals.platform.isWindows,
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
@@ -577,7 +579,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       packageConfig: device!.devFS!.lastPackageConfig ?? debuggingOptions.buildInfo.packageConfig,
     );
     final Status devFSStatus = _logger.startProgress(
-      'Waiting for connection from debug service on ${device!.device!.name}...',
+      'Waiting for connection from debug service on '
+      '${device!.device!.displayName}...',
     );
     final UpdateFSReport report = await device!.devFS!.update(
       mainUri: await _generateEntrypoint(
