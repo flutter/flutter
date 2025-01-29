@@ -189,6 +189,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.inputFormatters,
     this.closeBehavior = DropdownMenuCloseBehavior.all,
     this.maxLines = 1,
+    this.textInputAction,
   }) : assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -522,6 +523,9 @@ class DropdownMenu<T> extends StatefulWidget {
   ///  * [TextField.maxLines], which specifies the maximum number of lines
   ///    the [TextField] can display.
   final int? maxLines;
+
+  /// {@macro flutter.widgets.TextField.textInputAction}
+  final TextInputAction? textInputAction;
 
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
@@ -1027,6 +1031,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           textAlign: widget.textAlign,
           textAlignVertical: TextAlignVertical.center,
           maxLines: widget.maxLines,
+          textInputAction: widget.textInputAction,
           style: effectiveTextStyle,
           controller: _localTextEditingController,
           onEditingComplete: _handleEditingComplete,
