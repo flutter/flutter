@@ -826,31 +826,35 @@ class AppDomain extends Domain {
     }
     final Completer<void> appStartedCompleter = Completer<void>();
 
-    // This future won't complete until the application has shutdown.
-    unawaited(
-      app._runInZone<void>(this, () async {
-        try {
-          await runOrAttach(
-            connectionInfoCompleter: connectionInfoCompleter,
-            appStartedCompleter: appStartedCompleter,
-          );
-          _sendAppEvent(app, 'stop');
-        } on Exception catch (error, trace) {
-          _sendAppEvent(app, 'stop', <String, Object?>{
-            'error': _toJsonable(error),
-            'trace': '$trace',
-          });
-        } finally {
-          // If the full directory is used instead of the path then this causes
-          // a TypeError with the ErrorHandlingFileSystem.
-          globals.fs.currentDirectory = cwd.path;
-          _apps.remove(app);
-        }
-      }),
-    );
-    await appStartedCompleter.future.then<void>((void value) {
-      _sendAppEvent(app, 'started');
+    // This future won't complete until the application has shutdown, so we don't want to
+    // await it. However, we do need to listen to the future in order to handle possible
+    // tool exits
+    final Future<void> appRunFuture = app._runInZone<void>(this, () async {
+      try {
+        await runOrAttach(
+          connectionInfoCompleter: connectionInfoCompleter,
+          appStartedCompleter: appStartedCompleter,
+        );
+        _sendAppEvent(app, 'stop');
+      } on Exception catch (error, trace) {
+        _sendAppEvent(app, 'stop', <String, Object?>{
+          'error': _toJsonable(error),
+          'trace': '$trace',
+        });
+      } finally {
+        // If the full directory is used instead of the path then this causes
+        // a TypeError with the ErrorHandlingFileSystem.
+        globals.fs.currentDirectory = cwd.path;
+        _apps.remove(app);
+      }
     });
+
+    await Future.any(<Future<void>>[
+      appStartedCompleter.future.then<void>((void value) {
+        _sendAppEvent(app, 'started');
+      }),
+      appRunFuture,
+    ]);
     return app;
   }
 

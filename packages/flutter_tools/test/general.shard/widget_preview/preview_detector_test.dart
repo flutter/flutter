@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:test/test.dart';
@@ -17,17 +18,17 @@ Directory createBasicProjectStructure(FileSystem fs) {
   return fs.systemTempDirectory.createTempSync('root');
 }
 
-PreviewPath addPreviewContainingFile(Directory projectRoot, String path) {
+PreviewPath addPreviewContainingFile(Directory projectRoot, List<String> path) {
   final File file =
-      projectRoot.childDirectory('lib').childFile(path)
+      projectRoot.childDirectory('lib').childFile(path.join(const LocalPlatform().pathSeparator))
         ..createSync(recursive: true)
         ..writeAsStringSync(previewContainingFileContents);
   return (path: file.path, uri: file.uri);
 }
 
-PreviewPath addNonPreviewContainingFile(Directory projectRoot, String path) {
+PreviewPath addNonPreviewContainingFile(Directory projectRoot, List<String> path) {
   final File file =
-      projectRoot.childDirectory('lib').childFile(path)
+      projectRoot.childDirectory('lib').childFile(path.join(const LocalPlatform().pathSeparator))
         ..createSync(recursive: true)
         ..writeAsStringSync(nonPreviewContainingFileContents);
   return (path: file.path, uri: file.uri);
@@ -63,10 +64,10 @@ void main() {
 
     testUsingContext('can detect previews in existing files', () async {
       final List<PreviewPath> previewFiles = <PreviewPath>[
-        addPreviewContainingFile(projectRoot, 'foo.dart'),
-        addPreviewContainingFile(projectRoot, 'src/bar.dart'),
+        addPreviewContainingFile(projectRoot, <String>['foo.dart']),
+        addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']),
       ];
-      addNonPreviewContainingFile(projectRoot, 'baz.dart');
+      addNonPreviewContainingFile(projectRoot, <String>['baz.dart']);
       final PreviewMapping mapping = previewDetector.findPreviewFunctions(projectRoot);
       expect(mapping.keys.toSet(), previewFiles.toSet());
     });
@@ -74,12 +75,12 @@ void main() {
     testUsingContext('can detect previews in updated files', () async {
       // Create two files with existing previews and one without.
       final PreviewMapping expectedInitialMapping = <PreviewPath, List<String>>{
-        addPreviewContainingFile(projectRoot, 'foo.dart'): <String>['previews'],
-        addPreviewContainingFile(projectRoot, 'src/bar.dart'): <String>['previews'],
+        addPreviewContainingFile(projectRoot, <String>['foo.dart']): <String>['previews'],
+        addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']): <String>['previews'],
       };
       final PreviewPath nonPreviewContainingFile = addNonPreviewContainingFile(
         projectRoot,
-        'baz.dart',
+        <String>['baz.dart'],
       );
 
       Completer<void> completer = Completer<void>();
@@ -97,7 +98,7 @@ void main() {
 
       // Update the file without an existing preview to include a preview and ensure it triggers
       // the preview detector.
-      addPreviewContainingFile(projectRoot, 'baz.dart');
+      addPreviewContainingFile(projectRoot, <String>['baz.dart']);
       await completer.future;
 
       completer = Completer<void>();
@@ -109,7 +110,7 @@ void main() {
 
       // Update the file with an existing preview to remove the preview and ensure it triggers
       // the preview detector.
-      addNonPreviewContainingFile(projectRoot, 'baz.dart');
+      addNonPreviewContainingFile(projectRoot, <String>['baz.dart']);
       await completer.future;
     });
   });
