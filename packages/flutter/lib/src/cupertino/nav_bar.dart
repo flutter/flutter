@@ -927,7 +927,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// required.
   const CupertinoSliverNavigationBar.search({
     super.key,
-    required this.searchField,
+    required Widget this.searchField,
     this.largeTitle,
     this.leading,
     this.automaticallyImplyLeading = true,
