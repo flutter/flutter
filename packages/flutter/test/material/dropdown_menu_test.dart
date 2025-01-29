@@ -1541,7 +1541,7 @@ void main() {
     await tester.pump();
     expect(controller.selection, const TextSelection.collapsed(offset: 6));
 
-    // Press Right key, the caret shld move right.
+    // Press Right key, the caret should move right.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(controller.selection, const TextSelection.collapsed(offset: 7));
