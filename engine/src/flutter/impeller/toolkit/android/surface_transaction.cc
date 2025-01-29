@@ -37,14 +37,22 @@ bool SurfaceTransaction::Apply(OnCompleteCallback callback) {
   auto data = std::make_unique<TransactionInFlightData>();
   data->callback = callback;
   proc_table.ASurfaceTransaction_setOnComplete(
-      transaction_.get(),  //
-      data.release(),      //
+      transaction_.get().tx,  //
+      data.release(),         //
       [](void* context, ASurfaceTransactionStats* stats) -> void {
         auto data = reinterpret_cast<TransactionInFlightData*>(context);
         data->callback(stats);
         delete data;
       });
-  proc_table.ASurfaceTransaction_apply(transaction_.get());
+  // If the transaction was created in Java, then it must be applied in
+  // the java PlatformViewController and not as a part of the engine render
+  // loop.
+  if (!transaction_.get().owned) {
+    std::ignore = transaction_.reset();
+    return true;
+  }
+
+  proc_table.ASurfaceTransaction_apply(transaction_.get().tx);
 
   // Transactions may not be applied over and over.
   transaction_.reset();
@@ -59,7 +67,7 @@ bool SurfaceTransaction::SetContents(const SurfaceControl* control,
     return false;
   }
   GetProcTable().ASurfaceTransaction_setBuffer(
-      transaction_.get(),                                      //
+      transaction_.get().tx,                                   //
       control->GetHandle(),                                    //
       buffer->GetHandle(),                                     //
       acquire_fence.is_valid() ? acquire_fence.release() : -1  //
@@ -72,7 +80,7 @@ bool SurfaceTransaction::SetBackgroundColor(const SurfaceControl& control,
   if (!IsValid() || !control.IsValid()) {
     return false;
   }
-  GetProcTable().ASurfaceTransaction_setColor(transaction_.get(),     //
+  GetProcTable().ASurfaceTransaction_setColor(transaction_.get().tx,  //
                                               control.GetHandle(),    //
                                               color.red,              //
                                               color.green,            //
@@ -92,7 +100,7 @@ bool SurfaceTransaction::SetParent(const SurfaceControl& control,
     return false;
   }
   GetProcTable().ASurfaceTransaction_reparent(
-      transaction_.get(),                                        //
+      transaction_.get().tx,                                     //
       control.GetHandle(),                                       //
       new_parent == nullptr ? nullptr : new_parent->GetHandle()  //
   );
