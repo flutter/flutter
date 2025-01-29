@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -89,7 +88,6 @@ void main() {
   late FakeVmServiceHost fakeVmServiceHost;
   late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
-  late TestUsage testUsage;
   late FakeAnalytics fakeAnalytics;
 
   // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
@@ -99,7 +97,6 @@ void main() {
   }
 
   setUp(() {
-    testUsage = TestUsage();
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.any();
     debugConnection = FakeDebugConnection();
@@ -667,21 +664,6 @@ void main() {
       expect(result.code, 0);
       expect(webDevFS.mainUri.toString(), contains('entrypoint.dart'));
 
-      // ensure that analytics are sent.
-      expect(testUsage.events, <TestUsageEvent>[
-        TestUsageEvent(
-          'hot',
-          'restart',
-          parameters: CustomDimensions.fromMap(<String, String>{
-            'cd27': 'web-javascript',
-            'cd28': '',
-            'cd29': 'false',
-            'cd30': 'true',
-            'cd13': '0',
-            'cd48': 'false',
-          }),
-        ),
-      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -695,9 +677,6 @@ void main() {
           ),
         ),
       );
-      expect(testUsage.timings, const <TestTimingEvent>[
-        TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
-      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -710,7 +689,6 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -774,21 +752,6 @@ void main() {
       expect(logger.statusText, contains('Restarted application in'));
       expect(result.code, 0);
 
-      // ensure that analytics are sent.
-      expect(testUsage.events, <TestUsageEvent>[
-        TestUsageEvent(
-          'hot',
-          'restart',
-          parameters: CustomDimensions.fromMap(<String, String>{
-            'cd27': 'web-javascript',
-            'cd28': '',
-            'cd29': 'false',
-            'cd30': 'true',
-            'cd13': '0',
-            'cd48': 'false',
-          }),
-        ),
-      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -802,9 +765,6 @@ void main() {
           ),
         ),
       );
-      expect(testUsage.timings, const <TestTimingEvent>[
-        TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
-      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -817,7 +777,6 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -850,12 +809,9 @@ void main() {
       expect(result.code, 0);
 
       // web-server device does not send restart analytics
-      expect(testUsage.events, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
-      expect(testUsage.timings, isEmpty);
     },
     overrides: <Type, Generator>{
-      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -891,12 +847,9 @@ void main() {
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
 
       expect(await residentWebRunner.run(), 1);
-      expect(testUsage.events, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
-      expect(testUsage.timings, isEmpty);
     },
     overrides: <Type, Generator>{
-      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -962,12 +915,9 @@ void main() {
 
       expect(result.code, 1);
       expect(result.message, contains('Failed to recompile application.'));
-      expect(testUsage.events, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
-      expect(testUsage.timings, isEmpty);
     },
     overrides: <Type, Generator>{
-      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
