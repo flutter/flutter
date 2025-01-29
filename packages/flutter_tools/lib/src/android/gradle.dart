@@ -577,6 +577,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     if (isBuildingBundle) {
       final File bundleFile = findBundleFile(project, buildInfo, _logger, _analytics);
+
+      if (!(await isAppStrippedOfDebugSymbols(project, bundleFile.path))) {
+        throwToolExit('TODO(gmackall) what should we tell people here?');
+      }
+
       final String appSize =
           (buildInfo.mode == BuildMode.debug)
               ? '' // Don't display the size when building a debug variant.
@@ -653,17 +658,19 @@ class AndroidGradleBuilder implements AndroidBuilder {
     final RunResult result = await _processUtils.run(
       <String>[apkAnalyzerPath, 'files', 'list', apkOrAabPath],
       workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: _java?.environment
+      environment: _java?.environment,
     );
-    
+
     if (result.exitCode != 0) {
       return false;
     }
 
     // TODO(gmackall): What to do about apk? Can we see if they get debug symbols
     // stripped somehow? Currently only handles the aab case.
-    if (result.stdout.contains('BUNDLE-METADATA/com.android.tools.build.debugsymbols')
-        && result.stdout.contains('BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym')) {
+    if (result.stdout.contains('BUNDLE-METADATA/com.android.tools.build.debugsymbols') &&
+        result.stdout.contains(
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym',
+        )) {
       return true;
     }
 
