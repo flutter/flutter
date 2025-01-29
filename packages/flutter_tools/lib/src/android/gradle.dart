@@ -674,16 +674,17 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return false;
     }
 
-    bool containsSymFilesForEachArch = true;
+    // We don't always build for each architecture, so just ensure that symbols
+    // are present for at least one of the architectures.
     for (final AndroidArch targetArch in targetArchs) {
-      if (!result.stdout.contains(
+      if (result.stdout.contains(
         'BUNDLE-METADATA/com.android.tools.build.debugsymbols/${targetArch.archName}/libflutter.so.sym',
       )) {
-        containsSymFilesForEachArch = false;
+        return true;
       }
     }
 
-    return containsSymFilesForEachArch;
+    return false;
   }
 
   Future<void> _performCodeSizeAnalysis(
