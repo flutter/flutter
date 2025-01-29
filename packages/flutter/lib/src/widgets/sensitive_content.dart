@@ -51,7 +51,8 @@ class ViewContentSensitivityState {
         autoSensitiveWidgetCount--;
       case ContentSensitivity.notSensitive:
         notSensitiveWigetCount--;
-    }  }
+    }
+  }
 
   /// Returns the number of [SensitiveContent] widgets represented by this state.
   int getTotalNumberOfWidgets() {
@@ -64,25 +65,31 @@ class ViewContentSensitivityState {
 class SensitiveContentSetting {
   SensitiveContentSetting._();
 
-  final Map<int, ViewContentSensitivityState> _contentSensitivityStates = <int, ViewContentSensitivityState> {};
+  final Map<int, ViewContentSensitivityState> _contentSensitivityStates =
+      <int, ViewContentSensitivityState>{};
   final SensitiveContentService _sensitiveContentService = SensitiveContentService();
-  final ContentSensitivity _defaultContentSensitivitySetting = ContentSensitivity.autoSensitive;
+  ContentSensitivity? _defaultContentSensitivitySetting;
 
   static final SensitiveContentSetting _instance = SensitiveContentSetting._();
 
   /// Registers a [SensitiveContent] widget that will help determine the
   /// [ContentSensitivity] level for the Flutter view with ID [viewId].
-  static void register(int viewId, ContentSensitivity desiredSensitivityLevel) {
-     _instance._register(viewId, desiredSensitivityLevel);
+  static Future<void> register(int viewId, ContentSensitivity desiredSensitivityLevel) async {
+    await _instance._register(viewId, desiredSensitivityLevel);
   }
 
-  void _register(int viewId, ContentSensitivity desiredSensitivityLevel) {
+  Future<void> _register(int viewId, ContentSensitivity desiredSensitivityLevel) async {
+    // Set default content sensitivity level as set in native Android or the default
+    // if unset by the developer (auto sensitive).
+    _defaultContentSensitivitySetting ??= ContentSensitivity.getContentSensitivityById(
+        await _sensitiveContentService.getContentSensitivity(viewId));
     if (!_contentSensitivityStates.containsKey(viewId)) {
       _contentSensitivityStates[viewId] = ViewContentSensitivityState();
     }
 
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
-    final ViewContentSensitivityState contentSensitivityStateForView = _contentSensitivityStates[viewId]!;
+    final ViewContentSensitivityState contentSensitivityStateForView =
+        _contentSensitivityStates[viewId]!;
     contentSensitivityStateForView.addWidgetWithContentSensitivity(desiredSensitivityLevel);
 
     // Verify that desiredSensitivityLevel should be set in order for sensitive
@@ -99,34 +106,39 @@ class SensitiveContentSetting {
   /// Unregisters a [SensitiveContent] widget from the Flutter view with ID
   /// [viewId].
   static void unregister(int viewId, ContentSensitivity widgetSensitivityLevel) {
-     _instance._unregister(viewId, widgetSensitivityLevel);
+    _instance._unregister(viewId, widgetSensitivityLevel);
   }
 
   void _unregister(int viewId, ContentSensitivity widgetSensitivityLevel) {
     // Update SensitiveContent widget count for those with
     // desiredSensitivityLevel.
-    final ViewContentSensitivityState contentSensitivityStateForView = _contentSensitivityStates[viewId]!;
+    final ViewContentSensitivityState contentSensitivityStateForView =
+        _contentSensitivityStates[viewId]!;
     contentSensitivityStateForView.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
 
     // Determine if another sensitivity level needs to be restored.
-    ContentSensitivity sensitivityLevelToSet = _defaultContentSensitivitySetting;
+    ContentSensitivity sensitivityLevelToSet =
+        _defaultContentSensitivitySetting!; // TODO(camsim99): check if this is necessary.
     switch (widgetSensitivityLevel) {
       case ContentSensitivity.sensitive:
-      if (shouldSetContentSensitivity(contentSensitivityStateForView, ContentSensitivity.sensitive)) {
-        sensitivityLevelToSet = ContentSensitivity.sensitive;
-      }
-      continue auto;
+        if (shouldSetContentSensitivity(
+            contentSensitivityStateForView, ContentSensitivity.sensitive)) {
+          sensitivityLevelToSet = ContentSensitivity.sensitive;
+        }
+        continue auto;
       auto:
       case ContentSensitivity.autoSensitive:
-      if (shouldSetContentSensitivity(contentSensitivityStateForView, ContentSensitivity.autoSensitive)) {
-        sensitivityLevelToSet = ContentSensitivity.autoSensitive;
-      }
-      continue not;
+        if (shouldSetContentSensitivity(
+            contentSensitivityStateForView, ContentSensitivity.autoSensitive)) {
+          sensitivityLevelToSet = ContentSensitivity.autoSensitive;
+        }
+        continue not;
       not:
       case ContentSensitivity.notSensitive:
-      if (shouldSetContentSensitivity(contentSensitivityStateForView, ContentSensitivity.notSensitive)) {
-        sensitivityLevelToSet = ContentSensitivity.autoSensitive;
-      }
+        if (shouldSetContentSensitivity(
+            contentSensitivityStateForView, ContentSensitivity.notSensitive)) {
+          sensitivityLevelToSet = ContentSensitivity.autoSensitive;
+        }
     }
 
     _sensitiveContentService.setContentSensitivity(viewId, sensitivityLevelToSet);
@@ -137,18 +149,22 @@ class SensitiveContentSetting {
   ///
   /// [desiredSensitivityLevel] should be set only if it is striclty less
   /// severe than any of the other registered [SensitiveContent] widgets in the view.
-  bool shouldSetContentSensitivity(ViewContentSensitivityState contentSensitivityStateForView, ContentSensitivity desiredSensitivityLevel) {
-    if (contentSensitivityStateForView.currentContentSensitivitySetting == desiredSensitivityLevel) {
+  bool shouldSetContentSensitivity(ViewContentSensitivityState contentSensitivityStateForView,
+      ContentSensitivity desiredSensitivityLevel) {
+    if (contentSensitivityStateForView.currentContentSensitivitySetting ==
+        desiredSensitivityLevel) {
       return false;
     }
 
-    switch(desiredSensitivityLevel) {
+    switch (desiredSensitivityLevel) {
       case ContentSensitivity.sensitive:
         return true;
       case ContentSensitivity.autoSensitive:
         return contentSensitivityStateForView.sensitiveWidgetCount == 0;
       case ContentSensitivity.notSensitive:
-        return contentSensitivityStateForView.sensitiveWidgetCount + contentSensitivityStateForView.autoSensitiveWidgetCount == 0;
+        return contentSensitivityStateForView.sensitiveWidgetCount +
+                contentSensitivityStateForView.autoSensitiveWidgetCount ==
+            0;
     }
   }
 }
@@ -160,8 +176,8 @@ class SensitiveContentSetting {
 ///
 ///  * [ContentSensitivity] to understand each of the content sensitivity levels
 ///     and how [SensitiveContent] widgets with each level may interact with each other,
-///     e.g. two `SensitiveContent` widgets in the same tree where one has [sensitivitLevel]
-///     [ContentSensitivity.notSensitive] and the other [ContentSensitivity.senstive] will cause
+///     e.g. two `SensitiveContent` widgets in the same tree where one has [sensitivityLevel]
+///     [ContentSensitivity.notSensitive] and the other [ContentSensitivity.sensitive] will cause
 ///     the Flutter view to remain marked sensitive in accordance with [ContentSensitivity.sensitive]
 ///     as this is the more severe setting.
 class SensitiveContent extends StatefulWidget {
@@ -198,9 +214,9 @@ class SensitiveContent extends StatefulWidget {
 
 class _SensitiveContentState extends State<SensitiveContent> {
   @override
-  void initState() {
+  Future<void> initState() async {
     super.initState();
-    SensitiveContentSetting.register(widget.viewId, widget.sensitivityLevel);
+    await SensitiveContentSetting.register(widget.viewId, widget.sensitivityLevel);
   }
 
   @override

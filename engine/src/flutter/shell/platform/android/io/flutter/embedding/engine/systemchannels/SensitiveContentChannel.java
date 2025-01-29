@@ -47,6 +47,14 @@ public class SensitiveContentChannel {
                 result.error("error", exception.getMessage(), null);
               }
               break;
+            case "SensitiveContent.getContentSensitivity":
+              final int flutterViewId = (int) args.get("flutterViewId");
+              try {
+                final int contentSensitivity = sensitiveContentMethodHandler.getContentSensitivity(flutterViewId, result);
+              } catch (IllegalStateException exception) {
+                result.error("error", exception.getMessage(), null);
+              }
+              break;
             default:
               Log.v(
                   TAG, "Method " + method + " is not implemented for the SensitiveContentChannel.");
@@ -74,11 +82,19 @@ public class SensitiveContentChannel {
   public interface SensitiveContentMethodHandler {
     /**
      * Requests that the native Flutter Android {@code View} whose ID matches {@code flutterViewId}
-     * sets its contentsensitivity level to {@code requestedContentSensitivity}.
+     * sets its content sensitivity level to {@code requestedContentSensitivity}.
      */
     void setContentSensitivity(
         @NonNull int flutterViewId,
         @NonNull int requestedContentSensitivity,
         @NonNull MethodChannel.Result result);
+
+    /**
+     * Returns the current content sensitivity level of the Flutter Android {@code View} whose ID
+     * matches {@code flutterViewId}.
+    */
+   void getContentSensitivity(
+      @NonNull int flutterViewId,
+      @NonNull MethodChannel.Result result);
   }
 }

@@ -76,6 +76,31 @@ public class SensitiveContentPlugin
   }
 
   /**
+   * Gets content sensitivity level of the Android {@code View} with the specified {@code
+   * flutterViewId} to the level specified by {@requestedContentSensitivity}.
+   */
+  @Override
+  public void getContentSensitivity(@NonNull int flutterViewId, @NonNull MethodChannel.Result result) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
+      // This feature is only available on > API 35.
+      return;
+    }
+
+    final View flutterView = mflutterActivity.findViewById(flutterViewId);
+    if (flutterView == null) {
+      result.error(
+          "error",
+          "Requested Flutter View with ID "
+              + flutterViewId
+              + " to set content sensitivty of was not found.",
+          null);
+    }
+
+    final int currentContentSensitivity = flutterView.getContentSensitivity();
+    result.success(currentContentSensitivity);
+  }
+
+  /**
    * Releases all resources held by this {@code SensitiveContentPlugin}.
    *
    * <p>Do not invoke any methods on a {@code SensitiveContentPlugin} after invoking this method.
