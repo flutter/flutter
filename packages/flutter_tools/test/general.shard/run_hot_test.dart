@@ -32,7 +32,6 @@ void main() {
       'flutter-sdk',
       false,
       'test-reason',
-      TestUsage(),
       const NoOpAnalytics(),
     );
   });

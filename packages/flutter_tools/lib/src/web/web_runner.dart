@@ -31,7 +31,6 @@ abstract class WebRunnerFactory {
     required Logger logger,
     required FileSystem fileSystem,
     required SystemClock systemClock,
-    required Usage usage,
     required Analytics analytics,
     bool machine = false,
   });

@@ -85,7 +85,6 @@ void main() {
       logger: logger,
       platform: FakePlatform(operatingSystem: 'macos'),
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-      usage: usage,
       analytics: fakeAnalytics,
     );
     fileSystem.file(
@@ -227,7 +226,6 @@ void main() {
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
-        usage: usage,
         analytics: fakeAnalytics,
       );
 
@@ -269,7 +267,6 @@ void main() {
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(isInstalled: false),
-        usage: usage,
         analytics: fakeAnalytics,
       );
 
@@ -1487,7 +1484,6 @@ end''');
           processManager: fakeProcessManager,
           version: Version(14, 3, 0),
         ),
-        usage: usage,
         analytics: fakeAnalytics,
       );
 

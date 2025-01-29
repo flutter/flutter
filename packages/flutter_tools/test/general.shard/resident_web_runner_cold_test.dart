@@ -64,7 +64,6 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
-        usage: TestUsage(),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -99,7 +98,6 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
-        usage: TestUsage(),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -130,7 +128,6 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
-        usage: TestUsage(),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -160,7 +157,6 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
-        usage: TestUsage(),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -194,7 +190,6 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
-        usage: TestUsage(),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
