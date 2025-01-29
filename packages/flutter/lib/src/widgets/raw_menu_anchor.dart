@@ -121,22 +121,14 @@ typedef RawMenuAnchorChildBuilder =
 // Used to notify anchor descendants when the menu opens and closes, and to
 // access the anchor's controller.
 class _RawMenuAnchorScope extends InheritedWidget {
-  const _RawMenuAnchorScope({
-    required this.anchor,
-    required this.isOpen,
-    required this.controller,
-    required super.child,
-  });
+  const _RawMenuAnchorScope({required this.isOpen, required this.controller, required super.child});
 
-  final _RawMenuAnchorBaseMixin anchor;
   final bool isOpen;
   final MenuController controller;
 
   @override
   bool updateShouldNotify(_RawMenuAnchorScope oldWidget) {
-    return anchor != oldWidget.anchor ||
-        isOpen != oldWidget.isOpen ||
-        controller != oldWidget.controller;
+    return isOpen != oldWidget.isOpen || controller != oldWidget.controller;
   }
 }
 
@@ -472,7 +464,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   @nonVirtual
   Widget build(BuildContext context) {
     return _RawMenuAnchorScope(
-      anchor: this,
       isOpen: isOpen,
       controller: menuController,
       child: Actions(

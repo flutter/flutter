@@ -2321,7 +2321,7 @@ class _MenuBarAnchorState extends _MenuAnchorState {
 
   @override
   Widget build(BuildContext context) {
-    final child = Actions(
+    final Actions child = Actions(
       actions: actions,
       child: Shortcuts(
         shortcuts: _kMenuTraversalShortcuts,
