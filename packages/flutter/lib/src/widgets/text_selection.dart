@@ -1649,7 +1649,7 @@ class SelectionOverlay {
     _contextMenuController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
-        return _SelectionToolbarWrapper(
+        return SelectionToolbarWrapper(
           visibility: toolbarVisible,
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
@@ -1670,7 +1670,7 @@ class SelectionOverlay {
     _spellCheckToolbarController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
-        return _SelectionToolbarWrapper(
+        return SelectionToolbarWrapper(
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
           child: builder(context),
@@ -1842,7 +1842,7 @@ class SelectionOverlay {
       selectionEndpoints.first.point.dy - lineHeightAtStart,
     );
 
-    return _SelectionToolbarWrapper(
+    return SelectionToolbarWrapper(
       visibility: toolbarVisible,
       layerLink: toolbarLayerLink,
       offset: -editingRegion.topLeft,
@@ -1888,8 +1888,8 @@ class SelectionOverlay {
 // https://github.com/flutter/flutter/issues/107732
 // Wrap the given child in the widgets common to both contextMenuBuilder and
 // TextSelectionControls.buildToolbar.
-class _SelectionToolbarWrapper extends StatefulWidget {
-  const _SelectionToolbarWrapper({
+class SelectionToolbarWrapper extends StatefulWidget {
+  const SelectionToolbarWrapper({
     this.visibility,
     required this.layerLink,
     required this.offset,
@@ -1902,10 +1902,10 @@ class _SelectionToolbarWrapper extends StatefulWidget {
   final ValueListenable<bool>? visibility;
 
   @override
-  State<_SelectionToolbarWrapper> createState() => _SelectionToolbarWrapperState();
+  State<SelectionToolbarWrapper> createState() => SelectionToolbarWrapperState();
 }
 
-class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
+class SelectionToolbarWrapperState extends State<SelectionToolbarWrapper>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
@@ -1921,7 +1921,7 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
   }
 
   @override
-  void didUpdateWidget(_SelectionToolbarWrapper oldWidget) {
+  void didUpdateWidget(SelectionToolbarWrapper oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.visibility == widget.visibility) {
       return;
