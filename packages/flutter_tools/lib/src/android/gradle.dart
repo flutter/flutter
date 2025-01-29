@@ -579,10 +579,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final File bundleFile = findBundleFile(project, buildInfo, _logger, _analytics);
 
       if ((buildInfo.mode == BuildMode.release) &&
-          !(await isAabStrippedOfDebugSymbols(project, bundleFile.path, androidBuildInfo.targetArchs))) {
+          !(await isAabStrippedOfDebugSymbols(
+            project,
+            bundleFile.path,
+            androidBuildInfo.targetArchs,
+          ))) {
         throwToolExit('TODO(gmackall) what should we tell people here?');
       }
-
 
       final String appSize =
           (buildInfo.mode == BuildMode.debug)
@@ -645,7 +648,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
   // and moved them to the BUNDLE-METADATA directory. Block the build if this
   // isn't successful, as it means that debug symbols are getting included in
   // the final app that would be delivered to users.
-  Future<bool> isAabStrippedOfDebugSymbols(FlutterProject project, String aabPath, Iterable<AndroidArch> targetArchs) async {
+  Future<bool> isAabStrippedOfDebugSymbols(
+    FlutterProject project,
+    String aabPath,
+    Iterable<AndroidArch> targetArchs,
+  ) async {
     if (globals.androidSdk == null) {
       return false;
     }
@@ -669,7 +676,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     bool containsSymFilesForEachArch = true;
     for (final AndroidArch targetArch in targetArchs) {
-      if (!result.stdout.contains('BUNDLE-METADATA/com.android.tools.build.debugsymbols/${targetArch.archName}/libflutter.so.sym')) {
+      if (!result.stdout.contains(
+        'BUNDLE-METADATA/com.android.tools.build.debugsymbols/${targetArch.archName}/libflutter.so.sym',
+      )) {
         containsSymFilesForEachArch = false;
       }
     }
