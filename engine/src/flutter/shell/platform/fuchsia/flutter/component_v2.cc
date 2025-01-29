@@ -268,7 +268,8 @@ ComponentV2::ComponentV2(
   }
 
   auto composed_service_dir = std::make_unique<vfs::ComposedServiceDir>();
-  composed_service_dir->SetFallback(fidl::ClientEnd<fuchsia::io::Directory>(flutter_public_dir.TakeChannel()));
+  composed_service_dir->SetFallback(fidl::ClientEnd<fuchsia::io::Directory>(
+      flutter_public_dir.TakeChannel()));
 
   // Request an event from the directory to ensure it is servicing requests.
   directory_ptr_->Open3(".",
