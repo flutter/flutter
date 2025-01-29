@@ -643,7 +643,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   // and moved them to the BUNDLE-METADATA directory. Block the build if this
   // isn't successful, as it means that debug symbols are getting included in
   // the final app that would be delivered to users.
-  Future<bool> isAppStrippedOfDebugSymbols(FlutterProject project, String apkOrAabPath) async {
+  Future<bool> isAabStrippedOfDebugSymbols(FlutterProject project, String aabPath) async {
     if (globals.androidSdk == null) {
       return false;
     }
@@ -656,7 +656,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
 
     final RunResult result = await _processUtils.run(
-      <String>[apkAnalyzerPath, 'files', 'list', apkOrAabPath],
+      <String>[apkAnalyzerPath, 'files', 'list', aabPath],
       workingDirectory: project.android.hostAppGradleRoot.path,
       environment: _java?.environment,
     );
