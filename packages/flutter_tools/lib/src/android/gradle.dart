@@ -578,7 +578,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (isBuildingBundle) {
       final File bundleFile = findBundleFile(project, buildInfo, _logger, _analytics);
 
-      if (!(await isAppStrippedOfDebugSymbols(project, bundleFile.path))) {
+      if (!(await isAabStrippedOfDebugSymbols(project, bundleFile.path))) {
         throwToolExit('TODO(gmackall) what should we tell people here?');
       }
 
