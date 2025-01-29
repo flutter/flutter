@@ -15,12 +15,8 @@ import 'package:flutter/foundation.dart'
 /// with this position information. For example:
 ///
 /// ```dart
-/// Offset handlePositionedGestures(PositionedGestureDetails details) {
-///   final Offset transformedBySomeMathematics = calculate(
-///     details.globalPosition,
-///     details.localPosition,
-///   );
-///   return transformedBySomeMathematics;
+/// void handlePositionedGestures(PositionedGestureDetails details) {
+///   // Handle the positional information of the gesture details.
 /// }
 /// ```
 abstract class PositionedGestureDetails with Diagnosticable {
