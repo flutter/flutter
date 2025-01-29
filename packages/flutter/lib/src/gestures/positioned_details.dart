@@ -7,27 +7,21 @@ import 'dart:ui' show Offset;
 import 'package:flutter/foundation.dart'
     show DiagnosticPropertiesBuilder, Diagnosticable, DiagnosticsProperty;
 
-/// An abstract class representing gesture details that include
-/// positional information.
+/// An abstract class representing gesture details that include positional information.
 ///
-/// This class serve as a common interface for gesture details that involve
-/// positional data, such as dragging and tapping.
-/// It simplifies gesture handling by enabling the use of shared logic across
-/// multiple gesture types, users can create a method to handle gesture details
+/// This class serve as a common interface for gesture details that involve positional data,
+/// such as dragging and tapping. It simplifies gesture handling by enabling the use of shared logic
+/// across multiple gesture types, users can create a method to handle a single gesture details
 /// with this position information. For example:
 ///
 /// ```dart
-/// void handleGesture(PositionedGestureDetails details) {
-///   final Offset globalPosition = details.globalPosition;
-///
-///   if (details is TapDownDetails) {
-///     // Handles specific detail cases.
-///   }
-///
-///   final Offset localPosition = details.localPosition;
-///
-///   // Rest of business logic.
-/// }
+/// Offset handlePositionedGestures(PositionedGestureDetails details) {
+//   final Offset transformedBySomeMathematics = calculate(
+//     details.globalPosition,
+//     details.localPosition,
+//   );
+//   return transformedBySomeMathematics;
+// }
 /// ```
 abstract class PositionedGestureDetails with Diagnosticable {
   /// Creates details with positions.
