@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The Flutter widgets framework.
+/// The Flutter widgets framework. KICK
 ///
 /// To use, import `package:flutter/widgets.dart`.
 ///
