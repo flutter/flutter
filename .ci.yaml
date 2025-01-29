@@ -351,9 +351,6 @@ targets:
     timeout: 60
     properties:
       shard: analyze
-      # TODO(matanlurey): Remove or document.
-      # See https://github.com/flutter/flutter/issues/162329.
-      runs_in_merge_queue: "true"
       dependencies: >-
         [
           {"dependency": "ktlint", "version": "version_1_1_1"}
