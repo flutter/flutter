@@ -223,7 +223,7 @@ bool DartComponentController::CreateAndBindNamespace() {
   }
 
   auto composed_service_dir = std::make_unique<vfs::ComposedServiceDir>();
-  composed_service_dir->SetFallback(fidl::ClientEnd<fuchsia::io::Directory>(
+  composed_service_dir->SetFallback(fidl::ClientEnd<fuchsia_io::Directory>(
       dart_public_dir.TakeChannel()));
 
   // Request an event from the directory to ensure it is servicing requests.
@@ -632,6 +632,13 @@ void DartComponentController::OnIdleTimer(async_dispatcher_t* dispatcher,
     }
   }
   wait->Begin(dispatcher);  // ignore errors
+}
+
+void DartComponentController::handle_unknown_method(uint64_t ordinal,
+                                                    bool method_has_response) {
+  FML_LOG(ERROR) << "Unknown method called on DartComponentController. "
+                    "Ordinal: "
+                 << ordinal;
 }
 
 }  // namespace dart_runner

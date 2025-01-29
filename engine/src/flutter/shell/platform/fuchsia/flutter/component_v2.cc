@@ -268,7 +268,7 @@ ComponentV2::ComponentV2(
   }
 
   auto composed_service_dir = std::make_unique<vfs::ComposedServiceDir>();
-  composed_service_dir->SetFallback(fidl::ClientEnd<fuchsia::io::Directory>(
+  composed_service_dir->SetFallback(fidl::ClientEnd<fuchsia_io::Directory>(
       flutter_public_dir.TakeChannel()));
 
   // Request an event from the directory to ensure it is servicing requests.
@@ -659,5 +659,11 @@ void ComponentV2::WriteProfileToTrace() const {
   }
 }
 #endif  // !defined(DART_PRODUCT)
+
+void ComponentV2::handle_unknown_method(uint64_t ordinal,
+                                        bool method_has_response) {
+  FML_LOG(ERROR) << "Unknown method called on ComponentV2. Ordinal: "
+                 << ordinal;
+}
 
 }  // namespace flutter_runner
