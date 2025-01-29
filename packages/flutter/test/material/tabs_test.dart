@@ -7871,6 +7871,7 @@ void main() {
       matchesGoldenFile('tab_indicator.elastic_animation.various_size_tabs.ltr.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
   testWidgets('Elastic Tab animation with various size tabs - RTL', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
       frameSize: const Size(800, 100),
