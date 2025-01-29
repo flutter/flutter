@@ -132,8 +132,6 @@ GOTO :after_subroutine
     REM Do not fall through - return from subroutine
     EXIT /B
 
-  SET retries="0"
-
   :do_sdk_update_and_snapshot
     REM Detect which PowerShell executable is available on the Host
     REM PowerShell version <= 5: PowerShell.exe
@@ -147,7 +145,7 @@ GOTO :after_subroutine
         ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
         EXIT 1
     )
-    SET /A retries+=1
+    SET /A dart_sdk_retries+=1
     ECHO Checking Dart SDK version... 1>&2
     SET update_dart_bin=%FLUTTER_ROOT%\bin\internal\update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
@@ -161,7 +159,7 @@ GOTO :after_subroutine
       EXIT 1
     )
     IF "%ERRORLEVEL%" NEQ "0" (
-      IF "%retries%" EQU "3" (
+      IF "%dart_sdk_retries%" EQU "3" (
         ECHO Error: Unable to update Dart SDK after 3 retries. 1>&2
         EXIT 1
       )
