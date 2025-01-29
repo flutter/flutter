@@ -67,6 +67,20 @@ enum ContentSensitivity {
 
   /// Identifier for each sensitivity level.
   final int id;
+
+  /// Retrieve [ContentSensitivity] level by [id].
+  static ContentSensitivity getContentSensitivityById(int id) {
+    switch (id) {
+      case 0:
+        return ContentSensitivity.autoSensitive;
+      case 1:
+        return ContentSensitivity.sensitive;
+      case 2:
+        return ContentSensitivity.notSensitive;
+      default:
+        throw ArgumentError('$id is an invalid ContentSensitvity ID.');
+    }
+  }
 }
 
 /// Service for setting the content sensitivity of native Flutter views.
@@ -81,22 +95,40 @@ class SensitiveContentService {
   /// content sensitivity of Flutter views.
   late MethodChannel sensitiveContentChannel;
 
-   /// Sets content sensitivity level of the native backing to a Flutter view
-   /// with the specified [flutterViewId] to the level specified by
-   /// [contentSensitivity] via a call to the native embedder.
+  /// Sets content sensitivity level of the native backing to a Flutter view
+  /// with the specified [flutterViewId] to the level specified by
+  /// [contentSensitivity] via a call to the native embedder.
   void setContentSensitivity(int flutterViewId, ContentSensitivity contentSensitivity) {
     try {
       sensitiveContentChannel.invokeMethod<void>(
         'SensitiveContent.setContentSensitivity',
-        <String, dynamic>{'flutterViewId': flutterViewId, 'contentSensitivityLevel': contentSensitivity.id},
+        <String, dynamic>{
+          'flutterViewId': flutterViewId,
+          'contentSensitivityLevel': contentSensitivity.id
+        },
       );
     } catch (e) {
       // Content sensitivity failed to be set.
-      throw FlutterError(
-        'Content sensitivity failed to be set. Please ensure that the '
-        'flutterViewId $flutterViewId corresponds to a valid Android Flutter view '
-        'or Fragment.'
+      throw FlutterError('Content sensitivity failed to be set. Please ensure that the '
+          'flutterViewId $flutterViewId corresponds to a valid Android Flutter View '
+          'or Fragment.');
+    }
+  }
+
+  /// Gets content sensitivity level of the native backing to a Flutter view
+  /// with the specified [flutterViewId] via a call to the native embedder.
+  Future<int> getContentSensitivity(int flutterViewId) async {
+    try {
+      final int? result = await sensitiveContentChannel.invokeMethod<int>(
+        'SensitiveContent.getContentSensitivity',
+        <String, dynamic>{'flutterViewId': flutterViewId},
       );
+      return result!;
+    } catch (e) {
+      // Content sensitivity failed to be set.
+      throw FlutterError(
+          'Failed to retrieve content sensitivity. Please ensure that the flutterViewId '
+          '$flutterViewId corresponds to a valid Android Flutter View for Fragment. ');
     }
   }
 }
