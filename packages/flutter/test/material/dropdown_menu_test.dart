@@ -3901,6 +3901,35 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('DropdownMenu passes maxLines to TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren))),
+    );
+    TextField textField = tester.widget(find.byType(TextField));
+    // Default behavior.
+    expect(textField.maxLines, 1);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren, maxLines: null),
+        ),
+      ),
+    );
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.maxLines, null);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren, maxLines: 2),
+        ),
+      ),
+    );
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.maxLines, 2);
+  });
 }
 
 enum TestMenu {
