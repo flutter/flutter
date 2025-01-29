@@ -632,6 +632,44 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
   }
 
+  // Checks whether AGP has successfully stripped debug symbols from native libraries
+  // - libflutter.so, aka the engine
+  // - lib_app.so, aka the framework dart code
+  // and moved them to the BUNDLE-METADATA directory. Block the build if this
+  // isn't successful, as it means that debug symbols are getting included in
+  // the final app that would be delivered to users.
+  Future<bool> isAppStrippedOfDebugSymbols(FlutterProject project, String apkOrAabPath) async {
+    if (globals.androidSdk == null) {
+      return false;
+    }
+    if (!globals.androidSdk!.cmdlineToolsAvailable) {
+      return false;
+    }
+    final String? apkAnalyzerPath = globals.androidSdk!.getCmdlineToolsPath('apkanalyzer');
+    if (apkAnalyzerPath == null) {
+      return false;
+    }
+
+    final RunResult result = await _processUtils.run(
+      <String>[apkAnalyzerPath, 'files', 'list', apkOrAabPath],
+      workingDirectory: project.android.hostAppGradleRoot.path,
+      environment: _java?.environment
+    );
+    
+    if (result.exitCode != 0) {
+      return false;
+    }
+
+    // TODO(gmackall): What to do about apk? Can we see if they get debug symbols
+    // stripped somehow? Currently only handles the aab case.
+    if (result.stdout.contains('BUNDLE-METADATA/com.android.tools.build.debugsymbols')
+        && result.stdout.contains('BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym')) {
+      return true;
+    }
+
+    return false;
+  }
+
   Future<void> _performCodeSizeAnalysis(
     String kind,
     File zipFile,
