@@ -22,11 +22,11 @@ class HardwareBuffer;
 /// created by the flutter engine or was borrowed from Java for platform
 /// interop.
 struct WrappedSurfaceTransaction {
-  ASurfaceTransaction* tx;
+  ASurfaceTransaction* tx = nullptr;
 
   /// Whether this SurfaceTransaction was created by the engine or imported from
   /// Java.
-  bool owned;
+  bool owned = true;
 
   constexpr bool operator==(const WrappedSurfaceTransaction& other) const {
     return other.tx == tx;
