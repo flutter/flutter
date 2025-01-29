@@ -3509,16 +3509,14 @@ bool get _platformSupportsAccelerators {
 // dart format off
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(3.0),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(
-              _defaultMenuBorder),
-          alignment: AlignmentDirectional.bottomStart,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.bottomStart,
+    );
 
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 
@@ -3543,7 +3541,8 @@ class _MenuBarDefaultsM3 extends MenuStyle {
   MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
     return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
       EdgeInsetsDirectional.symmetric(
-          horizontal: _kTopLevelMenuHorizontalMinPadding),
+        horizontal: _kTopLevelMenuHorizontalMinPadding
+      ),
     );
   }
 
@@ -3553,11 +3552,11 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
 class _MenuButtonDefaultsM3 extends ButtonStyle {
   _MenuButtonDefaultsM3(this.context)
-      : super(
-          animationDuration: kThemeChangeDuration,
-          enableFeedback: true,
-          alignment: AlignmentDirectional.centerStart,
-        );
+    : super(
+      animationDuration: kThemeChangeDuration,
+      enableFeedback: true,
+      alignment: AlignmentDirectional.centerStart,
+    );
 
   final BuildContext context;
 
@@ -3665,25 +3664,21 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding {
-    return ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(
-        _scaledPadding(context));
+    return ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(_scaledPadding(context));
   }
 
   // No default side
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape {
-    return ButtonStyleButton.allOrNull<OutlinedBorder>(
-        const RoundedRectangleBorder());
+    return ButtonStyleButton.allOrNull<OutlinedBorder>(const RoundedRectangleBorder());
   }
 
   @override
-  InteractiveInkFeatureFactory? get splashFactory =>
-      Theme.of(context).splashFactory;
+  InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 
   @override
-  MaterialTapTargetSize? get tapTargetSize =>
-      Theme.of(context).materialTapTargetSize;
+  MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle {
@@ -3709,18 +3704,14 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
     // Since the threshold paddings used below are empirical values determined
     // at a font size of 14.0, 14.0 is used as the base value for scaling the
     // padding.
-    final double fontSize =
-        Theme.of(context).textTheme.labelLarge?.fontSize ?? 14.0;
-    final double fontSizeRatio =
-        MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
+    final double fontSize = Theme.of(context).textTheme.labelLarge?.fontSize ?? 14.0;
+    final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
     return ButtonStyleButton.scaledPadding(
-      EdgeInsets.symmetric(
-          horizontal: math.max(
+      EdgeInsets.symmetric(horizontal: math.max(
         _kMenuViewPadding,
         _kLabelItemDefaultSpacing + visualDensity.baseSizeAdjustment.dx,
       )),
-      EdgeInsets.symmetric(
-          horizontal: math.max(
+      EdgeInsets.symmetric(horizontal: math.max(
         _kMenuViewPadding,
         8 + visualDensity.baseSizeAdjustment.dx,
       )),
@@ -3732,16 +3723,14 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
 class _MenuDefaultsM3 extends MenuStyle {
   _MenuDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(3.0),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(
-              _defaultMenuBorder),
-          alignment: AlignmentDirectional.topEnd,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.topEnd,
+    );
 
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 
