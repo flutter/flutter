@@ -12,6 +12,7 @@
 #include <lib/fdio/directory.h>
 #include <lib/fdio/io.h>
 #include <lib/fdio/namespace.h>
+#include <lib/fidl/cpp/client.h>
 #include <lib/vfs/cpp/composed_service_dir.h>
 #include <lib/vfs/cpp/remote_dir.h>
 #include <lib/vfs/cpp/service.h>
@@ -267,7 +268,7 @@ ComponentV2::ComponentV2(
   }
 
   auto composed_service_dir = std::make_unique<vfs::ComposedServiceDir>();
-  composed_service_dir->SetFallback(std::move(flutter_public_dir));
+  composed_service_dir->SetFallback(fidl::ClientEnd<fuchsia::io::Directory>(flutter_public_dir.TakeChannel()));
 
   // Request an event from the directory to ensure it is servicing requests.
   directory_ptr_->Open3(".",
