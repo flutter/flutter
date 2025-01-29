@@ -11,8 +11,9 @@
 namespace impeller::android {
 
 SurfaceTransaction::SurfaceTransaction()
-    : transaction_(GetProcTable().ASurfaceTransaction_create(),
-                   /*owned=*/true) {}
+    : transaction_(
+          WrappedSurfaceTransaction{GetProcTable().ASurfaceTransaction_create(),
+                                    /*owned=*/true}) {}
 
 SurfaceTransaction::SurfaceTransaction(ASurfaceTransaction* transaction)
     : transaction_(WrappedSurfaceTransaction{transaction, /*owned=*/false}) {}
@@ -52,7 +53,7 @@ bool SurfaceTransaction::Apply(OnCompleteCallback callback) {
   // the java PlatformViewController and not as a part of the engine render
   // loop.
   if (!transaction_.get().owned) {
-    std::ignore = transaction_.reset();
+    transaction_.reset();
     return true;
   }
 
