@@ -411,7 +411,7 @@ class ExpansionTile extends StatefulWidget {
   /// The color to display behind the expanded children section of the tile.
   ///
   /// If this property is null, the value from [ExpansionTileThemeData.childrenPaddingColor] is
-  /// used if specified. If both are null, then [backgroundColor] will be used.
+  /// used. If both are null, then [backgroundColor] will be used.
   final Color? childrenPaddingColor;
 
   /// The icon color of tile's expansion arrow icon when the sublist is expanded.
