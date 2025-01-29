@@ -56,6 +56,7 @@ void main() async {
           nativeDriver.screenshot(),
           matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portrait.png'),
         );
+        break;
       } on TestFailure catch (e) {
         if (retriesLeft == 0) {
           rethrow;
