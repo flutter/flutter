@@ -21,12 +21,11 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -40,15 +39,8 @@ import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   group('Flutter Command', () {
     late FakeCache cache;
-    late TestUsage usage;
     late FakeAnalytics fakeAnalytics;
     late FakeClock clock;
     late FakeProcessInfo processInfo;
@@ -66,7 +58,6 @@ void main() {
     setUp(() {
       Cache.disableLocking();
       cache = FakeCache();
-      usage = TestUsage();
       clock = FakeClock();
       processInfo = FakeProcessInfo();
       processInfo.maxRss = 10;
@@ -237,6 +228,7 @@ void main() {
       },
     );
 
+    @isTest
     void testUsingCommandContext(String testName, dynamic Function() testBody) {
       testUsingContext(
         testName,
@@ -246,7 +238,6 @@ void main() {
           ProcessInfo: () => processInfo,
           ProcessManager: () => processManager,
           SystemClock: () => clock,
-          Usage: () => usage,
           Analytics: () => fakeAnalytics,
         },
       );
@@ -263,10 +254,6 @@ void main() {
       );
       await flutterCommand.run();
 
-      expect(usage.events, <TestUsageEvent>[
-        const TestUsageEvent('tool-command-result', 'dummy', label: 'success'),
-        const TestUsageEvent('tool-command-max-rss', 'dummy', label: 'success', value: 10),
-      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -291,10 +278,6 @@ void main() {
       );
       await flutterCommand.run();
 
-      expect(usage.events, <TestUsageEvent>[
-        const TestUsageEvent('tool-command-result', 'dummy', label: 'warning'),
-        const TestUsageEvent('tool-command-max-rss', 'dummy', label: 'warning', value: 10),
-      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -318,10 +301,6 @@ void main() {
         },
       );
       await expectLater(() => flutterCommand.run(), throwsToolExit());
-      expect(usage.events, <TestUsageEvent>[
-        const TestUsageEvent('tool-command-result', 'dummy', label: 'fail'),
-        const TestUsageEvent('tool-command-max-rss', 'dummy', label: 'fail', value: 10),
-      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -430,10 +409,6 @@ void main() {
           signalController.add(mockSignal);
           await completer.future;
 
-          expect(usage.events, <TestUsageEvent>[
-            const TestUsageEvent('tool-command-result', 'dummy', label: 'killed'),
-            const TestUsageEvent('tool-command-max-rss', 'dummy', label: 'killed', value: 10),
-          ]);
           expect(
             fakeAnalytics.sentEvents,
             contains(
@@ -456,7 +431,6 @@ void main() {
                 exitSignals: <ProcessSignal>[signalUnderTest],
               ),
           SystemClock: () => clock,
-          Usage: () => usage,
           Analytics: () => fakeAnalytics,
         },
       );
@@ -499,7 +473,6 @@ void main() {
                 subForSigTerm: signalUnderTest,
                 exitSignals: <ProcessSignal>[signalUnderTest],
               ),
-          Usage: () => usage,
         },
       );
     });
@@ -511,12 +484,6 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
 
-      expect(
-        usage.timings,
-        contains(
-          const TestTimingEvent('flutter', 'dummy', Duration(milliseconds: 1000), label: 'fail'),
-        ),
-      );
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -537,8 +504,6 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
 
-      expect(usage.timings, isEmpty);
-      // Iterate through and count all the [Event.timing] instances
       int timingEventCounts = 0;
       for (final Event e in fakeAnalytics.sentEvents) {
         if (e.eventName == DashEvent.timing) {
@@ -571,17 +536,6 @@ void main() {
       await flutterCommand.run();
 
       expect(
-        usage.timings,
-        contains(
-          const TestTimingEvent(
-            'flutter',
-            'dummy',
-            Duration(milliseconds: 500),
-            label: 'success-blah1-blah2-blah3',
-          ),
-        ),
-      );
-      expect(
         fakeAnalytics.sentEvents,
         contains(
           Event.timing(
@@ -606,12 +560,6 @@ void main() {
 
       await expectLater(() => flutterCommand.run(), throwsToolExit());
       expect(
-        usage.timings,
-        contains(
-          const TestTimingEvent('flutter', 'dummy', Duration(milliseconds: 1000), label: 'fail'),
-        ),
-      );
-      expect(
         fakeAnalytics.sentEvents,
         contains(
           Event.timing(
@@ -623,66 +571,6 @@ void main() {
         ),
       );
     });
-
-    testUsingContext(
-      'reports null safety analytics when reportNullSafety is true',
-      () async {
-        globals.fs.file('lib/main.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('// @dart=2.12');
-        globals.fs.file('pubspec.yaml').writeAsStringSync('name: example\n');
-        globals.fs.file('.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "example",
-      "rootUri": "../",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ],
-  "generated": "2020-12-02T19:30:53.862346Z",
-  "generator": "pub",
-  "generatorVersion": "2.12.0-76.0.dev"
-}
-''');
-        final FakeReportingNullSafetyCommand command = FakeReportingNullSafetyCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-
-        await runner.run(<String>['test']);
-
-        expect(
-          usage.events,
-          containsAll(<TestUsageEvent>[
-            const TestUsageEvent(
-              NullSafetyAnalysisEvent.kNullSafetyCategory,
-              'runtime-mode',
-              label: 'NullSafetyMode.sound',
-            ),
-            TestUsageEvent(
-              NullSafetyAnalysisEvent.kNullSafetyCategory,
-              'stats',
-              parameters: CustomDimensions.fromMap(<String, String>{'cd49': '1', 'cd50': '1'}),
-            ),
-            const TestUsageEvent(
-              NullSafetyAnalysisEvent.kNullSafetyCategory,
-              'language-version',
-              label: '2.12',
-            ),
-          ]),
-        );
-      },
-      overrides: <Type, Generator>{
-        Pub: () => FakePub(),
-        Usage: () => usage,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
-      },
-    );
 
     testUsingContext(
       'use packagesPath to generate BuildInfo',
