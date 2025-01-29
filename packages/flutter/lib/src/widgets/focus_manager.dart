@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
@@ -2122,6 +2123,7 @@ class _HighlightModeManager {
     // HardwareKeyboard.
     ServicesBinding.instance.keyEventManager.keyMessageHandler = handleKeyMessage;
     GestureBinding.instance.pointerRouter.addGlobalRoute(handlePointerEvent);
+    SemanticsBinding.instance.addSemanticsActionListener(handleSemanticsAction);
   }
 
   @mustCallSuper
@@ -2132,6 +2134,7 @@ class _HighlightModeManager {
     if (ServicesBinding.instance.keyEventManager.keyMessageHandler == handleKeyMessage) {
       GestureBinding.instance.pointerRouter.removeGlobalRoute(handlePointerEvent);
       ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
+      SemanticsBinding.instance.removeSemanticsActionListener(handleSemanticsAction);
     }
     _listeners = HashedObserverList<ValueChanged<FocusHighlightMode>>();
   }
@@ -2175,21 +2178,15 @@ class _HighlightModeManager {
   }
 
   void handlePointerEvent(PointerEvent event) {
-    final FocusHighlightMode expectedMode;
     switch (event.kind) {
       case PointerDeviceKind.touch:
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
         _lastInteractionWasTouch = true;
-        expectedMode = FocusHighlightMode.touch;
+        updateMode();
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.trackpad:
       case PointerDeviceKind.unknown:
-        _lastInteractionWasTouch = false;
-        expectedMode = FocusHighlightMode.traditional;
-    }
-    if (expectedMode != highlightMode) {
-      updateMode();
     }
   }
 
@@ -2288,6 +2285,13 @@ class _HighlightModeManager {
       assert(_focusDebug(() => 'Key event not handled by focus system: $message.'));
     }
     return handled;
+  }
+
+  void handleSemanticsAction(SemanticsActionEvent semanticsActionEvent) {
+    if (kIsWeb && semanticsActionEvent.type == SemanticsAction.focus) {
+      _lastInteractionWasTouch = true;
+      updateMode();
+    }
   }
 
   // Update function to be called whenever the state relating to highlightMode
