@@ -2164,6 +2164,7 @@ void main() {
     expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/162229.
   testWidgets(
     'Time picker spacing between time control and day period control for locales using "a h:mm" pattern',
     (WidgetTester tester) async {
@@ -2175,7 +2176,7 @@ void main() {
       final Finder timeControlFinder =
           find.ancestor(of: find.text('7'), matching: find.byType(Row)).first;
 
-      // portrait
+      // Render in portrait mode.
       tester.view.physicalSize = const Size(800, 800.5);
       tester.view.devicePixelRatio = 1;
       await mediaQueryBoilerplate(
@@ -2190,14 +2191,14 @@ void main() {
         12,
       );
 
-      // dismiss the dialog
+      // Dismiss the dialog.
       final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(
         tester.element(find.byType(TextButton).first),
       );
       await tester.tap(find.text(materialLocalizations.okButtonLabel));
       await tester.pumpAndSettle();
 
-      // landscape
+      // Render in landscape mode.
       tester.view.physicalSize = const Size(800.5, 800);
       tester.view.devicePixelRatio = 1;
       await mediaQueryBoilerplate(
