@@ -16,12 +16,12 @@ import 'package:flutter/foundation.dart'
 ///
 /// ```dart
 /// Offset handlePositionedGestures(PositionedGestureDetails details) {
-//   final Offset transformedBySomeMathematics = calculate(
-//     details.globalPosition,
-//     details.localPosition,
-//   );
-//   return transformedBySomeMathematics;
-// }
+///   final Offset transformedBySomeMathematics = calculate(
+///     details.globalPosition,
+///     details.localPosition,
+///   );
+///   return transformedBySomeMathematics;
+/// }
 /// ```
 abstract class PositionedGestureDetails with Diagnosticable {
   /// Creates details with positions.
