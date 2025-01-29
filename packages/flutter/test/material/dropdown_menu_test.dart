@@ -3930,6 +3930,28 @@ void main() {
     textField = tester.widget(find.byType(TextField));
     expect(textField.maxLines, 2);
   });
+
+  testWidgets('DropdownMenu passes textInputAction to TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren))),
+    );
+    TextField textField = tester.widget(find.byType(TextField));
+    // Default behavior.
+    expect(textField.textInputAction, null);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            dropdownMenuEntries: menuChildren,
+            textInputAction: TextInputAction.next,
+          ),
+        ),
+      ),
+    );
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textInputAction, TextInputAction.next);
+  });
 }
 
 enum TestMenu {
