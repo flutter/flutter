@@ -289,32 +289,56 @@ class StartContext extends Context {
     if (dartRevision != null && dartRevision!.isNotEmpty) {
       if (state.isMonorepo) {
         await framework.updateDartRevision(dartRevision!);
+        await framework.commit('Update Dart SDK to $dartRevision', addFirst: true);
       } else {
         await engine.updateDartRevision(dartRevision!);
         await engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
       }
     }
 
-    final String engineHead = await engine.reverseParse('HEAD');
-    state.engine =
+    final String frameworkHead = await framework.reverseParse('HEAD');
+    state.framework =
         (pb.Repository.create()
           ..candidateBranch = candidateBranch
           ..workingBranch = workingBranchName
-          ..startingGitHead = engineHead
-          ..currentGitHead = engineHead
-          ..checkoutPath = (await engine.checkoutDirectory).path
+          ..startingGitHead = frameworkHead
+          ..currentGitHead = frameworkHead
+          ..checkoutPath = (await framework.checkoutDirectory).path
           ..upstream =
               (pb.Remote.create()
                 ..name = 'upstream'
-                ..url = engine.upstreamRemote.url)
+                ..url = framework.upstreamRemote.url)
           ..mirror =
               (pb.Remote.create()
                 ..name = 'mirror'
-                ..url = engine.mirrorRemote!.url));
-    if (dartRevision != null && dartRevision!.isNotEmpty) {
-      state.engine.dartRevision = dartRevision!;
-    }
+                ..url = framework.mirrorRemote!.url));
 
+    if (state.isMonorepo) {
+      if (dartRevision != null && dartRevision!.isNotEmpty) {
+        // In the monorepo, the DEPS file is in flutter/flutter
+        state.framework.dartRevision = dartRevision!;
+      }
+    } else {
+      final String engineHead = await engine.reverseParse('HEAD');
+      state.engine =
+          (pb.Repository.create()
+            ..candidateBranch = candidateBranch
+            ..workingBranch = workingBranchName
+            ..startingGitHead = engineHead
+            ..currentGitHead = engineHead
+            ..checkoutPath = (await engine.checkoutDirectory).path
+            ..upstream =
+                (pb.Remote.create()
+                  ..name = 'upstream'
+                  ..url = engine.upstreamRemote.url)
+            ..mirror =
+                (pb.Remote.create()
+                  ..name = 'mirror'
+                  ..url = engine.mirrorRemote!.url));
+      if (dartRevision != null && dartRevision!.isNotEmpty) {
+        state.engine.dartRevision = dartRevision!;
+      }
+    }
     await framework.newBranch(workingBranchName);
 
     // Get framework version
@@ -322,7 +346,6 @@ class StartContext extends Context {
       await framework.getFullTag(framework.upstreamRemote.name, candidateBranch, exact: false),
     );
 
-    final String frameworkHead = await framework.reverseParse('HEAD');
     final String branchPoint = await framework.branchPoint(
       '${framework.upstreamRemote.name}/$candidateBranch',
       '${framework.upstreamRemote.name}/${FrameworkRepository.defaultBranch}',
@@ -353,23 +376,11 @@ class StartContext extends Context {
 
     state.releaseVersion = nextVersion.toString();
 
-    state.framework =
-        (pb.Repository.create()
-          ..candidateBranch = candidateBranch
-          ..workingBranch = workingBranchName
-          ..startingGitHead = frameworkHead
-          ..currentGitHead = frameworkHead
-          ..checkoutPath = (await framework.checkoutDirectory).path
-          ..upstream =
-              (pb.Remote.create()
-                ..name = 'upstream'
-                ..url = framework.upstreamRemote.url)
-          ..mirror =
-              (pb.Remote.create()
-                ..name = 'mirror'
-                ..url = framework.mirrorRemote!.url));
-
-    state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
+    if (state.isMonorepo) {
+      state.currentPhase = ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS;
+    } else {
+      state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
+    }
 
     state.conductorVersion = conductorVersion;
 

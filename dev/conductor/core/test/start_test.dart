@@ -255,6 +255,20 @@ void main() {
           const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
 
+          // update DEPS
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM path/to/DEPS',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(
+            command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
+          ),
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
+
+          // Get framework HEAD
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
+
           FakeCommand(
             command: <String>[
               'git',
@@ -278,16 +292,6 @@ void main() {
           const FakeCommand(
             command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
           ),
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/DEPS',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(
-            command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
-          ),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
 
           // checkout framework
           const FakeCommand(
@@ -985,6 +989,7 @@ void main() {
           const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
           const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
+
           const FakeCommand(
             command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
           ),
@@ -996,7 +1001,6 @@ void main() {
           const FakeCommand(
             command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
           ),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
 
           // setup framework

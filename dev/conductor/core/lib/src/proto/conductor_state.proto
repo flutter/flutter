@@ -100,7 +100,7 @@ message Repository {
   // Desired cherrypicks.
   repeated Cherrypick cherrypicks = 7;
 
-  // Only for engine repositories.
+  // For the repository that has a dart_revision in a DEPS file.
   string dartRevision = 8;
 
   // Name of local and remote branch for applying cherrypicks.
