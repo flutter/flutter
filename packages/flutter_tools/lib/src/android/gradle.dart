@@ -659,7 +659,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (!globals.androidSdk!.cmdlineToolsAvailable) {
       return false;
     }
-    final String? apkAnalyzerPath = globals.androidSdk!.getCmdlineToolsPath('apkanalyzer');
+    final String binaryName = globals.platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer';
+    final String? apkAnalyzerPath = globals.androidSdk!.getCmdlineToolsPath(binaryName);
     if (apkAnalyzerPath == null) {
       return false;
     }
