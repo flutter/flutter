@@ -32,7 +32,7 @@ dependencies:
   fake_async: 1.3.3
   stack_trace: 1.12.1
   usage: 4.1.1
-  webdriver: 3.0.4
+  webdriver: 3.1.0
   webkit_inspection_protocol: 1.2.1
   xml: 6.5.0
   yaml: 3.1.3
@@ -121,4 +121,5 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: c83b
+
+# PUBSPEC CHECKSUM: f89b
