@@ -1026,6 +1026,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           keyboardType: widget.keyboardType,
           textAlign: widget.textAlign,
           textAlignVertical: TextAlignVertical.center,
+          maxLines: widget.maxLines,
           style: effectiveTextStyle,
           controller: _localTextEditingController,
           onEditingComplete: _handleEditingComplete,
@@ -1055,7 +1056,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                     : null,
             suffixIcon: trailingButton,
           ).applyDefaults(effectiveInputDecorationTheme),
-          maxLines: widget.maxLines,
         );
 
         // If [expandedInsets] is not null, the width of the text field should depend
