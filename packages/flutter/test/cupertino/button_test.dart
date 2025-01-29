@@ -600,15 +600,16 @@ void main() {
       ),
     );
 
-    decoration = tester
-        .widget<DecoratedBox>(
-          find.descendant(
-            of: find.byType(CupertinoButton),
-            matching: find.byType(DecoratedBox),
-          ),
-        )
-        .decoration as BoxDecoration;
-
+    decoration =
+        tester
+                .widget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(CupertinoButton),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.systemRed));
   });
 
