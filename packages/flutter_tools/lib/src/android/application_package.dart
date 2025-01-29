@@ -18,75 +18,9 @@ import '../base/user_messages.dart';
 import '../build_info.dart';
 import '../project.dart';
 import 'android_sdk.dart';
-import 'gradle.dart';
 
-/// An application package created from an already built Android APK.
-class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackage {
-  AndroidApk({
-    required super.id,
-    required this.applicationPackage,
-    required this.versionCode,
-    required this.launchActivity,
-  });
-
-  /// Creates a new AndroidApk from an existing APK.
-  ///
-  /// Returns `null` if the APK was invalid or any required tooling was missing.
-  static AndroidApk? fromApk(
-    File apk, {
-    required AndroidSdk androidSdk,
-    required ProcessManager processManager,
-    required UserMessages userMessages,
-    required Logger logger,
-    required ProcessUtils processUtils,
-  }) {
-    final String? aaptPath = androidSdk.latestVersion?.aaptPath;
-    if (aaptPath == null || !processManager.canRun(aaptPath)) {
-      logger.printError(userMessages.aaptNotFound);
-      return null;
-    }
-
-    String apptStdout;
-    try {
-      apptStdout =
-          processUtils
-              .runSync(<String>[
-                aaptPath,
-                'dump',
-                'xmltree',
-                apk.path,
-                'AndroidManifest.xml',
-              ], throwOnError: true)
-              .stdout
-              .trim();
-    } on ProcessException catch (error) {
-      logger.printError('Failed to extract manifest from APK: $error.');
-      return null;
-    }
-
-    final ApkManifestData? data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
-
-    if (data == null) {
-      logger.printError('Unable to read manifest info from ${apk.path}.');
-      return null;
-    }
-
-    final String? packageName = data.packageName;
-    if (packageName == null || data.launchableActivityName == null) {
-      logger.printError('Unable to read manifest info from ${apk.path}.');
-      return null;
-    }
-
-    return AndroidApk(
-      id: packageName,
-      applicationPackage: apk,
-      versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
-      launchActivity: '${data.packageName}/${data.launchableActivityName}',
-    );
-  }
-
-  @override
-  final FileSystemEntity applicationPackage;
+abstract class AndroidApk extends ApplicationPackage {
+  AndroidApk({required super.id, required this.versionCode, required this.launchActivity});
 
   /// The path to the activity that should be launched.
   final String launchActivity;
@@ -94,8 +28,19 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   /// The version code of the APK.
   final int? versionCode;
 
+  @override
+  String? get name => id;
+}
+
+class BuildableAndroidApk extends AndroidApk {
+  BuildableAndroidApk({
+    required super.id,
+    required super.versionCode,
+    required super.launchActivity,
+  });
+
   /// Creates a new AndroidApk based on the information in the Android manifest.
-  static Future<AndroidApk?> fromAndroidProject(
+  static Future<BuildableAndroidApk?> fromAndroidProject(
     AndroidProject androidProject, {
     required AndroidSdk? androidSdk,
     required ProcessManager processManager,
@@ -105,43 +50,6 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required FileSystem fileSystem,
     BuildInfo? buildInfo,
   }) async {
-    final File apkFile;
-    final String filename;
-    if (buildInfo == null) {
-      filename = 'app.apk';
-    } else if (buildInfo.flavor == null) {
-      filename = 'app-${buildInfo.mode.cliName}.apk';
-    } else {
-      filename = 'app-${buildInfo.lowerCasedFlavor}-${buildInfo.mode.cliName}.apk';
-    }
-
-    if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
-      Directory apkDirectory = getApkDirectory(androidProject.parent);
-      if (androidProject.parent.isModule) {
-        // Module builds output the apk in a subdirectory that corresponds
-        // to the buildmode of the apk.
-        apkDirectory = apkDirectory.childDirectory(buildInfo!.mode.cliName);
-      }
-      apkFile = apkDirectory.childFile(filename);
-      if (apkFile.existsSync()) {
-        // Grab information from the .apk. The gradle build script might alter
-        // the application Id, so we need to look at what was actually built.
-        return AndroidApk.fromApk(
-          apkFile,
-          androidSdk: androidSdk!,
-          processManager: processManager,
-          logger: logger,
-          userMessages: userMessages,
-          processUtils: processUtils,
-        );
-      }
-      // The .apk hasn't been built yet, so we work with what we have. The run
-      // command will grab a new AndroidApk after building, to get the updated
-      // IDs.
-    } else {
-      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), filename));
-    }
-
     final File manifest = androidProject.appManifestFile;
 
     if (!manifest.existsSync()) {
@@ -224,16 +132,77 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       return null;
     }
 
-    return AndroidApk(
-      id: packageId,
-      applicationPackage: apkFile,
-      versionCode: null,
-      launchActivity: launchActivity,
+    return BuildableAndroidApk(id: packageId, versionCode: null, launchActivity: launchActivity);
+  }
+}
+
+/// An application package created from an already built Android APK.
+class PrebuiltAndroidApk extends AndroidApk implements PrebuiltApplicationPackage {
+  PrebuiltAndroidApk({
+    required super.id,
+    required super.versionCode,
+    required super.launchActivity,
+    required this.applicationPackage,
+  });
+
+  /// Creates a new AndroidApk from an existing APK.
+  ///
+  /// Returns `null` if the APK was invalid or any required tooling was missing.
+  static PrebuiltAndroidApk? fromApk(
+    File apk, {
+    required AndroidSdk androidSdk,
+    required ProcessManager processManager,
+    required UserMessages userMessages,
+    required Logger logger,
+    required ProcessUtils processUtils,
+  }) {
+    final String? aaptPath = androidSdk.latestVersion?.aaptPath;
+    if (aaptPath == null || !processManager.canRun(aaptPath)) {
+      logger.printError(userMessages.aaptNotFound);
+      return null;
+    }
+
+    String apptStdout;
+    try {
+      apptStdout =
+          processUtils
+              .runSync(<String>[
+                aaptPath,
+                'dump',
+                'xmltree',
+                apk.path,
+                'AndroidManifest.xml',
+              ], throwOnError: true)
+              .stdout
+              .trim();
+    } on ProcessException catch (error) {
+      logger.printError('Failed to extract manifest from APK: $error.');
+      return null;
+    }
+
+    final ApkManifestData? data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
+
+    if (data == null) {
+      logger.printError('Unable to read manifest info from ${apk.path}.');
+      return null;
+    }
+
+    final String? packageName = data.packageName;
+    if (packageName == null || data.launchableActivityName == null) {
+      logger.printError('Unable to read manifest info from ${apk.path}.');
+      return null;
+    }
+
+    return PrebuiltAndroidApk(
+      id: packageName,
+      versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
+      launchActivity: '${data.packageName}/${data.launchableActivityName}',
+      applicationPackage: apk,
     );
   }
 
   @override
-  String get name => applicationPackage.basename;
+  final FileSystemEntity applicationPackage;
 }
 
 abstract class _Entry {

@@ -7,6 +7,7 @@ import com.android.build.OutputFile
 import com.flutter.gradle.BaseApplicationNameHandler
 import groovy.json.JsonGenerator
 import groovy.xml.QName
+import org.gradle.api.plugins.BasePluginExtension
 import java.nio.file.Paths
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
@@ -1391,6 +1392,7 @@ class FlutterPlugin implements Plugin<Project> {
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
         if (isFlutterAppProject()) {
+            def baseExtension = project.extensions.findByType(BasePluginExtension)
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
                 if (!shouldConfigureFlutterTask(assembleTask)) {
@@ -1420,7 +1422,7 @@ class FlutterPlugin implements Plugin<Project> {
                         String outputDirectoryStr = outputDirectory.metaClass.respondsTo(outputDirectory, "get")
                             ? outputDirectory.get()
                             : outputDirectory
-                        String filename = "app"
+                        String filename = baseExtension.getArchivesName().get()
                         String abi = output.getFilter(OutputFile.ABI)
                         if (abi != null && !abi.isEmpty()) {
                             filename += "-${abi}"

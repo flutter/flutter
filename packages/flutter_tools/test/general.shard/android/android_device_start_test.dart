@@ -65,7 +65,7 @@ void main() {
         androidSdk: androidSdk,
       );
       final File apkFile = fileSystem.file('app-debug.apk')..createSync();
-      final AndroidApk apk = AndroidApk(
+      final PrebuiltAndroidApk apk = PrebuiltAndroidApk(
         id: 'FlutterApp',
         applicationPackage: apkFile,
         launchActivity: 'FlutterActivity',
@@ -139,7 +139,7 @@ void main() {
       androidSdk: androidSdk,
     );
     final File apkFile = fileSystem.file('app-debug.apk')..createSync();
-    final AndroidApk apk = AndroidApk(
+    final PrebuiltAndroidApk apk = PrebuiltAndroidApk(
       id: 'FlutterApp',
       applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',
@@ -179,7 +179,7 @@ void main() {
       androidSdk: androidSdk,
     );
     final File apkFile = fileSystem.file('app-debug.apk')..createSync();
-    final AndroidApk apk = AndroidApk(
+    final PrebuiltAndroidApk apk = PrebuiltAndroidApk(
       id: 'FlutterApp',
       applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',

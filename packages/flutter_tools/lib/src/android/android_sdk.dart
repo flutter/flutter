@@ -573,7 +573,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   /// This is used to dump the xml in order to launch built android applications.
   ///
   /// See also:
-  ///   * [AndroidApk.fromApk], which depends on this to determine application identifiers.
+  ///   * [PrebuiltAndroidApk.fromApk], which depends on this to determine application identifiers.
   String get aaptPath => getBuildToolsPath('aapt');
 
   List<String> validateSdkWellFormed() {

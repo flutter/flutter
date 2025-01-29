@@ -907,7 +907,7 @@ android {
 </manifest>
 ''');
 
-      final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+      final BuildableAndroidApk? androidApk = await BuildableAndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
         fileSystem: fileSystem,

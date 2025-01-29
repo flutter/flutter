@@ -126,20 +126,26 @@ const String androidX86DeprecationWarning =
     'Support for Android x86 targets will be removed in the next stable release after 3.27. '
     'See https://github.com/flutter/flutter/issues/157543 for details.';
 
-/// Returns the output APK file names for a given [AndroidBuildInfo].
+/// Returns the expected APK file name endings for a given [AndroidBuildInfo].
 ///
-/// For example, when [splitPerAbi] is true, multiple APKs are created.
-Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
+/// The file name endings follow the format:
+/// - For single APK builds: `-[flavor]-[buildType].apk`
+/// - For split APK builds: `-[abi]-[flavor]-[buildType].apk` for each target ABI
+///
+/// For example:
+/// - Single APK: '-dev-release.apk'
+/// - Split APKs: ['-arm64-v8a-dev-release.apk', '-armeabi-v7a-dev--release.apk']
+Iterable<String> _apkFileNamesEndingsFor(AndroidBuildInfo androidBuildInfo) {
   final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
   final String productFlavor = androidBuildInfo.buildInfo.lowerCasedFlavor ?? '';
   final String flavorString = productFlavor.isEmpty ? '' : '-$productFlavor';
   if (androidBuildInfo.splitPerAbi) {
     return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
       final String abi = arch.archName;
-      return 'app$flavorString-$abi-$buildType.apk';
+      return '$abi$flavorString-$buildType.apk';
     });
   }
-  return <String>['app$flavorString-$buildType.apk'];
+  return <String>['$flavorString-$buildType.apk'];
 }
 
 // The maximum time to wait before the tool retries a Gradle build.
@@ -594,23 +600,16 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return;
     }
     // Gradle produced APKs.
-    final Iterable<String> apkFilesPaths =
-        project.isModule
-            ? findApkFilesModule(project, androidBuildInfo, _logger, _analytics)
-            : listApkPaths(androidBuildInfo);
+    final Iterable<File> apkFilesPaths = findApkFiles(
+      project,
+      androidBuildInfo,
+      _logger,
+      _analytics,
+    );
     final Directory apkDirectory = getApkDirectory(project);
 
     // Generate sha1 for every generated APKs.
-    for (final File apkFile in apkFilesPaths.map(apkDirectory.childFile)) {
-      if (!apkFile.existsSync()) {
-        _exitWithExpectedFileNotFound(
-          project: project,
-          fileExtension: '.apk',
-          logger: _logger,
-          analytics: _analytics,
-        );
-      }
-
+    for (final File apkFile in apkFilesPaths) {
       final String filename = apkFile.basename;
       _logger.printTrace('Calculate SHA1: $apkDirectory/$filename');
       final File apkShaFile = apkDirectory.childFile('$filename.sha1');
@@ -1001,36 +1000,45 @@ bool isAppUsingAndroidX(Directory androidDirectory) {
 
 /// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
 @visibleForTesting
-Iterable<String> findApkFilesModule(
+Iterable<File> findApkFiles(
   FlutterProject project,
   AndroidBuildInfo androidBuildInfo,
   Logger logger,
   Analytics analytics,
 ) {
-  final Iterable<String> apkFileNames = _apkFilesFor(androidBuildInfo);
+  final Iterable<String> apkFilePartialNames = _apkFileNamesEndingsFor(androidBuildInfo);
   final Directory apkDirectory = getApkDirectory(project);
-  final Iterable<File> apks = apkFileNames.expand<File>((String apkFileName) {
-    File apkFile = apkDirectory.childFile(apkFileName);
-    if (apkFile.existsSync()) {
-      return <File>[apkFile];
+  final List<FileSystemEntity> apkDirectoryContents =
+      apkDirectory.existsSync() ? apkDirectory.listSync(recursive: true) : <FileSystemEntity>[];
+
+  final List<File> apkFiles = <File>[];
+
+  for (final String apkFileNameEnding in apkFilePartialNames) {
+    // Remove any separators from the apkFileNameEnding to handle cases where the
+    // apk file name contains a hyphen or underscore.
+    // For example, flavor, which passed to flutter build/run command as `--flavor=flavorName`,
+    // can be in camelCase, but gradle can transform it (or not):
+    // 1. flavorName -> flavor-name (in case of several dimensions, where 'flavor' belongs to one and 'Name' to another dimension)
+    // 2. flavorName -> flavorname (in case of one dimension)
+    //
+    // To handle all possible cases (and because '_' also possible in case with abi: x86_64) we sanitize string
+    // to remove all separators.
+    final String endingWithoutSeparators =
+        _removeSeparatorsFromApkName(apkFileNameEnding).toLowerCase();
+    final File? apkFile =
+        apkDirectoryContents
+            .whereType<File>()
+            .where(
+              (File file) => _removeSeparatorsFromApkName(
+                file.basename,
+              ).toLowerCase().endsWith(endingWithoutSeparators),
+            )
+            .firstOrNull;
+    if (apkFile != null) {
+      apkFiles.add(apkFile);
     }
-    final BuildInfo buildInfo = androidBuildInfo.buildInfo;
-    final String modeName = camelCase(buildInfo.modeName);
-    apkFile = apkDirectory.childDirectory(modeName).childFile(apkFileName);
-    if (apkFile.existsSync()) {
-      return <File>[apkFile];
-    }
-    final String? flavor = buildInfo.flavor;
-    if (flavor != null) {
-      // Android Studio Gradle plugin v3 adds flavor to path.
-      apkFile = apkDirectory.childDirectory(flavor).childDirectory(modeName).childFile(apkFileName);
-      if (apkFile.existsSync()) {
-        return <File>[apkFile];
-      }
-    }
-    return const <File>[];
-  });
-  if (apks.isEmpty) {
+  }
+  if (apkFiles.isEmpty || apkFiles.length != apkFilePartialNames.length) {
     _exitWithExpectedFileNotFound(
       project: project,
       fileExtension: '.apk',
@@ -1038,30 +1046,7 @@ Iterable<String> findApkFilesModule(
       analytics: analytics,
     );
   }
-  return apks.map((File file) => file.path);
-}
-
-/// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
-///
-/// The flutter.gradle plugin will copy APK outputs into:
-/// `$buildDir/app/outputs/flutter-apk/app-<abi>-<flavor-flag>-<build-mode-flag>.apk`
-@visibleForTesting
-Iterable<String> listApkPaths(AndroidBuildInfo androidBuildInfo) {
-  final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
-  final List<String> apkPartialName = <String>[
-    if (androidBuildInfo.buildInfo.flavor?.isNotEmpty ?? false)
-      androidBuildInfo.buildInfo.lowerCasedFlavor!,
-    '$buildType.apk',
-  ];
-  if (androidBuildInfo.splitPerAbi) {
-    return <String>[
-      for (final AndroidArch androidArch in androidBuildInfo.targetArchs)
-        <String>['app', androidArch.archName, ...apkPartialName].join('-'),
-    ];
-  }
-  return <String>[
-    <String>['app', ...apkPartialName].join('-'),
-  ];
+  return apkFiles;
 }
 
 @visibleForTesting
@@ -1282,4 +1267,8 @@ String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
     result = 'android-arm64';
   }
   return result;
+}
+
+String _removeSeparatorsFromApkName(String apkName) {
+  return apkName.replaceAll(RegExp(r'[-_.]'), '');
 }

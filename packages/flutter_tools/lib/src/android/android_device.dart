@@ -28,6 +28,7 @@ import 'android_builder.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
 import 'application_package.dart';
+import 'gradle.dart';
 
 /// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
 enum HardwareType { emulator, physical }
@@ -365,7 +366,7 @@ class AndroidDevice extends Device {
     return result.stdout;
   }
 
-  String _getSourceSha1(AndroidApk apk) {
+  String _getSourceSha1(PrebuiltAndroidApk apk) {
     final File shaFile = _fileSystem.file('${apk.applicationPackage.path}.sha1');
     return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
   }
@@ -396,13 +397,13 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(covariant AndroidApk app) async {
+  Future<bool> isLatestBuildInstalled(covariant PrebuiltAndroidApk app) async {
     final String installedSha1 = await _getDeviceApkSha1(app);
     return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(app);
   }
 
   @override
-  Future<bool> installApp(covariant AndroidApk app, {String? userIdentifier}) async {
+  Future<bool> installApp(covariant PrebuiltAndroidApk app, {String? userIdentifier}) async {
     if (!await _adbIsValid) {
       return false;
     }
@@ -426,7 +427,7 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<bool> _installApp(AndroidApk app, {String? userIdentifier}) async {
+  Future<bool> _installApp(PrebuiltAndroidApk app, {String? userIdentifier}) async {
     if (!app.applicationPackage.existsSync()) {
       _logger.printError(
         '"${_fileSystem.path.relative(app.applicationPackage.path)}" does not exist.',
@@ -517,7 +518,7 @@ class AndroidDevice extends Device {
     return await _checkForSupportedAdbVersion() && await _checkForSupportedAndroidVersion();
   }();
 
-  AndroidApk? _package;
+  PrebuiltAndroidApk? _package;
 
   @override
   Future<LaunchResult> startApp(
@@ -532,6 +533,10 @@ class AndroidDevice extends Device {
   }) async {
     if (!await _adbIsValid) {
       return LaunchResult.failed();
+    }
+
+    if (prebuiltApplication && package is BuildableAndroidApk) {
+      throwToolExit('Provided path to application binary does not contain valid APK.');
     }
 
     final TargetPlatform devicePlatform = await targetPlatform;
@@ -579,14 +584,34 @@ class AndroidDevice extends Device {
           fastStart: debuggingOptions.fastStart,
         ),
       );
+
+      final String filenameEnding;
+      if (debuggingOptions.buildInfo.flavor == null) {
+        filenameEnding = '${debuggingOptions.buildInfo.mode.cliName}.apk';
+      } else {
+        filenameEnding =
+            '${debuggingOptions.buildInfo.lowerCasedFlavor}-${debuggingOptions.buildInfo.mode.cliName}.apk';
+      }
+
+      final Directory apkDirectory = getApkDirectory(project);
+      final File? apk =
+          apkDirectory
+              .listSync(recursive: true)
+              .whereType<File>()
+              .where((File file) => file.basename.toLowerCase().endsWith(filenameEnding))
+              .singleOrNull;
+      if (apk == null) {
+        throwToolExit('Problem building Android application: see above error(s).');
+      }
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
       builtPackage =
           await ApplicationPackageFactory.instance!.getPackageForPlatform(
                 devicePlatform,
                 buildInfo: debuggingOptions.buildInfo,
+                applicationBinary: apk,
               )
-              as AndroidApk?;
+              as PrebuiltAndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {
@@ -596,7 +621,7 @@ class AndroidDevice extends Device {
     _logger.printTrace("Stopping app '${builtPackage.name}' on $name.");
     await stopApp(builtPackage, userIdentifier: userIdentifier);
 
-    if (!await installApp(builtPackage, userIdentifier: userIdentifier)) {
+    if (!await installApp(builtPackage as PrebuiltAndroidApk, userIdentifier: userIdentifier)) {
       return LaunchResult.failed();
     }
 
@@ -763,7 +788,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<MemoryInfo> queryMemoryInfo() async {
-    final AndroidApk? package = _package;
+    final PrebuiltAndroidApk? package = _package;
     if (package == null) {
       _logger.printError('Android package unknown, skipping dumpsys meminfo.');
       return const MemoryInfo.empty();

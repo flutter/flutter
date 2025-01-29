@@ -178,7 +178,7 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
 
 class FakeIOSApp extends Fake implements IOSApp {}
 
-class FakeAndroidApk extends Fake implements AndroidApk {}
+class FakeAndroidApk extends Fake implements PrebuiltAndroidApk {}
 
 class FakeIOSDevice extends Fake implements IOSDevice {
   @override
@@ -202,7 +202,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;
 
   @override
-  Future<bool> installApp(AndroidApk app, {String? userIdentifier}) async => true;
+  Future<bool> installApp(PrebuiltAndroidApk app, {String? userIdentifier}) async => true;
 
   @override
   String get name => 'Android';

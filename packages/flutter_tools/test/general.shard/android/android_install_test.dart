@@ -68,7 +68,7 @@ void main() {
       ),
     ]);
     final File apk = fileSystem.file('app-debug.apk')..createSync();
-    final AndroidApk androidApk = AndroidApk(
+    final PrebuiltAndroidApk androidApk = PrebuiltAndroidApk(
       applicationPackage: apk,
       id: 'app',
       versionCode: 22,
@@ -82,7 +82,7 @@ void main() {
 
   testWithoutContext('Cannot install app if APK file is missing', () async {
     final File apk = fileSystem.file('app-debug.apk');
-    final AndroidApk androidApk = AndroidApk(
+    final PrebuiltAndroidApk androidApk = PrebuiltAndroidApk(
       applicationPackage: apk,
       id: 'app',
       versionCode: 22,
@@ -105,7 +105,7 @@ void main() {
       kStoreShaCommand,
     ]);
     final File apk = fileSystem.file('app-debug.apk')..createSync();
-    final AndroidApk androidApk = AndroidApk(
+    final PrebuiltAndroidApk androidApk = PrebuiltAndroidApk(
       applicationPackage: apk,
       id: 'app',
       versionCode: 22,
@@ -126,7 +126,7 @@ void main() {
       kStoreShaCommand,
     ]);
     final File apk = fileSystem.file('app-debug.apk')..createSync();
-    final AndroidApk androidApk = AndroidApk(
+    final PrebuiltAndroidApk androidApk = PrebuiltAndroidApk(
       applicationPackage: apk,
       id: 'app',
       versionCode: 22,
@@ -164,7 +164,7 @@ void main() {
       ),
     ]);
     final File apk = fileSystem.file('app-debug.apk')..createSync();
-    final AndroidApk androidApk = AndroidApk(
+    final PrebuiltAndroidApk androidApk = PrebuiltAndroidApk(
       applicationPackage: apk,
       id: 'app',
       versionCode: 22,
@@ -209,7 +209,7 @@ void main() {
     ]);
     final File apk = fileSystem.file('app-debug.apk')..createSync();
     fileSystem.file('app-debug.apk.sha1').writeAsStringSync('example_sha');
-    final AndroidApk androidApk = AndroidApk(
+    final PrebuiltAndroidApk androidApk = PrebuiltAndroidApk(
       applicationPackage: apk,
       id: 'app',
       versionCode: 22,
@@ -281,7 +281,7 @@ void main() {
       ]);
       final File apk = fileSystem.file('app-debug.apk')..createSync();
       fileSystem.file('app-debug.apk.sha1').writeAsStringSync('example_sha');
-      final AndroidApk androidApk = AndroidApk(
+      final PrebuiltAndroidApk androidApk = PrebuiltAndroidApk(
         applicationPackage: apk,
         id: 'app',
         versionCode: 22,
@@ -321,7 +321,7 @@ void main() {
         ),
       ]);
       final File apk = fileSystem.file('app-debug.apk')..createSync();
-      final AndroidApk androidApk = AndroidApk(
+      final PrebuiltAndroidApk androidApk = PrebuiltAndroidApk(
         applicationPackage: apk,
         id: 'app',
         versionCode: 22,

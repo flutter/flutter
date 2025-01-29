@@ -56,7 +56,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         if (applicationBinary == null) {
-          return AndroidApk.fromAndroidProject(
+          return BuildableAndroidApk.fromAndroidProject(
             FlutterProject.current().android,
             processManager: _processManager,
             processUtils: _processUtils,
@@ -67,7 +67,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             buildInfo: buildInfo,
           );
         }
-        return AndroidApk.fromApk(
+        return PrebuiltAndroidApk.fromApk(
           applicationBinary,
           processManager: _processManager,
           logger: _logger,

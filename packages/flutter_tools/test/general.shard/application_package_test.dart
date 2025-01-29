@@ -113,7 +113,7 @@ void main() {
           .childDirectory('debug')
           .childFile('app-debug.apk');
       apkDebugFile.createSync(recursive: true);
-      final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+      final PrebuiltAndroidApk? androidApk = await PrebuiltAndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
         processManager: fakeProcessManager,
@@ -201,7 +201,7 @@ void main() {
 
     testWithoutContext('returns null when failed to extract manifest', () async {
       final Logger logger = BufferLogger.test();
-      final AndroidApk? androidApk = AndroidApk.fromApk(
+      final PrebuiltAndroidApk? androidApk = PrebuiltAndroidApk.fromApk(
         fs.file(''),
         processManager: fakeProcessManager,
         logger: logger,
