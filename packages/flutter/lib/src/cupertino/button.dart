@@ -205,9 +205,10 @@ class CupertinoButton extends StatefulWidget {
   )
   final double? minSize;
 
-  /// The minimumSize of the button.
+  /// The minimum size of the button.
   ///
-  /// Defaults to [kMinInteractiveDimensionCupertino], which the iOS Human
+  /// Defaults to a button with a height and a width of
+  /// [kMinInteractiveDimensionCupertino], which the iOS Human
   /// Interface Guidelines recommends as the minimum tappable area.
   final Size? minimumSize;
 
