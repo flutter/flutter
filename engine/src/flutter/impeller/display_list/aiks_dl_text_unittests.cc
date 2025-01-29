@@ -152,27 +152,17 @@ TEST_P(AiksTest, CanRenderTextFrameWithHalfScaling) {
 }
 
 TEST_P(AiksTest, CanRenderTextFrameWithFractionScaling) {
-  Scalar fine_scale = 0.f;
-  auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
-      ImGui::SliderFloat("Fine Scale", &fine_scale, -1, 1);
-      ImGui::End();
-    }
+  DisplayListBuilder builder;
 
-    DisplayListBuilder builder;
-    DlPaint paint;
-    paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
-    builder.DrawPaint(paint);
-    Scalar scale = 2.625 + fine_scale;
-    builder.Scale(scale, scale);
-    RenderTextInCanvasSkia(GetContext(), builder,
-                           "the quick brown fox jumped over the lazy dog!.?",
-                           "Roboto-Regular.ttf");
-    return builder.Build();
-  };
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+  builder.Scale(2.625, 2.625);
 
-  ASSERT_TRUE(OpenPlaygroundHere(callback));
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "the quick brown fox jumped over the lazy dog!.?",
+      "Roboto-Regular.ttf"));
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 TEST_P(AiksTest, TextFrameSubpixelAlignment) {
