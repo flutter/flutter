@@ -11,7 +11,6 @@ import '../base/net.dart';
 import '../base/time.dart';
 import '../device.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 
 WebRunnerFactory? get webRunnerFactory => context.get<WebRunnerFactory>();
