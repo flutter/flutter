@@ -80,7 +80,8 @@ public class SensitiveContentPlugin
    * flutterViewId} to the level specified by {@requestedContentSensitivity}.
    */
   @Override
-  public void getContentSensitivity(@NonNull int flutterViewId, @NonNull MethodChannel.Result result) {
+  public void getContentSensitivity(
+      @NonNull int flutterViewId, @NonNull MethodChannel.Result result) {
     if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
       // This feature is only available on > API 35.
       return;

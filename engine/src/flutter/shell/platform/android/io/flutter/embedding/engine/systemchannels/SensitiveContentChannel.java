@@ -50,7 +50,8 @@ public class SensitiveContentChannel {
             case "SensitiveContent.getContentSensitivity":
               final int flutterViewId = (int) args.get("flutterViewId");
               try {
-                final int contentSensitivity = sensitiveContentMethodHandler.getContentSensitivity(flutterViewId, result);
+                final int contentSensitivity =
+                    sensitiveContentMethodHandler.getContentSensitivity(flutterViewId, result);
               } catch (IllegalStateException exception) {
                 result.error("error", exception.getMessage(), null);
               }
@@ -92,9 +93,7 @@ public class SensitiveContentChannel {
     /**
      * Returns the current content sensitivity level of the Flutter Android {@code View} whose ID
      * matches {@code flutterViewId}.
-    */
-   void getContentSensitivity(
-      @NonNull int flutterViewId,
-      @NonNull MethodChannel.Result result);
+     */
+    void getContentSensitivity(@NonNull int flutterViewId, @NonNull MethodChannel.Result result);
   }
 }
