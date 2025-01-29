@@ -74,6 +74,16 @@ void TextContents::SetTextProperties(Color color,
   }
 }
 
+namespace {
+Matrix MakeRectTransform(Rect from, Rect to) {
+  return Matrix::MakeTranslation({to.GetLeft(), to.GetTop(), 0}) *
+         Matrix::MakeScale(
+             /*s=*/{to.GetWidth() / from.GetWidth(),
+                    to.GetHeight() / from.GetHeight(), 1}) *
+         Matrix::MakeTranslation({-from.GetLeft(), -from.GetTop(), 0});
+}
+}  // namespace
+
 void TextContents::ComputeVertexData(
     VS::PerVertexData* vtx_contents,
     const std::shared_ptr<TextFrame>& frame,
@@ -178,20 +188,25 @@ void TextContents::ComputeVertexData(
       Point screen_glyph_position =
           (screen_offset + unrounded_glyph_position + subpixel_adjustment)
               .Floor();
+      Vector3 screen_size = basis_transform * scaled_bounds.GetSize();
+
+      Matrix position_to_uv = MakeRectTransform(
+          Rect::MakeOriginSize(screen_glyph_position,
+                               Size(screen_size.x, screen_size.y)),
+          Rect::MakeOriginSize(uv_origin, Size(uv_size.x, uv_size.y)));
 
       for (const Point& point : unit_points) {
-        Point position;
         if (is_translation_scale) {
-          position = (screen_glyph_position +
-                      (basis_transform * point * scaled_bounds.GetSize()))
-                         .Round();
+          vtx.position = (screen_glyph_position +
+                          (basis_transform * point * scaled_bounds.GetSize()))
+                             .Round();
+          vtx.uv = position_to_uv * vtx.position;
         } else {
-          position = entity_transform *
-                     (glyph_position.position + scaled_bounds.GetLeftTop() +
-                      point * scaled_bounds.GetSize());
+          vtx.position = entity_transform *
+                         (glyph_position.position + scaled_bounds.GetLeftTop() +
+                          point * scaled_bounds.GetSize());
+          vtx.uv = uv_origin + (uv_size * point);
         }
-        vtx.uv = uv_origin + (uv_size * point);
-        vtx.position = position;
         vtx_contents[i++] = vtx;
       }
     }
