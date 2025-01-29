@@ -60,7 +60,8 @@ int GetVlogVerbosity();
 // kLogFatal and above is always true.
 bool ShouldCreateLogMessage(LogSeverity severity);
 
-constexpr bool ShouldCreateLogMessage2(LogSeverity severity, bool true_arg) {
+constexpr bool ShouldCreateLogMessageConstexpr(LogSeverity severity,
+                                               bool true_arg) {
   if (true_arg) {
     return ShouldCreateLogMessage(severity);
   }
@@ -69,7 +70,7 @@ constexpr bool ShouldCreateLogMessage2(LogSeverity severity, bool true_arg) {
 
 [[noreturn]] void KillProcess();
 
-[[noreturn]] constexpr void KillProcess2(bool true_arg) {
+[[noreturn]] constexpr void KillProcessConstexpr(bool true_arg) {
   if (true_arg) {
     KillProcess();
   }
@@ -95,7 +96,7 @@ constexpr bool ShouldCreateLogMessage2(LogSeverity severity, bool true_arg) {
             ::fml::LogMessage(::fml::kLogFatal, 0, 0, nullptr).stream()
 
 #define FML_LOG_IS_ON(severity) \
-  (::fml::ShouldCreateLogMessage2(::fml::LOG_##severity, true))
+  (::fml::ShouldCreateLogMessageConstexpr(::fml::LOG_##severity, true))
 
 #define FML_LOG(severity) \
   FML_LAZY_STREAM(FML_LOG_STREAM(severity), FML_LOG_IS_ON(severity))
@@ -127,7 +128,7 @@ constexpr bool ShouldCreateLogMessage2(LogSeverity severity, bool true_arg) {
 #define FML_UNREACHABLE()                          \
   {                                                \
     FML_LOG(ERROR) << "Reached unreachable code."; \
-    ::fml::KillProcess2(true);                     \
+    ::fml::KillProcessConstexpr(true);             \
   }
 
 #endif  // FLUTTER_FML_LOGGING_H_
