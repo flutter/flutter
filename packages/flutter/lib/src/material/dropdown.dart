@@ -1769,7 +1769,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
            if (field.errorText != null || effectiveDecoration.hintText != null) {
              final Widget? error =
                  field.errorText != null && errorBuilder != null
-                     ? errorBuilder(field.errorText!)
+                     ? errorBuilder(state.context, field.errorText!)
                      : null;
              final String? errorText = error == null ? field.errorText : null;
              // Clear the decoration hintText because DropdownButton has its own hint logic.

@@ -1673,14 +1673,14 @@ void main() {
             child: TextFormField(
               autovalidateMode: AutovalidateMode.always,
               validator: (String? value) => 'validation error',
-              errorBuilder: (String errorText) => Text('**$errorText**'),
+              errorBuilder: (BuildContext context, String errorText) => Text('**$errorText**'),
             ),
           ),
         ),
       ),
     );
 
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.text('**validation error**'), findsOneWidget);
   });

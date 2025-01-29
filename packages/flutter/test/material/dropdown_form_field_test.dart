@@ -1243,13 +1243,13 @@ void main() {
             onChanged: onChanged,
             autovalidateMode: AutovalidateMode.always,
             validator: (String? v) => 'Required',
-            errorBuilder: (String errorText) => Text('**$errorText**'),
+            errorBuilder: (BuildContext context, String errorText) => Text('**$errorText**'),
           ),
         ),
       ),
     );
 
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.text('**Required**'), findsOneWidget);
   });

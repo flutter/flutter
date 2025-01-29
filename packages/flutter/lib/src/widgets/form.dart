@@ -427,7 +427,7 @@ typedef FormFieldValidator<T> = String? Function(T? value);
 ///
 ///  * [FormField.errorBuilder], which is of this type, and passes the result error
 /// given by [TextFormField.validator].
-typedef FormFieldErrorBuilder = Widget Function(String errorText);
+typedef FormFieldErrorBuilder = Widget Function(BuildContext context, String errorText);
 
 /// Signature for being notified when a form field changes value.
 ///
@@ -475,9 +475,10 @@ class FormField<T> extends StatefulWidget {
     this.restorationId,
   }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
-  /// Function that returns the widget representing this form field. It is
-  /// passed the form field state as input, containing the current value and
-  /// validation state of this field.
+  /// Function that returns the widget representing this form field.
+  ///
+  /// It is passed the form field state as input, containing the current value
+  /// and validation state of this field.
   final FormFieldBuilder<T> builder;
 
   /// An optional method to call with the final value when the form is saved via
@@ -518,6 +519,7 @@ class FormField<T> extends StatefulWidget {
   final FormFieldValidator<T>? validator;
 
   /// Function that returns the widget representing the error to display.
+  ///
   /// It is passed the form field validator error string as input.
   /// The resulting widget is passed to [InputDecoration.error].
   ///

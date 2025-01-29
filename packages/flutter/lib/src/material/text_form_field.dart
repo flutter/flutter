@@ -217,7 +217,7 @@ class TextFormField extends FormField<String> {
            if (errorText != null) {
              effectiveDecoration =
                  errorBuilder != null
-                     ? effectiveDecoration.copyWith(error: errorBuilder(errorText))
+                     ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
                      : effectiveDecoration.copyWith(errorText: errorText);
            }
 
@@ -233,12 +233,7 @@ class TextFormField extends FormField<String> {
                restorationId: restorationId,
                controller: state._effectiveController,
                focusNode: focusNode,
-               decoration:
-                   errorBuilder != null
-                       ? effectiveDecoration.copyWith(
-                         error: field.errorText != null ? errorBuilder(field.errorText!) : null,
-                       )
-                       : effectiveDecoration.copyWith(errorText: field.errorText),
+               decoration: effectiveDecoration,
                keyboardType: keyboardType,
                textInputAction: textInputAction,
                style: style,
