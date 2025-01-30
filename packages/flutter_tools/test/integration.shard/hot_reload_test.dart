@@ -16,6 +16,10 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
+  testAll();
+}
+
+void testAll({bool chrome = false, List<String> additionalCommandArgs = const <String>[]}) {
   late Directory tempDir;
   final HotReloadProject project = HotReloadProject();
   late FlutterRunTestDriver flutter;
@@ -32,12 +36,12 @@ void main() {
   });
 
   testWithoutContext('hot reload works without error', () async {
-    await flutter.run();
+    await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
     await flutter.hotReload();
   });
 
   testWithoutContext('multiple overlapping hot reload are debounced and queued', () async {
-    await flutter.run();
+    await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
     // Capture how many *real* hot reloads occur.
     int numReloads = 0;
     final StreamSubscription<void> subscription = flutter.stdout
@@ -72,21 +76,27 @@ void main() {
 
   testWithoutContext('newly added code executes during hot reload', () async {
     final StringBuffer stdout = StringBuffer();
-    final Completer<void> completer = Completer<void>();
+    final Completer<void> sawTick1 = Completer<void>();
+    final Completer<void> sawTick2 = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String e) {
       stdout.writeln(e);
+      // Initial run should run the build method before we try and hot reload.
+      if (e.contains('(((TICK 1)))')) {
+        sawTick1.complete();
+      }
       // If hot reload properly executes newly added code, the 'RELOAD WORKED' message should
       // be printed before 'TICK 2'. If we don't wait for some signal that the build method
       // has executed after the reload, this test can encounter a race.
       if (e.contains('((((TICK 2))))')) {
-        completer.complete();
+        sawTick2.complete();
       }
     });
-    await flutter.run();
+    await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+    await sawTick1.future;
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotReload();
-      await completer.future;
+      await sawTick2.future;
       expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
     } finally {
       await subscription.cancel();
@@ -94,7 +104,7 @@ void main() {
   });
 
   testWithoutContext('hot restart works without error', () async {
-    await flutter.run(verbose: true);
+    await flutter.run(verbose: true, chrome: chrome, additionalCommandArgs: additionalCommandArgs);
     await flutter.hotRestart();
   });
 
@@ -112,7 +122,12 @@ void main() {
         sawDebuggerPausedMessage.complete();
       }
     });
-    await flutter.run(withDebugger: true, startPaused: true);
+    await flutter.run(
+      withDebugger: true,
+      startPaused: true,
+      chrome: chrome,
+      additionalCommandArgs: additionalCommandArgs,
+    );
     await flutter
         .resume(); // we start paused so we can set up our TICK 1 listener before the app starts
     unawaited(
@@ -142,8 +157,11 @@ void main() {
     printOnFailure('waiting for pause...');
     isolate = await flutter.waitForPause();
     expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
-    printOnFailure('waiting for debugger message...');
-    await sawDebuggerPausedMessage.future;
+    if (!chrome) {
+      // TODO(srujzs): Implement event messages for the web.
+      printOnFailure('waiting for debugger message...');
+      await sawDebuggerPausedMessage.future;
+    }
     expect(reloaded, isFalse);
     printOnFailure('waiting for resume...');
     await flutter.resume();
@@ -155,48 +173,59 @@ void main() {
     await subscription.cancel();
   });
 
-  testWithoutContext("hot reload doesn't reassemble if paused", () async {
-    final Completer<void> sawTick1 = Completer<void>();
-    final Completer<void> sawDebuggerPausedMessage1 = Completer<void>();
-    final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();
-    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
-      printOnFailure('[LOG]:"$line"');
-      if (line.contains('(((TICK 1)))')) {
-        expect(sawTick1.isCompleted, isFalse);
-        sawTick1.complete();
-      }
-      if (line.contains('The application is paused in the debugger on a breakpoint.')) {
-        expect(sawDebuggerPausedMessage1.isCompleted, isFalse);
-        sawDebuggerPausedMessage1.complete();
-      }
-      if (line.contains(
-        'The application is paused in the debugger on a breakpoint; interface might not update.',
-      )) {
-        expect(sawDebuggerPausedMessage2.isCompleted, isFalse);
-        sawDebuggerPausedMessage2.complete();
-      }
-    });
-    await flutter.run(withDebugger: true);
-    await Future<void>.delayed(const Duration(seconds: 1));
-    await sawTick1.future;
-    await flutter.addBreakpoint(project.buildBreakpointUri, project.buildBreakpointLine);
-    bool reloaded = false;
-    await Future<void>.delayed(const Duration(seconds: 1));
-    final Future<void> reloadFuture = flutter.hotReload().then((void value) {
-      reloaded = true;
-    });
-    final Isolate isolate = await flutter.waitForPause();
-    expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
-    expect(reloaded, isFalse);
-    await sawDebuggerPausedMessage1
-        .future; // this is the one where it say "uh, you broke into the debugger while reloading"
-    await reloadFuture; // this is the one where it times out because you're in the debugger
-    expect(reloaded, isTrue);
-    await flutter.hotReload(); // now we're already paused
-    await sawDebuggerPausedMessage2.future; // so we just get told that nothing is going to happen
-    await flutter.resume();
-    await subscription.cancel();
-  });
+  testWithoutContext(
+    "hot reload doesn't reassemble if paused",
+    () async {
+      final Completer<void> sawTick1 = Completer<void>();
+      final Completer<void> sawDebuggerPausedMessage1 = Completer<void>();
+      final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();
+      final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+        printOnFailure('[LOG]:"$line"');
+        if (line.contains('(((TICK 1)))')) {
+          expect(sawTick1.isCompleted, isFalse);
+          sawTick1.complete();
+        }
+        if (line.contains('The application is paused in the debugger on a breakpoint.')) {
+          expect(sawDebuggerPausedMessage1.isCompleted, isFalse);
+          sawDebuggerPausedMessage1.complete();
+        }
+        if (line.contains(
+          'The application is paused in the debugger on a breakpoint; interface might not update.',
+        )) {
+          expect(sawDebuggerPausedMessage2.isCompleted, isFalse);
+          sawDebuggerPausedMessage2.complete();
+        }
+      });
+      await flutter.run(
+        withDebugger: true,
+        chrome: chrome,
+        additionalCommandArgs: additionalCommandArgs,
+      );
+      await Future<void>.delayed(const Duration(seconds: 1));
+      await sawTick1.future;
+      await flutter.addBreakpoint(project.buildBreakpointUri, project.buildBreakpointLine);
+      bool reloaded = false;
+      await Future<void>.delayed(const Duration(seconds: 1));
+      final Future<void> reloadFuture = flutter.hotReload().then((void value) {
+        reloaded = true;
+      });
+      final Isolate isolate = await flutter.waitForPause();
+      expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
+      expect(reloaded, isFalse);
+      await sawDebuggerPausedMessage1
+          .future; // this is the one where it say "uh, you broke into the debugger while reloading"
+      await flutter.resume();
+      await reloadFuture; // this is the one where it times out because you're in the debugger
+      expect(reloaded, isTrue);
+      await flutter.hotReload(); // now we're already paused
+      await sawDebuggerPausedMessage2.future; // so we just get told that nothing is going to happen
+      await flutter.resume();
+      await subscription.cancel();
+    },
+    // On the web, hot reload cannot continue as the browser is paused and there are no multiple
+    // isolates, so this test will wait forever.
+    skip: chrome,
+  );
 }
 
 bool _isHotReloadCompletionEvent(Map<String, Object?>? event) {

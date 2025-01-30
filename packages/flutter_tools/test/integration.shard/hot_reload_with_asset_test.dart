@@ -15,6 +15,10 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
+  testAll();
+}
+
+void testAll({bool chrome = false, List<String> additionalCommandArgs = const <String>[]}) {
   late Directory tempDir;
   final HotReloadWithAssetProject project = HotReloadWithAssetProject();
   late FlutterRunTestDriver flutter;
@@ -49,7 +53,7 @@ void main() {
       }
     });
     flutter.stdout.listen(printOnFailure);
-    await flutter.run();
+    await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
     await onFirstLoad.future;
 
     project.uncommentHotReloadPrint();
@@ -76,7 +80,7 @@ void main() {
       }
     });
     flutter.stdout.listen(printOnFailure);
-    await flutter.run();
+    await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
     await onFirstLoad.future;
 
     project.uncommentHotReloadPrint();

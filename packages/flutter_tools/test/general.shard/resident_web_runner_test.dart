@@ -1725,6 +1725,7 @@ class FakeWebDevFS extends Fake implements WebDevFS {
     AssetBundle? bundle,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
+    bool resetCompiler = false,
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {

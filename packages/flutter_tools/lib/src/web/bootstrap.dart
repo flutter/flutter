@@ -253,6 +253,15 @@ $_simpleLoaderScript
     // reloaded into the page. This is then read when a hot restart is triggered
     // in DDC via the `\$dartReloadModifiedModules` callback.
     let restartScripts = currentUri + '.restartScripts';
+    // Flutter tools should write a file containing the scripts and libraries
+    // that need to be hot reloaded. This is read in DWDS when a hot reload is
+    // triggered.
+    // TODO(srujzs): Ideally, this should be passed to the
+    // `FrontendServerDdcLibraryBundleStrategyProvider`, but the injected client
+    // in DWDS would require conditionally parsing args so it can then be passed
+    // to the code that calls `hotReload`. Maybe it's worth it.
+    let reloadScripts = currentUri + '.reloadScripts';
+    window.\$reloadScriptsPath = reloadScripts;
 
     if (!window.\$dartReloadModifiedModules) {
       window.\$dartReloadModifiedModules = (function(appName, callback) {

@@ -40,6 +40,7 @@ import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
+import '../web/module_metadata.dart';
 import '../web_template.dart';
 
 typedef DwdsLauncher =
@@ -177,6 +178,29 @@ class WebAssetServer implements AssetReader {
       writeFile('main.dart.js.restartScripts', json.encode(srcIdsList));
     }
     _hotRestartGeneration++;
+  }
+
+  /// Given a list of [modules] that need to be reloaded, writes a file that
+  /// contains a list of objects each with two fields:
+  ///
+  /// `src`: A string that corresponds to the file path containing a DDC library
+  /// bundle.
+  /// `libraries`: An array of strings containing the libraries that were
+  /// compiled in `src`.
+  ///
+  /// The path of the output file should stay consistent across the lifetime of
+  /// the app.
+  void performReload(List<String> modules) {
+    final List<Map<String, Object>> moduleToLibrary = <Map<String, Object>>[];
+    for (final String module in modules) {
+      final ModuleMetadata metadata = ModuleMetadata.fromJson(
+        json.decode(utf8.decode(_webMemoryFS.metadataFiles['$module.metadata']!.toList()))
+            as Map<String, dynamic>,
+      );
+      final List<String> libraries = metadata.libraries.keys.toList();
+      moduleToLibrary.add(<String, Object>{'src': module, 'libraries': libraries});
+    }
+    writeFile('main.dart.js.reloadScripts', json.encode(moduleToLibrary));
   }
 
   @visibleForTesting
@@ -1001,6 +1025,7 @@ class WebDevFS implements DevFS {
     AssetBundle? bundle,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
+    bool resetCompiler = false,
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
@@ -1077,7 +1102,7 @@ class WebDevFS implements DevFS {
     await _validateTemplateFile('index.html');
     await _validateTemplateFile('flutter_bootstrap.js');
     final DateTime candidateCompileTime = DateTime.now();
-    if (fullRestart) {
+    if (resetCompiler) {
       generator.reset();
     }
 
@@ -1122,8 +1147,11 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
-
-    webAssetServer.performRestart(modules, writeRestartScripts: ddcModuleSystem);
+    if (fullRestart) {
+      webAssetServer.performRestart(modules, writeRestartScripts: ddcModuleSystem);
+    } else {
+      webAssetServer.performReload(modules);
+    }
     return UpdateFSReport(
       success: true,
       syncedBytes: codeFile.lengthSync(),
