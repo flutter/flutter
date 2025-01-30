@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/dds.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../device.dart';
@@ -24,17 +25,20 @@ import 'web_driver_service.dart';
 class FlutterDriverFactory {
   FlutterDriverFactory({
     required ApplicationPackageFactory applicationPackageFactory,
+    required Platform platform,
     required Logger logger,
     required ProcessUtils processUtils,
     required String dartSdkPath,
     required DevtoolsLauncher devtoolsLauncher,
   }) : _applicationPackageFactory = applicationPackageFactory,
+       _platform = platform,
        _logger = logger,
        _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
        _devtoolsLauncher = devtoolsLauncher;
 
   final ApplicationPackageFactory _applicationPackageFactory;
+  final Platform _platform;
   final Logger _logger;
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
@@ -45,12 +49,14 @@ class FlutterDriverFactory {
     if (web) {
       return WebDriverService(
         logger: _logger,
+        platform: _platform,
         processUtils: _processUtils,
         dartSdkPath: _dartSdkPath,
       );
     }
     return FlutterDriverService(
       logger: _logger,
+      platform: _platform,
       processUtils: _processUtils,
       dartSdkPath: _dartSdkPath,
       applicationPackageFactory: _applicationPackageFactory,
@@ -74,11 +80,7 @@ abstract class DriverService {
   });
 
   /// If --use-existing-app is provided, configured the correct VM Service URI.
-  Future<void> reuseApplication(
-    Uri vmServiceUri,
-    Device device,
-    DebuggingOptions debuggingOptions,
-  );
+  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions);
 
   /// Start the test file with the provided [arguments] and [environment], returning
   /// the test process exit code.
@@ -88,7 +90,6 @@ abstract class DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
     PackageConfig packageConfig, {
     bool? headless,
     String? chromeBinary,
@@ -105,10 +106,7 @@ abstract class DriverService {
   /// If [writeSkslOnExit] is non-null, will connect to the VM Service
   /// and write SkSL to the file. This is only supported on mobile and
   /// desktop devices.
-  Future<void> stop({
-    File? writeSkslOnExit,
-    String? userIdentifier,
-  });
+  Future<void> stop({File? writeSkslOnExit, String? userIdentifier});
 }
 
 /// An implementation of the driver service that connects to mobile and desktop
@@ -117,12 +115,14 @@ class FlutterDriverService extends DriverService {
   FlutterDriverService({
     required ApplicationPackageFactory applicationPackageFactory,
     required Logger logger,
+    required Platform platform,
     required ProcessUtils processUtils,
     required String dartSdkPath,
     required DevtoolsLauncher devtoolsLauncher,
     @visibleForTesting VMServiceConnector vmServiceConnector = connectToVmService,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _logger = logger,
+       _platform = platform,
        _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
        _vmServiceConnector = vmServiceConnector,
@@ -132,6 +132,7 @@ class FlutterDriverService extends DriverService {
 
   final ApplicationPackageFactory _applicationPackageFactory;
   final Logger _logger;
+  final Platform _platform;
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final VMServiceConnector _vmServiceConnector;
@@ -158,7 +159,7 @@ class FlutterDriverService extends DriverService {
         'Flutter Driver (non-web) does not support running in release mode.\n'
         '\n'
         'Use --profile mode for testing application performance.\n'
-        'Use --debug (default) mode for testing correctness (with assertions).'
+        'Use --debug (default) mode for testing correctness (with assertions).',
       );
     }
     _device = device;
@@ -192,11 +193,7 @@ class FlutterDriverService extends DriverService {
     if (result == null || !result.started) {
       throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
     }
-    return reuseApplication(
-      result.vmServiceUri!,
-      device,
-      debuggingOptions,
-    );
+    return reuseApplication(result.vmServiceUri!, device, debuggingOptions);
   }
 
   @override
@@ -231,16 +228,13 @@ class FlutterDriverService extends DriverService {
     _vmService = await _vmServiceConnector(uri, device: _device, logger: _logger);
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
-
-    final vm_service.VM vm = await _vmService.service.getVM();
-    logReader.appPid = vm.pid;
+    await logReader.provideVmService(_vmService);
   }
 
   @override
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
     PackageConfig packageConfig, {
     bool? headless,
     String? chromeBinary,
@@ -252,22 +246,20 @@ class FlutterDriverService extends DriverService {
     String? profileMemory,
   }) async {
     if (profileMemory != null) {
-      unawaited(_devtoolsLauncher.launch(
-        Uri.parse(_vmServiceUri),
-        additionalArguments: <String>['--record-memory-profile=$profileMemory'],
-      ));
+      unawaited(
+        _devtoolsLauncher.launch(
+          Uri.parse(_vmServiceUri),
+          additionalArguments: <String>['--record-memory-profile=$profileMemory'],
+        ),
+      );
       // When profiling memory the original launch future will never complete.
       await _devtoolsLauncher.processStart;
     }
     try {
-      final int result = await _processUtils.stream(<String>[
-        _dartSdkPath,
-        ...arguments,
-        testFile,
-      ], environment: <String, String>{
-        'VM_SERVICE_URL': _vmServiceUri,
-        ...environment,
-      });
+      final int result = await _processUtils.stream(
+        <String>[_dartSdkPath, ...arguments, testFile],
+        environment: <String, String>{..._platform.environment, 'VM_SERVICE_URL': _vmServiceUri},
+      );
       return result;
     } finally {
       if (profileMemory != null) {
@@ -277,15 +269,10 @@ class FlutterDriverService extends DriverService {
   }
 
   @override
-  Future<void> stop({
-    File? writeSkslOnExit,
-    String? userIdentifier,
-  }) async {
+  Future<void> stop({File? writeSkslOnExit, String? userIdentifier}) async {
     if (writeSkslOnExit != null) {
       final FlutterView flutterView = (await _vmService.getFlutterViews()).first;
-      final Map<String, Object?>? result = await _vmService.getSkSLs(
-        viewId: flutterView.id
-      );
+      final Map<String, Object?>? result = await _vmService.getSkSLs(viewId: flutterView.id);
       await sharedSkSlWriter(_device!, result, outputFile: writeSkslOnExit, logger: _logger);
     }
     // If the application package is available, stop and uninstall.
@@ -300,10 +287,11 @@ class FlutterDriverService extends DriverService {
     } else if (_device!.supportsFlutterExit) {
       // Otherwise use the VM Service URI to stop the app as a best effort approach.
       final vm_service.VM vm = await _vmService.service.getVM();
-      final vm_service.IsolateRef isolateRef = vm.isolates!
-        .firstWhere((vm_service.IsolateRef element) {
-          return !element.isSystemIsolate!;
-        });
+      final vm_service.IsolateRef isolateRef = vm.isolates!.firstWhere((
+        vm_service.IsolateRef element,
+      ) {
+        return !element.isSystemIsolate!;
+      });
       unawaited(_vmService.flutterExit(isolateId: isolateRef.id!));
     } else {
       _logger.printTrace('No application package for $_device, leaving app running');
