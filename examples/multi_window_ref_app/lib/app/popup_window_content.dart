@@ -72,7 +72,7 @@ class PopupWindowContent extends StatelessWidget {
                                             parent: controller,
                                             controller: PopupWindowController(
                                               parent: windowManagerModel
-                                                  .selected!.view,
+                                                  .selected!.rootView,
                                               onDestroyed: () =>
                                                   windowManagerModel
                                                       .remove(key),

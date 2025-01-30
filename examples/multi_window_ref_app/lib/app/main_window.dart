@@ -137,8 +137,9 @@ class _ActiveWindowsTable extends StatelessWidget {
                 selected: controller.controller == windowManagerModel.selected,
                 onSelectChanged: (selected) {
                   if (selected != null) {
-                    windowManagerModel.select(
-                        selected ? controller.controller.view?.viewId : null);
+                    windowManagerModel.select(selected
+                        ? controller.controller.rootView.viewId
+                        : null);
                   }
                 },
                 cells: [
@@ -147,7 +148,7 @@ class _ActiveWindowsTable extends StatelessWidget {
                         listenable: controller.controller,
                         builder: (BuildContext context, Widget? _) => Text(
                             controller.controller.isReady
-                                ? '${controller.controller.view.viewId}'
+                                ? '${controller.controller.rootView.viewId}'
                                 : 'Loading...')),
                   ),
                   DataCell(
@@ -234,7 +235,7 @@ class _WindowCreatorCard extends StatelessWidget {
                         key: key,
                         parent: windowManagerModel.selected,
                         controller: PopupWindowController(
-                          parent: windowManagerModel.selected!.view,
+                          parent: windowManagerModel.selected!.rootView,
                           onDestroyed: () => windowManagerModel.remove(key),
                           onError: (String error) =>
                               windowManagerModel.remove(key),
@@ -253,8 +254,8 @@ class _WindowCreatorCard extends StatelessWidget {
                                   .selected.constraintAdjustments),
                         )));
                   },
-                  child: Text(windowManagerModel.selected?.view?.viewId != null
-                      ? 'Popup of ID ${windowManagerModel.selected!.view.viewId}'
+                  child: Text(windowManagerModel.selected?.rootView.viewId != null
+                      ? 'Popup of ID ${windowManagerModel.selected!.rootView.viewId}'
                       : 'Popup'),
                 ),
                 const SizedBox(height: 8),

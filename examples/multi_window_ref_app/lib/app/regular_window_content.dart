@@ -112,7 +112,7 @@ class _RegularWindowContentState extends State<RegularWindowContent>
                           listenable: widget.controller,
                           builder: (BuildContext context, Widget? _) {
                             return Text(
-                              'View #${widget.controller.view?.viewId ?? "Unknown"}\n'
+                              'View #${widget.controller.rootView.viewId}\n'
                               'Logical Size: ${widget.controller.size?.width ?? "?"}\u00D7${widget.controller.size?.height ?? "?"}\n'
                               'DPR: ${MediaQuery.of(context).devicePixelRatio}',
                               textAlign: TextAlign.center,

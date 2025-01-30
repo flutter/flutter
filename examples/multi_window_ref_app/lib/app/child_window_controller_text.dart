@@ -14,9 +14,9 @@ class ChildWindowControllerText extends StatelessWidget {
         listenable: controller,
         builder: (BuildContext context, Widget? _) {
           return Text(
-              'View #${controller.view?.viewId ?? "Unknown"}\n'
-              'Parent View: ${controller.parent.viewId ?? "None"}\n'
-              'View Size: ${(controller.view!.physicalSize.width / dpr).toStringAsFixed(1)}\u00D7${(controller.view!.physicalSize.height / dpr).toStringAsFixed(1)}\n'
+              'View #${controller.rootView.viewId}\n'
+              'Parent View: ${controller.parent.viewId}\n'
+              'View Size: ${(controller.rootView.physicalSize.width / dpr).toStringAsFixed(1)}\u00D7${(controller.rootView!.physicalSize.height / dpr).toStringAsFixed(1)}\n'
               'Window Size: ${controller.size?.width}\u00D7${controller.size?.height}\n'
               'Device Pixel Ratio: $dpr',
               textAlign: TextAlign.center,
