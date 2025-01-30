@@ -956,7 +956,6 @@ void main() {
 
           createSharedGradleFiles();
           final File aabFile = createAabFile(BuildMode.debug);
-          aabFile.createSync(recursive: true);
 
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fileSystem.currentDirectory,
@@ -1009,7 +1008,6 @@ void main() {
 
           createSharedGradleFiles();
           final File aabFile = createAabFile(BuildMode.release);
-          aabFile.createSync(recursive: true);
 
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
@@ -1079,7 +1077,6 @@ void main() {
 
           createSharedGradleFiles();
           final File aabFile = createAabFile(BuildMode.release);
-          aabFile.createSync(recursive: true);
 
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
