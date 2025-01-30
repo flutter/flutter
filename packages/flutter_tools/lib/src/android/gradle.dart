@@ -690,7 +690,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (result.exitCode != 0) {
       _logger.printTrace(
         'apkanalyzer finished with exit code 0 when checking final appbundle for debug symbols.\n'
-        'stderr was: ${result.stderr}',
+        'stderr was: ${result.stderr}\n'
+        'and stdout was: ${result.stdout}',
       );
       return false;
     }
