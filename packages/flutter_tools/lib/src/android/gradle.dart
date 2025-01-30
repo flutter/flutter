@@ -662,13 +662,22 @@ class AndroidGradleBuilder implements AndroidBuilder {
     Iterable<AndroidArch> targetArchs,
   ) async {
     if (globals.androidSdk == null) {
+      _logger.printTrace(
+        'Failed to find android sdk when checking final appbundle for debug symbols.',
+      );
       return false;
     }
     if (!globals.androidSdk!.cmdlineToolsAvailable) {
+      _logger.printTrace(
+        'Failed to find cmdline-tools when checking final appbundle for debug symbols.',
+      );
       return false;
     }
     final String? apkAnalyzerPath = globals.androidSdk!.getCmdlineToolsPath(apkAnalyzerBinaryName);
     if (apkAnalyzerPath == null) {
+      _logger.printTrace(
+        'Failed to find apkanalyzer when checking final appbundle for debug symbols.',
+      );
       return false;
     }
 
@@ -679,19 +688,22 @@ class AndroidGradleBuilder implements AndroidBuilder {
     );
 
     if (result.exitCode != 0) {
+      _logger.printTrace(
+        'apkanalyzer finished with exit code 0 when checking final appbundle for debug symbols.\n'
+        'stderr was: ${result.stderr}',
+      );
       return false;
     }
 
-    // We don't always build for each architecture, so just ensure that symbols
-    // are present for at least one of the architectures.
-    for (final AndroidArch targetArch in targetArchs) {
-      if (result.stdout.contains(
-        'BUNDLE-METADATA/com.android.tools.build.debugsymbols/${targetArch.archName}/libflutter.so.sym',
-      )) {
-        return true;
-      }
+    // As long as libflutter.so.sym is present for at least one architecture,
+    // assume AGP succeeded in stripping.
+    if (result.stdout.contains('libflutter.so.sym')) {
+      return true;
     }
 
+    _logger.printTrace(
+      'libflutter.so.sym not present when checking final appbundle for debug symbols.',
+    );
     return false;
   }
 
