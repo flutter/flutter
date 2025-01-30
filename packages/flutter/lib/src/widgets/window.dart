@@ -60,10 +60,7 @@ abstract class WindowController with ChangeNotifier {
   }) {
     future
         .then((WindowCreationResult metadata) async {
-          _view = metadata.rootView;
-          _state = metadata.state;
-          _size = metadata.size;
-          notifyListeners();
+          _handleCreationResult();
 
           _listener = _WindowListener(
             viewId: metadata.rootView.viewId,
@@ -87,6 +84,12 @@ abstract class WindowController with ChangeNotifier {
         });
   }
 
+  void _handleCreationResult(WindowCretionResult metadata) {
+    _view = metadata.rootView;
+    _size = metadata.size;
+    notifyListeners();
+  }
+
   /// Returns true if the window associated with the controller has been
   /// created and is ready to be used. Otherwise, returns false.
   bool get isReady => _view != null;
@@ -103,10 +106,6 @@ abstract class WindowController with ChangeNotifier {
   /// The current size of the window. This may differ from the requested size.
   Size get size => _size;
   Size _size = Size.zero;
-
-  /// The current state of the window.
-  WindowState? get state => _state;
-  WindowState? _state;
 
   /// The archetype of the window.
   WindowArchetype get type;
@@ -177,10 +176,25 @@ class RegularWindowController extends WindowController {
            title: title,
            state: state,
          ),
-       );
+       ) {
+    super.future.then((WindowCreationResult metadata) {
+      _state = (metadata as _RegularWindowCreationResult).state;
+      notifyListeners();
+    });
+  }
+
+  @override
+  void _handleCreationResult(WindowCreationResult metadata) {
+    _state = (metadata as _RegularWindowCreationResult).state;
+    super._handleCreationResult(metadata);
+  }
 
   @override
   WindowArchetype get type => WindowArchetype.regular;
+
+  /// The current state of the window.
+  WindowState get state => _state;
+  WindowState _state = WindowState.restored;
 
   /// Modify the properties of the window. The window must be ready before
   /// calling this method. If the window is not ready, an assertion will be
@@ -291,42 +305,53 @@ class WindowControllerContext extends InheritedWidget {
 /// associated with the creation of a window. This object can be constructed
 /// from anywhere, but it is typically returned by internal methods that create
 /// windows.
-class WindowCreationResult {
+abstract class WindowCreationResult {
   /// Creates a new [WindowCreationResult]
   /// [rootView] the view associated with this window
   /// [archetype] the archetype of this window
   /// [size] the size of this window
   /// [state] the state of this window
   WindowCreationResult({
+    this.parentView,
     required this.rootView,
     required this.archetype,
     required this.size,
-    this.state,
   });
 
   /// The view associated with this window.
   final FlutterView rootView;
+
+  final FlutterView? parentView;
 
   /// The archetype of this window.
   final WindowArchetype archetype;
 
   /// The size of this window.
   final Size size;
-
-  /// The state of this window.
-  final WindowState? state;
 }
 
-Future<WindowCreationResult> _createRegular({
+class _RegularWindowCreationResult extends WindowCreationResult {
+  _RegularWindowCreationResult({
+    super.parentView,
+    required super.rootView,
+    required super.archetype,
+    required super.size,
+    required this.state,
+  });
+
+  /// The state of the window
+  final WindowState state;
+}
+
+Future<_RegularWindowCreationResult> _createRegular({
   required Size size,
   BoxConstraints? sizeConstraints,
   String? title,
   WindowState? state,
-}) {
-  return _createWindow(
-    archetype: WindowArchetype.regular,
-    viewBuilder: (MethodChannel channel) async {
-      return await channel.invokeMethod('createWindow', <String, dynamic>{
+}) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final Map<Object?, Object?> creationData =
+      await SystemChannels.windowing.invokeMethod('createWindow', <String, dynamic>{
             'size': <double>[size.width, size.height],
             'minSize':
                 sizeConstraints != null
@@ -340,7 +365,29 @@ Future<WindowCreationResult> _createRegular({
             'state': state?.toString(),
           })
           as Map<Object?, Object?>;
+  final int viewId = creationData['viewId']! as int;
+  final List<Object?> resultSize = creationData['size']! as List<Object?>;
+  final WindowState resultState =
+      (creationData['state'] as String?) != null
+          ? WindowState.values.firstWhere(
+            (WindowState e) => e.toString() == creationData['state'],
+            orElse:
+                () => throw Exception('Invalid window state received: ${creationData['state']}'),
+          )
+          : WindowState.restored;
+
+  final FlutterView flView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
+    (FlutterView view) => view.viewId == viewId,
+    orElse: () {
+      throw Exception('No matching view found for viewId: $viewId');
     },
+  );
+
+  return _RegularWindowCreationResult(
+    rootView: flView,
+    archetype: WindowArchetype.regular,
+    size: Size(resultSize[0]! as double, resultSize[1]! as double),
+    state: resultState,
   );
 }
 
@@ -352,39 +399,6 @@ Future<void> _modifyRegular({required int viewId, Size? size, String? title, Win
     'title': title,
     'state': state?.toString(),
   });
-}
-
-Future<WindowCreationResult> _createWindow({
-  required WindowArchetype archetype,
-  required Future<Map<Object?, Object?>> Function(MethodChannel channel) viewBuilder,
-}) async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final Map<Object?, Object?> creationData = await viewBuilder(SystemChannels.windowing);
-  final int viewId = creationData['viewId']! as int;
-  final List<Object?> size = creationData['size']! as List<Object?>;
-
-  final WindowState? state =
-      (creationData['state'] as String?) != null
-          ? WindowState.values.firstWhere(
-            (WindowState e) => e.toString() == creationData['state'],
-            orElse:
-                () => throw Exception('Invalid window state received: ${creationData['state']}'),
-          )
-          : null;
-
-  final FlutterView flView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-    (FlutterView view) => view.viewId == viewId,
-    orElse: () {
-      throw Exception('No matching view found for viewId: $viewId');
-    },
-  );
-
-  return WindowCreationResult(
-    rootView: flView,
-    archetype: archetype,
-    size: Size(size[0]! as double, size[1]! as double),
-    state: state,
-  );
 }
 
 Future<void> _destroyWindow(int viewId) async {
