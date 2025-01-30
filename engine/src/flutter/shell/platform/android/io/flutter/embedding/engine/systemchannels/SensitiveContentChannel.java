@@ -35,10 +35,10 @@ public class SensitiveContentChannel {
           }
           String method = call.method;
           Map<String, Object> args = call.arguments();
+          final int flutterViewId = (int) args.get("flutterViewId");
           Log.v(TAG, "Received '" + method + "' message.");
           switch (method) {
             case "SensitiveContent.setContentSensitivity":
-              final int flutterViewId = (int) args.get("flutterViewId");
               final int contentSensitivityLevel = (int) args.get("contentSensitivityLevel");
               try {
                 sensitiveContentMethodHandler.setContentSensitivity(
@@ -48,10 +48,8 @@ public class SensitiveContentChannel {
               }
               break;
             case "SensitiveContent.getContentSensitivity":
-              final int flutterViewId = (int) args.get("flutterViewId");
               try {
-                final int contentSensitivity =
-                    sensitiveContentMethodHandler.getContentSensitivity(flutterViewId, result);
+                sensitiveContentMethodHandler.getContentSensitivity(flutterViewId, result);
               } catch (IllegalStateException exception) {
                 result.error("error", exception.getMessage(), null);
               }
