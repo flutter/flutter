@@ -8,8 +8,6 @@
 #include "display_list/dl_paint.h"
 #include "display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/dl_builder.h"
-#include "flutter/impeller/display_list/testing/render_text_in_canvas.h"
-#include "flutter/impeller/display_list/testing/rmse.h"
 #include "flutter/impeller/geometry/path_builder.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
@@ -445,6 +443,5 @@ TEST_P(DlGoldenTest, BaselineHE) {
   int32_t y_diff = std::abs(left_max_y - right_max_y);
   EXPECT_TRUE(y_diff <= 2) << "y diff: " << y_diff;
 }
-
 }  // namespace testing
 }  // namespace flutter
