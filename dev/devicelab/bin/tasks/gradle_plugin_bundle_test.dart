@@ -39,7 +39,8 @@ Future<void> main() async {
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
-          'libapp.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libapp.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libapp.so.sym',
           // TODO(gmackall) when pr to not strip libflutter.so lands, expect that here too.
         ], await getFilesInAppBundle(releaseBundle));
       });
@@ -74,7 +75,8 @@ Future<void> main() async {
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
-          'libapp.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libapp.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libapp.so.sym',
           // TODO(gmackall) when pr to not strip libflutter.so lands, expect that here too.
         ], await getFilesInAppBundle(bundleFromGradlePath));
 
@@ -107,7 +109,8 @@ Future<void> main() async {
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
-          'libapp.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libapp.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libapp.so.sym',
           // TODO(gmackall) when pr to not strip libflutter.so lands, expect that here too.
         ], await getFilesInAppBundle(flavorUnderscoreBundlePath));
 
@@ -140,7 +143,8 @@ Future<void> main() async {
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
-          'libapp.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libapp.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libapp.so.sym',
           // TODO(gmackall) when pr to not strip libflutter.so lands, expect that here too.
         ], await getFilesInAppBundle(productionBundlePath));
       });
