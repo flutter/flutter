@@ -209,12 +209,9 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
-    return Semantics(
-      role: SemanticsRole.tab,
-      child: SizedBox(
-        height: height ?? calculatedHeight,
-        child: Center(widthFactor: 1.0, child: label),
-      ),
+    return SizedBox(
+      height: height ?? calculatedHeight,
+      child: Center(widthFactor: 1.0, child: label),
     );
   }
 
@@ -1909,6 +1906,7 @@ class _TabBarState extends State<TabBar> {
             children: <Widget>[
               wrappedTabs[index],
               Semantics(
+                role: SemanticsRole.tab,
                 selected: index == _currentIndex,
                 label:
                     kIsWeb ? null : localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
@@ -1924,6 +1922,8 @@ class _TabBarState extends State<TabBar> {
 
     Widget tabBar = Semantics(
       role: SemanticsRole.tabBar,
+      container: true,
+      explicitChildNodes: true,
       child: CustomPaint(
         painter: _indicatorPainter,
         child: _TabStyle(
@@ -2565,14 +2565,16 @@ class _TabPageSelectorState extends State<TabPageSelector> {
 
 // Hand coded defaults based on Material Design 2.
 class _TabsDefaultsM2 extends TabBarThemeData {
-  const _TabsDefaultsM2(this.context, this.isScrollable)
-    : super(indicatorSize: TabBarIndicatorSize.tab);
+  _TabsDefaultsM2(this.context, this.isScrollable) : super(indicatorSize: TabBarIndicatorSize.tab);
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final bool isDark = Theme.of(context).brightness == Brightness.dark;
+  late final Color primaryColor = isDark ? Colors.grey[900]! : Colors.blue;
   final bool isScrollable;
 
   @override
-  Color? get indicatorColor => Theme.of(context).indicatorColor;
+  Color? get indicatorColor => _colors.secondary == primaryColor ? Colors.white : _colors.secondary;
 
   @override
   Color? get labelColor => Theme.of(context).primaryTextTheme.bodyLarge!.color!;
