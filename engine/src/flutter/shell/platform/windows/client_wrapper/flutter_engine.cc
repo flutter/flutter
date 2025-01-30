@@ -17,6 +17,7 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
   c_engine_properties.icu_data_path = project.icu_data_path().c_str();
   c_engine_properties.aot_library_path = project.aot_library_path().c_str();
   c_engine_properties.dart_entrypoint = project.dart_entrypoint().c_str();
+  c_engine_properties.use_low_power_gpu = project.use_low_power_gpu();
 
   const std::vector<std::string>& entrypoint_args =
       project.dart_entrypoint_arguments();

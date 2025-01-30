@@ -59,6 +59,8 @@ class FlutterProjectBundle {
     return dart_entrypoint_arguments_;
   }
 
+  bool use_low_power_gpu() const { return use_low_power_gpu_; }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
@@ -74,6 +76,8 @@ class FlutterProjectBundle {
 
   // Engine switches.
   std::vector<std::string> engine_switches_;
+
+  bool use_low_power_gpu_;
 };
 
 }  // namespace flutter

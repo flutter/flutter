@@ -71,6 +71,13 @@ class DartProject {
     return dart_entrypoint_arguments_;
   }
 
+  // Sets the request to use low power gpu for flutter engine.
+  bool set_use_low_power_gpu(bool use_low_power_gpu) {
+    use_low_power_gpu_ = use_low_power_gpu;
+  }
+
+  bool use_low_power_gpu() const { return use_low_power_gpu_; }
+
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
@@ -95,6 +102,8 @@ class DartProject {
   std::string dart_entrypoint_;
   // The list of arguments to pass through to the Dart entrypoint.
   std::vector<std::string> dart_entrypoint_arguments_;
+
+  bool use_low_power_gpu_;
 };
 
 }  // namespace flutter

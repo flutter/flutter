@@ -68,6 +68,7 @@ typedef struct {
   // to FlutterDesktopEngineCreate.
   const char** dart_entrypoint_argv;
 
+  bool use_low_power_gpu;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========

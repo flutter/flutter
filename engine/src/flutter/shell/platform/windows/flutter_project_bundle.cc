@@ -29,6 +29,8 @@ FlutterProjectBundle::FlutterProjectBundle(
         std::string(properties.dart_entrypoint_argv[i]));
   }
 
+  use_low_power_gpu_ = properties.use_low_power_gpu;
+
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||
       (!aot_library_path_.empty() && aot_library_path_.is_relative())) {

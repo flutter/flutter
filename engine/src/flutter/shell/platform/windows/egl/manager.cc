@@ -14,19 +14,19 @@ namespace egl {
 
 int Manager::instance_count_ = 0;
 
-std::unique_ptr<Manager> Manager::Create() {
+std::unique_ptr<Manager> Manager::Create(bool use_low_power_gpu) {
   std::unique_ptr<Manager> manager;
-  manager.reset(new Manager());
+  manager.reset(new Manager(use_low_power_gpu));
   if (!manager->IsValid()) {
     return nullptr;
   }
   return std::move(manager);
 }
 
-Manager::Manager() {
+Manager::Manager(bool use_low_power_gpu) {
   ++instance_count_;
 
-  if (!InitializeDisplay()) {
+  if (!InitializeDisplay(use_low_power_gpu)) {
     return;
   }
 
@@ -46,7 +46,71 @@ Manager::~Manager() {
   --instance_count_;
 }
 
-bool Manager::InitializeDisplay() {
+bool Manager::InitializeDisplay(bool use_low_power_gpu) {
+  // If the request for a low power GPU is provided,
+  // we will attempt to select GPU explicitly, via ANGLE extension
+  // that allows to specify the GPU to use via LUID.
+  bool use_selected_gpu = low_power_gpu;
+  LUID luid;
+  if (low_power_gpu) {
+    Microsoft::WRL::ComPtr<IDXGIFactory1> factory1 = nullptr;
+    Microsoft::WRL::ComPtr<IDXGIFactory6> factory6 = nullptr;
+    Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter = nullptr;
+    HRESULT hr = ::CreateDXGIFactory1(IID_PPV_ARGS(&factory1));
+    if (FAILED(hr)) {
+      LogEGLError("DXGI factory creation failed");
+      return false;
+    }
+    hr = factory1->QueryInterface(IID_PPV_ARGS(&factory6));
+    if (FAILED(hr)) {
+      // No support for IDXGIFactory6, so we will not use the selected GPU.
+      // We will follow with the default ANGLE selection.
+      use_selected_gpu = false;
+    }
+    if (use_selected_gpu) {
+      hr = factory6->EnumAdaptersByGpuPreference(
+          0, DXGI_GPU_PREFERENCE_MINIMUM_POWER, IID_PPV_ARGS(&adapter));
+      if (FAILED(hr) || adapter == nullptr) {
+        use_selected_gpu = false;
+      }
+    }
+    if (use_selected_gpu) {
+      // Get the LUID of the adapter.
+      DXGI_ADAPTER_DESC desc;
+      hr = adapter->GetDesc(&desc);
+      if (FAILED(hr)) {
+        use_selected_gpu = false;
+      }
+      luid = desc.AdapterLuid;
+    }
+  }
+
+  // These are preferred display attributes and request ANGLE's D3D11
+  // renderer. We know that there is IDXGI device available for the selected
+  // GPU, so we will not fallback to other GPUs.
+  const EGLint d3d11_display_attributes_with_luid[] = {
+      EGL_PLATFORM_ANGLE_TYPE_ANGLE,
+      EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
+
+      // EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE is an option that will
+      // enable ANGLE to automatically call the IDXGIDevice3::Trim method on
+      // behalf of the application when it gets suspended.
+      EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE,
+      EGL_TRUE,
+
+      // This extension allows angle to render directly on a D3D swapchain
+      // in the correct orientation on D3D11.
+      EGL_EXPERIMENTAL_PRESENT_PATH_ANGLE,
+      EGL_EXPERIMENTAL_PRESENT_PATH_FAST_ANGLE,
+
+      // Specify the LUID of the GPU to use.
+      EGL_PLATFORM_ANGLE_D3D_LUID_HIGH_ANGLE,
+      luid.HighPart,
+      EGL_PLATFORM_ANGLE_D3D_LUID_LOW_ANGLE,
+      luid.LowPart,
+      EGL_NONE,
+  };
+
   // These are preferred display attributes and request ANGLE's D3D11
   // renderer. eglInitialize will only succeed with these attributes if the
   // hardware supports D3D11 Feature Level 10_0+.
@@ -92,10 +156,16 @@ bool Manager::InitializeDisplay() {
       EGL_NONE,
   };
 
-  std::vector<const EGLint*> display_attributes_configs = {
-      d3d11_display_attributes,
-      d3d11_fl_9_3_display_attributes,
-      d3d11_warp_display_attributes,
+  std::vector<const EGLint*> display_attributes_configs;
+
+  if (use_selected_gpu) {
+    // If low power GPU is requested, provide either low power GPU or SW renderer.
+    display_attributes_configs.push_back(d3d11_display_attributes_with_luid);
+    display_attributes_configs.push_back(d3d11_warp_display_attributes);
+  } else {
+    display_attributes_configs.push_back(d3d11_display_attributes);
+    display_attributes_configs.push_back(d3d11_fl_9_3_display_attributes);
+    display_attributes_configs.push_back(d3d11_warp_display_attributes);
   };
 
   PFNEGLGETPLATFORMDISPLAYEXTPROC egl_get_platform_display_EXT =

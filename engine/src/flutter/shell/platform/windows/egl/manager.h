@@ -14,6 +14,8 @@
 
 // Windows platform specific includes
 #include <d3d11.h>
+#include <dxgi.h>
+#include <dxgi1_6.h>
 #include <windows.h>
 #include <wrl/client.h>
 #include <memory>
@@ -30,7 +32,7 @@ namespace egl {
 // destroy surfaces
 class Manager {
  public:
-  static std::unique_ptr<Manager> Create();
+  static std::unique_ptr<Manager> Create(bool use_low_power_gpu);
 
   virtual ~Manager();
 
@@ -74,14 +76,14 @@ class Manager {
  protected:
   // Creates a new surface manager retaining reference to the passed-in target
   // for the lifetime of the manager.
-  explicit Manager();
+  explicit Manager(bool use_low_power_gpu);
 
  private:
   // Number of active instances of Manager
   static int instance_count_;
 
   // Initialize the EGL display.
-  bool InitializeDisplay();
+  bool InitializeDisplay(bool use_low_power_gpu);
 
   // Initialize the EGL configs.
   bool InitializeConfig();
