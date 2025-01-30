@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/fml/logging.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 
 namespace flutter {
 
