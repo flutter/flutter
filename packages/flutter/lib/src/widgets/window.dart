@@ -176,12 +176,7 @@ class RegularWindowController extends WindowController {
            title: title,
            state: state,
          ),
-       ) {
-    super.future.then((WindowCreationResult metadata) {
-      _state = (metadata as _RegularWindowCreationResult).state;
-      notifyListeners();
-    });
-  }
+       ) {}
 
   @override
   void _handleCreationResult(WindowCreationResult metadata) {
