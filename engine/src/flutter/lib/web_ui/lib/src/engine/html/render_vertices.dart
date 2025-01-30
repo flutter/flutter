@@ -50,7 +50,7 @@ class SurfaceVertices implements ui.Vertices {
     return list;
   }
 
-  bool get isEmpty => positions.isEmpty;
+  bool get hasNoPoints => positions.isEmpty;
 
   bool _disposed = false;
 

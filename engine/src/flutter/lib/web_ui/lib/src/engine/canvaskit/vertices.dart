@@ -95,7 +95,7 @@ class CkVertices implements ui.Vertices {
 
   SkVertices get skiaObject => _ref!.nativeObject;
 
-  bool get isEmpty => _ref == null;
+  bool get hasNoPoints => _ref == null;
 
   bool _isDisposed = false;
 
