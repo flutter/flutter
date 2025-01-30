@@ -874,10 +874,12 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym
         ''';
 
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              '/Users/mackall/Library/Android/sdk/cmdline-tools/latest/bin/apkanalyzer', // TODO(gmackall) need to find out how to fake the globals
+              sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
               'files',
               'list',
               aabFile.path,
@@ -1163,10 +1165,12 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.gradle/app-metadata.properties
         ''';
 
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              '/Users/mackall/Library/Android/sdk/cmdline-tools/latest/bin/apkanalyzer', // TODO(gmackall) need to find out how to fake the globals
+              sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
               'files',
               'list',
               aabFile.path,
@@ -1379,10 +1383,12 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym
         ''';
 
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              '/Users/mackall/Library/Android/sdk/cmdline-tools/latest/bin/apkanalyzer', // TODO(gmackall) need to find out how to fake the globals
+              sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
               'files',
               'list',
               aabFile.path,

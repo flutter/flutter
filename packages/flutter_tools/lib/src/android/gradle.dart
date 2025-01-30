@@ -91,6 +91,9 @@ Directory getBundleDirectory(FlutterProject project) {
           .childDirectory('bundle');
 }
 
+@visibleForTesting
+final String apkAnalyzerBinaryName = globals.platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer';
+
 /// The directory where the repo is generated.
 /// Only applicable to AARs.
 Directory getRepoDirectory(Directory buildDirectory) {
@@ -664,8 +667,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (!globals.androidSdk!.cmdlineToolsAvailable) {
       return false;
     }
-    final String binaryName = globals.platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer';
-    final String? apkAnalyzerPath = globals.androidSdk!.getCmdlineToolsPath(binaryName);
+    final String? apkAnalyzerPath = globals.androidSdk!.getCmdlineToolsPath(apkAnalyzerBinaryName);
     if (apkAnalyzerPath == null) {
       return false;
     }
