@@ -18,5 +18,9 @@ void main() {
 
     expanded = tester.getTopLeft(find.byType(Expanded).last);
     expect(expanded.dx, tester.getTopRight(find.byType(VerticalDivider)).dx);
+
+    // Verify the Divider's borderRadius
+    final Divider divider = tester.widget<Divider>(find.byType(Divider));
+    expect(divider.borderRadius, const BorderRadius.all(Radius.circular(10)));
   });
 }

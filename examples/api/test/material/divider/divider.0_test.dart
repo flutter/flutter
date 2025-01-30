@@ -18,5 +18,9 @@ void main() {
 
     final Offset subheader = tester.getTopLeft(find.text('Subheader'));
     expect(subheader.dy, tester.getBottomLeft(find.byType(Divider)).dy);
+
+    // Verify the Divider's borderRadius
+    final Divider divider = tester.widget<Divider>(find.byType(Divider));
+    expect(divider.borderRadius, const BorderRadius.all(Radius.circular(10)));
   });
 }

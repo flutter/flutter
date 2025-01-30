@@ -191,4 +191,30 @@ void main() {
     expect(() => Divider.createBorderSide(null), isNot(throwsAssertionError));
     expect(() => Divider.createBorderSide(null), isNot(throwsNoSuchMethodError));
   });
+
+
+  // Divider with border Radius
+  testWidgets('Divider with custom borderRadius', (WidgetTester tester) async {
+    const double borderRadiusValue = 8.0;
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Divider(
+            thickness: 5.0,
+            height: 10.0,
+            indent: 20.0,
+            endIndent: 20.0,
+            borderRadius: BorderRadius.all(Radius.circular(borderRadiusValue)), // Using the new property
+          ),
+        ),
+      ),
+    );
+
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+
+    // Check if the borderRadius is correctly applied
+    expect(decoration.borderRadius, BorderRadius.circular(borderRadiusValue));
+  });
 }
