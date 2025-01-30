@@ -235,7 +235,7 @@ class _WindowCreatorCard extends StatelessWidget {
                         key: key,
                         parent: windowManagerModel.selected,
                         controller: PopupWindowController(
-                          parent: windowManagerModel.selected!.view,
+                          parent: windowManagerModel.selected!.rootView,
                           onDestroyed: () => windowManagerModel.remove(key),
                           onError: (String error) =>
                               windowManagerModel.remove(key),
@@ -254,8 +254,8 @@ class _WindowCreatorCard extends StatelessWidget {
                                   .selected.constraintAdjustments),
                         )));
                   },
-                  child: Text(windowManagerModel.selected?.view?.viewId != null
-                      ? 'Popup of ID ${windowManagerModel.selected!.view.viewId}'
+                  child: Text(windowManagerModel.selected?.rootView.viewId != null
+                      ? 'Popup of ID ${windowManagerModel.selected!.rootView.viewId}'
                       : 'Popup'),
                 ),
                 const SizedBox(height: 8),
