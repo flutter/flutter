@@ -282,18 +282,30 @@ bool DisplayListMatrixClipState::rrect_covers_cull(
     return false;
   }
   auto outer = content.GetBounds();
-  auto center = outer.GetCenter();
-  auto radii = content.GetRadii().top_left;
-  auto inner = outer.GetSize() * 0.5 - radii;
-  auto scale = 1.0 / radii;
-  for (auto corner : corners) {
-    if (!outer.Contains(corner)) {
-      return false;
+  if (content.GetStyle() == impeller::RoundRect::Style::kContinuous) {
+    auto param = impeller::RoundSuperellipseParam::MakeBoundsRadii(outer, content.GetRadii());
+    for (auto corner : corners) {
+      if (!outer.Contains(corner)) {
+        return false;
+      }
+      if (!param.Contains(corner)) {
+        return false;
+      }
     }
-    auto rel = (corner - center).Abs() - inner;
-    if (rel.x > 0.0f && rel.y > 0.0f &&
-        (rel * scale).GetLengthSquared() >= 1.0f) {
-      return false;
+  } else {
+    auto center = outer.GetCenter();
+    auto radii = content.GetRadii().top_left;
+    auto inner = outer.GetSize() * 0.5 - radii;
+    auto scale = 1.0 / radii;
+    for (auto corner : corners) {
+      if (!outer.Contains(corner)) {
+        return false;
+      }
+      auto rel = (corner - center).Abs() - inner;
+      if (rel.x > 0.0f && rel.y > 0.0f &&
+          (rel * scale).GetLengthSquared() >= 1.0f) {
+        return false;
+      }
     }
   }
   return true;

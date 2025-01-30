@@ -14,7 +14,6 @@ namespace impeller {
 
 // A utility struct that expands input parameters for a rounded superellipse to
 // drawing variables.
-
 struct RoundSuperellipseParam {
   // Parameters for drawing a square-like rounded superellipse.
   //
@@ -109,6 +108,18 @@ struct RoundSuperellipseParam {
   // This method does not perform any prescreening such as comparing the point
   // with the bounds, which is recommended for callers.
   bool Contains(const Point& point) const;
+
+  // A factor used to calculate the "gap", defined as the distance from the
+  // midpoint of the curved corners to the nearest sides of the bounding box.
+  //
+  // When the corner radius is symmetrical on both dimensions, the midpoint of the
+  // corner is where the circular arc intersects its quadrant bisector. When the
+  // corner radius is asymmetrical, since the corner can be considered "elongated"
+  // from a symmetrical corner, the midpoint is transformed in the same way.
+  //
+  // Experiments indicate that the gap is linear with respect to the corner
+  // radius on that dimension.
+  static constexpr Scalar kGapFactor = 0.2924066406f;
 };
 
 }  // namespace impeller

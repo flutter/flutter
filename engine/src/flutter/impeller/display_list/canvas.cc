@@ -516,6 +516,20 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
 void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   auto& rect = round_rect.GetBounds();
   auto& radii = round_rect.GetRadii();
+  if (round_rect.GetStyle() == RoundRect::Style::kContinuous) {
+    // The continuous style only supports filling.
+    if (paint.style != Paint::Style::kFill) {
+      return;
+    }
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint.blend_mode);
+
+    RoundSuperellipseGeometry geom(rect, radii);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    return;
+  }
+
   if (radii.AreAllCornersSame()) {
     if (AttemptDrawBlurredRRect(rect, radii.top_left, paint)) {
       return;

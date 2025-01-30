@@ -14,8 +14,7 @@ namespace impeller {
 
 namespace {
 
-// TODO: Remove this
-constexpr Scalar kGapFactor = 0.2924066406;
+constexpr auto kGapFactor = RoundSuperellipseParam::kGapFactor;
 
 // An interface for classes that arranges a point list that forms a convex
 // contour into a triangle strip.

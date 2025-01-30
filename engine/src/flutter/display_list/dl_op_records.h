@@ -484,8 +484,7 @@ struct TransformResetOp final : TransformClipOpBase {
 
 // 4 byte header + 4 byte common payload packs into minimum 8 bytes
 // DlRect is 16 more bytes, which packs efficiently into 24 bytes total
-// DlRoundRect is 48 more bytes, which rounds up to 48 bytes
-//         which packs into 56 bytes total
+// DlRoundRect is 52 more bytes, which packs into 60 bytes total
 // CacheablePath is 128 more bytes, which packs efficiently into 136 bytes total
 //
 // We could pack the clip_op and the bool both into the free 4 bytes after

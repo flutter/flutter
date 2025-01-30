@@ -29,6 +29,7 @@
 #include "impeller/entity/geometry/fill_path_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/round_rect_geometry.h"
+#include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
@@ -459,6 +460,9 @@ void DlDispatcherBase::clipRoundRect(const DlRoundRect& rrect,
     GetCanvas().ClipGeometry(geom, clip_op, /*is_aa=*/is_aa);
   } else if (rrect.IsOval()) {
     EllipseGeometry geom(rrect.GetBounds());
+    GetCanvas().ClipGeometry(geom, clip_op);
+  } else if (rrect.GetStyle() == RoundRect::Style::kContinuous) {
+    RoundSuperellipseGeometry geom(rrect.GetBounds(), rrect.GetRadii());
     GetCanvas().ClipGeometry(geom, clip_op);
   } else if (rrect.GetRadii().AreAllCornersSame()) {
     RoundRectGeometry geom(rrect.GetBounds(), rrect.GetRadii().top_left);
