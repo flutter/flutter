@@ -1165,10 +1165,10 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     }
 
     double? target;
+    final double bottomScrollOffset =
+        widget.bottomMode == NavigationBarBottomMode.always ? 0.0 : _bottomHeight;
     final bool canScrollBottom =
-        (widget._searchable || widget.bottom != null) &&
-        (widget.bottomMode == NavigationBarBottomMode.automatic || widget.bottomMode == null);
-    final double bottomScrollOffset = _bottomHeight;
+        (widget._searchable || widget.bottom != null) && bottomScrollOffset > 0.0;
 
     // Snap the scroll view to a target determined by the navigation bar's
     // position.
