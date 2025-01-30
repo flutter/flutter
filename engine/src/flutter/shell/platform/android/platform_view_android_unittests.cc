@@ -35,8 +35,8 @@ TEST(AndroidPlatformView, SoftwareRenderingNotSupportedWithImpeller) {
 }
 
 TEST(AndroidPlatformView, FallsBackToGLESonEmulator) {
-  char* emulator_product = "gphone_x64";
-  char* device_product = "smg1234";
+  std::string emulator_product = "gphone_x64";
+  std::string device_product = "smg1234";
 
   EXPECT_TRUE(IsDeviceEmulator(emulator_product));
   EXPECT_FALSE(IsDeviceEmulator(device_product));
