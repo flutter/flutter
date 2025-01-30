@@ -9,7 +9,7 @@ import 'custom_positioner_dialog.dart';
 import 'window_controller_render.dart';
 
 class MainWindow extends StatefulWidget {
-  MainWindow({super.key, required WindowController mainController}) {
+  MainWindow({super.key, required this.mainController}) {
     _windowManagerModel.add(KeyedWindowController(
         isMainWindow: true, key: UniqueKey(), controller: mainController));
   }
@@ -18,6 +18,7 @@ class MainWindow extends StatefulWidget {
   final WindowSettings _settings = WindowSettings();
   final PositionerSettingsModifier _positionerSettingsModifier =
       PositionerSettingsModifier();
+  final WindowController mainController;
 
   @override
   State<MainWindow> createState() => _MainWindowState();
@@ -68,30 +69,12 @@ class _MainWindowState extends State<MainWindow> {
     );
 
     return ViewAnchor(
-        view: ListenableBuilder(
-            listenable: widget._windowManagerModel,
-            builder: (BuildContext context, Widget? _) {
-              final List<Widget> childViews = <Widget>[];
-              for (final KeyedWindowController controller
-                  in widget._windowManagerModel.windows) {
-                if (controller.parent == null && !controller.isMainWindow) {
-                  childViews.add(WindowControllerRender(
-                    controller: controller.controller,
-                    key: controller.key,
-                    windowSettings: widget._settings,
-                    windowManagerModel: widget._windowManagerModel,
-                    positionerSettingsModifier:
-                        widget._positionerSettingsModifier,
-                    onDestroyed: () =>
-                        widget._windowManagerModel.remove(controller.key),
-                    onError: () =>
-                        widget._windowManagerModel.remove(controller.key),
-                  ));
-                }
-              }
-
-              return ViewCollection(views: childViews);
-            }),
+        view: ChildWindowRenderer(
+          windowManagerModel: widget._windowManagerModel,
+          windowSettings: widget._settings,
+          positionerSettingsModifier: widget._positionerSettingsModifier,
+          controller: widget.mainController,
+          renderParentlessWindows: true),
         child: child);
   }
 }
@@ -245,7 +228,7 @@ class _WindowCreatorCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton(
-                  onPressed: () {
+                  onPressed: windowManagerModel.selected == null ? null : () {
                     final UniqueKey key = UniqueKey();
                     windowManagerModel.add(KeyedWindowController(
                         key: key,
@@ -271,7 +254,7 @@ class _WindowCreatorCard extends StatelessWidget {
                         )));
                   },
                   child: Text(windowManagerModel.selected?.view?.viewId != null
-                      ? 'Popup of ID ${windowManagerModel.selected!.view?.viewId}'
+                      ? 'Popup of ID ${windowManagerModel.selected!.view.viewId}'
                       : 'Popup'),
                 ),
                 const SizedBox(height: 8),
