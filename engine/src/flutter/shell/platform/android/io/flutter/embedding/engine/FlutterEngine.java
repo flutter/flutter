@@ -383,7 +383,6 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     this.renderer = new FlutterRenderer(flutterJNI);
 
     this.platformViewsController = platformViewsController;
-    this.platformViewsController.onAttachedToJNI();
     this.platformViewsController2 = platformViewsController2;
 
     this.pluginRegistry =
