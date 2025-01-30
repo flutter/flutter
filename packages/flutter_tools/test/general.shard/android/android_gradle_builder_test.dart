@@ -716,6 +716,8 @@ void main() {
         '-Ptree-shake-icons=false',
       ];
 
+      // Output from `<android_sdk_root>/tools/bin/apkanalyzer files list <aab>`
+      // on an aab not containing debug symbols.
       const String apkanalyzerOutputWithoutSymFiles = r'''
 /
 /META-INF/
@@ -835,6 +837,8 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.gradle/app-metadata.properties
 ''';
 
+      // Output from `<android_sdk_root>/tools/bin/apkanalyzer files list <aab>`
+      // on an aab containing debug symbols.
       const String apkanalyzerOutputWithSymFiles =
           apkanalyzerOutputWithoutSymFiles +
           r'''
