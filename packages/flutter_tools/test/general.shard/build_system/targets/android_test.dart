@@ -194,7 +194,6 @@ void main() {
           '--deterministic',
           '--snapshot_kind=app-aot-elf',
           '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
-          '--strip',
           environment.buildDir.childFile('app.dill').path,
         ],
       ),
@@ -233,7 +232,6 @@ void main() {
           '--trace-precompiler-to=code_size_1/trace.arm64-v8a.json',
           '--snapshot_kind=app-aot-elf',
           '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
-          '--strip',
           environment.buildDir.childFile('app.dill').path,
         ],
       ),
@@ -277,7 +275,6 @@ void main() {
           'baz=2',
           '--snapshot_kind=app-aot-elf',
           '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
-          '--strip',
           environment.buildDir.childFile('app.dill').path,
         ],
       ),
@@ -290,7 +287,7 @@ void main() {
   });
 
   testUsingContext(
-    '--no-strip in kExtraGenSnapshotOptions suppresses --strip gen_snapshot flag',
+    '--strip in kExtraGenSnapshotOptions provides --strip gen_snapshot flag',
     () async {
       processManager = FakeProcessManager.empty();
       final Environment environment = Environment.test(
@@ -298,7 +295,7 @@ void main() {
         outputDir: fileSystem.directory('out')..createSync(),
         defines: <String, String>{
           kBuildMode: 'release',
-          kExtraGenSnapshotOptions: 'foo,--no-strip,bar',
+          kExtraGenSnapshotOptions: 'foo,--strip,bar',
           kTargetPlatform: 'android-arm',
         },
         processManager: processManager,
@@ -316,6 +313,7 @@ void main() {
             ),
             '--deterministic',
             'foo',
+            '--strip',
             'bar',
             '--snapshot_kind=app-aot-elf',
             '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
