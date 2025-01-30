@@ -998,21 +998,6 @@ class _MaterialAppState extends State<MaterialApp> {
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
 
-
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarIconBrightness: switch (mode) {
-          ThemeMode.light => Brightness.dark,
-          ThemeMode.dark => Brightness.light,
-          ThemeMode.system =>
-          platformBrightness ==
-              Brightness.dark
-              ? Brightness.light
-              : Brightness.dark
-        },
-      ),
-    );
-
     final bool useDarkTheme =
         mode == ThemeMode.dark ||
         (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
@@ -1025,6 +1010,11 @@ class _MaterialAppState extends State<MaterialApp> {
       theme = widget.highContrastTheme;
     }
     theme ??= widget.theme ?? ThemeData.light();
+
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark),
+    );
+
     return theme;
   }
 

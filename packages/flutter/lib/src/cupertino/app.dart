@@ -12,6 +12,7 @@ library;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../services.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
@@ -651,6 +652,13 @@ class _CupertinoAppState extends State<CupertinoApp> {
   Widget build(BuildContext context) {
     final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData())
         .resolveFrom(context);
+    final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarIconBrightness: brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+      ),
+    );
 
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),

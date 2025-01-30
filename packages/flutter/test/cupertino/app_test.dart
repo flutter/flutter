@@ -481,6 +481,39 @@ void main() {
     },
   );
 
+  testWidgets('CupertinoApp has the correct default status bar icon brightness by default', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const CupertinoApp(home: CupertinoPageScaffold(child: Text('Hello'))));
+
+    expect(
+      SystemChrome.latestStyle,
+      const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark),
+    );
+  });
+
+  testWidgets(
+    'CupertinoApp has the correct default status bar icon brightness when the system is set to dark theme',
+    (WidgetTester tester) async {
+      // Simulates setting the system to dark theme.
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: CupertinoApp(
+            builder: (BuildContext context, Widget? child) {
+              return const Placeholder();
+            },
+          ),
+        ),
+      );
+
+      expect(
+        SystemChrome.latestStyle,
+        const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light),
+      );
+    },
+  );
+
   testWidgets('Text color is correctly resolved when CupertinoThemeData.brightness is null', (
     WidgetTester tester,
   ) async {

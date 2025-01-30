@@ -9,6 +9,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/multi_view_testing.dart';
@@ -282,6 +283,15 @@ void main() {
     );
     await tester.tap(find.byType(ElevatedButton));
     expect(pressed, isTrue);
+  });
+
+  testWidgets('The status bar icons are dark by default', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: Center(child: Text('test')))));
+
+    expect(
+      SystemChrome.latestStyle,
+      const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark),
+    );
   });
 
   group('Surface Tint Overlay', () {
