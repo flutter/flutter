@@ -167,10 +167,6 @@ TEST_P(TextContentsTest, SimpleComputeVertexData2x) {
 }
 
 TEST_P(TextContentsTest, MaintainsShape) {
-#ifndef FML_OS_MACOSX
-  GTEST_SKIP() << "Results aren't stable across linux and macos.";
-#endif
-
   std::shared_ptr<TextFrame> text_frame =
       MakeTextFrame("th", "ahem.ttf", /*font_size=*/50);
 
