@@ -1131,7 +1131,7 @@ void main() {
     );
 
     testUsingContext(
-      'build succeeds when debug symbols present for at least one architecture',
+      'build aab in release mode fails when apkanalyzer exit code is non zero',
       () async {
         final AndroidGradleBuilder builder = AndroidGradleBuilder(
           java: FakeJava(),
