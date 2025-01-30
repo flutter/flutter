@@ -52,6 +52,11 @@ import 'migrations/top_level_gradle_build_file_migration.dart';
 final RegExp _kBuildVariantRegex = RegExp('^BuildVariant: (?<$_kBuildVariantRegexGroupName>.*)\$');
 const String _kBuildVariantRegexGroupName = 'variant';
 const String _kBuildVariantTaskName = 'printBuildVariants';
+@visibleForTesting
+const String failedToStripDebugSymbolsErrorMessage = r'''
+Release app bundle failed to strip debug symbols from native libraries. Please run flutter doctor and ensure that the Android toolchain does not report any issues.
+
+Otherwise, file an issue at https://github.com/flutter/flutter/issues.''';
 
 typedef _OutputParser = void Function(String line);
 
@@ -579,12 +584,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final File bundleFile = findBundleFile(project, buildInfo, _logger, _analytics);
 
       if ((buildInfo.mode == BuildMode.release) &&
-          !(await isAabStrippedOfDebugSymbols(
+          !(await _isAabStrippedOfDebugSymbols(
             project,
             bundleFile.path,
             androidBuildInfo.targetArchs,
           ))) {
-        throwToolExit('TODO(gmackall) what should we tell people here?');
+        throwToolExit(failedToStripDebugSymbolsErrorMessage);
       }
 
       final String appSize =
@@ -648,7 +653,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   // and moved them to the BUNDLE-METADATA directory. Block the build if this
   // isn't successful, as it means that debug symbols are getting included in
   // the final app that would be delivered to users.
-  Future<bool> isAabStrippedOfDebugSymbols(
+  Future<bool> _isAabStrippedOfDebugSymbols(
     FlutterProject project,
     String aabPath,
     Iterable<AndroidArch> targetArchs,
