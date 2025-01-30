@@ -955,7 +955,7 @@ void main() {
           );
 
           createSharedGradleFiles();
-          final File aabFile = createAabFile(BuildMode.debug);
+          createAabFile(BuildMode.debug);
 
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fileSystem.currentDirectory,
