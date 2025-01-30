@@ -102,8 +102,7 @@ final int _kUnblockedUserActions =
     SemanticsAction.didLoseAccessibilityFocus.index;
 
 /// A static class to conduct semantics role checks.
-@visibleForTesting
-sealed class DebugSemanticsRoleChecks {
+sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _checkSemanticsData(SemanticsNode node) => switch (node.role) {
     SemanticsRole.none => _noCheckRequired,
     SemanticsRole.tab => _semanticsTab,
@@ -3044,7 +3043,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
     assert(() {
-      final FlutterError? error = DebugSemanticsRoleChecks._checkSemanticsData(this);
+      final FlutterError? error = _DebugSemanticsRoleChecks._checkSemanticsData(this);
       if (error != null) {
         throw error;
       }
