@@ -70,6 +70,7 @@ std::pair<std::optional<T>, bool> GetSingleValueForKeyOrSendError(
                                        typeid(T).name() + "'.");
   return {std::nullopt, false};
 }
+
 // Retrieves a list of values associated with |key| from |map|, ensuring the
 // list has only elements of type |T|. If |Size| is provided and greater than 0,
 // the number of elements in the list is also checked. Returns a pair where the
