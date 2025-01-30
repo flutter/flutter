@@ -223,6 +223,7 @@ class WidgetPreviewStartCommand extends FlutterCommand
     );
 
     if (globals.platform.isMacOS) {
+      globals.logger.printStatus('Windows architecture: ${globals.os.hostPlatform}');
       await buildMacOS(
         flutterProject: widgetPreviewScaffoldProject,
         buildInfo: buildInfo,
@@ -239,7 +240,7 @@ class WidgetPreviewStartCommand extends FlutterCommand
         logger: globals.logger,
       );
     } else if (globals.platform.isWindows) {
-      globals.logger.printStatus('Windows architecture: ${globals.os.hostPlatform}');
+      print('Windows architecture: ${globals.os.hostPlatform}');
       await buildWindows(
         widgetPreviewScaffoldProject.windows,
         buildInfo,
