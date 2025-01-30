@@ -2529,7 +2529,7 @@ The Flutter Preview device does not support the following plugins from your pubs
             },
           );
 
-          // injectPlugins will fail in main native class not found in expected spot, so add
+          // injectPlugins will fail if main native class not found in expected spot, so add
           // it first.
           pluginDir
               .childDirectory('android')
