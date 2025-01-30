@@ -32,8 +32,8 @@ constexpr char kDestroyWindowMethod[] = "destroyWindow";
 constexpr char kAnchorRectKey[] = "anchorRect";
 constexpr char kChildAnchorKey[] = "childAnchor";
 constexpr char kConstraintAdjustmentKey[] = "constraintAdjustment";
-constexpr char kMinSizeKey[] = "minSize";
 constexpr char kMaxSizeKey[] = "maxSize";
+constexpr char kMinSizeKey[] = "minSize";
 constexpr char kOffsetKey[] = "offset";
 constexpr char kParentAnchorKey[] = "parentAnchor";
 constexpr char kParentViewIdKey[] = "parentViewId";
@@ -41,6 +41,7 @@ constexpr char kPositionerKey[] = "positioner";
 constexpr char kSizeKey[] = "size";
 constexpr char kStateKey[] = "state";
 constexpr char kTitleKey[] = "title";
+constexpr char kViewIdKey[] = "viewId";
 
 void SimulateWindowingMessage(TestBinaryMessenger* messenger,
                               const std::string& method_name,
@@ -245,7 +246,7 @@ TEST_F(WindowingHandlerTest, HandleDestroyWindow) {
   WindowingHandler windowing_handler(&messenger, controller());
 
   EncodableMap const arguments = {
-      {EncodableValue("viewId"), EncodableValue(1)},
+      {EncodableValue(kViewIdKey), EncodableValue(1)},
   };
 
   bool success = false;
