@@ -180,8 +180,7 @@ void TextContents::ComputeVertexData(
       // glyph bounds are used to compute UVs in cases where the
       // destination and source sizes may differ due to clamping the sizes
       // of large glyphs.
-      Point uv_origin =
-          (atlas_glyph_bounds.GetLeftTop() - Point(0.5, 0.5)) / atlas_size;
+      Point uv_origin = (atlas_glyph_bounds.GetLeftTop()) / atlas_size;
       Point uv_size = SizeToPoint(atlas_glyph_bounds.GetSize()) / atlas_size;
 
       Point unrounded_glyph_position =
