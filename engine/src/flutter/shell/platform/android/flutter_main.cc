@@ -233,7 +233,7 @@ bool FlutterMain::Register(JNIEnv* env) {
 }
 
 // static
-bool IsDeviceEmulator(std::string_view product_model) {
+bool FlutterMain::IsDeviceEmulator(std::string_view product_model) {
   return std::string(product_model).find("gphone") != std::string::npos;
 }
 
