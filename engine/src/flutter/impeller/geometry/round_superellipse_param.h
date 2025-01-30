@@ -112,10 +112,11 @@ struct RoundSuperellipseParam {
   // A factor used to calculate the "gap", defined as the distance from the
   // midpoint of the curved corners to the nearest sides of the bounding box.
   //
-  // When the corner radius is symmetrical on both dimensions, the midpoint of the
-  // corner is where the circular arc intersects its quadrant bisector. When the
-  // corner radius is asymmetrical, since the corner can be considered "elongated"
-  // from a symmetrical corner, the midpoint is transformed in the same way.
+  // When the corner radius is symmetrical on both dimensions, the midpoint of
+  // the corner is where the circular arc intersects its quadrant bisector. When
+  // the corner radius is asymmetrical, since the corner can be considered
+  // "elongated" from a symmetrical corner, the midpoint is transformed in the
+  // same way.
   //
   // Experiments indicate that the gap is linear with respect to the corner
   // radius on that dimension.

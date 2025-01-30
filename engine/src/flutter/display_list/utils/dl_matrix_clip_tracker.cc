@@ -283,7 +283,8 @@ bool DisplayListMatrixClipState::rrect_covers_cull(
   }
   auto outer = content.GetBounds();
   if (content.GetStyle() == impeller::RoundRect::Style::kContinuous) {
-    auto param = impeller::RoundSuperellipseParam::MakeBoundsRadii(outer, content.GetRadii());
+    auto param = impeller::RoundSuperellipseParam::MakeBoundsRadii(
+        outer, content.GetRadii());
     for (auto corner : corners) {
       if (!outer.Contains(corner)) {
         return false;
