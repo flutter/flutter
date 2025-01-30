@@ -2182,8 +2182,10 @@ class _HighlightModeManager {
       case PointerDeviceKind.touch:
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
-        _lastInteractionWasTouch = true;
-        updateMode();
+        if (_lastInteractionWasTouch != true) {
+          _lastInteractionWasTouch = true;
+          updateMode();
+        }
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.trackpad:
       case PointerDeviceKind.unknown:
@@ -2191,10 +2193,13 @@ class _HighlightModeManager {
   }
 
   bool handleKeyMessage(KeyMessage message) {
-    // Update highlightMode first, since things responding to the keys might
-    // look at the highlight mode, and it should be accurate.
-    _lastInteractionWasTouch = false;
-    updateMode();
+    // ignore: use_if_null_to_convert_nulls_to_bools
+    if (_lastInteractionWasTouch != false) {
+      // Update highlightMode first, since things responding to the keys might
+      // look at the highlight mode, and it should be accurate.
+      _lastInteractionWasTouch = false;
+      updateMode();
+    }
 
     assert(_focusDebug(() => 'Received key event $message'));
     if (FocusManager.instance.primaryFocus == null) {
@@ -2288,7 +2293,9 @@ class _HighlightModeManager {
   }
 
   void handleSemanticsAction(SemanticsActionEvent semanticsActionEvent) {
-    if (kIsWeb && semanticsActionEvent.type == SemanticsAction.focus) {
+    if (kIsWeb &&
+        semanticsActionEvent.type == SemanticsAction.focus &&
+        _lastInteractionWasTouch != true) {
       _lastInteractionWasTouch = true;
       updateMode();
     }
