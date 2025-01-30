@@ -847,6 +847,30 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym
 ''';
 
+      void createSharedGradleFiles() {
+        fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+
+        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+
+        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+      }
+
+      File createAabFile(BuildMode buildMode) {
+        final File aabFile = fileSystem
+            .directory('/build')
+            .childDirectory('app')
+            .childDirectory('outputs')
+            .childDirectory('bundle')
+            .childDirectory('$buildMode')
+            .childFile('app-$buildMode.aab');
+
+        aabFile.createSync(recursive: true);
+
+        return aabFile;
+      }
+
       testUsingContext(
         'build succeeds when debug symbols present for at least one architecture',
         () async {
@@ -865,27 +889,8 @@ void main() {
             FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
           );
 
-          fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
-
-          fileSystem
-              .directory('android')
-              .childFile('gradle.properties')
-              .createSync(recursive: true);
-
-          fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
-
-          final File aabFile = fileSystem
-              .directory('/build')
-              .childDirectory('app')
-              .childDirectory('outputs')
-              .childDirectory('bundle')
-              .childDirectory('release')
-              .childFile('app-release.aab');
-
-          aabFile.createSync(recursive: true);
-
+          createSharedGradleFiles();
+          final File aabFile = createAabFile(BuildMode.release);
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
           processManager.addCommand(
@@ -949,25 +954,8 @@ void main() {
             FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleDebug')),
           );
 
-          fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
-
-          fileSystem
-              .directory('android')
-              .childFile('gradle.properties')
-              .createSync(recursive: true);
-
-          fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
-
-          final File aabFile = fileSystem
-              .directory('/build')
-              .childDirectory('app')
-              .childDirectory('outputs')
-              .childDirectory('bundle')
-              .childDirectory('debug')
-              .childFile('app-debug.aab');
-
+          createSharedGradleFiles();
+          final File aabFile = createAabFile(BuildMode.debug);
           aabFile.createSync(recursive: true);
 
           final FlutterProject project = FlutterProject.fromDirectoryTest(
@@ -1019,25 +1007,8 @@ void main() {
             FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
           );
 
-          fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
-
-          fileSystem
-              .directory('android')
-              .childFile('gradle.properties')
-              .createSync(recursive: true);
-
-          fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
-
-          final File aabFile = fileSystem
-              .directory('/build')
-              .childDirectory('app')
-              .childDirectory('outputs')
-              .childDirectory('bundle')
-              .childDirectory('release')
-              .childFile('app-release.aab');
-
+          createSharedGradleFiles();
+          final File aabFile = createAabFile(BuildMode.release);
           aabFile.createSync(recursive: true);
 
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
@@ -1106,25 +1077,8 @@ void main() {
             FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
           );
 
-          fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
-
-          fileSystem
-              .directory('android')
-              .childFile('gradle.properties')
-              .createSync(recursive: true);
-
-          fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
-
-          final File aabFile = fileSystem
-              .directory('/build')
-              .childDirectory('app')
-              .childDirectory('outputs')
-              .childDirectory('bundle')
-              .childDirectory('release')
-              .childFile('app-release.aab');
-
+          createSharedGradleFiles();
+          final File aabFile = createAabFile(BuildMode.release);
           aabFile.createSync(recursive: true);
 
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
