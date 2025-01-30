@@ -8,8 +8,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<Object?>? Function(MethodCall)? _createWindowMethodCallHandler({
 <<<<<<< HEAD
+<<<<<<< HEAD
   void Function(MethodCall)? onMethodCall,
   required WidgetTester tester,
+=======
+  required WidgetTester tester,
+  void Function(MethodCall)? onMethodCall,
+>>>>>>> regular-windows-modify
 =======
   required WidgetTester tester,
   void Function(MethodCall)? onMethodCall,
@@ -24,11 +29,16 @@ Future<Object?>? Function(MethodCall)? _createWindowMethodCallHandler({
 
       return <String, Object?>{'viewId': tester.view.viewId, 'size': size, 'state': state};
 <<<<<<< HEAD
+<<<<<<< HEAD
     } else if (call.method == 'createPopup') {
       final int parent = args['parent']! as int;
       final List<Object?> size = args['size']! as List<Object?>;
 
       return <String, Object?>{'viewId': tester.view.viewId, 'size': size, 'parentViewId': parent};
+=======
+    } else if (call.method == 'modifyRegular') {
+      return null;
+>>>>>>> regular-windows-modify
 =======
     } else if (call.method == 'modifyRegular') {
       return null;
@@ -157,11 +167,14 @@ void main() {
   );
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   testWidgets('PopupWindow widget can specify anchorRect', (WidgetTester tester) async {
     const Size childWindow = Size(400, 300);
 
     bool called = false;
 =======
+=======
+>>>>>>> regular-windows-modify
   testWidgets('RegularWindowController.modify can be called when provided with a "size" argument', (
     WidgetTester tester,
   ) async {
@@ -169,12 +182,16 @@ void main() {
     const Size newSize = Size(400, 300);
 
     bool wasCalled = false;
+<<<<<<< HEAD
+>>>>>>> regular-windows-modify
+=======
 >>>>>>> regular-windows-modify
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.windowing,
       _createWindowMethodCallHandler(
         tester: tester,
         onMethodCall: (MethodCall call) {
+<<<<<<< HEAD
 <<<<<<< HEAD
           final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
           if (call.method == 'createPopup') {
@@ -183,6 +200,8 @@ void main() {
             called = true;
           }
 =======
+=======
+>>>>>>> regular-windows-modify
           if (call.method != 'modifyRegular') {
             return;
           }
@@ -197,11 +216,15 @@ void main() {
           expect(title, null);
           expect(state, null);
           wasCalled = true;
+<<<<<<< HEAD
+>>>>>>> regular-windows-modify
+=======
 >>>>>>> regular-windows-modify
         },
       ),
     );
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     final PopupWindowController controller = PopupWindowController(
       parent: tester.binding.window,
@@ -267,6 +290,8 @@ void main() {
 
     expect(called, true);
 =======
+=======
+>>>>>>> regular-windows-modify
     final RegularWindowController controller = RegularWindowController(size: initialSize);
     await tester.pump();
 
@@ -371,6 +396,9 @@ void main() {
     await tester.pump();
 
     expect(() async => controller.modify(), throwsA(isA<AssertionError>()));
+<<<<<<< HEAD
+>>>>>>> regular-windows-modify
+=======
 >>>>>>> regular-windows-modify
   });
 }
