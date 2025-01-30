@@ -34,13 +34,5 @@ TEST(AndroidPlatformView, SoftwareRenderingNotSupportedWithImpeller) {
   ASSERT_DEATH(FlutterMain::SelectedRenderingAPI(settings), "");
 }
 
-TEST(AndroidPlatformView, FallsBackToGLESonEmulator) {
-  std::string emulator_product = "gphone_x64";
-  std::string device_product = "smg1234";
-
-  EXPECT_TRUE(FlutterMain::IsDeviceEmulator(emulator_product));
-  EXPECT_FALSE(FlutterMain::IsDeviceEmulator(device_product));
-}
-
 }  // namespace testing
 }  // namespace flutter
