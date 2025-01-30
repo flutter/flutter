@@ -137,8 +137,9 @@ class _ActiveWindowsTable extends StatelessWidget {
                 selected: controller.controller == windowManagerModel.selected,
                 onSelectChanged: (selected) {
                   if (selected != null) {
-                    windowManagerModel.select(
-                        selected ? controller.controller.view?.viewId : null);
+                    windowManagerModel.select(selected
+                        ? controller.controller.rootView.viewId
+                        : null);
                   }
                 },
                 cells: [
@@ -147,7 +148,7 @@ class _ActiveWindowsTable extends StatelessWidget {
                         listenable: controller.controller,
                         builder: (BuildContext context, Widget? _) => Text(
                             controller.controller.isReady
-                                ? '${controller.controller.view.viewId}'
+                                ? '${controller.controller.rootView.viewId}'
                                 : 'Loading...')),
                   ),
                   DataCell(

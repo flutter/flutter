@@ -9,6 +9,7 @@ dependencies:
   flutter:
     sdk: flutter
   stack_trace: ^1.11.1
+  vector_math: ^2.1.4
 
 dev_dependencies:
   flutter_test:

@@ -7,8 +7,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<Object?>? Function(MethodCall)? _createWindowMethodCallHandler({
+<<<<<<< HEAD
   void Function(MethodCall)? onMethodCall,
   required WidgetTester tester,
+=======
+  required WidgetTester tester,
+  void Function(MethodCall)? onMethodCall,
+>>>>>>> regular-windows-modify
 }) {
   return (MethodCall call) async {
     onMethodCall?.call(call);
@@ -18,11 +23,16 @@ Future<Object?>? Function(MethodCall)? _createWindowMethodCallHandler({
       final String state = args['state'] as String? ?? WindowState.restored.toString();
 
       return <String, Object?>{'viewId': tester.view.viewId, 'size': size, 'state': state};
+<<<<<<< HEAD
     } else if (call.method == 'createPopup') {
       final int parent = args['parent']! as int;
       final List<Object?> size = args['size']! as List<Object?>;
 
       return <String, Object?>{'viewId': tester.view.viewId, 'size': size, 'parentViewId': parent};
+=======
+    } else if (call.method == 'modifyRegular') {
+      return null;
+>>>>>>> regular-windows-modify
     } else if (call.method == 'destroyWindow') {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.windowing.name,
@@ -51,20 +61,12 @@ void main() {
     );
 
     final RegularWindowController controller = RegularWindowController(size: windowSize);
-    await tester.pumpWidget(
-      wrapWithView: false,
-      Builder(
-        builder: (BuildContext context) {
-          return RegularWindow(controller: controller, child: Container());
-        },
-      ),
-    );
 
     await tester.pump();
 
     expect(controller.type, WindowArchetype.regular);
     expect(controller.size, windowSize);
-    expect(controller.view.viewId, tester.view.viewId);
+    expect(controller.rootView.viewId, tester.view.viewId);
   });
 
   testWidgets('RegularWindow.onError is called when creation throws an error', (
@@ -136,15 +138,6 @@ void main() {
       );
 
       final RegularWindowController controller = RegularWindowController(size: initialSize);
-      await tester.pumpWidget(
-        wrapWithView: false,
-        Builder(
-          builder: (BuildContext context) {
-            return RegularWindow(controller: controller, child: Container());
-          },
-        ),
-      );
-
       await tester.pump();
 
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -163,25 +156,53 @@ void main() {
     },
   );
 
+<<<<<<< HEAD
   testWidgets('PopupWindow widget can specify anchorRect', (WidgetTester tester) async {
     const Size childWindow = Size(400, 300);
 
     bool called = false;
+=======
+  testWidgets('RegularWindowController.modify can be called when provided with a "size" argument', (
+    WidgetTester tester,
+  ) async {
+    const Size initialSize = Size(800, 600);
+    const Size newSize = Size(400, 300);
+
+    bool wasCalled = false;
+>>>>>>> regular-windows-modify
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.windowing,
       _createWindowMethodCallHandler(
         tester: tester,
         onMethodCall: (MethodCall call) {
+<<<<<<< HEAD
           final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
           if (call.method == 'createPopup') {
             final List<Object?>? anchorRect = args['anchorRect'] as List<Object?>?;
             expect(anchorRect, <Object?>[0, 0, 100, 100]);
             called = true;
           }
+=======
+          if (call.method != 'modifyRegular') {
+            return;
+          }
+
+          final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
+          final int viewId = args['viewId']! as int;
+          final List<Object?>? size = args['size'] as List<Object?>?;
+          final String? title = args['title'] as String?;
+          final String? state = args['state'] as String?;
+          expect(viewId, tester.view.viewId);
+          expect(size, <double>[newSize.width, newSize.height]);
+          expect(title, null);
+          expect(state, null);
+          wasCalled = true;
+>>>>>>> regular-windows-modify
         },
       ),
     );
 
+<<<<<<< HEAD
     final PopupWindowController controller = PopupWindowController(
       parent: tester.binding.window,
       size: childWindow,
@@ -245,5 +266,111 @@ void main() {
     await tester.pump();
 
     expect(called, true);
+=======
+    final RegularWindowController controller = RegularWindowController(size: initialSize);
+    await tester.pump();
+
+    await controller.modify(size: newSize);
+    await tester.pump();
+
+    expect(wasCalled, true);
+  });
+
+  testWidgets(
+    'RegularWindowController.modify can be called when provided with a "title" argument',
+    (WidgetTester tester) async {
+      const Size initialSize = Size(800, 600);
+      const String newTitle = 'New Title';
+
+      bool wasCalled = false;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.windowing,
+        _createWindowMethodCallHandler(
+          tester: tester,
+          onMethodCall: (MethodCall call) {
+            if (call.method != 'modifyRegular') {
+              return;
+            }
+
+            final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
+            final int viewId = args['viewId']! as int;
+            final List<Object?>? size = args['size'] as List<Object?>?;
+            final String? title = args['title'] as String?;
+            final String? state = args['state'] as String?;
+            expect(viewId, tester.view.viewId);
+            expect(size, null);
+            expect(title, newTitle);
+            expect(state, null);
+            wasCalled = true;
+          },
+        ),
+      );
+
+      final RegularWindowController controller = RegularWindowController(size: initialSize);
+      await tester.pump();
+
+      await controller.modify(title: newTitle);
+      await tester.pump();
+
+      expect(wasCalled, true);
+    },
+  );
+
+  testWidgets(
+    'RegularWindowController.modify can be called when provided with a "state" argument',
+    (WidgetTester tester) async {
+      const Size initialSize = Size(800, 600);
+      const WindowState newState = WindowState.minimized;
+
+      bool wasCalled = false;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.windowing,
+        _createWindowMethodCallHandler(
+          tester: tester,
+          onMethodCall: (MethodCall call) {
+            if (call.method != 'modifyRegular') {
+              return;
+            }
+
+            final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
+            final int viewId = args['viewId']! as int;
+            final List<Object?>? size = args['size'] as List<Object?>?;
+            final String? title = args['title'] as String?;
+            final String? state = args['state'] as String?;
+            expect(viewId, tester.view.viewId);
+            expect(size, null);
+            expect(title, null);
+            expect(state, newState.toString());
+            wasCalled = true;
+          },
+        ),
+      );
+
+      final RegularWindowController controller = RegularWindowController(size: initialSize);
+      await tester.pump();
+
+      await controller.modify(state: newState);
+      await tester.pump();
+
+      expect(wasCalled, true);
+    },
+  );
+
+  testWidgets('RegularWindowController.modify throws when no arguments are provided', (
+    WidgetTester tester,
+  ) async {
+    const Size initialSize = Size(800, 600);
+    const WindowState newState = WindowState.minimized;
+
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.windowing,
+      _createWindowMethodCallHandler(tester: tester),
+    );
+
+    final RegularWindowController controller = RegularWindowController(size: initialSize);
+    await tester.pump();
+
+    expect(() async => controller.modify(), throwsA(isA<AssertionError>()));
+>>>>>>> regular-windows-modify
   });
 }

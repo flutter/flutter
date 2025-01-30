@@ -26,7 +26,7 @@ class WindowManagerModel extends ChangeNotifier {
     }
 
     for (final KeyedWindowController controller in _windows) {
-      if (controller.controller.view.viewId == _selectedViewId) {
+      if (controller.controller.rootView.viewId == _selectedViewId) {
         return controller.controller;
       }
     }
