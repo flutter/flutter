@@ -3327,9 +3327,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
     properties.add(IntProperty('headingLevel', _headingLevel, defaultValue: 0));
-    if (_linkUrl != null) {
-      properties.add(StringProperty('linkUrl', _linkUrl!.toString(), defaultValue: ''));
-    }
   }
 
   /// Returns a string representation of this node and its descendants.
