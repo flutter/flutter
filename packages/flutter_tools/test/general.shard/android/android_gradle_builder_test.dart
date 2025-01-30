@@ -704,55 +704,58 @@ void main() {
       overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
     );
 
-    testUsingContext(
-      'build succeeds when debug symbols present for at least one architecture',
-      () async {
-        final AndroidGradleBuilder builder = AndroidGradleBuilder(
-          java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
-          fileSystem: fileSystem,
-          artifacts: Artifacts.test(),
-          analytics: fakeAnalytics,
-          gradleUtils: FakeGradleUtils(),
-          platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
-          androidStudio: FakeAndroidStudio(),
-        );
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'gradlew',
-              '-q',
-              '-Ptarget-platform=android-arm64,android-arm,android-x64',
-              '-Ptarget=lib/main.dart',
-              '-Pbase-application-name=android.app.Application',
-              '-Pdart-obfuscation=false',
-              '-Ptrack-widget-creation=false',
-              '-Ptree-shake-icons=false',
-              'bundleRelease',
-            ],
-          ),
-        );
+    group('Appbundle debug symbol tests', () {
+      final List<String> commonCommandPortion = <String>[
+        'gradlew',
+        '-q',
+        '-Ptarget-platform=android-arm64,android-arm,android-x64',
+        '-Ptarget=lib/main.dart',
+        '-Pbase-application-name=android.app.Application',
+        '-Pdart-obfuscation=false',
+        '-Ptrack-widget-creation=false',
+        '-Ptree-shake-icons=false',
+      ];
 
-        fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+      testUsingContext(
+        'build succeeds when debug symbols present for at least one architecture',
+        () async {
+          final AndroidGradleBuilder builder = AndroidGradleBuilder(
+            java: FakeJava(),
+            logger: logger,
+            processManager: processManager,
+            fileSystem: fileSystem,
+            artifacts: Artifacts.test(),
+            analytics: fakeAnalytics,
+            gradleUtils: FakeGradleUtils(),
+            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            androidStudio: FakeAndroidStudio(),
+          );
+          processManager.addCommand(
+            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
+          );
 
-        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+          fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
 
-        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          fileSystem
+              .directory('android')
+              .childFile('gradle.properties')
+              .createSync(recursive: true);
 
-        final File aabFile = fileSystem
-            .directory('/build')
-            .childDirectory('app')
-            .childDirectory('outputs')
-            .childDirectory('bundle')
-            .childDirectory('release')
-            .childFile('app-release.aab');
+          fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
-        aabFile.createSync(recursive: true);
+          final File aabFile = fileSystem
+              .directory('/build')
+              .childDirectory('app')
+              .childDirectory('outputs')
+              .childDirectory('bundle')
+              .childDirectory('release')
+              .childFile('app-release.aab');
 
-        const String apkanalyzerOutputWithSymFiles = r'''
+          aabFile.createSync(recursive: true);
+
+          const String apkanalyzerOutputWithSymFiles = r'''
 /
 /META-INF/
 /META-INF/MANIFEST.MF
@@ -874,179 +877,161 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym
         ''';
 
-        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
-              'files',
-              'list',
-              aabFile.path,
-            ],
-            stdout: apkanalyzerOutputWithSymFiles,
-          ),
-        );
-
-        final FlutterProject project = FlutterProject.fromDirectoryTest(
-          fileSystem.currentDirectory,
-        );
-        project.android.appManifestFile
-          ..createSync(recursive: true)
-          ..writeAsStringSync(minimalV2EmbeddingManifest);
-
-        await builder.buildGradleApp(
-          project: project,
-          androidBuildInfo: const AndroidBuildInfo(
-            BuildInfo(
-              BuildMode.release,
-              null,
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
+          processManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
+                'files',
+                'list',
+                aabFile.path,
+              ],
+              stdout: apkanalyzerOutputWithSymFiles,
             ),
-            targetArchs: <AndroidArch>[
-              AndroidArch.arm64_v8a,
-              AndroidArch.armeabi_v7a,
-              AndroidArch.x86_64,
-            ],
-          ),
-          target: 'lib/main.dart',
-          isBuildingBundle: true,
-          configOnly: false,
-          localGradleErrors: <GradleHandledError>[],
-        );
-      },
-      overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
-    );
+          );
 
-    testUsingContext(
-      'building a debug aab does not invoke apkanalyzer',
-      () async {
-        final AndroidGradleBuilder builder = AndroidGradleBuilder(
-          java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
-          fileSystem: fileSystem,
-          artifacts: Artifacts.test(),
-          analytics: fakeAnalytics,
-          gradleUtils: FakeGradleUtils(),
-          platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
-          androidStudio: FakeAndroidStudio(),
-        );
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'gradlew',
-              '-q',
-              '-Ptarget-platform=android-arm64,android-arm,android-x64',
-              '-Ptarget=lib/main.dart',
-              '-Pbase-application-name=android.app.Application',
-              '-Pdart-obfuscation=false',
-              '-Ptrack-widget-creation=false',
-              '-Ptree-shake-icons=false',
-              'bundleDebug',
-            ],
-          ),
-        );
+          final FlutterProject project = FlutterProject.fromDirectoryTest(
+            fileSystem.currentDirectory,
+          );
+          project.android.appManifestFile
+            ..createSync(recursive: true)
+            ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-        fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
-
-        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
-
-        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
-
-        final File aabFile = fileSystem
-            .directory('/build')
-            .childDirectory('app')
-            .childDirectory('outputs')
-            .childDirectory('bundle')
-            .childDirectory('debug')
-            .childFile('app-debug.aab');
-
-        aabFile.createSync(recursive: true);
-
-        final FlutterProject project = FlutterProject.fromDirectoryTest(
-          fileSystem.currentDirectory,
-        );
-        project.android.appManifestFile
-          ..createSync(recursive: true)
-          ..writeAsStringSync(minimalV2EmbeddingManifest);
-
-        await builder.buildGradleApp(
-          project: project,
-          androidBuildInfo: const AndroidBuildInfo(
-            BuildInfo(
-              BuildMode.debug,
-              null,
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
+          await builder.buildGradleApp(
+            project: project,
+            androidBuildInfo: const AndroidBuildInfo(
+              BuildInfo(
+                BuildMode.release,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+              targetArchs: <AndroidArch>[
+                AndroidArch.arm64_v8a,
+                AndroidArch.armeabi_v7a,
+                AndroidArch.x86_64,
+              ],
             ),
-            targetArchs: <AndroidArch>[
-              AndroidArch.arm64_v8a,
-              AndroidArch.armeabi_v7a,
-              AndroidArch.x86_64,
-            ],
-          ),
-          target: 'lib/main.dart',
-          isBuildingBundle: true,
-          configOnly: false,
-          localGradleErrors: <GradleHandledError>[],
-        );
-      },
-      overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
-    );
+            target: 'lib/main.dart',
+            isBuildingBundle: true,
+            configOnly: false,
+            localGradleErrors: <GradleHandledError>[],
+          );
+        },
+        overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
+      );
 
-    testUsingContext(
-      'throws tool exit for missing debug symbols when building release app bundle',
-      () async {
-        final AndroidGradleBuilder builder = AndroidGradleBuilder(
-          java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
-          fileSystem: fileSystem,
-          artifacts: Artifacts.test(),
-          analytics: fakeAnalytics,
-          gradleUtils: FakeGradleUtils(),
-          platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
-          androidStudio: FakeAndroidStudio(),
-        );
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'gradlew',
-              '-q',
-              '-Ptarget-platform=android-arm64,android-arm,android-x64',
-              '-Ptarget=lib/main.dart',
-              '-Pbase-application-name=android.app.Application',
-              '-Pdart-obfuscation=false',
-              '-Ptrack-widget-creation=false',
-              '-Ptree-shake-icons=false',
-              'bundleRelease',
-            ],
-          ),
-        );
+      testUsingContext(
+        'building a debug aab does not invoke apkanalyzer',
+        () async {
+          final AndroidGradleBuilder builder = AndroidGradleBuilder(
+            java: FakeJava(),
+            logger: logger,
+            processManager: processManager,
+            fileSystem: fileSystem,
+            artifacts: Artifacts.test(),
+            analytics: fakeAnalytics,
+            gradleUtils: FakeGradleUtils(),
+            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            androidStudio: FakeAndroidStudio(),
+          );
+          processManager.addCommand(
+            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleDebug')),
+          );
 
-        fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+          fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
 
-        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+          fileSystem
+              .directory('android')
+              .childFile('gradle.properties')
+              .createSync(recursive: true);
 
-        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
-        final File aabFile = fileSystem
-            .directory('/build')
-            .childDirectory('app')
-            .childDirectory('outputs')
-            .childDirectory('bundle')
-            .childDirectory('release')
-            .childFile('app-release.aab');
+          final File aabFile = fileSystem
+              .directory('/build')
+              .childDirectory('app')
+              .childDirectory('outputs')
+              .childDirectory('bundle')
+              .childDirectory('debug')
+              .childFile('app-debug.aab');
 
-        aabFile.createSync(recursive: true);
+          aabFile.createSync(recursive: true);
 
-        const String apkanalyzerOutputWithoutSymFiles = r'''
+          final FlutterProject project = FlutterProject.fromDirectoryTest(
+            fileSystem.currentDirectory,
+          );
+          project.android.appManifestFile
+            ..createSync(recursive: true)
+            ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+          await builder.buildGradleApp(
+            project: project,
+            androidBuildInfo: const AndroidBuildInfo(
+              BuildInfo(
+                BuildMode.debug,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+              targetArchs: <AndroidArch>[
+                AndroidArch.arm64_v8a,
+                AndroidArch.armeabi_v7a,
+                AndroidArch.x86_64,
+              ],
+            ),
+            target: 'lib/main.dart',
+            isBuildingBundle: true,
+            configOnly: false,
+            localGradleErrors: <GradleHandledError>[],
+          );
+        },
+        overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
+      );
+
+      testUsingContext(
+        'throws tool exit for missing debug symbols when building release app bundle',
+        () async {
+          final AndroidGradleBuilder builder = AndroidGradleBuilder(
+            java: FakeJava(),
+            logger: logger,
+            processManager: processManager,
+            fileSystem: fileSystem,
+            artifacts: Artifacts.test(),
+            analytics: fakeAnalytics,
+            gradleUtils: FakeGradleUtils(),
+            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            androidStudio: FakeAndroidStudio(),
+          );
+          processManager.addCommand(
+            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
+          );
+
+          fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+
+          fileSystem
+              .directory('android')
+              .childFile('gradle.properties')
+              .createSync(recursive: true);
+
+          fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+          final File aabFile = fileSystem
+              .directory('/build')
+              .childDirectory('app')
+              .childDirectory('outputs')
+              .childDirectory('bundle')
+              .childDirectory('release')
+              .childFile('app-release.aab');
+
+          aabFile.createSync(recursive: true);
+
+          const String apkanalyzerOutputWithoutSymFiles = r'''
 /
 /META-INF/
 /META-INF/MANIFEST.MF
@@ -1165,103 +1150,94 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.gradle/app-metadata.properties
         ''';
 
-        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
-              'files',
-              'list',
-              aabFile.path,
-            ],
-            stdout: apkanalyzerOutputWithoutSymFiles,
-          ),
-        );
-
-        final FlutterProject project = FlutterProject.fromDirectoryTest(
-          fileSystem.currentDirectory,
-        );
-        project.android.appManifestFile
-          ..createSync(recursive: true)
-          ..writeAsStringSync(minimalV2EmbeddingManifest);
-
-        await expectLater(
-          () async => builder.buildGradleApp(
-            project: project,
-            androidBuildInfo: const AndroidBuildInfo(
-              BuildInfo(
-                BuildMode.release,
-                null,
-                treeShakeIcons: false,
-                packageConfigPath: '.dart_tool/package_config.json',
-              ),
-              targetArchs: <AndroidArch>[
-                AndroidArch.arm64_v8a,
-                AndroidArch.armeabi_v7a,
-                AndroidArch.x86_64,
+          processManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
+                'files',
+                'list',
+                aabFile.path,
               ],
+              stdout: apkanalyzerOutputWithoutSymFiles,
             ),
-            target: 'lib/main.dart',
-            isBuildingBundle: true,
-            configOnly: false,
-            localGradleErrors: <GradleHandledError>[],
-          ),
-          throwsToolExit(message: failedToStripDebugSymbolsErrorMessage),
-        );
-      },
-      overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
-    );
+          );
 
-    testUsingContext(
-      'build aab in release mode fails when apkanalyzer exit code is non zero',
-      () async {
-        final AndroidGradleBuilder builder = AndroidGradleBuilder(
-          java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
-          fileSystem: fileSystem,
-          artifacts: Artifacts.test(),
-          analytics: fakeAnalytics,
-          gradleUtils: FakeGradleUtils(),
-          platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
-          androidStudio: FakeAndroidStudio(),
-        );
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>[
-              'gradlew',
-              '-q',
-              '-Ptarget-platform=android-arm64,android-arm,android-x64',
-              '-Ptarget=lib/main.dart',
-              '-Pbase-application-name=android.app.Application',
-              '-Pdart-obfuscation=false',
-              '-Ptrack-widget-creation=false',
-              '-Ptree-shake-icons=false',
-              'bundleRelease',
-            ],
-          ),
-        );
+          final FlutterProject project = FlutterProject.fromDirectoryTest(
+            fileSystem.currentDirectory,
+          );
+          project.android.appManifestFile
+            ..createSync(recursive: true)
+            ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-        fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+          await expectLater(
+            () async => builder.buildGradleApp(
+              project: project,
+              androidBuildInfo: const AndroidBuildInfo(
+                BuildInfo(
+                  BuildMode.release,
+                  null,
+                  treeShakeIcons: false,
+                  packageConfigPath: '.dart_tool/package_config.json',
+                ),
+                targetArchs: <AndroidArch>[
+                  AndroidArch.arm64_v8a,
+                  AndroidArch.armeabi_v7a,
+                  AndroidArch.x86_64,
+                ],
+              ),
+              target: 'lib/main.dart',
+              isBuildingBundle: true,
+              configOnly: false,
+              localGradleErrors: <GradleHandledError>[],
+            ),
+            throwsToolExit(message: failedToStripDebugSymbolsErrorMessage),
+          );
+        },
+        overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
+      );
 
-        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+      testUsingContext(
+        'build aab in release mode fails when apkanalyzer exit code is non zero',
+        () async {
+          final AndroidGradleBuilder builder = AndroidGradleBuilder(
+            java: FakeJava(),
+            logger: logger,
+            processManager: processManager,
+            fileSystem: fileSystem,
+            artifacts: Artifacts.test(),
+            analytics: fakeAnalytics,
+            gradleUtils: FakeGradleUtils(),
+            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            androidStudio: FakeAndroidStudio(),
+          );
+          processManager.addCommand(
+            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
+          );
 
-        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
 
-        final File aabFile = fileSystem
-            .directory('/build')
-            .childDirectory('app')
-            .childDirectory('outputs')
-            .childDirectory('bundle')
-            .childDirectory('release')
-            .childFile('app-release.aab');
+          fileSystem
+              .directory('android')
+              .childFile('gradle.properties')
+              .createSync(recursive: true);
 
-        aabFile.createSync(recursive: true);
+          fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
-        const String apkanalyzerOutputWithSymFiles = r'''
+          final File aabFile = fileSystem
+              .directory('/build')
+              .childDirectory('app')
+              .childDirectory('outputs')
+              .childDirectory('bundle')
+              .childDirectory('release')
+              .childFile('app-release.aab');
+
+          aabFile.createSync(recursive: true);
+
+          const String apkanalyzerOutputWithSymFiles = r'''
 /
 /META-INF/
 /META-INF/MANIFEST.MF
@@ -1383,54 +1359,55 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym
         ''';
 
-        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
-              'files',
-              'list',
-              aabFile.path,
-            ],
-            exitCode: 1,
-            stdout: apkanalyzerOutputWithSymFiles,
-          ),
-        );
-
-        final FlutterProject project = FlutterProject.fromDirectoryTest(
-          fileSystem.currentDirectory,
-        );
-        project.android.appManifestFile
-          ..createSync(recursive: true)
-          ..writeAsStringSync(minimalV2EmbeddingManifest);
-
-        await expectLater(
-          () async => builder.buildGradleApp(
-            project: project,
-            androidBuildInfo: const AndroidBuildInfo(
-              BuildInfo(
-                BuildMode.release,
-                null,
-                treeShakeIcons: false,
-                packageConfigPath: '.dart_tool/package_config.json',
-              ),
-              targetArchs: <AndroidArch>[
-                AndroidArch.arm64_v8a,
-                AndroidArch.armeabi_v7a,
-                AndroidArch.x86_64,
+          processManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
+                'files',
+                'list',
+                aabFile.path,
               ],
+              exitCode: 1,
+              stdout: apkanalyzerOutputWithSymFiles,
             ),
-            target: 'lib/main.dart',
-            isBuildingBundle: true,
-            configOnly: false,
-            localGradleErrors: <GradleHandledError>[],
-          ),
-          throwsToolExit(message: failedToStripDebugSymbolsErrorMessage),
-        );
-      },
-      overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
-    );
+          );
+
+          final FlutterProject project = FlutterProject.fromDirectoryTest(
+            fileSystem.currentDirectory,
+          );
+          project.android.appManifestFile
+            ..createSync(recursive: true)
+            ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+          await expectLater(
+            () async => builder.buildGradleApp(
+              project: project,
+              androidBuildInfo: const AndroidBuildInfo(
+                BuildInfo(
+                  BuildMode.release,
+                  null,
+                  treeShakeIcons: false,
+                  packageConfigPath: '.dart_tool/package_config.json',
+                ),
+                targetArchs: <AndroidArch>[
+                  AndroidArch.arm64_v8a,
+                  AndroidArch.armeabi_v7a,
+                  AndroidArch.x86_64,
+                ],
+              ),
+              target: 'lib/main.dart',
+              isBuildingBundle: true,
+              configOnly: false,
+              localGradleErrors: <GradleHandledError>[],
+            ),
+            throwsToolExit(message: failedToStripDebugSymbolsErrorMessage),
+          );
+        },
+        overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
+      );
+    });
 
     testUsingContext(
       'indicates that an APK has been built successfully',
