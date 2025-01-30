@@ -716,46 +716,7 @@ void main() {
         '-Ptree-shake-icons=false',
       ];
 
-      testUsingContext(
-        'build succeeds when debug symbols present for at least one architecture',
-        () async {
-          final AndroidGradleBuilder builder = AndroidGradleBuilder(
-            java: FakeJava(),
-            logger: logger,
-            processManager: processManager,
-            fileSystem: fileSystem,
-            artifacts: Artifacts.test(),
-            analytics: fakeAnalytics,
-            gradleUtils: FakeGradleUtils(),
-            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
-            androidStudio: FakeAndroidStudio(),
-          );
-          processManager.addCommand(
-            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
-          );
-
-          fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
-
-          fileSystem
-              .directory('android')
-              .childFile('gradle.properties')
-              .createSync(recursive: true);
-
-          fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
-
-          final File aabFile = fileSystem
-              .directory('/build')
-              .childDirectory('app')
-              .childDirectory('outputs')
-              .childDirectory('bundle')
-              .childDirectory('release')
-              .childFile('app-release.aab');
-
-          aabFile.createSync(recursive: true);
-
-          const String apkanalyzerOutputWithSymFiles = r'''
+      const String apkanalyzerOutputWithoutSymFiles = r'''
 /
 /META-INF/
 /META-INF/MANIFEST.MF
@@ -872,10 +833,54 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.libraries/dependencies.pb
 /BUNDLE-METADATA/com.android.tools.build.gradle/
 /BUNDLE-METADATA/com.android.tools.build.gradle/app-metadata.properties
+''';
+
+      const String apkanalyzerOutputWithSymFiles =
+          apkanalyzerOutputWithoutSymFiles +
+          r'''
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym
-        ''';
+''';
+
+      testUsingContext(
+        'build succeeds when debug symbols present for at least one architecture',
+        () async {
+          final AndroidGradleBuilder builder = AndroidGradleBuilder(
+            java: FakeJava(),
+            logger: logger,
+            processManager: processManager,
+            fileSystem: fileSystem,
+            artifacts: Artifacts.test(),
+            analytics: fakeAnalytics,
+            gradleUtils: FakeGradleUtils(),
+            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            androidStudio: FakeAndroidStudio(),
+          );
+          processManager.addCommand(
+            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
+          );
+
+          fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+
+          fileSystem
+              .directory('android')
+              .childFile('gradle.properties')
+              .createSync(recursive: true);
+
+          fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+          final File aabFile = fileSystem
+              .directory('/build')
+              .childDirectory('app')
+              .childDirectory('outputs')
+              .childDirectory('bundle')
+              .childDirectory('release')
+              .childFile('app-release.aab');
+
+          aabFile.createSync(recursive: true);
 
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
@@ -1031,125 +1036,6 @@ void main() {
 
           aabFile.createSync(recursive: true);
 
-          const String apkanalyzerOutputWithoutSymFiles = r'''
-/
-/META-INF/
-/META-INF/MANIFEST.MF
-/META-INF/ANDROIDD.RSA
-/META-INF/ANDROIDD.SF
-/base/
-/base/root/
-/base/root/kotlin/
-/base/root/kotlin/reflect/
-/base/root/kotlin/reflect/reflect.kotlin_builtins
-/base/root/kotlin/ranges/
-/base/root/kotlin/ranges/ranges.kotlin_builtins
-/base/root/kotlin/kotlin.kotlin_builtins
-/base/root/kotlin/internal/
-/base/root/kotlin/internal/internal.kotlin_builtins
-/base/root/kotlin/coroutines/
-/base/root/kotlin/coroutines/coroutines.kotlin_builtins
-/base/root/kotlin/collections/
-/base/root/kotlin/collections/collections.kotlin_builtins
-/base/root/kotlin/annotation/
-/base/root/kotlin/annotation/annotation.kotlin_builtins
-/base/root/kotlin-tooling-metadata.json
-/base/root/META-INF/
-/base/root/META-INF/version-control-info.textproto
-/base/root/META-INF/services/
-/base/root/META-INF/services/i0.b
-/base/root/META-INF/services/i0.a
-/base/root/META-INF/kotlinx_coroutines_core.version
-/base/root/META-INF/kotlinx_coroutines_android.version
-/base/root/META-INF/com/
-/base/root/META-INF/com/android/
-/base/root/META-INF/com/android/build/
-/base/root/META-INF/com/android/build/gradle/
-/base/root/META-INF/com/android/build/gradle/app-metadata.properties
-/base/root/META-INF/androidx.window_window.version
-/base/root/META-INF/androidx.window_window-java.version
-/base/root/META-INF/androidx.window.extensions.core_core.version
-/base/root/META-INF/androidx.viewpager_viewpager.version
-/base/root/META-INF/androidx.versionedparcelable_versionedparcelable.version
-/base/root/META-INF/androidx.tracing_tracing.version
-/base/root/META-INF/androidx.startup_startup-runtime.version
-/base/root/META-INF/androidx.savedstate_savedstate.version
-/base/root/META-INF/androidx.profileinstaller_profileinstaller.version
-/base/root/META-INF/androidx.loader_loader.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-viewmodel.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-viewmodel-savedstate.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-runtime.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-process.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-livedata.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-livedata-core.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-livedata-core-ktx.version
-/base/root/META-INF/androidx.interpolator_interpolator.version
-/base/root/META-INF/androidx.fragment_fragment.version
-/base/root/META-INF/androidx.customview_customview.version
-/base/root/META-INF/androidx.core_core.version
-/base/root/META-INF/androidx.core_core-ktx.version
-/base/root/META-INF/androidx.arch.core_core-runtime.version
-/base/root/META-INF/androidx.annotation_annotation-experimental.version
-/base/root/META-INF/androidx.activity_activity.version
-/base/root/DebugProbesKt.bin
-/base/resources.pb
-/base/res/
-/base/res/mipmap-xxxhdpi-v4/
-/base/res/mipmap-xxxhdpi-v4/ic_launcher.png
-/base/res/mipmap-xxhdpi-v4/
-/base/res/mipmap-xxhdpi-v4/ic_launcher.png
-/base/res/mipmap-xhdpi-v4/
-/base/res/mipmap-xhdpi-v4/ic_launcher.png
-/base/res/mipmap-mdpi-v4/
-/base/res/mipmap-mdpi-v4/ic_launcher.png
-/base/res/mipmap-hdpi-v4/
-/base/res/mipmap-hdpi-v4/ic_launcher.png
-/base/res/drawable-v21/
-/base/res/drawable-v21/launch_background.xml
-/base/native.pb
-/base/manifest/
-/base/manifest/AndroidManifest.xml
-/base/lib/
-/base/lib/x86_64/
-/base/lib/x86_64/libflutter.so
-/base/lib/x86_64/libapp.so
-/base/lib/armeabi-v7a/
-/base/lib/armeabi-v7a/libflutter.so
-/base/lib/armeabi-v7a/libapp.so
-/base/lib/arm64-v8a/
-/base/lib/arm64-v8a/libflutter.so
-/base/lib/arm64-v8a/libapp.so
-/base/dex/
-/base/dex/classes.dex
-/base/assets/
-/base/assets/flutter_assets/
-/base/assets/flutter_assets/shaders/
-/base/assets/flutter_assets/shaders/ink_sparkle.frag
-/base/assets/flutter_assets/packages/
-/base/assets/flutter_assets/packages/cupertino_icons/
-/base/assets/flutter_assets/packages/cupertino_icons/assets/
-/base/assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
-/base/assets/flutter_assets/fonts/
-/base/assets/flutter_assets/fonts/MaterialIcons-Regular.otf
-/base/assets/flutter_assets/NativeAssetsManifest.json
-/base/assets/flutter_assets/NOTICES.Z
-/base/assets/flutter_assets/FontManifest.json
-/base/assets/flutter_assets/AssetManifest.json
-/base/assets/flutter_assets/AssetManifest.bin
-/base/assets.pb
-/BundleConfig.pb
-/BUNDLE-METADATA/
-/BUNDLE-METADATA/com.android.tools.build.profiles/
-/BUNDLE-METADATA/com.android.tools.build.profiles/baseline.profm
-/BUNDLE-METADATA/com.android.tools.build.profiles/baseline.prof
-/BUNDLE-METADATA/com.android.tools.build.obfuscation/
-/BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map
-/BUNDLE-METADATA/com.android.tools.build.libraries/
-/BUNDLE-METADATA/com.android.tools.build.libraries/dependencies.pb
-/BUNDLE-METADATA/com.android.tools.build.gradle/
-/BUNDLE-METADATA/com.android.tools.build.gradle/app-metadata.properties
-        ''';
-
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
           processManager.addCommand(
@@ -1236,128 +1122,6 @@ void main() {
               .childFile('app-release.aab');
 
           aabFile.createSync(recursive: true);
-
-          const String apkanalyzerOutputWithSymFiles = r'''
-/
-/META-INF/
-/META-INF/MANIFEST.MF
-/META-INF/ANDROIDD.RSA
-/META-INF/ANDROIDD.SF
-/base/
-/base/root/
-/base/root/kotlin/
-/base/root/kotlin/reflect/
-/base/root/kotlin/reflect/reflect.kotlin_builtins
-/base/root/kotlin/ranges/
-/base/root/kotlin/ranges/ranges.kotlin_builtins
-/base/root/kotlin/kotlin.kotlin_builtins
-/base/root/kotlin/internal/
-/base/root/kotlin/internal/internal.kotlin_builtins
-/base/root/kotlin/coroutines/
-/base/root/kotlin/coroutines/coroutines.kotlin_builtins
-/base/root/kotlin/collections/
-/base/root/kotlin/collections/collections.kotlin_builtins
-/base/root/kotlin/annotation/
-/base/root/kotlin/annotation/annotation.kotlin_builtins
-/base/root/kotlin-tooling-metadata.json
-/base/root/META-INF/
-/base/root/META-INF/version-control-info.textproto
-/base/root/META-INF/services/
-/base/root/META-INF/services/i0.b
-/base/root/META-INF/services/i0.a
-/base/root/META-INF/kotlinx_coroutines_core.version
-/base/root/META-INF/kotlinx_coroutines_android.version
-/base/root/META-INF/com/
-/base/root/META-INF/com/android/
-/base/root/META-INF/com/android/build/
-/base/root/META-INF/com/android/build/gradle/
-/base/root/META-INF/com/android/build/gradle/app-metadata.properties
-/base/root/META-INF/androidx.window_window.version
-/base/root/META-INF/androidx.window_window-java.version
-/base/root/META-INF/androidx.window.extensions.core_core.version
-/base/root/META-INF/androidx.viewpager_viewpager.version
-/base/root/META-INF/androidx.versionedparcelable_versionedparcelable.version
-/base/root/META-INF/androidx.tracing_tracing.version
-/base/root/META-INF/androidx.startup_startup-runtime.version
-/base/root/META-INF/androidx.savedstate_savedstate.version
-/base/root/META-INF/androidx.profileinstaller_profileinstaller.version
-/base/root/META-INF/androidx.loader_loader.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-viewmodel.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-viewmodel-savedstate.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-runtime.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-process.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-livedata.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-livedata-core.version
-/base/root/META-INF/androidx.lifecycle_lifecycle-livedata-core-ktx.version
-/base/root/META-INF/androidx.interpolator_interpolator.version
-/base/root/META-INF/androidx.fragment_fragment.version
-/base/root/META-INF/androidx.customview_customview.version
-/base/root/META-INF/androidx.core_core.version
-/base/root/META-INF/androidx.core_core-ktx.version
-/base/root/META-INF/androidx.arch.core_core-runtime.version
-/base/root/META-INF/androidx.annotation_annotation-experimental.version
-/base/root/META-INF/androidx.activity_activity.version
-/base/root/DebugProbesKt.bin
-/base/resources.pb
-/base/res/
-/base/res/mipmap-xxxhdpi-v4/
-/base/res/mipmap-xxxhdpi-v4/ic_launcher.png
-/base/res/mipmap-xxhdpi-v4/
-/base/res/mipmap-xxhdpi-v4/ic_launcher.png
-/base/res/mipmap-xhdpi-v4/
-/base/res/mipmap-xhdpi-v4/ic_launcher.png
-/base/res/mipmap-mdpi-v4/
-/base/res/mipmap-mdpi-v4/ic_launcher.png
-/base/res/mipmap-hdpi-v4/
-/base/res/mipmap-hdpi-v4/ic_launcher.png
-/base/res/drawable-v21/
-/base/res/drawable-v21/launch_background.xml
-/base/native.pb
-/base/manifest/
-/base/manifest/AndroidManifest.xml
-/base/lib/
-/base/lib/x86_64/
-/base/lib/x86_64/libflutter.so
-/base/lib/x86_64/libapp.so
-/base/lib/armeabi-v7a/
-/base/lib/armeabi-v7a/libflutter.so
-/base/lib/armeabi-v7a/libapp.so
-/base/lib/arm64-v8a/
-/base/lib/arm64-v8a/libflutter.so
-/base/lib/arm64-v8a/libapp.so
-/base/dex/
-/base/dex/classes.dex
-/base/assets/
-/base/assets/flutter_assets/
-/base/assets/flutter_assets/shaders/
-/base/assets/flutter_assets/shaders/ink_sparkle.frag
-/base/assets/flutter_assets/packages/
-/base/assets/flutter_assets/packages/cupertino_icons/
-/base/assets/flutter_assets/packages/cupertino_icons/assets/
-/base/assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
-/base/assets/flutter_assets/fonts/
-/base/assets/flutter_assets/fonts/MaterialIcons-Regular.otf
-/base/assets/flutter_assets/NativeAssetsManifest.json
-/base/assets/flutter_assets/NOTICES.Z
-/base/assets/flutter_assets/FontManifest.json
-/base/assets/flutter_assets/AssetManifest.json
-/base/assets/flutter_assets/AssetManifest.bin
-/base/assets.pb
-/BundleConfig.pb
-/BUNDLE-METADATA/
-/BUNDLE-METADATA/com.android.tools.build.profiles/
-/BUNDLE-METADATA/com.android.tools.build.profiles/baseline.profm
-/BUNDLE-METADATA/com.android.tools.build.profiles/baseline.prof
-/BUNDLE-METADATA/com.android.tools.build.obfuscation/
-/BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map
-/BUNDLE-METADATA/com.android.tools.build.libraries/
-/BUNDLE-METADATA/com.android.tools.build.libraries/dependencies.pb
-/BUNDLE-METADATA/com.android.tools.build.gradle/
-/BUNDLE-METADATA/com.android.tools.build.gradle/app-metadata.properties
-/BUNDLE-METADATA/com.android.tools.build.debugsymbols/
-/BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/
-/BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym
-        ''';
 
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
