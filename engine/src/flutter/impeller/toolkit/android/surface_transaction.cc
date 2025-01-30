@@ -50,7 +50,7 @@ bool SurfaceTransaction::Apply(OnCompleteCallback callback) {
         delete data;
       });
   // If the transaction was created in Java, then it must be applied in
-  // the java PlatformViewController and not as a part of the engine render
+  // the Java PlatformViewController and not as a part of the engine render
   // loop.
   if (!transaction_.get().owned) {
     transaction_.reset();
