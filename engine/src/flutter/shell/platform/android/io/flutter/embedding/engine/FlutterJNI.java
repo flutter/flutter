@@ -318,7 +318,6 @@ public class FlutterJNI {
     asyncWaitForVsyncDelegate = delegate;
   }
 
-  // TODO(mattcarroll): add javadocs
   // Called by native.
   private static void asyncWaitForVsync(final long cookie) {
     if (asyncWaitForVsyncDelegate != null) {
@@ -592,7 +591,6 @@ public class FlutterJNI {
     }
   }
 
-  // TODO(mattcarroll): get native to call this when rendering stops.
   @VisibleForTesting
   @UiThread
   void onRenderingStopped() {
@@ -799,8 +797,6 @@ public class FlutterJNI {
     if (accessibilityDelegate != null) {
       accessibilityDelegate.updateSemantics(buffer, strings, stringAttributeArgs);
     }
-    // TODO(mattcarroll): log dropped messages when in debug mode
-    // (https://github.com/flutter/flutter/issues/25391)
   }
 
   /**
@@ -820,8 +816,6 @@ public class FlutterJNI {
     if (accessibilityDelegate != null) {
       accessibilityDelegate.updateCustomAccessibilityActions(buffer, strings);
     }
-    // TODO(mattcarroll): log dropped messages when in debug mode
-    // (https://github.com/flutter/flutter/issues/25391)
   }
 
   /** Sends a semantics action to Flutter's engine, without any additional arguments. */
@@ -885,8 +879,6 @@ public class FlutterJNI {
 
   private native void nativeSetSemanticsEnabled(long nativeShellHolderId, boolean enabled);
 
-  // TODO(mattcarroll): figure out what flags are supported and add javadoc about when/why/where to
-  // use this.
   @UiThread
   public void setAccessibilityFeatures(int flags) {
     ensureRunningOnMainThread();
@@ -1062,7 +1054,6 @@ public class FlutterJNI {
   }
 
   // Called by native on any thread.
-  // TODO(mattcarroll): determine if message is nonull or nullable
   @SuppressWarnings("unused")
   @VisibleForTesting
   public void handlePlatformMessage(
@@ -1075,19 +1066,14 @@ public class FlutterJNI {
     } else {
       nativeCleanupMessageData(messageData);
     }
-    // TODO(mattcarroll): log dropped messages when in debug mode
-    // (https://github.com/flutter/flutter/issues/25391)
   }
 
   // Called by native to respond to a platform message that we sent.
-  // TODO(mattcarroll): determine if reply is nonull or nullable
   @SuppressWarnings("unused")
   private void handlePlatformMessageResponse(int replyId, ByteBuffer reply) {
     if (platformMessageHandler != null) {
       platformMessageHandler.handlePlatformMessageResponse(replyId, reply);
     }
-    // TODO(mattcarroll): log dropped messages when in debug mode
-    // (https://github.com/flutter/flutter/issues/25391)
   }
 
   /**
@@ -1138,7 +1124,6 @@ public class FlutterJNI {
       int position,
       int responseId);
 
-  // TODO(mattcarroll): differentiate between channel responses and platform responses.
   public void invokePlatformMessageEmptyResponseCallback(int responseId) {
     // Called on any thread.
     shellHolderLock.readLock().lock();
@@ -1160,7 +1145,6 @@ public class FlutterJNI {
   private native void nativeInvokePlatformMessageEmptyResponseCallback(
       long nativeShellHolderId, int responseId);
 
-  // TODO(mattcarroll): differentiate between channel responses and platform responses.
   public void invokePlatformMessageResponseCallback(
       int responseId, @NonNull ByteBuffer message, int position) {
     // Called on any thread.
@@ -1470,7 +1454,6 @@ public class FlutterJNI {
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
   }
 
-  // TODO(mattcarroll): determine if this is nonull or nullable
   @UiThread
   public Bitmap getBitmap() {
     ensureRunningOnMainThread();
@@ -1478,7 +1461,6 @@ public class FlutterJNI {
     return nativeGetBitmap(nativeShellHolderId);
   }
 
-  // TODO(mattcarroll): determine if this is nonull or nullable
   private native Bitmap nativeGetBitmap(long nativeShellHolderId);
 
   /**
@@ -1545,4 +1527,41 @@ public class FlutterJNI {
   }
 
   private native boolean nativeShouldDisableAHB();
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public FlutterOverlaySurface createOverlaySurface() {
+    if (platformViewsController == null) {
+      throw new RuntimeException(
+          "platformViewsController must be set before attempting to position an overlay surface");
+    }
+    return platformViewsController.createOverlaySurface();
+  }
+
+
+
+  // HC++ Platform View Lifecycle Methods.
+  @SuppressWarnings("unused")
+  SurfaceControl.Transaction createTransaction() {
+    if (platformViewsController == null) {
+      throw new RuntimeException("");
+    }
+    return platformViewsController.createTransaction();
+  }
+
+  @SuppressWarnings("unused")
+  void swapTransactions() {
+    if (platformViewsController == null) {
+      throw new RuntimeException("");
+    }
+    platformViewsController.swapTransactions();
+  }
+
+  @SuppressWarnings("unused")
+  void applyTransactions() {
+    if (platformViewsController == null) {
+      throw new RuntimeException("");
+    }
+    platformViewsController.applyTransactions();
+  }
 }
