@@ -712,18 +712,8 @@ class FrameworkRepository extends Repository {
     return true;
   }
 
-  Future<bool> get isMonorepo async {
-    final Directory root = await checkoutDirectory;
-    return root.childDirectory('engine').existsSync();
-  }
-
   /// Update the `dart_revision` entry in the DEPS file.
   Future<void> updateDartRevision(String newRevision, {@visibleForTesting File? depsFile}) async {
-    if (!await isMonorepo) {
-      throw ConductorException(
-        'You cannot update the dart revision within a non-monorepo framework repo',
-      );
-    }
     return _updateDartRevision(this, newRevision, depsFile: depsFile);
   }
 }

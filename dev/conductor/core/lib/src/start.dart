@@ -273,28 +273,10 @@ class StartContext extends Context {
     // candidateBranch.
     final String workingBranchName = 'cherrypicks-$candidateBranch';
 
-    // Check if we are in a monorepo
-    if (await framework.isMonorepo) {
-      stdio.printTrace(
-        'Detected a monorepo at ${(await framework.checkoutDirectory).path}, '
-        'ignoring engine checkout.',
-      );
-      state.isMonorepo = true;
-    } else {
-      state.isMonorepo = false;
-
-      await engine.newBranch(workingBranchName);
-    }
-
     await framework.newBranch(workingBranchName);
     if (dartRevision != null && dartRevision!.isNotEmpty) {
-      if (state.isMonorepo) {
-        await framework.updateDartRevision(dartRevision!);
-        await framework.commit('Update Dart SDK to $dartRevision', addFirst: true);
-      } else {
-        await engine.updateDartRevision(dartRevision!);
-        await engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
-      }
+      await framework.updateDartRevision(dartRevision!);
+      await framework.commit('Update Dart SDK to $dartRevision', addFirst: true);
     }
 
     final String frameworkHead = await framework.reverseParse('HEAD');
@@ -314,31 +296,9 @@ class StartContext extends Context {
                 ..name = 'mirror'
                 ..url = framework.mirrorRemote!.url));
 
-    if (state.isMonorepo) {
-      if (dartRevision != null && dartRevision!.isNotEmpty) {
-        // In the monorepo, the DEPS file is in flutter/flutter
-        state.framework.dartRevision = dartRevision!;
-      }
-    } else {
-      final String engineHead = await engine.reverseParse('HEAD');
-      state.engine =
-          (pb.Repository.create()
-            ..candidateBranch = candidateBranch
-            ..workingBranch = workingBranchName
-            ..startingGitHead = engineHead
-            ..currentGitHead = engineHead
-            ..checkoutPath = (await engine.checkoutDirectory).path
-            ..upstream =
-                (pb.Remote.create()
-                  ..name = 'upstream'
-                  ..url = engine.upstreamRemote.url)
-            ..mirror =
-                (pb.Remote.create()
-                  ..name = 'mirror'
-                  ..url = engine.mirrorRemote!.url));
-      if (dartRevision != null && dartRevision!.isNotEmpty) {
-        state.engine.dartRevision = dartRevision!;
-      }
+    if (dartRevision != null && dartRevision!.isNotEmpty) {
+      // In the monorepo, the DEPS file is in flutter/flutter
+      state.framework.dartRevision = dartRevision!;
     }
 
     // Get framework version
@@ -376,11 +336,7 @@ class StartContext extends Context {
 
     state.releaseVersion = nextVersion.toString();
 
-    if (state.isMonorepo) {
-      state.currentPhase = ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS;
-    } else {
-      state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
-    }
+    state.currentPhase = ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS;
 
     state.conductorVersion = conductorVersion;
 
