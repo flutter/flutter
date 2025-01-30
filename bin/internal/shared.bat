@@ -158,9 +158,11 @@ GOTO :after_subroutine
     IF "%ERRORLEVEL%" EQU "2" (
       EXIT 1
     )
+    SET max_dart_sdk_retries = "3"
     IF "%ERRORLEVEL%" NEQ "0" (
-      IF "%dart_sdk_retries%" EQU "3" (
-        ECHO Error: Unable to update Dart SDK after 3 retries. 1>&2
+      IF "%dart_sdk_retries%" EQU "%max_dart_sdk_retries%" (
+        ECHO Error: Unable to update Dart SDK after %max_dart_sdk_retries% retries. 1>&2
+        DEL "%engine_stamp%"
         EXIT 1
       )
       ECHO Error: Unable to update Dart SDK. Retrying... 1>&2
