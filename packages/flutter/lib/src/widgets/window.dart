@@ -60,7 +60,7 @@ abstract class WindowController with ChangeNotifier {
   }) {
     future
         .then((WindowCreationResult metadata) async {
-          _handleCreationResult();
+          _handleCreationResult(metadata);
 
           _listener = _WindowListener(
             viewId: metadata.rootView.viewId,
@@ -84,7 +84,7 @@ abstract class WindowController with ChangeNotifier {
         });
   }
 
-  void _handleCreationResult(WindowCretionResult metadata) {
+  void _handleCreationResult(WindowCreationResult metadata) {
     _view = metadata.rootView;
     _size = metadata.size;
     notifyListeners();
