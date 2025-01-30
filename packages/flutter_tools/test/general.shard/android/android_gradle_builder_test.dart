@@ -706,7 +706,7 @@ void main() {
 
     testUsingContext(
       'build succeeds when debug symbols present for at least one architecture',
-          () async {
+      () async {
         final AndroidGradleBuilder builder = AndroidGradleBuilder(
           java: FakeJava(),
           logger: logger,
@@ -921,7 +921,7 @@ void main() {
 
     testUsingContext(
       'building a debug aab does not invoke apkanalyzer',
-          () async {
+      () async {
         final AndroidGradleBuilder builder = AndroidGradleBuilder(
           java: FakeJava(),
           logger: logger,
