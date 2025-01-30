@@ -170,7 +170,6 @@ const ConductorState$json = {
       '6': '.conductor_state.ReleaseType',
       '10': 'releaseType'
     },
-    {'1': 'isMonorepo', '3': 12, '4': 1, '5': 8, '10': 'isMonorepo'},
   ],
 };
 
@@ -184,5 +183,4 @@ final $typed_data.Uint8List conductorStateDescriptor = $convert
         'RlZERhdGUSEgoEbG9ncxgIIAMoCVIEbG9ncxJBCgxjdXJyZW50UGhhc2UYCSABKA4yHS5jb25k'
         'dWN0b3Jfc3RhdGUuUmVsZWFzZVBoYXNlUgxjdXJyZW50UGhhc2USKgoQY29uZHVjdG9yVmVyc2'
         'lvbhgKIAEoCVIQY29uZHVjdG9yVmVyc2lvbhI+CgtyZWxlYXNlVHlwZRgLIAEoDjIcLmNvbmR1'
-        'Y3Rvcl9zdGF0ZS5SZWxlYXNlVHlwZVILcmVsZWFzZVR5cGUSHgoKaXNNb25vcmVwbxgMIAEoCF'
-        'IKaXNNb25vcmVwbw==');
+        'Y3Rvcl9zdGF0ZS5SZWxlYXNlVHlwZVILcmVsZWFzZVR5cGU=');

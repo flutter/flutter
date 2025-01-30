@@ -286,6 +286,7 @@ class StartContext extends Context {
       await engine.newBranch(workingBranchName);
     }
 
+    await framework.newBranch(workingBranchName);
     if (dartRevision != null && dartRevision!.isNotEmpty) {
       if (state.isMonorepo) {
         await framework.updateDartRevision(dartRevision!);
@@ -339,7 +340,6 @@ class StartContext extends Context {
         state.engine.dartRevision = dartRevision!;
       }
     }
-    await framework.newBranch(workingBranchName);
 
     // Get framework version
     final Version lastVersion = Version.fromString(

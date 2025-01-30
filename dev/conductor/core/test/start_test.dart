@@ -994,6 +994,10 @@ void main() {
             command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
           ),
           const FakeCommand(
+            command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
+          ),
+
+          const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
             stdout: 'MM path/to/DEPS',
           ),
@@ -1017,11 +1021,6 @@ void main() {
               'refs/remotes/upstream/$candidateBranch',
             ],
             stdout: '$previousVersion-42-gabc123',
-          ),
-          // HEAD and branch point are same
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: branchPointRevision,
           ),
           const FakeCommand(
             command: <String>['git', 'merge-base', 'upstream/$candidateBranch', 'upstream/master'],

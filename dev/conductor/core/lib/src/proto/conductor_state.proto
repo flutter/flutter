@@ -132,6 +132,4 @@ message ConductorState {
   string conductorVersion = 10;
 
   ReleaseType releaseType = 11;
-
-  bool isMonorepo = 12;
 }

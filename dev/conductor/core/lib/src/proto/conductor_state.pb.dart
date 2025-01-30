@@ -372,7 +372,7 @@ class Repository extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   $core.List<Cherrypick> get cherrypicks => $_getList(6);
 
-  /// Only for engine repositories.
+  /// For the repository that has a dart_revision in a DEPS file.
   @$pb.TagNumber(8)
   $core.String get dartRevision => $_getSZ(7);
   @$pb.TagNumber(8)
@@ -414,7 +414,6 @@ class ConductorState extends $pb.GeneratedMessage {
     ReleasePhase? currentPhase,
     $core.String? conductorVersion,
     ReleaseType? releaseType,
-    $core.bool? isMonorepo,
   }) {
     final $result = create();
     if (releaseChannel != null) {
@@ -447,9 +446,6 @@ class ConductorState extends $pb.GeneratedMessage {
     if (releaseType != null) {
       $result.releaseType = releaseType;
     }
-    if (isMonorepo != null) {
-      $result.isMonorepo = isMonorepo;
-    }
     return $result;
   }
   ConductorState._() : super();
@@ -481,7 +477,6 @@ class ConductorState extends $pb.GeneratedMessage {
         defaultOrMaker: ReleaseType.STABLE_INITIAL,
         valueOf: ReleaseType.valueOf,
         enumValues: ReleaseType.values)
-    ..aOB(12, _omitFieldNames ? '' : 'isMonorepo', protoName: 'isMonorepo')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('Using this can add significant overhead to your binary. '
@@ -624,18 +619,6 @@ class ConductorState extends $pb.GeneratedMessage {
   $core.bool hasReleaseType() => $_has(9);
   @$pb.TagNumber(11)
   void clearReleaseType() => clearField(11);
-
-  @$pb.TagNumber(12)
-  $core.bool get isMonorepo => $_getBF(10);
-  @$pb.TagNumber(12)
-  set isMonorepo($core.bool v) {
-    $_setBool(10, v);
-  }
-
-  @$pb.TagNumber(12)
-  $core.bool hasIsMonorepo() => $_has(10);
-  @$pb.TagNumber(12)
-  void clearIsMonorepo() => clearField(12);
 }
 
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
