@@ -8,6 +8,8 @@
 #include "display_list/dl_paint.h"
 #include "display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/impeller/display_list/testing/render_text_in_canvas.h"
+#include "flutter/impeller/display_list/testing/rmse.h"
 #include "flutter/impeller/geometry/path_builder.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
