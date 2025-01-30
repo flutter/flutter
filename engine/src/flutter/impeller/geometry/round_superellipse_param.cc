@@ -136,7 +136,7 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
       radius == 0 ? kMaxRatio : std::min(half_size * 2 / radius, kMaxRatio);
   Scalar a = ratio * radius / 2;
   Scalar s = half_size - a;
-  Scalar g = kGapFactor * radius;
+  Scalar g = RoundSuperellipseParam::kGapFactor * radius;
 
   Scalar n = LerpPrecomputedVariable(1, ratio);
   Scalar d = LerpPrecomputedVariable(2, ratio) * a;
