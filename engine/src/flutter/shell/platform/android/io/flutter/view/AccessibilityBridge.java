@@ -2263,7 +2263,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private enum StringAttributeType {
     SPELLOUT,
     LOCALE,
-    URI
+    URL
   }
 
   private static class StringAttribute {
@@ -2278,8 +2278,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     String locale;
   }
 
-  private static class UriStringAttribute extends StringAttribute {
-    String uri;
+  private static class UrlStringAttribute extends StringAttribute {
+    String url;
   }
 
   /**
@@ -2851,11 +2851,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         } else {
           attributes = new ArrayList<StringAttribute>(attributes);
         }
-        UriStringAttribute uriStringAttribute = new UriStringAttribute();
+        UrlStringAttribute uriStringAttribute = new UrlStringAttribute();
         uriStringAttribute.start = 0;
         uriStringAttribute.end = label.length();
-        uriStringAttribute.uri = linkUrl;
-        uriStringAttribute.type = StringAttributeType.URI;
+        uriStringAttribute.url = linkUrl;
+        uriStringAttribute.type = StringAttributeType.URL;
         attributes.add(uriStringAttribute);
       }
       return createSpannableString(label, attributes);
@@ -2917,10 +2917,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 spannableString.setSpan(localeSpan, attribute.start, attribute.end, 0);
                 break;
               }
-            case URI:
+            case URL:
               {
-                UriStringAttribute uriAttribute = (UriStringAttribute) attribute;
-                final URLSpan urlSpan = new URLSpan(uriAttribute.uri);
+                UrlStringAttribute uriAttribute = (UrlStringAttribute) attribute;
+                final URLSpan urlSpan = new URLSpan(uriAttribute.url);
                 spannableString.setSpan(urlSpan, attribute.start, attribute.end, 0);
                 break;
               }
