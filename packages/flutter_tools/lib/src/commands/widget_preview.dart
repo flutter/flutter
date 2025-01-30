@@ -239,6 +239,7 @@ class WidgetPreviewStartCommand extends FlutterCommand
         logger: globals.logger,
       );
     } else if (globals.platform.isWindows) {
+      globals.logger.printStatus('Windows architecture: ${globals.os.hostPlatform}');
       await buildWindows(
         widgetPreviewScaffoldProject.windows,
         buildInfo,
