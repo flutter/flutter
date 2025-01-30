@@ -30,7 +30,7 @@
 #endif
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder2.h"
+#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_message_response_android.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"

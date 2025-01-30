@@ -26,6 +26,9 @@ namespace flutter {
 /// that render above (by Z order) the Android view corresponding to
 /// |flutter::PlatformViewLayer|.
 ///
+/// This implementation of the external view embedder is designed only to use
+/// HC++ mode. Mixing old HC modes is not supported, but either of the texture
+/// composition based platform views can be used with either mode.
 class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
  public:
   AndroidExternalViewEmbedder2(

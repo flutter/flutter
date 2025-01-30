@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder2.h"
+#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
 #include "flow/view_slicer.h"
 #include "flutter/common/constants.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -20,7 +20,8 @@ AndroidExternalViewEmbedder2::AndroidExternalViewEmbedder2(
       android_context_(android_context),
       jni_facade_(std::move(jni_facade)),
       surface_factory_(std::move(surface_factory)),
-      surface_pool_(std::make_unique<SurfacePool>()),
+      surface_pool_(
+          std::make_unique<SurfacePool>(/*use_new_surface_methods=*/true)),
       task_runners_(task_runners) {}
 
 // |ExternalViewEmbedder|
@@ -74,7 +75,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
-    jni_facade_->applyPendingTransactions();
+    jni_facade_->applyTransaction();
     return;
   }
 
@@ -93,7 +94,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   // Create Overlay frame.
   surface_pool_->TrimLayers();
   std::unique_ptr<SurfaceFrame> overlay_frame;
-  if (surface_pool_->HasLayer()) {
+  if (surface_pool_->HasLayers()) {
     for (int64_t view_id : composition_order_) {
       std::unordered_map<int64_t, SkRect>::const_iterator overlay =
           overlay_layers.find(view_id);
@@ -143,7 +144,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
               params.mutatorsStack()  //
           );
         }
-        if (!surface_pool_->HasLayer()) {
+        if (!surface_pool_->HasLayers()) {
           surface_pool_->GetLayer(context, android_context_, jni_facade_,
                                   surface_factory_);
         }
@@ -174,30 +175,6 @@ AndroidExternalViewEmbedder2::CreateSurfaceIfNeeded(GrDirectContext* context,
 // |ExternalViewEmbedder|
 PostPrerollResult AndroidExternalViewEmbedder2::PostPrerollAction(
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  // if (!FrameHasPlatformLayers()) {
-  //   return PostPrerollResult::kSuccess;
-  // }
-  // if (!raster_thread_merger->IsMerged()) {
-  //   // The raster thread merger may be disabled if the rasterizer is being
-  //   // created or teared down.
-  //   //
-  //   // In such cases, the current frame is dropped, and a new frame is
-  //   attempted
-  //   // with the same layer tree.
-  //   //
-  //   // Eventually, the frame is submitted once this method returns
-  //   `kSuccess`.
-  //   // At that point, the raster tasks are handled on the platform thread.
-  //   CancelFrame();
-  //   raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
-  //   return PostPrerollResult::kSkipAndRetryFrame;
-  // }
-  // raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
-  // // Surface switch requires to resubmit the frame.
-  // // TODO(egarciad): https://github.com/flutter/flutter/issues/65652
-  // if (previous_frame_view_count_ == 0) {
-  //   return PostPrerollResult::kResubmitFrame;
-  // }
   return PostPrerollResult::kSuccess;
 }
 
