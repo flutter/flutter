@@ -896,7 +896,8 @@ List<Plugin> _filterPluginsByVariant(
   }).toList();
 }
 
-Future<void> _writeWindowsPluginFiles(
+@visibleForTesting
+Future<void> writeWindowsPluginFiles(
   FlutterProject project,
   List<Plugin> plugins,
   TemplateRenderer templateRenderer, {
@@ -908,7 +909,8 @@ Future<void> _writeWindowsPluginFiles(
   );
   if (allowedPlugins != null) {
     final List<Plugin> disallowedPlugins =
-        methodChannelPlugins..removeWhere((Plugin plugin) => allowedPlugins.contains(plugin.name));
+        methodChannelPlugins.toList()
+          ..removeWhere((Plugin plugin) => allowedPlugins.contains(plugin.name));
     if (disallowedPlugins.isNotEmpty) {
       final StringBuffer buffer = StringBuffer();
       buffer.writeln(
@@ -930,7 +932,7 @@ Future<void> _writeWindowsPluginFiles(
     }
   }
   final List<Plugin> win32Plugins = _filterPluginsByVariant(
-    methodChannelPlugins.toList(),
+    methodChannelPlugins,
     WindowsPlugin.kConfigKey,
     PluginPlatformVariant.win32,
   );
@@ -1238,7 +1240,7 @@ Future<void> injectPlugins(
     await _writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
   }
   if (windowsPlatform) {
-    await _writeWindowsPluginFiles(
+    await writeWindowsPluginFiles(
       project,
       pluginsByPlatform[WindowsPlugin.kConfigKey]!,
       globals.templateRenderer,
