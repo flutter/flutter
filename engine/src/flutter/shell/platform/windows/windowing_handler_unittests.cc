@@ -19,14 +19,29 @@ namespace testing {
 namespace {
 using ::testing::_;
 using ::testing::Eq;
+using ::testing::Matches;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::StrEq;
 
-static constexpr char kChannelName[] = "flutter/windowing";
+constexpr char kChannelName[] = "flutter/windowing";
+constexpr char kCreateWindowMethod[] = "createWindow";
+constexpr char kCreatePopupMethod[] = "createPopup";
+constexpr char kDestroyWindowMethod[] = "destroyWindow";
 
-static constexpr char kCreateWindowMethod[] = "createWindow";
-static constexpr char kDestroyWindowMethod[] = "destroyWindow";
+constexpr char kAnchorRectKey[] = "anchorRect";
+constexpr char kChildAnchorKey[] = "childAnchor";
+constexpr char kConstraintAdjustmentKey[] = "constraintAdjustment";
+constexpr char kMaxSizeKey[] = "maxSize";
+constexpr char kMinSizeKey[] = "minSize";
+constexpr char kOffsetKey[] = "offset";
+constexpr char kParentAnchorKey[] = "parentAnchor";
+constexpr char kParentViewIdKey[] = "parentViewId";
+constexpr char kPositionerKey[] = "positioner";
+constexpr char kSizeKey[] = "size";
+constexpr char kStateKey[] = "state";
+constexpr char kTitleKey[] = "title";
+constexpr char kViewIdKey[] = "viewId";
 
 void SimulateWindowingMessage(TestBinaryMessenger* messenger,
                               const std::string& method_name,
@@ -52,11 +67,7 @@ class MockFlutterHostWindowController : public FlutterHostWindowController {
 
   MOCK_METHOD(std::optional<WindowMetadata>,
               CreateHostWindow,
-              (std::wstring const& title,
-               WindowSize const& size,
-               WindowArchetype archetype,
-               std::optional<WindowPositioner> positioner,
-               std::optional<FlutterViewId> parent_view_id),
+              (WindowCreationSettings const& settings),
               (override));
   MOCK_METHOD(bool, DestroyHostWindow, (FlutterViewId view_id), (override));
 
@@ -81,7 +92,14 @@ class WindowingHandlerTest : public WindowsTest {
             engine_.get());
 
     ON_CALL(*mock_controller_, CreateHostWindow)
-        .WillByDefault(Return(WindowMetadata{}));
+        .WillByDefault([](WindowCreationSettings const& settings) {
+          return WindowMetadata{
+              .size = settings.size,
+              .parent_id = settings.parent_view_id,
+              .state = WindowState::kRestored,
+              .relative_position = Point{},
+          };
+        });
     ON_CALL(*mock_controller_, DestroyHostWindow).WillByDefault(Return(true));
   }
 
@@ -96,15 +114,46 @@ class WindowingHandlerTest : public WindowsTest {
   FML_DISALLOW_COPY_AND_ASSIGN(WindowingHandlerTest);
 };
 
+MATCHER_P(WindowPositionerMatches, expected, "Matches WindowPositioner") {
+  return arg.anchor_rect == expected.anchor_rect &&
+         arg.parent_anchor == expected.parent_anchor &&
+         arg.child_anchor == expected.child_anchor &&
+         arg.offset == expected.offset &&
+         arg.constraint_adjustment == expected.constraint_adjustment;
+}
+
+MATCHER_P(WindowCreationSettingsMatches,
+          expected,
+          "Matches WindowCreationSettings") {
+  return arg.archetype == expected.archetype && arg.size == expected.size &&
+         arg.min_size == expected.min_size &&
+         arg.max_size == expected.max_size && arg.title == expected.title &&
+         arg.state == expected.state &&
+         arg.parent_view_id == expected.parent_view_id &&
+         (arg.positioner.has_value() == expected.positioner.has_value()) &&
+         (!arg.positioner.has_value() ||
+          Matches(WindowPositionerMatches(expected.positioner.value()))(
+              arg.positioner.value()));
+}
+
 TEST_F(WindowingHandlerTest, HandleCreateRegularWindow) {
   TestBinaryMessenger messenger;
   WindowingHandler windowing_handler(&messenger, controller());
 
-  WindowSize const size = {800, 600};
+  WindowCreationSettings const settings = {
+      .archetype = WindowArchetype::kRegular,
+      .size = {800.0, 600.0},
+      .title = "regular",
+  };
+
   EncodableMap const arguments = {
-      {EncodableValue("size"),
-       EncodableValue(EncodableList{EncodableValue(size.width),
-                                    EncodableValue(size.height)})},
+      {EncodableValue(kSizeKey),
+       EncodableValue(EncodableList{EncodableValue(settings.size.width()),
+                                    EncodableValue(settings.size.height())})},
+      {EncodableValue(kMinSizeKey), EncodableValue()},
+      {EncodableValue(kMaxSizeKey), EncodableValue()},
+      {EncodableValue(kTitleKey), EncodableValue(*settings.title)},
+      {EncodableValue(kStateKey), EncodableValue()},
   };
 
   bool success = false;
@@ -112,13 +161,80 @@ TEST_F(WindowingHandlerTest, HandleCreateRegularWindow) {
       [&success](const EncodableValue* result) { success = true; }, nullptr,
       nullptr);
 
-  EXPECT_CALL(
-      *controller(),
-      CreateHostWindow(StrEq(L"regular"), size, WindowArchetype::regular,
-                       Eq(std::nullopt), Eq(std::nullopt)))
+  EXPECT_CALL(*controller(),
+              CreateHostWindow(WindowCreationSettingsMatches(settings)))
       .Times(1);
 
   SimulateWindowingMessage(&messenger, kCreateWindowMethod,
+                           std::make_unique<EncodableValue>(arguments),
+                           &result_handler);
+
+  EXPECT_TRUE(success);
+}
+
+TEST_F(WindowingHandlerTest, HandleCreatePopup) {
+  TestBinaryMessenger messenger;
+  WindowingHandler windowing_handler(&messenger, controller());
+
+  Size const size = {200.0, 200.0};
+  WindowPositioner const positioner = WindowPositioner{
+      .anchor_rect = std::optional<Rect>({{0.0, 0.0}, size}),
+      .parent_anchor = WindowPositioner::Anchor::kCenter,
+      .child_anchor = WindowPositioner::Anchor::kCenter,
+      .offset = {0.0, 0.0},
+      .constraint_adjustment =
+          WindowPositioner::ConstraintAdjustment::kSlideAny,
+  };
+
+  WindowCreationSettings const settings = {
+      .archetype = WindowArchetype::kPopup,
+      .size = size,
+      .parent_view_id = 0,
+      .positioner = positioner,
+  };
+
+  EncodableMap const arguments = {
+      {EncodableValue(kParentViewIdKey),
+       EncodableValue(static_cast<int>(settings.parent_view_id.value()))},
+      {EncodableValue(kSizeKey),
+       EncodableValue(EncodableList{EncodableValue(settings.size.width()),
+                                    EncodableValue(settings.size.height())})},
+      {EncodableValue(kMinSizeKey), EncodableValue()},
+      {EncodableValue(kMaxSizeKey), EncodableValue()},
+      {EncodableValue(kPositionerKey),
+       EncodableValue(EncodableMap{
+           {EncodableValue(kAnchorRectKey),
+            EncodableValue(EncodableList{
+                EncodableValue(positioner.anchor_rect->left()),
+                EncodableValue(positioner.anchor_rect->top()),
+                EncodableValue(positioner.anchor_rect->width()),
+                EncodableValue(positioner.anchor_rect->height())})},
+           {EncodableValue(kParentAnchorKey),
+            EncodableValue("WindowPositionerAnchor.center")},
+           {EncodableValue(kChildAnchorKey),
+            EncodableValue("WindowPositionerAnchor.center")},
+           {EncodableValue(kOffsetKey),
+            EncodableValue(
+                EncodableList{EncodableValue(positioner.offset.x()),
+                              EncodableValue(positioner.offset.y())})},
+           {EncodableValue(kConstraintAdjustmentKey),
+            EncodableValue(EncodableValue(EncodableList{
+                EncodableValue("WindowPositionerConstraintAdjustment.slideX"),
+                EncodableValue(
+                    "WindowPositionerConstraintAdjustment.slideY")}))},
+       })},
+  };
+
+  bool success = false;
+  MethodResultFunctions<> result_handler(
+      [&success](const EncodableValue* result) { success = true; }, nullptr,
+      nullptr);
+
+  EXPECT_CALL(*controller(),
+              CreateHostWindow(WindowCreationSettingsMatches(settings)))
+      .Times(1);
+
+  SimulateWindowingMessage(&messenger, kCreatePopupMethod,
                            std::make_unique<EncodableValue>(arguments),
                            &result_handler);
 
@@ -130,7 +246,7 @@ TEST_F(WindowingHandlerTest, HandleDestroyWindow) {
   WindowingHandler windowing_handler(&messenger, controller());
 
   EncodableMap const arguments = {
-      {EncodableValue("viewId"), EncodableValue(1)},
+      {EncodableValue(kViewIdKey), EncodableValue(1)},
   };
 
   bool success = false;

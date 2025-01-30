@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-class WindowControllerText extends StatelessWidget {
-  const WindowControllerText({super.key, required this.controller});
+class ChildWindowControllerText extends StatelessWidget {
+  const ChildWindowControllerText({super.key, required this.controller});
 
-  final WindowController controller;
+  final ChildWindowController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +15,7 @@ class WindowControllerText extends StatelessWidget {
         builder: (BuildContext context, Widget? _) {
           return Text(
               'View #${controller.view?.viewId ?? "Unknown"}\n'
-              'Parent View: ${controller.parentViewId}\n'
+              'Parent View: ${controller.parent.viewId ?? "None"}\n'
               'View Size: ${(controller.view!.physicalSize.width / dpr).toStringAsFixed(1)}\u00D7${(controller.view!.physicalSize.height / dpr).toStringAsFixed(1)}\n'
               'Window Size: ${controller.size?.width}\u00D7${controller.size?.height}\n'
               'Device Pixel Ratio: $dpr',

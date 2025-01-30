@@ -23,20 +23,11 @@ class FlutterWindowsViewController;
 class FlutterHostWindow {
  public:
   // Creates a native Win32 window with a child view confined to its client
-  // area. |controller| manages the window. |title| is the window title.
-  // |preferred_client_size| is the preferred size of the client rectangle in
-  // logical coordinates. The window style is defined by |archetype|. For
-  // |WindowArchetype::popup|, both |owner| and |positioner| must be provided,
-  // with |positioner| used only for this archetype. For
-  // |WindowArchetype::regular|, |positioner| and |owner| must be std::nullopt.
-  // On success, a valid window handle can be retrieved via
+  // area. |controller| is a pointer to the controller that manages the
+  // |FlutterHostWindow|. On success, a valid window handle can be retrieved via
   // |FlutterHostWindow::GetWindowHandle|.
   FlutterHostWindow(FlutterHostWindowController* controller,
-                    std::wstring const& title,
-                    WindowSize const& preferred_client_size,
-                    WindowArchetype archetype,
-                    std::optional<HWND> owner,
-                    std::optional<WindowPositioner> positioner);
+                    WindowCreationSettings const& settings);
   virtual ~FlutterHostWindow();
 
   // Returns the instance pointer for |hwnd| or nulllptr if invalid.
@@ -45,14 +36,22 @@ class FlutterHostWindow {
   // Returns the window archetype.
   WindowArchetype GetArchetype() const;
 
+  // Returns the hosted Flutter view's ID.
+  FlutterViewId GetFlutterViewId() const;
+
   // Returns the owned windows.
   std::set<FlutterHostWindow*> const& GetOwnedWindows() const;
 
-  // Returns the hosted Flutter view's ID or std::nullopt if not created.
-  std::optional<FlutterViewId> GetFlutterViewId() const;
-
-  // Returns the owner window, or nullptr if this is a top-level window.
+  // Returns the owner window, or nullptr if there is not owner.
   FlutterHostWindow* GetOwnerWindow() const;
+
+  // Returns the position relative to the owner, in logical coordinates, or
+  // std::nullopt if there is no owner.
+  std::optional<Point> GetRelativePosition() const;
+
+  // Returns the current window state, or std::nullopt if the archetype is not
+  // WindowArchetype::kRegular.
+  std::optional<WindowState> GetState() const;
 
   // Returns the backing window handle, or nullptr if the native window is not
   // created or has already been destroyed.
@@ -98,7 +97,7 @@ class FlutterHostWindow {
   std::unique_ptr<FlutterWindowsViewController> view_controller_;
 
   // The window archetype.
-  WindowArchetype archetype_ = WindowArchetype::regular;
+  WindowArchetype archetype_ = WindowArchetype::kRegular;
 
   // Windows that have this window as their owner window.
   std::set<FlutterHostWindow*> owned_windows_;
@@ -116,9 +115,22 @@ class FlutterHostWindow {
   // Backing handle for the hosted view window.
   HWND child_content_ = nullptr;
 
+  // Offset between this window's top-left position and its owner's, in physical
+  // coordinates.
+  POINT offset_from_owner_ = {0, 0};
+
   // Whether the non-client area can be redrawn as inactive. Temporarily
   // disabled during owned popup destruction to prevent flickering.
   bool enable_redraw_non_client_as_inactive_ = true;
+
+  // The minimum size of the window's client area, if defined.
+  std::optional<Size> min_size_;
+
+  // The maximum size of the window's client area, if defined.
+  std::optional<Size> max_size_;
+
+  // The window state. Used by WindowArchetype::kRegular.
+  std::optional<WindowState> state_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterHostWindow);
 };

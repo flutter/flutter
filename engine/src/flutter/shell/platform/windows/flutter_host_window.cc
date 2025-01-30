@@ -15,6 +15,16 @@ namespace {
 
 constexpr wchar_t kWindowClassName[] = L"FLUTTER_HOST_WINDOW";
 
+// Clamps |size| to the size of the virtual screen. Both the parameter and
+// return size are in physical coordinates.
+flutter::Size ClampToVirtualScreen(flutter::Size size) {
+  double const virtual_screen_width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+  double const virtual_screen_height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+
+  return flutter::Size(std::clamp(size.width(), 0.0, virtual_screen_width),
+                       std::clamp(size.height(), 0.0, virtual_screen_height));
+}
+
 // Dynamically loads the |EnableNonClientDpiScaling| from the User32 module
 // so that the non-client area automatically responds to changes in DPI.
 // This API is only needed for PerMonitor V1 awareness mode.
@@ -94,53 +104,52 @@ void EnableTransparentWindowBackground(HWND hwnd) {
 // scaled using the owner's DPI and offset relative to |owner_rect|.
 // Otherwise, the function defaults to using the window frame of |owner_hwnd|
 // as the anchor rectangle.
-flutter::WindowRectangle GetAnchorRectInScreenSpace(
+flutter::Rect GetAnchorRectInScreenSpace(
     flutter::WindowPositioner const& positioner,
     HWND owner_hwnd,
-    flutter::WindowRectangle const& owner_rect) {
+    flutter::Rect const& owner_rect) {
   if (positioner.anchor_rect) {
     double const dpr = flutter::GetDpiForHWND(owner_hwnd) /
                        static_cast<double>(USER_DEFAULT_SCREEN_DPI);
-    return {{owner_rect.top_left.x +
-                 static_cast<int>(positioner.anchor_rect->top_left.x * dpr),
-             owner_rect.top_left.y +
-                 static_cast<int>(positioner.anchor_rect->top_left.y * dpr)},
-            {static_cast<int>(positioner.anchor_rect->size.width * dpr),
-             static_cast<int>(positioner.anchor_rect->size.height * dpr)}};
+    return {{owner_rect.left() + positioner.anchor_rect->left() * dpr,
+             owner_rect.top() + positioner.anchor_rect->top() * dpr},
+            {positioner.anchor_rect->width() * dpr,
+             positioner.anchor_rect->height() * dpr}};
   } else {
     // If the anchor rectangle specified in the positioner is std::nullopt,
     // return an anchor rectangle that is equal to the owner's frame.
     RECT frame_rect;
     DwmGetWindowAttribute(owner_hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &frame_rect,
                           sizeof(frame_rect));
-    return {{frame_rect.left, frame_rect.top},
-            {frame_rect.right - frame_rect.left,
-             frame_rect.bottom - frame_rect.top}};
+    return {flutter::Point(frame_rect.left, frame_rect.top),
+            flutter::Size(frame_rect.right - frame_rect.left,
+                          frame_rect.bottom - frame_rect.top)};
   }
 }
 
 // Calculates the client area of |hwnd| in screen space.
-flutter::WindowRectangle GetClientRectInScreenSpace(HWND hwnd) {
+flutter::Rect GetClientRectInScreenSpace(HWND hwnd) {
   RECT client_rect;
   GetClientRect(hwnd, &client_rect);
   POINT top_left = {0, 0};
   ClientToScreen(hwnd, &top_left);
   POINT bottom_right = {client_rect.right, client_rect.bottom};
   ClientToScreen(hwnd, &bottom_right);
-  return {{top_left.x, top_left.y},
-          {bottom_right.x - top_left.x, bottom_right.y - top_left.y}};
+  return {
+      flutter::Point(top_left.x, top_left.y),
+      flutter::Size(bottom_right.x - top_left.x, bottom_right.y - top_left.y)};
 }
 
 // Calculates the size of the window frame in physical coordinates, based on
 // the given |window_size| (also in physical coordinates) and the specified
 // |window_style|, |extended_window_style|, and owner window |owner_hwnd|.
-flutter::WindowSize GetFrameSizeForWindowSize(
-    flutter::WindowSize const& window_size,
-    DWORD window_style,
-    DWORD extended_window_style,
-    HWND owner_hwnd) {
-  RECT frame_rect = {0, 0, static_cast<LONG>(window_size.width),
-                     static_cast<LONG>(window_size.height)};
+flutter::Size GetFrameSizeForWindowSize(flutter::Size const& window_size,
+                                        DWORD window_style,
+                                        DWORD extended_window_style,
+                                        HWND owner_hwnd) {
+  LONG window_width = static_cast<LONG>(window_size.width());
+  LONG window_height = static_cast<LONG>(window_size.height());
+  RECT frame_rect = {0, 0, window_width, window_height};
 
   HINSTANCE hInstance = GetModuleHandle(nullptr);
   WNDCLASS window_class = {};
@@ -152,8 +161,8 @@ flutter::WindowSize GetFrameSizeForWindowSize(
   window_style &= ~WS_VISIBLE;
   if (HWND const window = CreateWindowEx(
           extended_window_style, window_class.lpszClassName, L"", window_style,
-          CW_USEDEFAULT, CW_USEDEFAULT, window_size.width, window_size.height,
-          owner_hwnd, nullptr, hInstance, nullptr)) {
+          CW_USEDEFAULT, CW_USEDEFAULT, window_width, window_height, owner_hwnd,
+          nullptr, hInstance, nullptr)) {
     DwmGetWindowAttribute(window, DWMWA_EXTENDED_FRAME_BOUNDS, &frame_rect,
                           sizeof(frame_rect));
     DestroyWindow(window);
@@ -161,8 +170,8 @@ flutter::WindowSize GetFrameSizeForWindowSize(
 
   UnregisterClass(window_class.lpszClassName, hInstance);
 
-  return {static_cast<int>(frame_rect.right - frame_rect.left),
-          static_cast<int>(frame_rect.bottom - frame_rect.top)};
+  return {static_cast<double>(frame_rect.right - frame_rect.left),
+          static_cast<double>(frame_rect.bottom - frame_rect.top)};
 }
 
 // Retrieves the calling thread's last-error code message as a string,
@@ -198,69 +207,107 @@ std::string GetLastErrorAsString() {
   return oss.str();
 }
 
+// Calculates the offset from the top-left corner of |from| to the top-left
+// corner of |to|, in physical coordinates. If either window handle is null or
+// if the window positions cannot be retrieved, the offset will be (0, 0).
+POINT GetOffsetBetweenWindows(HWND from, HWND to) {
+  POINT offset = {0, 0};
+  if (to && from) {
+    RECT to_rect;
+    RECT from_rect;
+    if (GetWindowRect(to, &to_rect) && GetWindowRect(from, &from_rect)) {
+      offset.x = to_rect.left - from_rect.left;
+      offset.y = to_rect.top - from_rect.top;
+    }
+  }
+  return offset;
+}
+
 // Calculates the rectangle of the monitor that has the largest area of
 // intersection with |rect|, in physical coordinates.
-flutter::WindowRectangle GetOutputRect(RECT rect) {
+flutter::Rect GetOutputRect(RECT rect) {
   HMONITOR monitor = MonitorFromRect(&rect, MONITOR_DEFAULTTONEAREST);
   MONITORINFO mi;
   mi.cbSize = sizeof(MONITORINFO);
   RECT const bounds =
       GetMonitorInfo(monitor, &mi) ? mi.rcWork : RECT{0, 0, 0, 0};
-  return {{bounds.left, bounds.top},
-          {bounds.right - bounds.left, bounds.bottom - bounds.top}};
+  return {
+      flutter::Point(bounds.left, bounds.top),
+      flutter::Size(bounds.right - bounds.left, bounds.bottom - bounds.top)};
 }
 
 // Calculates the required window size, in physical coordinates, to
-// accommodate the given |client_size|, in logical coordinates, for a window
-// with the specified |window_style| and |extended_window_style|. The result
-// accounts for window borders, non-client areas, and the drop-shadow area.
-flutter::WindowSize GetWindowSizeForClientSize(
-    flutter::WindowSize const& client_size,
+// accommodate the given |client_size|, in logical coordinates, constrained by
+// optional |min_size| and |max_size|, for a window with the specified
+// |window_style| and |extended_window_style|. If |owner_hwnd| is not null, the
+// DPI of the display with the largest area of intersection with |owner_hwnd| is
+// used for the calculation; otherwise, the primary display's DPI is used. The
+// resulting size includes window borders, non-client areas, and drop shadows.
+// On error, returns std::nullopt and logs an error message.
+std::optional<flutter::Size> GetWindowSizeForClientSize(
+    flutter::Size const& client_size,
+    std::optional<flutter::Size> min_size,
+    std::optional<flutter::Size> max_size,
     DWORD window_style,
     DWORD extended_window_style,
     HWND owner_hwnd) {
   UINT const dpi = flutter::GetDpiForHWND(owner_hwnd);
   double const scale_factor =
       static_cast<double>(dpi) / USER_DEFAULT_SCREEN_DPI;
-  RECT rect = {.left = 0,
-               .top = 0,
-               .right = static_cast<LONG>(client_size.width * scale_factor),
-               .bottom = static_cast<LONG>(client_size.height * scale_factor)};
+  RECT rect = {
+      .right = static_cast<LONG>(client_size.width() * scale_factor),
+      .bottom = static_cast<LONG>(client_size.height() * scale_factor)};
 
-  HMODULE const user32_module = LoadLibraryA("User32.dll");
-  if (user32_module) {
-    using AdjustWindowRectExForDpi = BOOL __stdcall(
-        LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
-
-    auto* const adjust_window_rect_ext_for_dpi =
-        reinterpret_cast<AdjustWindowRectExForDpi*>(
-            GetProcAddress(user32_module, "AdjustWindowRectExForDpi"));
-    if (adjust_window_rect_ext_for_dpi) {
-      if (adjust_window_rect_ext_for_dpi(&rect, window_style, FALSE,
-                                         extended_window_style, dpi)) {
-        FreeLibrary(user32_module);
-        return {static_cast<int>(rect.right - rect.left),
-                static_cast<int>(rect.bottom - rect.top)};
-      } else {
-        FML_LOG(WARNING) << "Failed to run AdjustWindowRectExForDpi: "
-                         << GetLastErrorAsString();
-      }
-    } else {
-      FML_LOG(WARNING)
-          << "Failed to retrieve AdjustWindowRectExForDpi address from "
-             "User32.dll.";
-    }
-    FreeLibrary(user32_module);
-  } else {
-    FML_LOG(WARNING) << "Failed to load User32.dll.\n";
+  HMODULE const user32_raw = LoadLibraryA("User32.dll");
+  auto free_user32_module = [](HMODULE module) { FreeLibrary(module); };
+  std::unique_ptr<std::remove_pointer_t<HMODULE>, decltype(free_user32_module)>
+      user32_module(user32_raw, free_user32_module);
+  if (!user32_module) {
+    FML_LOG(ERROR) << "Failed to load User32.dll.\n";
+    return std::nullopt;
   }
 
-  if (!AdjustWindowRectEx(&rect, window_style, FALSE, extended_window_style)) {
-    FML_LOG(WARNING) << "Failed to run AdjustWindowRectEx: "
-                     << GetLastErrorAsString();
+  using AdjustWindowRectExForDpi = BOOL __stdcall(
+      LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
+  auto* const adjust_window_rect_ext_for_dpi =
+      reinterpret_cast<AdjustWindowRectExForDpi*>(
+          GetProcAddress(user32_raw, "AdjustWindowRectExForDpi"));
+  if (!adjust_window_rect_ext_for_dpi) {
+    FML_LOG(ERROR) << "Failed to retrieve AdjustWindowRectExForDpi address "
+                      "from User32.dll.";
+    return std::nullopt;
   }
-  return {static_cast<int>(rect.right - rect.left),
-          static_cast<int>(rect.bottom - rect.top)};
+
+  if (!adjust_window_rect_ext_for_dpi(&rect, window_style, FALSE,
+                                      extended_window_style, dpi)) {
+    FML_LOG(ERROR) << "Failed to run AdjustWindowRectExForDpi: "
+                   << GetLastErrorAsString();
+    return std::nullopt;
+  }
+
+  double width = static_cast<double>(rect.right - rect.left);
+  double height = static_cast<double>(rect.bottom - rect.top);
+
+  // Apply size constraints
+  double const non_client_width = width - (client_size.width() * scale_factor);
+  double const non_client_height =
+      height - (client_size.height() * scale_factor);
+  if (min_size) {
+    flutter::Size min_physical_size = ClampToVirtualScreen(
+        flutter::Size(min_size->width() * scale_factor + non_client_width,
+                      min_size->height() * scale_factor + non_client_height));
+    width = std::max(width, min_physical_size.width());
+    height = std::max(height, min_physical_size.height());
+  }
+  if (max_size) {
+    flutter::Size max_physical_size = ClampToVirtualScreen(
+        flutter::Size(max_size->width() * scale_factor + non_client_width,
+                      max_size->height() * scale_factor + non_client_height));
+    width = std::min(width, max_physical_size.width());
+    height = std::min(height, max_physical_size.height());
+  }
+
+  return flutter::Size{width, height};
 }
 
 // Checks whether the window class of name |class_name| is registered for the
@@ -269,6 +316,23 @@ bool IsClassRegistered(LPCWSTR class_name) {
   WNDCLASSEX window_class = {};
   return GetClassInfoEx(GetModuleHandle(nullptr), class_name, &window_class) !=
          0;
+}
+
+// Convert std::string to std::wstring.
+std::wstring StringToWstring(std::string const& str) {
+  if (str.empty()) {
+    return {};
+  }
+  if (int buffer_size =
+          MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0)) {
+    std::wstring wide_str(buffer_size, L'\0');
+    if (MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wide_str[0],
+                            buffer_size)) {
+      wide_str.pop_back();
+      return wide_str;
+    }
+  }
+  return {};
 }
 
 // Window attribute that enables dark mode window decorations.
@@ -309,35 +373,37 @@ void UpdateTheme(HWND window) {
 namespace flutter {
 
 FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
-                                     std::wstring const& title,
-                                     WindowSize const& preferred_client_size,
-                                     WindowArchetype archetype,
-                                     std::optional<HWND> owner,
-                                     std::optional<WindowPositioner> positioner)
+                                     WindowCreationSettings const& settings)
     : window_controller_(controller) {
-  archetype_ = archetype;
+  archetype_ = settings.archetype;
+
+  HWND const owner =
+      settings.parent_view_id.has_value()
+          ? window_controller_->GetHostWindow(*settings.parent_view_id)
+                ->GetWindowHandle()
+          : nullptr;
 
   // Check preconditions and set window styles based on window type.
   DWORD window_style = 0;
   DWORD extended_window_style = 0;
-  switch (archetype) {
-    case WindowArchetype::regular:
-      if (owner.has_value()) {
+  switch (archetype_) {
+    case WindowArchetype::kRegular:
+      if (owner) {
         FML_LOG(ERROR) << "A regular window cannot have an owner.";
         return;
       }
-      if (positioner.has_value()) {
+      if (settings.positioner) {
         FML_LOG(ERROR) << "A regular window cannot have a positioner.";
         return;
       }
       window_style |= WS_OVERLAPPEDWINDOW;
       break;
-    case WindowArchetype::popup:
-      if (!positioner.has_value()) {
+    case WindowArchetype::kPopup:
+      if (!settings.positioner) {
         FML_LOG(ERROR) << "A popup window requires a positioner.";
         return;
       }
-      if (!owner.has_value()) {
+      if (!owner) {
         FML_LOG(ERROR) << "A popup window must have an owner.";
         return;
       }
@@ -347,44 +413,54 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
       FML_UNREACHABLE();
   }
 
+  // Validate size constraints.
+  min_size_ = settings.min_size;
+  max_size_ = settings.max_size;
+  if (min_size_ && max_size_) {
+    if (min_size_->width() > max_size_->width() ||
+        min_size_->height() > max_size_->height()) {
+      FML_LOG(ERROR) << "Invalid size constraints.";
+      return;
+    }
+  }
+
   // Calculate the screen space window rectangle for the new window.
   // Default positioning values (CW_USEDEFAULT) are used
-  // if the window has no owner or positioner.
-  WindowRectangle const window_rect = [&]() -> WindowRectangle {
-    WindowSize const window_size = GetWindowSizeForClientSize(
-        preferred_client_size, window_style, extended_window_style,
-        owner.value_or(nullptr));
-    if (owner) {
-      if (positioner) {
+  // if the window has no owner.
+  Rect const initial_window_rect = [&]() -> Rect {
+    std::optional<Size> const window_size =
+        GetWindowSizeForClientSize(settings.size, min_size_, max_size_,
+                                   window_style, extended_window_style, owner);
+    if (owner && window_size) {
+      if (settings.positioner) {
         // Calculate the window rectangle according to a positioner and
         // the owner's rectangle.
-        WindowSize const frame_size = GetFrameSizeForWindowSize(
-            window_size, window_style, extended_window_style, owner.value());
+        Size const frame_size = GetFrameSizeForWindowSize(
+            *window_size, window_style, extended_window_style, owner);
 
-        WindowRectangle const owner_rect =
-            GetClientRectInScreenSpace(owner.value());
+        Rect const owner_rect = GetClientRectInScreenSpace(owner);
 
-        WindowRectangle const anchor_rect = GetAnchorRectInScreenSpace(
-            positioner.value(), owner.value(), owner_rect);
+        Rect const anchor_rect = GetAnchorRectInScreenSpace(
+            settings.positioner.value(), owner, owner_rect);
 
-        WindowRectangle const output_rect = GetOutputRect(
-            {.left = static_cast<LONG>(anchor_rect.top_left.x),
-             .top = static_cast<LONG>(anchor_rect.top_left.y),
-             .right = static_cast<LONG>(anchor_rect.top_left.x +
-                                        anchor_rect.size.width),
-             .bottom = static_cast<LONG>(anchor_rect.top_left.y +
-                                         anchor_rect.size.height)});
+        Rect const output_rect =
+            GetOutputRect({.left = static_cast<LONG>(anchor_rect.left()),
+                           .top = static_cast<LONG>(anchor_rect.top()),
+                           .right = static_cast<LONG>(anchor_rect.right()),
+                           .bottom = static_cast<LONG>(anchor_rect.bottom())});
 
-        WindowRectangle const rect = PlaceWindow(
-            positioner.value(), frame_size, anchor_rect,
-            positioner->anchor_rect ? owner_rect : anchor_rect, output_rect);
+        Rect const rect = PlaceWindow(
+            settings.positioner.value(), frame_size, anchor_rect,
+            settings.positioner->anchor_rect ? owner_rect : anchor_rect,
+            output_rect);
 
-        return {rect.top_left,
-                {rect.size.width + window_size.width - frame_size.width,
-                 rect.size.height + window_size.height - frame_size.height}};
+        return {rect.origin(),
+                {rect.width() + window_size->width() - frame_size.width(),
+                 rect.height() + window_size->height() - frame_size.height()}};
       }
     }
-    return {{CW_USEDEFAULT, CW_USEDEFAULT}, window_size};
+    return {{CW_USEDEFAULT, CW_USEDEFAULT},
+            window_size ? *window_size : Size{CW_USEDEFAULT, CW_USEDEFAULT}};
   }();
 
   // Register the window class.
@@ -406,14 +482,16 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
     if (!RegisterClassEx(&window_class)) {
       FML_LOG(ERROR) << "Cannot register window class " << kWindowClassName
                      << ": " << GetLastErrorAsString();
+      return;
     }
   }
 
   // Create the native window.
   HWND hwnd = CreateWindowEx(
-      extended_window_style, kWindowClassName, title.c_str(), window_style,
-      window_rect.top_left.x, window_rect.top_left.y, window_rect.size.width,
-      window_rect.size.height, owner.value_or(nullptr), nullptr,
+      extended_window_style, kWindowClassName,
+      StringToWstring(settings.title.value_or("")).c_str(), window_style,
+      initial_window_rect.left(), initial_window_rect.top(),
+      initial_window_rect.width(), initial_window_rect.height(), owner, nullptr,
       GetModuleHandle(nullptr), this);
 
   if (!hwnd) {
@@ -425,16 +503,22 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
   // of the window frame, not the window rectangle (which includes the
   // drop-shadow). This adjustment must be done post-creation since the frame
   // rectangle is only available after the window has been created.
-  RECT frame_rc;
-  DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &frame_rc,
-                        sizeof(frame_rc));
-  RECT window_rc;
-  GetWindowRect(hwnd, &window_rc);
-  LONG const left_dropshadow_width = frame_rc.left - window_rc.left;
-  LONG const top_dropshadow_height = window_rc.top - frame_rc.top;
-  SetWindowPos(hwnd, nullptr, window_rc.left - left_dropshadow_width,
-               window_rc.top - top_dropshadow_height, 0, 0,
+  RECT frame_rect;
+  DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &frame_rect,
+                        sizeof(frame_rect));
+  RECT window_rect;
+  GetWindowRect(hwnd, &window_rect);
+  LONG const left_dropshadow_width = frame_rect.left - window_rect.left;
+  LONG const top_dropshadow_height = window_rect.top - frame_rect.top;
+  SetWindowPos(hwnd, nullptr, window_rect.left - left_dropshadow_width,
+               window_rect.top - top_dropshadow_height, 0, 0,
                SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+
+  if (owner) {
+    if (HWND const owner_window = GetWindow(hwnd, GW_OWNER)) {
+      offset_from_owner_ = GetOffsetBetweenWindows(owner_window, hwnd);
+    }
+  }
 
   // Set up the view.
   RECT client_rect;
@@ -474,12 +558,11 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
     return;
   }
 
-  // Update the properties of the owner window, if it exists.
-  if (FlutterHostWindow* const owner_window =
-          GetThisFromHandle(owner.value_or(nullptr))) {
+  // Update the properties of the owner window.
+  if (FlutterHostWindow* const owner_window = GetThisFromHandle(owner)) {
     owner_window->owned_windows_.insert(this);
 
-    if (archetype == WindowArchetype::popup) {
+    if (archetype_ == WindowArchetype::kPopup) {
       ++owner_window->num_owned_popups_;
     }
   }
@@ -489,11 +572,32 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
   SetChildContent(view_controller_->view()->GetWindowHandle());
 
   // TODO(loicsharma): Hide the window until the first frame is rendered.
-  // Single window apps use the engine's next frame callback to show the window.
-  // This doesn't work for multi window apps as the engine cannot have multiple
-  // next frame callbacks. If multiple windows are created, only the last one
-  // will be shown.
-  ShowWindow(hwnd, SW_SHOW);
+  // Single window apps use the engine's next frame callback to show the
+  // window. This doesn't work for multi window apps as the engine cannot have
+  // multiple next frame callbacks. If multiple windows are created, only the
+  // last one will be shown.
+  UINT const cmd_show = [&]() {
+    if (archetype_ == WindowArchetype::kRegular) {
+      if (settings.state.has_value()) {
+        switch (*settings.state) {
+          case WindowState::kRestored:
+            return SW_SHOWNORMAL;
+            break;
+          case WindowState::kMaximized:
+            return SW_SHOWMAXIMIZED;
+            break;
+          case WindowState::kMinimized:
+            return SW_SHOWMINIMIZED;
+            break;
+          default:
+            FML_UNREACHABLE();
+        }
+      }
+    }
+    return SW_SHOWNORMAL;
+  }();
+  state_ = settings.state.value_or(WindowState::kRestored);
+  ShowWindow(hwnd, cmd_show);
 
   window_handle_ = hwnd;
 }
@@ -522,23 +626,37 @@ WindowArchetype FlutterHostWindow::GetArchetype() const {
   return archetype_;
 }
 
+FlutterViewId FlutterHostWindow::GetFlutterViewId() const {
+  return view_controller_->view()->view_id();
+};
+
 std::set<FlutterHostWindow*> const& FlutterHostWindow::GetOwnedWindows() const {
   return owned_windows_;
 }
 
-std::optional<FlutterViewId> FlutterHostWindow::GetFlutterViewId() const {
-  if (!view_controller_ || !view_controller_->view()) {
-    return std::nullopt;
-  }
-  return view_controller_->view()->view_id();
-};
-
 FlutterHostWindow* FlutterHostWindow::GetOwnerWindow() const {
-  if (HWND const owner_window_handle = GetWindow(GetWindowHandle(), GW_OWNER)) {
+  if (HWND const owner_window_handle = GetWindow(window_handle_, GW_OWNER)) {
     return GetThisFromHandle(owner_window_handle);
   }
   return nullptr;
 };
+
+std::optional<Point> FlutterHostWindow::GetRelativePosition() const {
+  std::optional<Point> relative_position;
+  if (FlutterHostWindow* const owner = GetOwnerWindow()) {
+    UINT const dpi = flutter::GetDpiForHWND(owner->GetWindowHandle());
+    double const scale_factor =
+        static_cast<double>(dpi) / USER_DEFAULT_SCREEN_DPI;
+
+    relative_position = Point(offset_from_owner_.x / scale_factor,
+                              offset_from_owner_.y / scale_factor);
+  }
+  return relative_position;
+}
+
+std::optional<WindowState> FlutterHostWindow::GetState() const {
+  return state_;
+}
 
 HWND FlutterHostWindow::GetWindowHandle() const {
   return window_handle_;
@@ -587,13 +705,13 @@ std::size_t FlutterHostWindow::CloseOwnedPopups() {
 
   std::set<FlutterHostWindow*> popups;
   for (FlutterHostWindow* const owned : owned_windows_) {
-    if (owned->archetype_ == WindowArchetype::popup) {
+    if (owned->archetype_ == WindowArchetype::kPopup) {
       popups.insert(owned);
     }
   }
 
   for (auto it = owned_windows_.begin(); it != owned_windows_.end();) {
-    if ((*it)->archetype_ == WindowArchetype::popup) {
+    if ((*it)->archetype_ == WindowArchetype::kPopup) {
       it = owned_windows_.erase(it);
     } else {
       ++it;
@@ -648,9 +766,9 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
     case WM_DESTROY:
       if (window_handle_) {
         switch (archetype_) {
-          case WindowArchetype::regular:
+          case WindowArchetype::kRegular:
             break;
-          case WindowArchetype::popup:
+          case WindowArchetype::kPopup:
             if (FlutterHostWindow* const owner_window = GetOwnerWindow()) {
               owner_window->owned_windows_.erase(this);
               assert(owner_window->num_owned_popups_ > 0);
@@ -679,9 +797,43 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
       return 0;
     }
 
+    case WM_GETMINMAXINFO: {
+      RECT window_rect;
+      GetWindowRect(hwnd, &window_rect);
+      RECT client_rect;
+      GetClientRect(hwnd, &client_rect);
+      LONG const non_client_width = (window_rect.right - window_rect.left) -
+                                    (client_rect.right - client_rect.left);
+      LONG const non_client_height = (window_rect.bottom - window_rect.top) -
+                                     (client_rect.bottom - client_rect.top);
+
+      UINT const dpi = flutter::GetDpiForHWND(hwnd);
+      double const scale_factor =
+          static_cast<double>(dpi) / USER_DEFAULT_SCREEN_DPI;
+
+      MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
+      if (min_size_) {
+        Size const min_physical_size = ClampToVirtualScreen(
+            Size(min_size_->width() * scale_factor + non_client_width,
+                 min_size_->height() * scale_factor + non_client_height));
+
+        info->ptMinTrackSize.x = min_physical_size.width();
+        info->ptMinTrackSize.y = min_physical_size.height();
+      }
+      if (max_size_) {
+        Size const max_physical_size = ClampToVirtualScreen(
+            Size(max_size_->width() * scale_factor + non_client_width,
+                 max_size_->height() * scale_factor + non_client_height));
+
+        info->ptMaxTrackSize.x = max_physical_size.width();
+        info->ptMaxTrackSize.y = max_physical_size.height();
+      }
+      return 0;
+    }
+
     case WM_SIZE: {
       if (child_content_ != nullptr) {
-        // Resize and reposition the child content window
+        // Resize and reposition the child content window.
         RECT client_rect;
         GetClientRect(hwnd, &client_rect);
         MoveWindow(child_content_, client_rect.left, client_rect.top,
@@ -705,7 +857,7 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
       return 0;
 
     case WM_NCACTIVATE:
-      if (wparam == FALSE && archetype_ != WindowArchetype::popup) {
+      if (wparam == FALSE && archetype_ != WindowArchetype::kPopup) {
         if (!enable_redraw_non_client_as_inactive_ || num_owned_popups_ > 0) {
           // If an inactive title bar is to be drawn, and this is a top-level
           // window with popups, force the title bar to be drawn in its active
