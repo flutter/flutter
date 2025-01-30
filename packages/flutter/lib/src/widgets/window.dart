@@ -370,6 +370,7 @@ abstract class ChildWindowController extends WindowController {
 
 class PopupWindowController extends ChildWindowController {
   PopupWindowController({
+    BoxConstraints? sizeConstraints,
     VoidCallback? onDestroyed,
     void Function(String)? onError,
     Rect? anchorRect,
@@ -383,6 +384,7 @@ class PopupWindowController extends ChildWindowController {
          future: _createPopup(
            parentViewId: parent.viewId,
            size: size,
+           sizeConstraints: sizeConstraints,
            anchorRect: anchorRect,
            positioner: positioner,
          ),
@@ -506,6 +508,7 @@ class _WindowCreationResult {
     required this.size,
     this.state,
     this.parent,
+    this.relativePosition,
   });
 
   /// The view associated with the window.
@@ -523,6 +526,9 @@ class _WindowCreationResult {
 
   /// The id of the window's parent, if any.
   final int? parent;
+
+  /// The relative position to the parent, if any.
+  final Offset? relativePosition;
 }
 
 Future<_WindowCreationResult> _createRegular({
@@ -555,33 +561,51 @@ Future<_WindowCreationResult> _createRegular({
 Future<_WindowCreationResult> _createPopup({
   required int parentViewId,
   required Size size,
+  BoxConstraints? sizeConstraints,
   Rect? anchorRect,
   required WindowPositioner positioner,
 }) {
-  int constraintAdjustmentBitmask = 0;
-  for (final WindowPositionerConstraintAdjustment adjustment in positioner.constraintAdjustment) {
-    constraintAdjustmentBitmask |= 1 << adjustment.index;
+  List<String> constraintAdjustmentList = <String>[];
+  for (final WindowPositionerConstraintAdjustment adjustment
+      in positioner.constraintAdjustment) {
+    constraintAdjustmentList.add(adjustment.toString());
   }
 
   return _createWindow(
     archetype: WindowArchetype.popup,
     viewBuilder: (MethodChannel channel) async {
       return await channel.invokeMethod('createPopup', <String, dynamic>{
-            'parent': parentViewId,
-            'size': <int>[size.width.toInt(), size.height.toInt()],
-            'anchorRect':
-                anchorRect != null
-                    ? <int>[
-                      anchorRect.left.toInt(),
-                      anchorRect.top.toInt(),
-                      anchorRect.width.toInt(),
-                      anchorRect.height.toInt(),
+            'parentViewId': parentViewId,
+            'size': <double>[size.width, size.height],
+            'minSize':
+                sizeConstraints != null
+                    ? <double>[
+                      sizeConstraints.minWidth,
+                      sizeConstraints.minHeight,
                     ]
                     : null,
-            'positionerParentAnchor': positioner.parentAnchor.index,
-            'positionerChildAnchor': positioner.childAnchor.index,
-            'positionerOffset': <int>[positioner.offset.dx.toInt(), positioner.offset.dy.toInt()],
-            'positionerConstraintAdjustment': constraintAdjustmentBitmask,
+            'maxSize':
+                sizeConstraints != null
+                    ? <double>[
+                      sizeConstraints.maxWidth,
+                      sizeConstraints.maxHeight,
+                    ]
+                    : null,
+            'positioner': <String, dynamic>{
+              'anchorRect':
+                  anchorRect != null
+                      ? <double>[
+                        anchorRect.left,
+                        anchorRect.top,
+                        anchorRect.width,
+                        anchorRect.height,
+                      ]
+                      : null,
+              'parentAnchor': positioner.parentAnchor.toString(),
+              'childAnchor': positioner.childAnchor.toString(),
+              'offset': <double>[positioner.offset.dx, positioner.offset.dy],
+              'constraintAdjustment': constraintAdjustmentList,
+            },
           })
           as Map<Object?, Object?>;
     },
@@ -606,6 +630,18 @@ Future<_WindowCreationResult> _createWindow({
           )
           : null;
 
+  final int? parentViewId = creationData['parentViewId'] as int?;
+
+  final List<dynamic>? relativePositionList =
+      creationData['relativePosition'] as List<dynamic>?;
+  final Offset? relativePosition =
+      (relativePositionList != null && relativePositionList.length == 2)
+          ? Offset(
+            relativePositionList[0] as double,
+            relativePositionList[1] as double,
+          )
+          : null;
+
   final FlutterView flView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
     (FlutterView view) => view.viewId == viewId,
     orElse: () {
@@ -618,6 +654,8 @@ Future<_WindowCreationResult> _createWindow({
     archetype: archetype,
     size: Size(size[0]! as double, size[1]! as double),
     state: state,
+    parent: parentViewId,
+    relativePosition: relativePosition,
   );
 }
 
@@ -634,10 +672,10 @@ Future<void> _destroyWindow(int viewId) async {
 }
 
 class _WindowChangeProperties {
-  _WindowChangeProperties({this.size});
+  _WindowChangeProperties({this.size, this.relativePosition});
 
   Size? size;
-  int? parentViewId;
+  Offset? relativePosition;
 }
 
 class _WindowListener {
@@ -673,8 +711,20 @@ class _WindowingAppGlobalData {
           final List<Object?> sizeRaw = arguments['size']! as List<Object?>;
           size = Size(sizeRaw[0]! as double, sizeRaw[1]! as double);
         }
+        Offset? relativePosition;
+        if (arguments['relativePosition'] != null) {
+          final List<Object?> relativePositionRaw =
+              arguments['relativePosition']! as List<Object?>;
+          relativePosition = Offset(
+            relativePositionRaw[0]! as double,
+            relativePositionRaw[1]! as double,
+          );
+        }
 
-        final _WindowChangeProperties properties = _WindowChangeProperties(size: size);
+        final _WindowChangeProperties properties = _WindowChangeProperties(
+          size: size,
+          relativePosition: relativePosition,
+        );
         for (final _WindowListener listener in _listeners) {
           if (listener.viewId == viewId) {
             listener.onChanged(properties);
