@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart' show ContentSensitivity, SensitiveContentService;
+import 'package:flutter/widgets.dart' show AsyncSnapshot, FutureBuilder;
 
 import 'framework.dart';
 
@@ -213,10 +214,12 @@ class SensitiveContent extends StatefulWidget {
 }
 
 class _SensitiveContentState extends State<SensitiveContent> {
+  Future<void>? _sensitiveContentRegistrationFuture;
   @override
-  Future<void> initState() async {
+  void initState() {
     super.initState();
-    await SensitiveContentSetting.register(widget.viewId, widget.sensitivityLevel);
+    _sensitiveContentRegistrationFuture =
+        SensitiveContentSetting.register(widget.viewId, widget.sensitivityLevel);
   }
 
   @override
@@ -227,6 +230,9 @@ class _SensitiveContentState extends State<SensitiveContent> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    return FutureBuilder<void>(
+      future: _sensitiveContentRegistrationFuture,
+      builder: (BuildContext context, AsyncSnapshot<void> snapshot) => widget.child,
+    );
   }
 }
