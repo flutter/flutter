@@ -57,6 +57,7 @@ void main() {
     sub = process!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
       String msg,
     ) {
+      print('STDOUT: $msg');
       if (msg.contains(expectedMessages[i])) {
         ++i;
       }
@@ -64,6 +65,10 @@ void main() {
         sub.cancel();
         completer.complete();
       }
+    });
+
+    process!.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
+      print('STDERR: $msg');
     });
 
     await completer.future;
