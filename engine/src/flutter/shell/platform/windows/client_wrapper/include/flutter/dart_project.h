@@ -76,7 +76,7 @@ class DartProject {
     prefer_low_power_gpu_ = prefer_low_power_gpu;
   }
 
-  // Returns true if preference for low power GPU was requested..
+  // Returns true if preference for low power GPU was requested.
   bool prefer_low_power_gpu() const { return prefer_low_power_gpu_; }
 
  private:
