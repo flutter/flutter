@@ -109,7 +109,7 @@ class DartProject {
   // The list of arguments to pass through to the Dart entrypoint.
   std::vector<std::string> dart_entrypoint_arguments_;
   // The preference for GPU to be used by flutter engine.
-  GpuPreference gpu_preference_ = NoPreference;
+  GpuPreference gpu_preference_ = GpuPreference::NoPreference;
 };
 
 }  // namespace flutter

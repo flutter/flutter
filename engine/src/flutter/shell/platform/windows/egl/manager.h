@@ -79,6 +79,8 @@ class Manager {
   // Get the EGL context used for async texture uploads.
   virtual Context* resource_context() const;
 
+  static std::optional<LUID> GetLowPowerGpuLuid();
+
  protected:
   // Creates a new surface manager retaining reference to the passed-in target
   // for the lifetime of the manager.
@@ -101,8 +103,6 @@ class Manager {
   bool InitializeDevice();
 
   void CleanUp();
-
-  std::optional<LUID> GetLowPowerGpuLuid();
 
   // Whether the manager was initialized successfully.
   bool is_valid_ = false;
