@@ -18,6 +18,9 @@
 #include "impeller/typographer/glyph_atlas.h"
 
 namespace impeller {
+Point SizeToPoint(Size size) {
+  return Point(size.width, size.height);
+}
 
 using VS = GlyphAtlasPipeline::VertexShader;
 using FS = GlyphAtlasPipeline::FragmentShader;
@@ -73,16 +76,6 @@ void TextContents::SetTextProperties(Color color,
     properties_.stroke_miter = stroke_miter;
   }
 }
-
-namespace {
-Matrix MakeRectTransform(Rect from, Rect to) {
-  return Matrix::MakeTranslation({to.GetLeft(), to.GetTop(), 0}) *
-         Matrix::MakeScale(
-             /*s=*/{to.GetWidth() / from.GetWidth(),
-                    to.GetHeight() / from.GetHeight(), 1}) *
-         Matrix::MakeTranslation({-from.GetLeft(), -from.GetTop(), 0});
-}
-}  // namespace
 
 void TextContents::ComputeVertexData(
     VS::PerVertexData* vtx_contents,
@@ -177,36 +170,33 @@ void TextContents::ComputeVertexData(
       // glyph bounds are used to compute UVs in cases where the
       // destination and source sizes may differ due to clamping the sizes
       // of large glyphs.
-      Point uv_origin =
-          (atlas_glyph_bounds.GetLeftTop() - Point(0.5, 0.5)) / atlas_size;
-      Point uv_size = (atlas_glyph_bounds.GetSize() + Point(1, 1)) / atlas_size;
+      Point uv_origin = (atlas_glyph_bounds.GetLeftTop()) / atlas_size;
+      Point uv_size = SizeToPoint(atlas_glyph_bounds.GetSize()) / atlas_size;
 
       Point unrounded_glyph_position =
-          basis_transform *
-          (glyph_position.position + scaled_bounds.GetLeftTop());
+          // This is for RTL text.
+          (basis_transform.m[0] < 0 ? Matrix::MakeScale({-1, 1, 1})
+                                    : Matrix()) *
+              glyph_bounds.GetLeftTop() +
+          (basis_transform * glyph_position.position);
 
       Point screen_glyph_position =
           (screen_offset + unrounded_glyph_position + subpixel_adjustment)
               .Floor();
-      Vector3 screen_size = basis_transform * scaled_bounds.GetSize();
-
-      Matrix position_to_uv = MakeRectTransform(
-          Rect::MakeOriginSize(screen_glyph_position,
-                               Size(screen_size.x, screen_size.y)),
-          Rect::MakeOriginSize(uv_origin, Size(uv_size.x, uv_size.y)));
 
       for (const Point& point : unit_points) {
+        Point position;
         if (is_translation_scale) {
-          vtx.position = (screen_glyph_position +
-                          (basis_transform * point * scaled_bounds.GetSize()))
-                             .Round();
-          vtx.uv = position_to_uv * vtx.position;
+          position = (screen_glyph_position +
+                      (basis_transform * point * scaled_bounds.GetSize()))
+                         .Round();
         } else {
-          vtx.position = entity_transform *
-                         (glyph_position.position + scaled_bounds.GetLeftTop() +
-                          point * scaled_bounds.GetSize());
-          vtx.uv = uv_origin + (uv_size * point);
+          position = entity_transform *
+                     (glyph_position.position + scaled_bounds.GetLeftTop() +
+                      point * scaled_bounds.GetSize());
         }
+        vtx.uv = uv_origin + (uv_size * point);
+        vtx.position = position;
         vtx_contents[i++] = vtx;
       }
     }
