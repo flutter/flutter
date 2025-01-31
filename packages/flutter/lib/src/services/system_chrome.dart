@@ -648,14 +648,14 @@ abstract final class SystemChrome {
   ///
   /// {@tool sample}
   /// The following example uses SystemChrome to set the status bar icon brightness based on system brightness.
-  ///
-  ///     final Brightness brightness = MediaQuery.platformBrightnessOf(context);
-  ///     SystemChrome.setSystemUIOverlayStyle(
-  ///       SystemUiOverlayStyle(
-  ///         statusBarIconBrightness: brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+  /// ```dart
+  /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+  ///   SystemChrome.setSystemUIOverlayStyle(
+  ///     SystemUiOverlayStyle(
+  ///       statusBarIconBrightness: brightness == Brightness.dark ? Brightness.light : Brightness.dark,
   ///       ),
   ///     );
-  ///
+  /// ```
   /// {@end-tool}
   ///
   /// See also:
