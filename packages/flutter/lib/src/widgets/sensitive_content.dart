@@ -12,15 +12,11 @@ import 'framework.dart';
 /// Flutter view.
 class ViewContentSensitivityState {
   /// Creates a [ViewContentSensitivityState].
-  ViewContentSensitivityState();
+  ViewContentSensitivityState(this.currentContentSensitivitySetting);
 
   /// The current [ContentSensitivity] level set for the Flutter view that this
   /// state represents.
-  ///
-  /// By default, this level is [ContentSensitivity.autoSensitive] because this
-  /// is the default level on Android and this feature is currently only
-  /// supported for Android.
-  ContentSensitivity currentContentSensitivitySetting = ContentSensitivity.autoSensitive;
+  ContentSensitivity currentContentSensitivitySetting;
 
   /// The number of [SensitiveContent] widgets that have sensitivity level [ContentSensitivity.sensitive].
   int sensitiveWidgetCount = 0;
@@ -83,9 +79,10 @@ class SensitiveContentSetting {
     // Set default content sensitivity level as set in native Android or the default
     // if unset by the developer (auto sensitive).
     _defaultContentSensitivitySetting ??= ContentSensitivity.getContentSensitivityById(
-        await _sensitiveContentService.getContentSensitivity(viewId));
+        await _sensitiveContentService.getContentSensitivity());
     if (!_contentSensitivityStates.containsKey(viewId)) {
-      _contentSensitivityStates[viewId] = ViewContentSensitivityState();
+      _contentSensitivityStates[viewId] =
+          ViewContentSensitivityState(_defaultContentSensitivitySetting!);
     }
 
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
@@ -100,7 +97,7 @@ class SensitiveContentSetting {
     }
 
     // Set content sensitivity level for the view as desiredSensitivityLevel and update stored data.
-    _sensitiveContentService.setContentSensitivity(viewId, desiredSensitivityLevel);
+    _sensitiveContentService.setContentSensitivity(desiredSensitivityLevel);
     contentSensitivityStateForView.currentContentSensitivitySetting = desiredSensitivityLevel;
   }
 
@@ -142,7 +139,7 @@ class SensitiveContentSetting {
         }
     }
 
-    _sensitiveContentService.setContentSensitivity(viewId, sensitivityLevelToSet);
+    _sensitiveContentService.setContentSensitivity(sensitivityLevelToSet);
   }
 
   /// Return whether or not [desiredSensitivityLevel] should be set as the new

@@ -98,37 +98,28 @@ class SensitiveContentService {
   /// Sets content sensitivity level of the native backing to a Flutter view
   /// with the specified [flutterViewId] to the level specified by
   /// [contentSensitivity] via a call to the native embedder.
-  void setContentSensitivity(int flutterViewId, ContentSensitivity contentSensitivity) {
+  void setContentSensitivity(ContentSensitivity contentSensitivity) {
     try {
       sensitiveContentChannel.invokeMethod<void>(
         'SensitiveContent.setContentSensitivity',
-        <String, dynamic>{
-          'flutterViewId': flutterViewId,
-          'contentSensitivityLevel': contentSensitivity.id
-        },
+        contentSensitivity.id,
       );
     } catch (e) {
       // Content sensitivity failed to be set.
-      throw FlutterError('Content sensitivity failed to be set. Please ensure that the '
-          'flutterViewId $flutterViewId corresponds to a valid Android Flutter View '
-          'or Fragment.');
+      throw FlutterError('Content sensitivity failed to be set: $e');
     }
   }
 
   /// Gets content sensitivity level of the native backing to a Flutter view
   /// with the specified [flutterViewId] via a call to the native embedder.
-  Future<int> getContentSensitivity(int flutterViewId) async {
+  Future<int> getContentSensitivity() async {
     try {
-      final int? result = await sensitiveContentChannel.invokeMethod<int>(
-        'SensitiveContent.getContentSensitivity',
-        <String, dynamic>{'flutterViewId': flutterViewId},
-      );
+      final int? result =
+          await sensitiveContentChannel.invokeMethod<int>('SensitiveContent.getContentSensitivity');
       return result!;
     } catch (e) {
       // Content sensitivity failed to be set.
-      throw FlutterError(
-          'Failed to retrieve content sensitivity. Please ensure that the flutterViewId '
-          '$flutterViewId corresponds to a valid Android Flutter View for Fragment. ');
+      throw FlutterError('Failed to retrieve content sensitivity: $e');
     }
   }
 }
