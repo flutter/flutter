@@ -54,7 +54,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required Logger logger,
     required FileSystem fileSystem,
     required SystemClock systemClock,
-    required Usage usage,
     required Analytics analytics,
     bool machine = false,
   }) {
@@ -66,7 +65,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       stayResident: stayResident,
       urlTunneller: urlTunneller,
       machine: machine,
-      usage: usage,
       analytics: analytics,
       systemClock: systemClock,
       fileSystem: fileSystem,
@@ -91,7 +89,6 @@ class ResidentWebRunner extends ResidentRunner {
     required FileSystem fileSystem,
     required Logger logger,
     required SystemClock systemClock,
-    required Usage usage,
     required Analytics analytics,
     UrlTunneller? urlTunneller,
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
@@ -99,7 +96,6 @@ class ResidentWebRunner extends ResidentRunner {
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _systemClock = systemClock,
-       _usage = usage,
        _analytics = analytics,
        _urlTunneller = urlTunneller,
        super(
@@ -114,7 +110,6 @@ class ResidentWebRunner extends ResidentRunner {
   final FileSystem _fileSystem;
   final Logger _logger;
   final SystemClock _systemClock;
-  final Usage _usage;
   final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
 
@@ -342,7 +337,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             buildSystem: globals.buildSystem,
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
-            usage: globals.flutterUsage,
             analytics: globals.analytics,
           );
           await webBuilder.buildWeb(
@@ -449,7 +443,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           buildSystem: globals.buildSystem,
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
-          usage: globals.flutterUsage,
           analytics: globals.analytics,
         );
         await webBuilder.buildWeb(
@@ -523,7 +516,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       final String targetPlatform = getNameForTargetPlatform(TargetPlatform.web_javascript);
       final String sdkName = await device!.device!.sdkNameAndVersion;
       if (fullRestart) {
-        _usage.sendTiming('hot', 'web-incremental-restart', elapsed);
         _analytics.send(
           Event.timing(
             workflow: 'hot',
@@ -552,7 +544,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           ),
         );
       } else {
-        _usage.sendTiming('hot', 'reload', elapsed);
         _analytics.send(
           Event.timing(
             workflow: 'hot',
