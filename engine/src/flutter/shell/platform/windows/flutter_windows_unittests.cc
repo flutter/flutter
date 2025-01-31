@@ -31,7 +31,7 @@ namespace {
 // An EGL manager that initializes EGL but fails to create surfaces.
 class HalfBrokenEGLManager : public egl::Manager {
  public:
-  HalfBrokenEGLManager() : egl::Manager() {}
+  HalfBrokenEGLManager() : egl::Manager(false/*prefer_low_power_gpu*/) {}
 
   std::unique_ptr<egl::WindowSurface>
   CreateWindowSurface(HWND hwnd, size_t width, size_t height) override {
