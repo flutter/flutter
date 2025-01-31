@@ -34,6 +34,41 @@ void PumpMessage() {
   }
 }
 
+Size GetLogicalClientSize(HWND hwnd) {
+  RECT rect;
+  GetClientRect(hwnd, &rect);
+  double const dpr = FlutterDesktopGetDpiForHWND(hwnd) /
+                     static_cast<double>(USER_DEFAULT_SCREEN_DPI);
+  double const width = rect.right / dpr;
+  double const height = rect.bottom / dpr;
+  return {width, height};
+}
+
+std::wstring GetWindowTitle(HWND hwnd) {
+  int length = GetWindowTextLengthW(hwnd);
+  if (length == 0)
+    return L"";
+
+  std::vector<wchar_t> buffer(length + 1);
+  GetWindowTextW(hwnd, buffer.data(), length + 1);
+  return std::wstring(buffer.data());
+}
+
+std::wstring StringToWstring(std::string_view str) {
+  if (str.empty()) {
+    return {};
+  }
+  if (int buffer_size =
+          MultiByteToWideChar(CP_UTF8, 0, str.data(), str.size(), nullptr, 0)) {
+    std::wstring wide_str(buffer_size, L'\0');
+    if (MultiByteToWideChar(CP_UTF8, 0, str.data(), str.size(), &wide_str[0],
+                            buffer_size)) {
+      return wide_str;
+    }
+  }
+  return {};
+}
+
 class FlutterHostWindowControllerTest : public WindowsTest {
  public:
   FlutterHostWindowControllerTest() = default;
@@ -58,7 +93,7 @@ class FlutterHostWindowControllerTest : public WindowsTest {
     FML_CHECK(SUCCEEDED(::CoInitializeEx(nullptr, COINIT_MULTITHREADED)));
   }
 
-  void SetDpiAwareness() {
+  void SetDpiAwareness() const {
     HMODULE user32_module = LoadLibraryA("user32.dll");
     if (!user32_module) {
       return;
@@ -98,8 +133,8 @@ TEST_F(FlutterHostWindowControllerTest, CreateRegularWindow) {
   ASSERT_TRUE(result.has_value());
   EXPECT_NE(engine()->view(result->view_id), nullptr);
   EXPECT_EQ(result->archetype, settings.archetype);
-  EXPECT_GE(result->size.width(), settings.size.width());
-  EXPECT_GE(result->size.height(), settings.size.height());
+  EXPECT_EQ(result->size.width(), settings.size.width());
+  EXPECT_EQ(result->size.height(), settings.size.height());
   EXPECT_FALSE(result->parent_id.has_value());
 
   // Ensure the window was successfully retrieved.
@@ -114,7 +149,6 @@ TEST_F(FlutterHostWindowControllerTest, ModifyRegularWindow) {
       .archetype = WindowArchetype::kRegular,
       .size = {800.0, 600.0},
       .title = "window",
-      .state = WindowState::kMinimized,
   };
 
   // Create the window.
@@ -129,8 +163,7 @@ TEST_F(FlutterHostWindowControllerTest, ModifyRegularWindow) {
   // Define the modifications to be applied to the window.
   WindowModificationSettings const modification_settings = {
       .size = Size{200.0, 200.0},
-      .title = "new title",
-      .state = WindowState::kRestored,
+      .title = "new title 😉",
   };
 
   // Test messenger with a handler for onWindowChanged.
@@ -172,8 +205,8 @@ TEST_F(FlutterHostWindowControllerTest, ModifyRegularWindow) {
       ASSERT_NE(value_width, nullptr);
       auto const* value_height = std::get_if<double>(&value_size->at(1));
       ASSERT_NE(value_height, nullptr);
-      EXPECT_GE(*value_width, modification_settings.size->width());
-      EXPECT_GE(*value_height, modification_settings.size->height());
+      EXPECT_EQ(*value_width, modification_settings.size->width());
+      EXPECT_EQ(*value_height, modification_settings.size->height());
 
       done = true;
     }
@@ -185,6 +218,17 @@ TEST_F(FlutterHostWindowControllerTest, ModifyRegularWindow) {
   // Apply the modifications.
   EXPECT_TRUE(host_window_controller()->ModifyHostWindow(
       metadata->view_id, modification_settings));
+
+  // Validate the modified settings.
+  HWND const window_handle = host_window_controller()
+                                 ->GetHostWindow(metadata->view_id)
+                                 ->GetWindowHandle();
+  Size const new_size = GetLogicalClientSize(window_handle);
+  EXPECT_EQ(new_size.width(), modification_settings.size->width());
+  EXPECT_EQ(new_size.height(), modification_settings.size->height());
+  std::wstring const new_title = GetWindowTitle(window_handle);
+  std::wstring const old_title = StringToWstring(*modification_settings.title);
+  EXPECT_STREQ(new_title.c_str(), old_title.c_str());
 
   // Pump messages for the Windows platform task runner.
   while (!done) {

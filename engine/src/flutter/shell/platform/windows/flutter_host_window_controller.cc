@@ -72,13 +72,10 @@ bool FlutterHostWindowController::ModifyHostWindow(
   HWND const window_handle = window->GetWindowHandle();
 
   std::optional<Size> changed_size;
+  Size const size_before = GetViewSize(view_id);
+
   if (settings.size.has_value()) {
-    Size const view_size_before = GetViewSize(view_id);
     window->SetClientSize(*settings.size);
-    Size const view_size_after = GetViewSize(view_id);
-    if (!(view_size_before == view_size_after)) {
-      changed_size = view_size_after;
-    }
   }
   if (settings.title.has_value()) {
     window->SetTitle(*settings.title);
@@ -100,6 +97,11 @@ bool FlutterHostWindowController::ModifyHostWindow(
       }();
       SetWindowPlacement(window_handle, &window_placement);
     }
+  }
+
+  Size const size_after = GetViewSize(view_id);
+  if (!(size_before == size_after)) {
+    changed_size = size_after;
   }
 
   if (changed_size) {
