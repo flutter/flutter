@@ -74,9 +74,9 @@ bool Manager::InitializeDisplay(bool prefer_low_power_gpu) {
 
       // Specify the LUID of the GPU to use.
       EGL_PLATFORM_ANGLE_D3D_LUID_HIGH_ANGLE,
-      luid.has_value() ? luid->HighPart : 0,
+      static_cast<EGLint>(luid.has_value() ? luid->HighPart : 0),
       EGL_PLATFORM_ANGLE_D3D_LUID_LOW_ANGLE,
-      luid.has_value() ? luid->LowPart : 0,
+      static_cast<EGLint>(luid.has_value() ? luid->LowPart : 0),
       EGL_NONE,
   };
 
@@ -347,7 +347,7 @@ std::optional<LUID> Manager::GetLowPowerGpuLuid() {
     // We will follow with the default ANGLE selection.
     return std::nullopt;
   }
-  hr = factory6->EnumAdaptersByGpuPreference(
+  hr = factory6->EnumAdapterByGpuPreference(
       0, DXGI_GPU_PREFERENCE_MINIMUM_POWER, IID_PPV_ARGS(&adapter));
   if (FAILED(hr) || adapter == nullptr) {
     return std::nullopt;
