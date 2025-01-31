@@ -141,17 +141,15 @@ class _MenuControllerScope extends InheritedWidget {
 /// The child can be any widget, but is typically a button, a text field, or, in
 /// the case of context menus, the entire screen.
 ///
-/// A [RawMenuAnchor]'s menu is shown by calling [MenuController.open] on an
-/// attached [MenuController]. A [MenuController] is passed to the
-/// [RawMenuAnchor.builder] function, or an externally-created [MenuController]
-/// can be passed to the [controller] property.
+/// The menu overlay of a [RawMenuAnchor] is shown by calling
+/// [MenuController.open] on an attached [MenuController].
 ///
 /// When a [RawMenuAnchor] is opened, [overlayBuilder] is called to construct
 /// the menu contents within an [Overlay]. The [Overlay] allows the menu to
 /// "float" on top of other widgets. The `info` argument passed to
 /// [overlayBuilder] provides the anchor's [Rect], the [Size] of the overlay,
 /// the [TapRegion.groupId] used by members of the menu system, and the
-/// [position] argument passed to [MenuController.open].
+/// `position` argument passed to [MenuController.open].
 ///
 /// If [MenuController.open] is called with a `position` argument, it will be
 /// passed to the `info` argument of the `overlayBuilder` function.
