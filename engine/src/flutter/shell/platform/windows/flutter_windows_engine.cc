@@ -300,6 +300,9 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = argv.empty() ? nullptr : argv.data();
+#ifdef FLUTTER_ENABLE_IMPELLER
+  args.enable_impeller = true;
+#endif  // FLUTTER_ENABLE_IMPELLER
 
   // Fail if conflicting non-default entrypoints are specified in the method
   // argument and the project.

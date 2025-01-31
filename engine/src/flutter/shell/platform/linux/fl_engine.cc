@@ -625,6 +625,9 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       dart_entrypoint_args != nullptr ? g_strv_length(dart_entrypoint_args) : 0;
   args.dart_entrypoint_argv =
       reinterpret_cast<const char* const*>(dart_entrypoint_args);
+#ifdef FLUTTER_ENABLE_IMPELLER
+  args.enable_impeller = true;
+#endif  // FLUTTER_ENABLE_IMPELLER
 
   FlutterCompositor compositor = {};
   compositor.struct_size = sizeof(FlutterCompositor);

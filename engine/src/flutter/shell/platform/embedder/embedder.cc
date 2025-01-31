@@ -2050,6 +2050,9 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   }
 
   flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
+  if (SAFE_ACCESS(args, enable_impeller, false) != false) {
+    settings.enable_impeller = true;
+  }
 
   if (SAFE_ACCESS(args, aot_data, nullptr)) {
     if (SAFE_ACCESS(args, vm_snapshot_data, nullptr) ||
