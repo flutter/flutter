@@ -332,6 +332,7 @@ class FlutterProject {
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
+    bool? releaseMode,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -344,6 +345,7 @@ class FlutterProject {
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
       allowedPlugins: allowedPlugins,
+      releaseMode: releaseMode,
     );
   }
 
@@ -358,6 +360,7 @@ class FlutterProject {
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
+    bool? releaseMode,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
@@ -389,6 +392,7 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       allowedPlugins: allowedPlugins,
+      releaseMode: releaseMode,
     );
   }
 
@@ -631,6 +635,18 @@ class AndroidProject extends FlutterProjectPlatform {
     }
 
     return hostAppGradleRoot.childFile('AndroidManifest.xml');
+  }
+
+  File get generatedPluginRegistrantFile {
+    return hostAppGradleRoot
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childDirectory('io')
+        .childDirectory('flutter')
+        .childDirectory('plugins')
+        .childFile('GeneratedPluginRegistrant.java');
   }
 
   File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
