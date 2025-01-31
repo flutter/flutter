@@ -58,11 +58,13 @@ void main() {
       String msg,
     ) {
       print('STDOUT: $msg');
+      if (completer.isCompleted) {
+        return;
+      }
       if (msg.contains(expectedMessages[i])) {
         ++i;
       }
       if (i == expectedMessages.length) {
-        sub.cancel();
         completer.complete();
       }
     });

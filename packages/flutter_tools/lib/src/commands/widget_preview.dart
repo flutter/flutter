@@ -220,7 +220,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       _widgetPreviewApp = await runPreviewEnvironment(
         widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
       );
-
       final int result = await _widgetPreviewApp!.runner.waitForAppToFinish();
       if (result != 0) {
         throwToolExit(null, exitCode: result);
@@ -268,7 +267,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     );
 
     if (platform.isMacOS) {
-      logger.printStatus('Windows architecture: ${os.hostPlatform}');
       await buildMacOS(
         flutterProject: widgetPreviewScaffoldProject,
         buildInfo: buildInfo,
@@ -285,7 +283,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         logger: logger,
       );
     } else if (platform.isWindows) {
-      print('Windows architecture: ${os.hostPlatform}');
       await buildWindows(
         widgetPreviewScaffoldProject.windows,
         buildInfo,

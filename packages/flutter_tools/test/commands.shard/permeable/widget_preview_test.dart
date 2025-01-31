@@ -10,7 +10,9 @@ import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
@@ -40,7 +42,7 @@ void main() {
     botDetector = const FakeBotDetector(false);
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     mockStdio = FakeStdio();
-    platform = const LocalPlatform();
+    platform = FakePlatform.fromPlatform(const LocalPlatform());
   });
 
   tearDown(() {
@@ -62,6 +64,14 @@ void main() {
         fs: fs,
         projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
         cache: Cache.test(processManager: loggingProcessManager, platform: platform),
+        platform: platform,
+        shutdownHooks: ShutdownHooks(),
+        os: OperatingSystemUtils(
+          fileSystem: fs,
+          processManager: loggingProcessManager,
+          logger: logger,
+          platform: platform,
+        ),
       ),
     );
     await runner.run(<String>['widget-preview', ...arguments]);
