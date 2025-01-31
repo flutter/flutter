@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Taken from https://github.com/dart-lang/webdev/blob/616da45582e008efa114728927eabb498c71f1b7/dwds/lib/src/debugging/metadata/module_metadata.dart.
+// Prefer to keep the implementations consistent.
+
 /// Module metadata format version
 ///
 /// Module reader always creates the current version but is able to read
@@ -54,10 +57,14 @@ class ModuleMetadataVersion {
 class LibraryMetadata {
   LibraryMetadata(this.name, this.importUri, this.partUris);
 
-  LibraryMetadata.fromJson(Map<String, dynamic> json)
-    : name = _readRequiredField(json, 'name'),
-      importUri = _readRequiredField(json, 'importUri'),
-      partUris = _readOptionalList(json, 'partUris') ?? <String>[];
+  LibraryMetadata.fromJson(Map<String, Object?> json)
+    : name = _readRequiredField(json, nameField),
+      importUri = _readRequiredField(json, importUriField),
+      partUris = _readOptionalList(json, partUrisField) ?? <String>[];
+
+  static const String nameField = 'name';
+  static const String importUriField = 'importUri';
+  static const String partUrisField = 'partUris';
 
   /// Library name as defined in pubspec.yaml
   final String name;
@@ -72,11 +79,11 @@ class LibraryMetadata {
   /// Can be relative paths to the directory of the fileUri
   final List<String> partUris;
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'name': name,
-      'importUri': importUri,
-      'partUris': <String>[...partUris],
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      nameField: name,
+      importUriField: importUri,
+      partUrisField: <String>[...partUris],
     };
   }
 }
@@ -90,12 +97,12 @@ class ModuleMetadata {
     version = ver ?? ModuleMetadataVersion.current.version;
   }
 
-  ModuleMetadata.fromJson(Map<String, dynamic> json)
-    : version = _readRequiredField(json, 'version'),
-      name = _readRequiredField(json, 'name'),
-      closureName = _readRequiredField(json, 'closureName'),
-      sourceMapUri = _readRequiredField(json, 'sourceMapUri'),
-      moduleUri = _readRequiredField(json, 'moduleUri') {
+  ModuleMetadata.fromJson(Map<String, Object?> json)
+    : version = _readRequiredField(json, versionField),
+      name = _readRequiredField(json, nameField),
+      closureName = _readRequiredField(json, closureNameField),
+      sourceMapUri = _readRequiredField(json, sourceMapUriField),
+      moduleUri = _readRequiredField(json, moduleUriField) {
     if (!ModuleMetadataVersion.current.isCompatibleWith(version) &&
         !ModuleMetadataVersion.previous.isCompatibleWith(version)) {
       throw Exception(
@@ -106,13 +113,20 @@ class ModuleMetadata {
       );
     }
 
-    for (final Map<String, dynamic> l in _readRequiredList<Map<String, dynamic>>(
+    for (final Map<String, Object?> l in _readRequiredList<Map<String, Object?>>(
       json,
-      'libraries',
+      librariesField,
     )) {
       addLibrary(LibraryMetadata.fromJson(l));
     }
   }
+
+  static const String versionField = 'version';
+  static const String nameField = 'name';
+  static const String closureNameField = 'closureName';
+  static const String sourceMapUriField = 'sourceMapUri';
+  static const String moduleUriField = 'moduleUri';
+  static const String librariesField = 'libraries';
 
   /// Metadata format version
   late final String version;
@@ -155,35 +169,35 @@ class ModuleMetadata {
     }
   }
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'version': version,
-      'name': name,
-      'closureName': closureName,
-      'sourceMapUri': sourceMapUri,
-      'moduleUri': moduleUri,
-      'libraries': <Map<String, dynamic>>[
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      versionField: version,
+      nameField: name,
+      closureNameField: closureName,
+      sourceMapUriField: sourceMapUri,
+      moduleUriField: moduleUri,
+      librariesField: <Map<String, Object?>>[
         for (final LibraryMetadata lib in libraries.values) lib.toJson(),
       ],
     };
   }
 }
 
-T _readRequiredField<T>(Map<String, dynamic> json, String field) {
+T _readRequiredField<T>(Map<String, Object?> json, String field) {
   if (!json.containsKey(field)) {
     throw FormatException('Required field $field is not set in $json');
   }
   return json[field]! as T;
 }
 
-T? _readOptionalField<T>(Map<String, dynamic> json, String field) => json[field] as T?;
+T? _readOptionalField<T>(Map<String, Object?> json, String field) => json[field] as T?;
 
-List<T> _readRequiredList<T>(Map<String, dynamic> json, String field) {
-  final List<dynamic> list = _readRequiredField<List<dynamic>>(json, field);
-  return List.castFrom<dynamic, T>(list);
+List<T> _readRequiredList<T>(Map<String, Object?> json, String field) {
+  final List<Object?> list = _readRequiredField<List<Object?>>(json, field);
+  return List.castFrom<Object?, T>(list);
 }
 
-List<T>? _readOptionalList<T>(Map<String, dynamic> json, String field) {
-  final List<dynamic>? list = _readOptionalField<List<dynamic>>(json, field);
-  return list == null ? null : List.castFrom<dynamic, T>(list);
+List<T>? _readOptionalList<T>(Map<String, Object?> json, String field) {
+  final List<Object?>? list = _readOptionalField<List<Object?>>(json, field);
+  return list == null ? null : List.castFrom<Object?, T>(list);
 }

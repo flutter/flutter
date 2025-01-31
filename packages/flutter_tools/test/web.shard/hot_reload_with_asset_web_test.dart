@@ -5,7 +5,7 @@
 @Tags(<String>['flutter-test-driver'])
 library;
 
-import '../integration.shard/hot_reload_with_asset_test.dart';
+import '../integration.shard/test_data/hot_reload_with_asset_test_common.dart';
 import '../src/common.dart';
 
 void main() {

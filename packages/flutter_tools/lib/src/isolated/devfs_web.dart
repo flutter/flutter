@@ -159,6 +159,16 @@ class WebAssetServer implements AssetReader {
   /// If [writeRestartScripts] is true, writes a list of sources mapped to their
   /// ids to the file system that can then be consumed by the hot restart
   /// callback.
+  ///
+  /// For example:
+  /// ```json
+  /// [
+  ///   {
+  ///     "src": "<file_name>",
+  ///     "id": "<id>",
+  ///   },
+  /// ]
+  /// ```
   void performRestart(List<String> modules, {required bool writeRestartScripts}) {
     for (final String module in modules) {
       // We skip computing the digest by using the hashCode of the underlying buffer.
@@ -175,7 +185,7 @@ class WebAssetServer implements AssetReader {
       for (final String src in modules) {
         srcIdsList.add(<String, String>{'src': '$src?gen=$_hotRestartGeneration', 'id': src});
       }
-      writeFile('main.dart.js.restartScripts', json.encode(srcIdsList));
+      writeFile('restart_scripts.json', json.encode(srcIdsList));
     }
     _hotRestartGeneration++;
   }
@@ -187,6 +197,16 @@ class WebAssetServer implements AssetReader {
   /// bundle.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
+  ///
+  /// For example:
+  /// ```json
+  /// [
+  ///   {
+  ///     "src": "<file_name>",
+  ///     "libraries": ["<lib1>", "<lib2>"],
+  ///   },
+  /// ]
+  /// ```
   ///
   /// The path of the output file should stay consistent across the lifetime of
   /// the app.
@@ -200,7 +220,7 @@ class WebAssetServer implements AssetReader {
       final List<String> libraries = metadata.libraries.keys.toList();
       moduleToLibrary.add(<String, Object>{'src': module, 'libraries': libraries});
     }
-    writeFile('main.dart.js.reloadScripts', json.encode(moduleToLibrary));
+    writeFile('reload_scripts.json', json.encode(moduleToLibrary));
   }
 
   @visibleForTesting

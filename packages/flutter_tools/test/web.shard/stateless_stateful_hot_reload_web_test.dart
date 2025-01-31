@@ -5,7 +5,7 @@
 @Tags(<String>['flutter-test-driver'])
 library;
 
-import '../integration.shard/stateless_stateful_hot_reload_test.dart';
+import '../integration.shard/test_data/stateless_stateful_hot_reload_test_common.dart';
 import '../src/common.dart';
 
 void main() {

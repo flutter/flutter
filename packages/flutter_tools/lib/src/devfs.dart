@@ -551,6 +551,10 @@ class DevFS {
   /// Updates files on the device.
   ///
   /// Returns the number of bytes synced.
+  ///
+  /// If [fullRestart] is true, assumes this is a hot restart instead of a hot
+  /// reload. If [resetCompiler] is true, sends a `reset` instruction to the
+  /// frontend server.
   Future<UpdateFSReport> update({
     required Uri mainUri,
     required ResidentCompiler generator,
