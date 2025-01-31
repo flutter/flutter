@@ -489,60 +489,12 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
   MenuController get menuController => widget.controller;
 
   @override
-  Widget buildAnchor(BuildContext context) {
-    final Widget child = Shortcuts(
-      includeSemantics: false,
-      shortcuts: _kMenuTraversalShortcuts,
-      child: TapRegion(
-        groupId: root.menuController,
-        consumeOutsideTaps: root.isOpen && widget.consumeOutsideTaps,
-        onTapOutside: handleOutsideTap,
-        child: Builder(
-          key: _anchorKey,
-          builder: (BuildContext context) {
-            return widget.builder?.call(context, menuController, widget.child) ??
-                widget.child ??
-                const SizedBox();
-          },
-        ),
-      ),
-    );
-
-    if (useRootOverlay) {
-      return OverlayPortal.targetsRootOverlay(
-        controller: _overlayController,
-        overlayChildBuilder: _buildOverlay,
-        child: child,
-      );
-    } else {
-      return OverlayPortal(
-        controller: _overlayController,
-        overlayChildBuilder: _buildOverlay,
-        child: child,
-      );
+  void didUpdateWidget(RawMenuAnchor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller._detach(this);
+      widget.controller._attach(this);
     }
-  }
-
-  Widget _buildOverlay(BuildContext context) {
-    final BuildContext anchorContext = _anchorKey.currentContext!;
-    final RenderBox overlay =
-        Overlay.of(anchorContext, rootOverlay: useRootOverlay).context.findRenderObject()!
-            as RenderBox;
-    final RenderBox anchorBox = anchorContext.findRenderObject()! as RenderBox;
-    final ui.Offset upperLeft = anchorBox.localToGlobal(Offset.zero, ancestor: overlay);
-    final ui.Offset bottomRight = anchorBox.localToGlobal(
-      anchorBox.size.bottomRight(Offset.zero),
-      ancestor: overlay,
-    );
-
-    final RawMenuOverlayInfo info = RawMenuOverlayInfo(
-      anchorRect: Rect.fromPoints(upperLeft, bottomRight),
-      overlaySize: overlay.size,
-      position: _menuPosition,
-      tapRegionGroupId: root.menuController,
-    );
-
-    return widget.overlayBuilder(context, info);
   }
 
   @override
@@ -617,6 +569,63 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     }
   }
 
+  Widget _buildOverlay(BuildContext context) {
+    final BuildContext anchorContext = _anchorKey.currentContext!;
+    final RenderBox overlay =
+        Overlay.of(anchorContext, rootOverlay: useRootOverlay).context.findRenderObject()!
+            as RenderBox;
+    final RenderBox anchorBox = anchorContext.findRenderObject()! as RenderBox;
+    final ui.Offset upperLeft = anchorBox.localToGlobal(Offset.zero, ancestor: overlay);
+    final ui.Offset bottomRight = anchorBox.localToGlobal(
+      anchorBox.size.bottomRight(Offset.zero),
+      ancestor: overlay,
+    );
+
+    final RawMenuOverlayInfo info = RawMenuOverlayInfo(
+      anchorRect: Rect.fromPoints(upperLeft, bottomRight),
+      overlaySize: overlay.size,
+      position: _menuPosition,
+      tapRegionGroupId: root.menuController,
+    );
+
+    return widget.overlayBuilder(context, info);
+  }
+
+  @override
+  Widget buildAnchor(BuildContext context) {
+    final Widget child = Shortcuts(
+      includeSemantics: false,
+      shortcuts: _kMenuTraversalShortcuts,
+      child: TapRegion(
+        groupId: root.menuController,
+        consumeOutsideTaps: root.isOpen && widget.consumeOutsideTaps,
+        onTapOutside: handleOutsideTap,
+        child: Builder(
+          key: _anchorKey,
+          builder: (BuildContext context) {
+            return widget.builder?.call(context, menuController, widget.child) ??
+                widget.child ??
+                const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    if (useRootOverlay) {
+      return OverlayPortal.targetsRootOverlay(
+        controller: _overlayController,
+        overlayChildBuilder: _buildOverlay,
+        child: child,
+      );
+    } else {
+      return OverlayPortal(
+        controller: _overlayController,
+        overlayChildBuilder: _buildOverlay,
+        child: child,
+      );
+    }
+  }
+
   @override
   String toString({DiagnosticLevel? minLevel}) {
     return describeIdentity(this);
@@ -679,12 +688,20 @@ class RawMenuAnchorGroup extends StatefulWidget {
 
 class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
     with _RawMenuAnchorBaseMixin<RawMenuAnchorGroup> {
-
   @override
   bool get isOpen => _anchorChildren.any((_RawMenuAnchorBaseMixin child) => child.isOpen);
 
   @override
   MenuController get menuController => widget.controller;
+
+  @override
+  void didUpdateWidget(RawMenuAnchorGroup oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller._detach(this);
+      widget.controller._attach(this);
+    }
+  }
 
   @override
   void close({bool inDispose = false}) {

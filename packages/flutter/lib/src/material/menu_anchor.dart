@@ -99,12 +99,15 @@ typedef MenuAnchorChildBuilder =
     Widget Function(BuildContext context, MenuController controller, Widget? child);
 
 class _MenuAnchorScope extends InheritedWidget {
-  const _MenuAnchorScope({required super.child, required this.state});
+  const _MenuAnchorScope({required this.state, required super.child});
 
   final _MenuAnchorState state;
 
   @override
-  bool updateShouldNotify(_MenuAnchorScope oldWidget) => true;
+  bool updateShouldNotify(_MenuAnchorScope oldWidget) {
+    assert(oldWidget.state == state, 'The state of a MenuAnchor should not change.');
+    return false;
+  }
 }
 
 /// A widget used to mark the "anchor" for a set of submenus, defining the
@@ -333,7 +336,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   MenuController? _internalMenuController;
   final FocusScopeNode _menuScopeNode = FocusScopeNode();
-  _MenuAnchorState? _parent;
+  _MenuAnchorState? get _parent => _MenuAnchorState._maybeOf(context);
 
   @override
   void initState() {
@@ -344,33 +347,19 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   @override
+  void didUpdateWidget(MenuAnchor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      _internalMenuController = widget.controller != null ? MenuController() : null;
+    }
+  }
+
+  @override
   void dispose() {
     assert(_debugMenuInfo('Disposing of $this'));
     _internalMenuController = null;
     _menuScopeNode.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final _MenuAnchorState? newParent = _MenuAnchorState._maybeOf(context);
-    if (newParent != _parent) {
-      _parent = newParent;
-    }
-  }
-
-  @override
-  void didUpdateWidget(MenuAnchor oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      if (widget.controller != null) {
-        _internalMenuController = null;
-      } else {
-        assert(_internalMenuController == null);
-        _internalMenuController = MenuController();
-      }
-    }
   }
 
   @override
@@ -451,7 +440,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   static _MenuAnchorState? _maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_MenuAnchorScope>()?.state;
+    return context.getInheritedWidgetOfExactType<_MenuAnchorScope>()?.state;
   }
 
   @override
@@ -957,7 +946,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   void _handleFocusChange() {
     if (!_focusNode.hasPrimaryFocus) {
       // Close any child menus of this button's menu.
-      _anchor?._menuController.closeChildren();
+      MenuController.maybeOf(context)?.closeChildren();
     }
   }
 
@@ -1691,7 +1680,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   bool _isOpenOnFocusEnabled = true;
   MenuController? _internalMenuController;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
-  _MenuAnchorState? get _parent => _anchorState?._parent;
+  _MenuAnchorState? get _parent => _MenuAnchorState._maybeOf(context);
   _MenuAnchorState? get _anchorState => _anchorKey.currentState;
   FocusNode? _internalFocusNode;
   final GlobalKey<_MenuAnchorState> _anchorKey = GlobalKey<_MenuAnchorState>();
@@ -2339,7 +2328,7 @@ class _MenuBarAnchorState extends _MenuAnchorState {
         controller: _menuController,
         child: Builder(
           builder: (BuildContext context) {
-            final bool isOpen = MenuController.maybeOf(context, createDependency: true)!.isOpen;
+            final bool isOpen = MenuController.maybeIsOpenOf(context) ?? false;
             return FocusScope(
               node: _menuScopeNode,
               skipTraversal: !isOpen,
