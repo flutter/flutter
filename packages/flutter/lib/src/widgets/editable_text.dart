@@ -3385,7 +3385,7 @@ class EditableTextState extends State<EditableText>
       // `selection` is the only change.
       SelectionChangedCause cause;
       if (_textInputConnection?.scribbleInProgress ?? false) {
-        cause = SelectionChangedCause.scribble;
+        cause = SelectionChangedCause.stylusHandwriting;
       } else if (_pointOffsetOrigin != null) {
         // For floating cursor selection when force pressing the space bar.
         cause = SelectionChangedCause.forcePress;
@@ -4180,7 +4180,7 @@ class EditableTextState extends State<EditableText>
       case SelectionChangedCause.drag:
       case SelectionChangedCause.forcePress:
       case SelectionChangedCause.longPress:
-      case SelectionChangedCause.scribble:
+      case SelectionChangedCause.stylusHandwriting:
       case SelectionChangedCause.tap:
       case SelectionChangedCause.toolbar:
         requestKeyboard();
@@ -6027,7 +6027,7 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
   @override
   void onScribbleFocus(Offset offset) {
     widget.focusNode.requestFocus();
-    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.scribble);
+    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.stylusHandwriting);
     widget.updateSelectionRects();
   }
 
