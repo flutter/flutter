@@ -87,7 +87,7 @@ void main() {
       expect(endEdge.globalPosition, const Offset(100.0, 100.0));
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
+    });
 
     testWidgets('mouse double click sends select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
@@ -368,7 +368,6 @@ void main() {
         expect(pageController.page, 1.0);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
     );
 
     testWidgets(
@@ -485,7 +484,7 @@ void main() {
         (renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent).type,
         SelectionEventType.endEdgeUpdate,
       );
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
+    });
 
     testWidgets('touch long press sends select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
@@ -1317,7 +1316,6 @@ void main() {
         await tester.pumpAndSettle();
       },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      skip: true, // https://github.com/flutter/flutter/issues/125582.
     );
 
     testWidgets(
@@ -1414,7 +1412,6 @@ void main() {
         await tester.pumpAndSettle();
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
     );
 
     testWidgets('RenderParagraph should invalidate cached bounding boxes', (
@@ -1477,7 +1474,7 @@ void main() {
       // Should select "Good" again.
       expect(paragraph.selections.isEmpty, isFalse);
       expect(paragraph.selections[0], const TextSelection(baseOffset: 25, extentOffset: 29));
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+    });
 
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1737,7 +1734,7 @@ void main() {
       await tester.pump();
       expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 11));
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+    });
 
     testWidgets('mouse can select multiple widgets on double click drag', (
       WidgetTester tester,
@@ -1793,7 +1790,7 @@ void main() {
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+    });
 
     testWidgets(
       'mouse can select multiple widgets on double click drag and return to origin word',
@@ -1862,8 +1859,6 @@ void main() {
 
         await gesture.up();
       },
-      // https://github.com/flutter/flutter/issues/125582.
-      skip: kIsWeb,
     );
 
     testWidgets('mouse can reverse selection across multiple widgets on double click drag', (
@@ -1919,7 +1914,7 @@ void main() {
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 12, extentOffset: 4));
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+    });
 
     testWidgets('mouse can select paragraph-by-paragraph on triple click drag', (
       WidgetTester tester,
@@ -2002,7 +1997,7 @@ void main() {
       await tester.pump();
       expect(paragraph.selections[0], const TextSelection(baseOffset: 257, extentOffset: 0));
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+    });
 
     testWidgets(
       'mouse can select multiple widgets on triple click drag when selecting inside a WidgetSpan',
@@ -2075,7 +2070,6 @@ void main() {
 
         await gesture.up();
       },
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
     );
 
     testWidgets('mouse can select multiple widgets on triple click drag', (
@@ -2158,7 +2152,7 @@ void main() {
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 47));
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+    });
 
     testWidgets(
       'mouse can select multiple widgets on triple click drag and return to origin paragraph',
@@ -2251,7 +2245,6 @@ void main() {
 
         await gesture.up();
       },
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
     );
 
     testWidgets('mouse can reverse selection across multiple widgets on triple click drag', (
@@ -2315,7 +2308,7 @@ void main() {
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 43, extentOffset: 0));
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+    });
 
     testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3684,7 +3677,6 @@ void main() {
         TargetPlatform.linux,
         TargetPlatform.fuchsia,
       }),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
     testWidgets(
@@ -3743,7 +3735,6 @@ void main() {
         TargetPlatform.linux,
         TargetPlatform.fuchsia,
       }),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
     testWidgets(
@@ -3799,7 +3790,6 @@ void main() {
         TargetPlatform.linux,
         TargetPlatform.fuchsia,
       }),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
     testWidgets(
@@ -3848,7 +3838,6 @@ void main() {
         expect(innerParagraph.selections[0], const TextSelection(baseOffset: 6, extentOffset: 9));
       },
       variant: TargetPlatformVariant.only(TargetPlatform.macOS),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
     testWidgets(
@@ -3898,7 +3887,6 @@ void main() {
         expect(tester.takeException(), isNull);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.macOS),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
     testWidgets(
@@ -3949,7 +3937,6 @@ void main() {
         expect(paragraph.selections[0], const TextSelection(baseOffset: 124, extentOffset: 129));
       },
       variant: TargetPlatformVariant.only(TargetPlatform.macOS),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
     testWidgets(
@@ -3999,7 +3986,6 @@ void main() {
         expect(paragraph.selections[0], const TextSelection(baseOffset: 124, extentOffset: 129));
       },
       variant: TargetPlatformVariant.only(TargetPlatform.macOS),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
     testWidgets(
@@ -4053,7 +4039,6 @@ void main() {
         TargetPlatform.linux,
         TargetPlatform.fuchsia,
       }),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
     testWidgets(
@@ -4105,7 +4090,6 @@ void main() {
         TargetPlatform.iOS,
         TargetPlatform.macOS,
       }),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
     testWidgets('mouse can select across bidi text', (WidgetTester tester) async {
@@ -4155,7 +4139,7 @@ void main() {
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
       await gesture.up();
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+    });
 
     testWidgets('long press and drag touch moves selection word by word', (
       WidgetTester tester,
@@ -5516,7 +5500,7 @@ void main() {
     expect(paragraph1.selections, isEmpty);
     expect(paragraph2.selections, isEmpty);
     expect(paragraph3.selections, isEmpty);
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+  });
 
   testWidgets(
     'Text processing actions are added to the toolbar',
