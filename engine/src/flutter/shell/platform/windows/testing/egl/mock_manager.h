@@ -16,7 +16,7 @@ namespace egl {
 /// Mock for the |Manager| base class.
 class MockManager : public flutter::egl::Manager {
  public:
-  MockManager() : Manager(false /*prefer_low_power_gpu*/) {}
+  MockManager() : Manager(GpuPreference::NoPrefernce) {}
 
   MOCK_METHOD(std::unique_ptr<flutter::egl::WindowSurface>,
               CreateWindowSurface,

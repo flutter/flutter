@@ -29,11 +29,16 @@
 namespace flutter {
 namespace egl {
 
+class enum GpuPreference {
+    NoPreference,
+    LowPowerPreference,
+};
+
 // A manager for initializing ANGLE correctly and using it to create and
 // destroy surfaces
 class Manager {
  public:
-  static std::unique_ptr<Manager> Create(bool prefer_low_power_gpu);
+  static std::unique_ptr<Manager> Create(GpuPreference gpu_preference);
 
   virtual ~Manager();
 
@@ -77,14 +82,14 @@ class Manager {
  protected:
   // Creates a new surface manager retaining reference to the passed-in target
   // for the lifetime of the manager.
-  explicit Manager(bool prefer_low_power_gpu);
+  explicit Manager(GpuPreference gpu_preference);
 
  private:
   // Number of active instances of Manager
   static int instance_count_;
 
   // Initialize the EGL display.
-  bool InitializeDisplay(bool prefer_low_power_gpu);
+  bool InitializeDisplay(GpuPreference gpu_preference);
 
   // Initialize the EGL configs.
   bool InitializeConfig();

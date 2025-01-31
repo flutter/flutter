@@ -29,7 +29,8 @@ FlutterProjectBundle::FlutterProjectBundle(
         std::string(properties.dart_entrypoint_argv[i]));
   }
 
-  prefer_low_power_gpu_ = properties.prefer_low_power_gpu;
+  gpu_preference_ =
+      static_cast<FlutterGpuPreference>(properties.gpu_preference);
 
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||

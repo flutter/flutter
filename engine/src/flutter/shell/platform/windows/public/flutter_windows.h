@@ -35,6 +35,11 @@ typedef struct FlutterDesktopEngine* FlutterDesktopEngineRef;
 // The unique identifier for a view.
 typedef int64_t FlutterDesktopViewId;
 
+typedef enum {
+    NoPreference,
+    LowPowerPreference,
+} FlutterDesktopGpuPreference;
+
 // Properties for configuring a Flutter engine instance.
 typedef struct {
   // The path to the flutter_assets folder for the application to be run.
@@ -68,8 +73,8 @@ typedef struct {
   // to FlutterDesktopEngineCreate.
   const char** dart_entrypoint_argv;
 
-  // Bool for requesting preference for low power GPU.
-  bool prefer_low_power_gpu;
+  // GPU choice preference
+  FlutterDesktopGpuPreference gpu_preference;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========

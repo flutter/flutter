@@ -17,6 +17,11 @@ namespace flutter {
 using UniqueAotDataPtr =
     std::unique_ptr<_FlutterEngineAOTData, FlutterEngineCollectAOTDataFnPtr>;
 
+class enum FlutterGpuPreference {
+    NoPreference,
+    LowPowerPreference,
+};
+
 // The data associated with a Flutter project needed to run it in an engine.
 class FlutterProjectBundle {
  public:
@@ -60,7 +65,7 @@ class FlutterProjectBundle {
   }
 
   // Returns true if low power GPU was requested.
-  bool prefer_low_power_gpu() const { return prefer_low_power_gpu_; }
+  FlutterGpuPreference gpu_preference() const { return gpu_preference_; }
 
  private:
   std::filesystem::path assets_path_;
@@ -79,7 +84,7 @@ class FlutterProjectBundle {
   std::vector<std::string> engine_switches_;
 
   // Preference for low power GPU.
-  bool prefer_low_power_gpu_;
+  FlutterGpuPreference gpu_preference_;
 };
 
 }  // namespace flutter

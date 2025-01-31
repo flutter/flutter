@@ -14,19 +14,19 @@ namespace egl {
 
 int Manager::instance_count_ = 0;
 
-std::unique_ptr<Manager> Manager::Create(bool prefer_low_power_gpu) {
+std::unique_ptr<Manager> Manager::Create(GpuPreference gpu_preference) {
   std::unique_ptr<Manager> manager;
-  manager.reset(new Manager(prefer_low_power_gpu));
+  manager.reset(new Manager(gpu_preference));
   if (!manager->IsValid()) {
     return nullptr;
   }
   return std::move(manager);
 }
 
-Manager::Manager(bool prefer_low_power_gpu) {
+Manager::Manager(GpuPreference gpu_preference) {
   ++instance_count_;
 
-  if (!InitializeDisplay(prefer_low_power_gpu)) {
+  if (!InitializeDisplay(gpu_preference)) {
     return;
   }
 
@@ -46,12 +46,12 @@ Manager::~Manager() {
   --instance_count_;
 }
 
-bool Manager::InitializeDisplay(bool prefer_low_power_gpu) {
+bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
   // If the request for a low power GPU is provided,
   // we will attempt to select GPU explicitly, via ANGLE extension
   // that allows to specify the GPU to use via LUID.
   std::optional<LUID> luid = std::nullopt;
-  if (prefer_low_power_gpu) {
+  if (gpu_preference == GpuPreference::LowPowerPreference) {
     luid = GetLowPowerGpuLuid();
   }
 
@@ -128,7 +128,7 @@ bool Manager::InitializeDisplay(bool prefer_low_power_gpu) {
   std::vector<const EGLint*> display_attributes_configs;
 
   if (luid) {
-    // If low power GPU is requested, prioritize low power GPU's LUID.
+    // If LUID value is present, obtain an adapter with that luid.
     display_attributes_configs.push_back(d3d11_display_attributes_with_luid);
   }
   display_attributes_configs.push_back(d3d11_display_attributes);
