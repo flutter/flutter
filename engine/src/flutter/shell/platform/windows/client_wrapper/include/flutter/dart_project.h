@@ -72,7 +72,7 @@ class DartProject {
   }
 
   // Sets the request to use low power gpu for flutter engine.
-  bool set_prefer_low_power_gpu(bool prefer_low_power_gpu) {
+  void set_prefer_low_power_gpu(bool prefer_low_power_gpu) {
     prefer_low_power_gpu_ = prefer_low_power_gpu;
   }
 
@@ -104,7 +104,7 @@ class DartProject {
   // The list of arguments to pass through to the Dart entrypoint.
   std::vector<std::string> dart_entrypoint_arguments_;
   // True if the preference for low power GPU is requested.
-  bool prefer_low_power_gpu_;
+  bool prefer_low_power_gpu_ = false;
 };
 
 }  // namespace flutter
