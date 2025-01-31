@@ -6,6 +6,7 @@ package io.flutter.embedding.engine;
 
 import static io.flutter.Build.API_LEVELS;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
