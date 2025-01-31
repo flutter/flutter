@@ -161,7 +161,7 @@ class _RawMenuAnchorGroupExampleState extends State<RawMenuAnchorGroupExample> {
   }
 }
 
-class CustomSubmenu extends StatelessWidget {
+class CustomSubmenu extends StatefulWidget {
   const CustomSubmenu({
     super.key,
     required this.children,
@@ -181,9 +181,17 @@ class CustomSubmenu extends StatelessWidget {
   };
 
   @override
+  State<CustomSubmenu> createState() => _CustomSubmenuState();
+}
+
+class _CustomSubmenuState extends State<CustomSubmenu> {
+  final MenuController menuController = MenuController();
+
+  @override
   Widget build(BuildContext context) {
     return RawMenuAnchor(
-      childFocusNode: focusNode,
+      controller: menuController,
+      childFocusNode: widget.focusNode,
       overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
         return Positioned(
           top: info.anchorRect.bottom + 4,
@@ -210,11 +218,11 @@ class CustomSubmenu extends StatelessWidget {
                       boxShadow: kElevationToShadow[4],
                     ),
                     child: Shortcuts(
-                      shortcuts: _shortcuts,
+                      shortcuts: CustomSubmenu._shortcuts,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: children,
+                        children: widget.children,
                       ),
                     ),
                   ),
@@ -224,7 +232,7 @@ class CustomSubmenu extends StatelessWidget {
           ),
         );
       },
-      child: anchor,
+      child: widget.anchor,
     );
   }
 }

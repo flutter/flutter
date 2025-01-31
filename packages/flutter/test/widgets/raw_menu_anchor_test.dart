@@ -1630,8 +1630,10 @@ void main() {
   // menu or traverses its items. By default, we let the user choose whether
   // to close the menu or traverse its items.
   testWidgets('Tab traversal is not handled.', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: Tag.b.focusNode);
-    addTearDown(focusNode.dispose);
+    final FocusNode bFocusNode = FocusNode(debugLabel: Tag.b.focusNode);
+    final FocusNode bbFocusNode = FocusNode(debugLabel: Tag.b.b.focusNode);
+    addTearDown(bFocusNode.dispose);
+    addTearDown(bbFocusNode.dispose);
     final List<Intent> invokedIntents = <Intent>[];
 
     await tester.pumpWidget(
@@ -1659,15 +1661,14 @@ void main() {
                   children: <Widget>[
                     Button.tag(Tag.a),
                     Menu(
-                      focusNode: focusNode,
                       menuPanel: Panel(
                         children: <Widget>[
                           Button.tag(Tag.b.a),
-                          Button.tag(Tag.b.b),
+                          Button.tag(Tag.b.b, focusNode: bbFocusNode),
                           Button.tag(Tag.b.c),
                         ],
                       ),
-                      child: AnchorButton(Tag.b, focusNode: focusNode),
+                      child: AnchorButton(Tag.b, focusNode: bFocusNode),
                     ),
                     Button.tag(Tag.c),
                   ],
@@ -1681,8 +1682,7 @@ void main() {
 
     listenForFocusChanges();
 
-    // Open overlay and focus first menu item
-    focusNode.requestFocus();
+    bFocusNode.requestFocus();
     await tester.pump();
 
     expect(focusedMenu, equals(Tag.b.focusNode));
@@ -1702,10 +1702,7 @@ void main() {
     // Open and move focus to nested menu
     await tester.tap(find.text(Tag.b.text));
     await tester.pump();
-    focusNode.requestFocus();
-    await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    bbFocusNode.requestFocus();
     await tester.pump();
 
     expect(focusedMenu, equals(Tag.b.b.focusNode));
