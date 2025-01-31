@@ -130,7 +130,7 @@ sealed class _DebugSemanticsRoleChecks {
       return null;
     }
 
-    if (!data.hasFlag(SemanticsFlag.hasSelectedState)) {
+    if (!data.hasFlag(SemanticsFlag.hasEnabledState)) {
       if (!data.hasAction(SemanticsAction.tap)) {
         return FlutterError('A tab must have a tap action');
       }
