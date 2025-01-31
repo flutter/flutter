@@ -128,7 +128,7 @@ bool Manager::InitializeDisplay(bool prefer_low_power_gpu) {
   std::vector<const EGLint*> display_attributes_configs;
 
   if (luid) {
-    // If low power GPU is requested, provide either low power GPU or SW renderer.
+    // If low power GPU is requested, prioritize low power GPU's LUID.
     display_attributes_configs.push_back(d3d11_display_attributes_with_luid);
   }
   display_attributes_configs.push_back(d3d11_display_attributes);
