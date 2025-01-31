@@ -402,4 +402,55 @@ void main() {
     controller.hide();
     expect(controller.isVisible, isFalse);
   });
+
+  test('showing a controller with empty items', () {
+    // Create an active connection, which is required to show the system menu.
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    final List<List<IOSSystemContextMenuItemData>> itemsReceived =
+        <List<IOSSystemContextMenuItemData>>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall methodCall) async {
+        switch (methodCall.method) {
+          case 'ContextMenu.showSystemContextMenu':
+            final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
+            final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
+            final List<IOSSystemContextMenuItemData> lastItems =
+                untypedItems.map((dynamic value) {
+                  final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                  return systemContextMenuItemDataFromJson(itemJson);
+                }).toList();
+            itemsReceived.add(lastItems);
+        }
+        return;
+      },
+    );
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      );
+    });
+
+    final SystemContextMenuController controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    expect(controller.isVisible, isFalse);
+
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[];
+
+    expect(() {
+      controller.show(rect, items);
+    }, throwsAssertionError);
+    expect(controller.isVisible, isFalse);
+    expect(itemsReceived, hasLength(0));
+  });
 }
