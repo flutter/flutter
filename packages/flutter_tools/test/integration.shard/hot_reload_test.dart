@@ -158,7 +158,8 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     isolate = await flutter.waitForPause();
     expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
     if (!chrome) {
-      // TODO(srujzs): Implement event messages for the web.
+      // TODO(https://github.com/flutter/flutter/issues/162500): Implement paused event messages for
+      // the web.
       printOnFailure('waiting for debugger message...');
       await sawDebuggerPausedMessage.future;
     }

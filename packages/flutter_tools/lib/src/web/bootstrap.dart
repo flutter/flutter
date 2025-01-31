@@ -257,9 +257,8 @@ $_simpleLoaderScript
     // that need to be hot reloaded. This is read in DWDS when a hot reload is
     // triggered.
     // TODO(srujzs): Ideally, this should be passed to the
-    // `FrontendServerDdcLibraryBundleStrategyProvider`, but the injected client
-    // in DWDS would require conditionally parsing args so it can then be passed
-    // to the code that calls `hotReload`. Maybe it's worth it.
+    // `FrontendServerDdcLibraryBundleStrategyProvider` instead. See
+    // https://github.com/dart-lang/webdev/issues/2584 for more details.
     let reloadScripts = currentUri + '.reloadScripts';
     window.\$reloadScriptsPath = reloadScripts;
 
