@@ -6,11 +6,16 @@ import 'dart:io' as io show IOOverrides;
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 
 import '../../src/common.dart';
@@ -23,11 +28,19 @@ void main() {
   late Directory tempDir;
   late LoggingProcessManager loggingProcessManager;
   late FakeStdio mockStdio;
+  late Logger logger;
+  late FileSystem fs;
+  late BotDetector botDetector;
+  late Platform platform;
 
   setUp(() {
     loggingProcessManager = LoggingProcessManager();
-    tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
+    logger = BufferLogger.test();
+    fs = LocalFileSystem.test(signals: Signals.test());
+    botDetector = const FakeBotDetector(false);
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     mockStdio = FakeStdio();
+    platform = const LocalPlatform();
   });
 
   tearDown(() {
@@ -35,7 +48,7 @@ void main() {
   });
 
   Future<Directory> createRootProject() async {
-    return globals.fs.directory(await createProject(tempDir, arguments: <String>['--pub']));
+    return fs.directory(await createProject(tempDir, arguments: <String>['--pub']));
   }
 
   Directory widgetPreviewScaffoldFromRootProject({required Directory rootProject}) {
@@ -43,7 +56,14 @@ void main() {
   }
 
   Future<void> runWidgetPreviewCommand(List<String> arguments) async {
-    final CommandRunner<void> runner = createTestCommandRunner(WidgetPreviewCommand());
+    final CommandRunner<void> runner = createTestCommandRunner(
+      WidgetPreviewCommand(
+        logger: logger,
+        fs: fs,
+        projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
+        cache: Cache.test(processManager: loggingProcessManager, platform: platform),
+      ),
+    );
     await runner.run(<String>['widget-preview', ...arguments]);
   }
 
@@ -58,7 +78,7 @@ void main() {
       if (rootProject != null) rootProject.path,
     ]);
     final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
-      rootProject: rootProject ?? globals.fs.currentDirectory,
+      rootProject: rootProject ?? fs.currentDirectory,
     );
     expect(widgetPreviewScaffoldDir, exists);
     expect(
@@ -70,7 +90,7 @@ void main() {
   Future<void> cleanWidgetPreview({required Directory rootProject}) async {
     await runWidgetPreviewCommand(<String>['clean', rootProject.path]);
     expect(
-      globals.fs
+      fs
           .directory(rootProject)
           .childDirectory('.dart_tool')
           .childDirectory('widget_preview_scaffold'),
@@ -117,11 +137,11 @@ void main() {
       overrides: <Type, Generator>{
         Pub:
             () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
+              fileSystem: fs,
+              logger: logger,
+              processManager: loggingProcessManager,
+              botDetector: botDetector,
+              platform: platform,
               stdio: mockStdio,
             ),
       },
@@ -139,11 +159,11 @@ void main() {
       overrides: <Type, Generator>{
         Pub:
             () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
+              fileSystem: fs,
+              logger: logger,
+              processManager: loggingProcessManager,
+              botDetector: botDetector,
+              platform: platform,
               stdio: mockStdio,
             ),
       },
@@ -180,11 +200,11 @@ import 'package:flutter_project/foo.dart' as _i1;import 'package:widget_preview/
       overrides: <Type, Generator>{
         Pub:
             () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
+              fileSystem: fs,
+              logger: logger,
+              processManager: loggingProcessManager,
+              botDetector: botDetector,
+              platform: platform,
               stdio: mockStdio,
             ),
       },
@@ -210,16 +230,16 @@ import 'package:flutter_project/foo.dart' as _i1;import 'package:widget_preview/
           // Try to execute using the CWD.
           await startWidgetPreview(rootProject: null);
           expect(generatedFile.readAsStringSync(), expectedGeneratedFileContents);
-        }, getCurrentDirectory: () => globals.fs.directory(rootProject));
+        }, getCurrentDirectory: () => fs.directory(rootProject));
       },
       overrides: <Type, Generator>{
         Pub:
             () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
+              fileSystem: fs,
+              logger: logger,
+              processManager: loggingProcessManager,
+              botDetector: botDetector,
+              platform: platform,
               stdio: mockStdio,
             ),
       },
@@ -235,11 +255,11 @@ import 'package:flutter_project/foo.dart' as _i1;import 'package:widget_preview/
       overrides: <Type, Generator>{
         Pub:
             () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
+              fileSystem: fs,
+              logger: logger,
+              processManager: loggingProcessManager,
+              botDetector: botDetector,
+              platform: platform,
               stdio: mockStdio,
             ),
       },
@@ -288,11 +308,11 @@ import 'package:flutter_project/foo.dart' as _i1;import 'package:widget_preview/
         ProcessManager: () => loggingProcessManager,
         Pub:
             () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
+              fileSystem: fs,
+              logger: logger,
+              processManager: loggingProcessManager,
+              botDetector: botDetector,
+              platform: platform,
               stdio: mockStdio,
             ),
       },

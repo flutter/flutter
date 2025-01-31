@@ -16,7 +16,6 @@ import 'package:watcher/watcher.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
-import '../globals.dart' as globals;
 import 'preview_code_generator.dart';
 
 /// A path / URI pair used to map previews to a file.
@@ -30,8 +29,9 @@ typedef PreviewPath = ({String path, Uri uri});
 typedef PreviewMapping = Map<PreviewPath, List<String>>;
 
 class PreviewDetector {
-  PreviewDetector({required this.logger, required this.onChangeDetected});
+  PreviewDetector({required this.fs, required this.logger, required this.onChangeDetected});
 
+  final FileSystem fs;
   final Logger logger;
   final void Function(PreviewMapping) onChangeDetected;
   StreamSubscription<WatchEvent>? _fileWatcher;
@@ -55,7 +55,7 @@ class PreviewDetector {
       }
       logger.printStatus('Detected change in $eventPath.');
       final PreviewMapping filePreviewsMapping = findPreviewFunctions(
-        globals.fs.file(Uri.file(event.path)),
+        fs.file(Uri.file(event.path)),
       );
       final bool hasExistingPreviews =
           _pathToPreviews.keys.where((PreviewPath e) => e.path == event.path).isNotEmpty;
