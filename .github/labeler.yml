@@ -229,6 +229,15 @@ team-infra:
     - any-glob-to-any-file:
       - docs/infra/**/*
 
+team-ios:
+  - changed-files:
+    - any-glob-to-any-file:
+      - engine/src/flutter/shell/platform/darwin/common/**/*
+      - engine/src/flutter/shell/platform/darwin/ios/**/*
+      - packages/flutter_tools/lib/src/ios/**/*
+      - packages/flutter_tools/templates/module/ios/**/*
+      - packages/flutter_tools/*xcode*
+
 team-release:
   - changed-files:
     - any-glob-to-any-file:
