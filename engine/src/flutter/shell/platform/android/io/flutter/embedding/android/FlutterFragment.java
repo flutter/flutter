@@ -105,7 +105,7 @@ public class FlutterFragment extends Fragment
    * <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For more,
    * see {@link android.view.View#findViewById}.
    */
-  public static final int FLUTTER_VIEW_ID = 1;
+  public static final int FLUTTER_VIEW_ID = View.generateViewId();
 
   private static final String TAG = "FlutterFragment";
 
@@ -1514,7 +1514,8 @@ public class FlutterFragment extends Fragment
   public SensitiveContentPlugin provideSensitiveContentPlugin(
       @Nullable Activity activity, @NonNull FlutterEngine flutterEngine) {
     if (activity != null) {
-      return new SensitiveContentPlugin(getActivity(), flutterEngine.getSensitiveContentChannel());
+      return new SensitiveContentPlugin(
+          activity, FLUTTER_VIEW_ID, flutterEngine.getSensitiveContentChannel());
     } else {
       return null;
     }

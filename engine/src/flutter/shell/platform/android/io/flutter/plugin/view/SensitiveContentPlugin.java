@@ -23,40 +23,35 @@ import io.flutter.plugin.common.MethodChannel;
 public class SensitiveContentPlugin
     implements SensitiveContentChannel.SensitiveContentMethodHandler {
 
-  private final Activity mflutterActivity;
+  private final int mFlutterViewId;
+  private final Activity mFlutterActivity;
   private final SensitiveContentChannel mSensitiveContentChannel;
 
   public SensitiveContentPlugin(
-      @NonNull Activity flutterActivity, @NonNull SensitiveContentChannel sensitiveContentChannel) {
-    mflutterActivity = flutterActivity;
+      @NonNull Activity activity,
+      @NonNull int flutterViewId,
+      @NonNull SensitiveContentChannel sensitiveContentChannel) {
+    mFlutterActivity = activity;
+    mFlutterViewId = flutterViewId;
     mSensitiveContentChannel = sensitiveContentChannel;
 
     mSensitiveContentChannel.setSensitiveContentMethodHandler(this);
   }
 
   /**
-   * Sets content sensitivity level of the Android {@code View} with the specified {@code
-   * flutterViewId} to the level specified by {@requestedContentSensitivity}.
+   * Sets content sensitivity level of the Android {@code View} associated with this plugin's {@code
+   * mFlutterViewId} to the level specified by {@requestedContentSensitivity}.
    */
   @Override
   public void setContentSensitivity(
-      @NonNull int flutterViewId,
-      @NonNull int requestedContentSensitivity,
-      @NonNull MethodChannel.Result result) {
+      @NonNull int requestedContentSensitivity, @NonNull MethodChannel.Result result) {
     if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
       // This feature is only available on > API 35.
       return;
     }
 
-    final View flutterView = mflutterActivity.findViewById(flutterViewId);
-    if (flutterView == null) {
-      result.error(
-          "error",
-          "Requested Flutter View with ID "
-              + flutterViewId
-              + " to set content sensitivty of was not found.",
-          null);
-    }
+    final View flutterView = mFlutterActivity.findViewById(mFlutterViewId);
+    final int initialContentSensitivity = flutterView.getContentSensitivity();
 
     // Set requestedContentSensitivity on the requested View.
     flutterView.setContentSensitivity(requestedContentSensitivity);
@@ -64,9 +59,8 @@ public class SensitiveContentPlugin
     // Invalidate the View to force a redraw if we require that the screen
     // become unobscured, which is the case where the View was previously
     // marked sensitive but now is no longer.
-    final int currentContentSensitivity = flutterView.getContentSensitivity();
     final boolean shouldInvalidateView =
-        currentContentSensitivity == View.CONTENT_SENSITIVITY_SENSITIVE
+        initialContentSensitivity == View.CONTENT_SENSITIVITY_SENSITIVE
             && requestedContentSensitivity != View.CONTENT_SENSITIVITY_SENSITIVE;
     if (shouldInvalidateView) {
       flutterView.invalidate();
@@ -76,27 +70,17 @@ public class SensitiveContentPlugin
   }
 
   /**
-   * Gets content sensitivity level of the Android {@code View} with the specified {@code
-   * flutterViewId} to the level specified by {@requestedContentSensitivity}.
+   * Gets content sensitivity level of the Android {@code View} associated with this plugin's {@code
+   * mFlutterViewId}.
    */
   @Override
-  public void getContentSensitivity(
-      @NonNull int flutterViewId, @NonNull MethodChannel.Result result) {
+  public void getContentSensitivity(@NonNull MethodChannel.Result result) {
     if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
       // This feature is only available on > API 35.
       return;
     }
 
-    final View flutterView = mflutterActivity.findViewById(flutterViewId);
-    if (flutterView == null) {
-      result.error(
-          "error",
-          "Requested Flutter View with ID "
-              + flutterViewId
-              + " to set content sensitivty of was not found.",
-          null);
-    }
-
+    final View flutterView = mFlutterActivity.findViewById(mFlutterViewId);
     final int currentContentSensitivity = flutterView.getContentSensitivity();
     result.success(currentContentSensitivity);
   }
