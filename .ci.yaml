@@ -1494,7 +1494,6 @@ targets:
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"}
-
         ]
       shard: tool_tests
       subshard: commands

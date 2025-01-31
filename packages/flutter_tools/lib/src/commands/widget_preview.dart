@@ -301,13 +301,28 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     assert(platform.isLinux || platform.isMacOS || platform.isWindows);
     String path;
     if (platform.isMacOS) {
-      path = 'build/macos/Build/Products/Debug/widget_preview_scaffold.app';
+      path = fs.path.join(
+        getMacOSBuildDirectory(),
+        'Build/Products/Debug/widget_preview_scaffold.app',
+      );
     } else if (platform.isLinux) {
-      // TODO(bkonyi): verify on Linux
-      path = 'build/linux/x64/debug/bundle/widget_preview_scaffold';
+      path = fs.path.join(
+        getLinuxBuildDirectory(
+          os.hostPlatform == HostPlatform.linux_x64
+              ? TargetPlatform.linux_x64
+              : TargetPlatform.linux_arm64,
+        ),
+        'debug/bundle/widget_preview_scaffold',
+      );
     } else if (platform.isWindows) {
-      // TODO(bkonyi): verify on Windows
-      path = 'build/windows/x64/runner/Debug/widget_preview_scaffold.exe';
+      path = fs.path.join(
+        getWindowsBuildDirectory(
+          os.hostPlatform == HostPlatform.windows_x64
+              ? TargetPlatform.windows_x64
+              : TargetPlatform.windows_arm64,
+        ),
+        'runner/Debug/widget_preview_scaffold.exe',
+      );
     } else {
       throw StateError('Unknown OS');
     }
