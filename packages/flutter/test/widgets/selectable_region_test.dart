@@ -1316,6 +1316,7 @@ void main() {
         await tester.pumpAndSettle();
       },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+      skip: !kIsWeb, // [intended] This test verifies web behavior.
     );
 
     testWidgets(
