@@ -26,6 +26,9 @@ INTERNAL NOTE
 -->
 ## Flutter 3.27 Changes
 
+### [3.27.4](https://github.com/flutter/flutter/releases/tag/3.27.4)
+- [flutter/162132](https://github.com/flutter/flutter/pull/162132) On all platforms DropdownMenu's menuChildren might be placed somewhere far from menuAnchor.
+
 ### [3.27.3](https://github.com/flutter/flutter/releases/tag/3.27.3)
 - [flutter/159212](https://github.com/flutter/flutter/issues/159212) Track (via Google Analytics) if the Dart AOT Android "Deferred Components" feature is being meaningfully used.
 - [flutter/160631](https://github.com/flutter/flutter/issues/160631) Fixes an issue with Material 3 Tab Bar animations.
