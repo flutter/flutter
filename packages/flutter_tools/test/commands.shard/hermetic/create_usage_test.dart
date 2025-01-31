@@ -188,35 +188,22 @@ void main() {
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'module',
-        );
+        expect((await command.usageValues).commandCreateProjectType, 'module');
+
         await runner.run(<String>['create', '--no-pub', '--template=app', 'testy1']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'app',
-        );
+        expect((await command.usageValues).commandCreateProjectType, 'app');
+
         await runner.run(<String>['create', '--no-pub', '--template=package', 'testy3']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'package',
-        );
+        expect((await command.usageValues).commandCreateProjectType, 'package');
+
         await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy4']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'plugin',
-        );
+        expect((await command.usageValues).commandCreateProjectType, 'plugin');
+
         await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', 'testy5']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'plugin_ffi',
-        );
+        expect((await command.usageValues).commandCreateProjectType, 'plugin_ffi');
+
         await runner.run(<String>['create', '--no-pub', '--template=package_ffi', 'testy6']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createProjectType'],
-          'package_ffi',
-        );
+        expect((await command.usageValues).commandCreateProjectType, 'package_ffi');
       }),
       overrides: <Type, Generator>{Java: () => FakeJava()},
     );
@@ -228,10 +215,7 @@ void main() {
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'swift',
-        );
+        expect((await command.usageValues).commandCreateIosLanguage, 'swift');
 
         await runner.run(<String>[
           'create',
@@ -240,10 +224,7 @@ void main() {
           '--ios-language=objc',
           'testy',
         ]);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'objc',
-        );
+        expect((await command.usageValues).commandCreateIosLanguage, 'objc');
       }),
       overrides: <Type, Generator>{Java: () => FakeJava()},
     );
@@ -255,10 +236,7 @@ void main() {
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createAndroidLanguage'],
-          'kotlin',
-        );
+        expect((await command.usageValues).commandCreateAndroidLanguage, 'kotlin');
 
         await runner.run(<String>[
           'create',
@@ -267,10 +245,7 @@ void main() {
           '--android-language=java',
           'testy',
         ]);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createAndroidLanguage'],
-          'java',
-        );
+        expect((await command.usageValues).commandCreateAndroidLanguage, 'java');
       }),
       overrides: <Type, Generator>{Java: () => FakeJava()},
     );
