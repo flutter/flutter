@@ -53,11 +53,7 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     final Completer<void> completer = Completer<void>();
-    late final StreamSubscription<String> sub;
-    sub = process!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
-      String msg,
-    ) {
-      print('STDOUT: $msg');
+    process!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
       if (completer.isCompleted) {
         return;
       }
@@ -67,10 +63,6 @@ void main() {
       if (i == expectedMessages.length) {
         completer.complete();
       }
-    });
-
-    process!.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
-      print('STDERR: $msg');
     });
 
     await completer.future;
