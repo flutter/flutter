@@ -654,7 +654,7 @@ class _CupertinoDownGestureDetectorState<T> extends State<_CupertinoDownGestureD
     assert(mounted);
     assert(_downGestureController != null);
     _downGestureController!.dragUpdate(
-      // Devide by size of the sheet.
+      // Divide by size of the sheet.
       details.primaryDelta! / (context.size!.height - (context.size!.height * _kTopGapRatio)),
     );
   }

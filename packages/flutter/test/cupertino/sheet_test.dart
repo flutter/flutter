@@ -7,6 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/navigator_utils.dart';
 
+// Matches _kTopGapRatio in cupertino/sheet.dart.
+const double _kTopGapRatio = 0.08;
+
 void main() {
   testWidgets('Sheet route does not cover the whole screen', (WidgetTester tester) async {
     final GlobalKey scaffoldKey = GlobalKey();
@@ -683,7 +686,7 @@ void main() {
     await tester.tap(find.text('Push Page 2'));
     await tester.pumpAndSettle();
 
-    expect(tester.getSize(find.byType(Container)).height, 600.0 - (600.0 * 0.08));
+    expect(tester.getSize(find.byType(Container)).height, 600.0 - (600.0 * _kTopGapRatio));
   });
 
   testWidgets('nested navbars remove MediaQuery top padding', (WidgetTester tester) async {
@@ -700,7 +703,7 @@ void main() {
             navigationBar: CupertinoNavigationBar(
               key: appBarKey,
               middle: const Text('Navbar'),
-              backgroundColor: Color(0xFFF8F8F8),
+              backgroundColor: const Color(0xFFF8F8F8),
             ),
             child: Center(
               child: Column(
