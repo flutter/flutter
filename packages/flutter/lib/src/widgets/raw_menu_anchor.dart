@@ -120,14 +120,18 @@ typedef RawMenuAnchorChildBuilder =
 //
 // Used to notify anchor descendants when the menu opens and closes, and to
 // access the anchor's controller.
-class _RawMenuAnchorScope extends InheritedWidget {
-  const _RawMenuAnchorScope({required this.isOpen, required this.controller, required super.child});
+class _MenuControllerScope extends InheritedWidget {
+  const _MenuControllerScope({
+    required this.isOpen,
+    required this.controller,
+    required super.child,
+  });
 
   final bool isOpen;
   final MenuController controller;
 
   @override
-  bool updateShouldNotify(_RawMenuAnchorScope oldWidget) {
+  bool updateShouldNotify(_MenuControllerScope oldWidget) {
     return isOpen != oldWidget.isOpen || controller != oldWidget.controller;
   }
 }
@@ -463,7 +467,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   @override
   @nonVirtual
   Widget build(BuildContext context) {
-    return _RawMenuAnchorScope(
+    return _MenuControllerScope(
       isOpen: isOpen,
       controller: menuController,
       child: Actions(
@@ -843,15 +847,21 @@ class MenuController {
   /// Returns the [MenuController] of the ancestor [RawMenuAnchor] nearest to
   /// the given `context`, if one exists. Otherwise, returns null.
   ///
-  /// If `createDependency` is true, then the provided [BuildContext] will
-  /// rebuild when the menu opens and closes, or when the [MenuController]
-  /// changes.
-  static MenuController? maybeOf(BuildContext context, {bool createDependency = false}) {
-    if (createDependency) {
-      return context.dependOnInheritedWidgetOfExactType<_RawMenuAnchorScope>()?.controller;
-    } else {
-      return context.getInheritedWidgetOfExactType<_RawMenuAnchorScope>()?.controller;
-    }
+  /// This method will not establish a dependency relationship, so the provided
+  /// `context` will not rebuild when the menu opens and closes, nor when the
+  /// [MenuController] changes.
+  static MenuController? maybeOf(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<_MenuControllerScope>()?.controller;
+  }
+
+  /// Returns the [MenuController] of the ancestor [RawMenuAnchor] nearest to
+  /// the given `context`, if one exists. Otherwise, returns null.
+  ///
+  /// This method will establish a dependency relationship, so the provided
+  /// `context` will rebuild when the menu opens and closes, and when the
+  /// [MenuController] changes.
+  static bool? maybeIsOpenOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_MenuControllerScope>()?.isOpen;
   }
 
   @override

@@ -510,14 +510,14 @@ void main() {
     expect(find.text(Tag.b.a.text), findsOneWidget);
   });
 
-  testWidgets(
-    'MenuController.maybeOf notifies dependents on open and close when createDependency is true',
+ testWidgets(
+    'MenuController.maybeIsOpenOf notifies dependents when isOpen changes',
     (WidgetTester tester) async {
       final MenuController controller = MenuController();
       final MenuController nestedController = MenuController();
-      MenuController? panelController;
-      MenuController? overlayController;
-      MenuController? anchorController;
+      bool? panelIsOpen;
+      bool? overlayIsOpen;
+      bool? anchorIsOpen;
       int panelBuilds = 0;
       int anchorBuilds = 0;
       int overlayBuilds = 0;
@@ -530,7 +530,7 @@ void main() {
                 // Panel context.
                 Builder(
                   builder: (BuildContext context) {
-                    panelController = MenuController.maybeOf(context, createDependency: true);
+                    panelIsOpen = MenuController.maybeIsOpenOf(context);
                     panelBuilds += 1;
                     return Text(Tag.a.text);
                   },
@@ -542,10 +542,7 @@ void main() {
                       // Overlay context.
                       Builder(
                         builder: (BuildContext context) {
-                          overlayController = MenuController.maybeOf(
-                            context,
-                            createDependency: true,
-                          );
+                          overlayIsOpen = MenuController.maybeIsOpenOf(context);
                           overlayBuilds += 1;
                           return Text(Tag.b.a.a.text);
                         },
@@ -560,7 +557,7 @@ void main() {
                   // Anchor context.
                   child: Builder(
                     builder: (BuildContext context) {
-                      anchorController = MenuController.maybeOf(context, createDependency: true);
+                      anchorIsOpen = MenuController.maybeIsOpenOf(context);
                       anchorBuilds += 1;
                       return Text(Tag.b.a.text);
                     },
@@ -572,8 +569,8 @@ void main() {
         ),
       );
 
-      expect(panelController!.isOpen, isFalse);
-      expect(anchorController!.isOpen, isFalse);
+      expect(panelIsOpen, isFalse);
+      expect(anchorIsOpen, isFalse);
       expect(panelBuilds, equals(1));
       expect(anchorBuilds, equals(1));
       expect(overlayBuilds, equals(0));
@@ -581,9 +578,9 @@ void main() {
       controller.open();
       await tester.pump();
 
-      expect(panelController!.isOpen, isTrue);
-      expect(anchorController!.isOpen, isTrue);
-      expect(overlayController!.isOpen, isTrue);
+      expect(panelIsOpen, isTrue);
+      expect(anchorIsOpen, isTrue);
+      expect(overlayIsOpen, isTrue);
       expect(panelBuilds, equals(2));
       expect(anchorBuilds, equals(2));
       expect(overlayBuilds, equals(1));
@@ -592,9 +589,9 @@ void main() {
       await tester.pump();
 
       // No new builds should have occurred since all controllers are already open.
-      expect(panelController!.isOpen, isTrue);
-      expect(anchorController!.isOpen, isTrue);
-      expect(overlayController!.isOpen, isTrue);
+      expect(panelIsOpen, isTrue);
+      expect(anchorIsOpen, isTrue);
+      expect(overlayIsOpen, isTrue);
       expect(panelBuilds, equals(2));
       expect(anchorBuilds, equals(2));
       expect(overlayBuilds, equals(1));
@@ -602,199 +599,19 @@ void main() {
       controller.close();
       await tester.pump();
 
-      expect(panelController!.isOpen, isFalse);
-      expect(anchorController!.isOpen, isFalse);
-      expect(overlayController!.isOpen, isFalse);
+      expect(panelIsOpen, isFalse);
+      expect(anchorIsOpen, isFalse);
+
+      // Will be true because builder cannot rebuild when the menu is closed.
+      expect(overlayIsOpen, isTrue);
       expect(panelBuilds, equals(3));
       expect(anchorBuilds, equals(3));
       expect(overlayBuilds, equals(1));
     },
   );
 
-  testWidgets('MenuController.maybeOf notifies dependents when set if createDependency is true', (
-    WidgetTester tester,
-  ) async {
-    final GlobalKey anchorKey = GlobalKey();
-    MenuController? panelController;
-    MenuController? overlayController;
-    MenuController? anchorController;
-    int panelBuilds = 0;
-    int anchorBuilds = 0;
-    int overlayBuilds = 0;
-
-    Widget buildAnchor({MenuController? panel, MenuController? overlay}) {
-      return App(
-        RawMenuAnchorGroup(
-          controller: panel,
-          child: Column(
-            children: <Widget>[
-              // Panel context.
-              Builder(
-                builder: (BuildContext context) {
-                  panelController = MenuController.maybeOf(context, createDependency: true);
-                  panelBuilds += 1;
-                  return Text(Tag.a.text);
-                },
-              ),
-              Menu(
-                controller: overlay,
-                menuPanel: Panel(
-                  children: <Widget>[
-                    // Overlay context.
-                    Builder(
-                      builder: (BuildContext context) {
-                        overlayController = MenuController.maybeOf(context, createDependency: true);
-                        overlayBuilds += 1;
-                        return Text(Tag.b.a.a.text);
-                      },
-                    ),
-                  ],
-                ),
-                // Anchor context.
-                child: Builder(
-                  key: anchorKey,
-                  builder: (BuildContext context) {
-                    anchorController = MenuController.maybeOf(context, createDependency: true);
-                    anchorBuilds += 1;
-                    return Text(Tag.b.a.text);
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildAnchor());
-
-    expect(panelController, isNot(controller));
-    expect(anchorController, isNot(controller));
-
-    await tester.pumpWidget(buildAnchor(panel: controller));
-
-    expect(panelController, equals(controller));
-    expect(anchorController, isNot(controller));
-    expect(panelBuilds, equals(2));
-    expect(anchorBuilds, equals(2));
-
-    MenuController.maybeOf(anchorKey.currentContext!)?.open();
-    await tester.pump();
-
-    expect(panelBuilds, equals(3));
-    expect(anchorBuilds, equals(3));
-    expect(overlayBuilds, equals(1));
-
-    await tester.pumpWidget(buildAnchor(overlay: controller));
-
-    expect(panelController, isNot(controller));
-    expect(anchorController, equals(controller));
-    expect(overlayController, equals(controller));
-    expect(panelBuilds, equals(4));
-    expect(anchorBuilds, equals(4));
-    expect(overlayBuilds, equals(2));
-  });
-
   testWidgets(
-    'MenuController.maybeOf does not notify dependents on open and close if createDependency is false',
-    (WidgetTester tester) async {
-      final MenuController controller = MenuController();
-      final MenuController nestedController = MenuController();
-      MenuController? panelController;
-      MenuController? overlayController;
-      MenuController? anchorController;
-      int panelBuilds = 0;
-      int anchorBuilds = 0;
-      int overlayBuilds = 0;
-
-      await tester.pumpWidget(
-        App(
-          RawMenuAnchorGroup(
-            child: Column(
-              children: <Widget>[
-                // Panel context.
-                Builder(
-                  builder: (BuildContext context) {
-                    panelController = MenuController.maybeOf(context);
-                    panelBuilds += 1;
-                    return Text(Tag.a.text);
-                  },
-                ),
-                Menu(
-                  controller: controller,
-                  menuPanel: Panel(
-                    children: <Widget>[
-                      // Overlay context.
-                      Builder(
-                        builder: (BuildContext context) {
-                          overlayController = MenuController.maybeOf(context);
-                          overlayBuilds += 1;
-                          return Text(Tag.b.a.a.text);
-                        },
-                      ),
-                      Menu(
-                        controller: nestedController,
-                        menuPanel: Panel(children: <Widget>[Button.tag(Tag.b.a.b.a)]),
-                        child: Button.tag(Tag.b.a.b),
-                      ),
-                    ],
-                  ),
-                  // Anchor context.
-                  child: Builder(
-                    builder: (BuildContext context) {
-                      anchorController = MenuController.maybeOf(context);
-                      anchorBuilds += 1;
-                      return Text(Tag.b.a.text);
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      expect(panelController!.isOpen, isFalse);
-      expect(anchorController!.isOpen, isFalse);
-      expect(panelBuilds, equals(1));
-      expect(anchorBuilds, equals(1));
-      expect(overlayBuilds, equals(0));
-
-      controller.open();
-      await tester.pump();
-
-      expect(panelController!.isOpen, isTrue);
-      expect(anchorController!.isOpen, isTrue);
-      expect(overlayController!.isOpen, isTrue);
-      expect(panelBuilds, equals(1));
-      expect(anchorBuilds, equals(1));
-      expect(overlayBuilds, equals(1));
-
-      nestedController.open();
-      await tester.pump();
-
-      // No new builds should have occurred since all controllers are already open.
-      expect(panelController!.isOpen, isTrue);
-      expect(anchorController!.isOpen, isTrue);
-      expect(overlayController!.isOpen, isTrue);
-      expect(panelBuilds, equals(1));
-      expect(anchorBuilds, equals(1));
-      expect(overlayBuilds, equals(1));
-
-      controller.close();
-      await tester.pump();
-
-      expect(panelController!.isOpen, isFalse);
-      expect(anchorController!.isOpen, isFalse);
-      expect(overlayController!.isOpen, isFalse);
-      expect(panelBuilds, equals(1));
-      expect(anchorBuilds, equals(1));
-      expect(overlayBuilds, equals(1));
-    },
-  );
-
-  testWidgets(
-    'MenuController.maybeOf does not notify dependents when set if createDependency is false',
+    'MenuController.maybeOf does not notify dependents when MenuController changes',
     (WidgetTester tester) async {
       final GlobalKey anchorKey = GlobalKey();
       MenuController? panelController;
