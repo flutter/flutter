@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -55,7 +54,8 @@ void main() {
 
     final Completer<void> completer = Completer<void>();
     process!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
-      stdout.write('STDOUT: $msg');
+      // ignore: avoid_print
+      print('STDOUT: $msg');
       if (completer.isCompleted) {
         return;
       }
@@ -68,7 +68,8 @@ void main() {
     });
 
     process!.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
-      stdout.write('STDERR: $msg');
+      // ignore: avoid_print
+      print('STDERR: $msg');
     });
 
     await completer.future;
