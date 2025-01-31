@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'context_menu_button_item.dart';
 import 'editable_text.dart';
 import 'localizations.dart';
 import 'media_query.dart';
@@ -208,6 +209,228 @@ class SystemContextMenuController with SystemContextMenuClient {
   }
 }
 
+@immutable
+class IOSSystemContextMenuItemConstructors {
+  const IOSSystemContextMenuItemConstructors._({
+    required ContextMenuButtonType type,
+    this.onPressed,
+    this.title,
+  }) : _type = type;
+
+  /// Create a system context menu copy button.
+  factory IOSSystemContextMenuItemConstructors.copy() {
+    return const IOSSystemContextMenuItemConstructors._(type: ContextMenuButtonType.copy);
+  }
+
+  /// Create a system context menu cut button.
+  factory IOSSystemContextMenuItemConstructors.cut() {
+    return const IOSSystemContextMenuItemConstructors._(type: ContextMenuButtonType.cut);
+  }
+
+  /// Create a system context menu paste button.
+  factory IOSSystemContextMenuItemConstructors.paste() {
+    return const IOSSystemContextMenuItemConstructors._(type: ContextMenuButtonType.paste);
+  }
+
+  /// Create a system context menu selectAll button.
+  factory IOSSystemContextMenuItemConstructors.selectAll() {
+    return const IOSSystemContextMenuItemConstructors._(type: ContextMenuButtonType.selectAll);
+  }
+
+  /// Create a system context menu share button.
+  factory IOSSystemContextMenuItemConstructors.share({String? title}) {
+    return IOSSystemContextMenuItemConstructors._(title: title, type: ContextMenuButtonType.share);
+  }
+
+  /// Create a system context menu lookUp button.
+  factory IOSSystemContextMenuItemConstructors.lookUp({String? title}) {
+    return IOSSystemContextMenuItemConstructors._(title: title, type: ContextMenuButtonType.lookUp);
+  }
+
+  /// Create a system context menu search button.
+  factory IOSSystemContextMenuItemConstructors.searchWeb({String? title}) {
+    return IOSSystemContextMenuItemConstructors._(
+      title: title,
+      type: ContextMenuButtonType.searchWeb,
+    );
+  }
+
+  /// Create a custom system context menu button.
+  factory IOSSystemContextMenuItemConstructors.custom({
+    required String title,
+    required VoidCallback onPressed,
+  }) {
+    return IOSSystemContextMenuItemConstructors._(
+      title: title,
+      onPressed: onPressed,
+      type: ContextMenuButtonType.custom,
+    );
+  }
+
+  final ContextMenuButtonType _type;
+
+  /// The text to display to the user.
+  ///
+  /// Not exposed for some built-in menu items whose title is always set by the
+  /// platform.
+  final String? title;
+
+  /// The callback to be called when the menu item is pressed.
+  ///
+  /// Not exposed for built-in menu items, which handle their own action when
+  /// pressed.
+  final VoidCallback? onPressed;
+
+  @override
+  String toString() {
+    return 'IOSSystemContextMenuItemData(title: $title, type: $_type)';
+  }
+
+  @override
+  int get hashCode => Object.hash(title, onPressed);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is IOSSystemContextMenuItemConstructors &&
+        other.title == title &&
+        other.onPressed == onPressed;
+  }
+}
+
+@immutable
+class IOSSystemContextMenuItemDataConstructors {
+  const IOSSystemContextMenuItemDataConstructors._({
+    required ContextMenuButtonType type,
+    this.onPressed,
+    this.title,
+  }) : _type = type;
+
+  /// Create a system context menu copy button.
+  factory IOSSystemContextMenuItemDataConstructors.copy() {
+    return const IOSSystemContextMenuItemDataConstructors._(type: ContextMenuButtonType.copy);
+  }
+
+  /// Create a system context menu cut button.
+  factory IOSSystemContextMenuItemDataConstructors.cut() {
+    return const IOSSystemContextMenuItemDataConstructors._(type: ContextMenuButtonType.cut);
+  }
+
+  /// Create a system context menu paste button.
+  factory IOSSystemContextMenuItemDataConstructors.paste() {
+    return const IOSSystemContextMenuItemDataConstructors._(type: ContextMenuButtonType.paste);
+  }
+
+  /// Create a system context menu selectAll button.
+  factory IOSSystemContextMenuItemDataConstructors.selectAll() {
+    return const IOSSystemContextMenuItemDataConstructors._(type: ContextMenuButtonType.selectAll);
+  }
+
+  /// Create a system context menu share button.
+  factory IOSSystemContextMenuItemDataConstructors.share({required String title}) {
+    return IOSSystemContextMenuItemDataConstructors._(
+      title: title,
+      type: ContextMenuButtonType.share,
+    );
+  }
+
+  /// Create a system context menu lookUp button.
+  factory IOSSystemContextMenuItemDataConstructors.lookUp({required String title}) {
+    return IOSSystemContextMenuItemDataConstructors._(
+      title: title,
+      type: ContextMenuButtonType.lookUp,
+    );
+  }
+
+  /// Create a system context menu search button.
+  factory IOSSystemContextMenuItemDataConstructors.searchWeb({required String title}) {
+    return IOSSystemContextMenuItemDataConstructors._(
+      title: title,
+      type: ContextMenuButtonType.searchWeb,
+    );
+  }
+
+  /// Create a custom system context menu button.
+  factory IOSSystemContextMenuItemDataConstructors.custom({
+    required String title,
+    required VoidCallback onPressed,
+  }) {
+    return IOSSystemContextMenuItemDataConstructors._(
+      title: title,
+      onPressed: onPressed,
+      type: ContextMenuButtonType.custom,
+    );
+  }
+
+  final ContextMenuButtonType _type;
+
+  /// The text to display to the user.
+  ///
+  /// Not exposed for some built-in menu items whose title is always set by the
+  /// platform.
+  final String? title;
+
+  /// The callback to be called when the menu item is pressed.
+  ///
+  /// Not exposed for built-in menu items, which handle their own action when
+  /// pressed.
+  final VoidCallback? onPressed;
+
+  /// The type used when serializing to json for passing over a method channel,
+  /// specifically `ContextMenu.showSystemContextMenu`.
+  String get _jsonType {
+    return switch (_type) {
+      ContextMenuButtonType.copy => 'copy',
+      ContextMenuButtonType.cut => 'cut',
+      ContextMenuButtonType.selectAll => 'selectAll',
+      ContextMenuButtonType.paste => 'paste',
+      ContextMenuButtonType.share => 'share',
+      ContextMenuButtonType.searchWeb => 'searchWeb',
+      ContextMenuButtonType.delete => throw UnimplementedError(),
+      ContextMenuButtonType.lookUp => 'lookUp',
+      ContextMenuButtonType.liveTextInput => throw UnimplementedError(),
+      ContextMenuButtonType.custom => 'custom',
+    };
+  }
+
+  /// Returns json for use in method channel calls, specifically
+  /// `ContextMenu.showSystemContextMenu`.
+  Map<String, dynamic> _toJson() {
+    return <String, dynamic>{
+      'callbackId': hashCode,
+      if (title != null) 'title': title,
+      'type': _jsonType,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'IOSSystemContextMenuItemData(title: $title, type: $_type)';
+  }
+
+  @override
+  int get hashCode => Object.hash(title, onPressed);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is IOSSystemContextMenuItemDataConstructors &&
+        other._type == _type &&
+        other.title == title &&
+        other.onPressed == onPressed;
+  }
+}
+
 /// Describes a context menu button that will be rendered in the system context
 /// menu and not by Flutter itself.
 ///
@@ -230,6 +453,7 @@ sealed class IOSSystemContextMenuItem {
   /// platform.
   String? get title => null;
 
+  // TODO(justinmc): Remove this for now?? Only for Custom button.
   /// The callback to be called when the menu item is pressed.
   ///
   /// Not exposed for built-in menu items, which handle their own action when
