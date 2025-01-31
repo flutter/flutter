@@ -144,7 +144,8 @@ void main() {
   testWidgets(
     'can customize the menu items',
     (WidgetTester tester) async {
-      final List<List<IOSSystemContextMenuItem>> itemsReceived = <List<IOSSystemContextMenuItem>>[];
+      final List<List<IOSSystemContextMenuItemData>> itemsReceived =
+          <List<IOSSystemContextMenuItemData>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
@@ -152,7 +153,7 @@ void main() {
             case 'ContextMenu.showSystemContextMenu':
               final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
               final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-              final List<IOSSystemContextMenuItem> lastItems =
+              final List<IOSSystemContextMenuItemData> lastItems =
                   untypedItems.map((dynamic value) {
                     final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
                     return systemContextMenuItemDataFromJson(itemJson);
@@ -215,10 +216,10 @@ void main() {
 
       expect(itemsReceived, hasLength(1));
       expect(itemsReceived.last, hasLength(items1.length));
-      expect(itemsReceived.last[0], equals(const IOSSystemContextMenuItemCopy()));
+      expect(itemsReceived.last[0], equals(const IOSSystemContextMenuItemDataCopy()));
       expect(
         itemsReceived.last[1],
-        equals(const IOSSystemContextMenuItemShare(title: 'My Share Title')),
+        equals(const IOSSystemContextMenuItemDataShare(title: 'My Share Title')),
       );
 
       state.hideToolbar();
@@ -232,7 +233,8 @@ void main() {
   testWidgets(
     'items receive a default title',
     (WidgetTester tester) async {
-      final List<List<IOSSystemContextMenuItem>> itemsReceived = <List<IOSSystemContextMenuItem>>[];
+      final List<List<IOSSystemContextMenuItemData>> itemsReceived =
+          <List<IOSSystemContextMenuItemData>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
@@ -240,7 +242,7 @@ void main() {
             case 'ContextMenu.showSystemContextMenu':
               final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
               final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-              final List<IOSSystemContextMenuItem> lastItems =
+              final List<IOSSystemContextMenuItemData> lastItems =
                   untypedItems.map((dynamic value) {
                     final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
                     return systemContextMenuItemDataFromJson(itemJson);
@@ -305,11 +307,11 @@ void main() {
 
       expect(itemsReceived, hasLength(1));
       expect(itemsReceived.last, hasLength(items1.length));
-      expect(itemsReceived.last[0], equals(const IOSSystemContextMenuItemCopy()));
+      expect(itemsReceived.last[0], equals(const IOSSystemContextMenuItemDataCopy()));
       const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
       expect(
         itemsReceived.last[1],
-        equals(IOSSystemContextMenuItemShare(title: localizations.shareButtonLabel)),
+        equals(IOSSystemContextMenuItemDataShare(title: localizations.shareButtonLabel)),
       );
 
       state.hideToolbar();
