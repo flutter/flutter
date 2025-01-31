@@ -305,7 +305,7 @@ public class FlutterFragmentActivityTest {
   @TargetApi(Build.API_LEVELS.API_34)
   public void onBackPressedCallsGetForwardedToFragment() {
     FlutterFragmentActivityWithProvidedEngine activity =
-            spy(Robolectric.buildActivity(FlutterFragmentActivityWithProvidedEngine.class).get());
+        spy(Robolectric.buildActivity(FlutterFragmentActivityWithProvidedEngine.class).get());
 
     FlutterFragment fragment = mock(FlutterFragment.class);
     when(activity.retrieveExistingFlutterFragmentIfPossible()).thenReturn(null, fragment);
