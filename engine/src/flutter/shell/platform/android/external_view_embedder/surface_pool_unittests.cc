@@ -197,7 +197,7 @@ TEST(SurfacePool, DestroyLayersNew) {
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
-  EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
+  EXPECT_CALL(*jni_mock, createOverlaySurface2())
       .Times(1)
       .WillOnce(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
