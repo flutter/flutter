@@ -14,19 +14,19 @@ namespace egl {
 
 int Manager::instance_count_ = 0;
 
-std::unique_ptr<Manager> Manager::Create(bool use_low_power_gpu) {
+std::unique_ptr<Manager> Manager::Create(bool prefer_low_power_gpu) {
   std::unique_ptr<Manager> manager;
-  manager.reset(new Manager(use_low_power_gpu));
+  manager.reset(new Manager(prefer_low_power_gpu));
   if (!manager->IsValid()) {
     return nullptr;
   }
   return std::move(manager);
 }
 
-Manager::Manager(bool use_low_power_gpu) {
+Manager::Manager(bool prefer_low_power_gpu) {
   ++instance_count_;
 
-  if (!InitializeDisplay(use_low_power_gpu)) {
+  if (!InitializeDisplay(prefer_low_power_gpu)) {
     return;
   }
 
@@ -46,48 +46,17 @@ Manager::~Manager() {
   --instance_count_;
 }
 
-bool Manager::InitializeDisplay(bool use_low_power_gpu) {
+bool Manager::InitializeDisplay(bool prefer_low_power_gpu) {
   // If the request for a low power GPU is provided,
   // we will attempt to select GPU explicitly, via ANGLE extension
   // that allows to specify the GPU to use via LUID.
-  bool use_selected_gpu = low_power_gpu;
-  LUID luid;
-  if (low_power_gpu) {
-    Microsoft::WRL::ComPtr<IDXGIFactory1> factory1 = nullptr;
-    Microsoft::WRL::ComPtr<IDXGIFactory6> factory6 = nullptr;
-    Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter = nullptr;
-    HRESULT hr = ::CreateDXGIFactory1(IID_PPV_ARGS(&factory1));
-    if (FAILED(hr)) {
-      LogEGLError("DXGI factory creation failed");
-      return false;
-    }
-    hr = factory1->QueryInterface(IID_PPV_ARGS(&factory6));
-    if (FAILED(hr)) {
-      // No support for IDXGIFactory6, so we will not use the selected GPU.
-      // We will follow with the default ANGLE selection.
-      use_selected_gpu = false;
-    }
-    if (use_selected_gpu) {
-      hr = factory6->EnumAdaptersByGpuPreference(
-          0, DXGI_GPU_PREFERENCE_MINIMUM_POWER, IID_PPV_ARGS(&adapter));
-      if (FAILED(hr) || adapter == nullptr) {
-        use_selected_gpu = false;
-      }
-    }
-    if (use_selected_gpu) {
-      // Get the LUID of the adapter.
-      DXGI_ADAPTER_DESC desc;
-      hr = adapter->GetDesc(&desc);
-      if (FAILED(hr)) {
-        use_selected_gpu = false;
-      }
-      luid = desc.AdapterLuid;
-    }
+  std::optional<LUID> luid = std::nullopt;
+  if (prefer_low_power_gpu) {
+    luid = GetLowPowerGpuLuid();
   }
 
   // These are preferred display attributes and request ANGLE's D3D11
-  // renderer. We know that there is IDXGI device available for the selected
-  // GPU, so we will not fallback to other GPUs.
+  // renderer (use only in case of valid LUID returned from above).
   const EGLint d3d11_display_attributes_with_luid[] = {
       EGL_PLATFORM_ANGLE_TYPE_ANGLE,
       EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
@@ -105,9 +74,9 @@ bool Manager::InitializeDisplay(bool use_low_power_gpu) {
 
       // Specify the LUID of the GPU to use.
       EGL_PLATFORM_ANGLE_D3D_LUID_HIGH_ANGLE,
-      luid.HighPart,
+      luid.has_value() ? luid->HighPart : 0,
       EGL_PLATFORM_ANGLE_D3D_LUID_LOW_ANGLE,
-      luid.LowPart,
+      luid.has_value() ? luid->LowPart : 0,
       EGL_NONE,
   };
 
@@ -158,15 +127,13 @@ bool Manager::InitializeDisplay(bool use_low_power_gpu) {
 
   std::vector<const EGLint*> display_attributes_configs;
 
-  if (use_selected_gpu) {
+  if (luid) {
     // If low power GPU is requested, provide either low power GPU or SW renderer.
     display_attributes_configs.push_back(d3d11_display_attributes_with_luid);
-    display_attributes_configs.push_back(d3d11_warp_display_attributes);
-  } else {
-    display_attributes_configs.push_back(d3d11_display_attributes);
-    display_attributes_configs.push_back(d3d11_fl_9_3_display_attributes);
-    display_attributes_configs.push_back(d3d11_warp_display_attributes);
-  };
+  }
+  display_attributes_configs.push_back(d3d11_display_attributes);
+  display_attributes_configs.push_back(d3d11_fl_9_3_display_attributes);
+  display_attributes_configs.push_back(d3d11_warp_display_attributes);
 
   PFNEGLGETPLATFORMDISPLAYEXTPROC egl_get_platform_display_EXT =
       reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(
@@ -364,6 +331,34 @@ Context* Manager::render_context() const {
 
 Context* Manager::resource_context() const {
   return resource_context_.get();
+}
+
+std::optional<LUID> Manager::GetLowPowerGpuLuid() {
+  Microsoft::WRL::ComPtr<IDXGIFactory1> factory1 = nullptr;
+  Microsoft::WRL::ComPtr<IDXGIFactory6> factory6 = nullptr;
+  Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter = nullptr;
+  HRESULT hr = ::CreateDXGIFactory1(IID_PPV_ARGS(&factory1));
+  if (FAILED(hr)) {
+    return std::nullopt;
+  }
+  hr = factory1->QueryInterface(IID_PPV_ARGS(&factory6));
+  if (FAILED(hr)) {
+    // No support for IDXGIFactory6, so we will not use the selected GPU.
+    // We will follow with the default ANGLE selection.
+    return std::nullopt;
+  }
+  hr = factory6->EnumAdaptersByGpuPreference(
+      0, DXGI_GPU_PREFERENCE_MINIMUM_POWER, IID_PPV_ARGS(&adapter));
+  if (FAILED(hr) || adapter == nullptr) {
+    return std::nullopt;
+  }
+  // Get the LUID of the adapter.
+  DXGI_ADAPTER_DESC desc;
+  hr = adapter->GetDesc(&desc);
+  if (FAILED(hr)) {
+    return std::nullopt;
+  }
+  return std::make_optional(desc.AdapterLuid);
 }
 
 }  // namespace egl

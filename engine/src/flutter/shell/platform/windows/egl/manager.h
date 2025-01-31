@@ -19,6 +19,7 @@
 #include <windows.h>
 #include <wrl/client.h>
 #include <memory>
+#include <optional>
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/egl/context.h"
@@ -32,7 +33,7 @@ namespace egl {
 // destroy surfaces
 class Manager {
  public:
-  static std::unique_ptr<Manager> Create(bool use_low_power_gpu);
+  static std::unique_ptr<Manager> Create(bool prefer_low_power_gpu);
 
   virtual ~Manager();
 
@@ -76,14 +77,14 @@ class Manager {
  protected:
   // Creates a new surface manager retaining reference to the passed-in target
   // for the lifetime of the manager.
-  explicit Manager(bool use_low_power_gpu);
+  explicit Manager(bool prefer_low_power_gpu);
 
  private:
   // Number of active instances of Manager
   static int instance_count_;
 
   // Initialize the EGL display.
-  bool InitializeDisplay(bool use_low_power_gpu);
+  bool InitializeDisplay(bool prefer_low_power_gpu);
 
   // Initialize the EGL configs.
   bool InitializeConfig();
@@ -95,6 +96,8 @@ class Manager {
   bool InitializeDevice();
 
   void CleanUp();
+
+  std::optional<LUID> GetLowPowerGpuLuid();
 
   // Whether the manager was initialized successfully.
   bool is_valid_ = false;
