@@ -236,6 +236,7 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
+          controller: controller,
           overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
             return Column(
               children: <Widget>[
@@ -476,6 +477,7 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchorGroup(
+            controller: controller,
           child: Row(
             children: <Widget>[
               Menu(
@@ -513,6 +515,7 @@ void main() {
  testWidgets(
     'MenuController.maybeIsOpenOf notifies dependents when isOpen changes',
     (WidgetTester tester) async {
+      final MenuController groupController = MenuController();
       final MenuController controller = MenuController();
       final MenuController nestedController = MenuController();
       bool? panelIsOpen;
@@ -525,6 +528,7 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchorGroup(
+            controller: groupController,
             child: Column(
               children: <Widget>[
                 // Panel context.
@@ -614,6 +618,9 @@ void main() {
     'MenuController.maybeOf does not notify dependents when MenuController changes',
     (WidgetTester tester) async {
       final GlobalKey anchorKey = GlobalKey();
+      final MenuController demoControllerOne = MenuController();
+      final MenuController demoControllerTwo = MenuController();
+
       MenuController? panelController;
       MenuController? overlayController;
       MenuController? anchorController;
@@ -621,7 +628,7 @@ void main() {
       int anchorBuilds = 0;
       int overlayBuilds = 0;
 
-      Widget buildAnchor({MenuController? panel, MenuController? overlay}) {
+      Widget buildAnchor({required MenuController panel, required MenuController overlay}) {
         return App(
           RawMenuAnchorGroup(
             controller: panel,
@@ -665,12 +672,12 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(buildAnchor());
+      await tester.pumpWidget(buildAnchor(panel: demoControllerOne, overlay: demoControllerTwo));
 
       expect(panelController, isNot(controller));
       expect(anchorController, isNot(controller));
 
-      await tester.pumpWidget(buildAnchor(panel: controller));
+      await tester.pumpWidget(buildAnchor(panel: controller, overlay: demoControllerTwo));
 
       expect(panelController, equals(controller));
       expect(anchorController, isNot(controller));
@@ -684,7 +691,7 @@ void main() {
       expect(anchorBuilds, equals(2));
       expect(overlayBuilds, equals(1));
 
-      await tester.pumpWidget(buildAnchor(overlay: controller));
+      await tester.pumpWidget(buildAnchor(panel: demoControllerOne, overlay: controller));
 
       expect(panelController, isNot(controller));
       expect(anchorController, equals(controller));
@@ -745,17 +752,20 @@ void main() {
   testWidgets('Escape key closes menus', (WidgetTester tester) async {
     final FocusNode aFocusNode = FocusNode();
     final FocusNode baaFocusNode = FocusNode();
+    final MenuController menuController = MenuController();
     addTearDown(aFocusNode.dispose);
     addTearDown(baaFocusNode.dispose);
 
     await tester.pumpWidget(
       App(
         RawMenuAnchorGroup(
+                controller: controller,
+
           child: Row(
             children: <Widget>[
               Button.tag(Tag.a, focusNode: aFocusNode),
               Menu(
-                controller: controller,
+                controller: menuController,
                 menuPanel: Panel(
                   children: <Widget>[
                     Menu(
@@ -774,7 +784,7 @@ void main() {
       ),
     );
 
-    controller.open();
+    menuController.open();
     await tester.pump();
 
     aFocusNode.requestFocus();
@@ -840,7 +850,7 @@ void main() {
               },
             ),
           },
-          child: RawMenuAnchorGroup(
+          child: RawMenuAnchorGroup( controller: controller,
             child: Row(
               children: <Widget>[
                 Menu(
@@ -1107,7 +1117,7 @@ void main() {
     await tester.pumpWidget(
       App(
         alignment: AlignmentDirectional.topStart,
-        RawMenuAnchorGroup(
+        RawMenuAnchorGroup( controller: controller,
           child: Padding(
             key: Tag.anchor.key,
             padding: const EdgeInsets.all(8.0),
@@ -1138,6 +1148,7 @@ void main() {
             overlayPosition = position;
             return const SizedBox();
           },
+          controller: controller,
           child: AnchorButton(Tag.anchor, onPressed: onPressed),
         ),
       ),
@@ -1153,6 +1164,7 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
+          controller: controller,
           overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
             return Positioned(
               top: position.anchorRect.top,
@@ -1187,6 +1199,7 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
+          controller: controller,
           overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
             return Positioned.fromRect(
               rect: position.anchorRect.translate(200, 200),
@@ -1247,7 +1260,7 @@ void main() {
                 selected.add(Tag.outside);
               },
             ),
-            RawMenuAnchorGroup(
+            RawMenuAnchorGroup( controller: controller,
               child: Column(
                 children: <Widget>[
                   Menu(
@@ -1324,7 +1337,7 @@ void main() {
                   selected.add(Tag.outside);
                 },
               ),
-              RawMenuAnchorGroup(
+              RawMenuAnchorGroup( controller: controller,
                 child: Column(
                   children: <Widget>[
                     Menu(
@@ -1485,7 +1498,7 @@ void main() {
             .map((DiagnosticsNode node) => node.toString())
             .toList();
 
-    expect(properties, const <String>['has controller', 'has focusNode', 'use nearest overlay']);
+    expect(properties, const <String>[ 'has focusNode', 'use nearest overlay']);
   });
 
   testWidgets('[Group] diagnostics', (WidgetTester tester) async {
@@ -1564,11 +1577,11 @@ void main() {
                 ),
               },
               child: RawMenuAnchorGroup(
+                controller: controller,
                 child: Column(
                   children: <Widget>[
                     Button.tag(Tag.a),
                     Menu(
-                      controller: controller,
                       focusNode: focusNode,
                       menuPanel: Panel(
                         children: <Widget>[
@@ -2356,7 +2369,7 @@ class Panel extends StatelessWidget {
   }
 }
 
-class Menu extends StatelessWidget {
+class Menu extends StatefulWidget {
   const Menu({
     super.key,
     required this.menuPanel,
@@ -2380,23 +2393,30 @@ class Menu extends StatelessWidget {
   final bool consumeOutsideTaps;
 
   @override
+  State<Menu> createState() => _MenuState();
+}
+
+class _MenuState extends State<Menu> {
+  MenuController? _controller;
+
+  @override
   Widget build(BuildContext context) {
     return RawMenuAnchor(
-      childFocusNode: focusNode,
-      controller: controller,
-      onOpen: onOpen,
-      onClose: onClose,
-      consumeOutsideTaps: consumeOutsideTaps,
-      useRootOverlay: useRootOverlay,
-      builder: builder,
+      childFocusNode: widget.focusNode,
+      controller: widget.controller ?? (_controller ??= MenuController()),
+      onOpen: widget.onOpen,
+      onClose: widget.onClose,
+      consumeOutsideTaps: widget.consumeOutsideTaps,
+      useRootOverlay: widget.useRootOverlay,
+      builder: widget.builder,
       overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
         return Positioned(
           top: info.anchorRect.bottom,
           left: info.anchorRect.left,
-          child: menuPanel,
+          child: widget.menuPanel,
         );
       },
-      child: child,
+      child: widget.child,
     );
   }
 }

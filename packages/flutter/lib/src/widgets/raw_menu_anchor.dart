@@ -132,7 +132,7 @@ class _MenuControllerScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_MenuControllerScope oldWidget) {
-    return isOpen != oldWidget.isOpen || controller != oldWidget.controller;
+    return isOpen != oldWidget.isOpen;
   }
 }
 
@@ -172,15 +172,15 @@ class RawMenuAnchor extends StatefulWidget {
   /// The [overlayBuilder] should not be null.
   const RawMenuAnchor({
     super.key,
-    this.controller,
     this.childFocusNode,
     this.consumeOutsideTaps = false,
     this.onOpen,
     this.onClose,
     this.useRootOverlay = false,
     this.builder,
-    this.child,
+    required this.controller,
     required this.overlayBuilder,
+    this.child,
   });
 
   /// A callback that is invoked when the menu is opened.
@@ -259,11 +259,9 @@ class RawMenuAnchor extends StatefulWidget {
   /// Defaults to false.
   final bool consumeOutsideTaps;
 
-  /// An optional [MenuController] that allows opening and closing of the menu
-  /// from other widgets.
-  ///
-  /// If not supplied, [RawMenuAnchor] will create and manage a [MenuController].
-  final MenuController? controller;
+  /// A [MenuController] that allows opening and closing of the menu from other
+  /// widgets.
+  final MenuController controller;
 
   @override
   State<RawMenuAnchor> createState() => _RawMenuAnchorState();
@@ -271,7 +269,6 @@ class RawMenuAnchor extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ObjectFlagProperty<MenuController>.has('controller', controller));
     properties.add(ObjectFlagProperty<FocusNode>.has('focusNode', childFocusNode));
     properties.add(
       FlagProperty(
@@ -284,7 +281,7 @@ class RawMenuAnchor extends StatefulWidget {
   }
 }
 
-// Base class that provides the common interface and state for both types of
+// Base mixin that provides the common interface and state for both types of
 // [RawMenuAnchor]s, [RawMenuAnchor] and [RawMenuAnchorGroup].
 @optionalTypeArgs
 mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
@@ -301,32 +298,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ///
   /// If an overridding widget does not provide a [MenuController], then
   /// [_RawMenuAnchorBaseMixin] will create and manage its own.
-  @nonVirtual
-  MenuController get menuController {
-    return externalMenuController ?? (_internalMenuController ??= MenuController());
-  }
-
-  /// The [MenuController] that is provided by the user to the widget.
-  @protected
-  MenuController? get externalMenuController;
-
-  // The [MenuController] that is created and managed by the widget if an
-  // [externalMenuController] is not provided.
-  MenuController? _internalMenuController;
-
-  /// Users should call [didMenuControllerUpdate] from [didUpdateWidget] to
-  /// notify the menu system that the menu controller has changed.
-  void didMenuControllerUpdate(MenuController? oldWidgetController) {
-    if (_internalMenuController != null) {
-      _internalMenuController?._detach(this);
-      _internalMenuController = null;
-    } else {
-      oldWidgetController!._detach(this);
-    }
-    menuController._attach(this);
-    assert(menuController._anchor == this);
-    assert(externalMenuController == null || _internalMenuController == null);
-  }
+  MenuController get menuController;
 
   /// Whether this menu layer is open.
   @protected
@@ -384,7 +356,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     _parent = null;
     _anchorChildren.clear();
     menuController._detach(this);
-    _internalMenuController = null;
     super.dispose();
   }
 
@@ -515,15 +486,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
   bool get isOpen => _overlayController.isShowing;
 
   @override
-  MenuController? get externalMenuController => widget.controller;
-
-  @override
-  void didUpdateWidget(RawMenuAnchor oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      didMenuControllerUpdate(oldWidget.controller);
-    }
-  }
+  MenuController get menuController => widget.controller;
 
   @override
   Widget buildAnchor(BuildContext context) {
@@ -692,7 +655,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 ///   submenu.
 class RawMenuAnchorGroup extends StatefulWidget {
   /// Creates a [RawMenuAnchorGroup].
-  const RawMenuAnchorGroup({super.key, this.controller, required this.child});
+  const RawMenuAnchorGroup({super.key, required this.child, required this.controller});
 
   /// The child displayed by the [RawMenuAnchorGroup].
   ///
@@ -700,9 +663,9 @@ class RawMenuAnchorGroup extends StatefulWidget {
   /// builder and call [MenuController.maybeOf].
   final Widget child;
 
-  /// An optional [MenuController] that allows the closing of the menu
-  /// from other widgets.
-  final MenuController? controller;
+  /// An [MenuController] that allows the closing of the menu from other
+  /// widgets.
+  final MenuController controller;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -716,25 +679,19 @@ class RawMenuAnchorGroup extends StatefulWidget {
 
 class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
     with _RawMenuAnchorBaseMixin<RawMenuAnchorGroup> {
+
   @override
   bool get isOpen => _anchorChildren.any((_RawMenuAnchorBaseMixin child) => child.isOpen);
 
   @override
-  MenuController? get externalMenuController => widget.controller;
-
-  @override
-  void didUpdateWidget(RawMenuAnchorGroup oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      didMenuControllerUpdate(oldWidget.controller);
-    }
-  }
+  MenuController get menuController => widget.controller;
 
   @override
   void close({bool inDispose = false}) {
     if (!isOpen) {
       return;
     }
+
     closeChildren(inDispose: inDispose);
     if (!inDispose) {
       if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
@@ -779,9 +736,14 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
 ///
 /// [MenuController.maybeOf] can be used to retrieve a controller from the
 /// [BuildContext] of a widget that is a descendant of a [MenuAnchor],
-/// [MenuBar], [SubmenuButton], or [RawMenuAnchor]. By doing so, the widget will
-/// establish a dependency relationship that will rebuild the widget when the
-/// parent menu opens and closes.
+/// [MenuBar], [SubmenuButton], or [RawMenuAnchor]. Doing so will not establish
+/// a dependency relationship.
+///
+/// [MenuController.maybeIsOpenOf] can be used to interrogate the state of a
+/// menu from the [BuildContext] of a widget that is a descendant of a
+/// [MenuAnchor]. Unlike [MenuController.maybeOf], this method will establish a
+/// dependency relationship, so the calling widget will rebuild when the menu
+/// opens and closes, and when the [MenuController] changes.
 ///
 /// See also:
 ///
@@ -847,8 +809,8 @@ class MenuController {
   /// Returns the [MenuController] of the ancestor [RawMenuAnchor] nearest to
   /// the given `context`, if one exists. Otherwise, returns null.
   ///
-  /// This method will not establish a dependency relationship, so the provided
-  /// `context` will not rebuild when the menu opens and closes, nor when the
+  /// This method will not establish a dependency relationship, so the calling
+  /// widget will not rebuild when the menu opens and closes, nor when the
   /// [MenuController] changes.
   static MenuController? maybeOf(BuildContext context) {
     return context.getInheritedWidgetOfExactType<_MenuControllerScope>()?.controller;
@@ -857,8 +819,8 @@ class MenuController {
   /// Returns the [MenuController] of the ancestor [RawMenuAnchor] nearest to
   /// the given `context`, if one exists. Otherwise, returns null.
   ///
-  /// This method will establish a dependency relationship, so the provided
-  /// `context` will rebuild when the menu opens and closes, and when the
+  /// This method will establish a dependency relationship, so the calling
+  /// widget will rebuild when the menu opens and closes, and when the
   /// [MenuController] changes.
   static bool? maybeIsOpenOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_MenuControllerScope>()?.isOpen;
