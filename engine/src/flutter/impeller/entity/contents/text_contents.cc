@@ -18,6 +18,9 @@
 #include "impeller/typographer/glyph_atlas.h"
 
 namespace impeller {
+Point SizeToPoint(Size size) {
+  return Point(size.width, size.height);
+}
 
 using VS = GlyphAtlasPipeline::VertexShader;
 using FS = GlyphAtlasPipeline::FragmentShader;
@@ -167,9 +170,8 @@ void TextContents::ComputeVertexData(
       // glyph bounds are used to compute UVs in cases where the
       // destination and source sizes may differ due to clamping the sizes
       // of large glyphs.
-      Point uv_origin =
-          (atlas_glyph_bounds.GetLeftTop() - Point(0.5, 0.5)) / atlas_size;
-      Point uv_size = (atlas_glyph_bounds.GetSize() + Point(1, 1)) / atlas_size;
+      Point uv_origin = (atlas_glyph_bounds.GetLeftTop()) / atlas_size;
+      Point uv_size = SizeToPoint(atlas_glyph_bounds.GetSize()) / atlas_size;
 
       Point unrounded_glyph_position =
           // This is for RTL text.
