@@ -2687,12 +2687,6 @@ class SystemContextMenuController with SystemContextMenuClient {
 sealed class IOSSystemContextMenuItemData {
   const IOSSystemContextMenuItemData();
 
-  /// The callback to be called when the menu item is pressed.
-  ///
-  /// Not exposed for built-in menu items, which handle their own action when
-  /// pressed.
-  VoidCallback? get onPressed => null;
-
   /// The text to display to the user.
   ///
   /// Not exposed for some built-in menu items whose title is always set by the
@@ -2713,7 +2707,7 @@ sealed class IOSSystemContextMenuItemData {
   }
 
   @override
-  int get hashCode => Object.hash(title, onPressed);
+  int get hashCode => title.hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -2723,9 +2717,7 @@ sealed class IOSSystemContextMenuItemData {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is IOSSystemContextMenuItemData &&
-        other.title == title &&
-        other.onPressed == onPressed;
+    return other is IOSSystemContextMenuItemData && other.title == title;
   }
 }
 
@@ -2895,33 +2887,3 @@ class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemData {
 
 // TODO(justinmc): Support the "custom" type.
 // https://github.com/flutter/flutter/issues/103163
-/// A [IOSSystemContextMenuItemData] for a custom button whose title and
-/// callback are defined by the app developer.
-///
-/// Must specify a [title] and [onPressed].
-///
-/// See also:
-///
-///  * [SystemContextMenuController], which is used to show the system context
-///    menu.
-///  * [IOSSystemContextMenuItemCustom], which performs a similar role but at
-///    the widget level.
-class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemData {
-  /// Creates an instance of [IOSSystemContextMenuItemDataCustom] with the given
-  /// [title] and [onPressed] callback.
-  const IOSSystemContextMenuItemDataCustom({required this.onPressed, required this.title});
-
-  @override
-  final VoidCallback onPressed;
-
-  @override
-  final String title;
-
-  @override
-  String get _jsonType => 'custom';
-
-  @override
-  String toString() {
-    return 'IOSSystemContextMenuItemDataCustom(title: $title, onPressed: $onPressed)';
-  }
-}

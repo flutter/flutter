@@ -186,18 +186,11 @@ sealed class IOSSystemContextMenuItem {
   /// platform.
   String? get title => null;
 
-  // TODO(justinmc): Remove this for now?? Only for Custom button.
-  /// The callback to be called when the menu item is pressed.
-  ///
-  /// Not exposed for built-in menu items, which handle their own action when
-  /// pressed.
-  VoidCallback? get onPressed => null;
-
   /// Returns the representation of this class used by method channels.
   IOSSystemContextMenuItemData _getData(WidgetsLocalizations? localizations);
 
   @override
-  int get hashCode => Object.hash(title, onPressed);
+  int get hashCode => title.hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -208,8 +201,7 @@ sealed class IOSSystemContextMenuItem {
       return false;
     }
     return other is IOSSystemContextMenuItem &&
-        other.title == title &&
-        other.onPressed == onPressed;
+        other.title == title;
   }
 }
 
@@ -414,32 +406,3 @@ class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
 
 // TODO(justinmc): Support the "custom" type.
 // https://github.com/flutter/flutter/issues/103163
-/// Creates an instance of [IOSSystemContextMenuItem] for a custom menu item
-/// whose [title] and [onPressed] are as specified.
-///
-/// See also:
-///
-///  * [SystemContextMenu], a widget that can be used to display the system
-///    context menu.
-///  * [IOSSystemContextMenuItemCustom], which specifies the data to be sent
-///    to the platform for this same button.
-class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem {
-  /// Creates an instance of [IOSSystemContextMenuItemCustom].
-  const IOSSystemContextMenuItemCustom({required this.title, required this.onPressed});
-
-  @override
-  final String title;
-
-  @override
-  final VoidCallback onPressed;
-
-  @override
-  IOSSystemContextMenuItemDataCustom _getData(WidgetsLocalizations? localizations) {
-    return IOSSystemContextMenuItemDataCustom(title: title, onPressed: onPressed);
-  }
-
-  @override
-  String toString() {
-    return 'IOSSystemContextMenuItemCustom(title: $title, onPressed: $onPressed)';
-  }
-}
