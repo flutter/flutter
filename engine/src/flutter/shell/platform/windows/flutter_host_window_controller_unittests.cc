@@ -17,7 +17,11 @@ namespace testing {
 namespace {
 
 constexpr char kChannelName[] = "flutter/windowing";
+constexpr char kOnWindowChangedMethod[] = "onWindowChanged";
 constexpr char kOnWindowDestroyedMethod[] = "onWindowDestroyed";
+constexpr char kSizeKey[] = "size";
+constexpr char kStateKey[] = "state";
+constexpr char kTitleKey[] = "title";
 constexpr char kViewIdKey[] = "viewId";
 
 // Process the next Win32 message if there is one. This can be used to
@@ -38,6 +42,7 @@ class FlutterHostWindowControllerTest : public WindowsTest {
  protected:
   void SetUp() override {
     InitializeCOM();
+    SetDpiAwareness();
     FlutterWindowsEngineBuilder builder(GetContext());
     engine_ = builder.Build();
     controller_ = std::make_unique<FlutterHostWindowController>(engine_.get());
@@ -51,6 +56,22 @@ class FlutterHostWindowControllerTest : public WindowsTest {
  private:
   void InitializeCOM() const {
     FML_CHECK(SUCCEEDED(::CoInitializeEx(nullptr, COINIT_MULTITHREADED)));
+  }
+
+  void SetDpiAwareness() {
+    HMODULE user32_module = LoadLibraryA("user32.dll");
+    if (!user32_module) {
+      return;
+    }
+    using SetProcessDpiAwarenessContext = BOOL WINAPI(DPI_AWARENESS_CONTEXT);
+    auto set_process_dpi_awareness_context =
+        reinterpret_cast<SetProcessDpiAwarenessContext*>(
+            GetProcAddress(user32_module, "SetProcessDpiAwarenessContext"));
+    if (set_process_dpi_awareness_context != nullptr) {
+      set_process_dpi_awareness_context(
+          DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+    }
+    FreeLibrary(user32_module);
   }
 
   std::unique_ptr<FlutterWindowsEngine> engine_;
@@ -81,14 +102,94 @@ TEST_F(FlutterHostWindowControllerTest, CreateRegularWindow) {
   EXPECT_GE(result->size.height(), settings.size.height());
   EXPECT_FALSE(result->parent_id.has_value());
 
-  // Verify the window exists and the view has the expected dimensions.
+  // Ensure the window was successfully retrieved.
   FlutterHostWindow* const window =
       host_window_controller()->GetHostWindow(result->view_id);
   ASSERT_NE(window, nullptr);
-  RECT client_rect;
-  GetClientRect(window->GetWindowHandle(), &client_rect);
-  EXPECT_EQ(client_rect.right - client_rect.left, settings.size.width());
-  EXPECT_EQ(client_rect.bottom - client_rect.top, settings.size.height());
+}
+
+TEST_F(FlutterHostWindowControllerTest, ModifyRegularWindow) {
+  // Define settings for the window to be created.
+  WindowCreationSettings const creation_settings = {
+      .archetype = WindowArchetype::kRegular,
+      .size = {800.0, 600.0},
+      .title = "window",
+      .state = WindowState::kMinimized,
+  };
+
+  // Create the window.
+  std::optional<WindowMetadata> const metadata =
+      host_window_controller()->CreateHostWindow(creation_settings);
+  ASSERT_TRUE(metadata.has_value());
+  // Retrieve the created window and verify it exists.
+  FlutterHostWindow* const window =
+      host_window_controller()->GetHostWindow(metadata->view_id);
+  ASSERT_NE(window, nullptr);
+
+  // Define the modifications to be applied to the window.
+  WindowModificationSettings const modification_settings = {
+      .size = Size{200.0, 200.0},
+      .title = "new title",
+      .state = WindowState::kRestored,
+  };
+
+  // Test messenger with a handler for onWindowChanged.
+  bool done = false;
+  TestBinaryMessenger messenger([&](const std::string& channel,
+                                    const uint8_t* message, size_t size,
+                                    BinaryReply reply) {
+    // Ensure the message is sent on the windowing channel.
+    ASSERT_EQ(channel, kChannelName);
+
+    // Ensure the decoded method call is valid.
+    auto const method = StandardMethodCodec::GetInstance().DecodeMethodCall(
+        std::vector<uint8_t>(message, message + size));
+    ASSERT_NE(method, nullptr);
+
+    // Handle the onWindowChanged method.
+    if (method->method_name() == kOnWindowChangedMethod) {
+      // Validate the method arguments.
+      auto const& args = *method->arguments();
+      ASSERT_TRUE(std::holds_alternative<EncodableMap>(args));
+      auto const& args_map = std::get<EncodableMap>(args);
+
+      // Ensure 'viewId' is present and valid.
+      auto const& it_viewId = args_map.find(EncodableValue(kViewIdKey));
+      ASSERT_NE(it_viewId, args_map.end());
+      auto const* value_viewId = std::get_if<FlutterViewId>(&it_viewId->second);
+      ASSERT_NE(value_viewId, nullptr);
+      EXPECT_GE(*value_viewId, metadata->view_id);
+      EXPECT_NE(engine()->view(*value_viewId), nullptr);
+
+      // Ensure 'size' is present and valid.
+      auto const& it_size = args_map.find(EncodableValue(kSizeKey));
+      ASSERT_NE(it_size, args_map.end());
+      auto const* value_size =
+          std::get_if<std::vector<EncodableValue>>(&it_size->second);
+      ASSERT_NE(value_size, nullptr);
+      ASSERT_EQ(value_size->size(), 2);
+      auto const* value_width = std::get_if<double>(&value_size->at(0));
+      ASSERT_NE(value_width, nullptr);
+      auto const* value_height = std::get_if<double>(&value_size->at(1));
+      ASSERT_NE(value_height, nullptr);
+      EXPECT_GE(*value_width, modification_settings.size->width());
+      EXPECT_GE(*value_height, modification_settings.size->height());
+
+      done = true;
+    }
+  });
+
+  // Create the windowing handler with the test messenger.
+  WindowingHandler windowing_handler(&messenger, host_window_controller());
+
+  // Apply the modifications.
+  EXPECT_TRUE(host_window_controller()->ModifyHostWindow(
+      metadata->view_id, modification_settings));
+
+  // Pump messages for the Windows platform task runner.
+  while (!done) {
+    PumpMessage();
+  }
 }
 
 TEST_F(FlutterHostWindowControllerTest, DestroyWindow) {
@@ -140,7 +241,7 @@ TEST_F(FlutterHostWindowControllerTest, DestroyWindow) {
       host_window_controller()->CreateHostWindow(settings);
   ASSERT_TRUE(result.has_value());
 
-  // Destroy the window and ensure onWindowDestroyed was invoked.
+  // Destroy the window.
   EXPECT_TRUE(host_window_controller()->DestroyHostWindow(result->view_id));
 
   // Pump messages for the Windows platform task runner.

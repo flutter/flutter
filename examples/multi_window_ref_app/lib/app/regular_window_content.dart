@@ -107,8 +107,7 @@ class _RegularWindowContentState extends State<RegularWindowContent>
 
                     return Text(
                       'View #${widget.window.rootView.viewId}\n'
-                      'View Size: ${(widget.window.rootView.physicalSize.width / dpr).toStringAsFixed(1)}\u00D7${(widget.window.rootView.physicalSize.height / dpr).toStringAsFixed(1)}\n'
-                      'Window Size: ${(widget.window.size.width).toStringAsFixed(1)}\u00D7${(widget.window.size.height).toStringAsFixed(1)}\n'
+                      'Size: ${(widget.window.size.width).toStringAsFixed(1)}\u00D7${(widget.window.size.height).toStringAsFixed(1)}\n'
                       'Device Pixel Ratio: $dpr',
                       textAlign: TextAlign.center,
                     );

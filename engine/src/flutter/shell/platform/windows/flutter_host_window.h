@@ -33,24 +33,12 @@ class FlutterHostWindow {
   // Returns the instance pointer for |hwnd| or nulllptr if invalid.
   static FlutterHostWindow* GetThisFromHandle(HWND hwnd);
 
-  // Returns the window archetype.
-  WindowArchetype GetArchetype() const;
-
-  // Returns the hosted Flutter view's ID.
-  FlutterViewId GetFlutterViewId() const;
-
   // Returns the current window state.
   WindowState GetState() const;
 
   // Returns the backing window handle, or nullptr if the native window is not
   // created or has already been destroyed.
   HWND GetWindowHandle() const;
-
-  // Sets whether closing this window will quit the application.
-  void SetQuitOnClose(bool quit_on_close);
-
-  // Returns whether closing this window will quit the application.
-  bool GetQuitOnClose() const;
 
  private:
   friend FlutterHostWindowController;
@@ -69,8 +57,14 @@ class FlutterHostWindow {
   // inheriting classes can handle.
   LRESULT HandleMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
+  // Resizes the window to accommodate a client area of the given |client_size|.
+  void SetClientSize(Size const& client_size) const;
+
   // Inserts |content| into the window tree.
   void SetChildContent(HWND content);
+
+  // Sets the window title.
+  void SetTitle(std::string_view title) const;
 
   // Controller for this window.
   FlutterHostWindowController* const window_controller_;

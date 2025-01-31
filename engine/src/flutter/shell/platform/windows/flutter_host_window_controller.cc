@@ -8,6 +8,7 @@
 
 #include "flutter/shell/platform/common/windowing.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
+#include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 
 namespace flutter {
 
@@ -44,27 +45,73 @@ std::optional<WindowMetadata> FlutterHostWindowController::CreateHostWindow(
 
   // Assume first window is the main window.
   if (windows_.empty()) {
-    window->SetQuitOnClose(true);
+    window->quit_on_close_ = true;
   }
 
-  FlutterViewId const view_id = window->GetFlutterViewId();
-  WindowState const state = window->GetState();
+  FlutterViewId const view_id = window->view_controller_->view()->view_id();
+  WindowState const state = window->state_;
   windows_[view_id] = std::move(window);
 
   WindowMetadata const result = {.view_id = view_id,
                                  .archetype = settings.archetype,
-                                 .size = GetWindowSize(view_id),
+                                 .size = GetViewSize(view_id),
                                  .parent_id = std::nullopt,
                                  .state = state};
 
   return result;
 }
 
-bool FlutterHostWindowController::DestroyHostWindow(FlutterViewId view_id) {
-  if (auto const it = windows_.find(view_id); it != windows_.end()) {
-    FlutterHostWindow* const window = it->second.get();
-    HWND const window_handle = window->GetWindowHandle();
+bool FlutterHostWindowController::ModifyHostWindow(
+    FlutterViewId view_id,
+    WindowModificationSettings const& settings) const {
+  FlutterHostWindow* const window = GetHostWindow(view_id);
+  if (!window) {
+    return false;
+  }
 
+  HWND const window_handle = window->GetWindowHandle();
+
+  std::optional<Size> changed_size;
+  if (settings.size.has_value()) {
+    Size const view_size_before = GetViewSize(view_id);
+    window->SetClientSize(*settings.size);
+    Size const view_size_after = GetViewSize(view_id);
+    if (!(view_size_before == view_size_after)) {
+      changed_size = view_size_after;
+    }
+  }
+  if (settings.title.has_value()) {
+    window->SetTitle(*settings.title);
+  }
+  if (settings.state.has_value()) {
+    WINDOWPLACEMENT window_placement = {.length = sizeof(WINDOWPLACEMENT)};
+    if (GetWindowPlacement(window_handle, &window_placement)) {
+      window_placement.showCmd = [&]() {
+        switch (*settings.state) {
+          case WindowState::kRestored:
+            return SW_RESTORE;
+          case WindowState::kMaximized:
+            return SW_MAXIMIZE;
+          case WindowState::kMinimized:
+            return SW_MINIMIZE;
+          default:
+            FML_UNREACHABLE();
+        };
+      }();
+      SetWindowPlacement(window_handle, &window_placement);
+    }
+  }
+
+  if (changed_size) {
+    SendOnWindowChanged(view_id, changed_size, std::nullopt);
+  }
+
+  return true;
+}
+
+bool FlutterHostWindowController::DestroyHostWindow(
+    FlutterViewId view_id) const {
+  if (FlutterHostWindow* const window = GetHostWindow(view_id)) {
     // |window| will be removed from |windows_| when WM_NCDESTROY is handled.
     PostMessage(window->GetWindowHandle(), WM_CLOSE, 0, 0);
 
@@ -93,7 +140,7 @@ LRESULT FlutterHostWindowController::HandleMessage(HWND hwnd,
           });
       if (it != windows_.end()) {
         FlutterViewId const view_id = it->first;
-        bool const quit_on_close = it->second->GetQuitOnClose();
+        bool const quit_on_close = it->second->quit_on_close_;
 
         windows_.erase(it);
 
@@ -118,7 +165,7 @@ LRESULT FlutterHostWindowController::HandleMessage(HWND hwnd,
                                ? WindowState::kMinimized
                                : WindowState::kRestored;
         }
-        SendOnWindowChanged(view_id, GetWindowSize(view_id), std::nullopt);
+        SendOnWindowChanged(view_id, GetViewSize(view_id), std::nullopt);
       }
     } break;
     default:
@@ -155,17 +202,14 @@ void FlutterHostWindowController::DestroyAllWindows() {
   }
 }
 
-Size FlutterHostWindowController::GetWindowSize(FlutterViewId view_id) const {
-  HWND const hwnd = windows_.at(view_id)->GetWindowHandle();
-  RECT frame_rect;
-  DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &frame_rect,
-                        sizeof(frame_rect));
-
-  // Convert to logical coordinates.
-  double const dpr = FlutterDesktopGetDpiForHWND(hwnd) /
+Size FlutterHostWindowController::GetViewSize(FlutterViewId view_id) const {
+  HWND const window_handle = GetHostWindow(view_id)->GetWindowHandle();
+  RECT rect;
+  GetClientRect(window_handle, &rect);
+  double const dpr = FlutterDesktopGetDpiForHWND(window_handle) /
                      static_cast<double>(USER_DEFAULT_SCREEN_DPI);
-  double const width = (frame_rect.right - frame_rect.left) / dpr;
-  double const height = (frame_rect.bottom - frame_rect.top) / dpr;
+  double const width = rect.right / dpr;
+  double const height = rect.bottom / dpr;
   return {width, height};
 }
 

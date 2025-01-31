@@ -19,13 +19,18 @@ class WindowingHandler {
 
  private:
   // Handler for method calls received on |channel_|. Messages are
-  // redirected to either HandleCreateWindow or HandleDestroyWindow.
+  // redirected to HandleCreateWindow, HandlerModifyWindow or
+  // HandleDestroyWindow.
   void HandleMethodCall(
       const flutter::MethodCall<EncodableValue>& method_call,
       std::unique_ptr<flutter::MethodResult<EncodableValue>> result);
 
   // Handles the creation of windows.
   void HandleCreateWindow(flutter::WindowArchetype archetype,
+                          flutter::MethodCall<> const& call,
+                          flutter::MethodResult<>& result);
+  // Handles the modification of window attributes.
+  void HandleModifyWindow(flutter::WindowArchetype archetype,
                           flutter::MethodCall<> const& call,
                           flutter::MethodResult<>& result);
   // Handles the destruction of windows.

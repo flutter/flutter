@@ -13,7 +13,7 @@ Future<Object?>? Function(MethodCall)? _createWindowMethodCallHandler({
   return (MethodCall call) async {
     onMethodCall?.call(call);
     final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
-    if (call.method == 'createWindow') {
+    if (call.method == 'createRegular') {
       final List<Object?> size = args['size']! as List<Object?>;
       final String state = args['state'] as String? ?? WindowState.restored.toString();
 
