@@ -15,7 +15,7 @@ import '../test_utils.dart';
 // stateful one and back.
 void testAll({bool chrome = false, List<String> additionalCommandArgs = const <String>[]}) {
   group('chrome: $chrome'
-      '${additionalCommandArgs.isEmpty ? '' : 'with args: $additionalCommandArgs'}', () {
+      '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     late Directory tempDir;
     final HotReloadProject project = HotReloadProject();
     late FlutterRunTestDriver flutter;

@@ -13,7 +13,7 @@ import 'hot_reload_with_asset.dart';
 
 void testAll({bool chrome = false, List<String> additionalCommandArgs = const <String>[]}) {
   group('chrome: $chrome'
-      '${additionalCommandArgs.isEmpty ? '' : 'with args: $additionalCommandArgs'}', () {
+      '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     late Directory tempDir;
     final HotReloadWithAssetProject project = HotReloadWithAssetProject();
     late FlutterRunTestDriver flutter;
