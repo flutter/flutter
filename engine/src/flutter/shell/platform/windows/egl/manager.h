@@ -29,7 +29,7 @@
 namespace flutter {
 namespace egl {
 
-class enum GpuPreference {
+enum class GpuPreference {
     NoPreference,
     LowPowerPreference,
 };

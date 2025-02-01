@@ -17,7 +17,7 @@ namespace flutter {
 using UniqueAotDataPtr =
     std::unique_ptr<_FlutterEngineAOTData, FlutterEngineCollectAOTDataFnPtr>;
 
-class enum FlutterGpuPreference {
+enum class FlutterGpuPreference {
     NoPreference,
     LowPowerPreference,
 };
