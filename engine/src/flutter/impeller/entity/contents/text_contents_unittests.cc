@@ -202,5 +202,50 @@ TEST_P(TextContentsTest, MaintainsShape) {
   }
 }
 
+TEST_P(TextContentsTest, MaintainsSpace) {
+  std::shared_ptr<TextFrame> text_frame =
+      MakeTextFrame("ui", "Roboto-Regular.ttf", /*font_size=*/300);
+
+  std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
+  std::shared_ptr<GlyphAtlasContext> atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
+  ASSERT_TRUE(context && context->IsValid());
+
+  std::optional<int32_t> space;
+  // Something weird happens when we get around 415 so the test stops at 400.
+  // There can be seen a big drop in the geometry difference.
+  for (int i = 0; i <= 400; ++i) {
+    Scalar font_scale = 0.440 + (i / 1000.0);
+    Rect position_rect[2];
+    {
+      GlyphAtlasPipeline::VertexShader::PerVertexData data[12];
+      std::shared_ptr<GlyphAtlas> atlas =
+          CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+                           GlyphAtlas::Type::kAlphaBitmap, font_scale,
+                           atlas_context, text_frame);
+
+      TextContents::ComputeVertexData(
+          data, text_frame, font_scale,
+          /*entity_transform=*/Matrix::MakeScale({font_scale, font_scale, 1}),
+          /*offset=*/Vector2(0, 0),
+          /*glyph_properties=*/std::nullopt, atlas);
+      position_rect[0] = PerVertexDataPositionToRect(data);
+      position_rect[1] = PerVertexDataPositionToRect(data + 6);
+    }
+    int32_t diff = position_rect[1].GetLeft() - position_rect[0].GetRight();
+    if (space.has_value()) {
+      // As the scale increases the space between glyphs should remain the
+      // same or increase. Because of floating point rounding off we allow for
+      // 1 px of deviation
+      // See also: https://github.com/flutter/flutter/issues/162545
+      EXPECT_TRUE(abs(diff - *space) <= 2)
+          << "i:" << i << " diff:" << diff << " space:" << *space;
+    }
+    space = diff;
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller
