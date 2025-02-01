@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../test_data/stateless_stateful_project.dart';
@@ -34,39 +33,39 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
 
     testWithoutContext('Can switch from stateless to stateful', () async {
       final Completer<void> completer = Completer<void>();
-      globals.printStatus('staterunning1');
+      print('staterunning1'); // ignore: avoid_print
       StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
         if (line.contains('STATELESS')) {
-          globals.printStatus('staterunning2');
+          print('staterunning2'); // ignore: avoid_print
           completer.complete();
         }
       });
-      globals.printStatus('staterunning3');
+      print('staterunning3'); // ignore: avoid_print
       await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
       // Wait for run to finish.
-      globals.printStatus('staterunning4');
+      print('staterunning4'); // ignore: avoid_print
       await completer.future;
-      globals.printStatus('staterunning5');
+      print('staterunning5'); // ignore: avoid_print
       await subscription.cancel();
-      globals.printStatus('staterunning6');
+      print('staterunning6'); // ignore: avoid_print
 
       await flutter.hotReload();
-      globals.printStatus('staterunning7');
+      print('staterunning7'); // ignore: avoid_print
       final StringBuffer stdout = StringBuffer();
       subscription = flutter.stdout.listen(stdout.writeln);
 
       // switch to stateful.
       project.toggleState();
-      globals.printStatus('staterunning8');
+      print('staterunning8'); // ignore: avoid_print
       await flutter.hotReload();
-      globals.printStatus('staterunning9');
+      print('staterunning9'); // ignore: avoid_print
 
       final String logs = stdout.toString();
 
       expect(logs, contains('STATEFUL'));
-      globals.printStatus('staterunning10');
+      print('staterunning10'); // ignore: avoid_print
       await subscription.cancel();
-      globals.printStatus('staterunning11');
+      print('staterunning11'); // ignore: avoid_print
     });
   });
 }
