@@ -794,8 +794,7 @@ class MenuController {
   /// Close the menu that this [MenuController] is associated with.
   ///
   /// Associating with a menu is done by passing a [MenuController] to a
-  /// [RawMenuAnchor] or [MenuAnchor]. A [MenuController] is also be received by
-  /// [RawMenuAnchor.builder] or [MenuAnchor.builder] when invoked.
+  /// [MenuAnchor], [RawMenuAnchor], or [RawMenuAnchorGroup].
   ///
   /// If the menu's anchor point is scrolled by an ancestor, or the view changes
   /// size, then any open menu will automatically close.
