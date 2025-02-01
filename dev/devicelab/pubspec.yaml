@@ -6,7 +6,7 @@ environment:
   sdk: ^3.7.0-0
 
 dependencies:
-  archive: ^4.0.2
+  archive: 3.6.1
   args: 2.6.0
   file: 7.0.1
   http: 1.3.0
