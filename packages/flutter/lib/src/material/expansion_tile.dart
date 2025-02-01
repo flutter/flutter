@@ -246,6 +246,7 @@ class ExpansionTile extends StatefulWidget {
     this.expandedCrossAxisAlignment,
     this.expandedAlignment,
     this.childrenPadding,
+    this.childrenSpacing,
     this.backgroundColor,
     this.collapsedBackgroundColor,
     this.textColor,
@@ -406,6 +407,17 @@ class ExpansionTile extends StatefulWidget {
   /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
   ///   [ExpansionTileThemeData].
   final EdgeInsetsGeometry? childrenPadding;
+
+  /// Specifies spacing for [children].
+  ///
+  /// If this property is null then [ExpansionTileThemeData.childrenSpacing] is used. If that
+  /// is also null then the value of [childrenSpacing] is 0.0.
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
+  final double? childrenSpacing;
 
   /// The icon color of tile's expansion arrow icon when the sublist is expanded.
   ///
@@ -922,6 +934,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         child: Padding(
           padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
           child: Column(
+            spacing: widget.childrenSpacing ?? expansionTileTheme.childrenSpacing ?? 0.0,
             crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
             children: widget.children,
           ),

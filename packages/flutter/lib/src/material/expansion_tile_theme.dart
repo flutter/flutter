@@ -5,6 +5,8 @@
 /// @docImport 'expansion_tile.dart';
 library;
 
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -48,6 +50,7 @@ class ExpansionTileThemeData with Diagnosticable {
     this.tilePadding,
     this.expandedAlignment,
     this.childrenPadding,
+    this.childrenSpacing,
     this.iconColor,
     this.collapsedIconColor,
     this.textColor,
@@ -72,6 +75,9 @@ class ExpansionTileThemeData with Diagnosticable {
 
   /// Overrides the default value of [ExpansionTile.childrenPadding].
   final EdgeInsetsGeometry? childrenPadding;
+
+  /// Overrides the default value of [ExpansionTile.childrenSpacing].
+  final double? childrenSpacing;
 
   /// Overrides the default value of [ExpansionTile.iconColor].
   final Color? iconColor;
@@ -105,6 +111,7 @@ class ExpansionTileThemeData with Diagnosticable {
     EdgeInsetsGeometry? tilePadding,
     AlignmentGeometry? expandedAlignment,
     EdgeInsetsGeometry? childrenPadding,
+    double? childrenSpacing,
     Color? iconColor,
     Color? collapsedIconColor,
     Color? textColor,
@@ -120,6 +127,7 @@ class ExpansionTileThemeData with Diagnosticable {
       tilePadding: tilePadding ?? this.tilePadding,
       expandedAlignment: expandedAlignment ?? this.expandedAlignment,
       childrenPadding: childrenPadding ?? this.childrenPadding,
+      childrenSpacing: childrenSpacing ?? this.childrenSpacing,
       iconColor: iconColor ?? this.iconColor,
       collapsedIconColor: collapsedIconColor ?? this.collapsedIconColor,
       textColor: textColor ?? this.textColor,
@@ -150,6 +158,7 @@ class ExpansionTileThemeData with Diagnosticable {
       tilePadding: EdgeInsetsGeometry.lerp(a?.tilePadding, b?.tilePadding, t),
       expandedAlignment: AlignmentGeometry.lerp(a?.expandedAlignment, b?.expandedAlignment, t),
       childrenPadding: EdgeInsetsGeometry.lerp(a?.childrenPadding, b?.childrenPadding, t),
+      childrenSpacing: lerpDouble(a?.childrenSpacing, b?.childrenSpacing, t),
       iconColor: Color.lerp(a?.iconColor, b?.iconColor, t),
       collapsedIconColor: Color.lerp(a?.collapsedIconColor, b?.collapsedIconColor, t),
       textColor: Color.lerp(a?.textColor, b?.textColor, t),
@@ -169,6 +178,7 @@ class ExpansionTileThemeData with Diagnosticable {
       tilePadding,
       expandedAlignment,
       childrenPadding,
+      childrenSpacing,
       iconColor,
       collapsedIconColor,
       textColor,
@@ -194,6 +204,7 @@ class ExpansionTileThemeData with Diagnosticable {
         other.tilePadding == tilePadding &&
         other.expandedAlignment == expandedAlignment &&
         other.childrenPadding == childrenPadding &&
+        other.childrenSpacing == childrenSpacing &&
         other.iconColor == iconColor &&
         other.collapsedIconColor == collapsedIconColor &&
         other.textColor == textColor &&
@@ -227,6 +238,9 @@ class ExpansionTileThemeData with Diagnosticable {
         childrenPadding,
         defaultValue: null,
       ),
+    );
+    properties.add(
+      DiagnosticsProperty<double>('childrenSpacing', childrenSpacing, defaultValue: null),
     );
     properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
     properties.add(ColorProperty('collapsedIconColor', collapsedIconColor, defaultValue: null));
