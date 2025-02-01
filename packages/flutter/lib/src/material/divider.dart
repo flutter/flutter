@@ -149,6 +149,13 @@ class Divider extends StatelessWidget {
   /// {@end-tool}
   final BorderRadius? borderRadius;
 
+  /// Creates a [BorderSide] for use in dividers, based on the provided [BuildContext].
+  ///
+  /// This method allows for the creation of a [BorderSide] with customizable properties,
+  /// such as color and width, based on the current theme or default values.
+  ///
+  /// - [context]: The [BuildContext] used to look up the theme data. If `null`, default
+  ///   values will be used.
   static BorderSide createBorderSide(BuildContext? context,
       {Color? color, double? width}) {
     final DividerThemeData? dividerTheme =
@@ -330,6 +337,13 @@ class VerticalDivider extends StatelessWidget {
   /// {@end-tool}
   final BorderRadius? borderRadius;
 
+  /// Creates a [BorderSide] for use in dividers, based on the provided [BuildContext].
+  ///
+  /// This method allows for the creation of a [BorderSide] with customizable properties,
+  /// such as color and width, based on the current theme or default values.
+  ///
+  /// - [context]: The [BuildContext] used to look up the theme data. If `null`, default
+  ///   values will be used.
   static BorderSide createBorderSide(BuildContext? context,
       {Color? color, double? width}) {
     final DividerThemeData? dividerTheme =
