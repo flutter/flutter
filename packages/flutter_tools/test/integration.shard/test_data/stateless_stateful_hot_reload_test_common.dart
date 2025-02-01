@@ -32,13 +32,13 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('Can switch from stateless to stateful', () async {
-      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
       final Completer<void> completer = Completer<void>();
       StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
         if (line.contains('STATELESS')) {
           completer.complete();
         }
       });
+      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
       // Wait for run to finish.
       await completer.future;
       await subscription.cancel();
