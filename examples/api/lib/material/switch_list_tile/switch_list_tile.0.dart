@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SwitchListTile].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [SwitchListTile].
 
 void main() => runApp(const SwitchListTileApp());
 
@@ -17,9 +17,7 @@ class SwitchListTileApp extends StatelessWidget {
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('SwitchListTile Sample')),
-        body: const Center(
-          child: SwitchListTileExample(),
-        ),
+        body: const Center(child: SwitchListTileExample()),
       ),
     );
   }

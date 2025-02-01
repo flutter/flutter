@@ -18,7 +18,7 @@ enum _ReorderableListType {
 }
 
 class ReorderableListDemo extends StatefulWidget {
-  const ReorderableListDemo({ super.key });
+  const ReorderableListDemo({super.key});
 
   static const String routeName = '/material/reorderable-list';
 
@@ -37,13 +37,27 @@ class _ListItem {
 class _ListDemoState extends State<ReorderableListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  PersistentBottomSheetController<void>? _bottomSheet;
+  PersistentBottomSheetController? _bottomSheet;
   _ReorderableListType? _itemType = _ReorderableListType.threeLine;
   bool? _reverse = false;
   bool _reverseSort = false;
-  final List<_ListItem> _items = <String>[
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-  ].map<_ListItem>((String item) => _ListItem(item, false)).toList();
+  final List<_ListItem> _items =
+      <String>[
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
+        'I',
+        'J',
+        'K',
+        'L',
+        'M',
+        'N',
+      ].map<_ListItem>((String item) => _ListItem(item, false)).toList();
 
   void changeItemType(_ReorderableListType? type) {
     setState(() {
@@ -71,11 +85,9 @@ class _ListDemoState extends State<ReorderableListDemo> {
 
   void _showConfigurationSheet() {
     setState(() {
-      _bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((BuildContext bottomSheetContext) {
+      _bottomSheet = scaffoldKey.currentState!.showBottomSheet((BuildContext bottomSheetContext) {
         return DecoratedBox(
-          decoration: const BoxDecoration(
-            border: Border(top: BorderSide(color: Colors.black26)),
-          ),
+          decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.black26))),
           child: ListView(
             shrinkWrap: true,
             primary: false,
@@ -143,24 +155,16 @@ class _ListDemoState extends State<ReorderableListDemo> {
           subtitle: secondary,
           secondary: const Icon(Icons.drag_handle),
         );
-        break;
       case _ReorderableListType.horizontalAvatar:
       case _ReorderableListType.verticalAvatar:
         listTile = SizedBox(
           key: Key(item.value),
           height: 100.0,
           width: 100.0,
-          child: CircleAvatar(
-            backgroundColor: Colors.green,
-            child: Text(item.value),
-          ),
+          child: CircleAvatar(backgroundColor: Colors.green, child: Text(item.value)),
         );
-        break;
       case null:
-        listTile = Container(
-          key: Key(item.value),
-        );
-        break;
+        listTile = Container(key: Key(item.value));
     }
 
     return listTile;
@@ -176,7 +180,6 @@ class _ListDemoState extends State<ReorderableListDemo> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,15 +194,16 @@ class _ListDemoState extends State<ReorderableListDemo> {
             onPressed: () {
               setState(() {
                 _reverseSort = !_reverseSort;
-                _items.sort((_ListItem a, _ListItem b) => _reverseSort ? b.value.compareTo(a.value) : a.value.compareTo(b.value));
+                _items.sort(
+                  (_ListItem a, _ListItem b) =>
+                      _reverseSort ? b.value.compareTo(a.value) : a.value.compareTo(b.value),
+                );
               });
             },
           ),
           IconButton(
             icon: Icon(
-              Theme.of(context).platform == TargetPlatform.iOS
-                  ? Icons.more_horiz
-                  : Icons.more_vert,
+              Theme.of(context).platform == TargetPlatform.iOS ? Icons.more_horiz : Icons.more_vert,
             ),
             tooltip: 'Show menu',
             onPressed: _bottomSheet == null ? _showConfigurationSheet : null,
@@ -209,14 +213,20 @@ class _ListDemoState extends State<ReorderableListDemo> {
       body: Scrollbar(
         child: ReorderableListView(
           primary: true,
-          header: _itemType != _ReorderableListType.threeLine
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('Header of the list', style: Theme.of(context).textTheme.headlineSmall))
-              : null,
+          header:
+              _itemType != _ReorderableListType.threeLine
+                  ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Header of the list',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  )
+                  : null,
           onReorder: _onReorder,
           reverse: _reverse!,
-          scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
+          scrollDirection:
+              _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           children: _items.map<Widget>(buildListTile).toList(),
         ),

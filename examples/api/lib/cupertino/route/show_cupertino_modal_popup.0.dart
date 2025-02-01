@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [showCupertinoModalPopup].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [showCupertinoModalPopup].
 
 void main() => runApp(const ModalPopupApp());
 
@@ -27,9 +27,7 @@ class ModalPopupExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Home'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('Home')),
       child: Center(
         child: CupertinoButton(
           onPressed: () {

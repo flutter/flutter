@@ -33,13 +33,25 @@ void main() {
     expect(FractionalOffset.lerp(a, null, 0.25), equals(const FractionalOffset(0.125, 0.125)));
   });
 
+  test('FractionalOffset.lerp identical a,b', () {
+    expect(FractionalOffset.lerp(null, null, 0), null);
+    const FractionalOffset decoration = FractionalOffset(1, 2);
+    expect(identical(FractionalOffset.lerp(decoration, decoration, 0.5), decoration), true);
+  });
+
   test('FractionalOffset.fromOffsetAndSize()', () {
-    final FractionalOffset a = FractionalOffset.fromOffsetAndSize(const Offset(100.0, 100.0), const Size(200.0, 400.0));
+    final FractionalOffset a = FractionalOffset.fromOffsetAndSize(
+      const Offset(100.0, 100.0),
+      const Size(200.0, 400.0),
+    );
     expect(a, const FractionalOffset(0.5, 0.25));
   });
 
   test('FractionalOffset.fromOffsetAndRect()', () {
-    final FractionalOffset a = FractionalOffset.fromOffsetAndRect(const Offset(150.0, 120.0), const Rect.fromLTWH(50.0, 20.0, 200.0, 400.0));
+    final FractionalOffset a = FractionalOffset.fromOffsetAndRect(
+      const Offset(150.0, 120.0),
+      const Rect.fromLTWH(50.0, 20.0, 200.0, 400.0),
+    );
     expect(a, const FractionalOffset(0.5, 0.25));
   });
 }

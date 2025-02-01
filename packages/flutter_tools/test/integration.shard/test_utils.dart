@@ -15,6 +15,13 @@ import 'test_driver.dart';
 /// The [FileSystem] for the integration test environment.
 const FileSystem fileSystem = LocalFileSystem();
 
+/// The (real) `flutter` binary (i.e. `{ROOT}/bin/flutter`) to execute in tests.
+final String flutterBin = fileSystem.path.join(
+  getFlutterRoot(),
+  'bin',
+  platform.isWindows ? 'flutter.bat' : 'flutter',
+);
+
 /// The [Platform] for the integration test environment.
 const Platform platform = LocalPlatform();
 
@@ -31,26 +38,36 @@ Directory createResolvedTempDirectorySync(String prefix) {
 }
 
 void writeFile(String path, String content, {bool writeFutureModifiedDate = false}) {
-  final File file = fileSystem.file(path)
-    ..createSync(recursive: true)
-    ..writeAsStringSync(content, flush: true);
-    // Some integration tests on Windows to not see this file as being modified
-    // recently enough for the hot reload to pick this change up unless the
-    // modified time is written in the future.
-    if (writeFutureModifiedDate) {
-      file.setLastModifiedSync(DateTime.now().add(const Duration(seconds: 5)));
-    }
+  final File file =
+      fileSystem.file(path)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(content, flush: true);
+  // Some integration tests on Windows to not see this file as being modified
+  // recently enough for the hot reload to pick this change up unless the
+  // modified time is written in the future.
+  if (writeFutureModifiedDate) {
+    file.setLastModifiedSync(DateTime.now().add(const Duration(seconds: 5)));
+  }
 }
 
 void writeBytesFile(String path, List<int> content) {
   fileSystem.file(path)
     ..createSync(recursive: true)
-    ..writeAsBytesSync(content);
+    ..writeAsBytesSync(content, flush: true);
 }
 
-void writePackages(String folder) {
-  writeFile(fileSystem.path.join(folder, '.packages'), '''
-test:${fileSystem.path.join(fileSystem.currentDirectory.path, 'lib')}/
+void writePackageConfig(String folder) {
+  writeFile(fileSystem.path.join(folder, '.dart_tool', 'package_config.json'), '''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "test",
+      "rootUri": "fileSystem.currentDirectory.path"
+      "packageUri": "lib/",
+    }
+  ]
+}
 ''');
 }
 
@@ -67,6 +84,7 @@ Future<void> getPackages(String folder) async {
 }
 
 const String kLocalEngineEnvironment = 'FLUTTER_LOCAL_ENGINE';
+const String kLocalEngineHostEnvironment = 'FLUTTER_LOCAL_ENGINE_HOST';
 const String kLocalEngineLocation = 'FLUTTER_LOCAL_ENGINE_SRC_PATH';
 
 List<String> getLocalEngineArguments() {
@@ -75,6 +93,8 @@ List<String> getLocalEngineArguments() {
       '--local-engine=${platform.environment[kLocalEngineEnvironment]}',
     if (platform.environment.containsKey(kLocalEngineLocation))
       '--local-engine-src-path=${platform.environment[kLocalEngineLocation]}',
+    if (platform.environment.containsKey(kLocalEngineHostEnvironment))
+      '--local-engine-host=${platform.environment[kLocalEngineHostEnvironment]}',
   ];
 }
 
@@ -100,30 +120,106 @@ Future<void> pollForServiceExtensionValue<T>({
   );
 }
 
-class AppleTestUtils {
-  // static only
-  AppleTestUtils._();
-
+abstract final class AppleTestUtils {
   static const List<String> requiredSymbols = <String>[
     '_kDartIsolateSnapshotData',
     '_kDartIsolateSnapshotInstructions',
     '_kDartVmSnapshotData',
-    '_kDartVmSnapshotInstructions'
+    '_kDartVmSnapshotInstructions',
   ];
 
   static List<String> getExportedSymbols(String dwarfPath) {
-    final ProcessResult nm = processManager.runSync(
-      <String>[
-        'nm',
-        '--debug-syms',  // nm docs: 'Show all symbols, even debugger only'
-        '--defined-only',
-        '--just-symbol-name',
-        dwarfPath,
-        '-arch',
-        'arm64',
-      ],
-    );
+    final ProcessResult nm = processManager.runSync(<String>[
+      'nm',
+      '--debug-syms', // nm docs: 'Show all symbols, even debugger only'
+      '--defined-only',
+      '--just-symbol-name',
+      dwarfPath,
+      '-arch',
+      'arm64',
+    ]);
     final String nmOutput = (nm.stdout as String).trim();
     return nmOutput.isEmpty ? const <String>[] : nmOutput.split('\n');
+  }
+}
+
+/// Matcher to be used for [ProcessResult] returned
+/// from a process run
+///
+/// The default for [exitCode] will be 0 while
+/// [stdoutPattern] and [stderrPattern] are both optional
+class ProcessResultMatcher extends Matcher {
+  const ProcessResultMatcher({this.exitCode = 0, this.stdoutPattern, this.stderrPattern});
+
+  /// The expected exit code to get returned from a process run
+  final int exitCode;
+
+  /// Substring to find in the process's stdout
+  final Pattern? stdoutPattern;
+
+  /// Substring to find in the process's stderr
+  final Pattern? stderrPattern;
+
+  @override
+  Description describe(Description description) {
+    description.add('a process with exit code $exitCode');
+    if (stdoutPattern != null) {
+      description.add(' and stdout: "$stdoutPattern"');
+    }
+    if (stderrPattern != null) {
+      description.add(' and stderr: "$stderrPattern"');
+    }
+
+    return description;
+  }
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    final ProcessResult result = item as ProcessResult;
+    bool foundStdout = true;
+    bool foundStderr = true;
+
+    final String stdout = result.stdout as String;
+    final String stderr = result.stderr as String;
+    if (stdoutPattern != null) {
+      foundStdout = stdout.contains(stdoutPattern!);
+      matchState['stdout'] = stdout;
+    } else if (stdout.isNotEmpty) {
+      // even if we were not asserting on stdout, show stdout for debug purposes
+      matchState['stdout'] = stdout;
+    }
+
+    if (stderrPattern != null) {
+      foundStderr = stderr.contains(stderrPattern!);
+      matchState['stderr'] = stderr;
+    } else if (stderr.isNotEmpty) {
+      matchState['stderr'] = stderr;
+    }
+
+    return result.exitCode == exitCode && foundStdout && foundStderr;
+  }
+
+  @override
+  Description describeMismatch(
+    Object? item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    final ProcessResult result = item! as ProcessResult;
+
+    if (result.exitCode != exitCode) {
+      mismatchDescription.add('Actual exitCode was ${result.exitCode}\n');
+    }
+
+    if (matchState.containsKey('stdout')) {
+      mismatchDescription.add('Actual stdout:\n${matchState["stdout"]}\n');
+    }
+
+    if (matchState.containsKey('stderr')) {
+      mismatchDescription.add('Actual stderr:\n${matchState["stderr"]}\n');
+    }
+
+    return mismatchDescription;
   }
 }

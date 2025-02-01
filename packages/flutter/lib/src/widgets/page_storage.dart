@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'routes.dart';
+/// @docImport 'scroll_controller.dart';
+/// @docImport 'scroll_position.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'single_child_scroll_view.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -9,17 +19,19 @@ import 'framework.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// A key can be used to persist the widget state in storage after
-/// the destruction and will be restored when recreated.
+/// A [Key] that can be used to persist the widget state in storage after the
+/// destruction and will be restored when recreated.
 ///
-/// Each key with its value plus the ancestor chain of other PageStorageKeys need to
-/// be unique within the widget's closest ancestor [PageStorage]. To make it possible for a
-/// saved value to be found when a widget is recreated, the key's value must
-/// not be objects whose identity will change each time the widget is created.
+/// Each key with its value plus the ancestor chain of other [PageStorageKey]s
+/// need to be unique within the widget's closest ancestor [PageStorage]. To
+/// make it possible for a saved value to be found when a widget is recreated,
+/// the key's value must not be objects whose identity will change each time the
+/// widget is created.
 ///
 /// See also:
 ///
-///  * [PageStorage], which is the closet ancestor for [PageStorageKey].
+///  * [PageStorage], which manages the data storage for widgets using
+///    [PageStorageKey]s.
 class PageStorageKey<T> extends ValueKey<T> {
   /// Creates a [ValueKey] that defines where [PageStorage] values will be saved.
   const PageStorageKey(super.value);
@@ -38,8 +50,8 @@ class _StorageEntryIdentifier {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _StorageEntryIdentifier
-        && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
+    return other is _StorageEntryIdentifier &&
+        listEquals<PageStorageKey<dynamic>>(other.keys, keys);
   }
 
   @override
@@ -89,7 +101,7 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then the `data` is not saved.
-  void writeState(BuildContext context, dynamic data, { Object? identifier }) {
+  void writeState(BuildContext context, dynamic data, {Object? identifier}) {
     _storage ??= <Object, dynamic>{};
     if (identifier != null) {
       _storage![identifier] = data;
@@ -109,7 +121,7 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
-  dynamic readState(BuildContext context, { Object? identifier }) {
+  dynamic readState(BuildContext context, {Object? identifier}) {
     if (_storage == null) {
       return null;
     }
@@ -136,12 +148,12 @@ class PageStorageBucket {
 /// included in routes.
 ///
 /// [PageStorageKey] is used by [Scrollable] if [ScrollController.keepScrollOffset]
-/// is enabled to save their [ScrollPosition]s. When more than one
-/// scrollable ([ListView], [SingleChildScrollView], [TextField], etc.) appears
-/// within the widget's closest ancestor [PageStorage] (such as within the same route),
-/// if you want to save all of their positions independently,
-/// you should give each of them unique [PageStorageKey]s, or set some of their
-/// `keepScrollOffset` false to prevent saving.
+/// is enabled to save their [ScrollPosition]s. When more than one scrollable
+/// ([ListView], [SingleChildScrollView], [TextField], etc.) appears within the
+/// widget's closest ancestor [PageStorage] (such as within the same route), to
+/// save all of their positions independently, one must give each of them unique
+/// [PageStorageKey]s, or set the `keepScrollOffset` property of some such
+/// widgets to false to prevent saving.
 ///
 /// {@tool dartpad}
 /// This sample shows how to explicitly use a [PageStorage] to
@@ -157,13 +169,7 @@ class PageStorageBucket {
 ///  * [ModalRoute], which includes this class.
 class PageStorage extends StatelessWidget {
   /// Creates a widget that provides a storage bucket for its descendants.
-  ///
-  /// The [bucket] argument must not be null.
-  const PageStorage({
-    super.key,
-    required this.bucket,
-    required this.child,
-  });
+  const PageStorage({super.key, required this.bucket, required this.child});
 
   /// The widget below this widget in the tree.
   ///

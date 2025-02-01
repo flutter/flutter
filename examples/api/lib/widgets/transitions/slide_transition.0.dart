@@ -2,39 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SlideTransition].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SlideTransition].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SlideTransitionExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class SlideTransitionExampleApp extends StatelessWidget {
+  const SlideTransitionExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const Center(
-          child: MyStatefulWidget(),
-        ),
+        appBar: AppBar(title: const Text('SlideTransition Sample')),
+        body: const Center(child: SlideTransitionExample()),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SlideTransitionExample extends StatefulWidget {
+  const SlideTransitionExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SlideTransitionExample> createState() => _SlideTransitionExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+class _SlideTransitionExampleState extends State<SlideTransitionExample>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),
@@ -43,10 +38,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   late final Animation<Offset> _offsetAnimation = Tween<Offset>(
     begin: Offset.zero,
     end: const Offset(1.5, 0.0),
-  ).animate(CurvedAnimation(
-    parent: _controller,
-    curve: Curves.elasticIn,
-  ));
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticIn));
 
   @override
   void dispose() {
@@ -58,10 +50,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   Widget build(BuildContext context) {
     return SlideTransition(
       position: _offsetAnimation,
-      child: const Padding(
-        padding: EdgeInsets.all(8.0),
-        child: FlutterLogo(size: 150.0),
-      ),
+      child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
     );
   }
 }

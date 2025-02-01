@@ -8,9 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('has two containers when wide', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.MyApp(),
-    );
+    await tester.pumpWidget(const example.LayoutBuilderExampleApp());
 
     final Finder containerFinder = find.byType(Container);
     expect(containerFinder, findsNWidgets(2));
@@ -19,7 +17,7 @@ void main() {
     await tester.pumpWidget(
       ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
-        child: const example.MyApp(),
+        child: const example.LayoutBuilderExampleApp(),
       ),
     );
 

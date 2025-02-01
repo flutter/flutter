@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:fake_async/fake_async.dart';
+///
+/// @docImport 'test_compat.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -24,25 +30,22 @@ final Map<int, ui.Image> _cache = <int, ui.Image>{};
 /// [FakeAsync] zones set up by [testWidgets]. Typically, it should be invoked
 /// as a setup step before [testWidgets] are run, such as [setUp] or [setUpAll].
 /// If needed, it can be invoked using [WidgetTester.runAsync].
-Future<ui.Image> createTestImage({
-  int width = 1,
-  int height = 1,
-  bool cache = true,
-}) => TestAsyncUtils.guard(() async {
-  assert(width > 0);
-  assert(height > 0);
+Future<ui.Image> createTestImage({int width = 1, int height = 1, bool cache = true}) =>
+    TestAsyncUtils.guard(() async {
+      assert(width > 0);
+      assert(height > 0);
 
-  final int cacheKey = Object.hash(width, height);
-  if (cache && _cache.containsKey(cacheKey)) {
-    return _cache[cacheKey]!.clone();
-  }
+      final int cacheKey = Object.hash(width, height);
+      if (cache && _cache.containsKey(cacheKey)) {
+        return _cache[cacheKey]!.clone();
+      }
 
-  final ui.Image image = await _createImage(width, height);
-  if (cache) {
-    _cache[cacheKey] = image.clone();
-  }
-  return image;
-});
+      final ui.Image image = await _createImage(width, height);
+      if (cache) {
+        _cache[cacheKey] = image.clone();
+      }
+      return image;
+    });
 
 Future<ui.Image> _createImage(int width, int height) async {
   final Completer<ui.Image> completer = Completer<ui.Image>();

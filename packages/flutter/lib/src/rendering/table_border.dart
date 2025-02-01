@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' hide Border;
 
@@ -36,24 +39,29 @@ class TableBorder {
     BorderRadius borderRadius = BorderRadius.zero,
   }) {
     final BorderSide side = BorderSide(color: color, width: width, style: style);
-    return TableBorder(top: side, right: side, bottom: side, left: side, horizontalInside: side, verticalInside: side, borderRadius: borderRadius);
+    return TableBorder(
+      top: side,
+      right: side,
+      bottom: side,
+      left: side,
+      horizontalInside: side,
+      verticalInside: side,
+      borderRadius: borderRadius,
+    );
   }
 
   /// Creates a border for a table where all the interior sides use the same
   /// styling and all the exterior sides use the same styling.
-  factory TableBorder.symmetric({
+  const TableBorder.symmetric({
     BorderSide inside = BorderSide.none,
     BorderSide outside = BorderSide.none,
-  }) {
-    return TableBorder(
-      top: outside,
-      right: outside,
-      bottom: outside,
-      left: outside,
-      horizontalInside: inside,
-      verticalInside: inside,
-    );
-  }
+    this.borderRadius = BorderRadius.zero,
+  }) : top = outside,
+       right = outside,
+       bottom = outside,
+       left = outside,
+       horizontalInside = inside,
+       verticalInside = inside;
 
   /// The top side of this border.
   final BorderSide top;
@@ -89,7 +97,6 @@ class TableBorder {
   /// Whether all the sides of the border (outside and inside) are identical.
   /// Uniform borders are typically more efficient to paint.
   bool get isUniform {
-
     final Color topColor = top.color;
     if (right.color != topColor ||
         bottom.color != topColor ||
@@ -153,8 +160,8 @@ class TableBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TableBorder? lerp(TableBorder? a, TableBorder? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!.scale(t);
@@ -227,7 +234,6 @@ class TableBorder {
               path.lineTo(rect.left + x, rect.bottom);
             }
             canvas.drawPath(path, paint);
-            break;
           case BorderStyle.none:
             break;
         }
@@ -246,13 +252,12 @@ class TableBorder {
               path.lineTo(rect.right, rect.top + y);
             }
             canvas.drawPath(path, paint);
-            break;
           case BorderStyle.none:
             break;
         }
       }
     }
-    if(!isUniform || borderRadius == BorderRadius.zero) {
+    if (!isUniform || borderRadius == BorderRadius.zero) {
       paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
     } else {
       final RRect outer = borderRadius.toRRect(rect);
@@ -270,19 +275,21 @@ class TableBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TableBorder
-        && other.top == top
-        && other.right == right
-        && other.bottom == bottom
-        && other.left == left
-        && other.horizontalInside == horizontalInside
-        && other.verticalInside == verticalInside
-        && other.borderRadius == borderRadius;
+    return other is TableBorder &&
+        other.top == top &&
+        other.right == right &&
+        other.bottom == bottom &&
+        other.left == left &&
+        other.horizontalInside == horizontalInside &&
+        other.verticalInside == verticalInside &&
+        other.borderRadius == borderRadius;
   }
 
   @override
-  int get hashCode => Object.hash(top, right, bottom, left, horizontalInside, verticalInside, borderRadius);
+  int get hashCode =>
+      Object.hash(top, right, bottom, left, horizontalInside, verticalInside, borderRadius);
 
   @override
-  String toString() => 'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside, $borderRadius)';
+  String toString() =>
+      'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside, $borderRadius)';
 }

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ReorderableListView.buildDefaultDragHandles].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ReorderableListView.buildDefaultDragHandles].
 
 void main() => runApp(const ReorderableApp());
 
@@ -53,10 +53,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
                   padding: const EdgeInsets.all(8),
                   child: ReorderableDragStartListener(
                     index: index,
-                    child: Card(
-                      color: colorScheme.primary,
-                      elevation: 2,
-                    ),
+                    child: Card(color: colorScheme.primary, elevation: 2),
                   ),
                 ),
                 Text('Item ${_items[index]}'),

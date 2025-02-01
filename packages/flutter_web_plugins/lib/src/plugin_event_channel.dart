@@ -15,10 +15,9 @@ import 'plugin_registry.dart';
 /// channel sends a stream of events to the handler listening on the
 /// framework-side.
 ///
-/// The channel [name] must not be null. If no [codec] is provided, then
-/// [StandardMethodCodec] is used. If no [binaryMessenger] is provided, then
-/// [pluginBinaryMessenger], which sends messages to the framework-side,
-/// is used.
+/// If no [codec] is provided, then [StandardMethodCodec] is used. If no
+/// [binaryMessenger] is provided, then [pluginBinaryMessenger], which sends
+/// messages to the framework-side, is used.
 ///
 /// Channels created using this class implement two methods for
 /// subscribing to the event stream. The methods use the encoding of
@@ -37,8 +36,6 @@ import 'plugin_registry.dart';
 /// subscribed are silently discarded.
 class PluginEventChannel<T> {
   /// Creates a new plugin event channel.
-  ///
-  /// The [name] and [codec] arguments must not be null.
   const PluginEventChannel(
     this.name, [
     this.codec = const StandardMethodCodec(),
@@ -46,13 +43,11 @@ class PluginEventChannel<T> {
   ]);
 
   /// The logical channel on which communication happens.
-  ///
-  /// This must not be null.
   final String name;
 
   /// The message codec used by this channel.
   ///
-  /// This must not be null. This defaults to [StandardMethodCodec].
+  /// Defaults to [StandardMethodCodec].
   final MethodCodec codec;
 
   /// The messenger used by this channel to send platform messages.
@@ -68,9 +63,10 @@ class PluginEventChannel<T> {
   /// and providing a getter would require making this class non-const.
   @Deprecated(
     'Replace calls to the "controller" setter with calls to the "setController" method. '
-    'This feature was deprecated after v1.23.0-7.0.pre.'
+    'This feature was deprecated after v1.23.0-7.0.pre.',
   )
-  set controller(StreamController<T> controller) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set controller(StreamController<T> controller) {
     setController(controller);
   }
 
@@ -102,12 +98,7 @@ class PluginEventChannel<T> {
 }
 
 class _EventChannelHandler<T> {
-  _EventChannelHandler(
-    this.name,
-    this.codec,
-    this.controller,
-    this.messenger,
-  );
+  _EventChannelHandler(this.name, this.codec, this.controller, this.messenger);
 
   final String name;
   final MethodCodec codec;
@@ -132,20 +123,20 @@ class _EventChannelHandler<T> {
   Future<ByteData> _listen() async {
     // Cancel any existing subscription.
     await subscription?.cancel();
-    subscription = controller.stream.listen((dynamic event) {
-      messenger.send(name, codec.encodeSuccessEnvelope(event));
-    }, onError: (dynamic error) {
-      messenger.send(name, codec.encodeErrorEnvelope(code: 'error', message: '$error'));
-    });
+    subscription = controller.stream.listen(
+      (dynamic event) {
+        messenger.send(name, codec.encodeSuccessEnvelope(event));
+      },
+      onError: (dynamic error) {
+        messenger.send(name, codec.encodeErrorEnvelope(code: 'error', message: '$error'));
+      },
+    );
     return codec.encodeSuccessEnvelope(null);
   }
 
   Future<ByteData> _cancel() async {
     if (subscription == null) {
-      return codec.encodeErrorEnvelope(
-        code: 'error',
-        message: 'No active subscription to cancel.',
-      );
+      return codec.encodeErrorEnvelope(code: 'error', message: 'No active subscription to cancel.');
     }
     await subscription!.cancel();
     subscription = null;

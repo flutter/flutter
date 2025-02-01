@@ -46,7 +46,7 @@ The following message was thrown running a test:
 Who lives, who dies, who tells your story\?
 
 When the exception was thrown, this was the stack:
-#[0-9]+ +main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:16:5\)
+#[0-9]+ +main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:18:5\)
 <<skip until matching line>>
 #[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
 <<skip until matching line>>

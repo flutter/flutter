@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,12 +23,7 @@ void main() {
     );
     BoxConstraints copy = constraints.copyWith();
     expect(copy, equals(constraints));
-    copy = constraints.copyWith(
-      minWidth: 13.0,
-      maxWidth: 17.0,
-      minHeight: 111.0,
-      maxHeight: 117.0,
-    );
+    copy = constraints.copyWith(minWidth: 13.0, maxWidth: 17.0, minHeight: 111.0, maxHeight: 117.0);
     expect(copy.minWidth, 13.0);
     expect(copy.maxWidth, 17.0);
     expect(copy.minHeight, 111.0);
@@ -78,16 +75,22 @@ void main() {
     expect(copy.maxWidth, moreOrLessEquals(3.5));
     expect(copy.minHeight, moreOrLessEquals(5.5));
     expect(copy.maxHeight, moreOrLessEquals(8.5));
-    copy = BoxConstraints.lerp(const BoxConstraints(
-      minWidth: 13.0,
-      maxWidth: 17.0,
-      minHeight: 111.0,
-      maxHeight: 117.0,
-    ), constraints, 0.2)!;
+    copy =
+        BoxConstraints.lerp(
+          const BoxConstraints(minWidth: 13.0, maxWidth: 17.0, minHeight: 111.0, maxHeight: 117.0),
+          constraints,
+          0.2,
+        )!;
     expect(copy.minWidth, moreOrLessEquals(11.0));
     expect(copy.maxWidth, moreOrLessEquals(15.0));
     expect(copy.minHeight, moreOrLessEquals(91.0));
     expect(copy.maxHeight, moreOrLessEquals(97.0));
+  });
+
+  test('BoxConstraints.lerp identical a,b', () {
+    expect(BoxConstraints.lerp(null, null, 0), null);
+    const BoxConstraints constraints = BoxConstraints();
+    expect(identical(BoxConstraints.lerp(constraints, constraints, 0.5), constraints), true);
   });
 
   test('BoxConstraints lerp with unbounded width', () {
@@ -160,5 +163,31 @@ void main() {
     expect(copy.maxWidth, 3.0);
     expect(copy.minHeight, 11.0);
     expect(copy.maxHeight, 18.0);
+  });
+
+  test('BoxConstraints.fromViewConstraints', () {
+    final BoxConstraints unconstrained = BoxConstraints.fromViewConstraints(
+      const ViewConstraints(),
+    );
+    expect(unconstrained, const BoxConstraints());
+
+    final BoxConstraints constraints = BoxConstraints.fromViewConstraints(
+      const ViewConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4),
+    );
+    expect(constraints, const BoxConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4));
+  });
+
+  test('BoxConstraints.constrainSizeAndAttemptToPreserveAspectRatio can handle empty size', () {
+    const BoxConstraints constraints = BoxConstraints(
+      minWidth: 10.0,
+      maxWidth: 20.0,
+      minHeight: 10.0,
+      maxHeight: 20.0,
+    );
+    const Size unconstrainedSize = Size(15.0, 0.0);
+    final Size constrainedSize = constraints.constrainSizeAndAttemptToPreserveAspectRatio(
+      unconstrainedSize,
+    );
+    expect(constrainedSize, const Size(15.0, 10.0));
   });
 }

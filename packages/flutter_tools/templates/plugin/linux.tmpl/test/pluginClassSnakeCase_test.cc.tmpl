@@ -23,7 +23,7 @@ TEST({{pluginClass}}, GetPlatformVersion) {
   FlValue* result = fl_method_success_response_get_result(
       FL_METHOD_SUCCESS_RESPONSE(response));
   ASSERT_EQ(fl_value_get_type(result), FL_VALUE_TYPE_STRING);
-  // The full string varies, so just valiate that it has the right format.
+  // The full string varies, so just validate that it has the right format.
   EXPECT_THAT(fl_value_get_string(result), testing::StartsWith("Linux "));
 }
 

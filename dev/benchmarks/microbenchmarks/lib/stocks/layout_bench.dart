@@ -12,13 +12,14 @@ import '../common.dart';
 
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
-Future<void> main() async {
+Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
-  final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
+  final LiveTestWidgetsFlutterBinding binding =
+      TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
 
   final Stopwatch watch = Stopwatch();
   int iterations = 0;
@@ -31,15 +32,15 @@ Future<void> main() async {
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
-    final TestViewConfiguration big = TestViewConfiguration(
+    final TestViewConfiguration big = TestViewConfiguration.fromView(
       size: const Size(360.0, 640.0),
-      window: RendererBinding.instance.window,
+      view: tester.view,
     );
-    final TestViewConfiguration small = TestViewConfiguration(
+    final TestViewConfiguration small = TestViewConfiguration.fromView(
       size: const Size(355.0, 635.0),
-      window: RendererBinding.instance.window,
+      view: tester.view,
     );
-    final RenderView renderView = WidgetsBinding.instance.renderView;
+    final RenderView renderView = WidgetsBinding.instance.renderViews.single;
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
 
     watch.start();
@@ -59,4 +60,11 @@ Future<void> main() async {
     name: 'stock_layout_iteration',
   );
   printer.printToStdout();
+}
+
+//
+//  Note that the benchmark is normally run by benchmark_collection.dart.
+//
+Future<void> main() async {
+  return execute();
 }

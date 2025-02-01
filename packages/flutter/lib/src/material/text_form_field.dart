@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'input_decorator.dart';
+import 'material_state.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
@@ -77,6 +81,13 @@ export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 /// ** See code in examples/api/lib/material/text_form_field/text_form_field.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to force an error text to the field after making
+/// an asynchronous call.
+///
+/// ** See code in examples/api/lib/material/text_form_field/text_form_field.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/text-fields.html>
@@ -84,7 +95,7 @@ export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 ///    integration.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://docs.flutter.dev/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///
@@ -97,9 +108,11 @@ class TextFormField extends FormField<String> {
   /// and [TextField.new], the constructor.
   TextFormField({
     super.key,
+    this.groupId = EditableText,
     this.controller,
     String? initialValue,
     FocusNode? focusNode,
+    super.forceErrorText,
     InputDecoration? decoration = const InputDecoration(),
     TextInputType? keyboardType,
     TextCapitalization textCapitalization = TextCapitalization.none,
@@ -128,19 +141,24 @@ class TextFormField extends FormField<String> {
     int? minLines,
     bool expands = false,
     int? maxLength,
-    ValueChanged<String>? onChanged,
+    this.onChanged,
     GestureTapCallback? onTap,
+    bool onTapAlwaysCalled = false,
     TapRegionCallback? onTapOutside,
+    TapRegionUpCallback? onTapUpOutside,
     VoidCallback? onEditingComplete,
     ValueChanged<String>? onFieldSubmitted,
     super.onSaved,
     super.validator,
+    super.errorBuilder,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
+    bool? ignorePointers,
     double cursorWidth = 2.0,
     double? cursorHeight,
     Radius? cursorRadius,
     Color? cursorColor,
+    Color? cursorErrorColor,
     Brightness? keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool? enableInteractiveSelection,
@@ -154,7 +172,24 @@ class TextFormField extends FormField<String> {
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
     EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
+    SpellCheckConfiguration? spellCheckConfiguration,
     TextMagnifierConfiguration? magnifierConfiguration,
+    UndoHistoryController? undoController,
+    AppPrivateCommandCallback? onAppPrivateCommand,
+    bool? cursorOpacityAnimates,
+    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    ContentInsertionConfiguration? contentInsertionConfiguration,
+    MaterialStatesController? statesController,
+    Clip clipBehavior = Clip.hardEdge,
+    @Deprecated(
+      'Use `stylusHandwritingEnabled` instead. '
+      'This feature was deprecated after v3.27.0-0.2.pre.',
+    )
+    bool scribbleEnabled = true,
+    bool stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
+    bool canRequestFocus = true,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
        assert(maxLines == null || maxLines > 0),
@@ -175,21 +210,30 @@ class TextFormField extends FormField<String> {
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<String> field) {
            final _TextFormFieldState state = field as _TextFormFieldState;
-           final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+           InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
                .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+
+           final String? errorText = field.errorText;
+           if (errorText != null) {
+             effectiveDecoration =
+                 errorBuilder != null
+                     ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
+                     : effectiveDecoration.copyWith(errorText: errorText);
+           }
+
            void onChangedHandler(String value) {
              field.didChange(value);
-             if (onChanged != null) {
-               onChanged(value);
-             }
+             onChanged?.call(value);
            }
+
            return UnmanagedRestorationScope(
              bucket: field.bucket,
              child: TextField(
+               groupId: groupId,
                restorationId: restorationId,
                controller: state._effectiveController,
                focusNode: focusNode,
-               decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+               decoration: effectiveDecoration,
                keyboardType: keyboardType,
                textInputAction: textInputAction,
                style: style,
@@ -199,14 +243,19 @@ class TextFormField extends FormField<String> {
                textDirection: textDirection,
                textCapitalization: textCapitalization,
                autofocus: autofocus,
+               statesController: statesController,
                toolbarOptions: toolbarOptions,
                readOnly: readOnly,
                showCursor: showCursor,
                obscuringCharacter: obscuringCharacter,
                obscureText: obscureText,
                autocorrect: autocorrect,
-               smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-               smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+               smartDashesType:
+                   smartDashesType ??
+                   (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+               smartQuotesType:
+                   smartQuotesType ??
+                   (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
                enableSuggestions: enableSuggestions,
                maxLengthEnforcement: maxLengthEnforcement,
                maxLines: maxLines,
@@ -215,19 +264,24 @@ class TextFormField extends FormField<String> {
                maxLength: maxLength,
                onChanged: onChangedHandler,
                onTap: onTap,
+               onTapAlwaysCalled: onTapAlwaysCalled,
                onTapOutside: onTapOutside,
+               onTapUpOutside: onTapUpOutside,
                onEditingComplete: onEditingComplete,
                onSubmitted: onFieldSubmitted,
                inputFormatters: inputFormatters,
                enabled: enabled ?? decoration?.enabled ?? true,
+               ignorePointers: ignorePointers,
                cursorWidth: cursorWidth,
                cursorHeight: cursorHeight,
                cursorRadius: cursorRadius,
                cursorColor: cursorColor,
+               cursorErrorColor: cursorErrorColor,
                scrollPadding: scrollPadding,
                scrollPhysics: scrollPhysics,
                keyboardAppearance: keyboardAppearance,
-               enableInteractiveSelection: enableInteractiveSelection ?? (!obscureText || !readOnly),
+               enableInteractiveSelection:
+                   enableInteractiveSelection ?? (!obscureText || !readOnly),
                selectionControls: selectionControls,
                buildCounter: buildCounter,
                autofillHints: autofillHints,
@@ -235,7 +289,19 @@ class TextFormField extends FormField<String> {
                enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
                mouseCursor: mouseCursor,
                contextMenuBuilder: contextMenuBuilder,
+               spellCheckConfiguration: spellCheckConfiguration,
                magnifierConfiguration: magnifierConfiguration,
+               undoController: undoController,
+               onAppPrivateCommand: onAppPrivateCommand,
+               cursorOpacityAnimates: cursorOpacityAnimates,
+               selectionHeightStyle: selectionHeightStyle,
+               selectionWidthStyle: selectionWidthStyle,
+               dragStartBehavior: dragStartBehavior,
+               contentInsertionConfiguration: contentInsertionConfiguration,
+               clipBehavior: clipBehavior,
+               scribbleEnabled: scribbleEnabled,
+               stylusHandwritingEnabled: stylusHandwritingEnabled,
+               canRequestFocus: canRequestFocus,
              ),
            );
          },
@@ -247,10 +313,20 @@ class TextFormField extends FormField<String> {
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
-    return AdaptiveTextSelectionToolbar.editableText(
-      editableTextState: editableTextState,
-    );
+  /// {@macro flutter.widgets.editableText.groupId}
+  final Object groupId;
+
+  /// {@template flutter.material.TextFormField.onChanged}
+  /// Called when the user initiates a change to the TextField's
+  /// value: when they have inserted or deleted text or reset the form.
+  /// {@endtemplate}
+  final ValueChanged<String>? onChanged;
+
+  static Widget _defaultContextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 
   @override
@@ -282,9 +358,10 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller = value == null
-        ? RestorableTextEditingController()
-        : RestorableTextEditingController.fromValue(value);
+    _controller =
+        value == null
+            ? RestorableTextEditingController()
+            : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -294,7 +371,9 @@ class _TextFormFieldState extends FormFieldState<String> {
   void initState() {
     super.initState();
     if (_textFormField.controller == null) {
-      _createLocalController(widget.initialValue != null ? TextEditingValue(text: widget.initialValue!) : null);
+      _createLocalController(
+        widget.initialValue != null ? TextEditingValue(text: widget.initialValue!) : null,
+      );
     } else {
       _textFormField.controller!.addListener(_handleControllerChanged);
     }
@@ -334,16 +413,17 @@ class _TextFormFieldState extends FormFieldState<String> {
     super.didChange(value);
 
     if (_effectiveController.text != value) {
-      _effectiveController.text = value ?? '';
+      _effectiveController.value = TextEditingValue(text: value ?? '');
     }
   }
 
   @override
   void reset() {
-    // setState will be called in the superclass, so even though state is being
-    // manipulated, no setState call is needed here.
-    _effectiveController.text = widget.initialValue ?? '';
+    // Set the controller value before calling super.reset() to let
+    // _handleControllerChanged suppress the change.
+    _effectiveController.value = TextEditingValue(text: widget.initialValue ?? '');
     super.reset();
+    _textFormField.onChanged?.call(_effectiveController.text);
   }
 
   void _handleControllerChanged() {

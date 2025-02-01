@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
 
 import 'dart:math' as math;
 
@@ -91,6 +93,11 @@ abstract class TextInputFormatter {
   /// This constructor enables subclasses to provide const constructors so that they can be used in const expressions.
   const TextInputFormatter();
 
+  /// A shorthand to creating a custom [TextInputFormatter] which formats
+  /// incoming text input changes with the given function.
+  const factory TextInputFormatter.withFunction(TextInputFormatFunction formatFunction) =
+      _SimpleTextInputFormatter;
+
   /// Called when text is being typed or cut/copy/pasted in the [EditableText].
   ///
   /// You can override the resulting text based on the previous text value and
@@ -98,38 +105,22 @@ abstract class TextInputFormatter {
   ///
   /// When formatters are chained, `oldValue` reflects the initial value of
   /// [TextEditingValue] at the beginning of the chain.
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  );
-
-  /// A shorthand to creating a custom [TextInputFormatter] which formats
-  /// incoming text input changes with the given function.
-  static TextInputFormatter withFunction(
-    TextInputFormatFunction formatFunction,
-  ) {
-    return _SimpleTextInputFormatter(formatFunction);
-  }
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue);
 }
 
 /// Function signature expected for creating custom [TextInputFormatter]
 /// shorthands via [TextInputFormatter.withFunction].
-typedef TextInputFormatFunction = TextEditingValue Function(
-  TextEditingValue oldValue,
-  TextEditingValue newValue,
-);
+typedef TextInputFormatFunction =
+    TextEditingValue Function(TextEditingValue oldValue, TextEditingValue newValue);
 
 /// Wiring for [TextInputFormatter.withFunction].
 class _SimpleTextInputFormatter extends TextInputFormatter {
-  _SimpleTextInputFormatter(this.formatFunction);
+  const _SimpleTextInputFormatter(this.formatFunction);
 
   final TextInputFormatFunction formatFunction;
 
   @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     return formatFunction(oldValue, newValue);
   }
 }
@@ -139,15 +130,13 @@ class _MutableTextRange {
   _MutableTextRange(this.base, this.extent);
 
   static _MutableTextRange? fromComposingRange(TextRange range) {
-    return range.isValid && !range.isCollapsed
-      ? _MutableTextRange(range.start, range.end)
-      : null;
+    return range.isValid && !range.isCollapsed ? _MutableTextRange(range.start, range.end) : null;
   }
 
   static _MutableTextRange? fromTextSelection(TextSelection selection) {
     return selection.isValid
-      ? _MutableTextRange(selection.baseOffset, selection.extentOffset)
-      : null;
+        ? _MutableTextRange(selection.baseOffset, selection.extentOffset)
+        : null;
   }
 
   /// The start index of the range, inclusive.
@@ -205,19 +194,21 @@ class _TextEditingValueAccumulator {
     final _MutableTextRange? composingRegion = this.composingRegion;
     return TextEditingValue(
       text: stringBuffer.toString(),
-      composing: composingRegion == null || composingRegion.base == composingRegion.extent
-          ? TextRange.empty
-          : TextRange(start: composingRegion.base, end: composingRegion.extent),
-      selection: selection == null
-          ? const TextSelection.collapsed(offset: -1)
-          : TextSelection(
-              baseOffset: selection.base,
-              extentOffset: selection.extent,
-              // Try to preserve the selection affinity and isDirectional. This
-              // may not make sense if the selection has changed.
-              affinity: inputValue.selection.affinity,
-              isDirectional: inputValue.selection.isDirectional,
-            ),
+      composing:
+          composingRegion == null || composingRegion.base == composingRegion.extent
+              ? TextRange.empty
+              : TextRange(start: composingRegion.base, end: composingRegion.extent),
+      selection:
+          selection == null
+              ? const TextSelection.collapsed(offset: -1)
+              : TextSelection(
+                baseOffset: selection.base,
+                extentOffset: selection.extent,
+                // Try to preserve the selection affinity and isDirectional. This
+                // may not make sense if the selection has changed.
+                affinity: inputValue.selection.affinity,
+                isDirectional: inputValue.selection.isDirectional,
+              ),
     );
   }
 }
@@ -251,21 +242,25 @@ class _TextEditingValueAccumulator {
 /// As an example, [FilteringTextInputFormatter] typically shouldn't be used
 /// with [RegExp]s that contain positional matchers (`^` or `$`) since these
 /// patterns are usually meant for matching the whole string.
+///
+/// ### Quote characters on iOS
+///
+/// When filtering single (`'`) or double (`"`) quote characters, be aware that
+/// the default iOS keyboard actually inserts special directional versions of
+/// these characters (`‘` and `’` for single quote, and `“` and `”` for double
+/// quote). Consider including all three variants in your regular expressions to
+/// support iOS.
 class FilteringTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that replaces banned patterns with the given
   /// [replacementString].
   ///
   /// If [allow] is true, then the filter pattern is an allow list,
   /// and characters must match the pattern to be accepted. See also
-  /// the `FilteringTextInputFormatter.allow` constructor.
-  // TODO(goderbauer): Cannot link to the constructor because of https://github.com/dart-lang/dartdoc/issues/2276.
+  /// the [FilteringTextInputFormatter.allow()] constructor.
   ///
   /// If [allow] is false, then the filter pattern is a deny list,
   /// and characters that match the pattern are rejected. See also
   /// the [FilteringTextInputFormatter.deny] constructor.
-  ///
-  /// The [filterPattern], [allow], and [replacementString] arguments
-  /// must not be null.
   FilteringTextInputFormatter(
     this.filterPattern, {
     required this.allow,
@@ -273,22 +268,12 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   });
 
   /// Creates a formatter that only allows characters matching a pattern.
-  ///
-  /// The [filterPattern] and [replacementString] arguments
-  /// must not be null.
-  FilteringTextInputFormatter.allow(
-    Pattern filterPattern, {
-    String replacementString = '',
-  }) : this(filterPattern, allow: true, replacementString: replacementString);
+  FilteringTextInputFormatter.allow(Pattern filterPattern, {String replacementString = ''})
+    : this(filterPattern, allow: true, replacementString: replacementString);
 
   /// Creates a formatter that blocks characters matching a pattern.
-  ///
-  /// The [filterPattern] and [replacementString] arguments
-  /// must not be null.
-  FilteringTextInputFormatter.deny(
-    Pattern filterPattern, {
-    String replacementString = '',
-  }) : this(filterPattern, allow: false, replacementString: replacementString);
+  FilteringTextInputFormatter.deny(Pattern filterPattern, {String replacementString = ''})
+    : this(filterPattern, allow: false, replacementString: replacementString);
 
   /// A [Pattern] to match or replace in incoming [TextEditingValue]s.
   ///
@@ -404,10 +389,16 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     return formatState.finalize();
   }
 
-  void _processRegion(bool isBannedRegion, int regionStart, int regionEnd, _TextEditingValueAccumulator state) {
-    final String replacementString = isBannedRegion
-      ? (regionStart == regionEnd ? '' : this.replacementString)
-      : state.inputValue.text.substring(regionStart, regionEnd);
+  void _processRegion(
+    bool isBannedRegion,
+    int regionStart,
+    int regionEnd,
+    _TextEditingValueAccumulator state,
+  ) {
+    final String replacementString =
+        isBannedRegion
+            ? (regionStart == regionEnd ? '' : this.replacementString)
+            : state.inputValue.text.substring(regionStart, regionEnd);
 
     state.stringBuffer.write(replacementString);
 
@@ -419,9 +410,10 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
     int adjustIndex(int originalIndex) {
       // The length added by adding the replacementString.
-      final int replacedLength = originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
+      final int replacedLength =
+          originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart; // ignore_clamp_double_lint
+      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart;
       return replacedLength - removedLength;
     }
 
@@ -458,10 +450,8 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///
   /// The [maxLength] must be null, -1 or greater than zero. If it is null or -1
   /// then no limit is enforced.
-  LengthLimitingTextInputFormatter(
-    this.maxLength, {
-    this.maxLengthEnforcement,
-  }) : assert(maxLength == null || maxLength == -1 || maxLength > 0);
+  LengthLimitingTextInputFormatter(this.maxLength, {this.maxLengthEnforcement})
+    : assert(maxLength == null || maxLength == -1 || maxLength > 0);
 
   /// The limit on the number of user-perceived characters that this formatter
   /// will allow.
@@ -526,9 +516,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///    [MaxLengthEnforcement.truncateAfterCompositionEnds]. These platforms
   ///    allow the composition to exceed by default.
   /// {@endtemplate}
-  static MaxLengthEnforcement getDefaultMaxLengthEnforcement([
-    TargetPlatform? platform,
-  ]) {
+  static MaxLengthEnforcement getDefaultMaxLengthEnforcement([TargetPlatform? platform]) {
     if (kIsWeb) {
       return MaxLengthEnforcement.truncateAfterCompositionEnds;
     } else {
@@ -565,25 +553,21 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
         baseOffset: math.min(value.selection.start, truncated.length),
         extentOffset: math.min(value.selection.end, truncated.length),
       ),
-      composing: !value.composing.isCollapsed && truncated.length > value.composing.start
-        ? TextRange(
-            start: value.composing.start,
-            end: math.min(value.composing.end, truncated.length),
-          )
-        : TextRange.empty,
+      composing:
+          !value.composing.isCollapsed && truncated.length > value.composing.start
+              ? TextRange(
+                start: value.composing.start,
+                end: math.min(value.composing.end, truncated.length),
+              )
+              : TextRange.empty,
     );
   }
 
   @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     final int? maxLength = this.maxLength;
 
-    if (maxLength == null ||
-      maxLength == -1 ||
-      newValue.text.characters.length <= maxLength) {
+    if (maxLength == null || maxLength == -1 || newValue.text.characters.length <= maxLength) {
       return newValue;
     }
 
@@ -604,8 +588,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       case MaxLengthEnforcement.truncateAfterCompositionEnds:
         // If already at the maximum and tried to enter even more, and the old
         // value is not composing, keep the old value.
-        if (oldValue.text.characters.length == maxLength &&
-          !oldValue.composing.isValid) {
+        if (oldValue.text.characters.length == maxLength && !oldValue.composing.isValid) {
           return oldValue;
         }
 

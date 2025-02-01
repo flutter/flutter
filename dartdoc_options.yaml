@@ -5,36 +5,38 @@ dartdoc:
   # The dev/bots/docs.sh script does this automatically.
   tools:
     snippet:
-      command: ["bin/cache/dart-sdk/bin/dart", "pub", "global", "run", "snippets", "--output-directory=doc/snippets", "--type=snippet"]
+      command: ["bin/cache/artifacts/snippets/snippets", "--output-directory=doc/snippets", "--type=snippet"]
       description: "Creates sample code documentation output from embedded documentation samples."
     sample:
-      command: ["bin/cache/dart-sdk/bin/dart", "pub", "global", "run", "snippets", "--output-directory=doc/snippets", "--type=sample"]
+      command: ["bin/cache/artifacts/snippets/snippets", "--output-directory=doc/snippets", "--type=sample"]
       description: "Creates full application sample code documentation output from embedded documentation samples."
     dartpad:
-      command: ["bin/cache/dart-sdk/bin/dart", "pub", "global", "run", "snippets", "--output-directory=doc/snippets", "--type=dartpad"]
+      command: ["bin/cache/artifacts/snippets/snippets", "--output-directory=doc/snippets", "--type=dartpad"]
       description: "Creates full application sample code documentation output from embedded documentation samples and displays it in an embedded DartPad."
   errors:
-    # Default errors of dartdoc:
+    ## Default errors of dartdoc:
     - duplicate-file
     - invalid-parameter
-    - no-defining-library-found
     - tool-error
     - unresolved-export
-    # Warnings that are elevated to errors:
+    ## Warnings that are elevated to errors:
     - ambiguous-doc-reference
     - ambiguous-reexport
     - broken-link
     - category-order-gives-missing-package-name
     - deprecated
     - ignored-canonical-for
+    - missing-example-file
     - missing-from-search-index
     - no-canonical-found
     - no-documentable-libraries
     - no-library-level-docs
-    - not-implemented
     - orphaned-file
     - reexported-private-api-across-packages
-    # - unknown-directive  # Disabled due to https://github.com/dart-lang/dartdoc/issues/2353
     - unknown-file
+    - unknown-html-fragment
     - unknown-macro
     - unresolved-doc-reference
+    ## Ignores that are elevated to errors:
+    # - type-as-html # broken, https://github.com/dart-lang/dartdoc/issues/3545
+    - missing-constant-constructor

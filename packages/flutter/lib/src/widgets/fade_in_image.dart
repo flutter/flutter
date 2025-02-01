@@ -71,10 +71,6 @@ class FadeInImage extends StatefulWidget {
   /// The [placeholder] and [image] may have their own FilterQuality settings via [filterQuality]
   /// and [placeholderFilterQuality].
   ///
-  /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
-  /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and
-  /// [matchTextDirection] arguments must not be null.
-  ///
   /// If [excludeFromSemantics] is true, then [imageSemanticLabel] will be ignored.
   const FadeInImage({
     super.key,
@@ -88,11 +84,15 @@ class FadeInImage extends StatefulWidget {
     this.fadeOutCurve = Curves.easeOut,
     this.fadeInDuration = const Duration(milliseconds: 700),
     this.fadeInCurve = Curves.easeIn,
+    this.color,
+    this.colorBlendMode,
+    this.placeholderColor,
+    this.placeholderColorBlendMode,
     this.width,
     this.height,
     this.fit,
     this.placeholderFit,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
@@ -144,8 +144,12 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
+    this.color,
+    this.colorBlendMode,
+    this.placeholderColor,
+    this.placeholderColorBlendMode,
     this.placeholderFit,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
@@ -154,8 +158,16 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
-  }) : placeholder = ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, MemoryImage(placeholder, scale: placeholderScale)),
-       image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale));
+  }) : placeholder = ResizeImage.resizeIfNeeded(
+         placeholderCacheWidth,
+         placeholderCacheHeight,
+         MemoryImage(placeholder, scale: placeholderScale),
+       ),
+       image = ResizeImage.resizeIfNeeded(
+         imageCacheWidth,
+         imageCacheHeight,
+         NetworkImage(image, scale: imageScale),
+       );
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
   /// while loading the final image from the network.
@@ -177,10 +189,6 @@ class FadeInImage extends StatefulWidget {
   /// The image will be rendered to the constraints of the layout or [width]
   /// and [height] regardless of these parameters. These parameters are primarily
   /// intended to reduce the memory usage of [ImageCache].
-  ///
-  /// The [placeholder], [image], [imageScale], [fadeOutDuration],
-  /// [fadeOutCurve], [fadeInDuration], [fadeInCurve], [alignment], [repeat],
-  /// and [matchTextDirection] arguments must not be null.
   ///
   /// See also:
   ///
@@ -206,8 +214,12 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
+    this.color,
+    this.colorBlendMode,
+    this.placeholderColor,
+    this.placeholderColorBlendMode,
     this.placeholderFit,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
@@ -216,10 +228,23 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
-  }) : placeholder = placeholderScale != null
-         ? ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale))
-         : ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, AssetImage(placeholder, bundle: bundle)),
-       image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale));
+  }) : placeholder =
+           placeholderScale != null
+               ? ResizeImage.resizeIfNeeded(
+                 placeholderCacheWidth,
+                 placeholderCacheHeight,
+                 ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale),
+               )
+               : ResizeImage.resizeIfNeeded(
+                 placeholderCacheWidth,
+                 placeholderCacheHeight,
+                 AssetImage(placeholder, bundle: bundle),
+               ),
+       image = ResizeImage.resizeIfNeeded(
+         imageCacheWidth,
+         imageCacheHeight,
+         NetworkImage(image, scale: imageScale),
+       );
 
   /// Image displayed while the target [image] is loading.
   final ImageProvider placeholder;
@@ -261,6 +286,46 @@ class FadeInImage extends StatefulWidget {
   /// placeholder image does not match that of the target image. The size is
   /// also affected by the scale factor.
   final double? width;
+
+  /// If non-null, this color is blended with each image pixel using [colorBlendMode].
+  ///
+  /// Color applies to the [image].
+  ///
+  /// See Also:
+  ///
+  ///  * [placeholderColor], the color which applies to the [placeholder].
+  final Color? color;
+
+  /// Used to combine [color] with this [image].
+  ///
+  /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
+  /// the source and this image is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  ///  * [placeholderColorBlendMode], the color blend mode which applies to the [placeholder].
+  final BlendMode? colorBlendMode;
+
+  /// If non-null, this color is blended with each placeholder image pixel using [placeholderColorBlendMode].
+  ///
+  /// Color applies to the [placeholder].
+  ///
+  /// See Also:
+  ///
+  ///  * [color], the color which applies to the [image].
+  final Color? placeholderColor;
+
+  /// Used to combine [placeholderColor] with the [placeholder] image.
+  ///
+  /// The default is [BlendMode.srcIn]. In terms of the blend mode, [placeholderColor] is
+  /// the source and this placeholder is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  ///  * [colorBlendMode], the color blend mode which applies to the [image].
+  final BlendMode? placeholderColorBlendMode;
 
   /// If non-null, require the image to have this height.
   ///
@@ -369,6 +434,8 @@ class _FadeInImageState extends State<FadeInImage> {
     ImageErrorWidgetBuilder? errorBuilder,
     ImageFrameBuilder? frameBuilder,
     BoxFit? fit,
+    Color? color,
+    BlendMode? colorBlendMode,
     required FilterQuality filterQuality,
     required Animation<double> opacity,
   }) {
@@ -380,6 +447,8 @@ class _FadeInImageState extends State<FadeInImage> {
       width: widget.width,
       height: widget.height,
       fit: fit,
+      color: color,
+      colorBlendMode: colorBlendMode,
       filterQuality: filterQuality,
       alignment: widget.alignment,
       repeat: widget.repeat,
@@ -396,6 +465,8 @@ class _FadeInImageState extends State<FadeInImage> {
       errorBuilder: widget.imageErrorBuilder,
       opacity: _imageAnimation,
       fit: widget.fit,
+      color: widget.color,
+      colorBlendMode: widget.colorBlendMode,
       filterQuality: widget.filterQuality,
       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded || frame != null) {
@@ -408,6 +479,8 @@ class _FadeInImageState extends State<FadeInImage> {
             image: widget.placeholder,
             errorBuilder: widget.placeholderErrorBuilder,
             opacity: _placeholderAnimation,
+            color: widget.placeholderColor,
+            colorBlendMode: widget.placeholderColorBlendMode,
             fit: widget.placeholderFit ?? widget.fit,
             filterQuality: widget.placeholderFilterQuality ?? widget.filterQuality,
           ),
@@ -473,16 +546,20 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _targetOpacity = visitor(
-      _targetOpacity,
-      widget.isTargetLoaded ? 1.0 : 0.0,
-      (dynamic value) => Tween<double>(begin: value as double),
-    ) as Tween<double>?;
-    _placeholderOpacity = visitor(
-      _placeholderOpacity,
-      widget.isTargetLoaded ? 0.0 : 1.0,
-      (dynamic value) => Tween<double>(begin: value as double),
-    ) as Tween<double>?;
+    _targetOpacity =
+        visitor(
+              _targetOpacity,
+              widget.isTargetLoaded ? 1.0 : 0.0,
+              (dynamic value) => Tween<double>(begin: value as double),
+            )
+            as Tween<double>?;
+    _placeholderOpacity =
+        visitor(
+              _placeholderOpacity,
+              widget.isTargetLoaded ? 0.0 : 1.0,
+              (dynamic value) => Tween<double>(begin: value as double),
+            )
+            as Tween<double>?;
   }
 
   @override
@@ -492,32 +569,36 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       return;
     }
 
-    _placeholderOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
-      TweenSequenceItem<double>(
-        tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
-        weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
-      ),
-      TweenSequenceItem<double>(
-        tween: ConstantTween<double>(0),
-        weight: widget.fadeInDuration.inMilliseconds.toDouble(),
-      ),
-    ]))..addStatusListener((AnimationStatus status) {
+    _placeholderOpacityAnimation = animation.drive(
+      TweenSequence<double>(<TweenSequenceItem<double>>[
+        TweenSequenceItem<double>(
+          tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
+          weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
+        ),
+        TweenSequenceItem<double>(
+          tween: ConstantTween<double>(0),
+          weight: widget.fadeInDuration.inMilliseconds.toDouble(),
+        ),
+      ]),
+    )..addStatusListener((AnimationStatus status) {
       if (_placeholderOpacityAnimation!.isCompleted) {
         // Need to rebuild to remove placeholder now that it is invisible.
         setState(() {});
       }
     });
 
-    _targetOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
-      TweenSequenceItem<double>(
-        tween: ConstantTween<double>(0),
-        weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
-      ),
-      TweenSequenceItem<double>(
-        tween: _targetOpacity!.chain(CurveTween(curve: widget.fadeInCurve)),
-        weight: widget.fadeInDuration.inMilliseconds.toDouble(),
-      ),
-    ]));
+    _targetOpacityAnimation = animation.drive(
+      TweenSequence<double>(<TweenSequenceItem<double>>[
+        TweenSequenceItem<double>(
+          tween: ConstantTween<double>(0),
+          weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
+        ),
+        TweenSequenceItem<double>(
+          tween: _targetOpacity!.chain(CurveTween(curve: widget.fadeInCurve)),
+          weight: widget.fadeInDuration.inMilliseconds.toDouble(),
+        ),
+      ]),
+    );
 
     widget.targetProxyAnimation.parent = _targetOpacityAnimation;
     widget.placeholderProxyAnimation.parent = _placeholderOpacityAnimation;
@@ -525,8 +606,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
 
   @override
   Widget build(BuildContext context) {
-    if (widget.wasSynchronouslyLoaded ||
-        (_placeholderOpacityAnimation?.isCompleted ?? true)) {
+    if (widget.wasSynchronouslyLoaded || (_placeholderOpacityAnimation?.isCompleted ?? true)) {
       return widget.target;
     }
 
@@ -536,17 +616,18 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       // Text direction is irrelevant here since we're using center alignment,
       // but it allows the Stack to avoid a call to Directionality.of()
       textDirection: TextDirection.ltr,
-      children: <Widget>[
-        widget.target,
-        widget.placeholder,
-      ],
+      children: <Widget>[widget.target, widget.placeholder],
     );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Animation<double>>('targetOpacity', _targetOpacityAnimation));
-    properties.add(DiagnosticsProperty<Animation<double>>('placeholderOpacity', _placeholderOpacityAnimation));
+    properties.add(
+      DiagnosticsProperty<Animation<double>>('targetOpacity', _targetOpacityAnimation),
+    );
+    properties.add(
+      DiagnosticsProperty<Animation<double>>('placeholderOpacity', _placeholderOpacityAnimation),
+    );
   }
 }

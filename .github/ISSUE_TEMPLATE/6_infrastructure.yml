@@ -1,0 +1,73 @@
+name: The CI infrastructure used by Flutter has a problem
+description: |
+  As a contributor, you want to file an issue about the build/test/release
+  infra, e.g. dashboards (http://flutter-dashboard.appspot.com), devicelab,
+  LUCI (https://ci.chromium.org/p/flutter) etc.
+labels: ['team-infra']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for using Flutter!
+
+        It looks like you found an issue with our Infrastructure services.
+        Please complete the form below so that we can help to resolve your
+        issue as quickly as possible.
+  - type: markdown
+    attributes:
+      value: |
+        Before filling the form fields, please ensure that you have searched the [existing infra issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-infra)
+  - type: dropdown
+    attributes:
+      label: Type of Request
+      description: |
+        Is this a bug, feature request or Infra Task?
+
+        If you have a bug and you believe the issue is a blocker please add the P0 label and
+        set the project to 'Infra Ticket Queue.'
+
+        If this is a devicelab feature such as a package update or a device is down please
+        add the 'device-lab' label to the created issue and set the project to 'Infra Ticket Queue.'
+      options:
+        - bug
+        - feature request
+        - infra task
+      default: 0
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Infrastructure Environment
+      description: |
+        Which part of the infrastructure is this issue occurring? Or, if this is a feature
+        request, where should the feature be implemented?
+      value: LUCI, Github, Cocoon scheduler, Autosubmit, etc...
+    validations:
+      required: true
+  - type: textarea
+    id: affects
+    attributes:
+      label: What is happening?
+      description: |
+        If this is an issue please describe what is happening? If this is a feature request,
+        please describe the use case and provide a proposal of the feature.
+
+        Please include links to build pages, etc.
+      value: Please be descriptive.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: If you have a bug please include steps to reproduce the issue.
+      value: |
+        Step 1:
+        Step 2:
+        ..
+        Step n:
+  - type: textarea
+    attributes:
+      label: Expected results
+      description: If you have a bug, What should the expect output be?
+      value: I expect to see X when Y is finished.

@@ -30,7 +30,7 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
-  final List<String> jsonFiles = args.rest.isNotEmpty ? args.rest : <String>[ 'ABresults.json' ];
+  final List<String> jsonFiles = args.rest.isNotEmpty ? args.rest : <String>['ABresults.json'];
 
   for (final String filename in jsonFiles) {
     final File file = File(filename);
@@ -42,9 +42,9 @@ Future<void> main(List<String> rawArgs) async {
     ABTest test;
     try {
       test = ABTest.fromJsonMap(
-          const JsonDecoder().convert(await file.readAsString()) as Map<String, dynamic>
+        const JsonDecoder().convert(await file.readAsString()) as Map<String, dynamic>,
       );
-    } catch(error) {
+    } catch (error) {
       _usage('Could not parse json file "$filename"');
       return;
     }
@@ -65,20 +65,22 @@ Future<void> main(List<String> rawArgs) async {
 }
 
 /// Command-line options for the `summarize.dart` command.
-final ArgParser _argParser = ArgParser()
-  ..addFlag(
-    kAsciiTableOpt,
-    defaultsTo: true,
-    help: 'Prints the summary in a table formatted nicely for terminal output.',
-  )
-  ..addFlag(
-    kTabTableOpt,
-    defaultsTo: true,
-    help: 'Prints the summary in a table with tabs for easy spreadsheet entry.',
-  )
-  ..addFlag(
-    kRawSummaryOpt,
-    defaultsTo: true,
-    help: 'Prints all per-run data collected by the A/B test formatted with\n'
-        'tabs for easy spreadsheet entry.',
-  );
+final ArgParser _argParser =
+    ArgParser()
+      ..addFlag(
+        kAsciiTableOpt,
+        defaultsTo: true,
+        help: 'Prints the summary in a table formatted nicely for terminal output.',
+      )
+      ..addFlag(
+        kTabTableOpt,
+        defaultsTo: true,
+        help: 'Prints the summary in a table with tabs for easy spreadsheet entry.',
+      )
+      ..addFlag(
+        kRawSummaryOpt,
+        defaultsTo: true,
+        help:
+            'Prints all per-run data collected by the A/B test formatted with\n'
+            'tabs for easy spreadsheet entry.',
+      );

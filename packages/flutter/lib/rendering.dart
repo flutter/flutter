@@ -19,14 +19,19 @@
 /// [ServicesBinding], [GestureBinding], [SchedulerBinding], [PaintingBinding],
 /// and [RendererBinding]. The rendering library does not automatically create a
 /// binding, but relies on one being initialized with those features.
+///
+/// @docImport 'package:flutter/foundation.dart';
+/// @docImport 'package:flutter/gestures.dart';
+/// @docImport 'package:flutter/scheduler.dart';
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'src/rendering/binding.dart';
+/// @docImport 'src/rendering/box.dart';
+/// @docImport 'src/rendering/object.dart';
 library rendering;
 
-export 'package:flutter/foundation.dart' show
-  DiagnosticLevel,
-  ValueChanged,
-  ValueGetter,
-  ValueSetter,
-  VoidCallback;
+export 'package:flutter/foundation.dart'
+    show DiagnosticLevel, ValueChanged, ValueGetter, ValueSetter, VoidCallback;
 export 'package:flutter/semantics.dart';
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
@@ -37,6 +42,7 @@ export 'src/rendering/custom_layout.dart';
 export 'src/rendering/custom_paint.dart';
 export 'src/rendering/debug.dart';
 export 'src/rendering/debug_overflow_indicator.dart';
+export 'src/rendering/decorated_sliver.dart';
 export 'src/rendering/editable.dart';
 export 'src/rendering/error.dart';
 export 'src/rendering/flex.dart';
@@ -61,10 +67,12 @@ export 'src/rendering/sliver.dart';
 export 'src/rendering/sliver_fill.dart';
 export 'src/rendering/sliver_fixed_extent_list.dart';
 export 'src/rendering/sliver_grid.dart';
+export 'src/rendering/sliver_group.dart';
 export 'src/rendering/sliver_list.dart';
 export 'src/rendering/sliver_multi_box_adaptor.dart';
 export 'src/rendering/sliver_padding.dart';
 export 'src/rendering/sliver_persistent_header.dart';
+export 'src/rendering/sliver_tree.dart';
 export 'src/rendering/stack.dart';
 export 'src/rendering/table.dart';
 export 'src/rendering/table_border.dart';

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -9,7 +11,6 @@ import '../base/net.dart';
 import '../base/time.dart';
 import '../device.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 
 WebRunnerFactory? get webRunnerFactory => context.get<WebRunnerFactory>();
@@ -24,13 +25,12 @@ abstract class WebRunnerFactory {
     String? target,
     required bool stayResident,
     required FlutterProject flutterProject,
-    required bool? ipv6,
     required DebuggingOptions debuggingOptions,
     UrlTunneller? urlTunneller,
     required Logger logger,
     required FileSystem fileSystem,
     required SystemClock systemClock,
-    required Usage usage,
+    required Analytics analytics,
     bool machine = false,
   });
 }

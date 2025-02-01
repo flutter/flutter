@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/gestures.dart';
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -26,11 +30,13 @@ enum SelectionResult {
   /// [SelectionEdgeUpdateEvent].
   /// {@endtemplate}
   next,
+
   /// Selection does not reach this [Selectable] and is located before it in
   /// screen order.
   ///
   /// {@macro flutter.rendering.selection.SelectionResult.footNote}
   previous,
+
   /// Selection ends in this [Selectable].
   ///
   /// Part of the [Selectable] may or may not be selected, but there is still
@@ -38,6 +44,7 @@ enum SelectionResult {
   ///
   /// {@macro flutter.rendering.selection.SelectionResult.footNote}
   end,
+
   /// The result can't be determined in this frame.
   ///
   /// This is typically used when the subtree is scrolling to reveal more
@@ -47,6 +54,7 @@ enum SelectionResult {
   // See `_SelectableRegionState._triggerSelectionEndEdgeUpdate` for how this
   // result affects the selection.
   pending,
+
   /// There is no result for the selection event.
   ///
   /// This is used when a selection result is not applicable, e.g.
@@ -58,7 +66,7 @@ enum SelectionResult {
 /// The abstract interface to handle [SelectionEvent]s.
 ///
 /// This interface is extended by [Selectable] and [SelectionContainerDelegate]
-/// and is typically not use directly.
+/// and is typically not used directly.
 ///
 /// {@template flutter.rendering.SelectionHandler}
 /// This class returns a [SelectionGeometry] as its [value], and is responsible
@@ -86,6 +94,11 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// Return `null` if nothing is selected.
   SelectedContent? getSelectedContent();
 
+  /// Gets the [SelectedContentRange] representing the selected range in this object.
+  ///
+  /// When nothing is selected, subclasses should return `null`.
+  SelectedContentRange? getSelection();
+
   /// Handles the [SelectionEvent] sent to this object.
   ///
   /// The subclasses need to update their selections or delegate the
@@ -98,12 +111,93 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// See also:
   ///  * [SelectionEventType], which contains all of the possible types.
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
+
+  /// The length of the content in this object.
+  int get contentLength;
+}
+
+/// This class stores the range information of the selection under a [Selectable]
+/// or [SelectionHandler].
+///
+/// The [SelectedContentRange] for a given [Selectable] or [SelectionHandler]
+/// can be retrieved by calling [SelectionHandler.getSelection].
+@immutable
+class SelectedContentRange with Diagnosticable {
+  /// Creates a [SelectedContentRange] with the given values.
+  const SelectedContentRange({required this.startOffset, required this.endOffset})
+    : assert((startOffset >= 0 && endOffset >= 0));
+
+  /// The start of the selection relative to the start of the content.
+  ///
+  /// {@template flutter.rendering.selection.SelectedContentRange.selectionOffsets}
+  /// For example a [Text] widget's content is in the format of an [TextSpan] tree.
+  ///
+  /// Take the [Text] widget and [TextSpan] tree below:
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// const Text.rich(
+  ///   TextSpan(
+  ///     text: 'Hello world, ',
+  ///     children: <InlineSpan>[
+  ///       WidgetSpan(
+  ///         child: Text('how are you today? '),
+  ///       ),
+  ///       TextSpan(
+  ///         text: 'Good, thanks for asking.',
+  ///       ),
+  ///     ],
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// If we select from the beginning of 'world' to the end of the '.'
+  /// at the end of the [TextSpan] tree, the [SelectedContentRange] from
+  /// [SelectionHandler.getSelection] will be relative to the text of the
+  /// [TextSpan] tree, with [WidgetSpan] content being flattened. The [startOffset]
+  /// will be 6, and [endOffset] will be 56. This takes into account the
+  /// length of the content in the [WidgetSpan], which is 19, making the overall
+  /// length of the content 56.
+  /// {@endtemplate}
+  final int startOffset;
+
+  /// The end of the selection relative to the start of the content.
+  ///
+  /// {@macro flutter.rendering.selection.SelectedContentRange.selectionOffsets}
+  final int endOffset;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SelectedContentRange &&
+        other.startOffset == startOffset &&
+        other.endOffset == endOffset;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(startOffset, endOffset);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('startOffset', startOffset));
+    properties.add(IntProperty('endOffset', endOffset));
+  }
 }
 
 /// The selected content in a [Selectable] or [SelectionHandler].
 // TODO(chunhtai): Add more support for rich content.
 // https://github.com/flutter/flutter/issues/104206.
-class SelectedContent {
+@immutable
+class SelectedContent with Diagnosticable {
   /// Creates a selected content object.
   ///
   /// Only supports plain text.
@@ -111,6 +205,12 @@ class SelectedContent {
 
   /// The selected content in plain text format.
   final String plainText;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('plainText', plainText));
+  }
 }
 
 /// A mixin that can be selected by users when under a [SelectionArea] widget.
@@ -134,13 +234,17 @@ class SelectedContent {
 /// {@macro flutter.rendering.SelectionHandler}
 ///
 /// See also:
-///  * [SelectionArea], which provides an overview of selection system.
+///  * [SelectableRegion], which provides an overview of selection system.
 mixin Selectable implements SelectionHandler {
   /// {@macro flutter.rendering.RenderObject.getTransformTo}
   Matrix4 getTransformTo(RenderObject? ancestor);
 
   /// The size of this [Selectable].
   Size get size;
+
+  /// A list of [Rect]s that represent the bounding box of this [Selectable]
+  /// in local coordinates.
+  List<Rect> get boundingBoxes;
 
   /// Disposes resources held by the mixer.
   void dispose();
@@ -206,9 +310,7 @@ mixin SelectionRegistrant on Selectable {
 }
 
 /// A utility class that provides useful methods for handling selection events.
-class SelectionUtils {
-  SelectionUtils._();
-
+abstract final class SelectionUtils {
   /// Determines [SelectionResult] purely based on the target rectangle.
   ///
   /// This method returns [SelectionResult.end] if the `point` is inside the
@@ -226,9 +328,7 @@ class SelectionUtils {
     if (point.dy > targetRect.bottom) {
       return SelectionResult.next;
     }
-    return point.dx >= targetRect.right
-        ? SelectionResult.next
-        : SelectionResult.previous;
+    return point.dx >= targetRect.right ? SelectionResult.next : SelectionResult.previous;
   }
 
   /// Adjusts the dragging offset based on the target rect.
@@ -252,7 +352,11 @@ class SelectionUtils {
   /// For points in Area 2:
   ///   Move them to bottom-right of the rect if text direction is ltr, or
   ///   bottom-left if rtl.
-  static Offset adjustDragOffset(Rect targetRect, Offset point, {TextDirection direction = TextDirection.ltr}) {
+  static Offset adjustDragOffset(
+    Rect targetRect,
+    Offset point, {
+    TextDirection direction = TextDirection.ltr,
+  }) {
     if (targetRect.contains(point)) {
       return point;
     }
@@ -297,6 +401,12 @@ enum SelectionEventType {
   /// Used by [SelectWordSelectionEvent].
   selectWord,
 
+  /// An event to select a paragraph at the location
+  /// [SelectParagraphSelectionEvent.globalPosition].
+  ///
+  /// Used by [SelectParagraphSelectionEvent].
+  selectParagraph,
+
   /// An event that extends the selection by a specific [TextGranularity].
   granularlyExtendSelection,
 
@@ -314,6 +424,9 @@ enum TextGranularity {
 
   /// Treats word as an atomic unit when moving the selection handles.
   word,
+
+  /// Treats a paragraph as an atomic unit when moving the selection handles.
+  paragraph,
 
   /// Treats each line break as an atomic unit when moving the selection handles.
   line,
@@ -347,14 +460,14 @@ abstract class SelectionEvent {
 /// ctrl + A, or cmd + A in macOS.
 class SelectAllSelectionEvent extends SelectionEvent {
   /// Creates a select all selection event.
-  const SelectAllSelectionEvent(): super._(SelectionEventType.selectAll);
+  const SelectAllSelectionEvent() : super._(SelectionEventType.selectAll);
 }
 
 /// Clears the selection from the [Selectable] and removes any existing
 /// highlight as if there is no selection at all.
 class ClearSelectionEvent extends SelectionEvent {
   /// Create a clear selection event.
-  const ClearSelectionEvent(): super._(SelectionEventType.clear);
+  const ClearSelectionEvent() : super._(SelectionEventType.clear);
 }
 
 /// Selects the whole word at the location.
@@ -362,10 +475,27 @@ class ClearSelectionEvent extends SelectionEvent {
 /// This event can be sent as the result of mobile long press selection.
 class SelectWordSelectionEvent extends SelectionEvent {
   /// Creates a select word event at the [globalPosition].
-  const SelectWordSelectionEvent({required this.globalPosition}): super._(SelectionEventType.selectWord);
+  const SelectWordSelectionEvent({required this.globalPosition})
+    : super._(SelectionEventType.selectWord);
 
   /// The position in global coordinates to select word at.
   final Offset globalPosition;
+}
+
+/// Selects the entire paragraph at the location.
+///
+/// This event can be sent as the result of a triple click to select.
+class SelectParagraphSelectionEvent extends SelectionEvent {
+  /// Creates a select paragraph event at the [globalPosition].
+  const SelectParagraphSelectionEvent({required this.globalPosition, this.absorb = false})
+    : super._(SelectionEventType.selectParagraph);
+
+  /// The position in global coordinates to select paragraph at.
+  final Offset globalPosition;
+
+  /// Whether the selectable receiving the event should be absorbed into
+  /// an encompassing paragraph.
+  final bool absorb;
 }
 
 /// Updates a selection edge.
@@ -377,26 +507,46 @@ class SelectWordSelectionEvent extends SelectionEvent {
 ///
 /// The [globalPosition] contains the new offset of the edge.
 ///
-/// This event is dispatched when the framework detects [DragStartDetails] in
+/// The [granularity] contains the granularity that the selection edge should move by.
+/// Only [TextGranularity.character] and [TextGranularity.word] are currently supported.
+///
+/// This event is dispatched when the framework detects [TapDragStartDetails] in
 /// [SelectionArea]'s gesture recognizers for mouse devices, or the selection
 /// handles have been dragged to new locations.
 class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// Creates a selection start edge update event.
   ///
   /// The [globalPosition] contains the location of the selection start edge.
+  ///
+  /// The [granularity] contains the granularity which the selection edge should move by.
+  /// This value defaults to [TextGranularity.character].
   const SelectionEdgeUpdateEvent.forStart({
-    required this.globalPosition
-  }) : super._(SelectionEventType.startEdgeUpdate);
+    required this.globalPosition,
+    TextGranularity? granularity,
+  }) : granularity = granularity ?? TextGranularity.character,
+       super._(SelectionEventType.startEdgeUpdate);
 
   /// Creates a selection end edge update event.
   ///
   /// The [globalPosition] contains the new location of the selection end edge.
+  ///
+  /// The [granularity] contains the granularity which the selection edge should move by.
+  /// This value defaults to [TextGranularity.character].
   const SelectionEdgeUpdateEvent.forEnd({
-    required this.globalPosition
-  }) : super._(SelectionEventType.endEdgeUpdate);
+    required this.globalPosition,
+    TextGranularity? granularity,
+  }) : granularity = granularity ?? TextGranularity.character,
+       super._(SelectionEventType.endEdgeUpdate);
 
   /// The new location of the selection edge.
   final Offset globalPosition;
+
+  /// The granularity for which the selection moves.
+  ///
+  /// Only [TextGranularity.character] and [TextGranularity.word] are currently supported.
+  ///
+  /// Defaults to [TextGranularity.character].
+  final TextGranularity granularity;
 }
 
 /// Extends the start or end of the selection by a given [TextGranularity].
@@ -405,8 +555,6 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
 /// [isEnd], according to the [granularity].
 class GranularlyExtendSelectionEvent extends SelectionEvent {
   /// Creates a [GranularlyExtendSelectionEvent].
-  ///
-  /// All parameters are required and must not be null.
   const GranularlyExtendSelectionEvent({
     required this.forward,
     required this.isEnd,
@@ -483,8 +631,6 @@ enum SelectionExtendDirection {
 /// move to when moving to across lines.
 class DirectionallyExtendSelectionEvent extends SelectionEvent {
   /// Creates a [DirectionallyExtendSelectionEvent].
-  ///
-  /// All parameters are required and must not be null.
   const DirectionallyExtendSelectionEvent({
     required this.dx,
     required this.isEnd,
@@ -578,13 +724,13 @@ enum SelectionStatus {
 /// The geometry of the current selection.
 ///
 /// This includes details such as the locations of the selection start and end,
-/// line height, etc. This information is used for drawing selection controls
-/// for mobile platforms.
+/// line height, the rects that encompass the selection, etc. This information
+/// is used for drawing selection controls for mobile platforms.
 ///
 /// The positions in geometry are in local coordinates of the [SelectionHandler]
 /// or [Selectable].
 @immutable
-class SelectionGeometry {
+class SelectionGeometry with Diagnosticable {
   /// Creates a selection geometry object.
   ///
   /// If any of the [startSelectionPoint] and [endSelectionPoint] is not null,
@@ -592,9 +738,13 @@ class SelectionGeometry {
   const SelectionGeometry({
     this.startSelectionPoint,
     this.endSelectionPoint,
+    this.selectionRects = const <Rect>[],
     required this.status,
     required this.hasContent,
-  }) : assert((startSelectionPoint == null && endSelectionPoint == null) || status != SelectionStatus.none);
+  }) : assert(
+         (startSelectionPoint == null && endSelectionPoint == null) ||
+             status != SelectionStatus.none,
+       );
 
   /// The geometry information at the selection start.
   ///
@@ -629,6 +779,10 @@ class SelectionGeometry {
   /// The status of ongoing selection in the [Selectable] or [SelectionHandler].
   final SelectionStatus status;
 
+  /// The rects in the local coordinates of the containing [Selectable] that
+  /// represent the selection if there is any.
+  final List<Rect> selectionRects;
+
   /// Whether there is any selectable content in the [Selectable] or
   /// [SelectionHandler].
   final bool hasContent;
@@ -640,12 +794,14 @@ class SelectionGeometry {
   SelectionGeometry copyWith({
     SelectionPoint? startSelectionPoint,
     SelectionPoint? endSelectionPoint,
+    List<Rect>? selectionRects,
     SelectionStatus? status,
     bool? hasContent,
   }) {
     return SelectionGeometry(
       startSelectionPoint: startSelectionPoint ?? this.startSelectionPoint,
       endSelectionPoint: endSelectionPoint ?? this.endSelectionPoint,
+      selectionRects: selectionRects ?? this.selectionRects,
       status: status ?? this.status,
       hasContent: hasContent ?? this.hasContent,
     );
@@ -659,30 +815,34 @@ class SelectionGeometry {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SelectionGeometry
-        && other.startSelectionPoint == startSelectionPoint
-        && other.endSelectionPoint == endSelectionPoint
-        && other.status == status
-        && other.hasContent == hasContent;
+    return other is SelectionGeometry &&
+        other.startSelectionPoint == startSelectionPoint &&
+        other.endSelectionPoint == endSelectionPoint &&
+        listEquals(other.selectionRects, selectionRects) &&
+        other.status == status &&
+        other.hasContent == hasContent;
   }
 
   @override
   int get hashCode {
-    return Object.hash(
-      startSelectionPoint,
-      endSelectionPoint,
-      status,
-      hasContent,
-    );
+    return Object.hash(startSelectionPoint, endSelectionPoint, selectionRects, status, hasContent);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<SelectionPoint>('startSelectionPoint', startSelectionPoint));
+    properties.add(DiagnosticsProperty<SelectionPoint>('endSelectionPoint', endSelectionPoint));
+    properties.add(IterableProperty<Rect>('selectionRects', selectionRects));
+    properties.add(EnumProperty<SelectionStatus>('status', status));
+    properties.add(DiagnosticsProperty<bool>('hasContent', hasContent));
   }
 }
 
 /// The geometry information of a selection point.
 @immutable
-class SelectionPoint {
+class SelectionPoint with Diagnosticable {
   /// Creates a selection point object.
-  ///
-  /// All properties must not be null.
   const SelectionPoint({
     required this.localPosition,
     required this.lineHeight,
@@ -709,19 +869,23 @@ class SelectionPoint {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SelectionPoint
-        && other.localPosition == localPosition
-        && other.lineHeight == lineHeight
-        && other.handleType == handleType;
+    return other is SelectionPoint &&
+        other.localPosition == localPosition &&
+        other.lineHeight == lineHeight &&
+        other.handleType == handleType;
   }
 
   @override
   int get hashCode {
-    return Object.hash(
-      localPosition,
-      lineHeight,
-      handleType,
-    );
+    return Object.hash(localPosition, lineHeight, handleType);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(DoubleProperty('lineHeight', lineHeight));
+    properties.add(EnumProperty<TextSelectionHandleType>('handleType', handleType));
   }
 }
 

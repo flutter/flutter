@@ -20,23 +20,18 @@ Future<void> main() async {
   Future<Map<String, dynamic>>? request;
 
   group('Test Integration binding', () {
-    final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+    final IntegrationTestWidgetsFlutterBinding binding =
+        IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
     FakeVM? fakeVM;
 
     setUp(() {
-      request = binding.callback(<String, String>{
-        'command': 'request_data',
-      });
-      fakeVM = FakeVM(
-        timeline: _kTimelines,
-      );
+      request = binding.callback(<String, String>{'command': 'request_data'});
+      fakeVM = FakeVM(timeline: _kTimelines);
     });
 
     testWidgets('Run Integration app', (WidgetTester tester) async {
-      runApp(const MaterialApp(
-        home: Text('Test'),
-      ));
+      runApp(const MaterialApp(home: Text('Test')));
       expect(tester.binding, binding);
       binding.reportData = <String, dynamic>{'answer': 42};
       await tester.pump();
@@ -77,15 +72,13 @@ Future<void> main() async {
     testWidgets('setSurfaceSize works', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
-      final Size windowCenter = tester.binding.window.physicalSize /
-          tester.binding.window.devicePixelRatio /
-          2;
-      final double windowCenterX = windowCenter.width;
-      final double windowCenterY = windowCenter.height;
+      final Size viewCenter = tester.view.physicalSize / tester.view.devicePixelRatio / 2;
+      final double viewCenterX = viewCenter.width;
+      final double viewCenterY = viewCenter.height;
 
       Offset widgetCenter = tester.getRect(find.byType(Text)).center;
-      expect(widgetCenter.dx, windowCenterX);
-      expect(widgetCenter.dy, windowCenterY);
+      expect(widgetCenter.dx, viewCenterX);
+      expect(widgetCenter.dy, viewCenterY);
 
       await tester.binding.setSurfaceSize(const Size(200, 300));
       await tester.pump();
@@ -96,8 +89,8 @@ Future<void> main() async {
       await tester.binding.setSurfaceSize(null);
       await tester.pump();
       widgetCenter = tester.getRect(find.byType(Text)).center;
-      expect(widgetCenter.dx, windowCenterX);
-      expect(widgetCenter.dy, windowCenterY);
+      expect(widgetCenter.dx, viewCenterX);
+      expect(widgetCenter.dy, viewCenterY);
     });
 
     testWidgets('Test traceAction', (WidgetTester tester) async {
@@ -105,10 +98,7 @@ Future<void> main() async {
       await binding.traceAction(() async {});
       expect(binding.reportData, isNotNull);
       expect(binding.reportData!.containsKey('timeline'), true);
-      expect(
-        json.encode(binding.reportData!['timeline']),
-        json.encode(_kTimelines),
-      );
+      expect(json.encode(binding.reportData!['timeline']), json.encode(_kTimelines));
     });
 
     group('defaultTestTimeout', () {
@@ -124,11 +114,15 @@ Future<void> main() async {
       });
     });
 
-    // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    testWidgets('root widgets are wrapped with a RepaintBoundary', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66006.
+    testWidgets('root view reports correct dimensions', (WidgetTester tester) async {
       await tester.pumpWidget(const Placeholder());
 
-      expect(find.byType(RepaintBoundary), findsOneWidget);
+      expect(tester.binding.renderView.paintBounds, const Rect.fromLTWH(0, 0, 2400, 1800));
+    });
+
+    testWidgets('integration test has no label', (WidgetTester tester) async {
+      expect(binding.label, null);
     });
   });
 
@@ -136,8 +130,7 @@ Future<void> main() async {
     // This part is outside the group so that `request` has been completed as
     // part of the `tearDownAll` registered in the group during
     // `IntegrationTestWidgetsFlutterBinding` initialization.
-    final Map<String, dynamic> response =
-        (await request)!['response'] as Map<String, dynamic>;
+    final Map<String, dynamic> response = (await request)!['response'] as Map<String, dynamic>;
     final String message = response['message'] as String;
     final Response result = Response.fromJson(message);
     assert(result.data!['answer'] == 42);
@@ -161,10 +154,8 @@ class FakeVM extends Fake implements vm.VmService {
     return vm.Timestamp(timestamp: lastTimeStamp);
   }
 
-  List<String> recordedStreams = <String>[];
   @override
   Future<vm.Success> setVMTimelineFlags(List<String> recordedStreams) async {
-    recordedStreams = recordedStreams;
     return vm.Success();
   }
 

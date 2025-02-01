@@ -9,8 +9,7 @@ import 'recorder.dart';
 /// Repeatedly paints a grid of rectangles where each rectangle is drawn in its
 /// own [Picture].
 ///
-/// Measures the performance of updating many layers. For example, the HTML
-/// rendering backend attempts to reuse the DOM nodes created for engine layers.
+/// Measures the performance of updating many layers.
 ///
 /// See also `bench_draw_rect.dart`, which draws nearly identical UI but puts all
 /// rectangles into the same picture.
@@ -32,18 +31,15 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
   double wobbleCounter = 0;
 
   late List<Picture> _pictures;
-  late Size windowSize;
+  late Size viewSize;
   late Size cellSize;
   late Size rectSize;
 
   @override
   Future<void> setUpAll() async {
     _pictures = <Picture>[];
-    windowSize = window.physicalSize;
-    cellSize = Size(
-      windowSize.width / kColumns,
-      windowSize.height / kRows,
-    );
+    viewSize = view.physicalSize;
+    cellSize = Size(viewSize.width / kColumns, viewSize.height / kRows);
     rectSize = cellSize * 0.8;
 
     final Paint paint = Paint()..color = const Color.fromARGB(255, 255, 0, 0);
@@ -73,11 +69,7 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
         if (shouldRetain) {
           sceneBuilder.addRetained(oldLayer);
         } else {
-          _layers[layerId] = sceneBuilder.pushOffset(
-            wobbleOffsetX,
-            offsetY,
-            oldLayer: oldLayer,
-          );
+          _layers[layerId] = sceneBuilder.pushOffset(wobbleOffsetX, offsetY, oldLayer: oldLayer);
           sceneBuilder.addPicture(Offset.zero, _pictures[row * kColumns + col]);
           sceneBuilder.pop();
         }

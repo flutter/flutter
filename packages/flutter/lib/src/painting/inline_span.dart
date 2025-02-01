@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'placeholder_span.dart';
+library;
+
 import 'dart:ui' as ui show ParagraphBuilder, StringAttribute;
 
 import 'package:flutter/foundation.dart';
@@ -9,6 +16,7 @@ import 'package:flutter/gestures.dart';
 
 import 'basic_types.dart';
 import 'text_painter.dart';
+import 'text_scaler.dart';
 import 'text_span.dart';
 import 'text_style.dart';
 
@@ -32,6 +40,7 @@ class Accumulator {
     _value += addend;
   }
 }
+
 /// Called on each span as [InlineSpan.visitChildren] walks the [InlineSpan] tree.
 ///
 /// Returns true when the walk should continue, and false to stop visiting further
@@ -50,8 +59,6 @@ class InlineSpanSemanticsInformation {
   /// Constructs an object that holds the text and semantics label values of an
   /// [InlineSpan].
   ///
-  /// The text parameter must not be null.
-  ///
   /// Use [InlineSpanSemanticsInformation.placeholder] instead of directly setting
   /// [isPlaceholder].
   const InlineSpanSemanticsInformation(
@@ -60,11 +67,14 @@ class InlineSpanSemanticsInformation {
     this.semanticsLabel,
     this.stringAttributes = const <ui.StringAttribute>[],
     this.recognizer,
-  }) : assert(isPlaceholder == false || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
+  }) : assert(!isPlaceholder || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
        requiresOwnNode = isPlaceholder || recognizer != null;
 
   /// The text info for a [PlaceholderSpan].
-  static const InlineSpanSemanticsInformation placeholder = InlineSpanSemanticsInformation('\uFFFC', isPlaceholder: true);
+  static const InlineSpanSemanticsInformation placeholder = InlineSpanSemanticsInformation(
+    '\uFFFC',
+    isPlaceholder: true,
+  );
 
   /// The text value, if any. For [PlaceholderSpan]s, this will be the unicode
   /// placeholder value.
@@ -90,37 +100,42 @@ class InlineSpanSemanticsInformation {
 
   @override
   bool operator ==(Object other) {
-    return other is InlineSpanSemanticsInformation
-        && other.text == text
-        && other.semanticsLabel == semanticsLabel
-        && other.recognizer == recognizer
-        && other.isPlaceholder == isPlaceholder
-        && listEquals<ui.StringAttribute>(other.stringAttributes, stringAttributes);
+    return other is InlineSpanSemanticsInformation &&
+        other.text == text &&
+        other.semanticsLabel == semanticsLabel &&
+        other.recognizer == recognizer &&
+        other.isPlaceholder == isPlaceholder &&
+        listEquals<ui.StringAttribute>(other.stringAttributes, stringAttributes);
   }
 
   @override
   int get hashCode => Object.hash(text, semanticsLabel, recognizer, isPlaceholder);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'InlineSpanSemanticsInformation')}{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
+  String toString() =>
+      '${objectRuntimeType(this, 'InlineSpanSemanticsInformation')}{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
 }
 
 /// Combines _semanticsInfo entries where permissible.
 ///
 /// Consecutive inline spans can be combined if their
 /// [InlineSpanSemanticsInformation.requiresOwnNode] return false.
-List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanticsInformation> infoList) {
+List<InlineSpanSemanticsInformation> combineSemanticsInfo(
+  List<InlineSpanSemanticsInformation> infoList,
+) {
   final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
   String workingText = '';
   String workingLabel = '';
   List<ui.StringAttribute> workingAttributes = <ui.StringAttribute>[];
   for (final InlineSpanSemanticsInformation info in infoList) {
     if (info.requiresOwnNode) {
-      combined.add(InlineSpanSemanticsInformation(
-        workingText,
-        semanticsLabel: workingLabel,
-        stringAttributes: workingAttributes,
-      ));
+      combined.add(
+        InlineSpanSemanticsInformation(
+          workingText,
+          semanticsLabel: workingLabel,
+          stringAttributes: workingAttributes,
+        ),
+      );
       workingText = '';
       workingLabel = '';
       workingAttributes = <ui.StringAttribute>[];
@@ -139,14 +154,15 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanti
         );
       }
       workingLabel += effectiveLabel;
-
     }
   }
-  combined.add(InlineSpanSemanticsInformation(
-    workingText,
-    semanticsLabel: workingLabel,
-    stringAttributes: workingAttributes,
-  ));
+  combined.add(
+    InlineSpanSemanticsInformation(
+      workingText,
+      semanticsLabel: workingLabel,
+      stringAttributes: workingAttributes,
+    ),
+  );
   return combined;
 }
 
@@ -155,7 +171,7 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanti
 ///  * The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
 ///  * The subclass [PlaceholderSpan] represents a placeholder that may be
 ///    filled with non-text content. [PlaceholderSpan] itself defines a
-///    [ui.PlaceholderAlignment] and a [TextBaseline]. To be useful,
+///    [PlaceholderAlignment] and a [TextBaseline]. To be useful,
 ///    [PlaceholderSpan] must be extended to define content. An instance of
 ///    this is the [WidgetSpan] class in the widgets library.
 ///  * The subclass [WidgetSpan] specifies embedded inline widgets.
@@ -196,9 +212,7 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanti
 @immutable
 abstract class InlineSpan extends DiagnosticableTree {
   /// Creates an [InlineSpan] with the given values.
-  const InlineSpan({
-    this.style,
-  });
+  const InlineSpan({this.style});
 
   /// The [TextStyle] to apply to this span.
   ///
@@ -209,7 +223,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained.
   ///
-  /// The `textScaleFactor` parameter specifies a scale that the text and
+  /// The `textScaler` parameter specifies a [TextScaler] that the text and
   /// placeholders will be scaled by. The scaling is performed before layout,
   /// so the text will be laid out with the scaled glyphs and placeholders.
   ///
@@ -218,14 +232,41 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// in the same order as defined in the [InlineSpan] tree.
   ///
   /// [Paragraph] objects can be drawn on [Canvas] objects.
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions });
+  void build(
+    ui.ParagraphBuilder builder, {
+    TextScaler textScaler = TextScaler.noScaling,
+    List<PlaceholderDimensions>? dimensions,
+  });
 
   /// Walks this [InlineSpan] and any descendants in pre-order and calls `visitor`
   /// for each span that has content.
   ///
   /// When `visitor` returns true, the walk will continue. When `visitor` returns
   /// false, then the walk will end.
+  ///
+  /// See also:
+  ///
+  ///  * [visitDirectChildren], which preforms `build`-order traversal on the
+  ///    immediate children of this [InlineSpan], regardless of whether they
+  ///    have content.
   bool visitChildren(InlineSpanVisitor visitor);
+
+  /// Calls `visitor` for each immediate child of this [InlineSpan].
+  ///
+  /// The immediate children are visited in the same order they are added to
+  /// a [ui.ParagraphBuilder] in the [build] method, which is also the logical
+  /// order of the child [InlineSpan]s in the text.
+  ///
+  /// The traversal stops when all immediate children are visited, or when the
+  /// `visitor` callback returns `false` on an immediate child. This method
+  /// itself returns a `bool` indicating whether the visitor callback returned
+  /// `true` on all immediate children.
+  ///
+  /// See also:
+  ///
+  ///  * [visitChildren], which performs preorder traversal on this [InlineSpan]
+  ///    if it has content, and all its descendants with content.
+  bool visitDirectChildren(InlineSpanVisitor visitor);
 
   /// Returns the [InlineSpan] that contains the given position in the text.
   InlineSpan? getSpanForPosition(TextPosition position) {
@@ -260,7 +301,11 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// represented as a 0xFFFC 'object replacement character'.
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     final StringBuffer buffer = StringBuffer();
-    computeToPlainText(buffer, includeSemanticsLabels: includeSemanticsLabels, includePlaceholders: includePlaceholders);
+    computeToPlainText(
+      buffer,
+      includeSemanticsLabels: includeSemanticsLabels,
+      includePlaceholders: includePlaceholders,
+    );
     return buffer.toString();
   }
 
@@ -301,7 +346,11 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// This method will then recursively call [computeToPlainText] on its children
   /// [InlineSpan]s if available.
   @protected
-  void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true});
+  void computeToPlainText(
+    StringBuffer buffer, {
+    bool includeSemanticsLabels = true,
+    bool includePlaceholders = true,
+  });
 
   /// Returns the UTF-16 code unit at the given `index` in the flattened string.
   ///
@@ -361,8 +410,7 @@ abstract class InlineSpan extends DiagnosticableTree {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is InlineSpan
-        && other.style == style;
+    return other is InlineSpan && other.style == style;
   }
 
   @override
@@ -372,9 +420,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-
-    if (style != null) {
-      style!.debugFillProperties(properties);
-    }
+    style?.debugFillProperties(properties);
   }
 }

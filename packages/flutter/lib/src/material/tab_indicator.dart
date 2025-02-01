@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'tabs.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -17,8 +20,6 @@ import 'colors.dart';
 /// or the entire tab with [TabBarIndicatorSize.tab].
 class UnderlineTabIndicator extends Decoration {
   /// Create an underline style selected tab indicator.
-  ///
-  /// The [borderSide] and [insets] arguments must not be null.
   const UnderlineTabIndicator({
     this.borderRadius,
     this.borderSide = const BorderSide(width: 2.0, color: Colors.white),
@@ -28,7 +29,7 @@ class UnderlineTabIndicator extends Decoration {
   /// The radius of the indicator's corners.
   ///
   /// If this value is non-null, rounded rectangular tab indicator is
-  /// drawn, otherwise rectangular tab indictor is drawn.
+  /// drawn, otherwise rectangular tab indicator is drawn.
   final BorderRadius? borderRadius;
 
   /// The color and weight of the horizontal line drawn below the selected tab.
@@ -65,7 +66,7 @@ class UnderlineTabIndicator extends Decoration {
   }
 
   @override
-  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
     return _UnderlinePainter(this, borderRadius, onChanged);
   }
 
@@ -82,20 +83,14 @@ class UnderlineTabIndicator extends Decoration {
   @override
   Path getClipPath(Rect rect, TextDirection textDirection) {
     if (borderRadius != null) {
-      return Path()..addRRect(
-        borderRadius!.toRRect(_indicatorRectFor(rect, textDirection))
-      );
+      return Path()..addRRect(borderRadius!.toRRect(_indicatorRectFor(rect, textDirection)));
     }
     return Path()..addRect(_indicatorRectFor(rect, textDirection));
   }
 }
 
 class _UnderlinePainter extends BoxPainter {
-  _UnderlinePainter(
-    this.decoration,
-    this.borderRadius,
-    super.onChanged,
-  );
+  _UnderlinePainter(this.decoration, this.borderRadius, super.onChanged);
 
   final UnderlineTabIndicator decoration;
   final BorderRadius? borderRadius;
@@ -108,8 +103,7 @@ class _UnderlinePainter extends BoxPainter {
     final Paint paint;
     if (borderRadius != null) {
       paint = Paint()..color = decoration.borderSide.color;
-      final Rect indicator = decoration._indicatorRectFor(rect, textDirection)
-        .inflate(decoration.borderSide.width / 4.0);
+      final Rect indicator = decoration._indicatorRectFor(rect, textDirection);
       final RRect rrect = RRect.fromRectAndCorners(
         indicator,
         topLeft: borderRadius!.topLeft,
@@ -120,8 +114,9 @@ class _UnderlinePainter extends BoxPainter {
       canvas.drawRRect(rrect, paint);
     } else {
       paint = decoration.borderSide.toPaint()..strokeCap = StrokeCap.square;
-      final Rect indicator = decoration._indicatorRectFor(rect, textDirection)
-        .deflate(decoration.borderSide.width / 2.0);
+      final Rect indicator = decoration
+          ._indicatorRectFor(rect, textDirection)
+          .deflate(decoration.borderSide.width / 2.0);
       canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, paint);
     }
   }

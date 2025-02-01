@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Divider].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Divider].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const DividerExampleApp());
+
+class DividerExampleApp extends StatelessWidget {
+  const DividerExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,20 +31,9 @@ class DividerExample extends StatelessWidget {
       child: Column(
         children: <Widget>[
           const Expanded(
-            child: ColoredBox(
-              color: Colors.amber,
-              child: Center(
-                child: Text('Above'),
-              ),
-            ),
+            child: ColoredBox(color: Colors.amber, child: Center(child: Text('Above'))),
           ),
-          const Divider(
-            height: 20,
-            thickness: 5,
-            indent: 20,
-            endIndent: 0,
-            color: Colors.black,
-          ),
+          const Divider(height: 20, thickness: 5, indent: 20, endIndent: 0, color: Colors.black),
           // Subheader example from Material spec.
           // https://material.io/components/dividers#types
           Container(
@@ -61,9 +50,7 @@ class DividerExample extends StatelessWidget {
           Expanded(
             child: ColoredBox(
               color: Theme.of(context).colorScheme.primary,
-              child: const Center(
-                child: Text('Below'),
-              ),
+              child: const Center(child: Text('Below')),
             ),
           ),
         ],

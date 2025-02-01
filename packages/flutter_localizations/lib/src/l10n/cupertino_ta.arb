@@ -5,8 +5,8 @@
   "datePickerMinuteSemanticsLabelOther": "$minute நிமிடங்கள்",
   "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
-  "anteMeridiemAbbreviation": "முற்பகல்",
-  "postMeridiemAbbreviation": "பிற்பகல்",
+  "anteMeridiemAbbreviation": "AM",
+  "postMeridiemAbbreviation": "PM",
   "todayLabel": "இன்று",
   "alertDialogLabel": "விழிப்பூட்டல்",
   "timerPickerHourLabelOne": "மணிநேரம்",
@@ -21,5 +21,11 @@
   "selectAllButtonLabel": "எல்லாம் தேர்ந்தெடு",
   "tabSemanticsLabel": "தாவல் $tabIndex / $tabCount",
   "modalBarrierDismissLabel": "நிராகரிக்கும்",
-  "searchTextFieldPlaceholderLabel": "தேடுக"
+  "searchTextFieldPlaceholderLabel": "தேடுக",
+  "noSpellCheckReplacementsLabel": "மாற்று வார்த்தைகள் கிடைக்கவில்லை",
+  "menuDismissLabel": "மெனுவை மூடும்",
+  "lookUpButtonLabel": "தேடு",
+  "searchWebButtonLabel": "இணையத்தில் தேடு",
+  "shareButtonLabel": "பகிர்...",
+  "clearButtonLabel": "அழி"
 }

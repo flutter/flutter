@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'transitions.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -12,8 +15,8 @@ import 'ticker_provider.dart';
 /// duration whenever the given child's size changes.
 ///
 /// {@tool dartpad}
-/// This example makes a [Container] react to being touched, causing the child
-/// of the [AnimatedSize] widget, here a [FlutterLogo], to animate.
+/// This example defines a widget that uses [AnimatedSize] to change the size of
+/// the [SizedBox] on tap.
 ///
 /// ** See code in examples/api/lib/widgets/animated_size/animated_size.0.dart **
 /// {@end-tool}
@@ -23,8 +26,6 @@ import 'ticker_provider.dart';
 ///  * [SizeTransition], which changes its size based on an [Animation].
 class AnimatedSize extends StatefulWidget {
   /// Creates a widget that animates its size to match that of its child.
-  ///
-  /// The [curve] and [duration] arguments must not be null.
   const AnimatedSize({
     super.key,
     this.child,
@@ -33,6 +34,7 @@ class AnimatedSize extends StatefulWidget {
     required this.duration,
     this.reverseDuration,
     this.clipBehavior = Clip.hardEdge,
+    this.onEnd,
   });
 
   /// The widget below this widget in the tree.
@@ -77,15 +79,20 @@ class AnimatedSize extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// Called every time an animation completes.
+  ///
+  /// This can be useful to trigger additional actions (e.g. another animation)
+  /// at the end of the current animation.
+  final VoidCallback? onEnd;
 
   @override
   State<AnimatedSize> createState() => _AnimatedSizeState();
 }
 
-class _AnimatedSizeState
-    extends State<AnimatedSize> with SingleTickerProviderStateMixin {
+class _AnimatedSizeState extends State<AnimatedSize> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return _AnimatedSize(
@@ -95,6 +102,7 @@ class _AnimatedSizeState
       reverseDuration: widget.reverseDuration,
       vsync: this,
       clipBehavior: widget.clipBehavior,
+      onEnd: widget.onEnd,
       child: widget.child,
     );
   }
@@ -109,6 +117,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
     this.reverseDuration,
     required this.vsync,
     this.clipBehavior = Clip.hardEdge,
+    this.onEnd,
   });
 
   final AlignmentGeometry alignment;
@@ -121,6 +130,8 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
 
   final Clip clipBehavior;
 
+  final VoidCallback? onEnd;
+
   @override
   RenderAnimatedSize createRenderObject(BuildContext context) {
     return RenderAnimatedSize(
@@ -131,6 +142,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
       vsync: vsync,
       textDirection: Directionality.maybeOf(context),
       clipBehavior: clipBehavior,
+      onEnd: onEnd,
     );
   }
 
@@ -143,14 +155,28 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
       ..curve = curve
       ..vsync = vsync
       ..textDirection = Directionality.maybeOf(context)
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..onEnd = onEnd;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
+    properties.add(
+      DiagnosticsProperty<AlignmentGeometry>(
+        'alignment',
+        alignment,
+        defaultValue: Alignment.topCenter,
+      ),
+    );
     properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
-    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
+    properties.add(
+      IntProperty(
+        'reverseDuration',
+        reverseDuration?.inMilliseconds,
+        unit: 'ms',
+        defaultValue: null,
+      ),
+    );
   }
 }

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -53,8 +56,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// {@tool dartpad}
 /// When [thumbVisibility] is true, the scrollbar thumb will remain visible without the
 /// fade animation. This requires that a [ScrollController] is provided to controller,
-/// or that the [PrimaryScrollController] is available. [isAlwaysShown] is
-/// deprecated in favor of `thumbVisibility`.
+/// or that the [PrimaryScrollController] is available.
 ///
 /// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.1.dart **
 /// {@end-tool}
@@ -82,20 +84,11 @@ class CupertinoScrollbar extends RawScrollbar {
     this.radiusWhileDragging = defaultRadiusWhileDragging,
     ScrollNotificationPredicate? notificationPredicate,
     super.scrollbarOrientation,
-    @Deprecated(
-      'Use thumbVisibility instead. '
-      'This feature was deprecated after v2.9.0-1.0.pre.',
-    )
-    bool? isAlwaysShown,
+    super.mainAxisMargin = _kScrollbarMainAxisMargin,
   }) : assert(thickness < double.infinity),
        assert(thicknessWhileDragging < double.infinity),
-       assert(
-         isAlwaysShown == null || thumbVisibility == null,
-         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
-         'isAlwaysShown is deprecated.'
-       ),
        super(
-         thumbVisibility: isAlwaysShown ?? thumbVisibility ?? false,
+         thumbVisibility: thumbVisibility ?? false,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: const Duration(milliseconds: 100),
@@ -139,11 +132,16 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   late AnimationController _thicknessAnimationController;
 
   double get _thickness {
-    return widget.thickness! + _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness!);
+    return widget.thickness! +
+        _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness!);
   }
 
   Radius get _radius {
-    return Radius.lerp(widget.radius, widget.radiusWhileDragging, _thicknessAnimationController.value)!;
+    return Radius.lerp(
+      widget.radius,
+      widget.radiusWhileDragging,
+      _thicknessAnimationController.value,
+    )!;
   }
 
   @override
@@ -164,7 +162,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
       ..textDirection = Directionality.of(context)
       ..thickness = _thickness
-      ..mainAxisMargin = _kScrollbarMainAxisMargin
+      ..mainAxisMargin = widget.mainAxisMargin
       ..crossAxisMargin = _kScrollbarCrossAxisMargin
       ..radius = _radius
       ..padding = MediaQuery.paddingOf(context)
@@ -185,14 +183,10 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     if (direction == null) {
       return;
     }
-    switch (direction) {
-      case Axis.vertical:
-        _pressStartAxisPosition = localPosition.dy;
-        break;
-      case Axis.horizontal:
-        _pressStartAxisPosition = localPosition.dx;
-        break;
-    }
+    _pressStartAxisPosition = switch (direction) {
+      Axis.vertical => localPosition.dy,
+      Axis.horizontal => localPosition.dx,
+    };
   }
 
   @override
@@ -201,9 +195,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       return;
     }
     super.handleThumbPress();
-    _thicknessAnimationController.forward().then<void>(
-          (_) => HapticFeedback.mediumImpact(),
-    );
+    _thicknessAnimationController.forward().then<void>((_) => HapticFeedback.mediumImpact());
   }
 
   @override
@@ -214,19 +206,20 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     }
     _thicknessAnimationController.reverse();
     super.handleThumbPressEnd(localPosition, velocity);
-    switch(direction) {
-      case Axis.vertical:
-        if (velocity.pixelsPerSecond.dy.abs() < 10 &&
-          (localPosition.dy - _pressStartAxisPosition).abs() > 0) {
-          HapticFeedback.mediumImpact();
-        }
-        break;
-      case Axis.horizontal:
-        if (velocity.pixelsPerSecond.dx.abs() < 10 &&
-          (localPosition.dx - _pressStartAxisPosition).abs() > 0) {
-          HapticFeedback.mediumImpact();
-        }
-        break;
+    final (double axisPosition, double axisVelocity) = switch (direction) {
+      Axis.horizontal => (localPosition.dx, velocity.pixelsPerSecond.dx),
+      Axis.vertical => (localPosition.dy, velocity.pixelsPerSecond.dy),
+    };
+    if (axisPosition != _pressStartAxisPosition && axisVelocity.abs() < 10) {
+      HapticFeedback.mediumImpact();
+    }
+  }
+
+  @override
+  void handleTrackTapDown(TapDownDetails details) {
+    // On iOS, tapping the track does not page towards the position of the tap.
+    if (ScrollConfiguration.of(context).getPlatform(context) != TargetPlatform.iOS) {
+      super.handleTrackTapDown(details);
     }
   }
 

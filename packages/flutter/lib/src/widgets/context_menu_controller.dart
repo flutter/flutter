@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+library;
+
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'navigator.dart';
@@ -10,7 +13,8 @@ import 'overlay.dart';
 /// Builds and manages a context menu at a given location.
 ///
 /// There can only ever be one context menu shown at a given time in the entire
-/// app.
+/// app. Calling [show] on one instance of this class will hide any other
+/// shown instances.
 ///
 /// {@tool dartpad}
 /// This example shows how to use a GestureDetector to show a context menu
@@ -25,9 +29,7 @@ import 'overlay.dart';
 ///     be disabled and Flutter-rendered context menus to appear.
 class ContextMenuController {
   /// Creates a context menu that can be shown with [show].
-  ContextMenuController({
-    this.onRemove,
-  });
+  ContextMenuController({this.onRemove});
 
   /// Called when this menu is removed.
   final VoidCallback? onRemove;
@@ -80,6 +82,7 @@ class ContextMenuController {
   ///  * [remove], which removes only the current instance.
   static void removeAny() {
     _menuOverlayEntry?.remove();
+    _menuOverlayEntry?.dispose();
     _menuOverlayEntry = null;
     if (_shownInstance != null) {
       _shownInstance!.onRemove?.call();
@@ -93,7 +96,7 @@ class ContextMenuController {
   /// Cause the underlying [OverlayEntry] to rebuild during the next pipeline
   /// flush.
   ///
-  /// It's necessary to call this function if the output of [contextMenuBuilder]
+  /// It's necessary to call this function if the output of `contextMenuBuilder`
   /// has changed.
   ///
   /// Errors if the context menu is not currently shown.

@@ -2,26 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [MouseRegion.onExit].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [MouseRegion.onExit].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const MouseRegionApp());
 
-  static const String _title = 'Flutter Code Sample';
+class MouseRegionApp extends StatelessWidget {
+  const MouseRegionApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const Center(
-          child: MyStatefulWidget(),
-        ),
+        appBar: AppBar(title: const Text('MouseRegion.onExit Sample')),
+        body: const Center(child: MouseRegionExample()),
       ),
     );
   }
@@ -29,8 +24,7 @@ class MyApp extends StatelessWidget {
 
 // A region that hides its content one second after being hovered.
 class MyTimedButton extends StatefulWidget {
-  const MyTimedButton(
-      {super.key, required this.onEnterButton, required this.onExitButton});
+  const MyTimedButton({super.key, required this.onEnterButton, required this.onExitButton});
 
   final VoidCallback onEnterButton;
   final VoidCallback onExitButton;
@@ -64,37 +58,38 @@ class _MyTimedButton extends State<MyTimedButton> {
       width: 100,
       height: 100,
       child: MouseRegion(
-        child: regionIsHidden
-            ? null
-            : MouseRegion(
-                onEnter: (_) {
-                  widget.onEnterButton();
-                  setState(() {
-                    hovered = true;
-                  });
-                  startCountdown();
-                },
-                onExit: (_) {
-                  setState(() {
-                    hovered = false;
-                  });
-                  widget.onExitButton();
-                },
-                child: Container(color: Colors.red),
-              ),
+        child:
+            regionIsHidden
+                ? null
+                : MouseRegion(
+                  onEnter: (_) {
+                    widget.onEnterButton();
+                    setState(() {
+                      hovered = true;
+                    });
+                    startCountdown();
+                  },
+                  onExit: (_) {
+                    setState(() {
+                      hovered = false;
+                    });
+                    widget.onExitButton();
+                  },
+                  child: Container(color: Colors.red),
+                ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class MouseRegionExample extends StatefulWidget {
+  const MouseRegionExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<MouseRegionExample> createState() => _MouseRegionExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _MouseRegionExampleState extends State<MouseRegionExample> {
   Key key = UniqueKey();
   bool hovering = false;
 

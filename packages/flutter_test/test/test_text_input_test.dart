@@ -16,13 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('enterText works', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: TextField(),
-        ),
-      ),
-    );
+    await tester.pumpWidget(const MaterialApp(home: Material(child: TextField())));
 
     final EditableTextState state = tester.state(find.byType(EditableText));
     expect(state.textEditingValue.text, '');
@@ -33,13 +27,11 @@ void main() {
     expect(state.textEditingValue.selection.baseOffset, 17);
   });
 
-  testWidgets('receiveAction() forwards exception when exception occurs during action processing', (WidgetTester tester) async {
+  testWidgets('receiveAction() forwards exception when exception occurs during action processing', (
+    WidgetTester tester,
+  ) async {
     // Setup a widget that can receive focus so that we can open the keyboard.
-    const Widget widget = MaterialApp(
-      home: Material(
-        child: TextField(),
-      ),
-    );
+    const Widget widget = MaterialApp(home: Material(child: TextField()));
     await tester.pumpWidget(widget);
 
     // Keyboard must be shown for receiveAction() to function.
@@ -59,7 +51,10 @@ void main() {
 
   testWidgets('selectors are called on macOS', (WidgetTester tester) async {
     List<dynamic>? selectorNames;
-    await SystemChannels.textInput.invokeMethod('TextInput.setClient', <dynamic>[1, <String, dynamic>{}]);
+    await SystemChannels.textInput.invokeMethod('TextInput.setClient', <dynamic>[
+      1,
+      <String, dynamic>{},
+    ]);
     await SystemChannels.textInput.invokeMethod('TextInput.show');
     SystemChannels.textInput.setMethodCallHandler((MethodCall call) async {
       if (call.method == 'TextInputClient.performSelectors') {
@@ -72,6 +67,31 @@ void main() {
 
     if (defaultTargetPlatform == TargetPlatform.macOS) {
       expect(selectorNames, <dynamic>['moveBackward:', 'moveToBeginningOfParagraph:']);
+    } else {
+      expect(selectorNames, isNull);
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('selector is called for ctrl + backspace on macOS', (WidgetTester tester) async {
+    List<dynamic>? selectorNames;
+    await SystemChannels.textInput.invokeMethod('TextInput.setClient', <dynamic>[
+      1,
+      <String, dynamic>{},
+    ]);
+    await SystemChannels.textInput.invokeMethod('TextInput.show');
+    SystemChannels.textInput.setMethodCallHandler((MethodCall call) async {
+      if (call.method == 'TextInputClient.performSelectors') {
+        selectorNames = (call.arguments as List<dynamic>)[1] as List<dynamic>;
+      }
+    });
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.backspace);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.backspace);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await SystemChannels.textInput.invokeMethod('TextInput.clearClient');
+
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
+      expect(selectorNames, <dynamic>['deleteBackwardByDecomposingPreviousCharacter:']);
     } else {
       expect(selectorNames, isNull);
     }

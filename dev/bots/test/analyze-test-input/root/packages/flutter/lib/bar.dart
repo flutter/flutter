@@ -14,8 +14,13 @@ class Foo {
   final Map<String, String>? foo = kDebugMode ? <String, String>{} : null;
 
   @_debugOnly
-  final Map<String, String>? bar = kDebugMode ? null : <String, String>{};
-}
+  final Map<String, String>? bar = kDebugMode ? null : <String, String>{}; // ERROR: fields annotated with @_debugOnly must null initialize.
 
-/// Simply avoid this
-/// and simply do that.
+  // dart format off
+  // Checks the annotation works for multiline expressions.
+  @_debugOnly
+  final Map<String, String>? multiline = kDebugMode
+    ? <String, String>{}
+    : null;
+  // dart format on
+}

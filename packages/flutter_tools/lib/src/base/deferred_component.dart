@@ -5,6 +5,7 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
+import '../flutter_manifest.dart';
 
 /// Represents a configured deferred component as defined in
 /// the app's pubspec.yaml.
@@ -12,7 +13,7 @@ class DeferredComponent {
   DeferredComponent({
     required this.name,
     this.libraries = const <String>[],
-    this.assets = const <Uri>[],
+    this.assets = const <AssetsEntry>[],
   }) : _assigned = false;
 
   /// The name of the deferred component. There should be a matching
@@ -28,8 +29,8 @@ class DeferredComponent {
   /// libraries that are not listed here.
   final List<String> libraries;
 
-  /// Assets that are part of this component as a Uri relative to the project directory.
-  final List<Uri> assets;
+  /// Assets that are part of this component.
+  final List<AssetsEntry> assets;
 
   /// The minimal set of [LoadingUnit]s needed that contain all of the dart libraries in
   /// [libraries].
@@ -70,14 +71,21 @@ class DeferredComponent {
   /// status, but will result in [loadingUnits] returning an empty set.
   void assignLoadingUnits(List<LoadingUnit> allLoadingUnits) {
     _assigned = true;
-    _loadingUnits = <LoadingUnit>{};
-    for (final String lib in libraries) {
-      for (final LoadingUnit loadingUnit in allLoadingUnits) {
-        if (loadingUnit.libraries.contains(lib)) {
-          _loadingUnits!.add(loadingUnit);
-        }
-      }
-    }
+    _loadingUnits = <LoadingUnit>{
+      for (final String lib in libraries)
+        for (final LoadingUnit loadingUnit in allLoadingUnits)
+          if (loadingUnit.libraries.contains(lib)) loadingUnit,
+    };
+  }
+
+  /// Returns a descriptor of the component to be used when modifying a
+  /// pubspec.yaml.
+  Map<String, Object?> get descriptor {
+    return <String, Object?>{
+      'name': name,
+      if (libraries.isNotEmpty) 'libraries': libraries.toList(),
+      if (assets.isNotEmpty) 'assets': assets.map((AssetsEntry e) => e.descriptor).toList(),
+    };
   }
 
   /// Provides a human readable string representation of the
@@ -95,8 +103,11 @@ class DeferredComponent {
       }
     }
     out.write('\n  Assets:');
-    for (final Uri asset in assets) {
-      out.write('\n    - ${asset.path}');
+    for (final AssetsEntry asset in assets) {
+      out.write('\n    - ${asset.uri.path}');
+      if (asset.flavors.isNotEmpty) {
+        out.write(' (flavors: ${asset.flavors.join(', ')})');
+      }
     }
     return out.toString();
   }
@@ -109,11 +120,7 @@ class LoadingUnit {
   ///
   /// Loading units must include an [id] and [libraries]. The [path] is only present when
   /// parsing the loading unit from a loading unit manifest produced by gen_snapshot.
-  LoadingUnit({
-    required this.id,
-    required this.libraries,
-    this.path,
-  });
+  LoadingUnit({required this.id, required this.libraries, this.path});
 
   /// The unique loading unit id that is used to identify the loading unit within dart.
   final int id;
@@ -149,7 +156,11 @@ class LoadingUnit {
   ///
   /// This will read all existing loading units for every provided abi. If no abis are
   /// provided, loading units for all abis will be parsed.
-  static List<LoadingUnit> parseGeneratedLoadingUnits(Directory outputDir, Logger logger, {List<String>? abis}) {
+  static List<LoadingUnit> parseGeneratedLoadingUnits(
+    Directory outputDir,
+    Logger logger, {
+    List<String>? abis,
+  }) {
     final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
     final List<FileSystemEntity> files = outputDir.listSync(recursive: true);
     for (final FileSystemEntity fileEntity in files) {
@@ -189,21 +200,16 @@ class LoadingUnit {
     } on FormatException catch (e) {
       logger.printError('Loading unit manifest at `${manifestFile.path}` was invalid JSON:\n$e');
     }
-    final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
-    // Setup android source directory
-    if (manifest != null) {
-      for (final dynamic loadingUnitMetadata in manifest['loadingUnits'] as List<dynamic>) {
-        final Map<String, dynamic> loadingUnitMap = loadingUnitMetadata as Map<String, dynamic>;
-        if (loadingUnitMap['id'] == 1) {
-          continue; // Skip base unit
-        }
-        loadingUnits.add(LoadingUnit(
-          id: loadingUnitMap['id'] as int,
-          path: loadingUnitMap['path'] as String,
-          libraries: List<String>.from(loadingUnitMap['libraries'] as List<dynamic>)),
-        );
-      }
-    }
-    return loadingUnits;
+    // Set up android source directory
+    return <LoadingUnit>[
+      if (manifest?['loadingUnits'] case final List<dynamic> loadingUnits)
+        for (final Map<String, dynamic> loadingUnitMap in loadingUnits.cast<Map<String, dynamic>>())
+          if (loadingUnitMap['id'] != 1) // skip base unit
+            LoadingUnit(
+              id: loadingUnitMap['id'] as int,
+              path: loadingUnitMap['path'] as String,
+              libraries: List<String>.from(loadingUnitMap['libraries'] as List<dynamic>),
+            ),
+    ];
   }
 }

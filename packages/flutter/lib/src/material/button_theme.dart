@@ -2,6 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button.dart';
+/// @docImport 'button_bar.dart';
+/// @docImport 'dropdown.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'elevated_button_theme.dart';
+/// @docImport 'filled_button.dart';
+/// @docImport 'filled_button_theme.dart';
+/// @docImport 'material.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'outlined_button_theme.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_button_theme.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -9,7 +24,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'material_button.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart' show MaterialTapTargetSize;
 
@@ -23,7 +37,7 @@ enum ButtonTextTheme {
   /// Button text is black or white depending on [ThemeData.brightness].
   normal,
 
-  /// Button text is [ThemeData.accentColor].
+  /// Button text is [ColorScheme.secondary].
   accent,
 
   /// Button text is based on [ThemeData.primaryColor].
@@ -66,9 +80,6 @@ enum ButtonBarLayoutBehavior {
 ///    depend on any inherited themes.
 class ButtonTheme extends InheritedTheme {
   /// Creates a button theme.
-  ///
-  /// The [textTheme], [minWidth], [height], and [colorScheme] arguments
-  /// must not be null.
   ButtonTheme({
     super.key,
     ButtonTextTheme textTheme = ButtonTextTheme.normal,
@@ -108,13 +119,7 @@ class ButtonTheme extends InheritedTheme {
        );
 
   /// Creates a button theme from [data].
-  ///
-  /// The [data] argument must not be null.
-  const ButtonTheme.fromButtonThemeData({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const ButtonTheme.fromButtonThemeData({super.key, required this.data, required super.child});
 
   /// Specifies the color and geometry of buttons.
   final ButtonThemeData data;
@@ -127,9 +132,11 @@ class ButtonTheme extends InheritedTheme {
   /// ButtonThemeData theme = ButtonTheme.of(context);
   /// ```
   static ButtonThemeData of(BuildContext context) {
-    final ButtonTheme? inheritedButtonTheme = context.dependOnInheritedWidgetOfExactType<ButtonTheme>();
+    final ButtonTheme? inheritedButtonTheme =
+        context.dependOnInheritedWidgetOfExactType<ButtonTheme>();
     ButtonThemeData? buttonTheme = inheritedButtonTheme?.data;
-    if (buttonTheme?.colorScheme == null) { // if buttonTheme or buttonTheme.colorScheme is null
+    if (buttonTheme?.colorScheme == null) {
+      // if buttonTheme or buttonTheme.colorScheme is null
       final ThemeData theme = Theme.of(context);
       buttonTheme ??= theme.buttonTheme;
       if (buttonTheme.colorScheme == null) {
@@ -168,9 +175,7 @@ class ButtonThemeData with Diagnosticable {
   /// Create a button theme object that can be used with [ButtonTheme]
   /// or [ThemeData].
   ///
-  /// The [textTheme], [minWidth], [height], [alignedDropdown], and
-  /// [layoutBehavior] parameters must not be null. The [minWidth] and
-  /// [height] parameters must greater than or equal to zero.
+  /// The [minWidth] and [height] parameters must greater than or equal to zero.
   ///
   /// The ButtonTheme's methods that have a [MaterialButton] parameter and
   /// have a name with a `get` prefix are used to configure a
@@ -232,10 +237,7 @@ class ButtonThemeData with Diagnosticable {
   /// Convenience that returns [minWidth] and [height] as a
   /// [BoxConstraints] object.
   BoxConstraints get constraints {
-    return BoxConstraints(
-      minWidth: minWidth,
-      minHeight: height,
-    );
+    return BoxConstraints(minWidth: minWidth, minHeight: height);
   }
 
   /// Padding for a button's child (typically the button's label).
@@ -245,20 +247,15 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getPadding], which is used to calculate padding for the [button]'s
+  ///  * [getPadding], which is used to calculate padding for the button's
   ///    child (typically the button's label).
-  EdgeInsetsGeometry get padding {
-    if (_padding != null) {
-      return _padding!;
-    }
-    switch (textTheme) {
-      case ButtonTextTheme.normal:
-      case ButtonTextTheme.accent:
-        return const EdgeInsets.symmetric(horizontal: 16.0);
-      case ButtonTextTheme.primary:
-        return const EdgeInsets.symmetric(horizontal: 24.0);
-    }
-  }
+  EdgeInsetsGeometry get padding =>
+      _padding ??
+      switch (textTheme) {
+        ButtonTextTheme.normal => const EdgeInsets.symmetric(horizontal: 16.0),
+        ButtonTextTheme.accent => const EdgeInsets.symmetric(horizontal: 16.0),
+        ButtonTextTheme.primary => const EdgeInsets.symmetric(horizontal: 24.0),
+      };
   final EdgeInsetsGeometry? _padding;
 
   /// The shape of a button's material.
@@ -273,24 +270,18 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getShape], which is used to calculate the shape of the [button]'s
+  ///  * [getShape], which is used to calculate the shape of the button's
   ///    [Material].
-  ShapeBorder get shape {
-    if (_shape != null) {
-      return _shape!;
-    }
-    switch (textTheme) {
-      case ButtonTextTheme.normal:
-      case ButtonTextTheme.accent:
-        return const RoundedRectangleBorder(
+  ShapeBorder get shape =>
+      _shape ??
+      switch (textTheme) {
+        ButtonTextTheme.normal || ButtonTextTheme.accent => const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(2.0)),
-        );
-      case ButtonTextTheme.primary:
-        return const RoundedRectangleBorder(
+        ),
+        ButtonTextTheme.primary => const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
-        );
-    }
-  }
+        ),
+      };
   final ShapeBorder? _shape;
 
   /// If true, then a [DropdownButton] menu's width will match the button's
@@ -309,8 +300,8 @@ class ButtonThemeData with Diagnosticable {
   /// This property is null by default.
   ///
   /// If the button is in the focused, hovering, or highlighted state, then the
-  /// [focusColor], [hoverColor], or [highlightColor] will take precedence over
-  /// the [buttonColor].
+  /// `focusColor`, `hoverColor`, or `highlightColor` will take precedence over
+  /// the `buttonColor`.
   ///
   /// See also:
   ///
@@ -331,8 +322,8 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// This property is null by default.
   ///
-  /// If the button is in the hovering or highlighted state, then the [hoverColor]
-  /// or [highlightColor] will take precedence over the [focusColor].
+  /// If the button is in the hovering or highlighted state, then the `hoverColor`
+  /// or `highlightColor` will take precedence over the `focusColor`.
   ///
   /// See also:
   ///
@@ -344,8 +335,8 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// This property is null by default.
   ///
-  /// If the button is in the highlighted state, then the [highlightColor] will
-  /// take precedence over the [hoverColor].
+  /// If the button is in the highlighted state, then the `highlightColor` will
+  /// take precedence over the `hoverColor`.
   ///
   /// See also:
   ///
@@ -360,7 +351,7 @@ class ButtonThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [getHighlightColor], which is used to compute the color of the overlay
-  ///    that appears when the [button] is pressed.
+  ///    that appears when the `button` is pressed.
   final Color? _highlightColor;
 
   /// The color of the ink "splash" overlay that appears when a button is tapped.
@@ -370,7 +361,7 @@ class ButtonThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [getSplashColor], which is used to compute the color of the ink
-  ///    "splash" overlay that appears when the (enabled) [button] is tapped.
+  ///    "splash" overlay that appears when the (enabled) `button` is tapped.
   final Color? _splashColor;
 
   /// A set of thirteen colors that can be used to derive the button theme's
@@ -401,7 +392,7 @@ class ButtonThemeData with Diagnosticable {
   /// minimum size, internal padding, and shape.
   ///
   /// Despite the name, this property is not the [TextTheme] whose
-  /// [TextTheme.button] is used as the button text's [TextStyle].
+  /// [TextTheme.labelLarge] is used as the button text's [TextStyle].
   ButtonTextTheme getTextTheme(MaterialButton button) => button.textTheme ?? textTheme;
 
   /// The foreground color of the [button]'s text and icon when
@@ -411,8 +402,8 @@ class ButtonThemeData with Diagnosticable {
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
   /// with its opacity set to 0.38.
   ///
-  /// If [MaterialButton.textColor] is a [MaterialStateProperty<Color>], it will be
-  /// used as the `disabledTextColor`. It will be resolved in the [MaterialState.disabled] state.
+  /// If [MaterialButton.textColor] is a [WidgetStateProperty<Color>], it will be
+  /// used as the `disabledTextColor`. It will be resolved in the [WidgetState.disabled] state.
   Color getDisabledTextColor(MaterialButton button) {
     return button.textColor ?? button.disabledTextColor ?? colorScheme!.onSurface.withOpacity(0.38);
   }
@@ -470,8 +461,8 @@ class ButtonThemeData with Diagnosticable {
         return button.enabled ? colorScheme!.primary : getDisabledFillColor(button);
       case ButtonTextTheme.primary:
         return button.enabled
-          ? _buttonColor ?? colorScheme!.primary
-          : colorScheme!.onSurface.withOpacity(0.12);
+            ? _buttonColor ?? colorScheme!.primary
+            : colorScheme!.onSurface.withOpacity(0.12);
     }
   }
 
@@ -509,9 +500,10 @@ class ButtonThemeData with Diagnosticable {
 
       case ButtonTextTheme.primary:
         final Color? fillColor = getFillColor(button);
-        final bool fillIsDark = fillColor != null
-          ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
-          : getBrightness(button) == Brightness.dark;
+        final bool fillIsDark =
+            fillColor != null
+                ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
+                : getBrightness(button) == Brightness.dark;
         return fillIsDark ? Colors.white : Colors.black;
     }
   }
@@ -537,7 +529,7 @@ class ButtonThemeData with Diagnosticable {
       switch (getTextTheme(button)) {
         case ButtonTextTheme.normal:
         case ButtonTextTheme.accent:
-          return _splashColor!;
+          return _splashColor;
         case ButtonTextTheme.primary:
           break;
       }
@@ -637,25 +629,13 @@ class ButtonThemeData with Diagnosticable {
   /// [getTextTheme] is [ButtonTextTheme.primary], 16.0 on the left and right
   /// otherwise.
   EdgeInsetsGeometry getPadding(MaterialButton button) {
-    if (button.padding != null) {
-      return button.padding!;
-    }
-
-    if (button is MaterialButtonWithIconMixin) {
-      return const EdgeInsetsDirectional.only(start: 12.0, end: 16.0);
-    }
-
-    if (_padding != null) {
-      return _padding!;
-    }
-
-    switch (getTextTheme(button)) {
-      case ButtonTextTheme.normal:
-      case ButtonTextTheme.accent:
-        return const EdgeInsets.symmetric(horizontal: 16.0);
-      case ButtonTextTheme.primary:
-        return const EdgeInsets.symmetric(horizontal: 24.0);
-    }
+    return button.padding ??
+        _padding ??
+        switch (getTextTheme(button)) {
+          ButtonTextTheme.normal => const EdgeInsets.symmetric(horizontal: 16.0),
+          ButtonTextTheme.accent => const EdgeInsets.symmetric(horizontal: 16.0),
+          ButtonTextTheme.primary => const EdgeInsets.symmetric(horizontal: 24.0),
+        };
   }
 
   /// The shape of the [button]'s [Material].
@@ -734,21 +714,21 @@ class ButtonThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ButtonThemeData
-        && other.textTheme == textTheme
-        && other.minWidth == minWidth
-        && other.height == height
-        && other.padding == padding
-        && other.shape == shape
-        && other.alignedDropdown == alignedDropdown
-        && other._buttonColor == _buttonColor
-        && other._disabledColor == _disabledColor
-        && other._focusColor == _focusColor
-        && other._hoverColor == _hoverColor
-        && other._highlightColor == _highlightColor
-        && other._splashColor == _splashColor
-        && other.colorScheme == colorScheme
-        && other._materialTapTargetSize == _materialTapTargetSize;
+    return other is ButtonThemeData &&
+        other.textTheme == textTheme &&
+        other.minWidth == minWidth &&
+        other.height == height &&
+        other.padding == padding &&
+        other.shape == shape &&
+        other.alignedDropdown == alignedDropdown &&
+        other._buttonColor == _buttonColor &&
+        other._disabledColor == _disabledColor &&
+        other._focusColor == _focusColor &&
+        other._hoverColor == _hoverColor &&
+        other._highlightColor == _highlightColor &&
+        other._splashColor == _splashColor &&
+        other.colorScheme == colorScheme &&
+        other._materialTapTargetSize == _materialTapTargetSize;
   }
 
   @override
@@ -773,23 +753,48 @@ class ButtonThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const ButtonThemeData defaultTheme = ButtonThemeData();
-    properties.add(EnumProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: defaultTheme.textTheme));
+    properties.add(
+      EnumProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: defaultTheme.textTheme),
+    );
     properties.add(DoubleProperty('minWidth', minWidth, defaultValue: defaultTheme.minWidth));
     properties.add(DoubleProperty('height', height, defaultValue: defaultTheme.height));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultTheme.padding));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultTheme.shape));
-    properties.add(FlagProperty('alignedDropdown',
-      value: alignedDropdown,
-      defaultValue: defaultTheme.alignedDropdown,
-      ifTrue: 'dropdown width matches button',
-    ));
+    properties.add(
+      DiagnosticsProperty<EdgeInsetsGeometry>(
+        'padding',
+        padding,
+        defaultValue: defaultTheme.padding,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultTheme.shape),
+    );
+    properties.add(
+      FlagProperty(
+        'alignedDropdown',
+        value: alignedDropdown,
+        defaultValue: defaultTheme.alignedDropdown,
+        ifTrue: 'dropdown width matches button',
+      ),
+    );
     properties.add(ColorProperty('buttonColor', _buttonColor, defaultValue: null));
     properties.add(ColorProperty('disabledColor', _disabledColor, defaultValue: null));
     properties.add(ColorProperty('focusColor', _focusColor, defaultValue: null));
     properties.add(ColorProperty('hoverColor', _hoverColor, defaultValue: null));
     properties.add(ColorProperty('highlightColor', _highlightColor, defaultValue: null));
     properties.add(ColorProperty('splashColor', _splashColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultTheme.colorScheme));
-    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', _materialTapTargetSize, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<ColorScheme>(
+        'colorScheme',
+        colorScheme,
+        defaultValue: defaultTheme.colorScheme,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialTapTargetSize>(
+        'materialTapTargetSize',
+        _materialTapTargetSize,
+        defaultValue: null,
+      ),
+    );
   }
 }

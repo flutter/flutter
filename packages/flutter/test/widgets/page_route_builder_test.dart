@@ -11,15 +11,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestPage extends StatelessWidget {
-  const TestPage({super.key});
+  const TestPage({super.key, this.useMaterial3});
+
+  final bool? useMaterial3;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Test',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
+      theme: ThemeData(useMaterial3: useMaterial3, primarySwatch: Colors.blue),
       home: const HomePage(),
     );
   }
@@ -34,21 +35,21 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   void _presentModalPage() {
-    Navigator.of(context).push(PageRouteBuilder<void>(
-      barrierColor: Colors.black54,
-      opaque: false,
-      pageBuilder: (BuildContext context, _, __) {
-        return const ModalPage();
-      },
-    ));
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        barrierColor: Colors.black54,
+        opaque: false,
+        pageBuilder: (BuildContext context, _, _) {
+          return const ModalPage();
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const Center(
-        child: Text('Test Home'),
-      ),
+      body: const Center(child: Text('Test Home')),
       floatingActionButton: FloatingActionButton(
         onPressed: _presentModalPage,
         child: const Icon(Icons.add),
@@ -77,10 +78,7 @@ class ModalPage extends StatelessWidget {
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: Container(
-                height: 150,
-                color: Colors.teal,
-              ),
+              child: Container(height: 150, color: Colors.teal),
             ),
           ],
         ),
@@ -90,13 +88,23 @@ class ModalPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
-    await tester.pumpWidget(const TestPage());
+  testWidgets('Material2 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestPage(useMaterial3: false));
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(TestPage),
-      matchesGoldenFile('page_route_builder.barrier.png'),
+      matchesGoldenFile('m2_page_route_builder.barrier.png'),
+    );
+  });
+
+  testWidgets('Material3 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestPage(useMaterial3: true));
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(TestPage),
+      matchesGoldenFile('m3_page_route_builder.barrier.png'),
     );
   });
 }

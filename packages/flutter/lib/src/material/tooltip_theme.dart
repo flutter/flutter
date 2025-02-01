@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'tooltip.dart';
+/// @docImport 'tooltip_visibility.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -12,20 +17,23 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// Defines the visual properties of [Tooltip] widgets.
+/// Defines the visual properties of [Tooltip] widgets, a tooltip theme.
 ///
-/// Used by [TooltipTheme] to control the visual properties of tooltips in a
-/// widget subtree.
+/// Each property of [TooltipThemeData] corresponds to a property of [Tooltip],
+/// and describes the value to use when the [Tooltip] property is
+/// not given an explicit non-null value.
 ///
-/// To obtain this configuration, use [TooltipTheme.of] to access the closest
-/// ancestor [TooltipTheme] of the current [BuildContext].
+/// Use this class to configure a [TooltipTheme] widget, or to set the
+/// [ThemeData.tooltipTheme] for a [Theme] widget or [MaterialApp.theme].
+///
+/// To obtain the current ambient tooltip theme, use [TooltipTheme.of].
 ///
 /// See also:
 ///
-///  * [TooltipTheme], an [InheritedWidget] that propagates the theme down its
-///    subtree.
-///  * [TooltipThemeData], which describes the actual configuration of a
-///    tooltip theme.
+///  * [TooltipTheme], a widget which overrides the tooltip theme for a subtree.
+///  * [ThemeData.tooltipTheme], which specifies a tooltip theme as part of
+///    an overall theme.
+///  * [MaterialApp.theme], which specifies a theme for the whole application.
 @immutable
 class TooltipThemeData with Diagnosticable {
   /// Creates the set of properties used to configure [Tooltip]s.
@@ -41,6 +49,7 @@ class TooltipThemeData with Diagnosticable {
     this.textAlign,
     this.waitDuration,
     this.showDuration,
+    this.exitDuration,
     this.triggerMode,
     this.enableFeedback,
   });
@@ -67,6 +76,9 @@ class TooltipThemeData with Diagnosticable {
   ///
   /// If there is insufficient space to display the tooltip in the preferred
   /// direction, the tooltip will be displayed in the opposite direction.
+  ///
+  /// Applying `false` for the entire app is recommended
+  /// to avoid having a finger or cursor hide a tooltip.
   final bool? preferBelow;
 
   /// Whether the [Tooltip.message] should be excluded from the semantics
@@ -92,6 +104,10 @@ class TooltipThemeData with Diagnosticable {
 
   /// The length of time that the tooltip will be shown once it has appeared.
   final Duration? showDuration;
+
+  /// The length of time that a pointer must have stopped hovering over a
+  /// tooltip's widget before the tooltip will be hidden.
+  final Duration? exitDuration;
 
   /// The [TooltipTriggerMode] that will show the tooltip.
   final TooltipTriggerMode? triggerMode;
@@ -123,6 +139,7 @@ class TooltipThemeData with Diagnosticable {
     TextAlign? textAlign,
     Duration? waitDuration,
     Duration? showDuration,
+    Duration? exitDuration,
     TooltipTriggerMode? triggerMode,
     bool? enableFeedback,
   }) {
@@ -157,11 +174,11 @@ class TooltipThemeData with Diagnosticable {
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       margin: EdgeInsetsGeometry.lerp(a?.margin, b?.margin, t),
       verticalOffset: lerpDouble(a?.verticalOffset, b?.verticalOffset, t),
-      preferBelow: t < 0.5 ? a?.preferBelow: b?.preferBelow,
+      preferBelow: t < 0.5 ? a?.preferBelow : b?.preferBelow,
       excludeFromSemantics: t < 0.5 ? a?.excludeFromSemantics : b?.excludeFromSemantics,
       decoration: Decoration.lerp(a?.decoration, b?.decoration, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
-      textAlign: t < 0.5 ? a?.textAlign: b?.textAlign,
+      textAlign: t < 0.5 ? a?.textAlign : b?.textAlign,
     );
   }
 
@@ -178,32 +195,34 @@ class TooltipThemeData with Diagnosticable {
     textAlign,
     waitDuration,
     showDuration,
+    exitDuration,
     triggerMode,
     enableFeedback,
   );
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TooltipThemeData
-        && other.height == height
-        && other.padding == padding
-        && other.margin == margin
-        && other.verticalOffset == verticalOffset
-        && other.preferBelow == preferBelow
-        && other.excludeFromSemantics == excludeFromSemantics
-        && other.decoration == decoration
-        && other.textStyle == textStyle
-        && other.textAlign == textAlign
-        && other.waitDuration == waitDuration
-        && other.showDuration == showDuration
-        && other.triggerMode == triggerMode
-        && other.enableFeedback == enableFeedback;
+    return other is TooltipThemeData &&
+        other.height == height &&
+        other.padding == padding &&
+        other.margin == margin &&
+        other.verticalOffset == verticalOffset &&
+        other.preferBelow == preferBelow &&
+        other.excludeFromSemantics == excludeFromSemantics &&
+        other.decoration == decoration &&
+        other.textStyle == textStyle &&
+        other.textAlign == textAlign &&
+        other.waitDuration == waitDuration &&
+        other.showDuration == showDuration &&
+        other.exitDuration == exitDuration &&
+        other.triggerMode == triggerMode &&
+        other.enableFeedback == enableFeedback;
   }
 
   @override
@@ -213,23 +232,46 @@ class TooltipThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
-    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
-    properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
+    properties.add(
+      FlagProperty(
+        'position',
+        value: preferBelow,
+        ifTrue: 'below',
+        ifFalse: 'above',
+        showName: true,
+      ),
+    );
+    properties.add(
+      FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true),
+    );
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
-    properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
-    properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
-    properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true));
+    properties.add(
+      DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<Duration>('exit duration', exitDuration, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null),
+    );
+    properties.add(
+      FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true),
+    );
   }
 }
 
-/// An inherited widget that defines the configuration for
-/// [Tooltip]s in this widget's subtree.
+/// Applies a tooltip theme to descendant [Tooltip] widgets.
 ///
-/// Values specified here are used for [Tooltip] properties that are not
-/// given an explicit non-null value.
+/// A tooltip theme describes the values to use for [Tooltip] properties
+/// that are not given an explicit non-null value.
+///
+/// Descendant widgets obtain the ambient tooltip theme, a [TooltipThemeData],
+/// using [TooltipTheme.of].
 ///
 /// {@tool snippet}
 ///
@@ -258,24 +300,24 @@ class TooltipThemeData with Diagnosticable {
 ///
 /// See also:
 ///
+///  * [TooltipThemeData], which describes the actual configuration of a
+///    tooltip theme.
 ///  * [TooltipVisibility], which can be used to visually disable descendant [Tooltip]s.
 class TooltipTheme extends InheritedTheme {
   /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].
-  ///
-  /// The data argument must not be null.
-  const TooltipTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const TooltipTheme({super.key, required this.data, required super.child});
 
   /// The properties for descendant [Tooltip] widgets.
   final TooltipThemeData data;
 
-  /// Returns the [data] from the closest [TooltipTheme] ancestor. If there is
-  /// no ancestor, it returns [ThemeData.tooltipTheme]. Applications can assume
-  /// that the returned value will not be null.
+  /// Returns the ambient tooltip theme.
+  ///
+  /// The result comes from the closest [TooltipTheme] ancestor if any,
+  /// and otherwise from [Theme.of] and [ThemeData.tooltipTheme].
+  ///
+  /// When a widget uses this method, it is automatically rebuilt if the
+  /// tooltip theme later changes, so that the changes can be applied.
   ///
   /// Typical usage is as follows:
   ///

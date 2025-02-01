@@ -2,6 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'framework.dart';
+/// @docImport 'notification_listener.dart';
+/// @docImport 'page_storage.dart';
+/// @docImport 'page_view.dart';
+/// @docImport 'scroll_configuration.dart';
+/// @docImport 'scroll_metrics.dart';
+/// @docImport 'scroll_notification.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
@@ -9,6 +23,23 @@ import 'scroll_context.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
+
+// Examples can assume:
+// TrackingScrollController _trackingScrollController = TrackingScrollController();
+
+/// Signature for when a [ScrollController] has added or removed a
+/// [ScrollPosition].
+///
+/// Since a [ScrollPosition] is not created and attached to a controller until
+/// the [Scrollable] is built, this can be used to respond to the position being
+/// attached to a controller.
+///
+/// By having access to the position directly, additional listeners can be
+/// applied to aspects of the scroll position, like
+/// [ScrollPosition.isScrollingNotifier].
+///
+/// Used by [ScrollController.onAttach] and [ScrollController.onDetach].
+typedef ScrollControllerCallback = void Function(ScrollPosition position);
 
 /// Controls a scrollable widget.
 ///
@@ -22,10 +53,7 @@ import 'scroll_position_with_single_context.dart';
 /// to an individual [Scrollable] widget. To use a custom [ScrollPosition],
 /// subclass [ScrollController] and override [createScrollPosition].
 ///
-/// A [ScrollController] is a [Listenable]. It notifies its listeners whenever
-/// any of the attached [ScrollPosition]s notify _their_ listeners (i.e.
-/// whenever any of them scroll). It does not notify its listeners when the list
-/// of attached [ScrollPosition]s changes.
+/// {@macro flutter.widgets.scrollPosition.listening}
 ///
 /// Typically used with [ListView], [GridView], [CustomScrollView].
 ///
@@ -39,17 +67,21 @@ import 'scroll_position_with_single_context.dart';
 ///    [PageView].
 ///  * [ScrollPosition], which manages the scroll offset for an individual
 ///    scrolling widget.
-///  * [ScrollNotification] and [NotificationListener], which can be used to watch
-///    the scroll position without using a [ScrollController].
+///  * [ScrollNotification] and [NotificationListener], which can be used to
+///    listen to scrolling occur without using a [ScrollController].
 class ScrollController extends ChangeNotifier {
   /// Creates a controller for a scrollable widget.
-  ///
-  /// The values of `initialScrollOffset` and `keepScrollOffset` must not be null.
   ScrollController({
     double initialScrollOffset = 0.0,
     this.keepScrollOffset = true,
     this.debugLabel,
-  }) : _initialScrollOffset = initialScrollOffset;
+    this.onAttach,
+    this.onDetach,
+  }) : _initialScrollOffset = initialScrollOffset {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
 
   /// The initial value to use for [offset].
   ///
@@ -77,6 +109,40 @@ class ScrollController extends ChangeNotifier {
   ///    scrollable appears in the same route, to distinguish the [PageStorage]
   ///    locations used to save scroll offsets.
   final bool keepScrollOffset;
+
+  /// Called when a [ScrollPosition] is attached to the scroll controller.
+  ///
+  /// Since a scroll position is not attached until a [Scrollable] is actually
+  /// built, this can be used to respond to a new position being attached.
+  ///
+  /// At the time that a scroll position is attached, the [ScrollMetrics], such as
+  /// the [ScrollMetrics.maxScrollExtent], are not yet available. These are not
+  /// determined until the [Scrollable] has finished laying out its contents and
+  /// computing things like the full extent of that content.
+  /// [ScrollPosition.hasContentDimensions] can be used to know when the
+  /// metrics are available, or a [ScrollMetricsNotification] can be used,
+  /// discussed further below.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to apply a listener to the
+  /// [ScrollPosition.isScrollingNotifier] using [ScrollController.onAttach].
+  /// This is used to change the [AppBar]'s color when scrolling is occurring.
+  ///
+  /// ** See code in examples/api/lib/widgets/scroll_position/scroll_controller_on_attach.0.dart **
+  /// {@end-tool}
+  final ScrollControllerCallback? onAttach;
+
+  /// Called when a [ScrollPosition] is detached from the scroll controller.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to apply a listener to the
+  /// [ScrollPosition.isScrollingNotifier] using [ScrollController.onAttach]
+  /// & [ScrollController.onDetach].
+  /// This is used to change the [AppBar]'s color when scrolling is occurring.
+  ///
+  /// ** See code in examples/api/lib/widgets/scroll_position/scroll_controller_on_attach.0.dart **
+  /// {@end-tool}
+  final ScrollControllerCallback? onDetach;
 
   /// A label that is used in the [toString] output. Intended to aid with
   /// identifying scroll controller instances in debug output.
@@ -141,14 +207,11 @@ class ScrollController extends ChangeNotifier {
   /// When calling [animateTo] in widget tests, `await`ing the returned
   /// [Future] may cause the test to hang and timeout. Instead, use
   /// [WidgetTester.pumpAndSettle].
-  Future<void> animateTo(
-    double offset, {
-    required Duration duration,
-    required Curve curve,
-  }) async {
+  Future<void> animateTo(double offset, {required Duration duration, required Curve curve}) async {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
     await Future.wait<void>(<Future<void>>[
-      for (int i = 0; i < _positions.length; i += 1) _positions[i].animateTo(offset, duration: duration, curve: curve),
+      for (int i = 0; i < _positions.length; i += 1)
+        _positions[i].animateTo(offset, duration: duration, curve: curve),
     ]);
   }
 
@@ -179,6 +242,7 @@ class ScrollController extends ChangeNotifier {
     assert(!_positions.contains(position));
     _positions.add(position);
     position.addListener(notifyListeners);
+    onAttach?.call(position);
   }
 
   /// Unregister the given position with this controller.
@@ -187,6 +251,7 @@ class ScrollController extends ChangeNotifier {
   /// controller will not manipulate the given position.
   void detach(ScrollPosition position) {
     assert(_positions.contains(position));
+    onDetach?.call(position);
     position.removeListener(notifyListeners);
     _positions.remove(position);
   }
@@ -322,6 +387,8 @@ class TrackingScrollController extends ScrollController {
     super.initialScrollOffset,
     super.keepScrollOffset,
     super.debugLabel,
+    super.onAttach,
+    super.onDetach,
   });
 
   final Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};

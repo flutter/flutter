@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'system_channels.dart';
 
 /// A sound provided by the system.
@@ -26,20 +25,13 @@ enum SystemSoundType {
 
 /// Provides access to the library of short system specific sounds for common
 /// tasks.
-class SystemSound {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SystemSound._();
-
+abstract final class SystemSound {
   /// Play the specified system sound. If that sound is not present on the
   /// system, the call is ignored.
   ///
   /// The web platform currently does not support playing sounds, so this call
   /// will yield no behavior on that platform.
   static Future<void> play(SystemSoundType type) async {
-    await SystemChannels.platform.invokeMethod<void>(
-      'SystemSound.play',
-      type.toString(),
-    );
+    await SystemChannels.platform.invokeMethod<void>('SystemSound.play', type.toString());
   }
 }

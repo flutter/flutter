@@ -2,26 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Image.frameBuilder].
-
 import 'package:flutter/material.dart';
 
+/// Flutter code sample for [Image.frameBuilder].
+
 void main() {
-  runApp(MaterialApp(
-    title: 'Flutter Code Sample',
-    home: Scaffold(
-      appBar: AppBar(title: const Text('Flutter Code Sample')),
-      body: const Center(
-        child: MyStatelessWidget(
-          image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg'),
+  runApp(
+    MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Image.frameBuilder Sample')),
+        body: const Center(
+          child: ImageClipExample(
+            image: NetworkImage(
+              'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
+            ),
+          ),
         ),
       ),
     ),
-  ));
+  );
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key, required this.image});
+class ImageClipExample extends StatelessWidget {
+  const ImageClipExample({super.key, required this.image});
 
   final ImageProvider image;
 
@@ -36,16 +39,15 @@ class MyStatelessWidget extends StatelessWidget {
           height: 300,
           image: image,
           child: InkWell(
-            onTap: () {/* ... */},
+            onTap: () {
+              /* ... */
+            },
             child: const Align(
               child: Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Text(
                   'PUFFIN',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
                 ),
               ),
             ),

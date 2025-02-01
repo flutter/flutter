@@ -5,13 +5,12 @@
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';
 
-export 'package:flutter/painting.dart' show
-  BoxFit,
-  ImageRepeat;
+export 'package:flutter/painting.dart' show BoxFit, ImageRepeat;
 
 /// An image in the render tree.
 ///
@@ -23,9 +22,8 @@ export 'package:flutter/painting.dart' show
 class RenderImage extends RenderBox {
   /// Creates a render box that displays an image.
   ///
-  /// The [scale], [alignment], [repeat], [matchTextDirection] and [filterQuality] arguments
-  /// must not be null. The [textDirection] argument must not be null if
-  /// [alignment] will need resolving or if [matchTextDirection] is true.
+  /// The [textDirection] argument must not be null if [alignment] will need
+  /// resolving or if [matchTextDirection] is true.
   RenderImage({
     ui.Image? image,
     this.debugImageLabel,
@@ -43,7 +41,7 @@ class RenderImage extends RenderBox {
     TextDirection? textDirection,
     bool invertColors = false,
     bool isAntiAlias = false,
-    FilterQuality filterQuality = FilterQuality.low,
+    FilterQuality filterQuality = FilterQuality.medium,
   }) : _image = image,
        _width = width,
        _height = height,
@@ -93,10 +91,11 @@ class RenderImage extends RenderBox {
       value.dispose();
       return;
     }
+    final bool sizeChanged = _image?.width != value?.width || _image?.height != value?.height;
     _image?.dispose();
     _image = value;
     markNeedsPaint();
-    if (_width == null || _height == null) {
+    if (sizeChanged && (_width == null || _height == null)) {
       markNeedsLayout();
     }
   }
@@ -187,9 +186,7 @@ class RenderImage extends RenderBox {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
-  /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
-  /// to nearest-neighbor.
+  /// Defaults to [FilterQuality.medium].
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {
@@ -199,7 +196,6 @@ class RenderImage extends RenderBox {
     _filterQuality = value;
     markNeedsPaint();
   }
-
 
   /// Used to combine [color] with this image.
   ///
@@ -353,19 +349,15 @@ class RenderImage extends RenderBox {
   Size _sizeForConstraints(BoxConstraints constraints) {
     // Folds the given |width| and |height| into |constraints| so they can all
     // be treated uniformly.
-    constraints = BoxConstraints.tightFor(
-      width: _width,
-      height: _height,
-    ).enforce(constraints);
+    constraints = BoxConstraints.tightFor(width: _width, height: _height).enforce(constraints);
 
     if (_image == null) {
       return constraints.smallest;
     }
 
-    return constraints.constrainSizeAndAttemptToPreserveAspectRatio(Size(
-      _image!.width.toDouble() / _scale,
-      _image!.height.toDouble() / _scale,
-    ));
+    return constraints.constrainSizeAndAttemptToPreserveAspectRatio(
+      Size(_image!.width.toDouble() / _scale, _image!.height.toDouble() / _scale),
+    );
   }
 
   @override
@@ -402,7 +394,8 @@ class RenderImage extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _sizeForConstraints(constraints);
   }
 
@@ -468,10 +461,14 @@ class RenderImage extends RenderBox {
     properties.add(DiagnosticsProperty<Animation<double>?>('opacity', opacity, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null),
+    );
     properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
-    properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(
+      FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'),
+    );
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));

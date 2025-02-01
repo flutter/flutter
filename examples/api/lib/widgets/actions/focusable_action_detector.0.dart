@@ -2,33 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FocusableActionDetector].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [FocusableActionDetector].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FocusableActionDetectorExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class FocusableActionDetectorExampleApp extends StatelessWidget {
+  const FocusableActionDetectorExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
-    );
+    return const MaterialApp(home: FocusableActionDetectorExample());
   }
 }
 
 class FadButton extends StatefulWidget {
-  const FadButton({
-    super.key,
-    required this.onPressed,
-    required this.child,
-  });
+  const FadButton({super.key, required this.onPressed, required this.child});
 
   final VoidCallback onPressed;
   final Widget child;
@@ -42,8 +33,7 @@ class _FadButtonState extends State<FadButton> {
   bool _hovering = false;
   bool _on = false;
   late final Map<Type, Action<Intent>> _actionMap;
-  final Map<ShortcutActivator, Intent> _shortcutMap =
-      const <ShortcutActivator, Intent>{
+  final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.keyX): ActivateIntent(),
   };
 
@@ -51,9 +41,7 @@ class _FadButtonState extends State<FadButton> {
   void initState() {
     super.initState();
     _actionMap = <Type, Action<Intent>>{
-      ActivateIntent: CallbackAction<Intent>(
-        onInvoke: (Intent intent) => _toggleState(),
-      ),
+      ActivateIntent: CallbackAction<Intent>(onInvoke: (Intent intent) => _toggleState()),
     };
   }
 
@@ -97,11 +85,7 @@ class _FadButtonState extends State<FadButton> {
         onShowHoverHighlight: _handleHoveHighlight,
         child: Row(
           children: <Widget>[
-            Container(
-              padding: const EdgeInsets.all(10.0),
-              color: color,
-              child: widget.child,
-            ),
+            Container(padding: const EdgeInsets.all(10.0), color: color, child: widget.child),
             Container(
               width: 30,
               height: 30,
@@ -115,28 +99,25 @@ class _FadButtonState extends State<FadButton> {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class FocusableActionDetectorExample extends StatefulWidget {
+  const FocusableActionDetectorExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<FocusableActionDetectorExample> createState() => _FocusableActionDetectorExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _FocusableActionDetectorExampleState extends State<FocusableActionDetectorExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FocusableActionDetector Example'),
-      ),
+      appBar: AppBar(title: const Text('FocusableActionDetector Example')),
       body: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child:
-                  TextButton(onPressed: () {}, child: const Text('Press Me')),
+              child: TextButton(onPressed: () {}, child: const Text('Press Me')),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),

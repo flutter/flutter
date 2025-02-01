@@ -50,13 +50,13 @@ Future<void> main() => integrationDriver();
 You can also use different driver scripts to customize the behavior of the app
 under test. For example, `FlutterDriver` can also be parameterized with
 different [options](https://api.flutter.dev/flutter/flutter_driver/FlutterDriver/connect.html).
-See the [extended driver](https://github.com/flutter/flutter/blob/master/packages/integration_test/example/test_driver/extended_integration_test.dart) for an example.
+See the [extended driver](https://github.com/flutter/flutter/blob/main/packages/integration_test/example/test_driver/extended_integration_test.dart) for an example.
 
 ### Package Structure
 
 Your package should have a structure that looks like this:
 
-```
+```text
 lib/
   ...
 integration_test/
@@ -68,7 +68,7 @@ test_driver/
   integration_test.dart
 ```
 
-[Example](https://github.com/flutter/flutter/tree/master/packages/integration_test/example)
+[Example](https://github.com/flutter/flutter/tree/main/packages/integration_test/example)
 
 ## Using Flutter Driver to Run Tests
 
@@ -85,8 +85,8 @@ flutter drive \
 
 ### Web
 
-Make sure you have [enabled web support](https://flutter.dev/docs/get-started/web#set-up)
-then [download and run](https://docs.flutter.dev/cookbook/testing/integration/introduction#5b-web)
+Make sure you have [enabled web support](https://flutter.dev/to/add-web-support)
+then [download and run](https://flutter.dev/to/integration-test-on-web)
 the web driver in another process.
 
 Use following command to execute the tests:
@@ -140,7 +140,7 @@ import 'package:integration_test/integration_test_driver_extended.dart';
 
 Future<void> main() async {
   await integrationDriver(
-    onScreenshot: (String screenshotName, List<int> screenshotBytes) async {
+    onScreenshot: (String screenshotName, List<int> screenshotBytes, [Map<String, Object?>? args]) async {
       final File image = File('$screenshotName.png');
       image.writeAsBytesSync(screenshotBytes);
       // Return false if the screenshot is invalid.
@@ -221,6 +221,13 @@ physical):
 ./gradlew app:connectedAndroidTest -Ptarget=`pwd`/../integration_test/foo_test.dart
 ```
 
+Note:
+To use `--dart-define` with `gradlew` you must `base64` encode all parameters,
+and pass them to gradle in a comma separated list:
+```sh
+./gradlew project:task -Pdart-defines="{base64(key=value)},[...]"
+```
+
 ## Firebase Test Lab
 
 If this is your first time testing with Firebase Test Lab, you'll need to follow
@@ -231,7 +238,7 @@ to set up a project.
 To run a test on Android devices using Firebase Test Lab, use gradle commands to build an
 instrumentation test for Android, after creating `androidTest` as suggested in the last section.
 
-```bash
+```sh
 pushd android
 # flutter build generates files in android/ for building the app
 flutter build apk
@@ -243,7 +250,7 @@ popd
 Upload the build apks Firebase Test Lab, making sure to replace <PATH_TO_KEY_FILE>,
 <PROJECT_NAME>, <RESULTS_BUCKET>, and <RESULTS_DIRECTORY> with your values.
 
-```bash
+```sh
 gcloud auth activate-service-account --key-file=<PATH_TO_KEY_FILE>
 gcloud --quiet config set project <PROJECT_NAME>
 gcloud firebase test android run --type instrumentation \
@@ -304,28 +311,39 @@ Execute this script at the root of your Flutter app:
 ```sh
 output="../build/ios_integ"
 product="build/ios_integ/Build/Products"
-dev_target="14.3"
+
+flutter clean
 
 # Pass --simulator if building for the simulator.
 flutter build ios integration_test/foo_test.dart --release
 
 pushd ios
-xcodebuild -workspace Runner.xcworkspace -scheme Runner -config Flutter/Release.xcconfig -derivedDataPath $output -sdk iphoneos build-for-testing
+xcodebuild build-for-testing \
+  -workspace Runner.xcworkspace \
+  -scheme Runner \
+  -xcconfig Flutter/Release.xcconfig \
+  -configuration Release \
+  -derivedDataPath \
+  $output -sdk iphoneos
 popd
 
 pushd $product
-zip -r "ios_tests.zip" "Release-iphoneos" "Runner_iphoneos$dev_target-arm64.xctestrun"
+find . -name "Runner_*.xctestrun" -exec zip -r --must-match "ios_tests.zip" "Release-iphoneos" {} +
 popd
 ```
 
 You can verify locally that your tests are successful by running the following command:
 
 ```sh
-xcodebuild test-without-building -xctestrun "build/ios_integ/Build/Products/Runner_iphoneos14.3-arm64.xctestrun" -destination id=<YOUR_DEVICE_ID>
+xcodebuild test-without-building \
+  -xctestrun "build/ios_integ/Build/Products/Runner_*.xctestrun" \
+  -destination id=<YOUR_DEVICE_ID>
 ```
 
 Once everything is ok, you can upload the resulting zip to Firebase Test Lab (change the model with your values):
 
 ```sh
-gcloud firebase test ios run --test "build/ios_integ/Build/Products/ios_tests.zip" --device model=iphone11pro,version=14.1,locale=fr_FR,orientation=portrait
+gcloud firebase test ios run \
+  --test "build/ios_integ/Build/Products/ios_tests.zip" \
+  --device model=iphone11pro,version=14.1,locale=fr_FR,orientation=portrait
 ```

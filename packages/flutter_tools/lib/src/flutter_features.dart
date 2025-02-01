@@ -45,7 +45,24 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get areCustomDevicesEnabled => isEnabled(flutterCustomDevicesFeature);
 
   @override
-  bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
+  bool get isCliAnimationEnabled {
+    if (_platform.environment['TERM'] == 'dumb') {
+      return false;
+    }
+    return isEnabled(cliAnimation);
+  }
+
+  @override
+  bool get isNativeAssetsEnabled => isEnabled(nativeAssets);
+
+  @override
+  bool get isPreviewDeviceEnabled => isEnabled(previewDevice);
+
+  @override
+  bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);
+
+  @override
+  bool get isExplicitPackageDependenciesEnabled => isEnabled(explicitPackageDependencies);
 
   @override
   bool isEnabled(Feature feature) {

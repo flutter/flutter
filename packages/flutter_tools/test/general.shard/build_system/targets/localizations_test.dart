@@ -33,8 +33,7 @@ void main() {
 
   testWithoutContext('parseLocalizationsOptions handles valid yaml configuration', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File configFile = fileSystem.file('l10n.yaml')
-      ..writeAsStringSync('''
+    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
 arb-dir: arb
 template-arb-file: example.arb
 output-localization-file: bar
@@ -49,53 +48,136 @@ required-resource-attributes: false
 nullable-getter: false
 ''');
 
-    final LocalizationOptions options = parseLocalizationsOptions(
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: BufferLogger.test(),
+      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+      defaultSyntheticPackage: true,
     );
 
-    expect(options.arbDirectory, Uri.parse('arb'));
-    expect(options.templateArbFile, Uri.parse('example.arb'));
-    expect(options.outputLocalizationsFile, Uri.parse('bar'));
-    expect(options.untranslatedMessagesFile, Uri.parse('untranslated'));
+    expect(options.arbDir, Uri.parse('arb').path);
+    expect(options.templateArbFile, Uri.parse('example.arb').path);
+    expect(options.outputLocalizationFile, Uri.parse('bar').path);
+    expect(options.untranslatedMessagesFile, Uri.parse('untranslated').path);
     expect(options.outputClass, 'Foo');
-    expect(options.headerFile, Uri.parse('header'));
+    expect(options.headerFile, Uri.parse('header').path);
     expect(options.header, 'HEADER');
-    expect(options.deferredLoading, true);
+    expect(options.useDeferredLoading, true);
     expect(options.preferredSupportedLocales, <String>['en_US']);
-    expect(options.useSyntheticPackage, false);
-    expect(options.areResourceAttributesRequired, false);
-    expect(options.usesNullableGetter, false);
+    expect(options.syntheticPackage, false);
+    expect(options.requiredResourceAttributes, false);
+    expect(options.nullableGetter, false);
   });
 
-  testWithoutContext('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {
+  testWithoutContext('parseLocalizationsOptions uses defaultSyntheticPackage = true', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
-preferred-supported-locales: ['en_US', 'de']
+arb-dir: arb
+template-arb-file: example.arb
+output-localization-file: bar
+untranslated-messages-file: untranslated
+output-class: Foo
+header-file: header
+header: HEADER
+use-deferred-loading: true
+preferred-supported-locales: en_US
+# Intentionally omitted
+# synthetic-package: ...
+required-resource-attributes: false
+nullable-getter: false
 ''');
 
-    final LocalizationOptions options = parseLocalizationsOptions(
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: BufferLogger.test(),
+      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+      defaultSyntheticPackage: true,
     );
 
-    expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
+    expect(options.syntheticPackage, true);
+  });
+
+  testWithoutContext('parseLocalizationsOptions uses defaultSyntheticPackage = false', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+arb-dir: arb
+template-arb-file: example.arb
+output-localization-file: bar
+untranslated-messages-file: untranslated
+output-class: Foo
+header-file: header
+header: HEADER
+use-deferred-loading: true
+preferred-supported-locales: en_US
+# Intentionally omitted
+# synthetic-package: ...
+required-resource-attributes: false
+nullable-getter: false
+''');
+
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
+      file: configFile,
+      logger: BufferLogger.test(),
+      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+      defaultSyntheticPackage: false,
+    );
+
+    expect(options.syntheticPackage, false);
   });
 
   testWithoutContext(
-      'parseLocalizationsOptions throws exception on invalid yaml configuration',
-      () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+    'parseLocalizationsOptions handles preferredSupportedLocales as list',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+preferred-supported-locales: ['en_US', 'de']
+''');
+
+      final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
+        file: configFile,
+        logger: BufferLogger.test(),
+        defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+        defaultSyntheticPackage: true,
+      );
+
+      expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
+    },
+  );
+
+  testWithoutContext(
+    'parseLocalizationsOptions throws exception on invalid yaml configuration',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
 use-deferred-loading: string
 ''');
 
+      expect(
+        () => parseLocalizationsOptionsFromYAML(
+          file: configFile,
+          logger: BufferLogger.test(),
+          defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+          defaultSyntheticPackage: true,
+        ),
+        throwsException,
+      );
+    },
+  );
+
+  testWithoutContext('parseLocalizationsOptions tool exits on malformed Yaml', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+template-arb-file: {name}_en.arb
+''');
+
     expect(
-      () => parseLocalizationsOptions(
+      () => parseLocalizationsOptionsFromYAML(
         file: configFile,
         logger: BufferLogger.test(),
+        defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+        defaultSyntheticPackage: true,
       ),
-      throwsException,
+      throwsToolExit(),
     );
   });
 }

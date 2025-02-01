@@ -1,0 +1,20 @@
+# Run with `dart run ffigen --config ffigen.yaml`.
+name: LinkHookBindings
+description: |
+  Bindings for `src/link_hook.h`.
+
+  Regenerate bindings with `dart run ffigen --config ffigen.yaml`.
+output: 'lib/link_hook_bindings_generated.dart'
+headers:
+  entry-points:
+    - 'src/link_hook.h'
+  include-directives:
+    - 'src/link_hook.h'
+ffi-native:
+preamble: |
+  // ignore_for_file: always_specify_types
+  // ignore_for_file: camel_case_types
+  // ignore_for_file: non_constant_identifier_names
+comments:
+  style: any
+  length: full

@@ -2,27 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Shortcuts].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Shortcuts].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ShortcutsExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ShortcutsExampleApp extends StatelessWidget {
+  const ShortcutsExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const Center(
-          child: MyStatefulWidget(),
-        ),
+        appBar: AppBar(title: const Text('Shortcuts Sample')),
+        body: const Center(child: ShortcutsExample()),
       ),
     );
   }
@@ -36,14 +31,14 @@ class DecrementIntent extends Intent {
   const DecrementIntent();
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ShortcutsExample extends StatefulWidget {
+  const ShortcutsExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ShortcutsExample> createState() => _ShortcutsExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ShortcutsExampleState extends State<ShortcutsExample> {
   int count = 0;
 
   @override
@@ -56,14 +51,16 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       child: Actions(
         actions: <Type, Action<Intent>>{
           IncrementIntent: CallbackAction<IncrementIntent>(
-            onInvoke: (IncrementIntent intent) => setState(() {
-              count = count + 1;
-            }),
+            onInvoke:
+                (IncrementIntent intent) => setState(() {
+                  count = count + 1;
+                }),
           ),
           DecrementIntent: CallbackAction<DecrementIntent>(
-            onInvoke: (DecrementIntent intent) => setState(() {
-              count = count - 1;
-            }),
+            onInvoke:
+                (DecrementIntent intent) => setState(() {
+                  count = count - 1;
+                }),
           ),
         },
         child: Focus(
@@ -71,8 +68,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           child: Column(
             children: <Widget>[
               const Text('Add to the counter by pressing the up arrow key'),
-              const Text(
-                  'Subtract from the counter by pressing the down arrow key'),
+              const Text('Subtract from the counter by pressing the down arrow key'),
               Text('count: $count'),
             ],
           ),

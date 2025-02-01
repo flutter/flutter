@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scroll_view.dart';
+library;
+
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -29,13 +32,14 @@ class _ScrollNotificationObserverScope extends InheritedWidget {
     required ScrollNotificationObserverState scrollNotificationObserverState,
   }) : _scrollNotificationObserverState = scrollNotificationObserverState;
 
-  final ScrollNotificationObserverState  _scrollNotificationObserverState;
+  final ScrollNotificationObserverState _scrollNotificationObserverState;
 
   @override
-  bool updateShouldNotify(_ScrollNotificationObserverScope old) => _scrollNotificationObserverState != old._scrollNotificationObserverState;
+  bool updateShouldNotify(_ScrollNotificationObserverScope old) =>
+      _scrollNotificationObserverState != old._scrollNotificationObserverState;
 }
 
-class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
+final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
   _ListenerEntry(this.listener);
   final ScrollNotificationCallback listener;
 }
@@ -71,14 +75,18 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// This widget is similar to [NotificationListener]. It supports a listener
 /// list instead of just a single listener and its listeners run
 /// unconditionally, they do not require a gating boolean return value.
+///
+/// {@tool dartpad}
+/// This sample shows a "Scroll to top" button that uses [ScrollNotificationObserver]
+/// to listen for scroll notifications from [ListView]. The button is only visible
+/// when the user has scrolled down. When pressed, the button animates the scroll
+/// position of the [ListView] back to the top.
+///
+/// ** See code in examples/api/lib/widgets/scroll_notification_observer/scroll_notification_observer.0.dart **
+/// {@end-tool}
 class ScrollNotificationObserver extends StatefulWidget {
   /// Create a [ScrollNotificationObserver].
-  ///
-  /// The [child] parameter must not be null.
-  const ScrollNotificationObserver({
-    super.key,
-    required this.child,
-  });
+  const ScrollNotificationObserver({super.key, required this.child});
 
   /// The subtree below this widget.
   final Widget child;
@@ -96,7 +104,9 @@ class ScrollNotificationObserver extends StatefulWidget {
   /// * [ScrollNotificationObserver.of], which is similar to this method, but
   ///   asserts if no [ScrollNotificationObserver] ancestor is found.
   static ScrollNotificationObserverState? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()?._scrollNotificationObserverState;
+    return context
+        .dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()
+        ?._scrollNotificationObserverState;
   }
 
   /// The closest instance of this class that encloses the given context.
@@ -189,35 +199,35 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
           entry.listener(notification);
         }
       } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widget library',
-          context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: () => <DiagnosticsNode>[
-            DiagnosticsProperty<ScrollNotificationObserverState>(
-              'The $runtimeType sending notification was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ],
-        ));
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widget library',
+            context: ErrorDescription('while dispatching notifications for $runtimeType'),
+            informationCollector:
+                () => <DiagnosticsNode>[
+                  DiagnosticsProperty<ScrollNotificationObserverState>(
+                    'The $runtimeType sending notification was',
+                    this,
+                    style: DiagnosticsTreeStyle.errorProperty,
+                  ),
+                ],
+          ),
+        );
       }
     }
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
-    // A ScrollMetricsNotification allows listeners to be notified for an
-    // initial state, as well as if the content dimensions change without
-    // scrolling.
     return NotificationListener<ScrollMetricsNotification>(
       onNotification: (ScrollMetricsNotification notification) {
-        _notifyListeners(_ConvertedScrollMetricsNotification(
-          metrics: notification.metrics,
-          context: notification.context,
-          depth: notification.depth,
-        ));
+        // A ScrollMetricsNotification allows listeners to be notified for an
+        // initial state, as well as if the content dimensions change without
+        // scrolling.
+        _notifyListeners(notification.asScrollUpdate());
         return false;
       },
       child: NotificationListener<ScrollNotification>(
@@ -233,18 +243,11 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     );
   }
 
+  @protected
   @override
   void dispose() {
     assert(_debugAssertNotDisposed());
     _listeners = null;
     super.dispose();
   }
-}
-
-class _ConvertedScrollMetricsNotification extends ScrollUpdateNotification {
-  _ConvertedScrollMetricsNotification({
-    required super.metrics,
-    required super.context,
-    required super.depth,
-  });
 }

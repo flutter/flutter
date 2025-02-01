@@ -2,44 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ScaffoldMessenger.of].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ScaffoldMessenger.of].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const OfExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class OfExampleApp extends StatelessWidget {
+  const OfExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const Center(
-          child: MyStatelessWidget(),
-        ),
+        appBar: AppBar(title: const Text('ScaffoldMessenger.of Sample')),
+        body: const Center(child: OfExample()),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class OfExample extends StatelessWidget {
+  const OfExample({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       child: const Text('SHOW A SNACKBAR'),
       onPressed: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Have a snack!'),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Have a snack!')));
       },
     );
   }

@@ -4,9 +4,9 @@
 
 import 'package:pub_semver/pub_semver.dart';
 
+import 'base/logger.dart';
 import 'build_info.dart';
 import 'cmake_project.dart';
-import 'globals.dart' as globals;
 
 /// Extracts the `BINARY_NAME` from a project's CMake file.
 ///
@@ -32,21 +32,20 @@ String _escapeBackslashes(String s) {
 String _determineVersionString(CmakeBasedProject project, BuildInfo buildInfo) {
   // Prefer the build arguments for version information.
   final String buildName = buildInfo.buildName ?? project.parent.manifest.buildName ?? '1.0.0';
-  final String? buildNumber = buildInfo.buildName != null
-    ? buildInfo.buildNumber
-    : (buildInfo.buildNumber ?? project.parent.manifest.buildNumber);
+  final String? buildNumber =
+      buildInfo.buildName != null
+          ? buildInfo.buildNumber
+          : (buildInfo.buildNumber ?? project.parent.manifest.buildNumber);
 
-  return buildNumber != null
-    ? '$buildName+$buildNumber'
-    : buildName;
+  return buildNumber != null ? '$buildName+$buildNumber' : buildName;
 }
 
-Version _determineVersion(CmakeBasedProject project, BuildInfo buildInfo) {
+Version _determineVersion(CmakeBasedProject project, BuildInfo buildInfo, Logger logger) {
   final String version = _determineVersionString(project, buildInfo);
   try {
     return Version.parse(version);
   } on FormatException {
-    globals.printWarning('Warning: could not parse version $version, defaulting to 1.0.0.');
+    logger.printWarning('Warning: could not parse version $version, defaulting to 1.0.0.');
 
     return Version(1, 0, 0);
   }
@@ -74,25 +73,27 @@ void writeGeneratedCmakeConfig(
   String flutterRoot,
   CmakeBasedProject project,
   BuildInfo buildInfo,
-  Map<String, String> environment) {
+  Map<String, String> environment,
+  Logger logger,
+) {
   // Only a limited set of variables are needed by the CMake files themselves,
   // the rest are put into a list to pass to the re-entrant build step.
   final String escapedFlutterRoot = _escapeBackslashes(flutterRoot);
   final String escapedProjectDir = _escapeBackslashes(project.parent.directory.path);
 
-  final Version version = _determineVersion(project, buildInfo);
+  final Version version = _determineVersion(project, buildInfo, logger);
   final int? buildVersion = _tryDetermineBuildVersion(version);
 
   // Since complex Dart build identifiers cannot be converted into integers,
   // different Dart versions may be converted into the same Windows numeric version.
   // Warn the user as some Windows installers, like MSI, don't update files if their versions are equal.
   if (buildVersion == null && project is WindowsProject) {
-      final String buildIdentifier = version.build.join('.');
-      globals.printWarning(
-        'Warning: build identifier $buildIdentifier in version $version is not numeric '
-        'and cannot be converted into a Windows build version number. Defaulting to 0.\n'
-        'This may cause issues with Windows installers.'
-      );
+    final String buildIdentifier = version.build.join('.');
+    logger.printWarning(
+      'Warning: build identifier $buildIdentifier in version $version is not numeric '
+      'and cannot be converted into a Windows build version number. Defaulting to 0.\n'
+      'This may cause issues with Windows installers.',
+    );
   }
 
   final StringBuffer buffer = StringBuffer('''

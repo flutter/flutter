@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'color_scheme.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -11,11 +15,7 @@ import 'theme.dart';
 
 /// A utility class for dealing with the overlay color needed
 /// to indicate elevation of surfaces.
-class ElevationOverlay {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  ElevationOverlay._();
-
+abstract final class ElevationOverlay {
   /// Applies a surface tint color to a given container color to indicate
   /// the level of its elevation.
   ///
@@ -30,7 +30,10 @@ class ElevationOverlay {
   /// just return [color] unmodified.
   static Color applySurfaceTint(Color color, Color? surfaceTint, double elevation) {
     if (surfaceTint != null && surfaceTint != Colors.transparent) {
-      return Color.alphaBlend(surfaceTint.withOpacity(_surfaceTintOpacityForElevation(elevation)), color);
+      return Color.alphaBlend(
+        surfaceTint.withOpacity(_surfaceTintOpacityForElevation(elevation)),
+        color,
+      );
     }
     return color;
   }
@@ -160,8 +163,7 @@ class _ElevationOpacity {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
-
+// dart format off
 // Surface tint opacities based on elevations according to the
 // Material Design 3 specification:
 //   https://m3.material.io/styles/color/the-color-system/color-roles
@@ -174,5 +176,6 @@ const List<_ElevationOpacity> _surfaceTintElevationOpacities = <_ElevationOpacit
   _ElevationOpacity(8.0, 0.12),  // Elevation level 4
   _ElevationOpacity(12.0, 0.14), // Elevation level 5
 ];
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - SurfaceTint

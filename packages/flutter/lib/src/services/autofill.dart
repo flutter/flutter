@@ -6,18 +6,15 @@ import 'package:flutter/foundation.dart';
 
 import 'text_input.dart';
 
-export 'text_input.dart' show TextEditingValue, TextInputClient, TextInputConfiguration, TextInputConnection;
+export 'text_input.dart'
+    show TextEditingValue, TextInputClient, TextInputConfiguration, TextInputConnection;
 
 /// A collection of commonly used autofill hint strings on different platforms.
 ///
 /// Each hint is pre-defined on at least one supported platform. See their
 /// documentation for their availability on each platform, and the platform
 /// values each autofill hint corresponds to.
-class AutofillHints {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  AutofillHints._();
-
+abstract final class AutofillHints {
   /// The input field expects an address locality (city/town).
   ///
   /// This hint will be translated to the below values on different platforms:
@@ -638,12 +635,12 @@ class AutofillConfiguration {
     required TextEditingValue currentEditingValue,
     String? hintText,
   }) : this._(
-    enabled: true,
-    uniqueIdentifier: uniqueIdentifier,
-    autofillHints: autofillHints,
-    currentEditingValue: currentEditingValue,
-    hintText: hintText,
-  );
+         enabled: true,
+         uniqueIdentifier: uniqueIdentifier,
+         autofillHints: autofillHints,
+         currentEditingValue: currentEditingValue,
+         hintText: hintText,
+       );
 
   const AutofillConfiguration._({
     required this.enabled,
@@ -670,14 +667,10 @@ class AutofillConfiguration {
   ///
   /// The identifier needs to be unique within the [AutofillScope] for the
   /// [AutofillClient] to receive the correct autofill value.
-  ///
-  /// Must not be null.
   final String uniqueIdentifier;
 
   /// A list of strings that helps the autofill service identify the type of the
   /// [AutofillClient].
-  ///
-  /// Must not be null.
   ///
   /// {@template flutter.services.AutofillConfiguration.autofillHints}
   /// For the best results, hint strings need to be understood by the platform's
@@ -736,13 +729,13 @@ class AutofillConfiguration {
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic>? toJson() {
     return enabled
-      ? <String, dynamic>{
+        ? <String, dynamic>{
           'uniqueIdentifier': uniqueIdentifier,
           'hints': autofillHints,
           'editingValue': currentEditingValue.toJSON(),
           if (hintText != null) 'hintText': hintText,
         }
-      : null;
+        : null;
   }
 }
 
@@ -753,7 +746,7 @@ class AutofillConfiguration {
 abstract class AutofillClient {
   /// The unique identifier of this [AutofillClient].
   ///
-  /// Must not be null and the identifier must not be changed.
+  /// The identifier must not be changed.
   String get autofillId;
 
   /// The [TextInputConfiguration] that describes this [AutofillClient].
@@ -809,7 +802,9 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
     required this.allConfigurations,
     required TextInputConfiguration currentClientConfiguration,
-  }) : super(inputType: currentClientConfiguration.inputType,
+  }) : super(
+         viewId: currentClientConfiguration.viewId,
+         inputType: currentClientConfiguration.inputType,
          obscureText: currentClientConfiguration.obscureText,
          autocorrect: currentClientConfiguration.autocorrect,
          smartDashesType: currentClientConfiguration.smartDashesType,
@@ -828,8 +823,8 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> result = super.toJson();
     result['fields'] = allConfigurations
-      .map((TextInputConfiguration configuration) => configuration.toJson())
-      .toList(growable: false);
+        .map((TextInputConfiguration configuration) => configuration.toJson())
+        .toList(growable: false);
     return result;
   }
 }
@@ -841,12 +836,16 @@ mixin AutofillScopeMixin implements AutofillScope {
   @override
   TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration) {
     assert(
-      !autofillClients.any((AutofillClient client) => !client.textInputConfiguration.autofillConfiguration.enabled),
+      !autofillClients.any(
+        (AutofillClient client) => !client.textInputConfiguration.autofillConfiguration.enabled,
+      ),
       'Every client in AutofillScope.autofillClients must enable autofill',
     );
 
     final TextInputConfiguration inputConfiguration = _AutofillScopeTextInputConfiguration(
-      allConfigurations: autofillClients.map((AutofillClient client) => client.textInputConfiguration),
+      allConfigurations: autofillClients.map(
+        (AutofillClient client) => client.textInputConfiguration,
+      ),
       currentClientConfiguration: configuration,
     );
     return TextInput.attach(trigger, inputConfiguration);

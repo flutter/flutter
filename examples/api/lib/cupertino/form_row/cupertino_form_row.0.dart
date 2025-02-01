@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoFormRow].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoFormRow].
 
 void main() => runApp(const CupertinoFormRowApp());
 
@@ -33,9 +33,7 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('CupertinoFormSection Sample'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoFormSection Sample')),
       // Add safe area widget to place the CupertinoFormSection below the navigation bar.
       child: SafeArea(
         child: CupertinoFormSection(
@@ -68,7 +66,7 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
                 children: <Widget>[
                   Text('Not connected'),
                   SizedBox(width: 5),
-                  Icon(CupertinoIcons.forward)
+                  Icon(CupertinoIcons.forward),
                 ],
               ),
             ),
@@ -82,19 +80,12 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
                 padding: EdgeInsets.symmetric(vertical: 4.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text('Headphone'),
-                    Text('Connected'),
-                  ],
+                  children: <Widget>[Text('Headphone'), Text('Connected')],
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Text('On'),
-                  SizedBox(width: 5),
-                  Icon(CupertinoIcons.forward)
-                ],
+                children: <Widget>[Text('On'), SizedBox(width: 5), Icon(CupertinoIcons.forward)],
               ),
             ),
             const CupertinoFormRow(
@@ -113,12 +104,7 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
 }
 
 class PrefixWidget extends StatelessWidget {
-  const PrefixWidget({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.color,
-  });
+  const PrefixWidget({super.key, required this.icon, required this.title, required this.color});
 
   final IconData icon;
   final String title;
@@ -130,14 +116,11 @@ class PrefixWidget extends StatelessWidget {
       children: <Widget>[
         Container(
           padding: const EdgeInsets.all(4.0),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4.0),
-          ),
+          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4.0)),
           child: Icon(icon, color: CupertinoColors.white),
         ),
         const SizedBox(width: 15),
-        Text(title)
+        Text(title),
       ],
     );
   }

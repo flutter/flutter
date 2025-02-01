@@ -1,0 +1,8 @@
+{
+  "reorderItemToStart": "დასაწყისში გადატანა",
+  "reorderItemToEnd": "ბოლოში გადატანა",
+  "reorderItemUp": "ზემოთ გადატანა",
+  "reorderItemDown": "ქვემოთ გადატანა",
+  "reorderItemLeft": "მარცხნივ გადატანა",
+  "reorderItemRight": "მარჯვნივ გადატანა"
+}

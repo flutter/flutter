@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FontFeature.FontFeature.liningFigures].
-
-import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
+
+/// Flutter code sample for [FontFeature.liningFigures].
 
 void main() => runApp(const ExampleApp());
 
@@ -33,9 +31,7 @@ class ExampleWidget extends StatelessWidget {
       'CALL 311-555-2368 NOW!',
       style: TextStyle(
         fontFamily: 'Sorts Mill Goudy',
-        fontFeatures: <FontFeature>[
-          FontFeature.liningFigures(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.liningFigures()],
       ),
     );
   }

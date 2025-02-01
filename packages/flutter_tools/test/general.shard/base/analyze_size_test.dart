@@ -7,7 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/analyze_size.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 
@@ -65,23 +65,23 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: TestUsage(),
+      analytics: const NoOpAnalytics(),
     );
 
-    final Archive archive = Archive()
-      ..addFile(ArchiveFile('AndroidManifest.xml', 100,  List<int>.filled(100, 0)))
-      ..addFile(ArchiveFile('META-INF/CERT.RSA', 10,  List<int>.filled(10, 0)))
-      ..addFile(ArchiveFile('META-INF/CERT.SF', 10,  List<int>.filled(10, 0)))
-      ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50,  List<int>.filled(50, 0)))
-      ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
+    final Archive archive =
+        Archive()
+          ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
+          ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
+          ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
+          ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50, List<int>.filled(50, 0)))
+          ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
-    final File apk = fileSystem.file('test.apk')
-      ..writeAsBytesSync(ZipEncoder().encode(archive)!);
-    final File aotSizeJson = fileSystem.file('test.json')
-      ..createSync()
-      ..writeAsStringSync(aotSizeOutput);
-    final File precompilerTrace = fileSystem.file('trace.json')
-      ..writeAsStringSync('{}');
+    final File apk = fileSystem.file('test.apk')..writeAsBytesSync(ZipEncoder().encode(archive)!);
+    final File aotSizeJson =
+        fileSystem.file('test.json')
+          ..createSync()
+          ..writeAsStringSync(aotSizeOutput);
+    final File precompilerTrace = fileSystem.file('trace.json')..writeAsStringSync('{}');
     final Map<String, dynamic> result = await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
       zipFile: apk,
       aotSnapshot: aotSizeJson,
@@ -96,7 +96,8 @@ void main() {
     expect(androidManifestMap['value'], 6);
 
     final Map<String, Object?> metaInfMap = resultChildren[1] as Map<String, Object?>;
-    final List<Map<String, Object?>> metaInfMapChildren = metaInfMap['children']! as List<Map<String, Object?>>;
+    final List<Map<String, Object?>> metaInfMapChildren =
+        metaInfMap['children']! as List<Map<String, Object?>>;
     expect(metaInfMap['n'], 'META-INF');
     expect(metaInfMap['value'], 10);
     final Map<String, dynamic> certRsaMap = metaInfMapChildren[0];
@@ -107,11 +108,13 @@ void main() {
     expect(certSfMap['value'], 5);
 
     final Map<String, Object?> libMap = resultChildren[2] as Map<String, Object?>;
-    final List<Map<String, Object?>> libMapChildren = libMap['children']! as List<Map<String, Object?>>;
+    final List<Map<String, Object?>> libMapChildren =
+        libMap['children']! as List<Map<String, Object?>>;
     expect(libMap['n'], 'lib');
     expect(libMap['value'], 12);
     final Map<String, Object?> arm64Map = libMapChildren[0];
-    final List<Map<String, Object?>> arn64MapChildren = arm64Map['children']! as List<Map<String, Object?>>;
+    final List<Map<String, Object?>> arn64MapChildren =
+        arm64Map['children']! as List<Map<String, Object?>>;
     expect(arm64Map['n'], 'arm64-v8a');
     expect(arm64Map['value'], 12);
     final Map<String, Object?> libAppMap = arn64MapChildren[0];
@@ -149,22 +152,20 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: TestUsage(),
+      analytics: const NoOpAnalytics(),
     );
 
-    final Archive archive = Archive()
-      ..addFile(ArchiveFile('AndroidManifest.xml', 100,  List<int>.filled(100, 0)))
-      ..addFile(ArchiveFile('META-INF/CERT.RSA', 10,  List<int>.filled(10, 0)))
-      ..addFile(ArchiveFile('META-INF/CERT.SF', 10,  List<int>.filled(10, 0)))
-      ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50,  List<int>.filled(50, 0)))
-      ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
+    final Archive archive =
+        Archive()
+          ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
+          ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
+          ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
+          ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50, List<int>.filled(50, 0)))
+          ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
-    final File apk = fileSystem.file('test.apk')
-      ..writeAsBytesSync(ZipEncoder().encode(archive)!);
-    final File aotSizeJson = fileSystem.file('test.json')
-      ..writeAsStringSync(aotSizeOutput);
-    final File precompilerTrace = fileSystem.file('trace.json')
-      ..writeAsStringSync('{}');
+    final File apk = fileSystem.file('test.apk')..writeAsBytesSync(ZipEncoder().encode(archive)!);
+    final File aotSizeJson = fileSystem.file('test.json')..writeAsStringSync(aotSizeOutput);
+    final File precompilerTrace = fileSystem.file('trace.json')..writeAsStringSync('{}');
     await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
       zipFile: apk,
       aotSnapshot: aotSizeJson,
@@ -191,7 +192,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: TestUsage(),
+      analytics: const NoOpAnalytics(),
     );
 
     final Directory outputDirectory = fileSystem.directory('example/out/foo.app')
@@ -202,10 +203,8 @@ void main() {
     outputDirectory.childFile('libapp.so')
       ..createSync()
       ..writeAsStringSync('goodbye');
-    final File aotSizeJson = fileSystem.file('test.json')
-      ..writeAsStringSync(aotSizeOutput);
-    final File precompilerTrace = fileSystem.file('trace.json')
-      ..writeAsStringSync('{}');
+    final File aotSizeJson = fileSystem.file('test.json')..writeAsStringSync(aotSizeOutput);
+    final File precompilerTrace = fileSystem.file('trace.json')..writeAsStringSync('{}');
 
     final Map<String, Object?> result = await sizeAnalyzer.analyzeAotSnapshot(
       outputDirectory: outputDirectory,
@@ -234,30 +233,33 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: TestUsage(),
+      analytics: const NoOpAnalytics(),
     );
 
-    final Directory outputDirectory = fileSystem.directory('example/out/foo.app')..createSync(recursive: true);
+    final Directory outputDirectory = fileSystem.directory('example/out/foo.app')
+      ..createSync(recursive: true);
     final File invalidAotSizeJson = fileSystem.file('test.json')..writeAsStringSync('null');
     final File precompilerTrace = fileSystem.file('trace.json');
 
     await expectLater(
-        () => sizeAnalyzer.analyzeAotSnapshot(
-              outputDirectory: outputDirectory,
-              aotSnapshot: invalidAotSizeJson,
-              precompilerTrace: precompilerTrace,
-              type: 'linux',
-            ),
-        throwsToolExit());
+      () => sizeAnalyzer.analyzeAotSnapshot(
+        outputDirectory: outputDirectory,
+        aotSnapshot: invalidAotSizeJson,
+        precompilerTrace: precompilerTrace,
+        type: 'linux',
+      ),
+      throwsToolExit(),
+    );
 
     final File apk = fileSystem.file('test.apk')..writeAsBytesSync(ZipEncoder().encode(Archive())!);
     await expectLater(
-        () => sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
-              zipFile: apk,
-              aotSnapshot: invalidAotSizeJson,
-              precompilerTrace: precompilerTrace,
-              kind: 'apk',
-            ),
-        throwsToolExit());
+      () => sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
+        zipFile: apk,
+        aotSnapshot: invalidAotSizeJson,
+        precompilerTrace: precompilerTrace,
+        kind: 'apk',
+      ),
+      throwsToolExit(),
+    );
   });
 }

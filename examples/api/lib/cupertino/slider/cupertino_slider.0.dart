@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoSlider].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoSlider].
 
 void main() => runApp(const CupertinoSliderApp());
 
@@ -28,15 +28,13 @@ class CupertinoSliderExample extends StatefulWidget {
 }
 
 class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
-  double _currentSliderValue =  0.0;
+  double _currentSliderValue = 0.0;
   String? _sliderStatus;
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('CupertinoSlider Sample'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoSlider Sample')),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -74,9 +72,7 @@ class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
             ),
             Text(
               _sliderStatus ?? '',
-              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                fontSize: 12,
-              ),
+              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 12),
             ),
           ],
         ),

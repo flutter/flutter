@@ -21,5 +21,11 @@
   "selectAllButtonLabel": "Zgjidhi të gjitha",
   "tabSemanticsLabel": "Skeda $tabIndex nga $tabCount",
   "modalBarrierDismissLabel": "Hiq",
-  "searchTextFieldPlaceholderLabel": "Kërko"
+  "searchTextFieldPlaceholderLabel": "Kërko",
+  "noSpellCheckReplacementsLabel": "Nuk u gjetën zëvendësime",
+  "menuDismissLabel": "Hiqe menynë",
+  "lookUpButtonLabel": "Kërko",
+  "searchWebButtonLabel": "Kërko në ueb",
+  "shareButtonLabel": "Ndaj...",
+  "clearButtonLabel": "Pastro"
 }

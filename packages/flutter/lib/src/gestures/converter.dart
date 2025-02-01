@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+library;
 
 import 'dart:ui' as ui show PointerChange, PointerData, PointerSignalKind;
 
@@ -32,29 +34,46 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
   }
 }
 
+/// Signature for a callback that returns the device pixel ratio of a
+/// [FlutterView] identified by the provided `viewId`.
+///
+/// Returns null if no view with the provided ID exists.
+///
+/// Used by [PointerEventConverter.expand].
+///
+/// See also:
+///
+///  * [FlutterView.devicePixelRatio] for an explanation of device pixel ratio.
+typedef DevicePixelRatioGetter = double? Function(int viewId);
+
 /// Converts from engine pointer data to framework pointer events.
 ///
 /// This takes [PointerDataPacket] objects, as received from the engine via
 /// [dart:ui.PlatformDispatcher.onPointerDataPacket], and converts them to
 /// [PointerEvent] objects.
-class PointerEventConverter {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  PointerEventConverter._();
-
+abstract final class PointerEventConverter {
   /// Expand the given packet of pointer data into a sequence of framework
   /// pointer events.
   ///
-  /// The `devicePixelRatio` argument (usually given the value from
-  /// [dart:ui.FlutterView.devicePixelRatio]) is used to convert the incoming data
-  /// from physical coordinates to logical pixels. See the discussion at
-  /// [PointerEvent] for more details on the [PointerEvent] coordinate space.
-  static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) {
+  /// The `devicePixelRatioForView` is used to obtain the device pixel ratio for
+  /// the view a particular event occurred in to convert its data from physical
+  /// coordinates to logical pixels. See the discussion at [PointerEvent] for
+  /// more details on the [PointerEvent] coordinate space.
+  static Iterable<PointerEvent> expand(
+    Iterable<ui.PointerData> data,
+    DevicePixelRatioGetter devicePixelRatioForView,
+  ) {
     return data
         .where((ui.PointerData datum) => datum.signalKind != ui.PointerSignalKind.unknown)
         .map<PointerEvent?>((ui.PointerData datum) {
+          final double? devicePixelRatio = devicePixelRatioForView(datum.viewId);
+          if (devicePixelRatio == null) {
+            // View doesn't exist anymore.
+            return null;
+          }
           final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
-          final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
+          final Offset delta =
+              Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
           final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
           final double radiusMajor = _toLogicalPixels(datum.radiusMajor, devicePixelRatio);
           final double radiusMin = _toLogicalPixels(datum.radiusMin, devicePixelRatio);
@@ -66,6 +85,7 @@ class PointerEventConverter {
               switch (datum.change) {
                 case ui.PointerChange.add:
                   return PointerAddedEvent(
+                    viewId: datum.viewId,
                     timeStamp: timeStamp,
                     kind: kind,
                     device: datum.device,
@@ -83,6 +103,7 @@ class PointerEventConverter {
                   );
                 case ui.PointerChange.hover:
                   return PointerHoverEvent(
+                    viewId: datum.viewId,
                     timeStamp: timeStamp,
                     kind: kind,
                     device: datum.device,
@@ -106,6 +127,7 @@ class PointerEventConverter {
                   );
                 case ui.PointerChange.down:
                   return PointerDownEvent(
+                    viewId: datum.viewId,
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
                     kind: kind,
@@ -128,6 +150,7 @@ class PointerEventConverter {
                   );
                 case ui.PointerChange.move:
                   return PointerMoveEvent(
+                    viewId: datum.viewId,
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
                     kind: kind,
@@ -153,6 +176,7 @@ class PointerEventConverter {
                   );
                 case ui.PointerChange.up:
                   return PointerUpEvent(
+                    viewId: datum.viewId,
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
                     kind: kind,
@@ -176,6 +200,7 @@ class PointerEventConverter {
                   );
                 case ui.PointerChange.cancel:
                   return PointerCancelEvent(
+                    viewId: datum.viewId,
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
                     kind: kind,
@@ -198,6 +223,7 @@ class PointerEventConverter {
                   );
                 case ui.PointerChange.remove:
                   return PointerRemovedEvent(
+                    viewId: datum.viewId,
                     timeStamp: timeStamp,
                     kind: kind,
                     device: datum.device,
@@ -212,6 +238,7 @@ class PointerEventConverter {
                   );
                 case ui.PointerChange.panZoomStart:
                   return PointerPanZoomStartEvent(
+                    viewId: datum.viewId,
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
                     device: datum.device,
@@ -220,11 +247,11 @@ class PointerEventConverter {
                     synthesized: datum.synthesized,
                   );
                 case ui.PointerChange.panZoomUpdate:
-                  final Offset pan =
-                      Offset(datum.panX, datum.panY) / devicePixelRatio;
+                  final Offset pan = Offset(datum.panX, datum.panY) / devicePixelRatio;
                   final Offset panDelta =
                       Offset(datum.panDeltaX, datum.panDeltaY) / devicePixelRatio;
                   return PointerPanZoomUpdateEvent(
+                    viewId: datum.viewId,
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
                     device: datum.device,
@@ -238,6 +265,7 @@ class PointerEventConverter {
                   );
                 case ui.PointerChange.panZoomEnd:
                   return PointerPanZoomEndEvent(
+                    viewId: datum.viewId,
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
                     device: datum.device,
@@ -247,21 +275,26 @@ class PointerEventConverter {
                   );
               }
             case ui.PointerSignalKind.scroll:
-              if (!datum.scrollDeltaX.isFinite || !datum.scrollDeltaY.isFinite || devicePixelRatio <= 0) {
+              if (!datum.scrollDeltaX.isFinite ||
+                  !datum.scrollDeltaY.isFinite ||
+                  devicePixelRatio <= 0) {
                 return null;
               }
               final Offset scrollDelta =
                   Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
               return PointerScrollEvent(
+                viewId: datum.viewId,
                 timeStamp: timeStamp,
                 kind: kind,
                 device: datum.device,
                 position: position,
                 scrollDelta: scrollDelta,
                 embedderId: datum.embedderId,
+                onRespond: datum.respond,
               );
             case ui.PointerSignalKind.scrollInertiaCancel:
               return PointerScrollInertiaCancelEvent(
+                viewId: datum.viewId,
                 timeStamp: timeStamp,
                 kind: kind,
                 device: datum.device,
@@ -270,6 +303,7 @@ class PointerEventConverter {
               );
             case ui.PointerSignalKind.scale:
               return PointerScaleEvent(
+                viewId: datum.viewId,
                 timeStamp: timeStamp,
                 kind: kind,
                 device: datum.device,
@@ -278,15 +312,12 @@ class PointerEventConverter {
                 scale: datum.scale,
               );
             case ui.PointerSignalKind.unknown:
-            default: // ignore: no_default_cases, to allow adding a new [PointerSignalKind] - PointerStylusAuxiliaryAction
-            // TODO(louisehsu): remove after landing engine PR https://github.com/flutter/engine/pull/39637
-              // This branch should already have 'unknown' filtered out, but
-              // we don't want to return anything or miss if someone adds a new
-              // enumeration to PointerSignalKind.
               throw StateError('Unreachable');
           }
-        }).whereType<PointerEvent>();
+        })
+        .whereType<PointerEvent>();
   }
 
-  static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) => physicalPixels / devicePixelRatio;
+  static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) =>
+      physicalPixels / devicePixelRatio;
 }

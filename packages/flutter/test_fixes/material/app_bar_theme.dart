@@ -15,7 +15,7 @@ void main() {
   appBarTheme = appBarTheme.copyWith(brightness: Brightness.dark);
   appBarTheme.brightness;
 
-  TextTheme myTextTheme = TextTheme(); 
+  TextTheme myTextTheme = TextTheme();
   AppBarTheme appBarTheme = AppBarTheme();
   appBarTheme = AppBarTheme(textTheme: myTextTheme);
   appBarTheme = AppBarTheme(textTheme: myTextTheme);

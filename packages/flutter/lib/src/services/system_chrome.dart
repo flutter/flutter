@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -37,7 +41,7 @@ enum DeviceOrientation {
   /// clockwise from its boot orientation.
   portraitUp,
 
-  /// The orientation that is 90 degrees clockwise from [portraitUp].
+  /// The orientation that is 90 degrees counterclockwise from [portraitUp].
   ///
   /// If the device shows its boot logo in landscape, then the boot logo is
   /// shown in [landscapeLeft].
@@ -46,7 +50,7 @@ enum DeviceOrientation {
   /// The orientation that is 180 degrees from [portraitUp].
   portraitDown,
 
-  /// The orientation that is 90 degrees counterclockwise from [portraitUp].
+  /// The orientation that is 90 degrees clockwise from [portraitUp].
   landscapeRight,
 }
 
@@ -58,7 +62,7 @@ enum DeviceOrientation {
 @immutable
 class ApplicationSwitcherDescription {
   /// Creates an ApplicationSwitcherDescription.
-  const ApplicationSwitcherDescription({ this.label, this.primaryColor });
+  const ApplicationSwitcherDescription({this.label, this.primaryColor});
 
   /// A label and description of the current state of the application.
   final String? label;
@@ -88,12 +92,21 @@ enum SystemUiOverlay {
 /// These modes mimic Android-specific display setups.
 ///
 /// Used by [SystemChrome.setEnabledSystemUIMode].
+///
+/// Flutter apps use [SystemUiMode.edgeToEdge] by default and setting any
+/// of the other [SystemUiMode]s will NOT work unless you perform the migration
+/// detailed in
+/// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
 enum SystemUiMode {
   /// Fullscreen display with status and navigation bars presentable by tapping
   /// anywhere on the display.
   ///
-  /// Available starting at SDK 16 or Android J. Earlier versions of Android
-  /// will not be affected by this setting.
+  /// Available starting at Android SDK 4.1 (API 16). Earlier versions of Android
+  /// will not be affected by this setting. However, if your app targets Android
+  /// SDK 15 (API 35) or later (Flutter does this by default), then you must
+  /// migrate using the instructions in
+  /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
+  /// to use this mode.
   ///
   /// For applications running on iOS, the status bar and home indicator will be
   /// hidden for a similar fullscreen experience.
@@ -110,8 +123,12 @@ enum SystemUiMode {
   /// Fullscreen display with status and navigation bars presentable through a
   /// swipe gesture at the edges of the display.
   ///
-  /// Available starting at SDK 19 or Android K. Earlier versions of Android
-  /// will not be affected by this setting.
+  /// Available starting at Android SDK 4.4 (API 19). Earlier versions of
+  /// Android will not be affected by this setting. However, if your app targets
+  /// Android SDK 15 (API 35) or later (Flutter does this by default), then you
+  /// must migrate using the instructions in
+  /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
+  /// to use this mode.
   ///
   /// For applications running on iOS, the status bar and home indicator will be
   /// hidden for a similar fullscreen experience.
@@ -129,8 +146,12 @@ enum SystemUiMode {
   /// Fullscreen display with status and navigation bars presentable through a
   /// swipe gesture at the edges of the display.
   ///
-  /// Available starting at SDK 19 or Android K. Earlier versions of Android
-  /// will not be affected by this setting.
+  /// Available starting at Android SDK 4.4 (API 19). Earlier versions of
+  /// Android will not be affected by this setting. However, if your app targets
+  /// Android SDK 15 (API 35) or later (Flutter does this by default), then you
+  /// must migrate using the instructions in
+  /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
+  /// to use this mode.
   ///
   /// For applications running on iOS, the status bar and home indicator will be
   /// hidden for a similar fullscreen experience.
@@ -147,8 +168,12 @@ enum SystemUiMode {
   /// Fullscreen display with status and navigation elements rendered over the
   /// application.
   ///
-  /// Available starting at SDK 29 or Android 10. Earlier versions of Android
+  /// Available starting at Android SDK 10 (API 29). Earlier versions of Android
   /// will not be affected by this setting.
+  ///
+  /// If your app targets Android SDK 15 (API 35) or later (Flutter does this by
+  /// default), then this mode is used by default on Android. This mode is also
+  /// used by default on iOS.
   ///
   /// For applications running on iOS, the status bar and home indicator will be
   /// visible.
@@ -177,12 +202,19 @@ enum SystemUiMode {
   ///
   /// Omitting both overlays will result in the same configuration as
   /// [SystemUiMode.leanBack].
+  ///
+  /// If your app targets Android SDK 15 (API 35) or later, then you must
+  /// migrate using the instructions in
+  /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
+  /// to use this mode.
   manual,
 }
 
 /// Specifies a preference for the style of the system overlays.
 ///
-/// Used by [SystemChrome.setSystemUIOverlayStyle].
+/// Used by [AppBar.systemOverlayStyle] for declaratively setting the style of
+/// the system overlays, and by [SystemChrome.setSystemUIOverlayStyle] for
+/// imperatively setting the style of the system overlays.
 @immutable
 class SystemUiOverlayStyle {
   /// Creates a new [SystemUiOverlayStyle].
@@ -311,13 +343,17 @@ class SystemUiOverlayStyle {
   }) {
     return SystemUiOverlayStyle(
       systemNavigationBarColor: systemNavigationBarColor ?? this.systemNavigationBarColor,
-      systemNavigationBarDividerColor: systemNavigationBarDividerColor ?? this.systemNavigationBarDividerColor,
-      systemNavigationBarContrastEnforced: systemNavigationBarContrastEnforced ?? this.systemNavigationBarContrastEnforced,
+      systemNavigationBarDividerColor:
+          systemNavigationBarDividerColor ?? this.systemNavigationBarDividerColor,
+      systemNavigationBarContrastEnforced:
+          systemNavigationBarContrastEnforced ?? this.systemNavigationBarContrastEnforced,
       statusBarColor: statusBarColor ?? this.statusBarColor,
       statusBarIconBrightness: statusBarIconBrightness ?? this.statusBarIconBrightness,
       statusBarBrightness: statusBarBrightness ?? this.statusBarBrightness,
-      systemStatusBarContrastEnforced: systemStatusBarContrastEnforced ?? this.systemStatusBarContrastEnforced,
-      systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? this.systemNavigationBarIconBrightness,
+      systemStatusBarContrastEnforced:
+          systemStatusBarContrastEnforced ?? this.systemStatusBarContrastEnforced,
+      systemNavigationBarIconBrightness:
+          systemNavigationBarIconBrightness ?? this.systemNavigationBarIconBrightness,
     );
   }
 
@@ -338,15 +374,15 @@ class SystemUiOverlayStyle {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SystemUiOverlayStyle
-        && other.systemNavigationBarColor == systemNavigationBarColor
-        && other.systemNavigationBarDividerColor == systemNavigationBarDividerColor
-        && other.systemNavigationBarContrastEnforced == systemNavigationBarContrastEnforced
-        && other.statusBarColor == statusBarColor
-        && other.statusBarIconBrightness == statusBarIconBrightness
-        && other.statusBarBrightness == statusBarBrightness
-        && other.systemStatusBarContrastEnforced == systemStatusBarContrastEnforced
-        && other.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
+    return other is SystemUiOverlayStyle &&
+        other.systemNavigationBarColor == systemNavigationBarColor &&
+        other.systemNavigationBarDividerColor == systemNavigationBarDividerColor &&
+        other.systemNavigationBarContrastEnforced == systemNavigationBarContrastEnforced &&
+        other.statusBarColor == statusBarColor &&
+        other.statusBarIconBrightness == statusBarIconBrightness &&
+        other.statusBarBrightness == statusBarBrightness &&
+        other.systemStatusBarContrastEnforced == systemStatusBarContrastEnforced &&
+        other.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
   }
 }
 
@@ -356,11 +392,7 @@ List<String> _stringify(List<dynamic> list) => <String>[
 
 /// Controls specific aspects of the operating system's graphical interface and
 /// how it interacts with the application.
-class SystemChrome {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SystemChrome._();
-
+abstract final class SystemChrome {
   /// Specifies the set of orientations the application interface can
   /// be displayed in.
   ///
@@ -369,6 +401,74 @@ class SystemChrome {
   /// default.
   ///
   /// ## Limitations
+  ///
+  /// ### Android
+  ///
+  /// Android screens may choose to [letterbox](https://developer.android.com/guide/practices/enhanced-letterboxing)
+  /// applications that lock orientation, particularly on larger screens. When
+  /// letterboxing occurs on Android, the [MediaQueryData.size] reports the
+  /// letterboxed size, not the full screen size. Applications that make
+  /// decisions about whether to lock orientation based on the screen size
+  /// must use the `display` property of the current [FlutterView].
+  ///
+  /// ```dart
+  /// // A widget that locks the screen to portrait if it is less than 600
+  /// // logical pixels wide.
+  /// class MyApp extends StatefulWidget {
+  ///   const MyApp({ super.key });
+  ///
+  ///   @override
+  ///   State<MyApp> createState() => _MyAppState();
+  /// }
+  ///
+  /// class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  ///   ui.FlutterView? _view;
+  ///   static const double kOrientationLockBreakpoint = 600;
+  ///
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     WidgetsBinding.instance.addObserver(this);
+  ///   }
+  ///
+  ///   @override
+  ///   void didChangeDependencies() {
+  ///     super.didChangeDependencies();
+  ///     _view = View.maybeOf(context);
+  ///   }
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     WidgetsBinding.instance.removeObserver(this);
+  ///     _view = null;
+  ///     super.dispose();
+  ///   }
+  ///
+  ///   @override
+  ///   void didChangeMetrics() {
+  ///     final ui.Display? display = _view?.display;
+  ///     if (display == null) {
+  ///       return;
+  ///     }
+  ///     if (display.size.width / display.devicePixelRatio < kOrientationLockBreakpoint) {
+  ///       SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+  ///         DeviceOrientation.portraitUp,
+  ///       ]);
+  ///     } else {
+  ///       SystemChrome.setPreferredOrientations(<DeviceOrientation>[]);
+  ///     }
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return const MaterialApp(
+  ///       home: Placeholder(),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ### iOS
   ///
   /// This setting will only be respected on iPad if multitasking is disabled.
   ///
@@ -390,13 +490,12 @@ class SystemChrome {
   ///
   /// Any part of the description that is unsupported on the current platform
   /// will be ignored.
-  static Future<void> setApplicationSwitcherDescription(ApplicationSwitcherDescription description) async {
+  static Future<void> setApplicationSwitcherDescription(
+    ApplicationSwitcherDescription description,
+  ) async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setApplicationSwitcherDescription',
-      <String, dynamic>{
-        'label': description.label,
-        'primaryColor': description.primaryColor,
-      },
+      <String, dynamic>{'label': description.label, 'primaryColor': description.primaryColor},
     );
   }
 
@@ -432,7 +531,16 @@ class SystemChrome {
   /// is true, the application is not fullscreen. See
   /// [SystemChrome.setSystemUIChangeCallback] to respond to these changes in a
   /// fullscreen application.
-  static Future<void> setEnabledSystemUIMode(SystemUiMode mode, { List<SystemUiOverlay>? overlays }) async {
+  ///
+  /// If your app targets Android SDK 15 (API 35) or later (Flutter does this by
+  /// default), then your Flutter app uses [SystemUiMode.edgeToEdge] by default
+  /// on Android and setting any of the other [SystemUiMode]s will NOT work
+  /// unless you perform the migration detailed in
+  /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
+  static Future<void> setEnabledSystemUIMode(
+    SystemUiMode mode, {
+    List<SystemUiOverlay>? overlays,
+  }) async {
     if (mode != SystemUiMode.manual) {
       await SystemChannels.platform.invokeMethod<void>(
         'SystemChrome.setEnabledSystemUIMode',
@@ -471,9 +579,7 @@ class SystemChrome {
     ServicesBinding.instance.setSystemUiChangeCallback(callback);
     // Skip setting up the listener if there is no callback.
     if (callback != null) {
-      await SystemChannels.platform.invokeMethod<void>(
-        'SystemChrome.setSystemUIChangeListener',
-      );
+      await SystemChannels.platform.invokeMethod<void>('SystemChrome.setSystemUIChangeListener');
     }
   }
 
@@ -487,13 +593,11 @@ class SystemChrome {
   /// On Android, the system UI cannot be changed until 1 second after the previous
   /// change. This is to prevent malware from permanently hiding navigation buttons.
   static Future<void> restoreSystemUIOverlays() async {
-    await SystemChannels.platform.invokeMethod<void>(
-      'SystemChrome.restoreSystemUIOverlays',
-    );
+    await SystemChannels.platform.invokeMethod<void>('SystemChrome.restoreSystemUIOverlays');
   }
 
-  /// Specifies the style to use for the system overlays that are visible (if
-  /// any).
+  /// Specifies the style to use for the system overlays (e.g. the status bar on
+  /// Android or iOS, the system navigation bar on Android) that are visible (if any).
   ///
   /// This method will schedule the embedder update to be run in a microtask.
   /// Any subsequent calls to this method during the current event loop will
@@ -512,14 +616,11 @@ class SystemChrome {
   /// If a particular style is not supported on the platform, selecting it will
   /// have no effect.
   ///
-  /// {@tool snippet}
-  /// ```dart
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-  ///   return const Placeholder();
-  /// }
-  /// ```
+  /// {@tool sample}
+  /// The following example uses an `AppBar` to set the system status bar color and
+  /// the system navigation bar color.
+  ///
+  /// ** See code in examples/api/lib/services/system_chrome/system_chrome.set_system_u_i_overlay_style.0.dart **
   /// {@end-tool}
   ///
   /// For more complex control of the system overlay styles, consider using
@@ -531,21 +632,24 @@ class SystemChrome {
   /// to configure the system styles when an app bar is not used. When an app
   /// bar is used, apps should not enclose the app bar in an annotated region
   /// because one is automatically created. If an app bar is used and the app
-  /// bar is enclosed in an annotated region, the app bar overlay style supercedes
+  /// bar is enclosed in an annotated region, the app bar overlay style supersedes
   /// the status bar properties defined in the enclosing annotated region overlay
-  /// style and the enclosing annotated region overlay style supercedes the app bar
+  /// style and the enclosing annotated region overlay style supersedes the app bar
   /// overlay style navigation bar properties.
   ///
   /// {@tool sample}
-  /// The following example creates a widget that changes the status bar color
-  /// to a random value on Android.
+  /// The following example uses an `AnnotatedRegion<SystemUiOverlayStyle>` to set
+  /// the system status bar color and the system navigation bar color.
   ///
   /// ** See code in examples/api/lib/services/system_chrome/system_chrome.set_system_u_i_overlay_style.1.dart **
   /// {@end-tool}
   ///
   /// See also:
   ///
-  ///  * [AnnotatedRegion], the widget used to place data into the layer tree.
+  ///  * [AppBar.systemOverlayStyle], a convenient property for declaratively setting
+  ///    the style of the system overlays.
+  ///  * [AnnotatedRegion], the widget used to place a `SystemUiOverlayStyle` into
+  ///    the layer tree.
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     if (_pendingStyle != null) {
       // The microtask has already been queued; just update the pending value.
@@ -569,6 +673,17 @@ class SystemChrome {
       }
       _pendingStyle = null;
     });
+  }
+
+  /// Called by the binding during a transition to a new app lifecycle state.
+  static void handleAppLifecycleStateChanged(AppLifecycleState state) {
+    // When the app is detached, clear the record of the style sent to the host
+    // so that it will be sent again when the app is reattached.
+    if (state == AppLifecycleState.detached) {
+      scheduleMicrotask(() {
+        _latestStyle = null;
+      });
+    }
   }
 
   static SystemUiOverlayStyle? _pendingStyle;

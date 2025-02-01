@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 class TestParentData {
-  TestParentData({ this.top, this.right, this.bottom, this.left });
+  TestParentData({this.top, this.right, this.bottom, this.left});
 
   final double? top;
   final double? right;
@@ -55,11 +55,7 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationA),
-          Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: DecoratedBox(decoration: kBoxDecorationB),
-          ),
+          Positioned(top: 10.0, left: 10.0, child: DecoratedBox(decoration: kBoxDecorationB)),
           DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
@@ -75,16 +71,8 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(
-            bottom: 5.0,
-            right: 7.0,
-            child: DecoratedBox(decoration: kBoxDecorationA),
-          ),
-          Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: DecoratedBox(decoration: kBoxDecorationB),
-          ),
+          Positioned(bottom: 5.0, right: 7.0, child: DecoratedBox(decoration: kBoxDecorationA)),
+          Positioned(top: 10.0, left: 10.0, child: DecoratedBox(decoration: kBoxDecorationB)),
           DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
@@ -104,16 +92,8 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(
-            bottom: 5.0,
-            right: 7.0,
-            child: kDecoratedBoxA,
-          ),
-          Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: kDecoratedBoxB,
-          ),
+          Positioned(bottom: 5.0, right: 7.0, child: kDecoratedBoxA),
+          Positioned(top: 10.0, left: 10.0, child: kDecoratedBoxB),
           kDecoratedBoxC,
         ],
       ),
@@ -129,16 +109,8 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(
-            bottom: 6.0,
-            right: 8.0,
-            child: kDecoratedBoxA,
-          ),
-          Positioned(
-            left: 10.0,
-            right: 10.0,
-            child: kDecoratedBoxB,
-          ),
+          Positioned(bottom: 6.0, right: 8.0, child: kDecoratedBoxA),
+          Positioned(left: 10.0, right: 10.0, child: kDecoratedBoxB),
           kDecoratedBoxC,
         ],
       ),
@@ -155,11 +127,7 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           kDecoratedBoxA,
-          Positioned(
-            left: 11.0,
-            right: 12.0,
-            child: Container(child: kDecoratedBoxB),
-          ),
+          Positioned(left: 11.0, right: 12.0, child: Container(child: kDecoratedBoxB)),
           kDecoratedBoxC,
         ],
       ),
@@ -176,16 +144,8 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           kDecoratedBoxA,
-          Positioned(
-            right: 10.0,
-            child: Container(child: kDecoratedBoxB),
-          ),
-          const DummyWidget(
-            child: Positioned(
-              top: 8.0,
-              child: kDecoratedBoxC,
-            ),
-          ),
+          Positioned(right: 10.0, child: Container(child: kDecoratedBoxB)),
+          const DummyWidget(child: Positioned(top: 8.0, child: kDecoratedBoxC)),
         ],
       ),
     );
@@ -200,53 +160,127 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(
-            right: 10.0,
-            child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
-          ),
+          Positioned(right: 10.0, child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB)),
         ],
       ),
     );
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(right: 10.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(right: 10.0)]);
 
     flipStatefulWidget(tester);
     await tester.pump();
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(right: 10.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(right: 10.0)]);
 
     await tester.pumpWidget(
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(
-            top: 7.0,
-            child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
-          ),
+          Positioned(top: 7.0, child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB)),
         ],
       ),
     );
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(top: 7.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(top: 7.0)]);
 
     flipStatefulWidget(tester);
     await tester.pump();
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(top: 7.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(top: 7.0)]);
 
-    await tester.pumpWidget(
-      const Stack(textDirection: TextDirection.ltr),
-    );
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
 
     checkTree(tester, <TestParentData>[]);
+  });
+
+  testWidgets('ParentData overwrite with custom ParentDataWidget subclasses', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            CustomPositionedWidget(
+              bottom: 8.0,
+              child: Positioned(
+                top: 6.0,
+                left: 7.0,
+                child: DecoratedBox(decoration: kBoxDecorationB),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      startsWith(
+        'Incorrect use of ParentDataWidget.\n'
+        'Competing ParentDataWidgets are providing parent data to the same RenderObject:\n'
+        '- Positioned(left: 7.0, top: 6.0), which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        '- CustomPositionedWidget, which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        'A RenderObject can receive parent data from multiple '
+        'ParentDataWidgets, but the Type of ParentData must be unique to '
+        'prevent one overwriting another.\n'
+        'Usually, this indicates that one or more of the offending ParentDataWidgets listed '
+        "above isn't placed inside a dedicated compatible ancestor widget that it isn't "
+        'sharing with another ParentDataWidget of the same type.\n'
+        'Otherwise, separating aspects of ParentData to prevent conflicts can '
+        'be done using mixins, mixing them all in on the full ParentData '
+        'Object, such as KeepAlive does with KeepAliveParentDataMixin.\n'
+        'The ownership chain for the RenderObject that received the parent data was:\n'
+        '  DecoratedBox ← Positioned ← CustomPositionedWidget ← Stack ← Directionality ← ', // End of chain omitted, not relevant for test.
+      ),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            SubclassPositioned(
+              bottom: 8.0,
+              child: Positioned(
+                top: 6.0,
+                left: 7.0,
+                child: DecoratedBox(decoration: kBoxDecorationB),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      startsWith(
+        'Incorrect use of ParentDataWidget.\n'
+        'Competing ParentDataWidgets are providing parent data to the same RenderObject:\n'
+        '- Positioned(left: 7.0, top: 6.0), which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        '- SubclassPositioned(bottom: 8.0), which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        'A RenderObject can receive parent data from multiple '
+        'ParentDataWidgets, but the Type of ParentData must be unique to '
+        'prevent one overwriting another.\n'
+        'Usually, this indicates that one or more of the offending ParentDataWidgets listed '
+        "above isn't placed inside a dedicated compatible ancestor widget that it isn't "
+        'sharing with another ParentDataWidget of the same type.\n'
+        'Otherwise, separating aspects of ParentData to prevent conflicts can '
+        'be done using mixins, mixing them all in on the full ParentData '
+        'Object, such as KeepAlive does with KeepAliveParentDataMixin.\n'
+        'The ownership chain for the RenderObject that received the parent data was:\n'
+        '  DecoratedBox ← Positioned ← SubclassPositioned ← Stack ← Directionality ← ', // End of chain omitted, not relevant for test.
+      ),
+    );
   });
 
   testWidgets('ParentDataWidget conflicting data', (WidgetTester tester) async {
@@ -254,7 +288,6 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
-          textDirection: TextDirection.ltr,
           children: <Widget>[
             Positioned(
               top: 5.0,
@@ -276,19 +309,26 @@ void main() {
       exception.toString(),
       startsWith(
         'Incorrect use of ParentDataWidget.\n'
-        'The following ParentDataWidgets are providing parent data to the same RenderObject:\n'
-        '- Positioned(left: 7.0, top: 6.0) (typically placed directly inside a Stack widget)\n'
-        '- Positioned(top: 5.0, bottom: 8.0) (typically placed directly inside a Stack widget)\n'
-        'However, a RenderObject can only receive parent data from at most one ParentDataWidget.\n'
-        'Usually, this indicates that at least one of the offending ParentDataWidgets listed '
-        'above is not placed directly inside a compatible ancestor widget.\n'
+        'Competing ParentDataWidgets are providing parent data to the same RenderObject:\n'
+        '- Positioned(left: 7.0, top: 6.0), which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        '- Positioned(top: 5.0, bottom: 8.0), which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        'A RenderObject can receive parent data from multiple '
+        'ParentDataWidgets, but the Type of ParentData must be unique to '
+        'prevent one overwriting another.\n'
+        'Usually, this indicates that one or more of the offending ParentDataWidgets listed '
+        "above isn't placed inside a dedicated compatible ancestor widget that it isn't "
+        'sharing with another ParentDataWidget of the same type.\n'
+        'Otherwise, separating aspects of ParentData to prevent conflicts can '
+        'be done using mixins, mixing them all in on the full ParentData '
+        'Object, such as KeepAlive does with KeepAliveParentDataMixin.\n'
         'The ownership chain for the RenderObject that received the parent data was:\n'
         '  DecoratedBox ← Positioned ← Positioned ← Stack ← Directionality ← ', // End of chain omitted, not relevant for test.
       ),
     );
 
     await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
-
     checkTree(tester, <TestParentData>[]);
 
     await tester.pumpWidget(
@@ -297,16 +337,13 @@ void main() {
         child: DummyWidget(
           child: Row(
             children: <Widget>[
-              Positioned(
-                top: 6.0,
-                left: 7.0,
-                child: DecoratedBox(decoration: kBoxDecorationB),
-              ),
+              Positioned(top: 6.0, left: 7.0, child: DecoratedBox(decoration: kBoxDecorationB)),
             ],
           ),
         ),
       ),
     );
+
     exception = tester.takeException();
     expect(exception, isFlutterError);
     expect(
@@ -324,10 +361,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(
-      const Stack(textDirection: TextDirection.ltr),
-    );
-
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
     checkTree(tester, <TestParentData>[]);
   });
 
@@ -347,9 +381,7 @@ void main() {
       ),
     );
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(top: 10.0, left: 10.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(top: 10.0, left: 10.0)]);
 
     await tester.pumpWidget(
       Stack(
@@ -367,9 +399,7 @@ void main() {
       ),
     );
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(top: 10.0, left: 10.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(top: 10.0, left: 10.0)]);
 
     await tester.pumpWidget(
       Stack(
@@ -384,27 +414,23 @@ void main() {
       ),
     );
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(top: 10.0, left: 10.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(top: 10.0, left: 10.0)]);
   });
 
   testWidgets('Parent data invalid ancestor', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Row(
-        children: <Widget>[
-          Stack(
-            textDirection: TextDirection.ltr,
-            children: <Widget>[
-              Expanded(
-                child: Container(),
-              ),
-            ],
-          ),
-        ],
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            Stack(
+              textDirection: TextDirection.ltr,
+              children: <Widget>[Expanded(child: Container())],
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -424,45 +450,66 @@ void main() {
     );
   });
 
-  testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      OneAncestorWidget(
-        child: Container(),
-      ),
-    );
-    DummyParentData parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
+  testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(OneAncestorWidget(child: Container()));
+    DummyParentData parentData =
+        tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, isNull);
 
     await tester.pumpWidget(
-      OneAncestorWidget(
-        child: TestParentDataWidget(
-          string: 'Foo',
-          child: Container(),
-        ),
-      ),
+      OneAncestorWidget(child: TestParentDataWidget(string: 'Foo', child: Container())),
     );
     parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Foo');
 
     await tester.pumpWidget(
-      AnotherAncestorWidget(
-        child: TestParentDataWidget(
-          string: 'Bar',
-          child: Container(),
-        ),
-      ),
+      AnotherAncestorWidget(child: TestParentDataWidget(string: 'Bar', child: Container())),
     );
     parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Bar');
   });
 }
 
-class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
-  const TestParentDataWidget({
+class SubclassPositioned extends Positioned {
+  const SubclassPositioned({
     super.key,
-    required this.string,
+    super.left,
+    super.top,
+    super.right,
+    super.bottom,
+    super.width,
+    super.height,
     required super.child,
   });
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is StackParentData);
+    final StackParentData parentData = renderObject.parentData! as StackParentData;
+    parentData.bottom = bottom;
+  }
+}
+
+class CustomPositionedWidget extends ParentDataWidget<StackParentData> {
+  const CustomPositionedWidget({super.key, required this.bottom, required super.child});
+
+  final double bottom;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is StackParentData);
+    final StackParentData parentData = renderObject.parentData! as StackParentData;
+    parentData.bottom = bottom;
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Stack;
+}
+
+class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
+  const TestParentDataWidget({super.key, required this.string, required super.child});
 
   final String string;
 
@@ -482,20 +529,14 @@ class DummyParentData extends ParentData {
 }
 
 class OneAncestorWidget extends SingleChildRenderObjectWidget {
-  const OneAncestorWidget({
-    super.key,
-    required Widget super.child,
-  });
+  const OneAncestorWidget({super.key, required Widget super.child});
 
   @override
   RenderOne createRenderObject(BuildContext context) => RenderOne();
 }
 
 class AnotherAncestorWidget extends SingleChildRenderObjectWidget {
-  const AnotherAncestorWidget({
-    super.key,
-    required Widget super.child,
-  });
+  const AnotherAncestorWidget({super.key, required Widget super.child});
 
   @override
   RenderAnother createRenderObject(BuildContext context) => RenderAnother();
@@ -520,7 +561,7 @@ class RenderAnother extends RenderProxyBox {
 }
 
 class DummyWidget extends StatelessWidget {
-  const DummyWidget({ super.key, required this.child });
+  const DummyWidget({super.key, required this.child});
 
   final Widget child;
 

@@ -37,10 +37,11 @@ void _encodeBundleTranslations(Map<String, dynamic> bundle) {
     final String translation = bundle[key] as String;
     // Rewrite the string as a series of unicode characters in JSON format.
     // Like "\u0012\u0123\u1234".
-    bundle[key] = translation.runes.map((int code) {
-      final String codeString = '00${code.toRadixString(16)}';
-      return '\\u${codeString.substring(codeString.length - 4)}';
-    }).join();
+    bundle[key] =
+        translation.runes.map((int code) {
+          final String codeString = '00${code.toRadixString(16)}';
+          return '\\u${codeString.substring(codeString.length - 4)}';
+        }).join();
   }
 }
 
@@ -49,7 +50,9 @@ void _checkEncodedTranslations(Map<String, dynamic> encodedBundle, Map<String, d
   const JsonDecoder decoder = JsonDecoder();
   for (final String key in bundle.keys) {
     if (decoder.convert('"${encodedBundle[key]}"') != bundle[key]) {
-      stderr.writeln('  encodedTranslation for $key does not match original value "${bundle[key]}"');
+      stderr.writeln(
+        '  encodedTranslation for $key does not match original value "${bundle[key]}"',
+      );
       errorFound = true;
     }
   }
@@ -69,18 +72,23 @@ void _rewriteBundle(File file, Map<String, dynamic> bundle) {
 }
 
 void encodeKnArbFiles(Directory directory) {
+  final File widgetsArbFile = File(path.join(directory.path, 'widgets_kn.arb'));
   final File materialArbFile = File(path.join(directory.path, 'material_kn.arb'));
   final File cupertinoArbFile = File(path.join(directory.path, 'cupertino_kn.arb'));
 
+  final Map<String, dynamic> widgetsBundle = _loadBundle(widgetsArbFile);
   final Map<String, dynamic> materialBundle = _loadBundle(materialArbFile);
   final Map<String, dynamic> cupertinoBundle = _loadBundle(cupertinoArbFile);
 
+  _encodeBundleTranslations(widgetsBundle);
   _encodeBundleTranslations(materialBundle);
   _encodeBundleTranslations(cupertinoBundle);
 
+  _checkEncodedTranslations(widgetsBundle, _loadBundle(widgetsArbFile));
   _checkEncodedTranslations(materialBundle, _loadBundle(materialArbFile));
   _checkEncodedTranslations(cupertinoBundle, _loadBundle(cupertinoArbFile));
 
+  _rewriteBundle(widgetsArbFile, widgetsBundle);
   _rewriteBundle(materialArbFile, materialBundle);
   _rewriteBundle(cupertinoArbFile, cupertinoBundle);
 }

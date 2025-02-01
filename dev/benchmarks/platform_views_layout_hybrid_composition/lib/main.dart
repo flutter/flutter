@@ -5,22 +5,17 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_driver/driver_extension.dart';
 
 import 'android_platform_view.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(
-    const PlatformViewApp()
-  );
+  runApp(const PlatformViewApp());
 }
 
 class PlatformViewApp extends StatefulWidget {
-  const PlatformViewApp({
-    super.key
-  });
+  const PlatformViewApp({super.key});
 
   @override
   PlatformViewAppState createState() => PlatformViewAppState();
@@ -35,16 +30,10 @@ class PlatformViewAppState extends State<PlatformViewApp> {
       home: const PlatformViewLayout(),
     );
   }
-
-  void toggleAnimationSpeed() {
-    setState(() {
-      timeDilation = (timeDilation != 1.0) ? 1.0 : 5.0;
-    });
-  }
 }
 
 class PlatformViewLayout extends StatelessWidget {
-  const PlatformViewLayout({ super.key });
+  const PlatformViewLayout({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +48,7 @@ class PlatformViewLayout extends StatelessWidget {
             child: Material(
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
-              child: const Stack(
-                children: <Widget> [
-                  DummyPlatformView(),
-                  RotationContainer(),
-                ],
-              ),
+              child: const Stack(children: <Widget>[DummyPlatformView(), RotationContainer()]),
             ),
           );
         },
@@ -81,22 +65,13 @@ class DummyPlatformView extends StatelessWidget {
     const String viewType = 'benchmarks/platform_views_layout_hybrid_composition/DummyPlatformView';
     late Widget nativeView;
     if (Platform.isIOS) {
-      nativeView = const UiKitView(
-        viewType: viewType,
-      );
+      nativeView = const UiKitView(viewType: viewType);
     } else if (Platform.isAndroid) {
-      nativeView = const AndroidPlatformView(
-        viewType: viewType,
-      );
+      nativeView = const AndroidPlatformView(viewType: viewType);
     } else {
       assert(false, 'Invalid platform');
     }
-    return Container(
-      color: Colors.purple,
-      height: 200.0,
-      width: 300.0,
-      child: nativeView,
-    );
+    return Container(color: Colors.purple, height: 200.0, width: 300.0, child: nativeView);
   }
 }
 
@@ -107,8 +82,7 @@ class RotationContainer extends StatefulWidget {
   State<RotationContainer> createState() => _RotationContainerState();
 }
 
-class _RotationContainerState extends State<RotationContainer>
-  with SingleTickerProviderStateMixin {
+class _RotationContainerState extends State<RotationContainer> with SingleTickerProviderStateMixin {
   late AnimationController _rotationController;
 
   @override
@@ -132,11 +106,7 @@ class _RotationContainerState extends State<RotationContainer>
   Widget build(BuildContext context) {
     return RotationTransition(
       turns: Tween<double>(begin: 0.0, end: 1.0).animate(_rotationController),
-      child: Container(
-        color: Colors.purple,
-        width: 50.0,
-        height: 50.0,
-      ),
+      child: Container(color: Colors.purple, width: 50.0, height: 50.0),
     );
   }
 }

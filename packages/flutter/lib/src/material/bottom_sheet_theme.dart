@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_sheet.dart';
+/// @docImport 'material.dart';
+/// @docImport 'theme.dart';
+/// @docImport 'theme_data.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -33,8 +39,12 @@ class BottomSheetThemeData with Diagnosticable {
     this.elevation,
     this.modalBackgroundColor,
     this.modalBarrierColor,
+    this.shadowColor,
     this.modalElevation,
     this.shape,
+    this.showDragHandle,
+    this.dragHandleColor,
+    this.dragHandleSize,
     this.clipBehavior,
     this.constraints,
   });
@@ -66,6 +76,9 @@ class BottomSheetThemeData with Diagnosticable {
   /// a modal bottom sheet.
   final Color? modalBarrierColor;
 
+  /// Overrides the default value for [BottomSheet.shadowColor].
+  final Color? shadowColor;
+
   /// Value for [BottomSheet.elevation] when the Bottom sheet is presented as a
   /// modal bottom sheet.
   final double? modalElevation;
@@ -75,6 +88,15 @@ class BottomSheetThemeData with Diagnosticable {
   /// If null, no overriding shape is specified for [BottomSheet], so the
   /// [BottomSheet] is rectangular.
   final ShapeBorder? shape;
+
+  /// Overrides the default value for [BottomSheet.showDragHandle].
+  final bool? showDragHandle;
+
+  /// Overrides the default value for [BottomSheet.dragHandleColor].
+  final Color? dragHandleColor;
+
+  /// Overrides the default value for [BottomSheet.dragHandleSize].
+  final Size? dragHandleSize;
 
   /// Overrides the default value for [BottomSheet.clipBehavior].
   ///
@@ -94,8 +116,12 @@ class BottomSheetThemeData with Diagnosticable {
     double? elevation,
     Color? modalBackgroundColor,
     Color? modalBarrierColor,
+    Color? shadowColor,
     double? modalElevation,
     ShapeBorder? shape,
+    bool? showDragHandle,
+    Color? dragHandleColor,
+    Size? dragHandleSize,
     Clip? clipBehavior,
     BoxConstraints? constraints,
   }) {
@@ -105,8 +131,12 @@ class BottomSheetThemeData with Diagnosticable {
       elevation: elevation ?? this.elevation,
       modalBackgroundColor: modalBackgroundColor ?? this.modalBackgroundColor,
       modalBarrierColor: modalBarrierColor ?? this.modalBarrierColor,
+      shadowColor: shadowColor ?? this.shadowColor,
       modalElevation: modalElevation ?? this.modalElevation,
       shape: shape ?? this.shape,
+      showDragHandle: showDragHandle ?? this.showDragHandle,
+      dragHandleColor: dragHandleColor ?? this.dragHandleColor,
+      dragHandleSize: dragHandleSize ?? this.dragHandleSize,
       clipBehavior: clipBehavior ?? this.clipBehavior,
       constraints: constraints ?? this.constraints,
     );
@@ -127,8 +157,12 @@ class BottomSheetThemeData with Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       modalBackgroundColor: Color.lerp(a?.modalBackgroundColor, b?.modalBackgroundColor, t),
       modalBarrierColor: Color.lerp(a?.modalBarrierColor, b?.modalBarrierColor, t),
+      shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       modalElevation: lerpDouble(a?.modalElevation, b?.modalElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      showDragHandle: t < 0.5 ? a?.showDragHandle : b?.showDragHandle,
+      dragHandleColor: Color.lerp(a?.dragHandleColor, b?.dragHandleColor, t),
+      dragHandleSize: Size.lerp(a?.dragHandleSize, b?.dragHandleSize, t),
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
     );
@@ -141,8 +175,12 @@ class BottomSheetThemeData with Diagnosticable {
     elevation,
     modalBackgroundColor,
     modalBarrierColor,
+    shadowColor,
     modalElevation,
     shape,
+    showDragHandle,
+    dragHandleColor,
+    dragHandleSize,
     clipBehavior,
     constraints,
   );
@@ -155,16 +193,20 @@ class BottomSheetThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is BottomSheetThemeData
-        && other.backgroundColor == backgroundColor
-        && other.surfaceTintColor == surfaceTintColor
-        && other.elevation == elevation
-        && other.modalBackgroundColor == modalBackgroundColor
-        && other.modalBarrierColor == modalBarrierColor
-        && other.modalElevation == modalElevation
-        && other.shape == shape
-        && other.clipBehavior == clipBehavior
-        && other.constraints == constraints;
+    return other is BottomSheetThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.elevation == elevation &&
+        other.modalBackgroundColor == modalBackgroundColor &&
+        other.shadowColor == shadowColor &&
+        other.modalBarrierColor == modalBarrierColor &&
+        other.modalElevation == modalElevation &&
+        other.shape == shape &&
+        other.showDragHandle == showDragHandle &&
+        other.dragHandleColor == dragHandleColor &&
+        other.dragHandleSize == dragHandleSize &&
+        other.clipBehavior == clipBehavior &&
+        other.constraints == constraints;
   }
 
   @override
@@ -174,10 +216,16 @@ class BottomSheetThemeData with Diagnosticable {
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('modalBackgroundColor', modalBackgroundColor, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(ColorProperty('modalBarrierColor', modalBarrierColor, defaultValue: null));
     properties.add(DoubleProperty('modalElevation', modalElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('showDragHandle', showDragHandle, defaultValue: null));
+    properties.add(ColorProperty('dragHandleColor', dragHandleColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Size>('dragHandleSize', dragHandleSize, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
-    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null),
+    );
   }
 }

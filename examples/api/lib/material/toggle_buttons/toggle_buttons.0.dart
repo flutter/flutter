@@ -2,40 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ToggleButtons].
-
 import 'package:flutter/material.dart';
 
-const List<Widget> fruits = <Widget>[
-  Text('Apple'),
-  Text('Banana'),
-  Text('Orange')
-];
+/// Flutter code sample for [ToggleButtons].
 
-const List<Widget> vegetables = <Widget>[
-  Text('Tomatoes'),
-  Text('Potatoes'),
-  Text('Carrots')
-];
+const List<Widget> fruits = <Widget>[Text('Apple'), Text('Banana'), Text('Orange')];
 
-const List<Widget> icons = <Widget>[
-  Icon(Icons.sunny),
-  Icon(Icons.cloud),
-  Icon(Icons.ac_unit),
-];
+const List<Widget> vegetables = <Widget>[Text('Tomatoes'), Text('Potatoes'), Text('Carrots')];
 
-void main() => runApp(const MyApp());
+const List<Widget> icons = <Widget>[Icon(Icons.sunny), Icon(Icons.cloud), Icon(Icons.ac_unit)];
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ToggleButtonsExampleApp());
 
-  static const String _title = 'ToggleButtons Sample';
+class ToggleButtonsExampleApp extends StatelessWidget {
+  const ToggleButtonsExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: ToggleButtonsSample(title: _title),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const ToggleButtonsSample(title: 'ToggleButtons Sample'),
     );
   }
 }
@@ -85,10 +71,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                 selectedColor: Colors.white,
                 fillColor: Colors.red[200],
                 color: Colors.red[400],
-                constraints: const BoxConstraints(
-                  minHeight: 40.0,
-                  minWidth: 80.0,
-                ),
+                constraints: const BoxConstraints(minHeight: 40.0, minWidth: 80.0),
                 isSelected: _selectedFruits,
                 children: fruits,
               ),
@@ -101,8 +84,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                 onPressed: (int index) {
                   // All buttons are selectable.
                   setState(() {
-                    _selectedVegetables[index] =
-                        !_selectedVegetables[index];
+                    _selectedVegetables[index] = !_selectedVegetables[index];
                   });
                 },
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -110,10 +92,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                 selectedColor: Colors.white,
                 fillColor: Colors.green[200],
                 color: Colors.green[400],
-                constraints: const BoxConstraints(
-                  minHeight: 40.0,
-                  minWidth: 80.0,
-                ),
+                constraints: const BoxConstraints(minHeight: 40.0, minWidth: 80.0),
                 isSelected: _selectedVegetables,
                 children: vegetables,
               ),

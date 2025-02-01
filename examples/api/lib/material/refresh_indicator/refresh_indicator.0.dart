@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [RefreshIndicator].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [RefreshIndicator].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const RefreshIndicatorExampleApp());
+
+class RefreshIndicatorExampleApp extends StatelessWidget {
+  const RefreshIndicatorExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RefreshIndicatorExample(),
-    );
+    return const MaterialApp(home: RefreshIndicatorExample());
   }
 }
 
@@ -27,15 +25,12 @@ class RefreshIndicatorExample extends StatefulWidget {
 }
 
 class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-    GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('RefreshIndicator Sample'),
-      ),
+      appBar: AppBar(title: const Text('RefreshIndicator Sample')),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,
         color: Colors.white,
@@ -50,9 +45,7 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
         child: ListView.builder(
           itemCount: 25,
           itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              title: Text('Item $index'),
-            );
+            return ListTile(title: Text('Item $index'));
           },
         ),
       ),

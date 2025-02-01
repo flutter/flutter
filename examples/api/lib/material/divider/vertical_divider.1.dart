@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Divider].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Divider].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const VerticalDividerExampleApp());
+
+class VerticalDividerExampleApp extends StatelessWidget {
+  const VerticalDividerExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,17 +33,9 @@ class DividerExample extends StatelessWidget {
         padding: EdgeInsets.all(16.0),
         child: Row(
           children: <Widget>[
-            Expanded(
-              child: Card(
-                child: SizedBox.expand(),
-              ),
-            ),
+            Expanded(child: Card(child: SizedBox.expand())),
             VerticalDivider(),
-            Expanded(
-              child: Card(
-                child: SizedBox.expand(),
-              ),
-            ),
+            Expanded(child: Card(child: SizedBox.expand())),
           ],
         ),
       ),

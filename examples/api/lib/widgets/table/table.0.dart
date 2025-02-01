@@ -2,31 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Table].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Table].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const TableExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class TableExampleApp extends StatelessWidget {
+  const TableExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
-      ),
+      home: Scaffold(appBar: AppBar(title: const Text('Table Sample')), body: const TableExample()),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class TableExample extends StatelessWidget {
+  const TableExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,45 +35,20 @@ class MyStatelessWidget extends StatelessWidget {
       children: <TableRow>[
         TableRow(
           children: <Widget>[
-            Container(
-              height: 32,
-              color: Colors.green,
-            ),
+            Container(height: 32, color: Colors.green),
             TableCell(
               verticalAlignment: TableCellVerticalAlignment.top,
-              child: Container(
-                height: 32,
-                width: 32,
-                color: Colors.red,
-              ),
+              child: Container(height: 32, width: 32, color: Colors.red),
             ),
-            Container(
-              height: 64,
-              color: Colors.blue,
-            ),
+            Container(height: 64, color: Colors.blue),
           ],
         ),
         TableRow(
-          decoration: const BoxDecoration(
-            color: Colors.grey,
-          ),
+          decoration: const BoxDecoration(color: Colors.grey),
           children: <Widget>[
-            Container(
-              height: 64,
-              width: 128,
-              color: Colors.purple,
-            ),
-            Container(
-              height: 32,
-              color: Colors.yellow,
-            ),
-            Center(
-              child: Container(
-                height: 32,
-                width: 32,
-                color: Colors.orange,
-              ),
-            ),
+            Container(height: 64, width: 128, color: Colors.purple),
+            Container(height: 32, color: Colors.yellow),
+            Center(child: Container(height: 32, width: 32, color: Colors.orange)),
           ],
         ),
       ],

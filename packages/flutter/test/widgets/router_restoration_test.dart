@@ -7,9 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Router state restoration without RouteInformationProvider', (WidgetTester tester) async {
+  testWidgets('Router state restoration without RouteInformationProvider', (
+    WidgetTester tester,
+  ) async {
     final UniqueKey router = UniqueKey();
-    _TestRouterDelegate delegate() => tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
+    _TestRouterDelegate delegate() =>
+        tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
 
     await tester.pumpWidget(_TestWidget(routerKey: router));
     expect(find.text('Current config: null'), findsOneWidget);
@@ -41,17 +44,22 @@ void main() {
     expect(delegate().restoredRoutePaths, <String>['/foo', '/foo']);
   });
 
-  testWidgets('Router state restoration with RouteInformationProvider', (WidgetTester tester) async {
+  testWidgets('Router state restoration with RouteInformationProvider', (
+    WidgetTester tester,
+  ) async {
     final UniqueKey router = UniqueKey();
-    _TestRouterDelegate delegate() => tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
-    _TestRouteInformationProvider provider() => tester.widget<Router<Object?>>(find.byKey(router)).routeInformationProvider! as _TestRouteInformationProvider;
+    _TestRouterDelegate delegate() =>
+        tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
+    _TestRouteInformationProvider provider() =>
+        tester.widget<Router<Object?>>(find.byKey(router)).routeInformationProvider!
+            as _TestRouteInformationProvider;
 
     await tester.pumpWidget(_TestWidget(routerKey: router, withInformationProvider: true));
     expect(find.text('Current config: /home'), findsOneWidget);
     expect(delegate().newRoutePaths, <String>['/home']);
     expect(delegate().restoredRoutePaths, isEmpty);
 
-    provider().value = const RouteInformation(location: '/foo');
+    provider().value = RouteInformation(uri: Uri(path: '/foo'));
     await tester.pumpAndSettle();
     expect(find.text('Current config: /foo'), findsOneWidget);
     expect(delegate().newRoutePaths, <String>['/home', '/foo']);
@@ -64,7 +72,7 @@ void main() {
 
     final TestRestorationData restorationData = await tester.getRestorationData();
 
-    provider().value = const RouteInformation(location: '/bar');
+    provider().value = RouteInformation(uri: Uri.parse('/bar'));
     await tester.pumpAndSettle();
     expect(find.text('Current config: /bar'), findsOneWidget);
     expect(delegate().newRoutePaths, <String>['/bar']);
@@ -80,16 +88,22 @@ void main() {
 class _TestRouteInformationParser extends RouteInformationParser<String> {
   @override
   Future<String> parseRouteInformation(RouteInformation routeInformation) {
-    return SynchronousFuture<String>(routeInformation.location!);
+    return SynchronousFuture<String>(routeInformation.uri.toString());
   }
 
   @override
   RouteInformation? restoreRouteInformation(String configuration) {
-    return RouteInformation(location: configuration);
+    return RouteInformation(uri: Uri.parse(configuration));
   }
 }
 
 class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
+  _TestRouterDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   final List<String> newRoutePaths = <String>[];
   final List<String> restoredRoutePaths = <String>[];
 
@@ -128,9 +142,15 @@ class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
 }
 
 class _TestRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
+  _TestRouteInformationProvider() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   @override
   RouteInformation get value => _value;
-  RouteInformation _value = const RouteInformation(location: '/home');
+  RouteInformation _value = RouteInformation(uri: Uri.parse('/home'));
   set value(RouteInformation value) {
     if (value == _value) {
       return;
@@ -140,22 +160,37 @@ class _TestRouteInformationProvider extends RouteInformationProvider with Change
   }
 }
 
-class _TestWidget extends StatelessWidget {
+class _TestWidget extends StatefulWidget {
   const _TestWidget({this.withInformationProvider = false, this.routerKey});
 
   final bool withInformationProvider;
   final Key? routerKey;
 
   @override
+  State<_TestWidget> createState() => _TestWidgetState();
+}
+
+class _TestWidgetState extends State<_TestWidget> {
+  final _TestRouterDelegate _delegate = _TestRouterDelegate();
+  final _TestRouteInformationProvider _routeInformationProvider = _TestRouteInformationProvider();
+
+  @override
+  void dispose() {
+    _delegate.dispose();
+    _routeInformationProvider.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RootRestorationScope(
       restorationId: 'root',
       child: Router<String>(
-        key: routerKey,
+        key: widget.routerKey,
         restorationScopeId: 'router',
-        routerDelegate: _TestRouterDelegate(),
+        routerDelegate: _delegate,
         routeInformationParser: _TestRouteInformationParser(),
-        routeInformationProvider: withInformationProvider ? _TestRouteInformationProvider() : null,
+        routeInformationProvider: widget.withInformationProvider ? _routeInformationProvider : null,
       ),
     );
   }

@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_chip.dart';
+/// @docImport 'chip.dart';
+/// @docImport 'choice_chip.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'filter_chip.dart';
+/// @docImport 'input_chip.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -9,6 +18,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'material_state.dart';
 import 'theme.dart';
 
 /// Applies a chip theme to descendant [RawChip]-based widgets, like [Chip],
@@ -41,13 +51,7 @@ import 'theme.dart';
 ///    application.
 class ChipTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
-  ///
-  /// The [data] and [child] arguments must not be null.
-  const ChipTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const ChipTheme({super.key, required this.data, required super.child});
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.
@@ -112,7 +116,8 @@ class ChipTheme extends InheritedTheme {
 ///    Typically this is a [Text] widget.
 ///  * The "delete icon", which is a widget that appears at the end of the chip.
 ///  * The chip is disabled when it is not accepting user input. Only some chips
-///    have a disabled state: [InputChip], [ChoiceChip], and [FilterChip].
+///    have a disabled state: [ActionChip], [ChoiceChip], [FilterChip], and
+///    [InputChip].
 ///
 /// The simplest way to create a ChipThemeData is to use [copyWith] on the one
 /// you get from [ChipTheme.of], or create an entirely new one with
@@ -177,6 +182,7 @@ class ChipThemeData with Diagnosticable {
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes.
   const ChipThemeData({
+    this.color,
     this.backgroundColor,
     this.deleteIconColor,
     this.disabledColor,
@@ -197,6 +203,8 @@ class ChipThemeData with Diagnosticable {
     this.elevation,
     this.pressElevation,
     this.iconTheme,
+    this.avatarBoxConstraints,
+    this.deleteIconBoxConstraints,
   });
 
   /// Generates a ChipThemeData from a brightness, a primary color, and a text
@@ -222,8 +230,14 @@ class ChipThemeData with Diagnosticable {
     required Color secondaryColor,
     required TextStyle labelStyle,
   }) {
-    assert(primaryColor != null || brightness != null, 'One of primaryColor or brightness must be specified');
-    assert(primaryColor == null || brightness == null, 'Only one of primaryColor or brightness may be specified');
+    assert(
+      primaryColor != null || brightness != null,
+      'One of primaryColor or brightness must be specified',
+    );
+    assert(
+      primaryColor == null || brightness == null,
+      'Only one of primaryColor or brightness may be specified',
+    );
 
     if (primaryColor != null) {
       brightness = ThemeData.estimateBrightnessForColor(primaryColor);
@@ -264,8 +278,15 @@ class ChipThemeData with Diagnosticable {
       brightness: brightness,
       elevation: 0.0,
       pressElevation: 8.0,
+      iconTheme: const IconThemeData(size: 18.0),
     );
   }
+
+  /// Overrides the default for [ChipAttributes.color].
+  ///
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
+  final MaterialStateProperty<Color?>? color;
 
   /// Overrides the default for [ChipAttributes.backgroundColor]
   /// which is used for unselected, enabled chip backgrounds.
@@ -283,8 +304,8 @@ class ChipThemeData with Diagnosticable {
   /// [DisabledChipAttributes.disabledColor], the background color
   /// which indicates that the chip is not enabled.
   ///
-  /// This property applies to [ChoiceChip], [FilterChip],
-  /// [InputChip], [RawChip].
+  /// This property applies to [ActionChip], [ChoiceChip],
+  /// [FilterChip], [InputChip], and [RawChip].
   final Color? disabledColor;
 
   /// Overrides the default for
@@ -354,15 +375,15 @@ class ChipThemeData with Diagnosticable {
   /// the color and weight of the chip's outline.
   ///
   /// This value is combined with [shape] to create a shape decorated with an
-  /// outline. If it is a [MaterialStateBorderSide],
-  /// [MaterialStateProperty.resolve] is used for the following
-  /// [MaterialState]s:
+  /// outline. If it is a [WidgetStateBorderSide],
+  /// [WidgetStateProperty.resolve] is used for the following
+  /// [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.pressed].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.pressed].
   ///
   /// This property applies to [ActionChip], [Chip], [ChoiceChip],
   /// [FilterChip], [InputChip], [RawChip].
@@ -372,15 +393,15 @@ class ChipThemeData with Diagnosticable {
   /// the shape of border to draw around the chip.
   ///
   /// This shape is combined with [side] to create a shape decorated with an
-  /// outline. If it is a [MaterialStateOutlinedBorder],
-  /// [MaterialStateProperty.resolve] is used for the following
-  /// [MaterialState]s:
+  /// outline. If it is a [WidgetStateOutlinedBorder],
+  /// [WidgetStateProperty.resolve] is used for the following
+  /// [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.pressed].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.pressed].
   ///
   /// This property applies to [ActionChip], [Chip], [ChoiceChip],
   /// [FilterChip], [InputChip], [RawChip].
@@ -429,9 +450,23 @@ class ChipThemeData with Diagnosticable {
   /// [FilterChip], [InputChip], [RawChip].
   final IconThemeData? iconTheme;
 
+  /// Overrides the default for [ChipAttributes.avatarBoxConstraints],
+  /// the size constraints for the avatar widget.
+  ///
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
+  final BoxConstraints? avatarBoxConstraints;
+
+  /// Overrides the default for [DeletableChipAttributes.deleteIconBoxConstraints].
+  /// the size constraints for the delete icon widget.
+  ///
+  /// This property applies to [Chip], [FilterChip], [InputChip], [RawChip].
+  final BoxConstraints? deleteIconBoxConstraints;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ChipThemeData copyWith({
+    MaterialStateProperty<Color?>? color,
     Color? backgroundColor,
     Color? deleteIconColor,
     Color? disabledColor,
@@ -452,8 +487,11 @@ class ChipThemeData with Diagnosticable {
     double? elevation,
     double? pressElevation,
     IconThemeData? iconTheme,
+    BoxConstraints? avatarBoxConstraints,
+    BoxConstraints? deleteIconBoxConstraints,
   }) {
     return ChipThemeData(
+      color: color ?? this.color,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       deleteIconColor: deleteIconColor ?? this.deleteIconColor,
       disabledColor: disabledColor ?? this.disabledColor,
@@ -474,12 +512,12 @@ class ChipThemeData with Diagnosticable {
       elevation: elevation ?? this.elevation,
       pressElevation: pressElevation ?? this.pressElevation,
       iconTheme: iconTheme ?? this.iconTheme,
+      avatarBoxConstraints: avatarBoxConstraints ?? this.avatarBoxConstraints,
+      deleteIconBoxConstraints: deleteIconBoxConstraints ?? this.deleteIconBoxConstraints,
     );
   }
 
   /// Linearly interpolate between two chip themes.
-  ///
-  /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
@@ -487,6 +525,7 @@ class ChipThemeData with Diagnosticable {
       return a;
     }
     return ChipThemeData(
+      color: MaterialStateProperty.lerp<Color?>(a?.color, b?.color, t, Color.lerp),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
       disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
@@ -506,9 +545,20 @@ class ChipThemeData with Diagnosticable {
       brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       pressElevation: lerpDouble(a?.pressElevation, b?.pressElevation, t),
-      iconTheme: a?.iconTheme != null || b?.iconTheme != null
-        ? IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t)
-        : null,
+      iconTheme:
+          a?.iconTheme != null || b?.iconTheme != null
+              ? IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t)
+              : null,
+      avatarBoxConstraints: BoxConstraints.lerp(
+        a?.avatarBoxConstraints,
+        b?.avatarBoxConstraints,
+        t,
+      ),
+      deleteIconBoxConstraints: BoxConstraints.lerp(
+        a?.deleteIconBoxConstraints,
+        b?.deleteIconBoxConstraints,
+        t,
+      ),
     );
   }
 
@@ -516,6 +566,12 @@ class ChipThemeData with Diagnosticable {
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
     if (a == null && b == null) {
       return null;
+    }
+    if (a is MaterialStateBorderSide) {
+      a = a.resolve(<WidgetState>{});
+    }
+    if (b is MaterialStateBorderSide) {
+      b = b.resolve(<WidgetState>{});
     }
     if (a == null) {
       return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
@@ -536,6 +592,7 @@ class ChipThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
+    color,
     backgroundColor,
     deleteIconColor,
     disabledColor,
@@ -556,6 +613,8 @@ class ChipThemeData with Diagnosticable {
     elevation,
     pressElevation,
     iconTheme,
+    avatarBoxConstraints,
+    deleteIconBoxConstraints,
   ]);
 
   @override
@@ -566,51 +625,81 @@ class ChipThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ChipThemeData
-        && other.backgroundColor == backgroundColor
-        && other.deleteIconColor == deleteIconColor
-        && other.disabledColor == disabledColor
-        && other.selectedColor == selectedColor
-        && other.secondarySelectedColor == secondarySelectedColor
-        && other.shadowColor == shadowColor
-        && other.surfaceTintColor == surfaceTintColor
-        && other.selectedShadowColor == selectedShadowColor
-        && other.showCheckmark == showCheckmark
-        && other.checkmarkColor == checkmarkColor
-        && other.labelPadding == labelPadding
-        && other.padding == padding
-        && other.side == side
-        && other.shape == shape
-        && other.labelStyle == labelStyle
-        && other.secondaryLabelStyle == secondaryLabelStyle
-        && other.brightness == brightness
-        && other.elevation == elevation
-        && other.pressElevation == pressElevation
-        && other.iconTheme == iconTheme;
+    return other is ChipThemeData &&
+        other.color == color &&
+        other.backgroundColor == backgroundColor &&
+        other.deleteIconColor == deleteIconColor &&
+        other.disabledColor == disabledColor &&
+        other.selectedColor == selectedColor &&
+        other.secondarySelectedColor == secondarySelectedColor &&
+        other.shadowColor == shadowColor &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.selectedShadowColor == selectedShadowColor &&
+        other.showCheckmark == showCheckmark &&
+        other.checkmarkColor == checkmarkColor &&
+        other.labelPadding == labelPadding &&
+        other.padding == padding &&
+        other.side == side &&
+        other.shape == shape &&
+        other.labelStyle == labelStyle &&
+        other.secondaryLabelStyle == secondaryLabelStyle &&
+        other.brightness == brightness &&
+        other.elevation == elevation &&
+        other.pressElevation == pressElevation &&
+        other.iconTheme == iconTheme &&
+        other.avatarBoxConstraints == avatarBoxConstraints &&
+        other.deleteIconBoxConstraints == deleteIconBoxConstraints;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<Color?>>('color', color, defaultValue: null),
+    );
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
-    properties.add(ColorProperty('secondarySelectedColor', secondarySelectedColor, defaultValue: null));
+    properties.add(
+      ColorProperty('secondarySelectedColor', secondarySelectedColor, defaultValue: null),
+    );
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(ColorProperty('selectedShadowColor', selectedShadowColor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showCheckmark', showCheckmark, defaultValue: null));
     properties.add(ColorProperty('checkMarkColor', checkmarkColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('labelPadding', labelPadding, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<EdgeInsetsGeometry>('labelPadding', labelPadding, defaultValue: null),
+    );
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('secondaryLabelStyle', secondaryLabelStyle, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'secondaryLabelStyle',
+        secondaryLabelStyle,
+        defaultValue: null,
+      ),
+    );
     properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DoubleProperty('pressElevation', pressElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<BoxConstraints>(
+        'avatarBoxConstraints',
+        avatarBoxConstraints,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<BoxConstraints>(
+        'deleteIconBoxConstraints',
+        deleteIconBoxConstraints,
+        defaultValue: null,
+      ),
+    );
   }
 }

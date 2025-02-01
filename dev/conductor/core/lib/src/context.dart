@@ -15,10 +15,7 @@ import 'stdio.dart' show Stdio;
 /// Different frontends (e.g. CLI vs desktop) can share [Context]s, although
 /// methods for capturing user interaction may be overridden.
 abstract class Context {
-  const Context({
-    required this.checkouts,
-    required this.stateFile,
-  });
+  const Context({required this.checkouts, required this.stateFile});
 
   final Checkouts checkouts;
   final File stateFile;
@@ -26,7 +23,7 @@ abstract class Context {
 
   /// Confirm an action with the user before proceeding.
   ///
-  /// The default implementation reads from STDIN. This can be overriden in UI
+  /// The default implementation reads from STDIN. This can be overridden in UI
   /// implementations that capture user interaction differently.
   Future<bool> prompt(String message) async {
     stdio.write('${message.trim()} (y/n) ');
@@ -38,9 +35,7 @@ abstract class Context {
     if (firstChar == 'N') {
       return false;
     }
-    throw ConductorException(
-      'Unknown user input (expected "y" or "n"): $response',
-    );
+    throw ConductorException('Unknown user input (expected "y" or "n"): $response');
   }
 
   /// Save the release's [state].

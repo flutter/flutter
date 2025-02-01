@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoSearchTextField].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoSearchTextField].
 
 void main() => runApp(const SearchTextFieldApp());
 
@@ -33,9 +33,7 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('CupertinoSearchTextField Sample'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoSearchTextField Sample')),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -59,10 +57,7 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
 }
 
 class SearchTextField extends StatelessWidget {
-  const SearchTextField({
-    super.key,
-    required this.fieldValue,
-  });
+  const SearchTextField({super.key, required this.fieldValue});
 
   final ValueChanged<String> fieldValue;
 

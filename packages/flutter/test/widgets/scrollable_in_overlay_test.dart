@@ -18,9 +18,12 @@ void main() {
     position.dispose(); // Should not throw/assert.
   });
 
-  testWidgets('scrollable in hidden overlay does not crash when unhidden', (WidgetTester tester) async {
+  testWidgets('scrollable in hidden overlay does not crash when unhidden', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/44269.
     final TabController controller = TabController(vsync: const TestVSync(), length: 1);
+    addTearDown(controller.dispose);
 
     final OverlayEntry entry1 = OverlayEntry(
       maintainState: true,
@@ -29,12 +32,15 @@ void main() {
         return TabBar(
           isScrollable: true,
           controller: controller,
-          tabs: const <Tab>[
-            Tab(text: 'Main'),
-          ],
+          tabs: const <Tab>[Tab(text: 'Main')],
         );
       },
     );
+    addTearDown(() {
+      entry1.remove();
+      entry1.dispose();
+    });
+
     final OverlayEntry entry2 = OverlayEntry(
       maintainState: true,
       opaque: true,
@@ -42,18 +48,12 @@ void main() {
         return const Text('number2');
       },
     );
+    addTearDown(() {
+      entry2.dispose();
+    });
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry1,
-              entry2,
-            ],
-          ),
-        ),
-      ),
+      MaterialApp(home: Material(child: Overlay(initialEntries: <OverlayEntry>[entry1, entry2]))),
     );
 
     entry2.remove();

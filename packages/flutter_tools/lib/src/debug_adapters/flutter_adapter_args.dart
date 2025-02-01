@@ -9,20 +9,21 @@ import 'package:dds/dap.dart';
 /// This class represents the data passed from the client editor to the debug
 /// adapter in attachRequest, which is a request to attach to/debug a running
 /// application.
-class FlutterAttachRequestArguments
-    extends DartCommonLaunchAttachRequestArguments
+class FlutterAttachRequestArguments extends DartCommonLaunchAttachRequestArguments
     implements AttachRequestArguments {
   FlutterAttachRequestArguments({
     this.toolArgs,
     this.customTool,
     this.customToolReplacesArgs,
     this.vmServiceUri,
+    this.vmServiceInfoFile,
     this.program,
     super.restart,
     super.name,
     super.cwd,
     super.env,
     super.additionalProjectPaths,
+    super.allowAnsiColorOutput,
     super.debugSdkLibraries,
     super.debugExternalPackageLibraries,
     super.evaluateGettersInDebugViews,
@@ -32,15 +33,16 @@ class FlutterAttachRequestArguments
   });
 
   FlutterAttachRequestArguments.fromMap(super.obj)
-      : toolArgs = (obj['toolArgs'] as List<Object?>?)?.cast<String>(),
-        customTool = obj['customTool'] as String?,
-        customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
-        vmServiceUri = obj['vmServiceUri'] as String?,
-        program = obj['program'] as String?,
-        super.fromMap();
+    : toolArgs = (obj['toolArgs'] as List<Object?>?)?.cast<String>(),
+      customTool = obj['customTool'] as String?,
+      customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
+      vmServiceUri = obj['vmServiceUri'] as String?,
+      vmServiceInfoFile = obj['vmServiceInfoFile'] as String?,
+      program = obj['program'] as String?,
+      super.fromMap();
 
-  static FlutterAttachRequestArguments fromJson(Map<String, Object?> obj) =>
-      FlutterAttachRequestArguments.fromMap(obj);
+  factory FlutterAttachRequestArguments.fromJson(Map<String, Object?> obj) =
+      FlutterAttachRequestArguments.fromMap;
 
   /// Arguments to be passed to the tool that will run [program] (for example, the VM or Flutter tool).
   final List<String>? toolArgs;
@@ -64,20 +66,26 @@ class FlutterAttachRequestArguments
   final int? customToolReplacesArgs;
 
   /// The VM Service URI of the running Flutter app to connect to.
+  ///
+  /// Only one of this or [vmServiceInfoFile] (or neither) can be supplied.
   final String? vmServiceUri;
+
+  /// The VM Service info file to extract the VM Service URI from to attach to.
+  ///
+  /// Only one of this or [vmServiceUri] (or neither) can be supplied.
+  final String? vmServiceInfoFile;
 
   /// The program/Flutter app to be run.
   final String? program;
 
   @override
   Map<String, Object?> toJson() => <String, Object?>{
-        ...super.toJson(),
-        if (toolArgs != null) 'toolArgs': toolArgs,
-        if (customTool != null) 'customTool': customTool,
-        if (customToolReplacesArgs != null)
-          'customToolReplacesArgs': customToolReplacesArgs,
-        if (vmServiceUri != null) 'vmServiceUri': vmServiceUri,
-      };
+    ...super.toJson(),
+    if (toolArgs != null) 'toolArgs': toolArgs,
+    if (customTool != null) 'customTool': customTool,
+    if (customToolReplacesArgs != null) 'customToolReplacesArgs': customToolReplacesArgs,
+    if (vmServiceUri != null) 'vmServiceUri': vmServiceUri,
+  };
 }
 
 /// An implementation of [LaunchRequestArguments] that includes all fields used by the Flutter debug adapter.
@@ -85,8 +93,7 @@ class FlutterAttachRequestArguments
 /// This class represents the data passed from the client editor to the debug
 /// adapter in launchRequest, which is a request to start debugging an
 /// application.
-class FlutterLaunchRequestArguments
-    extends DartCommonLaunchAttachRequestArguments
+class FlutterLaunchRequestArguments extends DartCommonLaunchAttachRequestArguments
     implements LaunchRequestArguments {
   FlutterLaunchRequestArguments({
     this.noDebug,
@@ -100,6 +107,7 @@ class FlutterLaunchRequestArguments
     super.cwd,
     super.env,
     super.additionalProjectPaths,
+    super.allowAnsiColorOutput,
     super.debugSdkLibraries,
     super.debugExternalPackageLibraries,
     super.evaluateGettersInDebugViews,
@@ -109,13 +117,16 @@ class FlutterLaunchRequestArguments
   });
 
   FlutterLaunchRequestArguments.fromMap(super.obj)
-      : noDebug = obj['noDebug'] as bool?,
-        program = obj['program'] as String?,
-        args = (obj['args'] as List<Object?>?)?.cast<String>(),
-        toolArgs = (obj['toolArgs'] as List<Object?>?)?.cast<String>(),
-        customTool = obj['customTool'] as String?,
-        customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
-        super.fromMap();
+    : noDebug = obj['noDebug'] as bool?,
+      program = obj['program'] as String?,
+      args = (obj['args'] as List<Object?>?)?.cast<String>(),
+      toolArgs = (obj['toolArgs'] as List<Object?>?)?.cast<String>(),
+      customTool = obj['customTool'] as String?,
+      customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
+      super.fromMap();
+
+  factory FlutterLaunchRequestArguments.fromJson(Map<String, Object?> obj) =
+      FlutterLaunchRequestArguments.fromMap;
 
   /// If noDebug is true the launch request should launch the program without enabling debugging.
   @override
@@ -150,16 +161,12 @@ class FlutterLaunchRequestArguments
 
   @override
   Map<String, Object?> toJson() => <String, Object?>{
-        ...super.toJson(),
-        if (noDebug != null) 'noDebug': noDebug,
-        if (program != null) 'program': program,
-        if (args != null) 'args': args,
-        if (toolArgs != null) 'toolArgs': toolArgs,
-        if (customTool != null) 'customTool': customTool,
-        if (customToolReplacesArgs != null)
-          'customToolReplacesArgs': customToolReplacesArgs,
-      };
-
-  static FlutterLaunchRequestArguments fromJson(Map<String, Object?> obj) =>
-      FlutterLaunchRequestArguments.fromMap(obj);
+    ...super.toJson(),
+    if (noDebug != null) 'noDebug': noDebug,
+    if (program != null) 'program': program,
+    if (args != null) 'args': args,
+    if (toolArgs != null) 'toolArgs': toolArgs,
+    if (customTool != null) 'customTool': customTool,
+    if (customToolReplacesArgs != null) 'customToolReplacesArgs': customToolReplacesArgs,
+  };
 }

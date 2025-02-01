@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SliverFillRemaining].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SliverFillRemaining].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SliverFillRemainingExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class SliverFillRemainingExampleApp extends StatelessWidget {
+  const SliverFillRemainingExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: const Text('SliverFillRemaining Sample')),
+        body: const SliverFillRemainingExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class SliverFillRemainingExample extends StatelessWidget {
+  const SliverFillRemainingExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,23 +31,15 @@ class MyStatelessWidget extends StatelessWidget {
       slivers: <Widget>[
         SliverFixedExtentList(
           itemExtent: 100.0,
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
-              return Container(
-                color: index.isEven ? Colors.amber[200] : Colors.blue[200],
-              );
-            },
-            childCount: 3,
-          ),
+          delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            return Container(color: index.isEven ? Colors.amber[200] : Colors.blue[200]);
+          }, childCount: 3),
         ),
         SliverFillRemaining(
           hasScrollBody: false,
           child: Container(
             color: Colors.orange[300],
-            child: const Padding(
-              padding: EdgeInsets.all(50.0),
-              child: FlutterLogo(size: 100),
-            ),
+            child: const Padding(padding: EdgeInsets.all(50.0), child: FlutterLogo(size: 100)),
           ),
         ),
       ],

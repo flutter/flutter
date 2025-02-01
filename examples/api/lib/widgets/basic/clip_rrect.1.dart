@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ClipRRect].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ClipRRect].
 
 void main() => runApp(const ClipRRectApp());
 
@@ -32,10 +32,7 @@ class ClipRRectExample extends StatelessWidget {
       constraints: const BoxConstraints.expand(),
       // Add a FittedBox to make ClipRRect sized accordingly to the image it contains
       child: FittedBox(
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(40.0),
-          child: const _FakedImage(),
-        ),
+        child: ClipRRect(borderRadius: BorderRadius.circular(40.0), child: const _FakedImage()),
       ),
     );
   }

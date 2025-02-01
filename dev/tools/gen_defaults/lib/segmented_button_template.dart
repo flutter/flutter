@@ -5,17 +5,21 @@
 import 'template.dart';
 
 class SegmentedButtonTemplate extends TokenTemplate {
-  const SegmentedButtonTemplate(this.tokenGroup, super.blockName, super.fileName, super.tokens, {
+  const SegmentedButtonTemplate(
+    this.tokenGroup,
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
   final String tokenGroup;
 
   String _layerOpacity(String layerToken) {
-    if (tokens.containsKey(layerToken)) {
-      final String? layerValue = tokens[layerToken] as String?;
-      if (tokens.containsKey(layerValue)) {
-        final String? opacityValue = opacity(layerValue!);
+    if (tokenAvailable(layerToken)) {
+      final String layerValue = getToken(layerToken) as String;
+      if (tokenAvailable(layerValue)) {
+        final String? opacityValue = opacity(layerValue);
         if (opacityValue != null) {
           return '.withOpacity($opacityValue)';
         }
@@ -82,31 +86,31 @@ class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
       }),
       overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
+          if (states.contains(MaterialState.pressed)) {
+            return ${_stateColor(tokenGroup, 'selected', 'pressed')};
+          }
           if (states.contains(MaterialState.hovered)) {
             return ${_stateColor(tokenGroup, 'selected', 'hover')};
           }
           if (states.contains(MaterialState.focused)) {
             return ${_stateColor(tokenGroup, 'selected', 'focus')};
           }
-          if (states.contains(MaterialState.pressed)) {
-            return ${_stateColor(tokenGroup, 'selected', 'pressed')};
-          }
         } else {
+          if (states.contains(MaterialState.pressed)) {
+            return ${_stateColor(tokenGroup, 'unselected', 'pressed')};
+          }
           if (states.contains(MaterialState.hovered)) {
             return ${_stateColor(tokenGroup, 'unselected', 'hover')};
           }
           if (states.contains(MaterialState.focused)) {
             return ${_stateColor(tokenGroup, 'unselected', 'focus')};
           }
-          if (states.contains(MaterialState.pressed)) {
-            return ${_stateColor(tokenGroup, 'unselected', 'pressed')};
-          }
         }
         return null;
       }),
       surfaceTintColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
       elevation: const MaterialStatePropertyAll<double>(0),
-      iconSize: const MaterialStatePropertyAll<double?>(${tokens['$tokenGroup.with-icon.icon.size']}),
+      iconSize: const MaterialStatePropertyAll<double?>(${getToken('$tokenGroup.with-icon.icon.size')}),
       side: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return ${border("$tokenGroup.disabled.outline")};
@@ -114,11 +118,31 @@ class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
         return ${border("$tokenGroup.outline")};
       }),
       shape: const MaterialStatePropertyAll<OutlinedBorder>(${shape(tokenGroup, '')}),
-      minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(${tokens['$tokenGroup.container.height']})),
+      minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(${getToken('$tokenGroup.container.height')})),
     );
   }
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
+
+  static WidgetStateProperty<Color?> resolveStateColor(
+    Color? unselectedColor,
+    Color? selectedColor,
+    Color? overlayColor,
+  ) {
+    final Color? selected = overlayColor ?? selectedColor;
+    final Color? unselected = overlayColor ?? unselectedColor;
+    return WidgetStateProperty<Color?>.fromMap(
+      <WidgetStatesConstraint, Color?>{
+        WidgetState.selected & WidgetState.pressed: selected?.withOpacity(0.1),
+        WidgetState.selected & WidgetState.hovered: selected?.withOpacity(0.08),
+        WidgetState.selected & WidgetState.focused: selected?.withOpacity(0.1),
+        WidgetState.pressed: unselected?.withOpacity(0.1),
+        WidgetState.hovered: unselected?.withOpacity(0.08),
+        WidgetState.focused: unselected?.withOpacity(0.1),
+        WidgetState.any: Colors.transparent,
+      },
+    );
+  }
 }
 ''';
 }

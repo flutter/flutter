@@ -21,8 +21,7 @@ void main() {
   });
 
   testWithoutContext('dart.sh/bat can return a zero exit code', () async {
-    tempDir.childFile('main.dart')
-      .writeAsStringSync('''
+    tempDir.childFile('main.dart').writeAsStringSync('''
 import 'dart:io';
 void main() {
   exit(0);
@@ -34,15 +33,11 @@ void main() {
       fileSystem.path.join(tempDir.path, 'main.dart'),
     ]);
 
-    printOnFailure('Output of dart main.dart:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
-    expect(result.exitCode, 0);
+    expect(result, const ProcessResultMatcher());
   });
 
   testWithoutContext('dart.sh/bat can return a non-zero exit code', () async {
-    tempDir.childFile('main.dart')
-      .writeAsStringSync('''
+    tempDir.childFile('main.dart').writeAsStringSync('''
 import 'dart:io';
 void main() {
   exit(1);
@@ -54,9 +49,6 @@ void main() {
       fileSystem.path.join(tempDir.path, 'main.dart'),
     ]);
 
-    printOnFailure('Output of dart main.dart:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
-    expect(result.exitCode, 1);
+    expect(result, const ProcessResultMatcher(exitCode: 1));
   });
 }

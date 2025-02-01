@@ -22,8 +22,8 @@ import 'object.dart';
 class StackFrame {
   /// Creates a new StackFrame instance.
   ///
-  /// All parameters must not be null. The [className] may be the empty string
-  /// if there is no class (e.g. for a top level library method).
+  /// The [className] may be the empty string if there is no class (e.g. for a
+  /// top level library method).
   const StackFrame({
     required this.number,
     required this.column,
@@ -78,32 +78,48 @@ class StackFrame {
         // On the Web in non-debug builds the stack trace includes the exception
         // message that precedes the stack trace itself. fromStackTraceLine will
         // return null in that case. We will skip it here.
+        // TODO(polina-c): if one of lines was parsed to null, the entire stack trace
+        // is in unexpected format and should be returned as is, without partial parsing.
+        // https://github.com/flutter/flutter/issues/131877
         .whereType<StackFrame>()
         .toList();
   }
 
-  static StackFrame? _parseWebFrame(String line) {
-    if (kDebugMode) {
-      return _parseWebDebugFrame(line);
+  /// Parses a single [StackFrame] from a line of a [StackTrace].
+  ///
+  /// Returns null if format is not as expected.
+  static StackFrame? _tryParseWebFrame(String line) {
+    // dart2wasm doesn't emit stack frames in the same way DDC does, so we need
+    // to do the less clever non-debug path here when compiled to wasm.
+    if (kDebugMode && !kIsWasm) {
+      return _tryParseWebDebugFrame(line);
     } else {
-      return _parseWebNonDebugFrame(line);
+      return _tryParseWebNonDebugFrame(line);
     }
   }
 
-  static StackFrame _parseWebDebugFrame(String line) {
+  /// Parses a single [StackFrame] from a line of a [StackTrace].
+  ///
+  /// Returns null if format is not as expected.
+  static StackFrame? _tryParseWebDebugFrame(String line) {
     // This RegExp is only partially correct for flutter run/test differences.
     // https://github.com/flutter/flutter/issues/52685
     final bool hasPackage = line.startsWith('package');
-    final RegExp parser = hasPackage
-        ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
-        : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
-    Match? match = parser.firstMatch(line);
-    assert(match != null, 'Expected $line to match $parser.');
-    match = match!;
+    final RegExp parser =
+        hasPackage
+            ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
+            : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
+
+    final Match? match = parser.firstMatch(line);
+
+    if (match == null) {
+      return null;
+    }
 
     String package = '<unknown>';
     String packageScheme = '<unknown>';
     String packagePath = '<unknown>';
+
     if (hasPackage) {
       packageScheme = 'package';
       final Uri packageUri = Uri.parse(match.group(1)!);
@@ -132,7 +148,7 @@ class StackFrame {
 
   // Parses `line` as a stack frame in profile and release Web builds. If not
   // recognized as a stack frame, returns null.
-  static StackFrame? _parseWebNonDebugFrame(String line) {
+  static StackFrame? _tryParseWebNonDebugFrame(String line) {
     final Match? match = _webNonDebugFramePattern.firstMatch(line);
     if (match == null) {
       // On the Web in non-debug builds the stack trace includes the exception
@@ -151,9 +167,8 @@ class StackFrame {
 
     final List<String> classAndMethod = match.group(1)!.split('.');
     final String className = classAndMethod.length > 1 ? classAndMethod.first : '<unknown>';
-    final String method = classAndMethod.length > 1
-      ? classAndMethod.skip(1).join('.')
-      : classAndMethod.single;
+    final String method =
+        classAndMethod.length > 1 ? classAndMethod.skip(1).join('.') : classAndMethod.single;
 
     return StackFrame(
       number: -1,
@@ -169,6 +184,8 @@ class StackFrame {
   }
 
   /// Parses a single [StackFrame] from a single line of a [StackTrace].
+  ///
+  /// Returns null if format is not as expected.
   static StackFrame? fromStackTraceLine(String line) {
     if (line == '<asynchronous suspension>') {
       return asynchronousSuspension;
@@ -185,7 +202,7 @@ class StackFrame {
 
     // Web frames.
     if (!line.startsWith('#')) {
-      return _parseWebFrame(line);
+      return _tryParseWebFrame(line);
     }
 
     final RegExp parser = RegExp(r'^#(\d+) +(.+) \((.+?):?(\d+){0,1}:?(\d+){0,1}\)$');
@@ -202,7 +219,7 @@ class StackFrame {
       className = methodParts.length > 1 ? method.split(' ')[1] : '<unknown>';
       method = '';
       if (className.contains('.')) {
-        final List<String> parts  = className.split('.');
+        final List<String> parts = className.split('.');
         className = parts[0];
         method = parts[1];
       }
@@ -289,16 +306,17 @@ class StackFrame {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is StackFrame
-        && other.number == number
-        && other.package == package
-        && other.line == line
-        && other.column == column
-        && other.className == className
-        && other.method == method
-        && other.source == source;
+    return other is StackFrame &&
+        other.number == number &&
+        other.package == package &&
+        other.line == line &&
+        other.column == column &&
+        other.className == className &&
+        other.method == method &&
+        other.source == source;
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'StackFrame')}(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
+  String toString() =>
+      '${objectRuntimeType(this, 'StackFrame')}(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
 }

@@ -19,7 +19,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterFragment;
+import io.flutter.embedding.android.FlutterFragmentActivity;
 import io.flutter.embedding.android.FlutterSurfaceView;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.plugin.common.MethodChannel;
@@ -51,8 +55,15 @@ class FlutterDeviceScreenshot {
    * @return the Flutter view.
    */
   @Nullable
-  private static FlutterView getFlutterView(@NonNull Activity activity) {
-   return (FlutterView)activity.findViewById(FlutterActivity.FLUTTER_VIEW_ID);
+  @VisibleForTesting
+  public static FlutterView getFlutterView(@NonNull Activity activity) {
+    if (activity instanceof FlutterActivity) {
+      return (FlutterView)activity.findViewById(FlutterActivity.FLUTTER_VIEW_ID);
+    } else if (activity instanceof FlutterFragmentActivity) {
+      return (FlutterView)activity.findViewById(FlutterFragment.FLUTTER_VIEW_ID);
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -100,7 +111,6 @@ class FlutterDeviceScreenshot {
    * The new surface will either be {@code FlutterSurfaceView} or {@code FlutterTextureView}.
    *
    * @param activity typically {@code FlutterActivity}.
-   * @param onDone callback called once the surface has been restored.
    */
   static void revertFlutterImage(@NonNull Activity activity) {
     final FlutterView flutterView = getFlutterView(activity);
@@ -111,7 +121,7 @@ class FlutterDeviceScreenshot {
     }
   }
 
-  // Handlers use to capture a view.
+  // Handlers used to capture a view.
   private static Handler backgroundHandler;
   private static Handler mainHandler;
 
@@ -181,7 +191,7 @@ class FlutterDeviceScreenshot {
       @NonNull FlutterView view,
       @NonNull Result result) {
     final boolean acquired = view.acquireLatestImageViewFrame();
-    // The next frame may already have already been comitted.
+    // The next frame may already have already been committed.
     // The next frame is guaranteed to have the Flutter image.
     waitForAndroidFrame(
         () -> {

@@ -2,17 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
 // TODO(abarth): Consider using vector_math.
 class _Vector {
-  _Vector(int size)
-    : _offset = 0,
-      _length = size,
-      _elements = Float64List(size);
+  _Vector(int size) : _offset = 0, _length = size, _elements = Float64List(size);
 
   _Vector.fromVOL(List<double> values, int offset, int length)
     : _offset = offset,
@@ -43,9 +39,7 @@ class _Vector {
 
 // TODO(abarth): Consider using vector_math.
 class _Matrix {
-  _Matrix(int rows, int cols)
-    : _columns = cols,
-      _elements = Float64List(rows * cols);
+  _Matrix(int rows, int cols) : _columns = cols, _elements = Float64List(rows * cols);
 
   final int _columns;
   final List<double> _elements;
@@ -55,11 +49,7 @@ class _Matrix {
     _elements[row * _columns + col] = value;
   }
 
-  _Vector getRow(int row) => _Vector.fromVOL(
-    _elements,
-    row * _columns,
-    _columns,
-  );
+  _Vector getRow(int row) => _Vector.fromVOL(_elements, row * _columns, _columns);
 }
 
 /// An nth degree polynomial fit to a dataset.
@@ -70,19 +60,31 @@ class PolynomialFit {
   PolynomialFit(int degree) : coefficients = Float64List(degree + 1);
 
   /// The polynomial coefficients of the fit.
+  ///
+  /// For each `i`, the element `coefficients[i]` is the coefficient of
+  /// the `i`-th power of the variable.
   final List<double> coefficients;
 
   /// An indicator of the quality of the fit.
   ///
-  /// Larger values indicate greater quality.
+  /// Larger values indicate greater quality.  The value ranges from 0.0 to 1.0.
+  ///
+  /// The confidence is defined as the fraction of the dataset's variance
+  /// that is captured by variance in the fit polynomial.  In statistics
+  /// textbooks this is often called "r-squared".
   late double confidence;
+
+  @override
+  String toString() {
+    final String coefficientString =
+        coefficients.map((double c) => c.toStringAsPrecision(3)).toList().toString();
+    return '${objectRuntimeType(this, 'PolynomialFit')}($coefficientString, confidence: ${confidence.toStringAsFixed(3)})';
+  }
 }
 
 /// Uses the least-squares algorithm to fit a polynomial to a set of data.
 class LeastSquaresSolver {
   /// Creates a least-squares solver.
-  ///
-  /// The [x], [y], and [w] arguments must not be null.
   LeastSquaresSolver(this.x, this.y, this.w)
     : assert(x.length == y.length),
       assert(y.length == w.length);
@@ -191,10 +193,11 @@ class LeastSquaresSolver {
       sumSquaredTotal += w[h] * w[h] * v * v;
     }
 
-    result.confidence = sumSquaredTotal <= precisionErrorTolerance ? 1.0 :
-                          1.0 - (sumSquaredError / sumSquaredTotal);
+    result.confidence =
+        sumSquaredTotal <= precisionErrorTolerance
+            ? 1.0
+            : 1.0 - (sumSquaredError / sumSquaredTotal);
 
     return result;
   }
-
 }

@@ -28,8 +28,14 @@
   "cutButtonLabel": "Vyjmout",
   "copyButtonLabel": "Kopírovat",
   "pasteButtonLabel": "Vložit",
+  "clearButtonLabel": "Vymazat",
   "selectAllButtonLabel": "Vybrat vše",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zavřít",
-  "searchTextFieldPlaceholderLabel": "Hledat"
+  "searchTextFieldPlaceholderLabel": "Hledat",
+  "noSpellCheckReplacementsLabel": "Žádná nahrazení nenalezena",
+  "menuDismissLabel": "Zavřít nabídku",
+  "lookUpButtonLabel": "Vyhledat",
+  "searchWebButtonLabel": "Vyhledávat na webu",
+  "shareButtonLabel": "Sdílet…"
 }

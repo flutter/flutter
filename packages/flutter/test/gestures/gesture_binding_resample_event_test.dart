@@ -21,9 +21,7 @@ class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, S
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
-    if (callback != null) {
-      callback?.call(event);
-    }
+    callback?.call(event);
   }
 
   @override
@@ -33,7 +31,7 @@ class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, S
   }
 
   @override
-  int addPostFrameCallback(FrameCallback callback) {
+  int addPostFrameCallback(FrameCallback callback, {String debugLabel = 'callback'}) {
     postFrameCallback = callback;
     return 0;
   }
@@ -47,7 +45,8 @@ class TestSamplingClock implements SamplingClock {
   DateTime now() => clock.now();
 
   @override
-  Stopwatch stopwatch() => clock.stopwatch();
+  Stopwatch stopwatch() => clock.stopwatch(); // flutter_ignore: stopwatch (see analyze.dart)
+  // Ignore context: FakeAsync controls clock.stopwatch(), this is safe in tests.
 }
 
 typedef ResampleEventTest = void Function(FakeAsync async);
@@ -58,7 +57,7 @@ void testResampleEvent(String description, ResampleEventTest callback) {
       callback(async);
     }, initialTime: DateTime.utc(2015));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87067
-                       // Fake clock is not working with the web platform.
+  // Fake clock is not working with the web platform.
 }
 
 void main() {
@@ -68,48 +67,45 @@ void main() {
     final Duration epoch = currentTime();
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add, timeStamp: epoch),
         ui.PointerData(
-            change: ui.PointerChange.add,
-            timeStamp: epoch,
+          change: ui.PointerChange.down,
+          timeStamp: epoch + const Duration(milliseconds: 10),
         ),
         ui.PointerData(
-            change: ui.PointerChange.down,
-            timeStamp: epoch + const Duration(milliseconds: 10),
+          change: ui.PointerChange.move,
+          physicalX: 10.0,
+          timeStamp: epoch + const Duration(milliseconds: 20),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 10.0,
-            timeStamp: epoch + const Duration(milliseconds: 20),
+          change: ui.PointerChange.move,
+          physicalX: 20.0,
+          timeStamp: epoch + const Duration(milliseconds: 30),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 20.0,
-            timeStamp: epoch + const Duration(milliseconds: 30),
+          change: ui.PointerChange.move,
+          physicalX: 30.0,
+          timeStamp: epoch + const Duration(milliseconds: 40),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 30.0,
-            timeStamp: epoch + const Duration(milliseconds: 40),
+          change: ui.PointerChange.move,
+          physicalX: 40.0,
+          timeStamp: epoch + const Duration(milliseconds: 50),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 40.0,
-            timeStamp: epoch + const Duration(milliseconds: 50),
+          change: ui.PointerChange.move,
+          physicalX: 50.0,
+          timeStamp: epoch + const Duration(milliseconds: 60),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 50.0,
-            timeStamp: epoch + const Duration(milliseconds: 60),
+          change: ui.PointerChange.up,
+          physicalX: 50.0,
+          timeStamp: epoch + const Duration(milliseconds: 70),
         ),
         ui.PointerData(
-            change: ui.PointerChange.up,
-            physicalX: 50.0,
-            timeStamp: epoch + const Duration(milliseconds: 70),
-        ),
-        ui.PointerData(
-            change: ui.PointerChange.remove,
-            physicalX: 50.0,
-            timeStamp: epoch + const Duration(milliseconds: 70),
+          change: ui.PointerChange.remove,
+          physicalX: 50.0,
+          timeStamp: epoch + const Duration(milliseconds: 70),
         ),
       ],
     );
@@ -140,7 +136,7 @@ void main() {
     expect(events.length, 1);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[0].timeStamp, binding.frameTime! + samplingOffset);
-    expect(events[0].position, Offset(0.0 / GestureBinding.instance.window.devicePixelRatio, 0.0));
+    expect(events[0].position, Offset(0.0 / _devicePixelRatio, 0.0));
 
     // Second frame callback should have been requested.
     callback = binding.postFrameCallback;
@@ -155,8 +151,8 @@ void main() {
     expect(events.length, 2);
     expect(events[1], isA<PointerMoveEvent>());
     expect(events[1].timeStamp, binding.frameTime! + samplingOffset);
-    expect(events[1].position, Offset(10.0 / GestureBinding.instance.window.devicePixelRatio, 0.0));
-    expect(events[1].delta, Offset(10.0 / GestureBinding.instance.window.devicePixelRatio, 0.0));
+    expect(events[1].position, Offset(10.0 / _devicePixelRatio, 0.0));
+    expect(events[1].delta, Offset(10.0 / _devicePixelRatio, 0.0));
 
     // Verify that resampling continues without a frame callback.
     async.elapse(frameInterval * 1.5);
@@ -183,3 +179,6 @@ void main() {
     GestureBinding.instance.resamplingEnabled = false;
   });
 }
+
+double get _devicePixelRatio =>
+    GestureBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;

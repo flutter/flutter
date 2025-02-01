@@ -7,7 +7,7 @@ for building Flutter applications.
 
 Be sure to follow the instructions on [CONTRIBUTING.md](../../CONTRIBUTING.md)
 to set up your development environment. Further, familiarize yourself with the
-[style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo),
+[style guide](../../docs/contributing/Style-guide-for-Flutter-repo.md),
 which we follow.
 
 ### Setting up
@@ -26,6 +26,17 @@ $ dart bin/flutter_tools.dart
 ```
 followed by command-line arguments, as usual.
 
+As a convenience for folks developing the `flutter` tool itself,
+you can also use the `bin/flutter-dev` script:
+```shell
+# Assuming flutter/bin is on your PATH
+$ flutter-dev
+```
+
+Note: `flutter-dev` is identical to `flutter`, except it does not
+use a cached on-disk snapshot. In other words, it will be significantly
+slower but you will not need to forget (remember?) to delete the cached
+snapshot.
 
 ### Running the analyzer
 
@@ -36,8 +47,8 @@ $ flutter analyze
 
 ### Writing tests
 
-As with other parts of the Flutter repository, all changes in behavior [must be
-tested](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#write-test-find-bug).
+As with other parts of the Flutter repository, all changes in behavior
+[must be tested](../../docs/contributing/Style-guide-for-Flutter-repo.md#write-test-find-bug).
 Tests live under the `test/` subdirectory.
 
 - Hermetic unit tests of tool internals go under `test/general.shard`
@@ -67,14 +78,16 @@ Please avoid setting any other timeouts.
 #### Using local engine builds in integration tests
 
 The integration tests can be configured to use a specific local engine
-variant by setting the `FLUTTER_LOCAL_ENGINE` environment variable to the
-name of the local engine (e.g. "android_debug_unopt"). If the local engine build
-requires a source path, this can be provided by setting the `FLUTTER_LOCAL_ENGINE_SRC_PATH`
-environment variable. This second variable is not necessary if the `flutter` and
-`engine` checkouts are in adjacent directories.
+variant by setting the `FLUTTER_LOCAL_ENGINE` and `FLUTTER_LOCAL_ENGINE_HOST`
+environment variables to the name of the local engines (e.g. `android_debug_unopt`
+and `host_debug_unopt`). If the local engine build requires a source path, this
+can be provided by setting the `FLUTTER_LOCAL_ENGINE_SRC_PATH` environment
+variable. This second variable is not necessary if the `flutter` and `engine`
+checkouts are in adjacent directories.
 
 ```shell
 export FLUTTER_LOCAL_ENGINE=android_debug_unopt
+export FLUTTER_LOCAL_ENGINE_HOST=host_debug_unopt
 flutter test test/integration.shard/some_test_case
 ```
 

@@ -35,7 +35,8 @@ void main() {
         expect(
           output.toString(),
           '\n'
-          '[{"event":"test.startedProcess","params":{"vmServiceUri":"http://localhost:1234"}}]'
+          '[{"event":"test.startedProcess","params":{"vmServiceUri":"http://localhost:1234",'
+          '"observatoryUri":"http://localhost:1234"}}]'
           '\n',
         );
       });
@@ -46,7 +47,8 @@ void main() {
         expect(
           output.toString(),
           '\n'
-          '[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]'
+          '[{"event":"test.startedProcess","params":{"vmServiceUri":null,'
+          '"observatoryUri":null}}]'
           '\n',
         );
       });
@@ -54,4 +56,4 @@ void main() {
   });
 }
 
-class FakeDevice extends Fake implements TestDevice { }
+class FakeDevice extends Fake implements TestDevice {}

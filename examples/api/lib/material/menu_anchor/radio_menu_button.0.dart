@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [RadioMenuButton].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+/// Flutter code sample for [RadioMenuButton].
 
 void main() => runApp(const MenuApp());
 
@@ -21,18 +21,27 @@ class _MyRadioMenuState extends State<MyRadioMenu> {
   Color _backgroundColor = Colors.red;
   late ShortcutRegistryEntry _entry;
 
-  static const SingleActivator _redShortcut = SingleActivator(LogicalKeyboardKey.keyR, control: true);
-  static const SingleActivator _greenShortcut = SingleActivator(LogicalKeyboardKey.keyG, control: true);
-  static const SingleActivator _blueShortcut = SingleActivator(LogicalKeyboardKey.keyB, control: true);
+  static const SingleActivator _redShortcut = SingleActivator(
+    LogicalKeyboardKey.keyR,
+    control: true,
+  );
+  static const SingleActivator _greenShortcut = SingleActivator(
+    LogicalKeyboardKey.keyG,
+    control: true,
+  );
+  static const SingleActivator _blueShortcut = SingleActivator(
+    LogicalKeyboardKey.keyB,
+    control: true,
+  );
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _entry = ShortcutRegistry.of(context).addAll(<ShortcutActivator, VoidCallbackIntent>{
-        _redShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.red)),
-        _greenShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.green)),
-        _blueShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.blue)),
-      });
+      _redShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.red)),
+      _greenShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.green)),
+      _blueShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.blue)),
+    });
   }
 
   @override
@@ -92,11 +101,7 @@ class _MyRadioMenuState extends State<MyRadioMenu> {
             );
           },
         ),
-        Expanded(
-          child: Container(
-            color: _backgroundColor,
-          ),
-        ),
+        Expanded(child: Container(color: _backgroundColor)),
       ],
     );
   }
@@ -107,8 +112,9 @@ class MenuApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: MyRadioMenu()),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const Scaffold(body: SafeArea(child: MyRadioMenu())),
     );
   }
 }

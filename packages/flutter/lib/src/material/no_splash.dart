@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button_style.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'theme.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -29,6 +34,7 @@ class _NoSplashFactory extends InteractiveInkFeatureFactory {
       controller: controller,
       referenceBox: referenceBox,
       color: color,
+      onRemoved: onRemoved,
     );
   }
 }
@@ -62,6 +68,17 @@ class NoSplash extends InteractiveInkFeature {
   static const InteractiveInkFeatureFactory splashFactory = _NoSplashFactory();
 
   @override
-  void paintFeature(Canvas canvas, Matrix4 transform) {
+  void paintFeature(Canvas canvas, Matrix4 transform) {}
+
+  @override
+  void confirm() {
+    super.confirm();
+    dispose();
+  }
+
+  @override
+  void cancel() {
+    super.cancel();
+    dispose();
   }
 }

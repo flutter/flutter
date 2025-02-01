@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoSliverRefreshControl].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoSliverRefreshControl].
 
 void main() => runApp(const RefreshControlApp());
 
@@ -46,23 +46,14 @@ class _RefreshControlExampleState extends State<RefreshControlExample> {
         middle: Text('CupertinoSliverRefreshControl Sample'),
       ),
       child: CustomScrollView(
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
+        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         slivers: <Widget>[
-          const CupertinoSliverNavigationBar(
-            largeTitle: Text('Scroll down'),
-          ),
+          const CupertinoSliverNavigationBar(largeTitle: Text('Scroll down')),
           CupertinoSliverRefreshControl(
             onRefresh: () async {
-              await Future<void>.delayed(
-                const Duration(milliseconds: 1000),
-              );
+              await Future<void>.delayed(const Duration(milliseconds: 1000));
               setState(() {
-                items.insert(
-                  0,
-                  Container(color: colors[items.length % 3], height: 100.0),
-                );
+                items.insert(0, Container(color: colors[items.length % 3], height: 100.0));
               });
             },
           ),

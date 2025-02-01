@@ -31,6 +31,9 @@ abstract class TextBoundary {
   /// `position`, or null if no boundaries can be found.
   ///
   /// The return value, if not null, is usually less than or equal to `position`.
+  ///
+  /// The range of the return value is given by the closed interval
+  /// `[0, string.length]`.
   int? getLeadingTextBoundaryAt(int position) {
     if (position < 0) {
       return null;
@@ -39,10 +42,13 @@ abstract class TextBoundary {
     return start >= 0 ? start : null;
   }
 
-  /// Returns the offset of the closest text boundaries after the given `position`,
-  /// or null if there is no boundaries can be found after `position`.
+  /// Returns the offset of the closest text boundary after the given
+  /// `position`, or null if there is no boundary can be found after `position`.
   ///
   /// The return value, if not null, is usually greater than `position`.
+  ///
+  /// The range of the return value is given by the closed interval
+  /// `[0, string.length]`.
   int? getTrailingTextBoundaryAt(int position) {
     final int end = getTextBoundaryAt(max(0, position)).end;
     return end >= 0 ? end : null;
@@ -59,7 +65,7 @@ abstract class TextBoundary {
   }
 }
 
-/// A [TextBoundary] subclass for retriving the range of the grapheme the given
+/// A [TextBoundary] subclass for retrieving the range of the grapheme the given
 /// `position` is in.
 ///
 /// The class is implemented using the
@@ -75,7 +81,8 @@ class CharacterBoundary extends TextBoundary {
     if (position < 0) {
       return null;
     }
-    final int graphemeStart = CharacterRange.at(_text, min(position, _text.length)).stringBeforeLength;
+    final int graphemeStart =
+        CharacterRange.at(_text, min(position, _text.length)).stringBeforeLength;
     assert(CharacterRange.at(_text, graphemeStart).isEmpty);
     return graphemeStart;
   }
@@ -100,9 +107,15 @@ class CharacterBoundary extends TextBoundary {
     }
     final CharacterRange rangeAtPosition = CharacterRange.at(_text, position);
     return rangeAtPosition.isNotEmpty
-      ? TextRange(start: rangeAtPosition.stringBeforeLength, end: rangeAtPosition.stringBeforeLength + rangeAtPosition.current.length)
-      // rangeAtPosition is empty means `position` is a grapheme boundary.
-      : TextRange(start: rangeAtPosition.stringBeforeLength, end: getTrailingTextBoundaryAt(position) ?? -1);
+        ? TextRange(
+          start: rangeAtPosition.stringBeforeLength,
+          end: rangeAtPosition.stringBeforeLength + rangeAtPosition.current.length,
+        )
+        // rangeAtPosition is empty means `position` is a grapheme boundary.
+        : TextRange(
+          start: rangeAtPosition.stringBeforeLength,
+          end: getTrailingTextBoundaryAt(position) ?? -1,
+        );
   }
 }
 
@@ -120,7 +133,8 @@ class LineBoundary extends TextBoundary {
   final TextLayoutMetrics _textLayout;
 
   @override
-  TextRange getTextBoundaryAt(int position) => _textLayout.getLineAtOffset(TextPosition(offset: max(position, 0)));
+  TextRange getTextBoundaryAt(int position) =>
+      _textLayout.getLineAtOffset(TextPosition(offset: max(position, 0)));
 }
 
 /// A text boundary that uses paragraphs as logical boundaries.
@@ -191,11 +205,11 @@ class ParagraphBoundary extends TextBoundary {
       }
     }
 
-    return index < _text.length - 1
-                && _text.codeUnitAt(index) == 0x0D
-                && _text.codeUnitAt(index + 1) == 0x0A
-                ? index + 2
-                : index + 1;
+    return index < _text.length - 1 &&
+            _text.codeUnitAt(index) == 0x0D &&
+            _text.codeUnitAt(index + 1) == 0x0A
+        ? index + 2
+        : index + 1;
   }
 }
 

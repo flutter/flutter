@@ -3,15 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/web/file_generators/flutter_js.dart';
 
 import '../test_utils.dart';
 import 'deferred_components_config.dart';
 
-const String _kDefaultHtml  = '''
+const String _kDefaultHtml = '''
 <html>
     <head>
+        <meta charset='utf-8'>
         <title>Hello, World</title>
     </head>
     <body>
@@ -56,19 +55,18 @@ abstract class Project {
     }
     final String? generatedFile = this.generatedFile;
     if (generatedFile != null) {
-      writeFile(fileSystem.path.join(dir.path, '.dart_tool', 'flutter_gen', 'flutter_gen.dart'), generatedFile);
+      writeFile(
+        fileSystem.path.join(dir.path, '.dart_tool', 'flutter_gen', 'flutter_gen.dart'),
+        generatedFile,
+      );
     }
     deferredComponents?.setUpIn(dir);
 
-    final String fileGeneratorsPath =
-        Artifacts.test().getArtifactPath(Artifact.flutterToolsFileGenerators);
-    final String flutterJsContents = generateFlutterJsFile(fileGeneratorsPath);
-
     // Setup for different flutter web initializations
     writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
-    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), flutterJsContents);
+    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), '');
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
-    writePackages(dir.path);
+    writePackageConfig(dir.path);
     await getPackages(dir.path);
   }
 

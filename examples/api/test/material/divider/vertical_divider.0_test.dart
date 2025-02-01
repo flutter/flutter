@@ -8,17 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Vertical Divider', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.MyApp(),
-        ),
-      ),
-    );
+    await tester.pumpWidget(const example.VerticalDividerExampleApp());
 
     expect(find.byType(VerticalDivider), findsOneWidget);
 
-    // Divider is positioned horizintally.
+    // Divider is positioned horizontally.
     Offset expanded = tester.getTopRight(find.byType(Expanded).first);
     expect(expanded.dx, tester.getTopLeft(find.byType(VerticalDivider)).dx);
 

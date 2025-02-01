@@ -20,13 +20,16 @@ void main() {
     final FileExceptionHandler handler = FileExceptionHandler();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
-    expect(() => Template(
-      fileSystem.directory('doesNotExist'),
-      fileSystem.currentDirectory,
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      templateRenderer: FakeTemplateRenderer(),
-    ), throwsToolExit());
+    expect(
+      () => Template(
+        fileSystem.directory('doesNotExist'),
+        fileSystem.currentDirectory,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        templateRenderer: FakeTemplateRenderer(),
+      ),
+      throwsToolExit(),
+    );
   });
 
   testWithoutContext('Template.render throws ToolExit when FileSystem exception is raised', () {
@@ -42,8 +45,7 @@ void main() {
     final Directory directory = fileSystem.directory('foo');
     handler.addError(directory, FileSystemOp.create, const FileSystemException());
 
-    expect(() => template.render(directory, <String, Object>{}),
-      throwsToolExit());
+    expect(() => template.render(directory, <String, Object>{}), throwsToolExit());
   });
 
   group('template image directory', () {
@@ -51,19 +53,22 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     };
+    const TemplatePathProvider templatePathProvider = TemplatePathProvider();
 
-    testUsingContext('templateImageDirectory returns parent template directory if passed null name', () async {
-      final String packageConfigPath = globals.fs.path.join(
-        Cache.flutterRoot!,
-        'packages',
-        'flutter_tools',
-        '.dart_tool',
-        'package_config.json',
-      );
+    testUsingContext(
+      'templatePathProvider.imageDirectory returns parent template directory if passed null name',
+      () async {
+        final String packageConfigPath = globals.fs.path.join(
+          Cache.flutterRoot!,
+          'packages',
+          'flutter_tools',
+          '.dart_tool',
+          'package_config.json',
+        );
 
-      globals.fs.file(packageConfigPath)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
+        globals.fs.file(packageConfigPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 {
   "configVersion": 2,
   "packages": [
@@ -76,26 +81,27 @@ void main() {
   ]
 }
 ''');
-      expect(
-          (await templateImageDirectory(null, globals.fs, globals.logger)).path,
-          globals.fs.path.absolute(
-            'flutter_template_images',
-            'templates',
-          ),
-      );
-    }, overrides: overrides);
+        expect(
+          (await templatePathProvider.imageDirectory(null, globals.fs, globals.logger)).path,
+          globals.fs.path.absolute('flutter_template_images', 'templates'),
+        );
+      },
+      overrides: overrides,
+    );
 
-    testUsingContext('templateImageDirectory returns the directory containing the `name` template directory', () async {
-      final String packageConfigPath = globals.fs.path.join(
-        Cache.flutterRoot!,
-        'packages',
-        'flutter_tools',
-        '.dart_tool',
-        'package_config.json',
-      );
-      globals.fs.file(packageConfigPath)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
+    testUsingContext(
+      'templatePathProvider.imageDirectory returns the directory containing the `name` template directory',
+      () async {
+        final String packageConfigPath = globals.fs.path.join(
+          Cache.flutterRoot!,
+          'packages',
+          'flutter_tools',
+          '.dart_tool',
+          'package_config.json',
+        );
+        globals.fs.file(packageConfigPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 {
   "configVersion": 2,
   "packages": [
@@ -108,15 +114,13 @@ void main() {
   ]
 }
 ''');
-      expect(
-        (await templateImageDirectory('app_shared', globals.fs, globals.logger)).path,
-        globals.fs.path.absolute(
-          'flutter_template_images',
-          'templates',
-          'app_shared',
-        ),
-      );
-    }, overrides: overrides);
+        expect(
+          (await templatePathProvider.imageDirectory('app', globals.fs, globals.logger)).path,
+          globals.fs.path.absolute('flutter_template_images', 'templates', 'app'),
+        );
+      },
+      overrides: overrides,
+    );
   });
 
   group('renders template', () {
@@ -193,6 +197,23 @@ void main() {
       expect(logger.errorText, isEmpty);
       expect(logger.statusText, isEmpty);
     });
+  });
+
+  testWithoutContext('escapeYamlString', () {
+    expect(escapeYamlString(''), r'""');
+    expect(escapeYamlString('\x00\n\r\t\b'), r'"\0\n\r\t\x08"');
+    expect(escapeYamlString('test'), r'"test"');
+    expect(escapeYamlString('test\n test'), r'"test\n test"');
+    expect(escapeYamlString('\x00\x01\x02\x0c\x19\xab'), r'"\0\x01\x02\x0c\x19«"');
+    expect(escapeYamlString('"'), r'"\""');
+    expect(escapeYamlString(r'\'), r'"\\"');
+    expect(escapeYamlString('[user branch]'), r'"[user branch]"');
+    expect(escapeYamlString('main'), r'"main"');
+    expect(escapeYamlString('TEST_BRANCH'), r'"TEST_BRANCH"');
+    expect(escapeYamlString(' '), r'" "');
+    expect(escapeYamlString(' \n '), r'" \n "');
+    expect(escapeYamlString('""'), r'"\"\""');
+    expect(escapeYamlString('"\x01\u{0263A}\u{1F642}'), r'"\"\x01☺🙂"');
   });
 }
 

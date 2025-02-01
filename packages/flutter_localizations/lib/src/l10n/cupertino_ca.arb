@@ -18,8 +18,14 @@
   "cutButtonLabel": "Retalla",
   "copyButtonLabel": "Copia",
   "pasteButtonLabel": "Enganxa",
-  "selectAllButtonLabel": "Selecciona-ho tot",
+  "clearButtonLabel": "Esborra",
+  "selectAllButtonLabel": "Seleccionar-ho tot",
   "tabSemanticsLabel": "Pestanya $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Ignora",
-  "searchTextFieldPlaceholderLabel": "Cerca"
+  "searchTextFieldPlaceholderLabel": "Cerca",
+  "noSpellCheckReplacementsLabel": "No s'ha trobat cap substitució",
+  "menuDismissLabel": "Ignora el menú",
+  "lookUpButtonLabel": "Mira amunt",
+  "searchWebButtonLabel": "Cerca al web",
+  "shareButtonLabel": "Comparteix..."
 }

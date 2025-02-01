@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for custom labeled checkbox.
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for custom labeled checkbox.
 
 void main() => runApp(const LabeledCheckboxApp());
 
@@ -13,10 +13,7 @@ class LabeledCheckboxApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const LabeledCheckboxExample(),
-    );
+    return MaterialApp(theme: ThemeData(useMaterial3: true), home: const LabeledCheckboxExample());
   }
 }
 

@@ -15,15 +15,10 @@ class Title extends StatelessWidget {
   /// [title] will default to the empty string if not supplied.
   /// [color] must be an opaque color (i.e. color.alpha must be 255 (0xFF)).
   /// [color] and [child] are required arguments.
-  Title({
-    super.key,
-    this.title = '',
-    required this.color,
-    required this.child,
-  }) : assert(color.alpha == 0xFF);
+  Title({super.key, this.title = '', required this.color, required this.child})
+    : assert(color.alpha == 0xFF);
 
   /// A one-line description of this app for use in the window manager.
-  /// Must not be null.
   final String title;
 
   /// A color that the window manager should use to identify this app. Must be
@@ -39,10 +34,7 @@ class Title extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setApplicationSwitcherDescription(
-      ApplicationSwitcherDescription(
-        label: title,
-        primaryColor: color.value,
-      ),
+      ApplicationSwitcherDescription(label: title, primaryColor: color.value),
     );
     return child;
   }

@@ -2,37 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Radio.toggleable].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Radio.toggleable].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ToggleableExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ToggleableExampleApp extends StatelessWidget {
+  const ToggleableExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('Radio Sample')),
+        body: const ToggleableExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ToggleableExample extends StatefulWidget {
+  const ToggleableExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ToggleableExample> createState() => _ToggleableExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ToggleableExampleState extends State<ToggleableExample> {
   int? groupValue;
   static const List<String> selections = <String>[
     'Hercules Mulligan',
@@ -51,16 +48,17 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Radio<int>(
-                  value: index,
-                  groupValue: groupValue,
-                  // TRY THIS: Try setting the toggleable value to false and
-                  // see how that changes the behavior of the widget.
-                  toggleable: true,
-                  onChanged: (int? value) {
-                    setState(() {
-                      groupValue = value;
-                    });
-                  }),
+                value: index,
+                groupValue: groupValue,
+                // TRY THIS: Try setting the toggleable value to false and
+                // see how that changes the behavior of the widget.
+                toggleable: true,
+                onChanged: (int? value) {
+                  setState(() {
+                    groupValue = value;
+                  });
+                },
+              ),
               Text(selections[index]),
             ],
           );

@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [IconButton].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [IconButton].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const IconButtonExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class IconButtonExampleApp extends StatelessWidget {
+  const IconButtonExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: const Text('IconButton Sample')),
+        body: const IconButtonExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class IconButtonExample extends StatelessWidget {
+  const IconButtonExample({super.key});
 
   @override
   @override
@@ -35,15 +32,8 @@ class MyStatelessWidget extends StatelessWidget {
       color: Colors.white,
       child: Center(
         child: Ink(
-          decoration: const ShapeDecoration(
-            color: Colors.lightBlue,
-            shape: CircleBorder(),
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.android),
-            color: Colors.white,
-            onPressed: () {},
-          ),
+          decoration: const ShapeDecoration(color: Colors.lightBlue, shape: CircleBorder()),
+          child: IconButton(icon: const Icon(Icons.android), color: Colors.white, onPressed: () {}),
         ),
       ),
     );

@@ -10,9 +10,7 @@ void main() {
   testWidgets('Tooltip is visible when tapping button', (WidgetTester tester) async {
     const String tooltipText = 'I am a Tooltip';
 
-    await tester.pumpWidget(
-      const example.MyApp(),
-    );
+    await tester.pumpWidget(const example.TooltipExampleApp());
 
     // Tooltip is not visible before tapping the button.
     expect(find.text(tooltipText), findsNothing);
@@ -20,7 +18,8 @@ void main() {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tooltipText), findsOneWidget);
-    // Wait for the tooltip to disappear.
+    // Tap on the tooltip and wait for the tooltip to disappear.
+    await tester.tap(find.byTooltip(tooltipText));
     await tester.pump(const Duration(seconds: 1));
     expect(find.text(tooltipText), findsNothing);
   });

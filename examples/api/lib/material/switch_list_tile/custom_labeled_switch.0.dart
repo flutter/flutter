@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for custom labeled switch.
-
 import 'package:flutter/gestures.dart';
 
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for custom labeled switch.
 
 void main() => runApp(const LabeledSwitchApp());
 
@@ -19,9 +19,7 @@ class LabeledSwitchApp extends StatelessWidget {
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('Custom Labeled Switch Sample')),
-        body: const Center(
-          child: LabeledSwitchExample(),
-        ),
+        body: const Center(child: LabeledSwitchExample()),
       ),
     );
   }
@@ -55,10 +53,11 @@ class LinkedLabelSwitch extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                   decoration: TextDecoration.underline,
                 ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    debugPrint('Label has been tapped.');
-                  },
+                recognizer:
+                    TapGestureRecognizer()
+                      ..onTap = () {
+                        debugPrint('Label has been tapped.');
+                      },
               ),
             ),
           ),

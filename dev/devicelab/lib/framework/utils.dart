@@ -26,6 +26,14 @@ String? get localEngineFromEnv {
   return isDefined ? const String.fromEnvironment('localEngine') : null;
 }
 
+/// The local engine host to use for [flutter] and [evalFlutter], if any.
+///
+/// This is set as an environment variable when running the task, see runTask in runner.dart.
+String? get localEngineHostFromEnv {
+  const bool isDefined = bool.hasEnvironment('localEngineHost');
+  return isDefined ? const String.fromEnvironment('localEngineHost') : null;
+}
+
 /// The local engine source path to use if a local engine is used for [flutter]
 /// and [evalFlutter].
 ///
@@ -33,6 +41,14 @@ String? get localEngineFromEnv {
 String? get localEngineSrcPathFromEnv {
   const bool isDefined = bool.hasEnvironment('localEngineSrcPath');
   return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
+}
+
+/// The local Web SDK to use for [flutter] and [evalFlutter], if any.
+///
+/// This is set as an environment variable when running the task, see runTask in runner.dart.
+String? get localWebSdkFromEnv {
+  const bool isDefined = bool.hasEnvironment('localWebSdk');
+  return isDefined ? const String.fromEnvironment('localWebSdk') : null;
 }
 
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
@@ -51,8 +67,7 @@ class ProcessInfo {
   command: $command
   started: $startTime
   pid    : ${process.pid}
-'''
-        .trim();
+'''.trim();
   }
 }
 
@@ -61,8 +76,8 @@ class HealthCheckResult {
   HealthCheckResult.success([this.details]) : succeeded = true;
   HealthCheckResult.failure(this.details) : succeeded = false;
   HealthCheckResult.error(dynamic error, dynamic stackTrace)
-      : succeeded = false,
-        details = 'ERROR: $error${stackTrace != null ? '\n$stackTrace' : ''}';
+    : succeeded = false,
+      details = 'ERROR: $error${stackTrace != null ? '\n$stackTrace' : ''}';
 
   final bool succeeded;
   final String? details;
@@ -95,7 +110,7 @@ void fail(String message) {
 }
 
 // Remove the given file or directory.
-void rm(FileSystemEntity entity, { bool recursive = false}) {
+void rm(FileSystemEntity entity, {bool recursive = false}) {
   if (entity.existsSync()) {
     // This should not be necessary, but it turns out that
     // on Windows it's common for deletions to fail due to
@@ -120,8 +135,7 @@ Directory dir(String path) => Directory(path);
 File file(String path) => File(path);
 
 void copy(File sourceFile, Directory targetDirectory, {String? name}) {
-  final File target = file(
-      path.join(targetDirectory.path, name ?? path.basename(sourceFile.path)));
+  final File target = file(path.join(targetDirectory.path, name ?? path.basename(sourceFile.path)));
   target.writeAsBytesSync(sourceFile.readAsBytesSync());
 }
 
@@ -146,10 +160,8 @@ void recursiveCopy(Directory source, Directory target) {
   }
 }
 
-FileSystemEntity move(FileSystemEntity whatToMove,
-    {required Directory to, String? name}) {
-  return whatToMove
-      .renameSync(path.join(to.path, name ?? path.basename(whatToMove.path)));
+FileSystemEntity move(FileSystemEntity whatToMove, {required Directory to, String? name}) {
+  return whatToMove.renameSync(path.join(to.path, name ?? path.basename(whatToMove.path)));
 }
 
 /// Equivalent of `chmod a+x file`
@@ -158,11 +170,7 @@ void makeExecutable(File file) {
   if (Platform.isWindows) {
     return;
   }
-  final ProcessResult result = _processManager.runSync(<String>[
-    'chmod',
-    'a+x',
-    file.path,
-  ]);
+  final ProcessResult result = _processManager.runSync(<String>['chmod', 'a+x', file.path]);
 
   if (result.exitCode != 0) {
     throw FileSystemException(
@@ -234,12 +242,7 @@ Future<String?> getCurrentFlutterRepoCommit() {
 Future<DateTime> getFlutterRepoCommitTimestamp(String commit) {
   // git show -s --format=%at 4b546df7f0b3858aaaa56c4079e5be1ba91fbb65
   return inDirectory<DateTime>(flutterDirectory, () async {
-    final String unixTimestamp = await eval('git', <String>[
-      'show',
-      '-s',
-      '--format=%at',
-      commit,
-    ]);
+    final String unixTimestamp = await eval('git', <String>['show', '-s', '--format=%at', commit]);
     final int secondsSinceEpoch = int.parse(unixTimestamp);
     return DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
   });
@@ -273,12 +276,15 @@ Future<Process> startProcess(
   String executable,
   List<String>? arguments, {
   Map<String, String>? environment,
-  bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
+  bool isBot =
+      true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
   String? workingDirectory,
 }) async {
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
+  final Map<String, String> newEnvironment = Map<String, String>.from(
+    environment ?? <String, String>{},
+  );
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
   print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
@@ -291,9 +297,11 @@ Future<Process> startProcess(
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
-  unawaited(process.exitCode.then<void>((int exitCode) {
-    _runningProcesses.remove(processInfo);
-  }));
+  unawaited(
+    process.exitCode.then<void>((int exitCode) {
+      _runningProcesses.remove(processInfo);
+    }),
+  );
 
   return process;
 }
@@ -323,13 +331,17 @@ Future<int> exec(
   Map<String, String>? environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String? workingDirectory,
+  StringBuffer? output, // if not null, the stdout will be written here
+  StringBuffer? stderr, // if not null, the stderr will be written here
 }) async {
   return _execute(
     executable,
     arguments,
     environment: environment,
-    canFail : canFail,
+    canFail: canFail,
     workingDirectory: workingDirectory,
+    output: output,
+    stderr: stderr,
   );
 }
 
@@ -377,32 +389,39 @@ Future<void> forwardStandardStreams(
   StringBuffer? stderr,
   bool printStdout = true,
   bool printStderr = true,
-  }) {
+}) {
   final Completer<void> stdoutDone = Completer<void>();
   final Completer<void> stderrDone = Completer<void>();
   process.stdout
-    .transform<String>(utf8.decoder)
-    .transform<String>(const LineSplitter())
-    .listen((String line) {
-      if (printStdout) {
-        print('stdout: $line');
-      }
-      output?.writeln(line);
-    }, onDone: () { stdoutDone.complete(); });
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen(
+        (String line) {
+          if (printStdout) {
+            print('stdout: $line');
+          }
+          output?.writeln(line);
+        },
+        onDone: () {
+          stdoutDone.complete();
+        },
+      );
   process.stderr
-    .transform<String>(utf8.decoder)
-    .transform<String>(const LineSplitter())
-    .listen((String line) {
-      if (printStderr) {
-        print('stderr: $line');
-      }
-      stderr?.writeln(line);
-    }, onDone: () { stderrDone.complete(); });
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen(
+        (String line) {
+          if (printStderr) {
+            print('stderr: $line');
+          }
+          stderr?.writeln(line);
+        },
+        onDone: () {
+          stderrDone.complete();
+        },
+      );
 
-  return Future.wait<void>(<Future<void>>[
-    stdoutDone.future,
-    stderrDone.future,
-  ]);
+  return Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
 }
 
 /// Executes a command and returns its standard output as a String.
@@ -414,11 +433,12 @@ Future<String> eval(
   Map<String, String>? environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String? workingDirectory,
+  StringBuffer? stdout, // if not null, the stdout will be written here
   StringBuffer? stderr, // if not null, the stderr will be written here
   bool printStdout = true,
   bool printStderr = true,
 }) async {
-  final StringBuffer output = StringBuffer();
+  final StringBuffer output = stdout ?? StringBuffer();
   await _execute(
     executable,
     arguments,
@@ -433,7 +453,11 @@ Future<String> eval(
   return output.toString().trimRight();
 }
 
-List<String> flutterCommandArgs(String command, List<String> options) {
+List<String> _flutterCommandArgs(
+  String command,
+  List<String> options, {
+  bool driveWithDds = false,
+}) {
   // Commands support the --device-timeout flag.
   final Set<String> supportedDeviceTimeoutCommands = <String>{
     'attach',
@@ -445,35 +469,66 @@ List<String> flutterCommandArgs(String command, List<String> options) {
     'screenshot',
   };
   final String? localEngine = localEngineFromEnv;
+  final String? localEngineHost = localEngineHostFromEnv;
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
+  final String? localWebSdk = localWebSdkFromEnv;
+  final bool pubOrPackagesCommand = command.startsWith('packages') || command.startsWith('pub');
   return <String>[
     command,
-    if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
-      ...<String>[
-        '--device-timeout',
-        '5',
-      ],
+    if (deviceOperatingSystem == DeviceOperatingSystem.ios &&
+        supportedDeviceTimeoutCommands.contains(command)) ...<String>['--device-timeout', '5'],
+
+    // DDS should generally be disabled for flutter drive in CI.
+    // See https://github.com/flutter/flutter/issues/152684.
+    if (command == 'drive' && !driveWithDds) '--no-dds',
 
     if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
       '--screenshot',
       hostAgent.dumpDirectory!.path,
     ],
     if (localEngine != null) ...<String>['--local-engine', localEngine],
+    if (localEngineHost != null) ...<String>['--local-engine-host', localEngineHost],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
+    if (localWebSdk != null) ...<String>['--local-web-sdk', localWebSdk],
     ...options,
+    // Use CI flag when running devicelab tests, except for `packages`/`pub` commands.
+    // `packages`/`pub` commands effectively runs the `pub` tool, which does not have
+    // the same allowed args.
+    if (!pubOrPackagesCommand) '--ci',
+    if (!pubOrPackagesCommand && hostAgent.dumpDirectory != null)
+      '--debug-logs-dir=${hostAgent.dumpDirectory!.path}',
   ];
 }
 
 /// Runs the flutter `command`, and returns the exit code.
 /// If `canFail` is `false`, the future completes with an error.
-Future<int> flutter(String command, {
+Future<int> flutter(
+  String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  bool driveWithDds = false, // `flutter drive` tests should generally have dds disabled.
+  // The exception is tests that also exercise DevTools, such as
+  // DevToolsMemoryTest in perf_tests.dart.
   Map<String, String>? environment,
-}) {
-  final List<String> args = flutterCommandArgs(command, options);
-  return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-    canFail: canFail, environment: environment);
+  String? workingDirectory,
+  StringBuffer? output, // if not null, the stdout will be written here
+  StringBuffer? stderr, // if not null, the stderr will be written here
+}) async {
+  final List<String> args = _flutterCommandArgs(command, options, driveWithDds: driveWithDds);
+  final int exitCode = await exec(
+    path.join(flutterDirectory.path, 'bin', 'flutter'),
+    args,
+    canFail: canFail,
+    environment: environment,
+    workingDirectory: workingDirectory,
+    output: output,
+    stderr: stderr,
+  );
+
+  if (exitCode != 0 && !canFail) {
+    await _flutterScreenshot(workingDirectory: workingDirectory);
+  }
+  return exitCode;
 }
 
 /// Starts a Flutter subprocess.
@@ -498,49 +553,108 @@ Future<int> flutter(String command, {
 ///
 /// The actual process executes asynchronously. A handle to the subprocess is
 /// returned in the form of a [Future] that completes to a [Process] object.
-Future<Process> startFlutter(String command, {
+Future<Process> startFlutter(
+  String command, {
   List<String> options = const <String>[],
   Map<String, String> environment = const <String, String>{},
-  bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
-}) {
-  final List<String> args = flutterCommandArgs(command, options);
-  return startProcess(
+  bool isBot =
+      true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
+  String? workingDirectory,
+}) async {
+  final List<String> args = _flutterCommandArgs(command, options);
+  final Process process = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
     args,
     environment: environment,
     isBot: isBot,
+    workingDirectory: workingDirectory,
   );
+
+  unawaited(
+    process.exitCode.then<void>((int exitCode) async {
+      if (exitCode != 0) {
+        await _flutterScreenshot(workingDirectory: workingDirectory);
+      }
+    }),
+  );
+  return process;
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.
-Future<String> evalFlutter(String command, {
+Future<String> evalFlutter(
+  String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String>? environment,
   StringBuffer? stderr, // if not null, the stderr will be written here.
+  String? workingDirectory,
 }) {
-  final List<String> args = flutterCommandArgs(command, options);
-  return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment, stderr: stderr);
-}
-
-Future<ProcessResult> executeFlutter(String command, {
-  List<String> options = const <String>[],
-}) async {
-  final List<String> args = flutterCommandArgs(command, options);
-  return _processManager.run(
-    <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
-    workingDirectory: cwd,
+  final List<String> args = _flutterCommandArgs(command, options);
+  return eval(
+    path.join(flutterDirectory.path, 'bin', 'flutter'),
+    args,
+    canFail: canFail,
+    environment: environment,
+    stderr: stderr,
+    workingDirectory: workingDirectory,
   );
 }
 
-String get dartBin =>
-    path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+Future<ProcessResult> executeFlutter(
+  String command, {
+  List<String> options = const <String>[],
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+}) async {
+  final List<String> args = _flutterCommandArgs(command, options);
+  final ProcessResult processResult = await _processManager.run(<String>[
+    path.join(flutterDirectory.path, 'bin', 'flutter'),
+    ...args,
+  ], workingDirectory: cwd);
 
-String get pubBin =>
-    path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'pub');
+  if (processResult.exitCode != 0 && !canFail) {
+    await _flutterScreenshot();
+  }
+  return processResult;
+}
 
-Future<int> dart(List<String> args) => exec(dartBin, <String>['--disable-dart-dev', ...args]);
+Future<void> _flutterScreenshot({String? workingDirectory}) async {
+  try {
+    final Directory? dumpDirectory = hostAgent.dumpDirectory;
+    if (dumpDirectory == null) {
+      return;
+    }
+    // On command failure try uploading screenshot of failing command.
+    final String screenshotPath = path.join(
+      dumpDirectory.path,
+      'device-screenshot-${DateTime.now().toLocal().toIso8601String()}.png',
+    );
+
+    final String deviceId = (await devices.workingDevice).deviceId;
+    print('Taking screenshot of working device $deviceId at $screenshotPath');
+    final List<String> args = _flutterCommandArgs('screenshot', <String>[
+      '--out',
+      screenshotPath,
+      '-d',
+      deviceId,
+    ]);
+    final ProcessResult screenshot = await _processManager.run(<String>[
+      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      ...args,
+    ], workingDirectory: workingDirectory ?? cwd);
+
+    if (screenshot.exitCode != 0) {
+      print('Failed to take screenshot. Continuing.');
+    }
+  } catch (exception) {
+    print('Failed to take screenshot. Continuing.\n$exception');
+  }
+}
+
+String get dartBin => path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+
+String get pubBin => path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'pub');
+
+Future<int> dart(List<String> args) => exec(dartBin, args);
 
 /// Returns a future that completes with a path suitable for JAVA_HOME
 /// or with null, if Java cannot be found.
@@ -553,14 +667,13 @@ Future<String?> findJavaHome() async {
     if (hits.isEmpty) {
       return null;
     }
-    final String javaBinary = hits.first
-        .split(': ')
-        .last;
+    final String javaBinary = hits.first.split(': ').last;
     // javaBinary == /some/path/to/java/home/bin/java
     _javaHome = path.dirname(path.dirname(javaBinary));
   }
   return _javaHome;
 }
+
 String? _javaHome;
 
 Future<T> inDirectory<T>(dynamic directory, Future<T> Function() action) async {
@@ -582,7 +695,10 @@ void cd(dynamic directory) {
     cwd = directory.path;
     d = directory;
   } else {
-    throw FileSystemException('Unsupported directory type ${directory.runtimeType}', directory.toString());
+    throw FileSystemException(
+      'Unsupported directory type ${directory.runtimeType}',
+      directory.toString(),
+    );
   }
 
   if (!d.existsSync()) {
@@ -617,22 +733,6 @@ String jsonEncode(dynamic data) {
   return '$jsonValue\n';
 }
 
-Future<void> getNewGallery(String revision, Directory galleryDir) async {
-  section('Get New Flutter Gallery!');
-
-  if (exists(galleryDir)) {
-    galleryDir.deleteSync(recursive: true);
-  }
-
-  await inDirectory<void>(galleryDir.parent, () async {
-    await exec('git', <String>['clone', 'https://github.com/flutter/gallery.git']);
-  });
-
-  await inDirectory<void>(galleryDir, () async {
-    await exec('git', <String>['checkout', revision]);
-  });
-}
-
 /// Splits [from] into lines and selects those that contain [pattern].
 Iterable<String> grep(Pattern pattern, {required String from}) {
   return from.split('\n').where((String line) {
@@ -663,8 +763,7 @@ Future<void> runAndCaptureAsyncStacks(Future<void> Function() callback) {
 
 bool canRun(String path) => _processManager.canRun(path);
 
-final RegExp _obsRegExp =
-  RegExp('A Dart VM Service .* is available at: ');
+final RegExp _obsRegExp = RegExp('A Dart VM Service .* is available at: ');
 final RegExp _obsPortRegExp = RegExp(r'(\S+:(\d+)/\S*)$');
 final RegExp _obsUriRegExp = RegExp(r'((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
@@ -672,17 +771,14 @@ final RegExp _obsUriRegExp = RegExp(r'((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
 /// `prefix` defaults to the RegExp: `A Dart VM Service .* is available at: `.
-int? parseServicePort(String line, {
-  Pattern? prefix,
-}) {
+int? parseServicePort(String line, {Pattern? prefix}) {
   prefix ??= _obsRegExp;
   final Iterable<Match> matchesIter = prefix.allMatches(line);
   if (matchesIter.isEmpty) {
     return null;
   }
   final Match prefixMatch = matchesIter.first;
-  final List<Match> matches =
-    _obsPortRegExp.allMatches(line, prefixMatch.end).toList();
+  final List<Match> matches = _obsPortRegExp.allMatches(line, prefixMatch.end).toList();
   return matches.isEmpty ? null : int.parse(matches[0].group(2)!);
 }
 
@@ -690,17 +786,14 @@ int? parseServicePort(String line, {
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
 /// `prefix` defaults to the RegExp: `A Dart VM Service .* is available at: `.
-Uri? parseServiceUri(String line, {
-  Pattern? prefix,
-}) {
+Uri? parseServiceUri(String line, {Pattern? prefix}) {
   prefix ??= _obsRegExp;
   final Iterable<Match> matchesIter = prefix.allMatches(line);
   if (matchesIter.isEmpty) {
     return null;
   }
   final Match prefixMatch = matchesIter.first;
-  final List<Match> matches =
-    _obsUriRegExp.allMatches(line, prefixMatch.end).toList();
+  final List<Match> matches = _obsUriRegExp.allMatches(line, prefixMatch.end).toList();
   return matches.isEmpty ? null : Uri.parse(matches[0].group(0)!);
 }
 
@@ -765,7 +858,7 @@ void checkFileContains(List<Pattern> patterns, String filePath) {
     if (!fileContent.contains(pattern)) {
       throw TaskResult.failure(
         'Expected to find `$pattern` in `$filePath` '
-        'instead it found:\n$fileContent'
+        'instead it found:\n$fileContent',
       );
     }
   }
@@ -780,10 +873,7 @@ Future<int> gitClone({required String path, required String repo}) async {
 
   await Directory(path).create(recursive: true);
 
-  return inDirectory<int>(
-    path,
-        () => exec('git', <String>['clone', repo]),
-  );
+  return inDirectory<int>(path, () => exec('git', <String>['clone', repo]));
 }
 
 /// Call [fn] retrying so long as [retryIf] return `true` for the exception
@@ -806,8 +896,7 @@ Future<T> retry<T>(
     try {
       return await fn();
     } on Exception catch (e) {
-      if (attempt >= maxAttempts ||
-          (retryIf != null && !(await retryIf(e)))) {
+      if (attempt >= maxAttempts || (retryIf != null && !(await retryIf(e)))) {
         rethrow;
       }
     }
@@ -815,4 +904,27 @@ Future<T> retry<T>(
     // Sleep for a delay
     await Future<void>.delayed(delayDuration);
   }
+}
+
+Future<void> createFfiPackage(String name, Directory parent) async {
+  await inDirectory(parent, () async {
+    await flutter(
+      'create',
+      options: <String>[
+        '--no-pub',
+        '--org',
+        'io.flutter.devicelab',
+        '--template=package_ffi',
+        name,
+      ],
+    );
+    await _pinDependencies(File(path.join(parent.path, name, 'pubspec.yaml')));
+    await _pinDependencies(File(path.join(parent.path, name, 'example', 'pubspec.yaml')));
+  });
+}
+
+Future<void> _pinDependencies(File pubspecFile) async {
+  final String oldPubspec = await pubspecFile.readAsString();
+  final String newPubspec = oldPubspec.replaceAll(': ^', ': ');
+  await pubspecFile.writeAsString(newPubspec);
 }

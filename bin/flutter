@@ -6,8 +6,8 @@
 # ---------------------------------- NOTE ---------------------------------- #
 #
 # Please keep the logic in this file consistent with the logic in the
-# `flutter.bat` script in the same directory to ensure that Flutter continues
-# to work across all platforms!
+# `flutter.bat` script in the same directory to ensure that Flutter
+# continues to work across all platforms!
 #
 # -------------------------------------------------------------------------- #
 
@@ -50,6 +50,7 @@ function follow_links() (
 
 PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+SHARED_NAME="$BIN_DIR/internal/shared.sh"
 OS="$(uname -s)"
 
 # If we're on Windows, invoke the batch script instead to get proper locking.
@@ -58,6 +59,6 @@ if [[ $OS =~ MINGW.* || $OS =~ CYGWIN.* || $OS =~ MSYS.* ]]; then
 fi
 
 # To define `shared::execute()` function
-source "$BIN_DIR/internal/shared.sh"
+source "$SHARED_NAME"
 
 shared::execute "$@"

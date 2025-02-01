@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FontFeature.FontFeature.stylisticSet].
-import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
+
+/// Flutter code sample for [FontFeature.stylisticSet].
 
 void main() => runApp(const ExampleApp());
 
@@ -32,10 +31,7 @@ class ExampleWidget extends StatelessWidget {
       '-> MCMXCVII <-', // 1997
       style: TextStyle(
         fontFamily: 'Piazzolla',
-        fontFeatures: <FontFeature>[
-          FontFeature.stylisticSet(1),
-          FontFeature.stylisticSet(2),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.stylisticSet(1), FontFeature.stylisticSet(2)],
       ),
     );
   }

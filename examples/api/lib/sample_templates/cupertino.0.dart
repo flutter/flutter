@@ -29,9 +29,9 @@
 // is referenced more than once, link back to the instance the example file is
 // named for.
 
-// Flutter code sample for [Placeholder].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [Placeholder].
 
 void main() {
   runApp(const SampleApp());
@@ -41,9 +41,7 @@ class SampleApp extends StatelessWidget {
   const SampleApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(
-      home: PlaceholderExample(),
-    );
+    return const CupertinoApp(home: PlaceholderExample());
   }
 }
 

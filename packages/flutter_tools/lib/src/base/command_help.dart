@@ -58,10 +58,7 @@ class CommandHelp {
     'WidgetsApp.showPerformanceOverlay',
   );
 
-  late final CommandHelpOption R = _makeOption(
-    'R',
-    'Hot restart.',
-  );
+  late final CommandHelpOption R = _makeOption('R', 'Hot restart.');
 
   late final CommandHelpOption S = _makeOption(
     'S',
@@ -87,25 +84,22 @@ class CommandHelp {
     'debugBrightnessOverride',
   );
 
-  late final CommandHelpOption c = _makeOption(
-    'c',
-    'Clear the screen',
-  );
+  late final CommandHelpOption c = _makeOption('c', 'Clear the screen');
 
   late final CommandHelpOption d = _makeOption(
     'd',
     'Detach (terminate "flutter run" but leave application running).',
   );
 
-  late final CommandHelpOption g = _makeOption(
-    'g',
-    'Run source code generators.'
+  late final CommandHelpOption f = _makeOption(
+    'f',
+    'Dump focus tree to the console.',
+    'debugDumpFocusTree',
   );
 
-  late final CommandHelpOption hWithDetails = _makeOption(
-    'h',
-    'Repeat this help message.',
-  );
+  late final CommandHelpOption g = _makeOption('g', 'Run source code generators.');
+
+  late final CommandHelpOption hWithDetails = _makeOption('h', 'Repeat this help message.');
 
   late final CommandHelpOption hWithoutDetails = _makeOption(
     'h',
@@ -118,15 +112,7 @@ class CommandHelp {
     'WidgetsApp.showWidgetInspectorOverride',
   );
 
-  late final CommandHelpOption j = _makeOption(
-    'j',
-    'Dump frame raster stats for the current frame. (Unsupported for web)',
-  );
-
-  late final CommandHelpOption k = _makeOption(
-    'k',
-    'Toggle CanvasKit rendering.',
-  );
+  late final CommandHelpOption k = _makeOption('k', 'Toggle CanvasKit rendering.');
 
   late final CommandHelpOption o = _makeOption(
     'o',
@@ -145,15 +131,9 @@ class CommandHelp {
     'Quit (terminate the application on the device).',
   );
 
-  late final CommandHelpOption r = _makeOption(
-    'r',
-    'Hot reload. $fire$fire$fire',
-  );
+  late final CommandHelpOption r = _makeOption('r', 'Hot reload. $fire$fire$fire');
 
-  late final CommandHelpOption s = _makeOption(
-    's',
-    'Save a screenshot to flutter.png.',
-  );
+  late final CommandHelpOption s = _makeOption('s', 'Save a screenshot to flutter.png.');
 
   late final CommandHelpOption t = _makeOption(
     't',
@@ -161,10 +141,7 @@ class CommandHelp {
     'debugDumpRenderTree',
   );
 
-  late final CommandHelpOption v = _makeOption(
-    'v',
-    'Open Flutter DevTools.',
-  );
+  late final CommandHelpOption v = _makeOption('v', 'Open Flutter DevTools.');
 
   late final CommandHelpOption w = _makeOption(
     'w',
@@ -175,9 +152,7 @@ class CommandHelp {
   // When updating the list above, see the notes above the list regarding order
   // and tests.
 
-  CommandHelpOption _makeOption(String key, String description, [
-    String inParenthesis = '',
-  ]) {
+  CommandHelpOption _makeOption(String key, String description, [String inParenthesis = '']) {
     return CommandHelpOption(
       key,
       description,
@@ -215,8 +190,10 @@ class CommandHelpOption {
 
   /// The key associated with this command.
   final String key;
+
   /// A description of what this command does.
   final String description;
+
   /// Text shown in parenthesis to give the context.
   final String inParenthesis;
 
@@ -233,13 +210,9 @@ class CommandHelpOption {
     }
 
     bool wrap = false;
-    final int maxWidth = math.max(
-      _outputPreferences.wrapColumn,
-      maxLineWidth,
-    );
-    final int adjustedMessageLength = _platform.stdoutSupportsAnsi
-      ? _rawMessageLength + 1
-      : message.length;
+    final int maxWidth = math.max(_outputPreferences.wrapColumn, maxLineWidth);
+    final int adjustedMessageLength =
+        _platform.stdoutSupportsAnsi ? _rawMessageLength + 1 : message.length;
     int width = maxWidth - adjustedMessageLength;
     final String parentheticalText = '($inParenthesis)';
     if (width < parentheticalText.length) {
@@ -253,8 +226,12 @@ class CommandHelpOption {
     message.write(''.padLeft(width - parentheticalText.length));
     message.write(_terminal.color(parentheticalText, TerminalColor.grey));
 
-    // Terminals seem to require this because we have both bolded and colored
-    // a line. Otherwise the next line comes out bold until a reset bold.
+    // Some terminals seem to have a buggy implementation of the SGR ANSI escape
+    // codes and seem to require that we explicitly request "normal intensity"
+    // at the end of the line to prevent the next line comes out bold, despite
+    // the fact that the line already contains a "normal intensity" code.
+    // This doesn't make much sense but has been reproduced by multiple users.
+    // See: https://github.com/flutter/flutter/issues/52204
     if (_terminal.supportsColor) {
       message.write(AnsiTerminal.resetBold);
     }

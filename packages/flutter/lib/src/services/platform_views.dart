@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'message_codecs.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -44,12 +49,21 @@ class PlatformViewsRegistry {
   ///
   /// Typically a platform view identifier is passed to a platform view widget
   /// which creates the platform view and manages its lifecycle.
-  int getNextPlatformViewId() => _nextPlatformViewId++;
+  int getNextPlatformViewId() {
+    // On the Android side, the interface exposed to users uses 32-bit integers.
+    // See https://github.com/flutter/engine/pull/39476 for more details.
+
+    // We can safely assume that a Flutter application will not require more
+    // than MAX_INT32 platform views during its lifetime.
+    const int MAX_INT32 = 0x7FFFFFFF;
+    assert(_nextPlatformViewId <= MAX_INT32);
+    return _nextPlatformViewId++;
+  }
 }
 
 /// Callback signature for when a platform view was created.
 ///
-/// `id` is the platform view's unique identifier.
+/// The `id` parameter is the platform view's unique identifier.
 typedef PlatformViewCreatedCallback = void Function(int id);
 
 /// Provides access to the platform views service.
@@ -63,15 +77,16 @@ class PlatformViewsService {
   static final PlatformViewsService _instance = PlatformViewsService._();
 
   Future<void> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'viewFocused':
         final int id = call.arguments as int;
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]!();
         }
-        break;
       default:
-        throw UnimplementedError("${call.method} was invoked but isn't implemented by PlatformViewsService");
+        throw UnimplementedError(
+          "${call.method} was invoked but isn't implemented by PlatformViewsService",
+        );
     }
     return Future<void>.value();
   }
@@ -84,28 +99,33 @@ class PlatformViewsService {
   /// {@template flutter.services.PlatformViewsService.initAndroidView}
   /// Creates a controller for a new Android view.
   ///
-  /// `id` is an unused unique identifier generated with [platformViewsRegistry].
+  /// The `id` argument is an unused unique identifier generated with
+  /// [platformViewsRegistry].
   ///
-  /// `viewType` is the identifier of the Android view type to be created, a
-  /// factory for this view type must have been registered on the platform side.
-  /// Platform view factories are typically registered by plugin code.
-  /// Plugins can register a platform view factory with
+  /// The `viewType` argument is the identifier of the Android view type to be
+  /// created, a factory for this view type must have been registered on the
+  /// platform side. Platform view factories are typically registered by plugin
+  /// code. Plugins can register a platform view factory with
   /// [PlatformViewRegistry#registerViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
   ///
-  /// `creationParams` will be passed as the args argument of [PlatformViewFactory#create](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#create-android.content.Context-int-java.lang.Object-)
+  /// The `creationParams` argument will be passed as the args argument of
+  /// [PlatformViewFactory#create](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#create-android.content.Context-int-java.lang.Object-)
   ///
-  /// `creationParamsCodec` is the codec used to encode `creationParams` before sending it to the
-  /// platform side. It should match the codec passed to the constructor of [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
-  /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
+  /// The `creationParamsCodec` argument is the codec used to encode
+  /// `creationParams` before sending it to the platform side. It should match
+  /// the codec passed to the constructor of
+  /// [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
+  /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec],
+  /// [StringCodec], or [BinaryCodec].
   ///
-  /// `onFocus` is a callback that will be invoked when the Android View asks to get the
-  /// input focus.
+  /// The `onFocus` argument is a callback that will be invoked when the Android
+  /// View asks to get the input focus.
   ///
-  /// The Android view will only be created after [AndroidViewController.setSize] is called for the
-  /// first time.
+  /// The Android view will only be created after
+  /// [AndroidViewController.setSize] is called for the first time.
   ///
-  /// The `id, `viewType, and `layoutDirection` parameters must not be null.
-  /// If `creationParams` is non null then `creationParamsCodec` must not be null.
+  /// If `creationParams` is non null then `creationParamsCodec` must not be
+  /// null.
   /// {@endtemplate}
   ///
   /// This attempts to use the newest and most efficient platform view
@@ -188,26 +208,21 @@ class PlatformViewsService {
     return controller;
   }
 
-  /// Whether the render surface of the Android `FlutterView` should be converted to a `FlutterImageView`.
-  @Deprecated(
-    'No longer necessary to improve performance. '
-    'This feature was deprecated after v2.11.0-0.1.pre.',
-  )
-  static Future<void> synchronizeToNativeViewHierarchy(bool yes) async {}
-
-  // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
-  /// This is work in progress, not yet ready to be used, and requires a custom engine build. Creates a controller for a new iOS UIView.
+  /// Factory method to create a `UiKitView`.
   ///
-  /// `id` is an unused unique identifier generated with [platformViewsRegistry].
+  /// The `id` parameter is an unused unique identifier generated with
+  /// [platformViewsRegistry].
   ///
-  /// `viewType` is the identifier of the iOS view type to be created, a
-  /// factory for this view type must have been registered on the platform side.
-  /// Platform view factories are typically registered by plugin code.
+  /// The `viewType` parameter is the identifier of the iOS view type to be
+  /// created, a factory for this view type must have been registered on the
+  /// platform side. Platform view factories are typically registered by plugin
+  /// code.
   ///
-  /// `onFocus` is a callback that will be invoked when the UIKit view asks to
-  /// get the input focus.
-  /// The `id, `viewType, and `layoutDirection` parameters must not be null.
-  /// If `creationParams` is non null then `creationParamsCodec` must not be null.
+  /// The `onFocus` parameter is a callback that will be invoked when the UIKit
+  /// view asks to get the input focus. If `creationParams` is non null then
+  /// `creationParamsCodec` must not be null.
+  ///
+  /// See: https://docs.flutter.dev/platform-integration/ios/platform-views
   static Future<UiKitViewController> initUiKitView({
     required int id,
     required String viewType,
@@ -219,23 +234,56 @@ class PlatformViewsService {
     assert(creationParams == null || creationParamsCodec != null);
 
     // TODO(amirh): pass layoutDirection once the system channel supports it.
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': id,
-      'viewType': viewType,
-    };
+    // https://github.com/flutter/flutter/issues/133682
+    final Map<String, dynamic> args = <String, dynamic>{'id': id, 'viewType': viewType};
     if (creationParams != null) {
       final ByteData paramsByteData = creationParamsCodec!.encodeMessage(creationParams)!;
-      args['params'] = Uint8List.view(
-        paramsByteData.buffer,
-        0,
-        paramsByteData.lengthInBytes,
-      );
+      args['params'] = Uint8List.view(paramsByteData.buffer, 0, paramsByteData.lengthInBytes);
     }
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     if (onFocus != null) {
       _instance._focusCallbacks[id] = onFocus;
     }
     return UiKitViewController._(id, layoutDirection);
+  }
+
+  // TODO(cbracken): Write and link website docs. https://github.com/flutter/website/issues/9424.
+  //
+  /// Factory method to create an `AppKitView`.
+  ///
+  /// The `id` parameter is an unused unique identifier generated with
+  /// [platformViewsRegistry].
+  ///
+  /// The `viewType` parameter is the identifier of the iOS view type to be
+  /// created, a factory for this view type must have been registered on the
+  /// platform side. Platform view factories are typically registered by plugin
+  /// code.
+  ///
+  /// The `onFocus` parameter is a callback that will be invoked when the UIKit
+  /// view asks to get the input focus. If `creationParams` is non null then
+  /// `creationParamsCodec` must not be null.
+  static Future<AppKitViewController> initAppKitView({
+    required int id,
+    required String viewType,
+    required TextDirection layoutDirection,
+    dynamic creationParams,
+    MessageCodec<dynamic>? creationParamsCodec,
+    VoidCallback? onFocus,
+  }) async {
+    assert(creationParams == null || creationParamsCodec != null);
+
+    // TODO(amirh): pass layoutDirection once the system channel supports it.
+    // https://github.com/flutter/flutter/issues/133682
+    final Map<String, dynamic> args = <String, dynamic>{'id': id, 'viewType': viewType};
+    if (creationParams != null) {
+      final ByteData paramsByteData = creationParamsCodec!.encodeMessage(creationParams)!;
+      args['params'] = Uint8List.view(paramsByteData.buffer, 0, paramsByteData.lengthInBytes);
+    }
+    await SystemChannels.platform_views.invokeMethod<void>('create', args);
+    if (onFocus != null) {
+      _instance._focusCallbacks[id] = onFocus;
+    }
+    return AppKitViewController._(id, layoutDirection);
   }
 }
 
@@ -244,12 +292,7 @@ class PlatformViewsService {
 /// A Dart version of Android's [MotionEvent.PointerProperties](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties).
 class AndroidPointerProperties {
   /// Creates an [AndroidPointerProperties] object.
-  ///
-  /// All parameters must not be null.
-  const AndroidPointerProperties({
-    required this.id,
-    required this.toolType,
-  });
+  const AndroidPointerProperties({required this.id, required this.toolType});
 
   /// See Android's [MotionEvent.PointerProperties#id](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties.html#id).
   final int id;
@@ -286,8 +329,6 @@ class AndroidPointerProperties {
 /// A Dart version of Android's [MotionEvent.PointerCoords](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords).
 class AndroidPointerCoords {
   /// Creates an AndroidPointerCoords.
-  ///
-  /// All parameters must not be null.
   const AndroidPointerCoords({
     required this.orientation,
     required this.pressure,
@@ -368,8 +409,6 @@ class AndroidPointerCoords {
 ///  * [AndroidViewController.sendMotionEvent], which can be used to send an [AndroidMotionEvent] explicitly.
 class AndroidMotionEvent {
   /// Creates an AndroidMotionEvent.
-  ///
-  /// All parameters must not be null.
   AndroidMotionEvent({
     required this.downTime,
     required this.eventTime,
@@ -483,21 +522,14 @@ class AndroidMotionEvent {
   }
 }
 
-enum _AndroidViewState {
-  waitingForSize,
-  creating,
-  created,
-  disposed,
-}
+enum _AndroidViewState { waitingForSize, creating, created, disposed }
 
 // Helper for converting PointerEvents into AndroidMotionEvents.
 class _AndroidMotionEventConverter {
   _AndroidMotionEventConverter();
 
-  final Map<int, AndroidPointerCoords> pointerPositions =
-      <int, AndroidPointerCoords>{};
-  final Map<int, AndroidPointerProperties> pointerProperties =
-      <int, AndroidPointerProperties>{};
+  final Map<int, AndroidPointerCoords> pointerPositions = <int, AndroidPointerCoords>{};
+  final Map<int, AndroidPointerProperties> pointerProperties = <int, AndroidPointerProperties>{};
   final Set<int> usedAndroidPointerIds = <int>{};
 
   late PointTransformer pointTransformer;
@@ -570,20 +602,22 @@ class _AndroidMotionEventConverter {
       return null;
     }
 
-    final int action;
-    if (event is PointerDownEvent) {
-      action = numPointers == 1
-          ? AndroidViewController.kActionDown
-          : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerDown);
-    } else if (event is PointerUpEvent) {
-      action = numPointers == 1
-          ? AndroidViewController.kActionUp
-          : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerUp);
-    } else if (event is PointerMoveEvent) {
-      action = AndroidViewController.kActionMove;
-    } else if (event is PointerCancelEvent) {
-      action = AndroidViewController.kActionCancel;
-    } else {
+    final int? action = switch (event) {
+      PointerDownEvent() when numPointers == 1 => AndroidViewController.kActionDown,
+      PointerUpEvent() when numPointers == 1 => AndroidViewController.kActionUp,
+      PointerDownEvent() => AndroidViewController.pointerAction(
+        pointerIdx,
+        AndroidViewController.kActionPointerDown,
+      ),
+      PointerUpEvent() => AndroidViewController.pointerAction(
+        pointerIdx,
+        AndroidViewController.kActionPointerUp,
+      ),
+      PointerMoveEvent() => AndroidViewController.kActionMove,
+      PointerCancelEvent() => AndroidViewController.kActionCancel,
+      _ => null,
+    };
+    if (action == null) {
       return null;
     }
 
@@ -592,45 +626,44 @@ class _AndroidMotionEventConverter {
       eventTime: event.timeStamp.inMilliseconds,
       action: action,
       pointerCount: pointerPositions.length,
-      pointerProperties: pointers
-          .map<AndroidPointerProperties>((int i) => pointerProperties[i]!)
-          .toList(),
-      pointerCoords: pointers
-          .map<AndroidPointerCoords>((int i) => pointerPositions[i]!)
-          .toList(),
+      pointerProperties:
+          pointers.map<AndroidPointerProperties>((int i) => pointerProperties[i]!).toList(),
+      pointerCoords: pointers.map<AndroidPointerCoords>((int i) => pointerPositions[i]!).toList(),
       metaState: 0,
       buttonState: 0,
       xPrecision: 1.0,
       yPrecision: 1.0,
       deviceId: 0,
       edgeFlags: 0,
-      source: 0,
+      source: _AndroidMotionEventConverter.sourceFor(event),
       flags: 0,
       motionEventId: event.embedderId,
     );
   }
 
+  static int sourceFor(PointerEvent event) {
+    return switch (event.kind) {
+      PointerDeviceKind.touch => AndroidViewController.kInputDeviceSourceTouchScreen,
+      PointerDeviceKind.trackpad => AndroidViewController.kInputDeviceSourceTouchPad,
+      PointerDeviceKind.mouse => AndroidViewController.kInputDeviceSourceMouse,
+      PointerDeviceKind.stylus => AndroidViewController.kInputDeviceSourceStylus,
+      PointerDeviceKind.invertedStylus => AndroidViewController.kInputDeviceSourceStylus,
+      PointerDeviceKind.unknown => AndroidViewController.kInputDeviceSourceUnknown,
+    };
+  }
+
   AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
-    int toolType = AndroidPointerProperties.kToolTypeUnknown;
-    switch (event.kind) {
-      case PointerDeviceKind.touch:
-      case PointerDeviceKind.trackpad:
-        toolType = AndroidPointerProperties.kToolTypeFinger;
-        break;
-      case PointerDeviceKind.mouse:
-        toolType = AndroidPointerProperties.kToolTypeMouse;
-        break;
-      case PointerDeviceKind.stylus:
-        toolType = AndroidPointerProperties.kToolTypeStylus;
-        break;
-      case PointerDeviceKind.invertedStylus:
-        toolType = AndroidPointerProperties.kToolTypeEraser;
-        break;
-      case PointerDeviceKind.unknown:
-        toolType = AndroidPointerProperties.kToolTypeUnknown;
-        break;
-    }
-    return AndroidPointerProperties(id: pointerId, toolType: toolType);
+    return AndroidPointerProperties(
+      id: pointerId,
+      toolType: switch (event.kind) {
+        PointerDeviceKind.touch => AndroidPointerProperties.kToolTypeFinger,
+        PointerDeviceKind.trackpad => AndroidPointerProperties.kToolTypeFinger,
+        PointerDeviceKind.mouse => AndroidPointerProperties.kToolTypeMouse,
+        PointerDeviceKind.stylus => AndroidPointerProperties.kToolTypeStylus,
+        PointerDeviceKind.invertedStylus => AndroidPointerProperties.kToolTypeEraser,
+        PointerDeviceKind.unknown => AndroidPointerProperties.kToolTypeUnknown,
+      },
+    );
   }
 
   bool isSinglePointerAction(PointerEvent event) =>
@@ -654,10 +687,11 @@ abstract class AndroidViewController extends PlatformViewController {
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
-  })  : assert(creationParams == null || creationParamsCodec != null),
-        _viewType = viewType,
-        _layoutDirection = layoutDirection,
-        _creationParams = creationParams == null ? null : _CreationParams(creationParams, creationParamsCodec!);
+  }) : assert(creationParams == null || creationParamsCodec != null),
+       _viewType = viewType,
+       _layoutDirection = layoutDirection,
+       _creationParams =
+           creationParams == null ? null : _CreationParams(creationParams, creationParamsCodec!);
 
   /// Action code for when a primary pointer touched the screen.
   ///
@@ -695,6 +729,21 @@ abstract class AndroidViewController extends PlatformViewController {
   /// Android's [View.LAYOUT_DIRECTION_RTL](https://developer.android.com/reference/android/view/View.html#LAYOUT_DIRECTION_RTL) value.
   static const int kAndroidLayoutDirectionRtl = 1;
 
+  /// Android's [InputDevice.SOURCE_UNKNOWN](https://developer.android.com/reference/android/view/InputDevice#SOURCE_UNKNOWN)
+  static const int kInputDeviceSourceUnknown = 0;
+
+  /// Android's [InputDevice.SOURCE_TOUCHSCREEN](https://developer.android.com/reference/android/view/InputDevice#SOURCE_TOUCHSCREEN)
+  static const int kInputDeviceSourceTouchScreen = 4098;
+
+  /// Android's [InputDevice.SOURCE_MOUSE](https://developer.android.com/reference/android/view/InputDevice#SOURCE_MOUSE)
+  static const int kInputDeviceSourceMouse = 8194;
+
+  /// Android's [InputDevice.SOURCE_STYLUS](https://developer.android.com/reference/android/view/InputDevice#SOURCE_STYLUS)
+  static const int kInputDeviceSourceStylus = 16386;
+
+  /// Android's [InputDevice.SOURCE_TOUCHPAD](https://developer.android.com/reference/android/view/InputDevice#SOURCE_TOUCHPAD)
+  static const int kInputDeviceSourceTouchPad = 1048584;
+
   /// The unique identifier of the Android view controlled by this controller.
   @override
   final int viewId;
@@ -702,8 +751,7 @@ abstract class AndroidViewController extends PlatformViewController {
   final String _viewType;
 
   // Helps convert PointerEvents to AndroidMotionEvents.
-  final _AndroidMotionEventConverter _motionEventConverter =
-      _AndroidMotionEventConverter();
+  final _AndroidMotionEventConverter _motionEventConverter = _AndroidMotionEventConverter();
 
   TextDirection _layoutDirection;
 
@@ -715,12 +763,10 @@ abstract class AndroidViewController extends PlatformViewController {
       <PlatformViewCreatedCallback>[];
 
   static int _getAndroidDirection(TextDirection direction) {
-    switch (direction) {
-      case TextDirection.ltr:
-        return kAndroidLayoutDirectionLtr;
-      case TextDirection.rtl:
-        return kAndroidLayoutDirectionRtl;
-    }
+    return switch (direction) {
+      TextDirection.ltr => kAndroidLayoutDirectionLtr,
+      TextDirection.rtl => kAndroidLayoutDirectionRtl,
+    };
   }
 
   /// Creates a masked Android MotionEvent action value for an indexed pointer.
@@ -749,7 +795,10 @@ abstract class AndroidViewController extends PlatformViewController {
   @override
   Future<void> create({Size? size, Offset? position}) async {
     assert(_state != _AndroidViewState.disposed, 'trying to create a disposed Android view');
-    assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
+    assert(
+      _state == _AndroidViewState.waitingForSize,
+      'Android view is already sized. View id: $viewId',
+    );
 
     if (_createRequiresSize && size == null) {
       // Wait for a setSize call.
@@ -767,8 +816,8 @@ abstract class AndroidViewController extends PlatformViewController {
 
   /// Sizes the Android View.
   ///
-  /// [size] is the view's new size in logical pixel, it must not be null and must
-  /// be bigger than zero.
+  /// [size] is the view's new size in logical pixel. It must be greater than
+  /// zero.
   ///
   /// The first time a size is set triggers the creation of the Android view.
   ///
@@ -822,10 +871,7 @@ abstract class AndroidViewController extends PlatformViewController {
   /// See [AndroidViewController.dispatchPointerEvent] for sending a
   /// [PointerEvent].
   Future<void> sendMotionEvent(AndroidMotionEvent event) async {
-    await SystemChannels.platform_views.invokeMethod<dynamic>(
-      'touch',
-      event._asList(viewId),
-    );
+    await SystemChannels.platform_views.invokeMethod<dynamic>('touch', event._asList(viewId));
   }
 
   /// Converts a given point from the global coordinate system in logical pixels
@@ -878,8 +924,7 @@ abstract class AndroidViewController extends PlatformViewController {
       return;
     }
 
-    await SystemChannels.platform_views
-        .invokeMethod<void>('setDirection', <String, dynamic>{
+    await SystemChannels.platform_views.invokeMethod<void>('setDirection', <String, dynamic>{
       'id': viewId,
       'direction': _getAndroidDirection(layoutDirection),
     });
@@ -908,8 +953,7 @@ abstract class AndroidViewController extends PlatformViewController {
 
     _motionEventConverter.updatePointerPositions(event);
 
-    final AndroidMotionEvent? androidEvent =
-        _motionEventConverter.toAndroidMotionEvent(event);
+    final AndroidMotionEvent? androidEvent = _motionEventConverter.toAndroidMotionEvent(event);
 
     if (event is PointerUpEvent) {
       _motionEventConverter.handlePointerUpEvent(event);
@@ -952,13 +996,13 @@ abstract class AndroidViewController extends PlatformViewController {
 /// This controller is created from the [PlatformViewsService.initSurfaceAndroidView] factory,
 /// and is defined for backward compatibility.
 class SurfaceAndroidViewController extends AndroidViewController {
-    SurfaceAndroidViewController._({
+  SurfaceAndroidViewController._({
     required super.viewId,
     required super.viewType,
     required super.layoutDirection,
     super.creationParams,
     super.creationParamsCodec,
-  })  : super._();
+  }) : super._();
 
   // By default, assume the implementation will be texture-based.
   _AndroidViewControllerInternals _internals = _TextureAndroidViewControllerInternals();
@@ -968,7 +1012,10 @@ class SurfaceAndroidViewController extends AndroidViewController {
 
   @override
   Future<bool> _sendCreateMessage({required Size size, Offset? position}) async {
-    assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
+    assert(
+      !size.isEmpty,
+      'trying to create $TextureAndroidViewController without setting a valid size.',
+    );
 
     final dynamic response = await _AndroidViewControllerInternals.sendCreateMessage(
       viewId: viewId,
@@ -1025,7 +1072,7 @@ class ExpensiveAndroidViewController extends AndroidViewController {
     required super.layoutDirection,
     super.creationParams,
     super.creationParamsCodec,
-  })  : super._();
+  }) : super._();
 
   final _AndroidViewControllerInternals _internals = _HybridAndroidViewControllerInternals();
 
@@ -1085,24 +1132,30 @@ class TextureAndroidViewController extends AndroidViewController {
     super.creationParamsCodec,
   }) : super._();
 
-  final _TextureAndroidViewControllerInternals _internals = _TextureAndroidViewControllerInternals();
+  final _TextureAndroidViewControllerInternals _internals =
+      _TextureAndroidViewControllerInternals();
 
   @override
   bool get _createRequiresSize => true;
 
   @override
   Future<void> _sendCreateMessage({required Size size, Offset? position}) async {
-    assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
+    assert(
+      !size.isEmpty,
+      'trying to create $TextureAndroidViewController without setting a valid size.',
+    );
 
-    _internals.textureId = await _AndroidViewControllerInternals.sendCreateMessage(
-      viewId: viewId,
-      viewType: _viewType,
-      hybrid: false,
-      layoutDirection: _layoutDirection,
-      creationParams: _creationParams,
-      size: size,
-      position: position,
-    ) as int;
+    _internals.textureId =
+        await _AndroidViewControllerInternals.sendCreateMessage(
+              viewId: viewId,
+              viewType: _viewType,
+              hybrid: false,
+              layoutDirection: _layoutDirection,
+              creationParams: _creationParams,
+              size: size,
+              position: position,
+            )
+            as int;
   }
 
   @override
@@ -1143,32 +1196,29 @@ abstract class _AndroidViewControllerInternals {
   // on the native side, the return type is different. Callers should cast
   // depending on the possible return types for their arguments.
   static Future<dynamic> sendCreateMessage({
-      required int viewId,
-      required String viewType,
-      required TextDirection layoutDirection,
-      required bool hybrid,
-      bool hybridFallback = false,
-      _CreationParams? creationParams,
-      Size? size,
-      Offset? position}) {
+    required int viewId,
+    required String viewType,
+    required TextDirection layoutDirection,
+    required bool hybrid,
+    bool hybridFallback = false,
+    _CreationParams? creationParams,
+    Size? size,
+    Offset? position,
+  }) {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
-      if (hybrid == true) 'hybrid': hybrid,
+      if (hybrid) 'hybrid': hybrid,
       if (size != null) 'width': size.width,
       if (size != null) 'height': size.height,
-      if (hybridFallback == true) 'hybridFallback': hybridFallback,
+      if (hybridFallback) 'hybridFallback': hybridFallback,
       if (position != null) 'left': position.dx,
       if (position != null) 'top': position.dy,
     };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParams.codec.encodeMessage(creationParams.data)!;
-      args['params'] = Uint8List.view(
-        paramsByteData.buffer,
-        0,
-        paramsByteData.lengthInBytes,
-      );
+      args['params'] = Uint8List.view(paramsByteData.buffer, 0, paramsByteData.lengthInBytes);
     }
     return SystemChannels.platform_views.invokeMethod<dynamic>('create', args);
   }
@@ -1177,11 +1227,7 @@ abstract class _AndroidViewControllerInternals {
 
   bool get requiresViewComposition;
 
-  Future<Size> setSize(
-    Size size, {
-    required int viewId,
-    required _AndroidViewState viewState,
-  });
+  Future<Size> setSize(Size size, {required int viewId, required _AndroidViewState viewState});
 
   Future<void> setOffset(
     Offset offset, {
@@ -1214,17 +1260,18 @@ class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInter
     required int viewId,
     required _AndroidViewState viewState,
   }) async {
-    assert(viewState != _AndroidViewState.waitingForSize, 'Android view must have an initial size. View id: $viewId');
+    assert(
+      viewState != _AndroidViewState.waitingForSize,
+      'Android view must have an initial size. View id: $viewId',
+    );
     assert(!size.isEmpty);
 
-    final Map<Object?, Object?>? meta = await SystemChannels.platform_views.invokeMapMethod<Object?, Object?>(
-      'resize',
-      <String, dynamic>{
-        'id': viewId,
-        'width': size.width,
-        'height': size.height,
-      },
-    );
+    final Map<Object?, Object?>? meta = await SystemChannels.platform_views
+        .invokeMapMethod<Object?, Object?>('resize', <String, dynamic>{
+          'id': viewId,
+          'width': size.width,
+          'height': size.height,
+        });
     assert(meta != null);
     assert(meta!.containsKey('width'));
     assert(meta!.containsKey('height'));
@@ -1250,20 +1297,16 @@ class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInter
 
     _offset = offset;
 
-    await SystemChannels.platform_views.invokeMethod<void>(
-      'offset',
-      <String, dynamic>{
-        'id': viewId,
-        'top': offset.dy,
-        'left': offset.dx,
-      },
-    );
+    await SystemChannels.platform_views.invokeMethod<void>('offset', <String, dynamic>{
+      'id': viewId,
+      'top': offset.dy,
+      'left': offset.dx,
+    });
   }
 
   @override
   Future<void> sendDisposeMessage({required int viewId}) {
-    return SystemChannels
-        .platform_views.invokeMethod<void>('dispose', <String, dynamic>{
+    return SystemChannels.platform_views.invokeMethod<void>('dispose', <String, dynamic>{
       'id': viewId,
       'hybrid': false,
     });
@@ -1284,11 +1327,7 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
   bool get requiresViewComposition => true;
 
   @override
-  Future<Size> setSize(
-    Size size, {
-    required int viewId,
-    required _AndroidViewState viewState,
-  }) {
+  Future<Size> setSize(Size size, {required int viewId, required _AndroidViewState viewState}) {
     throw UnimplementedError('Not supported for hybrid composition.');
   }
 
@@ -1310,15 +1349,14 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
   }
 }
 
-/// Controls an iOS UIView.
+/// Base class for iOS and macOS view controllers.
 ///
-/// Typically created with [PlatformViewsService.initUiKitView].
-class UiKitViewController {
-  UiKitViewController._(
-    this.id,
-    TextDirection layoutDirection,
-  ) : _layoutDirection = layoutDirection;
-
+/// View controllers are used to create and interact with the UIView or NSView
+/// underlying a platform view.
+abstract class DarwinPlatformViewController {
+  /// Public default for subclasses to override.
+  DarwinPlatformViewController(this.id, TextDirection layoutDirection)
+    : _layoutDirection = layoutDirection;
 
   /// The unique identifier of the iOS view controlled by this controller.
   ///
@@ -1332,7 +1370,10 @@ class UiKitViewController {
 
   /// Sets the layout direction for the iOS UIView.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
-    assert(!_debugDisposed, 'trying to set a layout direction for a disposed iOS UIView. View id: $id');
+    assert(
+      !_debugDisposed,
+      'trying to set a layout direction for a disposed iOS UIView. View id: $id',
+    );
 
     if (layoutDirection == _layoutDirection) {
       return;
@@ -1349,9 +1390,7 @@ class UiKitViewController {
   /// Calling this method releases the delayed events to the embedded UIView and makes it consume
   /// any following touch events for the pointers involved in the active gesture.
   Future<void> acceptGesture() {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': id,
-    };
+    final Map<String, dynamic> args = <String, dynamic>{'id': id};
     return SystemChannels.platform_views.invokeMethod('acceptGesture', args);
   }
 
@@ -1361,9 +1400,7 @@ class UiKitViewController {
   /// Calling this method drops the buffered touch events and prevents any future touch events for
   /// the pointers that are part of the active touch sequence from arriving to the embedded view.
   Future<void> rejectGesture() {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': id,
-    };
+    final Map<String, dynamic> args = <String, dynamic>{'id': id};
     return SystemChannels.platform_views.invokeMethod('rejectGesture', args);
   }
 
@@ -1375,7 +1412,22 @@ class UiKitViewController {
   Future<void> dispose() async {
     _debugDisposed = true;
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
+    PlatformViewsService._instance._focusCallbacks.remove(id);
   }
+}
+
+/// Controller for an iOS platform view.
+///
+/// View controllers create and interact with the underlying UIView.
+///
+/// Typically created with [PlatformViewsService.initUiKitView].
+class UiKitViewController extends DarwinPlatformViewController {
+  UiKitViewController._(super.id, super.layoutDirection);
+}
+
+/// Controller for a macOS platform view.
+class AppKitViewController extends DarwinPlatformViewController {
+  AppKitViewController._(super.id, super.layoutDirection);
 }
 
 /// An interface for controlling a single platform view.

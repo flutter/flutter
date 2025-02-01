@@ -2,28 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [PlatformMenuBar].
-
 // THIS SAMPLE ONLY WORKS ON MACOS.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// Flutter code sample for [PlatformMenuBar].
+
 void main() => runApp(const ExampleApp());
 
-enum MenuSelection {
-  about,
-  showMessage,
-}
+enum MenuSelection { about, showMessage }
 
 class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: PlatformMenuBarExample()),
-    );
+    return const MaterialApp(home: Scaffold(body: PlatformMenuBarExample()));
   }
 }
 
@@ -46,12 +41,10 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
           applicationName: 'MenuBar Sample',
           applicationVersion: '1.0.0',
         );
-        break;
       case MenuSelection.showMessage:
         setState(() {
           _showMessage = !_showMessage;
         });
-        break;
     }
   }
 
@@ -125,10 +118,12 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
         ),
       ],
       child: Center(
-        child: Text(_showMessage
-            ? _message
-            : 'This space intentionally left blank.\n'
-              'Show a message here using the menu.'),
+        child: Text(
+          _showMessage
+              ? _message
+              : 'This space intentionally left blank.\n'
+                  'Show a message here using the menu.',
+        ),
       ),
     );
   }

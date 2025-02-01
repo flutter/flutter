@@ -10,16 +10,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const EditableTextToolbarBuilderExampleApp());
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
+  const EditableTextToolbarBuilderExampleApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<EditableTextToolbarBuilderExampleApp> createState() =>
+      _EditableTextToolbarBuilderExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _EditableTextToolbarBuilderExampleAppState
+    extends State<EditableTextToolbarBuilderExampleApp> {
   final TextEditingController _controller = TextEditingController(
     text: 'Right click (desktop) or long press (mobile) to see the menu with custom buttons.',
   );
@@ -46,9 +48,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Custom button appearance'),
-        ),
+        appBar: AppBar(title: const Text('Custom button appearance')),
         body: Center(
           child: Column(
             children: <Widget>[
@@ -61,22 +61,27 @@ class _MyAppState extends State<MyApp> {
                     // Build the default buttons, but make them look custom.
                     // In a real project you may want to build different
                     // buttons depending on the platform.
-                    children: editableTextState.contextMenuButtonItems.map((ContextMenuButtonItem buttonItem) {
-                      return CupertinoButton(
-                        borderRadius: null,
-                        color: const Color(0xffaaaa00),
-                        disabledColor: const Color(0xffaaaaff),
-                        onPressed: buttonItem.onPressed,
-                        padding: const EdgeInsets.all(10.0),
-                        pressedOpacity: 0.7,
-                        child: SizedBox(
-                          width: 200.0,
-                          child: Text(
-                            CupertinoTextSelectionToolbarButton.getButtonLabel(context, buttonItem),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                    children:
+                        editableTextState.contextMenuButtonItems.map((
+                          ContextMenuButtonItem buttonItem,
+                        ) {
+                          return CupertinoButton(
+                            color: const Color(0xffaaaa00),
+                            disabledColor: const Color(0xffaaaaff),
+                            onPressed: buttonItem.onPressed,
+                            padding: const EdgeInsets.all(10.0),
+                            pressedOpacity: 0.7,
+                            child: SizedBox(
+                              width: 200.0,
+                              child: Text(
+                                CupertinoTextSelectionToolbarButton.getButtonLabel(
+                                  context,
+                                  buttonItem,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
                   );
                 },
               ),

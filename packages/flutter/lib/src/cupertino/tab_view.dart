@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'tab_scaffold.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'app.dart' show CupertinoApp;
@@ -88,7 +91,7 @@ class CupertinoTabView extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed] inside this tab view,
   /// the route name is looked up in this map. If the name is present,
-  /// the associated [widgets.WidgetBuilder] is used to construct a
+  /// the associated [WidgetBuilder] is used to construct a
   /// [CupertinoPageRoute] that performs an appropriate transition to the new
   /// route.
   ///
@@ -150,26 +153,55 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   @override
   void didUpdateWidget(CupertinoTabView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.navigatorKey != oldWidget.navigatorKey
-        || widget.navigatorObservers != oldWidget.navigatorObservers) {
+    if (widget.navigatorKey != oldWidget.navigatorKey ||
+        widget.navigatorObservers != oldWidget.navigatorObservers) {
       _updateObservers();
     }
   }
 
-  void _updateObservers() {
-    _navigatorObservers =
-        List<NavigatorObserver>.of(widget.navigatorObservers)
-          ..add(_heroController);
+  @override
+  void dispose() {
+    _heroController.dispose();
+    super.dispose();
   }
+
+  void _updateObservers() {
+    _navigatorObservers = List<NavigatorObserver>.of(widget.navigatorObservers)
+      ..add(_heroController);
+  }
+
+  GlobalKey<NavigatorState>? _ownedNavigatorKey;
+  GlobalKey<NavigatorState> get _navigatorKey {
+    if (widget.navigatorKey != null) {
+      return widget.navigatorKey!;
+    }
+    _ownedNavigatorKey ??= GlobalKey<NavigatorState>();
+    return _ownedNavigatorKey!;
+  }
+
+  // Whether this tab is currently the active tab.
+  bool get _isActive => TickerMode.of(context);
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      key: widget.navigatorKey,
+    final Widget child = Navigator(
+      key: _navigatorKey,
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: _onUnknownRoute,
       observers: _navigatorObservers,
       restorationScopeId: widget.restorationScopeId,
+    );
+
+    // Handle system back gestures only if the tab is currently active.
+    return NavigatorPopHandler(
+      enabled: _isActive,
+      onPop: () {
+        if (!_isActive) {
+          return;
+        }
+        _navigatorKey.currentState!.maybePop();
+      },
+      child: child,
     );
   }
 
@@ -184,11 +216,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
       routeBuilder = widget.routes?[name];
     }
     if (routeBuilder != null) {
-      return CupertinoPageRoute<dynamic>(
-        builder: routeBuilder,
-        title: title,
-        settings: settings,
-      );
+      return CupertinoPageRoute<dynamic>(builder: routeBuilder, title: title, settings: settings);
     }
     return widget.onGenerateRoute?.call(settings);
   }

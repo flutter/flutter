@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/foundation.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/scheduler.dart';
+library;
+
 import 'dart:async';
 
 import 'package:meta/meta.dart' show visibleForTesting;
@@ -55,10 +60,7 @@ abstract class LicenseEntry {
   Iterable<LicenseParagraph> get paragraphs;
 }
 
-enum _LicenseEntryWithLineBreaksParserState {
-  beforeParagraph,
-  inParagraph,
-}
+enum _LicenseEntryWithLineBreaksParserState { beforeParagraph, inParagraph }
 
 /// Variant of [LicenseEntry] for licenses that separate paragraphs with blank
 /// lines and that hard-wrap text within paragraphs. Lines that begin with one
@@ -148,7 +150,8 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     int lastLineIndent = 0;
     int currentLineIndent = 0;
     int? currentParagraphIndentation;
-    _LicenseEntryWithLineBreaksParserState state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
+    _LicenseEntryWithLineBreaksParserState state =
+        _LicenseEntryWithLineBreaksParserState.beforeParagraph;
     final List<String> lines = <String>[];
     final List<LicenseParagraph> result = <LicenseParagraph>[];
 
@@ -160,7 +163,10 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     LicenseParagraph getParagraph() {
       assert(lines.isNotEmpty);
       assert(currentParagraphIndentation != null);
-      final LicenseParagraph result = LicenseParagraph(lines.join(' '), currentParagraphIndentation!);
+      final LicenseParagraph result = LicenseParagraph(
+        lines.join(' '),
+        currentParagraphIndentation!,
+      );
       assert(result.text.trimLeft() == result.text);
       assert(result.text.isNotEmpty);
       lines.clear();
@@ -176,20 +182,19 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               lineStart = currentPosition + 1;
               currentLineIndent += 1;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-              break;
             case '\t':
               lineStart = currentPosition + 1;
               currentLineIndent += 8;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-              break;
             case '\r':
             case '\n':
             case '\f':
               if (lines.isNotEmpty) {
                 result.add(getParagraph());
               }
-              if (text[currentPosition] == '\r' && currentPosition < text.length - 1
-                  && text[currentPosition + 1] == '\n') {
+              if (text[currentPosition] == '\r' &&
+                  currentPosition < text.length - 1 &&
+                  text[currentPosition + 1] == '\n') {
                 currentPosition += 1;
               }
               lastLineIndent = 0;
@@ -197,7 +202,6 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               currentParagraphIndentation = null;
               lineStart = currentPosition + 1;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-              break;
             case '[':
               // This is a bit of a hack for the LGPL 2.1, which does something like this:
               //
@@ -224,7 +228,6 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               }
               state = _LicenseEntryWithLineBreaksParserState.inParagraph;
           }
-          break;
         case _LicenseEntryWithLineBreaksParserState.inParagraph:
           switch (text[currentPosition]) {
             case '\n':
@@ -233,7 +236,6 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               currentLineIndent = 0;
               lineStart = currentPosition + 1;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-              break;
             case '\f':
               addLine();
               result.add(getParagraph());
@@ -242,11 +244,9 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               currentParagraphIndentation = null;
               lineStart = currentPosition + 1;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-              break;
             default:
               state = _LicenseEntryWithLineBreaksParserState.inParagraph;
           }
-          break;
       }
       currentPosition += 1;
     }
@@ -255,16 +255,13 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
         if (lines.isNotEmpty) {
           result.add(getParagraph());
         }
-        break;
       case _LicenseEntryWithLineBreaksParserState.inParagraph:
         addLine();
         result.add(getParagraph());
-        break;
     }
     return result;
   }
 }
-
 
 /// A registry for packages to add licenses to, so that they can be displayed
 /// together in an interface such as the [LicensePage].
@@ -291,11 +288,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 ///    uses this API to select licenses to show.
 ///  * [AboutListTile], which is a widget that can be added to a [Drawer]. When
 ///    tapped it calls [showAboutDialog].
-class LicenseRegistry {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  LicenseRegistry._();
-
+abstract final class LicenseRegistry {
   static List<LicenseEntryCollector>? _collectors;
 
   /// Adds licenses to the registry.

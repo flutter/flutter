@@ -3,16 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('Use home', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
-        home: CupertinoTabView(
-          builder: (BuildContext context) => const Text('home'),
-        ),
-      ),
+      CupertinoApp(home: CupertinoTabView(builder: (BuildContext context) => const Text('home'))),
     );
 
     expect(find.text('home'), findsOneWidget);
@@ -22,9 +20,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
-          routes: <String, WidgetBuilder>{
-            '/': (BuildContext context) => const Text('first route'),
-          },
+          routes: <String, WidgetBuilder>{'/': (BuildContext context) => const Text('first route')},
         ),
       ),
     );
@@ -80,26 +76,31 @@ void main() {
     expect(find.text('generated home'), findsOneWidget);
   });
 
-  testWidgets('Use onUnknownRoute', (WidgetTester tester) async {
-    late String unknownForRouteCalled;
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: CupertinoTabView(
-          onUnknownRoute: (RouteSettings settings) {
-            unknownForRouteCalled = settings.name!;
-            return null;
-          },
+  testWidgets(
+    'Use onUnknownRoute',
+    experimentalLeakTesting:
+        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      late String unknownForRouteCalled;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabView(
+            onUnknownRoute: (RouteSettings settings) {
+              unknownForRouteCalled = settings.name!;
+              return null;
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(tester.takeException(), isFlutterError);
-    expect(unknownForRouteCalled, '/');
+      expect(tester.takeException(), isFlutterError);
+      expect(unknownForRouteCalled, '/');
 
-    // Work-around for https://github.com/flutter/flutter/issues/65655.
-    await tester.pumpWidget(Container());
-    expect(tester.takeException(), isAssertionError);
-  });
+      // Work-around for https://github.com/flutter/flutter/issues/65655.
+      await tester.pumpWidget(Container());
+      expect(tester.takeException(), isAssertionError);
+    },
+  );
 
   testWidgets('Can use navigatorKey to navigate', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey();
@@ -245,14 +246,15 @@ void main() {
         restorationScopeId: 'app',
         home: CupertinoTabView(
           restorationScopeId: 'tab',
-          builder: (BuildContext context) => CupertinoButton(
-            child: const Text('home'),
-            onPressed: () {
-              Navigator.of(context).restorablePushNamed('/2');
-            },
-          ),
+          builder:
+              (BuildContext context) => CupertinoButton(
+                child: const Text('home'),
+                onPressed: () {
+                  Navigator.of(context).restorablePushNamed('/2');
+                },
+              ),
           routes: <String, WidgetBuilder>{
-            '/2' : (BuildContext context) => const Text('second route'),
+            '/2': (BuildContext context) => const Text('second route'),
           },
         ),
       ),
@@ -288,5 +290,43 @@ void main() {
 
     expect(find.text('home'), findsOneWidget);
     expect(find.text('second route'), findsNothing);
+  });
+
+  testWidgets('Handles Android back button', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(label: '', icon: Text('1')),
+              BottomNavigationBarItem(label: '', icon: Text('2')),
+            ],
+          ),
+          tabBuilder:
+              (_, int i) => PopScope<Object?>(
+                canPop: false,
+                child: CupertinoTabView(
+                  navigatorKey: key,
+                  builder: (BuildContext context) => const Text('first route'),
+                ),
+              ),
+        ),
+      ),
+    );
+
+    expect(find.text('first route'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/navigation',
+      message,
+      (_) {},
+    );
+    await tester.pumpAndSettle();
+
+    // Navigator didn't pop, so first route is still visible
+    expect(find.text('first route'), findsOneWidget);
   });
 }

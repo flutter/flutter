@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FontFeature.FontFeature.swash].
-import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
+
+/// Flutter code sample for [FontFeature.swash].
 
 void main() => runApp(const ExampleApp());
 
@@ -32,9 +31,7 @@ class ExampleWidget extends StatelessWidget {
       'Queer & Romantic',
       style: TextStyle(
         fontFamily: 'BioRhyme Expanded',
-        fontFeatures: <FontFeature>[
-          FontFeature.swash(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.swash()],
       ),
     );
   }

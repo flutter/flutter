@@ -5,29 +5,53 @@
 import 'template.dart';
 
 class CardTemplate extends TokenTemplate {
-  const CardTemplate(super.blockName, super.fileName, super.tokens);
+  const CardTemplate(
+    this.tokenGroup,
+    super.blockName,
+    super.fileName,
+    super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+  });
+
+  final String tokenGroup;
+
+  String _shape() {
+    final String cardShape = shape('$tokenGroup.container');
+    if (tokenAvailable('$tokenGroup.outline.color')) {
+      return '''
+
+    $cardShape.copyWith(
+      side: ${border('$tokenGroup.outline')}
+    )''';
+    } else {
+      return cardShape;
+    }
+  }
 
   @override
   String generate() => '''
-class _${blockName}DefaultsM3 extends CardTheme {
-  const _${blockName}DefaultsM3(this.context)
+class _${blockName}DefaultsM3 extends CardThemeData {
+  _${blockName}DefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
-        elevation: ${elevation("md.comp.elevated-card.container")},
+        elevation: ${elevation('$tokenGroup.container')},
         margin: const EdgeInsets.all(4.0),
-        shape: ${shape("md.comp.elevated-card.container")},
       );
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get color => ${componentColor("md.comp.elevated-card.container")};
+  Color? get color => ${componentColor('$tokenGroup.container')};
 
   @override
-  Color? get shadowColor => ${colorOrTransparent("md.comp.elevated-card.container.shadow-color")};
+  Color? get shadowColor => ${colorOrTransparent('$tokenGroup.container.shadow-color')};
 
   @override
-  Color? get surfaceTintColor => ${colorOrTransparent("md.comp.elevated-card.container.surface-tint-layer.color")};
+  Color? get surfaceTintColor => ${colorOrTransparent('$tokenGroup.container.surface-tint-layer.color')};
+
+  @override
+  ShapeBorder? get shape =>${_shape()};
 }
 ''';
 }

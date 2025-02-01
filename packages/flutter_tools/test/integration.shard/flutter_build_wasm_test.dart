@@ -12,16 +12,10 @@ import 'test_utils.dart';
 
 void main() {
   late Directory tempDir;
-  late String flutterBin;
   late Directory exampleAppDir;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_web_wasm_test.');
-    flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
     exampleAppDir = tempDir.childDirectory('test_app');
 
     processManager.runSync(<String>[
@@ -39,13 +33,11 @@ void main() {
       'web',
       '--wasm',
     ], workingDirectory: exampleAppDir.path);
-    expect(result.exitCode, 0);
+    expect(result, const ProcessResultMatcher());
 
-    final Directory appBuildDir = fileSystem.directory(fileSystem.path.join(
-      exampleAppDir.path,
-      'build',
-      'web_wasm'
-    ));
+    final Directory appBuildDir = fileSystem.directory(
+      fileSystem.path.join(exampleAppDir.path, 'build', 'web'),
+    );
     for (final String filename in const <String>[
       'flutter.js',
       'flutter_service_worker.js',

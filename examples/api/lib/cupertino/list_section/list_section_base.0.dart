@@ -2,28 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for base [CupertinoListSection] and [CupertinoListTile].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for base [CupertinoListSection] and [CupertinoListTile].
 
 void main() => runApp(const CupertinoListSectionBaseApp());
 
 class CupertinoListSectionBaseApp extends StatelessWidget {
   const CupertinoListSectionBaseApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
-
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(
-      title: _title,
-      home: MyStatelessWidget(),
-    );
+    return const CupertinoApp(home: ListSectionBaseExample());
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ListSectionBaseExample extends StatelessWidget {
+  const ListSectionBaseExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,13 +34,14 @@ class MyStatelessWidget extends StatelessWidget {
               color: CupertinoColors.activeGreen,
             ),
             trailing: const CupertinoListTileChevron(),
-            onTap: () => Navigator.of(context).push(
-              CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return const _SecondPage(text: 'Open pull request');
-                },
-              ),
-            ),
+            onTap:
+                () => Navigator.of(context).push(
+                  CupertinoPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return const _SecondPage(text: 'Open pull request');
+                    },
+                  ),
+                ),
           ),
           CupertinoListTile(
             title: const Text('Push to master'),
@@ -65,13 +61,14 @@ class MyStatelessWidget extends StatelessWidget {
             ),
             additionalInfo: const Text('12 days ago'),
             trailing: const CupertinoListTileChevron(),
-            onTap: () => Navigator.of(context).push(
-              CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return const _SecondPage(text: 'Last commit');
-                },
-              ),
-            ),
+            onTap:
+                () => Navigator.of(context).push(
+                  CupertinoPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return const _SecondPage(text: 'Last commit');
+                    },
+                  ),
+                ),
           ),
         ],
       ),
@@ -86,10 +83,6 @@ class _SecondPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      child: Center(
-        child: Text(text),
-      ),
-    );
+    return CupertinoPageScaffold(child: Center(child: Text(text)));
   }
 }

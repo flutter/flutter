@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [DropdownButton.selectedItemBuilder].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [DropdownButton.selectedItemBuilder].
 
 Map<String, String> cities = <String, String>{
   'New York': 'NYC',
@@ -61,7 +61,7 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
                   // Here custom text style, alignment and layout size can be applied
                   // to selected item string.
                   return Container(
-                    alignment:Alignment.centerLeft,
+                    alignment: Alignment.centerLeft,
                     constraints: const BoxConstraints(minWidth: 100),
                     child: Text(
                       item,
@@ -70,12 +70,10 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
                   );
                 }).toList();
               },
-              items: cities.keys.map<DropdownMenuItem<String>>((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
-                );
-              }).toList(),
+              items:
+                  cities.keys.map<DropdownMenuItem<String>>((String item) {
+                    return DropdownMenuItem<String>(value: item, child: Text(item));
+                  }).toList(),
             ),
           ),
         ],

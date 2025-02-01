@@ -21,5 +21,11 @@
   "selectAllButtonLabel": "Vali kõik",
   "tabSemanticsLabel": "$tabIndex. vaheleht $tabCount-st",
   "modalBarrierDismissLabel": "Loobu",
-  "searchTextFieldPlaceholderLabel": "Otsige"
+  "searchTextFieldPlaceholderLabel": "Otsige",
+  "noSpellCheckReplacementsLabel": "Asendusi ei leitud",
+  "menuDismissLabel": "Sulge menüü",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Otsi veebist",
+  "shareButtonLabel": "Jaga …",
+  "clearButtonLabel": "Kustutamine"
 }

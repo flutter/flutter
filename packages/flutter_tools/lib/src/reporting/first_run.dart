@@ -25,26 +25,27 @@ const String _kFlutterFirstRunMessage = '''
   ║ Flutter tool.                                                              ║
   ║                                                                            ║
   ║ By downloading the Flutter SDK, you agree to the Google Terms of Service.  ║
-  ║ Note: The Google Privacy Policy describes how data is handled in this      ║
-  ║ service.                                                                   ║
+  ║ The Google Privacy Policy describes how data is handled in this service.   ║
   ║                                                                            ║
   ║ Moreover, Flutter includes the Dart SDK, which may send usage metrics and  ║
   ║ crash reports to Google.                                                   ║
   ║                                                                            ║
   ║ Read about data we send with crash reports:                                ║
-  ║ https://flutter.dev/docs/reference/crash-reporting                         ║
+  ║ https://flutter.dev/to/crash-reporting                                     ║
   ║                                                                            ║
   ║ See Google's privacy policy:                                               ║
   ║ https://policies.google.com/privacy                                        ║
+  ║                                                                            ║
+  ║ To disable animations in this tool, use                                    ║
+  ║ 'flutter config --no-cli-animations'.                                      ║
   ╚════════════════════════════════════════════════════════════════════════════╝
 ''';
 
 /// The first run messenger determines whether the first run license terms
 /// need to be displayed.
 class FirstRunMessenger {
-  FirstRunMessenger({
-    required PersistentToolState persistentToolState
-  }) : _persistentToolState = persistentToolState;
+  FirstRunMessenger({required PersistentToolState persistentToolState})
+    : _persistentToolState = persistentToolState;
 
   final PersistentToolState _persistentToolState;
 
@@ -71,7 +72,7 @@ class FirstRunMessenger {
   }
 
   /// The hash of the current license representation.
-  String get _currentHash =>  hex.encode(md5.convert(utf8.encode(licenseTerms)).bytes);
+  String get _currentHash => hex.encode(md5.convert(utf8.encode(licenseTerms)).bytes);
 
   /// The current license terms.
   String get licenseTerms => _kFlutterFirstRunMessage;

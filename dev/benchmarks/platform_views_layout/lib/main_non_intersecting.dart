@@ -5,18 +5,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart' show timeDilation;
 
 void main() {
-  runApp(
-    const PlatformViewApp()
-  );
+  runApp(const PlatformViewApp());
 }
 
 class PlatformViewApp extends StatefulWidget {
-  const PlatformViewApp({
-    super.key,
-  });
+  const PlatformViewApp({super.key});
 
   @override
   PlatformViewAppState createState() => PlatformViewAppState();
@@ -31,16 +26,10 @@ class PlatformViewAppState extends State<PlatformViewApp> {
       home: const PlatformViewLayout(),
     );
   }
-
-  void toggleAnimationSpeed() {
-    setState(() {
-      timeDilation = (timeDilation != 1.0) ? 1.0 : 5.0;
-    });
-  }
 }
 
 class PlatformViewLayout extends StatelessWidget {
-  const PlatformViewLayout({ super.key });
+  const PlatformViewLayout({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +44,10 @@ class PlatformViewLayout extends StatelessWidget {
             child: Material(
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
-              child: index.isEven
-                ? CustomPaint(painter: ExpensivePainter(), size: const Size(400, 200))
-                : const DummyPlatformView()
+              child:
+                  index.isEven
+                      ? CustomPaint(painter: ExpensivePainter(), size: const Size(400, 200))
+                      : const DummyPlatformView(),
             ),
           );
         },
@@ -74,21 +64,13 @@ class DummyPlatformView extends StatelessWidget {
     const String viewType = 'benchmarks/platform_views_layout/DummyPlatformView';
     late Widget nativeView;
     if (Platform.isIOS) {
-      nativeView = const UiKitView(
-        viewType: viewType,
-      );
+      nativeView = const UiKitView(viewType: viewType);
     } else if (Platform.isAndroid) {
-      nativeView = const AndroidView(
-        viewType: viewType,
-      );
+      nativeView = const AndroidView(viewType: viewType);
     } else {
       assert(false, 'Invalid platform');
     }
-    return Container(
-      color: Colors.purple,
-      height: 200.0,
-      child: nativeView,
-    );
+    return Container(color: Colors.purple, height: 200.0, child: nativeView);
   }
 }
 
@@ -100,9 +82,11 @@ class ExpensivePainter extends CustomPainter {
     for (int i = 0; i < 50; i++) {
       for (int j = 0; j < 50; j++) {
         final Rect rect = Rect.fromLTWH(i * boxWidth, j * boxHeight, boxWidth, boxHeight);
-        canvas.drawRect(rect, Paint()
-          ..style = PaintingStyle.fill
-          ..color = Colors.red
+        canvas.drawRect(
+          rect,
+          Paint()
+            ..style = PaintingStyle.fill
+            ..color = Colors.red,
         );
       }
     }

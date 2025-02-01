@@ -9,22 +9,19 @@ import '../common.dart';
 const int _kNumIterations = 1000;
 const int _kNumWarmUp = 100;
 
-void main() {
+Future<void> execute() async {
   final List<String> words = 'Lorem Ipsum is simply dummy text of the printing and'
-    " typesetting industry. Lorem Ipsum has been the industry's"
-    ' standard dummy text ever since the 1500s, when an unknown'
-    ' printer took a galley of type and scrambled it to make a'
-    ' type specimen book'.split(' ');
+          " typesetting industry. Lorem Ipsum has been the industry's"
+          ' standard dummy text ever since the 1500s, when an unknown'
+          ' printer took a galley of type and scrambled it to make a'
+          ' type specimen book'
+      .split(' ');
   final List<InlineSpanSemanticsInformation> data = <InlineSpanSemanticsInformation>[];
   for (int i = 0; i < words.length; i++) {
     if (i.isEven) {
-      data.add(
-        InlineSpanSemanticsInformation(words[i]),
-      );
+      data.add(InlineSpanSemanticsInformation(words[i]));
     } else if (i.isEven) {
-      data.add(
-        InlineSpanSemanticsInformation(words[i], isPlaceholder: true),
-      );
+      data.add(InlineSpanSemanticsInformation(words[i], isPlaceholder: true));
     }
   }
   print(words);
@@ -77,13 +74,17 @@ String consumeSpan(Iterable<InlineSpanSemanticsInformation> items) {
   return result;
 }
 
-
-Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<InlineSpanSemanticsInformation> inputs) sync* {
+Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(
+  List<InlineSpanSemanticsInformation> inputs,
+) sync* {
   String workingText = '';
   String? workingLabel;
   for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
-      yield InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText);
+      yield InlineSpanSemanticsInformation(
+        workingText,
+        semanticsLabel: workingLabel ?? workingText,
+      );
       workingText = '';
       workingLabel = null;
       yield info;
@@ -91,23 +92,23 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<Inlin
       workingText += info.text;
       workingLabel ??= '';
       final String? infoSemanticsLabel = info.semanticsLabel;
-      if (infoSemanticsLabel != null) {
-        workingLabel += infoSemanticsLabel;
-      } else {
-        workingLabel += info.text;
-      }
+      workingLabel += infoSemanticsLabel ?? info.text;
     }
   }
   assert(workingLabel != null);
 }
 
-Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpanSemanticsInformation> inputs) {
+Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(
+  List<InlineSpanSemanticsInformation> inputs,
+) {
   String workingText = '';
   String? workingLabel;
   final List<InlineSpanSemanticsInformation> result = <InlineSpanSemanticsInformation>[];
   for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
-      result.add(InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText));
+      result.add(
+        InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText),
+      );
       workingText = '';
       workingLabel = null;
       result.add(info);
@@ -115,13 +116,16 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpa
       workingText += info.text;
       workingLabel ??= '';
       final String? infoSemanticsLabel = info.semanticsLabel;
-      if (infoSemanticsLabel != null) {
-        workingLabel += infoSemanticsLabel;
-      } else {
-        workingLabel += info.text;
-      }
+      workingLabel += infoSemanticsLabel ?? info.text;
     }
   }
   assert(workingLabel != null);
   return result;
+}
+
+//
+//  Note that the benchmark is normally run by benchmark_collection.dart.
+//
+Future<void> main() async {
+  return execute();
 }

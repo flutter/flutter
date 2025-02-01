@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final MemoryAllocations ma = MemoryAllocations.instance;
+  final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
   setUp(() {
     assert(!ma.hasListeners);
@@ -19,25 +19,24 @@ void main() {
     expect(kFlutterMemoryAllocationsEnabled, isFalse);
   });
 
-  testWidgets(
-    '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
-    (WidgetTester tester) async {
-      ObjectEvent? recievedEvent;
-      ObjectEvent listener(ObjectEvent event) => recievedEvent = event;
+  testWidgets('$FlutterMemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.', (
+    WidgetTester tester,
+  ) async {
+    ObjectEvent? receivedEvent;
+    ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
 
-      ma.addListener(listener);
-      _checkSdkHandlersNotSet();
-      expect(ma.hasListeners, isFalse);
+    ma.addListener(listener);
+    _checkSdkHandlersNotSet();
+    expect(ma.hasListeners, isFalse);
 
-      await _activateFlutterObjects(tester);
-      _checkSdkHandlersNotSet();
-      expect(recievedEvent, isNull);
-      expect(ma.hasListeners, isFalse);
+    await _activateFlutterObjects(tester);
+    _checkSdkHandlersNotSet();
+    expect(receivedEvent, isNull);
+    expect(ma.hasListeners, isFalse);
 
-      ma.removeListener(listener);
-      _checkSdkHandlersNotSet();
-    },
-  );
+    ma.removeListener(listener);
+    _checkSdkHandlersNotSet();
+  });
 }
 
 void _checkSdkHandlersNotSet() {
@@ -57,12 +56,8 @@ Future<void> _activateFlutterObjects(WidgetTester tester) async {
   changeNotifier.dispose();
   picture.dispose();
 
-  // TODO(polina-c): Remove the condition after
-  // https://github.com/flutter/flutter/issues/110599 is fixed.
-  if (!kIsWeb) {
-    final Image image = await _createImage();
-    image.dispose();
-  }
+  final Image image = await _createImage();
+  image.dispose();
 }
 
 Future<Image> _createImage() async {

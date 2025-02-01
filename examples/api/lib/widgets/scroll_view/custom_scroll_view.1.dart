@@ -2,34 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CustomScrollView].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [CustomScrollView].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const CustomScrollViewExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class CustomScrollViewExampleApp extends StatelessWidget {
+  const CustomScrollViewExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
-    );
+    return const MaterialApp(home: CustomScrollViewExample());
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class CustomScrollViewExample extends StatefulWidget {
+  const CustomScrollViewExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<CustomScrollViewExample> createState() => _CustomScrollViewExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _CustomScrollViewExampleState extends State<CustomScrollViewExample> {
   List<int> top = <int>[];
   List<int> bottom = <int>[0];
 
@@ -53,31 +48,25 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         center: centerKey,
         slivers: <Widget>[
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return Container(
-                  alignment: Alignment.center,
-                  color: Colors.blue[200 + top[index] % 4 * 100],
-                  height: 100 + top[index] % 4 * 20.0,
-                  child: Text('Item: ${top[index]}'),
-                );
-              },
-              childCount: top.length,
-            ),
+            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(
+                alignment: Alignment.center,
+                color: Colors.blue[200 + top[index] % 4 * 100],
+                height: 100 + top[index] % 4 * 20.0,
+                child: Text('Item: ${top[index]}'),
+              );
+            }, childCount: top.length),
           ),
           SliverList(
             key: centerKey,
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return Container(
-                  alignment: Alignment.center,
-                  color: Colors.blue[200 + bottom[index] % 4 * 100],
-                  height: 100 + bottom[index] % 4 * 20.0,
-                  child: Text('Item: ${bottom[index]}'),
-                );
-              },
-              childCount: bottom.length,
-            ),
+            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(
+                alignment: Alignment.center,
+                color: Colors.blue[200 + bottom[index] % 4 * 100],
+                height: 100 + bottom[index] % 4 * 20.0,
+                child: Text('Item: ${bottom[index]}'),
+              );
+            }, childCount: bottom.length),
           ),
         ],
       ),

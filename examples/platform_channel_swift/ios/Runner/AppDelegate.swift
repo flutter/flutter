@@ -19,7 +19,7 @@ enum MyFlutterErrorCode {
   static let unavailable = "UNAVAILABLE"
 }
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate, FlutterStreamHandler {
   private var eventSink: FlutterEventSink?
 

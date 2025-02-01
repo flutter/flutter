@@ -13,7 +13,7 @@ import 'package:process_runner/process_runner.dart';
 // See README.md for more information.
 
 final Directory flutterRoot =
-  Directory(path.fromUri(Platform.script)).absolute.parent.parent.parent.parent.parent;
+    Directory(path.fromUri(Platform.script)).absolute.parent.parent.parent.parent.parent;
 final Directory flutterPackageDir = Directory(path.join(flutterRoot.path, 'packages', 'flutter'));
 final Directory testPrivateDir = Directory(path.join(flutterPackageDir.path, 'test_private'));
 final Directory privateTestsDir = Directory(path.join(testPrivateDir.path, 'test'));
@@ -32,7 +32,7 @@ void _usage() {
 Future<void> main(List<String> args) async {
   // TODO(gspencergoog): Convert to using the args package once it has been
   // converted to be non-nullable by default.
-  if (args.isNotEmpty && args[0] == '--help') {
+  if (args.firstOrNull == '--help') {
     _usage();
     exit(0);
   }
@@ -165,7 +165,9 @@ class TestCase {
     }
     for (final File file in testDependencies) {
       try {
-        final Directory destDir = Directory(path.join(tmpdir.absolute.path, 'lib', file.parent.path));
+        final Directory destDir = Directory(
+          path.join(tmpdir.absolute.path, 'lib', file.parent.path),
+        );
         destDir.createSync(recursive: true);
         final File absFile = makeAbsolute(file, workingDirectory: flutterPackageDir);
         final String destination = path.join(tmpdir.absolute.path, 'lib', file.path);
@@ -181,7 +183,11 @@ class TestCase {
       try {
         final File absFile = makeAbsolute(file, workingDirectory: privateTestsDir);
         // Copy the file, but without the ".tmpl" extension.
-        destination = path.join(tmpdir.absolute.path, 'lib', path.basenameWithoutExtension(file.path));
+        destination = path.join(
+          tmpdir.absolute.path,
+          'lib',
+          path.basenameWithoutExtension(file.path),
+        );
         absFile.copySync(destination);
       } on FileSystemException catch (e) {
         stderr.writeln('Problem copying test ${file.path} to $destination: $e');
@@ -190,12 +196,19 @@ class TestCase {
     }
 
     // Copy the pubspec to the right place.
-    makeAbsolute(pubspec, workingDirectory: privateTestsDir)
-        .copySync(path.join(tmpdir.absolute.path, 'pubspec.yaml'));
+    makeAbsolute(
+      pubspec,
+      workingDirectory: privateTestsDir,
+    ).copySync(path.join(tmpdir.absolute.path, 'pubspec.yaml'));
 
     // Use Flutter's analysis_options.yaml file from packages/flutter.
-    File(path.join(tmpdir.absolute.path, 'analysis_options.yaml'))
-        .writeAsStringSync('include: ${path.toUri(path.join(flutterRoot.path, 'packages', 'flutter', 'analysis_options.yaml'))}');
+    File(path.join(tmpdir.absolute.path, 'analysis_options.yaml')).writeAsStringSync(
+      'include: ${path.toUri(path.join(flutterRoot.path, 'packages', 'flutter', 'analysis_options.yaml'))}\n'
+      'linter:\n'
+      '  rules:\n'
+      // The code does wonky things with the part-of directive that cause false positives.
+      '    unreachable_from_main: false',
+    );
 
     return true;
   }
@@ -206,10 +219,14 @@ class TestCase {
       defaultWorkingDirectory: tmpdir.absolute,
       printOutputDefault: true,
     );
-    final ProcessRunnerResult result = await runner.runProcess(
-      <String>[flutter, 'analyze', '--current-package', '--pub', '--congratulate', '.'],
-      failOk: true,
-    );
+    final ProcessRunnerResult result = await runner.runProcess(<String>[
+      flutter,
+      'analyze',
+      '--current-package',
+      '--pub',
+      '--congratulate',
+      '.',
+    ], failOk: true);
     if (result.exitCode != 0) {
       return false;
     }
@@ -223,11 +240,16 @@ class TestCase {
     );
     final String flutter = path.join(flutterRoot.path, 'bin', 'flutter');
     for (final File test in tests) {
-      final String testPath = path.join(path.dirname(test.path), 'lib', path.basenameWithoutExtension(test.path));
-      final ProcessRunnerResult result = await runner.runProcess(
-        <String>[flutter, 'test', '--enable-experiment=non-nullable', '--no-sound-null-safety', '--null-assertions', testPath],
-        failOk: true,
+      final String testPath = path.join(
+        path.dirname(test.path),
+        'lib',
+        path.basenameWithoutExtension(test.path),
       );
+      final ProcessRunnerResult result = await runner.runProcess(<String>[
+        flutter,
+        'test',
+        testPath,
+      ], failOk: true);
       if (result.exitCode != 0) {
         return false;
       }
@@ -251,8 +273,9 @@ Stream<TestCase> getTestCases(Directory tmpdir) async* {
     }
     if (entity is File && path.basename(entity.path).endsWith('_test.json')) {
       print('Found manifest ${entity.path}');
-      final Directory testTmpDir =
-          Directory(path.join(tmpdir.absolute.path, path.basenameWithoutExtension(entity.path)));
+      final Directory testTmpDir = Directory(
+        path.join(tmpdir.absolute.path, path.basenameWithoutExtension(entity.path)),
+      );
       yield TestCase.fromManifest(entity, testTmpDir);
     }
   }

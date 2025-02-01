@@ -12,9 +12,7 @@ void main() {
         home: Center(
           child: CupertinoListSection(
             header: const Text('Header'),
-            children: const <Widget>[
-              CupertinoListTile(title: Text('CupertinoListTile')),
-            ],
+            children: const <Widget>[CupertinoListTile(title: Text('CupertinoListTile'))],
           ),
         ),
       ),
@@ -29,9 +27,7 @@ void main() {
         home: Center(
           child: CupertinoListSection(
             footer: const Text('Footer'),
-            children: const <Widget>[
-              CupertinoListTile(title: Text('CupertinoListTile')),
-            ],
+            children: const <Widget>[CupertinoListTile(title: Text('CupertinoListTile'))],
           ),
         ),
       ),
@@ -45,9 +41,7 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoListSection(
-            children: const <Widget>[
-              CupertinoListTile(title: Text('CupertinoListTile')),
-            ],
+            children: const <Widget>[CupertinoListTile(title: Text('CupertinoListTile'))],
           ),
         ),
       ),
@@ -80,14 +74,14 @@ void main() {
     expect(childrenColumn.children.length, 5);
   });
 
-  testWidgets('does not show long dividers in insetGrouped section part 1', (WidgetTester tester) async {
+  testWidgets('does not show long dividers in insetGrouped section part 1', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoListSection.insetGrouped(
-            children: const <Widget>[
-              CupertinoListTile(title: Text('CupertinoListTile')),
-            ],
+            children: const <Widget>[CupertinoListTile(title: Text('CupertinoListTile'))],
           ),
         ),
       ),
@@ -100,7 +94,9 @@ void main() {
     expect(childrenColumn.children.length, 1);
   });
 
-  testWidgets('does not show long dividers in insetGrouped section part 2', (WidgetTester tester) async {
+  testWidgets('does not show long dividers in insetGrouped section part 2', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -131,9 +127,7 @@ void main() {
           data: const MediaQueryData(),
           child: CupertinoListSection(
             backgroundColor: backgroundColor,
-            children: const <Widget>[
-              CupertinoListTile(title: Text('CupertinoListTile')),
-            ],
+            children: const <Widget>[CupertinoListTile(title: Text('CupertinoListTile'))],
           ),
         ),
       ),
@@ -150,9 +144,7 @@ void main() {
         home: Center(
           child: CupertinoListSection(
             clipBehavior: Clip.antiAlias,
-            children: const <Widget>[
-              CupertinoListTile(title: Text('CupertinoListTile')),
-            ],
+            children: const <Widget>[CupertinoListTile(title: Text('CupertinoListTile'))],
           ),
         ),
       ),
@@ -161,12 +153,30 @@ void main() {
     expect(find.byType(ClipRRect), findsOneWidget);
   });
 
-  testWidgets('not setting clipBehavior does not clip children section', (WidgetTester tester) async {
+  testWidgets('not setting clipBehavior does not clip children section', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoListSection(
+            children: const <Widget>[CupertinoListTile(title: Text('CupertinoListTile'))],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(ClipRRect), findsNothing);
+  });
+
+  testWidgets('CupertinoListSection respects separatorColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoListSection(
+            separatorColor: const Color.fromARGB(255, 143, 193, 51),
             children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
               CupertinoListTile(title: Text('CupertinoListTile')),
             ],
           ),
@@ -174,6 +184,78 @@ void main() {
       ),
     );
 
-    expect(find.byType(ClipRRect), findsNothing);
+    final Column childrenColumn = tester.widget(find.byType(Column).at(1));
+    for (final Widget e in childrenColumn.children) {
+      if (e is Container) {
+        expect(e.color, const Color.fromARGB(255, 143, 193, 51));
+      }
+    }
+  });
+
+  testWidgets('CupertinoListSection.separatorColor defaults CupertinoColors.separator', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoListSection(
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+              CupertinoListTile(title: Text('CupertinoListTile')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.byType(CupertinoListSection));
+    final Column childrenColumn = tester.widget(find.byType(Column).at(1));
+    for (final Widget e in childrenColumn.children) {
+      if (e is Container) {
+        expect(e.color, CupertinoColors.separator.resolveFrom(context));
+      }
+    }
+  });
+
+  testWidgets('does not show margin by default', (WidgetTester tester) async {
+    const Widget child = CupertinoListTile(title: Text('CupertinoListTile'));
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoListSection(
+            header: const Text('Header'),
+            children: const <Widget>[child],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getTopLeft(find.byWidget(child)),
+      offsetMoreOrLessEquals(const Offset(0, 41), epsilon: 1),
+    );
+  });
+
+  testWidgets('shows custom margin', (WidgetTester tester) async {
+    const Widget child = CupertinoListTile(title: Text('CupertinoListTile'));
+    const double margin = 10;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoListSection(
+            header: const Text('Header'),
+            margin: const EdgeInsets.all(margin),
+            children: const <Widget>[child],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getTopLeft(find.byWidget(child)),
+      offsetMoreOrLessEquals(const Offset(margin, 41 + margin), epsilon: 1),
+    );
   });
 }

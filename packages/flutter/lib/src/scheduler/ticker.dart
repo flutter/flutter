@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -14,23 +18,28 @@ export 'package:flutter/foundation.dart' show DiagnosticsNode;
 
 /// Signature for the callback passed to the [Ticker] class's constructor.
 ///
-/// The argument is the time that the object had spent enabled so far
-/// at the time of the callback being called.
+/// The argument is the time elapsed from
+/// the frame timestamp when the ticker was last started
+/// to the current frame timestamp.
 typedef TickerCallback = void Function(Duration elapsed);
 
 /// An interface implemented by classes that can vend [Ticker] objects.
 ///
+/// To obtain a [TickerProvider], consider mixing in either
+/// [TickerProviderStateMixin] (which always works)
+/// or [SingleTickerProviderStateMixin] (which is more efficient when it works)
+/// to make a [State] subclass implement [TickerProvider].
+/// That [State] can then be passed to lower-level widgets
+/// or other related objects.
+/// This ensures the resulting [Ticker]s will only tick when that [State]'s
+/// subtree is enabled, as defined by [TickerMode].
+///
+/// In widget tests, the [WidgetTester] object is also a [TickerProvider].
+///
 /// Tickers can be used by any object that wants to be notified whenever a frame
 /// triggers, but are most commonly used indirectly via an
 /// [AnimationController]. [AnimationController]s need a [TickerProvider] to
-/// obtain their [Ticker]. If you are creating an [AnimationController] from a
-/// [State], then you can use the [TickerProviderStateMixin] and
-/// [SingleTickerProviderStateMixin] classes to obtain a suitable
-/// [TickerProvider]. The widget test framework [WidgetTester] object can be
-/// used as a ticker provider in the context of tests. In other contexts, you
-/// will have to either pass a [TickerProvider] from a higher level (e.g.
-/// indirectly from a [State] that mixes in [TickerProviderStateMixin]), or
-/// create a custom [TickerProvider] subclass.
+/// obtain their [Ticker].
 abstract class TickerProvider {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -43,9 +52,9 @@ abstract class TickerProvider {
   Ticker createTicker(TickerCallback onTick);
 }
 
-// TODO(jacobr): make Ticker use Diagnosticable to simplify reporting errors
-// related to a ticker.
-/// Calls its callback once per animation frame.
+/// Calls its callback once per animation frame, when enabled.
+///
+/// To obtain a ticker, consider [TickerProvider].
 ///
 /// When created, a ticker is initially disabled. Call [start] to
 /// enable the ticker.
@@ -55,22 +64,37 @@ abstract class TickerProvider {
 /// are called.
 ///
 /// By convention, the [start] and [stop] methods are used by the ticker's
-/// consumer, and the [muted] property is controlled by the [TickerProvider]
-/// that created the ticker.
+/// consumer (for example, an [AnimationController]), and the [muted] property
+/// is controlled by the [TickerProvider] that created the ticker (for example,
+/// a [State] that uses [TickerProviderStateMixin] to silence the ticker when
+/// the state's subtree is disabled as defined by [TickerMode]).
 ///
-/// Tickers are driven by the [SchedulerBinding]. See
-/// [SchedulerBinding.scheduleFrameCallback].
+/// See also:
+///
+/// * [TickerProvider], for obtaining a ticker.
+/// * [SchedulerBinding.scheduleFrameCallback], which drives tickers.
+// TODO(jacobr): make Ticker use Diagnosticable to simplify reporting errors
+// related to a ticker.
 class Ticker {
   /// Creates a ticker that will call the provided callback once per frame while
   /// running.
   ///
   /// An optional label can be provided for debugging purposes. That label
   /// will appear in the [toString] output in debug builds.
-  Ticker(this._onTick, { this.debugLabel }) {
+  Ticker(this._onTick, {this.debugLabel}) {
     assert(() {
       _debugCreationStack = StackTrace.current;
       return true;
     }());
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/scheduler.dart',
+        className: '$Ticker',
+        object: this,
+      );
+    }
   }
 
   TickerFuture? _future;
@@ -81,6 +105,7 @@ class Ticker {
   /// be called.
   bool get muted => _muted;
   bool _muted = false;
+
   /// When set to true, silences the ticker, so that it is no longer ticking. If
   /// a tick is already scheduled, it will unschedule it. This will not
   /// unschedule the next frame, though.
@@ -137,6 +162,8 @@ class Ticker {
   /// [isTicking].
   bool get isActive => _future != null;
 
+  /// The frame timestamp when the ticker was last started,
+  /// as reported by [SchedulerBinding.currentFrameTimeStamp].
   Duration? _startTime;
 
   /// Starts the clock for this [Ticker]. If the ticker is not [muted], then this
@@ -159,7 +186,9 @@ class Ticker {
       if (isActive) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('A ticker was started twice.'),
-          ErrorDescription('A ticker that is already active cannot be started again without first stopping it.'),
+          ErrorDescription(
+            'A ticker that is already active cannot be started again without first stopping it.',
+          ),
           describeForError('The affected ticker was'),
         ]);
       }
@@ -198,7 +227,7 @@ class Ticker {
   ///
   /// By convention, this method is used by the object that receives the ticks
   /// (as opposed to the [TickerProvider] which created the ticker).
-  void stop({ bool canceled = false }) {
+  void stop({bool canceled = false}) {
     if (!isActive) {
       return;
     }
@@ -218,7 +247,6 @@ class Ticker {
       localFuture._complete();
     }
   }
-
 
   final TickerCallback _onTick;
 
@@ -259,10 +287,13 @@ class Ticker {
   ///
   /// This should only be called if [shouldScheduleTick] is true.
   @protected
-  void scheduleTick({ bool rescheduling = false }) {
+  void scheduleTick({bool rescheduling = false}) {
     assert(!scheduled);
     assert(shouldScheduleTick);
-    _animationId = SchedulerBinding.instance.scheduleFrameCallback(_tick, rescheduling: rescheduling);
+    _animationId = SchedulerBinding.instance.scheduleFrameCallback(
+      _tick,
+      rescheduling: rescheduling,
+    );
   }
 
   /// Cancels the frame callback that was requested by [scheduleTick], if any.
@@ -294,14 +325,18 @@ class Ticker {
     assert(_future == null);
     assert(_startTime == null);
     assert(_animationId == null);
-    assert((originalTicker._future == null) == (originalTicker._startTime == null), 'Cannot absorb Ticker after it has been disposed.');
+    assert(
+      (originalTicker._future == null) == (originalTicker._startTime == null),
+      'Cannot absorb Ticker after it has been disposed.',
+    );
     if (originalTicker._future != null) {
       _future = originalTicker._future;
       _startTime = originalTicker._startTime;
       if (shouldScheduleTick) {
         scheduleTick();
       }
-      originalTicker._future = null; // so that it doesn't get disposed when we dispose of originalTicker
+      originalTicker._future =
+          null; // so that it doesn't get disposed when we dispose of originalTicker
       originalTicker.unscheduleTick();
     }
     originalTicker.dispose();
@@ -319,6 +354,12 @@ class Ticker {
   ///    with a [TickerCanceled] error.
   @mustCallSuper
   void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+
     if (_future != null) {
       final TickerFuture localFuture = _future!;
       _future = null;
@@ -342,7 +383,7 @@ class Ticker {
   late StackTrace _debugCreationStack;
 
   @override
-  String toString({ bool debugIncludeStack = false }) {
+  String toString({bool debugIncludeStack = false}) {
     final StringBuffer buffer = StringBuffer();
     buffer.write('${objectRuntimeType(this, 'Ticker')}(');
     assert(() {
@@ -354,7 +395,9 @@ class Ticker {
       if (debugIncludeStack) {
         buffer.writeln();
         buffer.writeln('The stack trace when the $runtimeType was actually created was:');
-        FlutterError.defaultStackFilter(_debugCreationStack.toString().trimRight().split('\n')).forEach(buffer.writeln);
+        FlutterError.defaultStackFilter(
+          _debugCreationStack.toString().trimRight().split('\n'),
+        ).forEach(buffer.writeln);
       }
       return true;
     }());
@@ -419,6 +462,7 @@ class TickerFuture implements Future<void> {
     void thunk(dynamic value) {
       callback();
     }
+
     orCancel.then<void>(thunk, onError: thunk);
   }
 
@@ -450,17 +494,17 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  Future<void> catchError(Function onError, { bool Function(Object)? test }) {
+  Future<void> catchError(Function onError, {bool Function(Object)? test}) {
     return _primaryCompleter.future.catchError(onError, test: test);
   }
 
   @override
-  Future<R> then<R>(FutureOr<R> Function(void value) onValue, { Function? onError }) {
+  Future<R> then<R>(FutureOr<R> Function(void value) onValue, {Function? onError}) {
     return _primaryCompleter.future.then<R>(onValue, onError: onError);
   }
 
   @override
-  Future<void> timeout(Duration timeLimit, { FutureOr<void> Function()? onTimeout }) {
+  Future<void> timeout(Duration timeLimit, {FutureOr<void> Function()? onTimeout}) {
     return _primaryCompleter.future.timeout(timeLimit, onTimeout: onTimeout);
   }
 
@@ -470,7 +514,12 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _completed == null ? "active" : _completed! ? "complete" : "canceled" })';
+  String toString() =>
+      '${describeIdentity(this)}(${_completed == null
+          ? "active"
+          : _completed!
+          ? "complete"
+          : "canceled"})';
 }
 
 /// Exception thrown by [Ticker] objects on the [TickerFuture.orCancel] future

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/painting.dart';
@@ -45,16 +48,12 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   /// Creates a [ScrollAwareImageProvider].
   ///
   /// The [context] object is the [BuildContext] of the [State] using this
-  /// provider. It is used to determine scrolling velocity during [resolve]. It
-  /// must not be null.
+  /// provider. It is used to determine scrolling velocity during [resolve].
   ///
   /// The [imageProvider] is used to create a key and load the image. It must
   /// not be null, and is assumed to interact with the cache in the normal way
   /// that [ImageProvider.resolveStreamForKey] does.
-  const ScrollAwareImageProvider({
-    required this.context,
-    required this.imageProvider,
-  });
+  const ScrollAwareImageProvider({required this.context, required this.imageProvider});
 
   /// The context that may or may not be enclosed by a [Scrollable].
   ///
@@ -63,7 +62,7 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   /// been resolved.
   final DisposableBuildContext context;
 
-  /// The wrapped image provider to delegate [obtainKey] and [load] to.
+  /// The wrapped image provider to delegate [obtainKey] and [loadImage] to.
   final ImageProvider<T> imageProvider;
 
   @override
@@ -106,13 +105,12 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   }
 
   @override
-  ImageStreamCompleter load(T key, DecoderCallback decode) => imageProvider.load(key, decode);
+  ImageStreamCompleter loadBuffer(T key, DecoderBufferCallback decode) =>
+      imageProvider.loadBuffer(key, decode);
 
   @override
-  ImageStreamCompleter loadBuffer(T key, DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);
-
-  @override
-  ImageStreamCompleter loadImage(T key, ImageDecoderCallback decode) => imageProvider.loadImage(key, decode);
+  ImageStreamCompleter loadImage(T key, ImageDecoderCallback decode) =>
+      imageProvider.loadImage(key, decode);
 
   @override
   Future<T> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);

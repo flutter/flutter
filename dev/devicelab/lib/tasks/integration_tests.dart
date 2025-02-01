@@ -4,6 +4,7 @@
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';
+import '../framework/talkback.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -21,26 +22,31 @@ TaskFunction createPlatformInteractionTest() {
   ).call;
 }
 
-TaskFunction createFlavorsTest() {
+TaskFunction createFlavorsTest({Map<String, String>? environment}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'lib/main.dart',
     extraOptions: <String>['--flavor', 'paid'],
+    environment: environment,
   ).call;
 }
 
-TaskFunction createIntegrationTestFlavorsTest() {
+TaskFunction createIntegrationTestFlavorsTest({Map<String, String>? environment}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'integration_test/integration_test.dart',
     extraOptions: <String>['--flavor', 'paid'],
+    environment: environment,
   ).call;
 }
 
-TaskFunction createExternalUiIntegrationTest() {
+TaskFunction createExternalTexturesFrameRateIntegrationTest({
+  List<String> extraOptions = const <String>[],
+}) {
   return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/external_ui',
-    'lib/main.dart',
+    '${flutterDirectory.path}/dev/integration_tests/external_textures',
+    'lib/frame_rate_main.dart',
+    extraOptions: extraOptions,
   ).call;
 }
 
@@ -74,9 +80,10 @@ TaskFunction createHybridAndroidViewsIntegrationTest() {
 }
 
 TaskFunction createAndroidSemanticsIntegrationTest() {
-  return DriverTest(
+  return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/android_semantics_testing',
-    'lib/main.dart',
+    'integration_test/main_test.dart',
+    withTalkBack: true,
   ).call;
 }
 
@@ -84,9 +91,7 @@ TaskFunction createIOSPlatformViewTests() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
     'lib/main.dart',
-    extraOptions: <String>[
-      '--dart-define=ENABLE_DRIVER_EXTENSION=true',
-    ],
+    extraOptions: <String>['--dart-define=ENABLE_DRIVER_EXTENSION=true'],
   ).call;
 }
 
@@ -104,10 +109,11 @@ TaskFunction createEndToEndFrameNumberTest() {
   ).call;
 }
 
-TaskFunction createEndToEndDriverTest() {
+TaskFunction createEndToEndDriverTest({Map<String, String>? environment}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/driver.dart',
+    environment: environment,
   ).call;
 }
 
@@ -125,12 +131,21 @@ TaskFunction createEndToEndKeyboardTextfieldTest() {
   ).call;
 }
 
+TaskFunction createSolidColorTest({required bool enableImpeller}) {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/solid_color.dart',
+    extraOptions: <String>[if (enableImpeller) '--enable-impeller'],
+  ).call;
+}
+
 TaskFunction dartDefinesTask() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/defines.dart', extraOptions: <String>[
-    '--dart-define=test.valueA=Example,A',
-    '--dart-define=test.valueB=Value',
+    'lib/defines.dart',
+    extraOptions: <String>[
+      '--dart-define=test.valueA=Example,A',
+      '--dart-define=test.valueB=Value',
     ],
   ).call;
 }
@@ -169,15 +184,16 @@ class DriverTest {
   DriverTest(
     this.testDirectory,
     this.testTarget, {
-      this.extraOptions = const <String>[],
-      this.deviceIdOverride,
-    }
-  );
+    this.extraOptions = const <String>[],
+    this.deviceIdOverride,
+    this.environment,
+  });
 
   final String testDirectory;
   final String testTarget;
   final List<String> extraOptions;
   final String? deviceIdOverride;
+  final Map<String, String>? environment;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -200,7 +216,7 @@ class DriverTest {
         deviceId,
         ...extraOptions,
       ];
-      await flutter('drive', options: options);
+      await flutter('drive', options: options, environment: environment);
 
       return TaskResult.success(null);
     });
@@ -211,15 +227,18 @@ class IntegrationTest {
   IntegrationTest(
     this.testDirectory,
     this.testTarget, {
-      this.extraOptions = const <String>[],
-      this.createPlatforms = const <String>[],
-    }
-  );
+    this.extraOptions = const <String>[],
+    this.createPlatforms = const <String>[],
+    this.withTalkBack = false,
+    this.environment,
+  });
 
   final String testDirectory;
   final String testTarget;
   final List<String> extraOptions;
   final List<String> createPlatforms;
+  final bool withTalkBack;
+  final Map<String, String>? environment;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -229,22 +248,27 @@ class IntegrationTest {
       await flutter('packages', options: <String>['get']);
 
       if (createPlatforms.isNotEmpty) {
-        await flutter('create', options: <String>[
-          '--platforms',
-          createPlatforms.join(','),
-          '--no-overwrite',
-          '.'
-        ]);
+        await flutter(
+          'create',
+          options: <String>['--platforms', createPlatforms.join(','), '--no-overwrite', '.'],
+        );
       }
 
-      final List<String> options = <String>[
-        '-v',
-        '-d',
-        deviceId,
-        testTarget,
-        ...extraOptions,
-      ];
-      await flutter('test', options: options);
+      if (withTalkBack) {
+        if (device is! AndroidDevice) {
+          return TaskResult.failure(
+            'A test that enables TalkBack can only be run on Android devices',
+          );
+        }
+        await enableTalkBack();
+      }
+
+      final List<String> options = <String>['-v', '-d', deviceId, testTarget, ...extraOptions];
+      await flutter('test', options: options, environment: environment);
+
+      if (withTalkBack) {
+        await disableTalkBack();
+      }
 
       return TaskResult.success(null);
     });

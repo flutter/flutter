@@ -2,43 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ScaffoldMessengerState.showSnackBar].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ScaffoldMessengerState.showSnackBar].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ShowSnackBarExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ShowSnackBarExampleApp extends StatelessWidget {
+  const ShowSnackBarExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const Center(
-          child: MyStatelessWidget(),
-        ),
+        appBar: AppBar(title: const Text('ScaffoldMessengerState Sample')),
+        body: const Center(child: ShowSnackBarExample()),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ShowSnackBarExample extends StatelessWidget {
+  const ShowSnackBarExample({super.key});
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('A SnackBar has been shown.'),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('A SnackBar has been shown.')));
       },
       child: const Text('Show SnackBar'),
     );

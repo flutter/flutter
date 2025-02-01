@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'page_storage.dart';
+/// @docImport 'scroll_configuration.dart';
+/// @docImport 'scroll_notification.dart';
+/// @docImport 'scroll_position.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -41,6 +51,10 @@ abstract class ScrollContext {
 
   /// The direction in which the widget scrolls.
   AxisDirection get axisDirection;
+
+  /// The [FlutterView.devicePixelRatio] of the view that the [Scrollable] this
+  /// [ScrollContext] is associated with is drawn into.
+  double get devicePixelRatio;
 
   /// Whether the contents of the widget should ignore [PointerEvent] inputs.
   ///

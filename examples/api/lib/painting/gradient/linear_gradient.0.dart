@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [LinearGradient].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [LinearGradient].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const LinearGradientExampleApp());
+
+class LinearGradientExampleApp extends StatelessWidget {
+  const LinearGradientExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +42,7 @@ class MoodyGradient extends StatelessWidget {
           ),
         ),
         child: const Center(
-          child: Text(
-            'From Night to Day',
-            style: TextStyle(fontSize: 24, color: Colors.white),
-          ),
+          child: Text('From Night to Day', style: TextStyle(fontSize: 24, color: Colors.white)),
         ),
       ),
     );

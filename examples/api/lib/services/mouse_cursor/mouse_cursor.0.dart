@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [MouseCursor].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [MouseCursor].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const MouseCursorExampleApp());
 
-  static const String _title = 'MouseCursor Code Sample';
+class MouseCursorExampleApp extends StatelessWidget {
+  const MouseCursorExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: const Text('MouseCursor Code Sample')),
+        body: const MouseCursorExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class MouseCursorExample extends StatelessWidget {
+  const MouseCursorExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +33,7 @@ class MyStatelessWidget extends StatelessWidget {
         child: Container(
           width: 200,
           height: 100,
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            border: Border.all(color: Colors.yellow),
-          ),
+          decoration: BoxDecoration(color: Colors.blue, border: Border.all(color: Colors.yellow)),
         ),
       ),
     );

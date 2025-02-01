@@ -2,27 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [LogicalKeySet].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [LogicalKeySet].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const LogicalKeySetExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class LogicalKeySetExampleApp extends StatelessWidget {
+  const LogicalKeySetExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const Center(
-          child: MyStatefulWidget(),
-        ),
+        appBar: AppBar(title: const Text('LogicalKeySet Sample')),
+        body: const Center(child: LogicalKeySetExample()),
       ),
     );
   }
@@ -32,14 +27,14 @@ class IncrementIntent extends Intent {
   const IncrementIntent();
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class LogicalKeySetExample extends StatefulWidget {
+  const LogicalKeySetExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<LogicalKeySetExample> createState() => _LogicalKeySetExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _LogicalKeySetExampleState extends State<LogicalKeySetExample> {
   int count = 0;
 
   @override
@@ -52,9 +47,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       child: Actions(
         actions: <Type, Action<Intent>>{
           IncrementIntent: CallbackAction<IncrementIntent>(
-            onInvoke: (IncrementIntent intent) => setState(() {
-              count = count + 1;
-            }),
+            onInvoke:
+                (IncrementIntent intent) => setState(() {
+                  count = count + 1;
+                }),
           ),
         },
         child: Focus(

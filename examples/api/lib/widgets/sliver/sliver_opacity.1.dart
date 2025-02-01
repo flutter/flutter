@@ -2,34 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SliverOpacity].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SliverOpacity].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SliverOpacityExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class SliverOpacityExampleApp extends StatelessWidget {
+  const SliverOpacityExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
-    );
+    return const MaterialApp(home: SliverOpacityExample());
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SliverOpacityExample extends StatefulWidget {
+  const SliverOpacityExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SliverOpacityExample> createState() => _SliverOpacityExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _SliverOpacityExampleState extends State<SliverOpacityExample> {
   static const List<Widget> _listItems = <Widget>[
     ListTile(title: Text('Now you see me,')),
     ListTile(title: Text("Now you don't!")),
@@ -40,26 +35,18 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('SliverOpacity demo'),
-      ),
+      appBar: AppBar(title: const Text('SliverOpacity demo')),
       body: CustomScrollView(
         slivers: <Widget>[
           const SliverToBoxAdapter(
-            child: ListTile(title: Text('Press on the button to toggle the list visibilty.')),
+            child: ListTile(title: Text('Press on the button to toggle the list visibility.')),
           ),
-          const SliverToBoxAdapter(
-            child: ListTile(title: Text('Before the list...')),
-          ),
+          const SliverToBoxAdapter(child: ListTile(title: Text('Before the list...'))),
           SliverOpacity(
             opacity: _visible ? 1.0 : 0.0,
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(_listItems),
-            ),
+            sliver: SliverList(delegate: SliverChildListDelegate(_listItems)),
           ),
-          const SliverToBoxAdapter(
-            child: ListTile(title: Text('Before the list...')),
-          ),
+          const SliverToBoxAdapter(child: ListTile(title: Text('Before the list...'))),
         ],
       ),
       floatingActionButton: FloatingActionButton(

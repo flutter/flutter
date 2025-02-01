@@ -4,9 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/scaffolding.dart' as test_package;
 
 /// Signature for the [reportTestException] callback.
 typedef TestExceptionReporter = void Function(FlutterErrorDetails details, String testDescription);
@@ -38,7 +36,10 @@ void _defaultTestExceptionReporter(FlutterErrorDetails errorDetails, String test
   if (testDescription.isNotEmpty) {
     additional = '\nThe test description was: $testDescription';
   }
-  test_package.registerException('Test failed. See exception logs above.$additional', _emptyStackTrace);
+  test_package.registerException(
+    'Test failed. See exception logs above.$additional',
+    _emptyStackTrace,
+  );
 }
 
 final StackTrace _emptyStackTrace = stack_trace.Chain(const <stack_trace.Trace>[]);

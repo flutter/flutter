@@ -9,15 +9,17 @@
 /// framework.
 library foundation;
 
-export 'package:meta/meta.dart' show
-  factory,
-  immutable,
-  mustCallSuper,
-  nonVirtual,
-  optionalTypeArgs,
-  protected,
-  required,
-  visibleForTesting;
+export 'package:meta/meta.dart'
+    show
+        factory,
+        immutable,
+        mustCallSuper,
+        nonVirtual,
+        optionalTypeArgs,
+        protected,
+        required,
+        visibleForOverriding,
+        visibleForTesting;
 
 export 'src/foundation/annotations.dart';
 export 'src/foundation/assertions.dart';
@@ -34,7 +36,6 @@ export 'src/foundation/diagnostics.dart';
 export 'src/foundation/isolates.dart';
 export 'src/foundation/key.dart';
 export 'src/foundation/licenses.dart';
-export 'src/foundation/math.dart';
 export 'src/foundation/memory_allocations.dart';
 export 'src/foundation/node.dart';
 export 'src/foundation/object.dart';
@@ -46,4 +47,5 @@ export 'src/foundation/serialization.dart';
 export 'src/foundation/service_extensions.dart';
 export 'src/foundation/stack_frame.dart';
 export 'src/foundation/synchronous_future.dart';
+export 'src/foundation/timeline.dart';
 export 'src/foundation/unicode.dart';

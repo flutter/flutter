@@ -5,14 +5,18 @@
 import 'template.dart';
 
 class ButtonTemplate extends TokenTemplate {
-  const ButtonTemplate(this.tokenGroup, super.blockName, super.fileName, super.tokens, {
+  const ButtonTemplate(
+    this.tokenGroup,
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
   final String tokenGroup;
 
   String _backgroundColor() {
-    if (tokens.containsKey('$tokenGroup.container.color')) {
+    if (tokenAvailable('$tokenGroup.container.color')) {
       return '''
 
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -28,21 +32,21 @@ class ButtonTemplate extends TokenTemplate {
   }
 
   String _elevation() {
-    if (tokens.containsKey('$tokenGroup.container.elevation')) {
+    if (tokenAvailable('$tokenGroup.container.elevation')) {
       return '''
 
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return ${elevation("$tokenGroup.disabled.container")};
       }
+      if (states.contains(MaterialState.pressed)) {
+        return ${elevation("$tokenGroup.pressed.container")};
+      }
       if (states.contains(MaterialState.hovered)) {
         return ${elevation("$tokenGroup.hover.container")};
       }
       if (states.contains(MaterialState.focused)) {
         return ${elevation("$tokenGroup.focus.container")};
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return ${elevation("$tokenGroup.pressed.container")};
       }
       return ${elevation("$tokenGroup.container")};
     })''';
@@ -53,7 +57,7 @@ class ButtonTemplate extends TokenTemplate {
   }
 
   String _elevationColor(String token) {
-    if (tokens.containsKey(token)) {
+    if (tokenAvailable(token)) {
       return 'MaterialStatePropertyAll<Color>(${color(token)})';
     } else {
       return 'const MaterialStatePropertyAll<Color>(Colors.transparent)';
@@ -92,14 +96,14 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return ${componentColor('$tokenGroup.pressed.state-layer')};
+      }
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('$tokenGroup.hover.state-layer')};
       }
       if (states.contains(MaterialState.focused)) {
         return ${componentColor('$tokenGroup.focus.state-layer')};
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return ${componentColor('$tokenGroup.pressed.state-layer')};
       }
       return null;
     });
@@ -121,20 +125,46 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Size>? get minimumSize =>
-    const MaterialStatePropertyAll<Size>(Size(64.0, ${tokens["$tokenGroup.container.height"]}));
+    const MaterialStatePropertyAll<Size>(Size(64.0, ${getToken("$tokenGroup.container.height")}));
 
   // No default fixedSize
+
+  @override
+  MaterialStateProperty<double>? get iconSize =>
+    const MaterialStatePropertyAll<double>(${getToken("$tokenGroup.with-icon.icon.size")});
+
+  @override
+  MaterialStateProperty<Color>? get iconColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return ${color('$tokenGroup.with-icon.disabled.icon.color')}.withOpacity(${opacity("$tokenGroup.with-icon.disabled.icon.opacity")});
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return ${color('$tokenGroup.with-icon.pressed.icon.color')};
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return ${color('$tokenGroup.with-icon.hover.icon.color')};
+      }
+      if (states.contains(MaterialState.focused)) {
+        return ${color('$tokenGroup.with-icon.focus.icon.color')};
+      }
+      return ${color('$tokenGroup.with-icon.icon.color')};
+    });
+  }
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>
     const MaterialStatePropertyAll<Size>(Size.infinite);
 
-${tokens.containsKey("$tokenGroup.outline.color") ? '''
+${tokenAvailable("$tokenGroup.outline.color") ? '''
   @override
   MaterialStateProperty<BorderSide>? get side =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return ${border("$tokenGroup.disabled.outline")};
+    }
+    if (states.contains(MaterialState.focused)) {
+      return ${border('$tokenGroup.focus.outline')};
     }
     return ${border("$tokenGroup.outline")};
   });''' : '''

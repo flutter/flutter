@@ -4,6 +4,7 @@
 
 import 'package:intl/locale.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
@@ -18,16 +19,16 @@ import 'message_parser.dart';
 // DateFormat.yMMMMd("en_US").format(DateTime.utc(1996, 7, 10)) results
 // in the string "July 10, 1996".
 //
-// Since the tool generates code that uses DateFormat's constructor, it is
-// necessary to verify that the constructor exists, or the
-// tool will generate code that may cause a compile-time error.
+// Since the tool generates code that uses DateFormat's constructor and its
+// add_* methods, it is necessary to verify that the constructor/method exists,
+// or the tool will generate code that may cause a compile-time error.
 //
 // See also:
 //
 // * <https://pub.dev/packages/intl>
 // * <https://pub.dev/documentation/intl/latest/intl/DateFormat-class.html>
 // * <https://api.dartlang.org/stable/2.7.0/dart-core/DateTime-class.html>
-const Set<String> _validDateFormats = <String>{
+const Set<String> validDateFormats = <String>{
   'd',
   'E',
   'EEEE',
@@ -71,6 +72,8 @@ const Set<String> _validDateFormats = <String>{
   's',
 };
 
+const String _dateFormatPartsDelimiter = '+';
+
 // The set of number formats that can be automatically localized.
 //
 // The localizations generation tool makes use of the intl library's
@@ -94,6 +97,7 @@ const Set<String> _validNumberFormats = <String>{
   'compactLong',
   'currency',
   'decimalPattern',
+  'decimalPatternDigits',
   'decimalPercentPattern',
   'percentPattern',
   'scientificPattern',
@@ -118,6 +122,7 @@ const Set<String> _numberFormatsWithNamedParameters = <String>{
   'compactSimpleCurrency',
   'compactLong',
   'currency',
+  'decimalPatternDigits',
   'decimalPercentPattern',
   'simpleCurrency',
 };
@@ -137,8 +142,8 @@ class L10nParserException extends L10nException {
     this.fileName,
     this.messageId,
     this.messageString,
-    this.charNumber
-  ): super('''
+    this.charNumber,
+  ) : super('''
 [$fileName:$messageId] $error
     $messageString
     ${List<String>.filled(charNumber, ' ').join()}^''');
@@ -242,13 +247,17 @@ class Placeholder {
   String? type;
   bool isPlural = false;
   bool isSelect = false;
+  bool isDateTime = false;
+  bool requiresDateFormatting = false;
 
   bool get requiresFormatting => requiresDateFormatting || requiresNumFormatting;
-  bool get requiresDateFormatting => type == 'DateTime';
-  bool get requiresNumFormatting => <String>['int', 'num', 'double'].contains(type) && format != null;
+  bool get requiresNumFormatting =>
+      <String>['int', 'num', 'double'].contains(type) && format != null;
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
-  bool get hasValidDateFormat => _validDateFormats.contains(format);
+  // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimiter`.
+  List<String> get dateFormatParts => format?.split(_dateFormatPartsDelimiter) ?? <String>[];
+  bool get hasValidDateFormat => dateFormatParts.every(validDateFormats.contains);
 
   static String? _stringAttribute(
     String resourceId,
@@ -270,19 +279,22 @@ class Placeholder {
   }
 
   static bool? _boolAttribute(
-      String resourceId,
-      String name,
-      Map<String, Object?> attributes,
-      String attributeName,
-      ) {
+    String resourceId,
+    String name,
+    Map<String, Object?> attributes,
+    String attributeName,
+  ) {
     final Object? value = attributes[attributeName];
     if (value == null) {
       return null;
     }
+    if (value is bool) {
+      return value;
+    }
     if (value != 'true' && value != 'false') {
       throw L10nException(
         'The "$attributeName" value of the "$name" placeholder in message $resourceId '
-            'must be a boolean value.',
+        'must be a boolean value.',
       );
     }
     return value == 'true';
@@ -291,7 +303,7 @@ class Placeholder {
   static List<OptionalParameter> _optionalParameters(
     String resourceId,
     String name,
-    Map<String, Object?> attributes
+    Map<String, Object?> attributes,
   ) {
     final Object? value = attributes['optionalParameters'];
     if (value == null) {
@@ -301,7 +313,7 @@ class Placeholder {
       throw L10nException(
         'The "optionalParameters" value of the "$name" placeholder in message '
         '$resourceId is not a properly formatted Map. Ensure that it is a map '
-        'with keys that are strings.'
+        'with keys that are strings.',
       );
     }
     final Map<String, Object?> optionalParameterMap = value;
@@ -331,17 +343,25 @@ class Message {
     AppResourceBundle templateBundle,
     AppResourceBundleCollection allBundles,
     this.resourceId,
-    bool isResourceAttributeRequired,
-    {
-      this.useEscaping = false,
-      this.logger,
-    }
-  ) : assert(resourceId.isNotEmpty),
-      value = _value(templateBundle.resources, resourceId),
-      description = _description(templateBundle.resources, resourceId, isResourceAttributeRequired),
-      placeholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
-      messages = <LocaleInfo, String?>{},
-      parsedMessages = <LocaleInfo, Node?>{} {
+    bool isResourceAttributeRequired, {
+    this.useRelaxedSyntax = false,
+    this.useEscaping = false,
+    this.logger,
+  }) : assert(resourceId.isNotEmpty),
+       value = _value(templateBundle.resources, resourceId),
+       description = _description(
+         templateBundle.resources,
+         resourceId,
+         isResourceAttributeRequired,
+       ),
+       templatePlaceholders = _placeholders(
+         templateBundle.resources,
+         resourceId,
+         isResourceAttributeRequired,
+       ),
+       localePlaceholders = <LocaleInfo, Map<String, Placeholder>>{},
+       messages = <LocaleInfo, String?>{},
+       parsedMessages = <LocaleInfo, Node?>{} {
     // Filenames for error handling.
     final Map<LocaleInfo, String> filenames = <LocaleInfo, String>{};
     // Collect all translations from allBundles and parse them.
@@ -349,14 +369,29 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
+
+      localePlaceholders[bundle.locale] =
+          templateBundle.locale == bundle.locale
+              ? templatePlaceholders
+              : _placeholders(bundle.resources, resourceId, false);
+
+      List<String>? validPlaceholders;
+      if (useRelaxedSyntax) {
+        validPlaceholders =
+            templatePlaceholders.entries.map((MapEntry<String, Placeholder> e) => e.key).toList();
+      }
       try {
-        parsedMessages[bundle.locale] = translation == null ? null : Parser(
-          resourceId,
-          bundle.file.basename,
-          translation,
-          useEscaping: useEscaping,
-          logger: logger
-        ).parse();
+        parsedMessages[bundle.locale] =
+            translation == null
+                ? null
+                : Parser(
+                  resourceId,
+                  bundle.file.basename,
+                  translation,
+                  useEscaping: useEscaping,
+                  placeholders: validPlaceholders,
+                  logger: logger,
+                ).parse();
       } on L10nParserException catch (error) {
         logger?.printError(error.toString());
         // Treat it as an untranslated message in case we can't parse.
@@ -365,7 +400,7 @@ class Message {
       }
     }
     // Infer the placeholders
-    _inferPlaceholders(filenames);
+    _inferPlaceholders();
   }
 
   final String resourceId;
@@ -373,12 +408,23 @@ class Message {
   final String? description;
   late final Map<LocaleInfo, String?> messages;
   final Map<LocaleInfo, Node?> parsedMessages;
-  final Map<String, Placeholder> placeholders;
+  final Map<LocaleInfo, Map<String, Placeholder>> localePlaceholders;
+  final Map<String, Placeholder> templatePlaceholders;
   final bool useEscaping;
+  final bool useRelaxedSyntax;
   final Logger? logger;
   bool hadErrors = false;
 
-  bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
+  Iterable<Placeholder> getPlaceholders(LocaleInfo locale) {
+    final Map<String, Placeholder>? placeholders = localePlaceholders[locale];
+    if (placeholders == null) {
+      return templatePlaceholders.values;
+    }
+    return templatePlaceholders.values.map(
+      (Placeholder templatePlaceholder) =>
+          placeholders[templatePlaceholder.name] ?? templatePlaceholder,
+    );
+  }
 
   static String _value(Map<String, Object?> bundle, String resourceId) {
     final Object? value = bundle[resourceId];
@@ -401,7 +447,7 @@ class Message {
       if (attributes == null) {
         throw L10nException(
           'Resource attribute "@$resourceId" was not found. Please '
-          'ensure that each resource has a corresponding @resource.'
+          'ensure that each resource has a corresponding @resource.',
         );
       }
     }
@@ -409,7 +455,7 @@ class Message {
     if (attributes != null && attributes is! Map<String, Object?>) {
       throw L10nException(
         'The resource attribute "@$resourceId" is not a properly formatted Map. '
-        'Ensure that it is a map with keys that are strings.'
+        'Ensure that it is a map with keys that are strings.',
       );
     }
 
@@ -421,7 +467,11 @@ class Message {
     String resourceId,
     bool isResourceAttributeRequired,
   ) {
-    final Map<String, Object?>? resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
+    final Map<String, Object?>? resourceAttributes = _attributes(
+      bundle,
+      resourceId,
+      isResourceAttributeRequired,
+    );
     if (resourceAttributes == null) {
       return null;
     }
@@ -431,9 +481,7 @@ class Message {
       return null;
     }
     if (value is! String) {
-      throw L10nException(
-        'The description for "@$resourceId" is not a properly formatted String.'
-      );
+      throw L10nException('The description for "@$resourceId" is not a properly formatted String.');
     }
     return value;
   }
@@ -443,7 +491,11 @@ class Message {
     String resourceId,
     bool isResourceAttributeRequired,
   ) {
-    final Map<String, Object?>? resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
+    final Map<String, Object?>? resourceAttributes = _attributes(
+      bundle,
+      resourceId,
+      isResourceAttributeRequired,
+    );
     if (resourceAttributes == null) {
       return <String, Placeholder>{};
     }
@@ -454,7 +506,7 @@ class Message {
     if (allPlaceholdersMap is! Map<String, Object?>) {
       throw L10nException(
         'The "placeholders" attribute for message $resourceId, is not '
-        'properly formatted. Ensure that it is a map with string valued keys.'
+        'properly formatted. Ensure that it is a map with string valued keys.',
       );
     }
     return Map<String, Placeholder>.fromEntries(
@@ -464,29 +516,40 @@ class Message {
           throw L10nException(
             'The value of the "$placeholderName" placeholder attribute for message '
             '"$resourceId", is not properly formatted. Ensure that it is a map '
-            'with string valued keys.'
+            'with string valued keys.',
           );
         }
-        return MapEntry<String, Placeholder>(placeholderName, Placeholder(resourceId, placeholderName, value));
+        return MapEntry<String, Placeholder>(
+          placeholderName,
+          Placeholder(resourceId, placeholderName, value),
+        );
       }),
     );
   }
 
   // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
   // For undeclared placeholders, create a new placeholder.
-  void _inferPlaceholders(Map<LocaleInfo, String> filenames) {
+  void _inferPlaceholders() {
     // We keep the undeclared placeholders separate so that we can sort them alphabetically afterwards.
     final Map<String, Placeholder> undeclaredPlaceholders = <String, Placeholder>{};
     // Helper for getting placeholder by name.
-    Placeholder? getPlaceholder(String name) => placeholders[name] ?? undeclaredPlaceholders[name];
     for (final LocaleInfo locale in parsedMessages.keys) {
+      Placeholder? getPlaceholder(String name) =>
+          localePlaceholders[locale]?[name] ??
+          templatePlaceholders[name] ??
+          undeclaredPlaceholders[name];
       if (parsedMessages[locale] == null) {
         continue;
       }
       final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
       while (traversalStack.isNotEmpty) {
         final Node node = traversalStack.removeLast();
-        if (<ST>[ST.placeholderExpr, ST.pluralExpr, ST.selectExpr].contains(node.type)) {
+        if (<ST>[
+          ST.placeholderExpr,
+          ST.pluralExpr,
+          ST.selectExpr,
+          ST.argumentExpr,
+        ].contains(node.type)) {
           final String identifier = node.children[1].value!;
           Placeholder? placeholder = getPlaceholder(identifier);
           if (placeholder == null) {
@@ -497,25 +560,37 @@ class Message {
             placeholder.isPlural = true;
           } else if (node.type == ST.selectExpr) {
             placeholder.isSelect = true;
+          } else if (node.type == ST.argumentExpr) {
+            placeholder.isDateTime = true;
+          } else {
+            // Here the node type must be ST.placeholderExpr.
+            // A DateTime placeholder must require date formatting.
+            if (placeholder.type == 'DateTime') {
+              placeholder.requiresDateFormatting = true;
+            }
           }
         }
         traversalStack.addAll(node.children);
       }
     }
-    placeholders.addEntries(
-      undeclaredPlaceholders.entries
-        .toList()
-        ..sort((MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
+    templatePlaceholders.addEntries(
+      undeclaredPlaceholders.entries.toList()..sort(
+        (MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) =>
+            p1.key.compareTo(p2.key),
+      ),
     );
 
-    for (final Placeholder placeholder in placeholders.values) {
-      if (placeholder.isPlural && placeholder.isSelect) {
-        throw L10nException('Placeholder is used as both a plural and select in certain languages.');
+    bool atMostOneOf(bool x, bool y, bool z) {
+      return x && !y && !z || !x && y && !z || !x && !y && z || !x && !y && !z;
+    }
+
+    for (final Placeholder placeholder in templatePlaceholders.values) {
+      if (!atMostOneOf(placeholder.isPlural, placeholder.isDateTime, placeholder.isSelect)) {
+        throw L10nException('Placeholder is used as plural/select/datetime in certain languages.');
       } else if (placeholder.isPlural) {
         if (placeholder.type == null) {
           placeholder.type = 'num';
-        }
-        else if (!<String>['num', 'int'].contains(placeholder.type)) {
+        } else if (!<String>['num', 'int'].contains(placeholder.type)) {
           throw L10nException("Placeholders used in plurals must be of type 'num' or 'int'");
         }
       } else if (placeholder.isSelect) {
@@ -524,19 +599,32 @@ class Message {
         } else if (placeholder.type != 'String') {
           throw L10nException("Placeholders used in selects must be of type 'String'");
         }
+      } else if (placeholder.isDateTime) {
+        if (placeholder.type == null) {
+          placeholder.type = 'DateTime';
+        } else if (placeholder.type != 'DateTime') {
+          throw L10nException(
+            "Placeholders used in datetime expressions much be of type 'DateTime'",
+          );
+        }
       }
       placeholder.type ??= 'Object';
     }
   }
 }
 
-// Represents the contents of one ARB file.
+/// Represents the contents of one ARB file.
 class AppResourceBundle {
+  /// Assuming that the caller has verified that the file exists and is readable.
   factory AppResourceBundle(File file) {
-    // Assuming that the caller has verified that the file exists and is readable.
-    Map<String, Object?> resources;
+    final Map<String, Object?> resources;
     try {
-      resources = json.decode(file.readAsStringSync()) as Map<String, Object?>;
+      final String content = file.readAsStringSync().trim();
+      if (content.isEmpty) {
+        resources = <String, Object?>{};
+      } else {
+        resources = json.decode(content) as Map<String, Object?>;
+      }
     } on FormatException catch (e) {
       throw L10nException(
         'The arb file ${file.path} has the following formatting issue: \n'
@@ -559,7 +647,6 @@ class AppResourceBundle {
           // The parsed result uses dashes ('-'), but we want underscores ('_').
           final String parserLocaleString = parserResult.toString().replaceAll('-', '_');
 
-
           if (localeString == null) {
             // If @@locale was not defined, use the filename locale suffix.
             localeString = parserLocaleString;
@@ -573,9 +660,9 @@ class AppResourceBundle {
                 'The locale specified in @@locale and the arb filename do not match. \n'
                 'Please make sure that they match, since this prevents any confusion \n'
                 'with which locale to use. Otherwise, specify the locale in either the \n'
-                'filename of the @@locale key only.\n'
+                'filename or the @@locale key only.\n'
                 'Current @@locale value: $localeString\n'
-                'Current filename extension: $parserLocaleString'
+                'Current filename extension: $parserLocaleString',
               );
             }
           }
@@ -589,7 +676,7 @@ class AppResourceBundle {
         "The following .arb file's locale could not be determined: \n"
         '${file.path} \n'
         "Make sure that the locale is specified in the file's '@@locale' "
-        'property or as part of the filename (e.g. file_en.arb)'
+        'property or as part of the filename (e.g. file_en.arb)',
       );
     }
 
@@ -601,11 +688,21 @@ class AppResourceBundle {
 
   final File file;
   final LocaleInfo locale;
+
   /// JSON representation of the contents of the ARB file.
   final Map<String, Object?> resources;
   final Iterable<String> resourceIds;
 
-  String? translationFor(String resourceId) => resources[resourceId] as String?;
+  String? translationFor(String resourceId) {
+    final Object? result = resources[resourceId];
+    if (result is! String?) {
+      throwToolExit(
+        'Localized message for key "$resourceId" in "${file.path}" '
+        'is not a string.',
+      );
+    }
+    return result;
+  }
 
   @override
   String toString() {
@@ -621,26 +718,34 @@ class AppResourceBundleCollection {
     final RegExp filenameRE = RegExp(r'(\w+)\.arb$');
     final Map<LocaleInfo, AppResourceBundle> localeToBundle = <LocaleInfo, AppResourceBundle>{};
     final Map<String, List<LocaleInfo>> languageToLocales = <String, List<LocaleInfo>>{};
-    final List<File> files = directory.listSync().whereType<File>().toList()..sort(sortFilesByPath);
+    // We require the list of files to be sorted so that
+    // "languageToLocales[bundle.locale.languageCode]" is not null
+    // by the time we handle locales with country codes.
+    final List<File> files =
+        directory
+            .listSync()
+            .whereType<File>()
+            .where((File e) => filenameRE.hasMatch(e.path))
+            .toList()
+          ..sort(sortFilesByPath);
     for (final File file in files) {
-      if (filenameRE.hasMatch(file.path)) {
-        final AppResourceBundle bundle = AppResourceBundle(file);
-        if (localeToBundle[bundle.locale] != null) {
-          throw L10nException(
-            "Multiple arb files with the same '${bundle.locale}' locale detected. \n"
-            'Ensure that there is exactly one arb file for each locale.'
-          );
-        }
-        localeToBundle[bundle.locale] = bundle;
-        languageToLocales[bundle.locale.languageCode] ??= <LocaleInfo>[];
-        languageToLocales[bundle.locale.languageCode]!.add(bundle.locale);
+      final AppResourceBundle bundle = AppResourceBundle(file);
+      if (localeToBundle[bundle.locale] != null) {
+        throw L10nException(
+          "Multiple arb files with the same '${bundle.locale}' locale detected. \n"
+          'Ensure that there is exactly one arb file for each locale.',
+        );
       }
+      localeToBundle[bundle.locale] = bundle;
+      languageToLocales[bundle.locale.languageCode] ??= <LocaleInfo>[];
+      languageToLocales[bundle.locale.languageCode]!.add(bundle.locale);
     }
 
     languageToLocales.forEach((String language, List<LocaleInfo> listOfCorrespondingLocales) {
-      final List<String> localeStrings = listOfCorrespondingLocales.map((LocaleInfo locale) {
-        return locale.toString();
-      }).toList();
+      final List<String> localeStrings =
+          listOfCorrespondingLocales.map((LocaleInfo locale) {
+            return locale.toString();
+          }).toList();
       if (!localeStrings.contains(language)) {
         throw L10nException(
           'Arb file for a fallback, $language, does not exist, even though \n'
@@ -648,7 +753,7 @@ class AppResourceBundleCollection {
           'When locales specify a script code or country code, a \n'
           'base locale (without the script code or country code) should \n'
           'exist as the fallback. Please create a {fileName}_$language.arb \n'
-          'file.'
+          'file.',
         );
       }
     });
@@ -656,7 +761,11 @@ class AppResourceBundleCollection {
     return AppResourceBundleCollection._(directory, localeToBundle, languageToLocales);
   }
 
-  const AppResourceBundleCollection._(this._directory, this._localeToBundle, this._languageToLocales);
+  const AppResourceBundleCollection._(
+    this._directory,
+    this._localeToBundle,
+    this._languageToLocales,
+  );
 
   final Directory _directory;
   final Map<LocaleInfo, AppResourceBundle> _localeToBundle;
@@ -667,7 +776,8 @@ class AppResourceBundleCollection {
   AppResourceBundle? bundleFor(LocaleInfo locale) => _localeToBundle[locale];
 
   Iterable<String> get languages => _languageToLocales.keys;
-  Iterable<LocaleInfo> localesForLanguage(String language) => _languageToLocales[language] ?? <LocaleInfo>[];
+  Iterable<LocaleInfo> localesForLanguage(String language) =>
+      _languageToLocales[language] ?? <LocaleInfo>[];
 
   @override
   String toString() {

@@ -10,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Scrollable scaled up', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Transform.scale(
@@ -54,6 +56,8 @@ void main() {
 
   testWidgets('Scrollable scaled down', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Transform.scale(
@@ -98,6 +102,8 @@ void main() {
 
   testWidgets('Scrollable rotated 90 degrees', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Transform.rotate(
@@ -138,12 +144,15 @@ void main() {
 
   testWidgets('Perspective transform on scrollable', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Transform(
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001)
-            ..rotateX(math.pi / 4),
+          transform:
+              Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateX(math.pi / 4),
           child: Center(
             child: SizedBox(
               width: 200,
@@ -202,10 +211,7 @@ void main() {
 
     // The tracked point (in the coordinate space of the screen) and the finger
     // should have moved the same vertical distance over the screen.
-    expect(
-      pointOnScreenStart.dy - pointOnScreenEnd.dy,
-      within(distance: 0.00001, from: 50.0),
-    );
+    expect(pointOnScreenStart.dy - pointOnScreenEnd.dy, within(distance: 0.00001, from: 50.0));
 
     // While the point traveled the same distance as the finger in the
     // coordinate space of the screen, the scroll view actually moved far more

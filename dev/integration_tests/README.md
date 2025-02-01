@@ -9,7 +9,7 @@ Intended for use with devicelab tests.
 If you want to run a driver test locally, to debug a problem with a test, you
 can use this command from the appropriate subdirectory:
 
-```shell
+```sh
 flutter drive -t <test> --driver <driver>
 ```
 

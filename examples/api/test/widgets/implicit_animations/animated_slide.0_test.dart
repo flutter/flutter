@@ -8,9 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Translate FlutterLogo using AnimatedSlide', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.AnimatedSlideApp(),
-    );
+    await tester.pumpWidget(const example.AnimatedSlideApp());
 
     Offset logoOffset = tester.getCenter(find.byType(FlutterLogo));
     expect(logoOffset.dx, 376.0);
@@ -23,7 +21,7 @@ void main() {
 
     logoOffset = tester.getCenter(find.byType(FlutterLogo));
     expect(logoOffset.dx.roundToDouble(), 376.0);
-    expect(logoOffset.dy.roundToDouble(), 140.0);
+    expect(logoOffset.dy.roundToDouble(), 137.0);
 
     // Test X axis slider.
     final Offset x = tester.getCenter(find.text('X'));
@@ -32,6 +30,6 @@ void main() {
 
     logoOffset = tester.getCenter(find.byType(FlutterLogo));
     expect(logoOffset.dx.roundToDouble(), 178.0);
-    expect(logoOffset.dy.roundToDouble(), 140.0);
+    expect(logoOffset.dy.roundToDouble(), 137.0);
   });
 }

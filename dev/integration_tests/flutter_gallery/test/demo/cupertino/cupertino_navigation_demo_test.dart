@@ -13,15 +13,12 @@ void main() {
     // dependency against in the flutter/cupertino package directly.
 
     final Future<ByteData> font = rootBundle.load(
-      'packages/cupertino_icons/assets/CupertinoIcons.ttf'
+      'packages/cupertino_icons/assets/CupertinoIcons.ttf',
     );
 
-    await (FontLoader('packages/cupertino_icons/CupertinoIcons')..addFont(font))
-      .load();
+    await (FontLoader('packages/cupertino_icons/CupertinoIcons')..addFont(font)).load();
 
-    await tester.pumpWidget(CupertinoApp(
-      home: CupertinoNavigationDemo(randomSeed: 123456),
-    ));
+    await tester.pumpWidget(CupertinoApp(home: CupertinoNavigationDemo(randomSeed: 123456)));
 
     await expectLater(
       find.byType(CupertinoNavigationDemo),
@@ -32,7 +29,7 @@ void main() {
     // Tap some row to go to the next page.
     await tester.tap(find.text('Buy this cool color').first);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     await expectLater(
       find.byType(CupertinoNavigationDemo),

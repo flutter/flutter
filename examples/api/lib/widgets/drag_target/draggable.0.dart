@@ -2,37 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Draggable].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Draggable].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const DraggableExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class DraggableExampleApp extends StatelessWidget {
+  const DraggableExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('Draggable Sample')),
+        body: const DraggableExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class DraggableExample extends StatefulWidget {
+  const DraggableExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DraggableExample> createState() => _DraggableExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _DraggableExampleState extends State<DraggableExample> {
   int acceptedData = 0;
 
   @override
@@ -53,37 +50,27 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             height: 100.0,
             width: 100.0,
             color: Colors.pinkAccent,
-            child: const Center(
-              child: Text('Child When Dragging'),
-            ),
+            child: const Center(child: Text('Child When Dragging')),
           ),
           child: Container(
             height: 100.0,
             width: 100.0,
             color: Colors.lightGreenAccent,
-            child: const Center(
-              child: Text('Draggable'),
-            ),
+            child: const Center(child: Text('Draggable')),
           ),
         ),
         DragTarget<int>(
-          builder: (
-            BuildContext context,
-            List<dynamic> accepted,
-            List<dynamic> rejected,
-          ) {
+          builder: (BuildContext context, List<dynamic> accepted, List<dynamic> rejected) {
             return Container(
               height: 100.0,
               width: 100.0,
               color: Colors.cyan,
-              child: Center(
-                child: Text('Value is updated to: $acceptedData'),
-              ),
+              child: Center(child: Text('Value is updated to: $acceptedData')),
             );
           },
-          onAccept: (int data) {
+          onAcceptWithDetails: (DragTargetDetails<int> details) {
             setState(() {
-              acceptedData += data;
+              acceptedData += details.data;
             });
           },
         ),

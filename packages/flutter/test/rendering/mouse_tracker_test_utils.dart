@@ -25,15 +25,34 @@ class _TestHitTester extends RenderBox {
 // A binding used to test MouseTracker, allowing the test to override hit test
 // searching.
 class TestMouseTrackerFlutterBinding extends BindingBase
-    with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding, TestDefaultBinaryMessengerBinding {
+    with
+        SchedulerBinding,
+        ServicesBinding,
+        GestureBinding,
+        SemanticsBinding,
+        RendererBinding,
+        TestDefaultBinaryMessengerBinding {
   @override
   void initInstances() {
     super.initInstances();
     postFrameCallbacks = <void Function(Duration)>[];
   }
 
+  late final RenderView _renderView = RenderView(view: platformDispatcher.implicitView!);
+
+  late final PipelineOwner _pipelineOwner = PipelineOwner(
+    onSemanticsUpdate: (ui.SemanticsUpdate _) {
+      assert(false);
+    },
+  );
+
   void setHitTest(BoxHitTest hitTest) {
-    renderView.child = _TestHitTester(hitTest);
+    if (_pipelineOwner.rootNode == null) {
+      _pipelineOwner.rootNode = _renderView;
+      rootPipelineOwner.adoptChild(_pipelineOwner);
+      addRenderView(_renderView);
+    }
+    _renderView.child = _TestHitTester(hitTest);
   }
 
   SchedulerPhase? _overridePhase;
@@ -48,7 +67,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     final SchedulerPhase? lastPhase = _overridePhase;
     _overridePhase = SchedulerPhase.persistentCallbacks;
     addPostFrameCallback((_) {
-      mouseTracker.updateAllDevices(renderView.hitTestMouseTrackers);
+      mouseTracker.updateAllDevices();
     });
     _overridePhase = lastPhase;
   }
@@ -57,7 +76,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
 
   // Proxy post-frame callbacks.
   @override
-  void addPostFrameCallback(void Function(Duration) callback) {
+  void addPostFrameCallback(void Function(Duration) callback, {String debugLabel = 'callback'}) {
     postFrameCallbacks.add(callback);
   }
 
@@ -71,7 +90,13 @@ class TestMouseTrackerFlutterBinding extends BindingBase
 
 // An object that mocks the behavior of a render object with [MouseTrackerAnnotation].
 class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation, HitTestTarget {
-  const TestAnnotationTarget({this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer, this.validForMouseTracker = true});
+  const TestAnnotationTarget({
+    this.onEnter,
+    this.onHover,
+    this.onExit,
+    this.cursor = MouseCursor.defer,
+    this.validForMouseTracker = true,
+  });
 
   @override
   final PointerEnterEventListener? onEnter;

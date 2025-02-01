@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'form_row.dart';
+/// @docImport 'text_form_field_row.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -9,13 +13,12 @@ import 'list_section.dart';
 
 // Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
-
-// Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultHeaderMargin = EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
-
-// Standard footer margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultFooterMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kFormDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(
+  20.0,
+  0.0,
+  20.0,
+  10.0,
+);
 
 /// An iOS-style form section.
 ///
@@ -102,8 +105,8 @@ class CupertinoFormSection extends StatelessWidget {
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
     this.clipBehavior = Clip.none,
-  })  : _type = CupertinoListSectionType.base,
-        assert(children.length > 0);
+  }) : _type = CupertinoListSectionType.base,
+       assert(children.length > 0);
 
   /// Creates a section that mimics standard "Inset Grouped" iOS forms.
   ///
@@ -148,8 +151,8 @@ class CupertinoFormSection extends StatelessWidget {
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
     this.clipBehavior = Clip.none,
-  })  : _type = CupertinoListSectionType.insetGrouped,
-        assert(children.length > 0);
+  }) : _type = CupertinoListSectionType.insetGrouped,
+       assert(children.length > 0);
 
   final CupertinoListSectionType _type;
 
@@ -193,53 +196,56 @@ class CupertinoFormSection extends StatelessWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
-    final Widget? headerWidget = header == null
-        ? null
-        : DefaultTextStyle(
-            style: TextStyle(
-              fontSize: 13.0,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-            child: Padding(
-              padding: _kFormDefaultHeaderMargin,
-              child: header,
-            ));
+    final Widget? headerWidget =
+        header == null
+            ? null
+            : DefaultTextStyle(
+              style: TextStyle(
+                fontSize: 13.0,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              ),
+              child: header!,
+            );
 
-    final Widget? footerWidget = footer == null
-        ? null
-        : DefaultTextStyle(
-            style: TextStyle(
-              fontSize: 13.0,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-            child: Padding(
-              padding: _kFormDefaultFooterMargin,
-              child: footer,
-            ));
+    final Widget? footerWidget =
+        footer == null
+            ? null
+            : DefaultTextStyle(
+              style: TextStyle(
+                fontSize: 13.0,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              ),
+              child: footer!,
+            );
 
-    return _type == CupertinoListSectionType.base
-        ? CupertinoListSection(
-            header: headerWidget,
-            footer: footerWidget,
-            margin: margin,
-            backgroundColor: backgroundColor,
-            decoration: decoration,
-            clipBehavior: clipBehavior,
-            hasLeading: false,
-            children: children)
-        : CupertinoListSection.insetGrouped(
-            header: headerWidget,
-            footer: footerWidget,
-            margin: margin,
-            backgroundColor: backgroundColor,
-            decoration: decoration,
-            clipBehavior: clipBehavior,
-            hasLeading: false,
-            children: children);
+    switch (_type) {
+      case CupertinoListSectionType.base:
+        return CupertinoListSection(
+          header: headerWidget,
+          footer: footerWidget,
+          margin: margin,
+          backgroundColor: backgroundColor,
+          decoration: decoration,
+          clipBehavior: clipBehavior,
+          hasLeading: false,
+          children: children,
+        );
+      case CupertinoListSectionType.insetGrouped:
+        return CupertinoListSection.insetGrouped(
+          header: headerWidget,
+          footer: footerWidget,
+          margin: margin,
+          backgroundColor: backgroundColor,
+          decoration: decoration,
+          clipBehavior: clipBehavior,
+          hasLeading: false,
+          children: children,
+        );
+    }
   }
 }

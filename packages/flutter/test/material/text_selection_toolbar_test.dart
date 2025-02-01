@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 const double _kToolbarContentDistance = 8.0;
@@ -20,20 +19,24 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
-      ? endpoints[1]
-      : endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint =
+        endpoints.length > 1 ? endpoints[1] : endpoints[0];
     final Offset anchorAbove = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance,
+      globalEditableRegion.top +
+          startTextSelectionPoint.point.dy -
+          textLineHeight -
+          _kToolbarContentDistance,
     );
     final Offset anchorBelow = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + endTextSelectionPoint.point.dy + TextSelectionToolbar.kToolbarContentDistanceBelow,
+      globalEditableRegion.top +
+          endTextSelectionPoint.point.dy +
+          TextSelectionToolbar.kToolbarContentDistanceBelow,
     );
 
     return TextSelectionToolbar(
@@ -102,9 +105,7 @@ void main() {
 
     // Adding one more child makes the children overflow.
     setState(() {
-      children.add(
-        const TestBox(),
-      );
+      children.add(const TestBox());
     });
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(children.length - 1));
@@ -203,4 +204,152 @@ void main() {
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Select all'), findsNothing);
   }, skip: kIsWeb); // [intended] We don't show the toolbar on the web.
+
+  for (final ColorScheme colorScheme in <ColorScheme>[
+    ThemeData.light().colorScheme,
+    ThemeData.dark().colorScheme,
+  ]) {
+    testWidgets('default background color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(colorScheme: colorScheme),
+          home: Scaffold(
+            body: Center(
+              child: TextSelectionToolbar(
+                anchorAbove: Offset.zero,
+                anchorBelow: Offset.zero,
+                children: <Widget>[
+                  TextSelectionToolbarTextButton(
+                    padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+                    onPressed: () {},
+                    child: const Text('Custom button'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      Finder findToolbarContainer() {
+        return find.descendant(
+          of: find.byWidgetPredicate(
+            (Widget w) => '${w.runtimeType}' == '_TextSelectionToolbarContainer',
+          ),
+          matching: find.byType(Material),
+        );
+      }
+
+      expect(findToolbarContainer(), findsAtLeastNWidgets(1));
+
+      final Material toolbarContainer = tester.widget(findToolbarContainer().first);
+      expect(
+        toolbarContainer.color,
+        // The default colors are hardcoded and don't take the default value of
+        // the theme's surface color.
+        switch (colorScheme.brightness) {
+          Brightness.light => const Color(0xffffffff),
+          Brightness.dark => const Color(0xff424242),
+        },
+      );
+    });
+
+    testWidgets('custom background color', (WidgetTester tester) async {
+      const Color customBackgroundColor = Colors.red;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(colorScheme: colorScheme.copyWith(surface: customBackgroundColor)),
+          home: Scaffold(
+            body: Center(
+              child: TextSelectionToolbar(
+                anchorAbove: Offset.zero,
+                anchorBelow: Offset.zero,
+                children: <Widget>[
+                  TextSelectionToolbarTextButton(
+                    padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+                    onPressed: () {},
+                    child: const Text('Custom button'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      Finder findToolbarContainer() {
+        return find.descendant(
+          of: find.byWidgetPredicate(
+            (Widget w) => '${w.runtimeType}' == '_TextSelectionToolbarContainer',
+          ),
+          matching: find.byType(Material),
+        );
+      }
+
+      expect(findToolbarContainer(), findsAtLeastNWidgets(1));
+
+      final Material toolbarContainer = tester.widget(findToolbarContainer().first);
+      expect(toolbarContainer.color, customBackgroundColor);
+    });
+  }
+
+  testWidgets('Overflowed menu expands children horizontally', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/144089.
+    late StateSetter setState;
+    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return TextSelectionToolbar(
+                anchorAbove: const Offset(50.0, 100.0),
+                anchorBelow: const Offset(50.0, 200.0),
+                children: children,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // All children fit on the screen, so they are all rendered.
+    expect(find.byType(TestBox), findsNWidgets(children.length));
+    expect(findOverflowButton(), findsNothing);
+
+    const String short = 'Short';
+    const String medium = 'Medium length';
+    const String long = 'Long label in the overflow menu';
+
+    // Adding several children makes the menu overflow.
+    setState(() {
+      children.addAll(const <Text>[Text(short), Text(medium), Text(long)]);
+    });
+    await tester.pumpAndSettle();
+    expect(findOverflowButton(), findsOneWidget);
+
+    // Tap the overflow button to show the overflow menu.
+    await tester.tap(findOverflowButton());
+    await tester.pumpAndSettle();
+    expect(find.byType(TestBox), findsNothing);
+    expect(find.byType(Text), findsNWidgets(3));
+    expect(findOverflowButton(), findsOneWidget);
+
+    Finder findToolbarContainer() {
+      return find.byWidgetPredicate(
+        (Widget w) => '${w.runtimeType}' == '_TextSelectionToolbarContainer',
+      );
+    }
+
+    expect(findToolbarContainer(), findsAtLeastNWidgets(1));
+
+    // Buttons have their width set to the container width.
+    final double overflowMenuWidth = tester.getRect(findToolbarContainer()).width;
+    expect(tester.getRect(find.text(long)).width, overflowMenuWidth);
+    expect(tester.getRect(find.text(medium)).width, overflowMenuWidth);
+    expect(tester.getRect(find.text(short)).width, overflowMenuWidth);
+  });
 }

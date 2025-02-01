@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ScaffoldMessenger.of].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ScaffoldMessenger.of].
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+void main() => runApp(const OfExampleApp());
+
+class OfExampleApp extends StatefulWidget {
+  const OfExampleApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<OfExampleApp> createState() => _OfExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _OfExampleAppState extends State<OfExampleApp> {
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
   int _counter = 0;
@@ -25,9 +25,9 @@ class _MyAppState extends State<MyApp> {
       _counter++;
     });
     if (_counter % 10 == 0) {
-      _scaffoldMessengerKey.currentState!.showSnackBar(const SnackBar(
-        content: Text('A multiple of ten!'),
-      ));
+      _scaffoldMessengerKey.currentState!.showSnackBar(
+        const SnackBar(content: Text('A multiple of ten!')),
+      );
     }
   }
 
@@ -41,13 +41,8 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Text(
-                'You have pushed the button this many times:',
-              ),
-              Text(
-                '$_counter',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
+              const Text('You have pushed the button this many times:'),
+              Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
             ],
           ),
         ),

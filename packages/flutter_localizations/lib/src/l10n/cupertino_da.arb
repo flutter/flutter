@@ -18,8 +18,14 @@
   "cutButtonLabel": "Klip",
   "copyButtonLabel": "Kopiér",
   "pasteButtonLabel": "Indsæt",
-  "selectAllButtonLabel": "Vælg alle",
+  "clearButtonLabel": "Ryd",
+  "selectAllButtonLabel": "Vælg alt",
   "tabSemanticsLabel": "Fane $tabIndex af $tabCount",
   "modalBarrierDismissLabel": "Afvis",
-  "searchTextFieldPlaceholderLabel": "Søg"
+  "searchTextFieldPlaceholderLabel": "Søg",
+  "noSpellCheckReplacementsLabel": "Der blev ikke fundet nogen erstatninger",
+  "menuDismissLabel": "Luk menu",
+  "lookUpButtonLabel": "Slå op",
+  "searchWebButtonLabel": "Søg på nettet",
+  "shareButtonLabel": "Del…"
 }

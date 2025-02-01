@@ -15,11 +15,17 @@
   "timerPickerMinuteLabelOther": "분",
   "timerPickerSecondLabelOne": "초",
   "timerPickerSecondLabelOther": "초",
-  "cutButtonLabel": "잘라냄",
+  "cutButtonLabel": "잘라내기",
   "copyButtonLabel": "복사",
   "pasteButtonLabel": "붙여넣기",
   "selectAllButtonLabel": "전체 선택",
   "tabSemanticsLabel": "탭 $tabCount개 중 $tabIndex번째",
   "modalBarrierDismissLabel": "닫기",
-  "searchTextFieldPlaceholderLabel": "검색"
+  "searchTextFieldPlaceholderLabel": "검색",
+  "noSpellCheckReplacementsLabel": "수정사항 없음",
+  "menuDismissLabel": "메뉴 닫기",
+  "lookUpButtonLabel": "찾기",
+  "searchWebButtonLabel": "웹 검색",
+  "shareButtonLabel": "공유...",
+  "clearButtonLabel": "삭제"
 }

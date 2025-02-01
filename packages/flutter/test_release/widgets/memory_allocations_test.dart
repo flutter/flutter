@@ -7,28 +7,27 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final MemoryAllocations ma = MemoryAllocations.instance;
+  final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
   setUp(() {
     assert(!ma.hasListeners);
   });
 
-  testWidgets(
-    '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
-    (WidgetTester tester) async {
-      ObjectEvent? recievedEvent;
-      ObjectEvent listener(ObjectEvent event) => recievedEvent = event;
+  testWidgets('$FlutterMemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.', (
+    WidgetTester tester,
+  ) async {
+    ObjectEvent? receivedEvent;
+    ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
 
-      ma.addListener(listener);
-      expect(ma.hasListeners, isFalse);
+    ma.addListener(listener);
+    expect(ma.hasListeners, isFalse);
 
-      await _activateFlutterObjects(tester);
-      expect(recievedEvent, isNull);
-      expect(ma.hasListeners, isFalse);
+    await _activateFlutterObjects(tester);
+    expect(receivedEvent, isNull);
+    expect(ma.hasListeners, isFalse);
 
-      ma.removeListener(listener);
-    },
-  );
+    ma.removeListener(listener);
+  });
 }
 
 class _TestLeafRenderObjectWidget extends LeafRenderObjectWidget {
@@ -55,14 +54,27 @@ class _TestRenderObject extends RenderObject {
   Rect get semanticBounds => throw UnimplementedError();
 }
 
-class _TestElement extends RootRenderObjectElement{
-  _TestElement(): super(_TestLeafRenderObjectWidget());
+class _TestElement extends RenderTreeRootElement with RootElementMixin {
+  _TestElement() : super(_TestLeafRenderObjectWidget());
 
   void makeInactive() {
     assignOwner(BuildOwner(focusManager: FocusManager()));
     mount(null, null);
     deactivate();
   }
+
+  @override
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) {}
+
+  @override
+  void moveRenderObjectChild(
+    covariant RenderObject child,
+    covariant Object? oldSlot,
+    covariant Object? newSlot,
+  ) {}
+
+  @override
+  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) {}
 }
 
 class _MyStatefulWidget extends StatefulWidget {
@@ -82,7 +94,8 @@ class _MyStatefulWidgetState extends State<_MyStatefulWidget> {
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<void> _activateFlutterObjects(WidgetTester tester) async {
   final _TestElement element = _TestElement();
-  element.makeInactive(); element.unmount();
+  element.makeInactive();
+  element.unmount();
 
   // Create and dispose State:
   await tester.pumpWidget(const _MyStatefulWidget());

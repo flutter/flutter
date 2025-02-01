@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'hardware_keyboard.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_maps.g.dart';
@@ -10,7 +13,6 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 String? _unicodeChar(String key) {
   if (key.length == 1) {
@@ -21,14 +23,23 @@ String? _unicodeChar(String key) {
 
 /// Platform-specific key event data for Web.
 ///
+/// This class is DEPRECATED. Platform specific key event data will no longer
+/// available. See [KeyEvent] for what is available.
+///
 /// See also:
 ///
 ///  * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 @immutable
 class RawKeyEventDataWeb extends RawKeyEventData {
   /// Creates a key event data structure specific for Web.
-  ///
-  /// The [code] and [metaState] arguments must not be null.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataWeb({
     required this.code,
     required this.key,
@@ -93,7 +104,8 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
   @override
   PhysicalKeyboardKey get physicalKey {
-    return kWebToPhysicalKey[code] ?? PhysicalKeyboardKey(LogicalKeyboardKey.webPlane + code.hashCode);
+    return kWebToPhysicalKey[code] ??
+        PhysicalKeyboardKey(LogicalKeyboardKey.webPlane + code.hashCode);
   }
 
   @override
@@ -123,30 +135,18 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(
-    ModifierKey key, {
-    KeyboardSide side = KeyboardSide.any,
-  }) {
-    switch (key) {
-      case ModifierKey.controlModifier:
-        return metaState & modifierControl != 0;
-      case ModifierKey.shiftModifier:
-        return metaState & modifierShift != 0;
-      case ModifierKey.altModifier:
-        return metaState & modifierAlt != 0;
-      case ModifierKey.metaModifier:
-        return metaState & modifierMeta != 0;
-      case ModifierKey.numLockModifier:
-        return metaState & modifierNumLock != 0;
-      case ModifierKey.capsLockModifier:
-        return metaState & modifierCapsLock != 0;
-      case ModifierKey.scrollLockModifier:
-        return metaState & modifierScrollLock != 0;
-      case ModifierKey.functionModifier:
-      case ModifierKey.symbolModifier:
-        // On Web, the browser doesn't report the state of the FN and SYM modifiers.
-        return false;
-    }
+  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
+    return switch (key) {
+      ModifierKey.controlModifier => metaState & modifierControl != 0,
+      ModifierKey.shiftModifier => metaState & modifierShift != 0,
+      ModifierKey.altModifier => metaState & modifierAlt != 0,
+      ModifierKey.metaModifier => metaState & modifierMeta != 0,
+      ModifierKey.numLockModifier => metaState & modifierNumLock != 0,
+      ModifierKey.capsLockModifier => metaState & modifierCapsLock != 0,
+      ModifierKey.scrollLockModifier => metaState & modifierScrollLock != 0,
+      // On Web, the browser doesn't report the state of the FN and SYM modifiers.
+      ModifierKey.functionModifier || ModifierKey.symbolModifier => false,
+    };
   }
 
   @override
@@ -162,37 +162,31 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-        properties.add(DiagnosticsProperty<String>('code', code));
-        properties.add(DiagnosticsProperty<String>('key', key));
-        properties.add(DiagnosticsProperty<int>('location', location));
-        properties.add(DiagnosticsProperty<int>('metaState', metaState));
-        properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+    properties.add(DiagnosticsProperty<String>('code', code));
+    properties.add(DiagnosticsProperty<String>('key', key));
+    properties.add(DiagnosticsProperty<int>('location', location));
+    properties.add(DiagnosticsProperty<int>('metaState', metaState));
+    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is RawKeyEventDataWeb
-        && other.code == code
-        && other.key == key
-        && other.location == location
-        && other.metaState == metaState
-        && other.keyCode == keyCode;
+    return other is RawKeyEventDataWeb &&
+        other.code == code &&
+        other.key == key &&
+        other.location == location &&
+        other.metaState == metaState &&
+        other.keyCode == keyCode;
   }
 
   @override
-  int get hashCode => Object.hash(
-    code,
-    key,
-    location,
-    metaState,
-    keyCode,
-  );
+  int get hashCode => Object.hash(code, key, location, metaState, keyCode);
 
   // Modifier key masks.
 

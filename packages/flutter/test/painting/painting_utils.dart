@@ -9,14 +9,18 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-class PaintingBindingSpy extends BindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {
+class PaintingBindingSpy extends BindingBase
+    with SchedulerBinding, ServicesBinding, PaintingBinding {
   int counter = 0;
   int get instantiateImageCodecCalledCount => counter;
 
   @override
-  Future<ui.Codec> instantiateImageCodec(Uint8List list, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
+  Future<ui.Codec> instantiateImageCodecWithSize(
+    ui.ImmutableBuffer buffer, {
+    ui.TargetImageSizeCallback? getTargetSize,
+  }) {
     counter++;
-    return ui.instantiateImageCodec(list);
+    return ui.instantiateImageCodecWithSize(buffer, getTargetSize: getTargetSize);
   }
 
   @override

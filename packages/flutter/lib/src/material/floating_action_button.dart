@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'elevated_button.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -24,12 +29,7 @@ class _DefaultHeroTag {
   String toString() => '<default FloatingActionButton tag>';
 }
 
-enum _FloatingActionButtonType {
-  regular,
-  small,
-  large,
-  extended,
-}
+enum _FloatingActionButtonType { regular, small, large, extended }
 
 /// A Material Design floating action button.
 ///
@@ -52,37 +52,26 @@ enum _FloatingActionButtonType {
 /// action button.
 ///
 /// {@tool dartpad}
-/// This example shows how to display a [FloatingActionButton] in a
-/// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
-///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button.png)
+/// This example shows a [FloatingActionButton] in its usual position within a
+/// [Scaffold]. Pressing the button cycles it through a few variations in its
+/// [foregroundColor], [backgroundColor], and [shape]. The button automatically
+/// animates its segue from one set of visual parameters to another.
 ///
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows how to make an extended [FloatingActionButton] in a
-/// [Scaffold], with a pink [backgroundColor], a thumbs up [Icon] and a
-/// [Text] label that reads "Approve".
-///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
+/// This sample shows all the variants of [FloatingActionButton] widget as
+/// described in: https://m3.material.io/components/floating-action-button/overview.
 ///
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.1.dart **
 /// {@end-tool}
 ///
-/// Material Design 3 introduced new types of floating action buttons.
 /// {@tool dartpad}
-/// This sample shows the creation of [FloatingActionButton] widget in the typical location in a Scaffold,
-/// as described in: https://m3.material.io/components/floating-action-button/overview
+/// This sample shows [FloatingActionButton] with additional color mappings as
+/// described in: https://m3.material.io/components/floating-action-button/overview.
 ///
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.2.dart **
-/// {@end-tool}
-///
-/// {@tool dartpad}
-/// This sample shows the creation of all the variants of [FloatingActionButton] widget as
-/// described in: https://m3.material.io/components/floating-action-button/overview
-///
-/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.3.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -94,9 +83,8 @@ enum _FloatingActionButtonType {
 class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
-  /// The [mini] and [clipBehavior] arguments must not be null. Additionally,
-  /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
-  /// must be non-negative.
+  /// The [elevation], [highlightElevation], and [disabledElevation] parameters,
+  /// if specified, must be non-negative.
   const FloatingActionButton({
     super.key,
     this.child,
@@ -127,7 +115,8 @@ class FloatingActionButton extends StatelessWidget {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       _floatingActionButtonType = mini ? _FloatingActionButtonType.small : _FloatingActionButtonType.regular,
+       _floatingActionButtonType =
+           mini ? _FloatingActionButtonType.small : _FloatingActionButtonType.regular,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
@@ -138,10 +127,8 @@ class FloatingActionButton extends StatelessWidget {
   /// This constructor overrides the default size constraints of the floating
   /// action button.
   ///
-  /// The [clipBehavior] and [autofocus] arguments must not be null.
-  /// Additionally, [elevation], [focusElevation], [hoverElevation],
-  /// [highlightElevation], and [disabledElevation] (if specified) must be
-  /// non-negative.
+  /// The [elevation], [focusElevation], [hoverElevation], [highlightElevation],
+  /// and [disabledElevation] parameters, if specified, must be non-negative.
   const FloatingActionButton.small({
     super.key,
     this.child,
@@ -183,10 +170,8 @@ class FloatingActionButton extends StatelessWidget {
   /// This constructor overrides the default size constraints of the floating
   /// action button.
   ///
-  /// The [clipBehavior] and [autofocus] arguments must not be null.
-  /// Additionally, [elevation], [focusElevation], [hoverElevation],
-  /// [highlightElevation], and [disabledElevation] (if specified) must be
-  /// non-negative.
+  /// The [elevation], [focusElevation], [hoverElevation], [highlightElevation],
+  /// and [disabledElevation] parameters, if specified, must be non-negative.
   const FloatingActionButton.large({
     super.key,
     this.child,
@@ -226,9 +211,8 @@ class FloatingActionButton extends StatelessWidget {
   /// Creates a wider [StadiumBorder]-shaped floating action button with
   /// an optional [icon] and a [label].
   ///
-  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
-  /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
-  /// (if specified) must be non-negative.
+  /// The [elevation], [highlightElevation], and [disabledElevation] parameters,
+  /// if specified, must be non-negative.
   ///
   /// See also:
   ///  * <https://m3.material.io/components/extended-fab>
@@ -283,36 +267,40 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The default foreground color for icons and text within the button.
   ///
-  /// If this property is null, then the
-  /// [FloatingActionButtonThemeData.foregroundColor] of
-  /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
-  /// null, then the [ColorScheme.onSecondary] color of [ThemeData.colorScheme]
-  /// is used.
+  /// If this property is null, then the [FloatingActionButtonThemeData.foregroundColor]
+  /// of [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// null, then the [ColorScheme.onPrimaryContainer] color of [ThemeData.colorScheme]
+  /// is used. If [ThemeData.useMaterial3] is set to false, then the
+  /// [ColorScheme.onSecondary] color of [ThemeData.colorScheme] is used.
   final Color? foregroundColor;
 
   /// The button's background color.
   ///
-  /// If this property is null, then the
-  /// [FloatingActionButtonThemeData.backgroundColor] of
-  /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
-  /// null, then the [Theme]'s [ColorScheme.secondary] color is used.
+  /// If this property is null, then the [FloatingActionButtonThemeData.backgroundColor]
+  /// of [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// null, then the [ColorScheme.primaryContainer] color of [ThemeData.colorScheme]
+  /// is used. If [ThemeData.useMaterial3] is set to false, then the
+  /// [ColorScheme.secondary] color of [ThemeData.colorScheme] is used.
   final Color? backgroundColor;
 
   /// The color to use for filling the button when the button has input focus.
   ///
-  /// Defaults to [ThemeData.focusColor] for the current theme.
+  /// In Material3, defaults to [ColorScheme.onPrimaryContainer] with opacity 0.1.
+  /// In Material 2, it defaults to [ThemeData.focusColor] for the current theme.
   final Color? focusColor;
 
   /// The color to use for filling the button when the button has a pointer
   /// hovering over it.
   ///
-  /// Defaults to [ThemeData.hoverColor] for the current theme.
+  /// Defaults to [ThemeData.hoverColor] for the current theme in Material 2. In
+  /// Material 3, defaults to [ColorScheme.onPrimaryContainer] with opacity 0.08.
   final Color? hoverColor;
 
   /// The splash color for this [FloatingActionButton]'s [InkWell].
   ///
   /// If null, [FloatingActionButtonThemeData.splashColor] is used, if that is
-  /// null, [ThemeData.splashColor] is used.
+  /// null, [ThemeData.splashColor] is used in Material 2; [ColorScheme.onPrimaryContainer]
+  /// with opacity 0.1 is used in Material 3.
   final Color? splashColor;
 
   /// The tag to apply to the button's [Hero] widget.
@@ -336,7 +324,7 @@ class FloatingActionButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
@@ -429,12 +417,12 @@ class FloatingActionButton extends StatelessWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// True if this is an "extended" floating action button.
   ///
-  /// Typically [extended] buttons have a [StadiumBorder] [shape]
+  /// Typically "extended" buttons have a [StadiumBorder] [shape]
   /// and have been created with the [FloatingActionButton.extended]
   /// constructor.
   ///
@@ -471,7 +459,6 @@ class FloatingActionButton extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
-
   /// The spacing between the icon and the label for an extended
   /// [FloatingActionButton].
   ///
@@ -502,93 +489,85 @@ class FloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
-    final FloatingActionButtonThemeData defaults = theme.useMaterial3
-      ? _FABDefaultsM3(context, _floatingActionButtonType, child != null)
-      : _FABDefaultsM2(context, _floatingActionButtonType, child != null);
+    final FloatingActionButtonThemeData defaults =
+        theme.useMaterial3
+            ? _FABDefaultsM3(context, _floatingActionButtonType, child != null)
+            : _FABDefaultsM2(context, _floatingActionButtonType, child != null);
 
-    final Color foregroundColor = this.foregroundColor
-      ?? floatingActionButtonTheme.foregroundColor
-      ?? defaults.foregroundColor!;
-    final Color backgroundColor = this.backgroundColor
-      ?? floatingActionButtonTheme.backgroundColor
-      ?? defaults.backgroundColor!;
-    final Color focusColor = this.focusColor
-      ?? floatingActionButtonTheme.focusColor
-      ?? defaults.focusColor!;
-    final Color hoverColor = this.hoverColor
-      ?? floatingActionButtonTheme.hoverColor
-      ?? defaults.hoverColor!;
-    final Color splashColor = this.splashColor
-      ?? floatingActionButtonTheme.splashColor
-      ?? defaults.splashColor!;
-    final double elevation = this.elevation
-      ?? floatingActionButtonTheme.elevation
-      ?? defaults.elevation!;
-    final double focusElevation = this.focusElevation
-      ?? floatingActionButtonTheme.focusElevation
-      ?? defaults.focusElevation!;
-    final double hoverElevation = this.hoverElevation
-      ?? floatingActionButtonTheme.hoverElevation
-      ?? defaults.hoverElevation!;
-    final double disabledElevation = this.disabledElevation
-      ?? floatingActionButtonTheme.disabledElevation
-      ?? defaults.disabledElevation
-      ?? elevation;
-    final double highlightElevation = this.highlightElevation
-      ?? floatingActionButtonTheme.highlightElevation
-      ?? defaults.highlightElevation!;
-    final MaterialTapTargetSize materialTapTargetSize = this.materialTapTargetSize
-      ?? theme.materialTapTargetSize;
-    final bool enableFeedback = this.enableFeedback
-      ?? floatingActionButtonTheme.enableFeedback
-      ?? defaults.enableFeedback!;
-    final double iconSize = floatingActionButtonTheme.iconSize
-      ?? defaults.iconSize!;
-    final TextStyle extendedTextStyle = (this.extendedTextStyle
-      ?? floatingActionButtonTheme.extendedTextStyle
-      ?? defaults.extendedTextStyle!).copyWith(color: foregroundColor);
-    final ShapeBorder shape = this.shape
-      ?? floatingActionButtonTheme.shape
-      ?? defaults.shape!;
+    final Color foregroundColor =
+        this.foregroundColor ??
+        floatingActionButtonTheme.foregroundColor ??
+        defaults.foregroundColor!;
+    final Color backgroundColor =
+        this.backgroundColor ??
+        floatingActionButtonTheme.backgroundColor ??
+        defaults.backgroundColor!;
+    final Color focusColor =
+        this.focusColor ?? floatingActionButtonTheme.focusColor ?? defaults.focusColor!;
+    final Color hoverColor =
+        this.hoverColor ?? floatingActionButtonTheme.hoverColor ?? defaults.hoverColor!;
+    final Color splashColor =
+        this.splashColor ?? floatingActionButtonTheme.splashColor ?? defaults.splashColor!;
+    final double elevation =
+        this.elevation ?? floatingActionButtonTheme.elevation ?? defaults.elevation!;
+    final double focusElevation =
+        this.focusElevation ?? floatingActionButtonTheme.focusElevation ?? defaults.focusElevation!;
+    final double hoverElevation =
+        this.hoverElevation ?? floatingActionButtonTheme.hoverElevation ?? defaults.hoverElevation!;
+    final double disabledElevation =
+        this.disabledElevation ??
+        floatingActionButtonTheme.disabledElevation ??
+        defaults.disabledElevation ??
+        elevation;
+    final double highlightElevation =
+        this.highlightElevation ??
+        floatingActionButtonTheme.highlightElevation ??
+        defaults.highlightElevation!;
+    final MaterialTapTargetSize materialTapTargetSize =
+        this.materialTapTargetSize ?? theme.materialTapTargetSize;
+    final bool enableFeedback =
+        this.enableFeedback ?? floatingActionButtonTheme.enableFeedback ?? defaults.enableFeedback!;
+    final double iconSize = floatingActionButtonTheme.iconSize ?? defaults.iconSize!;
+    final TextStyle extendedTextStyle = (this.extendedTextStyle ??
+            floatingActionButtonTheme.extendedTextStyle ??
+            defaults.extendedTextStyle!)
+        .copyWith(color: foregroundColor);
+    final ShapeBorder shape = this.shape ?? floatingActionButtonTheme.shape ?? defaults.shape!;
 
     BoxConstraints sizeConstraints;
-    Widget? resolvedChild = child != null ? IconTheme.merge(
-      data: IconThemeData(size: iconSize),
-      child: child!,
-    ) : child;
-    switch(_floatingActionButtonType) {
+    Widget? resolvedChild =
+        child != null ? IconTheme.merge(data: IconThemeData(size: iconSize), child: child!) : child;
+    switch (_floatingActionButtonType) {
       case _FloatingActionButtonType.regular:
         sizeConstraints = floatingActionButtonTheme.sizeConstraints ?? defaults.sizeConstraints!;
-        break;
       case _FloatingActionButtonType.small:
-        sizeConstraints = floatingActionButtonTheme.smallSizeConstraints ?? defaults.smallSizeConstraints!;
-        break;
+        sizeConstraints =
+            floatingActionButtonTheme.smallSizeConstraints ?? defaults.smallSizeConstraints!;
       case _FloatingActionButtonType.large:
-        sizeConstraints = floatingActionButtonTheme.largeSizeConstraints ?? defaults.largeSizeConstraints!;
-        break;
+        sizeConstraints =
+            floatingActionButtonTheme.largeSizeConstraints ?? defaults.largeSizeConstraints!;
       case _FloatingActionButtonType.extended:
-        sizeConstraints = floatingActionButtonTheme.extendedSizeConstraints ?? defaults.extendedSizeConstraints!;
-        final double iconLabelSpacing = extendedIconLabelSpacing ?? floatingActionButtonTheme.extendedIconLabelSpacing ?? 8.0;
-        final EdgeInsetsGeometry padding = extendedPadding
-            ?? floatingActionButtonTheme.extendedPadding
-            ?? defaults.extendedPadding!;
+        sizeConstraints =
+            floatingActionButtonTheme.extendedSizeConstraints ?? defaults.extendedSizeConstraints!;
+        final double iconLabelSpacing =
+            extendedIconLabelSpacing ?? floatingActionButtonTheme.extendedIconLabelSpacing ?? 8.0;
+        final EdgeInsetsGeometry padding =
+            extendedPadding ??
+            floatingActionButtonTheme.extendedPadding ??
+            defaults.extendedPadding!;
         resolvedChild = _ChildOverflowBox(
           child: Padding(
             padding: padding,
             child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  if (child != null)
-                    child!,
-                  if (child != null && isExtended)
-                    SizedBox(width: iconLabelSpacing),
-                  if (isExtended)
-                    _extendedLabel!,
-                ],
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (child != null) child!,
+                if (child != null && isExtended) SizedBox(width: iconLabelSpacing),
+                if (isExtended) _extendedLabel!,
+              ],
             ),
           ),
         );
-        break;
     }
 
     Widget result = RawMaterialButton(
@@ -615,17 +594,11 @@ class FloatingActionButton extends StatelessWidget {
     );
 
     if (tooltip != null) {
-      result = Tooltip(
-        message: tooltip,
-        child: result,
-      );
+      result = Tooltip(message: tooltip, child: result);
     }
 
     if (heroTag != null) {
-      result = Hero(
-        tag: heroTag!,
-        child: result,
-      );
+      result = Hero(tag: heroTag!, child: result);
     }
 
     return MergeSemantics(child: result);
@@ -650,7 +623,13 @@ class FloatingActionButton extends StatelessWidget {
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
     properties.add(FlagProperty('isExtended', value: isExtended, ifTrue: 'extended'));
-    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<MaterialTapTargetSize>(
+        'materialTapTargetSize',
+        materialTapTargetSize,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
@@ -665,9 +644,9 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<MaterialState> states) {
-    return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states)
-      ?? themeCursor?.resolve(states)
-      ?? MaterialStateMouseCursor.clickable.resolve(states);
+    return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
+        themeCursor?.resolve(states) ??
+        MaterialStateMouseCursor.clickable.resolve(states);
   }
 
   @override
@@ -680,15 +659,11 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
 // Used to encapsulate extended FABs whose size is fixed, using Row
 // and MainAxisSize.min, to be as wide as their label and icon.
 class _ChildOverflowBox extends SingleChildRenderObjectWidget {
-  const _ChildOverflowBox({
-    super.child,
-  });
+  const _ChildOverflowBox({super.child});
 
   @override
   _RenderChildOverflowBox createRenderObject(BuildContext context) {
-    return _RenderChildOverflowBox(
-      textDirection: Directionality.of(context),
-    );
+    return _RenderChildOverflowBox(textDirection: Directionality.of(context));
   }
 
   @override
@@ -698,9 +673,7 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
 }
 
 class _RenderChildOverflowBox extends RenderAligningShiftedBox {
-  _RenderChildOverflowBox({
-    super.textDirection,
-  }) : super(alignment: Alignment.center);
+  _RenderChildOverflowBox({super.textDirection}) : super(alignment: Alignment.center);
 
   @override
   double computeMinIntrinsicWidth(double height) => 0.0;
@@ -740,31 +713,20 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 // Hand coded defaults based on Material Design 2.
 class _FABDefaultsM2 extends FloatingActionButtonThemeData {
   _FABDefaultsM2(BuildContext context, this.type, this.hasChild)
-      : _theme = Theme.of(context),
-        _colors = Theme.of(context).colorScheme,
-        super(
-          elevation: 6,
-          focusElevation: 6,
-          hoverElevation: 8,
-          highlightElevation: 12,
-          enableFeedback: true,
-          sizeConstraints: const BoxConstraints.tightFor(
-            width: 56.0,
-            height: 56.0,
-          ),
-          smallSizeConstraints: const BoxConstraints.tightFor(
-            width: 40.0,
-            height: 40.0,
-          ),
-          largeSizeConstraints: const BoxConstraints.tightFor(
-            width: 96.0,
-            height: 96.0,
-          ),
-          extendedSizeConstraints: const BoxConstraints.tightFor(
-            height: 48.0,
-          ),
-          extendedIconLabelSpacing: 8.0,
-        );
+    : _theme = Theme.of(context),
+      _colors = Theme.of(context).colorScheme,
+      super(
+        elevation: 6,
+        focusElevation: 6,
+        hoverElevation: 8,
+        highlightElevation: 12,
+        enableFeedback: true,
+        sizeConstraints: const BoxConstraints.tightFor(width: 56.0, height: 56.0),
+        smallSizeConstraints: const BoxConstraints.tightFor(width: 40.0, height: 40.0),
+        largeSizeConstraints: const BoxConstraints.tightFor(width: 96.0, height: 96.0),
+        extendedSizeConstraints: const BoxConstraints.tightFor(height: 48.0),
+        extendedIconLabelSpacing: 8.0,
+      );
 
   final _FloatingActionButtonType type;
   final bool hasChild;
@@ -774,16 +736,26 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
   bool get _isExtended => type == _FloatingActionButtonType.extended;
   bool get _isLarge => type == _FloatingActionButtonType.large;
 
-  @override Color? get foregroundColor => _colors.onSecondary;
-  @override Color? get backgroundColor => _colors.secondary;
-  @override Color? get focusColor => _theme.focusColor;
-  @override Color? get hoverColor => _theme.hoverColor;
-  @override Color? get splashColor => _theme.splashColor;
-  @override ShapeBorder? get shape => _isExtended ? const StadiumBorder() : const CircleBorder();
-  @override double? get iconSize => _isLarge ? 36.0 : 24.0;
+  @override
+  Color? get foregroundColor => _colors.onSecondary;
+  @override
+  Color? get backgroundColor => _colors.secondary;
+  @override
+  Color? get focusColor => _theme.focusColor;
+  @override
+  Color? get hoverColor => _theme.hoverColor;
+  @override
+  Color? get splashColor => _theme.splashColor;
+  @override
+  ShapeBorder? get shape => _isExtended ? const StadiumBorder() : const CircleBorder();
+  @override
+  double? get iconSize => _isLarge ? 36.0 : 24.0;
 
-  @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
-  @override TextStyle? get extendedTextStyle => _theme.textTheme.labelLarge!.copyWith(letterSpacing: 1.2);
+  @override
+  EdgeInsetsGeometry? get extendedPadding =>
+      EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
+  @override
+  TextStyle? get extendedTextStyle => _theme.textTheme.labelLarge!.copyWith(letterSpacing: 1.2);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - FAB
@@ -793,8 +765,7 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
-
+// dart format off
 class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   _FABDefaultsM3(this.context, this.type, this.hasChild)
     : super(
@@ -831,36 +802,29 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
 
   @override Color? get foregroundColor => _colors.onPrimaryContainer;
   @override Color? get backgroundColor => _colors.primaryContainer;
-  @override Color? get splashColor => _colors.onPrimaryContainer.withOpacity(0.12);
-  @override Color? get focusColor => _colors.onPrimaryContainer.withOpacity(0.12);
+  @override Color? get splashColor => _colors.onPrimaryContainer.withOpacity(0.1);
+  @override Color? get focusColor => _colors.onPrimaryContainer.withOpacity(0.1);
   @override Color? get hoverColor => _colors.onPrimaryContainer.withOpacity(0.08);
 
   @override
-  ShapeBorder? get shape {
-    switch (type) {
-      case _FloatingActionButtonType.regular:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
-      case _FloatingActionButtonType.small:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
-      case _FloatingActionButtonType.large:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
-      case _FloatingActionButtonType.extended:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
-     }
-  }
+  ShapeBorder? get shape => switch (type) {
+    _FloatingActionButtonType.regular  => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
+    _FloatingActionButtonType.small    => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+    _FloatingActionButtonType.large    => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
+    _FloatingActionButtonType.extended => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
+  };
 
   @override
-  double? get iconSize {
-    switch (type) {
-      case _FloatingActionButtonType.regular: return 24.0;
-      case _FloatingActionButtonType.small: return  24.0;
-      case _FloatingActionButtonType.large: return 36.0;
-      case _FloatingActionButtonType.extended: return 24.0;
-    }
-  }
+  double? get iconSize => switch (type) {
+    _FloatingActionButtonType.regular  => 24.0,
+    _FloatingActionButtonType.small    => 24.0,
+    _FloatingActionButtonType.large    => 36.0,
+    _FloatingActionButtonType.extended => 24.0,
+  };
 
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
   @override TextStyle? get extendedTextStyle => _textTheme.labelLarge;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - FAB

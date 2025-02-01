@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoTextFormFieldRow].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoTextFormFieldRow].
 
 void main() => runApp(const FormSectionApp());
 
@@ -26,9 +26,7 @@ class FromSectionExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('CupertinoFormSection Sample'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoFormSection Sample')),
       // Add safe area widget to place the CupertinoFormSection below the navigation bar.
       child: SafeArea(
         child: Form(

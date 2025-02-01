@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:channels/main.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,9 +13,6 @@ String getStatus(WidgetTester tester) => tester.widget<Text>(statusField).data!;
 
 void main() {
   testWidgets('step through', (WidgetTester tester) async {
-    // TODO(goderbauer): Remove this once https://github.com/flutter/flutter/issues/116663 is diagnosed.
-    debugPrintHitTestResults = true;
-
     await tester.pumpWidget(const TestApp());
     await tester.pumpAndSettle();
 
@@ -24,7 +20,10 @@ void main() {
     while (getStatus(tester) == 'ok') {
       step++;
       print('>> Tapping for step $step...');
-      await tester.tap(stepButton);
+      // TODO(goderbauer): Setting the pointer ID to something large to avoid
+      //   that the test events clash with ghost events from the device to
+      //   further investigate https://github.com/flutter/flutter/issues/116663.
+      await tester.tap(stepButton, pointer: 500 + step);
       await tester.pump();
       expect(statusField, findsNothing);
 
@@ -33,9 +32,6 @@ void main() {
         await tester.pumpAndSettle();
       }
     }
-
-    // TODO(goderbauer): Remove this once https://github.com/flutter/flutter/issues/116663 is diagnosed.
-    debugPrintHitTestResults = false;
 
     final String status = getStatus(tester);
     if (status != 'complete') {

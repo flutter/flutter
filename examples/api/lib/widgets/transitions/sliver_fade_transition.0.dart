@@ -2,39 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SliverFadeTransition].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SliverFadeTransition].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SliverFadeTransitionExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class SliverFadeTransitionExampleApp extends StatelessWidget {
+  const SliverFadeTransitionExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const Center(
-          child: MyStatefulWidget(),
-        ),
+        appBar: AppBar(title: const Text('SliverFadeTransition Sample')),
+        body: const Center(child: SliverFadeTransitionExample()),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SliverFadeTransitionExample extends StatefulWidget {
+  const SliverFadeTransitionExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SliverFadeTransitionExample> createState() => _SliverFadeTransitionExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+class _SliverFadeTransitionExampleState extends State<SliverFadeTransitionExample>
     with SingleTickerProviderStateMixin {
   late final AnimationController controller = AnimationController(
     duration: const Duration(milliseconds: 1000),
@@ -66,21 +61,18 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(slivers: <Widget>[
-      SliverFadeTransition(
-        opacity: animation,
-        sliver: SliverFixedExtentList(
-          itemExtent: 100.0,
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
-              return Container(
-                color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
-              );
-            },
-            childCount: 5,
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverFadeTransition(
+          opacity: animation,
+          sliver: SliverFixedExtentList(
+            itemExtent: 100.0,
+            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(color: index.isEven ? Colors.indigo[200] : Colors.orange[200]);
+            }, childCount: 5),
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }

@@ -2,35 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FocusNode.unfocus].
-
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [FocusNode.unfocus].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const UnfocusExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class UnfocusExampleApp extends StatelessWidget {
+  const UnfocusExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
-    );
+    return const MaterialApp(home: UnfocusExample());
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class UnfocusExample extends StatefulWidget {
+  const UnfocusExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<UnfocusExample> createState() => _UnfocusExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _UnfocusExampleState extends State<UnfocusExample> {
   UnfocusDisposition disposition = UnfocusDisposition.scope;
 
   @override
@@ -47,9 +41,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   width: 200,
                   child: Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: TextField(
-                      decoration: InputDecoration(border: OutlineInputBorder()),
-                    ),
+                    child: TextField(decoration: InputDecoration(border: OutlineInputBorder())),
                   ),
                 );
               }),
@@ -57,8 +49,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                ...List<Widget>.generate(UnfocusDisposition.values.length,
-                    (int index) {
+                ...List<Widget>.generate(UnfocusDisposition.values.length, (int index) {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[

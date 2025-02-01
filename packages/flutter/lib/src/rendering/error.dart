@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle;
+import 'dart:ui'
+    as ui
+    show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle;
+
+import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -30,7 +34,7 @@ class RenderErrorBox extends RenderBox {
   ///
   /// A message can optionally be provided. If a message is provided, an attempt
   /// will be made to render the message when the box paints.
-  RenderErrorBox([ this.message = '' ]) {
+  RenderErrorBox([this.message = '']) {
     try {
       if (message != '') {
         // This class is intentionally doing things using the low-level
@@ -77,7 +81,8 @@ class RenderErrorBox extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.constrain(const Size(_kMaxWidth, _kMaxHeight));
   }
 
@@ -148,7 +153,7 @@ class RenderErrorBox extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     try {
-      context.canvas.drawRect(offset & size, Paint() .. color = backgroundColor);
+      context.canvas.drawRect(offset & size, Paint()..color = backgroundColor);
       if (_paragraph != null) {
         double width = size.width;
         double left = 0.0;
@@ -157,11 +162,11 @@ class RenderErrorBox extends RenderBox {
           width -= padding.left + padding.right;
           left += padding.left;
         }
-        _paragraph!.layout(ui.ParagraphConstraints(width: width));
-        if (size.height > padding.top + _paragraph!.height + padding.bottom) {
+        _paragraph.layout(ui.ParagraphConstraints(width: width));
+        if (size.height > padding.top + _paragraph.height + padding.bottom) {
           top += padding.top;
         }
-        context.canvas.drawParagraph(_paragraph!, offset + Offset(left, top));
+        context.canvas.drawParagraph(_paragraph, offset + Offset(left, top));
       }
     } catch (error) {
       // If an error happens here we're in a terrible state, so we really should

@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AppBar].
-
 import 'package:flutter/material.dart';
 
-List<String> titles = <String>[
-  'Cloud',
-  'Beach',
-  'Sunny',
-];
+/// Flutter code sample for [AppBar].
+
+List<String> titles = <String>['Cloud', 'Beach', 'Sunny'];
 
 void main() => runApp(const AppBarApp());
 
@@ -60,18 +56,9 @@ class AppBarExample extends StatelessWidget {
           shadowColor: Theme.of(context).shadowColor,
           bottom: TabBar(
             tabs: <Widget>[
-              Tab(
-                icon: const Icon(Icons.cloud_outlined),
-                text: titles[0],
-              ),
-              Tab(
-                icon: const Icon(Icons.beach_access_sharp),
-                text: titles[1],
-              ),
-              Tab(
-                icon: const Icon(Icons.brightness_5_sharp),
-                text: titles[2],
-              ),
+              Tab(icon: const Icon(Icons.cloud_outlined), text: titles[0]),
+              Tab(icon: const Icon(Icons.beach_access_sharp), text: titles[1]),
+              Tab(icon: const Icon(Icons.brightness_5_sharp), text: titles[2]),
             ],
           ),
         ),
@@ -80,7 +67,7 @@ class AppBarExample extends StatelessWidget {
             ListView.builder(
               itemCount: 25,
               itemBuilder: (BuildContext context, int index) {
-                return  ListTile(
+                return ListTile(
                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                   title: Text('${titles[0]} $index'),
                 );
@@ -89,7 +76,7 @@ class AppBarExample extends StatelessWidget {
             ListView.builder(
               itemCount: 25,
               itemBuilder: (BuildContext context, int index) {
-                return  ListTile(
+                return ListTile(
                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                   title: Text('${titles[1]} $index'),
                 );
@@ -98,7 +85,7 @@ class AppBarExample extends StatelessWidget {
             ListView.builder(
               itemCount: 25,
               itemBuilder: (BuildContext context, int index) {
-                return  ListTile(
+                return ListTile(
                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                   title: Text('${titles[2]} $index'),
                 );

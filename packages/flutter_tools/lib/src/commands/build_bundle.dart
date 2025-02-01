@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -18,7 +20,8 @@ class BuildBundleCommand extends BuildSubCommand {
     required super.logger,
     bool verboseHelp = false,
     BundleBuilder? bundleBuilder,
-  }) :  _bundleBuilder = bundleBuilder ?? BundleBuilder(), super(verboseHelp: verboseHelp) {
+  }) : _bundleBuilder = bundleBuilder ?? BundleBuilder(),
+       super(verboseHelp: verboseHelp) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
@@ -26,12 +29,15 @@ class BuildBundleCommand extends BuildSubCommand {
     usesDartDefineOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     argParser
-      ..addOption('depfile',
+      ..addOption(
+        'depfile',
         defaultsTo: defaultDepfilePath,
-        help: 'A file path where a depfile will be written. '
-              'This contains all build inputs and outputs in a Make-style syntax.'
+        help:
+            'A file path where a depfile will be written. '
+            'This contains all build inputs and outputs in a Make-style syntax.',
       )
-      ..addOption('target-platform',
+      ..addOption(
+        'target-platform',
         defaultsTo: 'android-arm',
         allowed: const <String>[
           'android-arm',
@@ -43,13 +49,16 @@ class BuildBundleCommand extends BuildSubCommand {
           'linux-x64',
           'linux-arm64',
           'windows-x64',
+          'windows-arm64',
         ],
         help: 'The architecture for which to build the application.',
       )
-      ..addOption('asset-dir',
+      ..addOption(
+        'asset-dir',
         defaultsTo: getAssetBuildDirectory(),
-        help: 'The output directory for the kernel_blob.bin file, the native snapshot, the assets, etc. '
-              'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
+        help:
+            'The output directory for the kernel_blob.bin file, the native snapshot, the assets, etc. '
+            'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
       )
       ..addFlag(
         'tree-shake-icons',
@@ -69,31 +78,50 @@ class BuildBundleCommand extends BuildSubCommand {
   final String description = 'Build the Flutter assets directory from your app.';
 
   @override
-  final String usageFooter = 'The Flutter assets directory contains your '
+  final String usageFooter =
+      'The Flutter assets directory contains your '
       'application code and resources; they are used by some Flutter Android and'
       ' iOS runtimes.';
 
   @override
   Future<CustomDimensions> get usageValues async {
     final String projectDir = globals.fs.file(targetFile).parent.parent.path;
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectDir));
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      globals.fs.directory(projectDir),
+    );
     return CustomDimensions(
-      commandBuildBundleTargetPlatform: stringArgDeprecated('target-platform'),
+      commandBuildBundleTargetPlatform: stringArg('target-platform'),
       commandBuildBundleIsModule: flutterProject.isModule,
     );
   }
 
   @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final String projectDir = globals.fs.file(targetFile).parent.parent.path;
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      globals.fs.directory(projectDir),
+    );
+    return Event.commandUsageValues(
+      workflow: commandPath,
+      commandHasTerminal: hasTerminal,
+      buildBundleTargetPlatform: stringArg('target-platform'),
+      buildBundleIsModule: flutterProject.isModule,
+    );
+  }
+
+  @override
   Future<void> validateCommand() async {
-    if (boolArgDeprecated('tree-shake-icons')) {
-      throwToolExit('The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
+    if (boolArg('tree-shake-icons')) {
+      throwToolExit(
+        'The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.',
+      );
     }
     return super.validateCommand();
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = stringArgDeprecated('target-platform')!;
+    final String targetPlatform = stringArg('target-platform')!;
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     // Check for target platforms that are only allowed via feature flags.
     switch (platform) {
@@ -101,18 +129,16 @@ class BuildBundleCommand extends BuildSubCommand {
         if (!featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }
-        break;
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
-        break;
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
         if (!featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
-        break;
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -133,8 +159,9 @@ class BuildBundleCommand extends BuildSubCommand {
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,
-      depfilePath: stringArgDeprecated('depfile'),
-      assetDirPath: stringArgDeprecated('asset-dir'),
+      depfilePath: stringArg('depfile'),
+      assetDirPath: stringArg('asset-dir'),
+      buildNativeAssets: false,
     );
     return FlutterCommandResult.success();
   }

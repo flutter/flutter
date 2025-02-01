@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_app_bar.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -34,12 +38,11 @@ class BottomAppBarTheme with Diagnosticable {
     this.shape,
     this.height,
     this.surfaceTintColor,
+    this.shadowColor,
     this.padding,
   });
 
   /// Overrides the default value for [BottomAppBar.color].
-  ///
-  /// If null, [BottomAppBar] uses [ThemeData.bottomAppBarColor].
   final Color? color;
 
   /// Overrides the default value for [BottomAppBar.elevation].
@@ -49,8 +52,6 @@ class BottomAppBarTheme with Diagnosticable {
   final NotchedShape? shape;
 
   /// Overrides the default value for [BottomAppBar.height].
-  ///
-  /// If null, [BottomAppBar] height will be the minimum on the non material 3.
   final double? height;
 
   /// Overrides the default value for [BottomAppBar.surfaceTintColor].
@@ -59,6 +60,9 @@ class BottomAppBarTheme with Diagnosticable {
   ///
   /// See [Material.surfaceTintColor] for more details.
   final Color? surfaceTintColor;
+
+  /// Overrides the default value for [BottomAppBar.shadowColor].
+  final Color? shadowColor;
 
   /// Overrides the default value for [BottomAppBar.padding].
   final EdgeInsetsGeometry? padding;
@@ -71,6 +75,7 @@ class BottomAppBarTheme with Diagnosticable {
     NotchedShape? shape,
     double? height,
     Color? surfaceTintColor,
+    Color? shadowColor,
     EdgeInsetsGeometry? padding,
   }) {
     return BottomAppBarTheme(
@@ -79,6 +84,7 @@ class BottomAppBarTheme with Diagnosticable {
       shape: shape ?? this.shape,
       height: height ?? this.height,
       surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
+      shadowColor: shadowColor ?? this.shadowColor,
       padding: padding ?? this.padding,
     );
   }
@@ -89,8 +95,6 @@ class BottomAppBarTheme with Diagnosticable {
   }
 
   /// Linearly interpolate between two BAB themes.
-  ///
-  /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BottomAppBarTheme lerp(BottomAppBarTheme? a, BottomAppBarTheme? b, double t) {
@@ -103,19 +107,14 @@ class BottomAppBarTheme with Diagnosticable {
       shape: t < 0.5 ? a?.shape : b?.shape,
       height: lerpDouble(a?.height, b?.height, t),
       surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
+      shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
     );
   }
 
   @override
-  int get hashCode => Object.hash(
-    color,
-    elevation,
-    shape,
-    height,
-    surfaceTintColor,
-    padding,
-  );
+  int get hashCode =>
+      Object.hash(color, elevation, shape, height, surfaceTintColor, shadowColor, padding);
 
   @override
   bool operator ==(Object other) {
@@ -125,13 +124,14 @@ class BottomAppBarTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is BottomAppBarTheme
-        && other.color == color
-        && other.elevation == elevation
-        && other.shape == shape
-        && other.height == height
-        && other.surfaceTintColor == surfaceTintColor
-        && other.padding == padding;
+    return other is BottomAppBarTheme &&
+        other.color == color &&
+        other.elevation == elevation &&
+        other.shape == shape &&
+        other.height == height &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.shadowColor == shadowColor &&
+        other.padding == padding;
   }
 
   @override
@@ -142,6 +142,7 @@ class BottomAppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('height', height, defaultValue: null));
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
   }
 }

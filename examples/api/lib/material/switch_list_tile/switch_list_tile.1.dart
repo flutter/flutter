@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SwitchListTile].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [SwitchListTile].
 
 void main() => runApp(const SwitchListTileApp());
 
@@ -17,7 +17,8 @@ class SwitchListTileApp extends StatelessWidget {
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('SwitchListTile Sample')),
-        body: const SwitchListTileExample()),
+        body: const SwitchListTileExample(),
+      ),
     );
   }
 }
@@ -58,7 +59,9 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
               });
             },
             title: const Text('Headline'),
-            subtitle: const Text('Longer supporting text to demonstrate how the text wraps and the switch is centered vertically with the text.'),
+            subtitle: const Text(
+              'Longer supporting text to demonstrate how the text wraps and the switch is centered vertically with the text.',
+            ),
           ),
           const Divider(height: 0),
           SwitchListTile(
@@ -69,7 +72,9 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
               });
             },
             title: const Text('Headline'),
-            subtitle: const Text("Longer supporting text to demonstrate how the text wraps and how setting 'SwitchListTile.isThreeLine = true' aligns the switch to the top vertically with the text."),
+            subtitle: const Text(
+              "Longer supporting text to demonstrate how the text wraps and how setting 'SwitchListTile.isThreeLine = true' aligns the switch to the top vertically with the text.",
+            ),
             isThreeLine: true,
           ),
           const Divider(height: 0),

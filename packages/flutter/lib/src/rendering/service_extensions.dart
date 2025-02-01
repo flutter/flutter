@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+///
+/// @docImport 'package:flutter/painting.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'box.dart';
+/// @docImport 'debug.dart';
+/// @docImport 'object.dart';
+library;
+
 /// Service extension constants for the rendering library.
 ///
 /// These constants will be used when registering service extensions in the
@@ -67,7 +77,6 @@ enum RenderingServiceExtensions {
   /// * [RendererBinding.initServiceExtensions], where the service extension is
   ///   registered.
   debugDumpLayerTree,
-
 
   /// Name of service extension that, when called, will toggle whether all
   /// clipping effects from the layer tree will be ignored.

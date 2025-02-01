@@ -5,17 +5,20 @@
 import 'template.dart';
 
 class SwitchTemplate extends TokenTemplate {
-  const SwitchTemplate(super.blockName, super.fileName, super.tokens, {
+  const SwitchTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends SwitchThemeData {
-  _${blockName}DefaultsM3(BuildContext context)
-    : _colors = Theme.of(context).colorScheme;
+  _${blockName}DefaultsM3(this.context);
 
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   MaterialStateProperty<Color> get thumbColor {
@@ -127,7 +130,19 @@ class _${blockName}DefaultsM3 extends SwitchThemeData {
   }
 
   @override
-  double get splashRadius => ${tokens['md.comp.switch.state-layer.size']} / 2;
+  MaterialStateProperty<MouseCursor> get mouseCursor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states)
+      => MaterialStateMouseCursor.clickable.resolve(states));
+  }
+
+  @override
+  MaterialStatePropertyAll<double> get trackOutlineWidth => const MaterialStatePropertyAll<double>(${getToken('md.comp.switch.track.outline.width')});
+
+  @override
+  double get splashRadius => ${getToken('md.comp.switch.state-layer.size')} / 2;
+
+  @override
+  EdgeInsetsGeometry? get padding => const EdgeInsets.symmetric(horizontal: 4);
 }
 
 class _SwitchConfigM3 with _SwitchConfig {
@@ -137,10 +152,10 @@ class _SwitchConfigM3 with _SwitchConfig {
   BuildContext context;
   final ColorScheme _colors;
 
-  static const double iconSize = ${tokens['md.comp.switch.unselected.icon.size']};
+  static const double iconSize = ${getToken('md.comp.switch.unselected.icon.size')};
 
   @override
-  double get activeThumbRadius => ${tokens['md.comp.switch.selected.handle.width']} / 2;
+  double get activeThumbRadius => ${getToken('md.comp.switch.selected.handle.width')} / 2;
 
   @override
   MaterialStateProperty<Color> get iconColor {
@@ -177,31 +192,31 @@ class _SwitchConfigM3 with _SwitchConfig {
   }
 
   @override
-  double get inactiveThumbRadius => ${tokens['md.comp.switch.unselected.handle.width']} / 2;
+  double get inactiveThumbRadius => ${getToken('md.comp.switch.unselected.handle.width')} / 2;
 
   @override
-  double get pressedThumbRadius => ${tokens['md.comp.switch.pressed.handle.width']} / 2;
+  double get pressedThumbRadius => ${getToken('md.comp.switch.pressed.handle.width')} / 2;
 
   @override
-  double get switchHeight => _kSwitchMinSize + 8.0;
+  double get switchHeight => switchMinSize.height + 8.0;
 
   @override
-  double get switchHeightCollapsed => _kSwitchMinSize;
+  double get switchHeightCollapsed => switchMinSize.height;
 
   @override
-  double get switchWidth => trackWidth - 2 * (trackHeight / 2.0) + _kSwitchMinSize;
+  double get switchWidth => 52.0;
 
   @override
-  double get thumbRadiusWithIcon => ${tokens['md.comp.switch.with-icon.handle.width']} / 2;
+  double get thumbRadiusWithIcon => ${getToken('md.comp.switch.with-icon.handle.width')} / 2;
 
   @override
   List<BoxShadow>? get thumbShadow => kElevationToShadow[0];
 
   @override
-  double get trackHeight => ${tokens['md.comp.switch.track.height']};
+  double get trackHeight => ${getToken('md.comp.switch.track.height')};
 
   @override
-  double get trackWidth => ${tokens['md.comp.switch.track.width']};
+  double get trackWidth => ${getToken('md.comp.switch.track.width')};
 
   // The thumb size at the middle of the track. Hand coded default based on the animation specs.
   @override
@@ -214,7 +229,9 @@ class _SwitchConfigM3 with _SwitchConfig {
   // Hand coded default based on the animation specs.
   @override
   double? get thumbOffset => null;
+
+  @override
+  Size get switchMinSize => const Size(kMinInteractiveDimension, kMinInteractiveDimension - 8.0);
 }
 ''';
-
 }

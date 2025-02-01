@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AspectRatio].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AspectRatio].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AspectRatioApp());
 
-  static const String _title = 'Flutter Code Sample';
+class AspectRatioApp extends StatelessWidget {
+  const AspectRatioApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: const Text('AspectRatio Sample')),
+        body: const AspectRatioExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class AspectRatioExample extends StatelessWidget {
+  const AspectRatioExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,12 +32,7 @@ class MyStatelessWidget extends StatelessWidget {
       alignment: Alignment.center,
       width: double.infinity,
       height: 100.0,
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Container(
-          color: Colors.green,
-        ),
-      ),
+      child: AspectRatio(aspectRatio: 16 / 9, child: Container(color: Colors.green)),
     );
   }
 }

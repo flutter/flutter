@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'page_scaffold.dart';
+/// @docImport 'tab_view.dart';
+library;
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -145,8 +153,6 @@ class CupertinoApp extends StatefulWidget {
   /// unsupported route.
   ///
   /// This class creates an instance of [WidgetsApp].
-  ///
-  /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   const CupertinoApp({
     super.key,
     this.navigatorKey,
@@ -157,9 +163,10 @@ class CupertinoApp extends StatefulWidget {
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
+    this.onNavigationNotification,
     List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
     this.builder,
-    this.title = '',
+    this.title,
     this.onGenerateTitle,
     this.color,
     this.locale,
@@ -179,7 +186,7 @@ class CupertinoApp extends StatefulWidget {
     @Deprecated(
       'Remove this parameter as it is now ignored. '
       'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
+      'This feature was deprecated after v3.7.0-29.0.pre.',
     )
     this.useInheritedMediaQuery = false,
   }) : routeInformationProvider = null,
@@ -200,8 +207,9 @@ class CupertinoApp extends StatefulWidget {
     this.routerConfig,
     this.theme,
     this.builder,
-    this.title = '',
+    this.title,
     this.onGenerateTitle,
+    this.onNavigationNotification,
     this.color,
     this.locale,
     this.localizationsDelegates,
@@ -220,7 +228,7 @@ class CupertinoApp extends StatefulWidget {
     @Deprecated(
       'Remove this parameter as it is now ignored. '
       'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
+      'This feature was deprecated after v3.7.0-29.0.pre.',
     )
     this.useInheritedMediaQuery = false,
   }) : assert(routerDelegate != null || routerConfig != null),
@@ -249,7 +257,7 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [widgets.WidgetBuilder] is used to construct a [CupertinoPageRoute] that
+  /// [WidgetBuilder] is used to construct a [CupertinoPageRoute] that
   /// performs an appropriate transition, including [Hero] animations, to the
   /// new route.
   ///
@@ -267,6 +275,9 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
   final RouteFactory? onUnknownRoute;
+
+  /// {@macro flutter.widgets.widgetsApp.onNavigationNotification}
+  final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver>? navigatorObservers;
@@ -292,7 +303,7 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.title}
   ///
   /// This value is passed unmodified to [WidgetsApp.title].
-  final String title;
+  final String? title;
 
   /// {@macro flutter.widgets.widgetsApp.onGenerateTitle}
   ///
@@ -327,7 +338,7 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performance-overlay>
+  ///  * <https://flutter.dev/to/performance-overlay>
   final bool showPerformanceOverlay;
 
   /// Turns on checkerboarding of raster cache images.
@@ -421,7 +432,7 @@ class CupertinoApp extends StatefulWidget {
   @Deprecated(
     'This setting is now ignored. '
     'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-    'This feature was deprecated after v3.7.0-29.0.pre.'
+    'This feature was deprecated after v3.7.0-29.0.pre.',
   )
   final bool useInheritedMediaQuery;
 
@@ -431,8 +442,7 @@ class CupertinoApp extends StatefulWidget {
   /// The [HeroController] used for Cupertino page transitions.
   ///
   /// Used by [CupertinoTabView] and [CupertinoApp].
-  static HeroController createCupertinoHeroController() =>
-      HeroController(); // Linear tweening.
+  static HeroController createCupertinoHeroController() => HeroController(); // Linear tweening.
 }
 
 /// Describes how [Scrollable] widgets behave for [CupertinoApp]s.
@@ -453,17 +463,15 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   const CupertinoScrollBehavior();
 
   @override
-  Widget buildScrollbar(BuildContext context , Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
     switch (getPlatform(context)) {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        return CupertinoScrollbar(
-          controller: details.controller,
-          child: child,
-        );
+        assert(details.controller != null);
+        return CupertinoScrollbar(controller: details.controller, child: child);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -488,6 +496,10 @@ class CupertinoScrollBehavior extends ScrollBehavior {
     }
     return const BouncingScrollPhysics();
   }
+
+  @override
+  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) =>
+      MultitouchDragStrategy.averageBoundaryPointers;
 }
 
 class _CupertinoAppState extends State<CupertinoApp> {
@@ -500,6 +512,12 @@ class _CupertinoAppState extends State<CupertinoApp> {
     _heroController = CupertinoApp.createCupertinoHeroController();
   }
 
+  @override
+  void dispose() {
+    _heroController.dispose();
+    super.dispose();
+  }
+
   // Combine the default localization for Cupertino with the ones contributed
   // by the localizationsDelegates parameter, if any. Only the first delegate
   // of a particular LocalizationsDelegate.type is loaded so the
@@ -507,27 +525,62 @@ class _CupertinoAppState extends State<CupertinoApp> {
   // _CupertinoLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
     return <LocalizationsDelegate<dynamic>>[
-      if (widget.localizationsDelegates != null)
-        ...widget.localizationsDelegates!,
+      if (widget.localizationsDelegates != null) ...widget.localizationsDelegates!,
       DefaultCupertinoLocalizations.delegate,
     ];
   }
 
-  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-    return CupertinoButton.filled(
+  Widget _exitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required GlobalKey key,
+  }) {
+    return CupertinoButton(
+      key: key,
+      color: _widgetSelectionButtonsBackgroundColor(context),
       padding: EdgeInsets.zero,
       onPressed: onPressed,
-      child: const Icon(
-        CupertinoIcons.search,
+      child: Icon(
+        CupertinoIcons.xmark,
         size: 28.0,
-        color: CupertinoColors.white,
+        color: _widgetSelectionButtonsForegroundColor(context),
+        semanticLabel: 'Exit Select Widget mode.',
       ),
     );
   }
 
+  Widget _moveExitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    bool isLeftAligned = true,
+  }) {
+    return CupertinoButton(
+      onPressed: onPressed,
+      padding: EdgeInsets.zero,
+      child: Icon(
+        isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
+        size: 32.0,
+        color: _widgetSelectionButtonsBackgroundColor(context),
+        semanticLabel:
+            'Move "Exit Select Widget mode" button to the ${isLeftAligned ? 'right' : 'left'}.',
+      ),
+    );
+  }
+
+  Color _widgetSelectionButtonsForegroundColor(BuildContext context) {
+    return CupertinoTheme.of(context).primaryContrastingColor;
+  }
+
+  Color _widgetSelectionButtonsBackgroundColor(BuildContext context) {
+    return CupertinoTheme.of(context).primaryColor;
+  }
+
   WidgetsApp _buildWidgetApp(BuildContext context) {
     final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
-    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
+    final Color color = CupertinoDynamicColor.resolve(
+      widget.color ?? effectiveThemeData.primaryColor,
+      context,
+    );
 
     if (_usesRouter) {
       return WidgetsApp.router(
@@ -537,6 +590,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         routerDelegate: widget.routerDelegate,
         routerConfig: widget.routerConfig,
         backButtonDispatcher: widget.backButtonDispatcher,
+        onNavigationNotification: widget.onNavigationNotification,
         builder: widget.builder,
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,
@@ -548,16 +602,16 @@ class _CupertinoAppState extends State<CupertinoApp> {
         localeListResolutionCallback: widget.localeListResolutionCallback,
         supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+        exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+        moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
       );
     }
+
     return WidgetsApp(
       key: GlobalObjectKey(this),
       navigatorKey: widget.navigatorKey,
@@ -571,6 +625,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       onGenerateRoute: widget.onGenerateRoute,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
       onUnknownRoute: widget.onUnknownRoute,
+      onNavigationNotification: widget.onNavigationNotification,
       builder: widget.builder,
       title: widget.title,
       onGenerateTitle: widget.onGenerateTitle,
@@ -582,11 +637,10 @@ class _CupertinoAppState extends State<CupertinoApp> {
       localeListResolutionCallback: widget.localeListResolutionCallback,
       supportedLocales: widget.supportedLocales,
       showPerformanceOverlay: widget.showPerformanceOverlay,
-      checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-      checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-      inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+      exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+      moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
@@ -595,7 +649,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   @override
   Widget build(BuildContext context) {
-    final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
+    final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData())
+        .resolveFrom(context);
 
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),
@@ -608,9 +663,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
             cursorColor: effectiveThemeData.primaryColor,
             child: HeroControllerScope(
               controller: _heroController,
-              child: Builder(
-                builder: _buildWidgetApp,
-              ),
+              child: Builder(builder: _buildWidgetApp),
             ),
           ),
         ),

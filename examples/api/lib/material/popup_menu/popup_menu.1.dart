@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [PopupMenuButton].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [PopupMenuButton].
 
 // This is the type used by the popup menu below.
 enum SampleItem { itemOne, itemTwo, itemThree }
@@ -31,7 +31,7 @@ class PopupMenuExample extends StatefulWidget {
 }
 
 class _PopupMenuExampleState extends State<PopupMenuExample> {
-  SampleItem? selectedMenu;
+  SampleItem? selectedItem;
 
   @override
   Widget build(BuildContext context) {
@@ -39,27 +39,18 @@ class _PopupMenuExampleState extends State<PopupMenuExample> {
       appBar: AppBar(title: const Text('PopupMenuButton')),
       body: Center(
         child: PopupMenuButton<SampleItem>(
-          initialValue: selectedMenu,
-          // Callback that sets the selected popup menu item.
+          initialValue: selectedItem,
           onSelected: (SampleItem item) {
             setState(() {
-              selectedMenu = item;
+              selectedItem = item;
             });
           },
-          itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
-            const PopupMenuItem<SampleItem>(
-              value: SampleItem.itemOne,
-              child: Text('Item 1'),
-            ),
-            const PopupMenuItem<SampleItem>(
-              value: SampleItem.itemTwo,
-              child: Text('Item 2'),
-            ),
-            const PopupMenuItem<SampleItem>(
-              value: SampleItem.itemThree,
-              child: Text('Item 3'),
-            ),
-          ],
+          itemBuilder:
+              (BuildContext context) => <PopupMenuEntry<SampleItem>>[
+                const PopupMenuItem<SampleItem>(value: SampleItem.itemOne, child: Text('Item 1')),
+                const PopupMenuItem<SampleItem>(value: SampleItem.itemTwo, child: Text('Item 2')),
+                const PopupMenuItem<SampleItem>(value: SampleItem.itemThree, child: Text('Item 3')),
+              ],
         ),
       ),
     );

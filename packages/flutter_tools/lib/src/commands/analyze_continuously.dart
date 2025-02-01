@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -13,7 +12,6 @@ import 'analyze_base.dart';
 class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(
     super.argResults,
-    List<String> repoRoots,
     List<Directory> repoPackages, {
     required super.fileSystem,
     required super.logger,
@@ -21,10 +19,8 @@ class AnalyzeContinuously extends AnalyzeBase {
     required super.platform,
     required super.processManager,
     required super.artifacts,
-  }) : super(
-        repoPackages: repoPackages,
-        repoRoots: repoRoots,
-      );
+    required super.suppressAnalytics,
+  }) : super(repoPackages: repoPackages);
 
   String? analysisTarget;
   bool firstAnalysis = true;
@@ -42,13 +38,10 @@ class AnalyzeContinuously extends AnalyzeBase {
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
-      directories = repoRoots;
+      directories = <String>[flutterRoot];
       analysisTarget = 'Flutter repository';
 
       logger.printTrace('Analyzing Flutter repository:');
-      for (final String projectPath in repoRoots) {
-        logger.printTrace('  ${fileSystem.path.relative(projectPath)}');
-      }
     } else {
       directories = <String>[fileSystem.currentDirectory.path];
       analysisTarget = fileSystem.currentDirectory.path;
@@ -63,6 +56,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       processManager: processManager,
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
+      suppressAnalytics: suppressAnalytics,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
@@ -133,7 +127,9 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount);
-        server.dispose().whenComplete(() { exit(issueCount > 0 ? 1 : 0); });
+        server.dispose().whenComplete(() {
+          exit(issueCount > 0 ? 1 : 0);
+        });
       }
 
       firstAnalysis = false;

@@ -9,16 +9,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const EditableTextToolbarBuilderExampleApp());
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
+  const EditableTextToolbarBuilderExampleApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<EditableTextToolbarBuilderExampleApp> createState() =>
+      _EditableTextToolbarBuilderExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _EditableTextToolbarBuilderExampleAppState
+    extends State<EditableTextToolbarBuilderExampleApp> {
   final TextEditingController _controller = TextEditingController(
     text: 'Right click (desktop) or long press (mobile) to see the menu with a custom toolbar.',
   );
@@ -45,9 +47,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Custom toolbar, default-looking buttons'),
-        ),
+        appBar: AppBar(title: const Text('Custom toolbar, default-looking buttons')),
         body: Center(
           child: Column(
             children: <Widget>[
@@ -59,32 +59,33 @@ class _MyAppState extends State<MyApp> {
                     anchor: editableTextState.contextMenuAnchors.primaryAnchor,
                     // getAdaptiveButtons creates the default button widgets for
                     // the current platform.
-                    children: AdaptiveTextSelectionToolbar.getAdaptiveButtons(
-                      context,
-                      // These buttons just close the menu when clicked.
-                      <ContextMenuButtonItem>[
-                        ContextMenuButtonItem(
-                          label: 'One',
-                          onPressed: () => ContextMenuController.removeAny(),
-                        ),
-                        ContextMenuButtonItem(
-                          label: 'Two',
-                          onPressed: () => ContextMenuController.removeAny(),
-                        ),
-                        ContextMenuButtonItem(
-                          label: 'Three',
-                          onPressed: () => ContextMenuController.removeAny(),
-                        ),
-                        ContextMenuButtonItem(
-                          label: 'Four',
-                          onPressed: () => ContextMenuController.removeAny(),
-                        ),
-                        ContextMenuButtonItem(
-                          label: 'Five',
-                          onPressed: () => ContextMenuController.removeAny(),
-                        ),
-                      ],
-                    ).toList(),
+                    children:
+                        AdaptiveTextSelectionToolbar.getAdaptiveButtons(
+                          context,
+                          // These buttons just close the menu when clicked.
+                          <ContextMenuButtonItem>[
+                            ContextMenuButtonItem(
+                              label: 'One',
+                              onPressed: () => ContextMenuController.removeAny(),
+                            ),
+                            ContextMenuButtonItem(
+                              label: 'Two',
+                              onPressed: () => ContextMenuController.removeAny(),
+                            ),
+                            ContextMenuButtonItem(
+                              label: 'Three',
+                              onPressed: () => ContextMenuController.removeAny(),
+                            ),
+                            ContextMenuButtonItem(
+                              label: 'Four',
+                              onPressed: () => ContextMenuController.removeAny(),
+                            ),
+                            ContextMenuButtonItem(
+                              label: 'Five',
+                              onPressed: () => ContextMenuController.removeAny(),
+                            ),
+                          ],
+                        ).toList(),
                   );
                 },
               ),
@@ -100,10 +101,7 @@ class _MyAppState extends State<MyApp> {
 ///
 /// Displays its children in a scrollable grid.
 class _MyTextSelectionToolbar extends StatelessWidget {
-  const _MyTextSelectionToolbar({
-    required this.anchor,
-    required this.children,
-  });
+  const _MyTextSelectionToolbar({required this.anchor, required this.children});
 
   final Offset anchor;
   final List<Widget> children;

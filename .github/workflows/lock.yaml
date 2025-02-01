@@ -1,3 +1,7 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 # Configuration for Lock Threads - https://github.com/dessant/lock-threads
 
 name: 'Lock Threads'
@@ -18,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
-      - uses: dessant/lock-threads@c1b35aecc5cdb1a34539d14196df55838bb2f836
+      - uses: dessant/lock-threads@1bf7ec25051fe7c00bdd17e6a7cf3d7bfb7dc771
         with:
           process-only: 'issues'
           github-token: ${{ github.token }}

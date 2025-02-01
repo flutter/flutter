@@ -2,28 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [LayoutBuilder].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [LayoutBuilder].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const LayoutBuilderExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class LayoutBuilderExampleApp extends StatelessWidget {
+  const LayoutBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
-    );
+    return const MaterialApp(home: LayoutBuilderExample());
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class LayoutBuilderExample extends StatelessWidget {
+  const LayoutBuilderExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +37,7 @@ class MyStatelessWidget extends StatelessWidget {
   }
 
   Widget _buildNormalContainer() {
-    return Center(
-      child: Container(
-        height: 100.0,
-        width: 100.0,
-        color: Colors.red,
-      ),
-    );
+    return Center(child: Container(height: 100.0, width: 100.0, color: Colors.red));
   }
 
   Widget _buildWideContainers() {
@@ -56,16 +45,8 @@ class MyStatelessWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          Container(
-            height: 100.0,
-            width: 100.0,
-            color: Colors.red,
-          ),
-          Container(
-            height: 100.0,
-            width: 100.0,
-            color: Colors.yellow,
-          ),
+          Container(height: 100.0, width: 100.0, color: Colors.red),
+          Container(height: 100.0, width: 100.0, color: Colors.yellow),
         ],
       ),
     );

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_driver/driver_extension.dart';
+library;
+
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ServicesBinding;
@@ -59,7 +65,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// See also:
   ///
   ///  * [ShaderWarmUp], the interface for implementing custom warm-up scenes.
-  ///  * <https://flutter.dev/docs/perf/rendering/shader>
+  ///  * <https://docs.flutter.dev/perf/shader>
   static ShaderWarmUp? shaderWarmUp;
 
   /// The singleton that implements the Flutter framework's image cache.
@@ -77,47 +83,6 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// This method can be overridden to provide a custom image cache.
   @protected
   ImageCache createImageCache() => ImageCache();
-
-  /// Calls through to [dart:ui.instantiateImageCodec] from [ImageCache].
-  ///
-  /// This method is deprecated. use [instantiateImageCodecFromBuffer] with an
-  /// [ImmutableBuffer] instance instead of this method.
-  ///
-  /// The `cacheWidth` and `cacheHeight` parameters, when specified, indicate
-  /// the size to decode the image to.
-  ///
-  /// Both `cacheWidth` and `cacheHeight` must be positive values greater than
-  /// or equal to 1, or null. It is valid to specify only one of `cacheWidth`
-  /// and `cacheHeight` with the other remaining null, in which case the omitted
-  /// dimension will be scaled to maintain the aspect ratio of the original
-  /// dimensions. When both are null or omitted, the image will be decoded at
-  /// its native resolution.
-  ///
-  /// The `allowUpscaling` parameter determines whether the `cacheWidth` or
-  /// `cacheHeight` parameters are clamped to the intrinsic width and height of
-  /// the original image. By default, the dimensions are clamped to avoid
-  /// unnecessary memory usage for images. Callers that wish to display an image
-  /// above its native resolution should prefer scaling the canvas the image is
-  /// drawn into.
-  @Deprecated(
-    'Use instantiateImageCodecWithSize with an ImmutableBuffer instance instead. '
-    'This feature was deprecated after v2.13.0-1.0.pre.',
-  )
-  Future<ui.Codec> instantiateImageCodec(
-    Uint8List bytes, {
-    int? cacheWidth,
-    int? cacheHeight,
-    bool allowUpscaling = false,
-  }) {
-    assert(cacheWidth == null || cacheWidth > 0);
-    assert(cacheHeight == null || cacheHeight > 0);
-    return ui.instantiateImageCodec(
-      bytes,
-      targetWidth: cacheWidth,
-      targetHeight: cacheHeight,
-      allowUpscaling: allowUpscaling,
-    );
-  }
 
   /// Calls through to [dart:ui.instantiateImageCodecFromBuffer] from [ImageCache].
   ///
@@ -215,7 +180,6 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     switch (type) {
       case 'fontsChange':
         _systemFonts.notifyListeners();
-        break;
     }
     return;
   }
@@ -224,7 +188,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
 class _SystemFontsNotifier extends Listenable {
   final Set<VoidCallback> _systemFontsCallbacks = <VoidCallback>{};
 
-  void notifyListeners () {
+  void notifyListeners() {
     for (final VoidCallback callback in _systemFontsCallbacks) {
       callback();
     }
@@ -234,6 +198,7 @@ class _SystemFontsNotifier extends Listenable {
   void addListener(VoidCallback listener) {
     _systemFontsCallbacks.add(listener);
   }
+
   @override
   void removeListener(VoidCallback listener) {
     _systemFontsCallbacks.remove(listener);

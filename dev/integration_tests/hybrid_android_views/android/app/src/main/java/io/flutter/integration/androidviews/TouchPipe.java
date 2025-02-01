@@ -31,7 +31,7 @@ class TouchPipe implements View.OnTouchListener {
     }
 
     public void disable() {
-        if(!mEnabled)
+        if (!mEnabled)
             return;
         mEnabled = false;
         mView.setOnTouchListener(null);

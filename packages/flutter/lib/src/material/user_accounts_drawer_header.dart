@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -35,31 +40,26 @@ class _AccountPictures extends StatelessWidget {
           top: 0.0,
           end: 0.0,
           child: Row(
-            children: (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
-              return Padding(
-                padding: const EdgeInsetsDirectional.only(start: 8.0),
-                child: Semantics(
-                  container: true,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-                    child: SizedBox.fromSize(
-                      size: otherAccountsPicturesSize,
-                      child: picture,
+            children:
+                (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
+                  return Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 8.0),
+                    child: Semantics(
+                      container: true,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                        child: SizedBox.fromSize(size: otherAccountsPicturesSize, child: picture),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            }).toList(),
+                  );
+                }).toList(),
           ),
         ),
         Positioned(
           top: 0.0,
           child: Semantics(
             explicitChildNodes: true,
-            child: SizedBox.fromSize(
-              size: currentAccountPictureSize,
-              child: currentAccountPicture,
-            ),
+            child: SizedBox.fromSize(size: currentAccountPictureSize, child: currentAccountPicture),
           ),
         ),
       ],
@@ -87,10 +87,10 @@ class _AccountDetails extends StatefulWidget {
 }
 
 class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProviderStateMixin {
-  late Animation<double> _animation;
-  late AnimationController _controller;
+  late final CurvedAnimation _animation;
+  late final AnimationController _controller;
   @override
-  void initState () {
+  void initState() {
     super.initState();
     _controller = AnimationController(
       value: widget.isOpen ? 1.0 : 0.0,
@@ -101,20 +101,22 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
       parent: _controller,
       curve: Curves.fastOutSlowIn,
       reverseCurve: Curves.fastOutSlowIn.flipped,
-    )
-      ..addListener(() => setState(() {
+    )..addListener(
+      () => setState(() {
         // [animation]'s value has changed here.
-      }));
+      }),
+    );
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _animation.dispose();
     super.dispose();
   }
 
   @override
-  void didUpdateWidget (_AccountDetails oldWidget) {
+  void didUpdateWidget(_AccountDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
     // If the state of the arrow did not change, there is no need to trigger the animation
     if (oldWidget.isOpen == widget.isOpen) {
@@ -138,9 +140,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     Widget accountDetails = CustomMultiChildLayout(
-      delegate: _AccountDetailsLayout(
-        textDirection: Directionality.of(context),
-      ),
+      delegate: _AccountDetailsLayout(textDirection: Directionality.of(context)),
       children: <Widget>[
         if (widget.accountName != null)
           LayoutId(
@@ -182,9 +182,10 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
                     child: Icon(
                       Icons.arrow_drop_down,
                       color: widget.arrowColor,
-                      semanticLabel: widget.isOpen
-                          ? localizations.hideAccountsLabel
-                          : localizations.showAccountsLabel,
+                      semanticLabel:
+                          widget.isOpen
+                              ? localizations.hideAccountsLabel
+                              : localizations.showAccountsLabel,
                     ),
                   ),
                 ),
@@ -202,18 +203,14 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
       );
     }
 
-    return SizedBox(
-      height: _kAccountDetailsHeight,
-      child: accountDetails,
-    );
+    return SizedBox(height: _kAccountDetailsHeight, child: accountDetails);
   }
 }
 
 const double _kAccountDetailsHeight = 56.0;
 
 class _AccountDetailsLayout extends MultiChildLayoutDelegate {
-
-  _AccountDetailsLayout({ required this.textDirection });
+  _AccountDetailsLayout({required this.textDirection});
 
   static const String accountName = 'accountName';
   static const String accountEmail = 'accountEmail';
@@ -230,10 +227,12 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
       positionChild(dropdownIcon, _offsetForIcon(size, iconSize));
     }
 
-    final String? bottomLine = hasChild(accountEmail) ? accountEmail : (hasChild(accountName) ? accountName : null);
+    final String? bottomLine =
+        hasChild(accountEmail) ? accountEmail : (hasChild(accountName) ? accountName : null);
 
     if (bottomLine != null) {
-      final Size constraintSize = iconSize == null ? size : Size(size.width - iconSize.width, size.height);
+      final Size constraintSize =
+          iconSize == null ? size : Size(size.width - iconSize.width, size.height);
       iconSize ??= const Size(_kAccountDetailsHeight, _kAccountDetailsHeight);
 
       // place bottom line center at same height as icon center
@@ -253,32 +252,26 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
 
   Offset _offsetForIcon(Size size, Size iconSize) {
-    switch (textDirection) {
-      case TextDirection.ltr:
-        return Offset(size.width - iconSize.width, size.height - iconSize.height);
-      case TextDirection.rtl:
-        return Offset(0.0, size.height - iconSize.height);
-    }
+    return switch (textDirection) {
+      TextDirection.ltr => Offset(size.width - iconSize.width, size.height - iconSize.height),
+      TextDirection.rtl => Offset(0.0, size.height - iconSize.height),
+    };
   }
 
   Offset _offsetForBottomLine(Size size, Size iconSize, Size bottomLineSize) {
     final double y = size.height - 0.5 * iconSize.height - 0.5 * bottomLineSize.height;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        return Offset(0.0, y);
-      case TextDirection.rtl:
-        return Offset(size.width - bottomLineSize.width, y);
-    }
+    return switch (textDirection) {
+      TextDirection.ltr => Offset(0.0, y),
+      TextDirection.rtl => Offset(size.width - bottomLineSize.width, y),
+    };
   }
 
   Offset _offsetForName(Size size, Size nameSize, Offset bottomLineOffset) {
     final double y = bottomLineOffset.dy - nameSize.height;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        return Offset(0.0, y);
-      case TextDirection.rtl:
-        return Offset(size.width - nameSize.width, y);
-    }
+    return switch (textDirection) {
+      TextDirection.ltr => Offset(0.0, y),
+      TextDirection.rtl => Offset(size.width - nameSize.width, y),
+    };
   }
 }
 
@@ -367,7 +360,8 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
       container: true,
       label: MaterialLocalizations.of(context).signedInLabel,
       child: DrawerHeader(
-        decoration: widget.decoration ?? BoxDecoration(color: Theme.of(context).colorScheme.primary),
+        decoration:
+            widget.decoration ?? BoxDecoration(color: Theme.of(context).colorScheme.primary),
         margin: widget.margin,
         padding: const EdgeInsetsDirectional.only(top: 16.0, start: 16.0),
         child: SafeArea(

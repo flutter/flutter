@@ -2,28 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Action.Action.overridable].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// Flutter code sample for [Action.overridable].
+
 void main() {
-  runApp(
-    const MaterialApp(
-      home: Scaffold(
-        body: Center(child: VerificationCodeGenerator()),
-      ),
-    ),
-  );
+  runApp(const MaterialApp(home: Scaffold(body: Center(child: VerificationCodeGenerator()))));
 }
 
 const CopyTextIntent copyTextIntent = CopyTextIntent._();
+
 class CopyTextIntent extends Intent {
   const CopyTextIntent._();
 }
 
 class CopyableText extends StatelessWidget {
-  const CopyableText({ super.key, required this.text });
+  const CopyableText({super.key, required this.text});
 
   final String text;
 
@@ -31,14 +26,21 @@ class CopyableText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Action<CopyTextIntent> defaultCopyAction = CallbackAction<CopyTextIntent>(onInvoke: _copy);
+    final Action<CopyTextIntent> defaultCopyAction = CallbackAction<CopyTextIntent>(
+      onInvoke: _copy,
+    );
     return Shortcuts(
-      shortcuts: const <ShortcutActivator, Intent> { SingleActivator(LogicalKeyboardKey.keyC, control: true) : copyTextIntent },
+      shortcuts: const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.keyC, control: true): copyTextIntent,
+      },
       child: Actions(
-        actions: <Type, Action<Intent>> {
+        actions: <Type, Action<Intent>>{
           // The Action is made overridable so the VerificationCodeGenerator
           // widget can override how copying is handled.
-          CopyTextIntent: Action<CopyTextIntent>.overridable(defaultAction: defaultCopyAction, context: context),
+          CopyTextIntent: Action<CopyTextIntent>.overridable(
+            defaultAction: defaultCopyAction,
+            context: context,
+          ),
         },
         child: Focus(
           autofocus: true,
@@ -53,7 +55,7 @@ class CopyableText extends StatelessWidget {
 }
 
 class VerificationCodeGenerator extends StatelessWidget {
-  const VerificationCodeGenerator({ super.key });
+  const VerificationCodeGenerator({super.key});
 
   void _copy(CopyTextIntent intent) {
     debugPrint('Content copied');
@@ -63,7 +65,9 @@ class VerificationCodeGenerator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Actions(
-      actions: <Type, Action<Intent>> { CopyTextIntent: CallbackAction<CopyTextIntent>(onInvoke: _copy) },
+      actions: <Type, Action<Intent>>{
+        CopyTextIntent: CallbackAction<CopyTextIntent>(onInvoke: _copy),
+      },
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -73,9 +77,9 @@ class VerificationCodeGenerator extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               CopyableText(text: '111'),
-              SizedBox(width: 5,),
+              SizedBox(width: 5),
               CopyableText(text: '222'),
-              SizedBox(width: 5,),
+              SizedBox(width: 5),
               CopyableText(text: '333'),
             ],
           ),

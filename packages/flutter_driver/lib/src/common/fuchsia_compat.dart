@@ -24,7 +24,7 @@ class _DummyPortForwarder implements PortForwarder {
   String get openPortAddress => InternetAddress.loopbackIPv4.address;
 
   @override
-  Future<void> stop() async { }
+  Future<void> stop() async {}
 }
 
 class _DummySshCommandRunner implements SshCommandRunner {
@@ -79,11 +79,7 @@ Future<PortForwarder> _dummyPortForwardingFunction(
 /// [FuchsiaRemoteConnection.connect] whereby the `FUCHSIA_REMOTE_URL` and
 /// `FUCHSIA_SSH_CONFIG` variables must be set. If run on a Fuchsia device, will
 /// connect locally without need for environment variables.
-class FuchsiaCompat {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  FuchsiaCompat._();
-
+abstract final class FuchsiaCompat {
   static void _init() {
     fuchsiaPortForwardingFunction = _dummyPortForwardingFunction;
   }
@@ -103,7 +99,6 @@ class FuchsiaCompat {
   /// [FuchsiaRemoteConnection.stop].
   static Future<FuchsiaRemoteConnection> connect() async {
     FuchsiaCompat._init();
-    return FuchsiaRemoteConnection.connectWithSshCommandRunner(
-        _DummySshCommandRunner());
+    return FuchsiaRemoteConnection.connectWithSshCommandRunner(_DummySshCommandRunner());
   }
 }

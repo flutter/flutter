@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SliverAppBar.medium].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [SliverAppBar.medium].
 
 void main() {
   runApp(const AppBarMediumApp());
@@ -16,19 +16,14 @@ class AppBarMediumApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xff6750A4)
-      ),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750A4)),
       home: Material(
         child: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar.medium(
               leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
               title: const Text('Medium App Bar'),
-              actions: <Widget>[
-                IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
-              ],
+              actions: <Widget>[IconButton(icon: const Icon(Icons.more_vert), onPressed: () {})],
             ),
             // Just some content big enough to have something to scroll.
             SliverToBoxAdapter(

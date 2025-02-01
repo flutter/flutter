@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FontFeature.FontFeature.contextualAlternates].
-import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
+
+/// Flutter code sample for [FontFeature.contextualAlternates].
 
 void main() => runApp(const ExampleApp());
 
@@ -32,9 +31,7 @@ class ExampleWidget extends StatelessWidget {
       "Ooohh, we weren't going to tell him that.",
       style: TextStyle(
         fontFamily: 'Barriecito',
-        fontFeatures: <FontFeature>[
-          FontFeature.contextualAlternates(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.contextualAlternates()],
       ),
     );
   }

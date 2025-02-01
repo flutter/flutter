@@ -2,25 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SelectableRegion].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SelectableRegion].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SelectableRegionExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class SelectableRegionExampleApp extends StatelessWidget {
+  const SelectableRegionExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
-      home: SelectionArea(
+      home: SelectableRegion(
+        selectionControls: materialTextSelectionControls,
         child: Scaffold(
-          appBar: AppBar(title: const Text(_title)),
+          appBar: AppBar(title: const Text('SelectableRegion Sample')),
           body: const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -50,28 +48,19 @@ class MySelectableAdapter extends StatelessWidget {
     }
     return MouseRegion(
       cursor: SystemMouseCursors.text,
-      child: _SelectableAdapter(
-        registrar: registrar,
-        child: child,
-      ),
+      child: _SelectableAdapter(registrar: registrar, child: child),
     );
   }
 }
 
 class _SelectableAdapter extends SingleChildRenderObjectWidget {
-  const _SelectableAdapter({
-    required this.registrar,
-    required Widget child,
-  }) : super(child: child);
+  const _SelectableAdapter({required this.registrar, required Widget child}) : super(child: child);
 
   final SelectionRegistrar registrar;
 
   @override
   _RenderSelectableAdapter createRenderObject(BuildContext context) {
-    return _RenderSelectableAdapter(
-      DefaultSelectionStyle.of(context).selectionColor!,
-      registrar,
-    );
+    return _RenderSelectableAdapter(DefaultSelectionStyle.of(context).selectionColor!, registrar);
   }
 
   @override
@@ -83,20 +72,21 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
 }
 
 class _RenderSelectableAdapter extends RenderProxyBox with Selectable, SelectionRegistrant {
-  _RenderSelectableAdapter(
-    Color selectionColor,
-    SelectionRegistrar registrar,
-  ) : _selectionColor = selectionColor,
+  _RenderSelectableAdapter(Color selectionColor, SelectionRegistrar registrar)
+    : _selectionColor = selectionColor,
       _geometry = ValueNotifier<SelectionGeometry>(_noSelection) {
     this.registrar = registrar;
     _geometry.addListener(markNeedsPaint);
   }
 
-  static const SelectionGeometry _noSelection = SelectionGeometry(status: SelectionStatus.none, hasContent: true);
+  static const SelectionGeometry _noSelection = SelectionGeometry(
+    status: SelectionStatus.none,
+    hasContent: true,
+  );
   final ValueNotifier<SelectionGeometry> _geometry;
 
   Color get selectionColor => _selectionColor;
-  late Color _selectionColor;
+  Color _selectionColor;
   set selectionColor(Color value) {
     if (_selectionColor == value) {
       return;
@@ -118,6 +108,9 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
 
   // Selectable APIs.
 
+  @override
+  List<Rect> get boundingBoxes => <Rect>[paintBounds];
+
   // Adjust this value to enlarge or shrink the selection highlight.
   static const double _padding = 10.0;
   Rect _getSelectionHighlightRect() {
@@ -125,7 +118,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
       0 - _padding,
       0 - _padding,
       size.width + _padding * 2,
-      size.height + _padding * 2
+      size.height + _padding * 2,
     );
   }
 
@@ -165,6 +158,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
         hasContent: true,
         startSelectionPoint: isReversed ? secondSelectionPoint : firstSelectionPoint,
         endSelectionPoint: isReversed ? firstSelectionPoint : secondSelectionPoint,
+        selectionRects: <Rect>[selectionRect],
       );
     }
   }
@@ -185,18 +179,17 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
           _end = adjustedPoint;
         }
         result = SelectionUtils.getResultBasedOnRect(renderObjectRect, point);
-        break;
       case SelectionEventType.clear:
         _start = _end = null;
-        break;
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
+      case SelectionEventType.selectParagraph:
         _start = Offset.zero;
         _end = Offset.infinite;
-        break;
       case SelectionEventType.granularlyExtendSelection:
         result = SelectionResult.end;
-        final GranularlyExtendSelectionEvent extendSelectionEvent = event as GranularlyExtendSelectionEvent;
+        final GranularlyExtendSelectionEvent extendSelectionEvent =
+            event as GranularlyExtendSelectionEvent;
         // Initialize the offset it there is no ongoing selection.
         if (_start == null || _end == null) {
           if (extendSelectionEvent.forward) {
@@ -218,15 +211,15 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
           }
           _start = newOffset;
         }
-        break;
       case SelectionEventType.directionallyExtendSelection:
         result = SelectionResult.end;
-        final DirectionallyExtendSelectionEvent extendSelectionEvent = event as DirectionallyExtendSelectionEvent;
+        final DirectionallyExtendSelectionEvent extendSelectionEvent =
+            event as DirectionallyExtendSelectionEvent;
         // Convert to local coordinates.
         final double horizontalBaseLine = globalToLocal(Offset(event.dx, 0)).dx;
         final Offset newOffset;
         final bool forward;
-        switch(extendSelectionEvent.direction) {
+        switch (extendSelectionEvent.direction) {
           case SelectionExtendDirection.backward:
           case SelectionExtendDirection.previousLine:
             forward = false;
@@ -235,12 +228,12 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
               _start = _end = Offset.infinite;
             }
             // Move the corresponding selection edge.
-            if (extendSelectionEvent.direction == SelectionExtendDirection.previousLine || horizontalBaseLine < 0) {
+            if (extendSelectionEvent.direction == SelectionExtendDirection.previousLine ||
+                horizontalBaseLine < 0) {
               newOffset = Offset.zero;
             } else {
               newOffset = Offset.infinite;
             }
-            break;
           case SelectionExtendDirection.nextLine:
           case SelectionExtendDirection.forward:
             forward = true;
@@ -249,12 +242,12 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
               _start = _end = Offset.zero;
             }
             // Move the corresponding selection edge.
-            if (extendSelectionEvent.direction == SelectionExtendDirection.nextLine || horizontalBaseLine > size.width) {
+            if (extendSelectionEvent.direction == SelectionExtendDirection.nextLine ||
+                horizontalBaseLine > size.width) {
               newOffset = Offset.infinite;
             } else {
               newOffset = Offset.zero;
             }
-            break;
         }
         if (extendSelectionEvent.isEnd) {
           if (newOffset == _end) {
@@ -267,7 +260,6 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
           }
           _start = newOffset;
         }
-        break;
     }
     _updateGeometry();
     return result;
@@ -279,6 +271,17 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   SelectedContent? getSelectedContent() {
     return value.hasSelection ? const SelectedContent(plainText: 'Custom Text') : null;
   }
+
+  @override
+  SelectedContentRange? getSelection() {
+    if (!value.hasSelection) {
+      return null;
+    }
+    return const SelectedContentRange(startOffset: 0, endOffset: 1);
+  }
+
+  @override
+  int get contentLength => 1;
 
   LayerLink? _startHandle;
   LayerLink? _endHandle;
@@ -300,29 +303,24 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
       return;
     }
     // Draw the selection highlight.
-    final Paint selectionPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = _selectionColor;
+    final Paint selectionPaint =
+        Paint()
+          ..style = PaintingStyle.fill
+          ..color = _selectionColor;
     context.canvas.drawRect(_getSelectionHighlightRect().shift(offset), selectionPaint);
 
     // Push the layer links if any.
     if (_startHandle != null) {
       context.pushLayer(
-        LeaderLayer(
-          link: _startHandle!,
-          offset: offset + value.startSelectionPoint!.localPosition,
-        ),
-        (PaintingContext context, Offset offset) { },
+        LeaderLayer(link: _startHandle!, offset: offset + value.startSelectionPoint!.localPosition),
+        (PaintingContext context, Offset offset) {},
         Offset.zero,
       );
     }
     if (_endHandle != null) {
       context.pushLayer(
-        LeaderLayer(
-          link: _endHandle!,
-          offset: offset + value.endSelectionPoint!.localPosition,
-        ),
-        (PaintingContext context, Offset offset) { },
+        LeaderLayer(link: _endHandle!, offset: offset + value.endSelectionPoint!.localPosition),
+        (PaintingContext context, Offset offset) {},
         Offset.zero,
       );
     }
@@ -331,6 +329,8 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   @override
   void dispose() {
     _geometry.dispose();
+    _startHandle = null;
+    _endHandle = null;
     super.dispose();
   }
 }

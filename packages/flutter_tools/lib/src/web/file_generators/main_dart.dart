@@ -5,13 +5,13 @@
 import 'package:package_config/package_config.dart';
 
 /// Generates the main.dart file.
-String generateMainDartFile(String appEntrypoint, {
+String generateMainDartFile(
+  String appEntrypoint, {
   required String pluginRegistrantEntrypoint,
   LanguageVersion? languageVersion,
 }) {
   return <String>[
-    if (languageVersion != null)
-      '// @dart=${languageVersion.major}.${languageVersion.minor}',
+    if (languageVersion != null) '// @dart=${languageVersion.major}.${languageVersion.minor}',
     '// Flutter web bootstrap script for $appEntrypoint.',
     '//',
     '// Generated file. Do not edit.',
@@ -19,7 +19,7 @@ String generateMainDartFile(String appEntrypoint, {
     '',
     '// ignore_for_file: type=lint',
     '',
-    "import 'dart:ui' as ui;",
+    "import 'dart:ui_web' as ui_web;",
     "import 'dart:async';",
     '',
     "import '$appEntrypoint' as entrypoint;",
@@ -29,7 +29,7 @@ String generateMainDartFile(String appEntrypoint, {
     'typedef _NullaryFunction = dynamic Function();',
     '',
     'Future<void> main() async {',
-    '  await ui.webOnlyWarmupEngine(',
+    '  await ui_web.bootstrapEngine(',
     '    runApp: () {',
     '      if (entrypoint.main is _UnaryFunction) {',
     '        return (entrypoint.main as _UnaryFunction)(<String>[]);',

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoSwitch].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoSwitch].
 
 void main() => runApp(const CupertinoSwitchApp());
 
@@ -33,14 +33,12 @@ class _CupertinoSwitchExampleState extends State<CupertinoSwitchExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('CupertinoSwitch Sample'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoSwitch Sample')),
       child: Center(
         child: CupertinoSwitch(
           // This bool value toggles the switch.
           value: switchValue,
-          activeColor: CupertinoColors.activeBlue,
+          activeTrackColor: CupertinoColors.activeBlue,
           onChanged: (bool? value) {
             // This is called when the user toggles the switch.
             setState(() {

@@ -21,5 +21,11 @@
   "selectAllButtonLabel": "ເລືອກທັງໝົດ",
   "tabSemanticsLabel": "ແຖບທີ $tabIndex ຈາກທັງໝົດ $tabCount",
   "modalBarrierDismissLabel": "ປິດໄວ້",
-  "searchTextFieldPlaceholderLabel": "ຊອກຫາ"
+  "searchTextFieldPlaceholderLabel": "ຊອກຫາ",
+  "noSpellCheckReplacementsLabel": "ບໍ່ພົບການແທນທີ່",
+  "menuDismissLabel": "ປິດເມນູ",
+  "lookUpButtonLabel": "ຊອກຫາຂໍ້ມູນ",
+  "searchWebButtonLabel": "ຊອກຫາຢູ່ອິນເຕີເນັດ",
+  "shareButtonLabel": "ແບ່ງປັນ...",
+  "clearButtonLabel": "ລຶບລ້າງ"
 }

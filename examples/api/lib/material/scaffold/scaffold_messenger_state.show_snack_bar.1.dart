@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SnackBar].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [SnackBar].
 
 void main() => runApp(const SnackBarApp());
 
@@ -13,9 +13,7 @@ class SnackBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: SnackBarExample(),
-    );
+    return const MaterialApp(home: SnackBarExample());
   }
 }
 

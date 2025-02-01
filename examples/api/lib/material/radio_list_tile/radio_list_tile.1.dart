@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [RadioListTile].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [RadioListTile].
 
 void main() => runApp(const RadioListTileApp());
 
@@ -13,10 +13,7 @@ class RadioListTileApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const RadioListTileExample(),
-    );
+    return MaterialApp(theme: ThemeData(useMaterial3: true), home: const RadioListTileExample());
   }
 }
 
@@ -58,7 +55,9 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
               });
             },
             title: const Text('Tomato'),
-            subtitle: const Text('Longer supporting text to demonstrate how the text wraps and the radio is centered vertically with the text.'),
+            subtitle: const Text(
+              'Longer supporting text to demonstrate how the text wraps and the radio is centered vertically with the text.',
+            ),
           ),
           RadioListTile<Groceries>(
             value: Groceries.lettuce,
@@ -69,7 +68,9 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
               });
             },
             title: const Text('Lettuce'),
-            subtitle: const Text("Longer supporting text to demonstrate how the text wraps and how setting 'RadioListTile.isThreeLine = true' aligns the radio to the top vertically with the text."),
+            subtitle: const Text(
+              "Longer supporting text to demonstrate how the text wraps and how setting 'RadioListTile.isThreeLine = true' aligns the radio to the top vertically with the text.",
+            ),
             isThreeLine: true,
           ),
         ],

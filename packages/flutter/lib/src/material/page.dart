@@ -20,6 +20,9 @@ import 'theme.dart';
 /// fullscreen modal dialog. On iOS, those routes animate from the bottom to the
 /// top rather than horizontally.
 ///
+/// If `barrierDismissible` is true, then pressing the escape key on the keyboard
+/// will cause the current route to be popped with null as the value.
+///
 /// The type `T` specifies the return type of the route which can be supplied as
 /// the route is popped from the stack via [Navigator.pop] by providing the
 /// optional `result` argument.
@@ -31,15 +34,14 @@ import 'theme.dart';
 ///  * [MaterialPage], which is a [Page] of this class.
 class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
   /// Construct a MaterialPageRoute whose contents are defined by [builder].
-  ///
-  /// The values of [builder], [maintainState], and [PageRoute.fullscreenDialog]
-  /// must not be null.
   MaterialPageRoute({
     required this.builder,
     super.settings,
+    super.requestFocus,
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
+    super.barrierDismissible = false,
   }) {
     assert(opaque);
   }
@@ -56,7 +58,6 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
   @override
   String get debugLabel => '${super.debugLabel}(${settings.name})';
 }
-
 
 /// A mixin that provides platform-adaptive transitions for a [PageRoute].
 ///
@@ -85,7 +86,42 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   Widget buildContent(BuildContext context);
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
+  Duration get transitionDuration =>
+      _getPageTransitionBuilder(navigator!.context)?.transitionDuration ??
+      const Duration(microseconds: 300);
+
+  @override
+  Duration get reverseTransitionDuration =>
+      _getPageTransitionBuilder(navigator!.context)?.reverseTransitionDuration ??
+      const Duration(microseconds: 300);
+
+  PageTransitionsBuilder? _getPageTransitionBuilder(BuildContext context) {
+    final TargetPlatform platform = Theme.of(context).platform;
+    final PageTransitionsTheme pageTransitionsTheme = Theme.of(context).pageTransitionsTheme;
+    return pageTransitionsTheme.builders[platform];
+  }
+
+  // The transitionDuration is used to create the AnimationController which is only
+  // built once, so when page transition builder is updated and transitionDuration
+  // has a new value, the AnimationController cannot be updated automatically. So we
+  // manually update its duration here.
+  // TODO(quncCccccc): Clean up this override method when controller can be updated as the transitionDuration is changed.
+  @override
+  TickerFuture didPush() {
+    controller?.duration = transitionDuration;
+    return super.didPush();
+  }
+
+  // The reverseTransitionDuration is used to create the AnimationController
+  // which is only built once, so when page transition builder is updated and
+  // reverseTransitionDuration has a new value, the AnimationController cannot
+  // be updated automatically. So we manually update its reverseDuration here.
+  // TODO(quncCccccc): Clean up this override method when controller can beupdated as the reverseTransitionDuration is changed.
+  @override
+  bool didPop(T? result) {
+    controller?.reverseDuration = reverseTransitionDuration;
+    return super.didPop(result);
+  }
 
   @override
   Color? get barrierColor => null;
@@ -94,10 +130,49 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   String? get barrierLabel => null;
 
   @override
+  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+
+  static Widget? _delegatedTransition(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    bool allowSnapshotting,
+    Widget? child,
+  ) {
+    final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
+    final TargetPlatform platform = Theme.of(context).platform;
+    final DelegatedTransitionBuilder? themeDelegatedTransition = theme.delegatedTransition(
+      platform,
+    );
+    return themeDelegatedTransition != null
+        ? themeDelegatedTransition(context, animation, secondaryAnimation, allowSnapshotting, child)
+        : null;
+  }
+
+  @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    // Don't perform outgoing animation if the next route is a fullscreen dialog,
+    // or there is no matching transition to use.
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
-      || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog);
+    final bool nextRouteIsNotFullscreen =
+        (nextRoute is! PageRoute<T>) || !nextRoute.fullscreenDialog;
+
+    // If the next route has a delegated transition, then this route is able to
+    // use that delegated transition to smoothly sync with the next route's
+    // transition.
+    final bool nextRouteHasDelegatedTransition =
+        nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null;
+
+    // Otherwise if the next route has the same route transition mixin as this
+    // one, then this route will already be synced with its transition.
+    return nextRouteIsNotFullscreen &&
+        ((nextRoute is MaterialRouteTransitionMixin) || nextRouteHasDelegatedTransition);
+  }
+
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    // Supress previous route from transitioning if this is a fullscreenDialog route.
+    return previousRoute is PageRoute && !fullscreenDialog;
   }
 
   @override
@@ -107,15 +182,16 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
   ) {
     final Widget result = buildContent(context);
-    return Semantics(
-      scopesRoute: true,
-      explicitChildNodes: true,
-      child: result,
-    );
+    return Semantics(scopesRoute: true, explicitChildNodes: true, child: result);
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
@@ -149,6 +225,8 @@ class MaterialPage<T> extends Page<T> {
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
     super.key,
+    super.canPop,
+    super.onPopInvoked,
     super.name,
     super.arguments,
     super.restorationId,
@@ -177,10 +255,8 @@ class MaterialPage<T> extends Page<T> {
 // This route uses the builder from the page to build its content. This ensures
 // the content is up to date after page updates.
 class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
-  _PageBasedMaterialPageRoute({
-    required MaterialPage<T> page,
-    super.allowSnapshotting,
-  }) : super(settings: page) {
+  _PageBasedMaterialPageRoute({required MaterialPage<T> page, super.allowSnapshotting})
+    : super(settings: page) {
     assert(opaque);
   }
 

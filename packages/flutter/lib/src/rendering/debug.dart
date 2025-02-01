@@ -2,6 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+///
+/// @docImport 'package:flutter/scheduler.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'layer.dart';
+/// @docImport 'proxy_box.dart';
+/// @docImport 'shifted_box.dart';
+/// @docImport 'view.dart';
+library;
+
+import 'box.dart';
 import 'object.dart';
 
 export 'package:flutter/foundation.dart' show debugPrint;
@@ -107,7 +120,7 @@ bool debugCheckIntrinsicSizes = false;
 /// performance. This data is omitted in profile builds.
 ///
 /// For more information about performance debugging in Flutter, see
-/// <https://flutter.dev/docs/perf/rendering>.
+/// <https://docs.flutter.dev/perf/ui-performance>.
 ///
 /// See also:
 ///
@@ -133,7 +146,7 @@ bool debugProfileLayoutsEnabled = false;
 /// performance. This data is omitted in profile builds.
 ///
 /// For more information about performance debugging in Flutter, see
-/// <https://flutter.dev/docs/perf/rendering>.
+/// <https://docs.flutter.dev/perf/ui-performance>.
 ///
 /// See also:
 ///
@@ -248,27 +261,45 @@ bool debugDisablePhysicalShapeLayers = false;
 bool debugDisableOpacityLayers = false;
 
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
-  final Path path = Path()
-    ..fillType = PathFillType.evenOdd
-    ..addRect(outerRect)
-    ..addRect(innerRect);
-  final Paint paint = Paint()
-    ..color = color;
+  final Path path =
+      Path()
+        ..fillType = PathFillType.evenOdd
+        ..addRect(outerRect)
+        ..addRect(innerRect);
+  final Paint paint = Paint()..color = color;
   canvas.drawPath(path, paint);
 }
 
 /// Paint a diagram showing the given area as padding.
 ///
-/// Called by [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is
-/// true.
-void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double outlineWidth = 2.0 }) {
+/// The `innerRect` argument represents the position of the child, if any.
+///
+/// When `innerRect` is null, the method draws the entire `outerRect` in a
+/// grayish color representing _spacing_.
+///
+/// When `innerRect` is non-null, the method draws the padding region around the
+/// `innerRect` in a tealish color, with a solid outline around the inner
+/// region.
+///
+/// This method is used by [RenderPadding.debugPaintSize] when
+/// [debugPaintSizeEnabled] is true.
+void debugPaintPadding(
+  Canvas canvas,
+  Rect outerRect,
+  Rect? innerRect, {
+  double outlineWidth = 2.0,
+}) {
   assert(() {
     if (innerRect != null && !innerRect.isEmpty) {
       _debugDrawDoubleRect(canvas, outerRect, innerRect, const Color(0x900090FF));
-      _debugDrawDoubleRect(canvas, innerRect.inflate(outlineWidth).intersect(outerRect), innerRect, const Color(0xFF0090FF));
+      _debugDrawDoubleRect(
+        canvas,
+        innerRect.inflate(outlineWidth).intersect(outerRect),
+        innerRect,
+        const Color(0xFF0090FF),
+      );
     } else {
-      final Paint paint = Paint()
-        ..color = const Color(0x90909090);
+      final Paint paint = Paint()..color = const Color(0x90909090);
       canvas.drawRect(outerRect, paint);
     }
     return true;
@@ -286,7 +317,7 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double 
 /// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
 /// the expected value for [debugCheckIntrinsicSizes]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride = false }) {
+bool debugAssertAllRenderVarsUnset(String reason, {bool debugCheckIntrinsicSizesOverride = false}) {
   assert(() {
     if (debugPaintSizeEnabled ||
         debugPaintBaselinesEnabled ||
@@ -306,6 +337,81 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugDisablePhysicalShapeLayers ||
         debugDisableOpacityLayers) {
       throw FlutterError(reason);
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Returns true if the given [Axis] is bounded within the given
+/// [BoxConstraints] in both the main and cross axis, throwing an exception
+/// otherwise.
+///
+/// This is used by viewports during `performLayout` and `computeDryLayout`
+/// because bounded constraints are required in order to layout their children.
+bool debugCheckHasBoundedAxis(Axis axis, BoxConstraints constraints) {
+  assert(() {
+    if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
+      switch (axis) {
+        case Axis.vertical:
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Vertical viewport was given unbounded height.'),
+              ErrorDescription(
+                'Viewports expand in the scrolling direction to fill their container. '
+                'In this case, a vertical viewport was given an unlimited amount of '
+                'vertical space in which to expand. This situation typically happens '
+                'when a scrollable widget is nested inside another scrollable widget.',
+              ),
+              ErrorHint(
+                'If this widget is always nested in a scrollable widget there '
+                'is no need to use a viewport because there will always be enough '
+                'vertical space for the children. In this case, consider using a '
+                'Column or Wrap instead. Otherwise, consider using a '
+                'CustomScrollView to concatenate arbitrary slivers into a '
+                'single scrollable.',
+              ),
+            ]);
+          }
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError(
+              'Vertical viewport was given unbounded width.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a vertical viewport was given an unlimited amount of '
+              'horizontal space in which to expand.',
+            );
+          }
+        case Axis.horizontal:
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Horizontal viewport was given unbounded width.'),
+              ErrorDescription(
+                'Viewports expand in the scrolling direction to fill their container. '
+                'In this case, a horizontal viewport was given an unlimited amount of '
+                'horizontal space in which to expand. This situation typically happens '
+                'when a scrollable widget is nested inside another scrollable widget.',
+              ),
+              ErrorHint(
+                'If this widget is always nested in a scrollable widget there '
+                'is no need to use a viewport because there will always be enough '
+                'horizontal space for the children. In this case, consider using a '
+                'Row or Wrap instead. Otherwise, consider using a '
+                'CustomScrollView to concatenate arbitrary slivers into a '
+                'single scrollable.',
+              ),
+            ]);
+          }
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError(
+              'Horizontal viewport was given unbounded height.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a horizontal viewport was given an unlimited amount of '
+              'vertical space in which to expand.',
+            );
+          }
+      }
     }
     return true;
   }());

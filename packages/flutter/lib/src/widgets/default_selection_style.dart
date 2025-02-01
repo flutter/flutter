@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'editable_text.dart';
+/// @docImport 'text.dart';
+library;
 
+import 'basic.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 
@@ -27,6 +32,7 @@ class DefaultSelectionStyle extends InheritedTheme {
     super.key,
     this.cursorColor,
     this.selectionColor,
+    this.mouseCursor,
     required super.child,
   });
 
@@ -38,10 +44,37 @@ class DefaultSelectionStyle extends InheritedTheme {
   ///
   /// This constructor creates a [DefaultTextStyle] with an invalid [child],
   /// which means the constructed value cannot be incorporated into the tree.
-  const DefaultSelectionStyle.fallback({ super.key })
+  const DefaultSelectionStyle.fallback({super.key})
     : cursorColor = null,
       selectionColor = null,
+      mouseCursor = null,
       super(child: const _NullWidget());
+
+  /// Creates a default selection style that overrides the selection styles in
+  /// scope at this point in the widget tree.
+  ///
+  /// Any Arguments that are not null replace the corresponding properties on the
+  /// default selection style for the [BuildContext] where the widget is inserted.
+  static Widget merge({
+    Key? key,
+    Color? cursorColor,
+    Color? selectionColor,
+    MouseCursor? mouseCursor,
+    required Widget child,
+  }) {
+    return Builder(
+      builder: (BuildContext context) {
+        final DefaultSelectionStyle parent = DefaultSelectionStyle.of(context);
+        return DefaultSelectionStyle(
+          key: key,
+          cursorColor: cursorColor ?? parent.cursorColor,
+          selectionColor: selectionColor ?? parent.selectionColor,
+          mouseCursor: mouseCursor ?? parent.mouseCursor,
+          child: child,
+        );
+      },
+    );
+  }
 
   /// The default cursor and selection color (semi-transparent grey).
   ///
@@ -58,6 +91,11 @@ class DefaultSelectionStyle extends InheritedTheme {
   /// The background color of selected text.
   final Color? selectionColor;
 
+  /// The [MouseCursor] for mouse pointers hovering over selectable Text widgets.
+  ///
+  /// If this property is null, [SystemMouseCursors.text] will be used.
+  final MouseCursor? mouseCursor;
+
   /// The closest instance of this class that encloses the given context.
   ///
   /// If no such instance exists, returns an instance created by
@@ -69,7 +107,8 @@ class DefaultSelectionStyle extends InheritedTheme {
   /// DefaultSelectionStyle style = DefaultSelectionStyle.of(context);
   /// ```
   static DefaultSelectionStyle of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<DefaultSelectionStyle>() ?? const DefaultSelectionStyle.fallback();
+    return context.dependOnInheritedWidgetOfExactType<DefaultSelectionStyle>() ??
+        const DefaultSelectionStyle.fallback();
   }
 
   @override
@@ -77,14 +116,16 @@ class DefaultSelectionStyle extends InheritedTheme {
     return DefaultSelectionStyle(
       cursorColor: cursorColor,
       selectionColor: selectionColor,
-      child: child
+      mouseCursor: mouseCursor,
+      child: child,
     );
   }
 
   @override
   bool updateShouldNotify(DefaultSelectionStyle oldWidget) {
     return cursorColor != oldWidget.cursorColor ||
-           selectionColor != oldWidget.selectionColor;
+        selectionColor != oldWidget.selectionColor ||
+        mouseCursor != oldWidget.mouseCursor;
   }
 }
 

@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'system_channels.dart';
 
 /// Allows access to the haptic feedback interface on the device.
 ///
 /// This API is intentionally terse since it calls default platform behavior. It
 /// is not suitable for precise control of the system's haptic feedback module.
-class HapticFeedback {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  HapticFeedback._();
-
+///
+/// See also:
+///
+/// * [Human Interface Haptics Guidelines](https://developer.apple.com/design/human-interface-guidelines/playing-haptics)
+abstract final class HapticFeedback {
   /// Provides vibration haptic feedback to the user for a short duration.
   ///
   /// On iOS devices that support haptic feedback, this uses the default system
@@ -32,6 +31,12 @@ class HapticFeedback {
   /// below 10.
   ///
   /// On Android, this uses `HapticFeedbackConstants.VIRTUAL_KEY`.
+  ///
+  /// {@template flutter.services.HapticFeedback.impact}
+  /// See also:
+  ///
+  /// * [Human Interface Selection Playing Impact Haptic](https://developer.apple.com/design/human-interface-guidelines/playing-haptics#Impact)
+  /// {@endtemplate}
   static Future<void> lightImpact() async {
     await SystemChannels.platform.invokeMethod<void>(
       'HapticFeedback.vibrate',
@@ -46,6 +51,8 @@ class HapticFeedback {
   /// below 10.
   ///
   /// On Android, this uses `HapticFeedbackConstants.KEYBOARD_TAP`.
+  ///
+  /// {@macro flutter.services.HapticFeedback.impact}
   static Future<void> mediumImpact() async {
     await SystemChannels.platform.invokeMethod<void>(
       'HapticFeedback.vibrate',
@@ -61,6 +68,8 @@ class HapticFeedback {
   ///
   /// On Android, this uses `HapticFeedbackConstants.CONTEXT_CLICK` on API levels
   /// 23 and above. This call has no effects on Android API levels below 23.
+  ///
+  /// {@macro flutter.services.HapticFeedback.impact}
   static Future<void> heavyImpact() async {
     await SystemChannels.platform.invokeMethod<void>(
       'HapticFeedback.vibrate',
@@ -74,6 +83,10 @@ class HapticFeedback {
   /// This call has no effects on iOS versions below 10.
   ///
   /// On Android, this uses `HapticFeedbackConstants.CLOCK_TICK`.
+  ///
+  /// See also:
+  ///
+  /// * [Human Interface Selection Playing Selection Haptics](https://developer.apple.com/design/human-interface-guidelines/playing-haptics#Selection)
   static Future<void> selectionClick() async {
     await SystemChannels.platform.invokeMethod<void>(
       'HapticFeedback.vibrate',

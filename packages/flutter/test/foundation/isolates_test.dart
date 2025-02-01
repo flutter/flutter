@@ -4,6 +4,7 @@
 
 import 'dart:io';
 import 'dart:isolate';
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
@@ -80,25 +81,29 @@ Future<int> test5CallCompute(int value) {
   return compute(test5, value);
 }
 
-Future<void> expectFileSuccessfullyCompletes(String filename,
-    [bool unsound = false]) async {
+Future<void> expectFileSuccessfullyCompletes(String filename) async {
   // Run a Dart script that calls compute().
   // The Dart process will terminate only if the script exits cleanly with
   // all isolate ports closed.
   const FileSystem fs = LocalFileSystem();
   const Platform platform = LocalPlatform();
   final String flutterRoot = platform.environment['FLUTTER_ROOT']!;
-  final String dartPath =
-      fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
-  final String packageRoot = fs.path.dirname(fs.path.fromUri(platform.script));
-  final String scriptPath =
-      fs.path.join(packageRoot, 'test', 'foundation', filename);
-  final String nullSafetyArg =
-      unsound ? '--no-sound-null-safety' : '--sound-null-safety';
+  final String dartPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+  final String scriptPath = fs.path.join(
+    flutterRoot,
+    'packages',
+    'flutter',
+    'test',
+    'foundation',
+    filename,
+  );
 
   // Enable asserts to also catch potentially invalid assertions.
-  final ProcessResult result = await Process.run(
-      dartPath, <String>[nullSafetyArg, 'run', '--enable-asserts', scriptPath]);
+  final ProcessResult result = await Process.run(dartPath, <String>[
+    'run',
+    '--enable-asserts',
+    scriptPath,
+  ]);
   expect(result.exitCode, 0);
 }
 
@@ -142,6 +147,7 @@ Future<int> computeInstanceMethod(int square) {
 
 Future<int> computeInvalidInstanceMethod(int square) {
   final ComputeTestSubject subject = ComputeTestSubject(square, ReceivePort());
+  expect(subject.additional, isA<ReceivePort>());
   return compute(subject.method, square);
 }
 
@@ -163,11 +169,11 @@ dynamic testInvalidError(int square) {
   }
 }
 
-String? testDebugName(_) {
+String? testDebugName(void _) {
   return Isolate.current.debugName;
 }
 
-int? testReturnNull(_) {
+int? testReturnNull(void _) {
   return null;
 }
 
@@ -200,8 +206,7 @@ void main() {
     expect(await computeInstanceMethod(10), 100);
     expect(computeInvalidInstanceMethod(10), throwsArgumentError);
 
-    expect(await compute(testDebugName, null, debugLabel: 'debug_name'),
-        'debug_name');
+    expect(await compute(testDebugName, null, debugLabel: 'debug_name'), 'debug_name');
     expect(await compute(testReturnNull, null), null);
   }, skip: kIsWeb); // [intended] isn't supported on the web.
 
@@ -210,15 +215,13 @@ void main() {
       await expectFileSuccessfullyCompletes('_compute_caller.dart');
     });
     test('with invalid message', () async {
-      await expectFileSuccessfullyCompletes(
-          '_compute_caller_invalid_message.dart');
+      await expectFileSuccessfullyCompletes('_compute_caller_invalid_message.dart');
     });
     test('with valid error', () async {
       await expectFileSuccessfullyCompletes('_compute_caller.dart');
     });
     test('with invalid error', () async {
-      await expectFileSuccessfullyCompletes(
-          '_compute_caller_invalid_message.dart');
+      await expectFileSuccessfullyCompletes('_compute_caller_invalid_message.dart');
     });
   }, skip: kIsWeb); // [intended] isn't supported on the web.
 }

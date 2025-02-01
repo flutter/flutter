@@ -8,7 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('RelativeRect.==', () {
     const RelativeRect r = RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);
-    expect(r, RelativeRect.fromSize(const Rect.fromLTWH(10.0, 20.0, 0.0, 0.0), const Size(40.0, 60.0)));
+    expect(
+      r,
+      RelativeRect.fromSize(const Rect.fromLTWH(10.0, 20.0, 0.0, 0.0), const Size(40.0, 60.0)),
+    );
   });
   test('RelativeRect.fromDirectional', () {
     final RelativeRect r1 = RelativeRect.fromDirectional(
@@ -66,5 +69,10 @@ void main() {
     const RelativeRect r2 = RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final RelativeRect r3 = RelativeRect.lerp(r1, r2, 0.5)!;
     expect(r3, const RelativeRect.fromLTRB(5.0, 10.0, 15.0, 20.0));
+  });
+  test('RelativeRect.lerp identical a,b', () {
+    expect(RelativeRect.lerp(null, null, 0), null);
+    const RelativeRect rect = RelativeRect.fill;
+    expect(identical(RelativeRect.lerp(rect, rect, 0.5), rect), true);
   });
 }

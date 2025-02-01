@@ -12,11 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Slider value indicator', (WidgetTester tester) async {
-    await _buildValueIndicatorStaticSlider(
-      tester,
-      value: 0,
-      useMaterial3: true,
-    );
+    await _buildValueIndicatorStaticSlider(tester, value: 0, useMaterial3: true);
 
     await _pressStartThumb(tester);
 
@@ -25,11 +21,7 @@ void main() {
       matchesGoldenFile('slider_m3_start_text_scale_1_width_0.png'),
     );
 
-    await _buildValueIndicatorStaticSlider(
-      tester,
-      value: 0.5,
-      useMaterial3: true,
-    );
+    await _buildValueIndicatorStaticSlider(tester, value: 0.5, useMaterial3: true);
 
     await _pressMiddleThumb(tester);
 
@@ -38,11 +30,7 @@ void main() {
       matchesGoldenFile('slider_m3_middle_text_scale_1_width_0.png'),
     );
 
-    await _buildValueIndicatorStaticSlider(
-      tester,
-      value: 1,
-      useMaterial3: true,
-    );
+    await _buildValueIndicatorStaticSlider(tester, value: 1, useMaterial3: true);
 
     await _pressEndThumb(tester);
 
@@ -53,12 +41,7 @@ void main() {
   });
 
   testWidgets('Slider value indicator wide text', (WidgetTester tester) async {
-    await _buildValueIndicatorStaticSlider(
-      tester,
-      value: 0,
-      decimalCount: 5,
-      useMaterial3: true,
-    );
+    await _buildValueIndicatorStaticSlider(tester, value: 0, decimalCount: 5, useMaterial3: true);
 
     await _pressStartThumb(tester);
 
@@ -67,12 +50,7 @@ void main() {
       matchesGoldenFile('slider_m3_start_text_scale_1_width_5.png'),
     );
 
-    await _buildValueIndicatorStaticSlider(
-      tester,
-      value: 0.5,
-      decimalCount: 5,
-      useMaterial3: true,
-    );
+    await _buildValueIndicatorStaticSlider(tester, value: 0.5, decimalCount: 5, useMaterial3: true);
 
     await _pressMiddleThumb(tester);
 
@@ -81,12 +59,7 @@ void main() {
       matchesGoldenFile('slider_m3_middle_text_scale_1_width_5.png'),
     );
 
-    await _buildValueIndicatorStaticSlider(
-      tester,
-      value: 1,
-      decimalCount: 5,
-      useMaterial3: true,
-    );
+    await _buildValueIndicatorStaticSlider(tester, value: 1, decimalCount: 5, useMaterial3: true);
 
     await _pressEndThumb(tester);
 
@@ -97,12 +70,7 @@ void main() {
   });
 
   testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
-    await _buildValueIndicatorStaticSlider(
-      tester,
-      value: 0,
-      textScale: 3,
-      useMaterial3: true,
-    );
+    await _buildValueIndicatorStaticSlider(tester, value: 0, textScale: 3, useMaterial3: true);
 
     await _pressStartThumb(tester);
 
@@ -111,12 +79,7 @@ void main() {
       matchesGoldenFile('slider_m3_start_text_scale_4_width_0.png'),
     );
 
-    await _buildValueIndicatorStaticSlider(
-      tester,
-      value: 0.5,
-      textScale: 3,
-      useMaterial3: true,
-    );
+    await _buildValueIndicatorStaticSlider(tester, value: 0.5, textScale: 3, useMaterial3: true);
 
     await _pressMiddleThumb(tester);
 
@@ -125,12 +88,7 @@ void main() {
       matchesGoldenFile('slider_m3_middle_text_scale_4_width_0.png'),
     );
 
-    await _buildValueIndicatorStaticSlider(
-      tester,
-      value: 1,
-      textScale: 3,
-      useMaterial3: true,
-    );
+    await _buildValueIndicatorStaticSlider(tester, value: 1, textScale: 3, useMaterial3: true);
 
     await _pressEndThumb(tester);
 
@@ -140,8 +98,7 @@ void main() {
     );
   });
 
-  testWidgets('Slider value indicator large text scale and wide text',
-      (WidgetTester tester) async {
+  testWidgets('Slider value indicator large text scale and wide text', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -189,14 +146,12 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Slider value indicator', (WidgetTester tester) async {
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 0,
-      );
+      await _buildValueIndicatorStaticSlider(tester, value: 0);
 
       await _pressStartThumb(tester);
 
@@ -205,10 +160,7 @@ void main() {
         matchesGoldenFile('slider_start_text_scale_1_width_0.png'),
       );
 
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 0.5,
-      );
+      await _buildValueIndicatorStaticSlider(tester, value: 0.5);
 
       await _pressMiddleThumb(tester);
 
@@ -217,10 +169,7 @@ void main() {
         matchesGoldenFile('slider_middle_text_scale_1_width_0.png'),
       );
 
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 1,
-      );
+      await _buildValueIndicatorStaticSlider(tester, value: 1);
 
       await _pressEndThumb(tester);
 
@@ -231,11 +180,7 @@ void main() {
     });
 
     testWidgets('Slider value indicator wide text', (WidgetTester tester) async {
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 0,
-        decimalCount: 5,
-      );
+      await _buildValueIndicatorStaticSlider(tester, value: 0, decimalCount: 5);
 
       await _pressStartThumb(tester);
 
@@ -244,11 +189,7 @@ void main() {
         matchesGoldenFile('slider_start_text_scale_1_width_5.png'),
       );
 
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 0.5,
-        decimalCount: 5,
-      );
+      await _buildValueIndicatorStaticSlider(tester, value: 0.5, decimalCount: 5);
 
       await _pressMiddleThumb(tester);
 
@@ -257,11 +198,7 @@ void main() {
         matchesGoldenFile('slider_middle_text_scale_1_width_5.png'),
       );
 
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 1,
-        decimalCount: 5,
-      );
+      await _buildValueIndicatorStaticSlider(tester, value: 1, decimalCount: 5);
 
       await _pressEndThumb(tester);
 
@@ -272,11 +209,7 @@ void main() {
     });
 
     testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 0,
-        textScale: 3,
-      );
+      await _buildValueIndicatorStaticSlider(tester, value: 0, textScale: 3);
 
       await _pressStartThumb(tester);
 
@@ -285,11 +218,7 @@ void main() {
         matchesGoldenFile('slider_start_text_scale_4_width_0.png'),
       );
 
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 0.5,
-        textScale: 3,
-      );
+      await _buildValueIndicatorStaticSlider(tester, value: 0.5, textScale: 3);
 
       await _pressMiddleThumb(tester);
 
@@ -298,11 +227,7 @@ void main() {
         matchesGoldenFile('slider_middle_text_scale_4_width_0.png'),
       );
 
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 1,
-        textScale: 3,
-      );
+      await _buildValueIndicatorStaticSlider(tester, value: 1, textScale: 3);
 
       await _pressEndThumb(tester);
 
@@ -312,14 +237,10 @@ void main() {
       );
     });
 
-    testWidgets('Slider value indicator large text scale and wide text',
-        (WidgetTester tester) async {
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 0,
-        textScale: 3,
-        decimalCount: 5,
-      );
+    testWidgets('Slider value indicator large text scale and wide text', (
+      WidgetTester tester,
+    ) async {
+      await _buildValueIndicatorStaticSlider(tester, value: 0, textScale: 3, decimalCount: 5);
 
       await _pressStartThumb(tester);
 
@@ -328,12 +249,7 @@ void main() {
         matchesGoldenFile('slider_start_text_scale_4_width_5.png'),
       );
 
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 0.5,
-        textScale: 3,
-        decimalCount: 5,
-      );
+      await _buildValueIndicatorStaticSlider(tester, value: 0.5, textScale: 3, decimalCount: 5);
 
       await _pressMiddleThumb(tester);
 
@@ -342,12 +258,7 @@ void main() {
         matchesGoldenFile('slider_middle_text_scale_4_width_5.png'),
       );
 
-      await _buildValueIndicatorStaticSlider(
-        tester,
-        value: 1,
-        textScale: 3,
-        decimalCount: 5,
-      );
+      await _buildValueIndicatorStaticSlider(tester, value: 1, textScale: 3, decimalCount: 5);
 
       await _pressEndThumb(tester);
 
@@ -364,8 +275,14 @@ Future<void> _pressStartThumb(WidgetTester tester) async {
   final Offset topLeft = tester.getTopLeft(find.byType(Slider));
   final Offset left = (bottomLeft + topLeft) / 2;
   final Offset start = left + const Offset(24, 0);
-  await tester.startGesture(start);
+  final TestGesture gesture = await tester.startGesture(start);
   await tester.pumpAndSettle();
+
+  addTearDown(() async {
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
 }
 
 Future<void> _pressMiddleThumb(WidgetTester tester) async {
@@ -378,8 +295,14 @@ Future<void> _pressEndThumb(WidgetTester tester) async {
   final Offset topRight = tester.getTopRight(find.byType(Slider));
   final Offset right = (bottomRight + topRight) / 2;
   final Offset start = right - const Offset(24, 0);
-  await tester.startGesture(start);
+  final TestGesture gesture = await tester.startGesture(start);
   await tester.pumpAndSettle();
+
+  addTearDown(() async {
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
 }
 
 Future<void> _buildValueIndicatorStaticSlider(
@@ -391,17 +314,19 @@ Future<void> _buildValueIndicatorStaticSlider(
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       theme: ThemeData(useMaterial3: useMaterial3),
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
             return Center(
-              child: MediaQuery(
-                data: MediaQueryData(textScaleFactor: textScale),
+              child: MediaQuery.withClampedTextScaling(
+                minScaleFactor: textScale,
+                maxScaleFactor: textScale,
                 child: SliderTheme(
-                  data: Theme.of(context).sliderTheme.copyWith(
-                    showValueIndicator: ShowValueIndicator.always,
-                  ),
+                  data: Theme.of(
+                    context,
+                  ).sliderTheme.copyWith(showValueIndicator: ShowValueIndicator.always),
                   child: Slider(
                     value: value,
                     label: value.toStringAsFixed(decimalCount),

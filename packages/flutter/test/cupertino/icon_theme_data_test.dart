@@ -14,15 +14,21 @@ void main() {
       grade: 0.0,
       opticalSize: 48.0,
       color: Color(0xAAAAAAAA),
-      opacity: 0.5
+      opacity: 0.5,
+      applyTextScaling: true,
     );
 
     late IconThemeData retrieved;
     await tester.pumpWidget(
-      IconTheme(data: data, child: Builder(builder: (BuildContext context) {
-        retrieved = IconTheme.of(context);
-        return const SizedBox();
-      })),
+      IconTheme(
+        data: data,
+        child: Builder(
+          builder: (BuildContext context) {
+            retrieved = IconTheme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
     );
 
     expect(retrieved, data);
@@ -32,7 +38,8 @@ void main() {
         data: const CupertinoIconThemeData(color: CupertinoColors.systemBlue),
         child: MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: Builder(builder: (BuildContext context) {
+          child: Builder(
+            builder: (BuildContext context) {
               retrieved = IconTheme.of(context);
               return const SizedBox();
             },

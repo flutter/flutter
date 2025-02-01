@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for custom list items.
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for custom list items.
 
 void main() => runApp(const CustomListItemApp());
 
@@ -13,9 +13,7 @@ class CustomListItemApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: CustomListItemExample(),
-    );
+    return MaterialApp(theme: ThemeData(useMaterial3: true), home: const CustomListItemExample());
   }
 }
 
@@ -39,52 +37,25 @@ class _ArticleDescription extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        Text(
+          title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const Padding(padding: EdgeInsets.only(bottom: 2.0)),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Padding(padding: EdgeInsets.only(bottom: 2.0)),
-              Text(
-                subtitle,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.black54,
-                ),
-              ),
-            ],
+          child: Text(
+            subtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12.0, color: Colors.black54),
           ),
         ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Text(
-                author,
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.black87,
-                ),
-              ),
-              Text(
-                '$publishDate - $readDuration',
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.black54,
-                ),
-              ),
-            ],
-          ),
+        Text(author, style: const TextStyle(fontSize: 12.0, color: Colors.black87)),
+        Text(
+          '$publishDate - $readDuration',
+          style: const TextStyle(fontSize: 12.0, color: Colors.black54),
         ),
       ],
     );
@@ -118,10 +89,7 @@ class CustomListItemTwo extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            AspectRatio(
-              aspectRatio: 1.0,
-              child: thumbnail,
-            ),
+            AspectRatio(aspectRatio: 1.0, child: thumbnail),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20.0, 0.0, 2.0, 0.0),
@@ -152,20 +120,17 @@ class CustomListItemExample extends StatelessWidget {
         padding: const EdgeInsets.all(10.0),
         children: <Widget>[
           CustomListItemTwo(
-            thumbnail: Container(
-              decoration: const BoxDecoration(color: Colors.pink),
-            ),
+            thumbnail: Container(decoration: const BoxDecoration(color: Colors.pink)),
             title: 'Flutter 1.0 Launch',
-            subtitle: 'Flutter continues to improve and expand its horizons. '
+            subtitle:
+                'Flutter continues to improve and expand its horizons. '
                 'This text should max out at two lines and clip',
             author: 'Dash',
             publishDate: 'Dec 28',
             readDuration: '5 mins',
           ),
           CustomListItemTwo(
-            thumbnail: Container(
-              decoration: const BoxDecoration(color: Colors.blue),
-            ),
+            thumbnail: Container(decoration: const BoxDecoration(color: Colors.blue)),
             title: 'Flutter 1.2 Release - Continual updates to the framework',
             subtitle: 'Flutter once again improves and makes updates.',
             author: 'Flutter',

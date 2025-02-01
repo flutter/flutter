@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
 
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 export 'dart:ui' show Offset;
@@ -126,8 +129,6 @@ class _Linear extends Curve {
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_sawtooth.mp4}
 class SawTooth extends Curve {
   /// Creates a sawtooth curve.
-  ///
-  /// The [count] argument must not be null.
   const SawTooth(this.count);
 
   /// The number of repetitions of the sawtooth pattern in the unit interval.
@@ -156,9 +157,7 @@ class SawTooth extends Curve {
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_interval.mp4}
 class Interval extends Curve {
   /// Creates an interval curve.
-  ///
-  /// The arguments must not be null.
-  const Interval(this.begin, this.end, { this.curve = Curves.linear });
+  const Interval(this.begin, this.end, {this.curve = Curves.linear});
 
   /// The largest value for which this interval is 0.0.
   ///
@@ -196,13 +195,80 @@ class Interval extends Curve {
   }
 }
 
+/// A curve that progresses according to [beginCurve] until [split], then
+/// according to [endCurve].
+///
+/// Split curves are useful in situations where a widget must track the
+/// user's finger (which requires a linear animation), but can also be flung
+/// using a curve specified with the [endCurve] argument, after the finger is
+/// released. In such a case, the value of [split] would be the progress
+/// of the animation at the time when the finger was released.
+///
+/// For example, if [split] is set to 0.5, [beginCurve] is [Curves.linear],
+/// and [endCurve] is [Curves.easeOutCubic], then the bottom-left quarter of the
+/// curve will be a straight line, and the top-right quarter will contain the
+/// entire [Curves.easeOutCubic] curve.
+///
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_split.mp4}
+class Split extends Curve {
+  /// Creates a split curve.
+  const Split(this.split, {this.beginCurve = Curves.linear, this.endCurve = Curves.easeOutCubic});
+
+  /// The progress value separating [beginCurve] from [endCurve].
+  ///
+  /// The value before which the curve progresses according to [beginCurve] and
+  /// after which the curve progresses according to [endCurve].
+  ///
+  /// When t is exactly `split`, the curve has the value `split`.
+  ///
+  /// Must be between 0 and 1.0, inclusively.
+  final double split;
+
+  /// The curve to use before [split] is reached.
+  ///
+  /// Defaults to [Curves.linear].
+  final Curve beginCurve;
+
+  /// The curve to use after [split] is reached.
+  ///
+  /// Defaults to [Curves.easeOutCubic].
+  final Curve endCurve;
+
+  @override
+  double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
+    assert(split >= 0.0 && split <= 1.0);
+
+    if (t == 0.0 || t == 1.0) {
+      return t;
+    }
+
+    if (t == split) {
+      return split;
+    }
+
+    if (t < split) {
+      final double curveProgress = t / split;
+      final double transformed = beginCurve.transform(curveProgress);
+      return lerpDouble(0, split, transformed)!;
+    } else {
+      final double curveProgress = (t - split) / (1 - split);
+      final double transformed = endCurve.transform(curveProgress);
+      return lerpDouble(split, 1, transformed)!;
+    }
+  }
+
+  @override
+  String toString() {
+    return '${describeIdentity(this)}($split, $beginCurve, $endCurve)';
+  }
+}
+
 /// A curve that is 0.0 until it hits the threshold, then it jumps to 1.0.
 ///
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_threshold.mp4}
 class Threshold extends Curve {
   /// Creates a threshold curve.
-  ///
-  /// The [threshold] argument must not be null.
   const Threshold(this.threshold);
 
   /// The value before which the curve is 0.0 and after which the curve is 1.0.
@@ -301,8 +367,6 @@ class Cubic extends Curve {
   ///
   /// Rather than creating a new instance, consider using one of the common
   /// cubic curves in [Curves].
-  ///
-  /// The [a] (x1), [b] (y1), [c] (x2) and [d] (y2) arguments must not be null.
   const Cubic(this.a, this.b, this.c, this.d);
 
   /// The x coordinate of the first control point.
@@ -332,9 +396,7 @@ class Cubic extends Curve {
   static const double _cubicErrorBound = 0.001;
 
   double _evaluateCubic(double a, double b, double m) {
-    return 3 * a * (1 - m) * (1 - m) * m +
-           3 * b * (1 - m) *           m * m +
-                                       m * m * m;
+    return 3 * a * (1 - m) * (1 - m) * m + 3 * b * (1 - m) * m * m + m * m * m;
   }
 
   @override
@@ -429,18 +491,21 @@ class ThreePointCubic extends Curve {
     final double scaledT = (t - (firstCurve ? 0.0 : midpoint.dx)) / scaleX;
     if (firstCurve) {
       return Cubic(
-        a1.dx / scaleX,
-        a1.dy / scaleY,
-        b1.dx / scaleX,
-        b1.dy / scaleY,
-      ).transform(scaledT) * scaleY;
+            a1.dx / scaleX,
+            a1.dy / scaleY,
+            b1.dx / scaleX,
+            b1.dy / scaleY,
+          ).transform(scaledT) *
+          scaleY;
     } else {
       return Cubic(
-        (a2.dx - midpoint.dx) / scaleX,
-        (a2.dy - midpoint.dy) / scaleY,
-        (b2.dx - midpoint.dx) / scaleX,
-        (b2.dy - midpoint.dy) / scaleY,
-      ).transform(scaledT) * scaleY + midpoint.dy;
+                (a2.dx - midpoint.dx) / scaleX,
+                (a2.dy - midpoint.dy) / scaleY,
+                (b2.dx - midpoint.dx) / scaleX,
+                (b2.dy - midpoint.dy) / scaleY,
+              ).transform(scaledT) *
+              scaleY +
+          midpoint.dy;
     }
   }
 
@@ -538,12 +603,15 @@ abstract class Curve2D extends ParametricCurve<Offset> {
         sample(r, q);
       }
     }
+
     // If the curve starts and ends on the same point, then we force it to
     // subdivide at least once, because otherwise it will terminate immediately.
     sample(
       first,
       last,
-      forceSubdivide: (first.value.dx - last.value.dx).abs() < tolerance && (first.value.dy - last.value.dy).abs() < tolerance,
+      forceSubdivide:
+          (first.value.dx - last.value.dx).abs() < tolerance &&
+          (first.value.dy - last.value.dy).abs() < tolerance,
     );
     return samples;
   }
@@ -598,8 +666,6 @@ abstract class Curve2D extends ParametricCurve<Offset> {
 ///  * [Curve2D], a parametric curve that maps a double parameter to a 2D location.
 class Curve2DSample {
   /// Creates an object that holds a sample; used with [Curve2D] subclasses.
-  ///
-  /// All arguments must not be null.
   const Curve2DSample(this.t, this.value);
 
   /// The parametric location of this sample point along the curve.
@@ -658,45 +724,54 @@ class CatmullRomSpline extends Curve2D {
   /// control point. The default is chosen so that the slope of the line at the
   /// ends matches that of the first or last line segment in the control points.
   ///
-  /// The `tension` and `controlPoints` arguments must not be null, and the
-  /// `controlPoints` list must contain at least four control points to
+  /// The `controlPoints` list must contain at least four control points to
   /// interpolate.
   ///
   /// The internal curve data structures are lazily computed the first time
   /// [transform] is called. If you would rather pre-compute the structures,
   /// use [CatmullRomSpline.precompute] instead.
   CatmullRomSpline(
-      List<Offset> controlPoints, {
-        double tension = 0.0,
-        Offset? startHandle,
-        Offset? endHandle,
-      }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
-           assert(tension >= 0.0, 'tension $tension must not be negative.'),
-           assert(controlPoints.length > 3, 'There must be at least four control points to create a CatmullRomSpline.'),
-           _controlPoints = controlPoints,
-           _startHandle = startHandle,
-           _endHandle = endHandle,
-           _tension = tension,
-           _cubicSegments = <List<Offset>>[];
+    List<Offset> controlPoints, {
+    double tension = 0.0,
+    Offset? startHandle,
+    Offset? endHandle,
+  }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
+       assert(tension >= 0.0, 'tension $tension must not be negative.'),
+       assert(
+         controlPoints.length > 3,
+         'There must be at least four control points to create a CatmullRomSpline.',
+       ),
+       _controlPoints = controlPoints,
+       _startHandle = startHandle,
+       _endHandle = endHandle,
+       _tension = tension,
+       _cubicSegments = <List<Offset>>[];
 
   /// Constructs a centripetal Catmull-Rom spline curve.
   ///
   /// The same as [CatmullRomSpline.new], except that the internal data
   /// structures are precomputed instead of being computed lazily.
   CatmullRomSpline.precompute(
-      List<Offset> controlPoints, {
-        double tension = 0.0,
-        Offset? startHandle,
-        Offset? endHandle,
-      }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
-           assert(tension >= 0.0, 'tension $tension must not be negative.'),
-           assert(controlPoints.length > 3, 'There must be at least four control points to create a CatmullRomSpline.'),
-           _controlPoints = null,
-           _startHandle = null,
-           _endHandle = null,
-           _tension = null,
-           _cubicSegments = _computeSegments(controlPoints, tension, startHandle: startHandle, endHandle: endHandle);
-
+    List<Offset> controlPoints, {
+    double tension = 0.0,
+    Offset? startHandle,
+    Offset? endHandle,
+  }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
+       assert(tension >= 0.0, 'tension $tension must not be negative.'),
+       assert(
+         controlPoints.length > 3,
+         'There must be at least four control points to create a CatmullRomSpline.',
+       ),
+       _controlPoints = null,
+       _startHandle = null,
+       _endHandle = null,
+       _tension = null,
+       _cubicSegments = _computeSegments(
+         controlPoints,
+         tension,
+         startHandle: startHandle,
+         endHandle: endHandle,
+       );
 
   static List<List<Offset>> _computeSegments(
     List<Offset> controlPoints,
@@ -704,16 +779,33 @@ class CatmullRomSpline extends Curve2D {
     Offset? startHandle,
     Offset? endHandle,
   }) {
+    assert(
+      startHandle == null || startHandle.isFinite,
+      'The provided startHandle of CatmullRomSpline must be finite. The '
+      'startHandle given was $startHandle.',
+    );
+    assert(
+      endHandle == null || endHandle.isFinite,
+      'The provided endHandle of CatmullRomSpline must be finite. The endHandle '
+      'given was $endHandle.',
+    );
+    assert(() {
+      for (int index = 0; index < controlPoints.length; index++) {
+        if (!controlPoints[index].isFinite) {
+          throw FlutterError(
+            'The provided CatmullRomSpline control point at index $index is not '
+            'finite. The control point given was ${controlPoints[index]}.',
+          );
+        }
+      }
+      return true;
+    }());
     // If not specified, select the first and last control points (which are
     // handles: they are not intersected by the resulting curve) so that they
     // extend the first and last segments, respectively.
     startHandle ??= controlPoints[0] * 2.0 - controlPoints[1];
     endHandle ??= controlPoints.last * 2.0 - controlPoints[controlPoints.length - 2];
-    final List<Offset> allPoints = <Offset>[
-      startHandle,
-      ...controlPoints,
-      endHandle,
-    ];
+    final List<Offset> allPoints = <Offset>[startHandle, ...controlPoints, endHandle];
 
     // An alpha of 0.5 is what makes it a centripetal Catmull-Rom spline. A
     // value of 0.0 would make it a uniform Catmull-Rom spline, and a value of
@@ -724,7 +816,12 @@ class CatmullRomSpline extends Curve2D {
     final double reverseTension = 1.0 - tension;
     final List<List<Offset>> result = <List<Offset>>[];
     for (int i = 0; i < allPoints.length - 3; ++i) {
-      final List<Offset> curve = <Offset>[allPoints[i], allPoints[i + 1], allPoints[i + 2], allPoints[i + 3]];
+      final List<Offset> curve = <Offset>[
+        allPoints[i],
+        allPoints[i + 1],
+        allPoints[i + 2],
+        allPoints[i + 3],
+      ];
       final Offset diffCurve10 = curve[1] - curve[0];
       final Offset diffCurve21 = curve[2] - curve[1];
       final Offset diffCurve32 = curve[3] - curve[2];
@@ -732,8 +829,12 @@ class CatmullRomSpline extends Curve2D {
       final double t12 = math.pow(diffCurve21.distance, alpha).toDouble();
       final double t23 = math.pow(diffCurve32.distance, alpha).toDouble();
 
-      final Offset m1 = (diffCurve21 + (diffCurve10 / t01 - (curve[2] - curve[0]) / (t01 + t12)) * t12) * reverseTension;
-      final Offset m2 = (diffCurve21 + (diffCurve32 / t23 - (curve[3] - curve[1]) / (t12 + t23)) * t12) * reverseTension;
+      final Offset m1 =
+          (diffCurve21 + (diffCurve10 / t01 - (curve[2] - curve[0]) / (t01 + t12)) * t12) *
+          reverseTension;
+      final Offset m2 =
+          (diffCurve21 + (diffCurve32 / t23 - (curve[3] - curve[1]) / (t12 + t23)) * t12) *
+          reverseTension;
       final Offset sumM12 = m1 + m2;
 
       final List<Offset> segment = <Offset>[
@@ -761,7 +862,12 @@ class CatmullRomSpline extends Curve2D {
       return;
     }
     _cubicSegments.addAll(
-      _computeSegments(_controlPoints!, _tension!, startHandle: _startHandle, endHandle: _endHandle),
+      _computeSegments(
+        _controlPoints!,
+        _tension!,
+        startHandle: _startHandle,
+        endHandle: _endHandle,
+      ),
     );
   }
 
@@ -791,10 +897,10 @@ class CatmullRomSpline extends Curve2D {
     }
     final List<Offset> cubicControlPoints = _cubicSegments[index];
     final double localT2 = localT * localT;
-    return cubicControlPoints[0] * localT2 * localT
-         + cubicControlPoints[1] * localT2
-         + cubicControlPoints[2] * localT
-         + cubicControlPoints[3];
+    return cubicControlPoints[0] * localT2 * localT +
+        cubicControlPoints[1] * localT2 +
+        cubicControlPoints[2] * localT +
+        cubicControlPoints[3];
   }
 }
 
@@ -838,38 +944,42 @@ class CatmullRomCurve extends Curve {
   /// [transform] is called. If you would rather pre-compute the curve, use
   /// [CatmullRomCurve.precompute] instead.
   ///
-  /// All of the arguments must not be null.
-  ///
   /// See also:
   ///
   ///  * This [paper on using Catmull-Rom splines](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
   CatmullRomCurve(this.controlPoints, {this.tension = 0.0})
-      : assert(() {
+    : assert(
+        () {
           return validateControlPoints(
             controlPoints,
             tension: tension,
             reasons: _debugAssertReasons..clear(),
           );
-        }(), 'control points $controlPoints could not be validated:\n  ${_debugAssertReasons.join('\n  ')}'),
-        // Pre-compute samples so that we don't have to evaluate the spline's inverse
-        // all the time in transformInternal.
-        _precomputedSamples = <Curve2DSample>[];
+        }(),
+        'control points $controlPoints could not be validated:\n  ${_debugAssertReasons.join('\n  ')}',
+      ),
+      // Pre-compute samples so that we don't have to evaluate the spline's inverse
+      // all the time in transformInternal.
+      _precomputedSamples = <Curve2DSample>[];
 
   /// Constructs a centripetal [CatmullRomCurve].
   ///
   /// Same as [CatmullRomCurve.new], but it precomputes the internal curve data
   /// structures for a more predictable computation load.
   CatmullRomCurve.precompute(this.controlPoints, {this.tension = 0.0})
-      : assert(() {
+    : assert(
+        () {
           return validateControlPoints(
             controlPoints,
             tension: tension,
             reasons: _debugAssertReasons..clear(),
           );
-        }(), 'control points $controlPoints could not be validated:\n  ${_debugAssertReasons.join('\n  ')}'),
-        // Pre-compute samples so that we don't have to evaluate the spline's inverse
-        // all the time in transformInternal.
-        _precomputedSamples = _computeSamples(controlPoints, tension);
+        }(),
+        'control points $controlPoints could not be validated:\n  ${_debugAssertReasons.join('\n  ')}',
+      ),
+      // Pre-compute samples so that we don't have to evaluate the spline's inverse
+      // all the time in transformInternal.
+      _precomputedSamples = _computeSamples(controlPoints, tension);
 
   static List<Curve2DSample> _computeSamples(List<Offset> controlPoints, double tension) {
     return CatmullRomSpline.precompute(
@@ -1002,9 +1112,11 @@ class CatmullRomCurve extends Curve {
     final double start = testSpline.findInverse(0.0);
     final double end = testSpline.findInverse(1.0);
     final Iterable<Curve2DSample> samplePoints = testSpline.generateSamples(start: start, end: end);
+
     /// If the first and last points in the samples aren't at (0,0) or (1,1)
     /// respectively, then the curve is multi-valued at the ends.
-    if (samplePoints.first.value.dy.abs() > tolerance || (1.0 - samplePoints.last.value.dy).abs() > tolerance) {
+    if (samplePoints.first.value.dy.abs() > tolerance ||
+        (1.0 - samplePoints.last.value.dy).abs() > tolerance) {
       bool bail = true;
       success = false;
       assert(() {
@@ -1122,8 +1234,6 @@ class CatmullRomCurve extends Curve {
 ///  * [CurvedAnimation], which can take a separate curve and reverse curve.
 class FlippedCurve extends Curve {
   /// Creates a flipped curve.
-  ///
-  /// The [curve] argument must not be null.
   const FlippedCurve(this.curve);
 
   /// The curve that is being flipped.
@@ -1151,7 +1261,7 @@ class _DecelerateCurve extends Curve {
   @override
   double transformInternal(double t) {
     // Intended to match the behavior of:
-    // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/view/animation/DecelerateInterpolator.java
+    // https://android.googlesource.com/platform/frameworks/base/+/main/core/java/android/view/animation/DecelerateInterpolator.java
     // ...as of December 2016.
     t = 1.0 - t;
     return 1.0 - t * t;
@@ -1213,7 +1323,6 @@ class _BounceInOutCurve extends Curve {
     }
   }
 }
-
 
 // ELASTIC CURVES
 
@@ -1305,7 +1414,6 @@ class ElasticInOutCurve extends Curve {
   }
 }
 
-
 // PREDEFINED CURVES
 
 /// A collection of common animation curves.
@@ -1353,11 +1461,8 @@ class ElasticInOutCurve extends Curve {
 ///
 ///  * [Curve], the interface implemented by the constants available from the
 ///    [Curves] class.
-class Curves {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Curves._();
-
+///  * [Easing], for the Material animation curves.
+abstract final class Curves {
   /// A linear animation curve.
   ///
   /// This is the identity map over the unit interval: its [Curve.transform]
@@ -1385,12 +1490,36 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_linear_to_slow_ease_in.mp4}
   static const Cubic fastLinearToSlowEaseIn = Cubic(0.18, 1.0, 0.04, 1.0);
 
+  /// A curve that starts slowly, speeds up very quickly, and then ends slowly.
+  ///
+  /// This curve is used by default to animate page transitions used by
+  /// [CupertinoPageRoute].
+  ///
+  /// It has been derived from plots of native iOS 16.3
+  /// animation frames on iPhone 14 Pro Max.
+  /// Specifically, transition animation positions were measured
+  /// every frame and plotted against time. Then, a cubic curve was
+  /// strictly fit to the measured data points.
+  ///
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_ease_in_to_slow_ease_out.mp4}
+  static const ThreePointCubic fastEaseInToSlowEaseOut = ThreePointCubic(
+    Offset(0.056, 0.024),
+    Offset(0.108, 0.3085),
+    Offset(0.198, 0.541),
+    Offset(0.3655, 1.0),
+    Offset(0.5465, 0.989),
+  );
+
   /// A cubic animation curve that speeds up quickly and ends slowly.
+  ///
+  /// This is the same as the CSS easing function `ease`.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease.mp4}
   static const Cubic ease = Cubic(0.25, 0.1, 0.25, 1.0);
 
   /// A cubic animation curve that starts slowly and ends quickly.
+  ///
+  /// This is the same as the CSS easing function `ease-in`.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
   static const Cubic easeIn = Cubic(0.42, 0.0, 1.0, 1.0);
@@ -1493,6 +1622,8 @@ class Curves {
 
   /// A cubic animation curve that starts quickly and ends slowly.
   ///
+  /// This is the same as the CSS easing function `ease-out`.
+  ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out.mp4}
   static const Cubic easeOut = Cubic(0.0, 0.0, 0.58, 1.0);
 
@@ -1594,6 +1725,8 @@ class Curves {
   /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly.
   ///
+  /// This is the same as the CSS easing function `ease-in-out`.
+  ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out.mp4}
   static const Cubic easeInOut = Cubic(0.42, 0.0, 0.58, 1.0);
 
@@ -1642,9 +1775,11 @@ class Curves {
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_cubic_emphasized.mp4}
   static const ThreePointCubic easeInOutCubicEmphasized = ThreePointCubic(
-      Offset(0.05, 0), Offset(0.133333, 0.06),
-      Offset(0.166666, 0.4),
-      Offset(0.208333, 0.82), Offset(0.25, 1),
+    Offset(0.05, 0),
+    Offset(0.133333, 0.06),
+    Offset(0.166666, 0.4),
+    Offset(0.208333, 0.82),
+    Offset(0.25, 1),
   );
 
   /// A cubic animation curve that starts slowly, speeds up, and then ends
@@ -1724,7 +1859,7 @@ class Curves {
   ///
   /// See also:
   ///
-  ///  * [standardEasing], the name for this curve in the Material specification.
+  ///  * [Easing.legacy], the name for this curve in the Material specification.
   static const Cubic fastOutSlowIn = Cubic(0.4, 0.0, 0.2, 1.0);
 
   /// A cubic animation curve that starts quickly, slows down, and then ends

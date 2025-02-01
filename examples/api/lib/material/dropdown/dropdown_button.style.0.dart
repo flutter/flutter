@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [DropdownButton.style].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [DropdownButton.style].
 
 void main() => runApp(const DropdownButtonApp());
 
@@ -54,19 +54,14 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
           return options.map((String value) {
             return Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                dropdownValue,
-                style: const TextStyle(color: Colors.white),
-              ),
+              child: Text(dropdownValue, style: const TextStyle(color: Colors.white)),
             );
           }).toList();
         },
-        items: options.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
+        items:
+            options.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(value: value, child: Text(value));
+            }).toList(),
       ),
     );
   }

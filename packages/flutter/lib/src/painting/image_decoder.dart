@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+library;
+
 import 'dart:typed_data';
-import 'dart:ui' as ui show Codec, FrameInfo, Image;
+import 'dart:ui' as ui show Codec, FrameInfo, Image, ImmutableBuffer;
 
 import 'binding.dart';
 
@@ -16,11 +19,12 @@ import 'binding.dart';
 /// If the image is animated, this returns the first frame. Consider
 /// [instantiateImageCodec] if support for animated images is necessary.
 ///
-/// This function differs from [ui.decodeImageFromList] in that it defers to
-/// [PaintingBinding.instantiateImageCodec], and therefore can be mocked in
-/// tests.
+/// This function differs from [decodeImageFromList] in that it defers to
+/// [PaintingBinding.instantiateImageCodecWithSize], and therefore can be mocked
+/// in tests.
 Future<ui.Image> decodeImageFromList(Uint8List bytes) async {
-  final ui.Codec codec = await PaintingBinding.instance.instantiateImageCodec(bytes);
+  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+  final ui.Codec codec = await PaintingBinding.instance.instantiateImageCodecWithSize(buffer);
   final ui.FrameInfo frameInfo = await codec.getNextFrame();
   return frameInfo.image;
 }

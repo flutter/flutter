@@ -9,25 +9,24 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ContextMenuControllerExampleApp());
 
 /// A builder that includes an Offset to draw the context menu at.
 typedef ContextMenuBuilder = Widget Function(BuildContext context, Offset offset);
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class ContextMenuControllerExampleApp extends StatefulWidget {
+  const ContextMenuControllerExampleApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<ContextMenuControllerExampleApp> createState() => _ContextMenuControllerExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  void _showDialog (BuildContext context) {
+class _ContextMenuControllerExampleAppState extends State<ContextMenuControllerExampleApp> {
+  void _showDialog(BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) =>
-          const AlertDialog(title: Text('You clicked print!')),
+        builder: (BuildContext context) => const AlertDialog(title: Text('You clicked print!')),
       ),
     );
   }
@@ -54,17 +53,13 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Context menu outside of text'),
-        ),
+        appBar: AppBar(title: const Text('Context menu outside of text')),
         body: _ContextMenuRegion(
           contextMenuBuilder: (BuildContext context, Offset offset) {
             // The custom context menu will look like the default context menu
             // on the current platform with a single 'Print' button.
             return AdaptiveTextSelectionToolbar.buttonItems(
-              anchors: TextSelectionToolbarAnchors(
-                primaryAnchor: offset,
-              ),
+              anchors: TextSelectionToolbarAnchors(primaryAnchor: offset),
               buttonItems: <ContextMenuButtonItem>[
                 ContextMenuButtonItem(
                   onPressed: () {
@@ -78,11 +73,13 @@ class _MyAppState extends State<MyApp> {
           },
           // In this case this wraps a big open space in a GestureDetector in
           // order to show the context menu, but it could also wrap a single
-          // wiget like an Image to give it a context menu.
+          // widget like an Image to give it a context menu.
           child: ListView(
             children: <Widget>[
               Container(height: 20.0),
-              const Text('Right click (desktop) or long press (mobile) anywhere, not just on this text, to show the custom menu.'),
+              const Text(
+                'Right click (desktop) or long press (mobile) anywhere, not just on this text, to show the custom menu.',
+              ),
             ],
           ),
         ),
@@ -96,10 +93,7 @@ class _MyAppState extends State<MyApp> {
 /// By default, shows the menu on right clicks and long presses.
 class _ContextMenuRegion extends StatefulWidget {
   /// Creates an instance of [_ContextMenuRegion].
-  const _ContextMenuRegion({
-    required this.child,
-    required this.contextMenuBuilder,
-  });
+  const _ContextMenuRegion({required this.child, required this.contextMenuBuilder});
 
   /// Builds the context menu.
   final ContextMenuBuilder contextMenuBuilder;

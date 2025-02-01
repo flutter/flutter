@@ -2,23 +2,22 @@
 
 This directory exists to support building Flutter on our build infrastructure.
 
-Flutter build results are available at:
-* https://flutter-dashboard.appspot.com/#/build
-  - Aggregate dashboard of the separate CI systems used by Flutter.
-* https://cirrus-ci.com/github/flutter/flutter/master
-  - Testing is done on PRs and submitted changes on GitHub.
+Flutter build results are available at: <https://flutter-dashboard.appspot.com>.
 
 Flutter infra requires special permissions to retrigger builds on the
 [build dashboard](https://flutter-dashboard.appspot.com/#/build). File an
-[infra ticket](https://github.com/flutter/flutter/wiki/Infra-Ticket-Queue) to
+[infra ticket](../../docs/infra/Infra-Ticket-Queue.md) to
 request permission.
 
-The [Cirrus](https://cirrus-ci.org)-based bots run the [`test.dart`](test.dart)
-script for each PR and submission. This does testing for the tools, for the
-framework, and (for submitted changes only) rebuilds and updates the master
-branch API docs [staging site](https://master-docs.flutter.dev/).
+The [LUCI](https://chromium.googlesource.com/infra/luci/luci-py/+/refs/heads/main/README.md)-based
+bots run the [`test.dart`](test.dart) script for each PR and submission. This
+does testing for the tools, for the framework, and (for submitted changes only)
+rebuilds and updates the main branch API docs [staging site](https://main-api.flutter.dev/).
 For tagged dev and beta builds, it also builds and deploys the gallery app to
-the app stores. It is configured by the [.cirrus.yml](/.cirrus.yml).
+the app stores. It is configured by two `.ci.yaml` files:
+
+- framework: [`.ci.yaml`](../../.ci.yaml)
+- engine: [`engine/src/flutter/.ci.yaml`](../../engine/src/flutter/.ci.yaml)
 
 The build dashboard includes post-commit testing run on physical devices. See
 [//dev/devicelab](../devicelab/README.md) for more information.
@@ -28,7 +27,7 @@ The build dashboard includes post-commit testing run on physical devices. See
 A [set of infra scripts](https://flutter.googlesource.com/recipes/)
 run on Windows, Linux, and Mac machines. The configuration for how many
 machines and what kind are managed internally by Google. File an
-[infra ticket](https://github.com/flutter/flutter/wiki/Infra-Ticket-Queue)
+[infra ticket](../../docs/infra/Infra-Ticket-Queue.md)
 to request new machine types to be added. Both of these technologies are highly
 specific to the [LUCI](https://github.com/luci) project, which is the successor
 to Chromium's infra and the foundation to Flutter's infrastructure.
@@ -61,7 +60,7 @@ actions through `recipe_modules`. Searching the builder config in [infra](https:
 will indicate the recipe used for a test.
 
 Recipes are just Python with some limitations on what can be imported. They are
-[documented](https://github.com/luci/recipes-py/blob/master/doc/user_guide.md)
+[documented](https://github.com/luci/recipes-py/blob/main/doc/user_guide.md)
 by the [luci/recipes-py GitHub project](https://github.com/luci/recipes-py).
 
 The typical cycle for editing a recipe is:
@@ -73,9 +72,8 @@ The typical cycle for editing a recipe is:
    the existing expected output to match the new output. Verify completely new test
    cases by altering the `GenTests` method of the recipe. The recipe is required
    to have 100% test coverage.
-4. Run `led get-builder 'luci.flutter.staging:BUILDER_NAME' | led edit -p 'revision="GIT_HASH"' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
-   `GIT_HASH` is the hash to build (which is important for the engine but not
-   for the framework).
+4. Run `led get-builder 'luci.flutter.staging:BUILDER_NAME' | led edit -pa git_ref='refs/pull/<PR number>/head' | led edit -pa git_url='https://github.com/flutter/<repo>' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
+   `git_ref`/`git_url` is the ref/url of the intended changes to build.
    * If `led` fails, ensure that your `depot_tools` checkout is up to date.
 5. To submit a CL, you need a local branch first (`git checkout -b [some branch name]`).
 6. Upload the patch (`git commit`, `git cl upload`), and open the outputted URL to the CL.
@@ -135,7 +133,6 @@ components need to be updated or installed, follow the steps below:
    `$ cd ../..`
    `$ dev/bots/upload_android_tools.py -t ndk`
 
-
 ## Flutter codelabs build test
 
 The Flutter codelabs exercise Material Components in the form of a
@@ -166,15 +163,15 @@ For example To remove a published package corresponding to the git hash
 `d444a455de87a2e40b7f576dc12ffd9ab82fd491`, first do a dry run of the script to
 see what it will do:
 
-```
-$ dart ./unpublish_package.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+```sh
+dart ./unpublish_package.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
 And once you've verified the output of the dry run to be sure it is what you
 want to do, run:
 
-```
-$ dart ./unpublish_package.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+```sh
+dart ./unpublish_package.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
 and it will perform the actions. You will of course need to have access

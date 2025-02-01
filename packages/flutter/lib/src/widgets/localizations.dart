@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_localizations/flutter_localizations.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'reorderable_list.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -38,7 +45,10 @@ class _Pending {
 // This is more complicated than just applying Future.wait to input
 // because some of the input.values may be SynchronousFutures. We don't want
 // to Future.wait for the synchronous futures.
-Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegate<dynamic>> allDelegates) {
+Future<Map<Type, dynamic>> _loadAll(
+  Locale locale,
+  Iterable<LocalizationsDelegate<dynamic>> allDelegates,
+) {
   final Map<Type, dynamic> output = <Type, dynamic>{};
   List<_Pending>? pendingList;
 
@@ -59,7 +69,8 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
     final Future<dynamic> futureValue = inputValue.then<dynamic>((dynamic value) {
       return completedValue = value;
     });
-    if (completedValue != null) { // inputValue was a SynchronousFuture
+    if (completedValue != null) {
+      // inputValue was a SynchronousFuture
       final Type type = delegate.type;
       assert(!output.containsKey(type));
       output[type] = completedValue;
@@ -75,16 +86,17 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
   }
 
   // Some of delegate.load() values were asynchronous futures. Wait for them.
-  return Future.wait<dynamic>(pendingList.map<Future<dynamic>>((_Pending p) => p.futureValue))
-    .then<Map<Type, dynamic>>((List<dynamic> values) {
-      assert(values.length == pendingList!.length);
-      for (int i = 0; i < values.length; i += 1) {
-        final Type type = pendingList![i].delegate.type;
-        assert(!output.containsKey(type));
-        output[type] = values[i];
-      }
-      return output;
-    });
+  return Future.wait<dynamic>(
+    pendingList.map<Future<dynamic>>((_Pending p) => p.futureValue),
+  ).then<Map<Type, dynamic>>((List<dynamic> values) {
+    assert(values.length == pendingList!.length);
+    for (int i = 0; i < values.length; i += 1) {
+      final Type type = pendingList![i].delegate.type;
+      assert(!output.containsKey(type));
+      output[type] = values[i];
+    }
+    return output;
+  });
 }
 
 /// A factory for a set of localized resources of type `T`, to be loaded by a
@@ -96,7 +108,7 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
 /// the object created by an individual delegate's [load] method.
 ///
 /// An example of a class used as the value of `T` here would be
-/// MaterialLocalizations.
+/// [MaterialLocalizations].
 abstract class LocalizationsDelegate<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -145,7 +157,7 @@ abstract class LocalizationsDelegate<T> {
 /// Interface for localized resource values for the lowest levels of the Flutter
 /// framework.
 ///
-/// In particular, this maps locales to a specific [Directionality] using the
+/// This class also maps locales to a specific [Directionality] using the
 /// [textDirection] property.
 ///
 /// See also:
@@ -155,6 +167,30 @@ abstract class LocalizationsDelegate<T> {
 abstract class WidgetsLocalizations {
   /// The reading direction for text in this locale.
   TextDirection get textDirection;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list to the start of the list.
+  String get reorderItemToStart;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list to the end of the list.
+  String get reorderItemToEnd;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list one space up the list.
+  String get reorderItemUp;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list one space down the list.
+  String get reorderItemDown;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list one space left in the list.
+  String get reorderItemLeft;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list one space right in the list.
+  String get reorderItemRight;
 
   /// The `WidgetsLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -208,6 +244,24 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   const DefaultWidgetsLocalizations();
 
   @override
+  String get reorderItemUp => 'Move up';
+
+  @override
+  String get reorderItemDown => 'Move down';
+
+  @override
+  String get reorderItemLeft => 'Move left';
+
+  @override
+  String get reorderItemRight => 'Move right';
+
+  @override
+  String get reorderItemToEnd => 'Move to the end';
+
+  @override
+  String get reorderItemToStart => 'Move to the start';
+
+  @override
   TextDirection get textDirection => TextDirection.ltr;
 
   /// Creates an object that provides US English resource values for the
@@ -225,7 +279,8 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// to create an instance of this class.
   ///
   /// [WidgetsApp] automatically adds this value to [WidgetsApp.localizationsDelegates].
-  static const LocalizationsDelegate<WidgetsLocalizations> delegate = _WidgetsLocalizationsDelegate();
+  static const LocalizationsDelegate<WidgetsLocalizations> delegate =
+      _WidgetsLocalizationsDelegate();
 }
 
 class _LocalizationsScope extends InheritedWidget {
@@ -360,12 +415,13 @@ class _LocalizationsScope extends InheritedWidget {
 /// resources.
 class Localizations extends StatefulWidget {
   /// Create a widget from which localizations (like translated strings) can be obtained.
-  Localizations({
-    super.key,
-    required this.locale,
-    required this.delegates,
-    this.child,
-  }) : assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
+  Localizations({super.key, required this.locale, required this.delegates, this.child})
+    : assert(
+        delegates.any(
+          (LocalizationsDelegate<dynamic> delegate) =>
+              delegate is LocalizationsDelegate<WidgetsLocalizations>,
+        ),
+      );
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
@@ -401,7 +457,9 @@ class Localizations extends StatefulWidget {
     List<LocalizationsDelegate<dynamic>>? delegates,
     Widget? child,
   }) {
-    final List<LocalizationsDelegate<dynamic>> mergedDelegates = Localizations._delegatesOf(context);
+    final List<LocalizationsDelegate<dynamic>> mergedDelegates = Localizations._delegatesOf(
+      context,
+    );
     if (delegates != null) {
       mergedDelegates.insertAll(0, delegates);
     }
@@ -431,7 +489,8 @@ class Localizations extends StatefulWidget {
   /// If no [Localizations] widget is in scope then the [Localizations.localeOf]
   /// method will throw an exception.
   static Locale localeOf(BuildContext context) {
-    final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope =
+        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(() {
       if (scope == null) {
         throw FlutterError(
@@ -456,14 +515,16 @@ class Localizations extends StatefulWidget {
   /// If no [Localizations] widget is in scope then this function will return
   /// null.
   static Locale? maybeLocaleOf(BuildContext context) {
-    final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope =
+        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState.locale;
   }
 
   // There doesn't appear to be a need to make this public. See the
   // Localizations.override factory constructor.
   static List<LocalizationsDelegate<dynamic>> _delegatesOf(BuildContext context) {
-    final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope =
+        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(scope != null, 'a Localizations ancestor was not found');
     return List<LocalizationsDelegate<dynamic>>.of(scope!.localizationsState.widget.delegates);
   }
@@ -484,7 +545,8 @@ class Localizations extends StatefulWidget {
   /// }
   /// ```
   static T? of<T>(BuildContext context, Type type) {
-    final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope =
+        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState.resourcesFor<T?>(type);
   }
 
@@ -544,10 +606,12 @@ class _LocalizationsState extends State<Localizations> {
     }
 
     Map<Type, dynamic>? typeToResources;
-    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(locale, delegates)
-      .then<Map<Type, dynamic>>((Map<Type, dynamic> value) {
-        return typeToResources = value;
-      });
+    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(
+      locale,
+      delegates,
+    ).then<Map<Type, dynamic>>((Map<Type, dynamic> value) {
+      return typeToResources = value;
+    });
 
     if (typeToResources != null) {
       // All of the delegates' resources loaded synchronously.
@@ -577,7 +641,8 @@ class _LocalizationsState extends State<Localizations> {
   }
 
   TextDirection get _textDirection {
-    final WidgetsLocalizations resources = _typeToResources[WidgetsLocalizations] as WidgetsLocalizations;
+    final WidgetsLocalizations resources =
+        _typeToResources[WidgetsLocalizations] as WidgetsLocalizations;
     return resources.textDirection;
   }
 
@@ -593,10 +658,7 @@ class _LocalizationsState extends State<Localizations> {
         locale: _locale!,
         localizationsState: this,
         typeToResources: _typeToResources,
-        child: Directionality(
-          textDirection: _textDirection,
-          child: widget.child!,
-        ),
+        child: Directionality(textDirection: _textDirection, child: widget.child!),
       ),
     );
   }

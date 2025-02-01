@@ -24,15 +24,18 @@ class WindowsDevice extends DesktopDevice {
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : super(
-      'windows',
-      platformType: PlatformType.windows,
-      ephemeral: false,
-      processManager: processManager,
-      logger: logger,
-      fileSystem: fileSystem,
-      operatingSystemUtils: operatingSystemUtils,
-  );
+  }) : _operatingSystemUtils = operatingSystemUtils,
+       super(
+         'windows',
+         platformType: PlatformType.windows,
+         ephemeral: false,
+         processManager: processManager,
+         logger: logger,
+         fileSystem: fileSystem,
+         operatingSystemUtils: operatingSystemUtils,
+       );
+
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   bool isSupported() => true;
@@ -41,7 +44,12 @@ class WindowsDevice extends DesktopDevice {
   String get name => 'Windows';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.windows_x64;
+  Future<TargetPlatform> get targetPlatform async => _targetPlatform;
+
+  TargetPlatform get _targetPlatform => switch (_operatingSystemUtils.hostPlatform) {
+    HostPlatform.windows_arm64 => TargetPlatform.windows_arm64,
+    _ => TargetPlatform.windows_x64,
+  };
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -52,17 +60,19 @@ class WindowsDevice extends DesktopDevice {
   Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
+    bool usingCISystem = false,
   }) async {
     await buildWindows(
       FlutterProject.current().windows,
       buildInfo,
+      _targetPlatform,
       target: mainPath,
     );
   }
 
   @override
   String executablePathForDevice(covariant WindowsApp package, BuildInfo buildInfo) {
-    return package.executable(buildInfo.mode);
+    return package.executable(buildInfo.mode, _targetPlatform);
   }
 }
 
@@ -74,11 +84,11 @@ class WindowsDevices extends PollingDeviceDiscovery {
     required OperatingSystemUtils operatingSystemUtils,
     required WindowsWorkflow windowsWorkflow,
   }) : _fileSystem = fileSystem,
-      _logger = logger,
-      _processManager = processManager,
-      _operatingSystemUtils = operatingSystemUtils,
-      _windowsWorkflow = windowsWorkflow,
-      super('windows devices');
+       _logger = logger,
+       _processManager = processManager,
+       _operatingSystemUtils = operatingSystemUtils,
+       _windowsWorkflow = windowsWorkflow,
+       super('windows devices');
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -93,7 +103,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _windowsWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
     if (!canListAnything) {
       return const <Device>[];
     }

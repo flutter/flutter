@@ -4,8 +4,6 @@
 
 package com.yourcompany.platforminteraction;
 
-import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -13,7 +11,7 @@ import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.StringCodec;
 
 public class MainActivity extends FlutterActivity {
-  BasicMessageChannel channel;
+  BasicMessageChannel<String> channel;
 
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {

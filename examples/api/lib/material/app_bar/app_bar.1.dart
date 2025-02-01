@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AppBar].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [AppBar].
 
 final List<int> _items = List<int>.generate(51, (int index) => index);
 
@@ -16,10 +16,7 @@ class AppBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xff6750a4),
-        useMaterial3: true,
-      ),
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: const AppBarExample(),
     );
   }
@@ -92,13 +89,11 @@ class _AppBarExampleState extends State<AppBarExample> {
                     shadowColor = !shadowColor;
                   });
                 },
-                icon: Icon(
-                  shadowColor ? Icons.visibility_off : Icons.visibility,
-                ),
+                icon: Icon(shadowColor ? Icons.visibility_off : Icons.visibility),
                 label: const Text('shadow color'),
               ),
               const SizedBox(width: 5),
-              ElevatedButton.icon(
+              ElevatedButton(
                 onPressed: () {
                   if (scrolledUnderElevation == null) {
                     setState(() {
@@ -111,10 +106,7 @@ class _AppBarExampleState extends State<AppBarExample> {
                     });
                   }
                 },
-                icon: const Icon(Icons.add),
-                label: Text(
-                  'scrolledUnderElevation: ${scrolledUnderElevation ?? 'default'}',
-                ),
+                child: Text('scrolledUnderElevation: ${scrolledUnderElevation ?? 'default'}'),
               ),
             ],
           ),

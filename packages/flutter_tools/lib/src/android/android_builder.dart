@@ -13,6 +13,7 @@ AndroidBuilder? get androidBuilder {
 
 abstract class AndroidBuilder {
   const AndroidBuilder();
+
   /// Builds an AAR artifact.
   Future<void> buildAar({
     required FlutterProject project,
@@ -27,6 +28,7 @@ abstract class AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    bool configOnly = false,
   });
 
   /// Builds an App Bundle artifact.
@@ -36,5 +38,14 @@ abstract class AndroidBuilder {
     required String target,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
+    bool configOnly = false,
   });
+
+  /// Returns a list of available build variant from the Android project.
+  Future<List<String>> getBuildVariants({required FlutterProject project});
+
+  /// Outputs app link related project settings into a json file.
+  ///
+  /// The return future resolves to the path of the json file.
+  Future<String> outputsAppLinkSettings(String buildVariant, {required FlutterProject project});
 }

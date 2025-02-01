@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [RawAutocomplete].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [RawAutocomplete].
 
 void main() => runApp(const AutocompleteExampleApp());
 
@@ -15,12 +15,8 @@ class AutocompleteExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('RawAutocomplete Custom Type'),
-        ),
-        body: const Center(
-          child: AutocompleteCustomTypeExample(),
-        ),
+        appBar: AppBar(title: const Text('RawAutocomplete Custom Type')),
+        body: const Center(child: AutocompleteCustomTypeExample()),
       ),
     );
   }
@@ -29,10 +25,7 @@ class AutocompleteExampleApp extends StatelessWidget {
 // An example of a type that someone might want to autocomplete a list of.
 @immutable
 class User {
-  const User({
-    required this.email,
-    required this.name,
-  });
+  const User({required this.email, required this.name});
 
   final String email;
   final String name;
@@ -72,16 +65,16 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
         return _userOptions.where((User option) {
           // Search based on User.toString, which includes both name and
           // email, even though the display string is just the name.
-          return option
-              .toString()
-              .contains(textEditingValue.text.toLowerCase());
+          return option.toString().contains(textEditingValue.text.toLowerCase());
         });
       },
       displayStringForOption: _displayStringForOption,
-      fieldViewBuilder: (BuildContext context,
-          TextEditingController textEditingController,
-          FocusNode focusNode,
-          VoidCallback onFieldSubmitted) {
+      fieldViewBuilder: (
+        BuildContext context,
+        TextEditingController textEditingController,
+        FocusNode focusNode,
+        VoidCallback onFieldSubmitted,
+      ) {
         return TextFormField(
           controller: textEditingController,
           focusNode: focusNode,
@@ -90,8 +83,11 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
           },
         );
       },
-      optionsViewBuilder: (BuildContext context,
-          AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
+      optionsViewBuilder: (
+        BuildContext context,
+        AutocompleteOnSelected<User> onSelected,
+        Iterable<User> options,
+      ) {
         return Align(
           alignment: Alignment.topLeft,
           child: Material(
@@ -107,9 +103,7 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
                     onTap: () {
                       onSelected(option);
                     },
-                    child: ListTile(
-                      title: Text(_displayStringForOption(option)),
-                    ),
+                    child: ListTile(title: Text(_displayStringForOption(option))),
                   );
                 },
               ),

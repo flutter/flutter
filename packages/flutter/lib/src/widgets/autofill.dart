@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'editable_text.dart';
+/// @docImport 'form.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'package:flutter/services.dart';
 import 'framework.dart';
 
@@ -26,7 +31,7 @@ enum AutofillContextAction {
 /// An [AutofillScope] widget that groups [AutofillClient]s together.
 ///
 /// [AutofillClient]s that share the same closest [AutofillGroup] ancestor must
-/// be built together, and they be will be autofilled together.
+/// be built together, and they will be autofilled together.
 ///
 /// {@macro flutter.services.AutofillScope}
 ///
@@ -64,8 +69,6 @@ enum AutofillContextAction {
 ///   clean up actions to be run when a topmost [AutofillGroup] is disposed.
 class AutofillGroup extends StatefulWidget {
   /// Creates a scope for autofillable input fields.
-  ///
-  /// The [child] argument must not be null.
   const AutofillGroup({
     super.key,
     required this.child,
@@ -174,8 +177,9 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
 
   @override
   Iterable<AutofillClient> get autofillClients {
-    return _clients.values
-      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration.enabled);
+    return _clients.values.where(
+      (AutofillClient client) => client.textInputConfiguration.autofillConfiguration.enabled,
+    );
   }
 
   /// Adds the [AutofillClient] to this [AutofillGroup].
@@ -210,20 +214,20 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
     _clients.remove(autofillId);
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _isTopmostAutofillGroup = AutofillGroup.maybeOf(context) == null;
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
-    return _AutofillScope(
-      autofillScopeState: this,
-      child: widget.child,
-    );
+    return _AutofillScope(autofillScopeState: this, child: widget.child);
   }
 
+  @protected
   @override
   void dispose() {
     super.dispose();
@@ -234,19 +238,15 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
     switch (widget.onDisposeAction) {
       case AutofillContextAction.cancel:
         TextInput.finishAutofillContext(shouldSave: false);
-        break;
       case AutofillContextAction.commit:
         TextInput.finishAutofillContext();
-        break;
     }
   }
 }
 
 class _AutofillScope extends InheritedWidget {
-  const _AutofillScope({
-    required super.child,
-    AutofillGroupState? autofillScopeState,
-  }) : _scope = autofillScopeState;
+  const _AutofillScope({required super.child, AutofillGroupState? autofillScopeState})
+    : _scope = autofillScopeState;
 
   final AutofillGroupState? _scope;
 

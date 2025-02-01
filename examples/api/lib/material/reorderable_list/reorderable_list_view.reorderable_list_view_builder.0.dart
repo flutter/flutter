@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ReorderableListView.ReorderableListView.builder].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ReorderableListView.builder].
 
 void main() => runApp(const ReorderableApp());
 
@@ -16,9 +16,7 @@ class ReorderableApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ReorderableListView Sample')),
-        body: const Center(
-          child: ReorderableExample(),
-        ),
+        body: const Center(child: ReorderableExample()),
       ),
     );
   }

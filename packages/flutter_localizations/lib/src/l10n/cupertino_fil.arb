@@ -21,5 +21,11 @@
   "selectAllButtonLabel": "Piliin Lahat",
   "tabSemanticsLabel": "Tab $tabIndex ng $tabCount",
   "modalBarrierDismissLabel": "I-dismiss",
-  "searchTextFieldPlaceholderLabel": "Hanapin"
+  "searchTextFieldPlaceholderLabel": "Hanapin",
+  "noSpellCheckReplacementsLabel": "Walang Nahanap na Kapalit",
+  "menuDismissLabel": "I-dismiss ang menu",
+  "lookUpButtonLabel": "Tumingin sa Itaas",
+  "searchWebButtonLabel": "Maghanap sa Web",
+  "shareButtonLabel": "Ibahagi...",
+  "clearButtonLabel": "I-clear"
 }

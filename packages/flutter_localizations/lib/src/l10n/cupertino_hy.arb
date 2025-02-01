@@ -21,5 +21,11 @@
   "selectAllButtonLabel": "Նշել բոլորը",
   "tabSemanticsLabel": "Ներդիր $tabIndex՝ $tabCount-ից",
   "modalBarrierDismissLabel": "Փակել",
-  "searchTextFieldPlaceholderLabel": "Որոնում"
+  "searchTextFieldPlaceholderLabel": "Որոնում",
+  "noSpellCheckReplacementsLabel": "Փոխարինումներ չեն գտնվել",
+  "menuDismissLabel": "Փակել ընտրացանկը",
+  "lookUpButtonLabel": "Փնտրել",
+  "searchWebButtonLabel": "Որոնել համացանցում",
+  "shareButtonLabel": "Կիսվել...",
+  "clearButtonLabel": "Մաքրել"
 }

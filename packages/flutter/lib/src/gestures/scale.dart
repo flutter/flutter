@@ -26,7 +26,7 @@ const double kDefaultMouseScrollToScaleFactor = 200;
 /// This factor matches the default [kDefaultMouseScrollToScaleFactor] of 200 to
 /// feel natural for most trackpads, and the convention that scrolling up means
 /// zooming in.
-const Offset kDefaultTrackpadScrollToScaleFactor = Offset(0, -1/kDefaultMouseScrollToScaleFactor);
+const Offset kDefaultTrackpadScrollToScaleFactor = Offset(0, -1 / kDefaultMouseScrollToScaleFactor);
 
 /// The possible states of a [ScaleGestureRecognizer].
 enum _ScaleState {
@@ -48,18 +48,14 @@ enum _ScaleState {
 }
 
 class _PointerPanZoomData {
-  _PointerPanZoomData.fromStartEvent(
-    this.parent,
-    PointerPanZoomStartEvent event
-  ) : _position = event.position,
+  _PointerPanZoomData.fromStartEvent(this.parent, PointerPanZoomStartEvent event)
+    : _position = event.position,
       _pan = Offset.zero,
       _scale = 1,
       _rotation = 0;
 
-  _PointerPanZoomData.fromUpdateEvent(
-    this.parent,
-    PointerPanZoomUpdateEvent event
-  ) : _position = event.position,
+  _PointerPanZoomData.fromUpdateEvent(this.parent, PointerPanZoomUpdateEvent event)
+    : _position = event.position,
       _pan = event.pan,
       _scale = event.scale,
       _rotation = event.rotation;
@@ -79,10 +75,11 @@ class _PointerPanZoomData {
 
   double get scale {
     if (parent.trackpadScrollCausesScale) {
-      return _scale * math.exp(
-        (_pan.dx * parent.trackpadScrollToScaleFactor.dx) +
-        (_pan.dy * parent.trackpadScrollToScaleFactor.dy)
-      );
+      return _scale *
+          math.exp(
+            (_pan.dx * parent.trackpadScrollToScaleFactor.dx) +
+                (_pan.dy * parent.trackpadScrollToScaleFactor.dy),
+          );
     }
     return _scale;
   }
@@ -90,18 +87,18 @@ class _PointerPanZoomData {
   double get rotation => _rotation;
 
   @override
-  String toString() => '_PointerPanZoomData(parent: $parent, _position: $_position, _pan: $_pan, _scale: $_scale, _rotation: $_rotation)';
+  String toString() =>
+      '_PointerPanZoomData(parent: $parent, _position: $_position, _pan: $_pan, _scale: $_scale, _rotation: $_rotation)';
 }
 
 /// Details for [GestureScaleStartCallback].
 class ScaleStartDetails {
   /// Creates details for [GestureScaleStartCallback].
-  ///
-  /// The [focalPoint] argument must not be null.
   ScaleStartDetails({
     this.focalPoint = Offset.zero,
     Offset? localFocalPoint,
     this.pointerCount = 0,
+    this.sourceTimeStamp,
   }) : localFocalPoint = localFocalPoint ?? focalPoint;
 
   /// The initial focal point of the pointers in contact with the screen.
@@ -131,17 +128,23 @@ class ScaleStartDetails {
   /// recognizer.
   final int pointerCount;
 
+  /// Recorded timestamp of the source pointer event that triggered the scale
+  /// event.
+  ///
+  /// Could be null if triggered from proxied events such as accessibility.
+  final Duration? sourceTimeStamp;
+
   @override
-  String toString() => 'ScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, pointersCount: $pointerCount)';
+  String toString() =>
+      'ScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, pointersCount: $pointerCount)';
 }
 
 /// Details for [GestureScaleUpdateCallback].
 class ScaleUpdateDetails {
   /// Creates details for [GestureScaleUpdateCallback].
   ///
-  /// The [focalPoint], [scale], [horizontalScale], [verticalScale], [rotation]
-  /// arguments must not be null. The [scale], [horizontalScale], and [verticalScale]
-  /// argument must be greater than or equal to zero.
+  /// The [scale], [horizontalScale], and [verticalScale] arguments must be
+  /// greater than or equal to zero.
   ScaleUpdateDetails({
     this.focalPoint = Offset.zero,
     Offset? localFocalPoint,
@@ -151,6 +154,7 @@ class ScaleUpdateDetails {
     this.rotation = 0.0,
     this.pointerCount = 0,
     this.focalPointDelta = Offset.zero,
+    this.sourceTimeStamp,
   }) : assert(scale >= 0.0),
        assert(horizontalScale >= 0.0),
        assert(verticalScale >= 0.0),
@@ -225,27 +229,34 @@ class ScaleUpdateDetails {
   /// The number of pointers being tracked by the gesture recognizer.
   ///
   /// Typically this is the number of fingers being used to pan the widget using the gesture
-  /// recognizer.
+  /// recognizer. Due to platform limitations, trackpad gestures count as two fingers
+  /// even if more than two fingers are used.
   final int pointerCount;
 
+  /// Recorded timestamp of the source pointer event that triggered the scale
+  /// event.
+  ///
+  /// Could be null if triggered from proxied events such as accessibility.
+  final Duration? sourceTimeStamp;
+
   @override
-  String toString() => 'ScaleUpdateDetails('
-    'focalPoint: $focalPoint,'
-    ' localFocalPoint: $localFocalPoint,'
-    ' scale: $scale,'
-    ' horizontalScale: $horizontalScale,'
-    ' verticalScale: $verticalScale,'
-    ' rotation: $rotation,'
-    ' pointerCount: $pointerCount,'
-    ' focalPointDelta: $focalPointDelta)';
+  String toString() =>
+      'ScaleUpdateDetails('
+      'focalPoint: $focalPoint,'
+      ' localFocalPoint: $localFocalPoint,'
+      ' scale: $scale,'
+      ' horizontalScale: $horizontalScale,'
+      ' verticalScale: $verticalScale,'
+      ' rotation: $rotation,'
+      ' pointerCount: $pointerCount,'
+      ' focalPointDelta: $focalPointDelta,'
+      ' sourceTimeStamp: $sourceTimeStamp)';
 }
 
 /// Details for [GestureScaleEndCallback].
 class ScaleEndDetails {
   /// Creates details for [GestureScaleEndCallback].
-  ///
-  /// The [velocity] argument must not be null.
-  ScaleEndDetails({ this.velocity = Velocity.zero, this.scaleVelocity = 0, this.pointerCount = 0 });
+  ScaleEndDetails({this.velocity = Velocity.zero, this.scaleVelocity = 0, this.pointerCount = 0});
 
   /// The velocity of the last pointer to be lifted off of the screen.
   final Velocity velocity;
@@ -260,7 +271,8 @@ class ScaleEndDetails {
   final int pointerCount;
 
   @override
-  String toString() => 'ScaleEndDetails(velocity: $velocity, scaleVelocity: $scaleVelocity, pointerCount: $pointerCount)';
+  String toString() =>
+      'ScaleEndDetails(velocity: $velocity, scaleVelocity: $scaleVelocity, pointerCount: $pointerCount)';
 }
 
 /// Signature for when the pointers in contact with the screen have established
@@ -279,13 +291,11 @@ bool _isFlingGesture(Velocity velocity) {
   return speedSquared > kMinFlingVelocity * kMinFlingVelocity;
 }
 
-
 /// Defines a line between two pointers on screen.
 ///
 /// [_LineBetweenPointers] is an abstraction of a line between two pointers in
 /// contact with the screen. Used to track the rotation of a scale gesture.
 class _LineBetweenPointers {
-
   /// Creates a [_LineBetweenPointers]. None of the [pointerStartLocation], [pointerStartId]
   /// [pointerEndLocation] and [pointerEndId] must be null. [pointerStartId] and [pointerEndId]
   /// should be different.
@@ -303,9 +313,7 @@ class _LineBetweenPointers {
   // The location and the id of the pointer that marks the end of the line.
   final Offset pointerEndLocation;
   final int pointerEndId;
-
 }
-
 
 /// Recognizes a scale gesture.
 ///
@@ -346,7 +354,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  /// * https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation,
+  /// * https://flutter.dev/to/gesture-disambiguation,
   ///   which provides more information about the gesture arena.
   DragStartBehavior dragStartBehavior;
 
@@ -358,7 +366,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  /// * https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation,
+  /// * https://flutter.dev/to/gesture-disambiguation,
   ///   which provides more information about the gesture arena.
   GestureScaleStartCallback? onStart;
 
@@ -393,6 +401,17 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// {@endtemplate}
   Offset trackpadScrollToScaleFactor;
 
+  /// The number of pointers being tracked by the gesture recognizer.
+  ///
+  /// Typically this is the number of fingers being used to pan the widget using the gesture
+  /// recognizer.
+  int get pointerCount {
+    // PointerPanZoom protocol doesn't contain the exact number of pointers
+    // used on the trackpad, as it isn't exposed by all platforms. However, it
+    // will always be at least two.
+    return (2 * _pointerPanZooms.length) + _pointerQueue.length;
+  }
+
   late Offset _initialFocalPoint;
   Offset? _currentFocalPoint;
   late double _initialSpan;
@@ -412,12 +431,15 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   final Map<int, _PointerPanZoomData> _pointerPanZooms = <int, _PointerPanZoomData>{};
   double _initialPanZoomScaleFactor = 1;
   double _initialPanZoomRotationFactor = 0;
+  Duration? _initialEventTimestamp;
 
   double get _pointerScaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
-  double get _pointerHorizontalScaleFactor => _initialHorizontalSpan > 0.0 ? _currentHorizontalSpan / _initialHorizontalSpan : 1.0;
+  double get _pointerHorizontalScaleFactor =>
+      _initialHorizontalSpan > 0.0 ? _currentHorizontalSpan / _initialHorizontalSpan : 1.0;
 
-  double get _pointerVerticalScaleFactor => _initialVerticalSpan > 0.0 ? _currentVerticalSpan / _initialVerticalSpan : 1.0;
+  double get _pointerVerticalScaleFactor =>
+      _initialVerticalSpan > 0.0 ? _currentVerticalSpan / _initialVerticalSpan : 1.0;
 
   double get _scaleFactor {
     double scale = _pointerScaleFactor;
@@ -441,10 +463,6 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       scale *= p.scale / _initialPanZoomScaleFactor;
     }
     return scale;
-  }
-
-  int get _pointerCount {
-    return _pointerPanZooms.length + _pointerQueue.length;
   }
 
   double _computeRotationFactor() {
@@ -476,6 +494,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
     _velocityTrackers[event.pointer] = VelocityTracker.withKind(event.kind);
+    _initialEventTimestamp = event.timeStamp;
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
       _initialSpan = 0.0;
@@ -495,6 +514,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     super.addAllowedPointerPanZoom(event);
     startTrackingPointer(event.pointer, event.transform);
     _velocityTrackers[event.pointer] = VelocityTracker.withKind(event.kind);
+    _initialEventTimestamp = event.timeStamp;
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
       _initialPanZoomScaleFactor = 1.0;
@@ -566,20 +586,15 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     for (final _PointerPanZoomData p in _pointerPanZooms.values) {
       focalPoint += p.focalPoint;
     }
-    _currentFocalPoint = _pointerCount > 0 ? focalPoint / _pointerCount.toDouble() : Offset.zero;
+    _currentFocalPoint =
+        focalPoint / math.max(1, _pointerLocations.length + _pointerPanZooms.length).toDouble();
 
     if (previousFocalPoint == null) {
-      _localFocalPoint = PointerEvent.transformPosition(
-        _lastTransform,
-        _currentFocalPoint!,
-      );
+      _localFocalPoint = PointerEvent.transformPosition(_lastTransform, _currentFocalPoint!);
       _delta = Offset.zero;
     } else {
       final Offset localPreviousFocalPoint = _localFocalPoint;
-      _localFocalPoint = PointerEvent.transformPosition(
-        _lastTransform,
-        _currentFocalPoint!,
-      );
+      _localFocalPoint = PointerEvent.transformPosition(_lastTransform, _currentFocalPoint!);
       _delta = _localFocalPoint - localPreviousFocalPoint;
     }
 
@@ -614,12 +629,13 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void _updateLines() {
     final int count = _pointerLocations.keys.length;
     assert(_pointerQueue.length >= count);
+
     /// In case of just one pointer registered, reconfigure [_initialLine]
     if (count < 2) {
       _initialLine = _currentLine;
     } else if (_initialLine != null &&
-      _initialLine!.pointerStartId == _pointerQueue[0] &&
-      _initialLine!.pointerEndId == _pointerQueue[1]) {
+        _initialLine!.pointerStartId == _pointerQueue[0] &&
+        _initialLine!.pointerEndId == _pointerQueue[1]) {
       /// Rotation updated, set the [_currentLine]
       _currentLine = _LineBetweenPointers(
         pointerStartId: _pointerQueue[0],
@@ -650,7 +666,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialPanZoomRotationFactor = 0.0;
     } else {
       _initialPanZoomScaleFactor = _scaleFactor / _pointerScaleFactor;
-      _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
+      _initialPanZoomRotationFactor = _pointerPanZooms.values
+          .map((_PointerPanZoomData x) => x.rotation)
+          .reduce((double a, double b) => a + b);
     }
     if (_state == _ScaleState.started) {
       if (onEnd != null) {
@@ -660,18 +678,41 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         if (_isFlingGesture(velocity)) {
           final Offset pixelsPerSecond = velocity.pixelsPerSecond;
           if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity) {
-            velocity = Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
+            velocity = Velocity(
+              pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity,
+            );
           }
-          invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(velocity: velocity, scaleVelocity: _scaleVelocityTracker?.getVelocity().pixelsPerSecond.dx ?? -1, pointerCount: _pointerCount)));
+          invokeCallback<void>(
+            'onEnd',
+            () => onEnd!(
+              ScaleEndDetails(
+                velocity: velocity,
+                scaleVelocity: _scaleVelocityTracker?.getVelocity().pixelsPerSecond.dx ?? -1,
+                pointerCount: pointerCount,
+              ),
+            ),
+          );
         } else {
-          invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(scaleVelocity: _scaleVelocityTracker?.getVelocity().pixelsPerSecond.dx ?? -1, pointerCount: _pointerCount)));
+          invokeCallback<void>(
+            'onEnd',
+            () => onEnd!(
+              ScaleEndDetails(
+                scaleVelocity: _scaleVelocityTracker?.getVelocity().pixelsPerSecond.dx ?? -1,
+                pointerCount: pointerCount,
+              ),
+            ),
+          );
         }
       }
       _state = _ScaleState.accepted;
-      _scaleVelocityTracker = VelocityTracker.withKind(PointerDeviceKind.touch); // arbitrary PointerDeviceKind
+      _scaleVelocityTracker = VelocityTracker.withKind(
+        PointerDeviceKind.touch,
+      ); // arbitrary PointerDeviceKind
       return false;
     }
-    _scaleVelocityTracker = VelocityTracker.withKind(PointerDeviceKind.touch); // arbitrary PointerDeviceKind
+    _scaleVelocityTracker = VelocityTracker.withKind(
+      PointerDeviceKind.touch,
+    ); // arbitrary PointerDeviceKind
     return true;
   }
 
@@ -683,7 +724,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state == _ScaleState.possible) {
       final double spanDelta = (_currentSpan - _initialSpan).abs();
       final double focalPointDelta = (_currentFocalPoint! - _initialFocalPoint).distance;
-      if (spanDelta > computeScaleSlop(event.kind) || focalPointDelta > computePanSlop(event.kind, gestureSettings) || math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05) {
+      if (spanDelta > computeScaleSlop(event.kind) ||
+          focalPointDelta > computePanSlop(event.kind, gestureSettings) ||
+          math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05) {
         resolve(GestureDisposition.accepted);
       }
     } else if (_state.index >= _ScaleState.accepted.index) {
@@ -691,6 +734,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     if (_state == _ScaleState.accepted && shouldStartIfAccepted) {
+      _initialEventTimestamp = event.timeStamp;
       _state = _ScaleState.started;
       _dispatchOnStartCallbackIfNeeded();
     }
@@ -699,16 +743,19 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _scaleVelocityTracker?.addPosition(event.timeStamp, Offset(_scaleFactor, 0));
       if (onUpdate != null) {
         invokeCallback<void>('onUpdate', () {
-          onUpdate!(ScaleUpdateDetails(
-            scale: _scaleFactor,
-            horizontalScale: _horizontalScaleFactor,
-            verticalScale: _verticalScaleFactor,
-            focalPoint: _currentFocalPoint!,
-            localFocalPoint: _localFocalPoint,
-            rotation: _computeRotationFactor(),
-            pointerCount: _pointerCount,
-            focalPointDelta: _delta,
-          ));
+          onUpdate!(
+            ScaleUpdateDetails(
+              scale: _scaleFactor,
+              horizontalScale: _horizontalScaleFactor,
+              verticalScale: _verticalScaleFactor,
+              focalPoint: _currentFocalPoint!,
+              localFocalPoint: _localFocalPoint,
+              rotation: _computeRotationFactor(),
+              pointerCount: pointerCount,
+              focalPointDelta: _delta,
+              sourceTimeStamp: event.timeStamp,
+            ),
+          );
         });
       }
     }
@@ -718,13 +765,17 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(_state == _ScaleState.started);
     if (onStart != null) {
       invokeCallback<void>('onStart', () {
-        onStart!(ScaleStartDetails(
-          focalPoint: _currentFocalPoint!,
-          localFocalPoint: _localFocalPoint,
-          pointerCount: _pointerCount,
-        ));
+        onStart!(
+          ScaleStartDetails(
+            focalPoint: _currentFocalPoint!,
+            localFocalPoint: _localFocalPoint,
+            pointerCount: pointerCount,
+            sourceTimeStamp: _initialEventTimestamp,
+          ),
+        );
       });
     }
+    _initialEventTimestamp = null;
   }
 
   @override
@@ -743,7 +794,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           _initialPanZoomRotationFactor = 0.0;
         } else {
           _initialPanZoomScaleFactor = _scaleFactor / _pointerScaleFactor;
-          _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
+          _initialPanZoomRotationFactor = _pointerPanZooms.values
+              .map((_PointerPanZoomData x) => x.rotation)
+              .reduce((double a, double b) => a + b);
         }
       }
     }
@@ -762,15 +815,12 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     switch (_state) {
       case _ScaleState.possible:
         resolve(GestureDisposition.rejected);
-        break;
       case _ScaleState.ready:
         assert(false); // We should have not seen a pointer yet
-        break;
       case _ScaleState.accepted:
         break;
       case _ScaleState.started:
         assert(false); // We should be in the accepted state when user is done
-        break;
     }
     _state = _ScaleState.ready;
   }

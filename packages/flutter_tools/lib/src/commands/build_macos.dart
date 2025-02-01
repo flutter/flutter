@@ -9,23 +9,21 @@ import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../macos/build_macos.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
-  BuildMacosCommand({
-    required super.logger,
-    required bool verboseHelp,
-  }) : super(verboseHelp: verboseHelp) {
+  BuildMacosCommand({required super.logger, required bool verboseHelp})
+    : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();
-    argParser
-      .addFlag('config-only',
-        help: 'Update the project configuration without performing a build. '
+    argParser.addFlag(
+      'config-only',
+      help:
+          'Update the project configuration without performing a build. '
           'This can be used in CI/CD process that create an archive to avoid '
-          'performing duplicate work.'
+          'performing duplicate work.',
     );
   }
 
@@ -46,21 +44,22 @@ class BuildMacosCommand extends BuildSubCommand {
   @override
   bool get supported => globals.platform.isMacOS;
 
-  bool get configOnly => boolArgDeprecated('config-only');
+  bool get configOnly => boolArg('config-only');
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final FlutterProject flutterProject = FlutterProject.current();
     if (!featureFlags.isMacOSEnabled) {
-      throwToolExit('"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".');
+      throwToolExit(
+        '"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".',
+      );
     }
     if (!supported) {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
     displayNullSafetyMode(buildInfo);
     await buildMacOS(
-      flutterProject: flutterProject,
+      flutterProject: project,
       buildInfo: buildInfo,
       targetOverride: targetFile,
       verboseLogging: globals.logger.isVerbose,
@@ -69,8 +68,9 @@ class BuildMacosCommand extends BuildSubCommand {
         fileSystem: globals.fs,
         logger: globals.logger,
         appFilenamePattern: 'App',
-        flutterUsage: globals.flutterUsage,
+        analytics: analytics,
       ),
+      usingCISystem: usingCISystem,
     );
     return FlutterCommandResult.success();
   }

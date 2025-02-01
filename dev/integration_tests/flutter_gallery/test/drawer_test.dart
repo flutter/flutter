@@ -55,10 +55,14 @@ void main() {
     // Switch back to system theme setting: first menu button, choose 'System Default'
     await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<ThemeMode>'),
-        matching: find.text('System Default')
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byWidgetPredicate(
+          (Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<ThemeMode>',
+        ),
+        matching: find.text('System Default'),
+      ),
+    );
     await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.themeMode, ThemeMode.system);
@@ -76,10 +80,15 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(2));
     await tester.pumpAndSettle();
-    await tester.tap(find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<GalleryVisualDensityValue>'),
-        matching: find.text('System Default')
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byWidgetPredicate(
+          (Widget widget) =>
+              widget.runtimeType.toString() == 'PopupMenuItem<GalleryVisualDensityValue>',
+        ),
+        matching: find.text('System Default'),
+      ),
+    );
     await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.theme!.visualDensity, equals(VisualDensity.standard));
@@ -105,15 +114,20 @@ void main() {
     await tester.tap(find.text('Small'));
     await tester.pumpAndSettle();
     Size textSize = tester.getSize(find.text('Text size'));
-    expect(textSize, equals(const Size(116.0, 13.0)));
+    expect(textSize, equals(within(distance: 0.05, from: const Size(115.2, 13.0))));
 
     // Set font scale back to the default.
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(1));
     await tester.pumpAndSettle();
-    await tester.tap(find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<GalleryTextScaleValue>'),
-        matching: find.text('System Default')
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byWidgetPredicate(
+          (Widget widget) =>
+              widget.runtimeType.toString() == 'PopupMenuItem<GalleryTextScaleValue>',
+        ),
+        matching: find.text('System Default'),
+      ),
+    );
     await tester.pumpAndSettle();
     textSize = tester.getSize(find.text('Text size'));
     expect(textSize, origTextSize);

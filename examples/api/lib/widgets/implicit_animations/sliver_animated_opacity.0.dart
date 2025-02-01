@@ -2,70 +2,71 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SliverAnimatedOpacity].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SliverAnimatedOpacity].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SliverAnimatedOpacityExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class SliverAnimatedOpacityExampleApp extends StatelessWidget {
+  const SliverAnimatedOpacityExampleApp({super.key});
+
+  static const Duration duration = Duration(milliseconds: 500);
+  static const Curve curve = Curves.easeInOut;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const Center(
-          child: MyStatefulWidget(),
-        ),
+        appBar: AppBar(title: const Text('SliverAnimatedOpacity Sample')),
+        body: const Center(child: SliverAnimatedOpacityExample(duration: duration, curve: curve)),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SliverAnimatedOpacityExample extends StatefulWidget {
+  const SliverAnimatedOpacityExample({required this.duration, required this.curve, super.key});
+
+  final Duration duration;
+
+  final Curve curve;
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SliverAnimatedOpacityExample> createState() => _SliverAnimatedOpacityExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExample>
     with SingleTickerProviderStateMixin {
   bool _visible = true;
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(slivers: <Widget>[
-      SliverAnimatedOpacity(
-        opacity: _visible ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 500),
-        sliver: SliverFixedExtentList(
-          itemExtent: 100.0,
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
-              return Container(
-                color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
-              );
-            },
-            childCount: 5,
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverAnimatedOpacity(
+          opacity: _visible ? 1.0 : 0.0,
+          duration: widget.duration,
+          curve: widget.curve,
+          sliver: SliverFixedExtentList(
+            itemExtent: 100.0,
+            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(color: index.isEven ? Colors.indigo[200] : Colors.orange[200]);
+            }, childCount: 5),
           ),
         ),
-      ),
-      SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _visible = !_visible;
-          });
-        },
-        tooltip: 'Toggle opacity',
-        child: const Icon(Icons.flip),
-      )),
-    ]);
+            onPressed: () {
+              setState(() {
+                _visible = !_visible;
+              });
+            },
+            tooltip: 'Toggle opacity',
+            child: const Icon(Icons.flip),
+          ),
+        ),
+      ],
+    );
   }
 }

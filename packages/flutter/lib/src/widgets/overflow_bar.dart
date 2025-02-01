@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'single_child_scroll_view.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -54,11 +57,6 @@ enum OverflowBarAlignment {
 /// {@end-tool}
 class OverflowBar extends MultiChildRenderObjectWidget {
   /// Constructs an OverflowBar.
-  ///
-  /// The [spacing], [overflowSpacing], [overflowAlignment],
-  /// [overflowDirection], and [clipBehavior] parameters must not be
-  /// null. The [children] argument must not be null and must not contain
-  /// any null objects.
   const OverflowBar({
     super.key,
     this.spacing = 0.0,
@@ -67,7 +65,6 @@ class OverflowBar extends MultiChildRenderObjectWidget {
     this.overflowAlignment = OverflowBarAlignment.start,
     this.overflowDirection = VerticalDirection.down,
     this.textDirection,
-    this.clipBehavior = Clip.none,
     super.children,
   });
 
@@ -197,11 +194,6 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   ///    text and text-direction-sensitive render objects.
   final TextDirection? textDirection;
 
-  /// {@macro flutter.material.Material.clipBehavior}
-  ///
-  /// Defaults to [Clip.none], and must not be null.
-  final Clip clipBehavior;
-
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderOverflowBar(
@@ -211,7 +203,6 @@ class OverflowBar extends MultiChildRenderObjectWidget {
       overflowAlignment: overflowAlignment,
       overflowDirection: overflowDirection,
       textDirection: textDirection ?? Directionality.of(context),
-      clipBehavior: clipBehavior,
     );
   }
 
@@ -223,8 +214,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
       ..overflowSpacing = overflowSpacing
       ..overflowAlignment = overflowAlignment
       ..overflowDirection = overflowDirection
-      ..textDirection = textDirection ?? Directionality.of(context)
-      ..clipBehavior = clipBehavior;
+      ..textDirection = textDirection ?? Directionality.of(context);
   }
 
   @override
@@ -233,17 +223,30 @@ class OverflowBar extends MultiChildRenderObjectWidget {
     properties.add(DoubleProperty('spacing', spacing, defaultValue: 0));
     properties.add(EnumProperty<MainAxisAlignment>('alignment', alignment, defaultValue: null));
     properties.add(DoubleProperty('overflowSpacing', overflowSpacing, defaultValue: 0));
-    properties.add(EnumProperty<OverflowBarAlignment>('overflowAlignment', overflowAlignment, defaultValue: OverflowBarAlignment.start));
-    properties.add(EnumProperty<VerticalDirection>('overflowDirection', overflowDirection, defaultValue: VerticalDirection.down));
+    properties.add(
+      EnumProperty<OverflowBarAlignment>(
+        'overflowAlignment',
+        overflowAlignment,
+        defaultValue: OverflowBarAlignment.start,
+      ),
+    );
+    properties.add(
+      EnumProperty<VerticalDirection>(
+        'overflowDirection',
+        overflowDirection,
+        defaultValue: VerticalDirection.down,
+      ),
+    );
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
-class _OverflowBarParentData extends ContainerBoxParentData<RenderBox> { }
+class _OverflowBarParentData extends ContainerBoxParentData<RenderBox> {}
 
 class _RenderOverflowBar extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, _OverflowBarParentData>,
-         RenderBoxContainerDefaultsMixin<RenderBox, _OverflowBarParentData> {
+    with
+        ContainerRenderObjectMixin<RenderBox, _OverflowBarParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _OverflowBarParentData> {
   _RenderOverflowBar({
     List<RenderBox>? children,
     double spacing = 0.0,
@@ -252,20 +255,18 @@ class _RenderOverflowBar extends RenderBox
     OverflowBarAlignment overflowAlignment = OverflowBarAlignment.start,
     VerticalDirection overflowDirection = VerticalDirection.down,
     required TextDirection textDirection,
-    Clip clipBehavior = Clip.none,
   }) : _spacing = spacing,
        _alignment = alignment,
        _overflowSpacing = overflowSpacing,
        _overflowAlignment = overflowAlignment,
        _overflowDirection = overflowDirection,
-       _textDirection = textDirection,
-       _clipBehavior = clipBehavior {
+       _textDirection = textDirection {
     addAll(children);
   }
 
   double get spacing => _spacing;
   double _spacing;
-  set spacing (double value) {
+  set spacing(double value) {
     if (_spacing == value) {
       return;
     }
@@ -275,7 +276,7 @@ class _RenderOverflowBar extends RenderBox
 
   MainAxisAlignment? get alignment => _alignment;
   MainAxisAlignment? _alignment;
-  set alignment (MainAxisAlignment? value) {
+  set alignment(MainAxisAlignment? value) {
     if (_alignment == value) {
       return;
     }
@@ -285,7 +286,7 @@ class _RenderOverflowBar extends RenderBox
 
   double get overflowSpacing => _overflowSpacing;
   double _overflowSpacing;
-  set overflowSpacing (double value) {
+  set overflowSpacing(double value) {
     if (_overflowSpacing == value) {
       return;
     }
@@ -295,7 +296,7 @@ class _RenderOverflowBar extends RenderBox
 
   OverflowBarAlignment get overflowAlignment => _overflowAlignment;
   OverflowBarAlignment _overflowAlignment;
-  set overflowAlignment (OverflowBarAlignment value) {
+  set overflowAlignment(OverflowBarAlignment value) {
     if (_overflowAlignment == value) {
       return;
     }
@@ -305,7 +306,7 @@ class _RenderOverflowBar extends RenderBox
 
   VerticalDirection get overflowDirection => _overflowDirection;
   VerticalDirection _overflowDirection;
-  set overflowDirection (VerticalDirection value) {
+  set overflowDirection(VerticalDirection value) {
     if (_overflowDirection == value) {
       return;
     }
@@ -321,17 +322,6 @@ class _RenderOverflowBar extends RenderBox
     }
     _textDirection = value;
     markNeedsLayout();
-  }
-
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
-  set clipBehavior(Clip value) {
-    if (value == _clipBehavior) {
-      return;
-    }
-    _clipBehavior = value;
-    markNeedsPaint();
-    markNeedsSemanticsUpdate();
   }
 
   @override
@@ -437,6 +427,51 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final BoxConstraints childConstraints = constraints.loosen();
+
+    final (
+      RenderBox? Function(RenderBox) next,
+      RenderBox? startChild,
+    ) = switch (overflowDirection) {
+      VerticalDirection.down => (childAfter, firstChild),
+      VerticalDirection.up => (childBefore, lastChild),
+    };
+
+    double maxChildHeight = 0.0;
+    double y = 0.0;
+    double childrenWidth = 0.0;
+    BaselineOffset minHorizontalBaseline = BaselineOffset.noBaseline;
+    BaselineOffset verticalBaseline = BaselineOffset.noBaseline;
+
+    for (RenderBox? child = startChild; child != null; child = next(child)) {
+      final Size childSize = child.getDryLayout(childConstraints);
+      final double heightDiff = childSize.height - maxChildHeight;
+      if (heightDiff > 0) {
+        minHorizontalBaseline += heightDiff / 2;
+        maxChildHeight = childSize.height;
+      }
+
+      final BaselineOffset baselineOffset = BaselineOffset(
+        child.getDryBaseline(childConstraints, baseline),
+      );
+      if (baselineOffset != null) {
+        verticalBaseline ??= baselineOffset + y;
+        minHorizontalBaseline = minHorizontalBaseline.minOf(
+          baselineOffset + (maxChildHeight - childSize.height),
+        );
+      }
+      y += childSize.height + overflowSpacing;
+      childrenWidth += childSize.width;
+    }
+
+    assert((verticalBaseline == null) == (minHorizontalBaseline == null));
+    return childrenWidth + spacing * (childCount - 1) > constraints.maxWidth
+        ? verticalBaseline.offset
+        : minHorizontalBaseline.offset;
+  }
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     RenderBox? child = firstChild;
     if (child == null) {
@@ -489,22 +524,16 @@ class _RenderOverflowBar extends RenderBox
     if (actualWidth > constraints.maxWidth) {
       // Overflow vertical layout
       child = overflowDirection == VerticalDirection.down ? firstChild : lastChild;
-      RenderBox? nextChild() => overflowDirection == VerticalDirection.down ? childAfter(child!) : childBefore(child!);
+      RenderBox? nextChild() =>
+          overflowDirection == VerticalDirection.down ? childAfter(child!) : childBefore(child!);
       double y = 0;
       while (child != null) {
         final _OverflowBarParentData childParentData = child.parentData! as _OverflowBarParentData;
-        double x = 0;
-        switch (overflowAlignment) {
-          case OverflowBarAlignment.start:
-            x = rtl ? constraints.maxWidth - child.size.width : 0;
-            break;
-          case OverflowBarAlignment.center:
-            x = (constraints.maxWidth - child.size.width) / 2;
-            break;
-          case OverflowBarAlignment.end:
-            x = rtl ? 0 : constraints.maxWidth - child.size.width;
-            break;
-        }
+        final double x = switch (overflowAlignment) {
+          OverflowBarAlignment.center => (constraints.maxWidth - child.size.width) / 2,
+          OverflowBarAlignment.start => rtl ? constraints.maxWidth - child.size.width : 0,
+          OverflowBarAlignment.end => rtl ? 0 : constraints.maxWidth - child.size.width,
+        };
         childParentData.offset = Offset(x, y);
         y += child.size.height + overflowSpacing;
         child = nextChild();
@@ -522,29 +551,22 @@ class _RenderOverflowBar extends RenderBox
       switch (alignment) {
         case null:
           x = rtl ? size.width - firstChildWidth : 0;
-          break;
         case MainAxisAlignment.start:
           x = rtl ? size.width - firstChildWidth : 0;
-          break;
         case MainAxisAlignment.center:
           final double halfRemainingWidth = (size.width - actualWidth) / 2;
           x = rtl ? size.width - halfRemainingWidth - firstChildWidth : halfRemainingWidth;
-          break;
         case MainAxisAlignment.end:
           x = rtl ? actualWidth - firstChildWidth : size.width - actualWidth;
-          break;
         case MainAxisAlignment.spaceBetween:
           layoutSpacing = (size.width - childrenWidth) / (childCount - 1);
           x = rtl ? size.width - firstChildWidth : 0;
-          break;
         case MainAxisAlignment.spaceAround:
           layoutSpacing = childCount > 0 ? (size.width - childrenWidth) / childCount : 0;
           x = rtl ? size.width - layoutSpacing / 2 - firstChildWidth : layoutSpacing / 2;
-          break;
         case MainAxisAlignment.spaceEvenly:
           layoutSpacing = (size.width - childrenWidth) / (childCount + 1);
           x = rtl ? size.width - layoutSpacing - firstChildWidth : layoutSpacing;
-          break;
       }
 
       while (child != null) {
@@ -566,7 +588,7 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -580,8 +602,20 @@ class _RenderOverflowBar extends RenderBox
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('spacing', spacing, defaultValue: 0));
     properties.add(DoubleProperty('overflowSpacing', overflowSpacing, defaultValue: 0));
-    properties.add(EnumProperty<OverflowBarAlignment>('overflowAlignment', overflowAlignment, defaultValue: OverflowBarAlignment.start));
-    properties.add(EnumProperty<VerticalDirection>('overflowDirection', overflowDirection, defaultValue: VerticalDirection.down));
+    properties.add(
+      EnumProperty<OverflowBarAlignment>(
+        'overflowAlignment',
+        overflowAlignment,
+        defaultValue: OverflowBarAlignment.start,
+      ),
+    );
+    properties.add(
+      EnumProperty<VerticalDirection>(
+        'overflowDirection',
+        overflowDirection,
+        defaultValue: VerticalDirection.down,
+      ),
+    );
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }

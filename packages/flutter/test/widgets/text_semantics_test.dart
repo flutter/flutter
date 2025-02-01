@@ -13,31 +13,34 @@ void main() {
   testWidgets('SemanticsNode ids are stable', (WidgetTester tester) async {
     // Regression test for b/151732341.
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(Directionality(
-    textDirection: TextDirection.ltr,
-      child: Text.rich(
-        TextSpan(
-          text: 'Hallo ',
-          recognizer: TapGestureRecognizer()..onTap = () {},
-          children: <TextSpan>[
-            TextSpan(
-              text: 'Welt ',
-              recognizer: TapGestureRecognizer()..onTap = () {},
-            ),
-            TextSpan(
-              text: '!!!',
-              recognizer: TapGestureRecognizer()..onTap = () {},
-            ),
-          ],
+    final TapGestureRecognizer recognizer1 = TapGestureRecognizer();
+    addTearDown(recognizer1.dispose);
+    final TapGestureRecognizer recognizer2 = TapGestureRecognizer();
+    addTearDown(recognizer2.dispose);
+    final TapGestureRecognizer recognizer3 = TapGestureRecognizer();
+    addTearDown(recognizer3.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            text: 'Hallo ',
+            recognizer: recognizer1..onTap = () {},
+            children: <TextSpan>[
+              TextSpan(text: 'Welt ', recognizer: recognizer2..onTap = () {}),
+              TextSpan(text: '!!!', recognizer: recognizer3..onTap = () {}),
+            ],
+          ),
         ),
       ),
-    ));
+    );
     expect(find.text('Hallo Welt !!!'), findsOneWidget);
     final SemanticsNode node = tester.getSemantics(find.text('Hallo Welt !!!'));
     final Map<String, int> labelToNodeId = <String, int>{};
     node.visitChildren((SemanticsNode node) {
       labelToNodeId[node.label] = node.id;
-       return true;
+      return true;
     });
     expect(node.id, 1);
     expect(labelToNodeId['Hallo '], 2);
@@ -63,22 +66,24 @@ void main() {
     expect(labelToNodeIdAfterRebuild['!!!'], labelToNodeId['!!!']);
     expect(labelToNodeIdAfterRebuild.length, 3);
 
+    final TapGestureRecognizer recognizer4 = TapGestureRecognizer();
+    addTearDown(recognizer4.dispose);
+    final TapGestureRecognizer recognizer5 = TapGestureRecognizer();
+    addTearDown(recognizer5.dispose);
+
     // Remove one node.
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Text.rich(
-        TextSpan(
-          text: 'Hallo ',
-          recognizer: TapGestureRecognizer()..onTap = () {},
-          children: <TextSpan>[
-            TextSpan(
-              text: 'Welt ',
-              recognizer: TapGestureRecognizer()..onTap = () {},
-            ),
-          ],
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            text: 'Hallo ',
+            recognizer: recognizer4..onTap = () {},
+            children: <TextSpan>[TextSpan(text: 'Welt ', recognizer: recognizer5..onTap = () {})],
+          ),
         ),
       ),
-    ));
+    );
 
     final SemanticsNode nodeAfterRemoval = tester.getSemantics(find.text('Hallo Welt '));
     final Map<String, int> labelToNodeIdAfterRemoval = <String, int>{};
@@ -93,25 +98,28 @@ void main() {
     expect(labelToNodeIdAfterRemoval['Welt '], labelToNodeId['Welt ']);
     expect(labelToNodeIdAfterRemoval.length, 2);
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Text.rich(
-        TextSpan(
-          text: 'Hallo ',
-          recognizer: TapGestureRecognizer()..onTap = () {},
-          children: <TextSpan>[
-            TextSpan(
-              text: 'Welt ',
-              recognizer: TapGestureRecognizer()..onTap = () {},
-            ),
-            TextSpan(
-              text: '!!!',
-              recognizer: TapGestureRecognizer()..onTap = () {},
-            ),
-          ],
+    final TapGestureRecognizer recognizer6 = TapGestureRecognizer();
+    addTearDown(recognizer6.dispose);
+    final TapGestureRecognizer recognizer7 = TapGestureRecognizer();
+    addTearDown(recognizer7.dispose);
+    final TapGestureRecognizer recognizer8 = TapGestureRecognizer();
+    addTearDown(recognizer8.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            text: 'Hallo ',
+            recognizer: recognizer6..onTap = () {},
+            children: <TextSpan>[
+              TextSpan(text: 'Welt ', recognizer: recognizer7..onTap = () {}),
+              TextSpan(text: '!!!', recognizer: recognizer8..onTap = () {}),
+            ],
+          ),
         ),
       ),
-    ));
+    );
     expect(find.text('Hallo Welt !!!'), findsOneWidget);
     final SemanticsNode nodeAfterAddition = tester.getSemantics(find.text('Hallo Welt !!!'));
     final Map<String, int> labelToNodeIdAfterAddition = <String, int>{};

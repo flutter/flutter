@@ -2,23 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [PreferredSize].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [PreferredSize].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const PreferredSizeExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class PreferredSizeExampleApp extends StatelessWidget {
+  const PreferredSizeExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
-    );
+    return const MaterialApp(home: PreferredSizeExample());
   }
 }
 
@@ -34,24 +29,15 @@ class AppBarContent extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             children: <Widget>[
-              const Text(
-                'PreferredSize Sample',
-                style: TextStyle(color: Colors.white),
-              ),
+              const Text('PreferredSize Sample', style: TextStyle(color: Colors.white)),
               const Spacer(),
               IconButton(
-                icon: const Icon(
-                  Icons.search,
-                  size: 20,
-                ),
+                icon: const Icon(Icons.search, size: 20),
                 color: Colors.white,
                 onPressed: () {},
               ),
               IconButton(
-                icon: const Icon(
-                  Icons.more_vert,
-                  size: 20,
-                ),
+                icon: const Icon(Icons.more_vert, size: 20),
                 color: Colors.white,
                 onPressed: () {},
               ),
@@ -63,8 +49,8 @@ class AppBarContent extends StatelessWidget {
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class PreferredSizeExample extends StatelessWidget {
+  const PreferredSizeExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -73,16 +59,12 @@ class MyStatelessWidget extends StatelessWidget {
         preferredSize: const Size.fromHeight(80.0),
         child: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: <Color>[Colors.blue, Colors.pink],
-            ),
+            gradient: LinearGradient(colors: <Color>[Colors.blue, Colors.pink]),
           ),
           child: const AppBarContent(),
         ),
       ),
-      body: const Center(
-        child: Text('Content'),
-      ),
+      body: const Center(child: Text('Content')),
     );
   }
 }

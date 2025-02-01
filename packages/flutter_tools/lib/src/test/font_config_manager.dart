@@ -13,7 +13,7 @@ class FontConfigManager {
 
   /// Returns a Font configuration that limits font fallback to the artifact
   /// cache directory.
-  late final File fontConfigFile = (){
+  late final File fontConfigFile = () {
     final StringBuffer sb = StringBuffer();
     sb.writeln('<fontconfig>');
     sb.writeln('  <dir>${globals.cache.getCacheArtifacts().path}</dir>');
@@ -34,7 +34,11 @@ class FontConfigManager {
   Future<void> dispose() async {
     if (_fontsDirectory != null) {
       globals.printTrace('Deleting ${_fontsDirectory!.path}...');
-      await _fontsDirectory!.delete(recursive: true);
+      try {
+        await _fontsDirectory!.delete(recursive: true);
+      } on FileSystemException {
+        // Silently exit
+      }
       _fontsDirectory = null;
     }
   }

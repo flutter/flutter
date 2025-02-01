@@ -14,9 +14,9 @@ import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
-import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionAsset = 'asset-dir';
@@ -32,29 +32,29 @@ const List<String> _kRequiredOptions = <String>[
 ];
 
 Future<void> main(List<String> args) {
-  return runInContext<void>(() => run(args), overrides: <Type, Generator>{
-    Usage: () => DisabledUsage(),
-  });
+  return runInContext<void>(
+    () => run(args),
+    overrides: <Type, Generator>{Analytics: () => const NoOpAnalytics()},
+  );
 }
 
-Future<void> writeFile(libfs.File outputFile, DevFSContent content) async {
+Future<void> writeAssetFile(libfs.File outputFile, AssetBundleEntry asset) async {
   outputFile.createSync(recursive: true);
-  final List<int> data = await content.contentsAsBytes();
+  final List<int> data = await asset.contentsAsBytes();
   outputFile.writeAsBytesSync(data);
 }
 
 Future<void> run(List<String> args) async {
-  final ArgParser parser = ArgParser()
-    ..addOption(_kOptionPackages, help: 'The .packages file')
-    ..addOption(_kOptionAsset,
-        help: 'The directory where to put temporary files')
-    ..addOption(_kOptionManifest, help: 'The manifest file')
-    ..addOption(_kOptionAssetManifestOut)
-    ..addOption(_kOptionComponentName)
-    ..addOption(_kOptionDepfile);
+  final ArgParser parser =
+      ArgParser()
+        ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config file')
+        ..addOption(_kOptionAsset, help: 'The directory where to put temporary files')
+        ..addOption(_kOptionManifest, help: 'The manifest file')
+        ..addOption(_kOptionAssetManifestOut)
+        ..addOption(_kOptionComponentName)
+        ..addOption(_kOptionDepfile);
   final ArgResults argResults = parser.parse(args);
-  if (_kRequiredOptions
-      .any((String option) => !argResults.options.contains(option))) {
+  if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
     globals.printError('Missing option! All options must be specified.');
     exit(1);
   }
@@ -64,8 +64,10 @@ Future<void> run(List<String> args) async {
   final AssetBundle? assets = await buildAssets(
     manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,
     assetDirPath: assetDir,
-    packagesPath: argResults[_kOptionPackages] as String?,
-    targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
+    packageConfigPath:
+        argResults[_kOptionPackages] as String? ??
+        findPackageConfigFileOrDefault(globals.fs.currentDirectory).path,
+    targetPlatform: TargetPlatform.fuchsia_arm64, // This is not arch specific.
   );
 
   if (assets == null) {
@@ -73,14 +75,19 @@ Future<void> run(List<String> args) async {
   }
 
   final List<Future<void>> calls = <Future<void>>[];
-  assets.entries.forEach((String fileName, DevFSContent content) {
+  assets.entries.forEach((String fileName, AssetBundleEntry entry) {
     final libfs.File outputFile = globals.fs.file(globals.fs.path.join(assetDir, fileName));
-    calls.add(writeFile(outputFile, content));
+    calls.add(writeAssetFile(outputFile, entry));
   });
   await Future.wait<void>(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut] as String;
-  await writeFuchsiaManifest(assets, argResults[_kOptionAsset] as String, outputMan, argResults[_kOptionComponentName] as String);
+  await writeFuchsiaManifest(
+    assets,
+    argResults[_kOptionAsset] as String,
+    outputMan,
+    argResults[_kOptionComponentName] as String,
+  );
 
   final String? depfilePath = argResults[_kOptionDepfile] as String?;
   if (depfilePath != null) {
@@ -89,10 +96,9 @@ Future<void> run(List<String> args) async {
 }
 
 Future<void> writeDepfile(AssetBundle assets, String outputManifest, String depfilePath) async {
-  final Depfile depfileContent = Depfile(
-    assets.inputFiles,
-    <libfs.File>[globals.fs.file(outputManifest)],
-  );
+  final Depfile depfileContent = Depfile(assets.inputFiles, <libfs.File>[
+    globals.fs.file(outputManifest),
+  ]);
   final DepfileService depfileService = DepfileService(
     fileSystem: globals.fs,
     logger: globals.logger,
@@ -103,8 +109,12 @@ Future<void> writeDepfile(AssetBundle assets, String outputManifest, String depf
   depfileService.writeToFile(depfileContent, depfile);
 }
 
-Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {
-
+Future<void> writeFuchsiaManifest(
+  AssetBundle assets,
+  String outputBase,
+  String fileDest,
+  String componentName,
+) async {
   final libfs.File destFile = globals.fs.file(fileDest);
   await destFile.create(recursive: true);
   final libfs.IOSink outFile = destFile.openWrite();

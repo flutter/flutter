@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CircularProgressIndicator].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const ProgressIndicatorApp());
+/// Flutter code sample for [CircularProgressIndicator].
 
-class ProgressIndicatorApp extends StatelessWidget {
-  const ProgressIndicatorApp({super.key});
+void main() => runApp(const ProgressIndicatorExampleApp());
+
+class ProgressIndicatorExampleApp extends StatelessWidget {
+  const ProgressIndicatorExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: ProgressIndicatorExample(),
-    );
+    return const MaterialApp(home: ProgressIndicatorExample());
   }
 }
 
@@ -29,19 +27,17 @@ class ProgressIndicatorExample extends StatefulWidget {
 class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
     with TickerProviderStateMixin {
   late AnimationController controller;
+  bool year2023 = true;
 
   @override
   void initState() {
-    controller = AnimationController(
-      /// [AnimationController]s can be created with `vsync: this` because of
-      /// [TickerProviderStateMixin].
-      vsync: this,
-      duration: const Duration(seconds: 5),
-    )..addListener(() {
-        setState(() {});
-      });
-    controller.repeat(reverse: true);
     super.initState();
+    controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 5))
+          ..addListener(() {
+            setState(() {});
+          })
+          ..repeat(reverse: true);
   }
 
   @override
@@ -53,18 +49,32 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
+      body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          spacing: 16.0,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'Circular progress indicator with a fixed color',
-              style: Theme.of(context).textTheme.titleLarge,
+            const Text('Determinate CircularProgressIndicator'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: CircularProgressIndicator(year2023: year2023, value: controller.value),
             ),
-            CircularProgressIndicator(
-              value: controller.value,
-              semanticsLabel: 'Circular progress indicator',
+            const Text('Indeterminate CircularProgressIndicator'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: CircularProgressIndicator(year2023: year2023),
+            ),
+            SwitchListTile(
+              value: year2023,
+              title:
+                  year2023
+                      ? const Text('Switch to latest M3 style')
+                      : const Text('Switch to year2023 M3 style'),
+              onChanged: (bool value) {
+                setState(() {
+                  year2023 = !year2023;
+                });
+              },
             ),
           ],
         ),

@@ -5,13 +5,10 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 RenderBox sizedBox(double width, double height) {
-  return RenderConstrainedBox(
-    additionalConstraints: BoxConstraints.tight(Size(width, height)),
-  );
+  return RenderConstrainedBox(additionalConstraints: BoxConstraints.tight(Size(width, height)));
 }
 
 void main() {
@@ -64,14 +61,19 @@ void main() {
 
   test('Table test: combinations', () {
     RenderTable table;
-    layout(RenderPositionedBox(child: table = RenderTable(
-      columns: 5,
-      rows: 5,
-      defaultColumnWidth: const IntrinsicColumnWidth(),
-      textDirection: TextDirection.ltr,
-      defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-    )));
+    layout(
+      RenderPositionedBox(
+        child:
+            table = RenderTable(
+              columns: 5,
+              rows: 5,
+              defaultColumnWidth: const IntrinsicColumnWidth(),
+              textDirection: TextDirection.ltr,
+              defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+            ),
+      ),
+    );
 
     expect(table.size, equals(Size.zero));
 
@@ -158,11 +160,7 @@ void main() {
   test('Table test: removing cells', () {
     RenderTable table;
     RenderBox child;
-    table = RenderTable(
-      columns: 5,
-      rows: 5,
-      textDirection: TextDirection.ltr,
-    );
+    table = RenderTable(columns: 5, rows: 5, textDirection: TextDirection.ltr);
     table.setChild(4, 4, child = sizedBox(10.0, 10.0));
 
     layout(table);
@@ -179,19 +177,31 @@ void main() {
     final RenderBox child3 = RenderPositionedBox();
     table = RenderTable(textDirection: TextDirection.ltr);
     table.setFlatChildren(3, <RenderBox>[
-      child1, RenderPositionedBox(), child2,
-      RenderPositionedBox(), child3, RenderPositionedBox(),
+      child1,
+      RenderPositionedBox(),
+      child2,
+      RenderPositionedBox(),
+      child3,
+      RenderPositionedBox(),
     ]);
     expect(table.rows, equals(2));
     layout(table);
     table.setFlatChildren(3, <RenderBox>[
-      RenderPositionedBox(), child1, RenderPositionedBox(),
-      child2, RenderPositionedBox(), child3,
+      RenderPositionedBox(),
+      child1,
+      RenderPositionedBox(),
+      child2,
+      RenderPositionedBox(),
+      child3,
     ]);
     pumpFrame();
     table.setFlatChildren(3, <RenderBox>[
-      RenderPositionedBox(), child1, RenderPositionedBox(),
-      child2, RenderPositionedBox(), child3,
+      RenderPositionedBox(),
+      child1,
+      RenderPositionedBox(),
+      child2,
+      RenderPositionedBox(),
+      child3,
     ]);
     pumpFrame();
     expect(table.columns, equals(3));
@@ -204,35 +214,88 @@ void main() {
       border: TableBorder.all(),
     );
     layout(table);
-    table.setFlatChildren(1, <RenderBox>[ ]);
+    table.setFlatChildren(1, <RenderBox>[]);
     pumpFrame();
-    expect(table, paints..path()..path()..path()..path());
-    table.setFlatChildren(1, <RenderBox>[ RenderPositionedBox() ]);
+    expect(
+      table,
+      paints
+        ..path()
+        ..path()
+        ..path()
+        ..path(),
+    );
+    table.setFlatChildren(1, <RenderBox>[RenderPositionedBox()]);
     pumpFrame();
-    expect(table, paints..path()..path()..path()..path());
-    table.setFlatChildren(1, <RenderBox>[ RenderPositionedBox(), RenderPositionedBox() ]);
+    expect(
+      table,
+      paints
+        ..path()
+        ..path()
+        ..path()
+        ..path(),
+    );
+    table.setFlatChildren(1, <RenderBox>[RenderPositionedBox(), RenderPositionedBox()]);
     pumpFrame();
-    expect(table, paints..path()..path()..path()..path()..path());
-    table.setFlatChildren(2, <RenderBox>[ RenderPositionedBox(), RenderPositionedBox() ]);
+    expect(
+      table,
+      paints
+        ..path()
+        ..path()
+        ..path()
+        ..path()
+        ..path(),
+    );
+    table.setFlatChildren(2, <RenderBox>[RenderPositionedBox(), RenderPositionedBox()]);
     pumpFrame();
-    expect(table, paints..path()..path()..path()..path()..path());
+    expect(
+      table,
+      paints
+        ..path()
+        ..path()
+        ..path()
+        ..path()
+        ..path(),
+    );
     table.setFlatChildren(2, <RenderBox>[
-      RenderPositionedBox(), RenderPositionedBox(),
-      RenderPositionedBox(), RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
     ]);
     pumpFrame();
-    expect(table, paints..path()..path()..path()..path()..path()..path());
+    expect(
+      table,
+      paints
+        ..path()
+        ..path()
+        ..path()
+        ..path()
+        ..path()
+        ..path(),
+    );
     table.setFlatChildren(3, <RenderBox>[
-      RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox(),
-      RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
     ]);
     pumpFrame();
-    expect(table, paints..path()..path()..path()..path()..path()..path());
+    expect(
+      table,
+      paints
+        ..path()
+        ..path()
+        ..path()
+        ..path()
+        ..path()
+        ..path(),
+    );
   });
 
   test('Table flex sizing', () {
-    const BoxConstraints cellConstraints =
-        BoxConstraints.tightFor(width: 100, height: 100);
+    const BoxConstraints cellConstraints = BoxConstraints.tightFor(width: 100, height: 100);
     final RenderTable table = RenderTable(
       textDirection: TextDirection.rtl,
       children: <List<RenderBox>>[
@@ -263,18 +326,81 @@ void main() {
     );
     layout(table);
     table.setFlatChildren(2, <RenderBox>[
-      RenderPositionedBox(), RenderPositionedBox(),
-      RenderPositionedBox(), RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
+      RenderPositionedBox(),
     ]);
     pumpFrame();
-    expect(table, paints
-      ..path()
-      ..path()
-      ..drrect(
-        outer: RRect.fromLTRBR(0.0, 0.0, 800.0, 0.0, const Radius.circular(8.0)),
-        inner: RRect.fromLTRBR(1.0, 1.0, 799.0, -1.0, const Radius.circular(7.0)),
-      )
+    expect(
+      table,
+      paints
+        ..path()
+        ..path()
+        ..drrect(
+          outer: RRect.fromLTRBR(0.0, 0.0, 800.0, 0.0, const Radius.circular(8.0)),
+          inner: RRect.fromLTRBR(1.0, 1.0, 799.0, -1.0, const Radius.circular(7.0)),
+        ),
     );
   });
 
+  test('MaxColumnWidth.flex returns the correct result', () {
+    MaxColumnWidth columnWidth = const MaxColumnWidth(
+      FixedColumnWidth(100), // returns null from .flex
+      FlexColumnWidth(), // returns 1 from .flex
+    );
+    final double? flexValue = columnWidth.flex(<RenderBox>[]);
+    expect(flexValue, 1.0);
+
+    // Swap a and b, check for same result.
+    columnWidth = const MaxColumnWidth(
+      FlexColumnWidth(), // returns 1 from .flex
+      FixedColumnWidth(100), // returns null from .flex
+    );
+    // Same result.
+    expect(columnWidth.flex(<RenderBox>[]), flexValue);
+  });
+
+  test('MinColumnWidth.flex returns the correct result', () {
+    MinColumnWidth columnWidth = const MinColumnWidth(
+      FixedColumnWidth(100), // returns null from .flex
+      FlexColumnWidth(), // returns 1 from .flex
+    );
+    final double? flexValue = columnWidth.flex(<RenderBox>[]);
+    expect(flexValue, 1.0);
+
+    // Swap a and b, check for same result.
+    columnWidth = const MinColumnWidth(
+      FlexColumnWidth(), // returns 1 from .flex
+      FixedColumnWidth(100), // returns null from .flex
+    );
+    // Same result.
+    expect(columnWidth.flex(<RenderBox>[]), flexValue);
+  });
+
+  test('TableRows with different constraints, but vertically with intrinsicHeight', () {
+    const BoxConstraints firstConstraints = BoxConstraints.tightFor(width: 100, height: 100);
+    const BoxConstraints secondConstraints = BoxConstraints.tightFor(width: 200, height: 200);
+
+    final RenderTable table = RenderTable(
+      textDirection: TextDirection.rtl,
+      defaultVerticalAlignment: TableCellVerticalAlignment.intrinsicHeight,
+      children: <List<RenderBox>>[
+        <RenderBox>[
+          RenderConstrainedBox(additionalConstraints: firstConstraints),
+          RenderConstrainedBox(additionalConstraints: secondConstraints),
+        ],
+      ],
+      columnWidths: const <int, TableColumnWidth>{0: FlexColumnWidth(), 1: FlexColumnWidth()},
+    );
+
+    const Size size = Size(300.0, 300.0);
+
+    // Layout the table with a fixed size.
+    layout(table, constraints: BoxConstraints.tight(size));
+
+    // Make sure the table has a size and that the children are filled vertically to the highest cell.
+    expect(table.size, equals(size));
+    expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.intrinsicHeight);
+  });
 }

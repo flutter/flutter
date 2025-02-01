@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # For details regarding the *Flutter Fix* feature, see
-# https://flutter.dev/docs/development/tools/flutter-fix
+# https://flutter.dev/to/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -15,7 +15,7 @@
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
-# * Fixes in this file are [for CLASS] from the <XXX> library. *
+# * Fixes in this file are from the Gestures library. *
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/28602

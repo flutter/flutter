@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ElevatedButton].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ElevatedButton].
 
 void main() {
   runApp(const ButtonApp());
@@ -18,9 +18,7 @@ class ButtonApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       title: 'Button Types',
-      home: const Scaffold(
-        body: ButtonTypesExample(),
-      ),
+      home: const Scaffold(body: ButtonTypesExample()),
     );
   }
 }
@@ -45,7 +43,7 @@ class ButtonTypesExample extends StatelessWidget {
 }
 
 class ButtonTypesGroup extends StatelessWidget {
-  const ButtonTypesGroup({ super.key, required this.enabled });
+  const ButtonTypesGroup({super.key, required this.enabled});
 
   final bool enabled;
 

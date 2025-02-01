@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ListTile].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ListTile].
 
 void main() => runApp(const ListTileApp());
 
@@ -15,24 +15,22 @@ class ListTileApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        listTileTheme: const ListTileThemeData(
-          textColor: Colors.white,
-        ),
+        listTileTheme: const ListTileThemeData(textColor: Colors.white),
         useMaterial3: true,
       ),
-      home: const LisTileExample(),
+      home: const ListTileExample(),
     );
   }
 }
 
-class LisTileExample extends StatefulWidget {
-  const LisTileExample({super.key});
+class ListTileExample extends StatefulWidget {
+  const ListTileExample({super.key});
 
   @override
-  State<LisTileExample> createState() => _LisTileExampleState();
+  State<ListTileExample> createState() => _ListTileExampleState();
 }
 
-class _LisTileExampleState extends State<LisTileExample> with TickerProviderStateMixin {
+class _ListTileExampleState extends State<ListTileExample> with TickerProviderStateMixin {
   late final AnimationController _fadeController;
   late final AnimationController _sizeController;
   late final Animation<double> _fadeAnimation;
@@ -41,25 +39,15 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-    _fadeController = AnimationController(
-      duration: const Duration(seconds: 1),
-      vsync: this,
-    )..repeat(reverse: true);
+    _fadeController = AnimationController(duration: const Duration(seconds: 1), vsync: this)
+      ..repeat(reverse: true);
 
-    _sizeController = AnimationController(
-      duration: const Duration(milliseconds: 850),
-      vsync: this,
-    )..repeat(reverse: true);
+    _sizeController = AnimationController(duration: const Duration(milliseconds: 850), vsync: this)
+      ..repeat(reverse: true);
 
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    );
+    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut);
 
-    _sizeAnimation = CurvedAnimation(
-      parent: _sizeController,
-      curve: Curves.easeOut,
-    );
+    _sizeAnimation = CurvedAnimation(parent: _sizeController, curve: Curves.easeOut);
   }
 
   @override
@@ -86,27 +74,30 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
                 subtitle: const Text('Tap here for Hero transition'),
                 tileColor: Colors.cyan,
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute<Widget>(
-                    builder: (BuildContext context) {
-                      return Scaffold(
-                        appBar: AppBar(title: const Text('ListTile Hero')),
-                        body: Center(
-                          child: Hero(
-                            tag: 'ListTile-Hero',
-                            child: Material(
-                              child: ListTile(
-                                title: const Text('ListTile with Hero'),
-                                subtitle: const Text('Tap here to go back'),
-                                tileColor: Colors.blue[700],
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<Widget>(
+                      builder: (BuildContext context) {
+                        return Scaffold(
+                          appBar: AppBar(title: const Text('ListTile Hero')),
+                          body: Center(
+                            child: Hero(
+                              tag: 'ListTile-Hero',
+                              child: Material(
+                                child: ListTile(
+                                  title: const Text('ListTile with Hero'),
+                                  subtitle: const Text('Tap here to go back'),
+                                  tileColor: Colors.blue[700],
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      },
+                    ),
                   );
                 },
               ),

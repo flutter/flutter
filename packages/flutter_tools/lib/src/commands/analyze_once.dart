@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -14,7 +13,6 @@ import 'analyze_base.dart';
 class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
     super.argResults,
-    List<String> repoRoots,
     List<Directory> repoPackages, {
     required super.fileSystem,
     required super.logger,
@@ -22,26 +20,23 @@ class AnalyzeOnce extends AnalyzeBase {
     required super.processManager,
     required super.terminal,
     required super.artifacts,
+    required super.suppressAnalytics,
     this.workingDirectory,
-  }) : super(
-        repoRoots: repoRoots,
-        repoPackages: repoPackages,
-      );
+  }) : super(repoPackages: repoPackages);
 
   /// The working directory for testing analysis using dartanalyzer.
   final Directory? workingDirectory;
 
   @override
   Future<void> analyze() async {
-    final String currentDirectory =
-        (workingDirectory ?? fileSystem.currentDirectory).path;
+    final String currentDirectory = (workingDirectory ?? fileSystem.currentDirectory).path;
     final Set<String> items = findDirectories(argResults, fileSystem);
 
     if (isFlutterRepo) {
       // check for conflicting dependencies
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
-      items.addAll(repoRoots);
+      items.add(flutterRoot);
       if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
         items.add(currentDirectory);
       }
@@ -67,6 +62,7 @@ class AnalyzeOnce extends AnalyzeBase {
       processManager: processManager,
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
+      suppressAnalytics: suppressAnalytics,
     );
 
     Stopwatch? timer;
@@ -82,7 +78,9 @@ class AnalyzeOnce extends AnalyzeBase {
         }
       }
 
-      subscription = server.onAnalyzing.listen((bool isAnalyzing) => handleAnalysisStatus(isAnalyzing));
+      subscription = server.onAnalyzing.listen(
+        (bool isAnalyzing) => handleAnalysisStatus(isAnalyzing),
+      );
 
       void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
         fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
@@ -94,27 +92,27 @@ class AnalyzeOnce extends AnalyzeBase {
 
       await server.start();
       // Completing the future in the callback can't fail.
-      unawaited(server.onExit.then<void>((int? exitCode) {
-        if (!analysisCompleter.isCompleted) {
-          analysisCompleter.completeError(
-            // Include the last 20 lines of server output in exception message
-            Exception(
-              'analysis server exited with code $exitCode and output:\n${server.getLogs(20)}',
-            ),
-          );
-        }
-      }));
+      unawaited(
+        server.onExit.then<void>((int? exitCode) {
+          if (!analysisCompleter.isCompleted) {
+            analysisCompleter.completeError(
+              // Include the last 20 lines of server output in exception message
+              Exception(
+                'analysis server exited with code $exitCode and output:\n${server.getLogs(20)}',
+              ),
+            );
+          }
+        }),
+      );
 
       // collect results
       timer = Stopwatch()..start();
-      final String message = items.length > 1
-          ? '${items.length} ${items.length == 1 ? 'item' : 'items'}'
-          : fileSystem.path.basename(items.first);
-      progress = argResults['preamble'] == true
-          ? logger.startProgress(
-            'Analyzing $message...',
-          )
-          : null;
+      final String message =
+          items.length > 1
+              ? '${items.length} ${items.length == 1 ? 'item' : 'items'}'
+              : fileSystem.path.basename(items.first);
+      progress =
+          argResults['preamble'] == true ? logger.startProgress('Analyzing $message...') : null;
 
       await analysisCompleter.future;
     } finally {

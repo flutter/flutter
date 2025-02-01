@@ -12,14 +12,15 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   SemanticsUpdateTestBinding();
 
-  testWidgets('Semantics update does not send update for merged nodes.', (WidgetTester tester) async {
+  testWidgets('Semantics update does not send update for merged nodes.', (
+    WidgetTester tester,
+  ) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
       const Placeholder(),
       // Stops right after the warm up frame.
-      null,
-      EnginePhase.build,
+      phase: EnginePhase.build,
     );
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
@@ -34,11 +35,7 @@ void main() {
             label: 'outer',
             // This semantics node should not be part of the semantics update
             // because it is under another semantics container.
-            child: Semantics(
-              label: 'inner',
-              container: true,
-              child: const Text('text'),
-            ),
+            child: Semantics(label: 'inner', container: true, child: const Text('text')),
           ),
         ),
       ),
@@ -66,11 +63,7 @@ void main() {
             label: 'outer',
             // This semantics node should not be part of the semantics update
             // because it is under another semantics container.
-            child: Semantics(
-              label: 'inner-updated',
-              container: true,
-              child: const Text('text'),
-            ),
+            child: Semantics(label: 'inner-updated', container: true, child: const Text('text')),
           ),
         ),
       ),
@@ -83,7 +76,7 @@ void main() {
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/97894
 
   testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
@@ -91,8 +84,7 @@ void main() {
     await tester.pumpWidget(
       const Placeholder(),
       // Stops right after the warm up frame.
-      null,
-      EnginePhase.build,
+      phase: EnginePhase.build,
     );
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
@@ -112,7 +104,10 @@ void main() {
           attributedValue: AttributedString(
             'value',
             attributes: <StringAttribute>[
-              LocaleStringAttribute(range: const TextRange(start: 0, end: 5), locale: const Locale('en', 'MX')),
+              LocaleStringAttribute(
+                range: const TextRange(start: 0, end: 5),
+                locale: const Locale('en', 'MX'),
+              ),
             ],
           ),
           attributedHint: AttributedString(
@@ -136,36 +131,51 @@ void main() {
     expect(SemanticsUpdateBuilderSpy.observations[1]!.childrenInTraversalOrder.length, 0);
     expect(SemanticsUpdateBuilderSpy.observations[1]!.label, 'label');
     expect(SemanticsUpdateBuilderSpy.observations[1]!.labelAttributes!.length, 1);
-    expect(SemanticsUpdateBuilderSpy.observations[1]!.labelAttributes![0] is SpellOutStringAttribute, isTrue);
-    expect(SemanticsUpdateBuilderSpy.observations[1]!.labelAttributes![0].range, const TextRange(start: 0, end: 5));
+    expect(
+      SemanticsUpdateBuilderSpy.observations[1]!.labelAttributes![0] is SpellOutStringAttribute,
+      isTrue,
+    );
+    expect(
+      SemanticsUpdateBuilderSpy.observations[1]!.labelAttributes![0].range,
+      const TextRange(start: 0, end: 5),
+    );
 
     expect(SemanticsUpdateBuilderSpy.observations[1]!.value, 'value');
     expect(SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes!.length, 1);
-    expect(SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes![0] is LocaleStringAttribute, isTrue);
-    final LocaleStringAttribute localeAttribute = SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes![0] as LocaleStringAttribute;
+    expect(
+      SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes![0] is LocaleStringAttribute,
+      isTrue,
+    );
+    final LocaleStringAttribute localeAttribute =
+        SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes![0] as LocaleStringAttribute;
     expect(localeAttribute.range, const TextRange(start: 0, end: 5));
     expect(localeAttribute.locale, const Locale('en', 'MX'));
 
     expect(SemanticsUpdateBuilderSpy.observations[1]!.hint, 'hint');
     expect(SemanticsUpdateBuilderSpy.observations[1]!.hintAttributes!.length, 1);
-    expect(SemanticsUpdateBuilderSpy.observations[1]!.hintAttributes![0] is SpellOutStringAttribute, isTrue);
-    expect(SemanticsUpdateBuilderSpy.observations[1]!.hintAttributes![0].range, const TextRange(start: 1, end: 2));
+    expect(
+      SemanticsUpdateBuilderSpy.observations[1]!.hintAttributes![0] is SpellOutStringAttribute,
+      isTrue,
+    );
+    expect(
+      SemanticsUpdateBuilderSpy.observations[1]!.hintAttributes![0].range,
+      const TextRange(start: 1, end: 2),
+    );
 
     expect(
       tester.widget(find.byType(Semantics)).toString(),
       'Semantics('
-        'container: false, '
-        'properties: SemanticsProperties, '
-        'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
-        'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
-        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))], '
-        'tooltip: null'// ignore: missing_whitespace_between_adjacent_strings
+      'container: false, '
+      'properties: SemanticsProperties, '
+      'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
+      'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
+      'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))]' // ignore: missing_whitespace_between_adjacent_strings
       ')',
     );
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/97894
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
@@ -175,8 +185,11 @@ class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
   }
 }
 
-class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
-  static Map<int, SemanticsNodeUpdateObservation> observations = <int, SemanticsNodeUpdateObservation>{};
+class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilder {
+  final SemanticsUpdateBuilder _builder = ui.SemanticsUpdateBuilder();
+
+  static Map<int, SemanticsNodeUpdateObservation> observations =
+      <int, SemanticsNodeUpdateObservation>{};
 
   @override
   void updateNode({
@@ -196,6 +209,7 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     required double elevation,
     required double thickness,
     required Rect rect,
+    required String identifier,
     required String label,
     List<StringAttribute>? labelAttributes,
     required String value,
@@ -212,109 +226,47 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
+    int headingLevel = 0,
+    String? linkUrl,
+    ui.SemanticsRole role = ui.SemanticsRole.none,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
     observations[id] = SemanticsNodeUpdateObservation(
-      id: id,
-      flags: flags,
-      actions: actions,
-      maxValueLength: maxValueLength,
-      currentValueLength: currentValueLength,
-      textSelectionBase: textSelectionBase,
-      textSelectionExtent: textSelectionExtent,
-      platformViewId: platformViewId,
-      scrollChildren: scrollChildren,
-      scrollIndex: scrollIndex,
-      scrollPosition: scrollPosition,
-      scrollExtentMax: scrollExtentMax,
-      scrollExtentMin: scrollExtentMin,
-      elevation: elevation,
-      thickness: thickness,
-      rect: rect,
       label: label,
       labelAttributes: labelAttributes,
       hint: hint,
       hintAttributes: hintAttributes,
       value: value,
       valueAttributes: valueAttributes,
-      increasedValue: increasedValue,
-      increasedValueAttributes: increasedValueAttributes,
-      decreasedValue: decreasedValue,
-      decreasedValueAttributes: decreasedValueAttributes,
-      textDirection: textDirection,
-      transform: transform,
       childrenInTraversalOrder: childrenInTraversalOrder,
-      childrenInHitTestOrder: childrenInHitTestOrder,
-      additionalActions: additionalActions,
     );
   }
+
+  @override
+  void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1}) =>
+      _builder.updateCustomAction(id: id, label: label, hint: hint, overrideId: overrideId);
+
+  @override
+  ui.SemanticsUpdate build() => _builder.build();
 }
 
 class SemanticsNodeUpdateObservation {
   const SemanticsNodeUpdateObservation({
-    required this.id,
-    required this.flags,
-    required this.actions,
-    required this.maxValueLength,
-    required this.currentValueLength,
-    required this.textSelectionBase,
-    required this.textSelectionExtent,
-    required this.platformViewId,
-    required this.scrollChildren,
-    required this.scrollIndex,
-    required this.scrollPosition,
-    required this.scrollExtentMax,
-    required this.scrollExtentMin,
-    required this.elevation,
-    required this.thickness,
-    required this.rect,
     required this.label,
     this.labelAttributes,
     required this.value,
     this.valueAttributes,
-    required this.increasedValue,
-    this.increasedValueAttributes,
-    required this.decreasedValue,
-    this.decreasedValueAttributes,
     required this.hint,
     this.hintAttributes,
-    this.textDirection,
-    required this.transform,
     required this.childrenInTraversalOrder,
-    required this.childrenInHitTestOrder,
-    required this.additionalActions,
   });
 
-  final int id;
-  final int flags;
-  final int actions;
-  final int maxValueLength;
-  final int currentValueLength;
-  final int textSelectionBase;
-  final int textSelectionExtent;
-  final int platformViewId;
-  final int scrollChildren;
-  final int scrollIndex;
-  final double scrollPosition;
-  final double scrollExtentMax;
-  final double scrollExtentMin;
-  final double elevation;
-  final double thickness;
-  final Rect rect;
   final String label;
   final List<StringAttribute>? labelAttributes;
   final String value;
   final List<StringAttribute>? valueAttributes;
-  final String increasedValue;
-  final List<StringAttribute>? increasedValueAttributes;
-  final String decreasedValue;
-  final List<StringAttribute>? decreasedValueAttributes;
   final String hint;
   final List<StringAttribute>? hintAttributes;
-  final TextDirection? textDirection;
-  final Float64List transform;
   final Int32List childrenInTraversalOrder;
-  final Int32List childrenInHitTestOrder;
-  final Int32List additionalActions;
 }

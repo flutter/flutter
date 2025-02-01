@@ -1,0 +1,51 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/to/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the
+# flutter/packages/flutter_test/test_fixes/README.md file for instructions
+# on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are for the flutter_test/widget_tester.dart file. *
+
+version: 1
+transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/89952
+  - title: "Migrate to timeout"
+    date: 2023-03-30
+    element:
+      uris: [ 'flutter_test.dart' ]
+      function: 'testWidgets'
+    oneOf:
+      - if: "initialTimeout != '' && timeout == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'timeout'
+            style: optional_named
+            argumentValue:
+              expression: 'Timeout({% initialTimeout %})'
+              requiredIf: "initialTimeout != '' && timeout == ''"
+          - kind: 'removeParameter'
+            name: 'initialTimeout'
+      - if: "initialTimeout != '' && timeout != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'initialTimeout'
+    variables:
+      initialTimeout:
+        kind: 'fragment'
+        value: 'arguments[initialTimeout]'
+      timeout:
+        kind: 'fragment'
+        value: 'arguments[timeout]'

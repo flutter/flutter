@@ -5,16 +5,19 @@
 import 'template.dart';
 
 class DatePickerTemplate extends TokenTemplate {
-  const DatePickerTemplate(super.blockName, super.fileName, super.tokens, {
+  const DatePickerTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
+    super.textThemePrefix = '_textTheme.',
   });
 
   String _layerOpacity(String layerToken) {
-    if (tokens.containsKey(layerToken)) {
-      final String? layerValue = tokens[layerToken] as String?;
-      if (tokens.containsKey(layerValue)) {
-        final String? opacityValue = opacity(layerValue!);
+    if (tokenAvailable(layerToken)) {
+      final String layerValue = getToken(layerToken) as String;
+      if (tokenAvailable(layerValue)) {
+        final String? opacityValue = opacity(layerValue);
         if (opacityValue != null) {
           return '.withOpacity($opacityValue)';
         }
@@ -26,9 +29,9 @@ class DatePickerTemplate extends TokenTemplate {
   String _stateColor(String componentToken, String? type, String state) {
     final String baseColor = color(
       type != null
-        ? '$componentToken.$type.$state.state-layer.color'
-        : '$componentToken.$state.state-layer.color',
-      ''
+          ? '$componentToken.$type.$state.state-layer.color'
+          : '$componentToken.$state.state-layer.color',
+      '',
     );
     if (baseColor.isEmpty) {
       return 'null';
@@ -44,6 +47,9 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
     : super(
         elevation: ${elevation("md.comp.date-picker.modal.container")},
         shape: ${shape("md.comp.date-picker.modal.container")},
+        // TODO(tahatesser): Update this to use token when gen_defaults
+        // supports `CircleBorder` for fully rounded corners.
+        dayShape: const MaterialStatePropertyAll<OutlinedBorder>(CircleBorder()),
         rangePickerElevation: ${elevation("md.comp.date-picker.modal.range-selection.container")},
         rangePickerShape: ${shape("md.comp.date-picker.modal.range-selection.container")},
       );
@@ -55,6 +61,16 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
 
   @override
   Color? get backgroundColor => ${componentColor("md.comp.date-picker.modal.container")};
+
+  @override
+  ButtonStyle get cancelButtonStyle {
+    return TextButton.styleFrom();
+  }
+
+  @override
+  ButtonStyle get confirmButtonStyle {
+    return TextButton.styleFrom();
+  }
 
   @override
   Color? get shadowColor => ${colorOrTransparent("md.comp.date-picker.modal.container.shadow-color")};
@@ -106,24 +122,24 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get dayOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return ${_stateColor('md.comp.date-picker.modal.date', 'selected', 'pressed')};
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${_stateColor('md.comp.date-picker.modal.date', 'selected', 'hover')};
         }
         if (states.contains(MaterialState.focused)) {
           return ${_stateColor('md.comp.date-picker.modal.date', 'selected', 'focus')};
         }
-        if (states.contains(MaterialState.pressed)) {
-          return ${_stateColor('md.comp.date-picker.modal.date', 'selected', 'pressed')};
-        }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return ${_stateColor('md.comp.date-picker.modal.date', 'unselected', 'pressed')};
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${_stateColor('md.comp.date-picker.modal.date', 'unselected', 'hover')};
         }
         if (states.contains(MaterialState.focused)) {
           return ${_stateColor('md.comp.date-picker.modal.date', 'unselected', 'focus')};
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return ${_stateColor('md.comp.date-picker.modal.date', 'unselected', 'pressed')};
         }
       }
       return null;
@@ -173,24 +189,24 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get yearOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'selected', 'pressed')};
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'selected', 'hover')};
         }
         if (states.contains(MaterialState.focused)) {
           return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'selected', 'focus')};
         }
-        if (states.contains(MaterialState.pressed)) {
-          return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'selected', 'pressed')};
-        }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'unselected', 'pressed')};
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'unselected', 'hover')};
         }
         if (states.contains(MaterialState.focused)) {
           return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'unselected', 'focus')};
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'unselected', 'pressed')};
         }
       }
       return null;
@@ -208,14 +224,14 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
   @override
   MaterialStateProperty<Color?>? get rangeSelectionOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range', null, 'pressed')};
+      }
       if (states.contains(MaterialState.hovered)) {
-        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range.', null, 'hover')};
+        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range', null, 'hover')};
       }
       if (states.contains(MaterialState.focused)) {
-        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range.', null, 'focus')};
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range.', null, 'pressed')};
+        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range', null, 'focus')};
       }
       return null;
     });
@@ -231,8 +247,6 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
 
   @override
   TextStyle? get rangePickerHeaderHelpStyle => ${textStyle("md.comp.date-picker.modal.range-selection.month.subhead")};
-
-
 }
 ''';
 }

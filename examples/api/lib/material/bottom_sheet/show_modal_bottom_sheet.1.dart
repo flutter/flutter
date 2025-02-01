@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [showModalBottomSheet].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [showModalBottomSheet].
 
 void main() => runApp(const BottomSheetApp());
 
@@ -14,10 +14,7 @@ class BottomSheetApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xff6750a4),
-        useMaterial3: true,
-      ),
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('Bottom Sheet Sample')),
         body: const BottomSheetExample(),

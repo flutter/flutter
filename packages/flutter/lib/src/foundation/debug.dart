@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+///
+/// @docImport 'package:flutter/foundation.dart';
+/// @docImport 'package:flutter/rendering.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:ui' as ui show Brightness;
 
 import 'assertions.dart';
@@ -25,7 +32,10 @@ export 'print.dart' show DebugPrintCallback;
 ///
 /// See [the foundation library](foundation/foundation-library.html)
 /// for a complete list.
-bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride = debugPrintThrottled }) {
+bool debugAssertAllFoundationVarsUnset(
+  String reason, {
+  DebugPrintCallback debugPrintOverride = debugPrintThrottled,
+}) {
   assert(() {
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null ||
@@ -75,7 +85,9 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> Function() acti
     return true;
   }());
   if (instrument) {
-    final Stopwatch stopwatch = Stopwatch()..start();
+    final Stopwatch stopwatch =
+        Stopwatch()..start(); // flutter_ignore: stopwatch (see analyze.dart)
+    // Ignore context: The framework does not use this function internally so it will not cause flakes.
     try {
       return await action();
     } finally {

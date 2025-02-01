@@ -42,8 +42,7 @@ static void update_charging_state(MyApplication* self) {
 
   const gchar* charge_event = "discharging";
   for (guint i = 0; i < self->battery_devices->len; i++) {
-    UpDevice* device =
-        static_cast<UpDevice*>(g_ptr_array_index(self->battery_devices, i));
+    UpDevice* device = UP_DEVICE(g_ptr_array_index(self->battery_devices, i));
 
     guint state;
     g_object_get(device, "state", &state, nullptr);
@@ -97,8 +96,7 @@ static void up_device_removed_cb(MyApplication* self, UpDevice* device) {
 static FlMethodResponse* get_battery_level(MyApplication* self) {
   // Find the first available battery and use that.
   for (guint i = 0; i < self->battery_devices->len; i++) {
-    UpDevice* device =
-        static_cast<UpDevice*>(g_ptr_array_index(self->battery_devices, i));
+    UpDevice* device = UP_DEVICE(g_ptr_array_index(self->battery_devices, i));
 
     double percentage;
     g_object_get(device, "percentage", &percentage, nullptr);
@@ -217,10 +215,15 @@ static void my_application_activate(GApplication* application) {
                            G_CALLBACK(up_device_added_cb), self);
   g_signal_connect_swapped(self->up_client, "device-removed",
                            G_CALLBACK(up_device_removed_cb), self);
+#if UP_CHECK_VERSION(0, 99, 8)
+  // up_client_get_devices was deprecated and replaced with
+  // up_client_get_devices2 in libupower 0.99.8.
+  g_autoptr(GPtrArray) devices = up_client_get_devices2(self->up_client);
+#else
   g_autoptr(GPtrArray) devices = up_client_get_devices(self->up_client);
+#endif
   for (guint i = 0; i < devices->len; i++) {
-    g_autoptr(UpDevice) device =
-        static_cast<UpDevice*>(g_ptr_array_index(devices, i));
+    UpDevice* device = UP_DEVICE(g_ptr_array_index(devices, i));
     up_device_added_cb(self, device);
   }
 
@@ -262,8 +265,7 @@ static void my_application_dispose(GObject* object) {
   MyApplication* self = MY_APPLICATION(object);
 
   for (guint i = 0; i < self->battery_devices->len; i++) {
-    UpDevice* device =
-        static_cast<UpDevice*>(g_ptr_array_index(self->battery_devices, i));
+    UpDevice* device = UP_DEVICE(g_ptr_array_index(self->battery_devices, i));
     g_signal_handlers_disconnect_matched(device, G_SIGNAL_MATCH_DATA, 0, 0,
                                          nullptr, nullptr, self);
   }
@@ -272,7 +274,7 @@ static void my_application_dispose(GObject* object) {
 
   g_clear_pointer(&self->dart_entrypoint_arguments, g_strfreev);
   g_clear_object(&self->up_client);
-  g_clear_object(&self->battery_devices);
+  g_clear_pointer(&self->battery_devices, g_ptr_array_unref);
   g_clear_object(&self->battery_channel);
   g_clear_object(&self->charging_channel);
   g_clear_pointer(&self->last_charge_event, g_free);

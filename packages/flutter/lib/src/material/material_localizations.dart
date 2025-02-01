@@ -2,6 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+/// @docImport 'package:flutter_localizations/flutter_localizations.dart';
+///
+/// @docImport 'about.dart';
+/// @docImport 'action_buttons.dart';
+/// @docImport 'app.dart';
+/// @docImport 'app_bar.dart';
+/// @docImport 'bottom_sheet.dart';
+/// @docImport 'calendar_date_picker.dart';
+/// @docImport 'chip.dart';
+/// @docImport 'date_picker.dart';
+/// @docImport 'expand_icon.dart';
+/// @docImport 'expansion_tile.dart';
+/// @docImport 'input_date_picker_form_field.dart';
+/// @docImport 'paginated_data_table.dart';
+/// @docImport 'popup_menu.dart';
+/// @docImport 'refresh_indicator.dart';
+/// @docImport 'reorderable_list.dart';
+/// @docImport 'search_anchor.dart';
+/// @docImport 'tabs.dart';
+/// @docImport 'text_field.dart';
+/// @docImport 'text_theme.dart';
+/// @docImport 'theme_data.dart';
+/// @docImport 'time_picker.dart';
+/// @docImport 'user_accounts_drawer_header.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -31,6 +58,9 @@ abstract class MaterialLocalizations {
 
   /// The [BackButton]'s tooltip.
   String get backButtonTooltip;
+
+  /// The tooltip for the clear button to clear text on [SearchAnchor]'s search view.
+  String get clearButtonTooltip;
 
   /// The [CloseButton]'s tooltip.
   String get closeButtonTooltip;
@@ -83,7 +113,7 @@ abstract class MaterialLocalizations {
   /// there are, e.g. 'Tab 1 of 2' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabLabel({ required int tabIndex, required int tabCount });
+  String tabLabel({required int tabIndex, required int tabCount});
 
   /// Title for the [PaginatedDataTable]'s selected row count header.
   String selectedRowCountTitle(int selectedRowCount);
@@ -103,6 +133,9 @@ abstract class MaterialLocalizations {
   /// Label for "cut" edit buttons and menu items.
   String get cutButtonLabel;
 
+  /// Label for "scan text" OCR edit buttons and menu items.
+  String get scanTextButtonLabel;
+
   /// Label for OK buttons and menu items.
   String get okButtonLabel;
 
@@ -111,6 +144,15 @@ abstract class MaterialLocalizations {
 
   /// Label for "select all" edit buttons and menu items.
   String get selectAllButtonLabel;
+
+  /// Label for "look up" edit buttons and menu items.
+  String get lookUpButtonLabel;
+
+  /// Label for "search web" edit buttons and menu items.
+  String get searchWebButtonLabel;
+
+  /// Label for "share" edit buttons and menu items.
+  String get shareButtonLabel;
 
   /// Label for the [AboutDialog] button that shows the [LicensePage].
   String get viewLicensesButtonLabel;
@@ -135,6 +177,10 @@ abstract class MaterialLocalizations {
   /// A modal barrier can for example be found behind an alert or popup to block
   /// user interaction with elements behind it.
   String get modalBarrierDismissLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) for a
+  /// context menu to indicate that a tap dismisses the context menu.
+  String get menuDismissLabel;
 
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// drawer widget is opened.
@@ -163,10 +209,15 @@ abstract class MaterialLocalizations {
   /// Label indicating that a given date is the current date.
   String get currentDateLabel;
 
-  /// Label for the scrim rendered underneath the content of a modal route.
+  /// The semantics label to describe the selected date in the calendar picker
+  /// invoked using [showDatePicker].
+  String get selectedDateLabel;
+
+  /// Label for the scrim rendered underneath a [BottomSheet].
   String get scrimLabel;
 
-  /// Label for a BottomSheet.
+  /// Label for a [BottomSheet], used as the `modalRouteContentName` of the
+  /// [scrimOnTapHint].
   String get bottomSheetLabel;
 
   /// Hint text announced when tapping on the scrim underneath the content of
@@ -177,7 +228,7 @@ abstract class MaterialLocalizations {
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
   /// each supported layout.
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false });
+  TimeOfDayFormat timeOfDayFormat({bool alwaysUse24HourFormat = false});
 
   /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
   ///
@@ -200,7 +251,7 @@ abstract class MaterialLocalizations {
   ///
   /// If [alwaysUse24HourFormat] is true, formats hour using [HourFormat.HH]
   /// rather than the default for the current locale.
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
+  String formatHour(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false});
 
   /// Formats [TimeOfDay.minute] in the given time of day according to the value
   /// of [timeOfDayFormat].
@@ -212,7 +263,7 @@ abstract class MaterialLocalizations {
   /// rather than the default for the current locale. This value is usually
   /// passed from [MediaQueryData.alwaysUse24HourFormat], which has platform-
   /// specific behavior.
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
+  String formatTimeOfDay(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false});
 
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
   String formatYear(DateTime date);
@@ -424,26 +475,50 @@ abstract class MaterialLocalizations {
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list to the start of the list.
+  @Deprecated(
+    'Use the reorderItemToStart from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.',
+  )
   String get reorderItemToStart;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list to the end of the list.
+  @Deprecated(
+    'Use the reorderItemToEnd from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.',
+  )
   String get reorderItemToEnd;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space up the list.
+  @Deprecated(
+    'Use the reorderItemUp from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.',
+  )
   String get reorderItemUp;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space down the list.
+  @Deprecated(
+    'Use the reorderItemDown from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.',
+  )
   String get reorderItemDown;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space left in the list.
+  @Deprecated(
+    'Use the reorderItemLeft from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.',
+  )
   String get reorderItemLeft;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space right in the list.
+  @Deprecated(
+    'Use the reorderItemRight from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.',
+  )
   String get reorderItemRight;
 
   /// The semantics hint to describe the tap action on an expanded [ExpandIcon].
@@ -451,6 +526,30 @@ abstract class MaterialLocalizations {
 
   /// The semantics hint to describe the tap action on a collapsed [ExpandIcon].
   String get collapsedIconTapHint => 'Expand';
+
+  /// The semantics hint to describe the tap action on an expanded
+  /// [ExpansionTile] on iOS and macOS. This is appended to the [collapsedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Expanded
+  /// double tap to collapse".
+  String get expansionTileExpandedHint => 'double tap to collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed
+  /// [ExpansionTile] on iOS and macOS. This is appended to the [expandedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Collapsed
+  /// double tap to expand".
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  /// The semantics hint to describe the tap action on an expanded [ExpansionTile].
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed [ExpansionTile].
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  /// The semantics hint to describe the [ExpansionTile] expanded state.
+  String get expandedHint => 'Collapsed';
+
+  /// The semantics hint to describe the [ExpansionTile] collapsed state.
+  String get collapsedHint => 'Expanded';
 
   /// The label for the [TextField]'s character counter.
   String remainingTextFieldCharacterCount(int remaining);
@@ -674,15 +773,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Sunday',
   ];
 
-  static const List<String> _narrowWeekdays = <String>[
-    'S',
-    'M',
-    'T',
-    'W',
-    'T',
-    'F',
-    'S',
-  ];
+  static const List<String> _narrowWeekdays = <String>['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   static const List<String> _shortMonths = <String>[
     'Jan',
@@ -721,8 +812,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// 1582. It will not give valid results for dates prior to that time.
   int _getDaysInMonth(int year, int month) {
     if (month == DateTime.february) {
-      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) ||
-          (year % 400 == 0);
+      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
       if (isLeapYear) {
         return 29;
       }
@@ -733,7 +823,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
+  String formatHour(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false}) {
     final TimeOfDayFormat format = timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat);
     switch (format) {
       case TimeOfDayFormat.h_colon_mm_space_a:
@@ -836,7 +926,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
       return null;
     }
-    return DateTime(year, month, day);
+
+    try {
+      return DateTime(year, month, day);
+    } on ArgumentError {
+      return null;
+    }
   }
 
   @override
@@ -921,12 +1016,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get inputTimeModeButtonLabel => 'Switch to text input mode';
 
   String _formatDayPeriod(TimeOfDay timeOfDay) {
-    switch (timeOfDay.period) {
-      case DayPeriod.am:
-        return anteMeridiemAbbreviation;
-      case DayPeriod.pm:
-        return postMeridiemAbbreviation;
-    }
+    return switch (timeOfDay.period) {
+      DayPeriod.am => anteMeridiemAbbreviation,
+      DayPeriod.pm => postMeridiemAbbreviation,
+    };
   }
 
   @override
@@ -948,7 +1041,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
+  String formatTimeOfDay(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false}) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -982,6 +1075,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get backButtonTooltip => 'Back';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonTooltip => 'Close';
@@ -1035,6 +1131,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get currentDateLabel => 'Today';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
@@ -1052,28 +1151,25 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String licensesPackageDetailText(int licenseCount) {
     assert(licenseCount >= 0);
-    switch (licenseCount) {
-      case 0:
-        return 'No licenses.';
-      case 1:
-        return '1 license.';
-      default:
-        return '$licenseCount licenses.';
-    }
+    return switch (licenseCount) {
+      0 => 'No licenses.',
+      1 => '1 license.',
+      _ => '$licenseCount licenses.',
+    };
   }
 
   @override
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
     return rowCountIsApproximate
-      ? '$firstRow–$lastRow of about $rowCount'
-      : '$firstRow–$lastRow of $rowCount';
+        ? '$firstRow–$lastRow of about $rowCount'
+        : '$firstRow–$lastRow of $rowCount';
   }
 
   @override
   String get rowsPerPageTitle => 'Rows per page:';
 
   @override
-  String tabLabel({ required int tabIndex, required int tabCount }) {
+  String tabLabel({required int tabIndex, required int tabCount}) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     return 'Tab $tabIndex of $tabCount';
@@ -1081,14 +1177,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String selectedRowCountTitle(int selectedRowCount) {
-    switch (selectedRowCount) {
-      case 0:
-        return 'No items selected';
-      case 1:
-        return '1 item selected';
-      default:
-        return '$selectedRowCount items selected';
-    }
+    return switch (selectedRowCount) {
+      0 => 'No items selected',
+      1 => '1 item selected',
+      _ => '$selectedRowCount items selected',
+    };
   }
 
   @override
@@ -1107,6 +1200,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get cutButtonLabel => 'Cut';
 
   @override
+  String get scanTextButtonLabel => 'Scan text';
+
+  @override
   String get okButtonLabel => 'OK';
 
   @override
@@ -1114,6 +1210,15 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Select all';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
+  String get searchWebButtonLabel => 'Search Web';
+
+  @override
+  String get shareButtonLabel => 'Share';
 
   @override
   String get viewLicensesButtonLabel => 'View licenses';
@@ -1134,13 +1239,14 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get modalBarrierDismissLabel => 'Dismiss';
 
   @override
+  String get menuDismissLabel => 'Dismiss menu';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
-    return alwaysUse24HourFormat
-      ? TimeOfDayFormat.HH_colon_mm
-      : TimeOfDayFormat.h_colon_mm_space_a;
+  TimeOfDayFormat timeOfDayFormat({bool alwaysUse24HourFormat = false}) {
+    return alwaysUse24HourFormat ? TimeOfDayFormat.HH_colon_mm : TimeOfDayFormat.h_colon_mm_space_a;
   }
 
   @override
@@ -1177,6 +1283,24 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get collapsedIconTapHint => 'Expand';
 
   @override
+  String get expansionTileExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get refreshIndicatorSemanticLabel => 'Refresh';
 
   /// Creates an object that provides US English resource values for the material
@@ -1194,18 +1318,16 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// to create an instance of this class.
   ///
   /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
-  static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
+  static const LocalizationsDelegate<MaterialLocalizations> delegate =
+      _MaterialLocalizationsDelegate();
 
   @override
   String remainingTextFieldCharacterCount(int remaining) {
-    switch (remaining) {
-      case 0:
-        return 'No characters remaining';
-      case 1:
-        return '1 character remaining';
-      default:
-        return '$remaining characters remaining';
-    }
+    return switch (remaining) {
+      0 => 'No characters remaining',
+      1 => '1 character remaining',
+      _ => '$remaining characters remaining',
+    };
   }
 
   @override

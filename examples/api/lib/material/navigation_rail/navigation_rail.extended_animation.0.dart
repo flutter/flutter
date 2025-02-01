@@ -2,24 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [NavigationRail.extendedAnimation].
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [NavigationRail.extendedAnimation].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ExtendedAnimationExampleApp());
+
+class ExtendedAnimationExampleApp extends StatelessWidget {
+  const ExtendedAnimationExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: MyNavigationRail(),
-      ),
-    );
+    return const MaterialApp(home: Scaffold(body: MyNavigationRail()));
   }
 }
 
@@ -41,11 +37,13 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
         NavigationRail(
           selectedIndex: _selectedIndex,
           extended: _extended,
-          leading: MyNavigationRailFab(onPressed: () {
-            setState(() {
-              _extended = !_extended;
-            });
-          }),
+          leading: MyNavigationRailFab(
+            onPressed: () {
+              setState(() {
+                _extended = !_extended;
+              });
+            },
+          ),
           onDestinationSelected: (int index) {
             setState(() {
               _selectedIndex = index;
@@ -103,26 +101,22 @@ class MyNavigationRailFab extends StatelessWidget {
         // The extended fab has a shorter height than the regular fab.
         return Container(
           height: 56,
-          padding: EdgeInsets.symmetric(
-            vertical: lerpDouble(0, 6, animation.value)!,
-          ),
-          child: animation.value == 0
-              ? FloatingActionButton(
-                  onPressed: onPressed,
-                  child: const Icon(Icons.add),
-                )
-              : Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  widthFactor: animation.value,
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 8),
-                    child: FloatingActionButton.extended(
-                      icon: const Icon(Icons.add),
-                      label: const Text('CREATE'),
-                      onPressed: onPressed,
+          padding: EdgeInsets.symmetric(vertical: lerpDouble(0, 6, animation.value)!),
+          child:
+              animation.value == 0
+                  ? FloatingActionButton(onPressed: onPressed, child: const Icon(Icons.add))
+                  : Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    widthFactor: animation.value,
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 8),
+                      child: FloatingActionButton.extended(
+                        icon: const Icon(Icons.add),
+                        label: const Text('CREATE'),
+                        onPressed: onPressed,
+                      ),
                     ),
                   ),
-                ),
         );
       },
     );

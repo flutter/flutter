@@ -15,7 +15,7 @@ Specifically:
 Should you experience anything that makes you feel unwelcome in Flutter's
 community, please contact [conduct@flutter.dev](mailto:conduct@flutter.dev)
 or, if you prefer, directly contact someone on the project, for instance
-[Hixie](mailto:ian@hixie.ch) or [Tim](mailto:timsneath@google.com).
+[Hixie](mailto:ian@hixie.ch).
 
 The Flutter project will not tolerate harassment in Flutter's
 community, even outside of Flutter's public communication channels.
@@ -38,8 +38,7 @@ concerns. Be wary of agreement by compromise, where two good competing
 solutions are merged into one mediocre solution. A conflict is
 addressed when the participants agree that the final solution is
 _better_ than all the conflicting proposals. Sometimes the solution is
-more work than either of the proposals. [Embrace the yak
-shave](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#lazy-programming).
+more work than either of the proposals. [Embrace the yak shave](./docs/contributing/Style-guide-for-Flutter-repo.md#lazy-programming).
 
 ## Questions
 

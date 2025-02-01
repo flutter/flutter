@@ -1,0 +1,120 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+
+void main() {
+  // Changes made in https://github.com/flutter/flutter/pull/142151
+  WidgetState selected = WidgetState.selected;
+  WidgetState hovered = WidgetState.hovered;
+  WidgetState focused = WidgetState.focused;
+  WidgetState pressed = WidgetState.pressed;
+  WidgetState dragged = WidgetState.dragged;
+  WidgetState scrolledUnder = WidgetState.scrolledUnder;
+  WidgetState disabled = WidgetState.disabled;
+  WidgetState error = WidgetState.error;
+
+  final WidgetPropertyResolver<MouseCursor?> resolveCallback;
+
+  Color getColor(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      if (states.contains(WidgetState.selected)) {
+        return Color(0xFF000002);
+      }
+      return Color(0xFF000004);
+    }
+    if (states.contains(WidgetState.selected)) {
+      return Color(0xFF000001);
+    }
+    return Color(0xFF000003);
+  }
+
+  final WidgetStateProperty<Color> backgroundColor =
+      WidgetStateColor.resolveWith(getColor);
+
+  TextStyle floatingLabelStyle = WidgetStateTextStyle.resolveWith((
+    Set<WidgetState> states,
+  ) {
+    final Color color =
+        states.contains(WidgetState.error)
+            ? Theme.of(context).colorScheme.error
+            : Colors.orange;
+    return TextStyle(color: color, letterSpacing: 1.3);
+  });
+
+  final WidgetStateProperty<Icon?> thumbIcon =
+      WidgetStateProperty.resolveWith<Icon?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
+          return const Icon(Icons.check);
+        }
+        return const Icon(Icons.close);
+      });
+
+  final Color backgroundColor = WidgetStatePropertyAll<Color>(
+    Colors.blue.withOpacity(0.12),
+  );
+
+  final WidgetStatesController statesController = WidgetStatesController(
+    <WidgetState>{if (widget.selected) WidgetState.selected},
+  );
+}
+
+class _MouseCursor extends WidgetStateMouseCursor {
+  const _MouseCursor(this.resolveCallback);
+
+  final WidgetPropertyResolver<MouseCursor?> resolveCallback;
+
+  @override
+  MouseCursor resolve(Set<WidgetState> states) =>
+      resolveCallback(states) ?? MouseCursor.uncontrolled;
+}
+
+class SelectedBorder extends RoundedRectangleBorder
+    implements WidgetStateOutlinedBorder {
+  const SelectedBorder();
+
+  @override
+  OutlinedBorder? resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.selected)) {
+      return const RoundedRectangleBorder();
+    }
+    return null;
+  }
+}
+
+class _MyWidget extends StatefulWidget {
+  const _MyWidget({
+    required this.controller,
+    required this.evaluator,
+    required this.materialState,
+  });
+
+  final bool Function(_MyWidgetState state) evaluator;
+
+  /// Stream passed down to the child [_InnerWidget] to begin the process.
+  /// This plays the role of an actual user interaction in the wild, but allows
+  /// us to engage the system without mocking pointers/hovers etc.
+  final StreamController<bool> controller;
+
+  /// The value we're watching in the given test.
+  final WidgetState materialState;
+
+  WidgetStateBorderSide? get side {
+    return WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
+          return const BorderSide(width: 2.0);
+        }
+        return BorderSide(width: 1.0);
+      }
+      if (states.contains(WidgetState.selected)) {
+        return const BorderSide(width: 1.5);
+      }
+      return BorderSide(width: 0.5);
+    });
+  }
+
+  @override
+  State createState() => _MyWidgetState();
+}

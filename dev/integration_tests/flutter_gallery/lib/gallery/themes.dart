@@ -8,11 +8,7 @@ final ThemeData kLightGalleryTheme = _buildLightTheme();
 final ThemeData kDarkGalleryTheme = _buildDarkTheme();
 
 TextTheme _buildTextTheme(TextTheme base) {
-  return base.copyWith(
-    titleLarge: base.titleLarge!.copyWith(
-      fontFamily: 'GoogleSans',
-    ),
-  );
+  return base.copyWith(titleLarge: base.titleLarge!.copyWith(fontFamily: 'GoogleSans'));
 }
 
 ThemeData _buildDarkTheme() {
@@ -23,9 +19,10 @@ ThemeData _buildDarkTheme() {
     secondary: secondaryColor,
     onPrimary: Colors.white,
     error: const Color(0xFFB00020),
-    background: const Color(0xFF202124),
+    surface: const Color(0xFF202124),
   );
   final ThemeData base = ThemeData(
+    useMaterial3: false,
     brightness: Brightness.dark,
     colorScheme: colorScheme,
     primaryColor: primaryColor,
@@ -50,6 +47,7 @@ ThemeData _buildLightTheme() {
     error: const Color(0xFFB00020),
   );
   final ThemeData base = ThemeData(
+    useMaterial3: false,
     brightness: Brightness.light,
     colorScheme: colorScheme,
     primaryColor: primaryColor,

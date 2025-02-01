@@ -2,13 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'basic.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver_fill.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
+import 'scroll_delegate.dart';
 import 'sliver.dart';
 
 /// A sliver that places its box children in a linear array and constrains them
 /// to have the same extent as a prototype item along the main axis.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
 /// [SliverPrototypeExtentList] arranges its children in a line along
 /// the main axis starting at offset zero and without gaps. Each child is
@@ -23,13 +31,14 @@ import 'sliver.dart';
 ///
 /// See also:
 ///
-///  * [SliverFixedExtentList], whose itemExtent is a pixel value.
+///  * [SliverFixedExtentList], whose children are forced to a given pixel
+///    extent.
+///  * [SliverVariedExtentList], which supports children with varying (but known
+///    upfront) extents.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
 ///  * [SliverFillViewport], which sizes its children based on the
 ///    size of the viewport, regardless of what else is in the scroll view.
-///  * [SliverList], which shows a list of variable-sized children in a
-///    viewport.
 class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places its box children in a linear array and
   /// constrains them to have the same extent as a prototype item along
@@ -94,14 +103,16 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(delegate: SliverChildBuilderDelegate(
-         itemBuilder,
-         findChildIndexCallback: findChildIndexCallback,
-         childCount: itemCount,
-         addAutomaticKeepAlives: addAutomaticKeepAlives,
-         addRepaintBoundaries: addRepaintBoundaries,
-         addSemanticIndexes: addSemanticIndexes,
-       ));
+  }) : super(
+         delegate: SliverChildBuilderDelegate(
+           itemBuilder,
+           findChildIndexCallback: findChildIndexCallback,
+           childCount: itemCount,
+           addAutomaticKeepAlives: addAutomaticKeepAlives,
+           addRepaintBoundaries: addRepaintBoundaries,
+           addSemanticIndexes: addSemanticIndexes,
+         ),
+       );
 
   /// A sliver that places multiple box children in a linear array along the main
   /// axis.
@@ -136,12 +147,14 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(delegate: SliverChildListDelegate(
-         children,
-         addAutomaticKeepAlives: addAutomaticKeepAlives,
-         addRepaintBoundaries: addRepaintBoundaries,
-         addSemanticIndexes: addSemanticIndexes,
-       ));
+  }) : super(
+         delegate: SliverChildListDelegate(
+           children,
+           addAutomaticKeepAlives: addAutomaticKeepAlives,
+           addRepaintBoundaries: addRepaintBoundaries,
+           addSemanticIndexes: addSemanticIndexes,
+         ),
+       );
 
   /// Defines the main axis extent of all of this sliver's children.
   ///
@@ -165,7 +178,8 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   _SliverPrototypeExtentListElement(SliverPrototypeExtentList super.widget);
 
   @override
-  _RenderSliverPrototypeExtentList get renderObject => super.renderObject as _RenderSliverPrototypeExtentList;
+  _RenderSliverPrototypeExtentList get renderObject =>
+      super.renderObject as _RenderSliverPrototypeExtentList;
 
   Element? _prototype;
   static final Object _prototypeSlot = Object();
@@ -217,21 +231,28 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
-    _prototype = updateChild(_prototype, (widget as SliverPrototypeExtentList).prototypeItem, _prototypeSlot);
+    _prototype = updateChild(
+      _prototype,
+      (widget as SliverPrototypeExtentList).prototypeItem,
+      _prototypeSlot,
+    );
   }
 
   @override
   void update(SliverPrototypeExtentList newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _prototype = updateChild(_prototype, (widget as SliverPrototypeExtentList).prototypeItem, _prototypeSlot);
+    _prototype = updateChild(
+      _prototype,
+      (widget as SliverPrototypeExtentList).prototypeItem,
+      _prototypeSlot,
+    );
   }
 }
 
 class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor {
-  _RenderSliverPrototypeExtentList({
-    required _SliverPrototypeExtentListElement childManager,
-  }) : super(childManager: childManager);
+  _RenderSliverPrototypeExtentList({required _SliverPrototypeExtentListElement childManager})
+    : super(childManager: childManager);
 
   RenderBox? _child;
   RenderBox? get child => _child;
@@ -255,17 +276,13 @@ class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    if (_child != null) {
-      _child!.attach(owner);
-    }
+    _child?.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    if (_child != null) {
-      _child!.detach();
-    }
+    _child?.detach();
   }
 
   @override

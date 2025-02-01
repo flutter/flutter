@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 
 import '../../src/common.dart';
 
@@ -15,39 +16,36 @@ void main() {
       final DeferredComponent component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
-        assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
+        assets: <AssetsEntry>[
+          AssetsEntry(uri: Uri.file('asset1')),
+          AssetsEntry(uri: Uri.file('asset2')),
+        ],
       );
       expect(component.name, 'bestcomponent');
       expect(component.libraries, <String>['lib1', 'lib2']);
-      expect(component.assets, <Uri>[Uri.file('asset1'), Uri.file('asset2')]);
+      expect(component.assets, <AssetsEntry>[
+        AssetsEntry(uri: Uri.file('asset1')),
+        AssetsEntry(uri: Uri.file('asset2')),
+      ]);
     });
 
     testWithoutContext('assignLoadingUnits selects the needed loading units and sets assigned', () {
       final DeferredComponent component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
-        assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
+        assets: <AssetsEntry>[
+          AssetsEntry(uri: Uri.file('asset1')),
+          AssetsEntry(uri: Uri.file('asset2')),
+        ],
       );
       expect(component.libraries, <String>['lib1', 'lib2']);
       expect(component.assigned, false);
       expect(component.loadingUnits, null);
 
       final List<LoadingUnit> loadingUnits1 = <LoadingUnit>[
-        LoadingUnit(
-          id: 2,
-          path: 'path/to/so.so',
-          libraries: <String>['lib1', 'lib4'],
-        ),
-        LoadingUnit(
-          id: 3,
-          path: 'path/to/so.so',
-          libraries: <String>['lib2', 'lib5'],
-        ),
-        LoadingUnit(
-          id: 4,
-          path: 'path/to/so.so',
-          libraries: <String>['lib6', 'lib7'],
-        ),
+        LoadingUnit(id: 2, path: 'path/to/so.so', libraries: <String>['lib1', 'lib4']),
+        LoadingUnit(id: 3, path: 'path/to/so.so', libraries: <String>['lib2', 'lib5']),
+        LoadingUnit(id: 4, path: 'path/to/so.so', libraries: <String>['lib6', 'lib7']),
       ];
 
       component.assignLoadingUnits(loadingUnits1);
@@ -59,21 +57,9 @@ void main() {
       expect(component.loadingUnits, isNot(contains(loadingUnits1[2])));
 
       final List<LoadingUnit> loadingUnits2 = <LoadingUnit>[
-        LoadingUnit(
-          id: 2,
-          path: 'path/to/so.so',
-          libraries: <String>['lib1', 'lib2'],
-        ),
-        LoadingUnit(
-          id: 3,
-          path: 'path/to/so.so',
-          libraries: <String>['lib5', 'lib6'],
-        ),
-        LoadingUnit(
-          id: 4,
-          path: 'path/to/so.so',
-          libraries: <String>['lib7', 'lib8'],
-        ),
+        LoadingUnit(id: 2, path: 'path/to/so.so', libraries: <String>['lib1', 'lib2']),
+        LoadingUnit(id: 3, path: 'path/to/so.so', libraries: <String>['lib5', 'lib6']),
+        LoadingUnit(id: 4, path: 'path/to/so.so', libraries: <String>['lib7', 'lib8']),
       ];
       // Can reassign loading units.
       component.assignLoadingUnits(loadingUnits2);
@@ -94,19 +80,33 @@ void main() {
       final DeferredComponent component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
-        assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
+        assets: <AssetsEntry>[
+          AssetsEntry(uri: Uri.file('asset1')),
+          AssetsEntry(uri: Uri.file('asset2')),
+        ],
       );
-      expect(component.toString(), '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  Assets:\n    - asset1\n    - asset2');
+      expect(
+        component.toString(),
+        '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  Assets:\n    - asset1\n    - asset2',
+      );
     });
 
     testWithoutContext('toString produces correct string for assigned component', () {
       final DeferredComponent component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
-        assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
+        assets: <AssetsEntry>[
+          AssetsEntry(uri: Uri.file('asset1')),
+          AssetsEntry(uri: Uri.file('asset2')),
+        ],
       );
-      component.assignLoadingUnits(<LoadingUnit>[LoadingUnit(id: 2, libraries: <String>['lib1'])]);
-      expect(component.toString(), '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  LoadingUnits:\n    - 2\n  Assets:\n    - asset1\n    - asset2');
+      component.assignLoadingUnits(<LoadingUnit>[
+        LoadingUnit(id: 2, libraries: <String>['lib1']),
+      ]);
+      expect(
+        component.toString(),
+        '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  LoadingUnits:\n    - 2\n  Assets:\n    - asset1\n    - asset2',
+      );
     });
   });
 
@@ -128,7 +128,7 @@ void main() {
         path: 'path/to/so.so',
         libraries: <String>['lib1', 'lib4'],
       );
-      expect(unit.toString(),'\nLoadingUnit 2\n  Libraries:\n  - lib1\n  - lib4');
+      expect(unit.toString(), '\nLoadingUnit 2\n  Libraries:\n  - lib1\n  - lib4');
     });
 
     testWithoutContext('equalsIgnoringPath works for various input', () {
@@ -186,7 +186,10 @@ void main() {
 ] }
 
 ''', flush: true);
-      final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(manifest, BufferLogger.test());
+      final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(
+        manifest,
+        BufferLogger.test(),
+      );
       expect(loadingUnits.length, 2); // base module (id 1) is not parsed.
       expect(loadingUnits[0].id, 2);
       expect(loadingUnits[0].path, '/arm64-v8a/app.so-2.part.so');
@@ -217,7 +220,10 @@ void main() {
 ]
 
 ''', flush: true);
-      final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(manifest, BufferLogger.test());
+      final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(
+        manifest,
+        BufferLogger.test(),
+      );
       expect(loadingUnits.length, 0);
       expect(loadingUnits.isEmpty, true);
     });
@@ -228,7 +234,10 @@ void main() {
       if (manifest.existsSync()) {
         manifest.deleteSync(recursive: true);
       }
-      final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(manifest, BufferLogger.test());
+      final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(
+        manifest,
+        BufferLogger.test(),
+      );
       expect(loadingUnits.length, 0);
       expect(loadingUnits.isEmpty, true);
     });
@@ -265,8 +274,10 @@ void main() {
 ] }
 
 ''', flush: true);
-      final List<LoadingUnit> loadingUnits =
-          LoadingUnit.parseGeneratedLoadingUnits(fileSystem.directory('/'), BufferLogger.test());
+      final List<LoadingUnit> loadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
+        fileSystem.directory('/'),
+        BufferLogger.test(),
+      );
       expect(loadingUnits.length, 4); // base module (id 1) is not parsed.
 
       expect(loadingUnits[0].id, 2);
@@ -322,8 +333,11 @@ void main() {
 ] }
 
 ''', flush: true);
-      final List<LoadingUnit> loadingUnits =
-          LoadingUnit.parseGeneratedLoadingUnits(fileSystem.directory('/'), BufferLogger.test(), abis: <String>['test-abi2']);
+      final List<LoadingUnit> loadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
+        fileSystem.directory('/'),
+        BufferLogger.test(),
+        abis: <String>['test-abi2'],
+      );
       expect(loadingUnits.length, 2); // base module (id 1) is not parsed.
 
       expect(loadingUnits[0].id, 2);
@@ -339,8 +353,10 @@ void main() {
 
     testWithoutContext('parseGeneratedLoadingUnits returns empty when no manifest files exist', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final List<LoadingUnit> loadingUnits =
-          LoadingUnit.parseGeneratedLoadingUnits(fileSystem.directory('/'), BufferLogger.test());
+      final List<LoadingUnit> loadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
+        fileSystem.directory('/'),
+        BufferLogger.test(),
+      );
       expect(loadingUnits.isEmpty, true);
       expect(loadingUnits.length, 0);
     });

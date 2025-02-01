@@ -28,8 +28,14 @@
   "cutButtonLabel": "Выразаць",
   "copyButtonLabel": "Капіраваць",
   "pasteButtonLabel": "Уставіць",
+  "clearButtonLabel": "Ачысціць",
   "selectAllButtonLabel": "Выбраць усе",
   "tabSemanticsLabel": "Укладка $tabIndex з $tabCount",
   "modalBarrierDismissLabel": "Адхіліць",
-  "searchTextFieldPlaceholderLabel": "Пошук"
+  "searchTextFieldPlaceholderLabel": "Пошук",
+  "noSpellCheckReplacementsLabel": "Замен не знойдзена",
+  "menuDismissLabel": "Закрыць меню",
+  "lookUpButtonLabel": "Знайсці",
+  "searchWebButtonLabel": "Пошук у сетцы",
+  "shareButtonLabel": "Абагуліць..."
 }

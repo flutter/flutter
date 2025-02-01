@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'image_icon.dart';
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -13,6 +17,7 @@ import 'framework.dart';
 import 'icon_data.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'media_query.dart';
 
 /// A graphical icon widget drawn with a glyph from a font described in
 /// an [IconData] such as material's predefined [IconData]s in [Icons].
@@ -80,6 +85,8 @@ class Icon extends StatelessWidget {
     this.shadows,
     this.semanticLabel,
     this.textDirection,
+    this.applyTextScaling,
+    this.blendMode,
   }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
        assert(weight == null || (0.0 < weight)),
        assert(opticalSize == null || (0.0 < opticalSize));
@@ -209,7 +216,7 @@ class Icon extends StatelessWidget {
 
   /// Semantic label for the icon.
   ///
-  /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
+  /// Announced by assistive technologies (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
   ///  * [SemanticsProperties.label], which is set to [semanticLabel] in the
@@ -231,6 +238,21 @@ class Icon extends StatelessWidget {
   /// specified, either directly using this property or using [Directionality].
   final TextDirection? textDirection;
 
+  /// Whether to scale the size of this widget using the ambient [MediaQuery]'s [TextScaler].
+  ///
+  /// This is specially useful when you have an icon associated with a text, as
+  /// scaling the text without scaling the icon would result in a confusing
+  /// interface.
+  ///
+  /// Defaults to the nearest [IconTheme]'s
+  /// [IconThemeData.applyTextScaling].
+  final bool? applyTextScaling;
+
+  /// The [BlendMode] to apply to the foreground of the icon.
+  ///
+  /// Defaults to [BlendMode.srcOver]
+  final BlendMode? blendMode;
+
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
@@ -238,7 +260,14 @@ class Icon extends StatelessWidget {
 
     final IconThemeData iconTheme = IconTheme.of(context);
 
-    final double? iconSize = size ?? iconTheme.size;
+    final bool applyTextScaling = this.applyTextScaling ?? iconTheme.applyTextScaling ?? false;
+
+    final double tentativeIconSize = size ?? iconTheme.size ?? kDefaultFontSize;
+
+    final double iconSize =
+        applyTextScaling
+            ? MediaQuery.textScalerOf(context).scale(tentativeIconSize)
+            : tentativeIconSize;
 
     final double? iconFill = fill ?? iconTheme.fill;
 
@@ -250,42 +279,53 @@ class Icon extends StatelessWidget {
 
     final List<Shadow>? iconShadows = shadows ?? iconTheme.shadows;
 
+    final IconData? icon = this.icon;
     if (icon == null) {
-      return Semantics(
-        label: semanticLabel,
-        child: SizedBox(width: iconSize, height: iconSize),
-      );
+      return Semantics(label: semanticLabel, child: SizedBox(width: iconSize, height: iconSize));
     }
 
     final double iconOpacity = iconTheme.opacity ?? 1.0;
-    Color iconColor = color ?? iconTheme.color!;
+    Color? iconColor = color ?? iconTheme.color!;
+    Paint? foreground;
     if (iconOpacity != 1.0) {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
     }
+    if (blendMode != null) {
+      foreground =
+          Paint()
+            ..blendMode = blendMode!
+            ..color = iconColor;
+      // Cannot provide both a color and a foreground.
+      iconColor = null;
+    }
+
+    final TextStyle fontStyle = TextStyle(
+      fontVariations: <FontVariation>[
+        if (iconFill != null) FontVariation('FILL', iconFill),
+        if (iconWeight != null) FontVariation('wght', iconWeight),
+        if (iconGrade != null) FontVariation('GRAD', iconGrade),
+        if (iconOpticalSize != null) FontVariation('opsz', iconOpticalSize),
+      ],
+      inherit: false,
+      color: iconColor,
+      fontSize: iconSize,
+      fontFamily: icon.fontFamily,
+      package: icon.fontPackage,
+      fontFamilyFallback: icon.fontFamilyFallback,
+      shadows: iconShadows,
+      height:
+          1.0, // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
+      leadingDistribution: TextLeadingDistribution.even,
+      foreground: foreground,
+    );
 
     Widget iconWidget = RichText(
       overflow: TextOverflow.visible, // Never clip.
       textDirection: textDirection, // Since we already fetched it for the assert...
-      text: TextSpan(
-        text: String.fromCharCode(icon!.codePoint),
-        style: TextStyle(
-          fontVariations: <FontVariation>[
-            if (iconFill != null) FontVariation('FILL', iconFill),
-            if (iconWeight != null) FontVariation('wght', iconWeight),
-            if (iconGrade != null) FontVariation('GRAD', iconGrade),
-            if (iconOpticalSize != null) FontVariation('opsz', iconOpticalSize),
-          ],
-          inherit: false,
-          color: iconColor,
-          fontSize: iconSize,
-          fontFamily: icon!.fontFamily,
-          package: icon!.fontPackage,
-          shadows: iconShadows,
-        ),
-      ),
+      text: TextSpan(text: String.fromCharCode(icon.codePoint), style: fontStyle),
     );
 
-    if (icon!.matchTextDirection) {
+    if (icon.matchTextDirection) {
       switch (textDirection) {
         case TextDirection.rtl:
           iconWidget = Transform(
@@ -294,7 +334,6 @@ class Icon extends StatelessWidget {
             transformHitTests: false,
             child: iconWidget,
           );
-          break;
         case TextDirection.ltr:
           break;
       }
@@ -303,13 +342,7 @@ class Icon extends StatelessWidget {
     return Semantics(
       label: semanticLabel,
       child: ExcludeSemantics(
-        child: SizedBox(
-          width: iconSize,
-          height: iconSize,
-          child: Center(
-            child: iconWidget,
-          ),
-        ),
+        child: SizedBox(width: iconSize, height: iconSize, child: Center(child: iconWidget)),
       ),
     );
   }
@@ -327,5 +360,8 @@ class Icon extends StatelessWidget {
     properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<bool>('applyTextScaling', applyTextScaling, defaultValue: null),
+    );
   }
 }

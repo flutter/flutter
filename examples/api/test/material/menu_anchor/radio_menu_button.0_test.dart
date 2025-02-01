@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can open menu', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.MenuApp(),
-    );
+    await tester.pumpWidget(const example.MenuApp());
 
     await tester.tap(find.byType(TextButton));
     await tester.pump();
@@ -24,15 +22,13 @@ void main() {
     expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.red));
 
     await tester.tap(find.text('Green Background'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.green));
   });
 
   testWidgets('Shortcuts work', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.MenuApp(),
-    );
+    await tester.pumpWidget(const example.MenuApp());
 
     // Open the menu so we can watch state changes resulting from the shortcuts
     // firing.
@@ -53,7 +49,17 @@ void main() {
     // update the overlay entry.
     await tester.pump();
 
-    expect(tester.widget<Radio<Color>>(find.descendant(of: find.byType(RadioMenuButton<Color>).at(0), matching: find.byType(Radio<Color>))).groupValue, equals(Colors.green));
+    expect(
+      tester
+          .widget<Radio<Color>>(
+            find.descendant(
+              of: find.byType(RadioMenuButton<Color>).at(0),
+              matching: find.byType(Radio<Color>),
+            ),
+          )
+          .groupValue,
+      equals(Colors.green),
+    );
     expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.green));
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
@@ -62,7 +68,17 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(tester.widget<Radio<Color>>(find.descendant(of: find.byType(RadioMenuButton<Color>).at(1), matching: find.byType(Radio<Color>))).groupValue, equals(Colors.red));
+    expect(
+      tester
+          .widget<Radio<Color>>(
+            find.descendant(
+              of: find.byType(RadioMenuButton<Color>).at(1),
+              matching: find.byType(Radio<Color>),
+            ),
+          )
+          .groupValue,
+      equals(Colors.red),
+    );
     expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.red));
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
@@ -71,7 +87,29 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(tester.widget<Radio<Color>>(find.descendant(of: find.byType(RadioMenuButton<Color>).at(2), matching: find.byType(Radio<Color>))).groupValue, equals(Colors.blue));
+    expect(
+      tester
+          .widget<Radio<Color>>(
+            find.descendant(
+              of: find.byType(RadioMenuButton<Color>).at(2),
+              matching: find.byType(Radio<Color>),
+            ),
+          )
+          .groupValue,
+      equals(Colors.blue),
+    );
     expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.blue));
+  });
+
+  testWidgets('MenuAnchor is wrapped in a SafeArea', (WidgetTester tester) async {
+    const double safeAreaPadding = 100.0;
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(padding: EdgeInsets.symmetric(vertical: safeAreaPadding)),
+        child: example.MenuApp(),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byType(MenuAnchor)), const Offset(0.0, safeAreaPadding));
   });
 }

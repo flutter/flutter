@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'safe_area.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show DisplayFeature, DisplayFeatureState;
 
@@ -48,11 +54,7 @@ import 'media_query.dart';
 class DisplayFeatureSubScreen extends StatelessWidget {
   /// Creates a widget that positions its child so that it avoids display
   /// features.
-  const DisplayFeatureSubScreen({
-    super.key,
-    this.anchorPoint,
-    required this.child,
-  });
+  const DisplayFeatureSubScreen({super.key, this.anchorPoint, required this.child});
 
   /// {@template flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   /// The anchor point used to pick the closest sub-screen.
@@ -87,15 +89,22 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(anchorPoint != null || debugCheckHasDirectionality(
-        context,
-        why: 'to determine which sub-screen DisplayFeatureSubScreen uses',
-        alternative: "Alternatively, consider specifying the 'anchorPoint' argument on the DisplayFeatureSubScreen.",
-    ));
+    assert(
+      anchorPoint != null ||
+          debugCheckHasDirectionality(
+            context,
+            why: 'to determine which sub-screen DisplayFeatureSubScreen uses',
+            alternative:
+                "Alternatively, consider specifying the 'anchorPoint' argument on the DisplayFeatureSubScreen.",
+          ),
+    );
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Size parentSize = mediaQuery.size;
     final Rect wantedBounds = Offset.zero & parentSize;
-    final Offset resolvedAnchorPoint = _capOffset(anchorPoint ?? _fallbackAnchorPoint(context), parentSize);
+    final Offset resolvedAnchorPoint = _capOffset(
+      anchorPoint ?? _fallbackAnchorPoint(context),
+      parentSize,
+    );
     final Iterable<Rect> subScreens = subScreensInBounds(wantedBounds, avoidBounds(mediaQuery));
     final Rect closestSubScreen = _closestToAnchorPoint(subScreens, resolvedAnchorPoint);
 
@@ -106,21 +115,15 @@ class DisplayFeatureSubScreen extends StatelessWidget {
         right: parentSize.width - closestSubScreen.right,
         bottom: parentSize.height - closestSubScreen.bottom,
       ),
-      child: MediaQuery(
-        data: mediaQuery.removeDisplayFeatures(closestSubScreen),
-        child: child,
-      ),
+      child: MediaQuery(data: mediaQuery.removeDisplayFeatures(closestSubScreen), child: child),
     );
   }
 
   static Offset _fallbackAnchorPoint(BuildContext context) {
-    final TextDirection textDirection = Directionality.of(context);
-    switch (textDirection) {
-      case TextDirection.rtl:
-        return const Offset(double.maxFinite, 0);
-      case TextDirection.ltr:
-        return Offset.zero;
-    }
+    return switch (Directionality.of(context)) {
+      TextDirection.rtl => const Offset(double.maxFinite, 0),
+      TextDirection.ltr => Offset.zero,
+    };
   }
 
   /// Returns the areas of the screen that are obstructed by display features.
@@ -129,8 +132,10 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   /// not 0 or the `state` is [DisplayFeatureState.postureHalfOpened].
   static Iterable<Rect> avoidBounds(MediaQueryData mediaQuery) {
     return mediaQuery.displayFeatures
-        .where((DisplayFeature d) => d.bounds.shortestSide > 0 ||
-            d.state == DisplayFeatureState.postureHalfOpened)
+        .where(
+          (DisplayFeature d) =>
+              d.bounds.shortestSide > 0 || d.state == DisplayFeatureState.postureHalfOpened,
+        )
         .map((DisplayFeature d) => d.bounds);
   }
 
@@ -200,41 +205,34 @@ class DisplayFeatureSubScreen extends StatelessWidget {
           // Display feature splits the screen vertically
           if (screen.left < bounds.left) {
             // There is a smaller sub-screen, left of the display feature
-            newSubScreens.add(Rect.fromLTWH(
-              screen.left,
-              screen.top,
-              bounds.left - screen.left,
-              screen.height,
-            ));
+            newSubScreens.add(
+              Rect.fromLTWH(screen.left, screen.top, bounds.left - screen.left, screen.height),
+            );
           }
           if (screen.right > bounds.right) {
             // There is a smaller sub-screen, right of the display feature
-            newSubScreens.add(Rect.fromLTWH(
-              bounds.right,
-              screen.top,
-              screen.right - bounds.right,
-              screen.height,
-            ));
+            newSubScreens.add(
+              Rect.fromLTWH(bounds.right, screen.top, screen.right - bounds.right, screen.height),
+            );
           }
         } else if (screen.left >= bounds.left && screen.right <= bounds.right) {
           // Display feature splits the sub-screen horizontally
           if (screen.top < bounds.top) {
             // There is a smaller sub-screen, above the display feature
-            newSubScreens.add(Rect.fromLTWH(
-              screen.left,
-              screen.top,
-              screen.width,
-              bounds.top - screen.top,
-            ));
+            newSubScreens.add(
+              Rect.fromLTWH(screen.left, screen.top, screen.width, bounds.top - screen.top),
+            );
           }
           if (screen.bottom > bounds.bottom) {
             // There is a smaller sub-screen, below the display feature
-            newSubScreens.add(Rect.fromLTWH(
-              screen.left,
-              bounds.bottom,
-              screen.width,
-              screen.bottom - bounds.bottom,
-            ));
+            newSubScreens.add(
+              Rect.fromLTWH(
+                screen.left,
+                bounds.bottom,
+                screen.width,
+                screen.bottom - bounds.bottom,
+              ),
+            );
           }
         } else {
           newSubScreens.add(screen);
@@ -246,8 +244,10 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   }
 
   static Offset _capOffset(Offset offset, Size maximum) {
-    if (offset.dx >= 0 && offset.dx <= maximum.width
-        && offset.dy >=0 && offset.dy <= maximum.height) {
+    if (offset.dx >= 0 &&
+        offset.dx <= maximum.width &&
+        offset.dy >= 0 &&
+        offset.dy <= maximum.height) {
       return offset;
     } else {
       return Offset(

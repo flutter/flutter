@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'date_picker.dart';
+/// @docImport 'text_field.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'date.dart';
+import 'date_picker_theme.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material_localizations.dart';
@@ -41,9 +46,6 @@ class InputDatePickerFormField extends StatefulWidget {
   /// for [initialDate].
   ///
   /// [firstDate] must be on or before [lastDate].
-  ///
-  /// [firstDate], [lastDate], and [autofocus] must be non-null.
-  ///
   InputDatePickerFormField({
     super.key,
     DateTime? initialDate,
@@ -58,6 +60,8 @@ class InputDatePickerFormField extends StatefulWidget {
     this.fieldLabelText,
     this.keyboardType,
     this.autofocus = false,
+    this.acceptEmptyDate = false,
+    this.focusNode,
   }) : initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate) {
@@ -74,7 +78,9 @@ class InputDatePickerFormField extends StatefulWidget {
       'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.',
     );
     assert(
-      selectableDayPredicate == null || initialDate == null || selectableDayPredicate!(this.initialDate!),
+      selectableDayPredicate == null ||
+          initialDate == null ||
+          selectableDayPredicate!(this.initialDate!),
       'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate.',
     );
   }
@@ -130,6 +136,16 @@ class InputDatePickerFormField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
+  /// Determines if an empty date would show [errorFormatText] or not.
+  ///
+  /// Defaults to false.
+  ///
+  /// If true, [errorFormatText] is not shown when the date input field is empty.
+  final bool acceptEmptyDate;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
   @override
   State<InputDatePickerFormField> createState() => _InputDatePickerFormFieldState();
 }
@@ -168,7 +184,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
           _selectedDate = widget.initialDate;
           _updateValueForSelectedDate();
         });
-      });
+      }, debugLabel: 'InputDatePickerFormField.update');
     }
   }
 
@@ -179,10 +195,9 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       TextEditingValue textEditingValue = TextEditingValue(text: _inputText!);
       // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
-        textEditingValue = textEditingValue.copyWith(selection: TextSelection(
-          baseOffset: 0,
-          extentOffset: _inputText!.length,
-        ));
+        textEditingValue = textEditingValue.copyWith(
+          selection: TextSelection(baseOffset: 0, extentOffset: _inputText!.length),
+        );
         _autoSelected = true;
       }
       _controller.value = textEditingValue;
@@ -198,14 +213,16 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   }
 
   bool _isValidAcceptableDate(DateTime? date) {
-    return
-      date != null &&
-      !date.isBefore(widget.firstDate) &&
-      !date.isAfter(widget.lastDate) &&
-      (widget.selectableDayPredicate == null || widget.selectableDayPredicate!(date));
+    return date != null &&
+        !date.isBefore(widget.firstDate) &&
+        !date.isAfter(widget.lastDate) &&
+        (widget.selectableDayPredicate == null || widget.selectableDayPredicate!(date));
   }
 
   String? _validateDate(String? text) {
+    if ((text == null || text.isEmpty) && widget.acceptEmptyDate) {
+      return null;
+    }
     final DateTime? date = _parseDate(text);
     if (date == null) {
       return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
@@ -237,23 +254,32 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     final ThemeData theme = Theme.of(context);
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final DatePickerThemeData datePickerTheme = theme.datePickerTheme;
     final InputDecorationTheme inputTheme = theme.inputDecorationTheme;
-    final InputBorder inputBorder = inputTheme.border
-      ?? (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
+    final InputBorder effectiveInputBorder =
+        datePickerTheme.inputDecorationTheme?.border ??
+        theme.inputDecorationTheme.border ??
+        (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
 
-    return TextFormField(
-      decoration: InputDecoration(
-        border: inputBorder,
-        filled: inputTheme.filled,
-        hintText: widget.fieldHintText ?? localizations.dateHelpText,
-        labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
+    return Semantics(
+      container: true,
+      child: TextFormField(
+        decoration: InputDecoration(
+          hintText: widget.fieldHintText ?? localizations.dateHelpText,
+          labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
+        ).applyDefaults(
+          inputTheme
+              .merge(datePickerTheme.inputDecorationTheme)
+              .copyWith(border: effectiveInputBorder),
+        ),
+        validator: _validateDate,
+        keyboardType: widget.keyboardType ?? TextInputType.datetime,
+        onSaved: _handleSaved,
+        onFieldSubmitted: _handleSubmitted,
+        autofocus: widget.autofocus,
+        controller: _controller,
+        focusNode: widget.focusNode,
       ),
-      validator: _validateDate,
-      keyboardType: widget.keyboardType ?? TextInputType.datetime,
-      onSaved: _handleSaved,
-      onFieldSubmitted: _handleSubmitted,
-      autofocus: widget.autofocus,
-      controller: _controller,
     );
   }
 }

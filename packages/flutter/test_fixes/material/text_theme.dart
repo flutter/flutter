@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   // Changes made in https://github.com/flutter/flutter/pull/48547
-  var TextTheme textTheme = TextTheme(
+  var textTheme = TextTheme(
     display4: displayStyle4,
     display3: displayStyle3,
     display2: displayStyle2,
@@ -21,10 +21,10 @@ void main() {
     subtitle: subtitleStyle,
     overline: overlineStyle,
   );
-  var TextTheme textTheme = TextTheme(error: '');
+  var errorTextTheme = TextTheme(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/48547
-  var TextTheme copiedTextTheme = TextTheme.copyWith(
+  var copiedTextTheme = TextTheme.copyWith(
     display4: displayStyle4,
     display3: displayStyle3,
     display2: displayStyle2,
@@ -39,7 +39,7 @@ void main() {
     subtitle: subtitleStyle,
     overline: overlineStyle,
   );
-  var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
+  var errorCopiedTextTheme = TextTheme.copyWith(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/48547
   var style;
@@ -58,7 +58,7 @@ void main() {
   style = textTheme.overline;
 
   // Changes made in https://github.com/flutter/flutter/pull/109817
-  var TextTheme textTheme = TextTheme(
+  var anotherTextTheme = TextTheme(
     headline1: headline1Style,
     headline2: headline2Style,
     headline3: headline3Style,
@@ -73,10 +73,10 @@ void main() {
     button: buttonStyle,
     overline: overlineStyle,
   );
-  var TextTheme textTheme = TextTheme(error: '');
+  var anotherErrorTextTheme = TextTheme(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/109817
-  var TextTheme copiedTextTheme = TextTheme.copyWith(
+  var anotherCopiedTextTheme = TextTheme.copyWith(
     headline1: headline1Style,
     headline2: headline2Style,
     headline3: headline3Style,
@@ -91,7 +91,7 @@ void main() {
     button: buttonStyle,
     overline: overlineStyle,
   );
-  var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
+  var anotherErrorCopiedTextTheme = TextTheme.copyWith(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/109817
   var style;

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoSlidingSegmentedControl].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoSlidingSegmentedControl].
 
 enum Sky { midnight, viridian, cerulean }
 
-Map<Sky, Color> skyColors = <Sky, Color> {
+Map<Sky, Color> skyColors = <Sky, Color>{
   Sky.midnight: const Color(0xff191970),
   Sky.viridian: const Color(0xff40826d),
   Sky.cerulean: const Color(0xff007ba7),
@@ -60,24 +60,15 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
           children: const <Sky, Widget>{
             Sky.midnight: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Midnight',
-                style: TextStyle(color: CupertinoColors.white),
-              ),
+              child: Text('Midnight', style: TextStyle(color: CupertinoColors.white)),
             ),
             Sky.viridian: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Viridian',
-                style: TextStyle(color: CupertinoColors.white),
-              ),
+              child: Text('Viridian', style: TextStyle(color: CupertinoColors.white)),
             ),
             Sky.cerulean: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Cerulean',
-                style: TextStyle(color: CupertinoColors.white),
-              ),
+              child: Text('Cerulean', style: TextStyle(color: CupertinoColors.white)),
             ),
           },
         ),

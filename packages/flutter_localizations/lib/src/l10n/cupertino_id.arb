@@ -21,5 +21,11 @@
   "selectAllButtonLabel": "Pilih Semua",
   "tabSemanticsLabel": "Tab $tabIndex dari $tabCount",
   "modalBarrierDismissLabel": "Tutup",
-  "searchTextFieldPlaceholderLabel": "Telusuri"
+  "searchTextFieldPlaceholderLabel": "Telusuri",
+  "noSpellCheckReplacementsLabel": "Penggantian Tidak Ditemukan",
+  "menuDismissLabel": "Tutup menu",
+  "lookUpButtonLabel": "Cari",
+  "searchWebButtonLabel": "Telusuri di Web",
+  "shareButtonLabel": "Bagikan...",
+  "clearButtonLabel": "Hapus"
 }

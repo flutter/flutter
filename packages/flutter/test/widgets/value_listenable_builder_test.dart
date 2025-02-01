@@ -10,9 +10,7 @@ void main() {
   late SpyStringValueNotifier valueListenable;
   late Widget textBuilderUnderTest;
 
-  Widget builderForValueListenable(
-    ValueListenable<String?> valueListenable,
-  ) {
+  Widget builderForValueListenable(ValueListenable<String?> valueListenable) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: ValueListenableBuilder<String?>(
@@ -32,6 +30,10 @@ void main() {
     textBuilderUnderTest = builderForValueListenable(valueListenable);
   });
 
+  tearDown(() {
+    valueListenable.dispose();
+  });
+
   testWidgets('Null value is ok', (WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
@@ -39,7 +41,8 @@ void main() {
   });
 
   testWidgets('Widget builds with initial value', (WidgetTester tester) async {
-    valueListenable = SpyStringValueNotifier('Bachman');
+    final SpyStringValueNotifier valueListenable = SpyStringValueNotifier('Bachman');
+    addTearDown(valueListenable.dispose);
 
     await tester.pumpWidget(builderForValueListenable(valueListenable));
 
@@ -66,8 +69,8 @@ void main() {
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final ValueListenable<String?> differentListenable =
-        SpyStringValueNotifier('Hendricks');
+    final SpyStringValueNotifier differentListenable = SpyStringValueNotifier('Hendricks');
+    addTearDown(differentListenable.dispose);
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
 
@@ -75,15 +78,17 @@ void main() {
     expect(find.text('Hendricks'), findsOneWidget);
   });
 
-  testWidgets('Stops listening to old listenable after changing listenable', (WidgetTester tester) async {
+  testWidgets('Stops listening to old listenable after changing listenable', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final ValueListenable<String?> differentListenable =
-       SpyStringValueNotifier('Hendricks');
+    final SpyStringValueNotifier differentListenable = SpyStringValueNotifier('Hendricks');
+    addTearDown(differentListenable.dispose);
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
 

@@ -2,33 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for TextInputControl
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [TextInputControl].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const TextInputControlExampleApp());
+
+class TextInputControlExampleApp extends StatelessWidget {
+  const TextInputControlExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: MyStatefulWidget(),
-   );
+    return const MaterialApp(home: TextInputControlExample());
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class TextInputControlExample extends StatefulWidget {
+  const TextInputControlExample({super.key});
 
   @override
   MyStatefulWidgetState createState() => MyStatefulWidgetState();
 }
 
-class MyStatefulWidgetState extends State<MyStatefulWidget> {
+class MyStatefulWidgetState extends State<TextInputControlExample> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
@@ -94,7 +92,7 @@ class MyVirtualKeyboardState extends State<MyVirtualKeyboard> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: _inputControl.visible,
-      builder: (_, bool visible, __) {
+      builder: (_, bool visible, _) {
         return Visibility(
           visible: visible,
           child: FocusScope(
@@ -104,10 +102,7 @@ class MyVirtualKeyboardState extends State<MyVirtualKeyboard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   for (final String key in <String>['A', 'B', 'C'])
-                    ElevatedButton(
-                      child: Text(key),
-                      onPressed: () => _handleKeyPress(key),
-                    ),
+                    ElevatedButton(child: Text(key), onPressed: () => _handleKeyPress(key)),
                 ],
               ),
             ),

@@ -13,10 +13,10 @@ const String _kLayerMemory = 'LayerMBytes';
 const String _kPictureCount = 'PictureCount';
 const String _kPictureMemory = 'PictureMBytes';
 
-/// Summarizes [TimelineEvents]s corresponding to [kRasterCacheEvent] events.
+/// Summarizes [TimelineEvent]s corresponding to [kRasterCacheEvent] events.
 ///
 /// A sample event (some fields have been omitted for brevity):
-/// ```
+/// ```json
 ///     {
 ///       "name": "RasterCache",
 ///       "ts": 75598996256,
@@ -58,16 +58,20 @@ class RasterCacheSummarizer {
   double computeAveragePictureMemory() => _computeAverage(_pictureMemories);
 
   /// The [percentile]-th percentile `LayerCount` over the cache events.
-  double computePercentileLayerCount(double percentile) => _computePercentile(_layerCounts, percentile);
+  double computePercentileLayerCount(double percentile) =>
+      _computePercentile(_layerCounts, percentile);
 
   /// The [percentile]-th percentile `LayerMemory` over the cache events.
-  double computePercentileLayerMemory(double percentile) => _computePercentile(_layerMemories, percentile);
+  double computePercentileLayerMemory(double percentile) =>
+      _computePercentile(_layerMemories, percentile);
 
   /// The [percentile]-th percentile `PictureCount` over the cache events.
-  double computePercentilePictureCount(double percentile) => _computePercentile(_pictureCounts, percentile);
+  double computePercentilePictureCount(double percentile) =>
+      _computePercentile(_pictureCounts, percentile);
 
   /// The [percentile]-th percentile `PictureMemory` over the cache events.
-  double computePercentilePictureMemory(double percentile) => _computePercentile(_pictureMemories, percentile);
+  double computePercentilePictureMemory(double percentile) =>
+      _computePercentile(_pictureMemories, percentile);
 
   /// Computes the worst of the `LayerCount` values over the cache events.
   double computeWorstLayerCount() => _computeWorst(_layerCounts);

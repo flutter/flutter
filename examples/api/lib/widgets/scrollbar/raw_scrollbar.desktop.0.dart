@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Scrollbar].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [Scrollbar].
 
 void main() => runApp(const ScrollbarApp());
 
@@ -16,31 +16,35 @@ class ScrollbarApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Scrollbar Sample')),
-        body: const Center(
-          child: MyStatefulWidget(),
-        ),
+        body: const Center(child: DesktopExample()),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class DesktopExample extends StatefulWidget {
+  const DesktopExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DesktopExample> createState() => _DesktopExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  final ScrollController controller = ScrollController();
+class _DesktopExampleState extends State<DesktopExample> {
+  final ScrollController _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-      return Row(
-        children: <Widget>[
-          SizedBox(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Row(
+          children: <Widget>[
+            SizedBox(
               width: constraints.maxWidth / 2,
               // When running this sample on desktop, two scrollbars will be
               // visible here. One is the default scrollbar and the other is the
@@ -48,9 +52,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               child: Scrollbar(
                 thickness: 20.0,
                 thumbVisibility: true,
-                controller: controller,
+                controller: _controller,
                 child: ListView.builder(
-                  controller: controller,
+                  controller: _controller,
                   itemCount: 100,
                   itemBuilder: (BuildContext context, int index) {
                     return SizedBox(
@@ -62,8 +66,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     );
                   },
                 ),
-              )),
-          SizedBox(
+              ),
+            ),
+            SizedBox(
               width: constraints.maxWidth / 2,
               // When running this sample on desktop, one scrollbar will be
               // visible here. The default scrollbar is hidden by setting the
@@ -73,8 +78,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 thickness: 20.0,
                 thumbVisibility: true,
                 child: ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(context)
-                      .copyWith(scrollbars: false),
+                  behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
                   child: ListView.builder(
                     primary: true,
                     itemCount: 100,
@@ -89,9 +93,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     },
                   ),
                 ),
-              )),
-        ],
-      );
-    });
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

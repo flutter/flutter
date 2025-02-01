@@ -8,9 +8,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 
 class TestBuildSystem implements BuildSystem {
   /// Create a [BuildSystem] instance that returns the provided results in order.
-  TestBuildSystem.list(this._results, [this._onRun])
-    : _exception = null,
-      _singleResult = null;
+  TestBuildSystem.list(this._results, [this._onRun]) : _exception = null, _singleResult = null;
 
   /// Create a [BuildSystem] instance that returns the provided result for every build
   /// and buildIncremental request.
@@ -32,15 +30,19 @@ class TestBuildSystem implements BuildSystem {
   int _nextResult = 0;
 
   @override
-  Future<BuildResult> build(Target target, Environment environment, {BuildSystemConfig buildSystemConfig = const BuildSystemConfig()}) async {
+  Future<BuildResult> build(
+    Target target,
+    Environment environment, {
+    BuildSystemConfig buildSystemConfig = const BuildSystemConfig(),
+  }) async {
     if (_onRun != null) {
-      _onRun?.call(target, environment);
+      _onRun.call(target, environment);
     }
     if (_exception != null) {
-      throw _exception!;
+      throw _exception;
     }
     if (_singleResult != null) {
-      return _singleResult!;
+      return _singleResult;
     }
     if (_nextResult >= _results.length) {
       throw StateError('Unexpected build request of ${target.name}');
@@ -49,15 +51,19 @@ class TestBuildSystem implements BuildSystem {
   }
 
   @override
-  Future<BuildResult> buildIncremental(Target target, Environment environment, BuildResult? previousBuild) async {
+  Future<BuildResult> buildIncremental(
+    Target target,
+    Environment environment,
+    BuildResult? previousBuild,
+  ) async {
     if (_onRun != null) {
-      _onRun?.call(target, environment);
+      _onRun.call(target, environment);
     }
     if (_exception != null) {
-      throw _exception!;
+      throw _exception;
     }
     if (_singleResult != null) {
-      return _singleResult!;
+      return _singleResult;
     }
     if (_nextResult >= _results.length) {
       throw StateError('Unexpected buildIncremental request of ${target.name}');

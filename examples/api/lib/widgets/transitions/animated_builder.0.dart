@@ -2,38 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AnimatedBuilder].
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AnimatedBuilder].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AnimatedBuilderExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class AnimatedBuilderExampleApp extends StatelessWidget {
+  const AnimatedBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
-    );
+    return const MaterialApp(home: AnimatedBuilderExample());
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class AnimatedBuilderExample extends StatefulWidget {
+  const AnimatedBuilderExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AnimatedBuilderExample> createState() => _AnimatedBuilderExampleState();
 }
 
 /// AnimationControllers can be created with `vsync: this` because of
 /// TickerProviderStateMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+class _AnimatedBuilderExampleState extends State<AnimatedBuilderExample>
     with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 10),
@@ -54,15 +49,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
         width: 200.0,
         height: 200.0,
         color: Colors.green,
-        child: const Center(
-          child: Text('Whee!'),
-        ),
+        child: const Center(child: Text('Whee!')),
       ),
       builder: (BuildContext context, Widget? child) {
-        return Transform.rotate(
-          angle: _controller.value * 2.0 * math.pi,
-          child: child,
-        );
+        return Transform.rotate(angle: _controller.value * 2.0 * math.pi, child: child);
       },
     );
   }

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [showCupertinoDialog].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [showCupertinoDialog].
 
 void main() => runApp(const CupertinoDialogApp());
 
@@ -27,9 +27,7 @@ class CupertinoDialogExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Home'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('Home')),
       child: Center(
         child: CupertinoButton(
           onPressed: () {
@@ -42,8 +40,7 @@ class CupertinoDialogExample extends StatelessWidget {
   }
 
   @pragma('vm:entry-point')
-  static Route<Object?> _dialogBuilder(
-      BuildContext context, Object? arguments) {
+  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return CupertinoDialogRoute<void>(
       context: context,
       builder: (BuildContext context) {

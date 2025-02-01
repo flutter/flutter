@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'divider_theme.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'expand_icon.dart';
+import 'icon_button.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'mergeable_material.dart';
@@ -14,7 +18,7 @@ import 'theme.dart';
 
 const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
-    vertical: 64.0 - _kPanelHeaderCollapsedHeight,
+  vertical: 64.0 - _kPanelHeaderCollapsedHeight,
 );
 const EdgeInsets _kExpandIconPadding = EdgeInsets.all(12.0);
 
@@ -29,9 +33,7 @@ class _SaltedKey<S, V> extends LocalKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _SaltedKey<S, V>
-        && other.salt == salt
-        && other.value == value;
+    return other is _SaltedKey<S, V> && other.salt == salt && other.value == value;
   }
 
   @override
@@ -74,14 +76,14 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 class ExpansionPanel {
   /// Creates an expansion panel to be used as a child for [ExpansionPanelList].
   /// See [ExpansionPanelList] for an example on how to use this widget.
-  ///
-  /// The [headerBuilder], [body], and [isExpanded] arguments must not be null.
   ExpansionPanel({
     required this.headerBuilder,
     required this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
     this.backgroundColor,
+    this.splashColor,
+    this.highlightColor,
   });
 
   /// The widget builder that builds the expansion panels' header.
@@ -96,6 +98,28 @@ class ExpansionPanel {
   ///
   /// Defaults to false.
   final bool isExpanded;
+
+  /// Defines the splash color of the panel if [canTapOnHeader] is true,
+  /// or the splash color of the expand/collapse IconButton if [canTapOnHeader]
+  /// is false.
+  ///
+  /// If [canTapOnHeader] is false, and [ThemeData.useMaterial3] is
+  /// true, this field will be ignored, as [IconButton.splashColor]
+  /// will be ignored, and you should use [highlightColor] instead.
+  ///
+  /// If this is null, then the icon button will use its default splash color
+  /// [ThemeData.splashColor], and the panel will use its default splash color
+  /// [ThemeData.splashColor] (if [canTapOnHeader] is true).
+  final Color? splashColor;
+
+  /// Defines the highlight color of the panel if [canTapOnHeader] is true, or
+  /// the highlight color of the expand/collapse IconButton if [canTapOnHeader]
+  /// is false.
+  ///
+  /// If this is null, then the icon button will use its default highlight color
+  /// [ThemeData.highlightColor], and the panel will use its default highlight
+  /// color [ThemeData.highlightColor] (if [canTapOnHeader] is true).
+  final Color? highlightColor;
 
   /// Whether tapping on the panel's header will expand/collapse it.
   ///
@@ -118,17 +142,17 @@ class ExpansionPanel {
 ///
 /// See [ExpansionPanelList.radio] for a sample implementation.
 class ExpansionPanelRadio extends ExpansionPanel {
-
   /// An expansion panel that allows for radio functionality.
   ///
-  /// A unique [value] must be passed into the constructor. The
-  /// [headerBuilder], [body], [value] must not be null.
+  /// A unique [value] must be passed into the constructor.
   ExpansionPanelRadio({
     required this.value,
     required super.headerBuilder,
     required super.body,
     super.canTapOnHeader,
     super.backgroundColor,
+    super.splashColor,
+    super.highlightColor,
   });
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -139,25 +163,28 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// A material expansion panel list that lays out its children and animates
 /// expansions.
 ///
-/// Note that [expansionCallback] behaves differently for [ExpansionPanelList]
-/// and [ExpansionPanelList.radio].
+/// The [expansionCallback] is called when the expansion state changes. For
+/// normal [ExpansionPanelList] widgets, it is the responsibility of the parent
+/// widget to rebuild the [ExpansionPanelList] with updated values for
+/// [ExpansionPanel.isExpanded]. For [ExpansionPanelList.radio] widgets, the
+/// open state is tracked internally and the callback is invoked both for the
+/// previously open panel, which is closing, and the previously closed panel,
+/// which is opening.
 ///
 /// {@tool dartpad}
-/// Here is a simple example of how to implement ExpansionPanelList.
+/// Here is a simple example of how to use [ExpansionPanelList].
 ///
 /// ** See code in examples/api/lib/material/expansion_panel/expansion_panel_list.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [ExpansionPanel]
-///  * [ExpansionPanelList.radio]
+///  * [ExpansionPanel], which is used in the [children] property.
+///  * [ExpansionPanelList.radio], a variant of this widget where only one panel is open at a time.
 ///  * <https://material.io/design/components/lists.html#types>
 class ExpansionPanelList extends StatefulWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
   /// triggered when an expansion panel expand/collapse button is pushed.
-  ///
-  /// The [children] and [animationDuration] arguments must not be null.
   const ExpansionPanelList({
     super.key,
     this.children = const <ExpansionPanel>[],
@@ -167,15 +194,15 @@ class ExpansionPanelList extends StatefulWidget {
     this.dividerColor,
     this.elevation = 2,
     this.expandIconColor,
+    this.materialGapSize = 16.0,
   }) : _allowOnlyOnePanelOpen = false,
        initialOpenPanelValue = null;
 
   /// Creates a radio expansion panel list widget.
   ///
-  /// This widget allows for at most one panel in the list to be open.
-  /// The expansion panel callback is triggered when an expansion panel
-  /// expand/collapse button is pushed. The [children] and [animationDuration]
-  /// arguments must not be null. The [children] objects must be instances
+  /// This widget allows for at most one panel in the list to be open. The
+  /// expansion panel callback is triggered when an expansion panel
+  /// expand/collapse button is pushed. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
   ///
   /// {@tool dartpad}
@@ -193,6 +220,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.dividerColor,
     this.elevation = 2,
     this.expandIconColor,
+    this.materialGapSize = 16.0,
   }) : _allowOnlyOnePanelOpen = true;
 
   /// The children of the expansion panel list. They are laid out in a similar
@@ -208,10 +236,11 @@ class ExpansionPanelList extends StatefulWidget {
   /// passed to the second callback are the index of the panel that will close
   /// and false, marking that it will be closed.
   ///
-  /// For [ExpansionPanelList], the callback needs to setState when it's notified
-  /// about the closing/opening panel. On the other hand, the callback for
-  /// [ExpansionPanelList.radio] is intended to inform the parent widget of
-  /// changes, as the radio panels' open/close states are managed internally.
+  /// For [ExpansionPanelList], the callback should call [State.setState] when
+  /// it is notified about the closing/opening panel. On the other hand, the
+  /// callback for [ExpansionPanelList.radio] is intended to inform the parent
+  /// widget of changes, as the radio panels' open/close states are managed
+  /// internally.
   ///
   /// This callback is useful in order to keep track of the expanded/collapsed
   /// panels in a parent widget that may need to react to these changes.
@@ -248,6 +277,12 @@ class ExpansionPanelList extends StatefulWidget {
   /// {@macro flutter.material.ExpandIcon.color}
   final Color? expandIconColor;
 
+  /// Defines the [MaterialGap.size] of the [MaterialGap] which is placed
+  /// between the [ExpansionPanelList.children] when they're expanded.
+  ///
+  /// Defaults to `16.0`.
+  final double materialGapSize;
+
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
 }
@@ -261,8 +296,10 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     if (widget._allowOnlyOnePanelOpen) {
       assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values must be unique.');
       if (widget.initialOpenPanelValue != null) {
-        _currentOpenPanel =
-          searchPanelByValue(widget.children.cast<ExpansionPanelRadio>(), widget.initialOpenPanelValue);
+        _currentOpenPanel = searchPanelByValue(
+          widget.children.cast<ExpansionPanelRadio>(),
+          widget.initialOpenPanelValue,
+        );
       }
     }
   }
@@ -276,8 +313,10 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       // If the previous widget was non-radio ExpansionPanelList, initialize the
       // open panel to widget.initialOpenPanelValue
       if (!oldWidget._allowOnlyOnePanelOpen) {
-        _currentOpenPanel =
-          searchPanelByValue(widget.children.cast<ExpansionPanelRadio>(), widget.initialOpenPanelValue);
+        _currentOpenPanel = searchPanelByValue(
+          widget.children.cast<ExpansionPanelRadio>(),
+          widget.initialOpenPanelValue,
+        );
       }
     } else {
       _currentOpenPanel = null;
@@ -301,8 +340,6 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   void _handlePressed(bool isExpanded, int index) {
-    widget.expansionCallback?.call(index, isExpanded);
-
     if (widget._allowOnlyOnePanelOpen) {
       final ExpansionPanelRadio pressedChild = widget.children[index] as ExpansionPanelRadio;
 
@@ -321,9 +358,11 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         _currentOpenPanel = isExpanded ? null : pressedChild;
       });
     }
+    // !isExpanded is passed because, when _handlePressed, the state of the panel to expand is not yet expanded.
+    widget.expansionCallback?.call(index, !isExpanded);
   }
 
-  ExpansionPanelRadio? searchPanelByValue(List<ExpansionPanelRadio> panels, Object? value)  {
+  ExpansionPanelRadio? searchPanelByValue(List<ExpansionPanelRadio> panels, Object? value) {
     for (final ExpansionPanelRadio panel in panels) {
       if (panel.value == value) {
         return panel;
@@ -334,7 +373,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   @override
   Widget build(BuildContext context) {
-    assert(kElevationToShadow.containsKey(widget.elevation),
+    assert(
+      kElevationToShadow.containsKey(widget.elevation),
       'Invalid value for elevation. See the kElevationToShadow constant for'
       ' possible elevation values.',
     );
@@ -343,32 +383,41 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
     for (int index = 0; index < widget.children.length; index += 1) {
       if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1)) {
-        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
+        items.add(
+          MaterialGap(
+            key: _SaltedKey<BuildContext, int>(context, index * 2 - 1),
+            size: widget.materialGapSize,
+          ),
+        );
       }
 
       final ExpansionPanel child = widget.children[index];
-      final Widget headerWidget = child.headerBuilder(
-        context,
-        _isChildExpanded(index),
-      );
+      final Widget headerWidget = child.headerBuilder(context, _isChildExpanded(index));
 
-      Widget expandIconContainer = Container(
-        margin: const EdgeInsetsDirectional.only(end: 8.0),
-        child: ExpandIcon(
-          color: widget.expandIconColor,
-          isExpanded: _isChildExpanded(index),
-          padding: _kExpandIconPadding,
-          onPressed: !child.canTapOnHeader
-              ? (bool isExpanded) => _handlePressed(isExpanded, index)
-              : null,
+      Widget expandIconPadded = Padding(
+        padding: const EdgeInsetsDirectional.only(end: 8.0),
+        child: IgnorePointer(
+          ignoring: child.canTapOnHeader,
+          child: ExpandIcon(
+            color: widget.expandIconColor,
+            isExpanded: _isChildExpanded(index),
+            padding: _kExpandIconPadding,
+            splashColor: child.splashColor,
+            highlightColor: child.highlightColor,
+            onPressed: (bool isExpanded) => _handlePressed(isExpanded, index),
+          ),
         ),
       );
+
       if (!child.canTapOnHeader) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-        expandIconContainer = Semantics(
-          label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
+        expandIconPadded = Semantics(
+          label:
+              _isChildExpanded(index)
+                  ? localizations.expandedIconTapHint
+                  : localizations.collapsedIconTapHint,
           container: true,
-          child: expandIconContainer,
+          child: expandIconPadded,
         );
       }
       Widget header = Row(
@@ -384,12 +433,14 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               ),
             ),
           ),
-          expandIconContainer,
+          expandIconPadded,
         ],
       );
       if (child.canTapOnHeader) {
         header = MergeSemantics(
           child: InkWell(
+            splashColor: child.splashColor,
+            highlightColor: child.highlightColor,
             onTap: () => _handlePressed(_isChildExpanded(index), index),
             child: header,
           ),
@@ -403,12 +454,16 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
             children: <Widget>[
               header,
               AnimatedCrossFade(
-                firstChild: Container(height: 0.0),
+                firstChild: const LimitedBox(
+                  maxWidth: 0.0,
+                  child: SizedBox(width: double.infinity, height: 0),
+                ),
                 secondChild: child.body,
                 firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
                 secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
                 sizeCurve: Curves.fastOutSlowIn,
-                crossFadeState: _isChildExpanded(index) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                crossFadeState:
+                    _isChildExpanded(index) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                 duration: widget.animationDuration,
               ),
             ],
@@ -417,7 +472,12 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       );
 
       if (_isChildExpanded(index) && index != widget.children.length - 1) {
-        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 + 1)));
+        items.add(
+          MaterialGap(
+            key: _SaltedKey<BuildContext, int>(context, index * 2 + 1),
+            size: widget.materialGapSize,
+          ),
+        );
       }
     }
 

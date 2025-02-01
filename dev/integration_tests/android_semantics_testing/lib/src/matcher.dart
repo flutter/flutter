@@ -77,7 +77,11 @@ class _AndroidSemanticsMatcher extends Matcher {
     this.isHeading,
     this.isPassword,
     this.isLongClickable,
-  });
+  }) : assert(
+         ignoredActions == null || actions != null,
+         'actions must not be null if ignoredActions is not null',
+       ),
+       assert(ignoredActions == null || !actions!.any(ignoredActions.contains));
 
   final String? text;
   final String? className;
@@ -104,7 +108,7 @@ class _AndroidSemanticsMatcher extends Matcher {
       description.add(' with text: $text');
     }
     if (contentDescription != null) {
-      description.add( 'with contentDescription $contentDescription');
+      description.add('with contentDescription $contentDescription');
     }
     if (className != null) {
       description.add(' with className: $className');
@@ -114,6 +118,9 @@ class _AndroidSemanticsMatcher extends Matcher {
     }
     if (actions != null) {
       description.add(' with actions: $actions');
+    }
+    if (ignoredActions != null) {
+      description.add(' with ignoredActions: $ignoredActions');
     }
     if (rect != null) {
       description.add(' with rect: $rect');
@@ -170,16 +177,29 @@ class _AndroidSemanticsMatcher extends Matcher {
     }
     if (actions != null) {
       final List<AndroidSemanticsAction> itemActions = item.getActions();
+      if (ignoredActions != null) {
+        itemActions.removeWhere(ignoredActions!.contains);
+      }
       if (!unorderedEquals(actions!).matches(itemActions, matchState)) {
-        final List<String> actionsString = actions!.map<String>((AndroidSemanticsAction action) => action.toString()).toList()..sort();
-        final List<String> itemActionsString = itemActions.map<String>((AndroidSemanticsAction action) => action.toString()).toList()..sort();
-        final Set<AndroidSemanticsAction> unexpected = itemActions.toSet().difference(actions!.toSet());
-        final Set<String> unexpectedInString = itemActionsString.toSet().difference(actionsString.toSet());
-        final Set<String> missingInString = actionsString.toSet().difference(itemActionsString.toSet());
-        if (missingInString.isEmpty && ignoredActions != null && unexpected.every(ignoredActions!.contains)) {
+        final List<String> actionsString =
+            actions!.map<String>((AndroidSemanticsAction action) => action.toString()).toList()
+              ..sort();
+        final List<String> itemActionsString =
+            itemActions.map<String>((AndroidSemanticsAction action) => action.toString()).toList()
+              ..sort();
+        final Set<String> unexpectedInString = itemActionsString.toSet().difference(
+          actionsString.toSet(),
+        );
+        final Set<String> missingInString = actionsString.toSet().difference(
+          itemActionsString.toSet(),
+        );
+        if (missingInString.isEmpty && unexpectedInString.isEmpty) {
           return true;
         }
-        return _failWithMessage('Expected actions: $actionsString\nActual actions: $itemActionsString\nUnexpected: $unexpectedInString\nMissing: $missingInString', matchState);
+        return _failWithMessage(
+          'Expected actions: $actionsString\nActual actions: $itemActionsString\nUnexpected: $unexpectedInString\nMissing: $missingInString',
+          matchState,
+        );
       }
     }
     if (isChecked != null && isChecked != item.isChecked) {
@@ -214,13 +234,16 @@ class _AndroidSemanticsMatcher extends Matcher {
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription,
-      Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
     final String? failure = matchState['failure'] as String?;
-    if (failure == null) {
-      return mismatchDescription.add('hasAndroidSemantics matcher does not complete successfully');
-    }
-    return mismatchDescription.add(failure);
+    return mismatchDescription.add(
+      failure ?? 'hasAndroidSemantics matcher does not complete successfully',
+    );
   }
 
   bool _failWithMessage(String value, Map<dynamic, dynamic> matchState) {

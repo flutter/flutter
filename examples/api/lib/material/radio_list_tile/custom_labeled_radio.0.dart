@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for custom labeled radio.
-
 import 'package:flutter/gestures.dart';
 
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for custom labeled radio.
 
 void main() => runApp(const LabeledRadioApp());
 
@@ -61,10 +61,11 @@ class LinkedLabelRadio extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primary,
                 decoration: TextDecoration.underline,
               ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  debugPrint('Label has been tapped.');
-                },
+              recognizer:
+                  TapGestureRecognizer()
+                    ..onTap = () {
+                      debugPrint('Label has been tapped.');
+                    },
             ),
           ),
         ],

@@ -1,3 +1,9 @@
+# Do not remove or rename entries in this file, only add new ones
+# See https://github.com/flutter/flutter/issues/128635 for more context.
+
+# This is dynamic in a monorepo
+bin/internal/engine.version
+
 # Miscellaneous
 *.class
 *.lock
@@ -20,7 +26,8 @@
 .classpath
 .project
 .settings/
-.vscode/
+.vscode/*
+.ccls-cache
 
 # Flutter repo-specific
 /bin/cache/
@@ -32,6 +39,7 @@
 /dev/bots/android_tools/
 /dev/devicelab/ABresults*.json
 /dev/docs/doc/
+/dev/docs/api_docs.zip
 /dev/docs/flutter.docs.zip
 /dev/docs/lib/
 /dev/docs/pubspec.yaml
@@ -51,6 +59,7 @@ analysis_benchmark.json
 .flutter-plugins-dependencies
 **/generated_plugin_registrant.dart
 .packages
+.pub-preload-cache/
 .pub-cache/
 .pub/
 build/
@@ -108,11 +117,13 @@ unlinked_spec.ds
 **/xcuserdata/
 
 # Windows
+**/windows/flutter/ephemeral/
 **/windows/flutter/generated_plugin_registrant.cc
 **/windows/flutter/generated_plugin_registrant.h
 **/windows/flutter/generated_plugins.cmake
 
 # Linux
+**/linux/flutter/ephemeral/
 **/linux/flutter/generated_plugin_registrant.cc
 **/linux/flutter/generated_plugin_registrant.h
 **/linux/flutter/generated_plugins.cmake
@@ -130,3 +141,12 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+!.vscode/settings.json
+
+# Monorepo
+.cipd
+.gclient
+.gclient_entries
+.python-version
+.gclient_previous_custom_vars
+.gclient_previous_sync_commits

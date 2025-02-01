@@ -7,7 +7,7 @@ import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
-    let flutterViewController = FlutterViewController.init()
+    let flutterViewController = FlutterViewController()
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
@@ -24,7 +24,8 @@ class MainFlutterWindow: NSWindow {
     let channel = FlutterMethodChannel(name: "flavor",
                                        binaryMessenger: registrar.messenger)
     channel.setMethodCallHandler({ (call, result) in
-      let flavor = Bundle.main.infoDictionary?["Flavor"] as? String
+      let bundleIdentifier = Bundle.main.infoDictionary?["CFBundleName"] as? String
+      let flavor = bundleIdentifier?.split(separator: " ").last?.lowercased();
       result(flavor)
     })
   }

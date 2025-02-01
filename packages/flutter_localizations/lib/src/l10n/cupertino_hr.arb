@@ -26,5 +26,11 @@
   "selectAllButtonLabel": "Odaberi sve",
   "tabSemanticsLabel": "Kartica $tabIndex od $tabCount",
   "modalBarrierDismissLabel": "Odbaci",
-  "searchTextFieldPlaceholderLabel": "Pretraživanje"
+  "searchTextFieldPlaceholderLabel": "Pretraživanje",
+  "noSpellCheckReplacementsLabel": "Nema pronađenih zamjena",
+  "menuDismissLabel": "Odbacivanje izbornika",
+  "lookUpButtonLabel": "Pogled prema gore",
+  "searchWebButtonLabel": "Pretraži web",
+  "shareButtonLabel": "Dijeli...",
+  "clearButtonLabel": "Izbriši"
 }
