@@ -40,7 +40,7 @@ void WindowsConfigBuilder::AddDartEntrypointArgument(std::string_view arg) {
 
 void WindowsConfigBuilder::SetGpuPreference(
     FlutterDesktopGpuPreference gpu_preference) {
-    gpu_preference_ = gpu_preference
+  gpu_preference_ = gpu_preference;
 }
 
 FlutterDesktopEngineProperties WindowsConfigBuilder::GetEngineProperties()
@@ -68,7 +68,7 @@ FlutterDesktopEngineProperties WindowsConfigBuilder::GetEngineProperties()
     engine_properties.dart_entrypoint_argc = 0;
   }
 
-  engine_properties.gpu_preference = gpu_preference;
+  engine_properties.gpu_preference = gpu_preference_;
 
   return engine_properties;
 }

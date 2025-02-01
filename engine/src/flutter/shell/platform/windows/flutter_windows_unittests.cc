@@ -31,7 +31,7 @@ namespace {
 // An EGL manager that initializes EGL but fails to create surfaces.
 class HalfBrokenEGLManager : public egl::Manager {
  public:
-  HalfBrokenEGLManager() : egl::Manager(GpuPreference::NoPrefernce) {}
+  HalfBrokenEGLManager() : egl::Manager(GpuPreference::NoPreference) {}
 
   std::unique_ptr<egl::WindowSurface>
   CreateWindowSurface(HWND hwnd, size_t width, size_t height) override {
@@ -426,7 +426,7 @@ TEST_F(WindowsTest, GetGraphicsAdapterWithLowPowerPreference) {
 
   std::optional<LUID> luid = egl::Manager::GetLowPowerGpuLuid();
   if (!luid) {
-    GTEST_SKIP() << "Not able to find low power GPU, nothing to check."
+    GTEST_SKIP() << "Not able to find low power GPU, nothing to check.";
   }
   
   auto& context = GetContext();
