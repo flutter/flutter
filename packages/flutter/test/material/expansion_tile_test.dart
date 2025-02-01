@@ -503,6 +503,67 @@ void main() {
     expect(columnRect.bottom, paddingRect.bottom - 4);
   });
 
+  testWidgets('childrenSpacing default value', (WidgetTester tester) async {
+    const Key firstSizedBoxKey = Key('firstSizedBoxRect');
+    const Key secondSizedBoxKey = Key('secondSizedBoxRect');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              title: Text('title'),
+              children: <Widget>[
+                SizedBox(height: 100, width: 100, key: firstSizedBoxKey),
+                SizedBox(height: 100, width: 100, key: secondSizedBoxKey),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect firstSizedBoxRect = tester.getRect(find.byKey(firstSizedBoxKey));
+    final Rect secondSizedBoxRect = tester.getRect(find.byKey(secondSizedBoxKey));
+
+    // Checks that the vertical spacing between children is the default value
+    expect(secondSizedBoxRect.top - firstSizedBoxRect.bottom, 0);
+  });
+
+  testWidgets('ExpansionTile childrenSpacing test', (WidgetTester tester) async {
+    const Key firstSizedBoxKey = Key('firstSizedBoxRect');
+    const Key secondSizedBoxKey = Key('secondSizedBoxRect');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              title: Text('title'),
+              childrenSpacing: 5,
+              children: <Widget>[
+                SizedBox(height: 100, width: 100, key: firstSizedBoxKey),
+                SizedBox(height: 100, width: 100, key: secondSizedBoxKey),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect firstSizedBoxRect = tester.getRect(find.byKey(firstSizedBoxKey));
+    final Rect secondSizedBoxRect = tester.getRect(find.byKey(secondSizedBoxKey));
+
+    // Checks that the vertical spacing between children is the provided value
+    expect(secondSizedBoxRect.top - firstSizedBoxRect.bottom, 5);
+  });
+
   testWidgets('ExpansionTile.collapsedBackgroundColor', (WidgetTester tester) async {
     const Key expansionTileKey = Key('expansionTileKey');
     const Color backgroundColor = Colors.red;
