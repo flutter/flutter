@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 /// Flutter code sample for a [RawMenuAnchorGroup] that demonstrates
@@ -196,11 +195,10 @@ class _CustomSubmenuState extends State<CustomSubmenu> {
         return Positioned(
           top: info.anchorRect.bottom + 4,
           left: info.anchorRect.left,
-          // The overlay will be treated as a dialog. SemanticsProperties.label can
-          // be set to a localized string to describe the dialog.
-          child: Semantics.fromProperties(
+          // The overlay will be treated as a dialog.
+          child: Semantics(
+            scopesRoute: true,
             explicitChildNodes: true,
-            properties: const SemanticsProperties(scopesRoute: true),
             child: TapRegion(
               groupId: info.tapRegionGroupId,
               onTapOutside: (PointerDownEvent event) {
