@@ -219,7 +219,6 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
         expect(reloaded, isFalse);
         // this is the one where it say "uh, you broke into the debugger while reloading"
         await sawDebuggerPausedMessage1.future;
-        await flutter.resume();
         await reloadFuture; // this is the one where it times out because you're in the debugger
         expect(reloaded, isTrue);
         await flutter.hotReload(); // now we're already paused
