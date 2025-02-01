@@ -43,7 +43,7 @@ function follow_links() (
   echo "$file"
 )
 
-PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
+PROG_NAME="$(follow_links "${BASH_SOURCE}")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 SHARED_NAME="$BIN_DIR/internal/shared.sh"
 OS="$(uname -s)"
