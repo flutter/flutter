@@ -149,13 +149,18 @@ class Divider extends StatelessWidget {
   /// {@end-tool}
   final BorderRadius? borderRadius;
 
-  /// Creates a [BorderSide] for use in dividers, based on the provided [BuildContext].
+  /// Creates a [BorderSide] based on the given [context].
   ///
-  /// This method allows for the creation of a [BorderSide] with customizable properties,
-  /// such as color and width, based on the current theme or default values.
+  /// If [context] is provided, the method attempts to retrieve border properties
+  /// from the theme, such as color and width. If no theme is found, default
+  /// border values are used.
   ///
-  /// - [context]: The [BuildContext] used to look up the theme data. If `null`, default
-  ///   values will be used.
+  /// Example usage:
+  /// ```dart
+  /// BorderSide border = createBorderSide(context);
+  /// ```
+  ///
+  /// Returns a [BorderSide] with the determined properties.
   static BorderSide createBorderSide(BuildContext? context,
       {Color? color, double? width}) {
     final DividerThemeData? dividerTheme =
@@ -337,13 +342,18 @@ class VerticalDivider extends StatelessWidget {
   /// {@end-tool}
   final BorderRadius? borderRadius;
 
-  /// Creates a [BorderSide] for use in dividers, based on the provided [BuildContext].
+  /// Creates a [BorderSide] based on the given [context].
   ///
-  /// This method allows for the creation of a [BorderSide] with customizable properties,
-  /// such as color and width, based on the current theme or default values.
+  /// If [context] is provided, the method attempts to retrieve border properties
+  /// from the theme, such as color and width. If no theme is found, default
+  /// border values are used.
   ///
-  /// - [context]: The [BuildContext] used to look up the theme data. If `null`, default
-  ///   values will be used.
+  /// Example usage:
+  /// ```dart
+  /// BorderSide border = createBorderSide(context);
+  /// ```
+  ///
+  /// Returns a [BorderSide] with the determined properties.
   static BorderSide createBorderSide(BuildContext? context,
       {Color? color, double? width}) {
     final DividerThemeData? dividerTheme =
