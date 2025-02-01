@@ -493,7 +493,7 @@ void main() {
   });
 
   testWidgets(
-    'CupertinoApp has the correct default status bar icon brightness when the system is set to dark theme',
+    'CupertinoApp has the correct default status bar icon brightness when the system is set to dark',
     (WidgetTester tester) async {
       // Simulates setting the system to dark theme.
       await tester.pumpWidget(
