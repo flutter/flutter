@@ -83,7 +83,7 @@ class FlutterProjectBundle {
   // Engine switches.
   std::vector<std::string> engine_switches_;
 
-  // Preference for low power GPU.
+  // App's GPU preference.
   FlutterGpuPreference gpu_preference_;
 };
 
