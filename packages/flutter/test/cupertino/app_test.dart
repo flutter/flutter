@@ -481,21 +481,57 @@ void main() {
     },
   );
 
-  testWidgets('CupertinoApp has the correct default status bar icon brightness by default', (
+  testWidgets('CupertinoApp uses the dark SystemUIOverlayStyle when the background is light', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const CupertinoApp(home: CupertinoPageScaffold(child: Text('Hello'))));
-
-    expect(
-      SystemChrome.latestStyle,
-      const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark),
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.light),
+        home: CupertinoPageScaffold(child: Text('Hello')),
+      ),
     );
+
+    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
+  });
+
+  testWidgets('CupertinoApp uses the light SystemUIOverlayStyle when the background is dark', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoPageScaffold(child: Text('Hello')),
+      ),
+    );
+
+    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
   });
 
   testWidgets(
-    'CupertinoApp has the correct default status bar icon brightness when the system is set to dark',
+    'CupertinoApp uses the dark SystemUIOverlayStyle when theme brightness is null and the system is in light mode',
     (WidgetTester tester) async {
-      // Simulates setting the system to dark theme.
+      // The theme brightness is null by default.
+      // The system is in light mode by default.
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoApp(
+            builder: (BuildContext context, Widget? child) {
+              return const Placeholder();
+            },
+          ),
+        ),
+      );
+
+      expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
+    },
+  );
+
+  testWidgets(
+    'CupertinoApp uses the light SystemUIOverlayStyle when theme brightness is null and the system is in dark mode',
+    (WidgetTester tester) async {
+      // The theme brightness is null by default.
+      // Simulates setting the system to dark mode.
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark),
@@ -507,10 +543,7 @@ void main() {
         ),
       );
 
-      expect(
-        SystemChrome.latestStyle,
-        const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light),
-      );
+      expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
     },
   );
 

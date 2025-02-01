@@ -652,12 +652,11 @@ class _CupertinoAppState extends State<CupertinoApp> {
   Widget build(BuildContext context) {
     final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData())
         .resolveFrom(context);
-    final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+    final Brightness brightness =
+        effectiveThemeData.brightness ?? MediaQuery.platformBrightnessOf(context);
 
     SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarIconBrightness: brightness == Brightness.dark ? Brightness.light : Brightness.dark,
-      ),
+      brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
     );
 
     return ScrollConfiguration(
