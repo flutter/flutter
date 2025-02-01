@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../test_data/stateless_stateful_project.dart';
@@ -33,28 +34,39 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
 
     testWithoutContext('Can switch from stateless to stateful', () async {
       final Completer<void> completer = Completer<void>();
+      globals.printStatus('staterunning1');
       StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
         if (line.contains('STATELESS')) {
+          globals.printStatus('staterunning2');
           completer.complete();
         }
       });
+      globals.printStatus('staterunning3');
       await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
       // Wait for run to finish.
+      globals.printStatus('staterunning4');
       await completer.future;
+      globals.printStatus('staterunning5');
       await subscription.cancel();
+      globals.printStatus('staterunning6');
 
       await flutter.hotReload();
+      globals.printStatus('staterunning7');
       final StringBuffer stdout = StringBuffer();
       subscription = flutter.stdout.listen(stdout.writeln);
 
       // switch to stateful.
       project.toggleState();
+      globals.printStatus('staterunning8');
       await flutter.hotReload();
+      globals.printStatus('staterunning9');
 
       final String logs = stdout.toString();
 
       expect(logs, contains('STATEFUL'));
+      globals.printStatus('staterunning10');
       await subscription.cancel();
+      globals.printStatus('staterunning11');
     });
   });
 }

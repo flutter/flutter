@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
@@ -31,8 +32,11 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('hot reload works without error', () async {
+      globals.printStatus('running1');
       await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+      globals.printStatus('hotreload1');
       await flutter.hotReload();
+      globals.printStatus('hotreload2');
     });
 
     testWithoutContext('multiple overlapping hot reload are debounced and queued', () async {
