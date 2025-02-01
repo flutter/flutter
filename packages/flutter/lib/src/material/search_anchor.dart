@@ -649,6 +649,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     assert(anchorKey.currentContext != null);
     updateTweens(anchorKey.currentContext!);
     toggleVisibility?.call();
+    viewOnClose?.call();
     return super.didPop(result);
   }
 
@@ -666,7 +667,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     if (willDisposeSearchController) {
       searchController.dispose();
     }
-    viewOnClose?.call();
     super.dispose();
   }
 
