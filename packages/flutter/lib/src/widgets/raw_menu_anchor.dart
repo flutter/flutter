@@ -821,8 +821,9 @@ class MenuController {
     }
   }
 
-  /// Returns the [MenuController] of the ancestor [RawMenuAnchor] nearest to
-  /// the given `context`, if one exists. Otherwise, returns null.
+  /// Returns the [MenuController] of the ancestor [RawMenuAnchor] or
+  /// [RawMenuAnchorGroup] nearest to the given `context`, if one exists.
+  /// Otherwise, returns null.
   ///
   /// This method will not establish a dependency relationship, so the calling
   /// widget will not rebuild when the menu opens and closes, nor when the
@@ -831,12 +832,12 @@ class MenuController {
     return context.getInheritedWidgetOfExactType<_MenuControllerScope>()?.controller;
   }
 
-  /// Returns the [MenuController] of the ancestor [RawMenuAnchor] nearest to
-  /// the given `context`, if one exists. Otherwise, returns null.
+  /// Returns the value of [MenuController.isOpen] of the ancestor
+  /// [RawMenuAnchor] or [RawMenuAnchorGroup] nearest to the given `context`, if
+  /// one exists. Otherwise, returns null.
   ///
   /// This method will establish a dependency relationship, so the calling
-  /// widget will rebuild when the menu opens and closes, and when the
-  /// [MenuController] changes.
+  /// widget will rebuild when the menu opens and closes.
   static bool? maybeIsOpenOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_MenuControllerScope>()?.isOpen;
   }
