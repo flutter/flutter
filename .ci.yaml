@@ -578,7 +578,10 @@ targets:
     dimensions:
       os: "Linux"
     enabled_branches:
-      # Don't run this on release branches
+      # Produces docs for main-api.flutter.dev
+      # stable and beta are managed by the targets:
+      #   - Linux docs_deploy_beta
+      #   - Linux docs_deploy_stable
       - master
     properties:
       cores: "32"
