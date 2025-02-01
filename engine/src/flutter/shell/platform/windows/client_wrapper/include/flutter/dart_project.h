@@ -10,9 +10,14 @@
 
 namespace flutter {
 
+// Configures how the Flutter engine selects a GPU.
 enum class GpuPreference {
-    NoPreference,
-    LowPowerPreference,
+  // No preference.
+  NoPreference,
+  // Prefer energy efficiency over performance, such as an integrated GPU.
+  // This falls back to a high performance GPU if no low power GPU is
+  // available.
+  LowPowerPreference,
 };
 
 // A set of Flutter and Dart assets used to initialize a Flutter engine.
@@ -81,8 +86,9 @@ class DartProject {
     gpu_preference_ = gpu_preference;
   }
 
-  // Returns true if preference for low power GPU was requested.
-  bool gpu_preference() const { return gpu_preference_; }
+  // Returns the project's GPU preference.
+  // Defaults to NoPreference.
+  GpuPreference gpu_preference() const { return gpu_preference_; }
 
  private:
   // Accessors for internals are private, so that they can be changed if more

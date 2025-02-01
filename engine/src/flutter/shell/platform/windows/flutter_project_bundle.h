@@ -64,7 +64,7 @@ class FlutterProjectBundle {
     return dart_entrypoint_arguments_;
   }
 
-  // Returns true if low power GPU was requested.
+  // Returns the app's GPU preference.
   FlutterGpuPreference gpu_preference() const { return gpu_preference_; }
 
  private:
