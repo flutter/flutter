@@ -579,7 +579,7 @@ targets:
       os: "Linux"
     enabled_branches:
       # Don't run this on release branches
-      - master      
+      - master
     properties:
       cores: "32"
       dependencies: >-
