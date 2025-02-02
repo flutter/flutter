@@ -11,7 +11,11 @@ import '../test_driver.dart';
 import '../test_utils.dart';
 import 'hot_reload_with_asset.dart';
 
-void testAll({bool chrome = false, List<String> additionalCommandArgs = const <String>[]}) {
+void testAll({
+  bool chrome = false,
+  List<String> additionalCommandArgs = const <String>[],
+  Object? skip = false,
+}) {
   group('chrome: $chrome'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     late Directory tempDir;
@@ -82,5 +86,5 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       await flutter.hotRestart();
       await onSecondLoad.future;
     });
-  });
+  }, skip: skip);
 }

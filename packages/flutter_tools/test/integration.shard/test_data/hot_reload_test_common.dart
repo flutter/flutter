@@ -12,7 +12,11 @@ import '../test_driver.dart';
 import '../test_utils.dart';
 import 'hot_reload_project.dart';
 
-void testAll({bool chrome = false, List<String> additionalCommandArgs = const <String>[]}) {
+void testAll({
+  bool chrome = false,
+  List<String> additionalCommandArgs = const <String>[],
+  Object? skip = false,
+}) {
   group('chrome: $chrome'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     late Directory tempDir;
@@ -231,7 +235,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       // isolates, so this test will wait forever.
       skip: chrome,
     );
-  });
+  }, skip: skip);
 }
 
 bool _isHotReloadCompletionEvent(Map<String, Object?>? event) {
