@@ -33,39 +33,28 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
 
     testWithoutContext('Can switch from stateless to stateful', () async {
       final Completer<void> completer = Completer<void>();
-      print('staterunning1'); // ignore: avoid_print
       StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
         if (line.contains('STATELESS')) {
-          print('staterunning2'); // ignore: avoid_print
           completer.complete();
         }
       });
-      print('staterunning3'); // ignore: avoid_print
       await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
       // Wait for run to finish.
-      print('staterunning4'); // ignore: avoid_print
       await completer.future;
-      print('staterunning5'); // ignore: avoid_print
       await subscription.cancel();
-      print('staterunning6'); // ignore: avoid_print
 
       await flutter.hotReload();
-      print('staterunning7'); // ignore: avoid_print
       final StringBuffer stdout = StringBuffer();
       subscription = flutter.stdout.listen(stdout.writeln);
 
       // switch to stateful.
       project.toggleState();
-      print('staterunning8'); // ignore: avoid_print
       await flutter.hotReload();
-      print('staterunning9'); // ignore: avoid_print
 
       final String logs = stdout.toString();
 
       expect(logs, contains('STATEFUL'));
-      print('staterunning10'); // ignore: avoid_print
       await subscription.cancel();
-      print('staterunning11'); // ignore: avoid_print
     });
   });
 }
