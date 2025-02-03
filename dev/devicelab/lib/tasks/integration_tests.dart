@@ -139,6 +139,15 @@ TaskFunction createSolidColorTest({required bool enableImpeller}) {
   ).call;
 }
 
+// Can run on any system that has an adb connectible andoid device
+// (emulator or physical).
+TaskFunction createDisplayCutoutTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/display_cutout_rotation/',
+    'integration_test/display_cutout_test.dart',
+  ).call;
+}
+
 TaskFunction dartDefinesTask() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
