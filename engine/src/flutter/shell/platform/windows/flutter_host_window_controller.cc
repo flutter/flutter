@@ -100,7 +100,7 @@ bool FlutterHostWindowController::ModifyHostWindow(
   }
 
   Size const size_after = GetViewSize(view_id);
-  if (!(size_before == size_after)) {
+  if (size_before != size_after) {
     changed_size = size_after;
   }
 
