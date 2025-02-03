@@ -1524,14 +1524,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// a level 3 is a subsection of that, and so on.
   final int? headingLevel;
 
-  /// Provides hint values which override the default hints on supported
-  /// platforms.
+  /// Overrides the default accessibility hints provided by the platform.
   ///
-  /// On Android, If no hint overrides are used then default [hint] will be
-  /// combined with the [label]. Otherwise, the [hint] will be ignored as long
-  /// as there as at least one non-null hint override.
+  /// The [hintOverrides] property allows to specify custom accessibility
+  /// hints for screen readers and assistive technologies.
   ///
-  /// On iOS, these are always ignored and the default [hint] is used instead.
+  /// This property does not affect how the platform processes hints; it only sets
+  /// the custom text that will be read by assistive technology.
   final SemanticsHintOverrides? hintOverrides;
 
   /// The reading direction of the [label], [value], [increasedValue],
