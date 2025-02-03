@@ -613,7 +613,6 @@ void main() {
     expect(decoration.color, isSameColorAs(CupertinoColors.systemRed));
   });
 
-
   testWidgets("All CupertinoButton const maps keys' match the available style sizes", (
     WidgetTester tester,
   ) async {
