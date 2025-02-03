@@ -423,7 +423,6 @@ TEST_F(WindowsTest, GetGraphicsAdapter) {
 }
 
 TEST_F(WindowsTest, GetGraphicsAdapterWithLowPowerPreference) {
-
   std::optional<LUID> luid = egl::Manager::GetLowPowerGpuLuid();
   if (!luid) {
     GTEST_SKIP() << "Not able to find low power GPU, nothing to check.";
