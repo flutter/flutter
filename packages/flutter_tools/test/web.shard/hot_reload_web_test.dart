@@ -16,6 +16,7 @@ void main() {
     additionalCommandArgs: <String>[
       '--extra-front-end-options=--dartdevc-canary,--dartdevc-module-format=ddc',
     ],
-    skip: Platform.isWindows ? 'https://github.com/flutter/flutter/issues/162567' : false,
+    // https://github.com/flutter/flutter/issues/162567
+    skip: Platform.isWindows,
   );
 }

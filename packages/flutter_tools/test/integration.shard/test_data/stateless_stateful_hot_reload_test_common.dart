@@ -18,52 +18,47 @@ void testAll({
   List<String> additionalCommandArgs = const <String>[],
   Object? skip = false,
 }) {
-  group(
-    'chrome: $chrome'
-    '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}',
-    () {
-      late Directory tempDir;
-      final HotReloadProject project = HotReloadProject();
-      late FlutterRunTestDriver flutter;
+  group('chrome: $chrome'
+      '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
+    late Directory tempDir;
+    final HotReloadProject project = HotReloadProject();
+    late FlutterRunTestDriver flutter;
 
-      setUp(() async {
-        tempDir = createResolvedTempDirectorySync('hot_reload_test.');
-        await project.setUpIn(tempDir);
-        flutter = FlutterRunTestDriver(tempDir);
+    setUp(() async {
+      tempDir = createResolvedTempDirectorySync('hot_reload_test.');
+      await project.setUpIn(tempDir);
+      flutter = FlutterRunTestDriver(tempDir);
+    });
+
+    tearDown(() async {
+      await flutter.stop();
+      tryToDelete(tempDir);
+    });
+
+    testWithoutContext('Can switch from stateless to stateful', () async {
+      final Completer<void> completer = Completer<void>();
+      StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+        if (line.contains('STATELESS')) {
+          completer.complete();
+        }
       });
+      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+      // Wait for run to finish.
+      await completer.future;
+      await subscription.cancel();
 
-      tearDown(() async {
-        await flutter.stop();
-        tryToDelete(tempDir);
-      });
+      await flutter.hotReload();
+      final StringBuffer stdout = StringBuffer();
+      subscription = flutter.stdout.listen(stdout.writeln);
 
-      testWithoutContext('Can switch from stateless to stateful', () async {
-        final Completer<void> completer = Completer<void>();
-        StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
-          if (line.contains('STATELESS')) {
-            completer.complete();
-          }
-        });
-        await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
-        // Wait for run to finish.
-        await completer.future;
-        await subscription.cancel();
+      // switch to stateful.
+      project.toggleState();
+      await flutter.hotReload();
 
-        await flutter.hotReload();
-        final StringBuffer stdout = StringBuffer();
-        subscription = flutter.stdout.listen(stdout.writeln);
+      final String logs = stdout.toString();
 
-        // switch to stateful.
-        project.toggleState();
-        await flutter.hotReload();
-
-        final String logs = stdout.toString();
-
-        expect(logs, contains('STATEFUL'));
-        await subscription.cancel();
-      });
-    },
-    // [intended] Code that calls `testAll` links a bug if skipping.
-    skip: skip,
-  );
+      expect(logs, contains('STATEFUL'));
+      await subscription.cancel();
+    });
+  }, skip: skip);
 }
