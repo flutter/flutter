@@ -186,7 +186,7 @@ WidgetPreview preview() => WidgetPreview();''';
 
     const String expectedGeneratedFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:flutter_project/foo.dart' as _i1;import 'package:widget_preview/widget_preview.dart';List<WidgetPreview> previews() => [_i1.preview()];''';
+import 'package:flutter_project/foo.dart' as _i1;import 'package:flutter/widgets.dart';List<WidgetPreview> previews() => [_i1.preview()];''';
 
     testUsingContext(
       'start finds existing previews and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',

@@ -481,6 +481,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     await pub.interactively(
       <String>[
         pubAdd,
+        if (offline) '--offline',
         '--directory',
         widgetPreviewScaffoldProject.directory.path,
         '${rootProject.manifest.appName}:{"path":${rootProject.directory.path}}',
