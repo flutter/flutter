@@ -193,7 +193,7 @@ sealed class IOSSystemContextMenuItem {
   int get hashCode => title.hashCode;
 
   @override
-  boo operator ==(Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
