@@ -298,6 +298,7 @@
 /dev/devicelab/bin/tasks/windows_desktop_impeller.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/mac_desktop_impeller.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/linux_desktop_impeller.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/android_display_cutout.dart @reidbaker @flutter/android
 
 ## Host only framework tests
 # Linux docs_deploy_beta
