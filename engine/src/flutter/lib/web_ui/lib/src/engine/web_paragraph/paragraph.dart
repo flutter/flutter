@@ -1,17 +1,15 @@
 // Copyright 2025 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import '../dom.dart';
-import 'dart:typed_data';
-import 'package:meta/meta.dart';
-import 'package:ui/ui.dart' as ui;
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
+
 import 'layout.dart';
 import 'paint.dart';
 
-/// The web implementation of [ui.ParagraphStyle]
+/// The web implementation of  [ui.ParagraphStyle]
 @immutable
 class WebParagraphStyle implements ui.ParagraphStyle {
   WebParagraphStyle({
@@ -27,13 +25,12 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) : _defaultTextStyle =
-          WebTextStyle(fontFamily: fontFamily, fontSize: fontSize);
+  }) : _defaultTextStyle = WebTextStyle(fontFamily: fontFamily, fontSize: fontSize);
 
   final WebTextStyle _defaultTextStyle;
 
   WebTextStyle getTextStyle() {
-      return _defaultTextStyle;
+    return _defaultTextStyle;
   }
 
   @override
@@ -44,8 +41,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is WebParagraphStyle &&
-           _defaultTextStyle == other._defaultTextStyle;
+    return other is WebParagraphStyle && _defaultTextStyle == other._defaultTextStyle;
   }
 
   @override
@@ -57,9 +53,10 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   String toString() {
     String result = super.toString();
     assert(() {
-      result = 'WebParagraphStyle('
-               'defaultTextStyle: ${_defaultTextStyle ?? "unspecified"}'
-                ')';
+      result =
+          'WebParagraphStyle('
+          'defaultTextStyle: ${_defaultTextStyle ?? "unspecified"}'
+          ')';
       return true;
     }());
     return result;
@@ -68,20 +65,11 @@ class WebParagraphStyle implements ui.ParagraphStyle {
 
 @immutable
 class WebTextStyle implements ui.TextStyle {
-  factory WebTextStyle({
-    String? fontFamily,
-    double? fontSize
-  }) {
-    return WebTextStyle._(
-      originalFontFamily: fontFamily,
-      fontSize: fontSize,
-    );
+  factory WebTextStyle({String? fontFamily, double? fontSize}) {
+    return WebTextStyle._(originalFontFamily: fontFamily, fontSize: fontSize);
   }
 
-  WebTextStyle._({
-    required this.originalFontFamily,
-    required this.fontSize,
-  });
+  WebTextStyle._({required this.originalFontFamily, required this.fontSize});
 
   final String? originalFontFamily;
   final double? fontSize;
@@ -109,10 +97,7 @@ class WebTextStyle implements ui.TextStyle {
 
   @override
   int get hashCode {
-    return Object.hash(
-      originalFontFamily,
-      fontSize,
-    );
+    return Object.hash(originalFontFamily, fontSize);
   }
 
   @override
@@ -121,7 +106,7 @@ class WebTextStyle implements ui.TextStyle {
     assert(() {
       final double? fontSize = this.fontSize;
       result =
-      'WebTextStyle('
+          'WebTextStyle('
           'fontFamily: ${originalFontFamily ?? "unspecified"}, '
           'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : "unspecified"} '
           ')';
@@ -214,13 +199,12 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   List<ui.TextBox> getBoxesForRange(
-      int start,
-      int end, {
-        ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-        ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
-      }) {
+    int start,
+    int end, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
     return <ui.TextBox>[];
-
   }
 
   @override
@@ -246,7 +230,6 @@ class WebParagraph implements ui.Paragraph {
   @override
   void layout(ui.ParagraphConstraints constraints) {
     try {
-
       _layout.performLayout();
       for (final textCluster in _layout.textClusters) {
         _paint.printTextCluster(textCluster);
@@ -254,8 +237,8 @@ class WebParagraph implements ui.Paragraph {
     } catch (e) {
       printWarning(
         'Canvas 2D threw an exception while laying '
-            'out the paragraph. '
-            'Exception:\n$e',
+        'out the paragraph. '
+        'Exception:\n$e',
       );
       rethrow;
     }
@@ -263,7 +246,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-      return ui.TextRange(start: 0,end: 0);
+    return ui.TextRange(start: 0, end: 0);
   }
 
   @override
@@ -317,13 +300,13 @@ class WebParagraph implements ui.Paragraph {
 
 class WebLineMetrics implements ui.LineMetrics {
   @override
-  double get ascent =>  0.0;
+  double get ascent => 0.0;
 
   @override
-  double get descent =>  0.0;
+  double get descent => 0.0;
 
   @override
-  double get unscaledAscent =>  0.0;
+  double get unscaledAscent => 0.0;
 
   @override
   bool get hardBreak => false;
@@ -344,31 +327,29 @@ class WebLineMetrics implements ui.LineMetrics {
   int get lineNumber => 0;
 }
 
-class WebParagraphPlaceholder { }
+class WebParagraphPlaceholder {}
 
 class WebParagraphBuilder implements ui.ParagraphBuilder {
-  WebParagraphBuilder(ui.ParagraphStyle style)
-      : _style = style as WebParagraphStyle {
-  }
+  WebParagraphBuilder(ui.ParagraphStyle style) : _style = style as WebParagraphStyle {}
 
   final WebParagraphStyle _style;
   String _text = '';
 
   @override
   void addPlaceholder(
-      double width,
-      double height,
-      ui.PlaceholderAlignment alignment, {
-        double scale = 1.0,
-        double? baselineOffset,
-        ui.TextBaseline? baseline,
-      }) {}
+    double width,
+    double height,
+    ui.PlaceholderAlignment alignment, {
+    double scale = 1.0,
+    double? baselineOffset,
+    ui.TextBaseline? baseline,
+  }) {}
 
   void _addPlaceholder(WebParagraphPlaceholder placeholderStyle) {}
 
   @override
   void addText(String text) {
-      _text += text;
+    _text += text;
   }
 
   @override

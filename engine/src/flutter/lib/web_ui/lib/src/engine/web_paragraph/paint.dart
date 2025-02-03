@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -17,7 +15,6 @@ final DomCanvasRenderingContext2D textContext =
     // possible to save memory.
     createDomCanvasElement(width: 0, height: 0).context2D;
 
-
 /// Performs layout on a [CanvasParagraph].
 ///
 /// It uses a [DomCanvasElement] to get text information
@@ -28,7 +25,6 @@ class TextPaint {
   ui.Rect _bounds = ui.Rect.zero;
 
   void printTextCluster(WebTextCluster textCluster) {
-      print('[${textCluster.begin()}:${textCluster.end()}): ${textCluster.text()}\n');
+    print('[${textCluster.begin()}:${textCluster.end()}): ${textCluster.text()}\n');
   }
-
 }
