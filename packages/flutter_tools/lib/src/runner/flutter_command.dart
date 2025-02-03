@@ -1575,6 +1575,11 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  @override
+  void printUsage() {
+    globals.logger.printStatus(usage);
+  }
+
   @visibleForOverriding
   String get deprecationWarning {
     return '${globals.logger.terminal.warningMark} The "$name" command is '
@@ -1800,14 +1805,6 @@ abstract class FlutterCommand extends Command<void> {
     final Duration elapsedDuration = (commandResult.endTimeOverride ?? endTime).difference(
       startTime,
     );
-    globals.flutterUsage.sendTiming(
-      'flutter',
-      name,
-      elapsedDuration,
-      // Report in the form of `success-[parameter1-parameter2]`, all of which
-      // can be null if the command doesn't provide a FlutterCommandResult.
-      label: label == '' ? null : label,
-    );
     analytics.send(
       Event.timing(
         workflow: 'flutter',
@@ -1882,7 +1879,6 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
-        usage: globals.flutterUsage,
         analytics: analytics,
         projectDir: project.directory,
         packageConfigPath: packageConfigPath(),

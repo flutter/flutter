@@ -71,6 +71,7 @@ void main() {
       expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     },
     overrides: <Type, Generator>{
+      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -209,14 +210,13 @@ flutter:
         logger.statusText,
         contains('Because l10n.yaml exists, the options defined there will be used instead.'),
       );
-      final Directory outputDirectory = fileSystem.directory(
-        fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'),
-      );
+      final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
       expect(outputDirectory.existsSync(), true);
       expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
       expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     },
     overrides: <Type, Generator>{
+      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -293,6 +293,7 @@ flutter:
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
+      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -341,6 +342,7 @@ format: true
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
+      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -401,6 +403,7 @@ untranslated-messages-file: lib/l10n/untranslated.json
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
+      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -485,6 +488,7 @@ format: true
       );
     },
     overrides: <Type, Generator>{
+      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -626,6 +630,7 @@ format: true
         expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
       },
       overrides: <Type, Generator>{
+        FeatureFlags: enableExplicitPackageDependencies,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },
