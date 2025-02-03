@@ -24,6 +24,7 @@ import '../ios/code_signing.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'create_base.dart';
 
@@ -153,6 +154,15 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
   @override
   String get invocation => '${runner?.executableName} $name <output directory>';
+
+  @override
+  Future<CustomDimensions> get usageValues async {
+    return CustomDimensions(
+      commandCreateProjectType: stringArg('template'),
+      commandCreateAndroidLanguage: stringArg('android-language'),
+      commandCreateIosLanguage: stringArg('ios-language'),
+    );
+  }
 
   @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => Event.commandUsageValues(
