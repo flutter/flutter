@@ -26,7 +26,7 @@ class TextLayout {
   List<WebTextCluster> textClusters = <WebTextCluster>[];
 
   void performLayout() {
-    final textMetrics = textContext.measureText(paragraph.text) as WebTextMetrics;
+    final textMetrics = textContext.measureText(paragraph.text) as DomTextMetrics;
     textClusters = textMetrics.getTextClusters();
   }
 }
