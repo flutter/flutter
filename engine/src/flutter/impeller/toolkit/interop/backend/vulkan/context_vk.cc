@@ -27,6 +27,20 @@ CreateShaderLibraryMappings() {
           impeller_compute_shaders_vk_data, impeller_compute_shaders_vk_length),
   };
 }
+// This bit is complicated by the fact that impeller::ContextVK::Settings takes
+// a raw function pointer to the callback.
+thread_local std::function<PFN_vkVoidFunction(VkInstance instance,
+                                              const char* proc_name)>
+    sContextVKProcAddressCallback;
+
+VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL ContextVKGetInstanceProcAddress(
+    VkInstance instance,
+    const char* proc_name) {
+  if (sContextVKProcAddressCallback) {
+    return sContextVKProcAddressCallback(instance, proc_name);
+  }
+  return nullptr;
+}
 
 ScopedObject<Context> ContextVK::Create(const Settings& settings) {
   if (!settings.IsValid()) {
@@ -37,20 +51,11 @@ ScopedObject<Context> ContextVK::Create(const Settings& settings) {
   impeller_settings.shader_libraries_data = CreateShaderLibraryMappings();
   impeller_settings.cache_directory = fml::paths::GetCachesDirectory();
   impeller_settings.enable_validation = true;
-  // This bit is complicated by the fact that impeller::ContextVK::Settings take
-  // a raw function pointer to the callback.
-  thread_local decltype(settings.instance_proc_address_callback) sCallback;
-  sCallback = settings.instance_proc_address_callback;
-  impeller_settings.proc_address_callback =
-      [](VkInstance instance, const char* proc_name) -> PFN_vkVoidFunction {
-    if (sCallback) {
-      return sCallback(instance, proc_name);
-    }
-    return nullptr;
-  };
+  sContextVKProcAddressCallback = settings.instance_proc_address_callback;
+  impeller_settings.proc_address_callback = ContextVKGetInstanceProcAddress;
   auto impeller_context =
       impeller::ContextVK::Create(std::move(impeller_settings));
-  sCallback = nullptr;
+  sContextVKProcAddressCallback = nullptr;
   if (!impeller_context) {
     VALIDATION_LOG << "Could not create Impeller context.";
     return {};
