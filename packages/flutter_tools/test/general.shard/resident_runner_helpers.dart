@@ -397,6 +397,9 @@ class FakeDevice extends Fake implements Device {
   String get name => 'FakeDevice';
 
   @override
+  String get displayName => name;
+
+  @override
   late DartDevelopmentService dds = FakeDartDevelopmentService();
 
   @override
@@ -485,6 +488,7 @@ class FakeDevFS extends Fake implements DevFS {
     AssetBundle? bundle,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
+    bool resetCompiler = false,
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
