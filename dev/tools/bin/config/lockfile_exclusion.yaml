@@ -6,6 +6,8 @@
 # Kotlin Gradle settings file (only a groovy one), so we currently can't generate it.
 - examples/hello_world/android
 
+- dev/integration_tests/display_cutout_rotation/android
+
 # The following files must also be manually updated at the moment, because they don't use a
 # lib/main.dart (but they don't need exclusion, as we already skip that case).
 # dev/benchmarks/microbenchmarks/android/build.gradle
