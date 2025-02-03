@@ -428,7 +428,7 @@ TEST_F(WindowsTest, GetGraphicsAdapterWithLowPowerPreference) {
   if (!luid) {
     GTEST_SKIP() << "Not able to find low power GPU, nothing to check.";
   }
-  
+
   auto& context = GetContext();
   WindowsConfigBuilder builder(context);
   builder.SetGpuPreference(FlutterDesktopGpuPreference::LowPowerPreference);

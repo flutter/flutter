@@ -18,8 +18,8 @@ using UniqueAotDataPtr =
     std::unique_ptr<_FlutterEngineAOTData, FlutterEngineCollectAOTDataFnPtr>;
 
 enum class FlutterGpuPreference {
-    NoPreference,
-    LowPowerPreference,
+  NoPreference,
+  LowPowerPreference,
 };
 
 // The data associated with a Flutter project needed to run it in an engine.

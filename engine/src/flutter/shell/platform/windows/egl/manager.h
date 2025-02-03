@@ -30,8 +30,8 @@ namespace flutter {
 namespace egl {
 
 enum class GpuPreference {
-    NoPreference,
-    LowPowerPreference,
+  NoPreference,
+  LowPowerPreference,
 };
 
 // A manager for initializing ANGLE correctly and using it to create and

@@ -87,7 +87,8 @@ class WindowsConfigBuilder {
   std::string dart_entrypoint_;
   std::vector<std::string> dart_entrypoint_arguments_;
 
-  FlutterDesktopGpuPreference gpu_preference_ = FlutterDesktopGpuPreference::NoPreference;
+  FlutterDesktopGpuPreference gpu_preference_ =
+      FlutterDesktopGpuPreference::NoPreference;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowsConfigBuilder);
 };
