@@ -285,13 +285,28 @@ void main() {
     expect(pressed, isTrue);
   });
 
-  testWidgets('The status bar icons are dark by default', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: Center(child: Text('test')))));
-
-    expect(
-      SystemChrome.latestStyle,
-      const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark),
+  testWidgets('Material uses the dark SystemUIOverlayStyle when the background is light', (
+      WidgetTester tester,
+      ) async {
+    final ThemeData lightTheme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(theme: lightTheme, home: const Scaffold(body: Center(child: Text('test')))),
     );
+
+    expect(lightTheme.colorScheme.brightness, Brightness.light);
+    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
+  });
+
+  testWidgets('Material uses the light SystemUIOverlayStyle when the background is dark', (
+    WidgetTester tester,
+  ) async {
+    final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(theme: darkTheme, home: const Scaffold(body: Center(child: Text('test')))),
+    );
+
+    expect(darkTheme.colorScheme.brightness, Brightness.dark);
+    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
   });
 
   group('Surface Tint Overlay', () {
