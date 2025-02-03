@@ -55,8 +55,7 @@ import 'text_selection_toolbar_anchors.dart';
 class SystemContextMenu extends StatefulWidget {
   /// Creates an instance of [SystemContextMenu] that points to the given
   /// [anchor].
-  SystemContextMenu._({super.key, required this.anchor, required this.items, this.onSystemHide})
-    : assert(items.isNotEmpty);
+  SystemContextMenu._({super.key, required this.anchor, required this.items, this.onSystemHide});
 
   /// Creates an instance of [SystemContextMenu] for the field indicated by the
   /// given [EditableTextState].
@@ -155,10 +154,13 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   Widget build(BuildContext context) {
     assert(SystemContextMenu.isSupported(context));
-    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    final List<IOSSystemContextMenuItemData> itemDatas =
-        widget.items.map((IOSSystemContextMenuItem item) => item._getData(localizations)).toList();
-    _systemContextMenuController.show(widget.anchor, itemDatas);
+
+    if (widget.items.isNotEmpty) {
+      final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+      final List<IOSSystemContextMenuItemData> itemDatas =
+          widget.items.map((IOSSystemContextMenuItem item) => item._getData(localizations)).toList();
+      _systemContextMenuController.show(widget.anchor, itemDatas);
+    }
 
     return const SizedBox.shrink();
   }
