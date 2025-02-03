@@ -705,12 +705,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return false;
     }
 
-    // if (!result.stdout.contains('libapp.so.sym')) {
-    //   _logger.printTrace(
-    //     'libapp.so.sym not present when checking final appbundle for debug symbols.',
-    //   );
-    //   return false;
-    // }
+    if (!result.stdout.contains('libapp.so.sym')) {
+      _logger.printTrace(
+        'libapp.so.sym not present when checking final appbundle for debug symbols.',
+      );
+      return false;
+    }
 
     return true;
   }
