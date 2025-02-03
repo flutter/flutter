@@ -176,9 +176,8 @@ void main() {
     );
 
     const String samplePreviewFile = '''
-// This doesn't need to be valid code for testing as long as it has the @Preview() annotation
 @Preview()
-WidgetPreview preview() => WidgetPreview();''';
+WidgetPreview preview() => const WidgetPreview(child: Text('Foo'));''';
 
     const String expectedGeneratedFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
