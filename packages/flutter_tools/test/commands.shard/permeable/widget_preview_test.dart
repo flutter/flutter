@@ -90,11 +90,7 @@ void main() {
     final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
       rootProject: rootProject ?? fs.currentDirectory,
     );
-    expect(widgetPreviewScaffoldDir, exists);
-    expect(
-      widgetPreviewScaffoldDir.childFile(PreviewCodeGenerator.generatedPreviewFilePath),
-      exists,
-    );
+    await analyzeProject(widgetPreviewScaffoldDir.path);
   }
 
   Future<void> cleanWidgetPreview({required Directory rootProject}) async {
