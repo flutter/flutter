@@ -946,6 +946,14 @@ abstract class RouteTransitionRecord {
   /// route to indicate that the route should be completed with the provided
   /// result and removed from the [Navigator] without an animated transition.
   void markForComplete([dynamic result]);
+
+  /// Marks the [route] to be removed without transition.
+  ///
+  /// During [TransitionDelegate.resolve], this can be called on an exiting
+  /// route to indicate that the route should be removed from the [Navigator]
+  /// without completing and without an animated transition.
+  @Deprecated('Use markForComplete instead.')
+  void markForRemove();
 }
 
 /// The delegate that decides how pages added and removed from [Navigator.pages]
@@ -2527,8 +2535,8 @@ class Navigator extends StatefulWidget {
   /// the new route, are all notified (see [Route.didReplace],
   /// [Route.didChangeNext], and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didReplace]). The removed route is disposed, and the
-  /// future that had been returned from pushing that routes will complete.
+  /// [NavigatorObserver.didReplace]). The removed route is disposed with its
+  /// future completed.
   ///
   /// This can be useful in combination with [removeRouteBelow] when building a
   /// non-linear user experience.
@@ -2596,8 +2604,8 @@ class Navigator extends StatefulWidget {
   /// the new route, are all notified (see [Route.didReplace],
   /// [Route.didChangeNext], and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didReplace]). The removed route is disposed, and the
-  /// future that had been returned from pushing that route will complete.
+  /// [NavigatorObserver.didReplace]). The removed route is disposed with its
+  /// future completed.
   ///
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
@@ -2793,8 +2801,8 @@ class Navigator extends StatefulWidget {
   /// The routes below and above the removed route are notified (see
   /// [Route.didChangeNext] and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didRemove]). The removed route is disposed, and the
-  /// future that had been returned from pushing that route will complete.
+  /// [NavigatorObserver.didRemove]). The removed route is disposed with its
+  /// future completed.
   ///
   /// The given `route` must be in the history; this method will throw an
   /// exception if it is not.
@@ -2829,8 +2837,8 @@ class Navigator extends StatefulWidget {
   /// The routes below and above the removed route are notified (see
   /// [Route.didChangeNext] and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didRemove]). The removed route is disposed, and the
-  /// future that had been returned from pushing that route will complete.
+  /// [NavigatorObserver.didRemove]). The removed route is disposed with its
+  /// future completed.
   ///
   /// The given `anchorRoute` must be in the history and must have a route below
   /// it; this method will throw an exception if it is not or does not.
