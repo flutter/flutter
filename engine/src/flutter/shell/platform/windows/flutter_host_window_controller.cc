@@ -39,7 +39,9 @@ FlutterHostWindowController::~FlutterHostWindowController() {
 std::optional<WindowMetadata> FlutterHostWindowController::CreateHostWindow(
     WindowCreationSettings const& settings) {
   auto window = std::make_unique<FlutterHostWindow>(this, settings);
+
   if (!window->GetWindowHandle()) {
+    FML_LOG(ERROR) << "Failed to create host window";
     return std::nullopt;
   }
 
@@ -66,6 +68,7 @@ bool FlutterHostWindowController::ModifyHostWindow(
     WindowModificationSettings const& settings) const {
   FlutterHostWindow* const window = GetHostWindow(view_id);
   if (!window) {
+    FML_LOG(ERROR) << "Failed to find window with view ID " << view_id;
     return false;
   }
 
@@ -96,13 +99,16 @@ bool FlutterHostWindowController::ModifyHostWindow(
 
 bool FlutterHostWindowController::DestroyHostWindow(
     FlutterViewId view_id) const {
-  if (FlutterHostWindow* const window = GetHostWindow(view_id)) {
-    // |window| will be removed from |windows_| when WM_NCDESTROY is handled.
-    PostMessage(window->GetWindowHandle(), WM_CLOSE, 0, 0);
-
-    return true;
+  FlutterHostWindow* const window = GetHostWindow(view_id);
+  if (!window) {
+    FML_LOG(ERROR) << "Failed to find window with view ID " << view_id;
+    return false;
   }
-  return false;
+
+  // |window| will be removed from |windows_| when WM_NCDESTROY is handled.
+  PostMessage(window->GetWindowHandle(), WM_CLOSE, 0, 0);
+
+  return true;
 }
 
 FlutterHostWindow* FlutterHostWindowController::GetHostWindow(
