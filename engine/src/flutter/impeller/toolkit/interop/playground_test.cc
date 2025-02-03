@@ -149,7 +149,7 @@ static ScopedObject<Context> CreateSharedContext(
   switch (backend) {
 #if IMPELLER_ENABLE_METAL
     case PlaygroundBackend::kMetal:
-      return ContextMTL::Create(std::move(shared_context));
+      return ContextMTL::Create(shared_context);
 #endif
 #if IMPELLER_ENABLE_OPENGLES
     case PlaygroundBackend::kOpenGLES:

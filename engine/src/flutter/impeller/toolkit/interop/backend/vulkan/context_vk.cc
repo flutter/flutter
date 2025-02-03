@@ -99,12 +99,13 @@ bool ContextVK::GetInfo(ImpellerContextVulkanInfo& info) const {
     return false;
   }
   const auto& context = impeller::ContextVK::Cast(*GetContext());
-
+  // NOLINTBEGIN(google-readability-casting)
   info.vk_instance = reinterpret_cast<void*>(VkInstance(context.GetInstance()));
   info.vk_physical_device =
       reinterpret_cast<void*>(VkPhysicalDevice(context.GetPhysicalDevice()));
   info.vk_logical_device =
       reinterpret_cast<void*>(VkDevice(context.GetDevice()));
+  // NOLINTEND(google-readability-casting)
   info.graphics_queue_family_index =
       context.GetGraphicsQueue()->GetIndex().family;
   info.graphics_queue_index = context.GetGraphicsQueue()->GetIndex().index;

@@ -15,7 +15,7 @@ class ContextMTL final : public Context {
   static ScopedObject<Context> Create();
 
   static ScopedObject<Context> Create(
-      std::shared_ptr<impeller::Context> context);
+      const std::shared_ptr<impeller::Context>& context);
 
   // |Context|
   ~ContextMTL() override;
@@ -29,7 +29,7 @@ class ContextMTL final : public Context {
  private:
   std::shared_ptr<SwapchainTransientsMTL> swapchain_transients_;
 
-  explicit ContextMTL(std::shared_ptr<impeller::Context> context);
+  explicit ContextMTL(const std::shared_ptr<impeller::Context>& context);
 };
 
 }  // namespace impeller::interop

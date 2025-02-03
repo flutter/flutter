@@ -40,10 +40,10 @@ ScopedObject<Context> ContextMTL::Create() {
 }
 
 ScopedObject<Context> ContextMTL::Create(
-    std::shared_ptr<impeller::Context> impeller_context) {
+    const std::shared_ptr<impeller::Context>& impeller_context) {
   // Can't call Create because of private constructor. Adopt the raw pointer
   // instead.
-  auto context = Adopt<Context>(new ContextMTL(std::move(impeller_context)));
+  auto context = Adopt<Context>(new ContextMTL(impeller_context));
   if (!context->IsValid()) {
     VALIDATION_LOG << " Could not create valid context.";
     return {};
@@ -51,7 +51,7 @@ ScopedObject<Context> ContextMTL::Create(
   return context;
 }
 
-ContextMTL::ContextMTL(std::shared_ptr<impeller::Context> context)
+ContextMTL::ContextMTL(const std::shared_ptr<impeller::Context>& context)
     : Context(context),
       swapchain_transients_(std::make_shared<SwapchainTransientsMTL>(
           context->GetResourceAllocator())) {}
