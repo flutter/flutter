@@ -301,32 +301,14 @@ include ":app"
 ''';
 
 const String rootGradleKtsFileContent = r'''
-pluginManagement {
-    val flutterSdkPath = run {
-        val properties = java.util.Properties()
-        file("local.properties").inputStream().use { properties.load(it) }
-        val flutterSdkPath = properties.getProperty("flutter.sdk")
-        require(flutterSdkPath != null) { "flutter.sdk not set in local.properties" }
-        flutterSdkPath
-    }
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-    includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
+// This file is auto generated.
+// To update all the settings.gradle files in the Flutter repo,
+// See dev/tools/bin/generate_gradle_lockfiles.dart.
 
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
-
-plugins {
-    id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.5.2" apply false
-    id("org.jetbrains.kotlin.android") version "1.8.22" apply false
-}
-
-include(":app")
-mackall-macbookpro:abc mackall$ cat android/build.gradle.kts 
 allprojects {
     repositories {
         google()
@@ -334,15 +316,20 @@ allprojects {
     }
 }
 
-val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
-rootProject.layout.buildDirectory.value(newBuildDir)
+rootProject.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir("../../build").get())
 
 subprojects {
-    val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
-    project.layout.buildDirectory.value(newSubprojectBuildDir)
+    project.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir(project.name).get())
 }
 subprojects {
     project.evaluationDependsOn(":app")
+    dependencyLocking {
+        ignoredDependencies.add("io.flutter:*")
+        lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
+        if (!project.hasProperty("local-engine-repo")) {
+            lockAllConfigurations()
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {
@@ -351,14 +338,23 @@ tasks.register<Delete>("clean") {
 ''';
 
 const String settingsGradleKtsFileContent = r'''
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// This file is auto generated.
+// To update all the settings.gradle files in the Flutter repo,
+// See dev/tools/bin/generate_gradle_lockfiles.dart.
+
 pluginManagement {
-    val flutterSdkPath = run {
-        val properties = java.util.Properties()
-        file("local.properties").inputStream().use { properties.load(it) }
-        val flutterSdkPath = properties.getProperty("flutter.sdk")
-        require(flutterSdkPath != null) { "flutter.sdk not set in local.properties" }
-        flutterSdkPath
-    }
+    val flutterSdkPath =
+        run {
+            val properties = java.util.Properties()
+            file("local.properties").inputStream().use { properties.load(it) }
+            val flutterSdkPath = properties.getProperty("flutter.sdk")
+            require(flutterSdkPath != null) { "flutter.sdk not set in local.properties" }
+            flutterSdkPath
+        }
 
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
@@ -369,9 +365,16 @@ pluginManagement {
     }
 }
 
+buildscript {
+    dependencyLocking {
+        lockFile = file("${rootProject.projectDir}/buildscript-gradle.lockfile")
+        lockAllConfigurations()
+    }
+}
+
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.5.2" apply false
+    id("com.android.application") version "8.7.0" apply false
     id("org.jetbrains.kotlin.android") version "1.8.22" apply false
 }
 
