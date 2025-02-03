@@ -51,7 +51,6 @@
 /* Begin PBXFileReference section */
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
-		15CFBFB93866C0A457CA5FDD /* Pods-Paid App.release-paid.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Paid App.release-paid.xcconfig"; path = "Target Support Files/Pods-Paid App/Pods-Paid App.release-paid.xcconfig"; sourceTree = "<group>"; };
 		1A1AB40A245F9BE7685BF241 /* Pods-Free App.release free.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.release free.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.release free.xcconfig"; sourceTree = "<group>"; };
 		2854017F9B7B8478EC866CE6 /* Pods-Paid App.debug free.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Paid App.debug free.xcconfig"; path = "Target Support Files/Pods-Paid App/Pods-Paid App.debug free.xcconfig"; sourceTree = "<group>"; };
 		2F6C7D6ABA66181AD1367CBD /* Pods-Free App.debug free.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.debug free.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.debug free.xcconfig"; sourceTree = "<group>"; };
@@ -62,9 +61,7 @@
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		7AFFD8ED1D35381100E5BB4D /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		809154F1FF681E6D817CD171 /* Pods-Paid App.debug-paid.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Paid App.debug-paid.xcconfig"; path = "Target Support Files/Pods-Paid App/Pods-Paid App.debug-paid.xcconfig"; sourceTree = "<group>"; };
 		8B8AFDAF5347CCCD64810738 /* Pods-Free App.release paid.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.release paid.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.release paid.xcconfig"; sourceTree = "<group>"; };
-		96D0EE9963701D3EFC97BA99 /* Pods-Paid App.release-free.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Paid App.release-free.xcconfig"; path = "Target Support Files/Pods-Paid App/Pods-Paid App.release-free.xcconfig"; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Free App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Free App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -73,16 +70,11 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info-Free.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-Free.plist"; sourceTree = "<group>"; };
-		9F677DE01C9CFA8AEF968AE2 /* Pods-Free App.release-paid.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.release-paid.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.release-paid.xcconfig"; sourceTree = "<group>"; };
 		A3D11A9D1653A6CF0D85528D /* libPods-Paid App.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Paid App.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		BDDD59F93BF1BFAA4C07CD12 /* Pods-Free App.debug-paid.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.debug-paid.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.debug-paid.xcconfig"; sourceTree = "<group>"; };
-		CBF99E294B865A3F67AC9C79 /* Pods-Paid App.debug-free.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Paid App.debug-free.xcconfig"; path = "Target Support Files/Pods-Paid App/Pods-Paid App.debug-free.xcconfig"; sourceTree = "<group>"; };
 		D2881C4AB6E69FA3735A4CB4 /* Pods-Paid App.release free.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Paid App.release free.xcconfig"; path = "Target Support Files/Pods-Paid App/Pods-Paid App.release free.xcconfig"; sourceTree = "<group>"; };
-		EBC958A7B95677E8E678DF0D /* Pods-Free App.debug-free.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.debug-free.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.debug-free.xcconfig"; sourceTree = "<group>"; };
 		F41C8FBAFCC90375E6D82338 /* Pods-Free App.debug paid.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.debug paid.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.debug paid.xcconfig"; sourceTree = "<group>"; };
 		F723D2412464E1C10004F0E0 /* Paid App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Paid App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F723D2682464E2860004F0E0 /* Info-Paid.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-Paid.plist"; sourceTree = "<group>"; };
-		FDE527DBF8655C826D7F30C6 /* Pods-Free App.release-free.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.release-free.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.release-free.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,14 +117,6 @@
 				3C3E60ABCBC52C4AD374B583 /* Pods-Paid App.debug paid.xcconfig */,
 				D2881C4AB6E69FA3735A4CB4 /* Pods-Paid App.release free.xcconfig */,
 				4A4236635749EA5737345C48 /* Pods-Paid App.release paid.xcconfig */,
-				EBC958A7B95677E8E678DF0D /* Pods-Free App.debug-free.xcconfig */,
-				BDDD59F93BF1BFAA4C07CD12 /* Pods-Free App.debug-paid.xcconfig */,
-				FDE527DBF8655C826D7F30C6 /* Pods-Free App.release-free.xcconfig */,
-				9F677DE01C9CFA8AEF968AE2 /* Pods-Free App.release-paid.xcconfig */,
-				CBF99E294B865A3F67AC9C79 /* Pods-Paid App.debug-free.xcconfig */,
-				809154F1FF681E6D817CD171 /* Pods-Paid App.debug-paid.xcconfig */,
-				96D0EE9963701D3EFC97BA99 /* Pods-Paid App.release-free.xcconfig */,
-				15CFBFB93866C0A457CA5FDD /* Pods-Paid App.release-paid.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -445,7 +429,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		744E33D21F45D145007AB5E2 /* Debug-Paid */ = {
+		744E33D21F45D145007AB5E2 /* Debug Paid */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -491,9 +475,9 @@
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
-			name = "Debug-Paid";
+			name = "Debug Paid";
 		};
-		744E33D31F45D145007AB5E2 /* Debug-Paid */ = {
+		744E33D31F45D145007AB5E2 /* Debug Paid */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
@@ -507,9 +491,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
-			name = "Debug-Paid";
+			name = "Debug Paid";
 		};
-		744E33D41F45D159007AB5E2 /* Release-Paid */ = {
+		744E33D41F45D159007AB5E2 /* Release Paid */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -549,9 +533,9 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
-			name = "Release-Paid";
+			name = "Release Paid";
 		};
-		744E33D51F45D159007AB5E2 /* Release-Paid */ = {
+		744E33D51F45D159007AB5E2 /* Release Paid */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
@@ -565,9 +549,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
-			name = "Release-Paid";
+			name = "Release Paid";
 		};
-		97C147031CF9000F007C117D /* Debug-Free */ = {
+		97C147031CF9000F007C117D /* Debug Free */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -613,9 +597,9 @@
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
-			name = "Debug-Free";
+			name = "Debug Free";
 		};
-		97C147041CF9000F007C117D /* Release-Free */ = {
+		97C147041CF9000F007C117D /* Release Free */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -655,9 +639,9 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
-			name = "Release-Free";
+			name = "Release Free";
 		};
-		97C147061CF9000F007C117D /* Debug-Free */ = {
+		97C147061CF9000F007C117D /* Debug Free */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
@@ -671,9 +655,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
-			name = "Debug-Free";
+			name = "Debug Free";
 		};
-		97C147071CF9000F007C117D /* Release-Free */ = {
+		97C147071CF9000F007C117D /* Release Free */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
@@ -687,9 +671,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
-			name = "Release-Free";
+			name = "Release Free";
 		};
-		F723D23D2464E1C10004F0E0 /* Debug-Free */ = {
+		F723D23D2464E1C10004F0E0 /* Debug Free */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
@@ -703,9 +687,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
-			name = "Debug-Free";
+			name = "Debug Free";
 		};
-		F723D23E2464E1C10004F0E0 /* Debug-Paid */ = {
+		F723D23E2464E1C10004F0E0 /* Debug Paid */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
@@ -719,9 +703,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
-			name = "Debug-Paid";
+			name = "Debug Paid";
 		};
-		F723D23F2464E1C10004F0E0 /* Release-Free */ = {
+		F723D23F2464E1C10004F0E0 /* Release Free */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
@@ -735,9 +719,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
-			name = "Release-Free";
+			name = "Release Free";
 		};
-		F723D2402464E1C10004F0E0 /* Release-Paid */ = {
+		F723D2402464E1C10004F0E0 /* Release Paid */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
@@ -751,7 +735,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
-			name = "Release-Paid";
+			name = "Release Paid";
 		};
 /* End XCBuildConfiguration section */
 
@@ -759,35 +743,35 @@
 		97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				97C147031CF9000F007C117D /* Debug-Free */,
-				744E33D21F45D145007AB5E2 /* Debug-Paid */,
-				97C147041CF9000F007C117D /* Release-Free */,
-				744E33D41F45D159007AB5E2 /* Release-Paid */,
+				97C147031CF9000F007C117D /* Debug Free */,
+				744E33D21F45D145007AB5E2 /* Debug Paid */,
+				97C147041CF9000F007C117D /* Release Free */,
+				744E33D41F45D159007AB5E2 /* Release Paid */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Release-Free";
+			defaultConfigurationName = "Release Free";
 		};
 		97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Free App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				97C147061CF9000F007C117D /* Debug-Free */,
-				744E33D31F45D145007AB5E2 /* Debug-Paid */,
-				97C147071CF9000F007C117D /* Release-Free */,
-				744E33D51F45D159007AB5E2 /* Release-Paid */,
+				97C147061CF9000F007C117D /* Debug Free */,
+				744E33D31F45D145007AB5E2 /* Debug Paid */,
+				97C147071CF9000F007C117D /* Release Free */,
+				744E33D51F45D159007AB5E2 /* Release Paid */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Release-Free";
+			defaultConfigurationName = "Release Free";
 		};
 		F723D23C2464E1C10004F0E0 /* Build configuration list for PBXNativeTarget "Paid App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F723D23D2464E1C10004F0E0 /* Debug-Free */,
-				F723D23E2464E1C10004F0E0 /* Debug-Paid */,
-				F723D23F2464E1C10004F0E0 /* Release-Free */,
-				F723D2402464E1C10004F0E0 /* Release-Paid */,
+				F723D23D2464E1C10004F0E0 /* Debug Free */,
+				F723D23E2464E1C10004F0E0 /* Debug Paid */,
+				F723D23F2464E1C10004F0E0 /* Release Free */,
+				F723D2402464E1C10004F0E0 /* Release Paid */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Release-Free";
+			defaultConfigurationName = "Release Free";
 		};
 /* End XCConfigurationList section */
 	};

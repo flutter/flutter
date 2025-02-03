@@ -102,6 +102,11 @@ Future<TaskResult> _testInstallBogusFlavor() async {
 Future<TaskResult> _testFlavorsWhenBuildStartsWithXcode(String projectDir) async {
   final String iosDirPath = '$projectDir/ios';
 
+  final Map<String, String> environment = Platform.environment;
+  final String? developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'];
+  final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+  final String? provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+
   // Prebuild with --config-only to make sure that Cocoapods dependencies are installed.
   await flutter('build', options: <String>['ios', '--config-only', '--flavor', 'paid']);
 
@@ -111,21 +116,22 @@ Future<TaskResult> _testFlavorsWhenBuildStartsWithXcode(String projectDir) async
       'build',
       '-workspace',
       'Runner.xcworkspace',
-      '-scheme paid',
+      '-scheme',
+      'paid',
       '-derivedDataPath',
-      'build',
+      '../build/ios',
       '-destination',
-      '"generic/platform=iOS Simulator"',
-      'CODE_SIGNING_ALLOWED=NO',
-      'CODE_SIGNING_REQUIRED=NO',
-      'CODE_SIGNING_IDENTITY=""',
+      'generic/platform=iOS',
+      if (developmentTeam != null) 'DEVELOPMENT_TEAM=$developmentTeam',
+      if (codeSignStyle != null) 'CODE_SIGN_STYLE=$codeSignStyle',
+      if (provisioningProfile != null) 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
     ]);
   });
 
-  final String appPath = '$iosDirPath/build/Build/Products/Debug-Paid-iphonesimulator/Paid App.app';
+  final String appPath = '$projectDir/build/ios/Build/Products/Debug Paid-iphoneos/Paid App.app';
 
   // Verify app exists before proceeding
-  if (!File(appPath).existsSync()) {
+  if (!Directory(appPath).existsSync()) {
     return TaskResult.failure('Built app not found at expected path: $appPath');
   }
 
@@ -134,7 +140,7 @@ Future<TaskResult> _testFlavorsWhenBuildStartsWithXcode(String projectDir) async
   await flutter(
     'drive',
     options: <String>[
-      '--use-application-binary="$appPath"',
+      '--use-application-binary=$appPath',
       '--driver=test_driver/main_test.dart',
       '--device-id',
       device.deviceId,
