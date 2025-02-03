@@ -537,7 +537,7 @@ abstract class ResidentCompiler {
   /// it is wrapping [mainUri].
   ///
   /// If [recompileRestart] is true, uses the `recompile-restart` instruction
-  /// instead.
+  /// intended for a hot restart instead.
   Future<CompilerOutput?> recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
