@@ -33,9 +33,6 @@ class FlutterHostWindow {
   // Returns the instance pointer for |hwnd| or nulllptr if invalid.
   static FlutterHostWindow* GetThisFromHandle(HWND hwnd);
 
-  // Returns the current window state.
-  WindowState GetState() const;
-
   // Returns the backing window handle, or nullptr if the native window is not
   // created or has already been destroyed.
   HWND GetWindowHandle() const;
@@ -62,6 +59,9 @@ class FlutterHostWindow {
 
   // Inserts |content| into the window tree.
   void SetChildContent(HWND content);
+
+  // Sets the window state.
+  void SetState(WindowState state);
 
   // Sets the window title.
   void SetTitle(std::string_view title) const;

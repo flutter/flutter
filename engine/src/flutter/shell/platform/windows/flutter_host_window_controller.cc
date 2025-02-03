@@ -69,8 +69,6 @@ bool FlutterHostWindowController::ModifyHostWindow(
     return false;
   }
 
-  HWND const window_handle = window->GetWindowHandle();
-
   std::optional<Size> changed_size;
   Size const size_before = GetViewSize(view_id);
 
@@ -81,22 +79,7 @@ bool FlutterHostWindowController::ModifyHostWindow(
     window->SetTitle(*settings.title);
   }
   if (settings.state.has_value()) {
-    WINDOWPLACEMENT window_placement = {.length = sizeof(WINDOWPLACEMENT)};
-    if (GetWindowPlacement(window_handle, &window_placement)) {
-      window_placement.showCmd = [&]() {
-        switch (*settings.state) {
-          case WindowState::kRestored:
-            return SW_RESTORE;
-          case WindowState::kMaximized:
-            return SW_MAXIMIZE;
-          case WindowState::kMinimized:
-            return SW_MINIMIZE;
-          default:
-            FML_UNREACHABLE();
-        };
-      }();
-      SetWindowPlacement(window_handle, &window_placement);
-    }
+    window->SetState(*settings.state);
   }
 
   Size const size_after = GetViewSize(view_id);

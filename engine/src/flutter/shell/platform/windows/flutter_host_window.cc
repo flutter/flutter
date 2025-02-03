@@ -446,10 +446,6 @@ FlutterHostWindow* FlutterHostWindow::GetThisFromHandle(HWND hwnd) {
       GetWindowLongPtr(hwnd, GWLP_USERDATA));
 }
 
-WindowState FlutterHostWindow::GetState() const {
-  return state_;
-}
-
 HWND FlutterHostWindow::GetWindowHandle() const {
   return window_handle_;
 }
@@ -591,6 +587,25 @@ void FlutterHostWindow::SetChildContent(HWND content) {
   MoveWindow(content, client_rect.left, client_rect.top,
              client_rect.right - client_rect.left,
              client_rect.bottom - client_rect.top, true);
+}
+
+void FlutterHostWindow::SetState(WindowState state) {
+  WINDOWPLACEMENT window_placement = {.length = sizeof(WINDOWPLACEMENT)};
+  GetWindowPlacement(window_handle_, &window_placement);
+  window_placement.showCmd = [&]() {
+    switch (state) {
+      case WindowState::kRestored:
+        return SW_RESTORE;
+      case WindowState::kMaximized:
+        return SW_MAXIMIZE;
+      case WindowState::kMinimized:
+        return SW_MINIMIZE;
+      default:
+        FML_UNREACHABLE();
+    };
+  }();
+  SetWindowPlacement(window_handle_, &window_placement);
+  state_ = state;
 }
 
 void FlutterHostWindow::SetTitle(std::string_view title) const {
