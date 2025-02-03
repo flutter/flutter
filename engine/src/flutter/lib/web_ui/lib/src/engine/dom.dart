@@ -3717,3 +3717,34 @@ extension JSArrayExtension on JSArray<JSAny?> {
   // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
   external int get length;
 }
+
+
+@JS()
+@staticInterop
+class WebTextCluster extends TextCluster {}
+
+extension WebTextClusterExtension on WebTextCluster {
+  @JS('text')
+  external JSString? _text();
+  String? text() => _text().toDart;
+
+  @JS('begin')
+  external int _begin();
+  int begin() => _begin();
+
+  @JS('end')
+  external int _end();
+  int end() => _end();
+
+  // TODO: add all the other methods
+}
+
+@JS()
+@staticInterop
+class WebTextMetrics extends DomTextMetrics {}
+
+extension WebTextMetricsExtension on WebTextMetrics {
+  @JS('getTextClusters')
+  external JSArray<JSAny?> _getTextClusters(int start, int end);
+  List<WebTextCluster> getTextClusters(int start, int end) => _getTextClusters(start, end).toDart.cast<WebTextCluster>();
+}
