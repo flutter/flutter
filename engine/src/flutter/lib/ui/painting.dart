@@ -292,8 +292,9 @@ class Color {
   /// Example:
   /// ```dart
   /// import 'dart:ui';
-  /// // Create sRGB magenta with 50% opacity.
-  /// Color.withValues(alpha: 0.5, red: 1.0, green: 0.0, blue: 1.0);
+  /// /// Create sRGB magenta with 50% opacity.
+  /// Color TransparentMagenta() =>
+  ///   Color.withValues(alpha: 0.5, red: 1.0, green: 0.0, blue: 1.0);
   /// ```
   Color withValues({
     double? alpha,
