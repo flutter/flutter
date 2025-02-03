@@ -1741,8 +1741,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       sliderTheme: _sliderTheme,
       isDiscrete: isDiscrete,
     );
-    final double padding =
-        isDiscrete || _sliderTheme.trackShape!.isRounded ? trackRect.height : 0.0;
+    final double padding = _sliderTheme.trackShape!.isRounded ? trackRect.height : 0.0;
     final double thumbPosition =
         isDiscrete
             ? trackRect.left + visualPosition * (trackRect.width - padding) + padding / 2
