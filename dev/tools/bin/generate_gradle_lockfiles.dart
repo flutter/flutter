@@ -83,7 +83,7 @@ void main(List<String> arguments) {
   final Set<String> exclusionSet;
   if (useExclusion) {
     exclusionSet = HashSet<String>.from(
-      (loadYaml(exclusionFile.readAsStringSync()) as YamlList).toList().cast<String>().map(
+      ((loadYaml(exclusionFile.readAsStringSync()) ?? YamlList()) as YamlList).toList().cast<String>().map(
         (String s) => '${repoRoot.path}/$s',
       ),
     );
