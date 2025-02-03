@@ -41,7 +41,8 @@ Future<void> main() async {
           'base/lib/armeabi-v7a/libflutter.so',
           'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libapp.so.sym',
           'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libapp.so.sym',
-          // TODO(gmackall): when pr to not strip libflutter.so lands, expect that here too.
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libflutter.so.sym',
         ], await getFilesInAppBundle(releaseBundle));
       });
 
@@ -77,7 +78,8 @@ Future<void> main() async {
           'base/lib/armeabi-v7a/libflutter.so',
           'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libapp.so.sym',
           'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libapp.so.sym',
-          // TODO(gmackall): when pr to not strip libflutter.so lands, expect that here too.
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libflutter.so.sym',
         ], await getFilesInAppBundle(bundleFromGradlePath));
 
         section('Build app bundle using the flutter tool - flavor: flavor_underscore');
@@ -111,7 +113,8 @@ Future<void> main() async {
           'base/lib/armeabi-v7a/libflutter.so',
           'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libapp.so.sym',
           'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libapp.so.sym',
-          // TODO(gmackall): when pr to not strip libflutter.so lands, expect that here too.
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libflutter.so.sym',
         ], await getFilesInAppBundle(flavorUnderscoreBundlePath));
 
         section('Build app bundle using the flutter tool - flavor: production');
@@ -145,7 +148,8 @@ Future<void> main() async {
           'base/lib/armeabi-v7a/libflutter.so',
           'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libapp.so.sym',
           'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libapp.so.sym',
-          // TODO(gmackall): when pr to not strip libflutter.so lands, expect that here too.
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libflutter.so.sym',
         ], await getFilesInAppBundle(productionBundlePath));
       });
 
