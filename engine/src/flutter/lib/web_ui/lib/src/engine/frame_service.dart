@@ -39,7 +39,6 @@ class FrameService {
   /// A monotonically increasing frame number being rendered.
   ///
   /// This is intended for tests only.
-  @visibleForTesting
   int get debugFrameNumber => _debugFrameNumber;
   int _debugFrameNumber = 0;
 
