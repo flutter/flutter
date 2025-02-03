@@ -2595,42 +2595,13 @@ class EngineSemanticsOwner {
     return (isConsistent, message.toString());
   }
 
-  /// Whether the semantics DOM tree is being updated right now.
-  ///
-  /// Some DOM events can be triggered synchronously with the DOM mutations,
-  /// such as the DOM "focus" event. Handlers of such events may wish to be
-  /// aware of the fact that semantics update is currently in progress. This is
-  /// espectially true for DOM event handlers that send notifications back to
-  /// the framework. As far as the framework is concerned, the semantics tree is
-  /// being updated as part of rendering a frame, as the last phase that follows
-  /// rendering the [Scene] into a [FlutterView]. The framework does not
-  /// anticipate to receive any events that lead to widget state changes that
-  /// alter the current frame's contents. That must be done in the next frame.
-  ///
-  /// DOM event handlers whose notifications to the framework result in state
-  /// changes may want to delay their notifications, e.g. by scheduling them in
-  /// a timer.
-  bool get isUpdatingSemanticsTree => _isUpdatingSemanticsTree;
-  bool _isUpdatingSemanticsTree = false;
-
   /// Updates the semantics tree from data in the [uiUpdate].
   void updateSemantics(ui.SemanticsUpdate uiUpdate) {
     EngineSemantics.instance.didReceiveSemanticsUpdate();
+
     if (!EngineSemantics.instance.semanticsEnabled) {
       return;
     }
-
-    _isUpdatingSemanticsTree = true;
-    try {
-      _doUpdateSemantics(uiUpdate);
-    } finally {
-      _isUpdatingSemanticsTree = false;
-    }
-  }
-
-  /// Updates the semantics tree from data in the [uiUpdate].
-  void _doUpdateSemantics(ui.SemanticsUpdate uiUpdate) {
-    _isUpdatingSemanticsTree = true;
 
     (bool, String)? preUpdateNodeMapConsistency;
     assert(() {

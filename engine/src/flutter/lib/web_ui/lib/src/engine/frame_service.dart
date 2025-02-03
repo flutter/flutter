@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:js_interop';
 
+import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'dom.dart';
@@ -30,6 +31,7 @@ class FrameService {
   /// implementation.
   ///
   /// This is intended for tests only.
+  @visibleForTesting
   static void debugOverrideFrameService(FrameService? mock) {
     _instance = mock;
   }
@@ -37,12 +39,14 @@ class FrameService {
   /// A monotonically increasing frame number being rendered.
   ///
   /// This is intended for tests only.
+  @visibleForTesting
   int get debugFrameNumber => _debugFrameNumber;
   int _debugFrameNumber = 0;
 
   /// Resets [debugFrameNumber] back to zero.
   ///
   /// This is intended for tests only.
+  @visibleForTesting
   void debugResetFrameNumber() {
     _debugFrameNumber = 0;
   }
