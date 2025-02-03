@@ -54,21 +54,6 @@ std::wstring GetWindowTitle(HWND hwnd) {
   return std::wstring(buffer.data());
 }
 
-std::wstring StringToWstring(std::string_view str) {
-  if (str.empty()) {
-    return {};
-  }
-  if (int buffer_size =
-          MultiByteToWideChar(CP_UTF8, 0, str.data(), str.size(), nullptr, 0)) {
-    std::wstring wide_str(buffer_size, L'\0');
-    if (MultiByteToWideChar(CP_UTF8, 0, str.data(), str.size(), &wide_str[0],
-                            buffer_size)) {
-      return wide_str;
-    }
-  }
-  return {};
-}
-
 class FlutterHostWindowControllerTest : public WindowsTest {
  public:
   FlutterHostWindowControllerTest() = default;
@@ -143,12 +128,11 @@ TEST_F(FlutterHostWindowControllerTest, CreateRegularWindow) {
   ASSERT_NE(window, nullptr);
 }
 
-TEST_F(FlutterHostWindowControllerTest, ModifyRegularWindow) {
+TEST_F(FlutterHostWindowControllerTest, ModifyRegularWindowSize) {
   // Define settings for the window to be created.
   WindowCreationSettings const creation_settings = {
       .archetype = WindowArchetype::kRegular,
       .size = {800.0, 600.0},
-      .title = "window",
   };
 
   // Create the window.
@@ -163,7 +147,6 @@ TEST_F(FlutterHostWindowControllerTest, ModifyRegularWindow) {
   // Define the modifications to be applied to the window.
   WindowModificationSettings const modification_settings = {
       .size = Size{200.0, 200.0},
-      .title = "new title 😉",
   };
 
   // Test messenger with a handler for onWindowChanged.
@@ -226,14 +209,74 @@ TEST_F(FlutterHostWindowControllerTest, ModifyRegularWindow) {
   Size const new_size = GetLogicalClientSize(window_handle);
   EXPECT_EQ(new_size.width(), modification_settings.size->width());
   EXPECT_EQ(new_size.height(), modification_settings.size->height());
-  std::wstring const new_title = GetWindowTitle(window_handle);
-  std::wstring const old_title = StringToWstring(*modification_settings.title);
-  EXPECT_STREQ(new_title.c_str(), old_title.c_str());
 
   // Pump messages for the Windows platform task runner.
   while (!done) {
     PumpMessage();
   }
+}
+
+TEST_F(FlutterHostWindowControllerTest, ModifyRegularWindowTitle) {
+  // Define settings for the window to be created.
+  WindowCreationSettings const creation_settings = {
+      .archetype = WindowArchetype::kRegular,
+      .title = "window",
+  };
+
+  // Create the window.
+  std::optional<WindowMetadata> const metadata =
+      host_window_controller()->CreateHostWindow(creation_settings);
+  ASSERT_TRUE(metadata.has_value());
+  // Retrieve the created window and verify it exists.
+  FlutterHostWindow* const window =
+      host_window_controller()->GetHostWindow(metadata->view_id);
+  ASSERT_NE(window, nullptr);
+
+  // Define the modifications to be applied to the window.
+  WindowModificationSettings const modification_settings = {
+      .title = "new title 😉",
+  };
+
+  // Apply the modifications.
+  EXPECT_TRUE(host_window_controller()->ModifyHostWindow(
+      metadata->view_id, modification_settings));
+
+  // Validate the modified settings.
+  HWND const window_handle = host_window_controller()
+                                 ->GetHostWindow(metadata->view_id)
+                                 ->GetWindowHandle();
+  std::wstring const new_title = GetWindowTitle(window_handle);
+  EXPECT_STREQ(new_title.c_str(), L"new title 😉");
+}
+
+TEST_F(FlutterHostWindowControllerTest, ModifyRegularWindowState) {
+  // Define settings for the window to be created.
+  WindowCreationSettings const creation_settings = {
+      .archetype = WindowArchetype::kRegular,
+      .state = WindowState::kRestored,
+  };
+
+  // Create the window.
+  std::optional<WindowMetadata> const metadata =
+      host_window_controller()->CreateHostWindow(creation_settings);
+  ASSERT_TRUE(metadata.has_value());
+  // Retrieve the created window and verify it exists.
+  FlutterHostWindow* const window =
+      host_window_controller()->GetHostWindow(metadata->view_id);
+  ASSERT_NE(window, nullptr);
+  EXPECT_EQ(window->GetState(), creation_settings.state);
+
+  // Define the modifications to be applied to the window.
+  WindowModificationSettings const modification_settings = {
+      .state = WindowState::kMinimized,
+  };
+
+  // Apply the modifications.
+  EXPECT_TRUE(host_window_controller()->ModifyHostWindow(
+      metadata->view_id, modification_settings));
+
+  // Validate the modified settings.
+  EXPECT_EQ(window->GetState(), modification_settings.state);
 }
 
 TEST_F(FlutterHostWindowControllerTest, DestroyWindow) {

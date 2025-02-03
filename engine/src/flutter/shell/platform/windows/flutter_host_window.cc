@@ -450,6 +450,10 @@ HWND FlutterHostWindow::GetWindowHandle() const {
   return window_handle_;
 }
 
+WindowState FlutterHostWindow::GetState() const {
+  return state_;
+}
+
 void FlutterHostWindow::FocusViewOf(FlutterHostWindow* window) {
   if (window != nullptr && window->child_content_ != nullptr) {
     SetFocus(window->child_content_);
