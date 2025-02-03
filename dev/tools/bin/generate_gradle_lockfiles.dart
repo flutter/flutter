@@ -309,8 +309,10 @@ Iterable<Directory> discoverAndroidDirectories(Directory repoRoot) {
       // Exclude the top-level "engine/" directory, which is not covered by the the tool.
       .where((Directory directory) => directory.basename != 'engine')
       // ... and then recurse into every directory (other than the excluded directory).
-      .expand((Directory d) => d.listSync(recursive: true))
+      .expand((Directory directory) => directory.listSync(recursive: true))
       .whereType<Directory>()
+      // These directories are build artifacts which are not part of source control.
+      .where((Directory directory) => !directory.path.contains('/build/') && !directory.path.contains('.symlinks'))
       // ... where the directory ultimately is named "android".
       .where((FileSystemEntity entity) => entity.basename == 'android');
 }
