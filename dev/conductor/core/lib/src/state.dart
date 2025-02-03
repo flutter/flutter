@@ -82,26 +82,6 @@ String presentState(pb.ConductorState state) {
   buffer.writeln(
     'Last updated at: ${DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt())}',
   );
-  buffer.writeln();
-  buffer.writeln('Engine Repo');
-  buffer.writeln('\tCandidate branch: ${state.engine.candidateBranch}');
-  buffer.writeln('\tStarting git HEAD: ${state.engine.startingGitHead}');
-  buffer.writeln('\tCurrent git HEAD: ${state.engine.currentGitHead}');
-  buffer.writeln('\tPath to checkout: ${state.engine.checkoutPath}');
-  buffer.writeln(
-    '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.engine.candidateBranch, 'engine')}',
-  );
-  if (state.engine.cherrypicks.isNotEmpty) {
-    buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
-    for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
-      buffer.writeln('\t${cherrypick.trunkRevision} - ${cherrypick.state}');
-    }
-  } else {
-    buffer.writeln('0 Engine cherrypicks.');
-  }
-  if (state.engine.dartRevision.isNotEmpty) {
-    buffer.writeln('New Dart SDK revision: ${state.engine.dartRevision}');
-  }
   buffer.writeln('Framework Repo');
   buffer.writeln('\tCandidate branch: ${state.framework.candidateBranch}');
   buffer.writeln('\tStarting git HEAD: ${state.framework.startingGitHead}');
@@ -117,6 +97,9 @@ String presentState(pb.ConductorState state) {
     }
   } else {
     buffer.writeln('0 Framework cherrypicks.');
+  }
+  if (state.framework.dartRevision.isNotEmpty) {
+    buffer.writeln('New Dart SDK revision: ${state.engine.dartRevision}');
   }
   buffer.writeln();
   if (state.currentPhase == ReleasePhase.VERIFY_RELEASE) {
