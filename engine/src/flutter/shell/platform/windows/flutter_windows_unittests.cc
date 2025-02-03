@@ -440,7 +440,6 @@ TEST_F(WindowsTest, GetGraphicsAdapterWithLowPowerPreference) {
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
-
   ASSERT_EQ(desc.AdapterLuid.HighPart, luid->HighPart);
   ASSERT_EQ(desc.AdapterLuid.LowPart, luid->LowPart);
 }
