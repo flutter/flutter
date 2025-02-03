@@ -47,7 +47,7 @@ void main() {
             // TODO(srujzs): Change this to "Try performing a hot restart instead." once we emit
             // that string in the delta inspector. Then unify this test with
             // hot_reload_errors_test.dart.
-            contains('Const class cannot become non-const'),
+            contains('Const class cannot remove fields'),
           ),
         ),
       );
