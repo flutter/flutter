@@ -286,8 +286,8 @@ void main() {
   });
 
   testWidgets('Material uses the dark SystemUIOverlayStyle when the background is light', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     final ThemeData lightTheme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(theme: lightTheme, home: const Scaffold(body: Center(child: Text('test')))),
