@@ -15,8 +15,7 @@ import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets_builder.dart' hide BuildMode;
-import 'package:package_config/package_config_types.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -182,17 +181,17 @@ void main() {
           ),
         ];
         final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <Package>[Package('bar', projectUri)],
+          packagesWithNativeAssetsResult: <String>['bar'],
           onBuild:
-              (BuildConfig config) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                codeAssets: codeAssets(config.targetOS, config.codeConfig),
+              (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
               ),
           onLink:
-              (LinkConfig config) =>
+              (LinkInput input) =>
                   buildMode == BuildMode.debug
                       ? null
                       : FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                        codeAssets: codeAssets(config.targetOS, config.codeConfig),
+                        codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
                       ),
         );
         final Map<String, String> environmentDefines = <String, String>{
@@ -218,8 +217,8 @@ void main() {
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for ios [arm64, x64] $buildMode.',
-            'Building native assets for ios [arm64, x64] $buildMode done.',
+            'Building native assets for ios [arm64, x64].',
+            'Building native assets for ios [arm64, x64] done.',
           ]),
         );
         expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);

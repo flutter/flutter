@@ -44,7 +44,7 @@ AndroidContext::ContextSettings CreateContextSettings(
   AndroidContext::ContextSettings settings;
   settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
   settings.enable_validation = p_settings.enable_vulkan_validation;
-  settings.disable_surface_control = p_settings.disable_surface_control;
+  settings.enable_surface_control = p_settings.enable_surface_control;
   return settings;
 }
 }  // namespace
@@ -148,8 +148,8 @@ void PlatformViewAndroid::NotifyCreated(
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetRasterTaskRunner(),
         [&latch, surface = android_surface_.get(),
-         native_window = std::move(native_window)]() {
-          surface->SetNativeWindow(native_window);
+         native_window = std::move(native_window), jni_facade = jni_facade_]() {
+          surface->SetNativeWindow(native_window, jni_facade);
           latch.Signal();
         });
     latch.Wait();
@@ -165,9 +165,9 @@ void PlatformViewAndroid::NotifySurfaceWindowChanged(
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetRasterTaskRunner(),
         [&latch, surface = android_surface_.get(),
-         native_window = std::move(native_window)]() {
+         native_window = std::move(native_window), jni_facade = jni_facade_]() {
           surface->TeardownOnScreenContext();
-          surface->SetNativeWindow(native_window);
+          surface->SetNativeWindow(native_window, jni_facade);
           latch.Signal();
         });
     latch.Wait();
