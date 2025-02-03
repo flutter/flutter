@@ -42,7 +42,7 @@ ScopedObject<ColorSource> ColorSource::MakeRadialGradient(
                                                       tile_mode,       //
                                                       &transformation  //
   );
-  x if (!dl_filter) {
+  if (!dl_filter) {
     return nullptr;
   }
   return Create<ColorSource>(std::move(dl_filter));
