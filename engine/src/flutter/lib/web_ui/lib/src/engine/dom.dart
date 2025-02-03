@@ -3718,15 +3718,20 @@ extension JSArrayExtension on JSArray<JSAny?> {
   external int get length;
 }
 
+@JS()
+@staticInterop
+class TextCluster {}
 
 @JS()
 @staticInterop
 class WebTextCluster extends TextCluster {}
 
 extension WebTextClusterExtension on WebTextCluster {
+
   @JS('text')
-  external JSString? _text();
-  String? text() => _text().toDart;
+  external JSString _text();
+
+  String text() => _text().toDart;
 
   @JS('begin')
   external int _begin();
