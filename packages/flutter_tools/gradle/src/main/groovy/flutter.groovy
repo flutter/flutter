@@ -5,6 +5,8 @@
 
 import com.android.build.OutputFile
 import com.flutter.gradle.BaseApplicationNameHandler
+import com.flutter.gradle.Deeplink
+import com.flutter.gradle.IntentFilterCheck
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -546,7 +548,7 @@ class FlutterPlugin implements Plugin<Project> {
                                     schemes.each { scheme ->
                                         hosts.each { host ->
                                             paths.each { path ->
-                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path, intentFilterCheck: intentFilterCheck))
+                                                appLinkSettings.deeplinks.add(new Deeplink(scheme, host, path, intentFilterCheck))
                                             }
                                         }
                                     }
@@ -590,11 +592,13 @@ class FlutterPlugin implements Plugin<Project> {
         }
         // The embedding is set as an API dependency in a Flutter plugin.
         // Therefore, don't make the app project depend on the embedding if there are Flutter
-        // plugins.
+        // plugin dependencies. In release mode, dev dependencies are stripped, so we do not
+        // consider those in the check.
         // This prevents duplicated classes when using custom build types. That is, a custom build
         // type like profile is used, and the plugin and app projects have API dependencies on the
         // embedding.
-        if (!isFlutterAppProject() || getPluginList(project).size() == 0) {
+        List<Map<String, Object>> pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency = flutterBuildMode == "release" ? getPluginListWithoutDevDependencies(project) : getPluginList(project);
+        if (!isFlutterAppProject() || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.size() == 0) {
             addApiDependencies(project, buildType.name,
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
@@ -986,6 +990,24 @@ class FlutterPlugin implements Plugin<Project> {
             pluginList = project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
         }
         return pluginList
+    }
+
+    /**
+     * Gets the list of plugins (as map) that support the Android platform and are dependencies of the
+     * Android project excluding dev dependencies.
+     *
+     * The map value contains either the plugins `name` (String),
+     * its `path` (String), or its `dependencies` (List<String>).
+     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
+     */
+    private List<Map<String, Object>> getPluginListWithoutDevDependencies(Project project) {
+        List<Map<String, Object>> pluginListWithoutDevDependencies = []
+        for (Map<String, Object> plugin in getPluginList(project)) {
+            if (!plugin.dev_dependency) {
+                pluginListWithoutDevDependencies += plugin
+            }
+        }
+        return pluginListWithoutDevDependencies
     }
 
     // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
@@ -1550,31 +1572,6 @@ class AppLinkSettings {
     Set<Deeplink> deeplinks
     boolean deeplinkingFlagEnabled
 
-}
-
-class IntentFilterCheck {
-
-    boolean hasAutoVerify
-    boolean hasActionView
-    boolean hasDefaultCategory
-    boolean hasBrowsableCategory
-
-}
-
-class Deeplink {
-    String scheme, host, path
-    IntentFilterCheck intentFilterCheck
-    boolean equals(Object o) {
-        if (o == null) {
-            throw new NullPointerException()
-        }
-        if (o.getClass() != getClass()) {
-            return false
-        }
-        return scheme == o.scheme &&
-                host == o.host &&
-                path == o.path
-    }
 }
 
 abstract class BaseFlutterTask extends DefaultTask {
