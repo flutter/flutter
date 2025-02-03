@@ -41,6 +41,7 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'sksl_writer.dart';
 import 'vmservice.dart';
+import 'web/chrome.dart';
 
 class FlutterDevice {
   FlutterDevice(
@@ -569,6 +570,7 @@ class FlutterDevice {
         bundleFirstUpload: bundleFirstUpload,
         generator: generator!,
         fullRestart: fullRestart,
+        resetCompiler: fullRestart,
         dillOutputPath: dillOutputPath,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         pathToReload: pathToReload,
@@ -1048,7 +1050,19 @@ abstract class ResidentRunner extends ResidentHandlers {
       artifactDirectory.createSync(recursive: true);
     }
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    _residentDevtoolsHandler = devtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
+    _residentDevtoolsHandler = devtoolsHandler(
+      DevtoolsLauncher.instance,
+      this,
+      globals.logger,
+      ChromiumLauncher(
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        processManager: globals.processManager,
+        operatingSystemUtils: globals.os,
+        browserFinder: findChromeExecutable,
+        logger: globals.logger,
+      ),
+    );
   }
 
   @override
@@ -1099,8 +1113,8 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   String get dillOutputPath =>
       _dillOutputPath ?? globals.fs.path.join(artifactDirectory.path, 'app.dill');
-  String getReloadPath({bool fullRestart = false, required bool swap}) {
-    if (!fullRestart) {
+  String getReloadPath({bool resetCompiler = false, required bool swap}) {
+    if (!resetCompiler) {
       return 'main.dart.incremental.dill';
     }
     return 'main.dart${swap ? '.swap' : ''}.dill';
