@@ -55,7 +55,7 @@ import 'text_selection_toolbar_anchors.dart';
 class SystemContextMenu extends StatefulWidget {
   /// Creates an instance of [SystemContextMenu] that points to the given
   /// [anchor].
-  SystemContextMenu._({super.key, required this.anchor, required this.items, this.onSystemHide});
+  const SystemContextMenu._({super.key, required this.anchor, required this.items, this.onSystemHide});
 
   /// Creates an instance of [SystemContextMenu] for the field indicated by the
   /// given [EditableTextState].
