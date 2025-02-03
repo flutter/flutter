@@ -34,11 +34,21 @@ class FlutterHostWindowController {
   virtual std::optional<WindowMetadata> CreateHostWindow(
       WindowCreationSettings const& settings);
 
+  // Modifies the attributes of the window hosting the view with ID |view_id|
+  // according to the given |settings|. A "onWindowChanged" message is sent if
+  // at least one attribute is modified.
+  //
+  // Returns false if the controller does not have a window hosting a view with
+  // ID |view_id|.
+  virtual bool ModifyHostWindow(
+      FlutterViewId view_id,
+      WindowModificationSettings const& settings) const;
+
   // Destroys the window that hosts the view with ID |view_id|.
   //
   // Returns false if the controller does not have a window hosting a view with
   // ID |view_id|.
-  virtual bool DestroyHostWindow(FlutterViewId view_id);
+  virtual bool DestroyHostWindow(FlutterViewId view_id) const;
 
   // Gets the window hosting the view with ID |view_id|.
   //
@@ -62,9 +72,8 @@ class FlutterHostWindowController {
   // Destroys all windows managed by this controller.
   void DestroyAllWindows();
 
-  // Gets the size of the host window for the view with ID |view_id|. The size
-  // is in logical coordinates and excludes the drop-shadow area.
-  Size GetWindowSize(FlutterViewId view_id) const;
+  // Retrieves the size of the view with ID |view_id|, in logical coordinates.
+  Size GetViewSize(FlutterViewId view_id) const;
 
   // Sends the "onWindowChanged" message to the Flutter engine.
   void SendOnWindowChanged(FlutterViewId view_id,

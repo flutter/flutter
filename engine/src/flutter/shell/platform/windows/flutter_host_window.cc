@@ -213,16 +213,15 @@ bool IsClassRegistered(LPCWSTR class_name) {
 }
 
 // Convert std::string to std::wstring.
-std::wstring StringToWstring(std::string const& str) {
+std::wstring StringToWstring(std::string_view str) {
   if (str.empty()) {
     return {};
   }
   if (int buffer_size =
-          MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0)) {
+          MultiByteToWideChar(CP_UTF8, 0, str.data(), str.size(), nullptr, 0)) {
     std::wstring wide_str(buffer_size, L'\0');
-    if (MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wide_str[0],
+    if (MultiByteToWideChar(CP_UTF8, 0, str.data(), str.size(), &wide_str[0],
                             buffer_size)) {
-      wide_str.pop_back();
       return wide_str;
     }
   }
@@ -447,28 +446,12 @@ FlutterHostWindow* FlutterHostWindow::GetThisFromHandle(HWND hwnd) {
       GetWindowLongPtr(hwnd, GWLP_USERDATA));
 }
 
-WindowArchetype FlutterHostWindow::GetArchetype() const {
-  return archetype_;
-}
-
-FlutterViewId FlutterHostWindow::GetFlutterViewId() const {
-  return view_controller_->view()->view_id();
-};
-
-WindowState FlutterHostWindow::GetState() const {
-  return state_;
-}
-
 HWND FlutterHostWindow::GetWindowHandle() const {
   return window_handle_;
 }
 
-void FlutterHostWindow::SetQuitOnClose(bool quit_on_close) {
-  quit_on_close_ = quit_on_close;
-}
-
-bool FlutterHostWindow::GetQuitOnClose() const {
-  return quit_on_close_;
+WindowState FlutterHostWindow::GetState() const {
+  return state_;
 }
 
 void FlutterHostWindow::FocusViewOf(FlutterHostWindow* window) {
@@ -587,6 +570,19 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
   return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
+void FlutterHostWindow::SetClientSize(Size const& client_size) const {
+  WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
+  GetWindowInfo(window_handle_, &window_info);
+
+  std::optional<Size> const window_size = GetWindowSizeForClientSize(
+      client_size, min_size_, max_size_, window_info.dwStyle,
+      window_info.dwExStyle, nullptr);
+
+  Size const size = window_size.value_or(client_size);
+  SetWindowPos(window_handle_, NULL, 0, 0, size.width(), size.height(),
+               SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+}
+
 void FlutterHostWindow::SetChildContent(HWND content) {
   child_content_ = content;
   SetParent(content, window_handle_);
@@ -595,6 +591,30 @@ void FlutterHostWindow::SetChildContent(HWND content) {
   MoveWindow(content, client_rect.left, client_rect.top,
              client_rect.right - client_rect.left,
              client_rect.bottom - client_rect.top, true);
+}
+
+void FlutterHostWindow::SetState(WindowState state) {
+  WINDOWPLACEMENT window_placement = {.length = sizeof(WINDOWPLACEMENT)};
+  GetWindowPlacement(window_handle_, &window_placement);
+  window_placement.showCmd = [&]() {
+    switch (state) {
+      case WindowState::kRestored:
+        return SW_RESTORE;
+      case WindowState::kMaximized:
+        return SW_MAXIMIZE;
+      case WindowState::kMinimized:
+        return SW_MINIMIZE;
+      default:
+        FML_UNREACHABLE();
+    };
+  }();
+  SetWindowPlacement(window_handle_, &window_placement);
+  state_ = state;
+}
+
+void FlutterHostWindow::SetTitle(std::string_view title) const {
+  std::wstring title_wide = StringToWstring(title);
+  SetWindowText(window_handle_, title_wide.c_str());
 }
 
 }  // namespace flutter

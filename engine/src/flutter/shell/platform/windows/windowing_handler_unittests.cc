@@ -23,9 +23,17 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::StrEq;
 
-static constexpr char kChannelName[] = "flutter/windowing";
-static constexpr char kCreateWindowMethod[] = "createWindow";
-static constexpr char kDestroyWindowMethod[] = "destroyWindow";
+constexpr char kChannelName[] = "flutter/windowing";
+constexpr char kCreateRegularMethod[] = "createRegular";
+constexpr char kDestroyWindowMethod[] = "destroyWindow";
+constexpr char kModifyRegularMethod[] = "modifyRegular";
+
+constexpr char kMaxSizeKey[] = "maxSize";
+constexpr char kMinSizeKey[] = "minSize";
+constexpr char kSizeKey[] = "size";
+constexpr char kStateKey[] = "state";
+constexpr char kTitleKey[] = "title";
+constexpr char kViewIdKey[] = "viewId";
 
 void SimulateWindowingMessage(TestBinaryMessenger* messenger,
                               const std::string& method_name,
@@ -53,7 +61,15 @@ class MockFlutterHostWindowController : public FlutterHostWindowController {
               CreateHostWindow,
               (WindowCreationSettings const& settings),
               (override));
-  MOCK_METHOD(bool, DestroyHostWindow, (FlutterViewId view_id), (override));
+  MOCK_METHOD(bool,
+              ModifyHostWindow,
+              (FlutterViewId view_id,
+               WindowModificationSettings const& settings),
+              (override, const));
+  MOCK_METHOD(bool,
+              DestroyHostWindow,
+              (FlutterViewId view_id),
+              (override, const));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterHostWindowController);
@@ -82,6 +98,7 @@ class WindowingHandlerTest : public WindowsTest {
               .state = WindowState::kRestored,
           };
         });
+    ON_CALL(*mock_controller_, ModifyHostWindow).WillByDefault(Return(true));
     ON_CALL(*mock_controller_, DestroyHostWindow).WillByDefault(Return(true));
   }
 
@@ -105,25 +122,41 @@ MATCHER_P(WindowCreationSettingsMatches,
          arg.state == expected.state;
 }
 
-TEST_F(WindowingHandlerTest, HandleCreateRegularWindow) {
+MATCHER_P(WindowModificationSettingsMatches,
+          expected,
+          "Matches WindowModificationSettings") {
+  return arg.size == expected.size && arg.title == expected.title &&
+         arg.state == expected.state;
+}
+
+TEST_F(WindowingHandlerTest, HandleCreateRegular) {
   TestBinaryMessenger messenger;
   WindowingHandler windowing_handler(&messenger, controller());
 
   WindowCreationSettings const settings = {
       .archetype = WindowArchetype::kRegular,
-      .size = {800.0, 600.0},
+      .size = Size{800.0, 600.0},
+      .min_size = Size{640.0, 480.0},
+      .max_size = Size{1024.0, 768.0},
       .title = "regular",
+      .state = WindowState::kRestored,
   };
 
-  Size const size = {800.0, 600.0};
   EncodableMap const arguments = {
-      {EncodableValue("size"),
+      {EncodableValue(kSizeKey),
        EncodableValue(EncodableList{EncodableValue(settings.size.width()),
                                     EncodableValue(settings.size.height())})},
-      {EncodableValue("minSize"), EncodableValue()},
-      {EncodableValue("maxSize"), EncodableValue()},
-      {EncodableValue("title"), EncodableValue(*settings.title)},
-      {EncodableValue("state"), EncodableValue()},
+      {EncodableValue(kMinSizeKey),
+       EncodableValue(
+           EncodableList{EncodableValue(settings.min_size->width()),
+                         EncodableValue(settings.min_size->height())})},
+      {EncodableValue(kMaxSizeKey),
+       EncodableValue(
+           EncodableList{EncodableValue(settings.max_size->width()),
+                         EncodableValue(settings.max_size->height())})},
+      {EncodableValue(kTitleKey), EncodableValue(*settings.title)},
+      {EncodableValue(kStateKey),
+       EncodableValue(WindowStateToString(*settings.state))},
   };
 
   bool success = false;
@@ -135,7 +168,45 @@ TEST_F(WindowingHandlerTest, HandleCreateRegularWindow) {
               CreateHostWindow(WindowCreationSettingsMatches(settings)))
       .Times(1);
 
-  SimulateWindowingMessage(&messenger, kCreateWindowMethod,
+  SimulateWindowingMessage(&messenger, kCreateRegularMethod,
+                           std::make_unique<EncodableValue>(arguments),
+                           &result_handler);
+
+  EXPECT_TRUE(success);
+}
+
+TEST_F(WindowingHandlerTest, HandleModifyRegular) {
+  TestBinaryMessenger messenger;
+  WindowingHandler windowing_handler(&messenger, controller());
+
+  FlutterViewId const view_id = 1;
+  WindowModificationSettings const settings = {
+      .size = Size{800.0, 600.0},
+      .title = "regular",
+      .state = WindowState::kRestored,
+  };
+
+  EncodableMap const arguments = {
+      {EncodableValue(kViewIdKey), EncodableValue(static_cast<int>(view_id))},
+      {EncodableValue(kSizeKey),
+       EncodableValue(EncodableList{EncodableValue(settings.size->width()),
+                                    EncodableValue(settings.size->height())})},
+      {EncodableValue(kTitleKey), EncodableValue(*settings.title)},
+      {EncodableValue(kStateKey),
+       EncodableValue(WindowStateToString(*settings.state))},
+  };
+
+  bool success = false;
+  MethodResultFunctions<> result_handler(
+      [&success](const EncodableValue* result) { success = true; }, nullptr,
+      nullptr);
+
+  EXPECT_CALL(
+      *controller(),
+      ModifyHostWindow(view_id, WindowModificationSettingsMatches(settings)))
+      .Times(1);
+
+  SimulateWindowingMessage(&messenger, kModifyRegularMethod,
                            std::make_unique<EncodableValue>(arguments),
                            &result_handler);
 
@@ -146,8 +217,10 @@ TEST_F(WindowingHandlerTest, HandleDestroyWindow) {
   TestBinaryMessenger messenger;
   WindowingHandler windowing_handler(&messenger, controller());
 
+  FlutterViewId const view_id = 1;
+
   EncodableMap const arguments = {
-      {EncodableValue("viewId"), EncodableValue(1)},
+      {EncodableValue(kViewIdKey), EncodableValue(static_cast<int>(view_id))},
   };
 
   bool success = false;
@@ -155,7 +228,7 @@ TEST_F(WindowingHandlerTest, HandleDestroyWindow) {
       [&success](const EncodableValue* result) { success = true; }, nullptr,
       nullptr);
 
-  EXPECT_CALL(*controller(), DestroyHostWindow(1)).Times(1);
+  EXPECT_CALL(*controller(), DestroyHostWindow(view_id)).Times(1);
 
   SimulateWindowingMessage(&messenger, kDestroyWindowMethod,
                            std::make_unique<EncodableValue>(arguments),
