@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../dom.dart';
 import 'layout.dart';
 import 'paint.dart';
 
@@ -231,9 +232,6 @@ class WebParagraph implements ui.Paragraph {
   void layout(ui.ParagraphConstraints constraints) {
     try {
       _layout.performLayout();
-      for (final textCluster in _layout.textClusters) {
-        _paint.printTextCluster(textCluster);
-      }
     } catch (e) {
       printWarning(
         'Canvas 2D threw an exception while laying '
@@ -241,6 +239,14 @@ class WebParagraph implements ui.Paragraph {
         'Exception:\n$e',
       );
       rethrow;
+    }
+  }
+
+  /// Paints this paragraph instance on a [canvas] at the given [offset].
+  void paint(DomCanvasElement canvas, ui.Offset offset) {
+    for (final textCluster in _layout.textClusters) {
+      _paint.printTextCluster(textCluster);
+      _paint.paint(canvas, textCluster, offset.dx, offset.dy);
     }
   }
 

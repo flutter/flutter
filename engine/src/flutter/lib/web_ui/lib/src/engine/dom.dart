@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:js/js_util.dart' as js_util;
 import 'package:meta/meta.dart';
+
 import 'browser_detection.dart';
 
 /// This file contains static interop classes for interacting with the DOM and
@@ -4221,20 +4222,15 @@ class TextCluster {}
 class WebTextCluster extends TextCluster {}
 
 extension WebTextClusterExtension on WebTextCluster {
-  @JS('text')
-  external JSString _text();
-
-  String text() => _text().toDart;
-
   @JS('begin')
-  external int _begin();
+  external int get _begin;
 
-  int begin() => _begin();
+  int begin() => _begin;
 
   @JS('end')
-  external int _end();
+  external int get _end;
 
-  int end() => _end();
+  int end() => _end;
 }
 
 @JS()
@@ -4246,4 +4242,11 @@ extension WebTextMetricsExtension on WebTextMetrics {
   external JSArray<JSAny?> _getTextClusters();
 
   List<WebTextCluster> getTextClusters() => _getTextClusters().toDart.cast<WebTextCluster>();
+}
+
+extension WebDomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
+  @JS('fillTextCluster')
+  external void _fillTextCluster(JSAny);
+
+  void fillTextCluster(WebTextCluster textCluster) => _fillTextCluster(textCluster.toJSAnyDeep);
 }

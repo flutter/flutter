@@ -24,7 +24,27 @@ class TextPaint {
   final WebParagraph paragraph;
   ui.Rect _bounds = ui.Rect.zero;
 
+  void paint(DomCanvasElement canvas, WebTextCluster textCluster, double x, double y) {
+    String text = this.paragraph.text.substring(textCluster.begin(), textCluster.end());
+    final DomCanvasRenderingContext2D context = canvas.context2D;
+    context.fillTextCluster(textCluster);
+    /*
+    // Loop through all the lines, for each line, loop through all fragments and
+    // paint them. The fragment objects have enough information to be painted
+    // individually.
+    final List<ParagraphLine> lines = paragraph.lines;
+
+    for (final ParagraphLine line in lines) {
+      for (final LayoutFragment fragment in line.fragments) {
+        _paintBackground(canvas, offset, fragment);f
+        _paintText(canvas, offset, line, fragment);
+      }
+    }
+     */
+  }
+
   void printTextCluster(WebTextCluster textCluster) {
-    print('[${textCluster.begin()}:${textCluster.end()}): ${textCluster.text()}\n');
+    String text = this.paragraph.text.substring(textCluster.begin(), textCluster.end());
+    print('[${textCluster.begin()}:${textCluster.end()}) = "${text}"\n');
   }
 }
