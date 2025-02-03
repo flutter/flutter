@@ -288,6 +288,13 @@ class Color {
   /// If [colorSpace] is provided, and is different than the current color
   /// space, the component values are updated before transforming them to the
   /// provided [ColorSpace].
+  ///
+  /// Example:
+  /// ```dart
+  /// import 'dart:ui';
+  /// // Create sRGB magenta with 50% opacity.
+  /// Color.withValues(alpha: 0.5, red: 1.0, green: 0.0, blue: 1.0);
+  /// ```
   Color withValues({
     double? alpha,
     double? red,
