@@ -1535,6 +1535,49 @@ class CarouselController extends ScrollController {
     }
   }
 
+  /// Animates the controlled scroll view to the given item index.
+  ///
+  /// The animation lasts for the given duration and follows the given curve.
+  /// The returned [Future] resolves when the animation completes.
+  ///
+  /// If the [CarouselView] is not attached to a [CarouselController] or the
+  /// method does nothing.
+  ///
+  /// By default, the animation will use a [Duration] of 300 milliseconds
+  /// and a [Curve] of [Curves.ease].
+  Future<void> animateToItem(
+    int index, {
+    Duration duration = const Duration(milliseconds: 300),
+    Curve curve = Curves.ease,
+  }) async {
+    if (!hasClients || _carouselState == null) {
+      return;
+    }
+
+    final bool hasFlexWeights = _carouselState!._flexWeights?.isNotEmpty ?? false;
+
+    await Future.wait<void>(<Future<void>>[
+      for (final _CarouselPosition position in positions.cast<_CarouselPosition>())
+        position.animateTo(
+          _getTargetOffset(position, index, hasFlexWeights),
+          duration: duration,
+          curve: curve,
+        ),
+    ]);
+  }
+
+  double _getTargetOffset(_CarouselPosition position, int index, bool hasFlexWeights) {
+    if (!hasFlexWeights) {
+      return index * _carouselState!._itemExtent!;
+    }
+
+    final List<int> weights = _carouselState!._flexWeights!;
+    final double dimension = position.viewportDimension;
+    final int totalWeight = weights.reduce((int a, int b) => a + b);
+
+    return  dimension * (weights.first / totalWeight) * index;
+  }
+
   @override
   ScrollPosition createScrollPosition(
     ScrollPhysics physics,

@@ -1413,6 +1413,95 @@ void main() {
       expect(buttonPressed, isTrue);
     },
   );
+
+  testWidgets('CarouselView animateToItem with itemExtent', (WidgetTester tester) async {
+    final CarouselController controller = CarouselController(initialItem: 5);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 350,
+            enableSplash: false,
+            controller: controller,
+            children: List<Widget>.generate(20, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    double realOffset() {
+      return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+    }
+
+    // Scroll to the last item.
+    controller.animateToItem(19, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    await tester.pumpAndSettle();
+
+    // Verify that the last item is visible.
+    expect(find.text('Item 19'), findsOneWidget);
+    expect(realOffset(), controller.offset);
+
+    // Scroll to the first item.
+    controller.animateToItem(0, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    await tester.pumpAndSettle();
+
+    // Verify that the first item is visible.
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(realOffset(), controller.offset);
+
+    // Scroll to the middle item.
+    controller.animateToItem(10, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    await tester.pumpAndSettle();
+
+    // Verify that the middle item is visible.
+    expect(find.text('Item 10'), findsOneWidget);
+    expect(realOffset(), controller.offset);
+  });
+
+  testWidgets('CarouselView animateToItem with flexWeights', (WidgetTester tester) async {
+    final CarouselController controller = CarouselController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            flexWeights: const <int>[7, 1],
+            controller: controller,
+            itemSnapping: true,
+            children: List<Widget>.generate(20, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+    // await tester.pumpAndSettle();
+
+    double realOffset() {
+      return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+    }
+
+    // Scroll to the middle item.
+    controller.animateToItem(10, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    await tester.pumpAndSettle();
+
+    // Verify that the middle item is visible.
+    expect(find.text('Item 10'), findsOneWidget);
+    expect(realOffset(), controller.offset);
+
+
+    // Scroll to the first item.
+    controller.animateToItem(0, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    await tester.pumpAndSettle();
+
+    // Verify that the first item is visible.
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(realOffset(), controller.offset);
+  });
 }
 
 Finder getItem(int index) {
