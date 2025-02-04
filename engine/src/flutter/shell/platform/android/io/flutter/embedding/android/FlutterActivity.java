@@ -220,7 +220,7 @@ public class FlutterActivity extends Activity
    * <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For more,
    * see {@link android.view.View#findViewById}.
    */
-  @VisibleForTesting final int flutterViewId;
+  @VisibleForTesting Integer flutterViewId;
 
   public static void setFlutterViewId(FlutterActivity instance, int id) {
     if (instance.flutterViewId == null) {
@@ -607,7 +607,7 @@ public class FlutterActivity extends Activity
 
   public FlutterActivity() {
     lifecycle = new LifecycleRegistry(this);
-    flutterViewId = setFlutterViewId(View.generateViewId());
+    FlutterActivity.setFlutterViewId(this, View.generateViewId());
   }
 
   /**
