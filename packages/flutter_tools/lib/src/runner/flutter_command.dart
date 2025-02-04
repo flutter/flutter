@@ -1894,16 +1894,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         buildTargets: globals.buildTargets,
       );
 
-      // null implicitly means all plugins are allowed
-      List<String>? allowedPlugins;
-      if (stringArg(FlutterGlobalOptions.kDeviceIdOption, global: true) == 'preview') {
-        // The preview device does not currently support any plugins.
-        allowedPlugins = PreviewDevice.supportedPubPlugins;
-      }
-      await project.regeneratePlatformSpecificTooling(
-        allowedPlugins: allowedPlugins,
-        releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && getBuildMode().isRelease,
-      );
+      await regeneratePlatformSpecificTooling(project);
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }
@@ -1916,6 +1907,40 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     }
 
     return runCommand();
+  }
+
+  /// Runs [FlutterProject.regeneratePlatformSpecificTooling] for [project] with appropriate configuration.
+  ///
+  /// By default, this uses [getBuildMode] to determine and provide whether a release build is being made,
+  /// but sub-commands (such as commands that do _meta_ builds, or builds that make multiple different builds
+  /// sequentially in one-go) may choose to overide this and make the call at a different point in time.
+  @protected
+  Future<void> regeneratePlatformSpecificTooling(
+    FlutterProject project, {
+    bool? releaseMode,
+  }) async {
+    // Interested in why this function exists? See https://github.com/flutter/flutter/issues/162649.
+
+    // Just like in "verifyThenRunCommand", we want to skip metadata generation steps when "--no-pub" is provided.
+    if (!shouldRunPub) {
+      return;
+    }
+
+    // TODO(matanlurey): Determine PreviewDevice should be kept.
+    // https://github.com/flutter/flutter/issues/162693
+
+    // null implicitly means all plugins are allowed
+    List<String>? allowedPlugins;
+    if (stringArg(FlutterGlobalOptions.kDeviceIdOption, global: true) == 'preview') {
+      // The preview device does not currently support any plugins.
+      allowedPlugins = PreviewDevice.supportedPubPlugins;
+    }
+
+    releaseMode ??= getBuildMode().isRelease;
+    await project.regeneratePlatformSpecificTooling(
+      allowedPlugins: allowedPlugins,
+      releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && releaseMode,
+    );
   }
 
   Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
