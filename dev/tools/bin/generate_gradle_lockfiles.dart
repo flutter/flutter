@@ -301,6 +301,9 @@ plugins {
 include ":app"
 ''';
 
+// Consider updating this file to reflect the latest updates to app templates
+// when performing batch updates (this file is modeled after
+// root_app/android/build.gradle.kts).
 const String rootGradleKtsFileContent = r'''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -338,6 +341,9 @@ tasks.register<Delete>("clean") {
 }
 ''';
 
+// Consider updating this file to reflect the latest updates to app templates
+// when performing batch updates (this file is modeled after
+// root_app/android/settings.gradle.kts).
 const String settingsGradleKtsFileContent = r'''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
