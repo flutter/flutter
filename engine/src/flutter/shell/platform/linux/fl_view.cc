@@ -211,6 +211,13 @@ static void handle_geometry_changed(FlView* self) {
 
   GdkWindow* window =
       gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(self)));
+  // NOTE(robert-ancell) If we haven't got a window we default to display 0.
+  // This is probably indicating a problem with this code in that we
+  // shouldn't be generating anything until the window is created.
+  // Another event with the correct display ID is generated soon after.
+  // I haven't changed this code in case there are side-effects but we
+  // probably shouldn't call handle_geometry_changed after the view is
+  // added but only when the window is realized.
   FlutterEngineDisplayId display_id = 0;
   if (window != nullptr) {
     GdkMonitor* monitor = gdk_display_get_monitor_at_window(
