@@ -2065,9 +2065,9 @@ class _HighlightModeManager {
     }
   }
 
-  // If set, indicates if the last interaction detected was touch or not. If
-  // null, no interactions have occurred yet.
-  bool? _lastInteractionWasTouch;
+  // If null, no interactions have occurred yet and the default highlight mode for the current
+  // platform applies.
+  bool? _lastInteractionRequiresTraditionalHighlights;
 
   FocusHighlightMode get highlightMode => _highlightMode ?? _defaultModeForPlatform;
   FocusHighlightMode? _highlightMode;
@@ -2182,8 +2182,8 @@ class _HighlightModeManager {
       case PointerDeviceKind.touch:
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
-        if (_lastInteractionWasTouch != true) {
-          _lastInteractionWasTouch = true;
+        if (_lastInteractionRequiresTraditionalHighlights != true) {
+          _lastInteractionRequiresTraditionalHighlights = true;
           updateMode();
         }
       case PointerDeviceKind.mouse:
@@ -2194,10 +2194,10 @@ class _HighlightModeManager {
 
   bool handleKeyMessage(KeyMessage message) {
     // ignore: use_if_null_to_convert_nulls_to_bools
-    if (_lastInteractionWasTouch != false) {
+    if (_lastInteractionRequiresTraditionalHighlights != false) {
       // Update highlightMode first, since things responding to the keys might
       // look at the highlight mode, and it should be accurate.
-      _lastInteractionWasTouch = false;
+      _lastInteractionRequiresTraditionalHighlights = false;
       updateMode();
     }
 
@@ -2295,8 +2295,8 @@ class _HighlightModeManager {
   void handleSemanticsAction(SemanticsActionEvent semanticsActionEvent) {
     if (kIsWeb &&
         semanticsActionEvent.type == SemanticsAction.focus &&
-        _lastInteractionWasTouch != true) {
-      _lastInteractionWasTouch = true;
+        _lastInteractionRequiresTraditionalHighlights != true) {
+      _lastInteractionRequiresTraditionalHighlights = true;
       updateMode();
     }
   }
@@ -2307,14 +2307,14 @@ class _HighlightModeManager {
     final FocusHighlightMode newMode;
     switch (strategy) {
       case FocusHighlightStrategy.automatic:
-        if (_lastInteractionWasTouch == null) {
+        if (_lastInteractionRequiresTraditionalHighlights == null) {
           // If we don't have any information about the last interaction yet,
           // then just rely on the default value for the platform, which will be
           // determined based on the target platform if _highlightMode is not
           // set.
           return;
         }
-        if (_lastInteractionWasTouch!) {
+        if (_lastInteractionRequiresTraditionalHighlights!) {
           newMode = FocusHighlightMode.touch;
         } else {
           newMode = FocusHighlightMode.traditional;
