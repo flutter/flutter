@@ -1989,12 +1989,13 @@ void main() {
     );
   });
 
-  testWidgets('CupertinoAlertDialog divider spans full width and applies color', (WidgetTester tester) async {
-      const double kCupertinoDialogWidth = 270.0;
-      const double kDividerThickness = 0.3;
-      const Size expectedSize = Size(kCupertinoDialogWidth, kDividerThickness);
+  testWidgets('CupertinoAlertDialog divider spans full width and applies color',
+      (WidgetTester tester) async {
+    const double kCupertinoDialogWidth = 270.0;
+    const double kDividerThickness = 0.3;
+    const Size expectedSize = Size(kCupertinoDialogWidth, kDividerThickness);
 
-      await tester.pumpWidget(
+    await tester.pumpWidget(
       CupertinoApp(
         home: MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark),
@@ -2016,18 +2017,23 @@ void main() {
 
     final Finder decoratedBoxFinder = find.byType(DecoratedBox);
 
-    expect(decoratedBoxFinder, findsAny, reason:  'There should exist at least one DecoratedBox');
+    expect(decoratedBoxFinder, findsAny,
+        reason: 'There should exist at least one DecoratedBox');
 
     final Iterable<Element> elements = decoratedBoxFinder.evaluate().where(
       (Element decoratedBoxElement) {
-        final DecoratedBox decoratedBox = decoratedBoxElement.widget as DecoratedBox;
-        return (decoratedBox.decoration is BoxDecoration?) && (decoratedBox.decoration as BoxDecoration?)?.color ==
+        final DecoratedBox decoratedBox =
+            decoratedBoxElement.widget as DecoratedBox;
+        return (decoratedBox.decoration is BoxDecoration?) &&
+            (decoratedBox.decoration as BoxDecoration?)?.color ==
                 CupertinoDynamicColor.resolve(
-                    CupertinoColors.separator, decoratedBoxElement) &&  tester.getSize(find.byWidget(decoratedBox)) == expectedSize;
+                    CupertinoColors.separator, decoratedBoxElement) &&
+            tester.getSize(find.byWidget(decoratedBox)) == expectedSize;
       },
     );
 
-    expect(elements.length, 1, reason: 'No DecoratedBox matches the specified criteria.');
+    expect(elements.length, 1,
+        reason: 'No DecoratedBox matches the specified criteria.');
   });
 }
 
