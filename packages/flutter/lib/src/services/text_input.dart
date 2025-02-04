@@ -2574,6 +2574,63 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// The [Rect] represents what the context menu is pointing to. For example,
   /// for some text selection, this would be the selection [Rect].
   ///
+  /// Currently this system context menu is bound to text input. Using this
+  /// without an active [TextInputConnection] will be a noop.
+  ///
+  /// There can only be one system context menu visible at a time. Calling this
+  /// while another system context menu is already visible will remove the old
+  /// menu before showing the new menu.
+  ///
+  /// See also:
+  ///
+  ///  * [hide], which hides the menu shown by this method.
+  ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
+  ///    this method is supported on the current platform.
+  @Deprecated(
+    'Use showWithItems instead. '
+    'This feature was deprecated after v3.29.0-0.3.pre.',
+  )
+  Future<void> show(Rect targetRect) {
+    assert(!_isDisposed);
+    assert(
+      TextInput._instance._currentConnection != null,
+      'Currently, the system context menu can only be shown for an active text input connection',
+    );
+
+    // Don't show the same thing that's already being shown.
+    if (_lastShown != null && _lastShown!.isVisible && _lastShown!._lastTargetRect == targetRect) {
+      return Future<void>.value();
+    }
+
+    assert(
+      _lastShown == null || _lastShown == this || !_lastShown!.isVisible,
+      'Attempted to show while another instance was still visible.',
+    );
+
+    ServicesBinding.systemContextMenuClient = this;
+
+    _lastTargetRect = targetRect;
+    _lastShown = this;
+    _hiddenBySystem = false;
+    return _channel.invokeMethod('ContextMenu.showSystemContextMenu', <String, dynamic>{
+      'targetRect': <String, double>{
+        'x': targetRect.left,
+        'y': targetRect.top,
+        'width': targetRect.width,
+        'height': targetRect.height,
+      },
+    });
+  }
+
+  /// Shows the system context menu anchored on the given [Rect] with the given
+  /// buttons.
+  ///
+  /// Currently only supported on iOS 16.0 and later. Check
+  /// [MediaQuery.maybeSupportsShowingSystemContextMenu] before calling this.
+  ///
+  /// The [Rect] represents what the context menu is pointing to. For example,
+  /// for some text selection, this would be the selection [Rect].
+  ///
   /// `items` specifies the buttons that appear in the menu. Any `items` that
   /// have no title will be passed a default title from the given
   /// [WidgetsLocalizations]. The buttons that appear in the menu will be
@@ -2593,7 +2650,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [hide], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
-  Future<void> show(Rect targetRect, List<IOSSystemContextMenuItemData> items) {
+  Future<void> showWithItems(Rect targetRect, List<IOSSystemContextMenuItemData> items) {
     assert(!_isDisposed);
     assert(items.isNotEmpty);
     assert(

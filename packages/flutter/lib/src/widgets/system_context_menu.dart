@@ -166,7 +166,7 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
           widget.items
               .map((IOSSystemContextMenuItem item) => item._getData(localizations))
               .toList();
-      _systemContextMenuController.show(widget.anchor, itemDatas);
+      _systemContextMenuController.showWithItems(widget.anchor, itemDatas);
     }
 
     return const SizedBox.shrink();

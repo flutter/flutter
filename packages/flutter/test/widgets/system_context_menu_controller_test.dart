@@ -63,7 +63,7 @@ void main() {
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
       const IOSSystemContextMenuItemDataCopy(),
     ];
-    controller.show(rect1, items);
+    controller.showWithItems(rect1, items);
     expect(targetRects, hasLength(1));
     expect(targetRects.last['x'], rect1.left);
     expect(targetRects.last['y'], rect1.top);
@@ -71,13 +71,13 @@ void main() {
     expect(targetRects.last['height'], rect1.height);
 
     // Showing the same thing again does nothing.
-    controller.show(rect1, items);
+    controller.showWithItems(rect1, items);
     expect(controller.isVisible, isTrue);
     expect(targetRects, hasLength(1));
 
     // Showing a new rect calls the platform.
     const Rect rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
-    controller.show(rect2, items);
+    controller.showWithItems(rect2, items);
     expect(targetRects, hasLength(2));
     expect(targetRects.last['x'], rect2.left);
     expect(targetRects.last['y'], rect2.top);
@@ -95,7 +95,7 @@ void main() {
     expect(hideCount, 1);
 
     // Showing the last shown rect calls the platform.
-    controller.show(rect2, items);
+    controller.showWithItems(rect2, items);
     expect(controller.isVisible, isTrue);
     expect(targetRects, hasLength(3));
     expect(targetRects.last['x'], rect2.left);
@@ -166,7 +166,7 @@ void main() {
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
       const IOSSystemContextMenuItemDataCopy(),
     ];
-    controller.show(rect1, items);
+    controller.showWithItems(rect1, items);
     expect(controller.isVisible, isTrue);
     expect(targetRects, hasLength(1));
     expect(targetRects.last['x'], rect1.left);
@@ -211,7 +211,7 @@ void main() {
       const IOSSystemContextMenuItemDataCopy(),
     ];
     expect(() {
-      controller1.show(rect1, items);
+      controller1.showWithItems(rect1, items);
     }, isNot(throwsAssertionError));
     expect(controller1.isVisible, isTrue);
 
@@ -223,7 +223,7 @@ void main() {
     expect(controller2.isVisible, isFalse);
     const Rect rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
     expect(() {
-      controller2.show(rect2, items);
+      controller2.showWithItems(rect2, items);
     }, throwsAssertionError);
     expect(controller1.isVisible, isTrue);
     expect(controller2.isVisible, isFalse);
@@ -285,7 +285,7 @@ void main() {
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
       const IOSSystemContextMenuItemDataCopy(),
     ];
-    controller1.show(rect1, items);
+    controller1.showWithItems(rect1, items);
     expect(controller1.isVisible, isTrue);
     expect(targetRects, hasLength(1));
     expect(targetRects.last['x'], rect1.left);
@@ -302,7 +302,7 @@ void main() {
     });
     expect(controller2.isVisible, isFalse);
     const Rect rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
-    controller2.show(rect2, items);
+    controller2.showWithItems(rect2, items);
     expect(controller1.isVisible, isFalse);
     expect(controller2.isVisible, isTrue);
     expect(targetRects, hasLength(2));
@@ -377,14 +377,14 @@ void main() {
       // https://github.com/flutter/flutter/issues/103163
     ];
 
-    controller.show(rect, items1);
+    controller.showWithItems(rect, items1);
     expect(controller.isVisible, isTrue);
     expect(itemsReceived, hasLength(1));
     expect(itemsReceived.last, hasLength(items1.length));
     expect(itemsReceived.last, equals(items1));
 
     // Showing the same thing again does nothing.
-    controller.show(rect, items1);
+    controller.showWithItems(rect, items1);
     expect(controller.isVisible, isTrue);
     expect(itemsReceived, hasLength(1));
 
@@ -392,7 +392,7 @@ void main() {
     final List<IOSSystemContextMenuItemData> items2 = <IOSSystemContextMenuItemData>[
       const IOSSystemContextMenuItemDataCut(),
     ];
-    controller.show(rect, items2);
+    controller.showWithItems(rect, items2);
     expect(controller.isVisible, isTrue);
     expect(itemsReceived, hasLength(2));
     expect(itemsReceived.last, hasLength(items2.length));
@@ -447,7 +447,7 @@ void main() {
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[];
 
     expect(() {
-      controller.show(rect, items);
+      controller.showWithItems(rect, items);
     }, throwsAssertionError);
     expect(controller.isVisible, isFalse);
     expect(itemsReceived, hasLength(0));

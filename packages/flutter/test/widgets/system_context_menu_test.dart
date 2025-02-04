@@ -231,7 +231,7 @@ void main() {
   );
 
   testWidgets(
-    'passing empty items is an error',
+    "passing empty items builds the widget but doesn't show the system context menu",
     (WidgetTester tester) async {
       final List<List<IOSSystemContextMenuItemData>> itemsReceived =
           <List<IOSSystemContextMenuItemData>>[];
@@ -302,8 +302,8 @@ void main() {
       expect(tester.takeException(), isNull);
 
       await tester.pump();
-      expect(tester.takeException(), isAssertionError);
-      expect(find.byType(SystemContextMenu), findsNothing);
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SystemContextMenu), findsOneWidget);
       expect(itemsReceived, hasLength(0));
     },
     skip: kIsWeb, // [intended]
