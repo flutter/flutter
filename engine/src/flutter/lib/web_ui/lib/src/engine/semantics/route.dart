@@ -6,6 +6,19 @@ import '../dom.dart';
 import '../semantics.dart';
 import '../util.dart';
 
+mixin RouteLike on SemanticRole {
+  /// Sets the description of this route based on a [RouteName] descendant
+  /// node, unless the route provides its own label.
+  void describeBy(RouteName routeName) {
+    if (semanticsObject.namesRoute) {
+      // The route provides its own label, which takes precedence.
+      return;
+    }
+
+    setAttribute('aria-describedby', routeName.semanticsObject.element.id);
+  }
+}
+
 /// Denotes that all descendant nodes are inside a route.
 ///
 /// Routes can include dialogs, pop-up menus, sub-screens, and more.
@@ -14,7 +27,7 @@ import '../util.dart';
 ///
 ///   * [RouteName], which provides a description for this route in the absense
 ///     of an explicit route label set on the route itself.
-class SemanticRoute extends SemanticRole {
+class SemanticRoute extends SemanticRole with RouteLike {
   SemanticRoute(SemanticsObject semanticsObject)
     : super.blank(EngineSemanticsRole.route, semanticsObject) {
     // The following behaviors can coexist with the route. Generic `RouteName`
@@ -90,17 +103,6 @@ class SemanticRoute extends SemanticRole {
     }
   }
 
-  /// Sets the description of this route based on a [RouteName] descendant
-  /// node, unless the route provides its own label.
-  void describeBy(RouteName routeName) {
-    if (semanticsObject.namesRoute) {
-      // The route provides its own label, which takes precedence.
-      return;
-    }
-
-    setAttribute('aria-describedby', routeName.semanticsObject.element.id);
-  }
-
   @override
   bool focusAsRouteDefault() {
     // Routes are the ones that look inside themselves to find elements to
@@ -121,7 +123,7 @@ class SemanticRoute extends SemanticRole {
 class RouteName extends SemanticBehavior {
   RouteName(super.semanticsObject, super.owner);
 
-  SemanticRoute? _route;
+  RouteLike? _route;
 
   @override
   void update() {
@@ -139,7 +141,7 @@ class RouteName extends SemanticBehavior {
     }
 
     if (semanticsObject.isLabelDirty) {
-      final SemanticRoute? route = _route;
+      final RouteLike? route = _route;
       if (route != null) {
         // Already attached to a route, just update the description.
         route.describeBy(this);
@@ -158,11 +160,11 @@ class RouteName extends SemanticBehavior {
 
   void _lookUpNearestAncestorRoute() {
     SemanticsObject? parent = semanticsObject.parent;
-    while (parent != null && parent.semanticRole?.kind != EngineSemanticsRole.route) {
+    while (parent != null && (parent.semanticRole is RouteLike)) {
       parent = parent.parent;
     }
-    if (parent != null && parent.semanticRole?.kind == EngineSemanticsRole.route) {
-      _route = parent.semanticRole! as SemanticRoute;
+    if (parent != null) {
+      _route = parent.semanticRole! as RouteLike;
     }
   }
 }

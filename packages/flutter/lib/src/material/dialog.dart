@@ -10,7 +10,7 @@
 /// @docImport 'text_button.dart';
 library;
 
-import 'dart:ui' show clampDouble, lerpDouble;
+import 'dart:ui' show clampDouble, lerpDouble, SemanticsRole;
 
 import 'package:flutter/cupertino.dart';
 
@@ -268,17 +268,20 @@ class Dialog extends StatelessWidget {
       );
     }
 
-    return AnimatedPadding(
-      padding: effectivePadding,
-      duration: insetAnimationDuration,
-      curve: insetAnimationCurve,
-      child: MediaQuery.removeViewInsets(
-        removeLeft: true,
-        removeTop: true,
-        removeRight: true,
-        removeBottom: true,
-        context: context,
-        child: dialogChild,
+    return Semantics(
+      role: SemanticsRole.dialog,
+      child: AnimatedPadding(
+        padding: effectivePadding,
+        duration: insetAnimationDuration,
+        curve: insetAnimationCurve,
+        child: MediaQuery.removeViewInsets(
+          removeLeft: true,
+          removeTop: true,
+          removeRight: true,
+          removeBottom: true,
+          context: context,
+          child: dialogChild,
+        ),
       ),
     );
   }
@@ -909,16 +912,19 @@ class AlertDialog extends StatelessWidget {
       );
     }
 
-    return Dialog(
-      backgroundColor: backgroundColor,
-      elevation: elevation,
-      shadowColor: shadowColor,
-      surfaceTintColor: surfaceTintColor,
-      insetPadding: insetPadding,
-      clipBehavior: clipBehavior,
-      shape: shape,
-      alignment: alignment,
-      child: dialogChild,
+    return Semantics(
+      role: SemanticsRole.alertDialog,
+      child: Dialog(
+        backgroundColor: backgroundColor,
+        elevation: elevation,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        insetPadding: insetPadding,
+        clipBehavior: clipBehavior,
+        shape: shape,
+        alignment: alignment,
+        child: dialogChild,
+      ),
     );
   }
 }

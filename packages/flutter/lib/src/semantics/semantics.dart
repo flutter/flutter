@@ -108,6 +108,8 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.tab => _semanticsTab,
     SemanticsRole.tabBar => _semanticsTabBar,
     SemanticsRole.tabPanel => _noCheckRequired,
+    SemanticsRole.dialog => _noCheckRequired,
+    SemanticsRole.alertDialog => _noCheckRequired,
   }(node);
 
   static FlutterError? _noCheckRequired(SemanticsNode node) => null;
