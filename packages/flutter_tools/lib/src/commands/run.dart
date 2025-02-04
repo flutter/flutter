@@ -258,9 +258,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   @override
   bool get refreshWirelessDevices => true;
 
-  @override
-  bool get reportNullSafety => true;
-
   /// Whether to start the application paused by default.
   bool get startPausedDefault;
 
