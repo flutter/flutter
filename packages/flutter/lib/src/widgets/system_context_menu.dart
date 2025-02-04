@@ -226,7 +226,7 @@ sealed class IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemCopy], which specifies the data to be sent to
 ///    the platform for this same button.
-class IOSSystemContextMenuItemCopy extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemCopy extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemCopy].
   const IOSSystemContextMenuItemCopy();
 
@@ -249,7 +249,7 @@ class IOSSystemContextMenuItemCopy extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemCut], which specifies the data to be sent to
 ///    the platform for this same button.
-class IOSSystemContextMenuItemCut extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemCut extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemCut].
   const IOSSystemContextMenuItemCut();
 
@@ -272,7 +272,7 @@ class IOSSystemContextMenuItemCut extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemPaste], which specifies the data to be sent
 ///     to the platform for this same button.
-class IOSSystemContextMenuItemPaste extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemPaste extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemPaste].
   const IOSSystemContextMenuItemPaste();
 
@@ -295,7 +295,7 @@ class IOSSystemContextMenuItemPaste extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemSelectAll], which specifies the data to be
 ///     sent to the platform for this same button.
-class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemSelectAll].
   const IOSSystemContextMenuItemSelectAll();
 
@@ -322,7 +322,7 @@ class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemLookUp], which specifies the data to be sent
 ///    to the platform for this same button.
-class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemLookUp].
   const IOSSystemContextMenuItemLookUp({this.title});
 
@@ -357,7 +357,7 @@ class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemSearchWeb], which specifies the data to be
 ///    sent to the platform for this same button.
-class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemSearchWeb].
   const IOSSystemContextMenuItemSearchWeb({this.title});
 
@@ -394,7 +394,7 @@ class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemShare], which specifies the data to be sent
 ///    to the platform for this same button.
-class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemShare].
   const IOSSystemContextMenuItemShare({this.title});
 

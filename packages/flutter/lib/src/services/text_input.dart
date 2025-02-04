@@ -2788,7 +2788,7 @@ sealed class IOSSystemContextMenuItemData {
 ///    menu.
 ///  * [IOSSystemContextMenuItemCopy], which performs a similar role but at the
 ///    widget level.
-class IOSSystemContextMenuItemDataCopy extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataCopy extends IOSSystemContextMenuItemData {
   /// Creates an instance of [IOSSystemContextMenuItemDataCopy].
   const IOSSystemContextMenuItemDataCopy();
 
@@ -2806,7 +2806,7 @@ class IOSSystemContextMenuItemDataCopy extends IOSSystemContextMenuItemData {
 ///    menu.
 ///  * [IOSSystemContextMenuItemCut], which performs a similar role but at the
 ///    widget level.
-class IOSSystemContextMenuItemDataCut extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataCut extends IOSSystemContextMenuItemData {
   /// Creates an instance of [IOSSystemContextMenuItemDataCut].
   const IOSSystemContextMenuItemDataCut();
 
@@ -2824,7 +2824,7 @@ class IOSSystemContextMenuItemDataCut extends IOSSystemContextMenuItemData {
 ///    menu.
 ///  * [IOSSystemContextMenuItemPaste], which performs a similar role but at the
 ///    widget level.
-class IOSSystemContextMenuItemDataPaste extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataPaste extends IOSSystemContextMenuItemData {
   /// Creates an instance of [IOSSystemContextMenuItemDataPaste].
   const IOSSystemContextMenuItemDataPaste();
 
@@ -2843,7 +2843,7 @@ class IOSSystemContextMenuItemDataPaste extends IOSSystemContextMenuItemData {
 ///    menu.
 ///  * [IOSSystemContextMenuItemSelectAll], which performs a similar role but at
 ///    the widget level.
-class IOSSystemContextMenuItemDataSelectAll extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataSelectAll extends IOSSystemContextMenuItemData {
   /// Creates an instance of [IOSSystemContextMenuItemDataSelectAll].
   const IOSSystemContextMenuItemDataSelectAll();
 
@@ -2865,7 +2865,7 @@ class IOSSystemContextMenuItemDataSelectAll extends IOSSystemContextMenuItemData
 ///  * [IOSSystemContextMenuItemLookUp], which performs a similar role but at the
 ///    widget level, where the title can be replaced with a default localized
 ///    value.
-class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemData {
   /// Creates an instance of [IOSSystemContextMenuItemDataLookUp].
   const IOSSystemContextMenuItemDataLookUp({required this.title});
 
@@ -2896,7 +2896,7 @@ class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemData {
 ///  * [IOSSystemContextMenuItemSearchWeb], which performs a similar role but at
 ///    the widget level, where the title can be replaced with a default localized
 ///    value.
-class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuItemData {
   /// Creates an instance of [IOSSystemContextMenuItemDataSearchWeb].
   const IOSSystemContextMenuItemDataSearchWeb({required this.title});
 
@@ -2926,7 +2926,7 @@ class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuItemData
 ///  * [IOSSystemContextMenuItemShare], which performs a similar role but at
 ///    the widget level, where the title can be replaced with a default
 ///    localized value.
-class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemData {
   /// Creates an instance of [IOSSystemContextMenuItemDataShare].
   const IOSSystemContextMenuItemDataShare({required this.title});
 
