@@ -31,6 +31,7 @@ import 'daemon.dart';
 
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
+    required bool verboseHelp,
     required Logger logger,
     required FileSystem fs,
     required FlutterProjectFactory projectFactory,
@@ -41,6 +42,7 @@ class WidgetPreviewCommand extends FlutterCommand {
   }) {
     addSubcommand(
       WidgetPreviewStartCommand(
+        verboseHelp: verboseHelp,
         logger: logger,
         fs: fs,
         projectFactory: projectFactory,
@@ -106,6 +108,7 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
   WidgetPreviewStartCommand({
+    this.verboseHelp = false,
     required this.logger,
     required this.fs,
     required this.projectFactory,
@@ -120,7 +123,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       defaultsTo: true,
       help: 'Launches the widget preview environment.',
       // Should only be used for testing.
-      hide: true,
+      hide: !verboseHelp,
     );
   }
 
@@ -132,6 +135,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @override
   String get name => 'start';
+
+  final bool verboseHelp;
 
   @override
   final FileSystem fs;
