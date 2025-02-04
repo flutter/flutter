@@ -21,6 +21,7 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity implements MethodChannel.MethodCallHandler {
+    final int flutterViewIdForTesting = 22;
     final static int STORAGE_PERMISSION_CODE = 1;
 
     MethodChannel mMethodChannel;
@@ -30,7 +31,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     private MethodChannel.Result permissionResult;
 
     private View getFlutterView() {
-      return findViewById(FLUTTER_VIEW_ID);
+      return findViewById(flutterViewIdForTesting);
     }
 
     @Override
@@ -43,6 +44,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         mMethodChannel = new MethodChannel(executor, "android_views_integration");
         mMethodChannel.setMethodCallHandler(this);
         GeneratedPluginRegistrant.registerWith(flutterEngine);
+        FlutterActivity.setFlutterViewId((FlutterActivity) this, flutterViewIdForTesting);
     }
 
     @Override
