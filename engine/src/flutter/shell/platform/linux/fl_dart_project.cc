@@ -118,13 +118,13 @@ G_MODULE_EXPORT void fl_dart_project_set_dart_entrypoint_arguments(
 }
 
 G_MODULE_EXPORT void fl_dart_project_set_enable_impeller(FlDartProject* project,
-                                                         bool value) {
+                                                         bool enabled) {
   g_return_if_fail(FL_IS_DART_PROJECT(self));
-  self->enable_impeller = value;
+  self->enable_impeller = enabled;
 }
 
 G_MODULE_EXPORT bool fl_dart_project_get_enable_impeller(
     FLDartProject* project) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(self), false);
-  return self->senable_impeller;
+  return self->enable_impeller;
 }

@@ -131,18 +131,15 @@ gchar** fl_dart_project_get_dart_entrypoint_arguments(FlDartProject* project);
 /**
  * fl_dart_project_set_enable_impeller:
  * @project: an #FlDartProject.
- * @value: whether the Impeller rendering backend is enabled.
+ * @enabled: whether the Impeller rendering backend is enabled.
  *
  * If true, Selects the Impeller rendering backend. Otherwise selects Skia.
  */
-void fl_dart_project_set_enable_impeller(FlDartProject* project, bool value);
+void fl_dart_project_set_enable_impeller(FlDartProject* project, bool enabled);
 
 /**
  * fl_dart_project_get_enable_impeller:
  * @project: an #FlDartProject.
- *
- * Gets the command line arguments to be passed through to the Dart entrypoint
- * function.
  *
  * Returns: whether the Impeller rendering backend is enabled.
  */
