@@ -160,7 +160,7 @@ class RouteName extends SemanticBehavior {
 
   void _lookUpNearestAncestorRoute() {
     SemanticsObject? parent = semanticsObject.parent;
-    while (parent != null && (parent.semanticRole is RouteLike)) {
+    while (parent != null && (parent.semanticRole is! RouteLike)) {
       parent = parent.parent;
     }
     if (parent != null) {
