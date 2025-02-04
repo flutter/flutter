@@ -288,7 +288,7 @@ void main() {
   testWidgets('Material uses the dark SystemUIOverlayStyle when the background is light', (
     WidgetTester tester,
   ) async {
-    final ThemeData lightTheme = ThemeData(useMaterial3: true);
+    final ThemeData lightTheme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(theme: lightTheme, home: const Scaffold(body: Center(child: Text('test')))),
     );
@@ -300,7 +300,7 @@ void main() {
   testWidgets('Material uses the light SystemUIOverlayStyle when the background is dark', (
     WidgetTester tester,
   ) async {
-    final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
+    final ThemeData darkTheme = ThemeData.dark();
     await tester.pumpWidget(
       MaterialApp(theme: darkTheme, home: const Scaffold(body: Center(child: Text('test')))),
     );
