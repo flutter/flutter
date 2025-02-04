@@ -117,14 +117,13 @@ G_MODULE_EXPORT void fl_dart_project_set_dart_entrypoint_arguments(
   self->dart_entrypoint_args = g_strdupv(argv);
 }
 
-G_MODULE_EXPORT void fl_dart_project_set_enable_impeller(FlDartProject* project,
+G_MODULE_EXPORT void fl_dart_project_set_enable_impeller(FlDartProject* self,
                                                          bool enabled) {
   g_return_if_fail(FL_IS_DART_PROJECT(self));
   self->enable_impeller = enabled;
 }
 
-G_MODULE_EXPORT bool fl_dart_project_get_enable_impeller(
-    FlDartProject* project) {
+G_MODULE_EXPORT bool fl_dart_project_get_enable_impeller(FlDartProject* self) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(self), false);
   return self->enable_impeller;
 }
