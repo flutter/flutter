@@ -176,15 +176,22 @@ base class DepthRange {
 }
 
 base class Viewport {
-  Viewport({this.x = 0, this.y = 0, this.width = 0, this.height = 0, DepthRange? depthRange = null})
-    : this.depthRange = depthRange ?? DepthRange();
+  Viewport({
+    this.x = 0,
+    this.y = 0,
+    this.width = 0,
+    this.height = 0,
+    DepthRange? depthRange = null,
+  }) : this.depthRange = depthRange ?? DepthRange();
 
   int x, y, width, height;
   DepthRange depthRange;
 
   void _validate() {
     if (x < 0 || y < 0 || width < 0 || height < 0) {
-      throw Exception("Invalid values for viewport. All values should be positive.");
+      throw Exception(
+        "Invalid values for viewport. All values should be positive.",
+      );
     }
   }
 }
@@ -372,7 +379,14 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       viewport._validate();
       return true;
     }());
-    _setViewport(viewport.x, viewport.y, viewport.width, viewport.height, viewport.depthRange.zNear, viewport.depthRange.zFar);
+    _setViewport(
+      viewport.x,
+      viewport.y,
+      viewport.width,
+      viewport.height,
+      viewport.depthRange.zNear,
+      viewport.depthRange.zFar,
+    );
   }
 
   void setDepthCompareOperation(CompareFunction compareFunction) {
@@ -538,14 +552,16 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   );
 
   @Native<Void Function(Pointer<Void>, Int, Int, Int, Int, Float, Float)>(
-      symbol: 'InternalFlutterGpu_RenderPass_SetViewport')
+    symbol: 'InternalFlutterGpu_RenderPass_SetViewport',
+  )
   external void _setViewport(
-      int x,
-      int y,
-      int width,
-      int height,
-      double depthRangeZNear,
-      double depthRangeZFar);
+    int x,
+    int y,
+    int width,
+    int height,
+    double depthRangeZNear,
+    double depthRangeZFar,
+  );
 
   @Native<
     Bool Function(
