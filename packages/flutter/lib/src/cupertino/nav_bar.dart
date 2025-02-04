@@ -1791,14 +1791,14 @@ class _NavigationBarStaticComponents {
     required EdgeInsetsDirectional? padding,
     required bool large,
     required bool staticBar,
-    required BuildContext context
+    required BuildContext context,
   }) : leading = createLeading(
          leadingKey: keys.leadingKey,
          userLeading: userLeading,
          route: route,
          automaticallyImplyLeading: automaticallyImplyLeading,
          padding: padding,
-         context: context
+         context: context,
        ),
        backChevron = createBackChevron(
          backChevronKey: keys.backChevronKey,
