@@ -703,9 +703,15 @@ class Text extends StatelessWidget {
     if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
-    if (MediaQuery.boldTextOf(context)) {
-      effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
-    }
+    final TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
+    effectiveTextStyle = effectiveTextStyle!.merge(
+      TextStyle(
+        height: typographySettings?.lineHeight,
+        letterSpacing: typographySettings?.letterSpacing,
+        wordSpacing: typographySettings?.wordSpacing,
+        fontWeight: MediaQuery.boldTextOf(context) ? FontWeight.bold : null,
+      ),
+    );
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
       (final TextScaler textScaler, _) => textScaler,
