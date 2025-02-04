@@ -582,15 +582,9 @@ static void synchronize_lock_states(FlKeyEmbedderResponder* self,
                                       : stage_by_event + kNumStages;
 
     g_return_if_fail(stage_by_record <= destination_stage);
-    if (stage_by_record == destination_stage) {
-      return;
-    }
-    for (int current_stage = stage_by_record; current_stage < destination_stage;
+    for (int current_stage = stage_by_record;
+         current_stage < destination_stage && current_stage < 9;
          current_stage += 1) {
-      if (current_stage == 9) {
-        return;
-      }
-
       const int standard_current_stage = current_stage % kNumStages;
       const bool is_down_event =
           standard_current_stage == 0 || standard_current_stage == 2;
