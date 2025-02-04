@@ -2631,12 +2631,11 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// The [Rect] represents what the context menu is pointing to. For example,
   /// for some text selection, this would be the selection [Rect].
   ///
-  /// `items` specifies the buttons that appear in the menu. Any `items` that
-  /// have no title will be passed a default title from the given
-  /// [WidgetsLocalizations]. The buttons that appear in the menu will be
-  /// exactly as given and will not automatically udpate based on the state of
-  /// the input field. See [SystemContextMenu.getDefaultItems] for the default
-  /// items for a given [EditableTextState].
+  /// `items` specifies the buttons that appear in the menu. The buttons that
+  /// appear in the menu will be exactly as given and will not automatically
+  /// udpate based on the state of the input field. See
+  /// [SystemContextMenu.getDefaultItems] for the default items for a given
+  /// [EditableTextState].
   ///
   /// Currently this system context menu is bound to text input. Using this
   /// without an active [TextInputConnection] will be a noop.

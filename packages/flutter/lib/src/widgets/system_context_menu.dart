@@ -196,7 +196,7 @@ sealed class IOSSystemContextMenuItem {
   String? get title => null;
 
   /// Returns the representation of this class used by method channels.
-  IOSSystemContextMenuItemData _getData(WidgetsLocalizations? localizations);
+  IOSSystemContextMenuItemData _getData(WidgetsLocalizations localizations);
 
   @override
   int get hashCode => title.hashCode;
@@ -224,14 +224,14 @@ sealed class IOSSystemContextMenuItem {
 ///
 ///  * [SystemContextMenu], a widget that can be used to display the system
 ///    context menu.
-///  * [IOSSystemContextMenuItemCopy], which specifies the data to be sent to
+///  * [IOSSystemContextMenuItemDataCopy], which specifies the data to be sent to
 ///    the platform for this same button.
 final class IOSSystemContextMenuItemCopy extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemCopy].
   const IOSSystemContextMenuItemCopy();
 
   @override
-  IOSSystemContextMenuItemDataCopy _getData(WidgetsLocalizations? localizations) {
+  IOSSystemContextMenuItemDataCopy _getData(WidgetsLocalizations localizations) {
     return const IOSSystemContextMenuItemDataCopy();
   }
 }
@@ -247,14 +247,14 @@ final class IOSSystemContextMenuItemCopy extends IOSSystemContextMenuItem {
 ///
 ///  * [SystemContextMenu], a widget that can be used to display the system
 ///    context menu.
-///  * [IOSSystemContextMenuItemCut], which specifies the data to be sent to
+///  * [IOSSystemContextMenuItemDataCut], which specifies the data to be sent to
 ///    the platform for this same button.
 final class IOSSystemContextMenuItemCut extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemCut].
   const IOSSystemContextMenuItemCut();
 
   @override
-  IOSSystemContextMenuItemDataCut _getData(WidgetsLocalizations? localizations) {
+  IOSSystemContextMenuItemDataCut _getData(WidgetsLocalizations localizations) {
     return const IOSSystemContextMenuItemDataCut();
   }
 }
@@ -270,14 +270,14 @@ final class IOSSystemContextMenuItemCut extends IOSSystemContextMenuItem {
 ///
 ///  * [SystemContextMenu], a widget that can be used to display the system
 ///    context menu.
-///  * [IOSSystemContextMenuItemPaste], which specifies the data to be sent
+///  * [IOSSystemContextMenuItemDataPaste], which specifies the data to be sent
 ///     to the platform for this same button.
 final class IOSSystemContextMenuItemPaste extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemPaste].
   const IOSSystemContextMenuItemPaste();
 
   @override
-  IOSSystemContextMenuItemDataPaste _getData(WidgetsLocalizations? localizations) {
+  IOSSystemContextMenuItemDataPaste _getData(WidgetsLocalizations localizations) {
     return const IOSSystemContextMenuItemDataPaste();
   }
 }
@@ -293,14 +293,14 @@ final class IOSSystemContextMenuItemPaste extends IOSSystemContextMenuItem {
 ///
 ///  * [SystemContextMenu], a widget that can be used to display the system
 ///    context menu.
-///  * [IOSSystemContextMenuItemSelectAll], which specifies the data to be
+///  * [IOSSystemContextMenuItemDataSelectAll], which specifies the data to be
 ///     sent to the platform for this same button.
 final class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemSelectAll].
   const IOSSystemContextMenuItemSelectAll();
 
   @override
-  IOSSystemContextMenuItemDataSelectAll _getData(WidgetsLocalizations? localizations) {
+  IOSSystemContextMenuItemDataSelectAll _getData(WidgetsLocalizations localizations) {
     return const IOSSystemContextMenuItemDataSelectAll();
   }
 }
@@ -320,7 +320,7 @@ final class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
 ///
 ///  * [SystemContextMenu], a widget that can be used to display the system
 ///    context menu.
-///  * [IOSSystemContextMenuItemLookUp], which specifies the data to be sent
+///  * [IOSSystemContextMenuItemDataLookUp], which specifies the data to be sent
 ///    to the platform for this same button.
 final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemLookUp].
@@ -330,8 +330,8 @@ final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
   final String? title;
 
   @override
-  IOSSystemContextMenuItemDataLookUp _getData(WidgetsLocalizations? localizations) {
-    return IOSSystemContextMenuItemDataLookUp(title: title ?? localizations!.lookUpButtonLabel);
+  IOSSystemContextMenuItemDataLookUp _getData(WidgetsLocalizations localizations) {
+    return IOSSystemContextMenuItemDataLookUp(title: title ?? localizations.lookUpButtonLabel);
   }
 
   @override
@@ -355,7 +355,7 @@ final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
 ///
 ///  * [SystemContextMenu], a widget that can be used to display the system
 ///    context menu.
-///  * [IOSSystemContextMenuItemSearchWeb], which specifies the data to be
+///  * [IOSSystemContextMenuItemDataSearchWeb], which specifies the data to be
 ///    sent to the platform for this same button.
 final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemSearchWeb].
@@ -365,9 +365,9 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
   final String? title;
 
   @override
-  IOSSystemContextMenuItemDataSearchWeb _getData(WidgetsLocalizations? localizations) {
+  IOSSystemContextMenuItemDataSearchWeb _getData(WidgetsLocalizations localizations) {
     return IOSSystemContextMenuItemDataSearchWeb(
-      title: title ?? localizations!.searchWebButtonLabel,
+      title: title ?? localizations.searchWebButtonLabel,
     );
   }
 
@@ -392,7 +392,7 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
 ///
 ///  * [SystemContextMenu], a widget that can be used to display the system
 ///    context menu.
-///  * [IOSSystemContextMenuItemShare], which specifies the data to be sent
+///  * [IOSSystemContextMenuItemDataShare], which specifies the data to be sent
 ///    to the platform for this same button.
 final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
   /// Creates an instance of [IOSSystemContextMenuItemShare].
@@ -402,8 +402,8 @@ final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
   final String? title;
 
   @override
-  IOSSystemContextMenuItemDataShare _getData(WidgetsLocalizations? localizations) {
-    return IOSSystemContextMenuItemDataShare(title: title ?? localizations!.shareButtonLabel);
+  IOSSystemContextMenuItemDataShare _getData(WidgetsLocalizations localizations) {
+    return IOSSystemContextMenuItemDataShare(title: title ?? localizations.shareButtonLabel);
   }
 
   @override
