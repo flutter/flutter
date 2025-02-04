@@ -13,6 +13,7 @@ struct _FlDartProject {
   gchar* assets_path;
   gchar* icu_data_path;
   gchar** dart_entrypoint_args;
+  bool enable_impeller;
 };
 
 G_DEFINE_TYPE(FlDartProject, fl_dart_project, G_TYPE_OBJECT)
@@ -58,6 +59,7 @@ G_MODULE_EXPORT FlDartProject* fl_dart_project_new() {
       g_build_filename(executable_dir, "data", "flutter_assets", nullptr);
   self->icu_data_path =
       g_build_filename(executable_dir, "data", "icudtl.dat", nullptr);
+  self->enable_impeller = false;
 
   return self;
 }
@@ -113,4 +115,16 @@ G_MODULE_EXPORT void fl_dart_project_set_dart_entrypoint_arguments(
   g_return_if_fail(FL_IS_DART_PROJECT(self));
   g_clear_pointer(&self->dart_entrypoint_args, g_strfreev);
   self->dart_entrypoint_args = g_strdupv(argv);
+}
+
+G_MODULE_EXPORT void fl_dart_project_set_enable_impeller(FlDartProject* project,
+                                                         bool value) {
+  g_return_if_fail(FL_IS_DART_PROJECT(self));
+  self->enable_impeller = value;
+}
+
+G_MODULE_EXPORT bool fl_dart_project_get_enable_impeller(
+    FLDartProject* project) {
+  g_return_val_if_fail(FL_IS_DART_PROJECT(self), false);
+  return self->senable_impeller;
 }
