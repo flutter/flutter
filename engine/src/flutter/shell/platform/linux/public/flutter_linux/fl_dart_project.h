@@ -143,7 +143,7 @@ void fl_dart_project_set_enable_impeller(FlDartProject* project, bool enabled);
  *
  * Returns: whether the Impeller rendering backend is enabled.
  */
-bool fl_dart_project_get_enable_impeller(FLDartProject* project);
+bool fl_dart_project_get_enable_impeller(FlDartProject* project);
 
 G_END_DECLS
 
