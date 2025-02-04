@@ -28,6 +28,6 @@
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Αναζήτηση στον ιστό",
   "shareButtonLabel": "Κοινοποίηση…",
-  "cancelButtonLabel": "Ακύρωση",
-  "backButtonLabel": "Πίσω"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Вебээс хайх",
   "shareButtonLabel": "Хуваалцах...",
   "clearButtonLabel": "Арилгах",
-  "cancelButtonLabel": "Цуцлах",
-  "backButtonLabel": "Буцах"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

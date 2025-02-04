@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Tìm kiếm trên web",
   "shareButtonLabel": "Chia sẻ...",
   "clearButtonLabel": "Xoá",
-  "cancelButtonLabel": "Huỷ",
-  "backButtonLabel": "Quay lại"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

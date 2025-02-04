@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Keresés az interneten",
   "shareButtonLabel": "Megosztás…",
   "clearButtonLabel": "Törlés",
-  "cancelButtonLabel": "Mégse",
-  "backButtonLabel": "Vissza"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

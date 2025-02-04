@@ -28,6 +28,6 @@
   "lookUpButtonLabel": "Axtarın",
   "searchWebButtonLabel": "Vebdə axtarın",
   "shareButtonLabel": "Paylaşın...",
-  "cancelButtonLabel": "Ləğv edin",
-  "backButtonLabel": "Geri"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

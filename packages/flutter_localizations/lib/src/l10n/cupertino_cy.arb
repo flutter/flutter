@@ -48,6 +48,6 @@
   "lookUpButtonLabel": "Chwilio",
   "searchWebButtonLabel": "Chwilio'r We",
   "shareButtonLabel": "Rhannu...",
-  "cancelButtonLabel": "Canslo",
-  "backButtonLabel": "Nôl"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

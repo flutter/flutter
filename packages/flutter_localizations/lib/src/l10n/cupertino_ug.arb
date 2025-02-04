@@ -28,6 +28,6 @@
   "searchTextFieldPlaceholderLabel": "ئىزدەش",
   "modalBarrierDismissLabel": "يېپىش",
   "menuDismissLabel": "تىزىملىكنى يېپىش",
-  "cancelButtonLabel": "بىكار قىلىش",
-  "backButtonLabel": "قايتىش"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

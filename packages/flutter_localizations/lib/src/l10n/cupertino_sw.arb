@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Tafuta kwenye Wavuti",
   "shareButtonLabel": "Shiriki...",
   "clearButtonLabel": "Futa",
-  "cancelButtonLabel": "Ghairi",
-  "backButtonLabel": "Rudi Nyuma"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

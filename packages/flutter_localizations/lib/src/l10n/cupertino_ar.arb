@@ -48,6 +48,6 @@
   "lookUpButtonLabel": "بحث عام",
   "searchWebButtonLabel": "البحث على الويب",
   "shareButtonLabel": "مشاركة…",
-  "cancelButtonLabel": "الإلغاء",
-  "backButtonLabel": "رجوع"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

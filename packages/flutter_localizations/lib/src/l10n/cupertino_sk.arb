@@ -38,6 +38,6 @@
   "searchWebButtonLabel": "Hľadať na webe",
   "shareButtonLabel": "Zdieľať…",
   "clearButtonLabel": "Vymazať",
-  "cancelButtonLabel": "Zrušiť",
-  "backButtonLabel": "Späť"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Որոնել համացանցում",
   "shareButtonLabel": "Կիսվել...",
   "clearButtonLabel": "Մաքրել",
-  "cancelButtonLabel": "Չեղարկել",
-  "backButtonLabel": "Հետ"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

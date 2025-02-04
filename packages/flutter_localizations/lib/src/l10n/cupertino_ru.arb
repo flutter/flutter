@@ -38,6 +38,6 @@
   "searchWebButtonLabel": "Искать в интернете",
   "shareButtonLabel": "Поделиться",
   "clearButtonLabel": "Очистить",
-  "cancelButtonLabel": "Отмена",
-  "backButtonLabel": "Назад"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

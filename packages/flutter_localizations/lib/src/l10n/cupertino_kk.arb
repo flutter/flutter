@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Интернеттен іздеу",
   "shareButtonLabel": "Бөлісу…",
   "clearButtonLabel": "Өшіру",
-  "cancelButtonLabel": "Бас тарту",
-  "backButtonLabel": "Артқа"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

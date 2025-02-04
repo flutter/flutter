@@ -28,6 +28,6 @@
   "searchTextFieldPlaceholderLabel": "འཚོལ་བཤེར།",
   "modalBarrierDismissLabel": "འདོར་བ།",
   "menuDismissLabel": "ཐོ་གཞུང་འདོར་བ།",
-  "cancelButtonLabel": "ཕྱིར་འཐེན།",
-  "backButtonLabel": "ཕྱིར་ལོག"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

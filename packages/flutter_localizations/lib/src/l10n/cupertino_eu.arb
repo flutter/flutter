@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Bilatu sarean",
   "shareButtonLabel": "Partekatu...",
   "clearButtonLabel": "Garbitu",
-  "cancelButtonLabel": "Utzi",
-  "backButtonLabel": "Atzera"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

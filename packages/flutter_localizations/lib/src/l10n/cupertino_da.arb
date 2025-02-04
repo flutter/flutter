@@ -28,6 +28,6 @@
   "lookUpButtonLabel": "Slå op",
   "searchWebButtonLabel": "Søg på nettet",
   "shareButtonLabel": "Del…",
-  "cancelButtonLabel": "Annuller",
-  "backButtonLabel": "Tilbage"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Kërko në ueb",
   "shareButtonLabel": "Ndaj...",
   "clearButtonLabel": "Pastro",
-  "cancelButtonLabel": "Anulo",
-  "backButtonLabel": "Prapa"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

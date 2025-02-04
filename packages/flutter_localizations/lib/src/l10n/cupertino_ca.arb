@@ -28,6 +28,6 @@
   "lookUpButtonLabel": "Mira amunt",
   "searchWebButtonLabel": "Cerca al web",
   "shareButtonLabel": "Comparteix...",
-  "cancelButtonLabel": "Cancel·la",
-  "backButtonLabel": "Enrere"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }
