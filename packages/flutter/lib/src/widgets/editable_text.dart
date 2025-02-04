@@ -5080,12 +5080,28 @@ class EditableTextState extends State<EditableText>
 
   @override
   void performSelector(String selectorName) {
-    final Intent? intent = intentForMacOSSelector(selectorName);
-
+    final Intent? intent;
+    if (_contextMenuPortalController.isShowing) {
+      // On macOS we should use different intents when the context menu is up.
+      if (selectorName == 'moveDown:') {
+        intent = const SelectionContextMenuNextItemIntent();
+      } else {
+        intent = intentForMacOSSelector(selectorName);
+      }
+    } else {
+      intent = intentForMacOSSelector(selectorName);
+    }
     if (intent != null) {
-      final BuildContext? primaryContext = primaryFocus?.context;
-      if (primaryContext != null) {
-        Actions.invoke(primaryContext, intent);
+      if (_contextMenuPortalController.isShowing) {
+        final BuildContext? contextMenuContext = _contextMenuContext;
+        if (contextMenuContext != null) {
+          Actions.invoke(contextMenuContext, intent);
+        }
+      } else {
+        final BuildContext? primaryContext = primaryFocus?.context;
+        if (primaryContext != null) {
+          Actions.invoke(primaryContext, intent);
+        }
       }
     }
   }
@@ -5500,6 +5516,9 @@ class EditableTextState extends State<EditableText>
     ReplaceTextIntent: _replaceTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
     DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
+    // DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: (DirectionalFocusIntent intent) {
+    //   debugPrint('textfield directional focus');
+    // }),
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
 
     // Delete
@@ -5627,6 +5646,10 @@ class EditableTextState extends State<EditableText>
     _effectiveToolbarVisibility.value =
         renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
   }
+
+  // Instead of using this, I wonder if we should just add the context menu intent-action map
+  // to editabletexts main action map, and invoke the intents on the primaryFocus.context as normal.
+  BuildContext? _contextMenuContext;
 
   @protected
   @override
@@ -5794,27 +5817,32 @@ class EditableTextState extends State<EditableText>
                             ),
                           );
                           if (widget.contextMenuBuilder != null) {
-                            editable = _EditableTextContextMenu(
-                              contextMenu: widget.contextMenuBuilder!(context, this),
-                              controller: _contextMenuPortalController,
-                              layerLink: _toolbarLayerLink,
-                              offsetToShow: -renderEditable.localToGlobal(Offset.zero),
-                              visibility: _effectiveToolbarVisibility,
-                              child: editable,
-                            );
-                            // editable = OverlayPortal(
+                            // editable = _EditableTextContextMenu(
+                            //   contextMenu: widget.contextMenuBuilder!(context, this),
                             //   controller: _contextMenuPortalController,
-                            //   overlayChildBuilder: (BuildContext context) {
-                            //     _updateTextSelectionToolbarVisibilities();
-                            //     return SelectionToolbarWrapper(
-                            //       layerLink: _toolbarLayerLink,
-                            //       offset: -renderEditable.localToGlobal(Offset.zero),
-                            //       visibility: _effectiveToolbarVisibility,
-                            //       child: widget.contextMenuBuilder!(context, this),
-                            //     );
-                            //   },
+                            //   layerLink: _toolbarLayerLink,
+                            //   offsetToShow: -renderEditable.localToGlobal(Offset.zero),
+                            //   visibility: _effectiveToolbarVisibility,
                             //   child: editable,
                             // );
+                            editable = OverlayPortal(
+                              controller: _contextMenuPortalController,
+                              overlayChildBuilder: (BuildContext context) {
+                                _updateTextSelectionToolbarVisibilities();
+                                return SelectionToolbarWrapper(
+                                  layerLink: _toolbarLayerLink,
+                                  offset: -renderEditable.localToGlobal(Offset.zero),
+                                  visibility: _effectiveToolbarVisibility,
+                                  child: Builder(
+                                    builder: (BuildContext context) {
+                                      _contextMenuContext = context;
+                                      return widget.contextMenuBuilder!(context, this);
+                                    }
+                                  ),
+                                );
+                              },
+                              child: editable,
+                            );
                           }
                           return CompositedTransformTarget(
                             link: _toolbarLayerLink,
