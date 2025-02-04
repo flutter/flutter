@@ -131,15 +131,14 @@ class CupertinoButton extends StatefulWidget {
 
   /// Creates an iOS-style button with a filled background.
   ///
-  /// The background color is derived from the [CupertinoTheme]'s `primaryColor`.
-  ///
-  /// To specify a custom background color, use the [color] argument of the
-  /// default constructor.
+  /// The background color is derived from the [color] argument.
+  /// The foreground color is the [CupertinoTheme]'s `primaryContrastingColor`.
   const CupertinoButton.filled({
     super.key,
     required this.child,
     this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
+    this.color,
     this.disabledColor = CupertinoColors.tertiarySystemFill,
     @Deprecated(
       'Use minimumSize instead. '
@@ -158,7 +157,6 @@ class CupertinoButton extends StatefulWidget {
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(minimumSize == null || minSize == null),
-       color = null,
        _style = _CupertinoButtonStyle.filled;
 
   /// The widget below this widget in the tree.
