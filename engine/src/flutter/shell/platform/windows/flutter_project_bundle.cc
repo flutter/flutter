@@ -47,6 +47,10 @@ FlutterProjectBundle::FlutterProjectBundle(
       }
     }
   }
+
+  if (properties.enable_impeller) {
+    impeller_enabled_ = true;
+  }
 }
 
 bool FlutterProjectBundle::HasValidPaths() {

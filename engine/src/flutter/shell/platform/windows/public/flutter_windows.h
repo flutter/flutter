@@ -68,6 +68,12 @@ typedef struct {
   // to FlutterDesktopEngineCreate.
   const char** dart_entrypoint_argv;
 
+  /// Whether to enable the Impeller rendering engine.
+  ///
+  /// When not provided, this value is treated as false. In a future release,
+  /// this setting will become a no-op when the Skia backend is fully removed.
+  bool enable_impeller;
+
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========
