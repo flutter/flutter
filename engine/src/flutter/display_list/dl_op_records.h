@@ -484,8 +484,9 @@ struct TransformResetOp final : TransformClipOpBase {
 
 // 4 byte header + 4 byte common payload packs into minimum 8 bytes
 // DlRect is 16 more bytes, which packs efficiently into 24 bytes total
-// DlRoundRect is 52 more bytes, which packs into 60 bytes total
-// CacheablePath is 128 more bytes, which packs efficiently into 136 bytes total
+// DlRoundRect is 52 more bytes, which packs into 64 bytes total (4 bytes
+// unused). CacheablePath is 128 more bytes, which packs efficiently into 136
+// bytes total
 //
 // We could pack the clip_op and the bool both into the free 4 bytes after
 // the header, but the Windows compiler keeps wanting to expand that
@@ -575,8 +576,7 @@ struct DrawColorOp final : DrawOpBase {
 // DlRect is 16 more bytes, using 20 bytes which rounds up to 24 bytes total
 //        (4 bytes unused)
 // SkOval is same as DlRect
-// DlRoundRect is 48 more bytes, using 52 bytes which rounds up to 56 bytes
-//        total (4 bytes unused)
+// DlRoundRect is 52 more bytes, efficiently using 56 bytes total.
 #define DEFINE_DRAW_1ARG_OP(op_name, arg_type, arg_name)             \
   struct Draw##op_name##Op final : DrawOpBase {                      \
     static constexpr auto kType = DisplayListOpType::kDraw##op_name; \
@@ -594,6 +594,8 @@ DEFINE_DRAW_1ARG_OP(Rect, DlRect, rect)
 DEFINE_DRAW_1ARG_OP(Oval, DlRect, oval)
 DEFINE_DRAW_1ARG_OP(RoundRect, DlRoundRect, rrect)
 #undef DEFINE_DRAW_1ARG_OP
+
+static_assert(sizeof(DrawRoundRectOp) == 56);
 
 // 4 byte header + 16 byte payload uses 20 bytes but is rounded
 // up to 24 bytes (4 bytes unused)
@@ -618,7 +620,7 @@ struct DrawPathOp final : DrawOpBase {
 // 2 x DlPoint is 16 more bytes, using 20 bytes rounding up to 24 bytes total
 //             (4 bytes unused)
 // DlPoint + DlScalar is 12 more bytes, packing efficiently into 16 bytes total
-// 2 x DlRoundRect is 96 more bytes, using 100 and rounding up to 104 bytes
+// 2 x DlRoundRect is 104 more bytes, using 108 and rounding up to 112 bytes
 //             total (4 bytes unused)
 #define DEFINE_DRAW_2ARG_OP(op_name, type1, name1, type2, name2)     \
   struct Draw##op_name##Op final : DrawOpBase {                      \
@@ -638,6 +640,8 @@ DEFINE_DRAW_2ARG_OP(Line, DlPoint, p0, DlPoint, p1)
 DEFINE_DRAW_2ARG_OP(Circle, DlPoint, center, DlScalar, radius)
 DEFINE_DRAW_2ARG_OP(DiffRoundRect, DlRoundRect, outer, DlRoundRect, inner)
 #undef DEFINE_DRAW_2ARG_OP
+
+static_assert(sizeof(DrawDiffRoundRectOp) == 108);
 
 // 4 byte header + 24 byte payload packs into 32 bytes (4 bytes unused)
 struct DrawDashedLineOp final : DrawOpBase {

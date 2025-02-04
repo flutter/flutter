@@ -524,24 +524,24 @@ std::vector<DisplayListInvocationGroup> CreateAllClipOps() {
        }},
       {"ClipRRect",
        {
-           {1, 56, 0,
+           {1, 64, 0,
             [](DlOpReceiver& r) {
               r.clipRoundRect(kTestRRect, DlClipOp::kIntersect, true);
             }},
-           {1, 56, 0,
+           {1, 64, 0,
             [](DlOpReceiver& r) {
               r.clipRoundRect(kTestRRect.Shift(1, 1), DlClipOp::kIntersect,
                               true);
             }},
-           {1, 56, 0,
+           {1, 64, 0,
             [](DlOpReceiver& r) {
               r.clipRoundRect(kTestRRect, DlClipOp::kIntersect, false);
             }},
-           {1, 56, 0,
+           {1, 64, 0,
             [](DlOpReceiver& r) {
               r.clipRoundRect(kTestRRect, DlClipOp::kDifference, true);
             }},
-           {1, 56, 0,
+           {1, 64, 0,
             [](DlOpReceiver& r) {
               r.clipRoundRect(kTestRRect, DlClipOp::kDifference, false);
             }},
@@ -583,7 +583,7 @@ std::vector<DisplayListInvocationGroup> CreateAllClipOps() {
               r.clipPath(kTestPathOval, DlClipOp::kIntersect, true);
             }},
            // clipPath(rrect) becomes clipRRect
-           {1, 56, 0,
+           {1, 64, 0,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPathRRect, DlClipOp::kIntersect, true);
             }},
@@ -727,11 +727,11 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawDRRect",
        {
-           {1, 104, 1,
+           {1, 112, 1,
             [](DlOpReceiver& r) {
               r.drawDiffRoundRect(kTestRRect, kTestInnerRRect);
             }},
-           {1, 104, 1,
+           {1, 112, 1,
             [](DlOpReceiver& r) {
               r.drawDiffRoundRect(kTestRRect.Shift(5, 5),
                                   kTestInnerRRect.Shift(4, 4));

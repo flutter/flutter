@@ -14,7 +14,7 @@ namespace impeller {
 
 struct RoundRect {
   /// @brief An enum that specifies the shape of a rounded rectangle's corners.
-  enum class Style {
+  enum class Style : std::int32_t {
     /// @brief Traditional quarter-circle rounded rectangle corners.
     kCircular,
 
