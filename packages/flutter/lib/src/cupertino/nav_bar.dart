@@ -17,12 +17,12 @@ import 'button.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'icons.dart';
+import 'localizations.dart';
 import 'page_scaffold.dart';
 import 'route.dart';
 import 'search_field.dart';
 import 'sheet.dart';
 import 'theme.dart';
-import 'localizations.dart';
 
 /// Modes that determine how to display the navigation bar's bottom in relation to scroll events.
 enum NavigationBarBottomMode {
