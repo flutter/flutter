@@ -3940,6 +3940,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:35v1"}
         ]
+      # TODO(vashworth): Remove once Xcode 16 is used by all tests
       $flutter/osx_sdk : >-
         {
           "sdk_version": "16c5032a"
