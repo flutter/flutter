@@ -106,6 +106,8 @@ dart_library("args") {
   package_root = "$dart_src/third_party/pkg/core/pkgs/args"
   package_name = "args"
 
+  language_version = "3.7"
+
   deps = []
 
   sources = [
