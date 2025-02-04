@@ -689,6 +689,7 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "3600" # TODO(https://github.com/flutter/flutter/issues/162654)
     runIf:
       - .ci.yaml
       - engine/**
