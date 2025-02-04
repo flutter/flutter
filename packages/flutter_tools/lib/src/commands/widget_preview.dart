@@ -119,6 +119,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       kLaunchPreviewer,
       defaultsTo: true,
       help: 'Launches the widget preview environment.',
+      // Should only be used for testing.
+      hide: true,
     );
   }
 
@@ -130,8 +132,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @override
   String get name => 'start';
-
-  bool get launchPreviewer => boolArg(kLaunchPreviewer);
 
   @override
   final FileSystem fs;
@@ -214,7 +214,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final PreviewMapping initialPreviews = await _previewDetector.initialize(rootProject.directory);
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(initialPreviews);
 
-    if (launchPreviewer) {
+    if (boolArg(kLaunchPreviewer)) {
       shutdownHooks.addShutdownHook(() async {
         await _widgetPreviewApp?.stop();
       });
@@ -223,7 +223,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       );
       final int result = await _widgetPreviewApp!.runner.waitForAppToFinish();
       if (result != 0) {
-        throwToolExit(null, exitCode: result);
+        throwToolExit('Failed to launch the widget previewer.', exitCode: result);
       }
     }
 
