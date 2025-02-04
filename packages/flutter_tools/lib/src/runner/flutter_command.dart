@@ -1518,9 +1518,6 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  /// Additional usage values to be sent with the usage ping.
-  Future<CustomDimensions> get usageValues async => const CustomDimensions();
-
   /// Additional usage values to be sent with the usage ping for
   /// package:unified_analytics.
   ///
@@ -1573,6 +1570,11 @@ abstract class FlutterCommand extends Command<void> {
         }
       },
     );
+  }
+
+  @override
+  void printUsage() {
+    globals.logger.printStatus(usage);
   }
 
   @visibleForOverriding
@@ -1800,14 +1802,6 @@ abstract class FlutterCommand extends Command<void> {
     final Duration elapsedDuration = (commandResult.endTimeOverride ?? endTime).difference(
       startTime,
     );
-    globals.flutterUsage.sendTiming(
-      'flutter',
-      name,
-      elapsedDuration,
-      // Report in the form of `success-[parameter1-parameter2]`, all of which
-      // can be null if the command doesn't provide a FlutterCommandResult.
-      label: label == '' ? null : label,
-    );
     analytics.send(
       Event.timing(
         workflow: 'flutter',
@@ -1882,7 +1876,6 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
-        usage: globals.flutterUsage,
         analytics: analytics,
         projectDir: project.directory,
         packageConfigPath: packageConfigPath(),
@@ -1907,7 +1900,10 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         // The preview device does not currently support any plugins.
         allowedPlugins = PreviewDevice.supportedPubPlugins;
       }
-      await project.regeneratePlatformSpecificTooling(allowedPlugins: allowedPlugins);
+      await project.regeneratePlatformSpecificTooling(
+        allowedPlugins: allowedPlugins,
+        releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && getBuildMode().isRelease,
+      );
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }
@@ -1916,20 +1912,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     setupApplicationPackages();
 
     if (commandPath != null) {
-      // Until the GA4 migration is complete, we will continue to send to the GA3 instance
-      // as well as GA4. Once migration is complete, we will only make a call for GA4 values
-      final List<Object> pairOfUsageValues = await Future.wait<Object>(<Future<Object>>[
-        usageValues,
-        unifiedAnalyticsUsageValues(commandPath),
-      ]);
-
-      Usage.command(
-        commandPath,
-        parameters: CustomDimensions(
-          commandHasTerminal: hasTerminal,
-        ).merge(pairOfUsageValues[0] as CustomDimensions),
-      );
-      analytics.send(pairOfUsageValues[1] as Event);
+      analytics.send(await unifiedAnalyticsUsageValues(commandPath));
     }
 
     return runCommand();

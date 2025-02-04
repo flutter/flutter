@@ -19,9 +19,7 @@ import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
-import '../macos/macos_ipad_device.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -534,24 +532,6 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<CustomDimensions> get usageValues async {
-    final AnalyticsUsageValuesRecord record = await _sharedAnalyticsUsageValues;
-
-    return CustomDimensions(
-      commandRunIsEmulator: record.runIsEmulator,
-      commandRunTargetName: record.runTargetName,
-      commandRunTargetOsVersion: record.runTargetOsVersion,
-      commandRunModeName: record.runModeName,
-      commandRunProjectModule: record.runProjectModule,
-      commandRunProjectHostLanguage: record.runProjectHostLanguage,
-      commandRunAndroidEmbeddingVersion: record.runAndroidEmbeddingVersion,
-      commandRunEnableImpeller: record.runEnableImpeller,
-      commandRunIOSInterfaceType: record.runIOSInterfaceType,
-      commandRunIsTest: record.runIsTest,
-    );
-  }
-
-  @override
   Future<analytics.Event> unifiedAnalyticsUsageValues(String commandPath) async {
     final AnalyticsUsageValuesRecord record = await _sharedAnalyticsUsageValues;
 
@@ -684,15 +664,6 @@ class RunCommand extends RunCommandBase {
     if (devices == null) {
       throwToolExit(null);
     }
-
-    if (devices!.length == 1 && devices!.first is MacOSDesignedForIPadDevice) {
-      throwToolExit('Mac Designed for iPad is currently not supported for flutter run -d.');
-    }
-
-    if (globals.deviceManager!.hasSpecifiedAllDevices) {
-      devices?.removeWhere((Device device) => device is MacOSDesignedForIPadDevice);
-    }
-
     if (globals.deviceManager!.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit(
         'Using "-d all" with "--${FlutterOptions.kUseApplicationBinary}" is not supported',
@@ -771,7 +742,6 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: await createDebuggingOptions(webMode),
         stayResident: stayResident,
         fileSystem: globals.fs,
-        usage: globals.flutterUsage,
         analytics: globals.analytics,
         logger: globals.logger,
         systemClock: globals.systemClock,
@@ -856,12 +826,15 @@ class RunCommand extends RunCommandBase {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
           '${sentenceCase(getFriendlyModeName(buildMode))} '
-          'mode is not supported by ${device.name}.',
+          'mode is not supported by ${device.displayName}.',
         );
       }
       if (hotMode) {
         if (!device.supportsHotReload) {
-          throwToolExit('Hot reload is not supported by ${device.name}. Run with "--no-hot".');
+          throwToolExit(
+            'Hot reload is not supported by ${device.displayName}. '
+            'Run with "--no-hot".',
+          );
         }
       }
     }

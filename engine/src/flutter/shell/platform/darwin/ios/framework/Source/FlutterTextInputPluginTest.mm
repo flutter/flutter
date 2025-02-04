@@ -321,6 +321,20 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(inputView.keyboardType, UIKeyboardTypeWebSearch);
 }
 
+- (void)testKeyboardTypeTwitter {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [config setValue:@{@"name" : @"TextInputType.twitter"} forKey:@"inputType"];
+  [self setClientId:123 configuration:config];
+
+  // Find all the FlutterTextInputViews we created.
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+
+  FlutterTextInputView* inputView = inputFields[0];
+
+  // Verify keyboardType is set to the value specified in config.
+  XCTAssertEqual(inputView.keyboardType, UIKeyboardTypeTwitter);
+}
+
 - (void)testVisiblePasswordUseAlphanumeric {
   NSDictionary* config = self.mutableTemplateCopy;
   [config setValue:@{@"name" : @"TextInputType.visiblePassword"} forKey:@"inputType"];
@@ -514,6 +528,19 @@ FLUTTER_ASSERT_ARC
   range = [FlutterTextRange rangeWithNSRange:NSMakeRange(10, 20)];
   substring = [inputView textInRange:range];
   XCTAssertEqual(substring.length, 0ul);
+}
+
+- (void)testTextInRangeAcceptsNSNotFoundLocationGracefully {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [self setClientId:123 configuration:config];
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = inputFields[0];
+
+  [inputView insertText:@"text"];
+  UITextRange* range = [FlutterTextRange rangeWithNSRange:NSMakeRange(NSNotFound, 0)];
+
+  NSString* substring = [inputView textInRange:range];
+  XCTAssertNil(substring);
 }
 
 - (void)testStandardEditActions {

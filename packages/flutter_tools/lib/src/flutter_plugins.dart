@@ -356,7 +356,7 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
-List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String type) {
+List<Map<String, Object?>> _extractPlatformMaps(Iterable<Plugin> plugins, String type) {
   return <Map<String, Object?>>[
     for (final Plugin plugin in plugins)
       if (plugin.platforms[type] case final PluginPlatform platformPlugin) platformPlugin.toMap(),
@@ -1195,7 +1195,7 @@ Future<void> injectBuildTimePluginFilesForWebPlatform(
 
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
 ///
-/// The injected files are required by the flutter app as soon as possible, so
+/// The injected files are required by the Flutter app as soon as possible, so
 /// it can be built.
 ///
 /// Files written by this method end up in platform-specific locations that are
@@ -1214,8 +1214,14 @@ Future<void> injectPlugins(
   bool windowsPlatform = false,
   Iterable<String>? allowedPlugins,
   DarwinDependencyManagement? darwinDependencyManagement,
+  bool? releaseMode,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  List<Plugin> plugins = await findPlugins(project);
+
+  if (releaseMode ?? false) {
+    plugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
+  }
+
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
     plugins,
     pluginResolutionType: _PluginResolutionType.nativeOrDart,

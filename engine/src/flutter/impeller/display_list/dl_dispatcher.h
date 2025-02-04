@@ -124,18 +124,24 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void transformReset() override;
 
   // |flutter::DlOpReceiver|
-  void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) override;
+  void clipRect(const DlRect& rect,
+                flutter::DlClipOp clip_op,
+                bool is_aa) override;
 
   // |flutter::DlOpReceiver|
-  void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) override;
+  void clipOval(const DlRect& bounds,
+                flutter::DlClipOp clip_op,
+                bool is_aa) override;
 
   // |flutter::DlOpReceiver|
   void clipRoundRect(const DlRoundRect& rrect,
-                     ClipOp clip_op,
+                     flutter::DlClipOp clip_op,
                      bool is_aa) override;
 
   // |flutter::DlOpReceiver|
-  void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override;
+  void clipPath(const DlPath& path,
+                flutter::DlClipOp clip_op,
+                bool is_aa) override;
 
   // |flutter::DlOpReceiver|
   void drawColor(flutter::DlColor color, flutter::DlBlendMode mode) override;
@@ -178,7 +184,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                bool use_center) override;
 
   // |flutter::DlOpReceiver|
-  void drawPoints(PointMode mode,
+  void drawPoints(flutter::DlPointMode mode,
                   uint32_t count,
                   const DlPoint points[]) override;
 
@@ -198,7 +204,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                      const DlRect& dst,
                      flutter::DlImageSampling sampling,
                      bool render_with_attributes,
-                     SrcRectConstraint constraint) override;
+                     flutter::DlSrcRectConstraint constraint) override;
 
   // |flutter::DlOpReceiver|
   void drawImageNine(const sk_sp<flutter::DlImage> image,
@@ -209,7 +215,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
 
   // |flutter::DlOpReceiver|
   void drawAtlas(const sk_sp<flutter::DlImage> atlas,
-                 const SkRSXform xform[],
+                 const RSTransform xform[],
                  const DlRect tex[],
                  const flutter::DlColor colors[],
                  int count,
@@ -254,6 +260,7 @@ class CanvasDlDispatcher : public DlDispatcherBase {
  public:
   CanvasDlDispatcher(ContentContext& renderer,
                      RenderTarget& render_target,
+                     bool is_onscreen,
                      bool has_root_backdrop_filter,
                      flutter::DlBlendMode max_root_blend_mode,
                      IRect cull_rect);
@@ -390,11 +397,15 @@ std::shared_ptr<Texture> DisplayListToTexture(
     bool reset_host_buffer = true,
     bool generate_mips = false);
 
-/// Render the provided display list to the render target.
-bool RenderToOnscreen(ContentContext& context, RenderTarget render_target,
+/// @brief Render the provided display list to the render target.
+///
+/// If [is_onscreen] is true, then the onscreen command buffer will be
+/// submitted via Context::SubmitOnscreen.
+bool RenderToTarget(ContentContext& context, RenderTarget render_target,
                          const sk_sp<flutter::DisplayList>& display_list,
                          SkIRect cull_rect,
-                         bool reset_host_buffer);
+                         bool reset_host_buffer,
+                         bool is_onscreen = true);
 
 }  // namespace impeller
 

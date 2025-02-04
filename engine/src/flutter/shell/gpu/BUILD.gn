@@ -120,6 +120,7 @@ if (is_mac) {
              "//flutter/runtime",
              "//flutter/runtime:libdart",
              "//flutter/testing",
+             "//flutter/testing",
            ] + gpu_common_deps
   }
 }
