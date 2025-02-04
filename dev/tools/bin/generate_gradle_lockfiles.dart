@@ -18,25 +18,27 @@ import 'package:file/local.dart';
 import 'package:yaml/yaml.dart';
 
 void main(List<String> arguments) {
-  const String usageMessage = "If you don't wish to re-generate the "
+  const String usageMessage =
+      "If you don't wish to re-generate the "
       'settings.gradle, build.gradle, and gradle-wrapper.properties files,\n'
       'add the flag `--no-gradle-generation`.\n'
       'This tool automatically excludes a set of android subdirectories, '
       'defined at dev/tools/bin/config/lockfile_exclusion.yaml.\n'
       'To disable this behavior, run with `--no-exclusion`.\n';
 
-  final ArgParser argParser = ArgParser()
-    ..addFlag(
-      'gradle-generation',
-      help: 'Re-generate gradle files in each processed directory.',
-      defaultsTo: true,
-    )
-    ..addFlag(
-      'exclusion',
-      help:
-          'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
-      defaultsTo: true,
-    );
+  final ArgParser argParser =
+      ArgParser()
+        ..addFlag(
+          'gradle-generation',
+          help: 'Re-generate gradle files in each processed directory.',
+          defaultsTo: true,
+        )
+        ..addFlag(
+          'exclusion',
+          help:
+              'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
+          defaultsTo: true,
+        );
 
   ArgResults args;
   try {
@@ -57,14 +59,16 @@ void main(List<String> arguments) {
 
   const FileSystem fileSystem = LocalFileSystem();
 
-  final Directory repoRoot = (() {
-    final String repoRootPath = exec('git', const <String>['rev-parse', '--show-toplevel']).trim();
-    final Directory repoRoot = fileSystem.directory(repoRootPath);
-    if (!repoRoot.existsSync()) {
-      throw StateError("Expected $repoRoot to exist but it didn't!");
-    }
-    return repoRoot;
-  })();
+  final Directory repoRoot =
+      (() {
+        final String repoRootPath =
+            exec('git', const <String>['rev-parse', '--show-toplevel']).trim();
+        final Directory repoRoot = fileSystem.directory(repoRootPath);
+        if (!repoRoot.existsSync()) {
+          throw StateError("Expected $repoRoot to exist but it didn't!");
+        }
+        return repoRoot;
+      })();
 
   final Iterable<Directory> androidDirectories = discoverAndroidDirectories(repoRoot);
 
@@ -82,9 +86,7 @@ void main(List<String> arguments) {
       ((loadYaml(exclusionFile.readAsStringSync()) ?? YamlList()) as YamlList)
           .toList()
           .cast<String>()
-          .map(
-            (String s) => '${repoRoot.path}/$s',
-          ),
+          .map((String s) => '${repoRoot.path}/$s'),
     );
     print('Loaded exclusion file from ${exclusionFile.path}.');
   } else {
@@ -202,12 +204,9 @@ void main(List<String> arguments) {
     }
 
     // Generate lock files.
-    exec(
-        gradleWrapper.absolute.path,
-        <String>[
-          ':generateLockfiles',
-        ],
-        workingDirectory: androidDirectory.absolute.path);
+    exec(gradleWrapper.absolute.path, <String>[
+      ':generateLockfiles',
+    ], workingDirectory: androidDirectory.absolute.path);
 
     print('Processed');
   }
@@ -401,8 +400,10 @@ Iterable<Directory> discoverAndroidDirectories(Directory repoRoot) {
       .expand((Directory directory) => directory.listSync(recursive: true))
       .whereType<Directory>()
       // These directories are build artifacts which are not part of source control.
-      .where((Directory directory) =>
-          !directory.path.contains('/build/') && !directory.path.contains('.symlinks'))
+      .where(
+        (Directory directory) =>
+            !directory.path.contains('/build/') && !directory.path.contains('.symlinks'),
+      )
       // ... where the directory ultimately is named "android".
       .where((FileSystemEntity entity) => entity.basename == 'android');
 }
