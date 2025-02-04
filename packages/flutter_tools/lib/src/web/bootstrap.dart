@@ -505,10 +505,13 @@ String generateDDCMainModule({
 ''';
 }
 
+const String _onLoadEndCallback = r'$onLoadEndCallback';
+
 String generateDDCLibraryBundleMainModule({
   required String entrypoint,
   required bool nullAssertions,
   required bool nativeNullAssertions,
+  required String onLoadEndBootstrap,
 }) {
   // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
@@ -519,19 +522,40 @@ String generateDDCLibraryBundleMainModule({
 
   dartDevEmbedder.debugger.registerDevtoolsFormatter();
 
+  let onLoadEndSrc = '$onLoadEndBootstrap';
+  window.\$dartLoader.loadConfig.bootstrapScript = {src: onLoadEndSrc, id: onLoadEndSrc};
+  window.\$dartLoader.loadConfig.tryLoadBootstrapScript = true;
+  let dwdsCalledMain = false;
+  let onLoadEnd = false;
   let child = {};
   child.main = function() {
-    let sdkOptions = {
-      nonNullAsserts: $nullAssertions,
-      nativeNonNullAsserts: $nativeNullAssertions,
-    };
-    dartDevEmbedder.runMain(appName, sdkOptions);
+    // Only run once all the scripts are loaded and DWDS triggers main.
+    if (dwdsCalledMain && onLoadEnd) {
+      let sdkOptions = {
+        nonNullAsserts: $nullAssertions,
+        nativeNonNullAsserts: $nativeNullAssertions,
+      };
+      dartDevEmbedder.runMain(appName, sdkOptions);
+    }
+  }
+  let dwdsApp = {};
+  dwdsApp.main = function() {
+    dwdsCalledMain = true;
+    child.main();
+  }
+  window.$_onLoadEndCallback = function() {
+    onLoadEnd = true;
+    child.main();
   }
 
   /* MAIN_EXTENSION_MARKER */
-  child.main();
+  dwdsApp.main();
 })();
 ''';
+}
+
+String generateDDCLibraryBundleOnLoadEndBootstrap() {
+  return '''window.$_onLoadEndCallback()''';
 }
 
 /// Generate a synthetic main module which captures the application's main
