@@ -467,6 +467,7 @@ static void fl_engine_dispose(GObject* object) {
   fl_texture_registrar_shutdown(self->texture_registrar);
 
   g_clear_object(&self->project);
+  g_clear_object(&self->display_monitor);
   g_clear_object(&self->renderer);
   g_clear_object(&self->texture_registrar);
   g_clear_object(&self->binary_messenger);
@@ -518,6 +519,9 @@ static void fl_engine_init(FlEngine* self) {
   if (FlutterEngineGetProcAddresses(&self->embedder_api) != kSuccess) {
     g_warning("Failed get get engine function pointers");
   }
+
+  self->display_monitor =
+      fl_display_monitor_new(self, gdk_display_get_default());
 
   // Implicit view is 0, so start at 1.
   self->next_view_id = 1;
@@ -681,8 +685,6 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
     g_warning("Failed to enable accessibility features on Flutter engine");
   }
 
-  self->display_monitor =
-      fl_display_monitor_new(self, gdk_display_get_default());
   fl_display_monitor_start(self->display_monitor);
 
   return TRUE;
