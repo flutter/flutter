@@ -3234,9 +3234,16 @@ class EditableTextState extends State<EditableText>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _style = MediaQuery.boldTextOf(context)
-        ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
-        : widget.style;
+    // Apply platform settings to text style.
+    final TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
+    _style = widget.style.merge(
+      TextStyle(
+        height: typographySettings?.lineHeight,
+        letterSpacing: typographySettings?.letterSpacing,
+        wordSpacing: typographySettings?.wordSpacing,
+        fontWeight: MediaQuery.boldTextOf(context) ? FontWeight.bold : null,
+      ),
+    );
 
     final AutofillGroupState? newAutofillGroup = AutofillGroup.maybeOf(context);
     if (currentAutofillScope != newAutofillGroup) {
