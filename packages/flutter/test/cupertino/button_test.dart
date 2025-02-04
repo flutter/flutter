@@ -48,6 +48,17 @@ void main() {
     );
   });
 
+  testWidgets('Minimum size minimumSize parameter', (WidgetTester tester) async {
+    const Size size = Size(60.0, 100.0);
+    await tester.pumpWidget(
+      boilerplate(
+        child: const CupertinoButton(onPressed: null, minimumSize: size, child: SizedBox.shrink()),
+      ),
+    );
+    final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
+    expect(buttonBox.size, size);
+  });
+
   testWidgets('Size grows with text', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
