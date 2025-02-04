@@ -29,11 +29,20 @@ typedef PreviewPath = ({String path, Uri uri});
 typedef PreviewMapping = Map<PreviewPath, List<String>>;
 
 class PreviewDetector {
-  PreviewDetector({required this.fs, required this.logger, required this.onChangeDetected});
+  PreviewDetector({
+    required this.fs,
+    required this.logger,
+    required this.onChangeDetected,
+    required this.onPubspecChangeDetected,
+  });
+
+  static const String kPubspecFileName = 'pubspec.yaml';
 
   final FileSystem fs;
   final Logger logger;
   final void Function(PreviewMapping) onChangeDetected;
+  final void Function() onPubspecChangeDetected;
+
   StreamSubscription<WatchEvent>? _fileWatcher;
   late final PreviewMapping _pathToPreviews;
 
@@ -44,9 +53,18 @@ class PreviewDetector {
     _pathToPreviews = findPreviewFunctions(projectRoot);
 
     final Watcher watcher = Watcher(projectRoot.path);
-    // TODO(bkonyi): watch for changes to pubspec.yaml
     _fileWatcher = watcher.events.listen((WatchEvent event) async {
       final String eventPath = event.path;
+      // Ignore changes in .dart_tool
+      if (eventPath.contains('.dart_tool')) {
+        return;
+      }
+      // If the pubspec has changed, new dependencies or assets could have been added, requiring
+      // the preview scaffold's pubspec to be updated.
+      if (eventPath.endsWith(kPubspecFileName)) {
+        onPubspecChangeDetected();
+        return;
+      }
       // Only trigger a reload when changes to Dart sources are detected. We
       // ignore the generated preview file to avoid getting stuck in a loop.
       if (!eventPath.endsWith('.dart') ||
