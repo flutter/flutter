@@ -646,7 +646,7 @@ abstract final class SystemChrome {
   ///
   /// To imperatively set the style of the system overlays, use [SystemChrome.setSystemUIOverlayStyle].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// The following example uses SystemChrome to set the status bar icon brightness based on system brightness.
   /// ```dart
   /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
