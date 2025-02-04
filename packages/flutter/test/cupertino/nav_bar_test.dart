@@ -497,6 +497,51 @@ void main() {
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(16.0 + 20.0, 54.0 + 10.0));
   });
 
+  testWidgets('CupertinoNavigationBar ignores MediaQuery top padding in a CupertinoSheetRoute', (
+    WidgetTester tester,
+  ) async {
+    double top = 10.0;
+    late StateSetter setState;
+
+    await tester.pumpWidget(const CupertinoApp(home: CupertinoNavigationBar()));
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          CupertinoSheetRoute<void>(
+            builder: (BuildContext context) {
+              return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setter) {
+                  setState = setter;
+                  return MediaQuery(
+                    data: MediaQueryData(padding: EdgeInsets.only(top: top)),
+                    child: const CupertinoPageScaffold(
+                      navigationBar: CupertinoNavigationBar(middle: Text('Hello world!')),
+                      child: Placeholder(),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    // Mediaquery padding applied to middle.
+    final double initialTop = tester.getTopLeft(find.text('Hello world!')).dy;
+
+    // Change the top padding.
+    setState(() {
+      top = 20.0;
+    });
+    await tester.pump();
+
+    // The navigation bar ignores the top padding and remains at the same position.
+    expect(tester.getTopLeft(find.text('Hello world!')).dy, initialTop);
+  });
+
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
