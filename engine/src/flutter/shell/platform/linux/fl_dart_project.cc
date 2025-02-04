@@ -124,7 +124,7 @@ G_MODULE_EXPORT void fl_dart_project_set_enable_impeller(FlDartProject* project,
 }
 
 G_MODULE_EXPORT bool fl_dart_project_get_enable_impeller(
-    FLDartProject* project) {
+    FlDartProject* project) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(self), false);
   return self->enable_impeller;
 }
