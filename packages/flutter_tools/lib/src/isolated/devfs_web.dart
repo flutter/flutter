@@ -1138,6 +1138,7 @@ class WebDevFS implements DevFS {
       projectRootPath: projectRootPath,
       fs: globals.fs,
       dartPluginRegistrant: dartPluginRegistrant,
+      recompileRestart: fullRestart,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport();
