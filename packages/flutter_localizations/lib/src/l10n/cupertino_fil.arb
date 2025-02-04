@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Maghanap sa Web",
   "shareButtonLabel": "Ibahagi...",
   "clearButtonLabel": "I-clear",
-  "cancelButtonLabel": "Kanselahin",
-  "backButtonLabel": "Bumalik"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

@@ -28,6 +28,6 @@
   "lookUpButtonLabel": "Nachschlagen",
   "searchWebButtonLabel": "Im Web suchen",
   "shareButtonLabel": "Teilen…",
-  "cancelButtonLabel": "Abbrechen",
-  "backButtonLabel": "Zurück"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

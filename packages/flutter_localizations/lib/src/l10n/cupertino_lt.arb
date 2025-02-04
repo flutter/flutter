@@ -38,6 +38,6 @@
   "searchWebButtonLabel": "Ieškoti žiniatinklyje",
   "shareButtonLabel": "Bendrinti...",
   "clearButtonLabel": "Išvalyti",
-  "cancelButtonLabel": "Atšaukti",
-  "backButtonLabel": "Atgal"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

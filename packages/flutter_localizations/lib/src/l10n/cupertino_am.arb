@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "ድርን ፈልግ",
   "shareButtonLabel": "አጋራ...",
   "clearButtonLabel": "አጽዳ",
-  "cancelButtonLabel": "ይቅር",
-  "backButtonLabel": "ተመለስ"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

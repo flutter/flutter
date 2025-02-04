@@ -38,6 +38,6 @@
   "searchWebButtonLabel": "חיפוש באינטרנט",
   "shareButtonLabel": "שיתוף…",
   "clearButtonLabel": "ניקוי",
-  "cancelButtonLabel": "ביטול",
-  "backButtonLabel": "הקודם"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

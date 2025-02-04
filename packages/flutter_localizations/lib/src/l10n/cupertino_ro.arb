@@ -33,6 +33,6 @@
   "searchWebButtonLabel": "Căutați pe web",
   "shareButtonLabel": "Trimiteți…",
   "clearButtonLabel": "Ștergeți",
-  "cancelButtonLabel": "Anulați",
-  "backButtonLabel": "Înapoi"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

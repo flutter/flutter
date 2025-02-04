@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "वेब पर खोजें",
   "shareButtonLabel": "शेयर करें…",
   "clearButtonLabel": "मिटाएं",
-  "cancelButtonLabel": "रद्द करें",
-  "backButtonLabel": "वापस जाएं"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

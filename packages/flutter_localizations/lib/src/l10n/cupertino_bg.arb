@@ -28,6 +28,6 @@
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Търсене в мрежата",
   "shareButtonLabel": "Споделяне...",
-  "cancelButtonLabel": "Отказ",
-  "backButtonLabel": "Назад"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

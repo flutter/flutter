@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Internetdan qidirish",
   "shareButtonLabel": "Ulashish…",
   "clearButtonLabel": "Tozalash",
-  "cancelButtonLabel": "Bekor qilish",
-  "backButtonLabel": "Orqaga"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

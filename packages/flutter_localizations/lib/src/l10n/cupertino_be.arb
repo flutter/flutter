@@ -38,6 +38,6 @@
   "lookUpButtonLabel": "Знайсці",
   "searchWebButtonLabel": "Пошук у сетцы",
   "shareButtonLabel": "Абагуліць...",
-  "cancelButtonLabel": "Скасаваць",
-  "backButtonLabel": "Назад"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

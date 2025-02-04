@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Sesha Iwebhu",
   "shareButtonLabel": "Yabelana...",
   "clearButtonLabel": "Sula",
-  "cancelButtonLabel": "Khansela",
-  "backButtonLabel": "Emuva"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

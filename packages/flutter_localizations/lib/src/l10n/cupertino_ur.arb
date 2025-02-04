@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "ویب تلاش کریں",
   "shareButtonLabel": "اشتراک کریں...",
   "clearButtonLabel": "صاف کریں",
-  "cancelButtonLabel": "منسوخ کریں",
-  "backButtonLabel": "پیچھے"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

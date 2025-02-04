@@ -33,6 +33,6 @@
   "searchWebButtonLabel": "Претражи веб",
   "shareButtonLabel": "Дели…",
   "clearButtonLabel": "Обриши",
-  "cancelButtonLabel": "Откажи",
-  "backButtonLabel": "Назад"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

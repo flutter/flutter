@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Telusuri di Web",
   "shareButtonLabel": "Bagikan...",
   "clearButtonLabel": "Hapus",
-  "cancelButtonLabel": "Batal",
-  "backButtonLabel": "Kembali"
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }
