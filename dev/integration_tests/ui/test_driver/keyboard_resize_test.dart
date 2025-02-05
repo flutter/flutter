@@ -19,7 +19,6 @@ void main() {
     });
 
     test('Ensure keyboard dismissal resizes the view to original size', () async {
-      await driver.setTextEntryEmulation(enabled: false);
       final SerializableFinder heightText = find.byValueKey(keys.kHeightText);
       await driver.waitFor(heightText);
 
@@ -31,9 +30,9 @@ void main() {
       await driver.waitFor(defaultTextField);
 
       bool heightTextDidShrink = false;
-      for (int i = 0; i < 6; ++i) {
+      for (int i = 0; i < 20; ++i) {
         await driver.tap(defaultTextField);
-        await Future<void>.delayed(const Duration(seconds: 1));
+        await Future<void>.delayed(const Duration(milliseconds: 300));
         // Measure the height with keyboard displayed.
         final String heightWithKeyboardShown = await driver.getText(heightText);
         if (double.parse(heightWithKeyboardShown) < double.parse(startHeight)) {
@@ -49,8 +48,8 @@ void main() {
       await driver.tap(unfocusButton);
 
       bool heightTextDidExpand = false;
-      for (int i = 0; i < 3; ++i) {
-        await Future<void>.delayed(const Duration(seconds: 1));
+      for (int i = 0; i < 10; ++i) {
+        await Future<void>.delayed(const Duration(milliseconds: 300));
         // Measure the final height.
         final String endHeight = await driver.getText(heightText);
         if (endHeight == startHeight) {
