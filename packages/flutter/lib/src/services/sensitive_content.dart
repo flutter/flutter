@@ -21,7 +21,7 @@ import 'system_channels.dart';
 /// auto-sensitive if there are only other auto-sensitive or not sensitive
 /// `SensitiveContent` widgets in the tree. [ContentSensitive.notSensitive]
 /// is the least severe setting and will cause the view to remain marked not
-/// sensitive as long ase there are only other not sensitive `SensitiveContent`
+/// sensitive as long as there are only other not sensitive `SensitiveContent`
 /// widgets in the tree. If there are no `SensitiveContent` widget in the tree,
 /// the default setting will be used. This could be set by a Flutter developer in
 /// the engine; otherwise, Android uses [ContentSensitivity.autoSensitive] by default.
