@@ -235,7 +235,10 @@ team-ios:
       - engine/src/flutter/shell/platform/darwin/common/**/*
       - engine/src/flutter/shell/platform/darwin/ios/framework/**/*
       - packages/flutter_tools/**/ios/*
+      - packages/flutter_tools/**/macos/*
       - packages/flutter_tools/**/*xcode*
+      - packages/flutter_tools/**/*ios*
+      - packages/flutter_tools/**/*macos*
 
 team-release:
   - changed-files:
