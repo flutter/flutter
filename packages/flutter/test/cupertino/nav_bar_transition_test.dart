@@ -1020,7 +1020,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom nav bar bottom widget fades and slides in from the left', (
+  testWidgets('Bottom CupertinoSliverNavigationBar.bottom fades and slides in from the left', (
     WidgetTester tester,
   ) async {
     await startTransitionBetween(
@@ -1052,6 +1052,41 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))),
       const Offset(-620.4643845558167, 96.0),
+    );
+  });
+
+  testWidgets('Bottom CupertinoNavigationBar.bottom fades and slides in from the left', (
+    WidgetTester tester,
+  ) async {
+    await startTransitionBetween(
+      tester,
+      from: const CupertinoNavigationBar(
+        bottom: PreferredSize(preferredSize: Size.fromHeight(30.0), child: Placeholder()),
+      ),
+      fromTitle: 'Page 1',
+    );
+
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // There's 2, one from the bottom large title fading out and one from the
+    // bottom back label fading in.
+    expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
+    expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
+
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.9280824661254883);
+
+    expect(
+      tester.getTopLeft(flying(tester, find.byType(Placeholder))),
+      const Offset(-20.579326152801514, 44.0),
+    );
+
+    await tester.pump(const Duration(milliseconds: 200));
+
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.0);
+
+    expect(
+      tester.getTopLeft(flying(tester, find.byType(Placeholder))),
+      const Offset(-620.4643845558167, 44.0),
     );
   });
 
@@ -1258,7 +1293,7 @@ void main() {
     );
   });
 
-  testWidgets('Top nav bar bottom is aligned with top large title animation', (
+  testWidgets('Top CupertinoSliverNavigationBar.bottom is aligned with top large title animation', (
     WidgetTester tester,
   ) async {
     const double horizontalPadding = 16.0;
@@ -1318,6 +1353,39 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
       largeTitleOffset.dx - horizontalPadding,
+    );
+  });
+
+  testWidgets('Top CupertinoNavigationBar.bottom fades and slides out to the right', (
+    WidgetTester tester,
+  ) async {
+    await startTransitionBetween(
+      tester,
+      toTitle: 'Page 2',
+      to: const CupertinoNavigationBar(
+        bottom: PreferredSize(preferredSize: Size.fromHeight(30.0), child: Placeholder()),
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(flying(tester, find.text('Page 2')), findsOneWidget);
+    expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
+
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.0);
+
+    expect(
+      tester.getTopLeft(flying(tester, find.byType(Placeholder))),
+      const Offset(779.4206738471985, 44.0),
+    );
+
+    await tester.pump(const Duration(milliseconds: 150));
+
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.2601277381181717);
+
+    expect(
+      tester.getTopLeft(flying(tester, find.byType(Placeholder))),
+      const Offset(309.3008875846863, 44.0),
     );
   });
 

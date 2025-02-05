@@ -752,7 +752,8 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
                 ),
               ),
             ),
-            if (widget.bottom != null) SizedBox(height: bottomHeight, child: widget.bottom),
+            if (widget.bottom != null)
+              SizedBox(height: bottomHeight, child: components.navBarBottom),
           ],
         ),
       );
@@ -763,7 +764,8 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
         child: Column(
           children: <Widget>[
             navBar,
-            if (widget.bottom != null) SizedBox(height: bottomHeight, child: widget.bottom),
+            if (widget.bottom != null)
+              SizedBox(height: bottomHeight, child: components.navBarBottom),
           ],
         ),
       );
