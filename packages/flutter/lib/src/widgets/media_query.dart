@@ -978,7 +978,9 @@ class MediaQueryData {
   }
 }
 
+/// Typography settings that may be modified by the platform.
 final class TypographySettings {
+  /// Create a new [TypographySettings].
   const TypographySettings({
     required this.lineHeight,
     required this.paragraphSpacing,
@@ -986,9 +988,19 @@ final class TypographySettings {
     required this.wordSpacing,
   });
 
+  /// The height of this text span, as a multiple of the font size.
   final double lineHeight;
+
+  /// The amount of space (in logical pixels) to add between each paragraph.
   final double paragraphSpacing;
+
+  /// The amount of space (in logical pixels) to add between each letter.
+  /// A negative value can be used to bring the letters closer.
   final double letterSpacing;
+
+  /// The amount of space (in logical pixels) to add at each sequence of
+  /// white-space (i.e. between each word). A negative value can be used to
+  /// bring the words closer.
   final double wordSpacing;
 }
 
