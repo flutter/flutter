@@ -162,12 +162,13 @@ TEST_P(AiksTest, Subpixel) {
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
   for (int i = 0; i < 5; ++i) {
-    RenderTextInCanvasSkia(GetContext(), builder, "ui", "Roboto-Regular.ttf",
-                           TextRenderOptions{
-                               .font_size = 200,
-                               .position = DlPoint(100 + 0.25 * i, 150 + i * 150),
-                               .is_subpixel = true,
-                           });
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "ui", "Roboto-Regular.ttf",
+        TextRenderOptions{
+            .font_size = 200,
+            .position = DlPoint(100 + 0.25 * i, 150 + i * 150),
+            .is_subpixel = true,
+        });
   }
   DlPaint line_paint;
   line_paint.setColor(DlColor::kBlue());
@@ -184,17 +185,61 @@ TEST_P(AiksTest, SubpixelScaled) {
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
   for (int i = 0; i < 5; ++i) {
-    RenderTextInCanvasSkia(GetContext(), builder, "ui", "Roboto-Regular.ttf",
-                           TextRenderOptions{
-                               .font_size = 200,
-                               .position = DlPoint(100 + 0.25 * i, 150 + i * 150),
-                               .is_subpixel = true,
-                           });
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "ui", "Roboto-Regular.ttf",
+        TextRenderOptions{
+            .font_size = 200,
+            .position = DlPoint(100 + 0.25 * i, 150 + i * 150),
+            .is_subpixel = true,
+        });
   }
   DlPaint line_paint;
   line_paint.setColor(DlColor::kBlue());
   builder.DrawLine(DlPoint(111, 0), DlPoint(111, 800), line_paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, TextJumpingTestPlayground) {
+  Scalar font_size = 300;
+  Scalar scale = 0.5;
+  Scalar fine_scale = -0.055;
+  bool lock_size = true;
+  bool is_subpixel = false;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Fine Scale", &fine_scale, -0.1, 0.1);
+      ImGui::Checkbox("Lock Size", &lock_size);
+      ImGui::Checkbox("subpixel", &is_subpixel);
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+
+    Scalar total_scale = scale + fine_scale;
+    DlPaint paint;
+    paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+    builder.DrawPaint(paint);
+    builder.Scale(total_scale, total_scale);
+    RenderTextInCanvasSkia(GetContext(), builder, "ui", "Roboto-Regular.ttf",
+                           TextRenderOptions{
+                               .font_size = font_size,
+                               .position = DlPoint(100, 300),
+                               .is_subpixel = is_subpixel,
+                           });
+    if (lock_size) {
+      std::shared_ptr<DlImageFilter> filter =
+          DlImageFilter::MakeMatrix(DlMatrix(                        //
+                                        1.0 / total_scale, 0, 0, 0,  //
+                                        0, 1.0 / total_scale, 0, 0,  //
+                                        0, 0, 1, 0,                  //
+                                        0, 0, 0, 1),
+                                    DlImageSampling::kNearestNeighbor);
+      builder.SaveLayer(std::nullopt, nullptr, filter.get());
+      builder.Restore();
+    }
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(AiksTest, CanRenderTextFrameWithFractionScaling) {
@@ -297,8 +342,8 @@ TEST_P(AiksTest, CanRenderEmojiTextFrame) {
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
-  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), builder,
-                                     "😀 😃 😄 😁 😆 😅 😂 🤣 🥲 😊", kFontFixture));
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "😀 😃 😄 😁 😆 😅 😂 🤣 🥲 😊", kFontFixture));
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
