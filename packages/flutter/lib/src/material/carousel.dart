@@ -1575,7 +1575,7 @@ class CarouselController extends ScrollController {
     final double dimension = position.viewportDimension;
     final int totalWeight = weights.reduce((int a, int b) => a + b);
 
-    return  dimension * (weights.first / totalWeight) * index;
+    return dimension * (weights.first / totalWeight) * index;
   }
 
   @override

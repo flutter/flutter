@@ -1438,7 +1438,11 @@ void main() {
     }
 
     // Scroll to the last item.
-    controller.animateToItem(19, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    controller.animateToItem(
+      19,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeInOut,
+    );
     await tester.pumpAndSettle();
 
     // Verify that the last item is visible.
@@ -1446,7 +1450,11 @@ void main() {
     expect(realOffset(), controller.offset);
 
     // Scroll to the first item.
-    controller.animateToItem(0, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    controller.animateToItem(
+      0,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeInOut,
+    );
     await tester.pumpAndSettle();
 
     // Verify that the first item is visible.
@@ -1454,7 +1462,11 @@ void main() {
     expect(realOffset(), controller.offset);
 
     // Scroll to the middle item.
-    controller.animateToItem(10, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    controller.animateToItem(
+      10,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeInOut,
+    );
     await tester.pumpAndSettle();
 
     // Verify that the middle item is visible.
@@ -1486,7 +1498,11 @@ void main() {
     }
 
     // Scroll to the middle item.
-    controller.animateToItem(10, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    controller.animateToItem(
+      10,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeInOut,
+    );
     await tester.pumpAndSettle();
 
     // Verify that the middle item is visible.
@@ -1495,7 +1511,11 @@ void main() {
 
 
     // Scroll to the first item.
-    controller.animateToItem(0, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    controller.animateToItem(
+      0,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeInOut,
+    );
     await tester.pumpAndSettle();
 
     // Verify that the first item is visible.
