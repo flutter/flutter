@@ -3050,47 +3050,6 @@ void main() {
     },
   );
 
-  // // Regression test for hhttps://github.com/flutter/flutter/issues/161805
-  // testWidgets('Discrete Slider does not apply thumb padding in a non-rounded track shape', (
-  //   WidgetTester tester,
-  // ) async {
-  //   const double sliderPadding = 24.0;
-  //   final ThemeData theme = ThemeData(
-  //     sliderTheme: const SliderThemeData(
-  //       // Thumb padding is applied based on the track height.
-  //       trackHeight: 100,
-  //       trackShape: RectangularSliderTrackShape(),
-  //     ),
-  //   );
-
-  //   Widget buildSlider({required double value}) {
-  //     return MaterialApp(
-  //       theme: theme,
-  //       home: Material(
-  //         child: SizedBox(
-  //           width: 300,
-  //           child: Slider(value: value, max: 100, divisions: 100, onChanged: (double value) {}),
-  //         ),
-  //       ),
-  //     );
-  //   }
-
-  //   await tester.pumpWidget(buildSlider(value: 0));
-
-  //   MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
-
-  //   expect(material, paints..circle(x: sliderPadding, y: 300.0, color: theme.colorScheme.primary));
-
-  //   await tester.pumpWidget(buildSlider(value: 100));
-  //   await tester.pumpAndSettle();
-
-  //   material = Material.of(tester.element(find.byType(Slider)));
-  //   expect(
-  //     material,
-  //     paints..circle(x: 800.0 - sliderPadding, y: 300.0, color: theme.colorScheme.primary),
-  //   );
-  // });
-
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
