@@ -360,33 +360,51 @@ void main() {
                 'framework',
               ),
             ],
+            onRun: (_) {
+              // ensure this is a monorepo checkout
+              fileSystem
+                  .directory(
+                    fileSystem.path.join(
+                      checkoutsParentDirectory,
+                      'flutter_conductor_checkouts',
+                      'framework',
+                      'engine',
+                    ),
+                  )
+                  .createSync(recursive: true);
+              fileSystem
+                  .file(
+                    fileSystem.path.join(
+                      checkoutsParentDirectory,
+                      'flutter_conductor_checkouts',
+                      'framework',
+                      'DEPS',
+                    ),
+                  )
+                  .writeAsStringSync(generateMockDeps(previousDartRevision));
+            },
           ),
           const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', frameworkMirror]),
           const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
           const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
-
-          // engine
-          FakeCommand(
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
+          const FakeCommand(
             command: <String>[
               'git',
-              'clone',
-              '--origin',
-              'upstream',
-              '--',
-              EngineRepository.defaultUpstream,
-              engine.path,
+              'describe',
+              '--match',
+              '*.*.*',
+              '--tags',
+              'refs/remotes/upstream/$candidateBranch',
             ],
-            onRun: (_) {
-              // Create the DEPS file which the tool will update
-              engine.createSync(recursive: true);
-              depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
-            },
+            stdout: '$previousVersion-42-gabc123',
           ),
-          const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', engineMirror]),
-          const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
-          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
+          const FakeCommand(
+            command: <String>['git', 'merge-base', 'upstream/$candidateBranch', 'upstream/master'],
+            stdout: branchPointRevision,
+          ),
+
           const FakeCommand(
             command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
           ),
@@ -399,28 +417,6 @@ void main() {
             command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
           ),
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
-
-          // checkout framework commit
-          const FakeCommand(
-            command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
-          ),
-          const FakeCommand(
-            command: <String>[
-              'git',
-              'describe',
-              '--match',
-              '*.*.*',
-              '--tags',
-              'refs/remotes/upstream/$candidateBranch',
-            ],
-            stdout: '$previousVersion-42-gabc123',
-          ),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
-          const FakeCommand(
-            command: <String>['git', 'merge-base', 'upstream/$candidateBranch', 'upstream/master'],
-            stdout: branchPointRevision,
-          ),
         ];
 
         final CommandRunner<void> runner = createRunner(commands: commands);
@@ -455,156 +451,6 @@ void main() {
         expect(state.releaseVersion, versionOverride);
       });
 
-      test('logs to STDERR but does not fail on an unexpected candidate branch', () async {
-        stdio.stdin.add('y'); // accept prompt from ensureBranchPointTagged()
-        const String revision2 = 'def789';
-        const String revision3 = '123abc';
-        const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
-        const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-        // This is significantly behind the candidate branch name
-        const String previousVersion = '0.9.0-1.0.pre';
-        // This is what this release will be
-        const String nextVersion = '0.9.0-1.1.pre';
-
-        final Directory engine = fileSystem
-            .directory(checkoutsParentDirectory)
-            .childDirectory('flutter_conductor_checkouts')
-            .childDirectory('engine');
-
-        final File depsFile = engine.childFile('DEPS');
-
-        final List<FakeCommand> commands = <FakeCommand>[
-          // rev-parse framework
-          FakeCommand(
-            command: <String>[
-              'git',
-              'clone',
-              '--origin',
-              'upstream',
-              '--',
-              FrameworkRepository.defaultUpstream,
-              fileSystem.path.join(
-                checkoutsParentDirectory,
-                'flutter_conductor_checkouts',
-                'framework',
-              ),
-            ],
-          ),
-          const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', frameworkMirror]),
-          const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
-          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
-
-          // engine
-          FakeCommand(
-            command: <String>[
-              'git',
-              'clone',
-              '--origin',
-              'upstream',
-              '--',
-              EngineRepository.defaultUpstream,
-              engine.path,
-            ],
-            onRun: (_) {
-              // Create the DEPS file which the tool will update
-              engine.createSync(recursive: true);
-              depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
-            },
-          ),
-          const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', engineMirror]),
-          const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
-          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
-          const FakeCommand(
-            command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
-          ),
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/DEPS',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(
-            command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
-          ),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
-
-          // check out framework
-          const FakeCommand(
-            command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
-          ),
-          const FakeCommand(
-            command: <String>[
-              'git',
-              'describe',
-              '--match',
-              '*.*.*',
-              '--tags',
-              'refs/remotes/upstream/$candidateBranch',
-            ],
-            stdout: '$previousVersion-42-gabc123',
-          ),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
-          const FakeCommand(
-            command: <String>['git', 'merge-base', 'upstream/$candidateBranch', 'upstream/master'],
-            stdout: branchPointRevision,
-          ),
-          // check if commit is tagged, 0 exit code means it is tagged
-          const FakeCommand(
-            command: <String>['git', 'describe', '--exact-match', '--tags', branchPointRevision],
-          ),
-        ];
-
-        final CommandRunner<void> runner = createRunner(commands: commands);
-
-        final String stateFilePath = fileSystem.path.join(
-          platform.environment['HOME']!,
-          kStateFileName,
-        );
-
-        await runner.run(<String>[
-          'start',
-          '--$kCandidateOption',
-          candidateBranch,
-          '--$kReleaseOption',
-          releaseChannel,
-          '--$kStateOption',
-          stateFilePath,
-          '--$kDartRevisionOption',
-          nextDartRevision,
-          '--$kGithubUsernameOption',
-          githubUsername,
-        ]);
-
-        final File stateFile = fileSystem.file(stateFilePath);
-
-        final pb.ConductorState state = pb.ConductorState();
-        state.mergeFromProto3Json(jsonDecode(stateFile.readAsStringSync()));
-
-        expect(stdio.error, isNot(contains('Tried to tag the branch point, however')));
-        expect(processManager, hasNoRemainingExpectations);
-        expect(state.isInitialized(), true);
-        expect(state.releaseChannel, releaseChannel);
-        expect(state.releaseVersion, nextVersion);
-        expect(state.engine.candidateBranch, candidateBranch);
-        expect(state.engine.startingGitHead, revision2);
-        expect(state.engine.dartRevision, nextDartRevision);
-        expect(state.engine.upstream.url, 'git@github.com:flutter/engine.git');
-        expect(state.framework.candidateBranch, candidateBranch);
-        expect(state.framework.startingGitHead, revision3);
-        expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
-        expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
-        expect(state.conductorVersion, conductorVersion);
-        expect(state.releaseType, ReleaseType.BETA_HOTFIX);
-        expect(
-          stdio.error,
-          contains(
-            'Parsed version $previousVersion.42 has a different x value than candidate branch $candidateBranch',
-          ),
-        );
-      });
-
       test('can convert from dev style version to stable version', () async {
         const String revision2 = 'def789';
         const String revision3 = '123abc';
@@ -612,13 +458,6 @@ void main() {
         const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
         const String previousVersion = '1.2.0-3.0.pre';
         const String nextVersion = '1.2.0';
-
-        final Directory engine = fileSystem
-            .directory(checkoutsParentDirectory)
-            .childDirectory('flutter_conductor_checkouts')
-            .childDirectory('engine');
-
-        final File depsFile = engine.childFile('DEPS');
 
         final List<FakeCommand> commands = <FakeCommand>[
           // rev-parse framework
@@ -658,7 +497,7 @@ void main() {
                     ),
                   )
                   .writeAsStringSync(generateMockDeps(previousDartRevision));
-            }
+            },
           ),
           const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', frameworkMirror]),
           const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
