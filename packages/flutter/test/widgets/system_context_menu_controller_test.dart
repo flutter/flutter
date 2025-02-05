@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -451,5 +452,79 @@ void main() {
     }, throwsAssertionError);
     expect(controller.isVisible, isFalse);
     expect(itemsReceived, hasLength(0));
+  });
+
+  testWidgets('showing a controller for an EditableText', (WidgetTester tester) async {
+    final TextEditingController textEditingController = TextEditingController(text: 'test');
+    final FocusNode focusNode = FocusNode();
+    final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
+    late final WidgetsLocalizations localizations;
+    addTearDown(() {
+      textEditingController.dispose();
+      focusNode.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: Builder(
+              builder: (BuildContext context) {
+                localizations = WidgetsLocalizations.of(context);
+                return EditableText(
+                  key: key,
+                  maxLines: 10,
+                  controller: textEditingController,
+                  showSelectionHandles: true,
+                  autofocus: true,
+                  focusNode: focusNode,
+                  style: Typography.material2018().black.titleMedium!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                  keyboardType: TextInputType.text,
+                  textAlign: TextAlign.right,
+                  selectionControls: materialTextSelectionHandleControls,
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState editableTextState = tester.state<EditableTextState>(
+      find.byType(EditableText),
+    );
+    final List<IOSSystemContextMenuItem> defaultItems = SystemContextMenu.getDefaultItems(
+      editableTextState,
+    );
+    expect(defaultItems, hasLength(1));
+    expect(defaultItems.first, const IOSSystemContextMenuItemSelectAll());
+
+    final (startGlyphHeight: double startGlyphHeight, endGlyphHeight: double endGlyphHeight) =
+        editableTextState.getGlyphHeights();
+    final Rect anchor = TextSelectionToolbarAnchors.getSelectionRect(
+      editableTextState.renderEditable,
+      startGlyphHeight,
+      endGlyphHeight,
+      editableTextState.renderEditable.getEndpointsForSelection(
+        editableTextState.textEditingValue.selection,
+      ),
+    );
+    final List<IOSSystemContextMenuItemData> defaultItemDatas =
+        defaultItems.map((IOSSystemContextMenuItem item) => item.getData(localizations)).toList();
+
+    expect(defaultItemDatas, isNotEmpty);
+
+    final SystemContextMenuController systemContextMenuController = SystemContextMenuController();
+    addTearDown(() {
+      systemContextMenuController.dispose();
+    });
+
+    expect(systemContextMenuController.isVisible, isFalse);
+    systemContextMenuController.showWithItems(anchor, defaultItemDatas);
+    expect(systemContextMenuController.isVisible, isTrue);
   });
 }
