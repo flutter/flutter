@@ -2543,6 +2543,7 @@ class SystemContextMenuController with SystemContextMenuClient {
 
   /// Indicates whether the system context menu managed by this controller is
   /// currently being displayed to the user.
+  @visibleForTesting
   bool get isVisible => this == _lastShown && !_hiddenBySystem;
 
   /// After calling [dispose], this instance can no longer be used.
