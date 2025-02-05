@@ -68,4 +68,5 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("com.android.tools.build:gradle:8.7.3")
     testImplementation("org.mockito:mockito-core:4.8.0")
+    testImplementation("io.mockk:mockk:1.13.16")
 }

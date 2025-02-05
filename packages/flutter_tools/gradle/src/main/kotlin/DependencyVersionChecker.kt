@@ -7,15 +7,18 @@ import org.gradle.kotlin.dsl.extra
 import org.jetbrains.annotations.VisibleForTesting
 
 object DependencyVersionChecker {
-    private const val GRADLE_NAME: String = "Gradle"
-    private const val JAVA_NAME: String = "Java"
-    private const val AGP_NAME: String = "Android Gradle Plugin"
-    private const val KGP_NAME: String = "Kotlin"
+    @VisibleForTesting const val GRADLE_NAME: String = "Gradle"
+
+    @VisibleForTesting const val JAVA_NAME: String = "Java"
+
+    @VisibleForTesting const val AGP_NAME: String = "Android Gradle Plugin"
+
+    @VisibleForTesting const val KGP_NAME: String = "Kotlin"
 
     // String constant that defines the name of the Gradle extra property that we set when
     // detecting that the project is using versions outside of Flutter's support range.
     // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-project/index.html#-2107180640%2FProperties%2F-1867656071.
-    private const val OUT_OF_SUPPORT_RANGE_PROPERTY = "usesUnsupportedDependencyVersions"
+    @VisibleForTesting const val OUT_OF_SUPPORT_RANGE_PROPERTY = "usesUnsupportedDependencyVersions"
 
     // The following messages represent best effort guesses at where a Flutter developer should
     // look to upgrade a dependency that is below the corresponding threshold. Developers can
@@ -35,7 +38,7 @@ object DependencyVersionChecker {
             "chooses which version of Java to use, see the --jdk-dir section of the " +
             "output of `flutter config -h`.\n"
 
-    private fun getPotentialAGPFix(projectDirectory: String): String {
+    @VisibleForTesting fun getPotentialAGPFix(projectDirectory: String): String {
         return "Your project's AGP version is typically " +
             "defined in the plugins block of the `settings.gradle` file " +
             "($projectDirectory/settings.gradle), by a plugin with the id of " +
@@ -125,7 +128,7 @@ object DependencyVersionChecker {
         }
     }
 
-    private fun getErrorMessage(
+    @VisibleForTesting fun getErrorMessage(
         dependencyName: String,
         versionString: String,
         errorVersion: String,
@@ -138,7 +141,7 @@ object DependencyVersionChecker {
             "Potential fix: $potentialFix"
     }
 
-    private fun getWarnMessage(
+    @VisibleForTesting fun getWarnMessage(
         dependencyName: String,
         versionString: String,
         warnVersion: String,
@@ -293,6 +296,6 @@ class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Versi
 
 // Custom error for when the dependency_version_checker.kts script finds a dependency out of
 // the defined support range.
-class DependencyValidationException(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
+@VisibleForTesting class DependencyValidationException(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
     constructor(cause: Throwable) : this(null, cause)
 }
