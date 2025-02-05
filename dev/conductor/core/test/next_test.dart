@@ -236,105 +236,6 @@ void main() {
           },
         );
 
-        test(
-          'with no engine cherrypicks but a dart revision update, updates engine revision',
-          () async {
-            stdio.stdin.add('n');
-            processManager.addCommands(<FakeCommand>[
-              const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-              // we want merged upstream commit, not local working commit
-              const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
-              const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision1),
-              const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-              FakeCommand(
-                command: const <String>['git', 'checkout', workingBranch],
-                onRun: (_) {
-                  final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
-                    ..createSync();
-                  _initializeCiYamlFile(file);
-                },
-              ),
-              const FakeCommand(
-                command: <String>['git', 'status', '--porcelain'],
-                stdout: 'MM bin/internal/release-candidate-branch.version',
-              ),
-              const FakeCommand(command: <String>['git', 'add', '--all']),
-              const FakeCommand(
-                command: <String>[
-                  'git',
-                  'commit',
-                  '--message',
-                  'Create candidate branch version $candidateBranch for $releaseChannel',
-                ],
-              ),
-              const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
-              const FakeCommand(
-                command: <String>['git', 'status', '--porcelain'],
-                stdout: 'MM bin/internal/engine.version',
-              ),
-              const FakeCommand(command: <String>['git', 'add', '--all']),
-              const FakeCommand(
-                command: <String>[
-                  'git',
-                  'commit',
-                  '--message',
-                  'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
-                ],
-              ),
-              const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision4),
-            ]);
-            final pb.ConductorState state =
-                (pb.ConductorState.create()
-                  ..releaseChannel = releaseChannel
-                  ..releaseVersion = releaseVersion
-                  ..currentPhase = ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS
-                  ..framework =
-                      (pb.Repository.create()
-                        ..candidateBranch = candidateBranch
-                        ..checkoutPath = frameworkCheckoutPath
-                        ..mirror =
-                            (pb.Remote.create()
-                              ..name = 'mirror'
-                              ..url = mirrorRemoteUrl)
-                        ..upstream =
-                            (pb.Remote.create()
-                              ..name = 'upstream'
-                              ..url = upstreamRemoteUrl)
-                        ..workingBranch = workingBranch)
-                  ..engine =
-                      (pb.Repository.create()
-                        ..candidateBranch = candidateBranch
-                        ..checkoutPath = engineCheckoutPath
-                        ..upstream =
-                            (pb.Remote.create()
-                              ..name = 'upstream'
-                              ..url = engineUpstreamRemoteUrl)
-                        ..dartRevision = 'abc123'));
-            writeStateToFile(fileSystem.file(stateFile), state, <String>[]);
-            final Checkouts checkouts = Checkouts(
-              fileSystem: fileSystem,
-              parentDirectory: fileSystem.directory(checkoutsParentDirectory)
-                ..createSync(recursive: true),
-              platform: platform,
-              processManager: processManager,
-              stdio: stdio,
-            );
-            final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-            await runner.run(<String>['next', '--$kStateOption', stateFile]);
-
-            expect(processManager, hasNoRemainingExpectations);
-            expect(
-              stdio.stdout,
-              contains('release-candidate-branch.version containing $candidateBranch'),
-            );
-            expect(
-              stdio.stdout,
-              contains('Updating engine revision from $oldEngineVersion to $revision1'),
-            );
-            expect(stdio.stdout, contains('Are you ready to push your framework branch'));
-          },
-        );
-
         test('does not update state.currentPhase if user responds no', () async {
           stdio.stdin.add('n');
           processManager.addCommands(<FakeCommand>[
@@ -409,11 +310,6 @@ void main() {
           processManager.addCommands(<FakeCommand>[
             // Engine repo
             const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-            //// we want merged upstream commit, not local working commit
-            //const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
-            //const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision1),
-            //// Framework repo
-            //const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
             FakeCommand(
               command: const <String>['git', 'checkout', workingBranch],
               onRun: (_) {
