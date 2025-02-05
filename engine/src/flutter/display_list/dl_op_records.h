@@ -485,7 +485,7 @@ struct TransformResetOp final : TransformClipOpBase {
 // 4 byte header + 4 byte common payload packs into minimum 8 bytes
 // DlRect is 16 more bytes, which packs efficiently into 24 bytes total
 // DlRoundRect is 52 more bytes, which packs into 64 bytes total (4 bytes
-// unused).
+// unused)
 // CacheablePath is 128 more bytes, which packs efficiently into 136
 // bytes total
 //
@@ -577,7 +577,7 @@ struct DrawColorOp final : DrawOpBase {
 // DlRect is 16 more bytes, using 20 bytes which rounds up to 24 bytes total
 //        (4 bytes unused)
 // SkOval is same as DlRect
-// DlRoundRect is 52 more bytes, efficiently using 56 bytes total.
+// DlRoundRect is 52 more bytes, efficiently using 56 bytes total
 #define DEFINE_DRAW_1ARG_OP(op_name, arg_type, arg_name)             \
   struct Draw##op_name##Op final : DrawOpBase {                      \
     static constexpr auto kType = DisplayListOpType::kDraw##op_name; \
