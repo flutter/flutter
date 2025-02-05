@@ -112,13 +112,7 @@ class BuildAarCommand extends BuildSubCommand {
   }
 
   @override
-  Future<void> regeneratePlatformSpecificTooling(
-    FlutterProject project, {
-    bool? releaseMode,
-  }) async {
-    // Intentionally left blank. We want to rebuild the tooling before every sub-build.
-    // See https://github.com/flutter/flutter/issues/162649.
-  }
+  bool get regeneratePlatformSpecificToolingDurifyVerify => false;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -158,12 +152,12 @@ class BuildAarCommand extends BuildSubCommand {
     }
 
     displayNullSafetyMode(androidBuildInfo.first.buildInfo);
+
     await androidBuilder?.buildAar(
       project: project,
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
-      // Intentionally use super.* in order to use the base implementation that is not NOP.
-      generateTooling: super.regeneratePlatformSpecificTooling,
+      generateTooling: regeneratePlatformSpecificToolingIfApplicable,
       outputDirectoryPath: stringArg('output'),
       buildNumber: buildNumber,
     );

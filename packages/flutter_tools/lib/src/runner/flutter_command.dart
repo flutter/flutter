@@ -1893,11 +1893,13 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         buildSystem: globals.buildSystem,
         buildTargets: globals.buildTargets,
       );
-
-      await regeneratePlatformSpecificTooling(project);
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }
+    }
+
+    if (regeneratePlatformSpecificToolingDurifyVerify) {
+      await regeneratePlatformSpecificToolingIfApplicable(project);
     }
 
     setupApplicationPackages();
@@ -1909,37 +1911,63 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     return runCommand();
   }
 
+  /// Whether to run [regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
+  ///
+  /// By default `true`, but sub-commands that do _meta_ builds (make multiple different
+  /// builds sequentially in one-go) may choose to override this and provide `false`, instead
+  /// calling [regeneratePlatformSpecificTooling] manually when applicable.
+  @visibleForOverriding
+  bool get regeneratePlatformSpecificToolingDurifyVerify => true;
+
   /// Runs [FlutterProject.regeneratePlatformSpecificTooling] for [project] with appropriate configuration.
   ///
   /// By default, this uses [getBuildMode] to determine and provide whether a release build is being made,
   /// but sub-commands (such as commands that do _meta_ builds, or builds that make multiple different builds
   /// sequentially in one-go) may choose to overide this and make the call at a different point in time.
+  ///
+  /// This method should only be called when [shouldRunPub] is `true`:
+  /// ```dart
+  /// if (shouldRunPub) {
+  ///   await regeneratePlatformSpecificTooling(project);
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  /// - <https://github.com/flutter/flutter/issues/162649>.
   @protected
-  Future<void> regeneratePlatformSpecificTooling(
+  @nonVirtual
+  Future<void> regeneratePlatformSpecificToolingIfApplicable(
     FlutterProject project, {
     bool? releaseMode,
   }) async {
-    // Interested in why this function exists? See https://github.com/flutter/flutter/issues/162649.
-
-    // Just like in "verifyThenRunCommand", we want to skip metadata generation steps when "--no-pub" is provided.
     if (!shouldRunPub) {
       return;
     }
 
-    // TODO(matanlurey): Determine PreviewDevice should be kept.
+    // TODO(matanlurey): Determine if PreviewDevice should be kept.
     // https://github.com/flutter/flutter/issues/162693
-
-    // null implicitly means all plugins are allowed
-    List<String>? allowedPlugins;
+    final List<String>? allowedPlugins;
     if (stringArg(FlutterGlobalOptions.kDeviceIdOption, global: true) == 'preview') {
       // The preview device does not currently support any plugins.
       allowedPlugins = PreviewDevice.supportedPubPlugins;
+    } else {
+      // null means all plugins are allowed
+      allowedPlugins = null;
     }
 
-    releaseMode ??= getBuildMode().isRelease;
     await project.regeneratePlatformSpecificTooling(
       allowedPlugins: allowedPlugins,
-      releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && releaseMode,
+      // TODO(matanlurey): Move this up, i.e. releaseMode ??= getBuildMode().release.
+      //
+      // As it stands, this is a breaking change until https://github.com/flutter/flutter/issues/162704 is
+      // implemented, as the build_ios_framework command (and similar) will start querying
+      // for getBuildMode(), causing an error (meta-build commands like build ios-framework do not have
+      // a single build mode). Once ios-framework and macos-framework are migrated, then this can be
+      // cleaned up.
+      releaseMode:
+          featureFlags.isExplicitPackageDependenciesEnabled &&
+          (releaseMode ?? getBuildMode().isRelease),
     );
   }
 
