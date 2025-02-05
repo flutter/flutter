@@ -1,4 +1,4 @@
-Signature: 5b6c6074831c2246ed7dc194af16ec66
+Signature: 351f700fed32c8dbd5586223f2dbca62
 
 ====================================================================================================
 LIBRARY: etc1
@@ -398,9 +398,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
-FILE: ../../../flutter/third_party/skia/relnotes/color4shader.md
-FILE: ../../../flutter/third_party/skia/relnotes/gradient-colorspaces.md
-FILE: ../../../flutter/third_party/skia/relnotes/pipelinepurging.md
+FILE: ../../../flutter/third_party/skia/relnotes/serializedkeyprecompilation.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -5688,8 +5686,6 @@ ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/HueSaturat
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/InvertEffect.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/LevelsEffect.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/LinearWipeEffect.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/MotionBlurEffect.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/MotionBlurEffect.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/MotionTileEffect.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/RadialWipeEffect.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/ShiftChannelsEffect.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -5806,8 +5802,6 @@ FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/HueSaturatio
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/InvertEffect.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/LevelsEffect.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/LinearWipeEffect.cpp
-FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/MotionBlurEffect.cpp
-FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/MotionBlurEffect.h
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/MotionTileEffect.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/RadialWipeEffect.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/ShiftChannelsEffect.cpp
