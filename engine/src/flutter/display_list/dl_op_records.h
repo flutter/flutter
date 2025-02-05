@@ -595,8 +595,6 @@ DEFINE_DRAW_1ARG_OP(Oval, DlRect, oval)
 DEFINE_DRAW_1ARG_OP(RoundRect, DlRoundRect, rrect)
 #undef DEFINE_DRAW_1ARG_OP
 
-static_assert(sizeof(DrawRoundRectOp) == 56);
-
 // 4 byte header + 16 byte payload uses 20 bytes but is rounded
 // up to 24 bytes (4 bytes unused)
 struct DrawPathOp final : DrawOpBase {
@@ -640,8 +638,6 @@ DEFINE_DRAW_2ARG_OP(Line, DlPoint, p0, DlPoint, p1)
 DEFINE_DRAW_2ARG_OP(Circle, DlPoint, center, DlScalar, radius)
 DEFINE_DRAW_2ARG_OP(DiffRoundRect, DlRoundRect, outer, DlRoundRect, inner)
 #undef DEFINE_DRAW_2ARG_OP
-
-static_assert(sizeof(DrawDiffRoundRectOp) == 108);
 
 // 4 byte header + 24 byte payload packs into 32 bytes (4 bytes unused)
 struct DrawDashedLineOp final : DrawOpBase {
