@@ -60,6 +60,7 @@ void main() {
   Future<void> runWidgetPreviewCommand(List<String> arguments) async {
     final CommandRunner<void> runner = createTestCommandRunner(
       WidgetPreviewCommand(
+        verboseHelp: false,
         logger: logger,
         fs: fs,
         projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
