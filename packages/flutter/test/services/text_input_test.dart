@@ -325,7 +325,7 @@ void main() {
     late TextInputConfiguration fakeTextInputConfiguration2;
 
     setUp(() {
-      // If you create two objects with `const` with the same values, the second object with will be equal to the first one by reference.
+      // If you create two objects with `const` with the same values, the second object will be equal to the first one by reference.
       // This means that even without overriding the `equals` method, the test will pass.
       // ignore: prefer_const_constructors
       fakeTextInputConfiguration = TextInputConfiguration(
