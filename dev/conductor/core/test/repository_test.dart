@@ -124,7 +124,7 @@ vars = {
             'upstream',
             '--',
             FrameworkRepository.defaultUpstream,
-            fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'engine'),
+            fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
           ],
         ),
         const FakeCommand(command: <String>['git', 'checkout', FrameworkRepository.defaultBranch]),
@@ -173,41 +173,6 @@ vars = {
         expect(didUpdate, false);
       },
     );
-
-    test('updateEngineRevision() returns false if newCommit is the same as version file', () async {
-      const String commit1 = 'abc123';
-      const String commit2 = 'def456';
-      final File engineVersionFile = fileSystem.file('/engine.version')..writeAsStringSync(commit2);
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(
-          command: <String>[
-            'git',
-            'clone',
-            '--origin',
-            'upstream',
-            '--',
-            FrameworkRepository.defaultUpstream,
-            fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
-          ],
-        ),
-        const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit1),
-      ]);
-
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(rootDir),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-
-      final FrameworkRepository repo = FrameworkRepository(checkouts);
-      final bool didUpdate = await repo.updateEngineRevision(
-        commit2,
-        engineVersionFile: engineVersionFile,
-      );
-      expect(didUpdate, false);
-    });
 
     test(
       'framework repo set as localUpstream ensures requiredLocalBranches exist locally',
