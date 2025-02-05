@@ -953,7 +953,7 @@ abstract class RouteTransitionRecord {
   /// route to indicate that the route should be removed from the [Navigator]
   /// without completing and without an animated transition.
   @Deprecated('Use markForComplete instead.')
-  void markForRemove();
+  void markForRemove() => markForComplete();
 }
 
 /// The delegate that decides how pages added and removed from [Navigator.pages]
