@@ -117,6 +117,7 @@ class SystemContextMenu extends StatefulWidget {
     return MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false;
   }
 
+  // TODO(justinmc): Test?
   /// The default [items] for the given [EditableTextState].
   ///
   /// For example, [IOSSystemContextMenuItemCopy] will only be included when the
@@ -163,9 +164,7 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     if (widget.items.isNotEmpty) {
       final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
       final List<IOSSystemContextMenuItemData> itemDatas =
-          widget.items
-              .map((IOSSystemContextMenuItem item) => item._getData(localizations))
-              .toList();
+          widget.items.map((IOSSystemContextMenuItem item) => item.getData(localizations)).toList();
       _systemContextMenuController.showWithItems(widget.anchor, itemDatas);
     }
 
@@ -195,8 +194,9 @@ sealed class IOSSystemContextMenuItem {
   /// platform.
   String? get title => null;
 
+  // TODO(justinmc): Test a raw usage of SystemContextMenuController that uses this.
   /// Returns the representation of this class used by method channels.
-  IOSSystemContextMenuItemData _getData(WidgetsLocalizations localizations);
+  IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations);
 
   @override
   int get hashCode => title.hashCode;
@@ -231,7 +231,7 @@ final class IOSSystemContextMenuItemCopy extends IOSSystemContextMenuItem {
   const IOSSystemContextMenuItemCopy();
 
   @override
-  IOSSystemContextMenuItemDataCopy _getData(WidgetsLocalizations localizations) {
+  IOSSystemContextMenuItemDataCopy getData(WidgetsLocalizations localizations) {
     return const IOSSystemContextMenuItemDataCopy();
   }
 }
@@ -254,7 +254,7 @@ final class IOSSystemContextMenuItemCut extends IOSSystemContextMenuItem {
   const IOSSystemContextMenuItemCut();
 
   @override
-  IOSSystemContextMenuItemDataCut _getData(WidgetsLocalizations localizations) {
+  IOSSystemContextMenuItemDataCut getData(WidgetsLocalizations localizations) {
     return const IOSSystemContextMenuItemDataCut();
   }
 }
@@ -277,7 +277,7 @@ final class IOSSystemContextMenuItemPaste extends IOSSystemContextMenuItem {
   const IOSSystemContextMenuItemPaste();
 
   @override
-  IOSSystemContextMenuItemDataPaste _getData(WidgetsLocalizations localizations) {
+  IOSSystemContextMenuItemDataPaste getData(WidgetsLocalizations localizations) {
     return const IOSSystemContextMenuItemDataPaste();
   }
 }
@@ -300,7 +300,7 @@ final class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
   const IOSSystemContextMenuItemSelectAll();
 
   @override
-  IOSSystemContextMenuItemDataSelectAll _getData(WidgetsLocalizations localizations) {
+  IOSSystemContextMenuItemDataSelectAll getData(WidgetsLocalizations localizations) {
     return const IOSSystemContextMenuItemDataSelectAll();
   }
 }
@@ -330,7 +330,7 @@ final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
   final String? title;
 
   @override
-  IOSSystemContextMenuItemDataLookUp _getData(WidgetsLocalizations localizations) {
+  IOSSystemContextMenuItemDataLookUp getData(WidgetsLocalizations localizations) {
     return IOSSystemContextMenuItemDataLookUp(title: title ?? localizations.lookUpButtonLabel);
   }
 
@@ -365,7 +365,7 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
   final String? title;
 
   @override
-  IOSSystemContextMenuItemDataSearchWeb _getData(WidgetsLocalizations localizations) {
+  IOSSystemContextMenuItemDataSearchWeb getData(WidgetsLocalizations localizations) {
     return IOSSystemContextMenuItemDataSearchWeb(
       title: title ?? localizations.searchWebButtonLabel,
     );
@@ -402,7 +402,7 @@ final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
   final String? title;
 
   @override
-  IOSSystemContextMenuItemDataShare _getData(WidgetsLocalizations localizations) {
+  IOSSystemContextMenuItemDataShare getData(WidgetsLocalizations localizations) {
     return IOSSystemContextMenuItemDataShare(title: title ?? localizations.shareButtonLabel);
   }
 
