@@ -1473,13 +1473,11 @@ void main() {
     final TabController controller = TabController(vsync: const TestVSync(), length: tabs.length);
     addTearDown(controller.dispose);
 
-    const Color themeIndicatorColor = Color(0xffff0000);
     const Color tabBarThemeIndicatorColor = Color(0xffffff00);
 
-    Widget buildTabBar({Color? themeIndicatorColor, Color? tabBarThemeIndicatorColor}) {
+    Widget buildTabBar({Color? tabBarThemeIndicatorColor}) {
       return MaterialApp(
         theme: ThemeData(
-          indicatorColor: themeIndicatorColor,
           tabBarTheme: TabBarThemeData(indicatorColor: tabBarThemeIndicatorColor),
           useMaterial3: false,
         ),
@@ -1492,15 +1490,9 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildTabBar(themeIndicatorColor: themeIndicatorColor));
-
-    RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    expect(tabBarBox, paints..line(color: themeIndicatorColor));
-
     await tester.pumpWidget(buildTabBar(tabBarThemeIndicatorColor: tabBarThemeIndicatorColor));
-    await tester.pumpAndSettle();
 
-    tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox, paints..line(color: tabBarThemeIndicatorColor));
   });
 
@@ -1626,7 +1618,6 @@ void main() {
       labelSize = tester.getSize(find.text('Tab 1'));
       expect(labelSize, equals(const Size(140.5, 40.0)));
     },
-    skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/87543
   );
 
   testWidgets('TabBarTheme indicatorAnimation can customize tab indicator animation', (

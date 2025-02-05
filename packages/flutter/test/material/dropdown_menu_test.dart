@@ -1125,6 +1125,60 @@ void main() {
     );
   });
 
+  testWidgets('The icon in the menu button should be aligned with the icon of '
+      'the text field - LTR', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.ltr,
+            child: DropdownMenu<TestMenu>(
+              leadingIcon: const Icon(Icons.search),
+              label: const Text('label'),
+              dropdownMenuEntries: menuChildrenWithIcons,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder dropdownIcon =
+        find.descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText)).last;
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    final Finder itemLeadingIcon = find.byKey(leadingIconKey(TestMenu.mainMenu0)).last;
+
+    expect(tester.getRect(dropdownIcon).left, tester.getRect(itemLeadingIcon).left);
+  });
+
+  testWidgets('The icon in the menu button should be aligned with the icon of '
+      'the text field - RTL', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.rtl,
+            child: DropdownMenu<TestMenu>(
+              leadingIcon: const Icon(Icons.search),
+              label: const Text('label'),
+              dropdownMenuEntries: menuChildrenWithIcons,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder dropdownIcon =
+        find.descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText)).last;
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    final Finder itemLeadingIcon = find.byKey(leadingIconKey(TestMenu.mainMenu0)).last;
+
+    expect(tester.getRect(dropdownIcon).right, tester.getRect(itemLeadingIcon).right);
+  });
+
   testWidgets('DropdownMenu has default trailing icon button', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(buildTest(themeData, menuChildren));
@@ -3847,6 +3901,57 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('DropdownMenu passes maxLines to TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren))),
+    );
+    TextField textField = tester.widget(find.byType(TextField));
+    // Default behavior.
+    expect(textField.maxLines, 1);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren, maxLines: null),
+        ),
+      ),
+    );
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.maxLines, null);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren, maxLines: 2),
+        ),
+      ),
+    );
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.maxLines, 2);
+  });
+
+  testWidgets('DropdownMenu passes textInputAction to TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren))),
+    );
+    TextField textField = tester.widget(find.byType(TextField));
+    // Default behavior.
+    expect(textField.textInputAction, null);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            dropdownMenuEntries: menuChildren,
+            textInputAction: TextInputAction.next,
+          ),
+        ),
+      ),
+    );
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textInputAction, TextInputAction.next);
+  });
 }
 
 enum TestMenu {

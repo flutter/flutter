@@ -202,7 +202,7 @@ void main() {
     final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
     expect(tip.size.height, equals(24.0)); // 14.0 height + 5.0 padding * 2 (top, bottom)
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Material3 - Does tooltip end up in the right place - top left', (
     WidgetTester tester,
@@ -260,7 +260,7 @@ void main() {
     final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
     expect(tip.size.height, equals(30.0)); // 20.0 height + 5.0 padding * 2 (top, bottom)
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Does tooltip end up in the right place - center prefer above fits', (
     WidgetTester tester,
@@ -514,51 +514,51 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
   });
 
-  testWidgets(
-    'Material3 - Does tooltip end up in the right place - way off to the right',
-    (WidgetTester tester) async {
-      final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
-      late final OverlayEntry entry;
-      addTearDown(
-        () =>
-            entry
-              ..remove()
-              ..dispose(),
-      );
+  testWidgets('Material3 - Does tooltip end up in the right place - way off to the right', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(
+      () =>
+          entry
+            ..remove()
+            ..dispose(),
+    );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) {
-                  return Stack(
-                    children: <Widget>[
-                      Positioned(
-                        left: 1600.0,
-                        top: 300.0,
-                        child: Tooltip(
-                          key: tooltipKey,
-                          message: tooltipText,
-                          height: 10.0,
-                          padding: EdgeInsets.zero,
-                          verticalOffset: 10.0,
-                          preferBelow: true,
-                          child: const SizedBox.shrink(),
-                        ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Stack(
+                  children: <Widget>[
+                    Positioned(
+                      left: 1600.0,
+                      top: 300.0,
+                      child: Tooltip(
+                        key: tooltipKey,
+                        message: tooltipText,
+                        height: 10.0,
+                        padding: EdgeInsets.zero,
+                        verticalOffset: 10.0,
+                        preferBelow: true,
+                        child: const SizedBox.shrink(),
                       ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
-      );
-      tooltipKey.currentState?.ensureTooltipVisible();
-      await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+      ),
+    );
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-      /********************* 800x600 screen
+    /********************* 800x600 screen
      *                   *
      *                   *
      *                   * y=300.0;   target -->   o
@@ -568,14 +568,12 @@ void main() {
      *                   * }-10.0 margin
      *********************/
 
-      final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
-      expect(tip.size.height, equals(20.0));
-      expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
-      expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
-      expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(330.0));
-    },
-    skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
-  );
+    final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
+    expect(tip.size.height, equals(20.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(330.0));
+  });
 
   testWidgets('Material2 - Does tooltip end up in the right place - near the edge', (
     WidgetTester tester,
@@ -698,7 +696,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(330.0));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Tooltip should be fully visible when MediaQuery.viewInsets > 0', (
     WidgetTester tester,
@@ -1207,7 +1205,6 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.windows,
     }),
-    skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
   );
 
   testWidgets('Material2 - Can tooltip decoration be customized', (WidgetTester tester) async {
@@ -1406,7 +1403,8 @@ void main() {
   });
 
   testWidgets('Tooltip is dismissed after tap to dismiss immediately', (WidgetTester tester) async {
-    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap);
+    // This test relies on not ignoring pointer events.
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, ignorePointer: false);
 
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
@@ -1424,7 +1422,13 @@ void main() {
   testWidgets('Tooltip is not dismissed after tap if enableTapToDismiss is false', (
     WidgetTester tester,
   ) async {
-    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, enableTapToDismiss: false);
+    // This test relies on not ignoring pointer events.
+    await setWidgetForTooltipMode(
+      tester,
+      TooltipTriggerMode.tap,
+      enableTapToDismiss: false,
+      ignorePointer: false,
+    );
 
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
@@ -1730,6 +1734,8 @@ void main() {
       const MaterialApp(
         home: Center(
           child: Tooltip(
+            // This test relies on not ignoring pointer events.
+            ignorePointer: false,
             message: tooltipText,
             waitDuration: waitDuration,
             child: Text('I am tool tip'),
@@ -2167,7 +2173,7 @@ void main() {
     expect(tester.getSize(find.text(tooltipText)).height, equals(80.0));
     tip = tester.renderObject(_findTooltipContainer(tooltipText));
     expect(tip.size.height, equals(88.0));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Tooltip text displays with richMessage', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
@@ -3223,6 +3229,167 @@ void main() {
     await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
   });
+
+  testWidgets('Tooltip overlay ignores pointer by default when passing simple message', (
+    WidgetTester tester,
+  ) async {
+    const String tooltipMessage = 'Tooltip message';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Tooltip(
+              message: tooltipMessage,
+              child: ElevatedButton(onPressed: () {}, child: const Text('Hover me')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.text('Hover me');
+    expect(buttonFinder, findsOneWidget);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(buttonFinder));
+    await tester.pumpAndSettle();
+
+    final Finder tooltipFinder = find.text(tooltipMessage);
+    expect(tooltipFinder, findsOneWidget);
+
+    final Finder ignorePointerFinder = find.byType(IgnorePointer);
+
+    final IgnorePointer ignorePointer = tester.widget<IgnorePointer>(ignorePointerFinder.last);
+    expect(ignorePointer.ignoring, isTrue);
+
+    await gesture.removePointer();
+  });
+
+  testWidgets(
+    "Tooltip overlay with simple message doesn't ignore pointer when passing ignorePointer: false",
+    (WidgetTester tester) async {
+      const String tooltipMessage = 'Tooltip message';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Tooltip(
+                ignorePointer: false,
+                message: tooltipMessage,
+                child: ElevatedButton(onPressed: () {}, child: const Text('Hover me')),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Finder buttonFinder = find.text('Hover me');
+      expect(buttonFinder, findsOneWidget);
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(buttonFinder));
+      await tester.pumpAndSettle();
+
+      final Finder tooltipFinder = find.text(tooltipMessage);
+      expect(tooltipFinder, findsOneWidget);
+
+      final Finder ignorePointerFinder = find.byType(IgnorePointer);
+
+      final IgnorePointer ignorePointer = tester.widget<IgnorePointer>(ignorePointerFinder.last);
+      expect(ignorePointer.ignoring, isFalse);
+
+      await gesture.removePointer();
+    },
+  );
+
+  testWidgets("Tooltip overlay doesn't ignore pointer by default when passing rich message", (
+    WidgetTester tester,
+  ) async {
+    const InlineSpan richMessage = TextSpan(
+      children: <InlineSpan>[
+        TextSpan(text: 'Rich ', style: TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: 'Tooltip'),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Tooltip(
+              richMessage: richMessage,
+              child: ElevatedButton(onPressed: () {}, child: const Text('Hover me')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.text('Hover me');
+    expect(buttonFinder, findsOneWidget);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(buttonFinder));
+    await tester.pumpAndSettle();
+
+    final Finder tooltipFinder = find.textContaining('Rich Tooltip');
+    expect(tooltipFinder, findsOneWidget);
+
+    final Finder ignorePointerFinder = find.byType(IgnorePointer);
+
+    final IgnorePointer ignorePointer = tester.widget<IgnorePointer>(ignorePointerFinder.last);
+    expect(ignorePointer.ignoring, isFalse);
+
+    await gesture.removePointer();
+  });
+
+  testWidgets('Tooltip overlay with richMessage ignores pointer when passing ignorePointer: true', (
+    WidgetTester tester,
+  ) async {
+    const InlineSpan richMessage = TextSpan(
+      children: <InlineSpan>[
+        TextSpan(text: 'Rich ', style: TextStyle(fontWeight: FontWeight.bold)),
+        TextSpan(text: 'Tooltip'),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Tooltip(
+              ignorePointer: true,
+              richMessage: richMessage,
+              child: ElevatedButton(onPressed: () {}, child: const Text('Hover me')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.text('Hover me');
+    expect(buttonFinder, findsOneWidget);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(buttonFinder));
+    await tester.pumpAndSettle();
+
+    final Finder tooltipFinder = find.textContaining('Rich Tooltip');
+    expect(tooltipFinder, findsOneWidget);
+
+    final Finder ignorePointerFinder = find.byType(IgnorePointer);
+
+    final IgnorePointer ignorePointer = tester.widget<IgnorePointer>(ignorePointerFinder.last);
+    expect(ignorePointer.ignoring, isTrue);
+
+    await gesture.removePointer();
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
@@ -3231,6 +3398,7 @@ Future<void> setWidgetForTooltipMode(
   Duration? showDuration,
   bool? enableTapToDismiss,
   TooltipTriggeredCallback? onTriggered,
+  bool? ignorePointer,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -3240,6 +3408,7 @@ Future<void> setWidgetForTooltipMode(
         onTriggered: onTriggered,
         showDuration: showDuration,
         enableTapToDismiss: enableTapToDismiss ?? true,
+        ignorePointer: ignorePointer,
         child: const SizedBox(width: 100.0, height: 100.0),
       ),
     ),
