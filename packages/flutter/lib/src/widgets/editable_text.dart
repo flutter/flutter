@@ -3387,6 +3387,7 @@ class EditableTextState extends State<EditableText>
   @protected
   @override
   void dispose() {
+    _contextMenuTraversalDirectionNotifier.dispose();
     _internalScrollController?.dispose();
     _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
@@ -5080,28 +5081,12 @@ class EditableTextState extends State<EditableText>
 
   @override
   void performSelector(String selectorName) {
-    final Intent? intent;
-    if (_contextMenuPortalController.isShowing) {
-      // On macOS we should use different intents when the context menu is up.
-      if (selectorName == 'moveDown:') {
-        intent = const SelectionContextMenuNextItemIntent();
-      } else {
-        intent = intentForMacOSSelector(selectorName);
-      }
-    } else {
-      intent = intentForMacOSSelector(selectorName);
-    }
+    final Intent? intent = intentForMacOSSelector(selectorName);
+
     if (intent != null) {
-      if (_contextMenuPortalController.isShowing) {
-        final BuildContext? contextMenuContext = _contextMenuContext;
-        if (contextMenuContext != null) {
-          Actions.invoke(contextMenuContext, intent);
-        }
-      } else {
-        final BuildContext? primaryContext = primaryFocus?.context;
-        if (primaryContext != null) {
-          Actions.invoke(primaryContext, intent);
-        }
+      final BuildContext? primaryContext = primaryFocus?.context;
+      if (primaryContext != null) {
+        Actions.invoke(primaryContext, intent);
       }
     }
   }
@@ -5516,9 +5501,6 @@ class EditableTextState extends State<EditableText>
     ReplaceTextIntent: _replaceTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
     DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
-    // DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(onInvoke: (DirectionalFocusIntent intent) {
-    //   debugPrint('textfield directional focus');
-    // }),
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
 
     // Delete
@@ -5644,12 +5626,12 @@ class EditableTextState extends State<EditableText>
   final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
   void _updateTextSelectionToolbarVisibilities() {
     _effectiveToolbarVisibility.value =
-        renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
+        renderEditable.selectionStartInViewport.value ||
+        renderEditable.selectionEndInViewport.value;
   }
 
-  // Instead of using this, I wonder if we should just add the context menu intent-action map
-  // to editabletexts main action map, and invoke the intents on the primaryFocus.context as normal.
-  BuildContext? _contextMenuContext;
+  final _SelectionContextMenuEventNotifier _contextMenuTraversalDirectionNotifier =
+      _SelectionContextMenuEventNotifier._();
 
   @protected
   @override
@@ -5680,197 +5662,229 @@ class EditableTextState extends State<EditableText>
       enabled: _hasInputConnection,
       child: Actions(
         actions: _actions,
-        child: Builder(
-          builder: (BuildContext context) {
-            return TextFieldTapRegion(
-              groupId: widget.groupId,
-              onTapOutside:
-                  _hasFocus ? (PointerDownEvent event) => _onTapOutside(context, event) : null,
-              onTapUpOutside: (PointerUpEvent event) => _onTapUpOutside(context, event),
-              debugLabel: kReleaseMode ? null : 'EditableText',
-              child: MouseRegion(
-                cursor: widget.mouseCursor ?? SystemMouseCursors.text,
-                child: UndoHistory<TextEditingValue>(
-                  value: widget.controller,
-                  onTriggered: (TextEditingValue value) {
-                    userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
-                  },
-                  shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue) {
-                    if (!newValue.selection.isValid) {
-                      return false;
-                    }
-
-                    if (oldValue == null) {
-                      return true;
-                    }
-
-                    switch (defaultTargetPlatform) {
-                      case TargetPlatform.iOS:
-                      case TargetPlatform.macOS:
-                      case TargetPlatform.fuchsia:
-                      case TargetPlatform.linux:
-                      case TargetPlatform.windows:
-                        // Composing text is not counted in history coalescing.
-                        if (!widget.controller.value.composing.isCollapsed) {
+        child: Shortcuts(
+          shortcuts: <ShortcutActivator, Intent>{
+            if (_contextMenuPortalController.isShowing)
+              const SingleActivator(LogicalKeyboardKey.arrowDown):
+                  const SelectionContextMenuNextItemIntent(),
+            const SingleActivator(LogicalKeyboardKey.arrowUp):
+                const SelectionContextMenuPreviousItemIntent(),
+          },
+          child: Actions(
+            actions: <Type, Action<Intent>>{
+              if (_contextMenuPortalController.isShowing)
+                SelectionContextMenuNextItemIntent:
+                    CallbackAction<SelectionContextMenuNextItemIntent>(
+                      onInvoke: (SelectionContextMenuNextItemIntent intent) {
+                        debugPrint('hi from editabletext context menu next item intent');
+                        _contextMenuTraversalDirectionNotifier.value =
+                            SelectionContextMenuTraversalDirection.next;
+                      },
+                    ),
+              SelectionContextMenuPreviousItemIntent:
+                  CallbackAction<SelectionContextMenuPreviousItemIntent>(
+                    onInvoke: (SelectionContextMenuPreviousItemIntent intent) {
+                      debugPrint('hi from editabletext context menu previous item intent');
+                      _contextMenuTraversalDirectionNotifier.value =
+                          SelectionContextMenuTraversalDirection.previous;
+                    },
+                  ),
+            },
+            child: Builder(
+              builder: (BuildContext context) {
+                return TextFieldTapRegion(
+                  groupId: widget.groupId,
+                  onTapOutside:
+                      _hasFocus ? (PointerDownEvent event) => _onTapOutside(context, event) : null,
+                  onTapUpOutside: (PointerUpEvent event) => _onTapUpOutside(context, event),
+                  debugLabel: kReleaseMode ? null : 'EditableText',
+                  child: MouseRegion(
+                    cursor: widget.mouseCursor ?? SystemMouseCursors.text,
+                    child: UndoHistory<TextEditingValue>(
+                      value: widget.controller,
+                      onTriggered: (TextEditingValue value) {
+                        userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+                      },
+                      shouldChangeUndoStack: (
+                        TextEditingValue? oldValue,
+                        TextEditingValue newValue,
+                      ) {
+                        if (!newValue.selection.isValid) {
                           return false;
                         }
-                      case TargetPlatform.android:
-                        // Gboard on Android puts non-CJK words in composing regions. Coalesce
-                        // composing text in order to allow the saving of partial words in that
-                        // case.
-                        break;
-                    }
 
-                    return oldValue.text != newValue.text ||
-                        oldValue.composing != newValue.composing;
-                  },
-                  undoStackModifier: (TextEditingValue value) {
-                    // On Android we should discard the composing region when pushing
-                    // a new entry to the undo stack. This prevents the TextInputPlugin
-                    // from restarting the input on every undo/redo when the composing
-                    // region is changed by the framework.
-                    return defaultTargetPlatform == TargetPlatform.android
-                        ? value.copyWith(composing: TextRange.empty)
-                        : value;
-                  },
-                  focusNode: widget.focusNode,
-                  controller: widget.undoController,
-                  child: Focus(
-                    focusNode: widget.focusNode,
-                    includeSemantics: false,
-                    debugLabel: kReleaseMode ? null : 'EditableText',
-                    child: NotificationListener<ScrollNotification>(
-                      onNotification: (ScrollNotification notification) {
-                        _handleContextMenuOnScroll(notification);
-                        _scribbleCacheKey = null;
-                        return false;
+                        if (oldValue == null) {
+                          return true;
+                        }
+
+                        switch (defaultTargetPlatform) {
+                          case TargetPlatform.iOS:
+                          case TargetPlatform.macOS:
+                          case TargetPlatform.fuchsia:
+                          case TargetPlatform.linux:
+                          case TargetPlatform.windows:
+                            // Composing text is not counted in history coalescing.
+                            if (!widget.controller.value.composing.isCollapsed) {
+                              return false;
+                            }
+                          case TargetPlatform.android:
+                            // Gboard on Android puts non-CJK words in composing regions. Coalesce
+                            // composing text in order to allow the saving of partial words in that
+                            // case.
+                            break;
+                        }
+
+                        return oldValue.text != newValue.text ||
+                            oldValue.composing != newValue.composing;
                       },
-                      child: Scrollable(
-                        key: _scrollableKey,
-                        excludeFromSemantics: true,
-                        axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-                        controller: _scrollController,
-                        // On iOS a single-line TextField should not scroll.
-                        physics:
-                            widget.scrollPhysics ??
-                            (!_isMultiline && defaultTargetPlatform == TargetPlatform.iOS
-                                ? const _NeverUserScrollableScrollPhysics()
-                                : null),
-                        dragStartBehavior: widget.dragStartBehavior,
-                        restorationId: widget.restorationId,
-                        // If a ScrollBehavior is not provided, only apply scrollbars when
-                        // multiline. The overscroll indicator should not be applied in
-                        // either case, glowing or stretching.
-                        scrollBehavior:
-                            widget.scrollBehavior ??
-                            ScrollConfiguration.of(
-                              context,
-                            ).copyWith(scrollbars: _isMultiline, overscroll: false),
-                        viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                          Widget editable = SizeChangedLayoutNotifier(
-                            child: _Editable(
-                              key: _editableKey,
-                              startHandleLayerLink: _startHandleLayerLink,
-                              endHandleLayerLink: _endHandleLayerLink,
-                              inlineSpan: buildTextSpan(),
-                              value: _value,
-                              cursorColor: _cursorColor,
-                              backgroundCursorColor: widget.backgroundCursorColor,
-                              showCursor: _cursorVisibilityNotifier,
-                              forceLine: widget.forceLine,
-                              readOnly: widget.readOnly,
-                              hasFocus: _hasFocus,
-                              maxLines: widget.maxLines,
-                              minLines: widget.minLines,
-                              expands: widget.expands,
-                              strutStyle: widget.strutStyle,
-                              selectionColor:
-                                  _selectionOverlay?.spellCheckToolbarIsVisible ?? false
-                                      ? _spellCheckConfiguration.misspelledSelectionColor ??
-                                          widget.selectionColor
-                                      : widget.selectionColor,
-                              textScaler: effectiveTextScaler,
-                              textAlign: widget.textAlign,
-                              textDirection: _textDirection,
-                              locale: widget.locale,
-                              textHeightBehavior:
-                                  widget.textHeightBehavior ??
-                                  DefaultTextHeightBehavior.maybeOf(context),
-                              textWidthBasis: widget.textWidthBasis,
-                              obscuringCharacter: widget.obscuringCharacter,
-                              obscureText: widget.obscureText,
-                              offset: offset,
-                              rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                              cursorWidth: widget.cursorWidth,
-                              cursorHeight: widget.cursorHeight,
-                              cursorRadius: widget.cursorRadius,
-                              cursorOffset: widget.cursorOffset ?? Offset.zero,
-                              selectionHeightStyle: widget.selectionHeightStyle,
-                              selectionWidthStyle: widget.selectionWidthStyle,
-                              paintCursorAboveText: widget.paintCursorAboveText,
-                              enableInteractiveSelection: widget._userSelectionEnabled,
-                              textSelectionDelegate: this,
-                              devicePixelRatio: _devicePixelRatio,
-                              promptRectRange: _currentPromptRectRange,
-                              promptRectColor: widget.autocorrectionTextRectColor,
-                              clipBehavior: widget.clipBehavior,
-                            ),
-                          );
-                          if (widget.contextMenuBuilder != null) {
-                            // editable = _EditableTextContextMenu(
-                            //   contextMenu: widget.contextMenuBuilder!(context, this),
-                            //   controller: _contextMenuPortalController,
-                            //   layerLink: _toolbarLayerLink,
-                            //   offsetToShow: -renderEditable.localToGlobal(Offset.zero),
-                            //   visibility: _effectiveToolbarVisibility,
-                            //   child: editable,
-                            // );
-                            editable = OverlayPortal(
-                              controller: _contextMenuPortalController,
-                              overlayChildBuilder: (BuildContext context) {
-                                _updateTextSelectionToolbarVisibilities();
-                                return SelectionToolbarWrapper(
-                                  layerLink: _toolbarLayerLink,
-                                  offset: -renderEditable.localToGlobal(Offset.zero),
-                                  visibility: _effectiveToolbarVisibility,
-                                  child: Builder(
-                                    builder: (BuildContext context) {
-                                      _contextMenuContext = context;
-                                      return widget.contextMenuBuilder!(context, this);
-                                    }
-                                  ),
+                      undoStackModifier: (TextEditingValue value) {
+                        // On Android we should discard the composing region when pushing
+                        // a new entry to the undo stack. This prevents the TextInputPlugin
+                        // from restarting the input on every undo/redo when the composing
+                        // region is changed by the framework.
+                        return defaultTargetPlatform == TargetPlatform.android
+                            ? value.copyWith(composing: TextRange.empty)
+                            : value;
+                      },
+                      focusNode: widget.focusNode,
+                      controller: widget.undoController,
+                      child: Focus(
+                        focusNode: widget.focusNode,
+                        includeSemantics: false,
+                        debugLabel: kReleaseMode ? null : 'EditableText',
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: (ScrollNotification notification) {
+                            _handleContextMenuOnScroll(notification);
+                            _scribbleCacheKey = null;
+                            return false;
+                          },
+                          child: Scrollable(
+                            key: _scrollableKey,
+                            excludeFromSemantics: true,
+                            axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+                            controller: _scrollController,
+                            // On iOS a single-line TextField should not scroll.
+                            physics:
+                                widget.scrollPhysics ??
+                                (!_isMultiline && defaultTargetPlatform == TargetPlatform.iOS
+                                    ? const _NeverUserScrollableScrollPhysics()
+                                    : null),
+                            dragStartBehavior: widget.dragStartBehavior,
+                            restorationId: widget.restorationId,
+                            // If a ScrollBehavior is not provided, only apply scrollbars when
+                            // multiline. The overscroll indicator should not be applied in
+                            // either case, glowing or stretching.
+                            scrollBehavior:
+                                widget.scrollBehavior ??
+                                ScrollConfiguration.of(
+                                  context,
+                                ).copyWith(scrollbars: _isMultiline, overscroll: false),
+                            viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                              Widget editable = SizeChangedLayoutNotifier(
+                                child: _Editable(
+                                  key: _editableKey,
+                                  startHandleLayerLink: _startHandleLayerLink,
+                                  endHandleLayerLink: _endHandleLayerLink,
+                                  inlineSpan: buildTextSpan(),
+                                  value: _value,
+                                  cursorColor: _cursorColor,
+                                  backgroundCursorColor: widget.backgroundCursorColor,
+                                  showCursor: _cursorVisibilityNotifier,
+                                  forceLine: widget.forceLine,
+                                  readOnly: widget.readOnly,
+                                  hasFocus: _hasFocus,
+                                  maxLines: widget.maxLines,
+                                  minLines: widget.minLines,
+                                  expands: widget.expands,
+                                  strutStyle: widget.strutStyle,
+                                  selectionColor:
+                                      _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                          ? _spellCheckConfiguration.misspelledSelectionColor ??
+                                              widget.selectionColor
+                                          : widget.selectionColor,
+                                  textScaler: effectiveTextScaler,
+                                  textAlign: widget.textAlign,
+                                  textDirection: _textDirection,
+                                  locale: widget.locale,
+                                  textHeightBehavior:
+                                      widget.textHeightBehavior ??
+                                      DefaultTextHeightBehavior.maybeOf(context),
+                                  textWidthBasis: widget.textWidthBasis,
+                                  obscuringCharacter: widget.obscuringCharacter,
+                                  obscureText: widget.obscureText,
+                                  offset: offset,
+                                  rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                                  cursorWidth: widget.cursorWidth,
+                                  cursorHeight: widget.cursorHeight,
+                                  cursorRadius: widget.cursorRadius,
+                                  cursorOffset: widget.cursorOffset ?? Offset.zero,
+                                  selectionHeightStyle: widget.selectionHeightStyle,
+                                  selectionWidthStyle: widget.selectionWidthStyle,
+                                  paintCursorAboveText: widget.paintCursorAboveText,
+                                  enableInteractiveSelection: widget._userSelectionEnabled,
+                                  textSelectionDelegate: this,
+                                  devicePixelRatio: _devicePixelRatio,
+                                  promptRectRange: _currentPromptRectRange,
+                                  promptRectColor: widget.autocorrectionTextRectColor,
+                                  clipBehavior: widget.clipBehavior,
+                                ),
+                              );
+                              if (widget.contextMenuBuilder != null) {
+                                // editable = _EditableTextContextMenu(
+                                //   contextMenu: widget.contextMenuBuilder!(context, this),
+                                //   controller: _contextMenuPortalController,
+                                //   layerLink: _toolbarLayerLink,
+                                //   offsetToShow: -renderEditable.localToGlobal(Offset.zero),
+                                //   visibility: _effectiveToolbarVisibility,
+                                //   child: editable,
+                                // );
+                                editable = OverlayPortal(
+                                  controller: _contextMenuPortalController,
+                                  overlayChildBuilder: (BuildContext context) {
+                                    _updateTextSelectionToolbarVisibilities();
+                                    return SelectionToolbarWrapper(
+                                      layerLink: _toolbarLayerLink,
+                                      offset: -renderEditable.localToGlobal(Offset.zero),
+                                      visibility: _effectiveToolbarVisibility,
+                                      child: Builder(
+                                        builder: (BuildContext context) {
+                                          return widget.contextMenuBuilder!(context, this);
+                                        },
+                                      ),
+                                    );
+                                  },
+                                  child: editable,
                                 );
-                              },
-                              child: editable,
-                            );
-                          }
-                          return CompositedTransformTarget(
-                            link: _toolbarLayerLink,
-                            child: Semantics(
-                              inputType: inputType,
-                              onCopy: _semanticsOnCopy(controls),
-                              onCut: _semanticsOnCut(controls),
-                              onPaste: _semanticsOnPaste(controls),
-                              child: _ScribbleFocusable(
-                                editableKey: _editableKey,
-                                enabled: _stylusHandwritingEnabled,
-                                focusNode: widget.focusNode,
-                                updateSelectionRects: () {
-                                  _openInputConnection();
-                                  _updateSelectionRects(force: true);
-                                },
-                                child: editable,
-                              ),
-                            ),
-                          );
-                        },
+                              }
+                              return CompositedTransformTarget(
+                                link: _toolbarLayerLink,
+                                child: Semantics(
+                                  inputType: inputType,
+                                  onCopy: _semanticsOnCopy(controls),
+                                  onCut: _semanticsOnCut(controls),
+                                  onPaste: _semanticsOnPaste(controls),
+                                  child: _ScribbleFocusable(
+                                    editableKey: _editableKey,
+                                    enabled: _stylusHandwritingEnabled,
+                                    focusNode: widget.focusNode,
+                                    updateSelectionRects: () {
+                                      _openInputConnection();
+                                      _updateSelectionRects(force: true);
+                                    },
+                                    child: editable,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            );
-          },
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
@@ -5953,6 +5967,54 @@ class EditableTextState extends State<EditableText>
     );
   }
 }
+
+class SelectionContextMenuPreviousItemIntent extends Intent {
+  const SelectionContextMenuPreviousItemIntent();
+}
+
+class SelectionContextMenuNextItemIntent extends Intent {
+  const SelectionContextMenuNextItemIntent();
+}
+
+final class _SelectionContextMenuEventNotifier extends ChangeNotifier
+    implements ValueListenable<SelectionContextMenuTraversalDirection> {
+  _SelectionContextMenuEventNotifier._();
+
+  SelectionContextMenuTraversalDirection _currentSelectionContextMenuTraversalDirection =
+      SelectionContextMenuTraversalDirection.none;
+
+  @override
+  SelectionContextMenuTraversalDirection get value =>
+      _currentSelectionContextMenuTraversalDirection;
+
+  @protected
+  set value(SelectionContextMenuTraversalDirection newDirection) {
+    _currentSelectionContextMenuTraversalDirection = newDirection;
+    notifyListeners();
+  }
+}
+
+final class SelectionContextMenuEventScope extends InheritedWidget {
+  const SelectionContextMenuEventScope({
+    required this.traversalDirectionNotifier,
+    required super.child,
+  });
+
+  final ValueListenable<SelectionContextMenuTraversalDirection> traversalDirectionNotifier;
+
+  static ValueListenable<SelectionContextMenuTraversalDirection>? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<SelectionContextMenuEventScope>()
+        ?.traversalDirectionNotifier;
+  }
+
+  @override
+  bool updateShouldNotify(SelectionContextMenuEventScope oldWidget) {
+    return traversalDirectionNotifier != oldWidget.traversalDirectionNotifier;
+  }
+}
+
+enum SelectionContextMenuTraversalDirection { next, previous, none }
 
 class _EditableTextContextMenu extends StatefulWidget {
   const _EditableTextContextMenu({

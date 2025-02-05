@@ -15,7 +15,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -1910,6 +1909,7 @@ class SelectionToolbarWrapperState extends State<SelectionToolbarWrapper>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
+  // final ValueNotifier<int?> _highlightedOptionIndex = ValueNotifier<int?>(null);
 
   @override
   void initState() {
@@ -1950,39 +1950,20 @@ class SelectionToolbarWrapperState extends State<SelectionToolbarWrapper>
   @override
   Widget build(BuildContext context) {
     return TextFieldTapRegion(
-      child: Shortcuts(
-        shortcuts: const <ShortcutActivator, Intent> {
-          SingleActivator(LogicalKeyboardKey.arrowDown) : DirectionalFocusIntent(TraversalDirection.down),
-        },
-        child: Actions(
-          actions: <Type, Action<Intent>> {
-            DirectionalFocusIntent : CallbackAction<DirectionalFocusIntent>(onInvoke: (DirectionalFocusIntent intent) {
-              debugPrint('hello from directional focus');
-            }),
-            SelectionContextMenuNextItemIntent : CallbackAction<SelectionContextMenuNextItemIntent>(onInvoke: (SelectionContextMenuNextItemIntent intent) {
-              debugPrint('hello from context menu next item');
-            }),
-          },
-          child: Directionality(
-            textDirection: Directionality.of(this.context),
-            child: FadeTransition(
-              opacity: _opacity,
-              child: CompositedTransformFollower(
-                link: widget.layerLink,
-                showWhenUnlinked: false,
-                offset: widget.offset,
-                child: widget.child,
-              ),
-            ),
+      child: Directionality(
+        textDirection: Directionality.of(this.context),
+        child: FadeTransition(
+          opacity: _opacity,
+          child: CompositedTransformFollower(
+            link: widget.layerLink,
+            showWhenUnlinked: false,
+            offset: widget.offset,
+            child: widget.child,
           ),
         ),
       ),
     );
   }
-}
-
-class SelectionContextMenuNextItemIntent extends Intent {
-  const SelectionContextMenuNextItemIntent();
 }
 
 /// This widget represents a single draggable selection handle.

@@ -10,6 +10,7 @@ library;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 
+import '../foundation/change_notifier.dart';
 import 'debug.dart';
 import 'desktop_text_selection_toolbar.dart';
 import 'desktop_text_selection_toolbar_button.dart';
@@ -303,31 +304,130 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
 
     final List<Widget> resultChildren =
         children != null ? children! : getAdaptiveButtons(context, buttonItems!).toList();
-
+    final Offset anchor;
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
-        return CupertinoTextSelectionToolbar(
-          anchorAbove: anchors.primaryAnchor,
-          anchorBelow:
-              anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!,
+      case TargetPlatform.android:
+        anchor = anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.macOS:
+        anchor = anchors.primaryAnchor;
+    }
+
+    return _AdaptiveTextSelectionToolbarWithHighlightedItem(
+      anchor: anchor,
+      children: resultChildren,
+    );
+  }
+}
+
+class _AdaptiveTextSelectionToolbarWithHighlightedItem extends StatefulWidget {
+  const _AdaptiveTextSelectionToolbarWithHighlightedItem({
+    required this.anchor,
+    required this.children,
+  });
+  final Offset anchor;
+  final List<Widget> children;
+
+  @override
+  _AdaptiveTextSelectionToolbarWithHighlightedItemState createState() =>
+      _AdaptiveTextSelectionToolbarWithHighlightedItemState();
+}
+
+class _AdaptiveTextSelectionToolbarWithHighlightedItemState
+    extends State<_AdaptiveTextSelectionToolbarWithHighlightedItem> {
+  ValueListenable<SelectionContextMenuTraversalDirection>? _traversalDirection;
+
+  int get _menuItemsLength => widget.children.length;
+
+  int? _highlightedIndex;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _traversalDirection?.removeListener(_handleTraversal);
+    _traversalDirection = SelectionContextMenuEventScope.maybeOf(context);
+    _traversalDirection?.addListener(_handleTraversal);
+  }
+
+  @override
+  void dispose() {
+    _traversalDirection?.removeListener(_handleTraversal);
+    _traversalDirection = null;
+    super.dispose();
+  }
+
+  void _handleTraversal() {
+    if (_traversalDirection == null) {
+      return;
+    }
+    switch (_traversalDirection!.value) {
+      case SelectionContextMenuTraversalDirection.next:
+        _handleNext();
+      case SelectionContextMenuTraversalDirection.previous:
+        _handlePrevious();
+      case SelectionContextMenuTraversalDirection.none:
+    }
+    if (_traversalDirection!.value != SelectionContextMenuTraversalDirection.none) {
+      setState(() {});
+    }
+  }
+
+  void _handleNext() {
+    if (_highlightedIndex == null) {
+      _highlightedIndex = 0;
+    } else {
+      _highlightedIndex = _highlightedIndex! < _menuItemsLength - 1 ? _highlightedIndex! + 1 : _highlightedIndex;
+    }
+  }
+
+  void _handlePrevious() {
+    if (_highlightedIndex == null) {
+      _highlightedIndex = _menuItemsLength - 1;
+    } else {
+      _highlightedIndex = _highlightedIndex! > 0 ? _highlightedIndex! - 1 : _highlightedIndex;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> resultChildren = List<Widget>.from(widget.children);
+    if (_highlightedIndex != null && _highlightedIndex! < _menuItemsLength) {
+      resultChildren[_highlightedIndex!] = ColoredBox(
+        color: Theme.of(context).focusColor,
+        child: resultChildren[_highlightedIndex!],
+      );
+    }
+
+    late Widget result;
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.iOS:
+        result = CupertinoTextSelectionToolbar(
+          anchorAbove: widget.anchor,
+          anchorBelow: widget.anchor,
           children: resultChildren,
         );
       case TargetPlatform.android:
-        return TextSelectionToolbar(
-          anchorAbove: anchors.primaryAnchor,
-          anchorBelow:
-              anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!,
+        result = TextSelectionToolbar(
+          anchorAbove: widget.anchor,
+          anchorBelow: widget.anchor,
           children: resultChildren,
         );
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return DesktopTextSelectionToolbar(anchor: anchors.primaryAnchor, children: resultChildren);
+        result = DesktopTextSelectionToolbar(
+          anchor: widget.anchor,
+          children: resultChildren,
+        );
       case TargetPlatform.macOS:
-        return CupertinoDesktopTextSelectionToolbar(
-          anchor: anchors.primaryAnchor,
+        result = CupertinoDesktopTextSelectionToolbar(
+          anchor: widget.anchor,
           children: resultChildren,
         );
     }
+    return result;
   }
 }
