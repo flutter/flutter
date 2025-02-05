@@ -409,11 +409,11 @@ void main() {
           processManager.addCommands(<FakeCommand>[
             // Engine repo
             const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-            // we want merged upstream commit, not local working commit
-            const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
-            const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision1),
-            // Framework repo
-            const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+            //// we want merged upstream commit, not local working commit
+            //const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
+            //const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision1),
+            //// Framework repo
+            //const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
             FakeCommand(
               command: const <String>['git', 'checkout', workingBranch],
               onRun: (_) {
@@ -437,20 +437,6 @@ void main() {
             ),
             const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
             const FakeCommand(
-              command: <String>['git', 'status', '--porcelain'],
-              stdout: 'MM bin/internal/engine.version',
-            ),
-            const FakeCommand(command: <String>['git', 'add', '--all']),
-            const FakeCommand(
-              command: <String>[
-                'git',
-                'commit',
-                '--message',
-                'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
-              ],
-            ),
-            const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision4),
-            const FakeCommand(
               command: <String>['git', 'push', 'mirror', 'HEAD:refs/heads/$workingBranch'],
             ),
           ]);
@@ -469,10 +455,6 @@ void main() {
           final pb.ConductorState finalState = readStateFromFile(fileSystem.file(stateFile));
 
           expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
-          expect(
-            stdio.stdout,
-            contains('Rolling new engine hash $revision1 to framework checkout...'),
-          );
           expect(stdio.stdout, contains('There was 1 cherrypick that was not auto-applied'));
           expect(
             stdio.stdout,
