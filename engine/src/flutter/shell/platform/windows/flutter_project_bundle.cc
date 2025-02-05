@@ -15,7 +15,8 @@ namespace flutter {
 FlutterProjectBundle::FlutterProjectBundle(
     const FlutterDesktopEngineProperties& properties)
     : assets_path_(properties.assets_path),
-      icu_path_(properties.icu_data_path) {
+      icu_path_(properties.icu_data_path),
+      impeller_enabled_(properties.enable_impeller) {
   if (properties.aot_library_path != nullptr) {
     aot_library_path_ = std::filesystem::path(properties.aot_library_path);
   }
@@ -46,10 +47,6 @@ FlutterProjectBundle::FlutterProjectBundle(
             std::filesystem::path(executable_location) / aot_library_path_;
       }
     }
-  }
-
-  if (properties.enable_impeller) {
-    impeller_enabled_ = true;
   }
 }
 
