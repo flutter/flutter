@@ -177,6 +177,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     widgetPreviewScaffold.createSync();
 
     if (generateScaffoldProject) {
+      // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
       logger.printStatus('Creating widget preview scaffolding at: ${widgetPreviewScaffold.path}');
       await generateApp(
         <String>['app', kWidgetPreviewScaffoldName],
@@ -263,6 +264,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       outputMode: PubOutputMode.summaryOnly,
     );
 
+    // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
     logger.printStatus('Performing initial build of the Widget Preview Scaffold...');
 
     final BuildInfo buildInfo = BuildInfo(
@@ -299,6 +301,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     } else {
       throw UnimplementedError();
     }
+    // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
     logger.printStatus('Widget Preview Scaffold initial build complete.');
   }
 
@@ -389,8 +392,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
     // Immediately perform a hot restart to ensure new previews are loaded into the prebuilt
     // application.
+    // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
     logger.printStatus('Loading previews into the Widget Preview Scaffold...');
     await app.restart(fullRestart: true);
+    // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
     logger.printStatus('Done loading previews.');
     return app;
   }
