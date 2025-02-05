@@ -85,7 +85,8 @@ typedef struct {
   ///
   /// When not provided, this value is treated as false. In a future release,
   /// this setting will become a no-op when the Skia backend is fully removed.
-  bool enable_impeller = false;
+  bool enable_impeller;
+
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========
