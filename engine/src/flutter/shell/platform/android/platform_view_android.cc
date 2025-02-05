@@ -8,6 +8,7 @@
 #include <memory>
 #include <utility>
 
+#include "common/settings.h"
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
@@ -132,6 +133,12 @@ PlatformViewAndroid::PlatformViewAndroid(
         delegate.OnPlatformViewGetSettings().enable_impeller  //
     );
     android_surface_ = surface_factory_->CreateSurface();
+    // TODO(jonahwilliams): we need to expose the runtime check for the
+    // correct extensions and allowlist for this to work correctly.
+    android_use_new_platform_view_ =
+        android_context->RenderingApi() ==
+            AndroidRenderingAPI::kImpellerVulkan &&
+        delegate.OnPlatformViewGetSettings().enable_surface_control;
     FML_CHECK(android_surface_ && android_surface_->IsValid())
         << "Could not create an OpenGL, Vulkan or Software surface to set up "
            "rendering.";
