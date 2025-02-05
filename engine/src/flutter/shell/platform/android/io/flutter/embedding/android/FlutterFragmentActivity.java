@@ -369,7 +369,7 @@ public class FlutterFragmentActivity extends FragmentActivity
 
   @Nullable private FlutterFragment flutterFragment;
 
-  int getFlutterFragmentViewId() {
+  public int getFlutterFragmentViewId() {
     return flutterFragment.flutterViewId;
   }
 

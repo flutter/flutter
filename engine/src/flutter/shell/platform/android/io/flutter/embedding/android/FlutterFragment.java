@@ -104,7 +104,7 @@ public class FlutterFragment extends Fragment
    * <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For more,
    * see {@link android.view.View#findViewById}.
    */
-  @VisibleForTesting Integer flutterViewId;
+  @VisibleForTesting public Integer flutterViewId;
 
   public static void setFlutterViewId(FlutterFragment instance, int id) {
     if (instance.flutterViewId == null) {
