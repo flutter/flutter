@@ -241,14 +241,14 @@ TEST_P(TextContentsTest, SimpleSubpixel) {
 
   Rect position_rect = PerVertexDataPositionToRect(data);
   Rect uv_rect = PerVertexDataUVToRect(data, texture_size);
-  // The values without subpixel.
+  // The values at Point(0, 0).
   // EXPECT_RECT_NEAR(position_rect, Rect::MakeXYWH(-1, -41, 52, 52));
   // EXPECT_RECT_NEAR(uv_rect, Rect::MakeXYWH(1.0, 1.0, 52, 52));
   EXPECT_RECT_NEAR(position_rect, Rect::MakeXYWH(-2, -41, 54, 52));
   EXPECT_RECT_NEAR(uv_rect, Rect::MakeXYWH(1.0, 1.0, 54, 52));
 }
 
-TEST_P(TextContentsTest, SimpleSubpixel2x) {
+TEST_P(TextContentsTest, SimpleSubpixel3x) {
 #ifndef FML_OS_MACOSX
   GTEST_SKIP() << "Results aren't stable across linux and macos.";
 #endif
@@ -256,7 +256,7 @@ TEST_P(TextContentsTest, SimpleSubpixel2x) {
   GlyphAtlasPipeline::VertexShader::PerVertexData data[6];
 
   std::shared_ptr<TextFrame> text_frame = MakeTextFrame(
-      "1", "ahem.ttf", TextOptions{.font_size = 50, .is_subpixel = false});
+      "1", "ahem.ttf", TextOptions{.font_size = 50, .is_subpixel = true});
 
   std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
   std::shared_ptr<GlyphAtlasContext> atlas_context =
@@ -264,24 +264,29 @@ TEST_P(TextContentsTest, SimpleSubpixel2x) {
   std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
   ASSERT_TRUE(context && context->IsValid());
-  Point offset = Point(0.0, 0);
-  Scalar scale = 2.0;
-  std::shared_ptr<GlyphAtlas> atlas = CreateGlyphAtlas(
-      *GetContext(), context.get(), *host_buffer,
-      GlyphAtlas::Type::kAlphaBitmap, scale, atlas_context, text_frame, offset);
+  Scalar font_scale = 3.f;
+  Point offset = {0.16667, 0};
+  std::shared_ptr<GlyphAtlas> atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+                       GlyphAtlas::Type::kAlphaBitmap, font_scale,
+                       atlas_context, text_frame, offset);
 
   ISize texture_size = atlas->GetTexture()->GetSize();
-  TextContents::ComputeVertexData(data, text_frame, scale,
-                                  /*entity_transform=*/Matrix(), offset,
-                                  /*glyph_properties=*/std::nullopt, atlas);
+  TextContents::ComputeVertexData(
+      data, text_frame, font_scale,
+      /*entity_transform=*/Matrix::MakeScale({font_scale, font_scale, 1}),
+      offset,
+      /*glyph_properties=*/std::nullopt, atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data);
   Rect uv_rect = PerVertexDataUVToRect(data, texture_size);
-  // The values without subpixel.
-  // EXPECT_RECT_NEAR(position_rect, Rect::MakeXYWH(-1, -41, 52, 52));
-  // EXPECT_RECT_NEAR(uv_rect, Rect::MakeXYWH(1.0, 1.0, 52, 52));
-  // EXPECT_RECT_NEAR(position_rect, Rect::MakeXYWH(-2, -41, 54, 52));
-  // EXPECT_RECT_NEAR(uv_rect, Rect::MakeXYWH(1.0, 1.0, 54, 52));
+  // Values at Point(0, 0)
+  // EXPECT_RECT_NEAR(position_rect, Rect::MakeXYWH(-1, -121, 152, 152));
+  // EXPECT_RECT_NEAR(uv_rect, Rect::MakeXYWH(1.0, 1.0, 152, 152));
+  EXPECT_RECT_NEAR(position_rect, Rect::MakeXYWH(-2, -121, 154, 152))
+      << "position size:" << position_rect.GetSize();
+  EXPECT_RECT_NEAR(uv_rect, Rect::MakeXYWH(1.0, 1.0, 154, 152))
+      << "position size:" << position_rect.GetSize();
 }
 
 TEST_P(TextContentsTest, SimpleSubpixel26) {
