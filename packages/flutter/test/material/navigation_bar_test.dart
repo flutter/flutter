@@ -471,7 +471,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 3',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
@@ -486,7 +486,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 3',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
@@ -500,7 +500,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('ABC')),
       matchesSemantics(
-        label: 'ABC\nTab 3 of 3',
+        label: 'ABC${kIsWeb ? '' : '\nTab 3 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
@@ -517,7 +517,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 3',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
@@ -531,7 +531,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 3',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
@@ -546,7 +546,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('ABC')),
       matchesSemantics(
-        label: 'ABC\nTab 3 of 3',
+        label: 'ABC${kIsWeb ? '' : '\nTab 3 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
@@ -576,7 +576,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
         textDirection: TextDirection.ltr,
         isSelected: true,
         hasSelectedState: true,
@@ -605,7 +605,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
@@ -620,7 +620,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
@@ -637,7 +637,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
@@ -651,7 +651,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasEnabledState: true,
