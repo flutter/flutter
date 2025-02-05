@@ -240,17 +240,6 @@ void main() {
           stdio.stdin.add('n');
           processManager.addCommands(<FakeCommand>[
             const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-            // we want merged upstream commit, not local working commit
-            FakeCommand(
-              command: const <String>['git', 'checkout', 'upstream/$candidateBranch'],
-              onRun: (_) {
-                final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
-                  ..createSync();
-                _initializeCiYamlFile(file);
-              },
-            ),
-            const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision1),
-            const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
             const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
             const FakeCommand(
               command: <String>['git', 'status', '--porcelain'],
@@ -266,10 +255,6 @@ void main() {
               ],
             ),
             const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
-            const FakeCommand(
-              command: <String>['git', 'status', '--porcelain'],
-              stdout: 'MM bin/internal/engine.version',
-            ),
             const FakeCommand(command: <String>['git', 'add', '--all']),
             const FakeCommand(
               command: <String>[
@@ -295,6 +280,7 @@ void main() {
 
           final pb.ConductorState finalState = readStateFromFile(fileSystem.file(stateFile));
 
+          expect(processManager, hasNoRemainingExpectations);
           expect(
             stdio.stdout,
             contains(
