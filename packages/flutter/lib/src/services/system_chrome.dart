@@ -14,12 +14,12 @@ import 'package:flutter/foundation.dart';
 import 'binding.dart';
 import 'system_channels.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 export 'dart:ui' show Brightness, Color;
 
 export 'binding.dart' show SystemUiChangeCallback;
-
-// Examples can assume:
-// late BuildContext context;
 
 /// Specifies a particular device orientation.
 ///
@@ -649,15 +649,16 @@ abstract final class SystemChrome {
   ///
   /// To imperatively set the style of the system overlays, use [SystemChrome.setSystemUIOverlayStyle].
   ///
-  /// The following example uses SystemChrome to set the status bar icon brightness based on system brightness.
+  /// {@tool snippet}
+  /// The following example uses SystemChrome to set the status bar icon brightness.
   /// ```dart
-  /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
   ///   SystemChrome.setSystemUIOverlayStyle(
-  ///     SystemUiOverlayStyle(
-  ///       statusBarIconBrightness: brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+  ///     const SystemUiOverlayStyle(
+  ///       statusBarIconBrightness: Brightness.dark
   ///       ),
   ///     );
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
