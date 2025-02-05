@@ -108,9 +108,9 @@ mixin RendererBinding
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.debugPaintBaselinesEnabled.name,
         getter: () async => debugPaintBaselinesEnabled,
-        setter: (bool value) {
+        setter: (bool value) async {
           if (debugPaintBaselinesEnabled == value) {
-            return Future<void>.value();
+            return;
           }
           debugPaintBaselinesEnabled = value;
           // We don't want to block the vm service response on the frame
