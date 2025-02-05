@@ -1760,6 +1760,7 @@ void main() {
                     TestSemantics(
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       label: 'Alert',
+                      role: SemanticsRole.dialog,
                       children: <TestSemantics>[
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
