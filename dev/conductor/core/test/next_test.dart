@@ -24,7 +24,6 @@ void main() {
   const String workingBranch = 'cherrypicks-$candidateBranch';
   const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
   const String revision3 = 'ffffffffffffffffffffffffffffffffffffffff';
-  const String revision4 = '280e23318a0d8341415c66aa32581352a421d974';
   const String releaseVersion = '1.2.0-3.0.pre';
   const String releaseChannel = 'beta';
   const String stateFile = '/state-file.json';
