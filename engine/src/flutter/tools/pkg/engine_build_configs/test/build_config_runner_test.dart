@@ -827,7 +827,7 @@ FakeProcessManager _fakeProcessManager({
   return FakeProcessManager(
     canRun: canRun ?? (Object? exe, {String? workingDirectory}) => true,
     onRun:
-        (List<String> cmd) => switch (cmd) {
+        (FakeCommandLogEntry entry) => switch (entry.command) {
           _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
         },
     onStart:
