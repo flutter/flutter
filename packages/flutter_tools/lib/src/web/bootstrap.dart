@@ -547,8 +547,8 @@ String generateDDCLibraryBundleMainModule({
     dwdsCalledMain = true;
     runMainWhenBoth();
   }
-  // Should be called by the bootstrap script set up within `loadConfig` once
-  // all the scripts have been loaded.
+  // Should be called by $onLoadEndBootstrap once all the scripts have been
+  // loaded.
   window.$_onLoadEndCallback = function() {
     dartSrcsLoaded = true;
     runMainWhenBoth();
