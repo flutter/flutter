@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 part of dart.ui;
 
-
 /// Helper functions for Dart Plugin Registrants.
 abstract final class DartPluginRegistrant {
   static bool _wasInitialized = false;

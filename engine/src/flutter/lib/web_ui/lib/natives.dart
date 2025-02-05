@@ -4,7 +4,6 @@
 
 part of ui;
 
-
 /// Helper functions for Dart Plugin Registrants.
 class DartPluginRegistrant {
   /// Makes sure the that the Dart Plugin Registrant has been called for this

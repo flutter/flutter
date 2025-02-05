@@ -11,8 +11,7 @@ import 'package:path/path.dart' as pathlib;
 import 'package:skia_gold_client/skia_gold_client.dart';
 import 'package:test_api/backend.dart' as hack;
 import 'package:test_core/src/executable.dart' as test;
-import 'package:test_core/src/runner/hack_register_platform.dart'
-    as hack;
+import 'package:test_core/src/runner/hack_register_platform.dart' as hack;
 
 import '../browser.dart';
 import '../common.dart';

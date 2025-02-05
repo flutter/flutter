@@ -55,21 +55,13 @@ class RouteConfiguration {
     ),
     Path(
       r'^' + rally_routes.homeRoute,
-      (BuildContext context, String? match) => StudyWrapper(
-        study: DeferredWidget(
-          rally.loadLibrary,
-          () => rally.RallyApp(),
-        ),
-      ),
+      (BuildContext context, String? match) =>
+          StudyWrapper(study: DeferredWidget(rally.loadLibrary, () => rally.RallyApp())),
     ),
     Path(
       r'^' + shrine_routes.homeRoute,
-      (BuildContext context, String? match) => StudyWrapper(
-        study: DeferredWidget(
-          shrine.loadLibrary,
-          () => shrine.ShrineApp(),
-        ),
-      ),
+      (BuildContext context, String? match) =>
+          StudyWrapper(study: DeferredWidget(shrine.loadLibrary, () => shrine.ShrineApp())),
     ),
     Path(
       r'^' + crane_routes.defaultRoute,
@@ -84,10 +76,7 @@ class RouteConfiguration {
     Path(
       r'^' + fortnightly_routes.defaultRoute,
       (BuildContext context, String? match) => StudyWrapper(
-        study: DeferredWidget(
-          fortnightly.loadLibrary,
-          () => fortnightly.FortnightlyApp(),
-        ),
+        study: DeferredWidget(fortnightly.loadLibrary, () => fortnightly.FortnightlyApp()),
       ),
     ),
     Path(

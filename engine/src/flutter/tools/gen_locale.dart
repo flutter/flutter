@@ -11,7 +11,6 @@
 // this script (the first set for _canonicalizeLanguageCode and the second set
 // for _canonicalizeRegionCode).
 
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
