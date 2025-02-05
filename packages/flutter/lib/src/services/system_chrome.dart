@@ -14,9 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'binding.dart';
 import 'system_channels.dart';
 
-// Examples can assume:
-// late BuildContext context;
-
 export 'dart:ui' show Brightness, Color;
 
 export 'binding.dart' show SystemUiChangeCallback;
