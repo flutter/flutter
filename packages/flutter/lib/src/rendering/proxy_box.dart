@@ -8,6 +8,7 @@
 /// @docImport 'sliver.dart';
 library;
 
+import 'dart:math';
 import 'dart:ui' as ui show Color, Gradient, Image, ImageFilter;
 
 import 'package:flutter/animation.dart';
@@ -260,7 +261,15 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedHeight && _additionalConstraints.hasTightHeight) {
       return _additionalConstraints.minHeight;
     }
-    final double height = super.computeMinIntrinsicHeight(width);
+
+    // TODO: Verify this logic is correct
+    // TODO: Write tests
+    // TODO: Clean up this logic to make readable
+    final double measuredWidth = switch (_additionalConstraints.minWidth) {
+      final double minWidth when minWidth > width => _additionalConstraints.maxWidth,
+      _ => min(_additionalConstraints.maxWidth, width),
+    };
+    final double height = super.computeMinIntrinsicHeight(measuredWidth);
     assert(height.isFinite);
     if (!_additionalConstraints.hasInfiniteHeight) {
       return _additionalConstraints.constrainHeight(height);
@@ -273,7 +282,14 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedHeight && _additionalConstraints.hasTightHeight) {
       return _additionalConstraints.minHeight;
     }
-    final double height = super.computeMaxIntrinsicHeight(width);
+    // TODO: Verify this logic is correct
+    // TODO: Write tests
+    // TODO: Clean up this logic to make readable
+    final double measuredWidth = switch (_additionalConstraints.maxWidth) {
+      final double maxWidth when maxWidth < width => _additionalConstraints.maxWidth,
+      _ => width,
+    };
+    final double height = super.computeMaxIntrinsicHeight(measuredWidth);
     assert(height.isFinite);
     if (!_additionalConstraints.hasInfiniteHeight) {
       return _additionalConstraints.constrainHeight(height);
