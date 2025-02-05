@@ -108,24 +108,6 @@ void TextContents::ComputeVertexData(
     Scalar rounded_scale = TextFrame::RoundScaledFontSize(scale);
     FontGlyphAtlas* font_atlas = nullptr;
 
-    // Adjust glyph position based on the subpixel rounding
-    // used by the font.
-    // Point subpixel_adjustment(0.5, 0.5);
-    // switch (font.GetAxisAlignment()) {
-    //   case AxisAlignment::kNone:
-    //     break;
-    //   case AxisAlignment::kX:
-    //     subpixel_adjustment.x = 0.125;
-    //     break;
-    //   case AxisAlignment::kY:
-    //     subpixel_adjustment.y = 0.125;
-    //     break;
-    //   case AxisAlignment::kAll:
-    //     subpixel_adjustment.x = 0.125;
-    //     subpixel_adjustment.y = 0.125;
-    //     break;
-    // }
-
     Point screen_offset = (entity_transform * Point(0, 0));
     for (const TextRun::GlyphPosition& glyph_position :
          run.GetGlyphPositions()) {
