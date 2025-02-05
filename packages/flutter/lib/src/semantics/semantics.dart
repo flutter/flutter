@@ -2050,8 +2050,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   ///  * [elevation], the actual elevation of this [SemanticsNode].
   @Deprecated(
-    'This was caches for internal calculation and is no longer needed. '
-    'This feature was deprecated after v3.27.0-0.0.pre.',
+    'This was a cache for internal calculations and is no longer needed. '
+    'This feature was deprecated after v3.29.0-0.0.pre.',
   )
   double? elevationAdjustment;
 
@@ -2611,6 +2611,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///  * [thickness], which describes how much space in z-direction this
   ///    [SemanticsNode] occupies starting at this [elevation].
   ///  * [elevationAdjustment], which has been used to calculate this value.
+  @Deprecated(
+    'This was a feature added for 3D rendering, but the feature was deprecated. '
+    'This feature was deprecated after v3.29.0-0.0.pre.',
+  )
   double get elevation => _elevation;
   double _elevation = _kEmptyConfig.elevation;
 
@@ -4889,6 +4893,10 @@ class SemanticsConfiguration {
 
   /// The elevation in z-direction at which the owning [RenderObject] is
   /// located relative to its parent.
+  @Deprecated(
+    'This was a feature added for 3D rendering, but the feature was deprecated. '
+    'This feature was deprecated after v3.29.0-0.0.pre.',
+  )
   double get elevation => _elevation;
   double _elevation = 0.0;
   set elevation(double value) {

@@ -1356,6 +1356,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// [RenderObject.scheduleInitialSemantics] has been called.
   ///
   /// See [RendererBinding] for an example of how this function is used.
+  // See [_RenderObjectSemantics]'s documentation for detailed explanations on
+  // what this method does
   void flushSemantics() {
     if (_semanticsOwner == null) {
       return;
@@ -1379,10 +1381,10 @@ base class PipelineOwner with DiagnosticableTreeMixin {
               .toList()
             ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
       _nodesNeedingSemantics.clear();
+      if (!kReleaseMode) {
+        FlutterTimeline.startSync('Semantics.updateChildren');
+      }
       for (final RenderObject node in nodesToProcess) {
-        if (!kReleaseMode) {
-          FlutterTimeline.startSync('Semantics.updateChildren');
-        }
         if (node._semantics.parentDataDirty) {
           // This node is either blocked by a sibling
           // (via SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes)
@@ -1395,9 +1397,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           continue;
         }
         node._semantics.updateChildren();
-        if (!kReleaseMode) {
-          FlutterTimeline.finishSync();
-        }
+      }
+      if (!kReleaseMode) {
+        FlutterTimeline.finishSync();
       }
 
       assert(() {
@@ -1408,32 +1410,32 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         return true;
       }());
 
+      if (!kReleaseMode) {
+        FlutterTimeline.startSync('Semantics.ensureGeometry');
+      }
       for (final RenderObject node in nodesToProcess) {
-        if (!kReleaseMode) {
-          FlutterTimeline.startSync('Semantics.ensureGeometry');
-        }
         if (node._semantics.parentDataDirty) {
           // same as above.
           continue;
         }
         node._semantics.ensureGeometry();
-        if (!kReleaseMode) {
-          FlutterTimeline.finishSync();
-        }
+      }
+      if (!kReleaseMode) {
+        FlutterTimeline.finishSync();
       }
 
+      if (!kReleaseMode) {
+        FlutterTimeline.startSync('Semantics.ensureSemanticsNode');
+      }
       for (final RenderObject node in nodesToProcess.reversed) {
-        if (!kReleaseMode) {
-          FlutterTimeline.startSync('Semantics.ensureSemanticsNode');
-        }
         if (node._semantics.parentDataDirty) {
           // same as above.
           continue;
         }
         node._semantics.ensureSemanticsNode();
-        if (!kReleaseMode) {
-          FlutterTimeline.finishSync();
-        }
+      }
+      if (!kReleaseMode) {
+        FlutterTimeline.finishSync();
       }
 
       _semanticsOwner!.sendSemanticsUpdate();
@@ -3736,7 +3738,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// Only valid in debug and profile mode. In release builds, always returns
   /// null.
   SemanticsNode? get debugSemantics {
-    // The _semantics.built is not true, the semantics node is an old cache and
+    // If _semantics.built is not true, the semantics node is an old cache and
     // is not on the semantics tree.
     if (!kReleaseMode && _semantics.built) {
       return _semantics.cachedSemanticsNode;
@@ -4576,8 +4578,6 @@ final class _SemanticsParentData {
   }
 }
 
-typedef _SemanticsConfigurationUpdater = void Function(SemanticsConfiguration config);
-
 /// A wrapper class that handles the life cycle of the [SemanticsConfiguration]
 /// of a [RenderObject].
 ///
@@ -4634,7 +4634,7 @@ class _SemanticsConfigurationProvider {
   ///
   /// This does not change the [original], and the change reflects in
   /// [effective].
-  void updateConfig(_SemanticsConfigurationUpdater callback) {
+  void updateConfig(ValueSetter<SemanticsConfiguration> callback) {
     if (!_isEffectiveConfigWritable) {
       _effectiveConfiguration = original.copy();
       _isEffectiveConfigWritable = true;
@@ -4716,20 +4716,22 @@ typedef _MergeUpAndSiblingMergeGroups =
 ///
 /// ## A high level summary
 ///
-/// The flushSemantics calls the [updateChildren] to build/update a tree of
-/// [_RenderObjectSemantics] by querying dirty RenderObjects about their
-/// [SemanticsConfiguration] and updating the _RenderObjectSemantics of the
-/// render objects according to these information. While doing that, the
-/// [updateChildren] also decide what _RenderObjectSemantics will have their own
-/// SemanticsNodes later on. After that, flushSemantics calls the
-/// [ensureGeometry] to calculate the geometries for these
-/// _RenderObjectSemantics. Finally, [ensureSemanticsNode] compiling these
-/// _RenderObjectSemantics into the actual SemanticsNodes that form the
-/// semantics tree.
+/// The [PipelineOwner.flushSemantics] calls the [updateChildren] to
+/// build/update a tree of [_RenderObjectSemantics] by querying dirty
+/// RenderObjects about their [SemanticsConfiguration] and updating the
+/// _RenderObjectSemantics of the render objects according to these information.
+/// While doing that, [updateChildren] also decide what
+/// _RenderObjectSemantics will have their own SemanticsNode later on.
+/// After that, [PipelineOwner.flushSemantics] calls [ensureGeometry] to
+/// calculate the geometries for these _RenderObjectSemantics. Finally,
+/// [ensureSemanticsNode] compiles these _RenderObjectSemantics into the actual
+/// SemanticsNodes that form the semantics tree.
 ///
 /// ## Steps Breakdown
 ///
-/// The _RenderObjectSemantics tree is compiled in four phases.
+/// The _RenderObjectSemantics tree is compiled in four phases. Phase 1 and 2
+/// are done in [updateChildren], Phase 3 is done in [ensureGeometry], and phase
+/// 4 is done in [ensureSemanticsNode].
 ///
 /// ### Phase 1
 ///
@@ -4738,19 +4740,18 @@ typedef _MergeUpAndSiblingMergeGroups =
 ///
 /// They are stored in [mergeUp] and [siblingMergeGroups] and should mimic
 /// rendering object tree closely but only contain [_RenderObjectSemantics] that
-/// contributes to semantics tree. i.e.
-/// [contributesToSemanticsTree] is true.
+/// contributes to semantics tree. i.e. where [contributesToSemanticsTree] is
+/// true.
 ///
 /// ### Phase 2
 ///
 /// Merge all fragments from [mergeUp] and decide which [_RenderObjectSemantics]
-/// should form a node. i.e. [shouldFormSemanticsNode] is true. Stores the
+/// should form a node, i.e. [shouldFormSemanticsNode] is true. Stores the
 /// [_RenderObjectSemantics] that should form a node with elevation adjustments
 /// into [_childrenAndElevationAdjustments].
 ///
 /// At this point, walking the [_childrenAndElevationAdjustments] forms a tree
-/// that exactly resemble the resulting semantics node tree except for sibling
-/// nodes.
+/// that exactly resemble the resulting semantics node tree.
 ///
 /// ### Phase 3
 ///
@@ -4762,12 +4763,9 @@ typedef _MergeUpAndSiblingMergeGroups =
 /// Walks the [_childrenAndElevationAdjustments] and produce semantics node for
 /// each [_RenderObjectSemantics] plus the sibling nodes.
 ///
-/// Since phase 2, 3, 4 each depends on previous step to finished updating the
-/// the entire _RenderObjectSemantics tree. All three of them require separate
-/// tree walk.
-///
-/// Phase 1 and 2 are done in [updateChildren], Phase 3 is done in
-/// [ensureGeometry], and phase 4 is done in [ensureSemanticsNode].
+/// Phase 2, 3, 4 each depends on previous step to finished updating the the
+/// entire _RenderObjectSemantics tree. All three of them require separate tree
+/// walk.
 class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeMixin {
   _RenderObjectSemantics(this.renderObject)
     : configProvider = _SemanticsConfigurationProvider(renderObject);
@@ -4936,7 +4934,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// rendering subtree and forms a [_RenderObjectSemantics] tree where children
   /// are stored in [_childrenAndElevationAdjustments].
   ///
-  /// This method does the following:
+  /// This method does the the phase 1 and 2 of the four phases documented on
+  /// [_RenderObjectSemantics].
   ///
   /// Gather all the merge up _RenderObjectSemantics(s) by walking the rendering
   /// object tree.
@@ -5194,6 +5193,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Updates the [geometry] for this [_RenderObjectSemantics]s and its subtree
   /// in [_childrenAndElevationAdjustments].
   ///
+  /// This method does the the phase 3 of the four phases documented on
+  /// [_RenderObjectSemantics].
+  ///
   /// This method is short-circuited if the subtree geometry won't
   /// be affect after the update. (e.g. the size doesn't change, or new clip
   /// rect doesn't clip the content).
@@ -5242,6 +5244,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Ensures the semantics nodes from this render object semantics subtree are
   /// generated and up to date.
   ///
+  /// This method does the the phase 4 of the four phases documented on
+  /// [_RenderObjectSemantics].
+  ///
   /// This can only be called if the owning rendering object is a semantics
   /// boundary. For non boundary rendering objects, they require semantics
   /// information from both their parent and child rendering objects to update
@@ -5262,10 +5267,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   /// Builds the semantics node and its semantics node subtree.
   ///
-  /// This method will in turn call the [_buildSemanticsSubtree].
+  /// This method will in turn call [_buildSemanticsSubtree].
   ///
-  /// This method will short-circuit itself if the [cachedSemanticsNode] is
-  /// is already up-to-date.
+  /// This method will short-circuit itself if [cachedSemanticsNode] is
+  /// already up-to-date.
   void _buildSemantics({required Set<int> usedSemanticsIds}) {
     assert(shouldFormSemanticsNode);
     if (cachedSemanticsNode != null) {
