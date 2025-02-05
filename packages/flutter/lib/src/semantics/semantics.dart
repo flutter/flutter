@@ -1526,11 +1526,27 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// Overrides the default accessibility hints provided by the platform.
   ///
-  /// The [hintOverrides] property allows to specify custom accessibility
-  /// hints for screen readers and assistive technologies.
+  /// This [hintOverrides] property does not affect how the platform processes hints;
+  /// it only sets the custom text that will be read by assistive technology.
   ///
-  /// This property does not affect how the platform processes hints; it only sets
-  /// the custom text that will be read by assistive technology.
+  /// On Android, these overrides replace the default hints for semantics nodes
+  /// with tap or long-press actions. For example, if [SemanticsHintOverrides.onTapHint]
+  /// is provided, instead of saying `Double tap to activate`, the screen reader
+  /// will say `Double tap to <onTapHint>`.
+  ///
+  /// On iOS, this property is ignored, and default platform behavior applies.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// Semantics.fromProperties(
+  ///  properties: SemanticsProperties(
+  ///    hintOverrides: SemanticsHintOverrides(
+  ///      onTapHint: 'open settings',
+  ///    ),
+  ///  ),
+  ///  child: Text('button'),
+  ///),
+  /// ```
   final SemanticsHintOverrides? hintOverrides;
 
   /// The reading direction of the [label], [value], [increasedValue],
