@@ -702,9 +702,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
     final double persistentHeight =
-        _kNavBarPersistentHeight +
-        bottomHeight +
-        (CupertinoSheetRoute.hasParentSheet(context) ? 0.0 : MediaQuery.paddingOf(context).top);
+        _kNavBarPersistentHeight + bottomHeight + MediaQuery.paddingOf(context).top;
     final double largeHeight = persistentHeight + _kNavBarLargeTitleHeightExtension;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
@@ -1598,9 +1596,7 @@ class _PersistentNavigationBar extends StatelessWidget {
     }
 
     return SizedBox(
-      height:
-          _kNavBarPersistentHeight +
-          (CupertinoSheetRoute.hasParentSheet(context) ? 0.0 : MediaQuery.paddingOf(context).top),
+      height: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
       child: SafeArea(
         top: !CupertinoSheetRoute.hasParentSheet(context),
         bottom: false,
