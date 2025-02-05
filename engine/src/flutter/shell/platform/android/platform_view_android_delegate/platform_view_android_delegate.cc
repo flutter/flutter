@@ -44,12 +44,6 @@ PlatformViewAndroidDelegate::PlatformViewAndroidDelegate(
 void PlatformViewAndroidDelegate::UpdateSemantics(
     const flutter::SemanticsNodeUpdates& update,
     const flutter::CustomAccessibilityActionUpdates& actions) {
-  constexpr size_t kBytesPerNode = 49 * sizeof(int32_t);
-  constexpr size_t kBytesPerChild = sizeof(int32_t);
-  constexpr size_t kBytesPerCustomAction = sizeof(int32_t);
-  constexpr size_t kBytesPerAction = 4 * sizeof(int32_t);
-  constexpr size_t kBytesPerStringAttribute = 4 * sizeof(int32_t);
-
   {
     size_t num_bytes = 0;
     for (const auto& value : update) {
