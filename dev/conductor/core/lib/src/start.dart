@@ -66,12 +66,6 @@ class StartCommand extends Command<void> {
       hide: true,
     );
     argParser.addOption(
-      kEngineUpstreamOption,
-      defaultsTo: EngineRepository.defaultUpstream,
-      help: 'Configurable Engine repo upstream remote. Primarily for testing.',
-      hide: true,
-    );
-    argParser.addOption(
       kStateOption,
       defaultsTo: defaultPath,
       help: 'Path to persistent state file. Defaults to $defaultPath',
@@ -119,9 +113,6 @@ class StartCommand extends Command<void> {
           allowNull: true,
         ) ??
         'git@github.com:$githubUsername/flutter.git';
-    final String engineUpstream =
-        getValueFromEnvOrArgs(kEngineUpstreamOption, argumentResults, platform.environment)!;
-    final String engineMirror = 'git@github.com:$githubUsername/engine.git';
     final String candidateBranch =
         getValueFromEnvOrArgs(kCandidateOption, argumentResults, platform.environment)!;
     final String releaseChannel =
@@ -151,8 +142,6 @@ class StartCommand extends Command<void> {
       candidateBranch: candidateBranch,
       checkouts: checkouts,
       dartRevision: dartRevision,
-      engineMirror: engineMirror,
-      engineUpstream: engineUpstream,
       conductorVersion: conductorVersion,
       frameworkMirror: frameworkMirror,
       frameworkUpstream: frameworkUpstream,
@@ -183,8 +172,6 @@ class StartContext extends Context {
   StartContext({
     required this.candidateBranch,
     required this.dartRevision,
-    required this.engineMirror,
-    required this.engineUpstream,
     required this.frameworkMirror,
     required this.frameworkUpstream,
     required this.conductorVersion,
@@ -196,12 +183,6 @@ class StartContext extends Context {
     this.force = false,
     this.versionOverride,
   }) : git = Git(processManager),
-       engine = EngineRepository(
-         checkouts,
-         initialRef: 'upstream/$candidateBranch',
-         upstreamRemote: Remote.upstream(engineUpstream),
-         mirrorRemote: Remote.mirror(engineMirror),
-       ),
        framework = FrameworkRepository(
          checkouts,
          initialRef: 'upstream/$candidateBranch',
@@ -211,8 +192,6 @@ class StartContext extends Context {
 
   final String candidateBranch;
   final String? dartRevision;
-  final String engineMirror;
-  final String engineUpstream;
   final String frameworkMirror;
   final String frameworkUpstream;
   final String conductorVersion;
@@ -225,7 +204,6 @@ class StartContext extends Context {
   /// If validations should be overridden.
   final bool force;
 
-  final EngineRepository engine;
   final FrameworkRepository framework;
 
   /// Determine which part of the version to increment in the next release.

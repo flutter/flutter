@@ -117,7 +117,6 @@ void main() {
           expect(context.frameworkUpstream, FrameworkRepository.defaultUpstream);
           expect(context.frameworkMirror, contains(githubUsername));
           expect(context.frameworkMirror, contains('/flutter.git'));
-          expect(context.engineUpstream, EngineRepository.defaultUpstream);
         });
 
         test('overridden mirror', () async {

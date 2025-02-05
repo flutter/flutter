@@ -775,45 +775,45 @@ class HostFrameworkRepository extends FrameworkRepository {
   }
 }
 
-class EngineRepository extends Repository {
-  EngineRepository(
-    this.checkouts, {
-    super.name = 'engine',
-    String super.initialRef = EngineRepository.defaultBranch,
-    super.upstreamRemote = const Remote.upstream(EngineRepository.defaultUpstream),
-    super.localUpstream,
-    super.previousCheckoutLocation,
-    super.mirrorRemote,
-    List<String>? additionalRequiredLocalBranches,
-  }) : super(
-         fileSystem: checkouts.fileSystem,
-         parentDirectory: checkouts.directory,
-         platform: checkouts.platform,
-         processManager: checkouts.processManager,
-         stdio: checkouts.stdio,
-         requiredLocalBranches: additionalRequiredLocalBranches ?? const <String>[],
-       );
-
-  final Checkouts checkouts;
-
-  static const String defaultUpstream = 'git@github.com:flutter/engine.git';
-  static const String defaultBranch = 'main';
-
-  /// Update the `dart_revision` entry in the DEPS file.
-  Future<void> updateDartRevision(String newRevision, {@visibleForTesting File? depsFile}) =>
-      _updateDartRevision(this, newRevision, depsFile: depsFile);
-
-  @override
-  Future<Repository> cloneRepository(String? cloneName) async {
-    assert(localUpstream);
-    cloneName ??= 'clone-of-$name';
-    return EngineRepository(
-      checkouts,
-      name: cloneName,
-      upstreamRemote: Remote.upstream('file://${(await checkoutDirectory).path}/'),
-    );
-  }
-}
+//class EngineRepository extends Repository {
+//  EngineRepository(
+//    this.checkouts, {
+//    super.name = 'engine',
+//    String super.initialRef = EngineRepository.defaultBranch,
+//    super.upstreamRemote = const Remote.upstream(EngineRepository.defaultUpstream),
+//    super.localUpstream,
+//    super.previousCheckoutLocation,
+//    super.mirrorRemote,
+//    List<String>? additionalRequiredLocalBranches,
+//  }) : super(
+//         fileSystem: checkouts.fileSystem,
+//         parentDirectory: checkouts.directory,
+//         platform: checkouts.platform,
+//         processManager: checkouts.processManager,
+//         stdio: checkouts.stdio,
+//         requiredLocalBranches: additionalRequiredLocalBranches ?? const <String>[],
+//       );
+//
+//  final Checkouts checkouts;
+//
+//  static const String defaultUpstream = 'git@github.com:flutter/engine.git';
+//  static const String defaultBranch = 'main';
+//
+//  /// Update the `dart_revision` entry in the DEPS file.
+//  Future<void> updateDartRevision(String newRevision, {@visibleForTesting File? depsFile}) =>
+//      _updateDartRevision(this, newRevision, depsFile: depsFile);
+//
+//  @override
+//  Future<Repository> cloneRepository(String? cloneName) async {
+//    assert(localUpstream);
+//    cloneName ??= 'clone-of-$name';
+//    return EngineRepository(
+//      checkouts,
+//      name: cloneName,
+//      upstreamRemote: Remote.upstream('file://${(await checkoutDirectory).path}/'),
+//    );
+//  }
+//}
 
 /// An enum of all the repositories that the Conductor supports.
 enum RepositoryType { framework, engine }
