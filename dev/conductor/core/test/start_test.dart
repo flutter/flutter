@@ -337,13 +337,6 @@ void main() {
         const String candidateBranch = 'flutter-1.2-candidate.1';
         const String versionOverride = '42.0.0-42.0.pre';
 
-        final Directory engine = fileSystem
-            .directory(checkoutsParentDirectory)
-            .childDirectory('flutter_conductor_checkouts')
-            .childDirectory('engine');
-
-        final File depsFile = engine.childFile('DEPS');
-
         final List<FakeCommand> commands = <FakeCommand>[
           // clone and rev-parse framework
           FakeCommand(
@@ -579,7 +572,6 @@ void main() {
       test('StartContext gets framework checkout directory after run', () async {
         stdio.stdin.add('y');
         const String revision2 = 'def789';
-        const String revision3 = '123abc';
         const String branchPointRevision = 'deadbeef';
         const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
         const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
