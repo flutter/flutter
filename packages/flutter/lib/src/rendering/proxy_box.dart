@@ -235,7 +235,14 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedWidth && _additionalConstraints.hasTightWidth) {
       return _additionalConstraints.minWidth;
     }
-    final double width = super.computeMinIntrinsicWidth(height);
+    // TODO: Verify this logic is correct
+    // TODO: Write tests
+    // TODO: Clean up this logic to make readable
+    final double measuredHeight = switch (_additionalConstraints.minHeight) {
+      final double minHeight when minHeight > height => minHeight,
+      _ => min(_additionalConstraints.maxHeight, height),
+    };
+    final double width = super.computeMinIntrinsicWidth(measuredHeight);
     assert(width.isFinite);
     if (!_additionalConstraints.hasInfiniteWidth) {
       return _additionalConstraints.constrainWidth(width);
@@ -248,7 +255,14 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedWidth && _additionalConstraints.hasTightWidth) {
       return _additionalConstraints.minWidth;
     }
-    final double width = super.computeMaxIntrinsicWidth(height);
+    // TODO: Verify this logic is correct
+    // TODO: Write tests
+    // TODO: Clean up this logic to make readable
+    final double measuredHeight = switch (_additionalConstraints.maxHeight) {
+      final double maxHeight when maxHeight < height => maxHeight,
+      _ => height,
+    };
+    final double width = super.computeMaxIntrinsicWidth(measuredHeight);
     assert(width.isFinite);
     if (!_additionalConstraints.hasInfiniteWidth) {
       return _additionalConstraints.constrainWidth(width);
