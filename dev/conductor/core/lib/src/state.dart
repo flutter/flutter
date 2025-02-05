@@ -139,43 +139,6 @@ String presentPhases(ReleasePhase currentPhase) {
 
 String phaseInstructions(pb.ConductorState state) {
   switch (state.currentPhase) {
-    case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
-      if (state.engine.cherrypicks.isEmpty) {
-        return <String>[
-          'There are no engine cherrypicks, so issue `conductor next` to continue',
-          'to the next step.',
-          '\n',
-          '******************************************************',
-          '* Create a new entry in http://go/release-eng-retros *',
-          '******************************************************',
-        ].join('\n');
-      }
-      return <String>[
-        'You must now manually apply the following engine cherrypicks to the checkout',
-        'at ${state.engine.checkoutPath} in order:',
-        for (final pb.Cherrypick cherrypick in state.engine.cherrypicks)
-          '\t${cherrypick.trunkRevision}',
-        'See ${globals.kReleaseDocumentationUrl} for more information.',
-      ].join('\n');
-    case ReleasePhase.VERIFY_ENGINE_CI:
-      if (!requiresEnginePR(state)) {
-        return 'You must verify engine CI has passed: '
-            '${luciConsoleLink(state.engine.candidateBranch, 'engine')}';
-      }
-      // User's working branch was pushed to their mirror, but a PR needs to be
-      // opened on GitHub.
-      final String newPrLink = globals.getNewPrLink(
-        userName: githubAccount(state.engine.mirror.url),
-        repoName: 'engine',
-        state: state,
-      );
-      final String consoleLink = luciConsoleLink(state.engine.candidateBranch, 'engine');
-      return <String>[
-        'Your working branch ${state.engine.workingBranch} was pushed to your mirror.',
-        'You must now open a pull request at $newPrLink, verify pre-submit CI',
-        'builds on your engine pull request are successful, merge your pull request,',
-        'validate post-submit CI at $consoleLink.',
-      ].join('\n');
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       final List<pb.Cherrypick> outstandingCherrypicks =
           state.framework.cherrypicks.where((pb.Cherrypick cp) {
@@ -263,8 +226,6 @@ ReleasePhase getNextPhase(ReleasePhase currentPhase) {
   switch (currentPhase) {
     case ReleasePhase.PUBLISH_VERSION:
       return ReleasePhase.VERIFY_RELEASE;
-    case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
-    case ReleasePhase.VERIFY_ENGINE_CI:
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
     case ReleasePhase.VERIFY_RELEASE:
     case ReleasePhase.RELEASE_COMPLETED:
