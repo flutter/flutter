@@ -1508,7 +1508,7 @@ void main() {
     // Verify that the middle item is visible.
     expect(find.text('Item 10'), findsOneWidget);
     expect(realOffset(), controller.offset);
-    
+
     // Scroll to the first item.
     controller.animateToItem(
       0,
