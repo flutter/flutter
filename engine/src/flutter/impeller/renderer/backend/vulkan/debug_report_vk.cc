@@ -133,6 +133,15 @@ DebugReportVK::Result DebugReportVK::OnDebugCallback(
     return Result::kContinue;
   }
 
+  // This warning happens when running tests that use SwiftShader.
+  // Some SPIR-V shaders request the UniformAndStorageBuffer16BitAccess
+  // capability, but SwiftShader does not support it.
+  if (data->pMessageIdName != nullptr &&
+      strcmp(data->pMessageIdName,
+             "VUID-VkShaderModuleCreateInfo-pCode-08740") == 0) {
+    return Result::kContinue;
+  }
+
   std::vector<std::pair<std::string, std::string>> items;
 
   items.emplace_back("Severity", vk::to_string(severity));
