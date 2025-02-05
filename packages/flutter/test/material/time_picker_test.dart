@@ -177,14 +177,17 @@ void main() {
     await mediaQueryBoilerplate(
       tester,
       use24HourFormat: true,
-      materialType: MaterialType.material2,
+      materialType: MaterialType.material3,
     );
     expect(find.text(amString), findsNothing);
     expect(find.text(pmString), findsNothing);
 
     // When use24HourFormat: true, hours should be displayed in 24 hour format
-    final List<String> labels00To22 = List<String>.generate(12, (int index) {
-      return (index * 2).toString().padLeft(2, '0');
+    final List<String> labels00To23 = List<String>.generate(24, (int index) {
+      if (index == 0) {
+        return '00';
+      }
+      return index.toString();
     });
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
@@ -192,14 +195,14 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     // ignore: avoid_dynamic_calls
-    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
+    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
 
     // ignore: avoid_dynamic_calls
     final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       // ignore: avoid_dynamic_calls
       selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
-      labels00To22,
+      labels00To23,
     );
   });
 
@@ -2322,7 +2325,7 @@ Future<void> mediaQueryBoilerplate(
                               errorInvalidText: errorInvalidText,
                               onEntryModeChanged: onEntryModeChange,
                               orientation: orientation,
-                              use24HourFormat: use24HourFormat,
+                              use24HourFormat: use24HourFormat ?? false,
                             );
                           },
                           child: const Text('X'),
