@@ -409,7 +409,6 @@ class ModuleTest {
 Future<void> main() async {
   await task(
     combine(<TaskFunction>[
-      // ignore: avoid_redundant_argument_values
       ModuleTest(gradleVersion: '8.7').call,
     ]),
   );

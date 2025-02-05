@@ -648,7 +648,7 @@ void main() {
         expect(
           (render as dynamic).orientation,
           Orientation.portrait,
-        ); // ignore: avoid_dynamic_calls
+        );
 
         // landscape
         tester.view.physicalSize = const Size(800.5, 800);

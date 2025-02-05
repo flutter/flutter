@@ -1038,7 +1038,6 @@ class Demos {
             buildRoute:
                 (_) => DeferredWidget(
                   cupertinoLoader,
-                  // ignore: prefer_const_constructors
                   () => cupertino_demos.CupertinoPickerDemo(),
                 ),
           ),
@@ -1058,7 +1057,6 @@ class Demos {
             buildRoute:
                 (_) => DeferredWidget(
                   cupertinoLoader,
-                  // ignore: prefer_const_constructors
                   () => cupertino_demos.CupertinoScrollbarDemo(),
                 ),
           ),

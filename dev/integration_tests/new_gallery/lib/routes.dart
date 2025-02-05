@@ -59,7 +59,7 @@ class RouteConfiguration {
         study: DeferredWidget(
           rally.loadLibrary,
           () => rally.RallyApp(),
-        ), // ignore: prefer_const_constructors
+        ),
       ),
     ),
     Path(
@@ -68,7 +68,7 @@ class RouteConfiguration {
         study: DeferredWidget(
           shrine.loadLibrary,
           () => shrine.ShrineApp(),
-        ), // ignore: prefer_const_constructors
+        ),
       ),
     ),
     Path(
@@ -76,7 +76,7 @@ class RouteConfiguration {
       (BuildContext context, String? match) => StudyWrapper(
         study: DeferredWidget(
           crane.loadLibrary,
-          () => crane.CraneApp(), // ignore: prefer_const_constructors
+          () => crane.CraneApp(),
           placeholder: const DeferredLoadingPlaceholder(name: 'Crane'),
         ),
       ),
@@ -86,14 +86,12 @@ class RouteConfiguration {
       (BuildContext context, String? match) => StudyWrapper(
         study: DeferredWidget(
           fortnightly.loadLibrary,
-          // ignore: prefer_const_constructors
           () => fortnightly.FortnightlyApp(),
         ),
       ),
     ),
     Path(
       r'^' + reply_routes.homeRoute,
-      // ignore: prefer_const_constructors
       (BuildContext context, String? match) =>
           const StudyWrapper(study: reply.ReplyApp(), hasBottomNavBar: true),
     ),
