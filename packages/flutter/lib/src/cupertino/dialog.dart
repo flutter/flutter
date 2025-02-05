@@ -371,10 +371,8 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   }
 
   Widget _buildBody(BuildContext context) {
-    final Color backgroundColor =
-        CupertinoDynamicColor.resolve(_kDialogColor, context);
-    final Color dividerColor =
-        CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kDialogColor, context);
+    final Color dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
     // Remove view padding here because the `Scrollbar` widget uses the view
     // padding as padding, which is unwanted.
     // https://github.com/flutter/flutter/issues/150544
@@ -390,9 +388,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
           final Widget? actionsSection = _buildActions();
           if (actionsSection == null) {
             return contentSection ??
-                const LimitedBox(
-                    maxWidth: 0,
-                    child: SizedBox(width: double.infinity, height: 0));
+                const LimitedBox(maxWidth: 0, child: SizedBox(width: double.infinity, height: 0));
           }
           final Widget scrolledActionsSection = _OverscrollBackground(
             color: backgroundColor,
@@ -403,19 +399,22 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
           }
           // It is observed on the simulator that the minimal height varies
           // depending on whether the device is in accessibility mode.
-          final double actionsMinHeight = _isInAccessibilityMode(context)
-              ? constraints.maxHeight / 2 + _kDividerThickness
-              : _kDialogActionsSectionMinHeight + _kDividerThickness;
+          final double actionsMinHeight =
+              _isInAccessibilityMode(context)
+                  ? constraints.maxHeight / 2 + _kDividerThickness
+                  : _kDialogActionsSectionMinHeight + _kDividerThickness;
           return _PriorityColumn(
             top: contentSection,
             bottom: Column(
               children: <Widget>[
                 SizedBox(
-                    width: double.infinity,
-                    child: _Divider(
-                        dividerColor: dividerColor,
-                        hiddenColor: backgroundColor,
-                        hidden: false)),
+                  width: double.infinity,
+                  child: _Divider(
+                    dividerColor: dividerColor,
+                    hiddenColor: backgroundColor,
+                    hidden: false,
+                  ),
+                ),
                 Flexible(child: scrolledActionsSection),
               ],
             ),
@@ -425,6 +424,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
