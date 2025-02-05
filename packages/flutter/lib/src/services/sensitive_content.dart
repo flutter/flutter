@@ -9,22 +9,21 @@ import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
 
-/// The level of sensitivity that content in a particular Flutter view
-/// contains.
+/// The level of sensitivity that content in a particular widget tree.
 ///
-/// There are only three levels and can be set on a Flutter view via a
+/// There are only three levels and can be set via a
 /// [SensitiveContent] widget. [ContentSensitivity.sensitive] is the most
-/// severe setting and if set on a view with a `SensitiveContent` widget,
-/// will cause the view to remain marked sensitive even if there are other
-/// `SensitiveContent` widget in the tree. [ContentSensitivity.autoSensitive]
-/// is the second most severe setting and will cause the view to remain marked
-/// auto-sensitive if there are only other auto-sensitive or not sensitive
+/// severe setting and if set with a `SensitiveContent` widget,
+/// will cause the tree to remain marked sensitive even if there are other
+/// `SensitiveContent` widgets in the tree. [ContentSensitivity.autoSensitive]
+/// is the second most severe setting and will cause the tree to remain marked
+/// auto-sensitive if there are either (1) no other [SensitiveContent] widgets in the tree or (2) there are only other auto-sensitive or not sensitive
 /// `SensitiveContent` widgets in the tree. [ContentSensitive.notSensitive]
-/// is the least severe setting and will cause the view to remain marked not
-/// sensitive as long as there are only other not sensitive `SensitiveContent`
+/// is the least severe setting and will cause the tree to remain marked not
+/// sensitive as long as there are (1) no other [SensitiveContent] widgets in the tree or (2) there are only other not sensitive `SensitiveContent`
 /// widgets in the tree. If there are no `SensitiveContent` widget in the tree,
-/// the default setting will be used. This could be set by a Flutter developer in
-/// the engine; otherwise, Android uses [ContentSensitivity.autoSensitive] by default.
+/// the default setting as queried from the embedding will be used. This could be
+/// set by a Flutter developer in native Android; otherwise, Android uses [ContentSensitivity.autoSensitive] by default.
 ///
 /// * See [SensitiveContent] for how to set a [ContentSensitivity] level
 ///   in order for sensitive content to be obscured when the Flutter screen
@@ -43,7 +42,7 @@ enum ContentSensitivity {
   // See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO.
   autoSensitive(id: 0),
 
-  /// The view displays sensitive content.
+  /// The widget tree contains sensitive content.
   ///
   /// When this level is set via a [SensitiveContent] widget, the windowx
   /// hosting the screen will be marked as sensitive during an active media
@@ -52,7 +51,7 @@ enum ContentSensitivity {
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_SENSITIVE.
   sensitive(id: 1),
 
-  /// The view does not display sensitive content.
+  /// The widget tree does not contain sensitive content.
   ///
   /// When this level is set via a [SensitiveContent] widget, the window
   /// hosting the screen will only be marked as sensitive if other [SensitiveContent]
@@ -83,21 +82,21 @@ enum ContentSensitivity {
   }
 }
 
-/// Service for setting the content sensitivity of native Flutter views.
+/// Service for setting the content sensitivity of the native Android `View`
+/// that contains the app's widget tree.
 class SensitiveContentService {
-  /// Creates service to set content sensitivity of Flutter views via
+  /// Creates service to set content sensitivity of the Android `View` via
   /// communication over the sensitive content [MethodChannel].
   SensitiveContentService() {
     sensitiveContentChannel = SystemChannels.sensitiveContent;
   }
 
   /// The channel used to communicate with the shell side to set the
-  /// content sensitivity of Flutter views.
+  /// content sensitivity of the Android `View`.
   late MethodChannel sensitiveContentChannel;
 
-  /// Sets content sensitivity level of the native backing to a Flutter view
-  /// with the specified [flutterViewId] to the level specified by
-  /// [contentSensitivity] via a call to the native embedder.
+  /// Sets content sensitivity level of the Android `View` to the level
+  /// specified by [contentSensitivity] via a call to the native embedder.
   void setContentSensitivity(ContentSensitivity contentSensitivity) {
     try {
       sensitiveContentChannel.invokeMethod<void>(
@@ -110,8 +109,8 @@ class SensitiveContentService {
     }
   }
 
-  /// Gets content sensitivity level of the native backing to a Flutter view
-  /// with the specified [flutterViewId] via a call to the native embedder.
+  /// Gets content sensitivity level of the Android `View` that contains
+  /// the app's widget tree.
   Future<int> getContentSensitivity() async {
     try {
       final int? result =
