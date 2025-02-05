@@ -71,6 +71,14 @@ class DartProject {
     return dart_entrypoint_arguments_;
   }
 
+  // Whether to enable the Impeller rendering engine.
+  //
+  // If not provided, defaults to false.
+  void set_enable_impeller(bool value) { enable_impeller_ = value; }
+
+  /// Whether the Impeller rendering engine is enabled.
+  bool get_enable_impeller() const { return enable_impeller_; }
+
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
@@ -95,6 +103,8 @@ class DartProject {
   std::string dart_entrypoint_;
   // The list of arguments to pass through to the Dart entrypoint.
   std::vector<std::string> dart_entrypoint_arguments_;
+  // Whether the Impeller rendering backend is enabled.
+  bool enable_impeller_ = false;
 };
 
 }  // namespace flutter

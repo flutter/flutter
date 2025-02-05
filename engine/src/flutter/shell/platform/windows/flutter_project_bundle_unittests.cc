@@ -68,6 +68,8 @@ TEST(FlutterProjectBundle, DartEntrypointArguments) {
 TEST(FlutterProjectBundle, EnableImpeller) {
   FlutterDesktopEngineProperties properties = {};
   properties.enable_impeller = true;
+  properties.assets_path = L"foo\\flutter_assets";
+  properties.icu_data_path = L"foo\\icudtl.dat";
 
   FlutterProjectBundle project(properties);
 
