@@ -85,19 +85,6 @@ class NextContext extends Context {
       CherrypickState.ABANDONED,
     ];
     switch (state.currentPhase) {
-      case pb.ReleasePhase.VERIFY_ENGINE_CI:
-        stdio.printStatus('You must validate post-submit CI for your engine PR and merge it');
-        if (!autoAccept) {
-          final bool response = await prompt(
-            'Has CI passed for the engine PR?\n\n'
-            '${state_import.luciConsoleLink(state.engine.candidateBranch, 'engine')}',
-          );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            updateState(state, stdio.logs);
-            return;
-          }
-        }
       case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
         final Remote upstream = Remote.upstream(state.framework.upstream.url);
         final FrameworkRepository framework = FrameworkRepository(

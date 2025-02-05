@@ -25,7 +25,6 @@ void main() {
       const String checkoutsParentDirectory = '$flutterRoot/dev/tools/';
       const String githubUsername = 'user';
       const String frameworkMirror = 'git@github.com:$githubUsername/flutter.git';
-      const String engineMirror = 'git@github.com:$githubUsername/engine.git';
       const String candidateBranch = 'flutter-1.2-candidate.3';
       const String releaseChannel = 'beta';
       const String revision = 'abcd1234';
@@ -698,8 +697,6 @@ void main() {
           candidateBranch: candidateBranch,
           checkouts: checkouts,
           dartRevision: nextDartRevision,
-          engineMirror: engineMirror,
-          engineUpstream: EngineRepository.defaultUpstream,
           frameworkMirror: frameworkMirror,
           frameworkUpstream: FrameworkRepository.defaultUpstream,
           releaseChannel: releaseChannel,
