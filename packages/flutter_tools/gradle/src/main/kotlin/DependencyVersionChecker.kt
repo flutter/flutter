@@ -84,7 +84,7 @@ object DependencyVersionChecker {
      * version range that we support. When we can't find a version for a given dependency
      * we treat it as within the range for the purpose of this check.
      */
-    fun checkDependencyVersions(project: Project) {
+    @JvmStatic fun checkDependencyVersions(project: Project) {
         project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false)
 
         checkGradleVersion(getGradleVersion(project), project)
