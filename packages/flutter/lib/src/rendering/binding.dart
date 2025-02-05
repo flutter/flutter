@@ -9,6 +9,7 @@
 /// @docImport 'layer.dart';
 library;
 
+import 'dart:async';
 import 'dart:ui' as ui show PictureRecorder, SceneBuilder, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
@@ -85,20 +86,23 @@ mixin RendererBinding
         setter: (bool value) async {
           if (debugInvertOversizedImages != value) {
             debugInvertOversizedImages = value;
-            return _forceRepaint();
+            // We don't want to block the vm service response on the frame
+            // actually rendering, just schedule it and return;
+            unawaited(_forceRepaint());
           }
-          return Future<void>.value();
         },
       );
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.debugPaint.name,
         getter: () async => debugPaintSizeEnabled,
-        setter: (bool value) {
+        setter: (bool value) async {
           if (debugPaintSizeEnabled == value) {
-            return Future<void>.value();
+            return;
           }
           debugPaintSizeEnabled = value;
-          return _forceRepaint();
+          // We don't want to block the vm service response on the frame
+          // actually rendering, just schedule it and return;
+          unawaited(_forceRepaint());
         },
       );
       registerBoolServiceExtension(
@@ -109,19 +113,22 @@ mixin RendererBinding
             return Future<void>.value();
           }
           debugPaintBaselinesEnabled = value;
-          return _forceRepaint();
+          // We don't want to block the vm service response on the frame
+          // actually rendering, just schedule it and return;
+          unawaited(_forceRepaint());
         },
       );
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.repaintRainbow.name,
         getter: () async => debugRepaintRainbowEnabled,
-        setter: (bool value) {
+        setter: (bool value) async {
           final bool repaint = debugRepaintRainbowEnabled && !value;
           debugRepaintRainbowEnabled = value;
           if (repaint) {
-            return _forceRepaint();
+            // We don't want to block the vm service response on the frame
+            // actually rendering, just schedule it and return;
+            unawaited(_forceRepaint());
           }
-          return Future<void>.value();
         },
       );
       registerServiceExtension(
@@ -133,34 +140,40 @@ mixin RendererBinding
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.debugDisableClipLayers.name,
         getter: () async => debugDisableClipLayers,
-        setter: (bool value) {
+        setter: (bool value) async {
           if (debugDisableClipLayers == value) {
-            return Future<void>.value();
+            return;
           }
           debugDisableClipLayers = value;
-          return _forceRepaint();
+          // We don't want to block the vm service response on the frame
+          // actually rendering, just schedule it and return;
+          unawaited(_forceRepaint());
         },
       );
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name,
         getter: () async => debugDisablePhysicalShapeLayers,
-        setter: (bool value) {
+        setter: (bool value) async {
           if (debugDisablePhysicalShapeLayers == value) {
-            return Future<void>.value();
+            return;
           }
           debugDisablePhysicalShapeLayers = value;
-          return _forceRepaint();
+          // We don't want to block the vm service response on the frame
+          // actually rendering, just schedule it and return;
+          unawaited(_forceRepaint());
         },
       );
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.debugDisableOpacityLayers.name,
         getter: () async => debugDisableOpacityLayers,
-        setter: (bool value) {
+        setter: (bool value) async {
           if (debugDisableOpacityLayers == value) {
-            return Future<void>.value();
+            return;
           }
           debugDisableOpacityLayers = value;
-          return _forceRepaint();
+          // We don't want to block the vm service response on the frame
+          // actually rendering, just schedule it and return;
+          unawaited(_forceRepaint());
         },
       );
       return true;
