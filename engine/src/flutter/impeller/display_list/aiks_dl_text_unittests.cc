@@ -200,49 +200,6 @@ TEST_P(AiksTest, SubpixelScaled) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_P(AiksTest, TextJumpingTestPlayground) {
-  Scalar font_size = 300;
-  Scalar scale = 0.5;
-  Scalar fine_scale = -0.055;
-  bool lock_size = true;
-  bool is_subpixel = false;
-  auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
-      ImGui::SliderFloat("Fine Scale", &fine_scale, -0.1, 0.1);
-      ImGui::Checkbox("Lock Size", &lock_size);
-      ImGui::Checkbox("subpixel", &is_subpixel);
-      ImGui::End();
-    }
-    DisplayListBuilder builder;
-
-    Scalar total_scale = scale + fine_scale;
-    DlPaint paint;
-    paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
-    builder.DrawPaint(paint);
-    builder.Scale(total_scale, total_scale);
-    RenderTextInCanvasSkia(GetContext(), builder, "ui", "Roboto-Regular.ttf",
-                           TextRenderOptions{
-                               .font_size = font_size,
-                               .position = DlPoint(100, 300),
-                               .is_subpixel = is_subpixel,
-                           });
-    if (lock_size) {
-      std::shared_ptr<DlImageFilter> filter =
-          DlImageFilter::MakeMatrix(DlMatrix(                        //
-                                        1.0 / total_scale, 0, 0, 0,  //
-                                        0, 1.0 / total_scale, 0, 0,  //
-                                        0, 0, 1, 0,                  //
-                                        0, 0, 0, 1),
-                                    DlImageSampling::kNearestNeighbor);
-      builder.SaveLayer(std::nullopt, nullptr, filter.get());
-      builder.Restore();
-    }
-    return builder.Build();
-  };
-  ASSERT_TRUE(OpenPlaygroundHere(callback));
-}
-
 TEST_P(AiksTest, CanRenderTextFrameWithFractionScaling) {
   Scalar fine_scale = 0.f;
   bool is_subpixel = false;
