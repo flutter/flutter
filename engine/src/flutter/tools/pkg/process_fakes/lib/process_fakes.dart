@@ -115,7 +115,10 @@ final class FakeProcessManager implements ProcessManager {
   }
 }
 
+/// Contains information about [ProcessManager.start] and [ProcessManager.run]
+/// invocations.
 final class FakeCommandLogEntry {
+  /// Creates a log entry for a single process invocation.
   FakeCommandLogEntry(
     List<Object> command, {
     required this.workingDirectory,
@@ -126,12 +129,26 @@ final class FakeCommandLogEntry {
     required this.stderrEncoding,
   }) : command = command.map((o) => '$o').toList();
 
+  /// The command passed to the [ProcessManager].
   final List<String> command;
+
+  /// The working directory passed to the [ProcessManager].
   final String? workingDirectory;
+
+  /// The environment variables at the time [ProcessManager] was called.
   final Map<String, String>? environment;
+
+  /// Whether the parent environment variables were included when spawning the
+  /// child process.
   final bool includeParentEnvironment;
+
+  /// When the child was spawned in a shell environment.
   final bool runInShell;
+
+  /// The encoding used by `stdout`.
   final Encoding? stdoutEncoding;
+
+  /// The encoding used by `stderr`.
   final Encoding? stderrEncoding;
 }
 

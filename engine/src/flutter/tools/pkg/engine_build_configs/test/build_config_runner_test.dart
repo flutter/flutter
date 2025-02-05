@@ -831,7 +831,7 @@ FakeProcessManager _fakeProcessManager({
           _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
         },
     onStart:
-        (List<String> cmd) => switch (cmd) {
+        (FakeCommandLogEntry entry) => switch (entry.command) {
           [final String exe, ...] when exe.endsWith('gn') => fakeProcess(gnResult),
           [final String exe, ...] when exe.endsWith('bootstrap') => fakeProcess(bootstrapResult),
           [final String exe, ...] when exe.endsWith('ninja') => fakeProcess(ninjaResult),
