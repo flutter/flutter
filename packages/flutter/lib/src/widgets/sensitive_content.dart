@@ -8,14 +8,12 @@ import 'package:flutter/widgets.dart' show AsyncSnapshot, FutureBuilder;
 import 'framework.dart';
 
 /// Data structure used to track the number of [SensitiveContent] widgets with
-/// each of the different [ContentSensitivity] levels set in a particular
-/// Flutter view.
+/// each of the different [ContentSensitivity] levels set.
 class ViewContentSensitivityState {
   /// Creates a [ViewContentSensitivityState].
   ViewContentSensitivityState(this.currentContentSensitivitySetting);
 
-  /// The current [ContentSensitivity] level set for the Flutter view that this
-  /// state represents.
+  /// The current [ContentSensitivity] level set.
   ContentSensitivity currentContentSensitivitySetting;
 
   /// The number of [SensitiveContent] widgets that have sensitivity level [ContentSensitivity.sensitive].
@@ -57,8 +55,8 @@ class ViewContentSensitivityState {
   }
 }
 
-/// Host of the current content sensitivity level for each Flutter view that
-/// contains any [SensitiveContent] widgets.
+/// Host of the current content sensitivity level for the widget tree that contains
+/// any number [SensitiveContent] widgets.
 class SensitiveContentSetting {
   SensitiveContentSetting._();
 
@@ -70,7 +68,7 @@ class SensitiveContentSetting {
   static final SensitiveContentSetting _instance = SensitiveContentSetting._();
 
   /// Registers a [SensitiveContent] widget that will help determine the
-  /// [ContentSensitivity] level for the Flutter view with ID [viewId].
+  /// [ContentSensitivity] level.
   static Future<void> register(int viewId, ContentSensitivity desiredSensitivityLevel) async {
     await _instance._register(viewId, desiredSensitivityLevel);
   }
@@ -101,8 +99,8 @@ class SensitiveContentSetting {
     contentSensitivityStateForView.currentContentSensitivitySetting = desiredSensitivityLevel;
   }
 
-  /// Unregisters a [SensitiveContent] widget from the Flutter view with ID
-  /// [viewId].
+  /// Unregisters a [SensitiveContent] widget from the ViewContentSensitivityState tracking
+  /// the content sensitivity level of the widget tree.
   static void unregister(int viewId, ContentSensitivity widgetSensitivityLevel) {
     _instance._unregister(viewId, widgetSensitivityLevel);
   }
@@ -143,7 +141,7 @@ class SensitiveContentSetting {
   }
 
   /// Return whether or not [desiredSensitivityLevel] should be set as the new
-  /// [ContentSensitivity] level for a Flutter view.
+  /// [ContentSensitivity] level.
   ///
   /// [desiredSensitivityLevel] should be set only if it is striclty less
   /// severe than any of the other registered [SensitiveContent] widgets in the view.
@@ -167,8 +165,8 @@ class SensitiveContentSetting {
   }
 }
 
-/// Widget to set the [ContentSensitivity] level of content in a particular
-/// Flutter view.
+/// Widget to set the [ContentSensitivity] level of content in the widget
+/// tree.
 ///
 /// See also:
 ///
