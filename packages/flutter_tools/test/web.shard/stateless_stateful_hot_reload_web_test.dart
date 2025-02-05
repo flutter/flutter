@@ -14,7 +14,5 @@ void main() {
     additionalCommandArgs: <String>[
       '--extra-front-end-options=--dartdevc-canary,--dartdevc-module-format=ddc',
     ],
-    // https://github.com/flutter/flutter/issues/162567
-    skip: true,
   );
 }

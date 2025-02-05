@@ -23,7 +23,8 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   node0.tooltip = "tooltip";
   update.insert(std::make_pair(0, node0));
 
-  std::vector<uint8_t> expected_buffer(196);
+  std::vector<uint8_t> expected_buffer(
+      PlatformViewAndroidDelegate::kBytesPerNode);
   std::vector<std::vector<uint8_t>> expected_string_attribute_args(0);
   size_t position = 0;
   int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&expected_buffer[0]);
@@ -87,7 +88,8 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdatelinkUrl) {
   node0.linkUrl = "url";
   update.insert(std::make_pair(0, node0));
 
-  std::vector<uint8_t> expected_buffer(196);
+  std::vector<uint8_t> expected_buffer(
+      PlatformViewAndroidDelegate::kBytesPerNode);
   std::vector<std::vector<uint8_t>> expected_string_attribute_args(0);
   size_t position = 0;
   int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&expected_buffer[0]);
@@ -165,7 +167,10 @@ TEST(PlatformViewShell,
   node0.hintAttributes.push_back(locale_attribute);
   update.insert(std::make_pair(0, node0));
 
-  std::vector<uint8_t> expected_buffer(228);
+  std::vector<uint8_t> expected_buffer(
+      PlatformViewAndroidDelegate::kBytesPerNode +
+      // 1 label attribute + 1 hint attribute.
+      2 * PlatformViewAndroidDelegate::kBytesPerStringAttribute);
   std::vector<std::vector<uint8_t>> expected_string_attribute_args;
   size_t position = 0;
   int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&expected_buffer[0]);
@@ -241,7 +246,8 @@ TEST(PlatformViewShell,
   action0.hint = "hint";
   actions.insert(std::make_pair(0, action0));
 
-  std::vector<uint8_t> expected_actions_buffer(16);
+  std::vector<uint8_t> expected_actions_buffer(
+      PlatformViewAndroidDelegate::kBytesPerAction);
   int32_t* actions_buffer_int32 =
       reinterpret_cast<int32_t*>(&expected_actions_buffer[0]);
   std::vector<std::string> expected_action_strings;
