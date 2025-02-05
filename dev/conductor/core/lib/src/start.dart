@@ -273,12 +273,6 @@ class StartContext extends Context {
     // candidateBranch.
     final String workingBranchName = 'cherrypicks-$candidateBranch';
 
-    await framework.newBranch(workingBranchName);
-    if (dartRevision != null && dartRevision!.isNotEmpty) {
-      await framework.updateDartRevision(dartRevision!);
-      await framework.commit('Update Dart SDK to $dartRevision', addFirst: true);
-    }
-
     final String frameworkHead = await framework.reverseParse('HEAD');
     state.framework =
         (pb.Repository.create()
@@ -315,13 +309,6 @@ class StartContext extends Context {
     final ReleaseType releaseType = computeReleaseType(lastVersion, atBranchPoint);
     state.releaseType = releaseType;
 
-    try {
-      lastVersion.ensureValid(candidateBranch, releaseType);
-    } on ConductorException catch (e) {
-      // Let the user know, but resume execution
-      stdio.printError(e.message);
-    }
-
     Version nextVersion;
     if (versionOverride != null) {
       nextVersion = versionOverride!;
@@ -332,6 +319,12 @@ class StartContext extends Context {
         requestedVersion: nextVersion,
         framework: framework,
       );
+    }
+
+    await framework.newBranch(workingBranchName);
+    if (dartRevision != null && dartRevision!.isNotEmpty) {
+      await framework.updateDartRevision(dartRevision!);
+      await framework.commit('Update Dart SDK to $dartRevision', addFirst: true);
     }
 
     state.releaseVersion = nextVersion.toString();
