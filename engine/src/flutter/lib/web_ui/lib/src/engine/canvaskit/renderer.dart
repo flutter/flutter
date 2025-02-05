@@ -63,7 +63,7 @@ class CanvasKitRenderer implements Renderer {
 
   /// A surface used specifically for `Picture.toImage` when software rendering
   /// is supported.
-  final Surface pictureToImageSurface = Surface();
+  final Surface pictureToImageSurface = Surface(resizeStrategy: SurfaceResizeStrategy.exact);
 
   // Listens for view creation events from the view manager.
   StreamSubscription<int>? _onViewCreatedListener;

@@ -25,6 +25,19 @@ const bool _kUsingMSAA = bool.fromEnvironment('flutter.canvaskit.msaa');
 
 typedef SubmitCallback = bool Function(SurfaceFrame, CkCanvas);
 
+/// Strategies for when to resize the surface. Either resize the surface
+/// whenever the requested size is different from the current size, or only
+/// when the requested size is larger than the current size.
+enum SurfaceResizeStrategy {
+  /// Resizes the surface whenever the requested size is different from the
+  /// current size.
+  exact,
+
+  /// Resizes the surface only if the current size is less than the requested
+  /// size. The surface will only ever grow.
+  onlyGrow,
+}
+
 /// A frame which contains a canvas to be drawn into.
 class SurfaceFrame {
   SurfaceFrame(this.skiaSurface, this.submitCallback) : _submitted = false;
@@ -50,7 +63,7 @@ class SurfaceFrame {
 /// successive frames if they are the same size. Otherwise, a new [CkSurface] is
 /// created.
 class Surface extends DisplayCanvas {
-  Surface({this.isDisplayCanvas = false})
+  Surface({this.isDisplayCanvas = false, this.resizeStrategy = SurfaceResizeStrategy.onlyGrow})
     : useOffscreenCanvas = Surface.offscreenCanvasSupported && !isDisplayCanvas;
 
   CkSurface? _surface;
@@ -60,6 +73,9 @@ class Surface extends DisplayCanvas {
 
   /// If `true`, this [Surface] is used as a [DisplayCanvas].
   final bool isDisplayCanvas;
+
+  /// When to resize the underlying surface.
+  final SurfaceResizeStrategy resizeStrategy;
 
   /// If true, forces a new WebGL context to be created, even if the window
   /// size is the same. This is used to restore the UI after the browser tab
@@ -237,8 +253,38 @@ class Surface extends DisplayCanvas {
     }
     // TODO(jonahwilliams): this is somewhat wasteful. We should probably
     // eagerly setup this surface instead of delaying until the first frame?
-    // Or at least cache the estimated window sizeThis is the first frame we have rendered with this canvas.
+    // Or at least cache the estimated window size.
+    // This is the first frame we have rendered with this canvas.
     createOrUpdateSurface(size);
+  }
+
+  /// Returns [true] if we need to resize the surface based on the requested
+  /// size and the resize strategy.
+  bool _needsResize(BitmapSize requestedSize) {
+    final BitmapSize? currentSize = _currentCanvasPhysicalSize;
+    if (currentSize == null) {
+      return true;
+    }
+    switch (resizeStrategy) {
+      case SurfaceResizeStrategy.exact:
+        return requestedSize.width != currentSize.width ||
+            requestedSize.height != currentSize.height;
+      case SurfaceResizeStrategy.onlyGrow:
+        return requestedSize.width > currentSize.width || requestedSize.height > currentSize.height;
+    }
+  }
+
+  /// Returns the size we should resize the surface to given the requested
+  /// size and the resize strategy.
+  BitmapSize _sizeToResizeTo(BitmapSize requestedSize) {
+    switch (resizeStrategy) {
+      case SurfaceResizeStrategy.exact:
+        return requestedSize;
+      case SurfaceResizeStrategy.onlyGrow:
+        // Initialize a new, larger, canvas. If the size is growing, then make the
+        // new canvas larger than required to avoid many canvas creations.
+        return BitmapSize.fromSize(requestedSize.toSize() * 1.4);
+    }
   }
 
   /// Creates a <canvas> and SkSurface for the given [size].
@@ -261,12 +307,8 @@ class Surface extends DisplayCanvas {
         return _surface!;
       }
 
-      final BitmapSize? previousCanvasSize = _currentCanvasPhysicalSize;
-      // Initialize a new, larger, canvas. If the size is growing, then make the
-      // new canvas larger than required to avoid many canvas creations.
-      if (previousCanvasSize != null &&
-          (size.width > previousCanvasSize.width || size.height > previousCanvasSize.height)) {
-        final BitmapSize newSize = BitmapSize.fromSize(size.toSize() * 1.4);
+      if (_currentCanvasPhysicalSize != null && _needsResize(size)) {
+        final BitmapSize newSize = _sizeToResizeTo(size);
         _surface?.dispose();
         _surface = null;
         _pixelWidth = newSize.width;
@@ -285,10 +327,14 @@ class Surface extends DisplayCanvas {
       }
     }
 
+    // If we reached here, then either we are forcing a new context, or
+    // the size of the surface has changed so we need to make a new one.
+
+    _surface?.dispose();
+    _surface = null;
+
     // Either a new context is being forced or we've never had one.
     if (_forceNewContext || _currentCanvasPhysicalSize == null) {
-      _surface?.dispose();
-      _surface = null;
       _grContext?.releaseResourcesAndAbandonContext();
       _grContext?.delete();
       _grContext = null;
@@ -297,7 +343,6 @@ class Surface extends DisplayCanvas {
       _currentCanvasPhysicalSize = size;
     }
 
-    _surface?.dispose();
     return _surface = _createNewSurface(size);
   }
 

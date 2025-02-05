@@ -45,7 +45,7 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
 
   @override
   final DisplayCanvasFactory<Surface> displayFactory = DisplayCanvasFactory<Surface>(
-    createCanvas: () => Surface(isDisplayCanvas: true),
+    createCanvas: () => Surface(isDisplayCanvas: true, resizeStrategy: SurfaceResizeStrategy.exact),
   );
 
   @override
