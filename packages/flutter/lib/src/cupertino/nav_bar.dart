@@ -2603,19 +2603,25 @@ class _NavigationBarComponentsTransition {
   Widget? get bottomNavBarBottom {
     final KeyedSubtree? bottomNavBarBottom =
         bottomComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
-    final KeyedSubtree? topNavBarBottom =
-        topComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
 
-    if (bottomNavBarBottom != null && topNavBarBottom != null) {
-      return slideFromLeadingEdge(
-        fromKey: bottomComponents.navBarBottomKey,
-        fromNavBarBox: bottomNavBarBox,
-        toKey: topComponents.navBarBottomKey,
-        toNavBarBox: topNavBarBox,
-        child: FadeTransition(opacity: fadeOutBy(0.6), child: bottomNavBarBottom.child),
-      );
+    if (bottomNavBarBottom == null) {
+      return null;
     }
-    return null;
+
+    final RelativeRect from = positionInTransitionBox(
+      bottomComponents.navBarBottomKey,
+      from: bottomNavBarBox,
+    );
+    // Shift in from the leading edge of the screen.
+    final RelativeRectTween positionTween = RelativeRectTween(
+      begin: from,
+      end: from.shift(Offset(-forwardDirection * bottomNavBarBox.size.width, 0.0)),
+    );
+
+    return PositionedTransition(
+      rect: animation.drive(positionTween),
+      child: FadeTransition(opacity: fadeOutBy(0.6), child: bottomNavBarBottom.child),
+    );
   }
 
   Widget? get topLeading {

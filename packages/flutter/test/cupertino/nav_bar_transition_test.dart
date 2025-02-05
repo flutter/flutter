@@ -973,6 +973,41 @@ void main() {
     );
   });
 
+  testWidgets('Bottom nav bar bottom widget fades and slides in from the left', (
+    WidgetTester tester,
+  ) async {
+    await startTransitionBetween(
+      tester,
+      from: const CupertinoSliverNavigationBar(
+        bottom: PreferredSize(preferredSize: Size.fromHeight(30.0), child: Placeholder()),
+      ),
+      fromTitle: 'Page 1',
+    );
+
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // There's 2, one from the bottom large title fading out and one from the
+    // bottom back label fading in.
+    expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
+    expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
+
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.9280824661254883);
+
+    expect(
+      tester.getTopLeft(flying(tester, find.byType(Placeholder))),
+      const Offset(-20.579326152801514, 96.0),
+    );
+
+    await tester.pump(const Duration(milliseconds: 200));
+
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.0);
+
+    expect(
+      tester.getTopLeft(flying(tester, find.byType(Placeholder))),
+      const Offset(-620.4643845558167, 96.0),
+    );
+  });
+
   testWidgets('Long title turns into the word back mid transition', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
