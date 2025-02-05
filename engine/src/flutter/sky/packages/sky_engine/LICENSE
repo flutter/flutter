@@ -1105,6 +1105,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
+fuchsia_sdk
 libcxx
 libcxxabi
 
@@ -30565,7 +30566,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/3fc177bfd7016bcfa2781f43f1aa04d4cbc1351f
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/1e8b9eae70aa1183c2c3f6b5cbba25b23f3336b4
 /third_party/fallback_root_certificates/
 
 --------------------------------------------------------------------------------
