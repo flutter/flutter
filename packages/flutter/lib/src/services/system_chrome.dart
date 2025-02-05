@@ -18,6 +18,9 @@ export 'dart:ui' show Brightness, Color;
 
 export 'binding.dart' show SystemUiChangeCallback;
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Specifies a particular device orientation.
 ///
 /// To determine which values correspond to which orientations, first position
