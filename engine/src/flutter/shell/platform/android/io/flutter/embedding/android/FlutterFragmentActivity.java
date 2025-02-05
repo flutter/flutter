@@ -369,6 +369,10 @@ public class FlutterFragmentActivity extends FragmentActivity
 
   @Nullable private FlutterFragment flutterFragment;
 
+  int getFlutterFragmentViewId() {
+    return flutterFragment.flutterViewId;
+  }
+
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     switchLaunchThemeForNormalTheme();
