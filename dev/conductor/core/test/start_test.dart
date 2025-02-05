@@ -246,23 +246,7 @@ void main() {
           const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
           const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
-
-          const FakeCommand(
-            command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
-          ),
-
-          // update DEPS
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/DEPS',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(
-            command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
-          ),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
-
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
           const FakeCommand(
             command: <String>[
               'git',
@@ -283,6 +267,21 @@ void main() {
           const FakeCommand(
             command: <String>['git', 'describe', '--exact-match', '--tags', branchPointRevision],
           ),
+
+          const FakeCommand(
+            command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
+          ),
+
+          // update DEPS
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM path/to/DEPS',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(
+            command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
+          ),
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
         ];
 
         final CommandRunner<void> runner = createRunner(commands: commands);
@@ -321,7 +320,7 @@ void main() {
         expect(state.releaseChannel, releaseChannel);
         expect(state.releaseVersion, nextVersion);
         expect(state.framework.candidateBranch, candidateBranch);
-        expect(state.framework.startingGitHead, revision2);
+        expect(state.framework.startingGitHead, revision3);
         expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
         expect(state.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
         expect(state.conductorVersion, conductorVersion);
