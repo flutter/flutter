@@ -255,16 +255,6 @@ void main() {
               ],
             ),
             const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
-            const FakeCommand(command: <String>['git', 'add', '--all']),
-            const FakeCommand(
-              command: <String>[
-                'git',
-                'commit',
-                '--message',
-                'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
-              ],
-            ),
-            const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision4),
           ]);
           writeStateToFile(fileSystem.file(stateFile), state, <String>[]);
           final Checkouts checkouts = Checkouts(
