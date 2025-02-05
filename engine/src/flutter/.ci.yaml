@@ -405,8 +405,6 @@ targets:
     properties:
       config_name: mac_unopt
       add_recipes_cq: "true"
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/157636
-      presubmit_max_attempts: "2"
     timeout: 120
 
   - name: Mac mac_ios_engine
