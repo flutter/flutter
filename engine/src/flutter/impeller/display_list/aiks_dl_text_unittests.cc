@@ -184,12 +184,13 @@ TEST_P(AiksTest, SubpixelScaled) {
   DlPaint paint;
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
+  Scalar offset = 0.25 / 0.75;
   for (int i = 0; i < 5; ++i) {
     RenderTextInCanvasSkia(
         GetContext(), builder, "ui", "Roboto-Regular.ttf",
         TextRenderOptions{
             .font_size = 200,
-            .position = DlPoint(100 + 0.25 * i, 150 + i * 150),
+            .position = DlPoint(100 + offset * i, 150 + i * 150),
             .is_subpixel = true,
         });
   }
