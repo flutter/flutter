@@ -237,6 +237,18 @@ class CupertinoButton extends StatefulWidget {
   /// enable a button, set [onPressed] or [onLongPress] to a non-null value.
   bool get enabled => onPressed != null || onLongPress != null;
 
+  /// The distance a button needs to be moved after being pressed for its opacity to change.
+  ///
+  /// The opacity changes when the position moved is this distance away from the button.
+  static double tapMoveSlop() {
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS ||
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia => kCupertinoButtonTapMoveSlop,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 0.0,
+    };
+  }
+
   @override
   State<CupertinoButton> createState() => _CupertinoButtonState();
 
@@ -305,7 +317,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     }
     final RenderBox rb = context.findRenderObject()! as RenderBox;
     final Offset localPosition = rb.globalToLocal(event.globalPosition);
-    if ((Offset.zero & rb.size).contains(localPosition)) {
+    if (rb.paintBounds.inflate(CupertinoButton.tapMoveSlop()).contains(localPosition)) {
       _handleTap();
     }
   }
@@ -318,15 +330,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handTapMove(TapMoveDetails event) {
-    final double distance = switch (defaultTargetPlatform) {
-      TargetPlatform.iOS ||
-      TargetPlatform.android ||
-      TargetPlatform.fuchsia => kCupertinoButtonTapMoveOpacityChangeDistance,
-      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 0.0,
-    };
     final RenderBox rb = context.findRenderObject()! as RenderBox;
     final Offset localPosition = rb.globalToLocal(event.globalPosition);
-    final bool buttonShouldHeldDown = rb.paintBounds.inflate(distance).contains(localPosition);
+    final bool buttonShouldHeldDown = rb.paintBounds.inflate(CupertinoButton.tapMoveSlop()).contains(localPosition);
     if (buttonShouldHeldDown != _buttonHeldDown) {
       _buttonHeldDown = buttonShouldHeldDown;
       _animate();

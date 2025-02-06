@@ -869,14 +869,12 @@ void main() {
       find.descendant(of: find.byType(CupertinoButton), matching: find.byType(FadeTransition)),
     );
     await tester.pumpAndSettle();
-    final double moveDistance = switch (defaultTargetPlatform) {
-      TargetPlatform.iOS ||
-      TargetPlatform.android ||
-      TargetPlatform.fuchsia => kCupertinoButtonTapMoveOpacityChangeDistance,
-      TargetPlatform.macOS || TargetPlatform.windows || TargetPlatform.linux => 0.0,
-    };
     expect(opacity.opacity.value, 0.4);
-    await gesture.moveBy(Offset(0, -moveDistance - 1));
+    final double moveDistance = CupertinoButton.tapMoveSlop();
+    await gesture.moveBy(Offset(0, -moveDistance + 1));
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 0.4);
+    await gesture.moveBy(const Offset(0, -2));
     await tester.pumpAndSettle();
     expect(opacity.opacity.value, 1.0);
     await gesture.moveBy(const Offset(0, 1));
