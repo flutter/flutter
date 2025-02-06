@@ -2500,7 +2500,9 @@ class EditableTextState extends State<EditableText>
   final OverlayPortalController _contextMenuPortalController = OverlayPortalController();
   final _SelectionContextMenuEventNotifier _contextMenuTraversalDirectionNotifier =
       _SelectionContextMenuEventNotifier._();
-  bool get _contextMenuIsVisible => _contextMenuPortalController.isShowing || (_selectionOverlay?.spellCheckToolbarIsVisible ?? false);
+  bool get _contextMenuIsVisible =>
+      _contextMenuPortalController.isShowing ||
+      (_selectionOverlay?.spellCheckToolbarIsVisible ?? false);
 
   /// Configuration that determines how spell check will be performed.
   ///
@@ -5856,13 +5858,150 @@ class EditableTextState extends State<EditableText>
                                 editable = OverlayPortal(
                                   controller: _contextMenuPortalController,
                                   overlayChildBuilder: (BuildContext context) {
+                                    final bool useSelectionControls =
+                                        widget.selectionControls != null &&
+                                        widget.selectionControls! is! TextSelectionHandleControls;
                                     return SelectionContextMenuEventScope(
                                       traversalDirectionNotifier:
                                           _contextMenuTraversalDirectionNotifier,
                                       child: _EditableTextContextMenu(
                                         layerLink: _toolbarLayerLink,
                                         renderEditable: renderEditable,
-                                        child: widget.contextMenuBuilder!(context, this),
+                                        child:
+                                            useSelectionControls
+                                                ? Builder(
+                                                  builder: (BuildContext context) {
+                                                    final TextSelection _selection =
+                                                        _value.selection;
+                                                    double _getStartGlyphHeight() {
+                                                      final String currText =
+                                                          renderEditable
+                                                              .textSelectionDelegate
+                                                              .textEditingValue
+                                                              .text;
+                                                      final int firstSelectedGraphemeExtent;
+                                                      Rect? startHandleRect;
+                                                      // Only calculate handle rects if the text in the previous frame
+                                                      // is the same as the text in the current frame. This is done because
+                                                      // widget.renderObject contains the renderEditable from the previous frame.
+                                                      // If the text changed between the current and previous frames then
+                                                      // widget.renderObject.getRectForComposingRange might fail. In cases where
+                                                      // the current frame is different from the previous we fall back to
+                                                      // renderObject.preferredLineHeight.
+                                                      if (renderEditable.plainText == currText &&
+                                                          _selection.isValid &&
+                                                          !_selection.isCollapsed) {
+                                                        final String selectedGraphemes = _selection
+                                                            .textInside(currText);
+                                                        firstSelectedGraphemeExtent =
+                                                            selectedGraphemes
+                                                                .characters
+                                                                .first
+                                                                .length;
+                                                        startHandleRect = renderEditable
+                                                            .getRectForComposingRange(
+                                                              TextRange(
+                                                                start: _selection.start,
+                                                                end:
+                                                                    _selection.start +
+                                                                    firstSelectedGraphemeExtent,
+                                                              ),
+                                                            );
+                                                      }
+                                                      return startHandleRect?.height ??
+                                                          renderEditable.preferredLineHeight;
+                                                    }
+
+                                                    double _getEndGlyphHeight() {
+                                                      final String currText =
+                                                          renderEditable
+                                                              .textSelectionDelegate
+                                                              .textEditingValue
+                                                              .text;
+                                                      final int lastSelectedGraphemeExtent;
+                                                      Rect? endHandleRect;
+                                                      // See the explanation in _getStartGlyphHeight.
+                                                      if (renderEditable.plainText == currText &&
+                                                          _selection.isValid &&
+                                                          !_selection.isCollapsed) {
+                                                        final String selectedGraphemes = _selection
+                                                            .textInside(currText);
+                                                        lastSelectedGraphemeExtent =
+                                                            selectedGraphemes
+                                                                .characters
+                                                                .last
+                                                                .length;
+                                                        endHandleRect = renderEditable
+                                                            .getRectForComposingRange(
+                                                              TextRange(
+                                                                start:
+                                                                    _selection.end -
+                                                                    lastSelectedGraphemeExtent,
+                                                                end: _selection.end,
+                                                              ),
+                                                            );
+                                                      }
+                                                      return endHandleRect?.height ??
+                                                          renderEditable.preferredLineHeight;
+                                                    }
+
+                                                    final RenderBox renderBox =
+                                                        this.context.findRenderObject()!
+                                                            as RenderBox;
+
+                                                    final Rect editingRegion = Rect.fromPoints(
+                                                      renderBox.localToGlobal(Offset.zero),
+                                                      renderBox.localToGlobal(
+                                                        renderBox.size.bottomRight(Offset.zero),
+                                                      ),
+                                                    );
+
+                                                    final List<TextSelectionPoint>
+                                                    selectionEndpoints = renderEditable
+                                                        .getEndpointsForSelection(_value.selection);
+                                                    final double lineHeightAtStart =
+                                                        _getStartGlyphHeight();
+                                                    final double lineHeightAtEnd =
+                                                        _getEndGlyphHeight();
+
+                                                    final bool isMultiline =
+                                                        selectionEndpoints.last.point.dy -
+                                                            selectionEndpoints.first.point.dy >
+                                                        lineHeightAtEnd / 2;
+
+                                                    // If the selected text spans more than 1 line, horizontally center the toolbar.
+                                                    // Derived from both iOS and Android.
+                                                    final double midX =
+                                                        isMultiline
+                                                            ? editingRegion.width / 2
+                                                            : (selectionEndpoints.first.point.dx +
+                                                                    selectionEndpoints
+                                                                        .last
+                                                                        .point
+                                                                        .dx) /
+                                                                2;
+
+                                                    final Offset midpoint = Offset(
+                                                      midX,
+                                                      // The y-coordinate won't be made use of most likely.
+                                                      selectionEndpoints.first.point.dy -
+                                                          lineHeightAtStart,
+                                                    );
+                                                    return widget.selectionControls!.buildToolbar(
+                                                      context,
+                                                      editingRegion,
+                                                      lineHeightAtStart,
+                                                      midpoint,
+                                                      renderEditable.getEndpointsForSelection(
+                                                        _value.selection,
+                                                      ),
+                                                      renderEditable.textSelectionDelegate,
+                                                      clipboardStatus,
+                                                      renderEditable.lastSecondaryTapDownPosition,
+                                                    );
+                                                  },
+                                                )
+                                                : widget.contextMenuBuilder!(context, this),
                                       ),
                                     );
                                   },
