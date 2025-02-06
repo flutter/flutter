@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Flutter code sample for [RawMenuAnchor] that demonstrates how to create a
+/// Flutter code sample for a [RawMenuAnchor] that demonstrates how to create a
 /// simple menu.
 void main() {
   runApp(const RawMenuAnchorApp());
