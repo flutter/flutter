@@ -261,11 +261,6 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     final List<BuildInfo> buildInfos = await getBuildInfos();
     displayNullSafetyMode(buildInfos.first);
     for (final BuildInfo buildInfo in buildInfos) {
-      final String? productBundleIdentifier = await project.ios.productBundleIdentifier(buildInfo);
-      globals.printStatus(
-        'Building frameworks for $productBundleIdentifier in ${buildInfo.mode.cliName} mode...',
-      );
-
       // Create the build-mode specific metadata.
       //
       // This normally would be done in the verifyAndRun step of FlutterCommand, but special "meta"
@@ -276,6 +271,11 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       await regeneratePlatformSpecificToolingIfApplicable(
         project,
         releaseMode: buildInfo.mode.isRelease,
+      );
+
+      final String? productBundleIdentifier = await project.ios.productBundleIdentifier(buildInfo);
+      globals.printStatus(
+        'Building frameworks for $productBundleIdentifier in ${buildInfo.mode.cliName} mode...',
       );
 
       final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.cliName);
