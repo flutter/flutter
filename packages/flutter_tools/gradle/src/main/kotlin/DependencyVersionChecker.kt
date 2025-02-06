@@ -1,24 +1,24 @@
 package com.flutter.gradle
 
+import androidx.annotation.VisibleForTesting
 import com.android.build.api.AndroidPluginVersion
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.extra
-import org.jetbrains.annotations.VisibleForTesting
 
 object DependencyVersionChecker {
-    @VisibleForTesting const val GRADLE_NAME: String = "Gradle"
+    private const val GRADLE_NAME: String = "Gradle"
 
-    @VisibleForTesting const val JAVA_NAME: String = "Java"
+    @VisibleForTesting internal const val JAVA_NAME: String = "Java"
 
-    @VisibleForTesting const val AGP_NAME: String = "Android Gradle Plugin"
+    @VisibleForTesting internal const val AGP_NAME: String = "Android Gradle Plugin"
 
-    @VisibleForTesting const val KGP_NAME: String = "Kotlin"
+    @VisibleForTesting internal const val KGP_NAME: String = "Kotlin"
 
     // String constant that defines the name of the Gradle extra property that we set when
     // detecting that the project is using versions outside of Flutter's support range.
     // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-project/index.html#-2107180640%2FProperties%2F-1867656071.
-    @VisibleForTesting const val OUT_OF_SUPPORT_RANGE_PROPERTY = "usesUnsupportedDependencyVersions"
+    @VisibleForTesting internal const val OUT_OF_SUPPORT_RANGE_PROPERTY = "usesUnsupportedDependencyVersions"
 
     // The following messages represent best effort guesses at where a Flutter developer should
     // look to upgrade a dependency that is below the corresponding threshold. Developers can
@@ -38,7 +38,7 @@ object DependencyVersionChecker {
             "chooses which version of Java to use, see the --jdk-dir section of the " +
             "output of `flutter config -h`.\n"
 
-    @VisibleForTesting fun getPotentialAGPFix(projectDirectory: String): String {
+    @VisibleForTesting internal fun getPotentialAGPFix(projectDirectory: String): String {
         return "Your project's AGP version is typically " +
             "defined in the plugins block of the `settings.gradle` file " +
             "($projectDirectory/settings.gradle), by a plugin with the id of " +
@@ -63,21 +63,21 @@ object DependencyVersionChecker {
     // Before updating any "error" version, ensure that you have updated the corresponding
     // "warn" version for a full release to provide advanced warning. See
     // flutter.dev/go/android-dependency-versions for more.
-    @VisibleForTesting val warnGradleVersion: Version = Version(7, 4, 2)
+    @VisibleForTesting internal val warnGradleVersion: Version = Version(7, 4, 2)
 
-    @VisibleForTesting val errorGradleVersion: Version = Version(7, 0, 2)
+    @VisibleForTesting internal val errorGradleVersion: Version = Version(7, 0, 2)
 
-    @VisibleForTesting val warnJavaVersion: JavaVersion = JavaVersion.VERSION_11
+    @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_11
 
-    @VisibleForTesting val errorJavaVersion: JavaVersion = JavaVersion.VERSION_1_1
+    @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_1_1
 
-    @VisibleForTesting val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(7, 3, 1)
+    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(7, 3, 1)
 
-    @VisibleForTesting val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(7, 0, 0)
+    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(7, 0, 0)
 
-    @VisibleForTesting val warnKGPVersion: Version = Version(1, 8, 10)
+    @VisibleForTesting internal val warnKGPVersion: Version = Version(1, 8, 10)
 
-    @VisibleForTesting val errorKGPVersion: Version = Version(1, 7, 0)
+    @VisibleForTesting internal val errorKGPVersion: Version = Version(1, 7, 0)
 
     /**
      * Checks if the project's Android build time dependencies are each within the respective
@@ -99,7 +99,7 @@ object DependencyVersionChecker {
     }
 
     // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.invocation/-gradle/index.html#-837060600%2FFunctions%2F-1793262594
-    @VisibleForTesting fun getGradleVersion(project: Project): Version {
+    @VisibleForTesting internal fun getGradleVersion(project: Project): Version {
         val untrimmedGradleVersion: String = project.gradle.gradleVersion
         // Trim to handle candidate gradle versions (example 7.6-rc-4). This means we treat all
         // candidate versions of gradle as the same as their base version
@@ -108,17 +108,15 @@ object DependencyVersionChecker {
     }
 
     // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-java-version/index.html#-1790786897%2FFunctions%2F-1793262594
-    @VisibleForTesting fun getJavaVersion(): JavaVersion {
+    @VisibleForTesting internal fun getJavaVersion(): JavaVersion {
         return JavaVersion.current()
     }
 
-    // This approach is taken from AGP's own version checking plugin:
-    // https://android.googlesource.com/platform/tools/base/+/1839aa23b8dc562005e2f0f0cc8e8b4c5caa37d0/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/utils/agpVersionChecker.kt#58.
-    @VisibleForTesting fun getAGPVersion(): AndroidPluginVersion {
+    @VisibleForTesting internal fun getAGPVersion(): AndroidPluginVersion {
         return AndroidPluginVersion.getCurrent()
     }
 
-    @VisibleForTesting fun getKGPVersion(project: Project): Version? {
+    @VisibleForTesting internal fun getKGPVersion(project: Project): Version? {
         val potentialAgpVersion: String? = com.android.build.gradle.internal.utils.getKotlinAndroidPluginVersion(project)
 
         return when (potentialAgpVersion) {
@@ -128,7 +126,7 @@ object DependencyVersionChecker {
         }
     }
 
-    @VisibleForTesting fun getErrorMessage(
+    @VisibleForTesting internal fun getErrorMessage(
         dependencyName: String,
         versionString: String,
         errorVersion: String,
@@ -141,7 +139,7 @@ object DependencyVersionChecker {
             "Potential fix: $potentialFix"
     }
 
-    @VisibleForTesting fun getWarnMessage(
+    @VisibleForTesting internal fun getWarnMessage(
         dependencyName: String,
         versionString: String,
         warnVersion: String,
@@ -154,7 +152,7 @@ object DependencyVersionChecker {
             " to bypass this check.\n\nPotential fix: $potentialFix"
     }
 
-    @VisibleForTesting fun checkGradleVersion(
+    @VisibleForTesting internal fun checkGradleVersion(
         version: Version,
         project: Project
     ) {
@@ -180,7 +178,7 @@ object DependencyVersionChecker {
         }
     }
 
-    @VisibleForTesting fun checkJavaVersion(
+    @VisibleForTesting internal fun checkJavaVersion(
         version: JavaVersion,
         project: Project
     ) {
@@ -206,7 +204,7 @@ object DependencyVersionChecker {
         }
     }
 
-    @VisibleForTesting fun checkAGPVersion(
+    @VisibleForTesting internal fun checkAGPVersion(
         androidPluginVersion: AndroidPluginVersion,
         project: Project
     ) {
@@ -232,7 +230,7 @@ object DependencyVersionChecker {
         }
     }
 
-    @VisibleForTesting fun checkKGPVersion(
+    @VisibleForTesting internal fun checkKGPVersion(
         version: Version,
         project: Project
     ) {
@@ -263,7 +261,7 @@ object DependencyVersionChecker {
 // perform easy comparisons. All versions will have a major, minor, and patch value. These values
 // default to 0 when they are not provided or are otherwise unparseable.
 // For example the version strings "8.2", "8.2.2hfd", and "8.2.0" would parse to the same version.
-class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Version> {
+internal class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Version> {
     companion object {
         fun fromString(version: String): Version {
             val asList: List<String> = version.split(".")
@@ -296,6 +294,7 @@ class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Versi
 
 // Custom error for when the dependency_version_checker.kts script finds a dependency out of
 // the defined support range.
-@VisibleForTesting class DependencyValidationException(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
-    constructor(cause: Throwable) : this(null, cause)
-}
+@VisibleForTesting internal class DependencyValidationException(
+    message: String? = null,
+    cause: Throwable? = null
+) : Exception(message, cause)
