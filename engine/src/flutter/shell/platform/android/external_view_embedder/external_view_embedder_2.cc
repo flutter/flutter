@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
+#include "display_list/dl_color.h"
 #include "flow/view_slicer.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
@@ -127,6 +128,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
        slices = std::move(slices_)]() -> void {
         jni_facade->swapTransaction();
+
         for (int64_t view_id : composition_order) {
           SkRect view_rect = GetViewRect(view_id, view_params);
           const EmbeddedViewParams& params = view_params.at(view_id);
@@ -145,6 +147,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
           surface_pool_->GetLayer(context, android_context_, jni_facade_,
                                   surface_factory_);
         }
+        jni_facade_->onEndFrame2();
       }));
 }
 
