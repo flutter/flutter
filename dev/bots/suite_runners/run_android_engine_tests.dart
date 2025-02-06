@@ -102,7 +102,7 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
       if (file.path.contains('hcpp')) {
         continue;
       }
-      runTest(file);
+      await runTest(file);
     }
 
     // Test HCPP Platform Views
@@ -116,7 +116,7 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
       if (!file.path.contains('hcpp')) {
         continue;
       }
-      runTest(file);
+      await runTest(file);
     }
   } finally {
     // Restore original contents.
