@@ -1452,7 +1452,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(MaterialApp(theme: ThemeData(), home: Material(child: buildTable())));
+    await tester.pumpWidget(MaterialApp(home: Material(child: buildTable())));
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content1')));
     await tester.pump(const Duration(milliseconds: 200)); // splash is well underway

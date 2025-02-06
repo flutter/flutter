@@ -133,7 +133,6 @@ void main() {
   testWidgets('BackButton color with ButtonStyle', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: const Material(
           child: BackButton(
             style: ButtonStyle(iconColor: MaterialStatePropertyAll<Color>(Colors.red)),
@@ -153,7 +152,6 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: const Material(
           child: BackButton(
             color: Colors.green,
@@ -270,7 +268,6 @@ void main() {
   testWidgets('CloseButton color with ButtonStyle', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: const Material(
           child: CloseButton(
             style: ButtonStyle(iconColor: MaterialStatePropertyAll<Color>(Colors.red)),
@@ -290,7 +287,6 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: const Material(
           child: CloseButton(
             color: Colors.green,

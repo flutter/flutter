@@ -761,7 +761,7 @@ void main() {
 
     await tester.pumpFrames(
       animationSheet.record(
-        Theme(data: ThemeData(useMaterial3: true), child: const _RefreshProgressIndicatorGolden()),
+        Theme(data: ThemeData(), child: const _RefreshProgressIndicatorGolden()),
       ),
       const Duration(seconds: 3),
     );
@@ -1063,7 +1063,7 @@ void main() {
     await tester.pumpFrames(
       animationSheet.record(
         Theme(
-          data: ThemeData(useMaterial3: true),
+          data: ThemeData(),
           child: const Directionality(
             textDirection: TextDirection.ltr,
             child: Padding(padding: EdgeInsets.all(4), child: CircularProgressIndicator()),
@@ -1084,7 +1084,6 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(),
           home: const Scaffold(body: Material(child: CircularProgressIndicator.adaptive())),
         ),
       );
@@ -1102,7 +1101,6 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(),
           home: const Scaffold(
             body: Material(child: CircularProgressIndicator.adaptive(value: 0.5)),
           ),
@@ -1127,7 +1125,6 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(),
           home: const Scaffold(
             body: Material(
               child: CircularProgressIndicator.adaptive(backgroundColor: Color(0xFF5D3FD3)),

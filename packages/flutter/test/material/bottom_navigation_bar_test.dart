@@ -2914,7 +2914,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(),
         home: Builder(
           builder: (BuildContext context) {
             return Scaffold(

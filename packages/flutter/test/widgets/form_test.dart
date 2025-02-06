@@ -913,7 +913,6 @@ void main() {
 
       Widget builder() {
         return MaterialApp(
-          theme: ThemeData(),
           home: MediaQuery(
             data: const MediaQueryData(),
             child: Directionality(
@@ -1297,7 +1296,6 @@ void main() {
 
     Widget builder() {
       return MaterialApp(
-        theme: ThemeData(),
         home: MediaQuery(
           data: const MediaQueryData(),
           child: Directionality(
@@ -1357,7 +1355,6 @@ void main() {
 
     Widget builder() {
       return MaterialApp(
-        theme: ThemeData(),
         home: MediaQuery(
           data: const MediaQueryData(),
           child: Directionality(
@@ -1468,7 +1465,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(),
         home: Center(
           child: Form(
             autovalidateMode: AutovalidateMode.always,

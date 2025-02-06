@@ -193,16 +193,12 @@ void main() {
     expect(getModel(tester).shadowColor, ThemeData().shadowColor);
 
     // Default M3 shadow color
-    await tester.pumpWidget(
-      Theme(data: ThemeData(useMaterial3: true), child: buildWithShadow(null)),
-    );
+    await tester.pumpWidget(Theme(data: ThemeData(), child: buildWithShadow(null)));
     await tester.pumpAndSettle();
     expect(getModel(tester).shadowColor, ThemeData().colorScheme.shadow);
 
     // Drop shadow can be turned off with a transparent color.
-    await tester.pumpWidget(
-      Theme(data: ThemeData(useMaterial3: true), child: buildWithShadow(Colors.transparent)),
-    );
+    await tester.pumpWidget(Theme(data: ThemeData(), child: buildWithShadow(Colors.transparent)));
     await tester.pumpAndSettle();
     expect(getModel(tester).shadowColor, Colors.transparent);
   });
@@ -292,7 +288,6 @@ void main() {
         await tester.pumpWidget(
           Theme(
             data: ThemeData(
-              useMaterial3: true,
               applyElevationOverlayColor: true,
               colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
             ),
@@ -312,10 +307,7 @@ void main() {
 
       // With no surfaceTintColor specified, it should not apply an overlay
       await tester.pumpWidget(
-        Theme(
-          data: ThemeData(useMaterial3: true),
-          child: buildMaterial(color: baseColor, elevation: 12.0),
-        ),
+        Theme(data: ThemeData(), child: buildMaterial(color: baseColor, elevation: 12.0)),
       );
       await tester.pumpAndSettle();
       final RenderPhysicalShape noTintModel = getModel(tester);
@@ -324,7 +316,7 @@ void main() {
       // With transparent surfaceTintColor, it should not apply an overlay
       await tester.pumpWidget(
         Theme(
-          data: ThemeData(useMaterial3: true),
+          data: ThemeData(),
           child: buildMaterial(
             color: baseColor,
             surfaceTintColor: Colors.transparent,
@@ -340,7 +332,7 @@ void main() {
       // on the elevation.
       await tester.pumpWidget(
         Theme(
-          data: ThemeData(useMaterial3: true),
+          data: ThemeData(),
           child: buildMaterial(
             color: baseColor,
             surfaceTintColor: surfaceTintColor,
@@ -916,7 +908,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Scaffold(
             body: RepaintBoundary(
               key: painterKey,
@@ -989,7 +980,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Scaffold(
             body: RepaintBoundary(
               key: painterKey,

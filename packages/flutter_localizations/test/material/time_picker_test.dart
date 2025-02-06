@@ -133,12 +133,7 @@ void main() {
     ];
 
     for (final Locale locale in locales) {
-      final Offset center = await startPicker(
-        tester,
-        (TimeOfDay? time) {},
-        locale: locale,
-        useMaterial3: true,
-      );
+      final Offset center = await startPicker(tester, (TimeOfDay? time) {}, locale: locale);
       final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
       final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
       final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
@@ -314,12 +309,7 @@ void main() {
     ];
 
     for (final Locale locale in locales) {
-      final Offset center = await startPicker(
-        tester,
-        (TimeOfDay? time) {},
-        locale: locale,
-        useMaterial3: true,
-      );
+      final Offset center = await startPicker(tester, (TimeOfDay? time) {}, locale: locale);
       final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
       final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
       final double hourTopOffset = tester.getTopLeft(hourControlFinder).dy;
@@ -495,7 +485,6 @@ void main() {
           onChanged: (TimeOfDay? time) {},
           locale: locale,
           entryMode: TimePickerEntryMode.input,
-          useMaterial3: true,
         ),
       );
       await tester.tap(find.text('X'));
@@ -590,14 +579,9 @@ void main() {
       // should land on the outer ring's "00".
       for (int factor = startFactor; factor < endFactor; factor += 1) {
         TimeOfDay? result;
-        final Offset center = await startPicker(
-          tester,
-          (TimeOfDay? time) {
-            result = time;
-          },
-          locale: locale,
-          useMaterial3: true,
-        );
+        final Offset center = await startPicker(tester, (TimeOfDay? time) {
+          result = time;
+        }, locale: locale);
         final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
         final double dy = (size.height / 2.0 / 10) * factor;
         await tester.tapAt(Offset(center.dx, center.dy - dy));
@@ -768,7 +752,7 @@ void main() {
   testWidgets('Material3 respects MediaQueryData.alwaysUse24HourFormat == false', (
     WidgetTester tester,
   ) async {
-    await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: false, useMaterial3: true);
+    await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: false);
 
     final CustomPaint dialPaint = tester.widget(
       find.byKey(const ValueKey<String>('time-picker-dial')),
@@ -798,7 +782,7 @@ void main() {
   testWidgets('Material3 respects MediaQueryData.alwaysUse24HourFormat == true', (
     WidgetTester tester,
   ) async {
-    await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, useMaterial3: true);
+    await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true);
 
     final CustomPaint dialPaint = tester.widget(
       find.byKey(const ValueKey<String>('time-picker-dial')),

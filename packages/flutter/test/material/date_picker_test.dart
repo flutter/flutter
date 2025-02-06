@@ -153,7 +153,7 @@ void main() {
         tester.view.physicalSize = size;
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.reset);
-        await prepareDatePicker(tester, (Future<DateTime?> date) async {}, useMaterial3: true);
+        await prepareDatePicker(tester, (Future<DateTime?> date) async {});
       }
 
       const Size calendarLandscapeDialogSize = Size(496.0, 346.0);
@@ -177,7 +177,7 @@ void main() {
     });
 
     testWidgets('Default dialog properties', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         final Material dialogMaterial = tester.widget<Material>(
           find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -201,7 +201,7 @@ void main() {
     testWidgets('Material3 uses sentence case labels', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         expect(find.text('Select date'), findsOneWidget);
-      }, useMaterial3: true);
+      });
     });
 
     testWidgets('Cancel, confirm, and help text is used', (WidgetTester tester) async {
@@ -763,7 +763,7 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
 
-      await tester.pumpWidget(buildApp(useMaterial3: true));
+      await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
@@ -814,7 +814,7 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
 
-      await tester.pumpWidget(buildApp(useMaterial3: true));
+      await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
@@ -846,7 +846,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DatePickerDialog(
               initialDate: initialDate,
@@ -948,7 +947,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DatePickerDialog(
               initialDate: initialDate,
@@ -1498,7 +1496,7 @@ void main() {
         expect(decoration.hintText, 'mm/dd/yyyy');
         expect(decoration.labelText, 'Enter Date');
         expect(decoration.errorText, null);
-      }, useMaterial3: true);
+      });
     });
 
     testWidgets('Initial entry mode is used', (WidgetTester tester) async {
@@ -2383,7 +2381,7 @@ void main() {
       tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 1.0;
       initialEntryMode = DatePickerEntryMode.input;
-      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, useMaterial3: true);
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {});
     }
 
     testWidgets('portrait', (WidgetTester tester) async {

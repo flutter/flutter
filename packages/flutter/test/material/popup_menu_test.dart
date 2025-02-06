@@ -1719,7 +1719,6 @@ void main() {
     final Key popupMenuButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           body: Center(
             child: PopupMenuButton<String>(
@@ -3406,7 +3405,7 @@ void main() {
     );
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: scrollbarTheme, useMaterial3: true),
+        theme: ThemeData(scrollbarTheme: scrollbarTheme),
         home: Material(
           child: Column(
             children: <Widget>[
@@ -3438,7 +3437,7 @@ void main() {
     // Test local ScrollbarTheme overrides global ScrollbarTheme.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: scrollbarTheme, useMaterial3: true),
+        theme: ThemeData(scrollbarTheme: scrollbarTheme),
         home: Material(
           child: Column(
             children: <Widget>[
@@ -3584,7 +3583,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key popupMenuButtonKey = UniqueKey();
-    ThemeData theme = ThemeData(useMaterial3: true);
+    ThemeData theme = ThemeData();
 
     Widget buildMenu() {
       return MaterialApp(
@@ -3780,7 +3779,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key popupMenuButtonKey = UniqueKey();
-    ThemeData theme = ThemeData(useMaterial3: true);
+    ThemeData theme = ThemeData();
 
     Widget buildMenu() {
       return MaterialApp(

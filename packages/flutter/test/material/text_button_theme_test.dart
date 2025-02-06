@@ -18,7 +18,7 @@ void main() {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(useMaterial3: true, colorScheme: colorScheme),
+        theme: ThemeData.from(colorScheme: colorScheme),
         home: Scaffold(
           body: Center(child: TextButton(onPressed: () {}, child: const Text('button'))),
         ),
@@ -281,10 +281,7 @@ void main() {
 
     Widget buildFrame({Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor}) {
       return MaterialApp(
-        theme: ThemeData.from(
-          useMaterial3: true,
-          colorScheme: colorScheme.copyWith(shadow: overallShadowColor),
-        ),
+        theme: ThemeData.from(colorScheme: colorScheme.copyWith(shadow: overallShadowColor)),
         home: Scaffold(
           body: Center(
             child: TextButtonTheme(

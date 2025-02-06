@@ -1039,7 +1039,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(useMaterial3: true),
+        theme: ThemeData.light().copyWith(),
         home: RefreshIndicator(
           onRefresh: refresh,
           child: Builder(

@@ -99,7 +99,7 @@ void main() {
   });
 
   testWidgets('Material3 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
-    await tester.pumpWidget(const TestPage(useMaterial3: true));
+    await tester.pumpWidget(const TestPage());
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     await expectLater(

@@ -6350,7 +6350,6 @@ void main() {
     final TextEditingController textController = _textEditingController();
     final ThemeData theme = ThemeData.from(
       colorScheme: const ColorScheme.light().copyWith(error: Colors.deepPurpleAccent),
-      useMaterial3: true,
     );
     await tester.pumpWidget(
       boilerplate(
@@ -6779,7 +6778,7 @@ void main() {
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
 
-    final ThemeData theme = ThemeData.light(useMaterial3: true);
+    final ThemeData theme = ThemeData.light();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -6938,7 +6937,7 @@ void main() {
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
 
-    final ThemeData theme = ThemeData.light(useMaterial3: true);
+    final ThemeData theme = ThemeData.light();
 
     Widget buildFrame(bool enabled) {
       return MaterialApp(
@@ -9284,7 +9283,6 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/23994
 
     final ThemeData themeData = ThemeData(
-      useMaterial3: true,
       textTheme: TextTheme(bodyLarge: TextStyle(color: Colors.blue[500])),
     );
 
@@ -14058,9 +14056,7 @@ void main() {
     testWidgets('By default, TextField is at least kMinInteractiveDimension high', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(
-        MaterialApp(theme: ThemeData(), home: const Scaffold(body: Center(child: TextField()))),
-      );
+      await tester.pumpWidget(MaterialApp(home: const Scaffold(body: Center(child: TextField()))));
 
       final RenderBox renderBox = tester.renderObject(find.byType(TextField));
       expect(renderBox.size.height, greaterThanOrEqualTo(kMinInteractiveDimension));
@@ -14071,7 +14067,6 @@ void main() {
       (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
-            theme: ThemeData(),
             home: const Scaffold(body: Center(child: TextField(style: TextStyle(fontSize: 2.0)))),
           ),
         );
@@ -14086,7 +14081,6 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(),
           home: const Scaffold(
             body: Center(child: TextField(decoration: InputDecoration(isDense: true))),
           ),
@@ -14160,7 +14154,6 @@ void main() {
     // Lay out text fields in a "+" formation, and focus the center one.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(),
         home: Scaffold(
           body: Center(
             child: Column(

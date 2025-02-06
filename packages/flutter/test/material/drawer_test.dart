@@ -54,7 +54,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           drawer: Drawer(
             child: ListView(
@@ -618,7 +617,6 @@ void main() {
   testWidgets('Material3 - Drawer default shape (ltr)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: const Directionality(
           textDirection: TextDirection.ltr,
           child: Scaffold(drawer: Drawer(), endDrawer: Drawer()),
@@ -675,7 +673,6 @@ void main() {
   testWidgets('Material3 - Drawer default shape (rtl)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: const Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(drawer: Drawer(), endDrawer: Drawer()),
@@ -730,9 +727,7 @@ void main() {
   });
 
   testWidgets('Material3 - Drawer clip behavior', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(useMaterial3: true), home: const Scaffold(drawer: Drawer())),
-    );
+    await tester.pumpWidget(MaterialApp(home: const Scaffold(drawer: Drawer())));
 
     final Finder drawerMaterial = find.descendant(
       of: find.byType(Drawer),
@@ -755,10 +750,7 @@ void main() {
 
     // Provide a custom clip behavior.
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        home: const Scaffold(drawer: Drawer(clipBehavior: Clip.antiAlias)),
-      ),
+      MaterialApp(home: const Scaffold(drawer: Drawer(clipBehavior: Clip.antiAlias))),
     );
 
     // Open the drawer again.

@@ -167,11 +167,11 @@ void main() {
       final Offset dayHeadersGridBottomLeft = tester.getBottomLeft(find.byType(GridView).first);
       expect(calendarScrollViewTopLeft.dx, 0.0);
       expect(calendarScrollViewTopLeft.dy, dayHeadersGridBottomLeft.dy);
-    }, useMaterial3: true);
+    });
   });
 
   testWidgets('Default Dialog properties (calendar mode)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Material dialogMaterial = tester.widget<Material>(
         find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -190,7 +190,7 @@ void main() {
   });
 
   testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Material dialogMaterial = tester.widget<Material>(
         find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -209,7 +209,7 @@ void main() {
   });
 
   testWidgets('Scaffold and AppBar defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
       expect(scaffold.backgroundColor, null);
@@ -236,7 +236,7 @@ void main() {
       tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 1.0;
       initialEntryMode = DatePickerEntryMode.input;
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {}, useMaterial3: true);
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {});
     }
 
     testWidgets('portrait', (WidgetTester tester) async {
@@ -277,7 +277,7 @@ void main() {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       expect(find.text('Save'), findsOneWidget);
       expect(find.text('Select range'), findsOneWidget);
-    }, useMaterial3: true);
+    });
   });
 
   testWidgets('Initial date is the default', (WidgetTester tester) async {
@@ -946,7 +946,7 @@ void main() {
     });
 
     testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         final Material dialogMaterial = tester.widget<Material>(
           find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -984,7 +984,7 @@ void main() {
         expect(endDateDecoration.hintText, 'mm/dd/yyyy');
         expect(endDateDecoration.labelText, 'End Date');
         expect(endDateDecoration.errorText, null);
-      }, useMaterial3: true);
+      });
     });
 
     testWidgets('Initial entry mode is used', (WidgetTester tester) async {
@@ -1567,7 +1567,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
 
-    await tester.pumpWidget(buildApp(useMaterial3: true));
+    await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
@@ -1618,7 +1618,7 @@ void main() {
     await tester.tap(find.text('CANCEL'));
     await tester.pumpAndSettle();
 
-    await tester.pumpWidget(buildApp(useMaterial3: true));
+    await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
@@ -1654,7 +1654,7 @@ void main() {
           color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08),
         ),
       );
-    }, useMaterial3: true);
+    });
   });
 
   group('Material 2', () {
