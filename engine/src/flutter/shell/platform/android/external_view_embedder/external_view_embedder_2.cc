@@ -4,7 +4,6 @@
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
 #include "flow/view_slicer.h"
-#include "flutter/common/constants.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/make_copyable.h"
@@ -131,9 +130,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         for (int64_t view_id : composition_order) {
           SkRect view_rect = GetViewRect(view_id, view_params);
           const EmbeddedViewParams& params = view_params.at(view_id);
-          // Display the platform view. If it's already displayed, then it's
-          // just positioned and sized.
-          jni_facade->FlutterViewOnDisplayPlatformView(
+          jni_facade->onDisplayPlatformView2(
               view_id,             //
               view_rect.x(),       //
               view_rect.y(),       //
@@ -148,28 +145,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
           surface_pool_->GetLayer(context, android_context_, jni_facade_,
                                   surface_factory_);
         }
-        jni_facade->FlutterViewEndFrame();
       }));
-}
-
-// |ExternalViewEmbedder|
-std::unique_ptr<SurfaceFrame>
-AndroidExternalViewEmbedder2::CreateSurfaceIfNeeded(GrDirectContext* context,
-                                                    int64_t view_id,
-                                                    EmbedderViewSlice* slice,
-                                                    const SkRect& rect) {
-  std::shared_ptr<OverlayLayer> layer = surface_pool_->GetLayer(
-      context, android_context_, jni_facade_, surface_factory_);
-
-  std::unique_ptr<SurfaceFrame> frame =
-      layer->surface->AcquireFrame(frame_size_);
-
-  DlCanvas* overlay_canvas = frame->Canvas();
-  overlay_canvas->Clear(DlColor::kTransparent());
-  // Offset the picture since its absolute position on the scene is determined
-  // by the position of the overlay view.
-  slice->render_into(overlay_canvas);
-  return frame;
 }
 
 // |ExternalViewEmbedder|
