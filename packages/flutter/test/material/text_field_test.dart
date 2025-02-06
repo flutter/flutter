@@ -2094,7 +2094,10 @@ void main() {
   testWidgets(
     'text field build empty toolbar when no options available',
     (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: Material(child: TextField(readOnly: true))));
+      await tester.pumpWidget(
+        // An obscured read-only field generates no options.
+        const MaterialApp(home: Material(child: TextField(obscureText: true, readOnly: true))),
+      );
 
       await tester.tap(find.byType(TextField));
       await tester.pump(const Duration(milliseconds: 50));
