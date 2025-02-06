@@ -101,31 +101,14 @@ final int _kUnblockedUserActions =
     SemanticsAction.didGainAccessibilityFocus.index |
     SemanticsAction.didLoseAccessibilityFocus.index;
 
-/// Function signature for checks in [DebugSemanticsRoleChecks.kChecks].
-///
-/// The check is run against any `node` that is sent to the platform.
-///
-/// To access the flags and properties, one should call the
-/// [SemanticsNode.getSemanticsData].
-@visibleForTesting
-typedef DebugSemanticsRoleCheck = FlutterError? Function(SemanticsNode node);
-
 /// A static class to conduct semantics role checks.
-///
-/// When adding a new [SemanticsRole], one must also add a corresponding check
-/// to [kChecks].
-@visibleForTesting
-sealed class DebugSemanticsRoleChecks {
-  /// A map to map each [SemanticsRole] to its check.
-  static const Map<SemanticsRole, DebugSemanticsRoleCheck> kChecks =
-      <SemanticsRole, DebugSemanticsRoleCheck>{
-        SemanticsRole.none: _noCheckRequired,
-        SemanticsRole.tab: _semanticsTab,
-        SemanticsRole.tabBar: _semanticsTabBar,
-        SemanticsRole.tabPanel: _noCheckRequired,
-      };
-
-  static FlutterError? _checkSemanticsData(SemanticsNode node) => kChecks[node.role]!(node);
+sealed class _DebugSemanticsRoleChecks {
+  static FlutterError? _checkSemanticsData(SemanticsNode node) => switch (node.role) {
+    SemanticsRole.none => _noCheckRequired,
+    SemanticsRole.tab => _semanticsTab,
+    SemanticsRole.tabBar => _semanticsTabBar,
+    SemanticsRole.tabPanel => _noCheckRequired,
+  }(node);
 
   static FlutterError? _noCheckRequired(SemanticsNode node) => null;
 
@@ -2446,6 +2429,22 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
+  /// When asserts are enabled, returns whether node is marked as dirty.
+  ///
+  /// Otherwise, returns null.
+  ///
+  /// This getter is intended for use in framework unit tests. Applications must
+  /// not depend on its value.
+  @visibleForTesting
+  bool? get debugIsDirty {
+    bool? isDirty;
+    assert(() {
+      isDirty = _dirty;
+      return true;
+    }());
+    return isDirty;
+  }
+
   bool _isDifferentFromCurrentSemanticAnnotation(SemanticsConfiguration config) {
     return _attributedLabel != config.attributedLabel ||
         _attributedHint != config.attributedHint ||
@@ -2471,7 +2470,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _areUserActionsBlocked != config.isBlockingUserActions ||
         _headingLevel != config._headingLevel ||
         _linkUrl != config._linkUrl ||
-        _linkUrl != config._linkUrl;
+        _role != config.role;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -3060,7 +3059,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
     assert(() {
-      final FlutterError? error = DebugSemanticsRoleChecks._checkSemanticsData(this);
+      final FlutterError? error = _DebugSemanticsRoleChecks._checkSemanticsData(this);
       if (error != null) {
         throw error;
       }

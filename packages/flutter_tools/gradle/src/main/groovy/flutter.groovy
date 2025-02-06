@@ -5,6 +5,8 @@
 
 import com.android.build.OutputFile
 import com.flutter.gradle.BaseApplicationNameHandler
+import com.flutter.gradle.Deeplink
+import com.flutter.gradle.IntentFilterCheck
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -184,13 +186,15 @@ class FlutterPlugin implements Plugin<Project> {
         Project rootProject = project.rootProject
         if (isFlutterAppProject()) {
             rootProject.tasks.register("generateLockfiles") {
-                rootProject.subprojects.each { subproject ->
-                    String gradlew = (OperatingSystem.current().isWindows()) ?
-                        "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
-                    rootProject.exec {
-                        workingDir(rootProject.projectDir)
-                        executable(gradlew)
-                        args(":${subproject.name}:dependencies", "--write-locks")
+                doLast {
+                    rootProject.subprojects.each { subproject ->
+                        String gradlew = (OperatingSystem.current().isWindows()) ?
+                            "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
+                        rootProject.exec {
+                            workingDir(rootProject.projectDir)
+                            executable(gradlew)
+                            args(":${subproject.name}:dependencies", "--write-locks")
+                        }
                     }
                 }
             }
@@ -546,7 +550,7 @@ class FlutterPlugin implements Plugin<Project> {
                                     schemes.each { scheme ->
                                         hosts.each { host ->
                                             paths.each { path ->
-                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path, intentFilterCheck: intentFilterCheck))
+                                                appLinkSettings.deeplinks.add(new Deeplink(scheme, host, path, intentFilterCheck))
                                             }
                                         }
                                     }
@@ -1570,31 +1574,6 @@ class AppLinkSettings {
     Set<Deeplink> deeplinks
     boolean deeplinkingFlagEnabled
 
-}
-
-class IntentFilterCheck {
-
-    boolean hasAutoVerify
-    boolean hasActionView
-    boolean hasDefaultCategory
-    boolean hasBrowsableCategory
-
-}
-
-class Deeplink {
-    String scheme, host, path
-    IntentFilterCheck intentFilterCheck
-    boolean equals(Object o) {
-        if (o == null) {
-            throw new NullPointerException()
-        }
-        if (o.getClass() != getClass()) {
-            return false
-        }
-        return scheme == o.scheme &&
-                host == o.host &&
-                path == o.path
-    }
 }
 
 abstract class BaseFlutterTask extends DefaultTask {
