@@ -559,5 +559,46 @@ TEST_P(DlGoldenTest, SubpixelScaled) {
   }
 }
 
+// Checks that the left most edge of the glyph is fading out as we push
+// it to the right by fractional pixels.
+TEST_P(DlGoldenTest, SubpixelScaledTranslated) {
+  SetWindowSize(impeller::ISize(1024, 200));
+  impeller::Scalar font_size = 200;
+  Scalar scalar = 0.75;
+  auto callback = [&](Scalar offset_x) -> sk_sp<DisplayList> {
+    DisplayListBuilder builder;
+    builder.Scale(scalar, scalar);
+    DlPaint paint;
+    paint.setColor(DlColor::ARGB(1, 0, 0, 0));
+    builder.DrawPaint(paint);
+    builder.Translate(offset_x, 180);
+    RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
+                           DlPoint::MakeXY(0, 0),
+                           TextRenderOptions{
+                               .font_size = font_size,
+                               .is_subpixel = true,
+                           });
+    return builder.Build();
+  };
+
+  LeftmostIntensity intensity[5];
+  Scalar offset_fraction = 0.25 / scalar;
+  for (int i = 0; i <= 4; ++i) {
+    Scalar offset = 10 + (offset_fraction * i);
+    std::unique_ptr<impeller::testing::Screenshot> right =
+        MakeScreenshot(callback(offset));
+    if (!right) {
+      GTEST_SKIP() << "making screenshots not supported.";
+    }
+    intensity[i] = CalculateLeftmostIntensity(right.get());
+    ASSERT_NE(intensity[i].value, 0);
+  }
+  for (int i = 1; i < 5; ++i) {
+    EXPECT_TRUE(intensity[i].x - intensity[i - 1].x == 1 ||
+                intensity[i].value < intensity[i - 1].value)
+        << i;
+  }
+}
+
 }  // namespace testing
 }  // namespace flutter
