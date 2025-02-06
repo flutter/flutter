@@ -2,6 +2,7 @@ package com.flutter.gradle
 
 import androidx.annotation.VisibleForTesting
 import com.android.build.api.AndroidPluginVersion
+import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.extra
@@ -89,7 +90,15 @@ object DependencyVersionChecker {
 
         checkGradleVersion(getGradleVersion(project), project)
         checkJavaVersion(getJavaVersion(), project)
-        checkAGPVersion(getAGPVersion(), project)
+        val agpVersion: AndroidPluginVersion? = getAGPVersion(project)
+        if (agpVersion != null) {
+            checkAGPVersion(agpVersion, project)
+        } else {
+            project.logger.error(
+                "Warning: unable to detect project AGP version. Skipping " +
+                    "version checking. \nThis may be because you have applied AGP after the Flutter Gradle Plugin."
+            )
+        }
 
         val kgpVersion: Version? = getKGPVersion(project)
         if (kgpVersion != null) {
@@ -112,8 +121,12 @@ object DependencyVersionChecker {
         return JavaVersion.current()
     }
 
-    @VisibleForTesting internal fun getAGPVersion(): AndroidPluginVersion {
-        return AndroidPluginVersion.getCurrent()
+    @VisibleForTesting internal fun getAGPVersion(project: Project): AndroidPluginVersion? {
+        val androidPluginVersion: AndroidPluginVersion? =
+            project.extensions.findByType(
+                AndroidComponentsExtension::class.java
+            )?.pluginVersion
+        return androidPluginVersion
     }
 
     @VisibleForTesting internal fun getKGPVersion(project: Project): Version? {
