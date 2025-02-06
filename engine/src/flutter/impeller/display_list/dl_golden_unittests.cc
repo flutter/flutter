@@ -519,6 +519,7 @@ TEST_P(DlGoldenTest, Subpixel) {
                 intensity[i].value < intensity[i - 1].value)
         << i;
   }
+  EXPECT_EQ(intensity[4].x - intensity[0].x, 1);
 }
 
 // Checks that the left most edge of the glyph is fading out as we push
@@ -559,6 +560,7 @@ TEST_P(DlGoldenTest, SubpixelScaled) {
                 intensity[i].value < intensity[i - 1].value)
         << i;
   }
+  EXPECT_EQ(intensity[4].x - intensity[0].x, 1);
 }
 
 // Checks that the left most edge of the glyph is fading out as we push
@@ -600,6 +602,7 @@ TEST_P(DlGoldenTest, SubpixelScaledTranslated) {
                 intensity[i].value < intensity[i - 1].value)
         << i;
   }
+  EXPECT_EQ(intensity[4].x - intensity[0].x, 1);
 }
 
 }  // namespace testing
