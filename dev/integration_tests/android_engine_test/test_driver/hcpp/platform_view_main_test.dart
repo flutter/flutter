@@ -13,12 +13,12 @@ import '../_luci_skia_gold_prelude.dart';
 ///
 /// ```sh
 /// # Checkout HEAD, i.e. *before* changes you want to test.
-/// UPDATE_GOLDENS=1 flutter drive lib/platform_view/hybrid_compoisition_2_platform_view_main.dart
+/// UPDATE_GOLDENS=1 flutter drive lib/platform_view/hcpp/platform_view_main.dart
 ///
 /// # Make your changes.
 ///
 /// # Run the test against baseline.
-/// flutter drive lib/platform_view/hybrid_compoisition_platform_2_view_main.dart
+/// flutter drive lib/platform_view/hcpp/platform_view_main.dart
 /// ```
 ///
 /// For a convenient way to deflake a test, see `tool/deflake.dart`.
@@ -46,7 +46,7 @@ void main() async {
   test('should screenshot an HC++ platform view', () async {
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.hc_2_platform_view.png'),
+      matchesGoldenFile('$goldenPrefix.hcpp_platform_view.png'),
     );
   }, timeout: Timeout.none);
 
@@ -54,13 +54,13 @@ void main() async {
     await nativeDriver.rotateToLandscape();
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.hc_2_platform_view_landscape_rotated.png'),
+      matchesGoldenFile('$goldenPrefix.hcpp_platform_view_landscape_rotated.png'),
     );
 
     await nativeDriver.rotateResetDefault();
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.hc_2_platform_view_portait_rotated_back.png'),
+      matchesGoldenFile('$goldenPrefix.hcpp_platform_view_portait_rotated_back.png'),
     );
   }, timeout: Timeout.none);
 }
