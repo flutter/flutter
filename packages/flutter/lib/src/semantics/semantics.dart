@@ -1538,7 +1538,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// Example usage:
   /// ```dart
-  /// Semantics.fromProperties(
+  /// const Semantics.fromProperties(
   ///  properties: SemanticsProperties(
   ///    hintOverrides: SemanticsHintOverrides(
   ///      onTapHint: 'open settings',
