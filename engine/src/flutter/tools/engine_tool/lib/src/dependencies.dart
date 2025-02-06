@@ -22,7 +22,7 @@ Future<int> fetchDependencies(Environment environment) async {
   if (dotGclientPath == null) {
     environment.logger.error(
       'Failed to find the .gclient file. Make sure your local engine build '
-      'environment is configured described in '
+      'environment is configured as described in '
       'https://github.com/flutter/flutter/blob/master/engine/README.md',
     );
     return 1;
