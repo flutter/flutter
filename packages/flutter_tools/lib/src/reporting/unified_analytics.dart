@@ -32,7 +32,7 @@ Analytics getAnalytics({
   final bool suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
 
   if ( // Ignore local user branches.
-  version.startsWith('[user-branch]') ||
+  version.startsWith('x[user-branch]') ||
       // Many CI systems don't do a full git checkout.
       version.endsWith('/unknown') ||
       // Ignore bots.

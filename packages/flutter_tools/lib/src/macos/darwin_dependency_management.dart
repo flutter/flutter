@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../features.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'cocoapods.dart';
@@ -22,12 +25,14 @@ class DarwinDependencyManagement {
     required SwiftPackageManager swiftPackageManager,
     required FileSystem fileSystem,
     required Logger logger,
+    required Analytics analytics,
   }) : _project = project,
        _plugins = plugins,
        _cocoapods = cocoapods,
        _swiftPackageManager = swiftPackageManager,
        _fileSystem = fileSystem,
-       _logger = logger;
+       _logger = logger,
+       _analytics = analytics;
 
   final FlutterProject _project;
   final List<Plugin> _plugins;
@@ -35,6 +40,7 @@ class DarwinDependencyManagement {
   final SwiftPackageManager _swiftPackageManager;
   final FileSystem _fileSystem;
   final Logger _logger;
+  final Analytics _analytics;
 
   /// Generates/updates required files and project settings for Darwin
   /// Dependency Managers (CocoaPods and Swift Package Manager). Projects may
@@ -87,6 +93,20 @@ class DarwinDependencyManagement {
       // whether to run.
       useCocoapods = _plugins.isNotEmpty;
     }
+
+    final Event event = Event.flutterSwiftPackageManager(
+      platform: platform.name,
+      swiftPackageManagerUsed: xcodeProject.usesSwiftPackageManager,
+      swiftPackageManagerFeatureEnabled: featureFlags.isSwiftPackageManagerEnabled,
+      projectDisabledSwiftPackageManager: _project.manifest.disabledSwiftPackageManager,
+      projectHasSwiftPackageManagerIntegration: xcodeProject.flutterPluginSwiftPackageInProjectSettings,
+      pluginCount: totalCount,
+      swiftPackageCount: swiftPackageCount,
+      podCount: podCount,
+    );
+
+    _analytics.send(event);
+
     if (useCocoapods) {
       await _cocoapods.setupPodfile(xcodeProject);
     }

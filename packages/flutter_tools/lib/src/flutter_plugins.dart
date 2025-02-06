@@ -1293,6 +1293,7 @@ Future<void> injectPlugins(
           ),
           fileSystem: globals.fs,
           logger: globals.logger,
+          analytics: globals.analytics,
         );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(platform: SupportedPlatform.ios);
