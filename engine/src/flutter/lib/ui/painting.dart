@@ -7,8 +7,8 @@ part of dart.ui;
 // // (for the example in Color)
 // // ignore_for_file: use_full_hex_values_for_flutter_colors
 // late ui.Image _image;
-// dynamic _cacheImage(dynamic _, [dynamic __]) { }
-// dynamic _drawImage(dynamic _, [dynamic __]) { }
+// dynamic _cacheImage(dynamic _, [dynamic _]) { }
+// dynamic _drawImage(dynamic _, [dynamic _]) { }
 
 // Some methods in this file assert that their arguments are not null. These
 // asserts are just to improve the error messages; they should only cover
@@ -293,6 +293,13 @@ class Color {
   /// If [colorSpace] is provided, and is different than the current color
   /// space, the component values are updated before transforming them to the
   /// provided [ColorSpace].
+  ///
+  /// Example:
+  /// ```dart
+  /// import 'dart:ui';
+  /// /// Create a color with 50% opacity.
+  /// Color makeTransparent(Color color) => color.withValues(alpha: 0.5);
+  /// ```
   Color withValues({
     double? alpha,
     double? red,
@@ -5571,7 +5578,7 @@ base class Vertices extends NativeFieldWrapperClass1 {
 /// Defines how a list of points is interpreted when drawing a set of points.
 ///
 /// Used by [Canvas.drawPoints] and [Canvas.drawRawPoints].
-// These enum values must be kept in sync with DlCanvas::PointMode.
+// These enum values must be kept in sync with DlPointMode.
 enum PointMode {
   /// Draw each point separately.
   ///

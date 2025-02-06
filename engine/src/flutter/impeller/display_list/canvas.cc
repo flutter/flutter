@@ -833,7 +833,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
     src_coverage =
         // Covered by FML_CHECK.
         // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-        vertices->GetTextureCoordinateCoverge().value_or(cvg.value());
+        vertices->GetTextureCoordinateCoverage().value_or(cvg.value());
   }
   src_contents = src_paint.CreateContents();
 
@@ -1030,12 +1030,19 @@ void Canvas::SaveLayer(const Paint& paint,
   // sampling mode.
   ISize subpass_size;
   bool did_round_out = false;
+  Point coverage_origin_adjustment = Point{0, 0};
   if (paint.image_filter) {
     subpass_size = ISize(subpass_coverage.GetSize());
   } else {
     did_round_out = true;
     subpass_size =
         static_cast<ISize>(IRect::RoundOut(subpass_coverage).GetSize());
+    // If rounding out, adjust the coverage to account for the subpixel shift.
+    coverage_origin_adjustment =
+        Point(subpass_coverage.GetLeftTop().x -
+                  std::floor(subpass_coverage.GetLeftTop().x),
+              subpass_coverage.GetLeftTop().y -
+                  std::floor(subpass_coverage.GetLeftTop().y));
   }
   if (subpass_size.IsEmpty()) {
     return SkipUntilMatchingRestore(total_content_depth);
@@ -1169,7 +1176,8 @@ void Canvas::SaveLayer(const Paint& paint,
                                              subpass_size,              //
                                              Color::BlackTransparent()  //
                                              )));
-  save_layer_state_.push_back(SaveLayerState{paint_copy, subpass_coverage});
+  save_layer_state_.push_back(SaveLayerState{
+      paint_copy, subpass_coverage.Shift(-coverage_origin_adjustment)});
 
   CanvasStackEntry entry;
   entry.transform = transform_stack_.back().transform;
@@ -1667,6 +1675,10 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   // applied.
   auto& replay_entities = clip_coverage_stack_.GetReplayEntities();
   for (const auto& replay : replay_entities) {
+    if (replay.clip_depth <= current_depth_) {
+      continue;
+    }
+
     SetClipScissor(replay.clip_coverage, current_render_pass,
                    global_pass_position);
     if (!replay.clip_contents.Render(renderer_, current_render_pass,

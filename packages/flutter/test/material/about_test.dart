@@ -479,7 +479,7 @@ void main() {
       tester.getTopLeft(find.text('Licenses')),
       const Offset(16.0 + safeareaPadding, 14.0 + safeareaPadding),
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
@@ -555,11 +555,11 @@ void main() {
         onGenerateRoute: (_) {
           return PageRouteBuilder<dynamic>(
             pageBuilder:
-                (_, __, ___) => Navigator(
+                (_, _, _) => Navigator(
                   observers: <NavigatorObserver>[nestedObserver],
                   onGenerateRoute: (RouteSettings settings) {
                     return PageRouteBuilder<dynamic>(
-                      pageBuilder: (BuildContext context, _, __) {
+                      pageBuilder: (BuildContext context, _, _) {
                         return ElevatedButton(
                           onPressed: () {
                             showLicensePage(context: context, applicationName: 'A');
@@ -595,11 +595,11 @@ void main() {
         onGenerateRoute: (_) {
           return PageRouteBuilder<dynamic>(
             pageBuilder:
-                (_, __, ___) => Navigator(
+                (_, _, _) => Navigator(
                   observers: <NavigatorObserver>[nestedObserver],
                   onGenerateRoute: (RouteSettings settings) {
                     return PageRouteBuilder<dynamic>(
-                      pageBuilder: (BuildContext context, _, __) {
+                      pageBuilder: (BuildContext context, _, _) {
                         return ElevatedButton(
                           onPressed: () {
                             showLicensePage(
@@ -1464,10 +1464,7 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    if (!kIsWeb || isSkiaWeb) {
-      // https://github.com/flutter/flutter/issues/99933
-      expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
-    }
+    expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
     expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.
@@ -1588,10 +1585,7 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    if (!kIsWeb || isSkiaWeb) {
-      // https://github.com/flutter/flutter/issues/99933
-      expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
-    }
+    expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
     expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.
@@ -1850,6 +1844,43 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(AlertDialog), findsNothing);
     }
+  });
+
+  testWidgets('showLicensePage inherits ambient Theme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0XFFFF0000)),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: theme,
+          child: Builder(
+            builder:
+                (BuildContext context) => ElevatedButton(
+                  onPressed: () {
+                    showAboutDialog(
+                      context: context,
+                      applicationName: 'Sample Test',
+                      applicationVersion: 'v1.0.0', // Version of the app
+                    );
+                  },
+                  child: const Text('Show About Dialog'),
+                ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('View licenses'));
+    await tester.pumpAndSettle();
+
+    final ThemeData licensePageTheme = Theme.of(tester.element(find.text('Powered by Flutter')));
+    expect(theme.colorScheme.primary, licensePageTheme.colorScheme.primary);
   });
 }
 

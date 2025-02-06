@@ -59,7 +59,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                 double top,
                 double right,
                 double bottom,
-                DlCanvas::ClipOp clipOp,
+                DlClipOp clipOp,
                 bool doAntiAlias = true);
   void clipRRect(const RRect& rrect, bool doAntiAlias = true);
   void clipRSuperellipse(const RSuperellipse& rse, bool doAntiAlias = true);
@@ -167,7 +167,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
 
   void drawPoints(Dart_Handle paint_objects,
                   Dart_Handle paint_data,
-                  DlCanvas::PointMode point_mode,
+                  DlPointMode point_mode,
                   const tonic::Float32List& points);
 
   void drawVertices(const Vertices* vertices,

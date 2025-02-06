@@ -414,9 +414,6 @@ class LayerStateStack {
   friend class ClipPathEntry;
 
   class Delegate {
-   protected:
-    using ClipOp = DlCanvas::ClipOp;
-
    public:
     virtual ~Delegate() = default;
 
@@ -449,12 +446,14 @@ class LayerStateStack {
     virtual void transform(const DlMatrix& matrix) = 0;
     virtual void integralTransform() = 0;
 
-    virtual void clipRect(const DlRect& rect, ClipOp op, bool is_aa) = 0;
-    virtual void clipRRect(const DlRoundRect& rrect, ClipOp op, bool is_aa) = 0;
+    virtual void clipRect(const DlRect& rect, DlClipOp op, bool is_aa) = 0;
+    virtual void clipRRect(const DlRoundRect& rrect,
+                           DlClipOp op,
+                           bool is_aa) = 0;
     virtual void clipRSuperellipse(const DlRoundSuperellipse& rse,
-                                   ClipOp op,
+                                   DlClipOp op,
                                    bool is_aa) = 0;
-    virtual void clipPath(const DlPath& path, ClipOp op, bool is_aa) = 0;
+    virtual void clipPath(const DlPath& path, DlClipOp op, bool is_aa) = 0;
   };
   friend class DummyDelegate;
   friend class DlCanvasDelegate;
