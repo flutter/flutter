@@ -220,7 +220,7 @@ class LuciConfig {
       'flutter:staging' => LuciRealm.Staging,
       'flutter:try' => LuciRealm.Try,
       'flutter:prod.shadow' => LuciRealm.Prod,
-      'flutter:staging.shadow' => LuciRealm.Staging,
+      'flutter:staging.shadow' => LuciRealm.Try,
       'flutter:try.shadow' => LuciRealm.Try,
       _ => LuciRealm.Unknown,
     };
