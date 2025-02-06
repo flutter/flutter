@@ -304,20 +304,9 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
 
     final List<Widget> resultChildren =
         children != null ? children! : getAdaptiveButtons(context, buttonItems!).toList();
-    final Offset anchor;
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.android:
-        anchor = anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.macOS:
-        anchor = anchors.primaryAnchor;
-    }
 
     return _AdaptiveTextSelectionToolbarWithHighlightedItem(
-      anchor: anchor,
+      anchors: anchors,
       children: resultChildren,
     );
   }
@@ -325,10 +314,11 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
 
 class _AdaptiveTextSelectionToolbarWithHighlightedItem extends StatefulWidget {
   const _AdaptiveTextSelectionToolbarWithHighlightedItem({
-    required this.anchor,
+    required this.anchors,
     required this.children,
   });
-  final Offset anchor;
+
+  final TextSelectionToolbarAnchors anchors;
   final List<Widget> children;
 
   @override
@@ -379,7 +369,8 @@ class _AdaptiveTextSelectionToolbarWithHighlightedItemState
     if (_highlightedIndex == null) {
       _highlightedIndex = 0;
     } else {
-      _highlightedIndex = _highlightedIndex! < _menuItemsLength - 1 ? _highlightedIndex! + 1 : _highlightedIndex;
+      _highlightedIndex =
+          _highlightedIndex! < _menuItemsLength - 1 ? _highlightedIndex! + 1 : _highlightedIndex;
     }
   }
 
@@ -405,26 +396,26 @@ class _AdaptiveTextSelectionToolbarWithHighlightedItemState
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         result = CupertinoTextSelectionToolbar(
-          anchorAbove: widget.anchor,
-          anchorBelow: widget.anchor,
+          anchorAbove: widget.anchors.primaryAnchor,
+          anchorBelow: widget.anchors.secondaryAnchor ?? widget.anchors.primaryAnchor,
           children: resultChildren,
         );
       case TargetPlatform.android:
         result = TextSelectionToolbar(
-          anchorAbove: widget.anchor,
-          anchorBelow: widget.anchor,
+          anchorAbove: widget.anchors.primaryAnchor,
+          anchorBelow: widget.anchors.secondaryAnchor ?? widget.anchors.primaryAnchor,
           children: resultChildren,
         );
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         result = DesktopTextSelectionToolbar(
-          anchor: widget.anchor,
+          anchor: widget.anchors.primaryAnchor,
           children: resultChildren,
         );
       case TargetPlatform.macOS:
         result = CupertinoDesktopTextSelectionToolbar(
-          anchor: widget.anchor,
+          anchor: widget.anchors.primaryAnchor,
           children: resultChildren,
         );
     }
