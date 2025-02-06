@@ -69,6 +69,10 @@ namespace testing {
 using EntityTest = EntityPlayground;
 INSTANTIATE_PLAYGROUND_SUITE(EntityTest);
 
+Rect RectMakeCenterSize(Point center, Size size) {
+  return Rect::MakeSize(size).Shift(center - size / 2);
+}
+
 TEST_P(EntityTest, CanCreateEntity) {
   Entity entity;
   ASSERT_TRUE(entity.GetTransform().IsIdentity());
@@ -2405,7 +2409,7 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
     auto contents = std::make_shared<SolidColorContents>();
     std::unique_ptr<RoundSuperellipseGeometry> geom =
         std::make_unique<RoundSuperellipseGeometry>(
-            Rect::MakeOriginSize({center[0], center[1]}, {size[0], size[1]}),
+            RectMakeCenterSize({center[0], center[1]}, {size[0], size[1]}),
             radii);
     contents->SetColor(Color::Red());
     contents->SetGeometry(geom.get());
