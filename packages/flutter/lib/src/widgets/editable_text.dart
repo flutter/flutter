@@ -3387,8 +3387,6 @@ class EditableTextState extends State<EditableText>
   @protected
   @override
   void dispose() {
-    renderEditable.selectionStartInViewport.removeListener(_updateTextSelectionToolbarVisibilities);
-    renderEditable.selectionEndInViewport.removeListener(_updateTextSelectionToolbarVisibilities);
     _contextMenuTraversalDirectionNotifier.dispose();
     _internalScrollController?.dispose();
     _currentAutofillScope?.unregister(autofillId);
@@ -4966,9 +4964,6 @@ class EditableTextState extends State<EditableText>
   void hideToolbar([bool hideHandles = true]) {
     // Stop listening to parent scroll events when toolbar is hidden.
     _disposeScrollNotificationObserver();
-    // Stop listening to selection start and end updates when toolbar is hidden.
-    renderEditable.selectionStartInViewport.removeListener(_updateTextSelectionToolbarVisibilities);
-    renderEditable.selectionEndInViewport.removeListener(_updateTextSelectionToolbarVisibilities);
     if (hideHandles) {
       // Hide the handles and the toolbar.
       // _selectionOverlay?.hide();
@@ -5628,13 +5623,6 @@ class EditableTextState extends State<EditableText>
     EditableTextTapUpOutsideIntent: _makeOverridable(_EditableTextTapUpOutsideAction()),
   };
 
-  final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
-  void _updateTextSelectionToolbarVisibilities() {
-    _effectiveToolbarVisibility.value =
-        renderEditable.selectionStartInViewport.value ||
-        renderEditable.selectionEndInViewport.value;
-  }
-
   final _SelectionContextMenuEventNotifier _contextMenuTraversalDirectionNotifier =
       _SelectionContextMenuEventNotifier._();
 
@@ -5681,17 +5669,17 @@ class EditableTextState extends State<EditableText>
                 SelectionContextMenuNextItemIntent:
                     CallbackAction<SelectionContextMenuNextItemIntent>(
                       onInvoke: (SelectionContextMenuNextItemIntent intent) {
-                        debugPrint('hi from editabletext context menu next item intent');
                         _contextMenuTraversalDirectionNotifier.value =
                             SelectionContextMenuTraversalDirection.next;
+                        return null;
                       },
                     ),
               SelectionContextMenuPreviousItemIntent:
                   CallbackAction<SelectionContextMenuPreviousItemIntent>(
                     onInvoke: (SelectionContextMenuPreviousItemIntent intent) {
-                      debugPrint('hi from editabletext context menu previous item intent');
                       _contextMenuTraversalDirectionNotifier.value =
                           SelectionContextMenuTraversalDirection.previous;
+                      return null;
                     },
                   ),
             },
@@ -5835,29 +5823,44 @@ class EditableTextState extends State<EditableText>
                                 ),
                               );
                               if (widget.contextMenuBuilder != null) {
+                                // editable = OverlayPortal(
+                                //   controller: _contextMenuPortalController,
+                                //   overlayChildBuilder: (BuildContext context) {
+                                //     renderEditable.selectionStartInViewport.removeListener(
+                                //       _updateTextSelectionToolbarVisibilities,
+                                //     );
+                                //     renderEditable.selectionEndInViewport.removeListener(
+                                //       _updateTextSelectionToolbarVisibilities,
+                                //     );
+                                //     renderEditable.selectionStartInViewport.addListener(
+                                //       _updateTextSelectionToolbarVisibilities,
+                                //     );
+                                //     renderEditable.selectionEndInViewport.addListener(
+                                //       _updateTextSelectionToolbarVisibilities,
+                                //     );
+                                //     _updateTextSelectionToolbarVisibilities();
+                                //     return SelectionToolbarWrapper(
+                                //       layerLink: _toolbarLayerLink,
+                                //       offset: -renderEditable.localToGlobal(Offset.zero),
+                                //       visibility: _effectiveToolbarVisibility,
+                                //       child: SelectionContextMenuEventScope(
+                                //         traversalDirectionNotifier:
+                                //             _contextMenuTraversalDirectionNotifier,
+                                //         child: widget.contextMenuBuilder!(context, this),
+                                //       ),
+                                //     );
+                                //   },
+                                //   child: editable,
+                                // );
                                 editable = OverlayPortal(
                                   controller: _contextMenuPortalController,
                                   overlayChildBuilder: (BuildContext context) {
-                                    renderEditable.selectionStartInViewport.removeListener(
-                                      _updateTextSelectionToolbarVisibilities,
-                                    );
-                                    renderEditable.selectionEndInViewport.removeListener(
-                                      _updateTextSelectionToolbarVisibilities,
-                                    );
-                                    renderEditable.selectionStartInViewport.addListener(
-                                      _updateTextSelectionToolbarVisibilities,
-                                    );
-                                    renderEditable.selectionEndInViewport.addListener(
-                                      _updateTextSelectionToolbarVisibilities,
-                                    );
-                                    _updateTextSelectionToolbarVisibilities();
-                                    return SelectionToolbarWrapper(
-                                      layerLink: _toolbarLayerLink,
-                                      offset: -renderEditable.localToGlobal(Offset.zero),
-                                      visibility: _effectiveToolbarVisibility,
-                                      child: SelectionContextMenuEventScope(
-                                        traversalDirectionNotifier:
-                                            _contextMenuTraversalDirectionNotifier,
+                                    return SelectionContextMenuEventScope(
+                                      traversalDirectionNotifier:
+                                          _contextMenuTraversalDirectionNotifier,
+                                      child: _EditableTextContextMenu(
+                                        layerLink: _toolbarLayerLink,
+                                        renderEditable: renderEditable,
                                         child: widget.contextMenuBuilder!(context, this),
                                       ),
                                     );
@@ -5973,6 +5976,68 @@ class EditableTextState extends State<EditableText>
       context: context,
       style: _style,
       withComposing: withComposing,
+    );
+  }
+}
+
+class _EditableTextContextMenu extends StatefulWidget {
+  const _EditableTextContextMenu({
+    required this.layerLink,
+    required this.renderEditable,
+    required this.child,
+  });
+
+  final LayerLink layerLink;
+  final RenderEditable renderEditable;
+  final Widget child;
+
+  @override
+  _EditableTextContextMenuState createState() => _EditableTextContextMenuState();
+}
+
+class _EditableTextContextMenuState extends State<_EditableTextContextMenu> {
+  final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
+  void _updateTextSelectionToolbarVisibilities() {
+    _effectiveToolbarVisibility.value =
+        widget.renderEditable.selectionStartInViewport.value ||
+        widget.renderEditable.selectionEndInViewport.value;
+  }
+
+  // final _SelectionContextMenuEventNotifier _contextMenuTraversalDirectionNotifier =
+  //     _SelectionContextMenuEventNotifier._();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.renderEditable.selectionStartInViewport.addListener(
+      _updateTextSelectionToolbarVisibilities,
+    );
+    widget.renderEditable.selectionEndInViewport.addListener(
+      _updateTextSelectionToolbarVisibilities,
+    );
+    _updateTextSelectionToolbarVisibilities();
+  }
+
+  @override
+  void dispose() {
+    widget.renderEditable.selectionStartInViewport.removeListener(
+      _updateTextSelectionToolbarVisibilities,
+    );
+    widget.renderEditable.selectionEndInViewport.removeListener(
+      _updateTextSelectionToolbarVisibilities,
+    );
+    _effectiveToolbarVisibility.dispose();
+    // _contextMenuTraversalDirectionNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectionToolbarWrapper(
+      layerLink: widget.layerLink,
+      offset: -widget.renderEditable.localToGlobal(Offset.zero),
+      visibility: _effectiveToolbarVisibility,
+      child: widget.child,
     );
   }
 }
