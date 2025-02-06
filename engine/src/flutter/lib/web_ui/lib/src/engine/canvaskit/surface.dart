@@ -237,7 +237,8 @@ class Surface extends DisplayCanvas {
     }
     // TODO(jonahwilliams): this is somewhat wasteful. We should probably
     // eagerly setup this surface instead of delaying until the first frame?
-    // Or at least cache the estimated window sizeThis is the first frame we have rendered with this canvas.
+    // Or at least cache the estimated window size.
+    // This is the first frame we have rendered with this canvas.
     createOrUpdateSurface(size);
   }
 
@@ -261,16 +262,13 @@ class Surface extends DisplayCanvas {
         return _surface!;
       }
 
-      final BitmapSize? previousCanvasSize = _currentCanvasPhysicalSize;
-      // Initialize a new, larger, canvas. If the size is growing, then make the
-      // new canvas larger than required to avoid many canvas creations.
-      if (previousCanvasSize != null &&
-          (size.width > previousCanvasSize.width || size.height > previousCanvasSize.height)) {
-        final BitmapSize newSize = BitmapSize.fromSize(size.toSize() * 1.4);
+      if (_currentCanvasPhysicalSize != null &&
+          (size.width != _currentCanvasPhysicalSize!.width ||
+              size.height != _currentCanvasPhysicalSize!.height)) {
         _surface?.dispose();
         _surface = null;
-        _pixelWidth = newSize.width;
-        _pixelHeight = newSize.height;
+        _pixelWidth = size.width;
+        _pixelHeight = size.height;
         if (useOffscreenCanvas) {
           _offscreenCanvas!.width = _pixelWidth.toDouble();
           _offscreenCanvas!.height = _pixelHeight.toDouble();
@@ -285,10 +283,14 @@ class Surface extends DisplayCanvas {
       }
     }
 
+    // If we reached here, then either we are forcing a new context, or
+    // the size of the surface has changed so we need to make a new one.
+
+    _surface?.dispose();
+    _surface = null;
+
     // Either a new context is being forced or we've never had one.
     if (_forceNewContext || _currentCanvasPhysicalSize == null) {
-      _surface?.dispose();
-      _surface = null;
       _grContext?.releaseResourcesAndAbandonContext();
       _grContext?.delete();
       _grContext = null;
@@ -297,7 +299,6 @@ class Surface extends DisplayCanvas {
       _currentCanvasPhysicalSize = size;
     }
 
-    _surface?.dispose();
     return _surface = _createNewSurface(size);
   }
 
