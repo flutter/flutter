@@ -17,7 +17,6 @@ import com.example.android_engine_test.fixtures.BoxPlatformViewFactory
 import com.example.android_engine_test.fixtures.ChangingColorButtonPlatformViewFactory
 import com.example.android_engine_test.fixtures.OtherFaceTexturePlugin
 import com.example.android_engine_test.fixtures.SmileyFaceTexturePlugin
-import com.example.android_engine_test.fixtures.BoxPlatformViewFactory
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 
