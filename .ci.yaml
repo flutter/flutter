@@ -1129,19 +1129,11 @@ targets:
   - name: Linux_android_emu android_display_cutout
     recipe: devicelab/devicelab_drone
     timeout: 60
-    presubmit: true
-    bringup: true
     properties:
-      xvfb: "1"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:17"}
-        ]
       tags: >
-        ["devicelab", "hostonly", "linux"]
+        ["devicelab", "linux"]
       task_name: android_display_cutout
+      presubmit_max_attempts: "2"
 
   - name: Linux android_release_builds_exclude_dev_dependencies_test
     recipe: devicelab/devicelab_drone
