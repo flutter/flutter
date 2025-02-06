@@ -59,7 +59,7 @@ kotlin {
 }
 
 dependencies {
-    implementation("androidx.annotation:annotation-jvm:1.9.1")
+    compileOnly("androidx.annotation:annotation-jvm:1.9.1")
     // When bumping, also update:
     //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
     //  * AGP version in the buildscript block in packages/flutter_tools/gradle/src/main/kotlin_scripts/dependency_version_checker.gradle.kts
