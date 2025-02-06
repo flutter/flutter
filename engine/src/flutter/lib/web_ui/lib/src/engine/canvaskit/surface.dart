@@ -25,19 +25,6 @@ const bool _kUsingMSAA = bool.fromEnvironment('flutter.canvaskit.msaa');
 
 typedef SubmitCallback = bool Function(SurfaceFrame, CkCanvas);
 
-/// Strategies for when to resize the surface. Either resize the surface
-/// whenever the requested size is different from the current size, or only
-/// when the requested size is larger than the current size.
-enum SurfaceResizeStrategy {
-  /// Resizes the surface whenever the requested size is different from the
-  /// current size.
-  exact,
-
-  /// Resizes the surface only if the current size is less than the requested
-  /// size. The surface will only ever grow.
-  onlyGrow,
-}
-
 /// A frame which contains a canvas to be drawn into.
 class SurfaceFrame {
   SurfaceFrame(this.skiaSurface, this.submitCallback) : _submitted = false;
@@ -63,7 +50,7 @@ class SurfaceFrame {
 /// successive frames if they are the same size. Otherwise, a new [CkSurface] is
 /// created.
 class Surface extends DisplayCanvas {
-  Surface({this.isDisplayCanvas = false, this.resizeStrategy = SurfaceResizeStrategy.onlyGrow})
+  Surface({this.isDisplayCanvas = false})
     : useOffscreenCanvas = Surface.offscreenCanvasSupported && !isDisplayCanvas;
 
   CkSurface? _surface;
@@ -73,9 +60,6 @@ class Surface extends DisplayCanvas {
 
   /// If `true`, this [Surface] is used as a [DisplayCanvas].
   final bool isDisplayCanvas;
-
-  /// When to resize the underlying surface.
-  final SurfaceResizeStrategy resizeStrategy;
 
   /// If true, forces a new WebGL context to be created, even if the window
   /// size is the same. This is used to restore the UI after the browser tab
@@ -258,35 +242,6 @@ class Surface extends DisplayCanvas {
     createOrUpdateSurface(size);
   }
 
-  /// Returns [true] if we need to resize the surface based on the requested
-  /// size and the resize strategy.
-  bool _needsResize(BitmapSize requestedSize) {
-    final BitmapSize? currentSize = _currentCanvasPhysicalSize;
-    if (currentSize == null) {
-      return true;
-    }
-    switch (resizeStrategy) {
-      case SurfaceResizeStrategy.exact:
-        return requestedSize.width != currentSize.width ||
-            requestedSize.height != currentSize.height;
-      case SurfaceResizeStrategy.onlyGrow:
-        return requestedSize.width > currentSize.width || requestedSize.height > currentSize.height;
-    }
-  }
-
-  /// Returns the size we should resize the surface to given the requested
-  /// size and the resize strategy.
-  BitmapSize _sizeToResizeTo(BitmapSize requestedSize) {
-    switch (resizeStrategy) {
-      case SurfaceResizeStrategy.exact:
-        return requestedSize;
-      case SurfaceResizeStrategy.onlyGrow:
-        // Initialize a new, larger, canvas. If the size is growing, then make the
-        // new canvas larger than required to avoid many canvas creations.
-        return BitmapSize.fromSize(requestedSize.toSize() * 1.4);
-    }
-  }
-
   /// Creates a <canvas> and SkSurface for the given [size].
   CkSurface createOrUpdateSurface(BitmapSize size) {
     if (size.isEmpty) {
@@ -307,12 +262,13 @@ class Surface extends DisplayCanvas {
         return _surface!;
       }
 
-      if (_currentCanvasPhysicalSize != null && _needsResize(size)) {
-        final BitmapSize newSize = _sizeToResizeTo(size);
+      if (_currentCanvasPhysicalSize != null &&
+          (size.width != _currentCanvasPhysicalSize!.width ||
+              size.height != _currentCanvasPhysicalSize!.height)) {
         _surface?.dispose();
         _surface = null;
-        _pixelWidth = newSize.width;
-        _pixelHeight = newSize.height;
+        _pixelWidth = size.width;
+        _pixelHeight = size.height;
         if (useOffscreenCanvas) {
           _offscreenCanvas!.width = _pixelWidth.toDouble();
           _offscreenCanvas!.height = _pixelHeight.toDouble();
