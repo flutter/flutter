@@ -82,11 +82,8 @@ static constexpr Scalar ComputeFractionalPosition(Scalar value) {
 Point TextFrame::ComputeSubpixelPosition(
     const TextRun::GlyphPosition& glyph_position,
     AxisAlignment alignment,
-    Point offset,
-    Scalar scale,
     const Matrix& transform) {
-  Point pos = glyph_position.position;
-  pos = transform * pos;
+  Point pos = transform * glyph_position.position;
   switch (alignment) {
     case AxisAlignment::kNone:
       return Point(0, 0);
@@ -104,7 +101,7 @@ void TextFrame::SetPerFrameData(Scalar scale,
                                 Point offset,
                                 const Matrix& transform,
                                 std::optional<GlyphProperties> properties) {
-  if (!ScalarNearlyEqual(scale_, scale) ||
+  if (!transform_.Equals(transform) || !ScalarNearlyEqual(scale_, scale) ||
       !ScalarNearlyEqual(offset_.x, offset.x) ||
       !ScalarNearlyEqual(offset_.y, offset.y) ||
       !TextPropertiesEquals(properties_, properties)) {

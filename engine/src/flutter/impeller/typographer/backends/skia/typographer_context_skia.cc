@@ -452,7 +452,6 @@ TypographerContextSkia::CollectNewGlyphs(
       for (const auto& glyph_position : run.GetGlyphPositions()) {
         Point subpixel = TextFrame::ComputeSubpixelPosition(
             glyph_position, scaled_font.font.GetAxisAlignment(),
-            frame->GetOffset(), frame->GetScale(),
             frame->GetTransform() *
                 Matrix::MakeTranslation(frame->GetOffset()));
         SubpixelGlyph subpixel_glyph(glyph_position.glyph, subpixel,

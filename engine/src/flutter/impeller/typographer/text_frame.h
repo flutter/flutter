@@ -30,8 +30,6 @@ class TextFrame {
   static Point ComputeSubpixelPosition(
       const TextRun::GlyphPosition& glyph_position,
       AxisAlignment alignment,
-      Point offset,
-      Scalar scale,
       const Matrix& transform);
 
   static Scalar RoundScaledFontSize(Scalar scale);
