@@ -8,6 +8,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/make_copyable.h"
+#include "fml/synchronization/count_down_latch.h"
 
 namespace flutter {
 
@@ -91,8 +92,24 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
                  view_rects           //
       );
 
-  // Create Overlay frame.
-  surface_pool_->TrimLayers();
+  // If there is no overlay Surface, initialize one on the platform thread. This
+  // will only be done once per application launch, as the singular overlay
+  // surface is never released.
+  surface_pool_->ResetLayers();
+  if (!surface_pool_->HasLayers()) {
+    std::shared_ptr<fml::CountDownLatch> latch =
+        std::make_shared<fml::CountDownLatch>(1u);
+    task_runners_.GetPlatformTaskRunner()->PostTask(
+        fml::MakeCopyable([&, latch]() {
+          surface_pool_->GetLayer(context, android_context_, jni_facade_,
+                                  surface_factory_);
+          latch->CountDown();
+        }));
+    latch->Wait();
+  }
+
+  // Create Overlay frame. If overlay surface creation failed,
+  // all this work must be skipped.
   std::unique_ptr<SurfaceFrame> overlay_frame;
   if (surface_pool_->HasLayers()) {
     for (int64_t view_id : composition_order_) {
@@ -142,10 +159,6 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
               params.sizePoints().height() * device_pixel_ratio,
               params.mutatorsStack()  //
           );
-        }
-        if (!surface_pool_->HasLayers()) {
-          surface_pool_->GetLayer(context, android_context_, jni_facade_,
-                                  surface_factory_);
         }
         jni_facade_->onEndFrame2();
       }));

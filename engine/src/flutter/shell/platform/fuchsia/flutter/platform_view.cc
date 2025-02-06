@@ -51,8 +51,6 @@ namespace flutter_runner {
 static constexpr char kFlutterPlatformChannel[] = "flutter/platform";
 static constexpr char kAccessibilityChannel[] = "flutter/accessibility";
 static constexpr char kFlutterPlatformViewsChannel[] = "flutter/platform_views";
-static constexpr char kFlutterPlatformViewsChannel2[] =
-    "flutter/platform_views_2";
 static constexpr char kFuchsiaShaderWarmupChannel[] = "fuchsia/shader_warmup";
 static constexpr char kFuchsiaInputTestChannel[] = "fuchsia/input_test";
 static constexpr char kFuchsiaChildViewChannel[] = "fuchsia/child_view";
