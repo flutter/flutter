@@ -54,8 +54,7 @@ void main() {
 
     final Completer<void> completer = Completer<void>();
     process!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
-      // ignore: avoid_print
-      print('STDOUT: $msg');
+      printOnFailure('STDOUT: $msg');
       if (completer.isCompleted) {
         return;
       }
@@ -68,8 +67,7 @@ void main() {
     });
 
     process!.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
-      // ignore: avoid_print
-      print('STDERR: $msg');
+      printOnFailure('STDERR: $msg');
     });
 
     await completer.future;

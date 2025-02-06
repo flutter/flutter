@@ -250,6 +250,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         nativeAssetsBuilder: globals.nativeAssetsBuilder,
       ),
       WidgetPreviewCommand(
+        verboseHelp: verboseHelp,
         logger: globals.logger,
         fs: globals.fs,
         projectFactory: globals.projectFactory,
