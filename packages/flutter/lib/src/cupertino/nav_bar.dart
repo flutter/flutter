@@ -1135,6 +1135,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   }
 
   double get _bottomHeight {
+    assert(!widget._searchable || widget.bottom == null);
     if (widget._searchable) {
       return preferredSizeSearchField!.preferredSize.height;
     } else if (widget.bottom != null) {
@@ -1196,6 +1197,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     switch (status) {
       case AnimationStatus.completed:
       case AnimationStatus.dismissed:
+        // Rebuild so that the leading, middle, and trailing widgets that were
+        // collapsed while the search field was active are re-expanded.
         setState(() {});
       case AnimationStatus.forward:
         searchIsActive = true;

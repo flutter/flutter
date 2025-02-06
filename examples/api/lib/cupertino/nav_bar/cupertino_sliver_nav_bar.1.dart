@@ -87,7 +87,7 @@ class NextPage extends StatefulWidget {
 
 class _NextPageState extends State<NextPage> {
   bool searchIsActive = false;
-  String text = '';
+  late String text;
 
   @override
   Widget build(BuildContext context) {
@@ -112,12 +112,16 @@ class _NextPageState extends State<NextPage> {
               placeholder: searchIsActive ? 'Enter search text' : 'Search',
               onChanged: (String value) {
                 setState(() {
-                  text = 'The text has changed to: $value';
+                  if (value.isEmpty) {
+                    text = 'Type in the search field to show text here';
+                  } else {
+                    text = 'The text has changed to: $value';
+                  }
                 });
               },
             ),
             onSearchableBottomTap: (bool value) {
-              text = '';
+              text = 'Type in the search field to show text here';
               setState(() {
                 searchIsActive = value;
               });
@@ -138,10 +142,6 @@ class _NextPageState extends State<NextPage> {
                           Text('Drag me up', textAlign: TextAlign.center),
                           Text(
                             'Tap on the search field to open the search view',
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            'Tap on the leading button to navigate back',
                             textAlign: TextAlign.center,
                           ),
                         ],
