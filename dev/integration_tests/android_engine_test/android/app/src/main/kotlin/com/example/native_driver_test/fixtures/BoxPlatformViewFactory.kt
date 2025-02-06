@@ -9,9 +9,7 @@ package com.example.android_engine_test.fixtures
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.LinearGradient
 import android.graphics.Paint
-import android.graphics.Shader
 import android.view.View
 import android.view.ViewGroup
 import io.flutter.plugin.platform.PlatformView
@@ -54,7 +52,7 @@ private class BoxPlatformView(
         oldw: Int,
         oldh: Int
     ) {
-        paint.color = Color.rgb(0x41, 0x69, 0xE1);
+        paint.color = Color.rgb(0x41, 0x69, 0xE1)
         super.onSizeChanged(w, h, oldw, oldh)
     }
 }

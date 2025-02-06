@@ -33,18 +33,14 @@ final class MainApp extends StatelessWidget {
       home: Stack(
         alignment: AlignmentDirectional.center,
         children: <Widget>[
-          SizedBox(
-            width: 190,
-            height: 190,
-            child: ColoredBox(color: Colors.red),
-          ),
+          SizedBox(width: 190, height: 190, child: ColoredBox(color: Colors.red)),
           SizedBox(
             width: 200,
             height: 200,
             child: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),
           ),
-          SizedBox(width: 800, height: 25, child: ColoredBox(color: Colors.yellow))
-        ]
+          SizedBox(width: 800, height: 25, child: ColoredBox(color: Colors.yellow)),
+        ],
       ),
     );
   }

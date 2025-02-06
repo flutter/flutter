@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.example.android_engine_test.extensions.NativeDriverSupportPlugin
 import com.example.android_engine_test.fixtures.BlueOrangeGradientPlatformViewFactory
 import com.example.android_engine_test.fixtures.BlueOrangeGradientSurfaceViewPlatformViewFactory
+import com.example.android_engine_test.fixtures.BoxPlatformViewFactory
 import com.example.android_engine_test.fixtures.ChangingColorButtonPlatformViewFactory
 import com.example.android_engine_test.fixtures.OtherFaceTexturePlugin
 import com.example.android_engine_test.fixtures.SmileyFaceTexturePlugin
