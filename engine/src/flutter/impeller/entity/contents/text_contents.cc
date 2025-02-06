@@ -148,7 +148,6 @@ void TextContents::ComputeVertexData(
           VALIDATION_LOG << "Could not find font in the atlas.";
           continue;
         }
-        FML_LOG(ERROR) << "TextContents";
         Point subpixel = TextFrame::ComputeSubpixelPosition(
             glyph_position, font.GetAxisAlignment(), offset, rounded_scale,
             entity_transform);

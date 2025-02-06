@@ -97,10 +97,7 @@ FontGlyphAtlas* GlyphAtlas::GetOrCreateFontGlyphAtlas(
     const ScaledFont& scaled_font) {
   auto [iter, inserted] =
       font_atlas_map_.try_emplace(scaled_font, FontGlyphAtlas());
-  FontGlyphAtlas* result = &iter->second;
-  // FML_LOG(ERROR) << "GetOrCreateFontGlyphAtlas " << scaled_font.scale << " "
-  //                << reinterpret_cast<uint64_t>(result);
-  return result;
+  return &iter->second;
 }
 
 size_t GlyphAtlas::GetGlyphCount() const {
@@ -133,9 +130,6 @@ size_t GlyphAtlas::IterateGlyphs(
 
 std::optional<FrameBounds> FontGlyphAtlas::FindGlyphBounds(
     const SubpixelGlyph& glyph) const {
-  // FML_LOG(ERROR) << "FindGlyphBounds "
-  //                << reinterpret_cast<uint64_t>(this) << " "
-  //                << glyph.glyph.index << " " << glyph.subpixel_offset;
   const auto& found = positions_.find(glyph);
   if (found == positions_.end()) {
     return std::nullopt;
@@ -145,8 +139,6 @@ std::optional<FrameBounds> FontGlyphAtlas::FindGlyphBounds(
 
 void FontGlyphAtlas::AppendGlyph(const SubpixelGlyph& glyph,
                                  const FrameBounds& frame_bounds) {
-  // FML_LOG(ERROR) << "AppendGlyph " << reinterpret_cast<uint64_t>(this)
-  //                << " " << glyph.glyph.index << " " << glyph.subpixel_offset;
   positions_[glyph] = frame_bounds;
 }
 

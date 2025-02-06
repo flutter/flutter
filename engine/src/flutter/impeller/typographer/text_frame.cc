@@ -87,7 +87,6 @@ Point TextFrame::ComputeSubpixelPosition(
     const Matrix& transform) {
   Point pos = glyph_position.position;
   pos = transform * pos;
-  FML_LOG(ERROR) << "ComputeSubpixelPosition " << pos << " " << transform;
   switch (alignment) {
     case AxisAlignment::kNone:
       return Point(0, 0);
