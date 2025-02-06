@@ -6,11 +6,9 @@ import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -74,10 +72,8 @@ class FakePlistUtils extends Fake implements PlistParser {
 void main() {
   late MemoryFileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
-  late ProcessUtils processUtils;
   late FakePlistUtils plistUtils;
   late BufferLogger logger;
-  late Artifacts artifacts;
   late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
@@ -86,10 +82,8 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    artifacts = Artifacts.test(fileSystem: fileSystem);
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
-    processUtils = ProcessUtils(logger: logger, processManager: fakeProcessManager);
     plistUtils = FakePlistUtils();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
