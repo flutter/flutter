@@ -1389,6 +1389,42 @@ void main() {
     );
   });
 
+  testWidgets('Searchable-to-searchable transition does not fade', (WidgetTester tester) async {
+    await startTransitionBetween(
+      tester,
+      from: const CupertinoSliverNavigationBar.search(),
+      to: const CupertinoSliverNavigationBar.search(),
+      fromTitle: 'Page 1',
+      toTitle: 'Page 2',
+    );
+
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(flying(tester, find.byType(CupertinoSearchTextField)), findsNWidgets(2));
+
+    // Either no FadeTransition ancestor is found, or one is found but there is no fade.
+    expect(
+      find.ancestor(
+        of: find.byType(CupertinoSearchTextField).first,
+        matching: find.byType(FadeTransition),
+      ),
+      findsNothing,
+    );
+    checkOpacity(tester, flying(tester, find.byType(CupertinoSearchTextField).last), 1.0);
+
+    await tester.pump(const Duration(milliseconds: 150));
+
+    // Either no FadeTransition ancestor is found, or one is found but there is no fade.
+    expect(
+      find.ancestor(
+        of: find.byType(CupertinoSearchTextField).first,
+        matching: find.byType(FadeTransition),
+      ),
+      findsNothing,
+    );
+    checkOpacity(tester, flying(tester, find.byType(CupertinoSearchTextField).last), 1.0);
+  });
+
   testWidgets('Components are not unnecessarily rebuilt during transitions', (
     WidgetTester tester,
   ) async {

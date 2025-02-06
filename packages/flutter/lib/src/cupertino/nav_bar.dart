@@ -2615,6 +2615,8 @@ class _NavigationBarComponentsTransition {
   Widget? get bottomNavBarBottom {
     final KeyedSubtree? bottomNavBarBottom =
         bottomComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
+    final KeyedSubtree? topNavBarBottom =
+        topComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
 
     if (bottomNavBarBottom == null) {
       return null;
@@ -2630,10 +2632,17 @@ class _NavigationBarComponentsTransition {
       end: from.shift(Offset(-forwardDirection * bottomNavBarBox.size.width, 0.0)),
     );
 
-    return PositionedTransition(
-      rect: animation.drive(positionTween),
-      child: FadeTransition(opacity: fadeOutBy(0.6), child: bottomNavBarBottom.child),
-    );
+    Widget child = bottomNavBarBottom.child;
+
+    // Fade out only if this is not a CupertinoSliverNavigationBar.search to
+    // CupertinoSliverNavigationBar.search transition.
+    if (topNavBarBottom == null ||
+        topNavBarBottom.child is! _NavigationBarSearchField ||
+        bottomNavBarBottom.child is! _NavigationBarSearchField) {
+      child = FadeTransition(opacity: fadeOutBy(0.6), child: child);
+    }
+
+    return PositionedTransition(rect: animation.drive(positionTween), child: child);
   }
 
   Widget? get topLeading {
@@ -2846,6 +2855,8 @@ class _NavigationBarComponentsTransition {
   Widget? get topNavBarBottom {
     final KeyedSubtree? topNavBarBottom =
         topComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
+    final KeyedSubtree? bottomNavBarBottom =
+        bottomComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
 
     if (topNavBarBottom == null) {
       return null;
@@ -2861,10 +2872,17 @@ class _NavigationBarComponentsTransition {
       end: to,
     );
 
-    return PositionedTransition(
-      rect: animation.drive(positionTween),
-      child: FadeTransition(opacity: fadeInFrom(0.3), child: topNavBarBottom.child),
-    );
+    Widget child = topNavBarBottom.child;
+
+    // Fade in only if this is not a CupertinoSliverNavigationBar.search to
+    // CupertinoSliverNavigationBar.search transition.
+    if (bottomNavBarBottom == null ||
+        bottomNavBarBottom.child is! _NavigationBarSearchField ||
+        topNavBarBottom.child is! _NavigationBarSearchField) {
+      child = FadeTransition(opacity: fadeInFrom(0.3), child: child);
+    }
+
+    return PositionedTransition(rect: animation.drive(positionTween), child: child);
   }
 }
 
