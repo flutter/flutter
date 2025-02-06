@@ -141,7 +141,7 @@ void DlSkCanvasDispatcher::clipRoundRect(const DlRoundRect& rrect,
   canvas_->clipRRect(ToSkRRect(rrect), ToSk(clip_op), is_aa);
 }
 void DlSkCanvasDispatcher::clipRoundSuperellipse(const DlRoundSuperellipse& rse,
-                                                 ClipOp clip_op,
+                                                 DlClipOp clip_op,
                                                  bool is_aa) {
   // Skia doesn't support round superellipse, thus fall back to round rectangle.
   canvas_->clipRRect(ToApproximateSkRRect(rse), ToSk(clip_op), is_aa);

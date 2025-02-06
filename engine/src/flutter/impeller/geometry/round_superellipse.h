@@ -7,6 +7,7 @@
 
 #include "flutter/impeller/geometry/point.h"
 #include "flutter/impeller/geometry/rect.h"
+#include "flutter/impeller/geometry/rounding_radii.h"
 #include "flutter/impeller/geometry/size.h"
 
 namespace impeller {
@@ -14,26 +15,37 @@ namespace impeller {
 struct RoundSuperellipse {
   RoundSuperellipse() = default;
 
-  static RoundSuperellipse MakeRectRadius(const Rect& rect,
-                                          Scalar corner_radius);
+  constexpr static RoundSuperellipse MakeRectRadius(const Rect& rect,
+                                                    Scalar radius) {
+    return MakeRectRadii(rect, RoundingRadii::MakeRadius(radius));
+  }
+
+  static RoundSuperellipse MakeRectRadii(const Rect& rect,
+                                         const RoundingRadii& radii);
 
   constexpr const Rect& GetBounds() const { return bounds_; }
-  constexpr float GetCornerRadius() const { return corner_radius_; }
+  constexpr const RoundingRadii& GetRadii() const { return radii_; }
 
   [[nodiscard]] constexpr bool IsFinite() const {
-    return bounds_.IsFinite() && std::isfinite(corner_radius_);
+    return bounds_.IsFinite() &&             //
+           radii_.top_left.IsFinite() &&     //
+           radii_.top_right.IsFinite() &&    //
+           radii_.bottom_left.IsFinite() &&  //
+           radii_.bottom_right.IsFinite();
   }
 
   [[nodiscard]] constexpr bool IsEmpty() const { return bounds_.IsEmpty(); }
 
   [[nodiscard]] constexpr bool IsRect() const {
-    return !bounds_.IsEmpty() && ScalarNearlyEqual(corner_radius_, 0);
+    return !bounds_.IsEmpty() && radii_.AreAllCornersEmpty();
   }
 
-  [[nodiscard]] constexpr bool IsCircle() const {
-    return !bounds_.IsEmpty() &&
-           ScalarNearlyEqual(corner_radius_, bounds_.GetWidth() * 0.5f) &&
-           ScalarNearlyEqual(corner_radius_, bounds_.GetHeight() * 0.5f);
+  [[nodiscard]] constexpr bool IsOval() const {
+    return !bounds_.IsEmpty() && radii_.AreAllCornersSame() &&
+           ScalarNearlyEqual(radii_.top_left.width,
+                             bounds_.GetWidth() * 0.5f) &&
+           ScalarNearlyEqual(radii_.top_left.height,
+                             bounds_.GetHeight() * 0.5f);
   }
 
   /// @brief  Returns a new round rectangle translated by the given offset.
@@ -41,29 +53,23 @@ struct RoundSuperellipse {
     // Just in case, use the factory rather than the internal constructor
     // as shifting the rectangle may increase/decrease its bit precision
     // so we should re-validate the radii to the newly located rectangle.
-    return MakeRectRadius(bounds_.Shift(dx, dy), corner_radius_);
+    return MakeRectRadii(bounds_.Shift(dx, dy), radii_);
   }
 
   [[nodiscard]] constexpr bool operator==(const RoundSuperellipse& rr) const {
-    return bounds_ == rr.bounds_ && corner_radius_ == rr.corner_radius_;
+    return bounds_ == rr.bounds_ && radii_ == rr.radii_;
   }
 
   [[nodiscard]] constexpr bool operator!=(const RoundSuperellipse& r) const {
     return !(*this == r);
   }
 
-  /// @brief  A conservative inner rectangle that is fully contained in this
-  /// shape.
-  ///
-  ///         This is useful for certain optimizations.
-  [[nodiscard]] Rect EstimateInner() const;
-
  private:
-  constexpr RoundSuperellipse(const Rect& bounds, float corner_radius)
-      : bounds_(bounds), corner_radius_(corner_radius) {}
+  constexpr RoundSuperellipse(const Rect& bounds, const RoundingRadii& radii)
+      : bounds_(bounds), radii_(radii) {}
 
-  const Rect bounds_;
-  const float corner_radius_ = 0;
+  Rect bounds_;
+  RoundingRadii radii_;
 };
 
 }  // namespace impeller
@@ -72,9 +78,9 @@ namespace std {
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const impeller::RoundSuperellipse& rr) {
-  out << "("                                        //
-      << "rect: " << rr.GetBounds() << ", "         //
-      << "corner_radius: " << rr.GetCornerRadius()  //
+  out << "("                                 //
+      << "rect: " << rr.GetBounds() << ", "  //
+      << "radii: " << rr.GetRadii()          //
       << ")";
   return out;
 }

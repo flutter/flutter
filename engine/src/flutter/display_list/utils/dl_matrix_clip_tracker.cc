@@ -99,25 +99,29 @@ void DisplayListMatrixClipState::clipRRect(const DlRoundRect& rrect,
 
 void DisplayListMatrixClipState::clipRSuperellipse(
     const DlRoundSuperellipse& rse,
-    ClipOp op,
+    DlClipOp op,
     bool is_aa) {
   DlRect bounds = rse.GetBounds();
   if (rse.IsRect()) {
     return clipRect(bounds, op, is_aa);
   }
   switch (op) {
-    case ClipOp::kIntersect:
+    case DlClipOp::kIntersect:
       adjustCullRect(bounds, op, is_aa);
       break;
-    case ClipOp::kDifference: {
+    case DlClipOp::kDifference: {
       if (rsuperellipse_covers_cull(rse)) {
         cull_rect_ = DlRect();
         return;
       }
-      // TODO(dkwingsmt): The current algorithm is a conservative estimate using
-      // the middle points of the corner curves. Consider switching to
-      // wideMiddleRect and tallMiddleRect in the future, just like RRect.
-      DlRect safe = rse.EstimateInner();
+      auto radii = rse.GetRadii();
+      DlRect safe = bounds.Expand(
+          -std::max(radii.top_left.width, radii.bottom_left.width), 0,
+          -std::max(radii.top_right.width, radii.bottom_right.width), 0);
+      adjustCullRect(safe, op, is_aa);
+      safe = bounds.Expand(
+          0, -std::max(radii.top_left.height, radii.top_right.height),  //
+          0, -std::max(radii.bottom_left.height, radii.bottom_right.height));
       adjustCullRect(safe, op, is_aa);
       break;
     }
@@ -337,25 +341,14 @@ bool DisplayListMatrixClipState::rsuperellipse_covers_cull(
   if (content.IsRect()) {
     return rect_covers_cull(content.GetBounds());
   }
-  if (content.IsCircle()) {
-    // TODO(dkwingsmt): RSEs might degenerates to ovals instead of mere circles
-    // once asymmetrical radius is supported.
-    // https://github.com/flutter/flutter/issues/161207
+  if (content.IsOval()) {
     return oval_covers_cull(content.GetBounds());
   }
   DlPoint corners[4];
   if (!getLocalCullCorners(corners)) {
     return false;
   }
-  // TODO(dkwingsmt): The current algorithm is a conservative estimate using the
-  // middle points of the corner curves. Consider switch to a more precise
-  // algorithm in the future.
-  DlRect inner = content.EstimateInner();
-  for (auto corner : corners) {
-    if (!inner.Contains(corner)) {
-      return false;
-    }
-  }
+  // TODO(dkwingsmt): Implement Contains
   return true;
 }
 

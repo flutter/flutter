@@ -179,8 +179,8 @@ void Canvas::clipRRect(const RRect& rrect, bool doAntiAlias) {
 
 void Canvas::clipRSuperellipse(const RSuperellipse& rse, bool doAntiAlias) {
   if (display_list_builder_) {
-    builder()->ClipRoundSuperellipse(rse.rsuperellipse,
-                                     DlCanvas::ClipOp::kIntersect, doAntiAlias);
+    builder()->ClipRoundSuperellipse(rse.rsuperellipse, DlClipOp::kIntersect,
+                                     doAntiAlias);
   }
 }
 

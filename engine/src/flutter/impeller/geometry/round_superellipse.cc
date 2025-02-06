@@ -8,33 +8,18 @@
 
 namespace impeller {
 
-namespace {
-// The distance from the middle of the curve corners (i.e. the intersection of
-// the circular arc with its respective quadrant bisector, or point M in the
-// figure in DrawOctantSquareLikeSquircle) to either closeby side of the
-// bounding box.
-constexpr Scalar CalculateGap(Scalar corner_radius) {
-  // The formula should be kept in sync with a few files, as documented in
-  // `CalculateGap` in round_superellipse_geometry.cc.
-
-  // Heuristic formula derived from experimentation.
-  return 0.2924066406 * corner_radius;
-}
-}  // namespace
-
-RoundSuperellipse RoundSuperellipse::MakeRectRadius(const Rect& rect,
-                                                    Scalar corner_radius) {
-  if (rect.IsEmpty() || !rect.IsFinite() ||  //
-      !std::isfinite(corner_radius)) {
-    // preserve the empty bounds as they might be strokable
-    return RoundSuperellipse(rect, 0);
+RoundSuperellipse RoundSuperellipse::MakeRectRadii(
+    const Rect& in_bounds,
+    const RoundingRadii& in_radii) {
+  if (!in_bounds.IsFinite()) {
+    return {};
   }
-
-  return RoundSuperellipse(rect, corner_radius);
-}
-
-Rect RoundSuperellipse::EstimateInner() const {
-  return bounds_.Expand(-CalculateGap(corner_radius_));
+  Rect bounds = in_bounds.GetPositive();
+  // RoundingRadii::Scaled might return an empty radii if bounds or in_radii is
+  // empty, which is expected. Pass along the bounds even if the radii is empty
+  // as it would still have a valid location and/or 1-dimensional size which
+  // might appear when stroked
+  return RoundSuperellipse(bounds, in_radii.Scaled(bounds));
 }
 
 }  // namespace impeller

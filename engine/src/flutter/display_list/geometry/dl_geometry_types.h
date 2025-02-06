@@ -211,8 +211,7 @@ inline constexpr const SkRRect ToApproximateSkRRect(
   // Experiments have shown that using the same corner radii for the RRect
   // provides an approximation that is close to optimal, as achieving a perfect
   // match is not feasible.
-  DlScalar radius = rse.GetCornerRadius();
-  return ToSkRRect(DlRoundRect::MakeRectRadius(rse.GetBounds(), radius));
+  return ToSkRRect(DlRoundRect::MakeRectRadii(rse.GetBounds(), rse.GetRadii()));
 };
 
 inline constexpr SkMatrix ToSkMatrix(const DlMatrix& matrix) {

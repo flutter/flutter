@@ -479,11 +479,11 @@ void DlDispatcherBase::clipRoundSuperellipse(const DlRoundSuperellipse& rse,
   if (rse.IsRect()) {
     RectGeometry geom(rse.GetBounds());
     GetCanvas().ClipGeometry(geom, clip_op, /*is_aa=*/is_aa);
-  } else if (rse.IsCircle()) {
+  } else if (rse.IsOval()) {
     EllipseGeometry geom(rse.GetBounds());
     GetCanvas().ClipGeometry(geom, clip_op);
   } else {
-    RoundSuperellipseGeometry geom(rse.GetBounds(), rse.GetCornerRadius());
+    RoundSuperellipseGeometry geom(rse.GetBounds(), rse.GetRadii());
     GetCanvas().ClipGeometry(geom, clip_op);
   }
 }

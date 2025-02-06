@@ -207,8 +207,8 @@ extern std::ostream& operator<<(std::ostream& os, const DlPath& path) {
 
 std::ostream& operator<<(std::ostream& os, const flutter::DlClipOp& op) {
   switch (op) {
-    case flutter::DlClipOp::kDifference: return os << "ClipOp::kDifference";
-    case flutter::DlClipOp::kIntersect:  return os << "ClipOp::kIntersect";
+    case flutter::DlClipOp::kDifference: return os << "DlClipOp::kDifference";
+    case flutter::DlClipOp::kIntersect:  return os << "DlClipOp::kIntersect";
   }
 }
 

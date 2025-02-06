@@ -542,14 +542,11 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
 
 void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
                                    const Paint& paint) {
-  auto& rect = rse.GetBounds();
-  Scalar corner_radius = rse.GetCornerRadius();
-
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  RoundSuperellipseGeometry geom(rect, corner_radius);
+  RoundSuperellipseGeometry geom(rse.GetBounds(), rse.GetRadii());
   AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
 }
 

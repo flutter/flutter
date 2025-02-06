@@ -390,10 +390,10 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
                              DlClipOp clip_op,
                              bool is_aa) override {
     switch (clip_op) {
-      case DlCanvas::ClipOp::kIntersect:
+      case DlClipOp::kIntersect:
         RecordByType(DisplayListOpType::kClipIntersectRoundSuperellipse);
         break;
-      case DlCanvas::ClipOp::kDifference:
+      case DlClipOp::kDifference:
         RecordByType(DisplayListOpType::kClipDifferenceRoundSuperellipse);
         break;
     }

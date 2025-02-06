@@ -86,7 +86,7 @@ class DlCanvas {
                              DlClipOp clip_op = DlClipOp::kIntersect,
                              bool is_aa = false) = 0;
   virtual void ClipRoundSuperellipse(const DlRoundSuperellipse& rse,
-                                     ClipOp clip_op = ClipOp::kIntersect,
+                                     DlClipOp clip_op = DlClipOp::kIntersect,
                                      bool is_aa = false) = 0;
   virtual void ClipPath(const DlPath& path,
                         DlClipOp clip_op = DlClipOp::kIntersect,

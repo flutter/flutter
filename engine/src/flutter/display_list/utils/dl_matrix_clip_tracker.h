@@ -108,7 +108,9 @@ class DisplayListMatrixClipState {
   void clipRect(const DlRect& rect, DlClipOp op, bool is_aa);
   void clipOval(const DlRect& bounds, DlClipOp op, bool is_aa);
   void clipRRect(const DlRoundRect& rrect, DlClipOp op, bool is_aa);
-  void clipRSuperellipse(const DlRoundSuperellipse& rse, DlClipOp op, bool is_aa);
+  void clipRSuperellipse(const DlRoundSuperellipse& rse,
+                         DlClipOp op,
+                         bool is_aa);
   void clipPath(const DlPath& path, DlClipOp op, bool is_aa);
 
  private:

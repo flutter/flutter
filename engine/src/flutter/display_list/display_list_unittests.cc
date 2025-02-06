@@ -4635,7 +4635,7 @@ class ClipExpector : public virtual DlOpReceiver,
     check(rrect, clip_op, is_aa);
   }
   void clipRoundSuperellipse(const DlRoundSuperellipse& rse,
-                             ClipOp clip_op,
+                             DlClipOp clip_op,
                              bool is_aa) override {
     check(rse, clip_op, is_aa);
   }

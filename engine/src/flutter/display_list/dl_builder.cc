@@ -1026,24 +1026,20 @@ void DisplayListBuilder::ClipRoundRect(const DlRoundRect& rrect,
   }
 }
 void DisplayListBuilder::ClipRoundSuperellipse(const DlRoundSuperellipse& rse,
-                                               ClipOp clip_op,
+                                               DlClipOp clip_op,
                                                bool is_aa) {
   if (rse.IsRect()) {
     ClipRect(rse.GetBounds(), clip_op, is_aa);
     return;
   }
-  if (rse.IsCircle()) {
-    // TODO(dkwingsmt): RSEs might degenerates to ovals instead of mere circles
-    // once asymmetrical radius is supported.
-    // https://github.com/flutter/flutter/issues/161207
+  if (rse.IsOval()) {
     ClipOval(rse.GetBounds(), clip_op, is_aa);
     return;
   }
   if (current_info().is_nop) {
     return;
   }
-  if (current_info().has_valid_clip &&
-      clip_op == DlCanvas::ClipOp::kIntersect &&
+  if (current_info().has_valid_clip && clip_op == DlClipOp::kIntersect &&
       layer_local_state().rsuperellipse_covers_cull(rse)) {
     return;
   }
@@ -1057,10 +1053,10 @@ void DisplayListBuilder::ClipRoundSuperellipse(const DlRoundSuperellipse& rse,
   current_info().has_valid_clip = true;
   checkForDeferredSave();
   switch (clip_op) {
-    case ClipOp::kIntersect:
+    case DlClipOp::kIntersect:
       Push<ClipIntersectRoundSuperellipseOp>(0, rse, is_aa);
       break;
-    case ClipOp::kDifference:
+    case DlClipOp::kDifference:
       Push<ClipDifferenceRoundSuperellipseOp>(0, rse, is_aa);
       break;
   }
@@ -1262,11 +1258,8 @@ void DisplayListBuilder::DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
 void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
   if (rse.IsRect()) {
     drawRect(rse.GetBounds());
-  } else if (rse.IsCircle()) {
-    // TODO(dkwingsmt): RSEs might degenerates to ovals instead of mere circles
-    // once asymmetrical radius is supported.
-    // https://github.com/flutter/flutter/issues/161207
-    drawCircle(rse.GetBounds().GetCenter(), rse.GetCornerRadius());
+  } else if (rse.IsOval()) {
+    drawOval(rse.GetBounds());
   } else {
     DisplayListAttributeFlags flags = kDrawRSuperellipseFlags;
     OpResult result = PaintResult(current_, flags);

@@ -467,7 +467,7 @@ class ClipRSuperellipseEntry : public LayerStateStack::StateEntry {
 
   void apply(LayerStateStack* stack) const override {
     stack->delegate_->clipRSuperellipse(clip_rsuperellipse_,
-                                        DlCanvas::ClipOp::kIntersect, is_aa_);
+                                        DlClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
     mutators_stack->PushClipRRect(ToApproximateSkRRect(clip_rsuperellipse_));

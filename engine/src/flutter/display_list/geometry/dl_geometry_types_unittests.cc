@@ -69,8 +69,10 @@ TEST(DisplayListGeometryTypes, VectorToSizeConversion) {
 }
 
 TEST(DisplayListGeometryTypes, RSEToRRectConversion) {
-  DlRoundSuperellipse dl_rse = DlRoundSuperellipse::MakeRectRadius(DlRect::MakeLTRB(10, 20, 30, 40), 1.0f);
-  SkRRect sk_rrect = SkRRect::MakeRectXY(SkRect::MakeLTRB(10, 20, 30, 40), 1.0f, 1.0f);
+  DlRoundSuperellipse dl_rse = DlRoundSuperellipse::MakeRectRadius(
+      DlRect::MakeLTRB(10, 20, 30, 40), 1.0f);
+  SkRRect sk_rrect =
+      SkRRect::MakeRectXY(SkRect::MakeLTRB(10, 20, 30, 40), 1.0f, 1.0f);
 
   EXPECT_EQ(sk_rrect, ToApproximateSkRRect(dl_rse));
 }
