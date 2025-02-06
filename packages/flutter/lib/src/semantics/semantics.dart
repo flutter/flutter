@@ -1545,7 +1545,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    ),
   ///  ),
   ///  child: Text('button'),
-  ///),
+  /// )
   /// ```
   final SemanticsHintOverrides? hintOverrides;
 
