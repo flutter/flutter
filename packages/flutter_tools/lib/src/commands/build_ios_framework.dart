@@ -239,6 +239,9 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   }
 
   @override
+  bool get regeneratePlatformSpecificToolingDuringVerify => false;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??
@@ -262,6 +265,19 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       globals.printStatus(
         'Building frameworks for $productBundleIdentifier in ${buildInfo.mode.cliName} mode...',
       );
+
+      // Create the build-mode specific metadata.
+      //
+      // This normally would be done in the verifyAndRun step of FlutterCommand, but special "meta"
+      // build commands (like flutter build ios-framework) make multiple builds, and do not have a
+      // single "buildInfo", so the step has to be done manually for each build.
+      //
+      // See regeneratePlatformSpecificToolingDurifyVerify.
+      await regeneratePlatformSpecificToolingIfApplicable(
+        project,
+        releaseMode: buildInfo.mode.isRelease,
+      );
+
       final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.cliName);
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
