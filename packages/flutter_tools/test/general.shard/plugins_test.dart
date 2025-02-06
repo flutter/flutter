@@ -23,7 +23,6 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/darwin_dependency_management.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
-import 'package:flutter_tools/src/preview_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
@@ -1900,12 +1899,7 @@ flutter:
           createFakePlugins(fsWindows, const <String>['plugin_one', 'plugin_two']);
 
           expect(
-            () => injectPlugins(
-              flutterProject,
-              linuxPlatform: true,
-              windowsPlatform: true,
-              allowedPlugins: PreviewDevice.supportedPubPlugins,
-            ),
+            () => injectPlugins(flutterProject, linuxPlatform: true, windowsPlatform: true),
             throwsToolExit(
               message: '''
 The Flutter Preview device does not support the following plugins from your pubspec.yaml:

@@ -73,9 +73,6 @@ enum Artifact {
 
   /// The location of file generators.
   flutterToolsFileGenerators,
-
-  /// Pre-built desktop debug app.
-  flutterPreviewDevice,
 }
 
 /// A subset of [Artifact]s that are platform and build mode independent
@@ -239,8 +236,6 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [BuildMode
       return 'const_finder.dart.snapshot';
     case Artifact.flutterToolsFileGenerators:
       return '';
-    case Artifact.flutterPreviewDevice:
-      return 'flutter_preview$exe';
   }
 }
 
@@ -670,7 +665,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
-      case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -722,7 +716,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
-      case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -769,7 +762,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
-      case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -821,7 +813,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
-      case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -953,9 +944,6 @@ class CachedArtifacts implements Artifacts {
         throw StateError('Artifact $artifact not available for platform $platform.');
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
-      case Artifact.flutterPreviewDevice:
-        assert(platform == TargetPlatform.windows_x64);
-        return _cache.getArtifactDirectory('flutter_preview').childFile('flutter_preview.exe').path;
     }
   }
 
@@ -1440,13 +1428,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', artifactFileName);
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
-      case Artifact.flutterPreviewDevice:
-        return _backupCache.getArtifactPath(
-          artifact,
-          platform: platform,
-          mode: mode,
-          environmentType: environmentType,
-        );
     }
   }
 
@@ -1622,7 +1603,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.fontSubset:
         case Artifact.constFinder:
         case Artifact.flutterToolsFileGenerators:
-        case Artifact.flutterPreviewDevice:
           break;
       }
     }

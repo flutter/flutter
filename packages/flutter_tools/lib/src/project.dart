@@ -391,7 +391,6 @@ class FlutterProject {
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
-      allowedPlugins: allowedPlugins,
       releaseMode: releaseMode,
     );
   }

@@ -1212,7 +1212,6 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
-  Iterable<String>? allowedPlugins,
   DarwinDependencyManagement? darwinDependencyManagement,
   bool? releaseMode,
 }) async {
@@ -1244,7 +1243,6 @@ Future<void> injectPlugins(
       project,
       pluginsByPlatform[WindowsPlugin.kConfigKey]!,
       globals.templateRenderer,
-      allowedPlugins: allowedPlugins,
     );
   }
   if (iosPlatform || macOSPlatform) {
