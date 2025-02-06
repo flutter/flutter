@@ -526,6 +526,9 @@ abstract class IosAssetBundle extends Target {
     }
 
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final String? flavor = await flutterProject.ios.parseFlavorFromConfiguration(
+      environment.defines[kXcodeConfiguration],
+    );
 
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(
@@ -542,7 +545,7 @@ abstract class IosAssetBundle extends Target {
           environment.buildDir.childFile('native_assets.json'),
         ),
       },
-      flavor: environment.defines[kFlavor],
+      flavor: flavor,
     );
     environment.depFileService.writeToFile(
       assetDepfile,

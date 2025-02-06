@@ -984,6 +984,9 @@ const String kBuildName = 'BuildName';
 /// The app flavor to build.
 const String kFlavor = 'Flavor';
 
+/// The Xcode configuration used to build the project.
+const String kXcodeConfiguration = 'Configuration';
+
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';
 

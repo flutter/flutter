@@ -283,6 +283,33 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     }
     return null;
   }
+
+  /// When flutter assemble runs within an Xcode run script, it does not know
+  /// the scheme and therefore doesn't know what flavor is being used. This
+  /// makes a best effort to parse the scheme name from the configuration name.
+  /// Most flavors should follow the naming convention of '$baseConfiguration-$scheme'.
+  /// This is only semi-enforced by [buildXcodeProject], so it may not work.
+  Future<String?> parseFlavorFromConfiguration(String? configuration) async {
+    if (configuration == null) {
+      return null;
+    }
+    final List<String> splitConfiguration = configuration.split('-');
+    if (splitConfiguration.length == 1) {
+      return null;
+    }
+    final String parsedScheme = splitConfiguration[1];
+
+    final XcodeProjectInfo? info = await projectInfo();
+    if (info == null) {
+      return null;
+    }
+    return info.schemes.where((String schemeName) {
+      if (schemeName.toLowerCase() == parsedScheme.toLowerCase()) {
+        return true;
+      }
+      return false;
+    }).firstOrNull;
+  }
 }
 
 /// Represents the iOS sub-project of a Flutter project.

@@ -216,6 +216,38 @@ void main() {
         },
       );
     });
+
+    group('parseFlavorFromConfiguration', () {
+      testWithoutContext('when configuration is null', () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final IosProject project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        expect(await project.parseFlavorFromConfiguration(null), isNull);
+      });
+
+      testWithoutContext('when configuration is Debug', () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final IosProject project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        expect(await project.parseFlavorFromConfiguration('Debug'), isNull);
+      });
+
+      testUsingContext('when configuration is Debug with a flavor that matches a scheme', () async {
+          final MemoryFileSystem fs = MemoryFileSystem.test();
+          final IosProject project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+          project.xcodeProject.createSync(recursive: true);
+          expect(await project.parseFlavorFromConfiguration('Debug-Strawberry'), 'strawberry');
+        },
+        overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry'])},
+      );
+
+      testUsingContext('when configuration is Debug with a flavor that does not match a scheme', () async {
+          final MemoryFileSystem fs = MemoryFileSystem.test();
+          final IosProject project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+          project.xcodeProject.createSync(recursive: true);
+          expect(await project.parseFlavorFromConfiguration('Debug-chocolate'), isNull);
+        },
+        overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry'])},
+      );
+    });
   });
 
   group('MacOSProject', () {
@@ -365,7 +397,11 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({this.isInstalled = true, this.version});
+  FakeXcodeProjectInterpreter({
+    this.isInstalled = true,
+    this.version,
+    this.schemes = const <String>['Runner'],
+  });
 
   @override
   final bool isInstalled;
@@ -373,9 +409,11 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   @override
   final Version? version;
 
+  List<String> schemes;
+
   @override
   Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
-    return XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], BufferLogger.test());
+    return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
   }
 }
 
