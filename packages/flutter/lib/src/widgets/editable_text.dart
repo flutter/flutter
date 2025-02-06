@@ -6039,9 +6039,6 @@ class _NeverUserScrollableScrollPhysics extends ScrollPhysics {
 
   @override
   bool get allowUserScrolling => false;
-
-  @override
-  bool get allowImplicitScrolling => true;
 }
 
 @immutable
