@@ -100,11 +100,12 @@ void main() {
 
     expect(find.text('You selected a Blue Smile'), findsOneWidget);
 
-    // resize the screen to small screen and make sure no overflowed error appears
+    // Resize the screen to small screen and make sure no overflowed error appears.
     tester.binding.window.physicalSizeTestValue = const Size(200, 160);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    await tester.pump();
 
-    expect(find.byType(RenderFlex), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 }
