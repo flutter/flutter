@@ -74,14 +74,14 @@ TEST(RoundSuperellipseTest, RectRadiusConstructor) {
 }
 
 TEST(RoundSuperellipseTest, RectRadiiConstructor) {
-  RoundSuperellipse round_rect =
-      RoundSuperellipse::MakeRectRadii(Rect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f),
-                               {
-                                   .top_left = Size(1.0, 1.5),
-                                   .top_right = Size(2.0, 2.5f),
-                                   .bottom_left = Size(3.0, 3.5f),
-                                   .bottom_right = Size(4.0, 4.5f),
-                               });
+  RoundSuperellipse round_rect = RoundSuperellipse::MakeRectRadii(
+      Rect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f),
+      {
+          .top_left = Size(1.0, 1.5),
+          .top_right = Size(2.0, 2.5f),
+          .bottom_left = Size(3.0, 3.5f),
+          .bottom_right = Size(4.0, 4.5f),
+      });
 
   EXPECT_FALSE(round_rect.IsEmpty());
   EXPECT_FALSE(round_rect.IsRect());
@@ -96,14 +96,14 @@ TEST(RoundSuperellipseTest, RectRadiiConstructor) {
 }
 
 TEST(RoundSuperellipseTest, RectRadiiOverflowWidthConstructor) {
-  RoundSuperellipse round_rect =
-      RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(10.0f, 10.0f, 6.0f, 30.0f),
-                               {
-                                   .top_left = Size(1.0f, 2.0f),
-                                   .top_right = Size(3.0f, 4.0f),
-                                   .bottom_left = Size(5.0f, 6.0f),
-                                   .bottom_right = Size(7.0f, 8.0f),
-                               });
+  RoundSuperellipse round_rect = RoundSuperellipse::MakeRectRadii(
+      Rect::MakeXYWH(10.0f, 10.0f, 6.0f, 30.0f),
+      {
+          .top_left = Size(1.0f, 2.0f),
+          .top_right = Size(3.0f, 4.0f),
+          .bottom_left = Size(5.0f, 6.0f),
+          .bottom_right = Size(7.0f, 8.0f),
+      });
   // Largest sum of paired radii widths is the bottom edge which sums to 12
   // Rect is only 6 wide so all radii are scaled by half
   // Rect is 30 tall so no scaling should happen due to radii heights
@@ -121,14 +121,14 @@ TEST(RoundSuperellipseTest, RectRadiiOverflowWidthConstructor) {
 }
 
 TEST(RoundSuperellipseTest, RectRadiiOverflowHeightConstructor) {
-  RoundSuperellipse round_rect =
-      RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 6.0f),
-                               {
-                                   .top_left = Size(1.0f, 2.0f),
-                                   .top_right = Size(3.0f, 4.0f),
-                                   .bottom_left = Size(5.0f, 6.0f),
-                                   .bottom_right = Size(7.0f, 8.0f),
-                               });
+  RoundSuperellipse round_rect = RoundSuperellipse::MakeRectRadii(
+      Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 6.0f),
+      {
+          .top_left = Size(1.0f, 2.0f),
+          .top_right = Size(3.0f, 4.0f),
+          .bottom_left = Size(5.0f, 6.0f),
+          .bottom_right = Size(7.0f, 8.0f),
+      });
   // Largest sum of paired radii heights is the right edge which sums to 12
   // Rect is only 6 tall so all radii are scaled by half
   // Rect is 30 wide so no scaling should happen due to radii widths
@@ -146,14 +146,14 @@ TEST(RoundSuperellipseTest, RectRadiiOverflowHeightConstructor) {
 }
 
 TEST(RoundSuperellipseTest, Shift) {
-  RoundSuperellipse round_rect =
-      RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
-                               {
-                                   .top_left = Size(1.0f, 2.0f),
-                                   .top_right = Size(3.0f, 4.0f),
-                                   .bottom_left = Size(5.0f, 6.0f),
-                                   .bottom_right = Size(7.0f, 8.0f),
-                               });
+  RoundSuperellipse round_rect = RoundSuperellipse::MakeRectRadii(
+      Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
+      {
+          .top_left = Size(1.0f, 2.0f),
+          .top_right = Size(3.0f, 4.0f),
+          .bottom_left = Size(5.0f, 6.0f),
+          .bottom_right = Size(7.0f, 8.0f),
+      });
   RoundSuperellipse shifted = round_rect.Shift(5.0, 6.0);
 
   EXPECT_FALSE(shifted.IsEmpty());
@@ -167,25 +167,25 @@ TEST(RoundSuperellipseTest, Shift) {
   EXPECT_EQ(shifted.GetRadii().bottom_left, Size(5.0f, 6.0f));
   EXPECT_EQ(shifted.GetRadii().bottom_right, Size(7.0f, 8.0f));
 
-  EXPECT_EQ(shifted,
-            RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(15.0f, 16.0f, 30.0f, 30.0f),
-                                     {
-                                         .top_left = Size(1.0f, 2.0f),
-                                         .top_right = Size(3.0f, 4.0f),
-                                         .bottom_left = Size(5.0f, 6.0f),
-                                         .bottom_right = Size(7.0f, 8.0f),
-                                     }));
+  EXPECT_EQ(shifted, RoundSuperellipse::MakeRectRadii(
+                         Rect::MakeXYWH(15.0f, 16.0f, 30.0f, 30.0f),
+                         {
+                             .top_left = Size(1.0f, 2.0f),
+                             .top_right = Size(3.0f, 4.0f),
+                             .bottom_left = Size(5.0f, 6.0f),
+                             .bottom_right = Size(7.0f, 8.0f),
+                         }));
 }
 
 TEST(RoundSuperellipseTest, ExpandScalar) {
-  RoundSuperellipse round_rect =
-      RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
-                               {
-                                   .top_left = Size(1.0f, 2.0f),
-                                   .top_right = Size(3.0f, 4.0f),
-                                   .bottom_left = Size(5.0f, 6.0f),
-                                   .bottom_right = Size(7.0f, 8.0f),
-                               });
+  RoundSuperellipse round_rect = RoundSuperellipse::MakeRectRadii(
+      Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
+      {
+          .top_left = Size(1.0f, 2.0f),
+          .top_right = Size(3.0f, 4.0f),
+          .bottom_left = Size(5.0f, 6.0f),
+          .bottom_right = Size(7.0f, 8.0f),
+      });
   RoundSuperellipse expanded = round_rect.Expand(5.0);
 
   EXPECT_FALSE(expanded.IsEmpty());
@@ -199,25 +199,25 @@ TEST(RoundSuperellipseTest, ExpandScalar) {
   EXPECT_EQ(expanded.GetRadii().bottom_left, Size(5.0f, 6.0f));
   EXPECT_EQ(expanded.GetRadii().bottom_right, Size(7.0f, 8.0f));
 
-  EXPECT_EQ(expanded,
-            RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(5.0f, 5.0f, 40.0f, 40.0f),
-                                     {
-                                         .top_left = Size(1.0f, 2.0f),
-                                         .top_right = Size(3.0f, 4.0f),
-                                         .bottom_left = Size(5.0f, 6.0f),
-                                         .bottom_right = Size(7.0f, 8.0f),
-                                     }));
+  EXPECT_EQ(expanded, RoundSuperellipse::MakeRectRadii(
+                          Rect::MakeXYWH(5.0f, 5.0f, 40.0f, 40.0f),
+                          {
+                              .top_left = Size(1.0f, 2.0f),
+                              .top_right = Size(3.0f, 4.0f),
+                              .bottom_left = Size(5.0f, 6.0f),
+                              .bottom_right = Size(7.0f, 8.0f),
+                          }));
 }
 
 TEST(RoundSuperellipseTest, ExpandTwoScalars) {
-  RoundSuperellipse round_rect =
-      RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
-                               {
-                                   .top_left = Size(1.0f, 2.0f),
-                                   .top_right = Size(3.0f, 4.0f),
-                                   .bottom_left = Size(5.0f, 6.0f),
-                                   .bottom_right = Size(7.0f, 8.0f),
-                               });
+  RoundSuperellipse round_rect = RoundSuperellipse::MakeRectRadii(
+      Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
+      {
+          .top_left = Size(1.0f, 2.0f),
+          .top_right = Size(3.0f, 4.0f),
+          .bottom_left = Size(5.0f, 6.0f),
+          .bottom_right = Size(7.0f, 8.0f),
+      });
   RoundSuperellipse expanded = round_rect.Expand(5.0, 6.0);
 
   EXPECT_FALSE(expanded.IsEmpty());
@@ -231,25 +231,25 @@ TEST(RoundSuperellipseTest, ExpandTwoScalars) {
   EXPECT_EQ(expanded.GetRadii().bottom_left, Size(5.0f, 6.0f));
   EXPECT_EQ(expanded.GetRadii().bottom_right, Size(7.0f, 8.0f));
 
-  EXPECT_EQ(expanded,
-            RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(5.0f, 4.0f, 40.0f, 42.0f),
-                                     {
-                                         .top_left = Size(1.0f, 2.0f),
-                                         .top_right = Size(3.0f, 4.0f),
-                                         .bottom_left = Size(5.0f, 6.0f),
-                                         .bottom_right = Size(7.0f, 8.0f),
-                                     }));
+  EXPECT_EQ(expanded, RoundSuperellipse::MakeRectRadii(
+                          Rect::MakeXYWH(5.0f, 4.0f, 40.0f, 42.0f),
+                          {
+                              .top_left = Size(1.0f, 2.0f),
+                              .top_right = Size(3.0f, 4.0f),
+                              .bottom_left = Size(5.0f, 6.0f),
+                              .bottom_right = Size(7.0f, 8.0f),
+                          }));
 }
 
 TEST(RoundSuperellipseTest, ExpandFourScalars) {
-  RoundSuperellipse round_rect =
-      RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
-                               {
-                                   .top_left = Size(1.0f, 2.0f),
-                                   .top_right = Size(3.0f, 4.0f),
-                                   .bottom_left = Size(5.0f, 6.0f),
-                                   .bottom_right = Size(7.0f, 8.0f),
-                               });
+  RoundSuperellipse round_rect = RoundSuperellipse::MakeRectRadii(
+      Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
+      {
+          .top_left = Size(1.0f, 2.0f),
+          .top_right = Size(3.0f, 4.0f),
+          .bottom_left = Size(5.0f, 6.0f),
+          .bottom_right = Size(7.0f, 8.0f),
+      });
   RoundSuperellipse expanded = round_rect.Expand(5.0, 6.0, 7.0, 8.0);
 
   EXPECT_FALSE(expanded.IsEmpty());
@@ -263,25 +263,25 @@ TEST(RoundSuperellipseTest, ExpandFourScalars) {
   EXPECT_EQ(expanded.GetRadii().bottom_left, Size(5.0f, 6.0f));
   EXPECT_EQ(expanded.GetRadii().bottom_right, Size(7.0f, 8.0f));
 
-  EXPECT_EQ(expanded,
-            RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(5.0f, 4.0f, 42.0f, 44.0f),
-                                     {
-                                         .top_left = Size(1.0f, 2.0f),
-                                         .top_right = Size(3.0f, 4.0f),
-                                         .bottom_left = Size(5.0f, 6.0f),
-                                         .bottom_right = Size(7.0f, 8.0f),
-                                     }));
+  EXPECT_EQ(expanded, RoundSuperellipse::MakeRectRadii(
+                          Rect::MakeXYWH(5.0f, 4.0f, 42.0f, 44.0f),
+                          {
+                              .top_left = Size(1.0f, 2.0f),
+                              .top_right = Size(3.0f, 4.0f),
+                              .bottom_left = Size(5.0f, 6.0f),
+                              .bottom_right = Size(7.0f, 8.0f),
+                          }));
 }
 
 TEST(RoundSuperellipseTest, ContractScalar) {
-  RoundSuperellipse round_rect =
-      RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
-                               {
-                                   .top_left = Size(1.0f, 2.0f),
-                                   .top_right = Size(3.0f, 4.0f),
-                                   .bottom_left = Size(5.0f, 6.0f),
-                                   .bottom_right = Size(7.0f, 8.0f),
-                               });
+  RoundSuperellipse round_rect = RoundSuperellipse::MakeRectRadii(
+      Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
+      {
+          .top_left = Size(1.0f, 2.0f),
+          .top_right = Size(3.0f, 4.0f),
+          .bottom_left = Size(5.0f, 6.0f),
+          .bottom_right = Size(7.0f, 8.0f),
+      });
   RoundSuperellipse expanded = round_rect.Expand(-2.0);
 
   EXPECT_FALSE(expanded.IsEmpty());
@@ -295,25 +295,25 @@ TEST(RoundSuperellipseTest, ContractScalar) {
   EXPECT_EQ(expanded.GetRadii().bottom_left, Size(5.0f, 6.0f));
   EXPECT_EQ(expanded.GetRadii().bottom_right, Size(7.0f, 8.0f));
 
-  EXPECT_EQ(expanded,
-            RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(12.0f, 12.0f, 26.0f, 26.0f),
-                                     {
-                                         .top_left = Size(1.0f, 2.0f),
-                                         .top_right = Size(3.0f, 4.0f),
-                                         .bottom_left = Size(5.0f, 6.0f),
-                                         .bottom_right = Size(7.0f, 8.0f),
-                                     }));
+  EXPECT_EQ(expanded, RoundSuperellipse::MakeRectRadii(
+                          Rect::MakeXYWH(12.0f, 12.0f, 26.0f, 26.0f),
+                          {
+                              .top_left = Size(1.0f, 2.0f),
+                              .top_right = Size(3.0f, 4.0f),
+                              .bottom_left = Size(5.0f, 6.0f),
+                              .bottom_right = Size(7.0f, 8.0f),
+                          }));
 }
 
 TEST(RoundSuperellipseTest, ContractTwoScalars) {
-  RoundSuperellipse round_rect =
-      RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
-                               {
-                                   .top_left = Size(1.0f, 2.0f),
-                                   .top_right = Size(3.0f, 4.0f),
-                                   .bottom_left = Size(5.0f, 6.0f),
-                                   .bottom_right = Size(7.0f, 8.0f),
-                               });
+  RoundSuperellipse round_rect = RoundSuperellipse::MakeRectRadii(
+      Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
+      {
+          .top_left = Size(1.0f, 2.0f),
+          .top_right = Size(3.0f, 4.0f),
+          .bottom_left = Size(5.0f, 6.0f),
+          .bottom_right = Size(7.0f, 8.0f),
+      });
   RoundSuperellipse expanded = round_rect.Expand(-1.0, -2.0);
 
   EXPECT_FALSE(expanded.IsEmpty());
@@ -327,25 +327,25 @@ TEST(RoundSuperellipseTest, ContractTwoScalars) {
   EXPECT_EQ(expanded.GetRadii().bottom_left, Size(5.0f, 6.0f));
   EXPECT_EQ(expanded.GetRadii().bottom_right, Size(7.0f, 8.0f));
 
-  EXPECT_EQ(expanded,
-            RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(11.0f, 12.0f, 28.0f, 26.0f),
-                                     {
-                                         .top_left = Size(1.0f, 2.0f),
-                                         .top_right = Size(3.0f, 4.0f),
-                                         .bottom_left = Size(5.0f, 6.0f),
-                                         .bottom_right = Size(7.0f, 8.0f),
-                                     }));
+  EXPECT_EQ(expanded, RoundSuperellipse::MakeRectRadii(
+                          Rect::MakeXYWH(11.0f, 12.0f, 28.0f, 26.0f),
+                          {
+                              .top_left = Size(1.0f, 2.0f),
+                              .top_right = Size(3.0f, 4.0f),
+                              .bottom_left = Size(5.0f, 6.0f),
+                              .bottom_right = Size(7.0f, 8.0f),
+                          }));
 }
 
 TEST(RoundSuperellipseTest, ContractFourScalars) {
-  RoundSuperellipse round_rect =
-      RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
-                               {
-                                   .top_left = Size(1.0f, 2.0f),
-                                   .top_right = Size(3.0f, 4.0f),
-                                   .bottom_left = Size(5.0f, 6.0f),
-                                   .bottom_right = Size(7.0f, 8.0f),
-                               });
+  RoundSuperellipse round_rect = RoundSuperellipse::MakeRectRadii(
+      Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
+      {
+          .top_left = Size(1.0f, 2.0f),
+          .top_right = Size(3.0f, 4.0f),
+          .bottom_left = Size(5.0f, 6.0f),
+          .bottom_right = Size(7.0f, 8.0f),
+      });
   RoundSuperellipse expanded = round_rect.Expand(-1.0, -1.5, -2.0, -2.5);
 
   EXPECT_FALSE(expanded.IsEmpty());
@@ -359,25 +359,25 @@ TEST(RoundSuperellipseTest, ContractFourScalars) {
   EXPECT_EQ(expanded.GetRadii().bottom_left, Size(5.0f, 6.0f));
   EXPECT_EQ(expanded.GetRadii().bottom_right, Size(7.0f, 8.0f));
 
-  EXPECT_EQ(expanded,
-            RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(11.0f, 11.5f, 27.0f, 26.0f),
-                                     {
-                                         .top_left = Size(1.0f, 2.0f),
-                                         .top_right = Size(3.0f, 4.0f),
-                                         .bottom_left = Size(5.0f, 6.0f),
-                                         .bottom_right = Size(7.0f, 8.0f),
-                                     }));
+  EXPECT_EQ(expanded, RoundSuperellipse::MakeRectRadii(
+                          Rect::MakeXYWH(11.0f, 11.5f, 27.0f, 26.0f),
+                          {
+                              .top_left = Size(1.0f, 2.0f),
+                              .top_right = Size(3.0f, 4.0f),
+                              .bottom_left = Size(5.0f, 6.0f),
+                              .bottom_right = Size(7.0f, 8.0f),
+                          }));
 }
 
 TEST(RoundSuperellipseTest, ContractAndRequireRadiiAdjustment) {
-  RoundSuperellipse round_rect =
-      RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
-                               {
-                                   .top_left = Size(1.0f, 2.0f),
-                                   .top_right = Size(3.0f, 4.0f),
-                                   .bottom_left = Size(5.0f, 6.0f),
-                                   .bottom_right = Size(7.0f, 8.0f),
-                               });
+  RoundSuperellipse round_rect = RoundSuperellipse::MakeRectRadii(
+      Rect::MakeXYWH(10.0f, 10.0f, 30.0f, 30.0f),
+      {
+          .top_left = Size(1.0f, 2.0f),
+          .top_right = Size(3.0f, 4.0f),
+          .bottom_left = Size(5.0f, 6.0f),
+          .bottom_right = Size(7.0f, 8.0f),
+      });
   RoundSuperellipse expanded = round_rect.Expand(-12.0);
   // Largest sum of paired radii sizes are the bottom and right edges
   // both of which sum to 12
@@ -397,33 +397,33 @@ TEST(RoundSuperellipseTest, ContractAndRequireRadiiAdjustment) {
 
   // In this test, the MakeRectRadii constructor will make the same
   // adjustment to the radii that the Expand method applied.
-  EXPECT_EQ(expanded,
-            RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(22.0f, 22.0f, 6.0f, 6.0f),
-                                     {
-                                         .top_left = Size(1.0f, 2.0f),
-                                         .top_right = Size(3.0f, 4.0f),
-                                         .bottom_left = Size(5.0f, 6.0f),
-                                         .bottom_right = Size(7.0f, 8.0f),
-                                     }));
+  EXPECT_EQ(expanded, RoundSuperellipse::MakeRectRadii(
+                          Rect::MakeXYWH(22.0f, 22.0f, 6.0f, 6.0f),
+                          {
+                              .top_left = Size(1.0f, 2.0f),
+                              .top_right = Size(3.0f, 4.0f),
+                              .bottom_left = Size(5.0f, 6.0f),
+                              .bottom_right = Size(7.0f, 8.0f),
+                          }));
 
   // In this test, the arguments to the constructor supply the correctly
   // adjusted radii (though there is no real way to tell other than
   // the result is the same).
-  EXPECT_EQ(expanded,
-            RoundSuperellipse::MakeRectRadii(Rect::MakeXYWH(22.0f, 22.0f, 6.0f, 6.0f),
-                                     {
-                                         .top_left = Size(0.5f, 1.0f),
-                                         .top_right = Size(1.5f, 2.0f),
-                                         .bottom_left = Size(2.5f, 3.0f),
-                                         .bottom_right = Size(3.5f, 4.0f),
-                                     }));
+  EXPECT_EQ(expanded, RoundSuperellipse::MakeRectRadii(
+                          Rect::MakeXYWH(22.0f, 22.0f, 6.0f, 6.0f),
+                          {
+                              .top_left = Size(0.5f, 1.0f),
+                              .top_right = Size(1.5f, 2.0f),
+                              .bottom_left = Size(2.5f, 3.0f),
+                              .bottom_right = Size(3.5f, 4.0f),
+                          }));
 }
 
 TEST(RoundSuperellipseTest, NoCornerContinuousRoundSuperellipseContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   // RRect of bounds with no corners contains corners just barely
-  auto no_corners =
-      RoundSuperellipse::MakeRectRadii(bounds, RoundingRadii::MakeRadii({0.0f, 0.0f}));
+  auto no_corners = RoundSuperellipse::MakeRectRadii(
+      bounds, RoundingRadii::MakeRadii({0.0f, 0.0f}));
 
   EXPECT_TRUE(no_corners.Contains({-50, -50}));
   // Rectangles have half-in, half-out containment so we need
@@ -444,7 +444,8 @@ TEST(RoundSuperellipseTest, NoCornerContinuousRoundSuperellipseContains) {
 TEST(RoundSuperellipseTest, TinyCornerContinuousRoundSuperellipseContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   // RRect of bounds with even the tiniest corners does not contain corners
-  auto tiny_corners = RoundSuperellipse::MakeRectRadii(bounds, RoundingRadii::MakeRadii({0.01f, 0.01f}));
+  auto tiny_corners = RoundSuperellipse::MakeRectRadii(
+      bounds, RoundingRadii::MakeRadii({0.01f, 0.01f}));
 
   EXPECT_FALSE(tiny_corners.Contains({-50, -50}));
   EXPECT_FALSE(tiny_corners.Contains({-50, 50}));
@@ -454,8 +455,8 @@ TEST(RoundSuperellipseTest, TinyCornerContinuousRoundSuperellipseContains) {
 
 TEST(RoundSuperellipseTest, UniformContinuousRoundSuperellipseContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
-  auto rr =
-      RoundSuperellipse::MakeRectRadii(bounds, RoundingRadii::MakeRadii({5.0f, 5.0f}));
+  auto rr = RoundSuperellipse::MakeRectRadii(
+      bounds, RoundingRadii::MakeRadii({5.0f, 5.0f}));
 
 #define CHECK_POINT_AND_MIRRORS(p)                                     \
   CHECK_POINT_WITH_OFFSET(rr, (p), Point(0.02, 0.02));                 \
@@ -473,10 +474,11 @@ TEST(RoundSuperellipseTest, UniformContinuousRoundSuperellipseContains) {
 #undef CHECK_POINT_AND_MIRRORS
 }
 
-TEST(RoundSuperellipseTest, UniformEllipticalContinuousRoundSuperellipseContains) {
+TEST(RoundSuperellipseTest,
+     UniformEllipticalContinuousRoundSuperellipseContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
-  auto rr =
-      RoundSuperellipse::MakeRectRadii(bounds, RoundingRadii::MakeRadii({5.0f, 10.0f}));
+  auto rr = RoundSuperellipse::MakeRectRadii(
+      bounds, RoundingRadii::MakeRadii({5.0f, 10.0f}));
 
 #define CHECK_POINT_AND_MIRRORS(p)                                     \
   CHECK_POINT_WITH_OFFSET(rr, (p), Point(0.02, 0.02));                 \
@@ -494,10 +496,12 @@ TEST(RoundSuperellipseTest, UniformEllipticalContinuousRoundSuperellipseContains
 #undef CHECK_POINT_AND_MIRRORS
 }
 
-TEST(RoundSuperellipseTest, UniformRectangularContinuousRoundSuperellipseContains) {
+TEST(RoundSuperellipseTest,
+     UniformRectangularContinuousRoundSuperellipseContains) {
   // The bounds is not centered at the origin and has unequal height and width.
   Rect bounds = Rect::MakeLTRB(0.0f, 0.0f, 50.0f, 100.0f);
-  auto rr = RoundSuperellipse::MakeRectRadii(bounds, RoundingRadii::MakeRadii({23.0f, 30.0f}));
+  auto rr = RoundSuperellipse::MakeRectRadii(
+      bounds, RoundingRadii::MakeRadii({23.0f, 30.0f}));
 
   Point center = bounds.GetCenter();
 #define CHECK_POINT_AND_MIRRORS(p)                                   \
@@ -527,13 +531,13 @@ TEST(RoundSuperellipseTest, SlimDiagnalContinuousRoundSuperellipseContains) {
   // This shape has large radii on one diagnal and tiny radii on the other,
   // resulting in a almond-like shape placed diagnally (NE to SW).
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
-  auto rr = RoundSuperellipse::MakeRectRadii(bounds,
-                                     {
-                                         .top_left = Size(1.0, 1.0),
-                                         .top_right = Size(99.0, 99.0),
-                                         .bottom_left = Size(99.0, 99.0),
-                                         .bottom_right = Size(1.0, 1.0),
-                                     });
+  auto rr = RoundSuperellipse::MakeRectRadii(
+      bounds, {
+                  .top_left = Size(1.0, 1.0),
+                  .top_right = Size(99.0, 99.0),
+                  .bottom_left = Size(99.0, 99.0),
+                  .bottom_right = Size(1.0, 1.0),
+              });
 
   EXPECT_TRUE(rr.Contains(Point{0, 0}));
   EXPECT_FALSE(rr.Contains(Point{-49.999, -49.999}));

@@ -8,8 +8,9 @@
 
 namespace impeller {
 
-RoundSuperellipse RoundSuperellipse::MakeRectRadii(const Rect& in_bounds,
-                                        const RoundingRadii& in_radii) {
+RoundSuperellipse RoundSuperellipse::MakeRectRadii(
+    const Rect& in_bounds,
+    const RoundingRadii& in_radii) {
   if (!in_bounds.IsFinite()) {
     return {};
   }

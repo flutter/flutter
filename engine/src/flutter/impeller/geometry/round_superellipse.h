@@ -16,12 +16,12 @@ struct RoundSuperellipse {
   RoundSuperellipse() = default;
 
   constexpr static RoundSuperellipse MakeRectRadius(const Rect& rect,
-                                            Scalar radius) {
+                                                    Scalar radius) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadius(radius));
   }
 
   static RoundSuperellipse MakeRectRadii(const Rect& rect,
-                                      const RoundingRadii& radii);
+                                         const RoundingRadii& radii);
 
   constexpr const Rect& GetBounds() const { return bounds_; }
   constexpr const RoundingRadii& GetRadii() const { return radii_; }
@@ -68,9 +68,9 @@ struct RoundSuperellipse {
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
   [[nodiscard]] constexpr RoundSuperellipse Expand(Scalar left,
-                                           Scalar top,
-                                           Scalar right,
-                                           Scalar bottom) const {
+                                                   Scalar top,
+                                                   Scalar right,
+                                                   Scalar bottom) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
@@ -80,7 +80,7 @@ struct RoundSuperellipse {
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
   [[nodiscard]] constexpr RoundSuperellipse Expand(Scalar horizontal,
-                                           Scalar vertical) const {
+                                                   Scalar vertical) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
@@ -105,8 +105,7 @@ struct RoundSuperellipse {
   }
 
  private:
-  constexpr RoundSuperellipse(const Rect& bounds,
-                      const RoundingRadii& radii)
+  constexpr RoundSuperellipse(const Rect& bounds, const RoundingRadii& radii)
       : bounds_(bounds), radii_(radii) {}
 
   Rect bounds_;
