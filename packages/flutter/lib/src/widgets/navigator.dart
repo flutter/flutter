@@ -952,7 +952,11 @@ abstract class RouteTransitionRecord {
   /// During [TransitionDelegate.resolve], this can be called on an exiting
   /// route to indicate that the route should be removed from the [Navigator]
   /// without completing and without an animated transition.
-  @Deprecated('Use markForComplete instead')
+  @Deprecated(
+    'Call markForComplete instead. '
+    'This will let route associated future to complete when route is removed. '
+    'This feature was deprecated after 3.27.0-1.0.pre.39922.',
+  )
   void markForRemove() => markForComplete();
 }
 
