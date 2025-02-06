@@ -6,30 +6,8 @@ import '../dom.dart';
 import '../semantics.dart';
 import '../util.dart';
 
-mixin RouteLike on SemanticRole {
-  /// Sets the description of this route based on a [RouteName] descendant
-  /// node, unless the route provides its own label.
-  void describeBy(RouteName routeName) {
-    if (semanticsObject.namesRoute) {
-      // The route provides its own label, which takes precedence.
-      return;
-    }
-
-    setAttribute('aria-describedby', routeName.semanticsObject.element.id);
-  }
-}
-
-/// Denotes that all descendant nodes are inside a route.
-///
-/// Routes can include dialogs, pop-up menus, sub-screens, and more.
-///
-/// See also:
-///
-///   * [RouteName], which provides a description for this route in the absense
-///     of an explicit route label set on the route itself.
-class SemanticRoute extends SemanticRole with RouteLike {
-  SemanticRoute(SemanticsObject semanticsObject)
-    : super.blank(EngineSemanticsRole.route, semanticsObject) {
+class SemanticRoutBase extends SemanticRole {
+  SemanticRoutBase(EngineSemanticsRole kind, SemanticsObject object) : super.blank(kind, object) {
     // The following behaviors can coexist with the route. Generic `RouteName`
     // and `LabelAndValue` are not used by this role because when the route
     // names its own route an `aria-label` is used instead of
@@ -103,11 +81,67 @@ class SemanticRoute extends SemanticRole with RouteLike {
     }
   }
 
+  /// Sets the description of this route based on a [RouteName] descendant
+  /// node, unless the route provides its own label.
+  void describeBy(RouteName routeName) {
+    if (semanticsObject.namesRoute) {
+      // The route provides its own label, which takes precedence.
+      return;
+    }
+
+    setAttribute('aria-describedby', routeName.semanticsObject.element.id);
+  }
+
   @override
   bool focusAsRouteDefault() {
     // Routes are the ones that look inside themselves to find elements to
     // focus on. It doesn't make sense to focus on the route itself.
     return false;
+  }
+}
+
+/// Denotes that all descendant nodes are inside a route.
+///
+/// Routes can include dialogs, pop-up menus, sub-screens, and more.
+///
+/// See also:
+///
+///   * [RouteName], which provides a description for this route in the absent
+///     of an explicit route label set on the route itself.
+class SemanticRoute extends SemanticRoutBase {
+  SemanticRoute(SemanticsObject object) : super(EngineSemanticsRole.route, object);
+}
+
+/// Indicates the container as a pop dialog.
+///
+/// Uses aria dialog role to convey this semantic information to the element.
+///
+/// Setting this role will also set aria-modal to true, which helps screen
+/// reader better understand this section of screen.
+///
+/// Screen-readers take advantage of "aria-label" to describe the visual.
+///
+/// See also:
+///
+///   * [RouteName], which provides a description for this route in the absent
+///     of an explicit route label set on the route itself.
+class SemanticDialog extends SemanticRoutBase {
+  SemanticDialog(SemanticsObject object) : super(EngineSemanticsRole.dialog, object) {
+    setAttribute('aria-modal', true);
+  }
+}
+
+/// Indicates the container as an alert dialog.
+///
+/// Uses aria alertdialog role to convey this semantic information to the element.
+///
+/// Setting this role will also set aria-modal to true, which helps screen
+/// reader better understand this section of screen.
+///
+/// Screen-readers takes advantage of "aria-label" to describe the visual.
+class SemanticAlertDialog extends SemanticRoutBase {
+  SemanticAlertDialog(SemanticsObject object) : super(EngineSemanticsRole.alertDialog, object) {
+    setAttribute('aria-modal', true);
   }
 }
 
@@ -123,7 +157,7 @@ class SemanticRoute extends SemanticRole with RouteLike {
 class RouteName extends SemanticBehavior {
   RouteName(super.semanticsObject, super.owner);
 
-  RouteLike? _route;
+  SemanticRoutBase? _route;
 
   @override
   void update() {
@@ -141,7 +175,7 @@ class RouteName extends SemanticBehavior {
     }
 
     if (semanticsObject.isLabelDirty) {
-      final RouteLike? route = _route;
+      final SemanticRoutBase? route = _route;
       if (route != null) {
         // Already attached to a route, just update the description.
         route.describeBy(this);
@@ -160,11 +194,11 @@ class RouteName extends SemanticBehavior {
 
   void _lookUpNearestAncestorRoute() {
     SemanticsObject? parent = semanticsObject.parent;
-    while (parent != null && (parent.semanticRole is! RouteLike)) {
+    while (parent != null && (parent.semanticRole is! SemanticRoutBase)) {
       parent = parent.parent;
     }
     if (parent != null) {
-      _route = parent.semanticRole! as RouteLike;
+      _route = parent.semanticRole! as SemanticRoutBase;
     }
   }
 }
