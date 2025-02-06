@@ -6,6 +6,7 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.extra
+import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 
 object DependencyVersionChecker {
     private const val GRADLE_NAME: String = "Gradle"
@@ -130,12 +131,26 @@ object DependencyVersionChecker {
     }
 
     @VisibleForTesting internal fun getKGPVersion(project: Project): Version? {
-        val potentialAgpVersion: String? = com.android.build.gradle.internal.utils.getKotlinAndroidPluginVersion(project)
-
-        return when (potentialAgpVersion) {
-            null -> null
-            "unknown" -> Version(0, 0, 0) // Should we do something else here? This blocks the build, null would let it continue.
-            else -> Version.fromString(potentialAgpVersion)
+        val kotlinVersionProperty = "kotlin_version"
+        val firstKotlinVersionFieldName = "pluginVersion"
+        val secondKotlinVersionFieldName = "kotlinPluginVersion"
+        // This property corresponds to application of the Kotlin Gradle plugin in the
+        // top-level build.gradle file.
+        if (project.hasProperty(kotlinVersionProperty)) {
+            return Version.fromString(project.properties[kotlinVersionProperty] as String)
+        }
+        val kotlinPlugin =
+            project.plugins
+                .findPlugin(KotlinAndroidPluginWrapper::class.java)
+        val versionField =
+            kotlinPlugin?.javaClass?.kotlin?.members?.first {
+                it.name == firstKotlinVersionFieldName || it.name == secondKotlinVersionFieldName
+            }
+        val versionString = versionField?.call(kotlinPlugin)
+        return if (versionString == null) {
+            null
+        } else {
+            Version.fromString(versionString as String)
         }
     }
 
