@@ -132,7 +132,6 @@ public class FlutterEngineConnectionRegistryTest {
     PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
     when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
 
-
     FlutterLoader flutterLoader = mock(FlutterLoader.class);
 
     ExclusiveAppComponent appComponent = mock(ExclusiveAppComponent.class);
