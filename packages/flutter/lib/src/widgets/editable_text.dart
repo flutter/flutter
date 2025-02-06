@@ -3203,6 +3203,14 @@ class EditableTextState extends State<EditableText>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted && renderEditable.hasSize) {
+        renderEditable.selectionStartInViewport.removeListener(_updateTextSelectionToolbarVisibilities);
+        renderEditable.selectionEndInViewport.removeListener(_updateTextSelectionToolbarVisibilities);
+        renderEditable.selectionStartInViewport.addListener(_updateTextSelectionToolbarVisibilities);
+        renderEditable.selectionEndInViewport.addListener(_updateTextSelectionToolbarVisibilities);
+      }
+    }, debugLabel: 'EditableText.selectionViewportListener');
 
     _style =
         MediaQuery.boldTextOf(context)
@@ -3387,6 +3395,8 @@ class EditableTextState extends State<EditableText>
   @protected
   @override
   void dispose() {
+    renderEditable.selectionStartInViewport.removeListener(_updateTextSelectionToolbarVisibilities);
+    renderEditable.selectionEndInViewport.removeListener(_updateTextSelectionToolbarVisibilities);
     _contextMenuTraversalDirectionNotifier.dispose();
     _internalScrollController?.dispose();
     _currentAutofillScope?.unregister(autofillId);
@@ -4945,6 +4955,7 @@ class EditableTextState extends State<EditableText>
     if (_contextMenuPortalController.isShowing) {
       return false;
     }
+    debugPrint('showw toolbar');
     _liveTextInputStatus?.update();
     clipboardStatus.update();
     // _selectionOverlay!.showToolbar();
