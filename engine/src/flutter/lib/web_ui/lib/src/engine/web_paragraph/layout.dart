@@ -26,6 +26,7 @@ class TextLayout {
   List<WebTextCluster> textClusters = <WebTextCluster>[];
 
   void performLayout() {
+    textContext.font = '50px arial';
     final textMetrics = textContext.measureText(paragraph.text) as DomTextMetrics;
     textClusters = textMetrics.getTextClusters();
   }

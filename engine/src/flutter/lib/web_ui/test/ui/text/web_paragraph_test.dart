@@ -18,18 +18,18 @@ void main() {
 
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true);
-  const Rect region = Rect.fromLTWH(0, 0, 300, 300);
+  const Rect region = Rect.fromLTWH(0, 0, 500, 500);
 
   test('Draw WebParagraph on Canvas2D', () async {
-    final DomCanvasElement canvas = createDomCanvasElement(width: 200, height: 200);
+    final DomCanvasElement canvas = createDomCanvasElement(width: 500, height: 500);
     domDocument.body!.append(canvas);
 
-    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Ahem', fontSize: 10);
+    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('Lorem ipsum');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(ParagraphConstraints(width: double.infinity));
-    paragraph.paint(canvas, Offset.zero);
+    paragraph.paint(canvas, Offset(50, 100));
 
     await matchGoldenFile('web_paragraph_canvas_2d.png', region: region);
   });

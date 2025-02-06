@@ -245,6 +245,7 @@ class WebParagraph implements ui.Paragraph {
   /// Paints this paragraph instance on a [canvas] at the given [offset].
   void paint(DomCanvasElement canvas, ui.Offset offset) {
     for (final textCluster in _layout.textClusters) {
+      print('[@(${offset.dx}, ${offset.dy}) ');
       _paint.printTextCluster(textCluster);
       _paint.paint(canvas, textCluster, offset.dx, offset.dy);
     }
