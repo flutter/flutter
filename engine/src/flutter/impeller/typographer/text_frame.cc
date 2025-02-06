@@ -83,23 +83,27 @@ Point TextFrame::ComputeSubpixelPosition(
     const TextRun::GlyphPosition& glyph_position,
     AxisAlignment alignment,
     Point offset,
-    Scalar scale) {
-  Point pos = glyph_position.position + offset;
+    Scalar scale,
+    const Matrix& transform) {
+  Point pos = glyph_position.position;
+  pos = transform * pos;
+  FML_LOG(ERROR) << "ComputeSubpixelPosition " << pos << " " << transform;
   switch (alignment) {
     case AxisAlignment::kNone:
       return Point(0, 0);
     case AxisAlignment::kX:
-      return Point(ComputeFractionalPosition(pos.x * scale), 0);
+      return Point(ComputeFractionalPosition(pos.x), 0);
     case AxisAlignment::kY:
-      return Point(0, ComputeFractionalPosition(pos.y * scale));
+      return Point(0, ComputeFractionalPosition(pos.y));
     case AxisAlignment::kAll:
-      return Point(ComputeFractionalPosition(pos.x * scale),
-                   ComputeFractionalPosition(pos.y * scale));
+      return Point(ComputeFractionalPosition(pos.x),
+                   ComputeFractionalPosition(pos.y));
   }
 }
 
 void TextFrame::SetPerFrameData(Scalar scale,
                                 Point offset,
+                                const Matrix& transform,
                                 std::optional<GlyphProperties> properties) {
   if (!ScalarNearlyEqual(scale_, scale) ||
       !ScalarNearlyEqual(offset_.x, offset.x) ||
@@ -110,6 +114,7 @@ void TextFrame::SetPerFrameData(Scalar scale,
   scale_ = scale;
   offset_ = offset;
   properties_ = properties;
+  transform_ = transform;
 }
 
 Scalar TextFrame::GetScale() const {

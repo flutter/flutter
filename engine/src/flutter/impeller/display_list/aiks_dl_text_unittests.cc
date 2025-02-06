@@ -155,6 +155,77 @@ TEST_P(AiksTest, CanRenderTextFrameWithHalfScaling) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, Subpixel) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+  for (int i = 0; i < 5; ++i) {
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "ui", "Roboto-Regular.ttf",
+        TextRenderOptions{
+            .font_size = 200,
+            .position = DlPoint(100 + 0.25 * i, 150 + i * 150),
+            .is_subpixel = true,
+        });
+  }
+  DlPaint line_paint;
+  line_paint.setColor(DlColor::kBlue());
+  builder.DrawLine(DlPoint(111, 0), DlPoint(111, 800), line_paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, SubpixelScaled) {
+  DisplayListBuilder builder;
+
+  builder.Scale(0.75, 0.75);
+
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+  Scalar offset = 0.25 / 0.75;
+  for (int i = 0; i < 5; ++i) {
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "ui", "Roboto-Regular.ttf",
+        TextRenderOptions{
+            .font_size = 200,
+            .position = DlPoint(100 + offset * i, 150 + i * 150),
+            .is_subpixel = true,
+        });
+  }
+  DlPaint line_paint;
+  line_paint.setColor(DlColor::kBlue());
+  builder.DrawLine(DlPoint(111, 0), DlPoint(111, 800), line_paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, SubpixelScaledTranslated) {
+  DisplayListBuilder builder;
+
+  builder.Scale(0.75, 0.75);
+
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+  Scalar offset = 0.25 / 0.75;
+  for (int i = 0; i < 5; ++i) {
+    builder.Save();
+    builder.Translate(100 + offset * i, 150 + i * 150);
+    RenderTextInCanvasSkia(GetContext(), builder, "ui", "Roboto-Regular.ttf",
+                           TextRenderOptions{
+                               .font_size = 200,
+                               .position = DlPoint(0, 0),
+                               .is_subpixel = true,
+                           });
+    builder.Restore();
+  }
+  DlPaint line_paint;
+  line_paint.setColor(DlColor::kBlue());
+  builder.DrawLine(DlPoint(111, 0), DlPoint(111, 800), line_paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderTextFrameWithFractionScaling) {
   Scalar fine_scale = 0.f;
   bool is_subpixel = false;
