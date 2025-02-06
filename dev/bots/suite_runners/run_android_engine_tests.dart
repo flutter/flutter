@@ -105,18 +105,20 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
       await runTest(file);
     }
 
-    // Test HCPP Platform Views
-    androidManifestXml.writeAsStringSync(
-      androidManifestXml.readAsStringSync().replaceFirst(
-        kSurfaceControlMetadataDisabled,
-        kSurfaceControlMetadataEnabled,
-      ),
-    );
-    for (final FileSystemEntity file in mains) {
-      if (!file.path.contains('hcpp')) {
-        continue;
+    // Test HCPP Platform Views on Vulkan.
+    if (impellerBackend == ImpellerBackend.vulkan) {
+      androidManifestXml.writeAsStringSync(
+        androidManifestXml.readAsStringSync().replaceFirst(
+          kSurfaceControlMetadataDisabled,
+          kSurfaceControlMetadataEnabled,
+        ),
+      );
+      for (final FileSystemEntity file in mains) {
+        if (!file.path.contains('hcpp')) {
+          continue;
+        }
+        await runTest(file);
       }
-      await runTest(file);
     }
   } finally {
     // Restore original contents.

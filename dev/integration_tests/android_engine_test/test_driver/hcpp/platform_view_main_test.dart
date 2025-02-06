@@ -23,7 +23,7 @@ import '../_luci_skia_gold_prelude.dart';
 ///
 /// For a convenient way to deflake a test, see `tool/deflake.dart`.
 void main() async {
-  const String goldenPrefix = 'hybrid_composition_2_platform_view';
+  const String goldenPrefix = 'hybrid_composition_pp_platform_view';
 
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
@@ -43,10 +43,10 @@ void main() async {
     await flutterDriver.close();
   });
 
-  test('should screenshot an HC++ platform view', () async {
+  test('should screenshot an HCPP platform view', () async {
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.hcpp_platform_view.png'),
+      matchesGoldenFile('$goldenPrefix.platform_view.png'),
     );
   }, timeout: Timeout.none);
 
@@ -54,13 +54,13 @@ void main() async {
     await nativeDriver.rotateToLandscape();
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.hcpp_platform_view_landscape_rotated.png'),
+      matchesGoldenFile('$goldenPrefix.platform_view_landscape_rotated.png'),
     );
 
     await nativeDriver.rotateResetDefault();
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.hcpp_platform_view_portait_rotated_back.png'),
+      matchesGoldenFile('$goldenPrefix.platform_view_portait_rotated_back.png'),
     );
   }, timeout: Timeout.none);
 }

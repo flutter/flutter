@@ -32,6 +32,7 @@ class MainActivity : FlutterActivity() {
                 add(NativeDriverSupportPlugin())
             }
 
+        // TODO(jonahwilliams): make platform view controllers share platform view registry.
         flutterEngine
             .platformViewsController2
             .registry
