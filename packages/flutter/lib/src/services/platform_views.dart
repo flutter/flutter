@@ -1175,7 +1175,7 @@ class HybridAndroidViewController extends AndroidViewController {
       layoutDirection: _layoutDirection,
       creationParams: _creationParams,
       position: position,
-      useNewController: true
+      useNewController: true,
     );
   }
 

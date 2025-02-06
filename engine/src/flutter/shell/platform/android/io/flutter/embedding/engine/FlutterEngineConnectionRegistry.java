@@ -392,6 +392,7 @@ import java.util.Set;
   private void detachFromActivityInternal() {
     // Deactivate PlatformViewsController.
     flutterEngine.getPlatformViewsController().detach();
+    flutterEngine.getPlatformViewsController2().detach();
 
     exclusiveActivity = null;
     activityPluginBinding = null;
