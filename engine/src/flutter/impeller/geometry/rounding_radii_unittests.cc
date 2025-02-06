@@ -8,14 +8,10 @@
 
 #include "flutter/impeller/geometry/geometry_asserts.h"
 
-#define CHECK_POINT_WITH_OFFSET(rr, p, outward_offset) \
-  EXPECT_TRUE(rr.Contains(p));                         \
-  EXPECT_FALSE(rr.Contains(p + outward_offset));
-
 namespace impeller {
 namespace testing {
 
-TEST(RoundSuperellipseTest, RoundingRadiiEmptyDeclaration) {
+TEST(RoudingRadiiTest, RoundingRadiiEmptyDeclaration) {
   RoundingRadii radii;
 
   EXPECT_TRUE(radii.AreAllCornersEmpty());
@@ -35,7 +31,7 @@ TEST(RoundSuperellipseTest, RoundingRadiiEmptyDeclaration) {
   EXPECT_EQ(radii.bottom_right.height, 0.0f);
 }
 
-TEST(RoundSuperellipseTest, RoundingRadiiDefaultConstructor) {
+TEST(RoudingRadiiTest, RoundingRadiiDefaultConstructor) {
   RoundingRadii radii = RoundingRadii();
 
   EXPECT_TRUE(radii.AreAllCornersEmpty());
@@ -47,7 +43,7 @@ TEST(RoundSuperellipseTest, RoundingRadiiDefaultConstructor) {
   EXPECT_EQ(radii.bottom_right, Size());
 }
 
-TEST(RoundSuperellipseTest, RoundingRadiiScalarConstructor) {
+TEST(RoudingRadiiTest, RoundingRadiiScalarConstructor) {
   RoundingRadii radii = RoundingRadii::MakeRadius(5.0f);
 
   EXPECT_FALSE(radii.AreAllCornersEmpty());
@@ -59,7 +55,7 @@ TEST(RoundSuperellipseTest, RoundingRadiiScalarConstructor) {
   EXPECT_EQ(radii.bottom_right, Size(5.0f, 5.0f));
 }
 
-TEST(RoundSuperellipseTest, RoundingRadiiEmptyScalarConstructor) {
+TEST(RoudingRadiiTest, RoundingRadiiEmptyScalarConstructor) {
   RoundingRadii radii = RoundingRadii::MakeRadius(-5.0f);
 
   EXPECT_TRUE(radii.AreAllCornersEmpty());
@@ -71,7 +67,7 @@ TEST(RoundSuperellipseTest, RoundingRadiiEmptyScalarConstructor) {
   EXPECT_EQ(radii.bottom_right, Size(-5.0f, -5.0f));
 }
 
-TEST(RoundSuperellipseTest, RoundingRadiiSizeConstructor) {
+TEST(RoudingRadiiTest, RoundingRadiiSizeConstructor) {
   RoundingRadii radii = RoundingRadii::MakeRadii(Size(5.0f, 6.0f));
 
   EXPECT_FALSE(radii.AreAllCornersEmpty());
@@ -83,7 +79,7 @@ TEST(RoundSuperellipseTest, RoundingRadiiSizeConstructor) {
   EXPECT_EQ(radii.bottom_right, Size(5.0f, 6.0f));
 }
 
-TEST(RoundSuperellipseTest, RoundingRadiiEmptySizeConstructor) {
+TEST(RoudingRadiiTest, RoundingRadiiEmptySizeConstructor) {
   {
     RoundingRadii radii = RoundingRadii::MakeRadii(Size(-5.0f, 6.0f));
 
@@ -109,7 +105,7 @@ TEST(RoundSuperellipseTest, RoundingRadiiEmptySizeConstructor) {
   }
 }
 
-TEST(RoundSuperellipseTest, RoundingRadiiNamedSizesConstructor) {
+TEST(RoudingRadiiTest, RoundingRadiiNamedSizesConstructor) {
   RoundingRadii radii = {
       .top_left = Size(5.0f, 5.5f),
       .top_right = Size(6.0f, 6.5f),
@@ -126,7 +122,7 @@ TEST(RoundSuperellipseTest, RoundingRadiiNamedSizesConstructor) {
   EXPECT_EQ(radii.bottom_right, Size(8.0f, 8.5f));
 }
 
-TEST(RoundSuperellipseTest, RoundingRadiiPartialNamedSizesConstructor) {
+TEST(RoudingRadiiTest, RoundingRadiiPartialNamedSizesConstructor) {
   {
     RoundingRadii radii = {
         .top_left = Size(5.0f, 5.5f),
@@ -184,7 +180,7 @@ TEST(RoundSuperellipseTest, RoundingRadiiPartialNamedSizesConstructor) {
   }
 }
 
-TEST(RoundSuperellipseTest, RoundingRadiiMultiply) {
+TEST(RoudingRadiiTest, RoundingRadiiMultiply) {
   RoundingRadii radii = {
       .top_left = Size(5.0f, 5.5f),
       .top_right = Size(6.0f, 6.5f),
@@ -202,7 +198,7 @@ TEST(RoundSuperellipseTest, RoundingRadiiMultiply) {
   EXPECT_EQ(doubled.bottom_right, Size(16.0f, 17.0f));
 }
 
-TEST(RoundSuperellipseTest, RoundingRadiiEquals) {
+TEST(RoudingRadiiTest, RoundingRadiiEquals) {
   RoundingRadii radii = {
       .top_left = Size(5.0f, 5.5f),
       .top_right = Size(6.0f, 6.5f),
@@ -219,7 +215,7 @@ TEST(RoundSuperellipseTest, RoundingRadiiEquals) {
   EXPECT_EQ(radii, other);
 }
 
-TEST(RoundSuperellipseTest, RoundingRadiiNotEquals) {
+TEST(RoudingRadiiTest, RoundingRadiiNotEquals) {
   const RoundingRadii radii = {
       .top_left = Size(5.0f, 5.5f),
       .top_right = Size(6.0f, 6.5f),
@@ -269,7 +265,7 @@ TEST(RoundSuperellipseTest, RoundingRadiiNotEquals) {
   }
 }
 
-TEST(RoundSuperellipseTest, RoundingRadiiCornersSameTolerance) {
+TEST(RoudingRadiiTest, RoundingRadiiCornersSameTolerance) {
   RoundingRadii radii{
       .top_left = {10, 20},
       .top_right = {10.01, 20.01},
