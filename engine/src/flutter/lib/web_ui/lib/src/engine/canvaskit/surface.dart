@@ -271,9 +271,9 @@ class Surface extends DisplayCanvas {
       }
     }
 
-    // If we reached here, then either we are forcing a new context, or
-    // the size of the surface has changed so we need to make a new one.
-
+    // If we reached here, then this is the first frame and we haven't made a
+    // surface yet, we are forcing a new context, or the size of the surface
+    // has changed and we need to make a new one.
     _surface?.dispose();
     _surface = null;
 
