@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
+#include "display_list/dl_color.h"
 #include "flow/view_slicer.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/make_copyable.h"
+#include "fml/synchronization/count_down_latch.h"
 
 namespace flutter {
 
@@ -90,8 +92,24 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
                  view_rects           //
       );
 
-  // Create Overlay frame.
-  surface_pool_->TrimLayers();
+  // If there is no overlay Surface, initialize one on the platform thread. This
+  // will only be done once per application launch, as the singular overlay
+  // surface is never released.
+  surface_pool_->ResetLayers();
+  if (!surface_pool_->HasLayers()) {
+    std::shared_ptr<fml::CountDownLatch> latch =
+        std::make_shared<fml::CountDownLatch>(1u);
+    task_runners_.GetPlatformTaskRunner()->PostTask(
+        fml::MakeCopyable([&, latch]() {
+          surface_pool_->GetLayer(context, android_context_, jni_facade_,
+                                  surface_factory_);
+          latch->CountDown();
+        }));
+    latch->Wait();
+  }
+
+  // Create Overlay frame. If overlay surface creation failed,
+  // all this work must be skipped.
   std::unique_ptr<SurfaceFrame> overlay_frame;
   if (surface_pool_->HasLayers()) {
     for (int64_t view_id : composition_order_) {
@@ -127,6 +145,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
        slices = std::move(slices_)]() -> void {
         jni_facade->swapTransaction();
+
         for (int64_t view_id : composition_order) {
           SkRect view_rect = GetViewRect(view_id, view_params);
           const EmbeddedViewParams& params = view_params.at(view_id);
@@ -141,10 +160,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
               params.mutatorsStack()  //
           );
         }
-        if (!surface_pool_->HasLayers()) {
-          surface_pool_->GetLayer(context, android_context_, jni_facade_,
-                                  surface_factory_);
-        }
+        jni_facade_->onEndFrame2();
       }));
 }
 

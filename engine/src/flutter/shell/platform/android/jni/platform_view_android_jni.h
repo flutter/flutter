@@ -228,6 +228,8 @@ class PlatformViewAndroidJNI {
 
   virtual void destroyOverlaySurface2() = 0;
 
+  virtual void onEndFrame2() = 0;
+
   virtual void onDisplayPlatformView2(int32_t view_id,
                                       int32_t x,
                                       int32_t y,

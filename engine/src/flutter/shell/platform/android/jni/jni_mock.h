@@ -139,6 +139,8 @@ class JNIMock final : public PlatformViewAndroidJNI {
                MutatorsStack mutators_stack),
               (override));
 
+  MOCK_METHOD(void, onEndFrame2, (), (override));
+
   MOCK_METHOD(std::unique_ptr<std::vector<std::string>>,
               FlutterViewComputePlatformResolvedLocale,
               (std::vector<std::string> supported_locales_data),
