@@ -499,5 +499,4 @@ flutter:
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
-
 }

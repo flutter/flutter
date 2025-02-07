@@ -232,10 +232,7 @@ void main() {
         package,
         prebuiltApplication: true,
         platformArgs: <String, Object>{'trace-startup': true},
-        debuggingOptions: DebuggingOptions.disabled(
-          BuildInfo.debug,
-          traceAllowlist: 'foo,bar',
-        ),
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug, traceAllowlist: 'foo,bar'),
       );
 
       expect(result.started, true);
