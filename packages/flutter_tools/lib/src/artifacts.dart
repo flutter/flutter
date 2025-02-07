@@ -89,6 +89,8 @@ enum HostArtifact {
   /// Folder that contains platform dill files for the web sdk.
   webPlatformKernelFolder,
 
+  // TODO(matanlurey): Remove the non-Sound variants, and rename the Sound variants, https://github.com/flutter/flutter/issues/162846.
+
   /// The summary dill for the dartdevc target.
   webPlatformDDCKernelDill,
 
