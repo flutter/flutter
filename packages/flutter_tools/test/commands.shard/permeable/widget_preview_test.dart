@@ -35,7 +35,8 @@ void main() {
   late BotDetector botDetector;
   late Platform platform;
 
-  setUp(() {
+  setUp(() async {
+    await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
     logger = BufferLogger.test();
     fs = LocalFileSystem.test(signals: Signals.test());
