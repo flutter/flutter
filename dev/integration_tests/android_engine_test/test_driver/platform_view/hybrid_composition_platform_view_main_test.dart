@@ -13,12 +13,12 @@ import '../_luci_skia_gold_prelude.dart';
 ///
 /// ```sh
 /// # Checkout HEAD, i.e. *before* changes you want to test.
-/// UPDATE_GOLDENS=1 flutter drive lib/platform_view/hybrid_compoisition_platform_view_main.dart
+/// UPDATE_GOLDENS=1 flutter drive lib/platform_view/hybrid_composition_platform_view_main.dart
 ///
 /// # Make your changes.
 ///
 /// # Run the test against baseline.
-/// flutter drive lib/platform_view/hybrid_compoisition_platform_view_main.dart
+/// flutter drive lib/platform_view/hybrid_composition_platform_view_main.dart
 /// ```
 ///
 /// For a convenient way to deflake a test, see `tool/deflake.dart`.
