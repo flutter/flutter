@@ -7,7 +7,7 @@ package io.flutter.plugin.platform;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PlatformViewRegistryImpl implements PlatformViewRegistry {
+class PlatformViewRegistryImpl implements PlatformViewRegistry {
 
   PlatformViewRegistryImpl() {
     viewFactories = new HashMap<>();

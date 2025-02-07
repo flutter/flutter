@@ -73,8 +73,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     motionEventTracker = MotionEventTracker.getInstance();
   }
 
-  public void setRegistry(@NonNull PlatformViewRegistryImpl registry) {
-    this.registry = registry;
+  public void setRegistry(@NonNull PlatformViewRegistry registry) {
+    this.registry = (PlatformViewRegistryImpl) registry;
   }
 
   @Override
