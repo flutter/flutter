@@ -153,6 +153,7 @@ abstract final class FlutterOptions {
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
   static const String kWebWasmFlag = 'wasm';
+  static const String kWebExperimentalHotReload = 'web-experimental-hot-reload';
 }
 
 /// flutter command categories for usage.
@@ -339,7 +340,7 @@ abstract class FlutterCommand extends Command<void> {
       hide: !verboseHelp,
     );
     argParser.addFlag(
-      'web-experimental-hot-reload',
+      FlutterOptions.kWebExperimentalHotReload,
       help: 'Enables new module format that supports hot reload.',
       hide: !verboseHelp,
     );
@@ -1348,9 +1349,10 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    // TODO(natebiggs): Delete this when the new DDC module system is the default.
-    if (boolArg('web-experimental-hot-reload')) {
-      extraFrontEndOptions.addAll(['--dartdevc-canary', '--dartdevc-module-format=ddc']);
+    // TODO(natebiggs): Delete this when new DDC module system is the default.
+    if (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+        boolArg(FlutterOptions.kWebExperimentalHotReload)) {
+      extraFrontEndOptions.addAll(<String>['--dartdevc-canary', '--dartdevc-module-format=ddc']);
     }
 
     String? codeSizeDirectory;
