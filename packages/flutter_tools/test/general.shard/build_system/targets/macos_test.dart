@@ -11,6 +11,8 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
@@ -485,6 +487,104 @@ void main() {
   );
 
   testUsingContext(
+    'debug macOS application copies correct assets with flavor',
+    () async {
+      fileSystem
+          .directory(
+            artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
+          )
+          .createSync();
+      environment.defines[kBundleSkSLPath] = 'bundle.sksl';
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.vmSnapshotData,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync(recursive: true);
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.isolateSnapshotData,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync(recursive: true);
+      fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
+      // sksl bundle
+      fileSystem
+          .file('bundle.sksl')
+          .writeAsStringSync(
+            json.encode(<String, Object>{
+              'engineRevision': '2',
+              'platform': 'ios',
+              'data': <String, Object>{'A': 'B'},
+            }),
+          );
+
+      final String inputKernel = '${environment.buildDir.path}/app.dill';
+      fileSystem.file(inputKernel)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('testing');
+      environment.buildDir.childFile('native_assets.json').createSync();
+
+      environment.defines[kXcodeConfiguration] = 'Debug-strawberry';
+      fileSystem.directory('/macos/Runner.xcodeproj').createSync(recursive: true);
+
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+  name: example
+  flutter:
+    assets:
+      - assets/common/
+      - path: assets/vanilla/
+        flavors:
+          - vanilla
+      - path: assets/strawberry/
+        flavors:
+          - strawberry
+  ''');
+
+      fileSystem.file('assets/common/image.png').createSync(recursive: true);
+      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+      fileSystem
+          .directory('.dart_tool')
+          .childFile('package_config.json')
+          .createSync(recursive: true);
+
+      await const DebugMacOSBundleFlutterAssets().build(environment);
+      final Directory frameworkDirectory = environment.outputDir.childDirectory(
+        '/App.framework/Versions/A/Resources/',
+      );
+      expect(
+        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/common/image.png'),
+        exists,
+      );
+      expect(
+        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/vanilla/ice-cream.png'),
+        isNot(exists),
+      );
+      expect(
+        fileSystem.file(
+          '${frameworkDirectory.path}/flutter_assets/assets/strawberry/ice-cream.png',
+        ),
+        exists,
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      XcodeProjectInterpreter:
+          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
+    },
+  );
+
+  testUsingContext(
     'release/profile macOS application has no blob or precompiled runtime',
     () async {
       fileSystem
@@ -901,4 +1001,25 @@ void main() {
       ProcessManager: () => processManager,
     },
   );
+}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  FakeXcodeProjectInterpreter({
+    this.isInstalled = true,
+    // this.version,
+    this.schemes = const <String>['Runner'],
+  });
+
+  @override
+  final bool isInstalled;
+
+  // @override
+  // final Version? version;
+
+  List<String> schemes;
+
+  @override
+  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+    return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
+  }
 }

@@ -3785,7 +3785,7 @@ targets:
       - DEPS
 
   - name: Mac flavors_test_macos
-    presubmit: false
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4820,7 +4820,7 @@ targets:
 
   - name: Mac_ios flavors_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
