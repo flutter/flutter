@@ -21,12 +21,13 @@ Future<void> main() async {
   String adbExecutable = 'adb';
   final bool adbExistsOnPath = Process.runSync('which', <String>[adbExecutable]).exitCode == 0;
   if (!adbExistsOnPath) {
+    print(r'ADB does not exist on the $PATH. Falling back to $ANDROID_HOME');
     final bool adbExistsInAndroidSdk =
         Process.runSync('which', <String>[r'$ANDROID_HOME/platform-tools/adb']).exitCode == 0;
     if (adbExistsInAndroidSdk) {
       adbExecutable = r'$ANDROID_HOME/platform-tools/adb';
     } else {
-      print(r'This test needs ADB to exist on the $PATH.');
+      print(r'This test needs ADB to exist on the $PATH or in $ANDROID_HOME');
       exitCode = 1;
       return;
     }
