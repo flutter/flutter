@@ -90,6 +90,7 @@ Future<void> main() async {
   } catch (e) {
     print('Driver Error ------');
     print(e);
+    print('Driver Error ------');
     exitCode = 1;
   } finally {
     print('Removing Synthetic notch...');
