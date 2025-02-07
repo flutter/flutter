@@ -232,6 +232,9 @@ class FilledButton extends ButtonStyleButton {
   /// [ButtonStyle.iconColor] and [iconSize] is used to construct
   /// [ButtonStyle.iconSize].
   ///
+  /// If [foregroundColor] is provided and [iconColor] is not provided, then the button icon will
+  /// use the provided [foregroundColor].
+  ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
   /// value, [elevation] + 2 is used when the button is hovered
