@@ -33,7 +33,6 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 public class MainActivity extends FlutterActivity {
-
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
       GeneratedPluginRegistrant.registerWith(flutterEngine);
