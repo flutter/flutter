@@ -1350,7 +1350,7 @@ void main() {
 
     semantics.dispose();
   });
-  testWidgets('AppBar can customize sort keys', (WidgetTester tester) async {
+  testWidgets('AppBar can customize sort keys for flexible space', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
