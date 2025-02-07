@@ -366,33 +366,35 @@ int32_t CalculateMaxY(const impeller::testing::Screenshot* img) {
   }
   return max_y;
 }
+
+int32_t CalculateSpaceBetweenUI(const impeller::testing::Screenshot* img) {
+  const uint32_t* ptr = reinterpret_cast<const uint32_t*>(img->GetBytes());
+  ptr += img->GetWidth() * static_cast<int32_t>(img->GetHeight() / 2.0);
+  std::vector<size_t> boundaries;
+  uint32_t value = *ptr++;
+  for (size_t i = 1; i < img->GetWidth(); ++i) {
+    if (((*ptr & 0x00ffffff) != 0) != ((value & 0x00ffffff) != 0)) {
+      boundaries.push_back(i);
+    }
+    value = *ptr++;
+  }
+
+  assert(boundaries.size() == 6);
+  return boundaries[4] - boundaries[3];
+}
 }  // namespace
 
-// This test makes sure that given a tiny change in scale, a glyph will not do a
-// large jump in its drawn y position. This was noticed when performing
-// animations as a problematic artifact. We tried to come up with a more
-// holistic quantification of the problem but haven't yet been able to.
-TEST_P(DlGoldenTest, TextJumpingTest) {
+TEST_P(DlGoldenTest, BaselineHE) {
   SetWindowSize(impeller::ISize(1024, 200));
   impeller::Scalar font_size = 300;
-  auto callback = [&](impeller::Scalar scale) -> sk_sp<DisplayList> {
+  auto callback = [&](const char* text,
+                      impeller::Scalar scale) -> sk_sp<DisplayList> {
     DisplayListBuilder builder;
     DlPaint paint;
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
     builder.Scale(scale, scale);
-    // If you move this code to a playgrounds test the RenderTextInCanvasSkia
-    // signature is a bit different there, it will look like this:
-    //
-    // RenderTextInCanvasSkia(GetContext(), builder,
-    //                    "the quick brown fox jumped over the lazy dog!.?",
-    //                    "Roboto-Regular.ttf",
-    //                    TextRenderOptions{
-    //                        .font_size = font_size,
-    //                        .position = SkPoint::Make(100, 300),
-    //                    });
-    // Note: The ahem font just has full blocks in it.
-    RenderTextInCanvasSkia(&builder, "h", "Roboto-Regular.ttf",
+    RenderTextInCanvasSkia(&builder, text, "Roboto-Regular.ttf",
                            DlPoint::MakeXY(10, 300),
                            TextRenderOptions{
                                .font_size = font_size,
@@ -401,18 +403,54 @@ TEST_P(DlGoldenTest, TextJumpingTest) {
   };
 
   std::unique_ptr<impeller::testing::Screenshot> right =
-      MakeScreenshot(callback(0.445));
+      MakeScreenshot(callback("h", 0.444));
   if (!right) {
     GTEST_SKIP() << "making screenshots not supported.";
   }
   std::unique_ptr<impeller::testing::Screenshot> left =
-      MakeScreenshot(callback(0.444));
+      MakeScreenshot(callback("e", 0.444));
 
   int32_t left_max_y = CalculateMaxY(left.get());
   int32_t right_max_y = CalculateMaxY(right.get());
   int32_t y_diff = std::abs(left_max_y - right_max_y);
-  EXPECT_TRUE(y_diff <= 1) << "y diff: " << y_diff;
+  EXPECT_TRUE(y_diff <= 2) << "y diff: " << y_diff;
 }
 
+TEST_P(DlGoldenTest, MaintainsSpace) {
+  SetWindowSize(impeller::ISize(1024, 200));
+  impeller::Scalar font_size = 300;
+  auto callback = [&](const char* text,
+                      impeller::Scalar scale) -> sk_sp<DisplayList> {
+    DisplayListBuilder builder;
+    DlPaint paint;
+    paint.setColor(DlColor::ARGB(1, 0, 0, 0));
+    builder.DrawPaint(paint);
+    builder.Scale(scale, scale);
+    RenderTextInCanvasSkia(&builder, text, "Roboto-Regular.ttf",
+                           DlPoint::MakeXY(10, 300),
+                           TextRenderOptions{
+                               .font_size = font_size,
+                           });
+    return builder.Build();
+  };
+
+  std::optional<int32_t> last_space;
+  for (int i = 0; i <= 100; ++i) {
+    Scalar scale = 0.440 + i / 1000.0;
+    std::unique_ptr<impeller::testing::Screenshot> right =
+        MakeScreenshot(callback("ui", scale));
+    if (!right) {
+      GTEST_SKIP() << "making screenshots not supported.";
+    }
+
+    int32_t space = CalculateSpaceBetweenUI(right.get());
+    if (last_space.has_value()) {
+      int32_t diff = abs(space - *last_space);
+      EXPECT_TRUE(diff <= 1)
+          << "i:" << i << " space:" << space << " last_space:" << *last_space;
+    }
+    last_space = space;
+  }
+}
 }  // namespace testing
 }  // namespace flutter

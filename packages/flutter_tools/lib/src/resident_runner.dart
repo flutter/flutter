@@ -570,6 +570,7 @@ class FlutterDevice {
         bundleFirstUpload: bundleFirstUpload,
         generator: generator!,
         fullRestart: fullRestart,
+        resetCompiler: fullRestart,
         dillOutputPath: dillOutputPath,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         pathToReload: pathToReload,
@@ -1112,8 +1113,8 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   String get dillOutputPath =>
       _dillOutputPath ?? globals.fs.path.join(artifactDirectory.path, 'app.dill');
-  String getReloadPath({bool fullRestart = false, required bool swap}) {
-    if (!fullRestart) {
+  String getReloadPath({bool resetCompiler = false, required bool swap}) {
+    if (!resetCompiler) {
       return 'main.dart.incremental.dill';
     }
     return 'main.dart${swap ? '.swap' : ''}.dill';
@@ -1798,7 +1799,6 @@ class TerminalHandler {
       await _commonTerminalInputHandler(command);
       // Catch all exception since this is doing cleanup and rethrowing.
     } catch (error, st) {
-      // ignore: avoid_catches_without_on_clauses
       // Don't print stack traces for known error types.
       if (error is! ToolExit) {
         _logger.printError('$error\n$st');
