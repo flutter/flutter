@@ -10,7 +10,7 @@ import 'dart:io';
 
 import 'package:flutter_driver/flutter_driver.dart';
 
-// display_cutout needs a custom driver becuase cutout manipulations needs to be
+// display_cutout needs a custom driver because cutout manipulations needs to be
 // done to a device/emulator in order for the tests to pass.
 Future<void> main() async {
   if (!(Platform.isLinux || Platform.isMacOS)) {
@@ -18,27 +18,40 @@ Future<void> main() async {
     print('This test must be run on a POSIX host. Skipping...');
     return;
   }
-  final bool adbExists = Process.runSync('which', <String>['adb']).exitCode == 0;
-  if (!adbExists) {
-    print(r'This test needs ADB to exist on the $PATH.');
-    exitCode = 1;
-    return;
+  String adbExecutable = 'adb';
+  final bool adbExistsOnPath =
+      Process.runSync('which', <String>[adbExecutable]).exitCode == 0;
+  if (!adbExistsOnPath) {
+    final bool adbExistsInAndroidSdk =
+        Process.runSync('which', <String>[r'$ANDROID_HOME/platform-tools/adb'])
+                .exitCode ==
+            0;
+    if (adbExistsInAndroidSdk) {
+      adbExecutable = r'$ANDROID_HOME/platform-tools/adb';
+    } else {
+      print(r'This test needs ADB to exist on the $PATH.');
+      exitCode = 1;
+      return;
+    }
   }
   // Test requires developer settings added in 28 and behavior added in 30
-  final ProcessResult checkApiLevel = Process.runSync('adb', <String>[
+  final ProcessResult checkApiLevel = Process.runSync(adbExecutable, <String>[
     'shell',
     'getprop',
     'ro.build.version.sdk',
   ]);
   final String apiStdout = checkApiLevel.stdout.toString();
   // Api level 30 or higher.
-  if (apiStdout.startsWith('2') || apiStdout.startsWith('1') || apiStdout.length == 1) {
+  if (apiStdout.startsWith('2') ||
+      apiStdout.startsWith('1') ||
+      apiStdout.length == 1) {
     print('This test must be run on api 30 or higher. Skipping...');
     return;
   }
   // Developer settings are required on target device for cutout manipulation.
   bool shouldResetDevSettings = false;
-  final ProcessResult checkDevSettingsResult = Process.runSync('adb', <String>[
+  final ProcessResult checkDevSettingsResult =
+      Process.runSync(adbExecutable, <String>[
     'shell',
     'settings',
     'get',
@@ -50,7 +63,7 @@ Future<void> main() async {
     // Developer settings not enabled, enable them and mark that the origional
     // state should be restored after.
     shouldResetDevSettings = true;
-    Process.runSync('adb', <String>[
+    Process.runSync(adbExecutable, <String>[
       'shell',
       'settings',
       'put',
@@ -61,7 +74,7 @@ Future<void> main() async {
   }
   // Assumption of diplay_cutout_test.dart is that there is a "tall" notch.
   print('Adding Synthetic notch...');
-  Process.runSync('adb', <String>[
+  Process.runSync(adbExecutable, <String>[
     'shell',
     'cmd',
     'overlay',
@@ -71,9 +84,11 @@ Future<void> main() async {
   print('Starting test.');
   try {
     final FlutterDriver driver = await FlutterDriver.connect();
-    final String data = await driver.requestData(null, timeout: const Duration(minutes: 1));
+    final String data =
+        await driver.requestData(null, timeout: const Duration(minutes: 1));
     await driver.close();
-    final Map<String, dynamic> result = jsonDecode(data) as Map<String, dynamic>;
+    final Map<String, dynamic> result =
+        jsonDecode(data) as Map<String, dynamic>;
     print('Test finished!');
     print(result);
     exitCode = result['result'] == 'true' ? 0 : 1;
@@ -82,7 +97,7 @@ Future<void> main() async {
     exitCode = 1;
   } finally {
     print('Removing Synthetic notch...');
-    Process.runSync('adb', <String>[
+    Process.runSync(adbExecutable, <String>[
       'shell',
       'cmd',
       'overlay',
@@ -92,7 +107,7 @@ Future<void> main() async {
     print('Reverting Adb changes...');
     if (shouldResetDevSettings) {
       print('Disabling developer settings...');
-      Process.runSync('adb', <String>[
+      Process.runSync(adbExecutable, <String>[
         'shell',
         'settings',
         'put',
