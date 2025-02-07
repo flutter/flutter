@@ -40,6 +40,7 @@ import io.flutter.embedding.engine.systemchannels.SpellCheckChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
+import io.flutter.plugin.platform.PlatformViewRegistryImpl;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import io.flutter.plugin.text.ProcessTextPlugin;
@@ -363,7 +364,9 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
       flutterLoader.ensureInitializationComplete(context, dartVmArgs);
     }
 
-    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
+    PlatformViewsController2 platformViewsController2 =
+        new PlatformViewsController2(
+            (PlatformViewRegistryImpl) platformViewsController.getRegistry());
 
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.setPlatformViewsController(platformViewsController);

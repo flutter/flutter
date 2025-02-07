@@ -95,7 +95,8 @@ public class PlatformViewsController2Test {
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void itRemovesPlatformViewBeforeDiposeIsCalled() {
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2(registryImpl);
     FlutterJNI jni = new FlutterJNI();
     attach(jni, PlatformViewsController2);
     // Get the platform view registry.
@@ -127,7 +128,8 @@ public class PlatformViewsController2Test {
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void itNotifiesPlatformViewsOfEngineAttachmentAndDetachment() {
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2(registryImpl);
     FlutterJNI jni = new FlutterJNI();
     attach(jni, PlatformViewsController2);
     // Get the platform view registry.
@@ -165,7 +167,8 @@ public class PlatformViewsController2Test {
   @Test
   public void itUsesActionEventTypeFromFrameworkEventAsActionChanged() {
     MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2(registryImpl);
 
     MotionEvent original =
         MotionEvent.obtain(
@@ -257,7 +260,8 @@ public class PlatformViewsController2Test {
 
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void getPlatformViewById() {
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2(registryImpl);
 
     int platformViewId = 0;
     assertNull(PlatformViewsController2.getPlatformViewById(platformViewId));
@@ -285,7 +289,8 @@ public class PlatformViewsController2Test {
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void createPlatformViewMessage_initializesAndroidView() {
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2(registryImpl);
 
     int platformViewId = 0;
     assertNull(PlatformViewsController2.getPlatformViewById(platformViewId));
@@ -307,7 +312,8 @@ public class PlatformViewsController2Test {
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void createPlatformViewMessage_setsAndroidViewLayoutDirection() {
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2(registryImpl);
 
     int platformViewId = 0;
     assertNull(PlatformViewsController2.getPlatformViewById(platformViewId));
@@ -331,7 +337,8 @@ public class PlatformViewsController2Test {
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void createPlatformViewMessage_throwsIfViewIsNull() {
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2(registryImpl);
 
     int platformViewId = 0;
     assertNull(PlatformViewsController2.getPlatformViewById(platformViewId));
@@ -355,7 +362,8 @@ public class PlatformViewsController2Test {
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void createHybridPlatformViewMessage_throwsIfViewIsNull() {
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2(registryImpl);
 
     int platformViewId = 0;
     assertNull(PlatformViewsController2.getPlatformViewById(platformViewId));
@@ -379,7 +387,8 @@ public class PlatformViewsController2Test {
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void setPlatformViewDirection_throwIfPlatformViewNotFound() {
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2(registryImpl);
 
     int platformViewId = 0;
     assertNull(PlatformViewsController2.getPlatformViewById(platformViewId));
@@ -413,7 +422,8 @@ public class PlatformViewsController2Test {
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void disposeAndroidView() {
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2(registryImpl);
 
     int platformViewId = 0;
     assertNull(PlatformViewsController2.getPlatformViewById(platformViewId));
@@ -454,7 +464,8 @@ public class PlatformViewsController2Test {
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void disposeNullAndroidView() {
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2(registryImpl);
 
     int platformViewId = 0;
     assertNull(PlatformViewsController2.getPlatformViewById(platformViewId));

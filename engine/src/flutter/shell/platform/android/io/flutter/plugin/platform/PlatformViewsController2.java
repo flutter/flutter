@@ -64,8 +64,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private final ArrayList<SurfaceControl.Transaction> activeTransactions;
   private Surface overlayerSurface = null;
 
-  public PlatformViewsController2() {
-    registry = new PlatformViewRegistryImpl();
+  public PlatformViewsController2(@NonNull PlatformViewRegistryImpl registry) {
+    this.registry = registry;
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
     platformViews = new SparseArray<>();
     platformViewParent = new SparseArray<>();
