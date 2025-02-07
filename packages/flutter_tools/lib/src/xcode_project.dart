@@ -289,11 +289,15 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// makes a best effort to parse the scheme name from the configuration name.
   /// Most flavors should follow the naming convention of '$baseConfiguration-$scheme'.
   /// This is only semi-enforced by [buildXcodeProject], so it may not work.
+  /// Also check if separated by a space instead of a `-`.
   Future<String?> parseFlavorFromConfiguration(String? configuration) async {
     if (configuration == null) {
       return null;
     }
-    final List<String> splitConfiguration = configuration.split('-');
+    List<String> splitConfiguration = configuration.split('-');
+    if (splitConfiguration.length == 1) {
+      splitConfiguration = configuration.split(' ');
+    }
     if (splitConfiguration.length == 1) {
       return null;
     }

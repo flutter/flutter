@@ -230,22 +230,46 @@ void main() {
         expect(await project.parseFlavorFromConfiguration('Debug'), isNull);
       });
 
-      testUsingContext('when configuration is Debug with a flavor that matches a scheme', () async {
+      testUsingContext(
+        'when configuration has flavor following a hyphen that matches a scheme',
+        () async {
           final MemoryFileSystem fs = MemoryFileSystem.test();
           final IosProject project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
           project.xcodeProject.createSync(recursive: true);
           expect(await project.parseFlavorFromConfiguration('Debug-Strawberry'), 'strawberry');
         },
-        overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry'])},
+        overrides: <Type, Generator>{
+          XcodeProjectInterpreter:
+              () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
+        },
       );
 
-      testUsingContext('when configuration is Debug with a flavor that does not match a scheme', () async {
+      testUsingContext(
+        'when configuration has flavor following a space that matches a scheme',
+        () async {
+          final MemoryFileSystem fs = MemoryFileSystem.test();
+          final IosProject project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+          project.xcodeProject.createSync(recursive: true);
+          expect(await project.parseFlavorFromConfiguration('Debug Strawberry'), 'strawberry');
+        },
+        overrides: <Type, Generator>{
+          XcodeProjectInterpreter:
+              () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
+        },
+      );
+
+      testUsingContext(
+        'when configuration has flavor that does not match a scheme',
+        () async {
           final MemoryFileSystem fs = MemoryFileSystem.test();
           final IosProject project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
           project.xcodeProject.createSync(recursive: true);
           expect(await project.parseFlavorFromConfiguration('Debug-chocolate'), isNull);
         },
-        overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry'])},
+        overrides: <Type, Generator>{
+          XcodeProjectInterpreter:
+              () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
+        },
       );
     });
   });
