@@ -22,22 +22,11 @@ Future<void> main() async {
   final bool adbExistsOnPath = Process.runSync('which', <String>[adbExecutable]).exitCode == 0;
   if (!adbExistsOnPath) {
     print(r'ADB does not exist on the $PATH. Falling back to $ANDROID_HOME');
-    final ProcessResult result = Process.runSync('which', <String>[
-      '${Platform.environment['ANDROID_HOME']}/platform-tools/adb',
-    ], environment: Platform.environment);
+    adbExecutable = '${Platform.environment['ANDROID_HOME']}/platform-tools/adb';
+    final ProcessResult result = Process.runSync('which', <String>[adbExecutable]);
     final bool adbExistsInAndroidSdk = result.exitCode == 0;
-    if (adbExistsInAndroidSdk) {
-      adbExecutable = '${Platform.environment['ANDROID_HOME']}/platform-tools/adb';
-    } else {
-      print('-------------');
-      print(result.stdout);
-      print('-------------');
-      print(result.stderr);
-      print('-------------');
-      print(result.exitCode);
+    if (!adbExistsInAndroidSdk) {
       print(r'This test needs ADB to exist on the $PATH or in $ANDROID_HOME');
-      print(Process.runSync(r'$ANDROID_HOME/platform-tools/adb', <String>['devices']).stdout);
-      print('-------------');
       exitCode = 1;
       return;
     }
@@ -89,13 +78,17 @@ Future<void> main() async {
   print('Starting test.');
   try {
     final FlutterDriver driver = await FlutterDriver.connect();
+    print('Connected');
     final String data = await driver.requestData(null, timeout: const Duration(minutes: 1));
+    print('Data recieved');
     await driver.close();
+    print('Driver closed');
     final Map<String, dynamic> result = jsonDecode(data) as Map<String, dynamic>;
     print('Test finished!');
     print(result);
     exitCode = result['result'] == 'true' ? 0 : 1;
   } catch (e) {
+    print('Driver Error ------');
     print(e);
     exitCode = 1;
   } finally {
