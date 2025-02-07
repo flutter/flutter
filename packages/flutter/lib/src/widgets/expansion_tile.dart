@@ -10,36 +10,44 @@ import 'transitions.dart';
 
 ///
 mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
-  late AnimationController _animationController;
-
+  ///
+  bool get isExpanded => _isExpanded;
   bool _isExpanded = false;
 
   ///
-  ValueChanged<bool>? get onExpansionChanged;
-
-  ///
-  bool get isExpanded => _isExpanded;
-
-  ///
   AnimationController get animationController => _animationController;
+  late AnimationController _animationController;
 
   ///
-  EdgeInsetsGeometry get childrenPadding => EdgeInsets.zero;
-
-  ///
-  bool get maintainState => false;
+  CurvedAnimation get heightFactor => _heightFactor;
+  late CurvedAnimation _heightFactor;
 
   ///
   List<Widget> get children;
 
   ///
-  CrossAxisAlignment get expandedCrossAxisAlignment => CrossAxisAlignment.center;
+  EdgeInsetsGeometry get childrenPadding;
+
+  ///
+  AlignmentGeometry get childrenAlignment;
+
+  ///
+  CrossAxisAlignment get expandedCrossAxisAlignment;
+
+  ///
+  bool get maintainState;
 
   ///
   Duration get expansionDuration;
 
   ///
+  Curve get expansionCurve;
+
+  ///
   bool get initiallyExpanded;
+
+  ///
+  ValueChanged<bool>? get onExpansionChanged;
 
   @override
   void initState() {
@@ -49,11 +57,17 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     if (_isExpanded) {
       _animationController.value = 1.0;
     }
+    final Tween<double> heightFactorTween = Tween<double>(begin: 0.0, end: 1.0);
+    _heightFactor = CurvedAnimation(
+      parent: animationController.drive(heightFactorTween),
+      curve: expansionCurve,
+    );
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _heightFactor.dispose();
     super.dispose();
   }
 
@@ -80,8 +94,15 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     onExpansionChanged?.call(_isExpanded);
   }
 
+  @protected
   ///
-  Widget buildChildren(BuildContext context, Widget? child);
+  Widget buildExpansible(BuildContext context, Widget header, Widget body) {
+    return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]);
+  }
+
+  @protected
+  ///
+  Widget buildHeader(BuildContext context);
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +122,19 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 
     return AnimatedBuilder(
       animation: animationController.view,
-      builder: buildChildren,
+      builder: (BuildContext context, Widget? child) {
+        return buildExpansible(
+          context,
+          buildHeader(context),
+          ClipRect(
+            child: Align(
+              alignment: childrenAlignment,
+              heightFactor: heightFactor.value,
+              child: child,
+            ),
+          ),
+        );
+      },
       child: shouldRemoveChildren ? null : result,
     );
   }

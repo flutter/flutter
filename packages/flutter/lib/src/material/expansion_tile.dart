@@ -23,8 +23,6 @@ import 'material_localizations.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const Duration _kExpand = Duration(milliseconds: 200);
-
 /// Enables control over a single [ExpansionTile]'s expanded/collapsed state.
 ///
 /// It can be useful to expand or collapse an [ExpansionTile]
@@ -583,17 +581,14 @@ class _ExpansionTileState extends State<ExpansionTile>
   final ColorTween _headerColorTween = ColorTween();
   final ColorTween _iconColorTween = ColorTween();
   final ColorTween _backgroundColorTween = ColorTween();
-  final Tween<double> _heightFactorTween = Tween<double>(begin: 0.0, end: 1.0);
 
   late Animation<double> _iconTurns;
-  late CurvedAnimation _heightFactor;
   late Animation<ShapeBorder?> _border;
   late Animation<Color?> _headerColor;
   late Animation<Color?> _iconColor;
   late Animation<Color?> _backgroundColor;
 
   late ExpansionTileThemeData _expansionTileTheme;
-
   late ExpansionTileController _tileController;
   Timer? _timer;
 
@@ -614,19 +609,22 @@ class _ExpansionTileState extends State<ExpansionTile>
   ValueChanged<bool>? get onExpansionChanged => widget.onExpansionChanged;
 
   @override
-  Duration get expansionDuration => _kExpand;
+  Duration get expansionDuration => const Duration(milliseconds: 200);
+
+  @override
+  Curve get expansionCurve => Curves.easeIn;
 
   @override
   EdgeInsetsGeometry get childrenPadding =>
       widget.childrenPadding ?? _expansionTileTheme.childrenPadding ?? EdgeInsets.zero;
 
   @override
+  AlignmentGeometry get childrenAlignment =>
+      widget.expandedAlignment ?? _expansionTileTheme.expandedAlignment ?? Alignment.center;
+
+  @override
   void initState() {
     super.initState();
-    _heightFactor = CurvedAnimation(
-      parent: animationController.drive(_heightFactorTween),
-      curve: Curves.easeIn,
-    );
     _iconTurns = animationController.drive(_halfTween.chain(_easeInTween));
     _border = animationController.drive(_borderTween.chain(_easeOutTween));
     _headerColor = animationController.drive(_headerColorTween.chain(_easeInTween));
@@ -641,7 +639,6 @@ class _ExpansionTileState extends State<ExpansionTile>
   @override
   void dispose() {
     _tileController._state = null;
-    _heightFactor.dispose();
     _timer?.cancel();
     _timer = null;
     super.dispose();
@@ -705,18 +702,8 @@ class _ExpansionTileState extends State<ExpansionTile>
   }
 
   @override
-  Widget buildChildren(BuildContext context, Widget? child) {
+  Widget buildHeader(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color backgroundColor =
-        _backgroundColor.value ?? _expansionTileTheme.backgroundColor ?? Colors.transparent;
-    final ShapeBorder expansionTileBorder =
-        _border.value ??
-        const Border(
-          top: BorderSide(color: Colors.transparent),
-          bottom: BorderSide(color: Colors.transparent),
-        );
-    final Clip clipBehavior =
-        widget.clipBehavior ?? _expansionTileTheme.clipBehavior ?? Clip.antiAlias;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String onTapHint =
         isExpanded
@@ -737,6 +724,43 @@ class _ExpansionTileState extends State<ExpansionTile>
         break;
     }
 
+    return Semantics(
+      hint: semanticsHint,
+      onTapHint: onTapHint,
+      child: ListTileTheme.merge(
+        iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
+        textColor: _headerColor.value,
+        child: ListTile(
+          enabled: widget.enabled,
+          onTap: _handleTap,
+          dense: widget.dense,
+          visualDensity: widget.visualDensity,
+          enableFeedback: widget.enableFeedback,
+          contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
+          leading: widget.leading ?? _buildLeadingIcon(context),
+          title: widget.title,
+          subtitle: widget.subtitle,
+          trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
+          minTileHeight: widget.minTileHeight,
+          internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget buildExpansible(BuildContext context, Widget header, Widget body) {
+    final Color backgroundColor =
+        _backgroundColor.value ?? _expansionTileTheme.backgroundColor ?? Colors.transparent;
+    final ShapeBorder expansionTileBorder =
+        _border.value ??
+        const Border(
+          top: BorderSide(color: Colors.transparent),
+          bottom: BorderSide(color: Colors.transparent),
+        );
+    final Clip clipBehavior =
+        widget.clipBehavior ?? _expansionTileTheme.clipBehavior ?? Clip.antiAlias;
+
     final Decoration decoration = ShapeDecoration(
       color: backgroundColor,
       shape: expansionTileBorder,
@@ -744,44 +768,7 @@ class _ExpansionTileState extends State<ExpansionTile>
 
     final Widget tile = Padding(
       padding: decoration.padding,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Semantics(
-            hint: semanticsHint,
-            onTapHint: onTapHint,
-            child: ListTileTheme.merge(
-              iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
-              textColor: _headerColor.value,
-              child: ListTile(
-                enabled: widget.enabled,
-                onTap: _handleTap,
-                dense: widget.dense,
-                visualDensity: widget.visualDensity,
-                enableFeedback: widget.enableFeedback,
-                contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
-                leading: widget.leading ?? _buildLeadingIcon(context),
-                title: widget.title,
-                subtitle: widget.subtitle,
-                trailing:
-                    widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
-                minTileHeight: widget.minTileHeight,
-                internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
-              ),
-            ),
-          ),
-          ClipRect(
-            child: Align(
-              alignment:
-                  widget.expandedAlignment ??
-                  _expansionTileTheme.expandedAlignment ??
-                  Alignment.center,
-              heightFactor: _heightFactor.value,
-              child: child,
-            ),
-          ),
-        ],
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]),
     );
 
     final bool isShapeProvided =
@@ -895,11 +882,11 @@ class _ExpansionTileState extends State<ExpansionTile>
   }
 
   void _updateHeightFactorCurve() {
-    _heightFactor.curve =
+    heightFactor.curve =
         widget.expansionAnimationStyle?.curve ??
         _expansionTileTheme.expansionAnimationStyle?.curve ??
         Curves.easeIn;
-    _heightFactor.reverseCurve =
+    heightFactor.reverseCurve =
         widget.expansionAnimationStyle?.reverseCurve ??
         _expansionTileTheme.expansionAnimationStyle?.reverseCurve;
   }
