@@ -3954,19 +3954,25 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/162539
-  testWidgets('When requestFocusOnTap is true, the TextField should gain focus after being tapped.', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren, requestFocusOnTap: true),
+  testWidgets(
+    'When requestFocusOnTap is true, the TextField should gain focus after being tapped.',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: true,
+            ),
+          ),
         ),
-      ),
-    );
-    await tester.tap(find.byType(TextField));
-    await tester.pumpAndSettle();
-    final Element textField = tester.firstElement(find.byType(TextField));
-    expect(Focus.of(textField).hasFocus, isTrue);
-  });
+      );
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+      final Element textField = tester.firstElement(find.byType(TextField));
+      expect(Focus.of(textField).hasFocus, isTrue);
+    },
+  );
 }
 
 enum TestMenu {
