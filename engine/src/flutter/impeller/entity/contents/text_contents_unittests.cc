@@ -235,9 +235,10 @@ TEST_P(TextContentsTest, SimpleSubpixel) {
                        atlas_context, text_frame, offset);
 
   ISize texture_size = atlas->GetTexture()->GetSize();
-  TextContents::ComputeVertexData(data, text_frame, /*scale=*/1.0,
-                                  /*entity_transform=*/Matrix(), offset,
-                                  /*glyph_properties=*/std::nullopt, atlas);
+  TextContents::ComputeVertexData(
+      data, text_frame, /*scale=*/1.0,
+      /*entity_transform=*/Matrix::MakeTranslation(offset), offset,
+      /*glyph_properties=*/std::nullopt, atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data);
   Rect uv_rect = PerVertexDataUVToRect(data, texture_size);
@@ -274,7 +275,9 @@ TEST_P(TextContentsTest, SimpleSubpixel3x) {
   ISize texture_size = atlas->GetTexture()->GetSize();
   TextContents::ComputeVertexData(
       data, text_frame, font_scale,
-      /*entity_transform=*/Matrix::MakeScale({font_scale, font_scale, 1}),
+      /*entity_transform=*/
+      Matrix::MakeTranslation(offset) *
+          Matrix::MakeScale({font_scale, font_scale, 1}),
       offset,
       /*glyph_properties=*/std::nullopt, atlas);
 
@@ -312,9 +315,10 @@ TEST_P(TextContentsTest, SimpleSubpixel26) {
                        atlas_context, text_frame, offset);
 
   ISize texture_size = atlas->GetTexture()->GetSize();
-  TextContents::ComputeVertexData(data, text_frame, /*scale=*/1.0,
-                                  /*entity_transform=*/Matrix(), offset,
-                                  /*glyph_properties=*/std::nullopt, atlas);
+  TextContents::ComputeVertexData(
+      data, text_frame, /*scale=*/1.0,
+      /*entity_transform=*/Matrix::MakeTranslation(offset), offset,
+      /*glyph_properties=*/std::nullopt, atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data);
   Rect uv_rect = PerVertexDataUVToRect(data, texture_size);
@@ -348,9 +352,10 @@ TEST_P(TextContentsTest, SimpleSubpixel80) {
                        atlas_context, text_frame, offset);
 
   ISize texture_size = atlas->GetTexture()->GetSize();
-  TextContents::ComputeVertexData(data, text_frame, /*scale=*/1.0,
-                                  /*entity_transform=*/Matrix(), offset,
-                                  /*glyph_properties=*/std::nullopt, atlas);
+  TextContents::ComputeVertexData(
+      data, text_frame, /*scale=*/1.0,
+      /*entity_transform=*/Matrix::MakeTranslation(offset), offset,
+      /*glyph_properties=*/std::nullopt, atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data);
   Rect uv_rect = PerVertexDataUVToRect(data, texture_size);
