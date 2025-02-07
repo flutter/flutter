@@ -1128,9 +1128,10 @@ void FirstPassDispatcher::drawTextFrame(
       (matrix_ * Matrix::MakeTranslation(Point(x, y))).GetMaxBasisLengthXY());
 
   renderer_.GetLazyGlyphAtlas()->AddTextFrame(
-      text_frame,                                       //
-      scale,                                            //
-      Point(x, y),                                      //
+      text_frame,   //
+      scale,        //
+      Point(x, y),  //
+      matrix_,
       (properties.stroke || text_frame->HasColor())     //
           ? std::optional<GlyphProperties>(properties)  //
           : std::nullopt                                //
