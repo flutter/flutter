@@ -459,8 +459,8 @@ struct LeftmostIntensity {
   int32_t value;
 };
 
-/// Returns the highest value in the blue channel for leftmost column that isn't
-/// all black.
+/// Returns the highest value in the green channel for leftmost column that
+/// isn't all black.
 LeftmostIntensity CalculateLeftmostIntensity(
     const impeller::testing::Screenshot* img) {
   LeftmostIntensity result = {.x = static_cast<int32_t>(img->GetWidth()),
@@ -471,7 +471,7 @@ LeftmostIntensity CalculateLeftmostIntensity(
       if (((*ptr & 0x00ffffff) != 0)) {
         if (j < result.x) {
           result.x = j;
-          result.value = *ptr & 0xff;
+          result.value = (*ptr & 0xff00) >> 8;
         } else if (j == result.x) {
           result.value =
               std::max(static_cast<int32_t>(*ptr & 0xff), result.value);
