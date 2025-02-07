@@ -21,25 +21,52 @@ void main() async {
   runApp(const MainApp());
 }
 
-final class MainApp extends StatelessWidget {
+// This should appear as the yellow line over a blue box. The
+// red box should not be visible unless the platform view has not loaded yet.
+final class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
-  // This should appear as the yellow line over a blue box. The
-  // red box should not be visible unless the platform view has not loaded yet.
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  bool showPlatformView = true;
+
+  void _togglePlatformView() {
+    setState(() {
+      showPlatformView = !showPlatformView;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Stack(
         alignment: AlignmentDirectional.center,
         children: <Widget>[
-          SizedBox(width: 190, height: 190, child: ColoredBox(color: Colors.red)),
-          SizedBox(
-            width: 200,
-            height: 200,
-            child: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),
+          TextButton(
+            key: const ValueKey<String>('AddOverlay'),
+            onPressed: _togglePlatformView,
+            child: const SizedBox(width: 190, height: 190, child: ColoredBox(color: Colors.red)),
           ),
-          SizedBox(width: 800, height: 25, child: ColoredBox(color: Colors.yellow)),
+          if (showPlatformView) ...<Widget>[
+            const SizedBox(
+              width: 200,
+              height: 200,
+              child: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),
+            ),
+            TextButton(
+              key: const ValueKey<String>('RemoveOverlay'),
+              onPressed: _togglePlatformView,
+              child: const SizedBox(
+                width: 800,
+                height: 25,
+                child: ColoredBox(color: Colors.yellow),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -51,7 +78,6 @@ final class _HybridCompositionAndroidPlatformView extends StatelessWidget {
 
   final String viewType;
 
-  // TODO(jonahwilliams): swap this out with new platform view APIs.
   @override
   Widget build(BuildContext context) {
     return PlatformViewLink(

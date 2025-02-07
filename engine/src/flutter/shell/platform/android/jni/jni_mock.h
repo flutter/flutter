@@ -140,6 +140,8 @@ class JNIMock final : public PlatformViewAndroidJNI {
               (override));
 
   MOCK_METHOD(void, onEndFrame2, (), (override));
+  MOCK_METHOD(void, hideOverlaySurface2, (), (override));
+  MOCK_METHOD(void, showOverlaySurface2, (), (override));
 
   MOCK_METHOD(std::unique_ptr<std::vector<std::string>>,
               FlutterViewComputePlatformResolvedLocale,

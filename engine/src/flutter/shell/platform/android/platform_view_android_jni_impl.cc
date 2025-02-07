@@ -160,6 +160,10 @@ static jmethodID g_on_display_platform_view2_method = nullptr;
 
 static jmethodID g_on_end_frame2_method = nullptr;
 
+static jmethodID g_show_overlay_surface2_method = nullptr;
+
+static jmethodID g_hide_overlay_surface2_method = nullptr;
+
 // Mutators
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_mutators_stack_class = nullptr;
 static jmethodID g_mutators_stack_init_method = nullptr;
@@ -1039,6 +1043,20 @@ bool RegisterApi(JNIEnv* env) {
       env->GetMethodID(g_flutter_jni_class->obj(), "endFrame2", "()V");
   if (g_on_end_frame2_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate onEndFrame2 method";
+    return false;
+  }
+
+  g_show_overlay_surface2_method = env->GetMethodID(
+      g_flutter_jni_class->obj(), "showOverlaySurface2", "()V");
+  if (g_on_end_frame2_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate showOverlaySurface2 method";
+    return false;
+  }
+
+  g_hide_overlay_surface2_method = env->GetMethodID(
+      g_flutter_jni_class->obj(), "hideOverlaySurface2", "()V");
+  if (g_on_end_frame2_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate hideOverlaySurface2 method";
     return false;
   }
   //
@@ -2170,6 +2188,30 @@ void PlatformViewAndroidJNIImpl::onEndFrame2() {
 
   env->CallVoidMethod(java_object.obj(), g_on_end_frame2_method);
 
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::showOverlaySurface2() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_show_overlay_surface2_method);
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::hideOverlaySurface2() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_hide_overlay_surface2_method);
   FML_CHECK(fml::jni::CheckException(env));
 }
 
