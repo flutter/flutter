@@ -4717,14 +4717,14 @@ void main() {
       expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
     });
 
-    testWidgets('Widget height collapses from hint height when maintainHintHeight is false', (
+    testWidgets('Widget height collapses from hint height when maintainHintSize is false', (
       WidgetTester tester,
     ) async {
       final String hintText = 'hint' * 20;
       final InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
       await tester.pumpWidget(buildInputDecorator(decoration: decoration));
@@ -4741,14 +4741,14 @@ void main() {
       expect(inputHeight, hintHeight + 16.0);
     });
 
-    testWidgets('hintFadeDuration applies to hint fade-in when maintainHintHeight is false', (
+    testWidgets('hintFadeDuration applies to hint fade-in when maintainHintSize is false', (
       WidgetTester tester,
     ) async {
       const InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
         hintFadeDuration: Duration(milliseconds: 120),
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
       // Build once with empty content.
@@ -4773,14 +4773,14 @@ void main() {
       expect(hintOpacity120ms, 1.0);
     });
 
-    testWidgets('hintFadeDuration applies to hint fade-out when maintainHintHeight is false', (
+    testWidgets('hintFadeDuration applies to hint fade-out when maintainHintSize is false', (
       WidgetTester tester,
     ) async {
       const InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
         hintFadeDuration: Duration(milliseconds: 120),
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
       // Build once with empty content.
@@ -4833,12 +4833,6 @@ void main() {
     const double helperStartPadding = 12.0;
     const double counterEndPadding = 12.0;
 
-    // Actual size varies a little on web platforms with HTML renderer.
-    // TODO(bleroux): remove closeTo usage when https://github.com/flutter/flutter/issues/99933 is fixed.
-    final Matcher closeToFullHeight = closeTo(fullHeight, 0.1);
-    final Matcher closeToHelperHeight = closeTo(helperHeight, 0.1);
-    final Matcher closeToErrorHeight = closeTo(errorHeight, 0.1);
-
     group('for filled text field', () {
       group('when field is enabled', () {
         testWidgets('Helper and counter are correctly positioned', (WidgetTester tester) async {
@@ -4853,13 +4847,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4897,13 +4891,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4942,13 +4936,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4987,13 +4981,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5054,13 +5048,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getErrorRect(tester).top, containerHeight + helperGap);
-          expect(getErrorRect(tester).height, closeToErrorHeight);
+          expect(getErrorRect(tester).height, errorHeight);
           expect(getErrorRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToErrorHeight);
+          expect(getCounterRect(tester).height, errorHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5105,13 +5099,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5149,13 +5143,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5194,13 +5188,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5239,13 +5233,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5306,13 +5300,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getErrorRect(tester).top, containerHeight + helperGap);
-          expect(getErrorRect(tester).height, closeToErrorHeight);
+          expect(getErrorRect(tester).height, errorHeight);
           expect(getErrorRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToErrorHeight);
+          expect(getCounterRect(tester).height, errorHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -8352,6 +8346,90 @@ void main() {
 
       expect(textSizeWithIcons.width, equals(textSizeWithoutIcon.width));
     });
+
+    testWidgets('depends on hint width and content width when decorator is empty', (
+      WidgetTester tester,
+    ) async {
+      const InputDecoration decorationWithHint = InputDecoration(
+        contentPadding: EdgeInsets.zero,
+        hintText: 'Hint',
+      );
+      const double hintTextWidth = 66.0;
+      const double smallContentWidth = 20.0;
+      const double largeContentWidth = 80.0;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decorationWithHint,
+          useIntrinsicWidth: true,
+          isEmpty: true,
+          child: const SizedBox(width: smallContentWidth),
+        ),
+      );
+
+      // Decorator width depends on the hint because the hint is larger than the content.
+      expect(getDecoratorRect(tester).width, hintTextWidth);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decorationWithHint,
+          useIntrinsicWidth: true,
+          isEmpty: true,
+          child: const SizedBox(width: largeContentWidth),
+        ),
+      );
+
+      // Decorator width depends on the content because the content is larger than the hint.
+      expect(getDecoratorRect(tester).width, largeContentWidth);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/93337.
+    testWidgets(
+      'depends on content width when decorator is not empty and maintainHintSize is false',
+      (WidgetTester tester) async {
+        const InputDecoration decorationWithHint = InputDecoration(
+          contentPadding: EdgeInsets.zero,
+          hintText: 'Hint',
+          maintainHintSize: false,
+        );
+        const double contentWidth = 20.0;
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: decorationWithHint,
+            useIntrinsicWidth: true,
+            child: const SizedBox(width: contentWidth),
+          ),
+        );
+
+        // The hint width is ignored even if larger than the content width.
+        expect(getDecoratorRect(tester).width, contentWidth);
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/93337.
+    testWidgets(
+      'depends on content width when decorator is not empty and maintainHintSize is true',
+      (WidgetTester tester) async {
+        const InputDecoration decorationWithHint = InputDecoration(
+          contentPadding: EdgeInsets.zero,
+          hintText: 'Hint',
+        );
+        const double contentWidth = 20.0;
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: decorationWithHint,
+            useIntrinsicWidth: true,
+            child: const SizedBox(width: contentWidth),
+          ),
+        );
+
+        // The hint width is ignored even if larger than the content width.
+        const double hintTextWidth = 66.0;
+        expect(getDecoratorRect(tester).width, hintTextWidth);
+      },
+    );
   });
 
   testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused', (

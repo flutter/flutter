@@ -96,56 +96,6 @@ const List<int> _kTestPngBytes = <int>[
 
 void main() {
   group('SkiaGoldClient', () {
-    test('web HTML test', () async {
-      final MemoryFileSystem fs = MemoryFileSystem();
-      final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'GOLDCTL': 'goldctl',
-          'FLUTTER_ROOT': _kFlutterRoot,
-          'FLUTTER_TEST_BROWSER': 'Chrome',
-          'FLUTTER_WEB_RENDERER': 'html',
-        },
-        operatingSystem: 'macos',
-      );
-      final FakeProcessManager process = FakeProcessManager();
-      final FakeHttpClient fakeHttpClient = FakeHttpClient();
-      fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
-      final SkiaGoldClient skiaClient = SkiaGoldClient(
-        workDirectory,
-        fs: fs,
-        process: process,
-        platform: platform,
-        httpClient: fakeHttpClient,
-        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
-      );
-
-      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
-        ..createSync(recursive: true);
-
-      const RunInvocation goldctlInvocation = RunInvocation(<String>[
-        'goldctl',
-        'imgtest',
-        'add',
-        '--work-dir',
-        '/workDirectory/temp',
-        '--test-name',
-        'golden_file_test',
-        '--png-file',
-        '/workDirectory/temp/golden_file_test.png',
-        '--passfail',
-        '--add-test-optional-key',
-        'image_matching_algorithm:fuzzy',
-        '--add-test-optional-key',
-        'fuzzy_max_different_pixels:20',
-        '--add-test-optional-key',
-        'fuzzy_pixel_delta_threshold:4',
-      ], null);
-      process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
-
-      expect(await skiaClient.imgtestAdd('golden_file_test.png', goldenFile), isTrue);
-    });
-
     test('web CanvasKit test', () async {
       final MemoryFileSystem fs = MemoryFileSystem();
       final FakePlatform platform = FakePlatform(
@@ -903,6 +853,43 @@ void main() {
         );
         expect(fakeSkiaClient.initCalls, 0);
       });
+
+      test('reports a failure as a TestFailure', () async {
+        final List<String> log = <String>[];
+        final MemoryFileSystem fs = MemoryFileSystem();
+        final FakePlatform platform = FakePlatform(
+          environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
+          operatingSystem: 'macos',
+        );
+        fs.directory(_kFlutterRoot).createSync(recursive: true);
+        final Directory basedir = fs.directory('flutter/test/library/')
+          ..createSync(recursive: true);
+        final FlutterGoldenFileComparator comparator = FlutterPostSubmitFileComparator(
+          basedir.uri,
+          ThrowsOnImgTestAddSkiaClient(
+            message: 'Skia Gold received an unapproved image in post-submit',
+          ),
+          fs: fs,
+          platform: platform,
+          log: log.add,
+        );
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1.png'),
+            );
+          },
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure error) => error.toString(),
+              'description',
+              contains('Skia Gold received an unapproved image in post-submit'),
+            ),
+          ),
+        );
+        expect(log, isEmpty);
+      });
     });
 
     group('Pre-Submit', () {
@@ -1258,6 +1245,21 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   Map<String, String> cleanTestNameValues = <String, String>{};
   @override
   String cleanTestName(String fileName) => cleanTestNameValues[fileName] ?? '';
+}
+
+class ThrowsOnImgTestAddSkiaClient extends Fake implements SkiaGoldClient {
+  ThrowsOnImgTestAddSkiaClient({required this.message});
+  final String message;
+
+  @override
+  Future<void> imgtestInit() async {
+    // Assume this function works.
+  }
+
+  @override
+  Future<bool> imgtestAdd(String testName, File goldenFile) {
+    throw SkiaException(message);
+  }
 }
 
 class FakeLocalFileComparator extends Fake implements LocalFileComparator {
