@@ -130,6 +130,9 @@ object DependencyVersionChecker {
         return androidPluginVersion
     }
 
+    // TODO(gmackall): AGP has a getKotlinAndroidPluginVersion(), and KGP has a
+    //                 getKotlinPluginVersion(). Consider replacing this implementation with one of
+    //                 those.
     @VisibleForTesting internal fun getKGPVersion(project: Project): Version? {
         val kotlinVersionProperty = "kotlin_version"
         val firstKotlinVersionFieldName = "pluginVersion"
