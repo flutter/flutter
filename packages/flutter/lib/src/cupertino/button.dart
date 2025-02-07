@@ -359,7 +359,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   void _handTapMove(TapMoveDetails event) {
     final RenderBox rb = context.findRenderObject()! as RenderBox;
     final Offset localPosition = rb.globalToLocal(event.globalPosition);
-    final bool buttonShouldHeldDown = rb.paintBounds.inflate(CupertinoButton.tapMoveSlop()).contains(localPosition);
+    final bool buttonShouldHeldDown = rb.paintBounds
+        .inflate(CupertinoButton.tapMoveSlop())
+        .contains(localPosition);
     if (buttonShouldHeldDown != _buttonHeldDown) {
       _buttonHeldDown = buttonShouldHeldDown;
       _animate();

@@ -921,7 +921,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets(
-    'When lifting up outside the button after moving, onPressed should not be triggered.',
+    'When lifting up outside the button slop after moving, onPressed should not be triggered.',
     (WidgetTester tester) async {
       bool value = false;
       await tester.pumpWidget(
@@ -938,7 +938,8 @@ void main() {
         tester.getTopLeft(find.byType(CupertinoButton)),
       );
       await gesture.moveTo(
-        tester.getBottomRight(find.byType(CupertinoButton)) + const Offset(0, 1),
+        tester.getBottomRight(find.byType(CupertinoButton)) +
+            Offset(0, CupertinoButton.tapMoveSlop()),
       );
       await gesture.up();
       expect(value, isFalse);
