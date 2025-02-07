@@ -81,7 +81,10 @@ Future<void> main() async {
         section('Build app bundle using the flutter tool - flavor: flavor_underscore');
 
         int exitCode = await inDirectory(project.rootPath, () {
-          return flutter('build', options: <String>['appbundle', '--flavor=flavor_underscore']);
+          return flutter(
+            'build',
+            options: <String>['appbundle', '--flavor=flavor_underscore', '--verbose'],
+          );
         });
 
         if (exitCode != 0) {
@@ -111,7 +114,10 @@ Future<void> main() async {
         section('Build app bundle using the flutter tool - flavor: production');
 
         exitCode = await inDirectory(project.rootPath, () {
-          return flutter('build', options: <String>['appbundle', '--flavor=production']);
+          return flutter(
+            'build',
+            options: <String>['appbundle', '--flavor=production', '--verbose'],
+          );
         });
 
         if (exitCode != 0) {

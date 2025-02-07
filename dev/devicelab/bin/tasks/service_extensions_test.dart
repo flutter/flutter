@@ -28,6 +28,7 @@ void main() {
       final Process run = await startFlutter(
         'run',
         options: <String>[
+          '--verbose',
           '--no-fast-start',
           '--no-publish-port',
           '--disable-service-auth-codes',
