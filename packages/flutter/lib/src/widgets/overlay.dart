@@ -1821,10 +1821,6 @@ class OverlayPortal extends StatefulWidget {
 
   final bool _targetRootOverlay;
 
-  /// Used in testing to check if the OverlayPortal is built with [OverlayPortal.targetsRootOverlay].
-  @visibleForTesting
-  static bool overlayPortalTargetIsRootOverlay(OverlayPortal portal) => portal._targetRootOverlay;
-
   @override
   State<OverlayPortal> createState() => _OverlayPortalState();
 }

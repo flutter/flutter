@@ -554,9 +554,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       _activeAvatars.add(avatar);
     });
     widget.onDragStarted?.call();
-    if (!_overlayPortalController.isShowing) {
-      _overlayPortalController.show();
-    }
+    _overlayPortalController.show();
     return avatar;
   }
 

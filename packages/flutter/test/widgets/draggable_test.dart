@@ -17,6 +17,19 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
+List<RenderObject> _ancestorRenderTheaters(RenderObject child) {
+  final List<RenderObject> results = <RenderObject>[];
+  RenderObject? node = child;
+  while (node != null) {
+    if (node.runtimeType.toString() == '_RenderTheater') {
+      results.add(node);
+    }
+    final RenderObject? parent = node.parent;
+    node = parent is RenderObject ? parent : null;
+  }
+  return results;
+}
+
 void main() {
   testWidgets('Drag and drop - control test', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
@@ -3123,97 +3136,53 @@ void main() {
   testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
-    final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
-    // Create a [MaterialApp], with a nested [Navigator], which has the
-    // [Draggable].
+    final GlobalKey rootOverlayKey = GlobalKey(debugLabel: 'root overlay');
     await tester.pumpWidget(
-      MaterialApp(
-        navigatorKey: rootNavigatorKey,
-        home: Column(
-          children: <Widget>[
-            SizedBox(
-              height: 200.0,
-              child: Navigator(
-                key: childNavigatorKey,
-                onGenerateRoute: (RouteSettings settings) {
-                  if (settings.name == '/') {
-                    return MaterialPageRoute<void>(
-                      settings: settings,
-                      builder:
-                          (BuildContext context) => const Draggable<int>(
-                            data: 1,
-                            feedback: Text('Dragging'),
-                            rootOverlay: true,
-                            child: Text('Source'),
-                          ),
-                    );
-                  }
-                  throw UnsupportedError('Unsupported route: $settings');
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            key: rootOverlayKey,
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Overlay(
+                    initialEntries: <OverlayEntry>[
+                      OverlayEntry(
+                        builder: (BuildContext context) {
+                          return Column(
+                            children: <Widget>[
+                              const SizedBox(
+                                height: 200.0,
+                                child: Draggable<int>(
+                                  data: 1,
+                                  feedback: Text('Dragging'),
+                                  rootOverlay: true,
+                                  child: Text('Source'),
+                                ),
+                              ),
+                              DragTarget<int>(
+                                builder: (
+                                  BuildContext context,
+                                  List<int?> data,
+                                  List<dynamic> rejects,
+                                ) {
+                                  return const SizedBox(
+                                    height: 300.0,
+                                    child: Center(child: Text('Target 1')),
+                                  );
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  );
                 },
               ),
-            ),
-            DragTarget<int>(
-              builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                return const SizedBox(height: 300.0, child: Center(child: Text('Target 1')));
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-
-    final Offset firstLocation = tester.getCenter(find.text('Source'));
-    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
-    await tester.pump();
-
-    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
-    await gesture.moveTo(secondLocation);
-    await tester.pump();
-
-    final OverlayPortal overlayPortal = tester.widget<OverlayPortal>(find.byType(OverlayPortal));
-    expect(OverlayPortal.overlayPortalTargetIsRootOverlay(overlayPortal), isTrue);
-  });
-
-  testWidgets('LongPressDraggable drag feedback is put on root overlay with [rootOverlay] flag', (
-    WidgetTester tester,
-  ) async {
-    final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
-    final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
-    // Create a [MaterialApp], with a nested [Navigator], which has the
-    // [Draggable].
-    await tester.pumpWidget(
-      MaterialApp(
-        navigatorKey: rootNavigatorKey,
-        home: Column(
-          children: <Widget>[
-            SizedBox(
-              height: 200.0,
-              child: Navigator(
-                key: childNavigatorKey,
-                onGenerateRoute: (RouteSettings settings) {
-                  if (settings.name == '/') {
-                    return MaterialPageRoute<void>(
-                      settings: settings,
-                      builder:
-                          (BuildContext context) => const LongPressDraggable<int>(
-                            data: 1,
-                            feedback: Text('Dragging'),
-                            rootOverlay: true,
-                            child: Text('Source'),
-                          ),
-                    );
-                  }
-                  throw UnsupportedError('Unsupported route: $settings');
-                },
-              ),
-            ),
-            DragTarget<int>(
-              builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                return const SizedBox(height: 300.0, child: Center(child: Text('Target 1')));
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -3226,8 +3195,78 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    final OverlayPortal overlayPortal = tester.widget<OverlayPortal>(find.byType(OverlayPortal));
-    expect(OverlayPortal.overlayPortalTargetIsRootOverlay(overlayPortal), isTrue);
+    expect(
+      _ancestorRenderTheaters(tester.renderObject(find.text('Dragging'))).single,
+      tester.renderObject(find.byKey(rootOverlayKey)),
+    );
+  });
+
+  testWidgets('LongPressDraggable drag feedback is put on root overlay with [rootOverlay] flag', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey rootOverlayKey = GlobalKey(debugLabel: 'root overlay');
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            key: rootOverlayKey,
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Overlay(
+                    initialEntries: <OverlayEntry>[
+                      OverlayEntry(
+                        builder: (BuildContext context) {
+                          return Column(
+                            children: <Widget>[
+                              const SizedBox(
+                                height: 200.0,
+                                child: LongPressDraggable<int>(
+                                  data: 1,
+                                  feedback: Text('Dragging'),
+                                  rootOverlay: true,
+                                  child: Text('Source'),
+                                ),
+                              ),
+                              DragTarget<int>(
+                                builder: (
+                                  BuildContext context,
+                                  List<int?> data,
+                                  List<dynamic> rejects,
+                                ) {
+                                  return const SizedBox(
+                                    height: 300.0,
+                                    child: Center(child: Text('Target 1')),
+                                  );
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump(kLongPressTimeout);
+
+    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(
+      _ancestorRenderTheaters(tester.renderObject(find.text('Dragging'))).single,
+      tester.renderObject(find.byKey(rootOverlayKey)),
+    );
   });
 
   testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
