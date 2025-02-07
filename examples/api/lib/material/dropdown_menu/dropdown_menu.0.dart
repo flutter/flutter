@@ -93,10 +93,10 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                       DropdownMenu<ColorLabel>(
                         initialSelection: ColorLabel.green,
                         controller: colorController,
-                        // requestFocusOnTap is enabled/disabled by platforms when it is null.
-                        // On mobile platforms, this is false by default. Setting this to true will
-                        // trigger focus request on the text field and virtual keyboard will appear
-                        // afterward. On desktop platforms however, this defaults to true.
+                        // The default requestFocusOnTap value depends on the platform.
+                        // On mobile, it defaults to false, and on desktop, it defaults to true.
+                        // Setting this to true will trigger a focus request on the text field, and
+                        // the virtual keyboard will appear afterward.
                         requestFocusOnTap: true,
                         label: const Text('Color'),
                         onSelected: (ColorLabel? color) {
