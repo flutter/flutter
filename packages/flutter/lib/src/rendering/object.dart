@@ -4,6 +4,7 @@
 
 /// @docImport 'dart:ui';
 ///
+/// @docImport 'package:flutter/rendering.dart';
 /// @docImport 'package:flutter/widgets.dart';
 ///
 /// @docImport 'box.dart';
@@ -4551,7 +4552,7 @@ final class _SemanticsParentData {
   /// [_RenderObjectSemantics.contributesToSemanticsTree] should forms a node
   ///
   /// This is imposed by parent render objects that set
-  /// [SemanticsConfiguration.explicitChildNode] to true.
+  /// [SemanticsConfiguration.explicitChildNodes] to true.
   final bool explicitChildNodes;
 
   /// Tags for immediate render object semantics that
