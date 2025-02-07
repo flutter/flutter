@@ -888,12 +888,6 @@ abstract class AndroidViewController extends PlatformViewController {
   /// call's future has completed.
   bool get requiresViewComposition => false;
 
-  /// True if the experimental hybrid composition controller is enabled.
-  ///
-  /// This value may change during [create], but will not change after that
-  /// call's future has completed.
-  bool get useNewHybridComposition => false;
-
   /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
   /// to the view.
   ///
@@ -1180,9 +1174,6 @@ class HybridAndroidViewController extends AndroidViewController {
   }
 
   @override
-  bool get useNewHybridComposition => true;
-
-  @override
   int? get textureId {
     return _internals.textureId;
   }
@@ -1205,6 +1196,11 @@ class HybridAndroidViewController extends AndroidViewController {
   @override
   Future<void> setOffset(Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
+  }
+
+  @override
+  Future<void> sendMotionEvent(AndroidMotionEvent event) async {
+    await SystemChannels.platform_views.invokeMethod<dynamic>('touch', event._asList(viewId));
   }
 }
 

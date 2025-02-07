@@ -49,7 +49,6 @@ class FakeAndroidViewController implements AndroidViewController {
     this.viewId, {
     this.requiresSize = false,
     this.requiresViewComposition = false,
-    this.useNewHybridComposition = false,
   });
 
   bool disposed = false;
@@ -148,9 +147,6 @@ class FakeAndroidViewController implements AndroidViewController {
 
   @override
   bool requiresViewComposition;
-
-  @override
-  bool useNewHybridComposition;
 }
 
 class FakeAndroidPlatformViewsController {
