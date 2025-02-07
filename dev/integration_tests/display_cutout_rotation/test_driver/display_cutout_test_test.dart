@@ -23,7 +23,7 @@ Future<void> main() async {
   if (!adbExistsOnPath) {
     print(r'ADB does not exist on the $PATH. Falling back to $ANDROID_HOME');
     final ProcessResult result = Process.runSync('which', <String>[
-      '${Platform.environment['ANDROID_HOME']}/public/platform-tools/adb',
+      '${Platform.environment['ANDROID_HOME']}/platform-tools/adb',
     ], environment: Platform.environment);
     final bool adbExistsInAndroidSdk = result.exitCode == 0;
     if (adbExistsInAndroidSdk) {
