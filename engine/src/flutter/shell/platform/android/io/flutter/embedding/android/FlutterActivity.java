@@ -224,7 +224,7 @@ public class FlutterActivity extends Activity
 
   public static void setFlutterViewId(FlutterActivity instance, int id) {
     if (instance.flutterViewId == null) {
-      Log.e("CAMILLE", "flutter view ID set");
+      Log.e("CAMILLE", "flutter view ID set to: " + Integer.toString(id));
       instance.flutterViewId = id;
     }
     Log.e("CAMILLE", "flutter view ID setter returning");

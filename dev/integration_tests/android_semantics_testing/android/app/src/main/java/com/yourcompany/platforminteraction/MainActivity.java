@@ -34,14 +34,11 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 public class MainActivity extends FlutterActivity {
 
-  final int flutterViewIdForTesting = 8;
-
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
       GeneratedPluginRegistrant.registerWith(flutterEngine);
       new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "semantics")
               .setMethodCallHandler(new SemanticsTesterMethodHandler());
-    FlutterActivity.setFlutterViewId((FlutterActivity) this, flutterViewIdForTesting);
   }
 
   class SemanticsTesterMethodHandler implements MethodCallHandler {
@@ -49,7 +46,7 @@ public class MainActivity extends FlutterActivity {
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-        FlutterView flutterView = findViewById(flutterViewIdForTesting); //TODO(camsim99): check
+        FlutterView flutterView = findViewById(MainActivity.this.flutterViewId);
         AccessibilityNodeProvider provider = flutterView.getAccessibilityNodeProvider();
         DisplayMetrics displayMetrics = new DisplayMetrics();
         WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);

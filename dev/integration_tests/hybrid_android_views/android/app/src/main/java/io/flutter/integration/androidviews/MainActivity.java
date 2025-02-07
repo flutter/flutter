@@ -27,7 +27,6 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity implements MethodChannel.MethodCallHandler {
-    final int flutterViewIdForTesting = 3;
     final static int STORAGE_PERMISSION_CODE = 1;
 
     MethodChannel mMethodChannel;
@@ -37,8 +36,9 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     private MethodChannel.Result permissionResult;
 
     private View getFlutterView() {
-      return findViewById(flutterViewIdForTesting);
+      return findViewById(this.flutterViewId);
     }
+
     private String getViewName(View view) {
         if (view instanceof FlutterImageView) {
             return "FlutterImageView";
