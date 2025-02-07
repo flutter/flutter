@@ -460,7 +460,7 @@ void main() {
   testWidgets('Material3 - AppBar drawer icon has default color', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(
       colorScheme: const ColorScheme.light(),
-      useMaterial3: true,
+
     );
     await tester.pumpWidget(
       MaterialApp(
@@ -515,7 +515,7 @@ void main() {
   testWidgets('Material3 - AppBar endDrawer icon has default color', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(
       colorScheme: const ColorScheme.light(),
-      useMaterial3: true,
+
     );
     await tester.pumpWidget(
       MaterialApp(
@@ -1006,7 +1006,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         // Test was designed against InkSplash so need to make sure that is used.
-        theme: ThemeData(useMaterial3: true, splashFactory: InkSplash.splashFactory),
+        theme: ThemeData(   splashFactory: InkSplash.splashFactory),
         home: Center(
           child: AppBar(
             title: const Text('Abc'),
@@ -1366,7 +1366,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         key: GlobalKey(),
-        theme: ThemeData.light().copyWith(useMaterial3: true, appBarTheme: const AppBarTheme()),
+        theme: ThemeData.light().copyWith(   appBarTheme: const AppBarTheme()),
         home: Scaffold(appBar: AppBar(title: const Text('title'))),
       ),
     );
@@ -1745,7 +1745,7 @@ void main() {
     ) async {
       final ThemeData themeData = ThemeData.from(
         colorScheme: const ColorScheme.light(),
-        useMaterial3: true,
+
       );
 
       const Color actionsIconColor = Color(0xff0000ff);
@@ -1783,7 +1783,7 @@ void main() {
     ) async {
       final ThemeData themeData = ThemeData.from(
         colorScheme: const ColorScheme.light(),
-        useMaterial3: true,
+
       );
 
       const Color overallIconColor = Color(0xff00ff00);
@@ -1825,7 +1825,7 @@ void main() {
           iconButtonTheme: IconButtonThemeData(
             style: IconButton.styleFrom(foregroundColor: Colors.red, iconSize: 32.0),
           ),
-          useMaterial3: true,
+
         );
 
         const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
@@ -1862,7 +1862,7 @@ void main() {
           iconButtonTheme: IconButtonThemeData(
             style: IconButton.styleFrom(foregroundColor: Colors.red, iconSize: 32.0),
           ),
-          useMaterial3: true,
+
         );
 
         const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
@@ -1894,7 +1894,7 @@ void main() {
           iconButtonTheme: IconButtonThemeData(
             style: IconButton.styleFrom(foregroundColor: Colors.red, iconSize: 32.0),
           ),
-          useMaterial3: true,
+
         );
 
         const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
@@ -1932,7 +1932,7 @@ void main() {
           iconButtonTheme: IconButtonThemeData(
             style: IconButton.styleFrom(foregroundColor: Colors.red, iconSize: 32.0),
           ),
-          useMaterial3: true,
+
         );
 
         const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
@@ -1964,7 +1964,7 @@ void main() {
           iconButtonTheme: IconButtonThemeData(
             style: IconButton.styleFrom(foregroundColor: Colors.red),
           ),
-          useMaterial3: true,
+
         );
 
         await tester.pumpWidget(
@@ -1995,7 +1995,7 @@ void main() {
     ) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.dark().copyWith(onSurfaceVariant: Colors.red),
-        useMaterial3: true,
+
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -2023,7 +2023,7 @@ void main() {
     ) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.dark().copyWith(onSurfaceVariant: Colors.red),
-        useMaterial3: true,
+
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -2051,7 +2051,7 @@ void main() {
     ) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.light().copyWith(onSurfaceVariant: Colors.red),
-        useMaterial3: true,
+
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -2079,7 +2079,7 @@ void main() {
     ) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.light().copyWith(onSurfaceVariant: Colors.red),
-        useMaterial3: true,
+
       );
       await tester.pumpWidget(
         MaterialApp(

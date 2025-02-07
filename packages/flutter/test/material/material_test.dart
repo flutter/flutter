@@ -292,7 +292,7 @@ void main() {
         await tester.pumpWidget(
           Theme(
             data: ThemeData(
-              useMaterial3: true,
+
               applyElevationOverlayColor: true,
               colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
             ),
