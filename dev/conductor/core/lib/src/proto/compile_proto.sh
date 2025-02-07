@@ -42,7 +42,7 @@ protoc --dart_out="$DIR" --proto_path="$DIR" "$DIR/conductor_state.proto"
 
 for SOURCE_FILE in $(ls "$DIR"/*.pb*.dart); do
   # Format in place file
-  dart format --output=write --line-length 120 "$SOURCE_FILE"
+  dart format --output=write "$SOURCE_FILE"
 
   # Create temp copy with the license header prepended
   cp "$DIR/license_header.txt" "${SOURCE_FILE}.tmp"

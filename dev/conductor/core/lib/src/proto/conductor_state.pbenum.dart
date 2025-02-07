@@ -20,9 +20,12 @@ import 'package:protobuf/protobuf.dart' as $pb;
 class ReleasePhase extends $pb.ProtobufEnum {
   static const ReleasePhase APPLY_FRAMEWORK_CHERRYPICKS =
       ReleasePhase._(0, _omitEnumNames ? '' : 'APPLY_FRAMEWORK_CHERRYPICKS');
-  static const ReleasePhase PUBLISH_VERSION = ReleasePhase._(1, _omitEnumNames ? '' : 'PUBLISH_VERSION');
-  static const ReleasePhase VERIFY_RELEASE = ReleasePhase._(2, _omitEnumNames ? '' : 'VERIFY_RELEASE');
-  static const ReleasePhase RELEASE_COMPLETED = ReleasePhase._(3, _omitEnumNames ? '' : 'RELEASE_COMPLETED');
+  static const ReleasePhase PUBLISH_VERSION =
+      ReleasePhase._(1, _omitEnumNames ? '' : 'PUBLISH_VERSION');
+  static const ReleasePhase VERIFY_RELEASE =
+      ReleasePhase._(2, _omitEnumNames ? '' : 'VERIFY_RELEASE');
+  static const ReleasePhase RELEASE_COMPLETED =
+      ReleasePhase._(3, _omitEnumNames ? '' : 'RELEASE_COMPLETED');
 
   static const $core.List<ReleasePhase> values = <ReleasePhase>[
     APPLY_FRAMEWORK_CHERRYPICKS,
@@ -51,7 +54,8 @@ class CherrypickState extends $pb.ProtobufEnum {
     ABANDONED,
   ];
 
-  static final $core.Map<$core.int, CherrypickState> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static final $core.Map<$core.int, CherrypickState> _byValue =
+      $pb.ProtobufEnum.initByValue(values);
   static CherrypickState? valueOf($core.int value) => _byValue[value];
 
   const CherrypickState._($core.int v, $core.String n) : super(v, n);
@@ -61,7 +65,8 @@ class CherrypickState extends $pb.ProtobufEnum {
 ///
 ///  This determines how the version will be calculated.
 class ReleaseType extends $pb.ProtobufEnum {
-  static const ReleaseType STABLE_INITIAL = ReleaseType._(0, _omitEnumNames ? '' : 'STABLE_INITIAL');
+  static const ReleaseType STABLE_INITIAL =
+      ReleaseType._(0, _omitEnumNames ? '' : 'STABLE_INITIAL');
   static const ReleaseType STABLE_HOTFIX = ReleaseType._(1, _omitEnumNames ? '' : 'STABLE_HOTFIX');
   static const ReleaseType BETA_INITIAL = ReleaseType._(2, _omitEnumNames ? '' : 'BETA_INITIAL');
   static const ReleaseType BETA_HOTFIX = ReleaseType._(3, _omitEnumNames ? '' : 'BETA_HOTFIX');
