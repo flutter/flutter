@@ -25,7 +25,7 @@ final class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   // This should appear as the yellow line over a blue box. The
-  // red box should not be visible unless the platform view has not loaded yet.
+  // green box should not be visible unless the platform view has not loaded yet.
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -33,7 +33,7 @@ final class MainApp extends StatelessWidget {
       home: Stack(
         alignment: AlignmentDirectional.center,
         children: <Widget>[
-          SizedBox(width: 190, height: 190, child: ColoredBox(color: Colors.red)),
+          SizedBox(width: 190, height: 190, child: ColoredBox(color: Colors.green)),
           SizedBox(
             width: 200,
             height: 200,
