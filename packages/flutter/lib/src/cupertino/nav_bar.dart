@@ -870,13 +870,6 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_sliver_nav_bar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad}
-/// This example shows how to add a bottom (typically a
-/// [CupertinoSearchTextField]) to a [CupertinoSliverNavigationBar].
-///
-/// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_sliver_nav_bar.1.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
@@ -923,11 +916,28 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
        searchField = null,
        _searchable = false;
 
-  /// Create a navigation bar for scrolling lists with [bottom] set to a
-  /// [CupertinoSearchTextField] with padding.
+  /// A navigation bar for scrolling lists that integrates a provided search
+  /// field directly into the navigation bar.
+  ///
+  /// This search-enabled navigation bar is functionally equivalent to
+  /// the standard [CupertinoSliverNavigationBar] constructor, but with the
+  /// addition of [searchField], which sits at the bottom of the navigation bar.
+  ///
+  /// When the search field is tapped, [leading], [trailing], [middle], and
+  /// [largeTitle] all collapse, causing the search field to animate to the
+  /// 'top' of the navigation bar. A 'Cancel' button is presented next to the
+  /// active [searchField], which when tapped, closes the search view, bringing
+  /// the navigation bar back to its initial state.
   ///
   /// If [automaticallyImplyTitle] is false, then the [largeTitle] argument is
   /// required.
+  ///
+  /// {@tool dartpad}
+  /// This example demonstrates how to use a
+  /// [CupertinoSliverNavigationBar.search] to manage a search view.
+  ///
+  /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_sliver_nav_bar.1.dart **
+  /// {@end-tool}
   const CupertinoSliverNavigationBar.search({
     super.key,
     required Widget this.searchField,
@@ -1085,6 +1095,10 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   final bool stretch;
 
   /// The search field used in [CupertinoSliverNavigationBar.search].
+  ///
+  /// The provided search field is constrained to a fixed height of 35 pixels in
+  /// its inactive state, and [kMinInteractiveDimensionCupertino] pixels in its
+  /// active state.
   ///
   /// Typically a [CupertinoSearchTextField].
   final Widget? searchField;
