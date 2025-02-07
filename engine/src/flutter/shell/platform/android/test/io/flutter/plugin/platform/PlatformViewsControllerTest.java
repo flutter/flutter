@@ -1665,7 +1665,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.attach(context, registry, executor);
 
     PlatformViewsController2 secondController =
-        new PlatformViewsController2(platformViewsController.getRegistry());
+        new PlatformViewsController2(new PlatformViewRegistryImpl());
 
     final FlutterEngine engine = mock(FlutterEngine.class);
     when(engine.getRenderer()).thenReturn(new FlutterRenderer(jni));
