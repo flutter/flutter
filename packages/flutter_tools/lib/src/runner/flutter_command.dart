@@ -338,6 +338,11 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Enables expression evaluation in the debugger.',
       hide: !verboseHelp,
     );
+    argParser.addFlag(
+      'web-experimental-hot-reload',
+      help: 'Enables new module format that supports hot reload.',
+      hide: !verboseHelp,
+    );
     argParser.addOption(
       'web-launch-url',
       help:
@@ -1341,6 +1346,11 @@ abstract class FlutterCommand extends Command<void> {
         extraFrontEndOptions.add(flag);
         extraGenSnapshotOptions.add(flag);
       }
+    }
+
+    // TODO(natebiggs): Delete this when the new DDC module system is the default.
+    if (boolArg('web-experimental-hot-reload')) {
+      extraFrontEndOptions.addAll(['--dartdevc-canary', '--dartdevc-module-format=ddc']);
     }
 
     String? codeSizeDirectory;
