@@ -145,7 +145,6 @@ class ColdRunner extends ResidentRunner {
     _didAttach = true;
     try {
       await connectToServiceProtocol(
-        getSkSLMethod: writeSkSL,
         allowExistingDdsInstance: allowExistingDdsInstance,
       );
     } on Exception catch (error) {

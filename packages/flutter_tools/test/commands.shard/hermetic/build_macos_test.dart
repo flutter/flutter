@@ -487,7 +487,6 @@ STDERR STUFF
       );
       createMinimalMockProjectFiles();
       fileSystem.file('lib/other.dart').createSync(recursive: true);
-      fileSystem.file('foo/bar.sksl.json').createSync(recursive: true);
 
       await createTestCommandRunner(command).run(const <String>[
         'build',
@@ -501,7 +500,6 @@ STDERR STUFF
         '--dart-define=foo.bar=2',
         '--dart-define=fizz.far=3',
         '--tree-shake-icons',
-        '--bundle-sksl-path=foo/bar.sksl.json',
       ]);
       final List<String> contents =
           fileSystem.file('./macos/Flutter/ephemeral/Flutter-Generated.xcconfig').readAsLinesSync();
@@ -521,7 +519,6 @@ STDERR STUFF
           'SPLIT_DEBUG_INFO=foo/',
           'TRACK_WIDGET_CREATION=true',
           'TREE_SHAKE_ICONS=true',
-          'BUNDLE_SKSL_PATH=foo/bar.sksl.json',
           'PACKAGE_CONFIG=/.dart_tool/package_config.json',
           'COCOAPODS_PARALLEL_CODE_SIGN=true',
         ]),

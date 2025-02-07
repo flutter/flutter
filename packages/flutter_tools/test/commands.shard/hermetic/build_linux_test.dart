@@ -639,7 +639,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[cmakeCommand('release'), ninjaCommand('release')]);
       fileSystem.file('lib/other.dart').createSync(recursive: true);
-      fileSystem.file('foo/bar.sksl.json').createSync(recursive: true);
 
       await createTestCommandRunner(command).run(const <String>[
         'build',
@@ -653,7 +652,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         '--dart-define=foo.bar=2',
         '--dart-define=fizz.far=3',
         '--tree-shake-icons',
-        '--bundle-sksl-path=foo/bar.sksl.json',
       ]);
 
       final File cmakeConfig = fileSystem.currentDirectory
@@ -686,7 +684,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
           '  "FLUTTER_ROOT=$_kTestFlutterRoot"',
           '  "PROJECT_DIR=${fileSystem.currentDirectory.path}"',
           '  "FLUTTER_TARGET=lib/other.dart"',
-          '  "BUNDLE_SKSL_PATH=foo/bar.sksl.json"',
         ]),
       );
     },
