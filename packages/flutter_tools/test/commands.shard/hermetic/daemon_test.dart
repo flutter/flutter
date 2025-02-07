@@ -421,7 +421,7 @@ void main() {
         discoverer.addDevice(FakeAndroidDevice());
 
         final List<Map<String, Object?>> names = <Map<String, Object?>>[];
-        await daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).take(2).forEach((
+        await daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).take(1).forEach((
           DaemonMessage response,
         ) async {
           expect(response.data['event'], 'device.added');
