@@ -13,7 +13,7 @@ import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show xcode;
+import '../../globals.dart' as globals show platform, xcode;
 import '../../project.dart';
 import '../../runner/flutter_command.dart';
 import '../build_system.dart';
@@ -254,10 +254,7 @@ class KernelSnapshot extends Target {
 
     final String dillPath = environment.buildDir.childFile(dillName).path;
 
-    final List<String> dartDefines = decodeDartDefines(
-      environment.defines,
-      kDartDefines,
-    );
+    final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
     await _addFlavorToDartDefines(dartDefines, environment, targetPlatform);
 
     final CompilerOutput? output = await compiler.compile(
@@ -296,28 +293,24 @@ class KernelSnapshot extends Target {
     Environment environment,
     TargetPlatform targetPlatform,
   ) async {
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(
-      environment.projectDir,
-    );
     final String? flavor;
 
     // For iOS and macOS projects, parse the flavor from the configuration, do
     // not get from the FLAVOR environment variable. This is because when built
     // from Xcode, the scheme/flavor can be changed through the UI and is not
     // reflected in the environment variable.
-    if (targetPlatform == TargetPlatform.ios) {
-      flavor = await flutterProject.ios.parseFlavorFromConfiguration(
-        environment.defines[kXcodeConfiguration],
-      );
-    } else if (targetPlatform == TargetPlatform.darwin) {
-      flavor = await flutterProject.macos.parseFlavorFromConfiguration(
+    if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      final XcodeBasedProject xcodeProject =
+          targetPlatform == TargetPlatform.ios ? flutterProject.ios : flutterProject.macos;
+      flavor = await xcodeProject.parseFlavorFromConfiguration(
         environment.defines[kXcodeConfiguration],
       );
     } else {
       flavor = environment.defines[kFlavor];
     }
     if (flavor != null) {
-      if (environment.defines['FLUTTER_APP_FLAVOR'] != null) {
+      if (globals.platform.environment['FLUTTER_APP_FLAVOR'] != null) {
         throwToolExit(
           'FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.',
         );
