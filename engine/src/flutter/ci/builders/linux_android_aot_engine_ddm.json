@@ -15,11 +15,10 @@
                     "type": "gcs",
                     "base_path": "out/ci/android_release_arm64_ddm/zip_archives/",
                     "include_paths": [
-                        "out/ci/android_release_arm64_ddm/zip_archives/android-arm64-release/artifacts.zip",
-                        "out/ci/android_release_arm64_ddm/zip_archives/android-arm64-release/linux-x64.zip",
-                        "out/ci/android_release_arm64_ddm/zip_archives/android-arm64-release/symbols.zip",
-                        "out/ci/android_release_arm64_ddm/zip_archives/android-arm64-release/analyze-snapshot-linux-x64.zip",
-                        "out/ci/android_release_arm64_ddm/zip_archives/download.flutter.io"
+                        "out/ci/android_release_arm64_ddm/zip_archives/android-arm64-release-ddm/artifacts.zip",
+                        "out/ci/android_release_arm64_ddm/zip_archives/android-arm64-release-ddm/linux-x64.zip",
+                        "out/ci/android_release_arm64_ddm/zip_archives/android-arm64-release-ddm/symbols.zip",
+                        "out/ci/android_release_arm64_ddm/zip_archives/android-arm64-release-ddm/analyze-snapshot-linux-x64.zip"
                     ],
                     "realm": "production"
                 }
@@ -51,7 +50,6 @@
                 "targets": [
                     "default",
                     "clang_x64/gen_snapshot",
-                    "flutter/shell/platform/android:abi_jars",
                     "flutter/shell/platform/android:analyze_snapshot"
                 ]
             },
