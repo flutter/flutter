@@ -265,6 +265,26 @@ targets:
       # at https://github.com/flutter/flutter/issues/152186.
       cores: "8"
 
+  - name: Linux linux_android_aot_engine_ddm
+    recipe: engine_v2/engine_v2
+    bringup: true
+    timeout: 120
+    properties:
+      config_name: linux_android_aot_engine_ddm
+      release_build: "false"
+      backfill: "false"
+    # Do not remove(https://github.com/flutter/flutter/issues/144644)
+    # Scheduler will fail to get the platform
+    drone_dimensions:
+      - os=Linux
+    dimensions:
+      # This is needed so that orchestrators that only spawn subbuilds are not
+      # assigned to the large 32 core workers when doing release builds.
+      # For more details see the issue
+      # at https://github.com/flutter/flutter/issues/152186.
+      cores: "8"
+
+
   - name: Linux linux_android_debug_engine
     recipe: engine_v2/engine_v2
     timeout: 120
