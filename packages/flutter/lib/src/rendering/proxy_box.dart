@@ -236,7 +236,6 @@ class RenderConstrainedBox extends RenderProxyBox {
       return _additionalConstraints.minWidth;
     }
     
-    // TODO: Write tests
     final double width = super.computeMinIntrinsicWidth(
       min(_additionalConstraints.maxHeight, height),
     );
@@ -253,7 +252,6 @@ class RenderConstrainedBox extends RenderProxyBox {
       return _additionalConstraints.minWidth;
     }
     
-    // TODO: Write tests
     final double width = super.computeMaxIntrinsicWidth(
       min(_additionalConstraints.maxHeight, height),
     );
@@ -270,7 +268,6 @@ class RenderConstrainedBox extends RenderProxyBox {
       return _additionalConstraints.minHeight;
     }
 
-    // TODO: Write tests
     final double height = super.computeMinIntrinsicHeight(
       min(_additionalConstraints.maxWidth, width),
     );
@@ -287,7 +284,6 @@ class RenderConstrainedBox extends RenderProxyBox {
       return _additionalConstraints.minHeight;
     }
 
-    // TODO: Write tests
     final double height = super.computeMaxIntrinsicHeight(
       min(_additionalConstraints.maxWidth, width),
     );

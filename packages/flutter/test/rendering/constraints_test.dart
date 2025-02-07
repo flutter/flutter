@@ -89,4 +89,32 @@ void main() {
       ),
     );
   });
+
+  test('Compute intrinsic height uses constraints for RenderConstrainedBox', () {
+    const double lineHeight = 15.0;
+    final RenderConstrainedBox renderConstrainedBox = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints(maxWidth: 250),
+      child: RenderParagraph(
+        const TextSpan(
+          text: 'A very very very very very very very very long text',
+          style: TextStyle(fontSize: lineHeight),
+        ),
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    expect(renderConstrainedBox.computeMaxIntrinsicHeight(double.infinity), 4 * lineHeight);
+    expect(renderConstrainedBox.computeMaxIntrinsicHeight(600), 4 * lineHeight);
+    expect(renderConstrainedBox.computeMaxIntrinsicHeight(250), 4 * lineHeight);
+    expect(renderConstrainedBox.computeMaxIntrinsicHeight(200), 5 * lineHeight);
+    expect(renderConstrainedBox.computeMaxIntrinsicHeight(150), 6 * lineHeight);
+    expect(renderConstrainedBox.computeMaxIntrinsicHeight(100), 10 * lineHeight);
+
+    expect(renderConstrainedBox.computeMinIntrinsicHeight(double.infinity), 4 * lineHeight);
+    expect(renderConstrainedBox.computeMinIntrinsicHeight(600), 4 * lineHeight);
+    expect(renderConstrainedBox.computeMinIntrinsicHeight(250), 4 * lineHeight);
+    expect(renderConstrainedBox.computeMinIntrinsicHeight(200), 5 * lineHeight);
+    expect(renderConstrainedBox.computeMinIntrinsicHeight(150), 6 * lineHeight);
+    expect(renderConstrainedBox.computeMinIntrinsicHeight(100), 10 * lineHeight);
+  });
 }
