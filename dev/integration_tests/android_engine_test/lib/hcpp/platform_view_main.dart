@@ -49,7 +49,7 @@ class _MainAppState extends State<MainApp> {
           TextButton(
             key: const ValueKey<String>('AddOverlay'),
             onPressed: _togglePlatformView,
-            child: const SizedBox(width: 190, height: 190, child: ColoredBox(color: Colors.red)),
+            child: const SizedBox(width: 190, height: 190, child: ColoredBox(color: Colors.green)),
           ),
           if (showPlatformView) ...<Widget>[
             const SizedBox(
