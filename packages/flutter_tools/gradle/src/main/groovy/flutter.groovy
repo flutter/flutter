@@ -4,8 +4,10 @@
 // found in the LICENSE file.
 
 import com.android.build.OutputFile
+import com.flutter.gradle.AppLinkSettings
 import com.flutter.gradle.BaseApplicationNameHandler
 import com.flutter.gradle.Deeplink
+import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.IntentFilterCheck
 import groovy.json.JsonGenerator
 import groovy.xml.QName
@@ -32,78 +34,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
-
-/**
- * For apps only. Provides the flutter extension used in the app-level Gradle
- * build file (app/build.gradle or app/build.gradle.kts).
- *
- * The versions specified here should match the values in
- * packages/flutter_tools/lib/src/android/gradle_utils.dart, so when bumping,
- * make sure to update the versions specified there.
- *
- * Learn more about extensions in Gradle:
- *  * https://docs.gradle.org/8.0.2/userguide/custom_plugins.html#sec:getting_input_from_the_build
-*/
-class FlutterExtension {
-
-    /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    public final int compileSdkVersion = 35
-
-    /** Sets the minSdkVersion used by default in Flutter app projects. */
-    public final int minSdkVersion = 21
-
-    /**
-     * Sets the targetSdkVersion used by default in Flutter app projects.
-     * targetSdkVersion should always be the latest available stable version.
-     *
-     * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
-     */
-    public final int targetSdkVersion = 35
-
-    /**
-     * Sets the ndkVersion used by default in Flutter app projects.
-     * Chosen as default version of the AGP version below as found in
-     * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
-     */
-    public final String ndkVersion = "26.3.11579264"
-
-    /**
-     * Specifies the relative directory to the Flutter project directory.
-     * In an app project, this is ../.. since the app's Gradle build file is under android/app.
-     */
-    String source = "../.."
-
-    /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
-    String target
-
-    /** The versionCode that was read from app's local.properties. */
-    public String flutterVersionCode = null
-
-    /** The versionName that was read from app's local.properties. */
-    public String flutterVersionName = null
-
-    /** Returns flutterVersionCode as an integer with error handling. */
-    Integer getVersionCode() {
-        if (flutterVersionCode == null) {
-            throw new GradleException("flutterVersionCode must not be null.")
-        }
-
-        if (!flutterVersionCode.isNumber()) {
-            throw new GradleException("flutterVersionCode must be an integer.")
-        }
-
-        return flutterVersionCode.toInteger()
-    }
-
-    /** Returns flutterVersionName with error handling. */
-    String getVersionName() {
-        if (flutterVersionName == null) {
-            throw new GradleException("flutterVersionName must not be null.")
-        }
-
-        return flutterVersionName
-    }
-}
 
 class FlutterPlugin implements Plugin<Project> {
 
@@ -1565,14 +1495,6 @@ class FlutterPlugin implements Plugin<Project> {
         // If we got this far then all the common indices are identical, so whichever version is longer must be more recent
         return firstVersion.size() <=> secondVersion.size()
     }
-
-}
-
-class AppLinkSettings {
-
-    String applicationId
-    Set<Deeplink> deeplinks
-    boolean deeplinkingFlagEnabled
 
 }
 
