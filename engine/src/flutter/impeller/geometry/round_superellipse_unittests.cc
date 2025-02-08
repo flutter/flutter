@@ -489,7 +489,7 @@ TEST(RoundSuperellipseTest,
   CHECK_POINT_AND_MIRRORS(Point(0, 49.995));       // Top
   CHECK_POINT_AND_MIRRORS(Point(44.245, 49.995));  // Top stretch end
   CHECK_POINT_AND_MIRRORS(Point(45.72, 49.84));    // Top joint
-  CHECK_POINT_AND_MIRRORS(Point(48.53, 47.09));    // Circular arc mid
+  CHECK_POINT_AND_MIRRORS(Point(48.51, 47.07));    // Circular arc mid
   CHECK_POINT_AND_MIRRORS(Point(49.92, 41.44));    // Right joint
   CHECK_POINT_AND_MIRRORS(Point(49.995, 38.49));   // Right stretch end
   CHECK_POINT_AND_MIRRORS(Point(49.995, 0));       // Right
@@ -516,10 +516,10 @@ TEST(RoundSuperellipseTest,
 
   CHECK_POINT_AND_MIRRORS(Point(24.99, 99.99));  // Bottom mid edge
   CHECK_POINT_AND_MIRRORS(Point(29.99, 99.64));
-  CHECK_POINT_AND_MIRRORS(Point(34.99, 98.09));
-  CHECK_POINT_AND_MIRRORS(Point(39.99, 94.76));
-  CHECK_POINT_AND_MIRRORS(Point(44.16, 89.99));
-  CHECK_POINT_AND_MIRRORS(Point(48.63, 79.99));
+  CHECK_POINT_AND_MIRRORS(Point(34.99, 98.06));
+  CHECK_POINT_AND_MIRRORS(Point(39.99, 94.73));
+  CHECK_POINT_AND_MIRRORS(Point(44.13, 89.99));
+  CHECK_POINT_AND_MIRRORS(Point(48.60, 79.99));
   CHECK_POINT_AND_MIRRORS(Point(49.93, 69.99));
   CHECK_POINT_AND_MIRRORS(Point(49.99, 59.99));
   CHECK_POINT_AND_MIRRORS(Point(49.99, 49.99));  // Right mid edge
@@ -529,7 +529,7 @@ TEST(RoundSuperellipseTest,
 
 TEST(RoundSuperellipseTest, SlimDiagnalContinuousRoundSuperellipseContains) {
   // This shape has large radii on one diagnal and tiny radii on the other,
-  // resulting in a almond-like shape placed diagnally (NE to SW).
+  // resulting in a almond-like shape placed diagnally (NW to SE).
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   auto rr = RoundSuperellipse::MakeRectRadii(
       bounds, {
@@ -556,11 +556,11 @@ TEST(RoundSuperellipseTest, SlimDiagnalContinuousRoundSuperellipseContains) {
 
   // A few other points along the edge
   CHECK_DIAGNAL_POINTS(Point(-40.0, -49.59));
-  CHECK_DIAGNAL_POINTS(Point(-20.0, -45.66));
-  CHECK_DIAGNAL_POINTS(Point(0.0, -37.06));
-  CHECK_DIAGNAL_POINTS(Point(20.0, -22.08));
-  CHECK_DIAGNAL_POINTS(Point(21.05, -21.05));
-  CHECK_DIAGNAL_POINTS(Point(40.0, 5.60));
+  CHECK_DIAGNAL_POINTS(Point(-20.0, -45.64));
+  CHECK_DIAGNAL_POINTS(Point(0.0, -37.01));
+  CHECK_DIAGNAL_POINTS(Point(20.0, -21.96));
+  CHECK_DIAGNAL_POINTS(Point(21.05, -20.92));
+  CHECK_DIAGNAL_POINTS(Point(40.0, 5.68));
 #undef CHECK_POINT_AND_MIRRORS
 }
 
