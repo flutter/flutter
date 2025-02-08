@@ -123,6 +123,8 @@ const double _fontSizeToScale = 14.0;
 /// this can be used to only allow weekdays for selection. If provided, it must
 /// return true for [initialDate].
 ///
+/// {@macro flutter.material.calendar_date_picker.calendarDelegate}
+///
 /// The following optional string parameters allow you to override the default
 /// text used for various parts of the dialog:
 ///
@@ -221,8 +223,8 @@ Future<DateTime?> showDatePicker({
   final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
+  final CalendarDelegate calendarDelegate = const GregorianCalendarDelegate(),
 }) async {
-  const GregorianCalendarDelegate calendarDelegate = GregorianCalendarDelegate();
   initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
   firstDate = calendarDelegate.dateOnly(firstDate);
   lastDate = calendarDelegate.dateOnly(lastDate);
@@ -455,7 +457,7 @@ class DatePickerDialog extends StatefulWidget {
   /// Defaults to `EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0)`.
   final EdgeInsets insetPadding;
 
-  /// The calendarDelegate that controls the logic and localization.
+  /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate calendarDelegate;
 
   @override
@@ -1085,6 +1087,8 @@ typedef SelectableDayForRangePredicate =
 ///
 /// {@macro flutter.material.date_picker.switchToCalendarEntryModeIcon}
 ///
+/// {@macro flutter.material.calendar_date_picker.calendarDelegate}
+///
 /// The following optional string parameters allow you to override the default
 /// text used for various parts of the dialog:
 ///
@@ -1477,7 +1481,7 @@ class DateRangePickerDialog extends StatefulWidget {
   /// Function to provide full control over which [DateTime] can be selected.
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
-  /// The calendarDelegate that controls the calendar's logic and localization.
+  /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate calendarDelegate;
 
   @override
@@ -1996,7 +2000,7 @@ class CalendarDateRangePicker extends StatefulWidget {
   /// Called when the user changes the end date of the selected range.
   final ValueChanged<DateTime?>? onEndDateChanged;
 
-  /// The calendarDelegate that controls the calendar's logic and localization.
+  /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate calendarDelegate;
 
   @override
@@ -2548,6 +2552,7 @@ class _MonthItem extends StatefulWidget {
 
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
+  /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate calendarDelegate;
 
   @override
@@ -3289,6 +3294,7 @@ class _InputDateRangePicker extends StatefulWidget {
 
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
+  /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate calendarDelegate;
 
   @override

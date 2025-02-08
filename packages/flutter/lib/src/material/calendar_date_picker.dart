@@ -107,6 +107,13 @@ class CalendarDatePicker extends StatefulWidget {
   ///
   /// If [selectableDayPredicate] and [initialDate] are both non-null,
   /// [selectableDayPredicate] must return `true` for the [initialDate].
+  ///
+  /// {@template flutter.material.calendar_date_picker.calendarDelegate}
+  /// The [calendarDelegate] controls date interpretation, formatting, and
+  /// navigation within the picker. By providing a custom implementation,
+  /// you can support alternative calendar systems such as Nepali, Hijri,
+  /// Buddhist, and more. Defaults to [GregorianCalendarDelegate].
+  /// {@endtemplate}
   CalendarDatePicker({
     super.key,
     required DateTime? initialDate,
@@ -176,7 +183,7 @@ class CalendarDatePicker extends StatefulWidget {
   /// Function to provide full control over which dates in the calendar can be selected.
   final SelectableDayPredicate? selectableDayPredicate;
 
-  /// The delegate that controls the calendar picker's logic and localization.
+  /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate calendarDelegate;
 
   @override
@@ -554,6 +561,7 @@ class _MonthPicker extends StatefulWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
 
+  /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate calendarDelegate;
 
   @override
@@ -942,6 +950,7 @@ class _DayPicker extends StatefulWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
 
+  /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate calendarDelegate;
 
   @override
@@ -1302,7 +1311,7 @@ class YearPicker extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// The delegate that controls the localization.
+  /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate calendarDelegate;
 
   @override
