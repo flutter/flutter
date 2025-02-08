@@ -14,9 +14,9 @@ import 'material_localizations.dart';
 
 /// A delegate that supplies localized strings and other values for the
 /// date picker.
-abstract class DatePickerDelegate {
+abstract class CalendarDelegate {
   /// Creates a date picker delegate.
-  const DatePickerDelegate();
+  const CalendarDelegate();
 
   /// Returns a [DateTime] representing the current date and time.
   DateTime now();
@@ -191,12 +191,12 @@ abstract class DatePickerDelegate {
   String dateHelpText(MaterialLocalizations localizations);
 }
 
-/// A [DatePickerDelegate] that uses the Gregorian calendar and the
+/// A [CalendarDelegate] that uses the Gregorian calendar and the
 /// conventions of the current [MaterialLocalizations].
-class GregorianDatePickerDelegate extends DatePickerDelegate {
+class GregorianCalendarDelegate extends CalendarDelegate {
   /// Creates a date picker delegate that uses the Gregorian calendar and the
   /// conventions of the current [MaterialLocalizations].
-  const GregorianDatePickerDelegate();
+  const GregorianCalendarDelegate();
 
   @override
   DateTime now() => DateTime.now();

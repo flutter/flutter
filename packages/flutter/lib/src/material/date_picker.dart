@@ -222,7 +222,7 @@ Future<DateTime?> showDatePicker({
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
 }) async {
-  const GregorianDatePickerDelegate delegate = GregorianDatePickerDelegate();
+  const GregorianCalendarDelegate delegate = GregorianCalendarDelegate();
   initialDate = initialDate == null ? null : delegate.dateOnly(initialDate);
   firstDate = delegate.dateOnly(firstDate);
   lastDate = delegate.dateOnly(lastDate);
@@ -329,7 +329,7 @@ class DatePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
     this.insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-    this.delegate = const GregorianDatePickerDelegate(),
+    this.delegate = const GregorianCalendarDelegate(),
   }) : initialDate = initialDate == null ? null : delegate.dateOnly(initialDate),
        firstDate = delegate.dateOnly(firstDate),
        lastDate = delegate.dateOnly(lastDate),
@@ -456,7 +456,7 @@ class DatePickerDialog extends StatefulWidget {
   final EdgeInsets insetPadding;
 
   /// The delegate that controls the logic and localization.
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -1182,7 +1182,7 @@ Future<DateTimeRange?> showDateRangePicker({
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
   SelectableDayForRangePredicate? selectableDayPredicate,
-  DatePickerDelegate delegate = const GregorianDatePickerDelegate(),
+  CalendarDelegate delegate = const GregorianCalendarDelegate(),
 }) async {
   initialDateRange = initialDateRange == null ? null : delegate.datesOnly(initialDateRange);
   firstDate = delegate.dateOnly(firstDate);
@@ -1280,7 +1280,7 @@ Future<DateTimeRange?> showDateRangePicker({
 /// (i.e. 'Jan 21, 2020').
 String _formatRangeStartDate(
   MaterialLocalizations localizations,
-  DatePickerDelegate delegate,
+  CalendarDelegate delegate,
   DateTime? startDate,
   DateTime? endDate,
 ) {
@@ -1299,7 +1299,7 @@ String _formatRangeStartDate(
 /// include the year (i.e. 'Jan 21, 2020').
 String _formatRangeEndDate(
   MaterialLocalizations localizations,
-  DatePickerDelegate delegate,
+  CalendarDelegate delegate,
   DateTime? startDate,
   DateTime? endDate,
   DateTime currentDate,
@@ -1345,7 +1345,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
     this.selectableDayPredicate,
-    this.delegate = const GregorianDatePickerDelegate(),
+    this.delegate = const GregorianCalendarDelegate(),
   });
 
   /// The date range that the date range picker starts with when it opens.
@@ -1478,7 +1478,7 @@ class DateRangePickerDialog extends StatefulWidget {
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
   /// The delegate that controls the calendar's logic and localization.
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   @override
   State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
@@ -1798,7 +1798,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
   final VoidCallback? onCancel;
   final String confirmText;
   final String helpText;
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
   final Widget? entryModeButton;
 
   @override
@@ -1996,7 +1996,7 @@ class CalendarDateRangePicker extends StatefulWidget {
   final ValueChanged<DateTime?>? onEndDateChanged;
 
   /// The delegate that controls the calendar's logic and localization.
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   @override
   State<CalendarDateRangePicker> createState() => _CalendarDateRangePickerState();
@@ -2163,7 +2163,7 @@ class _CalendarKeyboardNavigator extends StatefulWidget {
   final DateTime firstDate;
   final DateTime lastDate;
   final DateTime initialFocusedDay;
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   @override
   _CalendarKeyboardNavigatorState createState() => _CalendarKeyboardNavigatorState();
@@ -2301,7 +2301,7 @@ class _FocusedDate extends InheritedWidget {
     this.scrollDirection,
   });
 
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
   final DateTime? date;
   final TraversalDirection? scrollDirection;
 
@@ -2543,7 +2543,7 @@ class _MonthItem extends StatefulWidget {
 
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   @override
   _MonthItemState createState() => _MonthItemState();
@@ -2810,7 +2810,7 @@ class _DayItem extends StatefulWidget {
 
   final bool isToday;
 
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   @override
   State<_DayItem> createState() => _DayItemState();
@@ -3055,7 +3055,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
   final String? cancelText;
   final String? helpText;
   final Widget? entryModeButton;
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   String _formatDateRange(BuildContext context, DateTime? start, DateTime? end, DateTime now) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -3282,7 +3282,7 @@ class _InputDateRangePicker extends StatefulWidget {
 
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   @override
   _InputDateRangePickerState createState() => _InputDateRangePickerState();

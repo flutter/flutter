@@ -117,7 +117,7 @@ class CalendarDatePicker extends StatefulWidget {
     this.onDisplayedMonthChanged,
     this.initialCalendarMode = DatePickerMode.day,
     this.selectableDayPredicate,
-    this.delegate = const GregorianDatePickerDelegate(),
+    this.delegate = const GregorianCalendarDelegate(),
   }) : initialDate = initialDate == null ? null : delegate.dateOnly(initialDate),
        firstDate = delegate.dateOnly(firstDate),
        lastDate = delegate.dateOnly(lastDate),
@@ -177,7 +177,7 @@ class CalendarDatePicker extends StatefulWidget {
   final SelectableDayPredicate? selectableDayPredicate;
 
   /// The delegate that controls the calendar picker's logic and localization.
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   @override
   State<CalendarDatePicker> createState() => _CalendarDatePickerState();
@@ -551,7 +551,7 @@ class _MonthPicker extends StatefulWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
 
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   @override
   _MonthPickerState createState() => _MonthPickerState();
@@ -869,7 +869,7 @@ class _MonthPickerState extends State<_MonthPicker> {
 class _FocusedDate extends InheritedWidget {
   const _FocusedDate({required super.child, required this.delegate, this.date});
 
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
   final DateTime? date;
 
   @override
@@ -930,7 +930,7 @@ class _DayPicker extends StatefulWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
 
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   @override
   _DayPickerState createState() => _DayPickerState();
@@ -1260,7 +1260,7 @@ class YearPicker extends StatefulWidget {
     required this.selectedDate,
     required this.onChanged,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.delegate = const GregorianDatePickerDelegate(),
+    this.delegate = const GregorianCalendarDelegate(),
   }) : assert(!firstDate.isAfter(lastDate)),
        currentDate = delegate.dateOnly(currentDate ?? DateTime.now());
 
@@ -1287,7 +1287,7 @@ class YearPicker extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   /// The delegate that controls the localization.
-  final DatePickerDelegate delegate;
+  final CalendarDelegate delegate;
 
   @override
   State<YearPicker> createState() => _YearPickerState();
