@@ -40,7 +40,6 @@ import io.flutter.embedding.engine.systemchannels.SpellCheckChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
-import io.flutter.plugin.platform.PlatformViewRegistryImpl;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import io.flutter.plugin.text.ProcessTextPlugin;
