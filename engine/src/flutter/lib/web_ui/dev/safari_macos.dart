@@ -185,20 +185,7 @@ $stackTrace
 
   @override
   Future<Browser> launchBrowserInstance(Uri url, {bool debug = false}) async {
-    while (true) {
-      try {
-        return WebDriverBrowser(webDriver!, url);
-      } on SocketException {
-        // Sometimes we may try to connect before the web driver port is ready.
-        // So we should retry here. Note that if there was some issue with the
-        // webdriver process, we may loop infinitely here, so we're relying on
-        // the test timeout to kill us if it takes too long to connect.
-        print('Failed to connect to webdriver process. Retrying in 100 ms');
-        await Future<void>.delayed(const Duration(milliseconds: 100));
-      } catch (exception) {
-        rethrow;
-      }
-    }
+    return WebDriverBrowser(webDriver!, url);
   }
 
   @override
