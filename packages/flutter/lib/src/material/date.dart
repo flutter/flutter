@@ -12,8 +12,23 @@ import 'package:flutter/widgets.dart';
 
 import 'material_localizations.dart';
 
-/// A delegate that supplies localized strings and other values for the
-/// date picker.
+/// Controls the calendar system used in the date picker.
+///
+/// A [CalendarDelegate] defines how dates are interpreted, formatted, and
+/// navigated within the picker. Different calendar systems (e.g., Gregorian,
+/// Nepali, Hijri, Buddhist) can be supported by providing custom implementations.
+///
+/// {@tool dartpad}
+/// This example demonstrates how a [CalendarDelegate] is used to implement a
+/// custom calendar system in the date picker.
+///
+/// ** See code in examples/api/lib/material/date_picker/custom_calendar_delegate.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [GregorianCalendarDelegate], the default implementation for the Gregorian calendar.
+///  * [CalendarDatePicker], which uses this delegate to manage calendar-specific behavior.
 abstract class CalendarDelegate {
   /// Creates a date picker delegate.
   const CalendarDelegate();
