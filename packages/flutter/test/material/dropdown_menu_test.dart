@@ -2111,7 +2111,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(menuAnchor.controller!.isOpen, true);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    // Simulate `TextInputAction.done` on textfield
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     expect(menuAnchor.controller!.isOpen, false);
   });
@@ -2164,7 +2165,15 @@ void main() {
     // Test onSelected on key press
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+
+    // On mobile platforms, the TextField cannot gain focus by default; the focus is
+    // on a FocusNode specifically used for keyboard navigation. Therefore,
+    // LogicalKeyboardKey.enter should be used.
+    if (isMobile) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    } else {
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+    }
     await tester.pumpAndSettle();
     expect(selectionCount, expectedCount);
 
