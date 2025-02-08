@@ -2226,9 +2226,7 @@ class _CancelButton extends StatelessWidget {
         child: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: onPressed,
-          // TODO(victorsanni): Localize this string.
-          // See https://github.com/flutter/flutter/issues/48616.
-          child: const Text('Cancel', maxLines: 1, overflow: TextOverflow.clip),
+          child: Text(CupertinoLocalizations.of(context).cancelButtonLabel, maxLines: 1, overflow: TextOverflow.clip),
         ),
       ),
     );
