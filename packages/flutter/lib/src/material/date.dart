@@ -30,7 +30,7 @@ import 'material_localizations.dart';
 ///  * [GregorianCalendarDelegate], the default implementation for the Gregorian calendar.
 ///  * [CalendarDatePicker], which uses this delegate to manage calendar-specific behavior.
 abstract class CalendarDelegate {
-  /// Creates a date picker delegate.
+  /// Creates a calendar delegate.
   const CalendarDelegate();
 
   /// Returns a [DateTime] representing the current date and time.
@@ -317,7 +317,7 @@ abstract final class DateUtils {
   }
 
   /// Returns true if the two [DateTime] objects have the same day, month, and
-  /// year, or are both null.InheritedWidget
+  /// year, or are both null.
   static bool isSameDay(DateTime? dateA, DateTime? dateB) {
     return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
   }
