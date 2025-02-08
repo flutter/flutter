@@ -3137,6 +3137,16 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey rootOverlayKey = GlobalKey(debugLabel: 'root overlay');
+    late final OverlayEntry entry1;
+    late final OverlayEntry entry2;
+    addTearDown(() {
+      entry1
+        ..remove()
+        ..dispose();
+      entry2
+        ..remove()
+        ..dispose();
+    });
     await tester.pumpWidget(
       Center(
         child: Directionality(
@@ -3144,11 +3154,11 @@ void main() {
           child: Overlay(
             key: rootOverlayKey,
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry1 = OverlayEntry(
                 builder: (BuildContext context) {
                   return Overlay(
                     initialEntries: <OverlayEntry>[
-                      OverlayEntry(
+                      entry2 = OverlayEntry(
                         builder: (BuildContext context) {
                           return Column(
                             children: <Widget>[
@@ -3199,12 +3209,23 @@ void main() {
       _ancestorRenderTheaters(tester.renderObject(find.text('Dragging'))).single,
       tester.renderObject(find.byKey(rootOverlayKey)),
     );
+    await gesture.up();
   });
 
   testWidgets('LongPressDraggable drag feedback is put on root overlay with [rootOverlay] flag', (
     WidgetTester tester,
   ) async {
     final GlobalKey rootOverlayKey = GlobalKey(debugLabel: 'root overlay');
+    late final OverlayEntry entry1;
+    late final OverlayEntry entry2;
+    addTearDown(() {
+      entry1
+        ..remove()
+        ..dispose();
+      entry2
+        ..remove()
+        ..dispose();
+    });
     await tester.pumpWidget(
       Center(
         child: Directionality(
@@ -3212,11 +3233,11 @@ void main() {
           child: Overlay(
             key: rootOverlayKey,
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry1 = OverlayEntry(
                 builder: (BuildContext context) {
                   return Overlay(
                     initialEntries: <OverlayEntry>[
-                      OverlayEntry(
+                      entry2 = OverlayEntry(
                         builder: (BuildContext context) {
                           return Column(
                             children: <Widget>[
@@ -3267,6 +3288,7 @@ void main() {
       _ancestorRenderTheaters(tester.renderObject(find.text('Dragging'))).single,
       tester.renderObject(find.byKey(rootOverlayKey)),
     );
+    await gesture.up();
   });
 
   testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
