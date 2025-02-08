@@ -70,8 +70,6 @@ class CrashReporter {
   /// Prints instructions for filing a bug about the crash.
   Future<void> informUser(CrashDetails details, File crashFile) async {
     _logger.printError('A crash report has been written to ${crashFile.path}');
-    _logger.printError(details.error.toString());
-    _logger.printError(details.stackTrace.toString());
     _logger.printStatus(
       'This crash may already be reported. Check GitHub for similar crashes.',
       emphasis: true,

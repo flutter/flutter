@@ -1302,6 +1302,10 @@ class DebuggingOptions {
     // the flutter_tools binary that is currently checked into Google3.
     // Remove this when that binary has been updated.
     'webUseLocalCanvaskit': false,
+    // See above: these fields are required for backwards compatibility
+    // with the google3 checked in binary.
+    'dumpSkpOnShaderCompilation': false,
+    'cacheSkSL': false,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
