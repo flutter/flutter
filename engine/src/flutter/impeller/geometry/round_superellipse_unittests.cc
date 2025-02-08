@@ -419,7 +419,7 @@ TEST(RoundSuperellipseTest, ContractAndRequireRadiiAdjustment) {
                           }));
 }
 
-TEST(RoundSuperellipseTest, NoCornerContinuousRoundSuperellipseContains) {
+TEST(RoundSuperellipseTest, NoCornerRoundSuperellipseContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   // RRect of bounds with no corners contains corners just barely
   auto no_corners = RoundSuperellipse::MakeRectRadii(
@@ -441,7 +441,7 @@ TEST(RoundSuperellipseTest, NoCornerContinuousRoundSuperellipseContains) {
   EXPECT_FALSE(no_corners.Contains({50, 50.01}));
 }
 
-TEST(RoundSuperellipseTest, TinyCornerContinuousRoundSuperellipseContains) {
+TEST(RoundSuperellipseTest, TinyCornerContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   // RRect of bounds with even the tiniest corners does not contain corners
   auto tiny_corners = RoundSuperellipse::MakeRectRadii(
@@ -453,7 +453,7 @@ TEST(RoundSuperellipseTest, TinyCornerContinuousRoundSuperellipseContains) {
   EXPECT_FALSE(tiny_corners.Contains({50, 50}));
 }
 
-TEST(RoundSuperellipseTest, UniformContinuousRoundSuperellipseContains) {
+TEST(RoundSuperellipseTest, UniformSquareContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   auto rr = RoundSuperellipse::MakeRectRadii(
       bounds, RoundingRadii::MakeRadii({5.0f, 5.0f}));
@@ -475,7 +475,7 @@ TEST(RoundSuperellipseTest, UniformContinuousRoundSuperellipseContains) {
 }
 
 TEST(RoundSuperellipseTest,
-     UniformEllipticalContinuousRoundSuperellipseContains) {
+     UniformEllipticalContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   auto rr = RoundSuperellipse::MakeRectRadii(
       bounds, RoundingRadii::MakeRadii({5.0f, 10.0f}));
@@ -497,7 +497,7 @@ TEST(RoundSuperellipseTest,
 }
 
 TEST(RoundSuperellipseTest,
-     UniformRectangularContinuousRoundSuperellipseContains) {
+     UniformRectangularContains) {
   // The bounds is not centered at the origin and has unequal height and width.
   Rect bounds = Rect::MakeLTRB(0.0f, 0.0f, 50.0f, 100.0f);
   auto rr = RoundSuperellipse::MakeRectRadii(
@@ -527,7 +527,7 @@ TEST(RoundSuperellipseTest,
 #undef CHECK_POINT_AND_MIRRORS
 }
 
-TEST(RoundSuperellipseTest, SlimDiagnalContinuousRoundSuperellipseContains) {
+TEST(RoundSuperellipseTest, SlimDiagnalContains) {
   // This shape has large radii on one diagnal and tiny radii on the other,
   // resulting in a almond-like shape placed diagnally (NW to SE).
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
