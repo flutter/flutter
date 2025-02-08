@@ -959,7 +959,7 @@ void main() {
                     barrierLabel: 'barrier_label',
                     barrierColor: const Color(0x00000000),
                     transitionDuration: Duration.zero,
-                    pageBuilder: (BuildContext innerContext, _, __) {
+                    pageBuilder: (BuildContext innerContext, _, _) {
                       return const SizedBox();
                     },
                   );
@@ -994,7 +994,7 @@ void main() {
                   showGeneralDialog<void>(
                     context: context,
                     transitionDuration: Duration.zero,
-                    pageBuilder: (BuildContext innerContext, _, __) {
+                    pageBuilder: (BuildContext innerContext, _, _) {
                       return const SizedBox();
                     },
                   );
@@ -1034,7 +1034,7 @@ void main() {
                   showGeneralDialog<void>(
                     context: context,
                     transitionDuration: Duration.zero,
-                    pageBuilder: (BuildContext innerContext, _, __) {
+                    pageBuilder: (BuildContext innerContext, _, _) {
                       return const SizedBox();
                     },
                   );
@@ -1079,7 +1079,7 @@ void main() {
                       showGeneralDialog<void>(
                         context: context,
                         transitionDuration: Duration.zero,
-                        pageBuilder: (BuildContext innerContext, _, __) {
+                        pageBuilder: (BuildContext innerContext, _, _) {
                           return const SizedBox();
                         },
                       );
@@ -1120,7 +1120,7 @@ void main() {
                         useRootNavigator: false,
                         context: context,
                         transitionDuration: Duration.zero,
-                        pageBuilder: (BuildContext innerContext, _, __) {
+                        pageBuilder: (BuildContext innerContext, _, _) {
                           return const SizedBox();
                         },
                       );
@@ -1155,7 +1155,7 @@ void main() {
                     onPressed: () {
                       showGeneralDialog<void>(
                         context: context,
-                        pageBuilder: (BuildContext innerContext, _, __) {
+                        pageBuilder: (BuildContext innerContext, _, _) {
                           return const SizedBox();
                         },
                       );
@@ -1205,7 +1205,7 @@ void main() {
 
         showGeneralDialog<void>(
           context: context,
-          pageBuilder: (BuildContext context, _, __) {
+          pageBuilder: (BuildContext context, _, _) {
             return const Placeholder();
           },
           anchorPoint: const Offset(1000, 0),
@@ -1243,7 +1243,7 @@ void main() {
 
         showGeneralDialog<void>(
           context: context,
-          pageBuilder: (BuildContext context, _, __) {
+          pageBuilder: (BuildContext context, _, _) {
             return const Placeholder();
           },
         );
@@ -1280,7 +1280,7 @@ void main() {
 
         showGeneralDialog<void>(
           context: context,
-          pageBuilder: (BuildContext context, _, __) {
+          pageBuilder: (BuildContext context, _, _) {
             return const Placeholder();
           },
         );
@@ -2624,6 +2624,37 @@ void main() {
       expect(notifications.first.canHandlePop, isFalse);
       expect(notifications.last.canHandlePop, isTrue);
     });
+  });
+
+  testWidgets("ModalRoute's default directionalTraversalEdgeBehavior is the same as Navigator's", (
+    WidgetTester tester,
+  ) async {
+    Future<void> pumpWith(TraversalEdgeBehavior behavior) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            key: UniqueKey(),
+            routeDirectionalTraversalEdgeBehavior: behavior,
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const Center(child: Text('page'));
+                },
+                settings: settings,
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    for (final TraversalEdgeBehavior element in TraversalEdgeBehavior.values) {
+      await pumpWith(element);
+      await tester.pumpAndSettle();
+      final FocusScopeNode focusScope = FocusScope.of(tester.element(find.text('page')));
+      expect(focusScope.directionalTraversalEdgeBehavior, element);
+    }
   });
 }
 

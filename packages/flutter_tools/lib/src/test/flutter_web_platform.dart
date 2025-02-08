@@ -228,12 +228,6 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   bool get _closed => _closeMemo.hasRun;
 
-  NullSafetyMode get _nullSafetyMode {
-    return buildInfo.nullSafetyMode == NullSafetyMode.sound
-        ? NullSafetyMode.sound
-        : NullSafetyMode.unsound;
-  }
-
   final Configuration _config;
   final shelf.Server _server;
   Uri get url => _server.url;
@@ -293,23 +287,29 @@ class FlutterWebPlatform extends PlatformPlugin {
   );
 
   File get _dartSdk {
-    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap =
+    // TODO(srujzs): Remove this assertion when the library bundle format is
+    // supported without canary mode.
+    if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
+      assert(buildInfo.canaryFeatures ?? true);
+    }
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
-            ? kDdcDartSdkJsArtifactMap
+            ? kDdcLibraryBundleDartSdkJsArtifactMap
             : kAmdDartSdkJsArtifactMap;
-    return _fileSystem.file(
-      _artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!),
-    );
+    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _dartSdkSourcemaps {
-    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap =
+    // TODO(srujzs): Remove this assertion when the library bundle format is
+    // supported without canary mode.
+    if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
+      assert(buildInfo.canaryFeatures ?? true);
+    }
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
-            ? kDdcDartSdkJsMapArtifactMap
+            ? kDdcLibraryBundleDartSdkJsMapArtifactMap
             : kAmdDartSdkJsMapArtifactMap;
-    return _fileSystem.file(
-      _artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!),
-    );
+    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File _canvasKitFile(String relativePath) {
@@ -674,7 +674,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
 
     final Completer<WebSocketChannel> completer = Completer<WebSocketChannel>.sync();
-    final String path = _webSocketHandler.create(webSocketHandler(completer.complete));
+    final String path = _webSocketHandler.create(
+      webSocketHandler((WebSocketChannel webSocket, _) {
+        completer.complete(webSocket);
+      }),
+    );
     final Uri webSocketUrl = url.replace(scheme: 'ws').resolve(path);
     final Uri hostUrl = url
         .resolve('static/index.html')
@@ -977,7 +981,6 @@ class BrowserManager {
       return await controller.suite;
       // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) {
-      // ignore: avoid_catches_without_on_clauses
       closeIframe();
       rethrow;
     }

@@ -41,6 +41,7 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'sksl_writer.dart';
 import 'vmservice.dart';
+import 'web/chrome.dart';
 
 class FlutterDevice {
   FlutterDevice(
@@ -436,7 +437,7 @@ class FlutterDevice {
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
       'Launching ${getDisplayPath(hotRunner.mainPath, globals.fs)} '
-      'on ${device!.name} in $modeName mode...',
+      'on ${device!.displayName} in $modeName mode...',
     );
 
     final TargetPlatform targetPlatform = await device!.targetPlatform;
@@ -476,7 +477,7 @@ class FlutterDevice {
     final LaunchResult result = await futureResult;
 
     if (!result.started) {
-      globals.printError('Error launching application on ${device!.name}.');
+      globals.printError('Error launching application on ${device!.displayName}.');
       await stopEchoingDeviceLog();
       return 2;
     }
@@ -513,7 +514,7 @@ class FlutterDevice {
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     globals.printStatus(
       'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
-      'on ${device!.name} in $modeName mode...',
+      'on ${device!.displayName} in $modeName mode...',
     );
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
@@ -532,7 +533,7 @@ class FlutterDevice {
     );
 
     if (!result.started) {
-      globals.printError('Error running application on ${device!.name}.');
+      globals.printError('Error running application on ${device!.displayName}.');
       await stopEchoingDeviceLog();
       return 2;
     }
@@ -557,7 +558,7 @@ class FlutterDevice {
     required PackageConfig packageConfig,
   }) async {
     final Status devFSStatus = globals.logger.startProgress(
-      'Syncing files to device ${device!.name}...',
+      'Syncing files to device ${device!.displayName}...',
       progressId: 'devFS.update',
     );
     UpdateFSReport report;
@@ -569,6 +570,7 @@ class FlutterDevice {
         bundleFirstUpload: bundleFirstUpload,
         generator: generator!,
         fullRestart: fullRestart,
+        resetCompiler: fullRestart,
         dillOutputPath: dillOutputPath,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         pathToReload: pathToReload,
@@ -922,7 +924,9 @@ abstract class ResidentHandlers {
     if (!device.device!.supportsScreenshot && !supportsServiceProtocol) {
       return;
     }
-    final Status status = logger.startProgress('Taking screenshot for ${device.device!.name}...');
+    final Status status = logger.startProgress(
+      'Taking screenshot for ${device.device!.displayName}...',
+    );
     final File outputFile = getUniqueFile(fileSystem!.currentDirectory, 'flutter', 'png');
 
     try {
@@ -1046,7 +1050,19 @@ abstract class ResidentRunner extends ResidentHandlers {
       artifactDirectory.createSync(recursive: true);
     }
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    _residentDevtoolsHandler = devtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
+    _residentDevtoolsHandler = devtoolsHandler(
+      DevtoolsLauncher.instance,
+      this,
+      globals.logger,
+      ChromiumLauncher(
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        processManager: globals.processManager,
+        operatingSystemUtils: globals.os,
+        browserFinder: findChromeExecutable,
+        logger: globals.logger,
+      ),
+    );
   }
 
   @override
@@ -1097,8 +1113,8 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   String get dillOutputPath =>
       _dillOutputPath ?? globals.fs.path.join(artifactDirectory.path, 'app.dill');
-  String getReloadPath({bool fullRestart = false, required bool swap}) {
-    if (!fullRestart) {
+  String getReloadPath({bool resetCompiler = false, required bool swap}) {
+    if (!resetCompiler) {
       return 'main.dart.incremental.dill';
     }
     return 'main.dart${swap ? '.swap' : ''}.dill';
@@ -1191,7 +1207,6 @@ abstract class ResidentRunner extends ResidentHandlers {
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
       platform: globals.platform,
-      usage: globals.flutterUsage,
       analytics: globals.analytics,
       projectDir: globals.fs.currentDirectory,
       packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
@@ -1456,8 +1471,8 @@ abstract class ResidentRunner extends ResidentHandlers {
       if (includeVmService) {
         // Caution: This log line is parsed by device lab tests.
         globals.printStatus(
-          'A Dart VM Service on ${device.device!.name} is available at: '
-          '${device.vmService!.httpAddress}',
+          'A Dart VM Service on ${device.device!.displayName} '
+          'is available at: ${device.vmService!.httpAddress}',
         );
       }
       if (includeDevtools) {
@@ -1473,7 +1488,8 @@ abstract class ResidentRunner extends ResidentHandlers {
         if (uri != null) {
           globals.printStatus(
             'The Flutter DevTools debugger and profiler '
-            'on ${device.device!.name} is available at: ${urlToDisplayString(uri)}',
+            'on ${device.device!.displayName} '
+            'is available at: ${urlToDisplayString(uri)}',
           );
         }
       }
@@ -1783,7 +1799,6 @@ class TerminalHandler {
       await _commonTerminalInputHandler(command);
       // Catch all exception since this is doing cleanup and rethrowing.
     } catch (error, st) {
-      // ignore: avoid_catches_without_on_clauses
       // Don't print stack traces for known error types.
       if (error is! ToolExit) {
         _logger.printError('$error\n$st');

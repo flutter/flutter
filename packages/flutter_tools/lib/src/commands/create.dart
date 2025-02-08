@@ -24,7 +24,6 @@ import '../ios/code_signing.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'create_base.dart';
 
@@ -154,15 +153,6 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
   @override
   String get invocation => '${runner?.executableName} $name <output directory>';
-
-  @override
-  Future<CustomDimensions> get usageValues async {
-    return CustomDimensions(
-      commandCreateProjectType: stringArg('template'),
-      commandCreateAndroidLanguage: stringArg('android-language'),
-      commandCreateIosLanguage: stringArg('ios-language'),
-    );
-  }
 
   @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => Event.commandUsageValues(
@@ -1155,9 +1145,8 @@ String getIncompatibleJavaGradleAgpMessageHeader(
   return '''
 The configured version of Java detected may conflict with the $incompatibleDependency version in your new Flutter $projectType.
 
-To keep the default AGP version $incompatibleDependencyVersion, download a compatible Java version
-(Java 17 <= $validJavaRangeMessage Java version < Java 21). Configure this Java version
-globally for Flutter by running:
+To keep the default $incompatibleDependencyVersion, download a compatible Java version
+$validJavaRangeMessage. Configure this Java version globally for Flutter by running:
 
   flutter config --jdk-dir=<JDK_DIRECTORY>
 ''';

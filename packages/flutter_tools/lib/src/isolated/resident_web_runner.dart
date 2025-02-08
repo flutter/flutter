@@ -54,7 +54,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required Logger logger,
     required FileSystem fileSystem,
     required SystemClock systemClock,
-    required Usage usage,
     required Analytics analytics,
     bool machine = false,
   }) {
@@ -66,7 +65,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       stayResident: stayResident,
       urlTunneller: urlTunneller,
       machine: machine,
-      usage: usage,
       analytics: analytics,
       systemClock: systemClock,
       fileSystem: fileSystem,
@@ -91,7 +89,6 @@ class ResidentWebRunner extends ResidentRunner {
     required FileSystem fileSystem,
     required Logger logger,
     required SystemClock systemClock,
-    required Usage usage,
     required Analytics analytics,
     UrlTunneller? urlTunneller,
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
@@ -99,7 +96,6 @@ class ResidentWebRunner extends ResidentRunner {
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _systemClock = systemClock,
-       _usage = usage,
        _analytics = analytics,
        _urlTunneller = urlTunneller,
        super(
@@ -114,7 +110,6 @@ class ResidentWebRunner extends ResidentRunner {
   final FileSystem _fileSystem;
   final Logger _logger;
   final SystemClock _systemClock;
-  final Usage _usage;
   final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
 
@@ -255,7 +250,7 @@ class ResidentWebRunner extends ResidentRunner {
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     _logger.printStatus(
       'Launching ${getDisplayPath(target, _fileSystem)} '
-      'on ${device!.device!.name} in $modeName mode...',
+      'on ${device!.device!.displayName} in $modeName mode...',
     );
     if (device!.device is ChromiumDevice) {
       _chromiumLauncher = (device!.device! as ChromiumDevice).chromeLauncher;
@@ -311,13 +306,14 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           extraHeaders: debuggingOptions.webHeaders,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
-          nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
+          canaryFeatures: debuggingOptions.buildInfo.canaryFeatures ?? false,
           webRenderer: debuggingOptions.webRenderer,
           isWasm: debuggingOptions.webUseWasm,
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
+          isWindows: globals.platform.isWindows,
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
@@ -325,7 +321,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         }
         if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
           await runSourceGenerators();
-          final UpdateFSReport report = await _updateDevFS(fullRestart: true);
+          final UpdateFSReport report = await _updateDevFS(fullRestart: true, resetCompiler: true);
           if (!report.success) {
             _logger.printError('Failed to compile application.');
             appFailedToStart();
@@ -340,7 +336,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             buildSystem: globals.buildSystem,
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
-            usage: globals.flutterUsage,
             analytics: globals.analytics,
           );
           await webBuilder.buildWeb(
@@ -410,15 +405,28 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     bool benchmarkMode = false,
   }) async {
     final DateTime start = _systemClock.now();
-    final Status status = _logger.startProgress(
-      'Performing hot restart...',
-      progressId: 'hot.restart',
-    );
+    final Status status;
+    if (debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
+        debuggingOptions.buildInfo.canaryFeatures == false) {
+      // Triggering hot reload performed hot restart for the old module formats
+      // historically. Keep that behavior and only perform hot reload when the
+      // new module format is used.
+      fullRestart = true;
+    }
+    if (fullRestart) {
+      status = _logger.startProgress('Performing hot restart...', progressId: 'hot.restart');
+    } else {
+      status = _logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
+    }
 
     if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
       await runSourceGenerators();
-      // Full restart is always false for web, since the extra recompile is wasteful.
-      final UpdateFSReport report = await _updateDevFS();
+      // Don't reset the resident compiler for web, since the extra recompile is
+      // wasteful.
+      final UpdateFSReport report = await _updateDevFS(
+        fullRestart: fullRestart,
+        resetCompiler: false,
+      );
       if (report.success) {
         device!.generator!.accept();
       } else {
@@ -434,7 +442,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           buildSystem: globals.buildSystem,
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
-          usage: globals.flutterUsage,
           analytics: globals.analytics,
         );
         await webBuilder.buildWeb(
@@ -453,10 +460,32 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       if (!deviceIsDebuggable) {
         _logger.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
-        // If the hot-restart service extension method is registered, then use
-        // it. Otherwise, default to calling "hotRestart" without a namespace.
-        final String hotRestartMethod = _registeredMethodsForService['hotRestart'] ?? 'hotRestart';
-        await _vmService.service.callMethod(hotRestartMethod);
+        if (fullRestart) {
+          // If the hot-restart service extension method is registered, then use
+          // it. Otherwise, default to calling "hotRestart" without a namespace.
+          final String hotRestartMethod =
+              _registeredMethodsForService['hotRestart'] ?? 'hotRestart';
+          await _vmService.service.callMethod(hotRestartMethod);
+        } else {
+          // Isolates don't work on web. For lack of a better value, pass an
+          // empty string for the isolate id.
+          final vmservice.ReloadReport report = await _vmService.service.reloadSources('');
+          final ReloadReportContents contents = ReloadReportContents.fromReloadReport(report);
+          final bool success = contents.success ?? false;
+          if (!success) {
+            // Rejections happen at compile-time for the web, so in theory,
+            // nothing should go wrong here. However, if DWDS or the DDC runtime
+            // has some internal error, we should still surface it to make
+            // debugging easier.
+            String reloadFailedMessage = 'Hot reload failed:';
+            globals.printError(reloadFailedMessage);
+            for (final ReasonForCancelling reason in contents.notices) {
+              reloadFailedMessage += reason.toString();
+              globals.printError(reason.toString());
+            }
+            return OperationResult(1, reloadFailedMessage);
+          }
+        }
       } else {
         // On non-debug builds, a hard refresh is required to ensure the
         // up to date sources are loaded.
@@ -472,41 +501,76 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
     final Duration elapsed = _systemClock.now().difference(start);
     final String elapsedMS = getElapsedAsMilliseconds(elapsed);
-    _logger.printStatus('Restarted application in $elapsedMS.');
+    _logger.printStatus('${fullRestart ? 'Restarted' : 'Reloaded'} application in $elapsedMS.');
 
-    unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
+    if (fullRestart) {
+      unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
+    }
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
-      _usage.sendTiming('hot', 'web-incremental-restart', elapsed);
-      _analytics.send(
-        Event.timing(
-          workflow: 'hot',
-          variableName: 'web-incremental-restart',
-          elapsedMilliseconds: elapsed.inMilliseconds,
-        ),
-      );
+      // TODO(srujzs): There are a number of fields that the VM tracks in the
+      // analytics that we do not for both hot restart and reload. We should
+      // unify that.
+      final String targetPlatform = getNameForTargetPlatform(TargetPlatform.web_javascript);
       final String sdkName = await device!.device!.sdkNameAndVersion;
-      HotEvent(
-        'restart',
-        targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
-        sdkName: sdkName,
-        emulator: false,
-        fullRestart: true,
-        reason: reason,
-        overallTimeInMs: elapsed.inMilliseconds,
-      ).send();
-      _analytics.send(
-        Event.hotRunnerInfo(
-          label: 'restart',
-          targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
+      if (fullRestart) {
+        _analytics.send(
+          Event.timing(
+            workflow: 'hot',
+            variableName: 'web-incremental-restart',
+            elapsedMilliseconds: elapsed.inMilliseconds,
+          ),
+        );
+        HotEvent(
+          'restart',
+          targetPlatform: targetPlatform,
           sdkName: sdkName,
           emulator: false,
           fullRestart: true,
           reason: reason,
           overallTimeInMs: elapsed.inMilliseconds,
-        ),
-      );
+        ).send();
+        _analytics.send(
+          Event.hotRunnerInfo(
+            label: 'restart',
+            targetPlatform: targetPlatform,
+            sdkName: sdkName,
+            emulator: false,
+            fullRestart: true,
+            reason: reason,
+            overallTimeInMs: elapsed.inMilliseconds,
+          ),
+        );
+      } else {
+        _analytics.send(
+          Event.timing(
+            workflow: 'hot',
+            variableName: 'reload',
+            elapsedMilliseconds: elapsed.inMilliseconds,
+          ),
+        );
+        HotEvent(
+          'reload',
+          targetPlatform: targetPlatform,
+          sdkName: sdkName,
+          emulator: false,
+          fullRestart: false,
+          reason: reason,
+          overallTimeInMs: elapsed.inMilliseconds,
+        ).send();
+        _analytics.send(
+          Event.hotRunnerInfo(
+            label: 'reload',
+            targetPlatform: targetPlatform,
+            sdkName: sdkName,
+            emulator: false,
+            fullRestart: false,
+            reason: reason,
+            overallTimeInMs: elapsed.inMilliseconds,
+          ),
+        );
+      }
     }
     return OperationResult.ok;
   }
@@ -557,7 +621,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     return result!.absolute.uri;
   }
 
-  Future<UpdateFSReport> _updateDevFS({bool fullRestart = false}) async {
+  Future<UpdateFSReport> _updateDevFS({
+    required bool fullRestart,
+    required bool resetCompiler,
+  }) async {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
@@ -577,7 +644,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       packageConfig: device!.devFS!.lastPackageConfig ?? debuggingOptions.buildInfo.packageConfig,
     );
     final Status devFSStatus = _logger.startProgress(
-      'Waiting for connection from debug service on ${device!.device!.name}...',
+      'Waiting for connection from debug service on '
+      '${device!.device!.displayName}...',
     );
     final UpdateFSReport report = await device!.devFS!.update(
       mainUri: await _generateEntrypoint(
@@ -589,8 +657,9 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       bundleFirstUpload: isFirstUpload,
       generator: device!.generator!,
       fullRestart: fullRestart,
+      resetCompiler: resetCompiler,
       dillOutputPath: dillOutputPath,
-      pathToReload: getReloadPath(fullRestart: fullRestart, swap: false),
+      pathToReload: getReloadPath(resetCompiler: resetCompiler, swap: false),
       invalidatedFiles: invalidationResult.uris!,
       packageConfig: invalidationResult.packageConfig!,
       trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,

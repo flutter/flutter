@@ -19,13 +19,15 @@ bool AHBSwapchainVK::IsAvailableOnPlatform() {
 
 AHBSwapchainVK::AHBSwapchainVK(const std::shared_ptr<Context>& context,
                                ANativeWindow* window,
+                               const CreateTransactionCB& cb,
                                const vk::UniqueSurfaceKHR& surface,
                                const ISize& size,
                                bool enable_msaa)
     : context_(context),
       surface_control_(
           std::make_shared<android::SurfaceControl>(window, "ImpellerSurface")),
-      enable_msaa_(enable_msaa) {
+      enable_msaa_(enable_msaa),
+      cb_(cb) {
   const auto [caps_result, surface_caps] =
       ContextVK::Cast(*context).GetPhysicalDevice().getSurfaceCapabilitiesKHR(
           *surface);
@@ -67,6 +69,12 @@ vk::Format AHBSwapchainVK::GetSurfaceFormat() const {
 }
 
 // |SwapchainVK|
+void AHBSwapchainVK::AddFinalCommandBuffer(
+    std::shared_ptr<CommandBuffer> cmd_buffer) const {
+  return impl_->AddFinalCommandBuffer(cmd_buffer);
+}
+
+// |SwapchainVK|
 void AHBSwapchainVK::UpdateSurfaceSize(const ISize& size) {
   if (impl_ && impl_->GetSize() == size) {
     return;
@@ -74,6 +82,7 @@ void AHBSwapchainVK::UpdateSurfaceSize(const ISize& size) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   auto impl = AHBSwapchainImplVK::Create(context_,               //
                                          surface_control_,       //
+                                         cb_,                    //
                                          size,                   //
                                          enable_msaa_,           //
                                          swapchain_image_count_  //

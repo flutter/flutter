@@ -1518,9 +1518,6 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  /// Additional usage values to be sent with the usage ping.
-  Future<CustomDimensions> get usageValues async => const CustomDimensions();
-
   /// Additional usage values to be sent with the usage ping for
   /// package:unified_analytics.
   ///
@@ -1573,6 +1570,11 @@ abstract class FlutterCommand extends Command<void> {
         }
       },
     );
+  }
+
+  @override
+  void printUsage() {
+    globals.logger.printStatus(usage);
   }
 
   @visibleForOverriding
@@ -1800,14 +1802,6 @@ abstract class FlutterCommand extends Command<void> {
     final Duration elapsedDuration = (commandResult.endTimeOverride ?? endTime).difference(
       startTime,
     );
-    globals.flutterUsage.sendTiming(
-      'flutter',
-      name,
-      elapsedDuration,
-      // Report in the form of `success-[parameter1-parameter2]`, all of which
-      // can be null if the command doesn't provide a FlutterCommandResult.
-      label: label == '' ? null : label,
-    );
     analytics.send(
       Event.timing(
         workflow: 'flutter',
@@ -1882,7 +1876,6 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
-        usage: globals.flutterUsage,
         analytics: analytics,
         projectDir: project.directory,
         packageConfigPath: packageConfigPath(),
@@ -1900,39 +1893,82 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         buildSystem: globals.buildSystem,
         buildTargets: globals.buildTargets,
       );
-
-      // null implicitly means all plugins are allowed
-      List<String>? allowedPlugins;
-      if (stringArg(FlutterGlobalOptions.kDeviceIdOption, global: true) == 'preview') {
-        // The preview device does not currently support any plugins.
-        allowedPlugins = PreviewDevice.supportedPubPlugins;
-      }
-      await project.regeneratePlatformSpecificTooling(allowedPlugins: allowedPlugins);
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }
     }
 
+    if (regeneratePlatformSpecificToolingDurifyVerify) {
+      await regeneratePlatformSpecificToolingIfApplicable(project);
+    }
+
     setupApplicationPackages();
 
     if (commandPath != null) {
-      // Until the GA4 migration is complete, we will continue to send to the GA3 instance
-      // as well as GA4. Once migration is complete, we will only make a call for GA4 values
-      final List<Object> pairOfUsageValues = await Future.wait<Object>(<Future<Object>>[
-        usageValues,
-        unifiedAnalyticsUsageValues(commandPath),
-      ]);
-
-      Usage.command(
-        commandPath,
-        parameters: CustomDimensions(
-          commandHasTerminal: hasTerminal,
-        ).merge(pairOfUsageValues[0] as CustomDimensions),
-      );
-      analytics.send(pairOfUsageValues[1] as Event);
+      analytics.send(await unifiedAnalyticsUsageValues(commandPath));
     }
 
     return runCommand();
+  }
+
+  /// Whether to run [regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
+  ///
+  /// By default `true`, but sub-commands that do _meta_ builds (make multiple different
+  /// builds sequentially in one-go) may choose to override this and provide `false`, instead
+  /// calling [regeneratePlatformSpecificTooling] manually when applicable.
+  @visibleForOverriding
+  bool get regeneratePlatformSpecificToolingDurifyVerify => true;
+
+  /// Runs [FlutterProject.regeneratePlatformSpecificTooling] for [project] with appropriate configuration.
+  ///
+  /// By default, this uses [getBuildMode] to determine and provide whether a release build is being made,
+  /// but sub-commands (such as commands that do _meta_ builds, or builds that make multiple different builds
+  /// sequentially in one-go) may choose to overide this and make the call at a different point in time.
+  ///
+  /// This method should only be called when [shouldRunPub] is `true`:
+  /// ```dart
+  /// if (shouldRunPub) {
+  ///   await regeneratePlatformSpecificTooling(project);
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  /// - <https://github.com/flutter/flutter/issues/162649>.
+  @protected
+  @nonVirtual
+  Future<void> regeneratePlatformSpecificToolingIfApplicable(
+    FlutterProject project, {
+    bool? releaseMode,
+  }) async {
+    if (!shouldRunPub) {
+      return;
+    }
+
+    // TODO(matanlurey): Determine if PreviewDevice should be kept.
+    // https://github.com/flutter/flutter/issues/162693
+    final List<String>? allowedPlugins;
+    if (stringArg(FlutterGlobalOptions.kDeviceIdOption, global: true) == 'preview') {
+      // The preview device does not currently support any plugins.
+      allowedPlugins = PreviewDevice.supportedPubPlugins;
+    } else {
+      // null means all plugins are allowed
+      allowedPlugins = null;
+    }
+
+    await project.regeneratePlatformSpecificTooling(
+      allowedPlugins: allowedPlugins,
+      // TODO(matanlurey): Move this up, i.e. releaseMode ??= getBuildMode().release.
+      //
+      // As it stands, this is a breaking change until https://github.com/flutter/flutter/issues/162704 is
+      // implemented, as the build_ios_framework command (and similar) will start querying
+      // for getBuildMode(), causing an error (meta-build commands like build ios-framework do not have
+      // a single build mode). Once ios-framework and macos-framework are migrated, then this can be
+      // cleaned up.
+      releaseMode:
+          featureFlags.isExplicitPackageDependenciesEnabled &&
+          (releaseMode ?? getBuildMode().isRelease),
+    );
   }
 
   Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {

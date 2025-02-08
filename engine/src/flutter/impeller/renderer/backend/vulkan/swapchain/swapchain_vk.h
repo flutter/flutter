@@ -10,14 +10,20 @@
 #include "flutter/fml/build_config.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
+#include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/surface.h"
 
 #if FML_OS_ANDROID
 #include "impeller/toolkit/android/native_window.h"
+#include "impeller/toolkit/android/surface_transaction.h"
 #endif  // FML_OS_ANDROID
 
 namespace impeller {
+
+#if FML_OS_ANDROID
+using CreateTransactionCB = std::function<android::SurfaceTransaction()>;
+#endif  // FML_OS_ANDROID
 
 //------------------------------------------------------------------------------
 /// @brief      A swapchain that adapts to the underlying surface going out of
@@ -37,6 +43,7 @@ class SwapchainVK {
   static std::shared_ptr<SwapchainVK> Create(
       const std::shared_ptr<Context>& context,
       ANativeWindow* window,
+      const CreateTransactionCB& cb,
       bool enable_msaa = true);
 #endif  // FML_OS_ANDROID
 
@@ -51,6 +58,9 @@ class SwapchainVK {
   virtual std::unique_ptr<Surface> AcquireNextDrawable() = 0;
 
   virtual vk::Format GetSurfaceFormat() const = 0;
+
+  virtual void AddFinalCommandBuffer(
+      std::shared_ptr<CommandBuffer> cmd_buffer) const = 0;
 
   /// @brief Mark the current swapchain configuration as dirty, forcing it to be
   ///        recreated on the next frame.
