@@ -2072,6 +2072,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ModalRoute<dynamic>? currentRoute = ModalRoute.of(context);
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     if (onPressed == null) {
       assert(
         currentRoute?.canPop ?? false,
@@ -2091,7 +2092,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
       child: Semantics(
         container: true,
         excludeSemantics: true,
-        label: CupertinoLocalizations.of(context).backButtonLabel,
+        label: localizations.backButtonLabel,
         button: true,
         child: DefaultTextStyle(
           style: actionTextStyle,
@@ -2219,6 +2220,7 @@ class _CancelButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     return Align(
       alignment: Alignment.centerLeft,
       child: Opacity(
@@ -2226,7 +2228,7 @@ class _CancelButton extends StatelessWidget {
         child: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: onPressed,
-          child: Text(CupertinoLocalizations.of(context).cancelButtonLabel, maxLines: 1, overflow: TextOverflow.clip),
+          child: Text(localizations.cancelButtonLabel, maxLines: 1, overflow: TextOverflow.clip),
         ),
       ),
     );
