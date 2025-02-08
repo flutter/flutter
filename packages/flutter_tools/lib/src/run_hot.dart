@@ -258,7 +258,6 @@ class HotRunner extends ResidentRunner {
       );
       // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) {
-      // ignore: avoid_catches_without_on_clauses
       if (error is! Exception && error is! String) {
         rethrow;
       }
@@ -536,7 +535,7 @@ class HotRunner extends ResidentRunner {
           bundleFirstUpload: isFirstUpload,
           bundleDirty: !isFirstUpload && rebuildBundle,
           fullRestart: fullRestart,
-          pathToReload: getReloadPath(fullRestart: fullRestart, swap: _swap),
+          pathToReload: getReloadPath(resetCompiler: fullRestart, swap: _swap),
           invalidatedFiles: invalidationResult.uris!,
           packageConfig: invalidationResult.packageConfig!,
           dillOutputPath: dillOutputPath,

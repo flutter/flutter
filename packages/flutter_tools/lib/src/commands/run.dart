@@ -14,13 +14,11 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../daemon.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -533,24 +531,6 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<CustomDimensions> get usageValues async {
-    final AnalyticsUsageValuesRecord record = await _sharedAnalyticsUsageValues;
-
-    return CustomDimensions(
-      commandRunIsEmulator: record.runIsEmulator,
-      commandRunTargetName: record.runTargetName,
-      commandRunTargetOsVersion: record.runTargetOsVersion,
-      commandRunModeName: record.runModeName,
-      commandRunProjectModule: record.runProjectModule,
-      commandRunProjectHostLanguage: record.runProjectHostLanguage,
-      commandRunAndroidEmbeddingVersion: record.runAndroidEmbeddingVersion,
-      commandRunEnableImpeller: record.runEnableImpeller,
-      commandRunIOSInterfaceType: record.runIOSInterfaceType,
-      commandRunIsTest: record.runIsTest,
-    );
-  }
-
-  @override
   Future<analytics.Event> unifiedAnalyticsUsageValues(String commandPath) async {
     final AnalyticsUsageValuesRecord record = await _sharedAnalyticsUsageValues;
 
@@ -780,18 +760,7 @@ class RunCommand extends RunCommandBase {
 
   @visibleForTesting
   Daemon createMachineDaemon() {
-    final Daemon daemon = Daemon(
-      DaemonConnection(
-        daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
-        logger: globals.logger,
-      ),
-      notifyingLogger:
-          (globals.logger is NotifyingLogger)
-              ? globals.logger as NotifyingLogger
-              : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
-      logToStdout: true,
-    );
-    return daemon;
+    return Daemon.createMachineDaemon();
   }
 
   @override
