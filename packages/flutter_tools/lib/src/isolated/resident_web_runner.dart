@@ -303,7 +303,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           extraHeaders: debuggingOptions.webHeaders,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
-          nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
           canaryFeatures: debuggingOptions.buildInfo.canaryFeatures ?? false,
