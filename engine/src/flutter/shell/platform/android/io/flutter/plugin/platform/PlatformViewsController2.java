@@ -585,6 +585,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
   }
 
+  @TargetApi(API_LEVELS.API_34)
+  @RequiresApi(API_LEVELS.API_34)
   public void showOverlaySurface() {
     if (overlaySurfaceControl == null) {
       return;
@@ -594,6 +596,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     tx.apply();
   }
 
+  @TargetApi(API_LEVELS.API_34)
+  @RequiresApi(API_LEVELS.API_34)
   public void hideOverlaySurface() {
     if (overlaySurfaceControl == null) {
       return;
