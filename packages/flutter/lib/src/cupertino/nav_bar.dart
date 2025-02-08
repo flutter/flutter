@@ -2072,7 +2072,6 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ModalRoute<dynamic>? currentRoute = ModalRoute.of(context);
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     if (onPressed == null) {
       assert(
         currentRoute?.canPop ?? false,
@@ -2087,6 +2086,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
       );
     }
 
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     return CupertinoButton(
       padding: EdgeInsets.zero,
       child: Semantics(
