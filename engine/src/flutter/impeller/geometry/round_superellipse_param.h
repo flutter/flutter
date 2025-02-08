@@ -120,7 +120,7 @@ struct RoundSuperellipseParam {
   //
   // Experiments indicate that the gap is linear with respect to the corner
   // radius on that dimension.
-  static constexpr Scalar kGapFactor = 0.2924066406f;
+  static constexpr Scalar kGapFactor = 0.29289321881f;  // 1-cos(pi/4)
 };
 
 }  // namespace impeller

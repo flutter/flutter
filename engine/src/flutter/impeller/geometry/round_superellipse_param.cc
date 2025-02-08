@@ -35,27 +35,18 @@ inline Point Flip(Point a) {
 //
 //  * ratio = size / a
 //  * n
-//  * d / a
-//  * thetaJ
+//  * sin(thetaJ)
 //
 // For definition of the variables, see DrawOctantSquareLikeSquircle.
-constexpr Scalar kPrecomputedVariables[][4] = {
-    {2.000, 2.00000, 0.00000, 0.24040},  //
-    {2.020, 2.03340, 0.01447, 0.24040},  //
-    {2.040, 2.06540, 0.02575, 0.21167},  //
-    {2.060, 2.09800, 0.03668, 0.20118},  //
-    {2.080, 2.13160, 0.04719, 0.19367},  //
-    {2.100, 2.17840, 0.05603, 0.16233},  //
-    {2.120, 2.19310, 0.06816, 0.20020},  //
-    {2.140, 2.22990, 0.07746, 0.19131},  //
-    {2.160, 2.26360, 0.08693, 0.19008},  //
-    {2.180, 2.30540, 0.09536, 0.17935},  //
-    {2.200, 2.32900, 0.10541, 0.19136},  //
-    {2.220, 2.38330, 0.11237, 0.17130},  //
-    {2.240, 2.39770, 0.12271, 0.18956},  //
-    {2.260, 2.41770, 0.13251, 0.20254},  //
-    {2.280, 2.47180, 0.13879, 0.18454},  //
-    {2.300, 2.50910, 0.14658, 0.18261}   //
+constexpr Scalar kPrecomputedVariables[][3] = {
+    {2.00, 2.00000000, 0.117205737}, {2.02, 2.03999083, 0.117205737},
+    {2.04, 2.07976152, 0.119418745}, {2.06, 2.11195967, 0.136274515},
+    {2.08, 2.14721808, 0.141289310}, {2.10, 2.18349805, 0.143410679},
+    {2.12, 2.21858213, 0.146668334}, {2.14, 2.24861661, 0.154985392},
+    {2.16, 2.28146030, 0.158932848}, {2.18, 2.30842385, 0.168182439},
+    {2.20, 2.33888662, 0.172911853}, {2.22, 2.36937163, 0.177039959},
+    {2.24, 2.40317673, 0.177839181}, {2.26, 2.42840031, 0.185615110},
+    {2.28, 2.45838300, 0.188905374}, {2.30, 2.48660575, 0.193273145},
 };
 
 constexpr size_t kNumRecords =
@@ -139,17 +130,22 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
   Scalar g = RoundSuperellipseParam::kGapFactor * radius;
 
   Scalar n = LerpPrecomputedVariable(1, ratio);
-  Scalar d = LerpPrecomputedVariable(2, ratio) * a;
-  Scalar thetaJ = radius == 0 ? 0 : LerpPrecomputedVariable(3, ratio);
+  Scalar sin_thetaJ = radius == 0 ? 0 : LerpPrecomputedVariable(2, ratio);
 
+  Scalar sin_thetaJ_sq = sin_thetaJ * sin_thetaJ;
+  Scalar cos_thetaJ_sq = 1 - sin_thetaJ_sq;
+  Scalar tan_thetaJ_sq = sin_thetaJ_sq / cos_thetaJ_sq;
+
+  Scalar xJ = a * pow(sin_thetaJ_sq, 1 / n);
+  Scalar yJ = a * pow(cos_thetaJ_sq, 1 / n);
+  Scalar tan_phiJ = pow(tan_thetaJ_sq, (n - 1) / n);
+  Scalar d = (xJ - tan_phiJ * yJ) / (1 - tan_phiJ);
   Scalar R = (a - d - g) * sqrt(2);
 
   Point pointA{0, half_size};
   Point pointM{half_size - g, half_size - g};
   Point pointS{s, s};
-  Point pointJ =
-      Point{pow(abs(sinf(thetaJ)), 2 / n), pow(abs(cosf(thetaJ)), 2 / n)} * a +
-      pointS;
+  Point pointJ = Point{xJ, yJ} + pointS;
   Point circle_center =
       radius == 0 ? pointM : FindCircleCenter(pointJ, pointM, R);
   Radians circle_max_angle =
@@ -164,7 +160,7 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
       .se_center = pointS,
       .se_a = a,
       .se_n = n,
-      .se_max_theta = thetaJ,
+      .se_max_theta = asin(sin_thetaJ),
 
       .circle_start = pointJ,
       .circle_center = circle_center,
