@@ -27,7 +27,6 @@ import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../preview_device.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../reporting/unified_analytics.dart';
@@ -1945,19 +1944,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       return;
     }
 
-    // TODO(matanlurey): Determine if PreviewDevice should be kept.
-    // https://github.com/flutter/flutter/issues/162693
-    final List<String>? allowedPlugins;
-    if (stringArg(FlutterGlobalOptions.kDeviceIdOption, global: true) == 'preview') {
-      // The preview device does not currently support any plugins.
-      allowedPlugins = PreviewDevice.supportedPubPlugins;
-    } else {
-      // null means all plugins are allowed
-      allowedPlugins = null;
-    }
-
     await project.regeneratePlatformSpecificTooling(
-      allowedPlugins: allowedPlugins,
       // TODO(matanlurey): Move this up, i.e. releaseMode ??= getBuildMode().release.
       //
       // As it stands, this is a breaking change until https://github.com/flutter/flutter/issues/162704 is
