@@ -191,10 +191,8 @@ void FlutterWindowsView::ForceRedraw() {
   }
 }
 
+// Called on platform thread.
 bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
-  // Called on the platform thread.
-  std::unique_lock<std::mutex> lock(resize_mutex_);
-
   if (!engine_->egl_manager()) {
     SendWindowMetrics(width, height, binding_handler_->GetDpiScale());
     return true;
@@ -214,19 +212,30 @@ bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
     return true;
   }
 
-  resize_status_ = ResizeState::kResizeStarted;
-  resize_target_width_ = width;
-  resize_target_height_ = height;
+  {
+    std::unique_lock<std::mutex> lock(resize_mutex_);
+    resize_status_ = ResizeState::kResizeStarted;
+    resize_target_width_ = width;
+    resize_target_height_ = height;
+  }
 
   SendWindowMetrics(width, height, binding_handler_->GetDpiScale());
 
-  // Block the platform thread until a frame is presented with the target
-  // size. See |OnFrameGenerated|, |OnEmptyFrameGenerated|, and
-  // |OnFramePresented|.
-  return resize_cv_.wait_for(lock, kWindowResizeTimeout,
-                             [&resize_status = resize_status_] {
-                               return resize_status == ResizeState::kDone;
-                             });
+  std::chrono::time_point<std::chrono::steady_clock> start_time =
+      std::chrono::steady_clock::now();
+
+  while (true) {
+    if (std::chrono::steady_clock::now() > start_time + kWindowResizeTimeout) {
+      return false;
+    }
+    std::unique_lock<std::mutex> lock(resize_mutex_);
+    if (resize_status_ == ResizeState::kDone) {
+      break;
+    }
+    lock.unlock();
+    engine_->task_runner()->PollOnce();
+  }
+  return true;
 }
 
 void FlutterWindowsView::OnWindowRepaint() {
@@ -665,9 +674,12 @@ void FlutterWindowsView::OnFramePresented() {
     case ResizeState::kFrameGenerated: {
       // A frame was generated for a pending resize.
       // Unblock the platform thread.
-      resize_status_ = ResizeState::kDone;
+      engine_->task_runner()->PostTask([this] {
+        std::unique_lock<std::mutex> lock(resize_mutex_);
+        resize_status_ = ResizeState::kDone;
+      });
+
       lock.unlock();
-      resize_cv_.notify_all();
 
       // Blocking the raster thread until DWM flushes alleviates glitches where
       // previous size surface is stretched over current size view.
