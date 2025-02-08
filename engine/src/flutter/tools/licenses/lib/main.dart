@@ -849,11 +849,6 @@ class _RepositoryBoringSSLLicenseFile extends _RepositorySingleLicenseFile {
     assert(match.groupCount == 5);
     return License.fromBodyAndType(match.group(1)!, LicenseType.apache, origin: io.fullName);
   }
-
-  @override
-  License? licenseOfType(LicenseType type) {
-    return super.licenseOfType(type);
-  }
 }
 
 class _RepositoryBoringSSLFiatLicenseFile extends _RepositorySingleLicenseFile {
