@@ -147,7 +147,7 @@ class InputDatePickerFormField extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-  /// The [DatePickerDelegate] that controls the localization and date parsing logic.
+  /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate calendarDelegate;
 
   @override
