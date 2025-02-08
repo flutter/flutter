@@ -190,6 +190,8 @@ $stackTrace
 
   @override
   Future<void> cleanup() async {
+    // WebDriver.quit() is not called here, because that's done in
+    // WebDriverBrowser.close().
     _driverProcess.kill();
   }
 }
