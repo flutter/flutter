@@ -14,7 +14,6 @@ import 'webdriver_browser.dart';
 
 /// Provides an environment for the desktop variant of Safari running on macOS.
 class SafariMacOsEnvironment extends BrowserEnvironment {
-
   static const Duration _waitBetweenRetries = Duration(seconds: 1);
   static const int _maxRetryCount = 5;
 
@@ -175,7 +174,9 @@ $stackTrace
           print('safaridriver not ready yet. Waiting...');
           await Future<void>.delayed(const Duration(milliseconds: 100));
         } else {
-          print('safaridriver failed to reach ready state in a reasonable amount of time. Giving up.');
+          print(
+            'safaridriver failed to reach ready state in a reasonable amount of time. Giving up.',
+          );
           rethrow;
         }
       }
