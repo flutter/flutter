@@ -22,7 +22,7 @@ import 'material_localizations.dart';
 /// This example demonstrates how a [CalendarDelegate] is used to implement a
 /// custom calendar system in the date picker.
 ///
-/// ** See code in examples/api/lib/material/date_picker/custom_calendar_delegate.dart **
+/// ** See code in examples/api/lib/material/date_picker/custom_calendar_date_picker.0.dart **
 /// {@end-tool}
 ///
 /// See also:
