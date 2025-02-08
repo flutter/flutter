@@ -7,17 +7,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 void main() {
-  print('-----Running main');
-  try {
-    runApp(const MyApp());
-    print('-----Ran app');
-  } catch (e, st) {
-    print('------');
-    print(e);
-    print('------');
-    print(st);
-    print('------');
-  }
+  runApp(const MyApp());
 }
 
 final class MyApp extends StatefulWidget {

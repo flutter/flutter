@@ -86,10 +86,8 @@ Future<void> main() async {
     print(result);
     exitCode = result['result'] == 'true' ? 0 : 1;
   } catch (e, st) {
-    print('Driver Error ------');
-    print(e);
-    print('Driver stacktrace ------');
-    print(st);
+    print('Driver Error: $e');
+    print('Stacktrace: $st');
     exitCode = 1;
   } finally {
     print('Removing Synthetic notch...');

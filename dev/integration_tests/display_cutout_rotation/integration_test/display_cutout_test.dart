@@ -21,7 +21,6 @@ void main() {
       await setOrientationAndWaitUntilRotation(tester, DeviceOrientation.portraitUp);
       // Load app widget.
       await tester.pumpWidget(const MyApp());
-      await tester.pumpAndSettle(Durations.extralong1);
       final BuildContext context = tester.element(find.byType(Text));
       final Iterable<DisplayFeature> displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
