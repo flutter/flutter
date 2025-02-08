@@ -365,12 +365,11 @@ class SelectableText extends StatefulWidget {
 
   /// The color to use when painting the selection.
   ///
-  /// This is ignored if [SelectionContainer.maybeOf] returns null
-  /// in the [BuildContext] of the [Text] widget.
-  ///
-  /// If null, the ambient [DefaultSelectionStyle] is used (if any); failing
-  /// that, the selection color defaults to [DefaultSelectionStyle.defaultColor]
-  /// (semi-transparent grey).
+  /// If this property is null, this widget gets the selection color from the
+  /// inherited [DefaultSelectionStyle] (if any);
+  /// if none, the selection color is derived from the
+  /// [CupertinoThemeData.primaryColor] on Apple platforms
+  /// and [ThemeData.colorScheme.primary] on other platforms with 40% opacity.
   final Color? selectionColor;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -705,9 +704,7 @@ class _SelectableTextState extends State<SelectableText>
         cursorColor =
             widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor =
-            widget.selectionColor ??
-            selectionStyle.selectionColor ??
-            cupertinoTheme.primaryColor.withOpacity(0.40);
+            selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
 
@@ -720,9 +717,7 @@ class _SelectableTextState extends State<SelectableText>
         cursorColor =
             widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor =
-            widget.selectionColor ??
-            selectionStyle.selectionColor ??
-            cupertinoTheme.primaryColor.withOpacity(0.40);
+            selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
 
@@ -734,9 +729,7 @@ class _SelectableTextState extends State<SelectableText>
         cursorOpacityAnimates = false;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor =
-            widget.selectionColor ??
-            selectionStyle.selectionColor ??
-            theme.colorScheme.primary.withOpacity(0.40);
+            selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
 
       case TargetPlatform.linux:
       case TargetPlatform.windows:
@@ -746,9 +739,7 @@ class _SelectableTextState extends State<SelectableText>
         cursorOpacityAnimates = false;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor =
-            widget.selectionColor ??
-            selectionStyle.selectionColor ??
-            theme.colorScheme.primary.withOpacity(0.40);
+            selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
     }
 
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
