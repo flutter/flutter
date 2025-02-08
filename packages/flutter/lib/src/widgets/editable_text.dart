@@ -5541,8 +5541,10 @@ class EditableTextState extends State<EditableText>
                           (PointerDownEvent event) => _defaultOnTapOutside(context, event)
                       : null,
               onTapUpOutside:
-                  widget.onTapUpOutside ??
-                  (PointerUpEvent event) => _defaultOnTapUpOutside(context, event),
+                  _hasFocus
+                      ? widget.onTapUpOutside ??
+                          (PointerUpEvent event) => _defaultOnTapUpOutside(context, event)
+                      : null,
               debugLabel: kReleaseMode ? null : 'EditableText',
               child: MouseRegion(
                 cursor: widget.mouseCursor ?? SystemMouseCursors.text,
