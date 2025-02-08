@@ -62,10 +62,10 @@ class InputDatePickerFormField extends StatefulWidget {
     this.autofocus = false,
     this.acceptEmptyDate = false,
     this.focusNode,
-    this.delegate = const GregorianDatePickerDelegate(),
-  }) : initialDate = initialDate != null ? delegate.dateOnly(initialDate) : null,
-       firstDate = delegate.dateOnly(firstDate),
-       lastDate = delegate.dateOnly(lastDate) {
+    this.calendarDelegate = const GregorianCalendarDelegate(),
+  }) : initialDate = initialDate != null ? calendarDelegate.dateOnly(initialDate) : null,
+       firstDate = calendarDelegate.dateOnly(firstDate),
+       lastDate = calendarDelegate.dateOnly(lastDate) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -148,7 +148,7 @@ class InputDatePickerFormField extends StatefulWidget {
   final FocusNode? focusNode;
 
   /// The [DatePickerDelegate] that controls the localization and date parsing logic.
-  final DatePickerDelegate delegate;
+  final CalendarDelegate calendarDelegate;
 
   @override
   State<InputDatePickerFormField> createState() => _InputDatePickerFormFieldState();
@@ -195,7 +195,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   void _updateValueForSelectedDate() {
     if (_selectedDate != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-      _inputText = widget.delegate.formatCompactDate(_selectedDate!, localizations);
+      _inputText = widget.calendarDelegate.formatCompactDate(_selectedDate!, localizations);
       TextEditingValue textEditingValue = TextEditingValue(text: _inputText!);
       // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
@@ -213,7 +213,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   DateTime? _parseDate(String? text) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    return widget.delegate.parseCompactDate(text, localizations);
+    return widget.calendarDelegate.parseCompactDate(text, localizations);
   }
 
   bool _isValidAcceptableDate(DateTime? date) {
@@ -269,7 +269,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       container: true,
       child: TextFormField(
         decoration: InputDecoration(
-          hintText: widget.fieldHintText ?? widget.delegate.dateHelpText(localizations),
+          hintText: widget.fieldHintText ?? widget.calendarDelegate.dateHelpText(localizations),
           labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
         ).applyDefaults(
           inputTheme

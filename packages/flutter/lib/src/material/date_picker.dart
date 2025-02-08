@@ -222,10 +222,10 @@ Future<DateTime?> showDatePicker({
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
 }) async {
-  const GregorianCalendarDelegate delegate = GregorianCalendarDelegate();
-  initialDate = initialDate == null ? null : delegate.dateOnly(initialDate);
-  firstDate = delegate.dateOnly(firstDate);
-  lastDate = delegate.dateOnly(lastDate);
+  const GregorianCalendarDelegate calendarDelegate = GregorianCalendarDelegate();
+  initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
+  firstDate = calendarDelegate.dateOnly(firstDate);
+  lastDate = calendarDelegate.dateOnly(lastDate);
   assert(
     !lastDate.isBefore(firstDate),
     'lastDate $lastDate must be on or after firstDate $firstDate.',
@@ -329,11 +329,11 @@ class DatePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
     this.insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-    this.delegate = const GregorianCalendarDelegate(),
-  }) : initialDate = initialDate == null ? null : delegate.dateOnly(initialDate),
-       firstDate = delegate.dateOnly(firstDate),
-       lastDate = delegate.dateOnly(lastDate),
-       currentDate = delegate.dateOnly(currentDate ?? delegate.now()) {
+    this.calendarDelegate = const GregorianCalendarDelegate(),
+  }) : initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate),
+       firstDate = calendarDelegate.dateOnly(firstDate),
+       lastDate = calendarDelegate.dateOnly(lastDate),
+       currentDate = calendarDelegate.dateOnly(currentDate ?? calendarDelegate.now()) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -455,8 +455,8 @@ class DatePickerDialog extends StatefulWidget {
   /// Defaults to `EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0)`.
   final EdgeInsets insetPadding;
 
-  /// The delegate that controls the logic and localization.
-  final CalendarDelegate delegate;
+  /// The calendarDelegate that controls the logic and localization.
+  final CalendarDelegate calendarDelegate;
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -628,7 +628,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     CalendarDatePicker calendarDatePicker() {
       return CalendarDatePicker(
-        delegate: widget.delegate,
+        calendarDelegate: widget.calendarDelegate,
         key: _calendarPickerKey,
         initialDate: _selectedDate.value,
         firstDate: widget.firstDate,
@@ -660,7 +660,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                     child: MediaQuery.withClampedTextScaling(
                       maxScaleFactor: 2.0,
                       child: InputDatePickerFormField(
-                        delegate: widget.delegate,
+                        calendarDelegate: widget.calendarDelegate,
                         initialDate: _selectedDate.value,
                         firstDate: widget.firstDate,
                         lastDate: widget.lastDate,
@@ -725,7 +725,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       titleText:
           _selectedDate.value == null
               ? ''
-              : widget.delegate.formatMediumDate(_selectedDate.value!, localizations),
+              : widget.calendarDelegate.formatMediumDate(_selectedDate.value!, localizations),
       titleStyle: headlineStyle,
       orientation: orientation,
       isShort: orientation == Orientation.landscape,
@@ -1182,11 +1182,11 @@ Future<DateTimeRange?> showDateRangePicker({
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
   SelectableDayForRangePredicate? selectableDayPredicate,
-  CalendarDelegate delegate = const GregorianCalendarDelegate(),
+  CalendarDelegate calendarDelegate = const GregorianCalendarDelegate(),
 }) async {
-  initialDateRange = initialDateRange == null ? null : delegate.datesOnly(initialDateRange);
-  firstDate = delegate.dateOnly(firstDate);
-  lastDate = delegate.dateOnly(lastDate);
+  initialDateRange = initialDateRange == null ? null : calendarDelegate.datesOnly(initialDateRange);
+  firstDate = calendarDelegate.dateOnly(firstDate);
+  lastDate = calendarDelegate.dateOnly(lastDate);
   assert(
     !lastDate.isBefore(firstDate),
     'lastDate $lastDate must be on or after firstDate $firstDate.',
@@ -1223,7 +1223,7 @@ Future<DateTimeRange?> showDateRangePicker({
         selectableDayPredicate(initialDateRange.end, initialDateRange.start, initialDateRange.end),
     "initialDateRange's end date must be selectable.",
   );
-  currentDate = delegate.dateOnly(currentDate ?? delegate.now());
+  currentDate = calendarDelegate.dateOnly(currentDate ?? calendarDelegate.now());
   assert(debugCheckHasMaterialLocalizations(context));
 
   Widget dialog = DateRangePickerDialog(
@@ -1280,15 +1280,15 @@ Future<DateTimeRange?> showDateRangePicker({
 /// (i.e. 'Jan 21, 2020').
 String _formatRangeStartDate(
   MaterialLocalizations localizations,
-  CalendarDelegate delegate,
+  CalendarDelegate calendarDelegate,
   DateTime? startDate,
   DateTime? endDate,
 ) {
   return startDate == null
       ? localizations.dateRangeStartLabel
       : (endDate == null || startDate.year == endDate.year)
-      ? delegate.formatShortMonthDay(startDate, localizations)
-      : delegate.formatShortDate(startDate, localizations);
+      ? calendarDelegate.formatShortMonthDay(startDate, localizations)
+      : calendarDelegate.formatShortDate(startDate, localizations);
 }
 
 /// Returns an locale-appropriate string to describe the end of a date range.
@@ -1299,7 +1299,7 @@ String _formatRangeStartDate(
 /// include the year (i.e. 'Jan 21, 2020').
 String _formatRangeEndDate(
   MaterialLocalizations localizations,
-  CalendarDelegate delegate,
+  CalendarDelegate calendarDelegate,
   DateTime? startDate,
   DateTime? endDate,
   DateTime currentDate,
@@ -1307,8 +1307,8 @@ String _formatRangeEndDate(
   return endDate == null
       ? localizations.dateRangeEndLabel
       : (startDate != null && startDate.year == endDate.year && startDate.year == currentDate.year)
-      ? delegate.formatShortMonthDay(endDate, localizations)
-      : delegate.formatShortDate(endDate, localizations);
+      ? calendarDelegate.formatShortMonthDay(endDate, localizations)
+      : calendarDelegate.formatShortDate(endDate, localizations);
 }
 
 /// A Material-style date range picker dialog.
@@ -1345,7 +1345,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
     this.selectableDayPredicate,
-    this.delegate = const GregorianCalendarDelegate(),
+    this.calendarDelegate = const GregorianCalendarDelegate(),
   });
 
   /// The date range that the date range picker starts with when it opens.
@@ -1477,8 +1477,8 @@ class DateRangePickerDialog extends StatefulWidget {
   /// Function to provide full control over which [DateTime] can be selected.
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
-  /// The delegate that controls the calendar's logic and localization.
-  final CalendarDelegate delegate;
+  /// The calendarDelegate that controls the calendar's logic and localization.
+  final CalendarDelegate calendarDelegate;
 
   @override
   State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
@@ -1614,7 +1614,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
       case DatePickerEntryMode.calendarOnly:
         contents = _CalendarRangePickerDialog(
           key: _calendarPickerKey,
-          delegate: widget.delegate,
+          calendarDelegate: widget.calendarDelegate,
           selectedStartDate: _selectedStart.value,
           selectedEndDate: _selectedEnd.value,
           firstDate: widget.firstDate,
@@ -1658,7 +1658,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
       case DatePickerEntryMode.input:
       case DatePickerEntryMode.inputOnly:
         contents = _InputDateRangePickerDialog(
-          delegate: widget.delegate,
+          calendarDelegate: widget.calendarDelegate,
           selectedStartDate: _selectedStart.value,
           selectedEndDate: _selectedEnd.value,
           currentDate: widget.currentDate,
@@ -1674,7 +1674,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
                   const Spacer(),
                   _InputDateRangePicker(
                     key: _inputPickerKey,
-                    delegate: widget.delegate,
+                    calendarDelegate: widget.calendarDelegate,
                     initialStartDate: _selectedStart.value,
                     initialEndDate: _selectedEnd.value,
                     firstDate: widget.firstDate,
@@ -1782,7 +1782,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     required this.confirmText,
     required this.helpText,
     required this.selectableDayPredicate,
-    required this.delegate,
+    required this.calendarDelegate,
     this.entryModeButton,
   });
 
@@ -1798,7 +1798,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
   final VoidCallback? onCancel;
   final String confirmText;
   final String helpText;
-  final CalendarDelegate delegate;
+  final CalendarDelegate calendarDelegate;
   final Widget? entryModeButton;
 
   @override
@@ -1823,16 +1823,16 @@ class _CalendarRangePickerDialog extends StatelessWidget {
         ?.apply(color: headerForeground);
     final String startDateText = _formatRangeStartDate(
       localizations,
-      delegate,
+      calendarDelegate,
       selectedStartDate,
       selectedEndDate,
     );
     final String endDateText = _formatRangeEndDate(
       localizations,
-      delegate,
+      calendarDelegate,
       selectedStartDate,
       selectedEndDate,
-      delegate.now(),
+      calendarDelegate.now(),
     );
     final TextStyle? startDateStyle = headlineStyle?.apply(
       color: selectedStartDate != null ? headerForeground : headerDisabledForeground,
@@ -1925,7 +1925,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           onStartDateChanged: onStartDateChanged,
           onEndDateChanged: onEndDateChanged,
           selectableDayPredicate: selectableDayPredicate,
-          delegate: delegate,
+          calendarDelegate: calendarDelegate,
         ),
       ),
     );
@@ -1956,12 +1956,13 @@ class CalendarDateRangePicker extends StatefulWidget {
     DateTime? currentDate,
     required this.onStartDateChanged,
     required this.onEndDateChanged,
-    required this.delegate,
-  }) : initialStartDate = initialStartDate != null ? delegate.dateOnly(initialStartDate) : null,
-       initialEndDate = initialEndDate != null ? delegate.dateOnly(initialEndDate) : null,
-       firstDate = delegate.dateOnly(firstDate),
-       lastDate = delegate.dateOnly(lastDate),
-       currentDate = delegate.dateOnly(currentDate ?? delegate.now()) {
+    required this.calendarDelegate,
+  }) : initialStartDate =
+           initialStartDate != null ? calendarDelegate.dateOnly(initialStartDate) : null,
+       initialEndDate = initialEndDate != null ? calendarDelegate.dateOnly(initialEndDate) : null,
+       firstDate = calendarDelegate.dateOnly(firstDate),
+       lastDate = calendarDelegate.dateOnly(lastDate),
+       currentDate = calendarDelegate.dateOnly(currentDate ?? calendarDelegate.now()) {
     assert(
       this.initialStartDate == null ||
           this.initialEndDate == null ||
@@ -1995,8 +1996,8 @@ class CalendarDateRangePicker extends StatefulWidget {
   /// Called when the user changes the end date of the selected range.
   final ValueChanged<DateTime?>? onEndDateChanged;
 
-  /// The delegate that controls the calendar's logic and localization.
-  final CalendarDelegate delegate;
+  /// The calendarDelegate that controls the calendar's logic and localization.
+  final CalendarDelegate calendarDelegate;
 
   @override
   State<CalendarDateRangePicker> createState() => _CalendarDateRangePickerState();
@@ -2023,7 +2024,7 @@ class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
     // divide the list of months into two `SliverList`s.
     final DateTime initialDate = widget.initialStartDate ?? widget.currentDate;
     if (!initialDate.isBefore(widget.firstDate) && !initialDate.isAfter(widget.lastDate)) {
-      _initialMonthIndex = widget.delegate.monthDelta(widget.firstDate, initialDate);
+      _initialMonthIndex = widget.calendarDelegate.monthDelta(widget.firstDate, initialDate);
     }
 
     _showWeekBottomDivider = _initialMonthIndex != 0;
@@ -2047,7 +2048,8 @@ class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
     }
   }
 
-  int get _numberOfMonths => widget.delegate.monthDelta(widget.firstDate, widget.lastDate) + 1;
+  int get _numberOfMonths =>
+      widget.calendarDelegate.monthDelta(widget.firstDate, widget.lastDate) + 1;
 
   void _vibrate() {
     switch (Theme.of(context).platform) {
@@ -2091,9 +2093,12 @@ class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
   Widget _buildMonthItem(BuildContext context, int index, bool beforeInitialMonth) {
     final int monthIndex =
         beforeInitialMonth ? _initialMonthIndex - index - 1 : _initialMonthIndex + index;
-    final DateTime month = widget.delegate.addMonthsToMonthDate(widget.firstDate, monthIndex);
+    final DateTime month = widget.calendarDelegate.addMonthsToMonthDate(
+      widget.firstDate,
+      monthIndex,
+    );
     return _MonthItem(
-      delegate: widget.delegate,
+      calendarDelegate: widget.calendarDelegate,
       selectedDateStart: _startDate,
       selectedDateEnd: _endDate,
       currentDate: widget.currentDate,
@@ -2115,7 +2120,7 @@ class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
         if (_showWeekBottomDivider) const Divider(height: 0),
         Expanded(
           child: _CalendarKeyboardNavigator(
-            delegate: widget.delegate,
+            calendarDelegate: widget.calendarDelegate,
             firstDate: widget.firstDate,
             lastDate: widget.lastDate,
             initialFocusedDay: _startDate ?? widget.initialStartDate ?? widget.currentDate,
@@ -2156,14 +2161,14 @@ class _CalendarKeyboardNavigator extends StatefulWidget {
     required this.firstDate,
     required this.lastDate,
     required this.initialFocusedDay,
-    required this.delegate,
+    required this.calendarDelegate,
   });
 
   final Widget child;
   final DateTime firstDate;
   final DateTime lastDate;
   final DateTime initialFocusedDay;
-  final CalendarDelegate delegate;
+  final CalendarDelegate calendarDelegate;
 
   @override
   _CalendarKeyboardNavigatorState createState() => _CalendarKeyboardNavigatorState();
@@ -2264,7 +2269,7 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
 
   DateTime? _nextDateInDirection(DateTime date, TraversalDirection direction) {
     final TextDirection textDirection = Directionality.of(context);
-    final DateTime nextDate = widget.delegate.addDaysToDate(
+    final DateTime nextDate = widget.calendarDelegate.addDaysToDate(
       date,
       _dayDirectionOffset(direction, textDirection),
     );
@@ -2282,7 +2287,7 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
       focusNode: _dayGridFocus,
       onFocusChange: _handleGridFocusChange,
       child: _FocusedDate(
-        delegate: widget.delegate,
+        calendarDelegate: widget.calendarDelegate,
         date: _dayGridFocus.hasFocus ? _focusedDay : null,
         scrollDirection: _dayGridFocus.hasFocus ? _dayTraversalDirection : null,
         child: widget.child,
@@ -2296,18 +2301,18 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
 class _FocusedDate extends InheritedWidget {
   const _FocusedDate({
     required super.child,
-    required this.delegate,
+    required this.calendarDelegate,
     this.date,
     this.scrollDirection,
   });
 
-  final CalendarDelegate delegate;
+  final CalendarDelegate calendarDelegate;
   final DateTime? date;
   final TraversalDirection? scrollDirection;
 
   @override
   bool updateShouldNotify(_FocusedDate oldWidget) {
-    return !delegate.isSameDay(date, oldWidget.date) ||
+    return !calendarDelegate.isSameDay(date, oldWidget.date) ||
         scrollDirection != oldWidget.scrollDirection;
   }
 
@@ -2504,7 +2509,7 @@ class _MonthItem extends StatefulWidget {
     required this.lastDate,
     required this.displayedMonth,
     required this.selectableDayPredicate,
-    required this.delegate,
+    required this.calendarDelegate,
   }) : assert(!firstDate.isAfter(lastDate)),
        assert(selectedDateStart == null || !selectedDateStart.isBefore(firstDate)),
        assert(selectedDateEnd == null || !selectedDateEnd.isBefore(firstDate)),
@@ -2543,7 +2548,7 @@ class _MonthItem extends StatefulWidget {
 
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
-  final CalendarDelegate delegate;
+  final CalendarDelegate calendarDelegate;
 
   @override
   _MonthItemState createState() => _MonthItemState();
@@ -2556,7 +2561,7 @@ class _MonthItemState extends State<_MonthItem> {
   @override
   void initState() {
     super.initState();
-    final int daysInMonth = widget.delegate.getDaysInMonth(
+    final int daysInMonth = widget.calendarDelegate.getDaysInMonth(
       widget.displayedMonth.year,
       widget.displayedMonth.month,
     );
@@ -2571,7 +2576,8 @@ class _MonthItemState extends State<_MonthItem> {
     super.didChangeDependencies();
     // Check to see if the focused date is in this month, if so focus it.
     final DateTime? focusedDate = _FocusedDate.maybeOf(context)?.date;
-    if (focusedDate != null && widget.delegate.isSameMonth(widget.displayedMonth, focusedDate)) {
+    if (focusedDate != null &&
+        widget.calendarDelegate.isSameMonth(widget.displayedMonth, focusedDate)) {
       _dayFocusNodes[focusedDate.day - 1].requestFocus();
     }
   }
@@ -2639,10 +2645,10 @@ class _MonthItemState extends State<_MonthItem> {
         dayToBuild.isBefore(widget.selectedDateEnd!);
     final bool isOneDayRange =
         isRangeSelected && widget.selectedDateStart == widget.selectedDateEnd;
-    final bool isToday = widget.delegate.isSameDay(widget.currentDate, dayToBuild);
+    final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, dayToBuild);
 
     return _DayItem(
-      delegate: widget.delegate,
+      calendarDelegate: widget.calendarDelegate,
       day: dayToBuild,
       focusNode: _dayFocusNodes[day - 1],
       onChanged: widget.onChanged,
@@ -2670,8 +2676,8 @@ class _MonthItemState extends State<_MonthItem> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final int year = widget.displayedMonth.year;
     final int month = widget.displayedMonth.month;
-    final int daysInMonth = widget.delegate.getDaysInMonth(year, month);
-    final int dayOffset = widget.delegate.firstDayOffset(year, month, localizations);
+    final int daysInMonth = widget.calendarDelegate.getDaysInMonth(year, month);
+    final int dayOffset = widget.calendarDelegate.firstDayOffset(year, month, localizations);
     final int weeks = ((daysInMonth + dayOffset) / DateTime.daysPerWeek).ceil();
     final double gridHeight =
         weeks * _monthItemRowHeight + (weeks - 1) * _monthItemSpaceBetweenRows;
@@ -2683,7 +2689,7 @@ class _MonthItemState extends State<_MonthItem> {
       if (day < 1) {
         dayItems.add(const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
       } else {
-        final DateTime dayToBuild = widget.delegate.getDay(year, month, day);
+        final DateTime dayToBuild = widget.calendarDelegate.getDay(year, month, day);
         final Widget dayItem = _buildDayItem(context, dayToBuild, dayOffset, daysInMonth);
         dayItems.add(dayItem);
       }
@@ -2697,7 +2703,7 @@ class _MonthItemState extends State<_MonthItem> {
       final int end = math.min(start + DateTime.daysPerWeek, dayItems.length);
       final List<Widget> weekList = dayItems.sublist(start, end);
 
-      final DateTime dateAfterLeadingPadding = widget.delegate.getDay(
+      final DateTime dateAfterLeadingPadding = widget.calendarDelegate.getDay(
         year,
         month,
         start - dayOffset + 1,
@@ -2716,7 +2722,7 @@ class _MonthItemState extends State<_MonthItem> {
       // partial week.
       if (end < dayItems.length ||
           (end == dayItems.length && dayItems.length % DateTime.daysPerWeek == 0)) {
-        final DateTime dateBeforeTrailingPadding = widget.delegate.getDay(
+        final DateTime dateBeforeTrailingPadding = widget.calendarDelegate.getDay(
           year,
           month,
           end - dayOffset,
@@ -2748,7 +2754,7 @@ class _MonthItemState extends State<_MonthItem> {
               alignment: AlignmentDirectional.centerStart,
               child: ExcludeSemantics(
                 child: Text(
-                  widget.delegate.formatMonthYear(widget.displayedMonth, localizations),
+                  widget.calendarDelegate.formatMonthYear(widget.displayedMonth, localizations),
                   style: textTheme.bodyMedium!.apply(color: themeData.colorScheme.onSurface),
                 ),
               ),
@@ -2783,7 +2789,7 @@ class _DayItem extends StatefulWidget {
     required this.isInRange,
     required this.isOneDayRange,
     required this.isToday,
-    required this.delegate,
+    required this.calendarDelegate,
   });
 
   final DateTime day;
@@ -2810,7 +2816,7 @@ class _DayItem extends StatefulWidget {
 
   final bool isToday;
 
-  final CalendarDelegate delegate;
+  final CalendarDelegate calendarDelegate;
 
   @override
   State<_DayItem> createState() => _DayItemState();
@@ -2927,7 +2933,7 @@ class _DayItemState extends State<_DayItem> {
     // formatted full date.
     final String semanticLabelSuffix = widget.isToday ? ', ${localizations.currentDateLabel}' : '';
     String semanticLabel =
-        '$dayText, ${widget.delegate.formatFullDate(widget.day, localizations)}$semanticLabelSuffix';
+        '$dayText, ${widget.calendarDelegate.formatFullDate(widget.day, localizations)}$semanticLabelSuffix';
     if (widget.isSelectedDayStart) {
       semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
     } else if (widget.isSelectedDayEnd) {
@@ -3042,7 +3048,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     required this.cancelText,
     required this.helpText,
     required this.entryModeButton,
-    required this.delegate,
+    required this.calendarDelegate,
   });
 
   final DateTime? selectedStartDate;
@@ -3055,12 +3061,12 @@ class _InputDateRangePickerDialog extends StatelessWidget {
   final String? cancelText;
   final String? helpText;
   final Widget? entryModeButton;
-  final CalendarDelegate delegate;
+  final CalendarDelegate calendarDelegate;
 
   String _formatDateRange(BuildContext context, DateTime? start, DateTime? end, DateTime now) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String startText = _formatRangeStartDate(localizations, delegate, start, end);
-    final String endText = _formatRangeEndDate(localizations, delegate, start, end, now);
+    final String startText = _formatRangeStartDate(localizations, calendarDelegate, start, end);
+    final String endText = _formatRangeEndDate(localizations, calendarDelegate, start, end, now);
     if (start == null || end == null) {
       return localizations.unspecifiedDateRange;
     }
@@ -3099,7 +3105,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     );
     final String semanticDateText =
         selectedStartDate != null && selectedEndDate != null
-            ? '${delegate.formatMediumDate(selectedStartDate!, localizations)} – ${delegate.formatMediumDate(selectedEndDate!, localizations)}'
+            ? '${calendarDelegate.formatMediumDate(selectedStartDate!, localizations)} – ${calendarDelegate.formatMediumDate(selectedEndDate!, localizations)}'
             : '';
 
     final Widget header = _DatePickerHeader(
@@ -3206,7 +3212,7 @@ class _InputDateRangePicker extends StatefulWidget {
     required this.onStartDateChanged,
     required this.onEndDateChanged,
     required this.selectableDayPredicate,
-    required this.delegate,
+    required this.calendarDelegate,
     this.helpText,
     this.errorFormatText,
     this.errorInvalidText,
@@ -3218,10 +3224,11 @@ class _InputDateRangePicker extends StatefulWidget {
     this.autofocus = false,
     this.autovalidate = false,
     this.keyboardType = TextInputType.datetime,
-  }) : initialStartDate = initialStartDate == null ? null : delegate.dateOnly(initialStartDate),
-       initialEndDate = initialEndDate == null ? null : delegate.dateOnly(initialEndDate),
-       firstDate = delegate.dateOnly(firstDate),
-       lastDate = delegate.dateOnly(lastDate);
+  }) : initialStartDate =
+           initialStartDate == null ? null : calendarDelegate.dateOnly(initialStartDate),
+       initialEndDate = initialEndDate == null ? null : calendarDelegate.dateOnly(initialEndDate),
+       firstDate = calendarDelegate.dateOnly(firstDate),
+       lastDate = calendarDelegate.dateOnly(lastDate);
 
   /// The [DateTime] that represents the start of the initial date range selection.
   final DateTime? initialStartDate;
@@ -3282,7 +3289,7 @@ class _InputDateRangePicker extends StatefulWidget {
 
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
-  final CalendarDelegate delegate;
+  final CalendarDelegate calendarDelegate;
 
   @override
   _InputDateRangePickerState createState() => _InputDateRangePickerState();
@@ -3322,14 +3329,14 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     super.didChangeDependencies();
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_startDate != null) {
-      _startInputText = widget.delegate.formatCompactDate(_startDate!, localizations);
+      _startInputText = widget.calendarDelegate.formatCompactDate(_startDate!, localizations);
       final bool selectText = widget.autofocus && !_autoSelected;
       _updateController(_startController, _startInputText, selectText);
       _autoSelected = selectText;
     }
 
     if (_endDate != null) {
-      _endInputText = widget.delegate.formatCompactDate(_endDate!, localizations);
+      _endInputText = widget.calendarDelegate.formatCompactDate(_endDate!, localizations);
       _updateController(_endController, _endInputText, false);
     }
   }
@@ -3358,7 +3365,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
 
   DateTime? _parseDate(String? text) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    return widget.delegate.parseCompactDate(text, localizations);
+    return widget.calendarDelegate.parseCompactDate(text, localizations);
   }
 
   String? _validateDate(DateTime? date) {
@@ -3431,7 +3438,8 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
             decoration: InputDecoration(
               border: inputBorder,
               filled: inputTheme.filled,
-              hintText: widget.fieldStartHintText ?? widget.delegate.dateHelpText(localizations),
+              hintText:
+                  widget.fieldStartHintText ?? widget.calendarDelegate.dateHelpText(localizations),
               labelText: widget.fieldStartLabelText ?? localizations.dateRangeStartLabel,
               errorText: _startErrorText,
             ),
@@ -3447,7 +3455,8 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
             decoration: InputDecoration(
               border: inputBorder,
               filled: inputTheme.filled,
-              hintText: widget.fieldEndHintText ?? widget.delegate.dateHelpText(localizations),
+              hintText:
+                  widget.fieldEndHintText ?? widget.calendarDelegate.dateHelpText(localizations),
               labelText: widget.fieldEndLabelText ?? localizations.dateRangeEndLabel,
               errorText: _endErrorText,
             ),
