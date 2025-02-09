@@ -124,7 +124,9 @@ struct RoundSuperellipseParam {
   // radius on that dimension.
   static constexpr Scalar kGapFactor = 0.29289321881f;  // 1-cos(pi/4)
 
-  static void SuperellipseBezierArc(Point* output, const RoundSuperellipseParam::Octant& param);
+  static void SuperellipseBezierArc(
+      Point* output,
+      const RoundSuperellipseParam::Octant& param);
 };
 
 }  // namespace impeller

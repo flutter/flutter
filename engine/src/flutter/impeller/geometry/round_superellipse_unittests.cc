@@ -474,8 +474,7 @@ TEST(RoundSuperellipseTest, UniformSquareContains) {
 #undef CHECK_POINT_AND_MIRRORS
 }
 
-TEST(RoundSuperellipseTest,
-     UniformEllipticalContains) {
+TEST(RoundSuperellipseTest, UniformEllipticalContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   auto rr = RoundSuperellipse::MakeRectRadii(
       bounds, RoundingRadii::MakeRadii({5.0f, 10.0f}));
@@ -496,8 +495,7 @@ TEST(RoundSuperellipseTest,
 #undef CHECK_POINT_AND_MIRRORS
 }
 
-TEST(RoundSuperellipseTest,
-     UniformRectangularContains) {
+TEST(RoundSuperellipseTest, UniformRectangularContains) {
   // The bounds is not centered at the origin and has unequal height and width.
   Rect bounds = Rect::MakeLTRB(0.0f, 0.0f, 50.0f, 100.0f);
   auto rr = RoundSuperellipse::MakeRectRadii(

@@ -22,7 +22,7 @@ constexpr Matrix kFlip = Matrix(
   0.0f, 0.0f, 0.0f, 1.0f);
 // clang-format on
 
-} // namespace
+}  // namespace
 
 PathBuilder::PathBuilder() {
   AddContourComponent({});
@@ -237,10 +237,9 @@ PathBuilder& PathBuilder::AddRoundSuperellipse(RoundSuperellipse rse) {
   if (rse.IsRect()) {
     return AddRect(rse.GetBounds());
   }
-  auto param =
-      RoundSuperellipseParam::MakeBoundsRadii(rse.GetBounds(), rse.GetRadii());
 
-  auto CircularArcPoints = [](Point* output, const RoundSuperellipseParam::Octant& param) {
+  auto CircularArcPoints = [](Point* output,
+                              const RoundSuperellipseParam::Octant& param) {
     Point start_vector = param.circle_start - param.circle_center;
     Point end_vector =
         start_vector.Rotate(Radians(-param.circle_max_angle.radians));
@@ -256,11 +255,13 @@ PathBuilder& PathBuilder::AddRoundSuperellipse(RoundSuperellipse rse) {
     output[3] = circle_end;
   };
 
-  auto AddOctant = [this, &CircularArcPoints](const RoundSuperellipseParam::Octant& param,
-                       bool reverse_and_flip,
+  auto AddOctant = [this, &CircularArcPoints](
+                       const RoundSuperellipseParam::Octant& param,
+                       bool reverse, bool flip,
                        const Matrix& external_transform) {
-    Matrix transform = external_transform * Matrix::MakeTranslation(param.offset);
-    if (reverse_and_flip) {
+    Matrix transform =
+        external_transform * Matrix::MakeTranslation(param.offset);
+    if (flip) {
       transform = transform * kFlip;
     }
 
@@ -270,35 +271,58 @@ PathBuilder& PathBuilder::AddRoundSuperellipse(RoundSuperellipse rse) {
     Point se_points[4];
     RoundSuperellipseParam::SuperellipseBezierArc(se_points, param);
 
-    if (reverse_and_flip) {
+    if (!reverse) {
+      AddCubicComponent(transform * se_points[0], transform * se_points[1],
+                        transform * se_points[2], transform * se_points[3]);
+      AddCubicComponent(
+          transform * circle_points[0], transform * circle_points[1],
+          transform * circle_points[2], transform * circle_points[3]);
     } else {
-      AddCubicComponent(transform * se_points[0],
-                        transform * se_points[1],
-                        transform * se_points[2],
-                        transform * se_points[3]);
-      AddCubicComponent(transform * circle_points[0],
-                        transform * circle_points[1],
-                        transform * circle_points[2],
-                        transform * circle_points[3]);
+      AddCubicComponent(
+          transform * circle_points[3], transform * circle_points[2],
+          transform * circle_points[1], transform * circle_points[0]);
+      AddCubicComponent(transform * se_points[3], transform * se_points[2],
+                        transform * se_points[1], transform * se_points[0]);
     }
   };
 
-  auto AddQuadrant = [&AddOctant](
-                         const RoundSuperellipseParam::Quadrant& param,
-                         bool reverse_and_flip) {
-    auto transform = Matrix::MakeTranslateScale(param.signed_scale, param.offset);
-    AddOctant(param.top, /*reverse_and_flip=*/reverse_and_flip, transform);
-    AddOctant(param.top, /*reverse_and_flip=*/!reverse_and_flip, transform);
+  auto AddQuadrant = [&AddOctant](const RoundSuperellipseParam::Quadrant& param,
+                                  bool reverse) {
+    auto transform =
+        Matrix::MakeTranslateScale(param.signed_scale, param.offset);
+    if (!reverse) {
+      AddOctant(param.top, /*reverse=*/false, /*flip=*/false, transform);
+      AddOctant(param.right, /*reverse=*/true, /*flip=*/true, transform);
+    } else {
+      AddOctant(param.right, /*reverse=*/false, /*flip=*/true, transform);
+      AddOctant(param.top, /*reverse=*/true, /*flip=*/false, transform);
+    }
   };
 
-  MoveTo(param.top_right.offset +
-         param.top_right.signed_scale *
-             (param.top_right.top.offset + param.top_right.top.edge_mid));
+  auto param =
+      RoundSuperellipseParam::MakeBoundsRadii(rse.GetBounds(), rse.GetRadii());
+  Point start = param.top_right.offset +
+                param.top_right.signed_scale *
+                    (param.top_right.top.offset + param.top_right.top.edge_mid);
+  MoveTo(start);
 
-  AddQuadrant(param.top_right, /*reverse_and_flip=*/false);
-  AddQuadrant(param.bottom_right, /*reverse_and_flip=*/true);
-  AddQuadrant(param.bottom_left, /*reverse_and_flip=*/false);
-  AddQuadrant(param.top_left, /*reverse_and_flip=*/true);
+  if (param.all_corners_same) {
+    auto* quadrant = &param.top_right;
+    AddQuadrant(*quadrant, /*reverse=*/false);
+    quadrant->signed_scale.y *= -1;
+    AddQuadrant(*quadrant, /*reverse=*/true);
+    quadrant->signed_scale.x *= -1;
+    AddQuadrant(*quadrant, /*reverse=*/false);
+    quadrant->signed_scale.y *= -1;
+    AddQuadrant(*quadrant, /*reverse=*/true);
+  } else {
+    AddQuadrant(param.top_right, /*reverse=*/false);
+    AddQuadrant(param.bottom_right, /*reverse=*/true);
+    AddQuadrant(param.bottom_left, /*reverse=*/false);
+    AddQuadrant(param.top_left, /*reverse=*/true);
+  }
+
+  LineTo(start);
 
   Close();
 
