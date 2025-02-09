@@ -33,30 +33,6 @@ void main() {
 
     lastDayText = tester.getLastDayText();
     expect(lastDayText.data, equals('28'));
-
-    // // Tap the button to show the date picker.
-    // await tester.tap(find.byType(OutlinedButton));
-    // await tester.pumpAndSettle();
-
-    // // The initial date is shown.
-    // expect(find.text(datePickerTitle), findsOneWidget);
-    // expect(find.text(initialDate), findsOneWidget);
-
-    // // Tap another date to select it.
-    // await tester.tap(find.text('30'));
-    // await tester.pumpAndSettle();
-
-    // // The selected date is shown.
-    // expect(find.text(datePickerTitle), findsOneWidget);
-    // expect(find.text('Fri, Jul 30'), findsOneWidget);
-
-    // // Tap OK to confirm the selection and close the date picker.
-    // await tester.tap(find.text('OK'));
-    // await tester.pumpAndSettle();
-
-    // // The date picker is closed and the selected date is shown.
-    // expect(find.text(datePickerTitle), findsNothing);
-    // expect(find.text('Selected: 30/7/2021'), findsOneWidget);
   });
 }
 
