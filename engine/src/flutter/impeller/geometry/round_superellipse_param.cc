@@ -36,17 +36,27 @@ inline Point Flip(Point a) {
 //  * ratio = size / a
 //  * n
 //  * sin(thetaJ)
+//  * bezierFactorA
+//  * bezierFactorJ
 //
 // For definition of the variables, see DrawOctantSquareLikeSquircle.
-constexpr Scalar kPrecomputedVariables[][3] = {
-    {2.00, 2.00000000, 0.117205737}, {2.02, 2.03999083, 0.117205737},
-    {2.04, 2.07976152, 0.119418745}, {2.06, 2.11195967, 0.136274515},
-    {2.08, 2.14721808, 0.141289310}, {2.10, 2.18349805, 0.143410679},
-    {2.12, 2.21858213, 0.146668334}, {2.14, 2.24861661, 0.154985392},
-    {2.16, 2.28146030, 0.158932848}, {2.18, 2.30842385, 0.168182439},
-    {2.20, 2.33888662, 0.172911853}, {2.22, 2.36937163, 0.177039959},
-    {2.24, 2.40317673, 0.177839181}, {2.26, 2.42840031, 0.185615110},
-    {2.28, 2.45838300, 0.188905374}, {2.30, 2.48660575, 0.193273145},
+constexpr Scalar kPrecomputedVariables[][5] = {
+  {2.00, 2.00000000, 0.117475756, 0.04337844638, 0.03902146665},
+  {2.02, 2.04000000, 0.117475756, 0.04337844638, 0.03902146665},
+  {2.04, 2.07980000, 0.119704417, 0.02995696498, 0.05463995986},
+  {2.06, 2.11200000, 0.136699866, 0.03468310788, 0.06397291389},
+  {2.08, 2.14720000, 0.141763669, 0.03713046792, 0.06793318739},
+  {2.10, 2.18350000, 0.143906864, 0.03905176904, 0.07054132958},
+  {2.12, 2.21860000, 0.147199336, 0.04146061666, 0.07347055405},
+  {2.14, 2.24860000, 0.155612667, 0.04494317041, 0.07847124204},
+  {2.16, 2.28150000, 0.159609668, 0.04770674736, 0.08146043573},
+  {2.18, 2.30840000, 0.168985554, 0.05167098584, 0.08655832347},
+  {2.20, 2.33890000, 0.173785291, 0.05474671727, 0.08967826839},
+  {2.22, 2.36940000, 0.177978083, 0.05773410310, 0.09247527682},
+  {2.24, 2.40320000, 0.178790192, 0.06019419533, 0.09379090679},
+  {2.26, 2.42840000, 0.186697814, 0.06421368877, 0.09783749197},
+  {2.28, 2.45840000, 0.190047331, 0.06712365294, 0.10008871523},
+  {2.30, 2.48660000, 0.194497103, 0.07035110571, 0.10268486768},
 };
 
 constexpr size_t kNumRecords =
@@ -161,6 +171,8 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
       .se_a = a,
       .se_n = n,
       .se_max_theta = asin(sin_thetaJ),
+
+      .ratio = ratio,
 
       .circle_start = pointJ,
       .circle_center = circle_center,
@@ -312,6 +324,25 @@ bool RoundSuperellipseParam::Contains(const Point& point) const {
   return CornerContains(top_right, point) &&
          CornerContains(bottom_right, point) &&
          CornerContains(bottom_left, point) && CornerContains(top_left, point);
+}
+
+void RoundSuperellipseParam::SuperellipseBezierArc(
+    Point* output,
+    const RoundSuperellipseParam::Octant& param) {
+  Point start = {param.se_center.x, param.edge_mid.y};
+  const Point& end = param.circle_start;
+  constexpr Point start_tangent = {1, 0};
+  Point circle_start_vector = param.circle_start - param.circle_center;
+  Point end_tangent =
+      Point{-circle_start_vector.y, circle_start_vector.x}.Normalize();
+
+  Scalar start_factor = LerpPrecomputedVariable(3, param.ratio);
+  Scalar end_factor = LerpPrecomputedVariable(3, param.ratio);
+
+  output[0] = start;
+  output[1] = start + start_tangent * start_factor * param.se_a;
+  output[2] = end + end_tangent * end_factor * param.se_a;
+  output[3] = end;
 }
 
 }  // namespace impeller

@@ -7,8 +7,22 @@
 #include <cmath>
 
 #include "impeller/geometry/path_component.h"
+#include "impeller/geometry/round_superellipse_param.h"
 
 namespace impeller {
+
+namespace {
+
+// A matrix that swaps the coordinates of a point.
+// clang-format off
+constexpr Matrix kFlip = Matrix(
+  0.0f, 1.0f, 0.0f, 0.0f,
+  1.0f, 0.0f, 0.0f, 0.0f,
+  0.0f, 0.0f, 1.0f, 0.0f,
+  0.0f, 0.0f, 0.0f, 1.0f);
+// clang-format on
+
+} // namespace
 
 PathBuilder::PathBuilder() {
   AddContourComponent({});
@@ -213,6 +227,78 @@ PathBuilder& PathBuilder::AddRoundRect(RoundRect round_rect) {
   // Top left arc.
   //
   AddRoundedRectTopLeft(rect, radii);
+
+  Close();
+
+  return *this;
+}
+
+PathBuilder& PathBuilder::AddRoundSuperellipse(RoundSuperellipse rse) {
+  if (rse.IsRect()) {
+    return AddRect(rse.GetBounds());
+  }
+  auto param =
+      RoundSuperellipseParam::MakeBoundsRadii(rse.GetBounds(), rse.GetRadii());
+
+  auto CircularArcPoints = [](Point* output, const RoundSuperellipseParam::Octant& param) {
+    Point start_vector = param.circle_start - param.circle_center;
+    Point end_vector =
+        start_vector.Rotate(Radians(-param.circle_max_angle.radians));
+    Point circle_end = param.circle_center + end_vector;
+    Point start_tangent = Point{start_vector.y, -start_vector.x}.Normalize();
+    Point end_tangent = Point{-end_vector.y, end_vector.x}.Normalize();
+    Scalar bezier_factor = std::tan(param.circle_max_angle.radians / 4) * 4 / 3;
+    Scalar radius = start_vector.GetLength();
+
+    output[0] = param.circle_start;
+    output[1] = param.circle_start + start_tangent * bezier_factor * radius;
+    output[2] = circle_end + end_tangent * bezier_factor * radius;
+    output[3] = circle_end;
+  };
+
+  auto AddOctant = [this, &CircularArcPoints](const RoundSuperellipseParam::Octant& param,
+                       bool reverse_and_flip,
+                       const Matrix& external_transform) {
+    Matrix transform = external_transform * Matrix::MakeTranslation(param.offset);
+    if (reverse_and_flip) {
+      transform = transform * kFlip;
+    }
+
+    Point circle_points[4];
+    CircularArcPoints(circle_points, param);
+
+    Point se_points[4];
+    RoundSuperellipseParam::SuperellipseBezierArc(se_points, param);
+
+    if (reverse_and_flip) {
+    } else {
+      AddCubicComponent(transform * se_points[0],
+                        transform * se_points[1],
+                        transform * se_points[2],
+                        transform * se_points[3]);
+      AddCubicComponent(transform * circle_points[0],
+                        transform * circle_points[1],
+                        transform * circle_points[2],
+                        transform * circle_points[3]);
+    }
+  };
+
+  auto AddQuadrant = [&AddOctant](
+                         const RoundSuperellipseParam::Quadrant& param,
+                         bool reverse_and_flip) {
+    auto transform = Matrix::MakeTranslateScale(param.signed_scale, param.offset);
+    AddOctant(param.top, /*reverse_and_flip=*/reverse_and_flip, transform);
+    AddOctant(param.top, /*reverse_and_flip=*/!reverse_and_flip, transform);
+  };
+
+  MoveTo(param.top_right.offset +
+         param.top_right.signed_scale *
+             (param.top_right.top.offset + param.top_right.top.edge_mid));
+
+  AddQuadrant(param.top_right, /*reverse_and_flip=*/false);
+  AddQuadrant(param.bottom_right, /*reverse_and_flip=*/true);
+  AddQuadrant(param.bottom_left, /*reverse_and_flip=*/false);
+  AddQuadrant(param.top_left, /*reverse_and_flip=*/true);
 
   Close();
 
