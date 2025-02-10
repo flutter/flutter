@@ -50,6 +50,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private AndroidTouchProcessor androidTouchProcessor;
   private Context context;
   private FlutterView flutterView;
+  private boolean surfaceControlEnabled = false;
 
   @Nullable private TextInputPlugin textInputPlugin;
 
@@ -75,6 +76,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   public void setRegistry(@NonNull PlatformViewRegistry registry) {
     this.registry = (PlatformViewRegistryImpl) registry;
+  }
+
+  /** Whether the SurfaceControl swapchain mode is enabled. */
+  public void setSurfaceControlEnabled(boolean value) {
+    surfaceControlEnabled = value;
   }
 
   @Override
@@ -678,6 +684,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
             return;
           }
           embeddedView.clearFocus();
+        }
+
+        @Override
+        public boolean isSurfaceControlEnabled() {
+          return surfaceControlEnabled;
         }
       };
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:android_driver_extensions/native_driver.dart';
 import 'package:android_driver_extensions/skia_gold.dart';
 import 'package:flutter_driver/flutter_driver.dart';
@@ -42,6 +44,13 @@ void main() async {
     await nativeDriver.close();
     await flutterDriver.close();
   });
+
+  test('verify that HCPP is supported and enabled', () async {
+    final Map<String, Object?> response =
+        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+
+    expect(response['enabled'], true);
+  }, timeout: Timeout.none);
 
   test('should screenshot an HCPP platform view', () async {
     await expectLater(

@@ -383,6 +383,12 @@ static void UpdateDisplayMetrics(JNIEnv* env,
   ANDROID_SHELL_HOLDER->UpdateDisplayMetrics();
 }
 
+static bool IsSurfaceControlEnabled(JNIEnv* env,
+                                    jobject jcaller,
+                                    jlong shell_holder) {
+  return ANDROID_SHELL_HOLDER->GetPlatformView()->IsSurfaceControlEnabled();
+}
+
 static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   auto screenshot = ANDROID_SHELL_HOLDER->Screenshot(
       Rasterizer::ScreenshotType::UncompressedImage, false);
@@ -873,6 +879,11 @@ bool RegisterApi(JNIEnv* env) {
           .signature = "()Z",
           .fnPtr = reinterpret_cast<void*>(
               &impeller::android::ShadowRealm::ShouldDisableAHB),
+      },
+      {
+          .name = "nativeIsSurfaceControlEnabled",
+          .signature = "()Z",
+          .fnPtr = reinterpret_cast<void*>(&IsSurfaceControlEnabled),
       }};
 
   if (env->RegisterNatives(g_flutter_jni_class->obj(), flutter_jni_methods,
