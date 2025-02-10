@@ -202,12 +202,20 @@ TEST_F(EmbedderTest, ImplicitViewNotNull) {
 
 std::atomic_size_t EmbedderTestTaskRunner::sEmbedderTaskRunnerIdentifiers = {};
 
-TEST_F(EmbedderTest, MergedPlatformUIThreadRuns) {
+TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
-  auto ui_task_runner = CreateNewThread("test_platform_thread");
+  auto ui_task_runner = CreateNewThread("test_ui_thread");
+  auto platform_task_runner = CreateNewThread("test_ui_thread");
   UniqueEngine engine;
 
-  EmbedderTestTaskRunner test_task_runner(
+  EmbedderTestTaskRunner test_ui_task_runner(
+      ui_task_runner, [&](FlutterTask task) {
+        if (!engine.is_valid()) {
+          return;
+        }
+        FlutterEngineRunTask(engine.get(), &task);
+      });
+  EmbedderTestTaskRunner test_platform_task_runner(
       ui_task_runner, [&](FlutterTask task) {
         if (!engine.is_valid()) {
           return;
@@ -215,26 +223,33 @@ TEST_F(EmbedderTest, MergedPlatformUIThreadRuns) {
         FlutterEngineRunTask(engine.get(), &task);
       });
 
-  fml::AutoResetWaitableEvent signal_latch;
+  fml::AutoResetWaitableEvent signal_latch_ui;
+  fml::AutoResetWaitableEvent signal_latch_platform;
 
   context.AddNativeCallback(
       "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
         // Assert that the UI isolate is running on platform thread.
         ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
-        signal_latch.Signal();
+        signal_latch_ui.Signal();
       }));
 
   ui_task_runner->PostTask([&]() {
     EmbedderConfigBuilder builder(context);
     const auto task_runner_description =
-        test_task_runner.GetFlutterTaskRunnerDescription();
+        test_ui_task_runner.GetFlutterTaskRunnerDescription();
     builder.SetSurface(SkISize::Make(1, 1));
     builder.SetUITaskRunner(&task_runner_description);
-    builder.SetDartEntrypoint("mergedPlatformUIThreadRuns");
+    builder.SetDartEntrypoint("canSpecifyCustomUITaskRunner");
+    builder.SetPlatformMessageCallback(
+        [&](const FlutterPlatformMessage* message) {
+          ASSERT_TRUE(platform_task_runner->RunsTasksOnCurrentThread());
+          signal_latch_platform.Signal();
+        });
     engine = builder.LaunchEngine();
     ASSERT_TRUE(engine.is_valid());
   });
-  signal_latch.Wait();
+  signal_latch_ui.Wait();
+  signal_latch_platform.Wait();
 
   fml::AutoResetWaitableEvent kill_latch;
   ui_task_runner->PostTask([&] {
@@ -244,9 +259,58 @@ TEST_F(EmbedderTest, MergedPlatformUIThreadRuns) {
   kill_latch.Wait();
 }
 
-TEST_F(EmbedderTest, MergedPlatformUIThreadFlushesMicrotasks) {
+TEST_F(EmbedderTest, MergedPlatformUIThread) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
-  auto ui_task_runner = CreateNewThread("test_platform_thread");
+  auto task_runner = CreateNewThread("test_thread");
+  UniqueEngine engine;
+
+  EmbedderTestTaskRunner test_task_runner(task_runner, [&](FlutterTask task) {
+    if (!engine.is_valid()) {
+      return;
+    }
+    FlutterEngineRunTask(engine.get(), &task);
+  });
+
+  fml::AutoResetWaitableEvent signal_latch_ui;
+  fml::AutoResetWaitableEvent signal_latch_platform;
+
+  context.AddNativeCallback(
+      "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        // Assert that the UI isolate is running on platform thread.
+        ASSERT_TRUE(task_runner->RunsTasksOnCurrentThread());
+        signal_latch_ui.Signal();
+      }));
+
+  task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto task_runner_description =
+        test_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSurface(SkISize::Make(1, 1));
+    builder.SetUITaskRunner(&task_runner_description);
+    builder.SetPlatformTaskRunner(&task_runner_description);
+    builder.SetDartEntrypoint("mergedPlatformUIThread");
+    builder.SetPlatformMessageCallback(
+        [&](const FlutterPlatformMessage* message) {
+          ASSERT_TRUE(task_runner->RunsTasksOnCurrentThread());
+          signal_latch_platform.Signal();
+        });
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+  });
+  signal_latch_ui.Wait();
+  signal_latch_platform.Wait();
+
+  fml::AutoResetWaitableEvent kill_latch;
+  task_runner->PostTask([&] {
+    engine.reset();
+    task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  });
+  kill_latch.Wait();
+}
+
+TEST_F(EmbedderTest, UITaskRunnerFlushesMicrotasks) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  auto ui_task_runner = CreateNewThread("test_ui_thread");
   UniqueEngine engine;
 
   EmbedderTestTaskRunner test_task_runner(
@@ -272,7 +336,7 @@ TEST_F(EmbedderTest, MergedPlatformUIThreadFlushesMicrotasks) {
         test_task_runner.GetFlutterTaskRunnerDescription();
     builder.SetSurface(SkISize::Make(1, 1));
     builder.SetUITaskRunner(&task_runner_description);
-    builder.SetDartEntrypoint("mergedPlatformUIThreadFlushesMicrotasks");
+    builder.SetDartEntrypoint("uiTaskRunnerFlushesMicrotasks");
     engine = builder.LaunchEngine();
     ASSERT_TRUE(engine.is_valid());
   });

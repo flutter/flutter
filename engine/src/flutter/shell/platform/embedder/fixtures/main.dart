@@ -63,12 +63,19 @@ void invokePlatformTaskRunner() {
 }
 
 @pragma('vm:entry-point')
-void mergedPlatformUIThreadRuns() {
+void canSpecifyCustomUITaskRunner() {
   signalNativeTest();
+  PlatformDispatcher.instance.sendPlatformMessage('OhHi', null, null);
 }
 
 @pragma('vm:entry-point')
-void mergedPlatformUIThreadFlushesMicrotasks() {
+void mergedPlatformUIThread() {
+  signalNativeTest();
+  PlatformDispatcher.instance.sendPlatformMessage('OhHi', null, null);
+}
+
+@pragma('vm:entry-point')
+void uiTaskRunnerFlushesMicrotasks() {
   // Microtasks are always flushed at the beginning of the frame, hence the delay.
   Future.delayed(const Duration(milliseconds: 50), () {
     Future.microtask(() {
