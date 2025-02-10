@@ -251,6 +251,14 @@ class WebParagraph implements ui.Paragraph {
     }
   }
 
+  void paintTexture(DomCanvasElement canvas, ui.Offset offset) {
+    for (final textCluster in _layout.textClusters) {
+      print('[@(${offset.dx}, ${offset.dy}) ');
+      _paint.printTextCluster(textCluster);
+      _paint.paintTexture(canvas, textCluster, offset.dx, offset.dy);
+    }
+  }
+
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
     return ui.TextRange(start: 0, end: 0);

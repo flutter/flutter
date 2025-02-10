@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
+import '../safe_browser_api.dart';
 import 'paragraph.dart';
 
 /// A single canvas2d context to use for all text information.
@@ -42,6 +43,25 @@ class TextPaint {
       }
     }
      */
+  }
+
+  void paintTexture(DomCanvasElement canvas, WebTextCluster textCluster, double x, double y) {
+    String text = this.paragraph.text.substring(textCluster.begin(), textCluster.end());
+
+    //final WebGLContext webgl = canvas.getGlContext(webGLVersion);
+    final GlContext webgl = canvas.getContext('webgl')! as GlContext;
+
+    //final DomCanvasRenderingContext2D webgl =
+    //    canvas.getContext('webgl')! as DomCanvasRenderingContext2D;
+    var texture = webgl.createTexture();
+
+    webgl.pixelStorei(webgl.kUnpackFlipYWebGl, true);
+    webgl.bindTexture(webgl.kTexture2D, texture);
+    webgl.texImage2D(webgl.kTexture2D, 0, webgl.kRGBA, webgl.kRGBA, webgl.kUnsignedByte, canvas);
+    webgl.texParameteri(webgl.kTexture2D, webgl.kTextureMagFilter, webgl.kLinear);
+    webgl.texParameteri(webgl.kTexture2D, webgl.kTextureMinFilter, webgl.kLinearMipMapNearest);
+    webgl.generateMipmap(webgl.kTexture2D);
+    webgl.bindTexture(webgl.kTexture2D, null);
   }
 
   void printTextCluster(WebTextCluster textCluster) {

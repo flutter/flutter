@@ -155,6 +155,7 @@ DomCanvasElement? tryCreateCanvasElement(int width, int height) {
 
 @JS('window.ImageDecoder')
 external JSAny? get __imageDecoderConstructor;
+
 Object? get _imageDecoderConstructor => __imageDecoderConstructor?.toObjectShallow;
 
 /// Environment variable that allows the developer to opt out of using browser's
@@ -208,9 +209,11 @@ extension ImageDecoderExtension on ImageDecoder {
 
   @JS('complete')
   external JSBoolean get _complete;
+
   bool get complete => _complete.toDart;
 
   external JSPromise<JSAny?> decode(DecodeOptions options);
+
   external JSVoid close();
 }
 
@@ -249,6 +252,7 @@ extension DecodeResultExtension on DecodeResult {
 
   @JS('complete')
   external JSBoolean get _complete;
+
   bool get complete => _complete.toDart;
 }
 
@@ -279,37 +283,46 @@ class VideoFrame implements DomCanvasImageSource {}
 extension VideoFrameExtension on VideoFrame {
   @JS('allocationSize')
   external JSNumber _allocationSize();
+
   double allocationSize() => _allocationSize().toDartDouble;
 
   @JS('copyTo')
   external JSPromise<JSAny?> _copyTo(JSAny destination);
+
   JSPromise<JSAny?> copyTo(Object destination) => _copyTo(destination.toJSAnyShallow);
 
   @JS('format')
   external JSString? get _format;
+
   String? get format => _format?.toDart;
 
   @JS('codedWidth')
   external JSNumber get _codedWidth;
+
   double get codedWidth => _codedWidth.toDartDouble;
 
   @JS('codedHeight')
   external JSNumber get _codedHeight;
+
   double get codedHeight => _codedHeight.toDartDouble;
 
   @JS('displayWidth')
   external JSNumber get _displayWidth;
+
   double get displayWidth => _displayWidth.toDartDouble;
 
   @JS('displayHeight')
   external JSNumber get _displayHeight;
+
   double get displayHeight => _displayHeight.toDartDouble;
 
   @JS('duration')
   external JSNumber? get _duration;
+
   double? get duration => _duration?.toDartDouble;
 
   external VideoFrame clone();
+
   external JSVoid close();
 }
 
@@ -325,6 +338,7 @@ class ImageTrackList {}
 
 extension ImageTrackListExtension on ImageTrackList {
   external JSPromise<JSAny?> get ready;
+
   external ImageTrack? get selectedTrack;
 }
 
@@ -341,10 +355,12 @@ class ImageTrack {}
 extension ImageTrackExtension on ImageTrack {
   @JS('repetitionCount')
   external JSNumber get _repetitionCount;
+
   double get repetitionCount => _repetitionCount.toDartDouble;
 
   @JS('frameCount')
   external JSNumber get _frameCount;
+
   double get frameCount => _frameCount.toDartDouble;
 }
 
@@ -378,6 +394,7 @@ void vertexAttribPointerGlContext(
 /// Compiled and cached gl program.
 class GlProgram {
   GlProgram(this.program);
+
   final Object program;
 }
 
@@ -430,6 +447,9 @@ class GlContext {
   Object? _kRGBA;
   Object? _kLinear;
   Object? _kTextureMinFilter;
+  Object? _kTextureMagFilter;
+  Object? _kLinearMipMapNearest;
+  Object? _kUnpackFlipYWebGl;
   double? _kTexture0;
 
   Object? _canvas;
@@ -548,6 +568,10 @@ class GlContext {
 
   void activeTexture(double textureUnit) {
     js_util.callMethod<void>(glContext, 'activeTexture', <dynamic>[textureUnit]);
+  }
+
+  void pixelStorei(int pname, dynamic param) {
+    js_util.callMethod<void>(glContext, 'pixelStorei', <dynamic>[pname, param]);
   }
 
   void texImage2D(
@@ -717,6 +741,15 @@ class GlContext {
   Object? get kTextureMinFilter =>
       _kTextureMinFilter ??= js_util.getProperty(glContext, 'TEXTURE_MIN_FILTER');
 
+  Object? get kTextureMagFilter =>
+      _kTextureMagFilter ??= js_util.getProperty(glContext, 'TEXTURE_MAG_FILTER');
+
+  Object? get kLinearMipMapNearest =>
+      _kLinearMipMapNearest ??= js_util.getProperty(glContext, 'LINEAR_MIPMAP_NEAREST');
+
+  Object? get kUnpackFlipYWebGl =>
+      _kUnpackFlipYWebGl ??= js_util.getProperty(glContext, 'UNPACK_FLIP_Y_WEBGL');
+
   /// Returns reference to uniform in program.
   Object getUniformLocation(Object program, String uniformName) {
     final Object? res = js_util.callMethod(glContext, 'getUniformLocation', <dynamic>[
@@ -790,6 +823,7 @@ class GlContext {
   }
 
   int? get drawingBufferWidth => js_util.getProperty<int?>(glContext, 'drawingBufferWidth');
+
   int? get drawingBufferHeight => js_util.getProperty<int?>(glContext, 'drawingBufferWidth');
 
   /// Reads gl contents as image data.
