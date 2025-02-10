@@ -1627,8 +1627,8 @@ public class FlutterJNI {
 
   /** Whether the SurfaceControl swapchain required for hcpp is enabled and active. */
   public boolean IsSurfaceControlEnabled() {
-    return nativeIsSurfaceControlEnabled();
+    return nativeIsSurfaceControlEnabled(nativeShellHolderId);
   }
 
-  private native boolean nativeIsSurfaceControlEnabled();
+  private native boolean nativeIsSurfaceControlEnabled(long nativeShellHolderId);
 }

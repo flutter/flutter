@@ -49,7 +49,7 @@ void main() async {
     final Map<String, Object?> response =
         json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
 
-    expect(response['enabled'], true);
+    expect(response['supported'], true);
   }, timeout: Timeout.none);
 
   test('should screenshot an HCPP platform view', () async {

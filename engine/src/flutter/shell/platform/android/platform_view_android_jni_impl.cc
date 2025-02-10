@@ -386,7 +386,7 @@ static void UpdateDisplayMetrics(JNIEnv* env,
 static bool IsSurfaceControlEnabled(JNIEnv* env,
                                     jobject jcaller,
                                     jlong shell_holder) {
-  return ANDROID_SHELL_HOLDER->GetPlatformView()->IsSurfaceControlEnabled();
+  return ANDROID_SHELL_HOLDER->IsSurfaceControlEnabled();
 }
 
 static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
@@ -882,7 +882,7 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeIsSurfaceControlEnabled",
-          .signature = "()Z",
+          .signature = "(J)Z",
           .fnPtr = reinterpret_cast<void*>(&IsSurfaceControlEnabled),
       }};
 

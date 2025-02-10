@@ -19,7 +19,7 @@ void main() async {
   enableFlutterDriverExtension(
     handler: (String? command) async {
       return json.encode(<String, Object?>{
-        'supported': HybridAndroidViewController.checkIfSupported(),
+        'supported': await HybridAndroidViewController.checkIfSupported(),
       });
     },
     commands: <CommandExtension>[nativeDriverCommands],
