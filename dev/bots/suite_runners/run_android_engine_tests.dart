@@ -127,9 +127,9 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
 }
 
 const String kSurfaceControlMetadataDisabled =
-    '<meta-data android:name="io.flutter.embedding.android.UseSurfaceControl" android:value="false" />';
+    '<meta-data android:name="io.flutter.embedding.android.EnableSurfaceControl" android:value="false" />';
 const String kSurfaceControlMetadataEnabled =
-    '<meta-data android:name="io.flutter.embedding.android.UseSurfaceControl" android:value="true" />';
+    '<meta-data android:name="io.flutter.embedding.android.EnableSurfaceControl" android:value="true" />';
 
 String _impellerBackendMetadata({required String value}) {
   return '<meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="$value" />';

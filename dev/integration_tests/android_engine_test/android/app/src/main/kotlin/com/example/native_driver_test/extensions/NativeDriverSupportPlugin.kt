@@ -61,7 +61,8 @@ class NativeDriverSupportPlugin :
                         selector = NativeSelector.ByContentDescription(call.argument("label")!!)
                     }
                     "byNativeIntegerId" -> {
-                        selector = NativeSelector.ByViewId(call.argument("id")!!)
+                        val stringId = call.argument<String>("id")!!
+                        selector = NativeSelector.ByViewId(stringId.toInt())
                     }
                     else -> {
                         result.error("INVALID_SELECTOR", "Not supported", kind)
