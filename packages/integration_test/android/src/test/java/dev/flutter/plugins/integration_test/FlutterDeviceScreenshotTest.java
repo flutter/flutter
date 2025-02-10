@@ -32,15 +32,14 @@ public class FlutterDeviceScreenshotTest extends AndroidJUnitRunner {
 
     @Test
     public void getFlutterView_returnsFlutterViewForFlutterActivity() {
-        // Mock the static call to View.generateViewId that FlutterActivity.flutterViewId needs.
+        // Mock the static call to View.generateViewId that FlutterActivity.FLUTTER_VIEW_ID needs.
         // For why this test currently doesn't use Robolectric,
         // see https://github.com/flutter/flutter/pull/148803.
         try (MockedStatic<View> mockedStatic = Mockito.mockStatic(View.class)) {
-            final int mockFlutterViewId = 123;
-            mockedStatic.when(View::generateViewId).thenReturn(mockFlutterViewId);
+            mockedStatic.when(View::generateViewId).thenReturn(123);
             FlutterView mockFlutterView = mock(FlutterView.class);
             FlutterActivity mockFlutterActivity = mock(FlutterActivity.class);
-            when(mockFlutterActivity.findViewById(mockFlutterViewId))
+            when(mockFlutterActivity.findViewById(FlutterActivity.FLUTTER_VIEW_ID))
                     .thenReturn(mockFlutterView);
             assertEquals(
                     FlutterDeviceScreenshot.getFlutterView(mockFlutterActivity),
@@ -51,19 +50,18 @@ public class FlutterDeviceScreenshotTest extends AndroidJUnitRunner {
 
     @Test
     public void getFlutterView_returnsFlutterViewForFlutterFragmentActivity() {
-        // Mock the static call to View.generateViewId that FlutterFragment.flutterViewId needs.
+        // Mock the static call to View.generateViewId that FlutterFragment.FLUTTER_VIEW_ID needs.
         // For why this test currently doesn't use Robolectric,
         // see https://github.com/flutter/flutter/pull/148803.
-        FlutterView mockFlutterView = mock(FlutterView.class);
-        FlutterFragmentActivity mockFlutterFragmentActivity = mock(FlutterFragmentActivity.class);
-        final int mockFlutterViewId = 5;
-
-        when(mockFlutterFragmentActivity.getFlutterFragmentViewId()).thenReturn(mockFlutterViewId);
-        when(mockFlutterFragmentActivity.findViewById(mockFlutterViewId))
-                .thenReturn(mockFlutterView);
-        assertEquals(
-                FlutterDeviceScreenshot.getFlutterView(mockFlutterFragmentActivity),
-                mockFlutterView
-        );
+        try (MockedStatic<View> mockedStatic = Mockito.mockStatic(View.class)) {
+            FlutterView mockFlutterView = mock(FlutterView.class);
+            FlutterFragmentActivity mockFlutterFragmentActivity = mock(FlutterFragmentActivity.class);
+            when(mockFlutterFragmentActivity.findViewById(FlutterFragment.FLUTTER_VIEW_ID))
+                    .thenReturn(mockFlutterView);
+            assertEquals(
+                    FlutterDeviceScreenshot.getFlutterView(mockFlutterFragmentActivity),
+                    mockFlutterView
+            );
+        }
     }
 }
