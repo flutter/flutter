@@ -41,39 +41,6 @@ Future<void> main() async {
     print('This test must be run on api 30 or higher. Skipping...');
     return;
   }
-  // // Developer settings are required on target device for cutout manipulation.
-  // bool shouldResetDevSettings = false;
-  // final ProcessResult checkDevSettingsResult = Process.runSync(adbExecutable, <String>[
-  //   'shell',
-  //   'settings',
-  //   'get',
-  //   'global',
-  //   'development_settings_enabled',
-  // ]);
-  // if (checkDevSettingsResult.stdout.toString().startsWith('0')) {
-  //   print('Enabling developer settings...');
-  //   // Developer settings not enabled, enable them and mark that the origional
-  //   // state should be restored after.
-  //   shouldResetDevSettings = true;
-  //   Process.runSync(adbExecutable, <String>[
-  //     'shell',
-  //     'settings',
-  //     'put',
-  //     'global',
-  //     'development_settings_enabled',
-  //     '1',
-  //   ]);
-  // }
-  // // Assumption of diplay_cutout_test.dart is that there is a "tall" notch.
-  // print('Adding Synthetic notch...');
-  // // This command will cause android activities to be recreated.
-  // Process.runSync(adbExecutable, <String>[
-  //   'shell',
-  //   'cmd',
-  //   'overlay',
-  //   'enable',
-  //   'com.android.internal.display.cutout.emulation.tall',
-  // ]);
   print('Starting test.');
   try {
     final FlutterDriver driver = await FlutterDriver.connect();
@@ -90,27 +57,6 @@ Future<void> main() async {
     print('Driver Error: $e');
     print('Stacktrace: $st');
     exitCode = 1;
-  } finally {
-    print('NOT ACTUALLY Removing Synthetic notch...');
-    // Process.runSync(adbExecutable, <String>[
-    //   'shell',
-    //   'cmd',
-    //   'overlay',
-    //   'disable',
-    //   'com.android.internal.display.cutout.emulation.tall',
-    // ]);
-    // print('Reverting Adb changes...');
-    // if (shouldResetDevSettings) {
-    //   print('Disabling developer settings...');
-    //   Process.runSync(adbExecutable, <String>[
-    //     'shell',
-    //     'settings',
-    //     'put',
-    //     'global',
-    //     'development_settings_enabled',
-    //     '0',
-    //   ]);
-    // }
   }
   return;
 }

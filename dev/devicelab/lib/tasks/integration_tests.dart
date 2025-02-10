@@ -147,6 +147,8 @@ TaskFunction createDisplayCutoutTest() {
     setup: (Device device) async {
       // Only android devices support this cutoutTest.
       if (device is AndroidDevice) {
+        print('Adding Synthetic notch...');
+        // This command will cause any running android activity to be recreated.
         await device.shellExec('cmd', <String>[
           'overlay',
           'enable',
@@ -156,6 +158,7 @@ TaskFunction createDisplayCutoutTest() {
     },
     tearDown: (Device device) async {
       if (device is AndroidDevice) {
+        print('Removing Synthetic notch...');
         await device.shellExec('cmd', <String>[
           'overlay',
           'disable',
@@ -223,7 +226,11 @@ class DriverTest {
   final List<String> extraOptions;
   final String? deviceIdOverride;
   final Map<String, String>? environment;
+
+  /// Run before flutter drive with the result from devices.workingDevice.
   final Future<void> Function(Device device)? setup;
+
+  /// Run after flutter drive with the result from devices.workingDevice.
   final Future<void> Function(Device device)? tearDown;
 
   Future<TaskResult> call() {
