@@ -4,7 +4,31 @@
 
 import 'package:flutter/widgets.dart';
 
-class _TestRouteTransitionRecord extends RouteTransitionRecord {}
+class _TestRouteTransitionRecord extends RouteTransitionRecord {
+  @override
+  bool get isWaitingForEnteringDecision => throw UnimplementedError();
+
+  @override
+  bool get isWaitingForExitingDecision => throw UnimplementedError();
+
+  @override
+  void markForAdd() {}
+
+  @override
+  void markForComplete([dynamic result]) {}
+
+  @override
+  void markForPop([dynamic result]) {}
+
+  @override
+  void markForPush() {}
+
+  @override
+  void markForRemove() {}
+
+  @override
+  Route<dynamic> get route => throw UnimplementedError();
+}
 
 void main() {
   // Generic reference variables.

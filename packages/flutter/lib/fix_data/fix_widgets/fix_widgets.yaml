@@ -945,7 +945,7 @@ transforms:
   - title: "Migrate to 'markForComplete'"
     date: 2025-02-10
     element:
-      uris: [ 'navigator.dart' ]
+      uris: [ 'widgets.dart' ]
       method: 'markForRemove'
       inClass: 'RouteTransitionRecord'
     changes:
