@@ -27,6 +27,7 @@ import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.android.MotionEventTracker;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.*;
@@ -50,6 +51,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private AndroidTouchProcessor androidTouchProcessor;
   private Context context;
   private FlutterView flutterView;
+  private FlutterJNI flutterJNI = null;
 
   @Nullable private TextInputPlugin textInputPlugin;
 
@@ -75,6 +77,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   public void setRegistry(@NonNull PlatformViewRegistry registry) {
     this.registry = (PlatformViewRegistryImpl) registry;
+  }
+
+  /** Whether the SurfaceControl swapchain mode is enabled. */
+  public void setFlutterJNI(FlutterJNI flutterJNI) {
+    this.flutterJNI = flutterJNI;
   }
 
   @Override
@@ -678,6 +685,14 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
             return;
           }
           embeddedView.clearFocus();
+        }
+
+        @Override
+        public boolean isSurfaceControlEnabled() {
+          if (flutterJNI == null) {
+            return false;
+          }
+          return flutterJNI.IsSurfaceControlEnabled();
         }
       };
 }

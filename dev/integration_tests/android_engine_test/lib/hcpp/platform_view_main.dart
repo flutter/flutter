@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:android_driver_extensions/extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -14,7 +16,14 @@ import '../src/allow_list_devices.dart';
 
 void main() async {
   ensureAndroidDevice();
-  enableFlutterDriverExtension(commands: <CommandExtension>[nativeDriverCommands]);
+  enableFlutterDriverExtension(
+    handler: (String? command) async {
+      return json.encode(<String, Object?>{
+        'supported': await HybridAndroidViewController.checkIfSupported(),
+      });
+    },
+    commands: <CommandExtension>[nativeDriverCommands],
+  );
 
   // Run on full screen.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
