@@ -19,6 +19,8 @@ void main() async {
 
   // Run on full screen.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  await ServicesBinding.instance.endOfFrame;
+
   runApp(
     const MainApp(
       platformView: _HybridCompositionAndroidPlatformView(
