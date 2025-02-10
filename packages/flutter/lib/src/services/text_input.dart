@@ -203,6 +203,15 @@ class TextInputType {
   /// On Android this is remapped to the [url] keyboard type as it always shows a space bar.
   static const TextInputType webSearch = TextInputType._(11);
 
+  /// Optimized for social media.
+  ///
+  /// Requests a keyboard that includes keys useful for handles and tags.
+  ///
+  /// On iOS, requests a default keyboard with ready access to the "@" and "#" keys.
+  ///
+  /// On Android this is remapped to the [emailAddress] keyboard type as it always shows the "@" key.
+  static const TextInputType twitter = TextInputType._(12);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
     text,
@@ -217,6 +226,7 @@ class TextInputType {
     streetAddress,
     none,
     webSearch,
+    twitter,
   ];
 
   // Corresponding string name for each of the [values].
@@ -233,6 +243,7 @@ class TextInputType {
     'address',
     'none',
     'webSearch',
+    'twitter',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
@@ -1086,13 +1097,21 @@ enum SelectionChangedCause {
   /// of text.
   drag,
 
-  // TODO(justinmc): Rename this to stylusHandwriting.
-  // https://github.com/flutter/flutter/issues/159223
   /// The user used stylus handwriting to change the selection.
   ///
   /// Currently, this is only supported on iPadOS 14+ via the Scribble feature,
   /// or on Android API 34+ via the Scribe feature.
-  scribble,
+  stylusHandwriting;
+
+  /// The user used stylus handwriting to change the selection.
+  ///
+  /// Currently, this is only supported on iPadOS 14+ via the Scribble feature,
+  /// or on Android API 34+ via the Scribe feature.
+  @Deprecated(
+    'Use stylusHandwriting instead. '
+    'This feature was deprecated after v3.28.0-0.1.pre.',
+  )
+  static const SelectionChangedCause scribble = stylusHandwriting;
 }
 
 /// A mixin for manipulating the selection, provided for toolbar or shortcut

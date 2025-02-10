@@ -7,25 +7,25 @@ import 'dart:ui' show FlutterView;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Defines the type of the Window.
+/// Defines the possible archetypes for a window.
 enum WindowArchetype {
-  /// Regular top-level window.
+  /// Defines a traditional window
   regular,
 
-  /// A window that is on a layer above regular windows and is not dockable.
-  floating_regular,
-
-  /// Dialog window.
-  dialog,
-
-  /// Satellite window attached to a regular, floating_regular or dialog window.
-  satellite,
-
-  /// Popup.
+  /// Defines a popup window
   popup,
+}
 
-  /// Tooltip.
-  tip,
+/// Defines the possible states that a window can be in.
+enum WindowState {
+  /// Window is in its normal state, neither maximized, nor minimized.
+  restored,
+
+  /// Window is maximized, occupying the full screen but still showing the system UI.
+  maximized,
+
+  /// Window is minimized and not visible on the screen.
+  minimized,
 }
 
 /// Defines the anchor point for the anchor rectangle or child [Window] when
@@ -240,221 +240,304 @@ class WindowPositioner {
   final Set<WindowPositionerConstraintAdjustment> constraintAdjustment;
 }
 
-/// Controller used with the [RegularWindow] widget. This controller
-/// provides access to modify and destroy the window, in addition to
-/// listening to changes on the window.
+/// Base class for window controllers.
+///
+/// A window controller must provide a [future] that resolves to a
+/// a [WindowCreationResult] object. This object contains the view
+/// associated with the window, the archetype of the window, the size
+/// of the window, and the state of the window.
+///
+/// The caller may also provide a callback to be called when the window
+/// is destroyed, and a callback to be called when an error is encountered
+/// during the creation of the window.
+///
+/// Each [WindowController] is associated with exactly one root [FlutterView].
+///
+/// When the window is destroyed for any reason (either by the caller or by the
+/// platform), the content of the controller will thereafter be invalid. Callers
+/// may check if this content is invalid via the [isReady] property.
+///
+/// This class implements the [Listenable] interface, so callers can listen
+/// for changes to the window's properties.
 abstract class WindowController with ChangeNotifier {
+  /// Creates a [WindowController] with the provided properties.
+  /// Upon construction, this widget begins creating a window for the platform.
+  /// The [future] parameter is a future that resolves to a [WindowCreationResult]
+  /// object.
+  /// The [onDestroyed] parameter is a callback that is called when the window
+  /// is destroyed.
+  /// The [onError] parameter is a callback that is called when an error is
+  /// encountered during creation.
+  WindowController({
+    VoidCallback? onDestroyed,
+    void Function(String)? onError,
+    required this.future,
+  }) {
+    future
+        .then((WindowCreationResult metadata) async {
+          _handleCreationResult(metadata);
+
+          _listener = _WindowListener(
+            viewId: metadata.rootView.viewId,
+            onChanged: (_WindowChangeProperties properties) {
+              if (properties.size != null) {
+                _size = properties.size!;
+                notifyListeners();
+              }
+            },
+            onDestroyed: () {
+              _view = null;
+              _isPendingDestroy = false;
+              notifyListeners();
+              onDestroyed?.call();
+            },
+          );
+          _WindowingAppGlobalData.instance._listen(_listener);
+        })
+        .catchError((Object? error) {
+          onError?.call(error.toString());
+        });
+  }
+
+  void _handleCreationResult(WindowCreationResult metadata) {
+    _view = metadata.rootView;
+    _size = metadata.size;
+    notifyListeners();
+  }
+
+  /// Returns true if the window associated with the controller has been
+  /// created and is ready to be used. Otherwise, returns false.
+  bool get isReady => _view != null;
+
+  /// The future that resolves when the window has been created.
+  final Future<WindowCreationResult> future;
+
+  late final _WindowListener _listener;
+
+  /// The root view associated to this window, which is unique to each window.
+  FlutterView get rootView => _view!;
   FlutterView? _view;
 
   /// Returns true when the window associated with the controller has been created.
   bool get isShowing => _view != null;
 
-  /// The ID of the view used for this window, which is unique to each window.
-  FlutterView? get view => _view;
-  set view(FlutterView? value) {
-    _view = value;
-    notifyListeners();
-  }
-
-  Size? _size;
-
   /// The current size of the window. This may differ from the requested size.
-  Size? get size => _size;
-  set size(Size? value) {
-    _size = value;
-    notifyListeners();
-  }
-
-  int? _parentViewId;
-
-  /// The ID of the parent in which this rendered, if any.
-  int? get parentViewId => _parentViewId;
-  set parentViewId(int? value) {
-    _parentViewId = value;
-    notifyListeners();
-  }
+  Size get size => _size;
+  Size _size = Size.zero;
 
   /// The archetype of the window.
   WindowArchetype get type;
 
-  /// Destroys this window.
+  /// Destroys this window. If the window is not ready or is already pending
+  /// destruction, then nothing happens. Otherwise, we begin destroying the
+  /// window.
   Future<void> destroy() async {
-    if (view == null) {
+    if (!isReady || _isPendingDestroy) {
       return;
     }
 
-    return destroyWindow(view!.viewId);
+    _isPendingDestroy = true;
+    return _destroyWindow(rootView.viewId);
   }
 }
 
-/// Provided to [RegularWindow]. Allows the user to listen on changes
-/// to a regular window and modify the window.
+/// A controller for a regular window.
+///
+/// A regular window is a traditional window that can be resized, minimized,
+/// maximized, and closed. Upon construction, the window is created for the
+/// platform with the provided properties.
+///
+/// This class does not interact with the widget tree. Instead, it is typically
+/// provided to the [RegularWindow] widget, who does the work of rendering the
+/// content inside of this window.
+///
+/// An example usage might look like:
+/// ```dart
+/// final RegularWindowController controller = RegularWindowController(
+///   size: const Size(800, 600),
+///   sizeConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///   title: "Example Window",
+/// );
+/// runWidget(RegularWindow(
+///   controller: controller,
+///   child: MaterialApp(home: Container())));
+/// ```
+///
+/// When provided to a [RegularWindow] widget, widgets inside of the [child]
+/// parameter will have access to the [RegularWindowController] via the
+/// [WindowControllerContext] widget.
 class RegularWindowController extends WindowController {
+  /// Creates a [RegularWindowController] with the provided properties.
+  /// Upon construction, the window is created for the platform.
+  ///
+  /// [title] the title of the window
+  /// [state] the initial state of the window
+  /// [sizeConstraints] the size constraints of the window
+  /// [onDestroyed] a callback that is called when the window is destroyed
+  /// [onError] a callback that is called when an error is encountered
+  /// [size] the size of the window
+  RegularWindowController({
+    String? title,
+    WindowState? state,
+    BoxConstraints? sizeConstraints,
+    VoidCallback? onDestroyed,
+    void Function(String)? onError,
+    required Size size,
+  }) : super(
+         onDestroyed: onDestroyed,
+         onError: onError,
+         future: _createRegular(
+           size: size,
+           sizeConstraints: sizeConstraints,
+           title: title,
+           state: state,
+         ),
+       ) {}
+
+  @override
+  void _handleCreationResult(WindowCreationResult metadata) {
+    _state = (metadata as _RegularWindowCreationResult).state;
+    super._handleCreationResult(metadata);
+  }
+
   @override
   WindowArchetype get type => WindowArchetype.regular;
 
-  /// Modify the properties of the window.
-  Future<void> modify({Size? size}) {
-    throw UnimplementedError();
+  /// The current state of the window.
+  WindowState get state => _state;
+  WindowState _state = WindowState.restored;
+
+  /// Modify the properties of the window. The window must be ready before
+  /// calling this method. If the window is not ready, an assertion will be
+  /// thrown. The caller must provide at least one of the following parameters:
+  ///
+  /// [size] the new size of the window
+  /// [title] the new title of the window
+  /// [state] the new state of the window
+  ///
+  /// If no parameters are provided, then an assertion will be thrown.
+  Future<void> modify({Size? size, String? title, WindowState? state}) {
+    assert(isReady, 'Window is not ready');
+    return _modifyRegular(viewId: rootView.viewId, size: size, title: title, state: state);
   }
 }
 
-class PopupWindowController extends WindowController {
+abstract class ChildWindowController extends WindowController {
+  ChildWindowController({
+    VoidCallback? onDestroyed,
+    void Function(String)? onError,
+    required Future<WindowCreationResult> future,
+    required FlutterView parent,
+  }) : _parent = parent,
+       super(onDestroyed: onDestroyed, onError: onError, future: future);
+
+  FlutterView get parent => _parent;
+  final FlutterView _parent;
+}
+
+class PopupWindowController extends ChildWindowController {
+  PopupWindowController({
+    BoxConstraints? sizeConstraints,
+    VoidCallback? onDestroyed,
+    void Function(String)? onError,
+    Rect? anchorRect,
+    WindowPositioner positioner = const WindowPositioner(),
+    required FlutterView parent,
+    required Size size,
+  }) : super(
+         onDestroyed: onDestroyed,
+         onError: onError,
+         future: _createPopup(
+           parentViewId: parent.viewId,
+           size: size,
+           sizeConstraints: sizeConstraints,
+           anchorRect: anchorRect,
+           positioner: positioner,
+         ),
+         parent: parent,
+       );
+
   @override
   WindowArchetype get type => WindowArchetype.popup;
 }
 
-class _GenericWindow extends StatefulWidget {
-  _GenericWindow({
-    this.onDestroyed,
-    this.onError,
-    super.key,
-    required this.createFuture,
-    required this.controller,
-    required this.child,
-  });
+class _Window extends StatefulWidget {
+  const _Window({super.key, required this.controller, required this.child});
 
-  final Future<WindowCreationResult> Function() createFuture;
-  final WindowController? controller;
-  final void Function()? onDestroyed;
-  final void Function(String?)? onError;
+  final WindowController controller;
   final Widget child;
 
   @override
-  State<_GenericWindow> createState() => _GenericWindowState();
+  State<_Window> createState() => _WindowState();
 }
 
-class _GenericWindowState extends State<_GenericWindow> {
-  _WindowListener? _listener;
-  Future<WindowCreationResult>? _future;
-  int? _viewId;
-  bool _hasBeenDestroyed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    create();
-  }
-
-  void create() {
-    setState(() {
-      _future = widget.createFuture();
-    });
-
-    _future!
-        .then((WindowCreationResult metadata) async {
-          _viewId = metadata.view.viewId;
-          if (widget.controller != null) {
-            widget.controller!.view = metadata.view;
-            widget.controller!.parentViewId = metadata.parent;
-            widget.controller!.size = metadata.size;
-          }
-
-          final WindowingAppContext? windowingAppContext = WindowingAppContext.of(context);
-          assert(windowingAppContext != null);
-          _listener = _WindowListener(
-            viewId: metadata.view.viewId,
-            onChanged: (_WindowChangeProperties properties) {
-              if (widget.controller == null) {
-                return;
-              }
-
-              if (properties.size != null) {
-                widget.controller!.size = properties.size;
-              }
-              if (properties.parentViewId != null) {
-                widget.controller!.parentViewId = properties.parentViewId;
-              }
-            },
-            onDestroyed: () {
-              widget.controller?.view = null;
-              widget.onDestroyed?.call();
-              _hasBeenDestroyed = true;
-            },
-          );
-          _WindowingAppGlobalData.instance()._registerListener(_listener!);
-        })
-        .catchError((Object? error) {
-          widget.onError?.call(error.toString());
-        });
-  }
-
+class _WindowState extends State<_Window> {
   @override
   Future<void> dispose() async {
     super.dispose();
-
-    if (_listener != null) {
-      _WindowingAppGlobalData.instance()._unregisterListener(_listener!);
-    }
-
-    // In the event that we're being disposed before we've been destroyed
-    // we need to destroy the window on our way out.
-    if (!_hasBeenDestroyed && _viewId != null) {
-      // In the event of an argument error, we do nothing. We assume that
-      // the window has been successfully destroyed somehow else.
-      try {
-        await destroyWindow(_viewId!);
-      } on ArgumentError {}
-    }
+    await widget.controller.destroy();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<WindowCreationResult>(
       key: widget.key,
-      future: _future,
+      future: widget.controller.future,
       builder: (BuildContext context, AsyncSnapshot<WindowCreationResult> metadata) {
         if (!metadata.hasData) {
           return const ViewCollection(views: <Widget>[]);
         }
 
         return View(
-          view: metadata.data!.view,
-          child: WindowContext(view: metadata.data!.view, child: widget.child),
+          view: metadata.data!.rootView,
+          child: WindowControllerContext(controller: widget.controller, child: widget.child),
         );
       },
     );
   }
 }
 
-/// A widget that creates a regular window. This content of this window is
-/// rendered into a [View], meaning that this widget must be rendered into
-/// either a [ViewAnchor] or a [ViewCollection].
+/// The [RegularWindow] widget provides a way to render a regular window in the
+/// widget tree. The provided [controller] creates the native window that backs
+/// the widget. The [child] widget is rendered into this newly created window.
+///
+/// While the window is being created, the [RegularWindow] widget will render
+/// an empty [ViewCollection] widget. Once the window is created, the [child]
+/// widget will be rendered into the window inside of a [View].
+///
+/// An example usage might look like:
+/// ```dart
+/// final RegularWindowController controller = RegularWindowController(
+///   size: const Size(800, 600),
+///   sizeConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///   title: "Example Window",
+/// );
+/// runApp(RegularWindow(
+///   controller: controller,
+///   child: MaterialApp(home: Container())));
+/// ```
+///
+/// When a [RegularWindow] widget is removed from the tree, the window that was created
+/// by the [controller] is automatically destroyed if it has not yet been destroyed.
+///
+/// Widgets in the same tree as the [child] widget will have access to the
+/// [RegularWindowController] via the [WindowControllerContext] widget.
 class RegularWindow extends StatelessWidget {
-  /// Creates a regular window widget
-  const RegularWindow({
-    this.controller,
-    this.onDestroyed,
-    this.onError,
-    super.key,
-    required this.preferredSize,
-    required this.child,
-  });
+  /// Creates a regular window widget.
+  /// [controller] the controller for this window
+  /// [child] the content to render into this window
+  /// [key] the key for this widget
+  const RegularWindow({super.key, required this.controller, required this.child});
 
-  final RegularWindowController? controller;
-
-  /// Called when the window backing this widget is destroyed.
-  final void Function()? onDestroyed;
-
-  /// Called when an error is encountered during the creation of this widget.
-  final void Function(String?)? onError;
-
-  /// Preferred size of the window.
-  final Size preferredSize;
+  /// Controller for this widget.
+  final RegularWindowController controller;
 
   /// The content rendered into this window.
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return _GenericWindow(
-      onDestroyed: onDestroyed,
-      onError: onError,
-      key: key,
-      createFuture: () => createRegular(size: preferredSize),
-      controller: controller,
-      child: child,
-    );
+    return _Window(key: key, controller: controller, child: child);
   }
 }
 
@@ -462,179 +545,117 @@ class RegularWindow extends StatelessWidget {
 /// rendered into a [View], meaning that this widget must be rendered into
 /// either a [ViewAnchor] or a [ViewCollection].
 class PopupWindow extends StatelessWidget {
-  /// Creates a popup window widget
-  const PopupWindow({
-    this.controller,
-    this.onDestroyed,
-    this.onError,
-    super.key,
-    required Size preferredSize,
-    Rect? anchorRect,
-    WindowPositioner positioner = const WindowPositioner(),
-    required this.child,
-  }) : _preferredSize = preferredSize,
-       _anchorRect = anchorRect,
-       _positioner = positioner;
+  /// Creates a regular window widget
+  const PopupWindow({super.key, required this.controller, required this.child});
 
   /// Controller for this widget.
-  final PopupWindowController? controller;
-
-  /// Called when the window backing this widget is destroyed.
-  final void Function()? onDestroyed;
-
-  /// Called when an error is encountered during the creation of this widget.
-  final void Function(String?)? onError;
-
-  final Size _preferredSize;
-
-  final Rect? _anchorRect;
-
-  final WindowPositioner _positioner;
+  final PopupWindowController controller;
 
   /// The content rendered into this window.
   final Widget child;
 
-  FlutterView _getParent(BuildContext context) {
-    final FlutterView? view = WindowContext.of(context)?.view;
-    assert(view != null);
-    return view!;
-  }
-
-  Rect _clampRectToSize(BuildContext context, Rect anchorRect) {
-    final double dpr = MediaQuery.of(context).devicePixelRatio;
-    final Size size = _getParent(context).physicalSize / dpr;
-
-    final double left = anchorRect.left.clamp(0, size.width);
-    final double top = anchorRect.top.clamp(0, size.height);
-    final double right = anchorRect.right.clamp(0, size.width);
-    final double bottom = anchorRect.bottom.clamp(0, size.height);
-    return Rect.fromLTRB(left, top, right, bottom);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return _GenericWindow(
-      onDestroyed: onDestroyed,
-      onError: onError,
-      key: key,
-      createFuture:
-          () => createPopup(
-            parentViewId: _getParent(context).viewId,
-            size: _preferredSize,
-            anchorRect: _anchorRect == null ? null : _clampRectToSize(context, _anchorRect),
-            positioner: _positioner,
-          ),
-      controller: controller,
-      child: child,
-    );
+    return _Window(key: key, controller: controller, child: child);
   }
 }
 
-/// Provides descendents with access to the [Window] in which they are rendered
-class WindowContext extends InheritedWidget {
-  /// [window] the [Window]
-  const WindowContext({super.key, required this.view, required super.child});
+/// Provides descendents with access to the [WindowController] associated with
+/// the window that is being rendered.
+class WindowControllerContext extends InheritedWidget {
+  /// Creates a new [WindowControllerContext]
+  /// [controller] the controller associated with this window
+  /// [child] the child widget
+  const WindowControllerContext({super.key, required this.controller, required super.child});
 
-  /// The view backing this window.
-  final FlutterView view;
-
-  /// The id of the current window.
-  int get viewId => view.viewId;
+  /// The controller associated with this window.
+  final WindowController controller;
 
   /// Returns the [WindowContext] if any
-  static WindowContext? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<WindowContext>();
+  static WindowControllerContext? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<WindowControllerContext>();
   }
 
   @override
-  bool updateShouldNotify(WindowContext oldWidget) {
-    return viewId != oldWidget.viewId;
+  bool updateShouldNotify(WindowControllerContext oldWidget) {
+    return controller != oldWidget.controller;
   }
 }
 
-/// The raw data returned as a result of creating a window.
-class WindowCreationResult {
-  /// Creates a new window.
+/// Used by the [WindowController], this class defines the raw data
+/// associated with the creation of a window. This object can be constructed
+/// from anywhere, but it is typically returned by internal methods that create
+/// windows.
+abstract class WindowCreationResult {
+  /// Creates a new [WindowCreationResult]
+  /// [rootView] the view associated with this window
+  /// [archetype] the archetype of this window
+  /// [size] the size of this window
+  /// [state] the state of this window
   WindowCreationResult({
-    required this.view,
+    this.parentView,
+    required this.rootView,
     required this.archetype,
     required this.size,
-    this.parent,
   });
 
-  /// The view associated with the window.
-  final FlutterView view;
+  /// The view associated with this window.
+  final FlutterView rootView;
 
-  /// The archetype of the window.
+  final FlutterView? parentView;
+
+  /// The archetype of this window.
   final WindowArchetype archetype;
 
-  /// The initial size of the window.
+  /// The size of this window.
   final Size size;
-
-  /// The id of the window's parent, if any.
-  final int? parent;
 }
 
-/// Creates a regular window for the platform and returns the metadata associated
-/// with the new window. Users should prefer using the [RegularWindow]
-/// widget instead of this method.
-///
-/// [size] the size of the new [Window] in pixels
-Future<WindowCreationResult> createRegular({required Size size}) {
-  return _createWindow(
-    viewBuilder: (MethodChannel channel) async {
-      return await channel.invokeMethod('createWindow', <String, dynamic>{
-            'size': <int>[size.width.toInt(), size.height.toInt()],
-          })
-          as Map<Object?, Object?>;
-    },
-  );
+class _RegularWindowCreationResult extends WindowCreationResult {
+  _RegularWindowCreationResult({
+    super.parentView,
+    required super.rootView,
+    required super.archetype,
+    required super.size,
+    required this.state,
+  });
+
+  /// The state of the window
+  final WindowState state;
 }
 
-Future<WindowCreationResult> createPopup({
-  required int parentViewId,
+Future<_RegularWindowCreationResult> _createRegular({
   required Size size,
-  Rect? anchorRect,
-  required WindowPositioner positioner,
-}) {
-  int constraintAdjustmentBitmask = 0;
-  for (final WindowPositionerConstraintAdjustment adjustment in positioner.constraintAdjustment) {
-    constraintAdjustmentBitmask |= 1 << adjustment.index;
-  }
-
-  return _createWindow(
-    viewBuilder: (MethodChannel channel) async {
-      return await channel.invokeMethod('createPopup', <String, dynamic>{
-            'parent': parentViewId,
-            'size': <int>[size.width.toInt(), size.height.toInt()],
-            'anchorRect':
-                anchorRect != null
-                    ? <int>[
-                      anchorRect.left.toInt(),
-                      anchorRect.top.toInt(),
-                      anchorRect.width.toInt(),
-                      anchorRect.height.toInt(),
-                    ]
-                    : null,
-            'positionerParentAnchor': positioner.parentAnchor.index,
-            'positionerChildAnchor': positioner.childAnchor.index,
-            'positionerOffset': <int>[positioner.offset.dx.toInt(), positioner.offset.dy.toInt()],
-            'positionerConstraintAdjustment': constraintAdjustmentBitmask,
-          })
-          as Map<Object?, Object?>;
-    },
-  );
-}
-
-Future<WindowCreationResult> _createWindow({
-  required Future<Map<Object?, Object?>> Function(MethodChannel channel) viewBuilder,
+  BoxConstraints? sizeConstraints,
+  String? title,
+  WindowState? state,
 }) async {
   WidgetsFlutterBinding.ensureInitialized();
-  final Map<Object?, Object?> creationData = await viewBuilder(SystemChannels.windowing);
+  final Map<Object?, Object?> creationData =
+      await SystemChannels.windowing.invokeMethod('createRegular', <String, dynamic>{
+            'size': <double>[size.width, size.height],
+            'minSize':
+                sizeConstraints != null
+                    ? <double>[sizeConstraints.minWidth, sizeConstraints.minHeight]
+                    : null,
+            'maxSize':
+                sizeConstraints != null
+                    ? <double>[sizeConstraints.maxWidth, sizeConstraints.maxHeight]
+                    : null,
+            'title': title,
+            'state': state?.toString(),
+          })
+          as Map<Object?, Object?>;
   final int viewId = creationData['viewId']! as int;
-  final WindowArchetype archetype = WindowArchetype.values[creationData['archetype']! as int];
-  final List<Object?> size = creationData['size']! as List<Object?>;
-  final int? parentViewId = creationData['parentViewId'] as int?;
+  final List<Object?> resultSize = creationData['size']! as List<Object?>;
+  final WindowState resultState =
+      (creationData['state'] as String?) != null
+          ? WindowState.values.firstWhere(
+            (WindowState e) => e.toString() == creationData['state'],
+            orElse:
+                () => throw Exception('Invalid window state received: ${creationData['state']}'),
+          )
+          : WindowState.restored;
 
   final FlutterView flView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
     (FlutterView view) => view.viewId == viewId,
@@ -643,18 +664,111 @@ Future<WindowCreationResult> _createWindow({
     },
   );
 
-  return WindowCreationResult(
-    view: flView,
-    archetype: archetype,
-    size: Size((size[0]! as int).toDouble(), (size[1]! as int).toDouble()),
-    parent: parentViewId,
+  return _RegularWindowCreationResult(
+    rootView: flView,
+    archetype: WindowArchetype.regular,
+    size: Size(resultSize[0]! as double, resultSize[1]! as double),
+    state: resultState,
   );
 }
 
-/// Destroys the window associated with the provided view ID.
-///
-/// [viewId] the view id of the window that should be destroyed
-Future<void> destroyWindow(int viewId) async {
+class _PopupWindowCreationResult extends WindowCreationResult {
+  _PopupWindowCreationResult({
+    required super.parentView,
+    required super.rootView,
+    required super.archetype,
+    required super.size,
+    required this.relativePosition,
+  });
+
+  /// The relative position to the parent.
+  final Offset relativePosition;
+}
+
+Future<_PopupWindowCreationResult> _createPopup({
+  required int parentViewId,
+  required Size size,
+  BoxConstraints? sizeConstraints,
+  Rect? anchorRect,
+  required WindowPositioner positioner,
+}) async {
+  final List<String> constraintAdjustmentList = <String>[];
+  for (final WindowPositionerConstraintAdjustment adjustment in positioner.constraintAdjustment) {
+    constraintAdjustmentList.add(adjustment.toString());
+  }
+
+  WidgetsFlutterBinding.ensureInitialized();
+  final Map<Object?, Object?> creationData =
+      await SystemChannels.windowing.invokeMethod('createPopup', <String, dynamic>{
+            'parentViewId': parentViewId,
+            'size': <double>[size.width, size.height],
+            'minSize':
+                sizeConstraints != null
+                    ? <double>[sizeConstraints.minWidth, sizeConstraints.minHeight]
+                    : null,
+            'maxSize':
+                sizeConstraints != null
+                    ? <double>[sizeConstraints.maxWidth, sizeConstraints.maxHeight]
+                    : null,
+            'positioner': <String, dynamic>{
+              'anchorRect':
+                  anchorRect != null
+                      ? <double>[
+                        anchorRect.left,
+                        anchorRect.top,
+                        anchorRect.width,
+                        anchorRect.height,
+                      ]
+                      : null,
+              'parentAnchor': positioner.parentAnchor.toString(),
+              'childAnchor': positioner.childAnchor.toString(),
+              'offset': <double>[positioner.offset.dx, positioner.offset.dy],
+              'constraintAdjustment': constraintAdjustmentList,
+            },
+          })
+          as Map<Object?, Object?>;
+
+  final int viewId = creationData['viewId']! as int;
+  final List<Object?> resultSize = creationData['size']! as List<Object?>;
+  final int resultParentViewId = creationData['parentViewId']! as int;
+  final List<dynamic>? relativePositionList = creationData['relativePosition'] as List<dynamic>?;
+  final Offset relativePosition =
+      (relativePositionList != null && relativePositionList.length == 2)
+          ? Offset(relativePositionList[0] as double, relativePositionList[1] as double)
+          : Offset.zero;
+  final FlutterView flView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
+    (FlutterView view) => view.viewId == viewId,
+    orElse: () {
+      throw Exception('No matching view found for viewId: $viewId');
+    },
+  );
+  final FlutterView parentView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
+    (FlutterView view) => view.viewId == resultParentViewId,
+    orElse: () {
+      throw Exception('No matching view found for viewId: $viewId');
+    },
+  );
+
+  return _PopupWindowCreationResult(
+    rootView: flView,
+    parentView: parentView,
+    archetype: WindowArchetype.regular,
+    size: Size(resultSize[0]! as double, resultSize[1]! as double),
+    relativePosition: relativePosition,
+  );
+}
+
+Future<void> _modifyRegular({required int viewId, Size? size, String? title, WindowState? state}) {
+  assert(size != null || title != null || state != null);
+  return SystemChannels.windowing.invokeMethod('modifyRegular', <String, dynamic>{
+    'viewId': viewId,
+    'size': size != null ? <double>[size.width, size.height] : null,
+    'title': title,
+    'state': state?.toString(),
+  });
+}
+
+Future<void> _destroyWindow(int viewId) async {
   try {
     await SystemChannels.windowing.invokeMethod('destroyWindow', <String, dynamic>{
       'viewId': viewId,
@@ -667,10 +781,10 @@ Future<void> destroyWindow(int viewId) async {
 }
 
 class _WindowChangeProperties {
-  _WindowChangeProperties({this.size, this.parentViewId});
+  _WindowChangeProperties({this.size, this.relativePosition});
 
   Size? size;
-  int? parentViewId;
+  Offset? relativePosition;
 }
 
 class _WindowListener {
@@ -682,47 +796,43 @@ class _WindowListener {
 }
 
 class _WindowingAppGlobalData {
-  final List<_WindowListener> _listeners = <_WindowListener>[];
-  static _WindowingAppGlobalData? _instance;
-
-  static _WindowingAppGlobalData instance() {
-    _instance ??= _WindowingAppGlobalData();
-    return _instance!;
-  }
-
   _WindowingAppGlobalData() {
     WidgetsFlutterBinding.ensureInitialized();
     SystemChannels.windowing.setMethodCallHandler(_methodCallHandler);
   }
 
+  static _WindowingAppGlobalData get instance {
+    _instance ??= _WindowingAppGlobalData();
+    return _instance!;
+  }
+
+  final List<_WindowListener> _listeners = <_WindowListener>[];
+  static _WindowingAppGlobalData? _instance;
+
   Future<void> _methodCallHandler(MethodCall call) async {
     final Map<Object?, Object?> arguments = call.arguments as Map<Object?, Object?>;
 
     switch (call.method) {
-      case 'onWindowCreated':
-        final int viewId = arguments['viewId']! as int;
-        int? parentViewId;
-        if (arguments['parentViewId'] != null) {
-          parentViewId = arguments['parentViewId']! as int;
-        }
-
-        final _WindowChangeProperties properties = _WindowChangeProperties(
-          parentViewId: parentViewId,
-        );
-        for (final _WindowListener listener in _listeners) {
-          if (listener.viewId == viewId) {
-            listener.onChanged(properties);
-          }
-        }
       case 'onWindowChanged':
         final int viewId = arguments['viewId']! as int;
         Size? size;
         if (arguments['size'] != null) {
           final List<Object?> sizeRaw = arguments['size']! as List<Object?>;
-          size = Size((sizeRaw[0]! as int).toDouble(), (sizeRaw[1]! as int).toDouble());
+          size = Size(sizeRaw[0]! as double, sizeRaw[1]! as double);
+        }
+        Offset? relativePosition;
+        if (arguments['relativePosition'] != null) {
+          final List<Object?> relativePositionRaw = arguments['relativePosition']! as List<Object?>;
+          relativePosition = Offset(
+            relativePositionRaw[0]! as double,
+            relativePositionRaw[1]! as double,
+          );
         }
 
-        final _WindowChangeProperties properties = _WindowChangeProperties(size: size);
+        final _WindowChangeProperties properties = _WindowChangeProperties(
+          size: size,
+          relativePosition: relativePosition,
+        );
         for (final _WindowListener listener in _listeners) {
           if (listener.viewId == viewId) {
             listener.onChanged(properties);
@@ -735,56 +845,12 @@ class _WindowingAppGlobalData {
             listener.onDestroyed?.call();
           }
         }
+
+        _listeners.removeWhere((_WindowListener listener) => listener.viewId == viewId);
     }
   }
 
-  void _registerListener(_WindowListener listener) {
+  void _listen(_WindowListener listener) {
     _listeners.add(listener);
-  }
-
-  void _unregisterListener(_WindowListener listener) {
-    _listeners.remove(listener);
-  }
-}
-
-/// Declares that an application will create multiple windows.
-class WindowingApp extends StatefulWidget {
-  /// Creates a new windowing app with the provided child windows.
-  const WindowingApp({super.key, required this.children});
-
-  /// A list of initial windows to render. These windows will be placed inside
-  /// of a [ViewCollection].
-  final List<Widget> children;
-
-  @override
-  State<WindowingApp> createState() => _WindowingAppState();
-}
-
-class _WindowingAppState extends State<WindowingApp> {
-  @override
-  Widget build(BuildContext context) {
-    return WindowingAppContext._(windowingApp: this, child: ViewCollection(views: widget.children));
-  }
-}
-
-/// This context is only available when a widget tree includes the [WindowingApp]
-/// widget. Other widgets may use the presence of this context to check whether
-/// or not the user has specified this application has a window application. In
-/// that case, they may opt to perform a different behavior, such as opening
-/// a window where they were previously using an overlay.
-class WindowingAppContext extends InheritedWidget {
-  const WindowingAppContext._({required super.child, required _WindowingAppState windowingApp})
-    : _windowingApp = windowingApp;
-
-  final _WindowingAppState _windowingApp;
-
-  /// Returns the [MultiWindowAppContext] if any
-  static WindowingAppContext? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<WindowingAppContext>();
-  }
-
-  @override
-  bool updateShouldNotify(WindowingAppContext oldWidget) {
-    return _windowingApp != oldWidget._windowingApp;
   }
 }

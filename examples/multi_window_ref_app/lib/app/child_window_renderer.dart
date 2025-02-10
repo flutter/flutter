@@ -36,8 +36,8 @@ class ChildWindowRenderer extends StatelessWidget {
                 windowSettings: windowSettings,
                 positionerSettingsModifier: positionerSettingsModifier,
                 windowManagerModel: windowManagerModel,
-                onDestroyed: () => windowManagerModel.remove(child),
-                onError: () => windowManagerModel.remove(child),
+                onDestroyed: () => windowManagerModel.remove(child.key),
+                onError: () => windowManagerModel.remove(child.key),
               ));
             }
           }

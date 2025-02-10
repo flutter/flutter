@@ -6,7 +6,9 @@
 
 #include <dwmapi.h>
 
+#include "flutter/shell/platform/common/windowing.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
+#include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 
 namespace flutter {
 
@@ -18,10 +20,10 @@ constexpr char kOnWindowCreatedMethod[] = "onWindowCreated";
 constexpr char kOnWindowDestroyedMethod[] = "onWindowDestroyed";
 
 // Keys used in the onWindow* messages sent through the channel.
-constexpr char kIsMovingKey[] = "isMoving";
 constexpr char kParentViewIdKey[] = "parentViewId";
 constexpr char kRelativePositionKey[] = "relativePosition";
 constexpr char kSizeKey[] = "size";
+constexpr char kStateKey[] = "state";
 constexpr char kViewIdKey[] = "viewId";
 
 }  // namespace
@@ -35,58 +37,91 @@ FlutterHostWindowController::~FlutterHostWindowController() {
 }
 
 std::optional<WindowMetadata> FlutterHostWindowController::CreateHostWindow(
-    std::wstring const& title,
-    WindowSize const& preferred_size,
-    WindowArchetype archetype,
-    std::optional<WindowPositioner> positioner,
-    std::optional<FlutterViewId> parent_view_id) {
-  std::optional<HWND> const owner_hwnd =
-      parent_view_id.has_value() &&
-              windows_.find(parent_view_id.value()) != windows_.end()
-          ? std::optional<HWND>{windows_[parent_view_id.value()]
-                                    ->GetWindowHandle()}
-          : std::nullopt;
+    WindowCreationSettings const& settings) {
+  auto window = std::make_unique<FlutterHostWindow>(this, settings);
 
-  auto window = std::make_unique<FlutterHostWindow>(
-      this, title, preferred_size, archetype, owner_hwnd, positioner);
   if (!window->GetWindowHandle()) {
+    FML_LOG(ERROR) << "Failed to create host window";
     return std::nullopt;
   }
 
   // Assume first window is the main window.
   if (windows_.empty()) {
-    window->SetQuitOnClose(true);
+    window->quit_on_close_ = true;
   }
 
-  FlutterViewId const view_id = window->GetFlutterViewId().value();
+  FlutterViewId const view_id = window->GetFlutterViewId();
+  std::optional<WindowState> const state = window->GetState();
+  std::optional<Point> relative_position = window->GetRelativePosition();
   windows_[view_id] = std::move(window);
 
-  SendOnWindowCreated(view_id, parent_view_id);
-
   WindowMetadata result = {.view_id = view_id,
-                           .archetype = archetype,
-                           .size = GetWindowSize(view_id),
-                           .parent_id = parent_view_id};
+                           .archetype = settings.archetype,
+                           .size = GetViewSize(view_id),
+                           .parent_id = std::nullopt,
+                           .state = std::nullopt};
+  if (settings.archetype == WindowArchetype::kRegular) {
+    result.state = state;
+  }
+  if (settings.archetype == WindowArchetype::kPopup) {
+    result.parent_id = settings.parent_view_id;
+    result.relative_position = relative_position;
+  }
 
   return result;
 }
 
-bool FlutterHostWindowController::DestroyHostWindow(FlutterViewId view_id) {
-  if (auto it = windows_.find(view_id); it != windows_.end()) {
-    FlutterHostWindow* const window = it->second.get();
-    HWND const window_handle = window->GetWindowHandle();
-
-    // |window| will be removed from |windows_| when WM_NCDESTROY is handled.
-    PostMessage(window->GetWindowHandle(), WM_CLOSE, 0, 0);
-
-    return true;
+bool FlutterHostWindowController::ModifyHostWindow(
+    FlutterViewId view_id,
+    WindowModificationSettings const& settings) const {
+  FlutterHostWindow* const window = GetHostWindow(view_id);
+  if (!window) {
+    FML_LOG(ERROR) << "Failed to find window with view ID " << view_id;
+    return false;
   }
-  return false;
+
+  std::optional<Size> changed_size;
+  Size const size_before = GetViewSize(view_id);
+
+  if (settings.size.has_value()) {
+    window->SetClientSize(*settings.size);
+  }
+  if (settings.title.has_value()) {
+    window->SetTitle(*settings.title);
+  }
+  if (settings.state.has_value()) {
+    window->SetState(*settings.state);
+  }
+
+  Size const size_after = GetViewSize(view_id);
+  if (size_before != size_after) {
+    changed_size = size_after;
+  }
+
+  if (changed_size) {
+    SendOnWindowChanged(view_id, changed_size, std::nullopt);
+  }
+
+  return true;
+}
+
+bool FlutterHostWindowController::DestroyHostWindow(
+    FlutterViewId view_id) const {
+  FlutterHostWindow* const window = GetHostWindow(view_id);
+  if (!window) {
+    FML_LOG(ERROR) << "Failed to find window with view ID " << view_id;
+    return false;
+  }
+
+  // |window| will be removed from |windows_| when WM_NCDESTROY is handled.
+  PostMessage(window->GetWindowHandle(), WM_CLOSE, 0, 0);
+
+  return true;
 }
 
 FlutterHostWindow* FlutterHostWindowController::GetHostWindow(
     FlutterViewId view_id) const {
-  if (auto it = windows_.find(view_id); it != windows_.end()) {
+  if (auto const it = windows_.find(view_id); it != windows_.end()) {
     return it->second.get();
   }
   return nullptr;
@@ -104,7 +139,7 @@ LRESULT FlutterHostWindowController::HandleMessage(HWND hwnd,
           });
       if (it != windows_.end()) {
         FlutterViewId const view_id = it->first;
-        bool const quit_on_close = it->second->GetQuitOnClose();
+        bool const quit_on_close = it->second->quit_on_close_;
 
         windows_.erase(it);
 
@@ -120,7 +155,7 @@ LRESULT FlutterHostWindowController::HandleMessage(HWND hwnd,
       if (wparam != WA_INACTIVE) {
         if (FlutterHostWindow* const window =
                 FlutterHostWindow::GetThisFromHandle(hwnd)) {
-          if (window->GetArchetype() != WindowArchetype::popup) {
+          if (window->GetArchetype() != WindowArchetype::kPopup) {
             // If a non-popup window is activated, close popups for all windows.
             auto it = windows_.begin();
             while (it != windows_.end()) {
@@ -155,8 +190,14 @@ LRESULT FlutterHostWindowController::HandleMessage(HWND hwnd,
             return window.second->GetWindowHandle() == hwnd;
           });
       if (it != windows_.end()) {
-        FlutterViewId const view_id = it->first;
-        SendOnWindowChanged(view_id);
+        auto& [view_id, window] = *it;
+        if (window->archetype_ == WindowArchetype::kRegular) {
+          window->state_ = (wparam == SIZE_MAXIMIZED) ? WindowState::kMaximized
+                           : (wparam == SIZE_MINIMIZED)
+                               ? WindowState::kMinimized
+                               : WindowState::kRestored;
+        }
+        SendOnWindowChanged(view_id, GetViewSize(view_id), std::nullopt);
       }
     } break;
     default:
@@ -184,7 +225,7 @@ void FlutterHostWindowController::DestroyAllWindows() {
     // Destroy windows in reverse order of creation.
     for (auto it = std::prev(windows_.end());
          it != std::prev(windows_.begin());) {
-      auto current = it--;
+      auto const current = it--;
       auto const& [view_id, window] = *current;
       if (window->GetWindowHandle()) {
         DestroyHostWindow(view_id);
@@ -193,53 +234,37 @@ void FlutterHostWindowController::DestroyAllWindows() {
   }
 }
 
-WindowSize FlutterHostWindowController::GetWindowSize(
-    FlutterViewId view_id) const {
-  HWND const hwnd = windows_.at(view_id)->GetWindowHandle();
-  RECT frame_rect;
-  DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &frame_rect,
-                        sizeof(frame_rect));
-
-  // Convert to logical coordinates.
-  auto const dpr = FlutterDesktopGetDpiForHWND(hwnd) /
-                   static_cast<double>(USER_DEFAULT_SCREEN_DPI);
-  frame_rect.left = static_cast<LONG>(frame_rect.left / dpr);
-  frame_rect.top = static_cast<LONG>(frame_rect.top / dpr);
-  frame_rect.right = static_cast<LONG>(frame_rect.right / dpr);
-  frame_rect.bottom = static_cast<LONG>(frame_rect.bottom / dpr);
-
-  auto const width = frame_rect.right - frame_rect.left;
-  auto const height = frame_rect.bottom - frame_rect.top;
-  return {static_cast<int>(width), static_cast<int>(height)};
+Size FlutterHostWindowController::GetViewSize(FlutterViewId view_id) const {
+  HWND const window_handle = GetHostWindow(view_id)->GetWindowHandle();
+  RECT rect;
+  GetClientRect(window_handle, &rect);
+  double const dpr = FlutterDesktopGetDpiForHWND(window_handle) /
+                     static_cast<double>(USER_DEFAULT_SCREEN_DPI);
+  double const width = rect.right / dpr;
+  double const height = rect.bottom / dpr;
+  return {width, height};
 }
 
 void FlutterHostWindowController::SendOnWindowChanged(
-    FlutterViewId view_id) const {
-  if (channel_) {
-    WindowSize const size = GetWindowSize(view_id);
-    channel_->InvokeMethod(
-        kOnWindowChangedMethod,
-        std::make_unique<EncodableValue>(EncodableMap{
-            {EncodableValue(kViewIdKey), EncodableValue(view_id)},
-            {EncodableValue(kSizeKey),
-             EncodableValue(EncodableList{EncodableValue(size.width),
-                                          EncodableValue(size.height)})},
-            {EncodableValue(kRelativePositionKey), EncodableValue()},
-            {EncodableValue(kIsMovingKey), EncodableValue()}}));
-  }
-}
-
-void FlutterHostWindowController::SendOnWindowCreated(
     FlutterViewId view_id,
-    std::optional<FlutterViewId> parent_view_id) const {
+    std::optional<Size> size,
+    std::optional<Point> relative_position) const {
   if (channel_) {
-    channel_->InvokeMethod(
-        kOnWindowCreatedMethod,
-        std::make_unique<EncodableValue>(EncodableMap{
-            {EncodableValue(kViewIdKey), EncodableValue(view_id)},
-            {EncodableValue(kParentViewIdKey),
-             parent_view_id ? EncodableValue(parent_view_id.value())
-                            : EncodableValue()}}));
+    EncodableMap map{{EncodableValue(kViewIdKey), EncodableValue(view_id)}};
+    if (size) {
+      map.insert(
+          {EncodableValue(kSizeKey),
+           EncodableValue(EncodableList{EncodableValue(size->width()),
+                                        EncodableValue(size->height())})});
+    }
+    if (relative_position) {
+      map.insert({EncodableValue(kRelativePositionKey),
+                  EncodableValue(
+                      EncodableList{EncodableValue(relative_position->x()),
+                                    EncodableValue(relative_position->y())})});
+    }
+    channel_->InvokeMethod(kOnWindowChangedMethod,
+                           std::make_unique<EncodableValue>(map));
   }
 }
 

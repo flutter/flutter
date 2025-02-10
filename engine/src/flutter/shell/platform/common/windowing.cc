@@ -5,86 +5,80 @@
 #include "flutter/shell/platform/common/windowing.h"
 
 #include <algorithm>
-#include <iostream>
 
 namespace flutter {
 
 namespace {
 
-WindowPoint offset_for(WindowSize const& size,
-                       WindowPositioner::Anchor anchor) {
+Point offset_for(Size const& size, WindowPositioner::Anchor anchor) {
   switch (anchor) {
-    case WindowPositioner::Anchor::top_left:
-      return {0, 0};
-    case WindowPositioner::Anchor::top:
-      return {-size.width / 2, 0};
-    case WindowPositioner::Anchor::top_right:
-      return {-1 * size.width, 0};
-    case WindowPositioner::Anchor::left:
-      return {0, -size.height / 2};
-    case WindowPositioner::Anchor::center:
-      return {-size.width / 2, -size.height / 2};
-    case WindowPositioner::Anchor::right:
-      return {-1 * size.width, -size.height / 2};
-    case WindowPositioner::Anchor::bottom_left:
-      return {0, -1 * size.height};
-    case WindowPositioner::Anchor::bottom:
-      return {-size.width / 2, -1 * size.height};
-    case WindowPositioner::Anchor::bottom_right:
-      return {-1 * size.width, -1 * size.height};
+    case WindowPositioner::Anchor::kTopLeft:
+      return {0.0, 0.0};
+    case WindowPositioner::Anchor::kTop:
+      return {-size.width() / 2.0, 0.0};
+    case WindowPositioner::Anchor::kTopRight:
+      return {-1.0 * size.width(), 0.0};
+    case WindowPositioner::Anchor::kLeft:
+      return {0.0, -size.height() / 2.0};
+    case WindowPositioner::Anchor::kCenter:
+      return {-size.width() / 2.0, -size.height() / 2.0};
+    case WindowPositioner::Anchor::kRight:
+      return {-1.0 * size.width(), -size.height() / 2.0};
+    case WindowPositioner::Anchor::kBottomLeft:
+      return {0.0, -1.0 * size.height()};
+    case WindowPositioner::Anchor::kBottom:
+      return {-size.width() / 2.0, -1.0 * size.height()};
+    case WindowPositioner::Anchor::kBottomRight:
+      return {-1.0 * size.width(), -1.0 * size.height()};
     default:
-      std::cerr << "Unknown anchor value: " << static_cast<int>(anchor) << '\n';
-      std::abort();
+      FML_UNREACHABLE();
   }
 }
 
-WindowPoint anchor_position_for(WindowRectangle const& rect,
-                                WindowPositioner::Anchor anchor) {
+Point anchor_position_for(Rect const& rect, WindowPositioner::Anchor anchor) {
   switch (anchor) {
-    case WindowPositioner::Anchor::top_left:
-      return rect.top_left;
-    case WindowPositioner::Anchor::top:
-      return rect.top_left + WindowPoint{rect.size.width / 2, 0};
-    case WindowPositioner::Anchor::top_right:
-      return rect.top_left + WindowPoint{rect.size.width, 0};
-    case WindowPositioner::Anchor::left:
-      return rect.top_left + WindowPoint{0, rect.size.height / 2};
-    case WindowPositioner::Anchor::center:
-      return rect.top_left +
-             WindowPoint{rect.size.width / 2, rect.size.height / 2};
-    case WindowPositioner::Anchor::right:
-      return rect.top_left + WindowPoint{rect.size.width, rect.size.height / 2};
-    case WindowPositioner::Anchor::bottom_left:
-      return rect.top_left + WindowPoint{0, rect.size.height};
-    case WindowPositioner::Anchor::bottom:
-      return rect.top_left + WindowPoint{rect.size.width / 2, rect.size.height};
-    case WindowPositioner::Anchor::bottom_right:
-      return rect.top_left + WindowPoint{rect.size.width, rect.size.height};
+    case WindowPositioner::Anchor::kTopLeft:
+      return rect.origin();
+    case WindowPositioner::Anchor::kTop:
+      return rect.origin() + Point{rect.width() / 2.0, 0.0};
+    case WindowPositioner::Anchor::kTopRight:
+      return rect.origin() + Point{rect.width(), 0.0};
+    case WindowPositioner::Anchor::kLeft:
+      return rect.origin() + Point{0.0, rect.height() / 2.0};
+    case WindowPositioner::Anchor::kCenter:
+      return rect.origin() + Point{rect.width() / 2.0, rect.height() / 2.0};
+    case WindowPositioner::Anchor::kRight:
+      return rect.origin() + Point{rect.width(), rect.height() / 2.0};
+    case WindowPositioner::Anchor::kBottomLeft:
+      return rect.origin() + Point{0.0, rect.height()};
+    case WindowPositioner::Anchor::kBottom:
+      return rect.origin() + Point{rect.width() / 2.0, rect.height()};
+    case WindowPositioner::Anchor::kBottomRight:
+      return rect.origin() + Point{rect.width(), rect.height()};
     default:
-      std::cerr << "Unknown anchor value: " << static_cast<int>(anchor) << '\n';
-      std::abort();
+      FML_UNREACHABLE();
   }
 }
 
-WindowPoint constrain_to(WindowRectangle const& r, WindowPoint const& p) {
-  return {std::clamp(p.x, r.top_left.x, r.top_left.x + r.size.width),
-          std::clamp(p.y, r.top_left.y, r.top_left.y + r.size.height)};
+Point constrain_to(Rect const& r, Point const& p) {
+  return {std::clamp(p.x(), r.left(), r.left() + r.width()),
+          std::clamp(p.y(), r.top(), r.top() + r.height())};
 }
 
 WindowPositioner::Anchor flip_anchor_x(WindowPositioner::Anchor anchor) {
   switch (anchor) {
-    case WindowPositioner::Anchor::top_left:
-      return WindowPositioner::Anchor::top_right;
-    case WindowPositioner::Anchor::top_right:
-      return WindowPositioner::Anchor::top_left;
-    case WindowPositioner::Anchor::left:
-      return WindowPositioner::Anchor::right;
-    case WindowPositioner::Anchor::right:
-      return WindowPositioner::Anchor::left;
-    case WindowPositioner::Anchor::bottom_left:
-      return WindowPositioner::Anchor::bottom_right;
-    case WindowPositioner::Anchor::bottom_right:
-      return WindowPositioner::Anchor::bottom_left;
+    case WindowPositioner::Anchor::kTopLeft:
+      return WindowPositioner::Anchor::kTopRight;
+    case WindowPositioner::Anchor::kTopRight:
+      return WindowPositioner::Anchor::kTopLeft;
+    case WindowPositioner::Anchor::kLeft:
+      return WindowPositioner::Anchor::kRight;
+    case WindowPositioner::Anchor::kRight:
+      return WindowPositioner::Anchor::kLeft;
+    case WindowPositioner::Anchor::kBottomLeft:
+      return WindowPositioner::Anchor::kBottomRight;
+    case WindowPositioner::Anchor::kBottomRight:
+      return WindowPositioner::Anchor::kBottomLeft;
     default:
       return anchor;
   }
@@ -92,57 +86,57 @@ WindowPositioner::Anchor flip_anchor_x(WindowPositioner::Anchor anchor) {
 
 WindowPositioner::Anchor flip_anchor_y(WindowPositioner::Anchor anchor) {
   switch (anchor) {
-    case WindowPositioner::Anchor::top_left:
-      return WindowPositioner::Anchor::bottom_left;
-    case WindowPositioner::Anchor::top:
-      return WindowPositioner::Anchor::bottom;
-    case WindowPositioner::Anchor::top_right:
-      return WindowPositioner::Anchor::bottom_right;
-    case WindowPositioner::Anchor::bottom_left:
-      return WindowPositioner::Anchor::top_left;
-    case WindowPositioner::Anchor::bottom:
-      return WindowPositioner::Anchor::top;
-    case WindowPositioner::Anchor::bottom_right:
-      return WindowPositioner::Anchor::top_right;
+    case WindowPositioner::Anchor::kTopLeft:
+      return WindowPositioner::Anchor::kBottomLeft;
+    case WindowPositioner::Anchor::kTop:
+      return WindowPositioner::Anchor::kBottom;
+    case WindowPositioner::Anchor::kTopRight:
+      return WindowPositioner::Anchor::kBottomRight;
+    case WindowPositioner::Anchor::kBottomLeft:
+      return WindowPositioner::Anchor::kTopLeft;
+    case WindowPositioner::Anchor::kBottom:
+      return WindowPositioner::Anchor::kTop;
+    case WindowPositioner::Anchor::kBottomRight:
+      return WindowPositioner::Anchor::kTopRight;
     default:
       return anchor;
   }
 }
 
-WindowPoint flip_offset_x(WindowPoint const& p) {
-  return {-1 * p.x, p.y};
+Point flip_offset_x(Point const& p) {
+  return {-1.0 * p.x(), p.y()};
 }
 
-WindowPoint flip_offset_y(WindowPoint const& p) {
-  return {p.x, -1 * p.y};
+Point flip_offset_y(Point const& p) {
+  return {p.x(), -1.0 * p.y()};
 }
 
 }  // namespace
 
-WindowRectangle PlaceWindow(WindowPositioner const& positioner,
-                            WindowSize child_size,
-                            WindowRectangle const& anchor_rect,
-                            WindowRectangle const& parent_rect,
-                            WindowRectangle const& output_rect) {
-  WindowRectangle default_result;
+Rect PlaceWindow(WindowPositioner const& positioner,
+                 Size child_size,
+                 Rect const& anchor_rect,
+                 Rect const& parent_rect,
+                 Rect const& output_rect) {
+  Rect default_result;
 
   {
-    WindowPoint const result =
+    Point const result =
         constrain_to(parent_rect, anchor_position_for(
                                       anchor_rect, positioner.parent_anchor) +
                                       positioner.offset) +
         offset_for(child_size, positioner.child_anchor);
 
     if (output_rect.contains({result, child_size})) {
-      return WindowRectangle{result, child_size};
+      return Rect{result, child_size};
     }
 
-    default_result = WindowRectangle{result, child_size};
+    default_result = Rect{result, child_size};
   }
 
   if (static_cast<int>(positioner.constraint_adjustment) &
-      static_cast<int>(WindowPositioner::ConstraintAdjustment::flip_x)) {
-    WindowPoint const result =
+      static_cast<int>(WindowPositioner::ConstraintAdjustment::kFlipX)) {
+    Point const result =
         constrain_to(parent_rect,
                      anchor_position_for(
                          anchor_rect, flip_anchor_x(positioner.parent_anchor)) +
@@ -150,13 +144,13 @@ WindowRectangle PlaceWindow(WindowPositioner const& positioner,
         offset_for(child_size, flip_anchor_x(positioner.child_anchor));
 
     if (output_rect.contains({result, child_size})) {
-      return WindowRectangle{result, child_size};
+      return Rect{result, child_size};
     }
   }
 
   if (static_cast<int>(positioner.constraint_adjustment) &
-      static_cast<int>(WindowPositioner::ConstraintAdjustment::flip_y)) {
-    WindowPoint const result =
+      static_cast<int>(WindowPositioner::ConstraintAdjustment::kFlipY)) {
+    Point const result =
         constrain_to(parent_rect,
                      anchor_position_for(
                          anchor_rect, flip_anchor_y(positioner.parent_anchor)) +
@@ -164,15 +158,15 @@ WindowRectangle PlaceWindow(WindowPositioner const& positioner,
         offset_for(child_size, flip_anchor_y(positioner.child_anchor));
 
     if (output_rect.contains({result, child_size})) {
-      return WindowRectangle{result, child_size};
+      return Rect{result, child_size};
     }
   }
 
   if (static_cast<int>(positioner.constraint_adjustment) &
-          static_cast<int>(WindowPositioner::ConstraintAdjustment::flip_x) &&
+          static_cast<int>(WindowPositioner::ConstraintAdjustment::kFlipX) &&
       static_cast<int>(positioner.constraint_adjustment) &
-          static_cast<int>(WindowPositioner::ConstraintAdjustment::flip_y)) {
-    WindowPoint const result =
+          static_cast<int>(WindowPositioner::ConstraintAdjustment::kFlipY)) {
+    Point const result =
         constrain_to(
             parent_rect,
             anchor_position_for(anchor_rect, flip_anchor_x(flip_anchor_y(
@@ -182,93 +176,89 @@ WindowRectangle PlaceWindow(WindowPositioner const& positioner,
                    flip_anchor_x(flip_anchor_y(positioner.child_anchor)));
 
     if (output_rect.contains({result, child_size})) {
-      return WindowRectangle{result, child_size};
+      return Rect{result, child_size};
     }
   }
 
   {
-    WindowPoint result =
+    Point result =
         constrain_to(parent_rect, anchor_position_for(
                                       anchor_rect, positioner.parent_anchor) +
                                       positioner.offset) +
         offset_for(child_size, positioner.child_anchor);
 
     if (static_cast<int>(positioner.constraint_adjustment) &
-        static_cast<int>(WindowPositioner::ConstraintAdjustment::slide_x)) {
-      int const left_overhang = result.x - output_rect.top_left.x;
-      int const right_overhang =
-          (result.x + child_size.width) -
-          (output_rect.top_left.x + output_rect.size.width);
+        static_cast<int>(WindowPositioner::ConstraintAdjustment::kSlideX)) {
+      double const left_overhang = result.x() - output_rect.left();
+      double const right_overhang = (result.x() + child_size.width()) -
+                                    (output_rect.left() + output_rect.width());
 
-      if (left_overhang < 0) {
-        result.x -= left_overhang;
-      } else if (right_overhang > 0) {
-        result.x -= right_overhang;
+      if (left_overhang < 0.0) {
+        result = {result.x() - left_overhang, result.y()};
+      } else if (right_overhang > 0.0) {
+        result = {result.x() - right_overhang, result.y()};
       }
     }
 
     if (static_cast<int>(positioner.constraint_adjustment) &
-        static_cast<int>(WindowPositioner::ConstraintAdjustment::slide_y)) {
-      int const top_overhang = result.y - output_rect.top_left.y;
-      int const bot_overhang =
-          (result.y + child_size.height) -
-          (output_rect.top_left.y + output_rect.size.height);
+        static_cast<int>(WindowPositioner::ConstraintAdjustment::kSlideY)) {
+      double const top_overhang = result.y() - output_rect.top();
+      double const bot_overhang = (result.y() + child_size.height()) -
+                                  (output_rect.top() + output_rect.height());
 
-      if (top_overhang < 0) {
-        result.y -= top_overhang;
-      } else if (bot_overhang > 0) {
-        result.y -= bot_overhang;
+      if (top_overhang < 0.0) {
+        result = {result.x(), result.y() - top_overhang};
+      } else if (bot_overhang > 0.0) {
+        result = {result.x(), result.y() - bot_overhang};
       }
     }
 
     if (output_rect.contains({result, child_size})) {
-      return WindowRectangle{result, child_size};
+      return Rect{result, child_size};
     }
   }
 
   {
-    WindowPoint result =
+    Point result =
         constrain_to(parent_rect, anchor_position_for(
                                       anchor_rect, positioner.parent_anchor) +
                                       positioner.offset) +
         offset_for(child_size, positioner.child_anchor);
 
     if (static_cast<int>(positioner.constraint_adjustment) &
-        static_cast<int>(WindowPositioner::ConstraintAdjustment::resize_x)) {
-      int const left_overhang = result.x - output_rect.top_left.x;
-      int const right_overhang =
-          (result.x + child_size.width) -
-          (output_rect.top_left.x + output_rect.size.width);
+        static_cast<int>(WindowPositioner::ConstraintAdjustment::kResizeX)) {
+      double const left_overhang = result.x() - output_rect.left();
+      double const right_overhang = (result.x() + child_size.width()) -
+                                    (output_rect.left() + output_rect.width());
 
-      if (left_overhang < 0) {
-        result.x -= left_overhang;
-        child_size.width += left_overhang;
+      if (left_overhang < 0.0) {
+        result = {result.x() - left_overhang, result.y()};
+        child_size = {child_size.width() + left_overhang, child_size.height()};
       }
 
-      if (right_overhang > 0) {
-        child_size.width -= right_overhang;
+      if (right_overhang > 0.0) {
+        child_size = {child_size.width() - right_overhang, child_size.height()};
       }
     }
 
     if (static_cast<int>(positioner.constraint_adjustment) &
-        static_cast<int>(WindowPositioner::ConstraintAdjustment::resize_y)) {
-      int const top_overhang = result.y - output_rect.top_left.y;
-      int const bot_overhang =
-          (result.y + child_size.height) -
-          (output_rect.top_left.y + output_rect.size.height);
+        static_cast<int>(WindowPositioner::ConstraintAdjustment::kResizeY)) {
+      double const top_overhang = result.y() - output_rect.top();
+      double const bot_overhang = (result.y() + child_size.height()) -
+                                  (output_rect.top() + output_rect.height());
 
-      if (top_overhang < 0) {
-        result.y -= top_overhang;
-        child_size.height += top_overhang;
+      if (top_overhang < 0.0) {
+        result = {result.x(), result.y() - top_overhang};
+        child_size = {child_size.width(), child_size.height() + top_overhang};
       }
 
-      if (bot_overhang > 0) {
-        child_size.height -= bot_overhang;
+      if (bot_overhang > 0.0) {
+        child_size = {child_size.width(), child_size.height() - bot_overhang};
       }
     }
 
     if (output_rect.contains({result, child_size})) {
-      return WindowRectangle{result, child_size};
+      return Rect{result, child_size};
     }
   }
 

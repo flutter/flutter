@@ -13,47 +13,18 @@ Future<Object?>? Function(MethodCall)? _createWindowMethodCallHandler({
   return (MethodCall call) async {
     onMethodCall?.call(call);
     final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
-    if (call.method == 'createWindow') {
+    if (call.method == 'createRegular') {
       final List<Object?> size = args['size']! as List<Object?>;
+      final String state = args['state'] as String? ?? WindowState.restored.toString();
 
-      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-        SystemChannels.windowing.name,
-        SystemChannels.windowing.codec.encodeMethodCall(
-          MethodCall('onWindowCreated', <String, Object?>{
-            'viewId': tester.view.viewId,
-            'parentViewId': null,
-          }),
-        ),
-        (ByteData? data) {},
-      );
-
-      return <String, Object?>{
-        'viewId': tester.view.viewId,
-        'archetype': WindowArchetype.regular.index,
-        'size': size,
-        'parentViewId': null,
-      };
+      return <String, Object?>{'viewId': tester.view.viewId, 'size': size, 'state': state};
     } else if (call.method == 'createPopup') {
-      final int parent = args['parent']! as int;
+      final int parent = args['parentViewId']! as int;
       final List<Object?> size = args['size']! as List<Object?>;
 
-      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-        SystemChannels.windowing.name,
-        SystemChannels.windowing.codec.encodeMethodCall(
-          MethodCall('onWindowCreated', <String, Object?>{
-            'viewId': tester.view.viewId,
-            'parentViewId': parent,
-          }),
-        ),
-        (ByteData? data) {},
-      );
-
-      return <String, Object?>{
-        'viewId': tester.view.viewId,
-        'archetype': WindowArchetype.regular.index,
-        'size': size,
-        'parentViewId': parent,
-      };
+      return <String, Object?>{'viewId': tester.view.viewId, 'size': size, 'parentViewId': parent};
+    } else if (call.method == 'modifyRegular') {
+      return null;
     } else if (call.method == 'destroyWindow') {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.windowing.name,
@@ -81,25 +52,13 @@ void main() {
       _createWindowMethodCallHandler(tester: tester),
     );
 
-    final RegularWindowController controller = RegularWindowController();
-    await tester.pumpWidget(
-      wrapWithView: false,
-      Builder(
-        builder: (BuildContext context) {
-          return WindowingApp(
-            children: <Widget>[
-              RegularWindow(controller: controller, preferredSize: windowSize, child: Container()),
-            ],
-          );
-        },
-      ),
-    );
+    final RegularWindowController controller = RegularWindowController(size: windowSize);
 
     await tester.pump();
 
     expect(controller.type, WindowArchetype.regular);
     expect(controller.size, windowSize);
-    expect(controller.view!.viewId, tester.view.viewId);
+    expect(controller.rootView.viewId, tester.view.viewId);
   });
 
   testWidgets('RegularWindow.onError is called when creation throws an error', (
@@ -113,30 +72,12 @@ void main() {
       throw Exception('Failed to create the window');
     });
 
-    final RegularWindowController controller = RegularWindowController();
     bool receivedError = false;
-    await tester.pumpWidget(
-      wrapWithView: false,
-      Builder(
-        builder: (BuildContext context) {
-          return WindowingApp(
-            children: <Widget>[
-              RegularWindow(
-                controller: controller,
-                onError: (String? error) {
-                  expect(
-                    error,
-                    'PlatformException(error, Exception: Failed to create the window, null, null)',
-                  );
-                  receivedError = true;
-                },
-                preferredSize: windowSize,
-                child: Container(),
-              ),
-            ],
-          );
-        },
-      ),
+    final RegularWindowController controller = RegularWindowController(
+      onError: (String error) {
+        receivedError = true;
+      },
+      size: windowSize,
     );
 
     await tester.pump();
@@ -155,23 +96,17 @@ void main() {
     );
 
     bool destroyed = false;
-    final RegularWindowController controller = RegularWindowController();
+    final RegularWindowController controller = RegularWindowController(
+      size: windowSize,
+      onDestroyed: () {
+        destroyed = true;
+      },
+    );
     await tester.pumpWidget(
       wrapWithView: false,
       Builder(
         builder: (BuildContext context) {
-          return WindowingApp(
-            children: <Widget>[
-              RegularWindow(
-                controller: controller,
-                preferredSize: windowSize,
-                onDestroyed: () {
-                  destroyed = true;
-                },
-                child: Container(),
-              ),
-            ],
-          );
+          return RegularWindow(controller: controller, child: Container());
         },
       ),
     );
@@ -194,24 +129,7 @@ void main() {
         _createWindowMethodCallHandler(tester: tester),
       );
 
-      final RegularWindowController controller = RegularWindowController();
-      await tester.pumpWidget(
-        wrapWithView: false,
-        Builder(
-          builder: (BuildContext context) {
-            return WindowingApp(
-              children: <Widget>[
-                RegularWindow(
-                  controller: controller,
-                  preferredSize: initialSize,
-                  child: Container(),
-                ),
-              ],
-            );
-          },
-        ),
-      );
-
+      final RegularWindowController controller = RegularWindowController(size: initialSize);
       await tester.pump();
 
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -219,7 +137,7 @@ void main() {
         SystemChannels.windowing.codec.encodeMethodCall(
           MethodCall('onWindowChanged', <String, Object?>{
             'viewId': tester.view.viewId,
-            'size': <int>[newSize.width.toInt(), newSize.height.toInt()],
+            'size': <double>[newSize.width, newSize.height],
           }),
         ),
         (ByteData? data) {},
@@ -230,51 +148,142 @@ void main() {
     },
   );
 
-  testWidgets('PopupWindow widget populates the controller with proper values', (
+  testWidgets('RegularWindowController.modify can be called when provided with a "size" argument', (
     WidgetTester tester,
   ) async {
-    const Size windowSize = Size(800, 600);
-    const Size childWindow = Size(400, 300);
+    const Size initialSize = Size(800, 600);
+    const Size newSize = Size(400, 300);
+
+    bool wasCalled = false;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.windowing,
+      _createWindowMethodCallHandler(
+        tester: tester,
+        onMethodCall: (MethodCall call) {
+          if (call.method != 'modifyRegular') {
+            return;
+          }
+
+          final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
+          final int viewId = args['viewId']! as int;
+          final List<Object?>? size = args['size'] as List<Object?>?;
+          final String? title = args['title'] as String?;
+          final String? state = args['state'] as String?;
+          expect(viewId, tester.view.viewId);
+          expect(size, <double>[newSize.width, newSize.height]);
+          expect(title, null);
+          expect(state, null);
+          wasCalled = true;
+        },
+      ),
+    );
+
+    final RegularWindowController controller = RegularWindowController(size: initialSize);
+    await tester.pump();
+
+    await controller.modify(size: newSize);
+    await tester.pump();
+
+    expect(wasCalled, true);
+  });
+
+  testWidgets(
+    'RegularWindowController.modify can be called when provided with a "title" argument',
+    (WidgetTester tester) async {
+      const Size initialSize = Size(800, 600);
+      const String newTitle = 'New Title';
+
+      bool wasCalled = false;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.windowing,
+        _createWindowMethodCallHandler(
+          tester: tester,
+          onMethodCall: (MethodCall call) {
+            if (call.method != 'modifyRegular') {
+              return;
+            }
+
+            final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
+            final int viewId = args['viewId']! as int;
+            final List<Object?>? size = args['size'] as List<Object?>?;
+            final String? title = args['title'] as String?;
+            final String? state = args['state'] as String?;
+            expect(viewId, tester.view.viewId);
+            expect(size, null);
+            expect(title, newTitle);
+            expect(state, null);
+            wasCalled = true;
+          },
+        ),
+      );
+
+      final RegularWindowController controller = RegularWindowController(size: initialSize);
+      await tester.pump();
+
+      await controller.modify(title: newTitle);
+      await tester.pump();
+
+      expect(wasCalled, true);
+    },
+  );
+
+  testWidgets(
+    'RegularWindowController.modify can be called when provided with a "state" argument',
+    (WidgetTester tester) async {
+      const Size initialSize = Size(800, 600);
+      const WindowState newState = WindowState.minimized;
+
+      bool wasCalled = false;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.windowing,
+        _createWindowMethodCallHandler(
+          tester: tester,
+          onMethodCall: (MethodCall call) {
+            if (call.method != 'modifyRegular') {
+              return;
+            }
+
+            final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
+            final int viewId = args['viewId']! as int;
+            final List<Object?>? size = args['size'] as List<Object?>?;
+            final String? title = args['title'] as String?;
+            final String? state = args['state'] as String?;
+            expect(viewId, tester.view.viewId);
+            expect(size, null);
+            expect(title, null);
+            expect(state, newState.toString());
+            wasCalled = true;
+          },
+        ),
+      );
+
+      final RegularWindowController controller = RegularWindowController(size: initialSize);
+      await tester.pump();
+
+      await controller.modify(state: newState);
+      await tester.pump();
+
+      expect(wasCalled, true);
+    },
+  );
+
+  testWidgets('RegularWindowController.modify throws when no arguments are provided', (
+    WidgetTester tester,
+  ) async {
+    const Size initialSize = Size(800, 600);
+    const WindowState newState = WindowState.minimized;
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.windowing,
       _createWindowMethodCallHandler(tester: tester),
     );
 
-    final PopupWindowController controller = PopupWindowController();
-    await tester.pumpWidget(
-      wrapWithView: false,
-      Builder(
-        builder: (BuildContext context) {
-          return WindowingApp(
-            children: <Widget>[
-              RegularWindow(
-                preferredSize: windowSize,
-                child: ViewAnchor(
-                  view: PopupWindow(
-                    controller: controller,
-                    preferredSize: childWindow,
-                    child: Container(),
-                  ),
-                  child: Container(),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-
+    final RegularWindowController controller = RegularWindowController(size: initialSize);
     await tester.pump();
 
-    expect(controller.type, WindowArchetype.popup);
-    expect(controller.size, childWindow);
-    expect(controller.view!.viewId, tester.view.viewId);
-    expect(controller.parentViewId, tester.view.viewId);
+    expect(() async => controller.modify(), throwsA(isA<AssertionError>()));
   });
-
   testWidgets('PopupWindow widget can specify anchorRect', (WidgetTester tester) async {
-    const Size windowSize = Size(800, 600);
     const Size childWindow = Size(400, 300);
 
     bool called = false;
@@ -285,7 +294,8 @@ void main() {
         onMethodCall: (MethodCall call) {
           final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
           if (call.method == 'createPopup') {
-            final List<Object?>? anchorRect = args['anchorRect'] as List<Object?>?;
+            final Map<Object?, Object?> positioner = args['positioner']! as Map<Object?, Object?>;
+            final List<Object?>? anchorRect = positioner['anchorRect'] as List<Object?>?;
             expect(anchorRect, <Object?>[0, 0, 100, 100]);
             called = true;
           }
@@ -293,29 +303,10 @@ void main() {
       ),
     );
 
-    final PopupWindowController controller = PopupWindowController();
-    await tester.pumpWidget(
-      wrapWithView: false,
-      Builder(
-        builder: (BuildContext context) {
-          return WindowingApp(
-            children: <Widget>[
-              RegularWindow(
-                preferredSize: windowSize,
-                child: ViewAnchor(
-                  view: PopupWindow(
-                    controller: controller,
-                    preferredSize: childWindow,
-                    anchorRect: const Rect.fromLTWH(0, 0, 100, 100),
-                    child: Container(),
-                  ),
-                  child: Container(),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
+    final PopupWindowController controller = PopupWindowController(
+      parent: tester.binding.window,
+      size: childWindow,
+      anchorRect: const Rect.fromLTWH(0, 0, 100, 100),
     );
 
     await tester.pump();
@@ -324,7 +315,6 @@ void main() {
   });
 
   testWidgets('PopupWindow widget can specify positioner', (WidgetTester tester) async {
-    const Size windowSize = Size(800, 600);
     const Size childWindow = Size(400, 300);
     const Set<WindowPositionerConstraintAdjustment> constraintAdjustment =
         <WindowPositionerConstraintAdjustment>{
@@ -340,55 +330,36 @@ void main() {
         onMethodCall: (MethodCall call) {
           final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
           if (call.method == 'createPopup') {
-            final int positionerParentAnchor = args['positionerParentAnchor']! as int;
-            final int positionerChildAnchor = args['positionerChildAnchor']! as int;
-            final List<Object?> positionerOffset = args['positionerOffset']! as List<Object?>;
+            final Map<Object?, Object?> positioner = args['positioner']! as Map<Object?, Object?>;
+            final String positionerParentAnchor = positioner['parentAnchor']! as String;
+            final String positionerChildAnchor = positioner['childAnchor']! as String;
+            final List<Object?> positionerOffset = positioner['offset']! as List<Object?>;
 
-            final int positionerConstraintAdjustment =
-                args['positionerConstraintAdjustment']! as int;
+            final List<Object?> positionerConstraintAdjustment =
+                positioner['constraintAdjustment']! as List<Object?>;
 
-            expect(positionerParentAnchor, WindowPositionerAnchor.left.index);
-            expect(positionerChildAnchor, WindowPositionerAnchor.left.index);
+            expect(positionerParentAnchor, WindowPositionerAnchor.left.toString());
+            expect(positionerChildAnchor, WindowPositionerAnchor.left.toString());
             expect(positionerOffset, <Object?>[100, 100]);
 
-            int constraintAdjustmentBitmask = 0;
-            for (final WindowPositionerConstraintAdjustment adjustment in constraintAdjustment) {
-              constraintAdjustmentBitmask |= 1 << adjustment.index;
-            }
-            expect(positionerConstraintAdjustment, constraintAdjustmentBitmask);
+            expect(positionerConstraintAdjustment, <Object?>[
+              WindowPositionerConstraintAdjustment.flipX.toString(),
+              WindowPositionerConstraintAdjustment.resizeX.toString(),
+            ]);
             called = true;
           }
         },
       ),
     );
 
-    final PopupWindowController controller = PopupWindowController();
-    await tester.pumpWidget(
-      wrapWithView: false,
-      Builder(
-        builder: (BuildContext context) {
-          return WindowingApp(
-            children: <Widget>[
-              RegularWindow(
-                preferredSize: windowSize,
-                child: ViewAnchor(
-                  view: PopupWindow(
-                    controller: controller,
-                    preferredSize: childWindow,
-                    positioner: const WindowPositioner(
-                      parentAnchor: WindowPositionerAnchor.left,
-                      childAnchor: WindowPositionerAnchor.left,
-                      offset: Offset(100, 100),
-                      constraintAdjustment: constraintAdjustment,
-                    ),
-                    child: Container(),
-                  ),
-                  child: Container(),
-                ),
-              ),
-            ],
-          );
-        },
+    final PopupWindowController controller = PopupWindowController(
+      parent: tester.binding.window,
+      size: childWindow,
+      positioner: const WindowPositioner(
+        parentAnchor: WindowPositionerAnchor.left,
+        childAnchor: WindowPositionerAnchor.left,
+        offset: Offset(100, 100),
+        constraintAdjustment: constraintAdjustment,
       ),
     );
 

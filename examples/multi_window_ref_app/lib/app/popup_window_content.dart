@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:multi_window_ref_app/app/child_window_renderer.dart';
 import 'package:multi_window_ref_app/app/positioner_settings.dart';
-import 'package:multi_window_ref_app/app/window_controller_text.dart';
+import 'package:multi_window_ref_app/app/child_window_controller_text.dart';
 import 'window_settings.dart';
 import 'window_manager_model.dart';
 
@@ -65,15 +65,48 @@ class PopupWindowContent extends StatelessWidget {
                               const SizedBox(height: 20.0),
                               ElevatedButton(
                                   onPressed: () {
-                                    windowManagerModel.add(
-                                        KeyedWindowController(
+                                    final UniqueKey key = UniqueKey();
+                                    windowManagerModel
+                                        .add(KeyedWindowController(
+                                            key: key,
                                             parent: controller,
-                                            controller:
-                                                PopupWindowController()));
+                                            controller: PopupWindowController(
+                                              parent: windowManagerModel
+                                                  .selected!.rootView,
+                                              onDestroyed: () =>
+                                                  windowManagerModel
+                                                      .remove(key),
+                                              onError: (String error) =>
+                                                  windowManagerModel
+                                                      .remove(key),
+                                              size: windowSettings
+                                                  .popupSizeNotifier.value,
+                                              anchorRect: windowSettings
+                                                      .anchorToWindowNotifier
+                                                      .value
+                                                  ? null
+                                                  : windowSettings
+                                                      .anchorRectNotifier.value,
+                                              positioner: WindowPositioner(
+                                                  parentAnchor:
+                                                      positionerSettingsModifier
+                                                          .selected
+                                                          .parentAnchor,
+                                                  childAnchor:
+                                                      positionerSettingsModifier
+                                                          .selected.childAnchor,
+                                                  offset:
+                                                      positionerSettingsModifier
+                                                          .selected.offset,
+                                                  constraintAdjustment:
+                                                      positionerSettingsModifier
+                                                          .selected
+                                                          .constraintAdjustments),
+                                            )));
                                   },
                                   child: const Text('Another popup')),
                               const SizedBox(height: 16.0),
-                              WindowControllerText(controller: controller)
+                              ChildWindowControllerText(controller: controller)
                             ],
                           ),
                         ),

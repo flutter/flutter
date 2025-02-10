@@ -6,17 +6,20 @@ import 'window_settings_dialog.dart';
 import 'window_manager_model.dart';
 import 'positioner_settings.dart';
 import 'custom_positioner_dialog.dart';
+import 'window_controller_render.dart';
+import 'regular_window_edit_dialog.dart';
 
 class MainWindow extends StatefulWidget {
-  MainWindow({super.key, required WindowController mainController}) {
-    _windowManagerModel.add(
-        KeyedWindowController(isMainWindow: true, controller: mainController));
+  MainWindow({super.key, required this.mainController}) {
+    _windowManagerModel.add(KeyedWindowController(
+        isMainWindow: true, key: UniqueKey(), controller: mainController));
   }
 
   final WindowManagerModel _windowManagerModel = WindowManagerModel();
   final WindowSettings _settings = WindowSettings();
   final PositionerSettingsModifier _positionerSettingsModifier =
       PositionerSettingsModifier();
+  final WindowController mainController;
 
   @override
   State<MainWindow> createState() => _MainWindowState();
@@ -51,6 +54,8 @@ class _MainWindowState extends State<MainWindow> {
                       return _WindowCreatorCard(
                           selectedWindow: widget._windowManagerModel.selected,
                           windowManagerModel: widget._windowManagerModel,
+                          positionerSettings:
+                              widget._positionerSettingsModifier,
                           windowSettings: widget._settings);
                     }),
                 const SizedBox(height: 12),
@@ -66,11 +71,11 @@ class _MainWindowState extends State<MainWindow> {
 
     return ViewAnchor(
         view: ChildWindowRenderer(
-            windowManagerModel: widget._windowManagerModel,
-            windowSettings: widget._settings,
-            positionerSettingsModifier: widget._positionerSettingsModifier,
-            controller: widget._windowManagerModel.windows[0].controller,
-            renderParentlessWindows: true),
+          windowManagerModel: widget._windowManagerModel,
+          windowSettings: widget._settings,
+          positionerSettingsModifier: widget._positionerSettingsModifier,
+          controller: widget.mainController,
+          renderParentlessWindows: true),
         child: child);
   }
 }
@@ -133,8 +138,9 @@ class _ActiveWindowsTable extends StatelessWidget {
                 selected: controller.controller == windowManagerModel.selected,
                 onSelectChanged: (selected) {
                   if (selected != null) {
-                    windowManagerModel.select(
-                        selected ? controller.controller.view?.viewId : null);
+                    windowManagerModel.select(selected
+                        ? controller.controller.rootView.viewId
+                        : null);
                   }
                 },
                 cells: [
@@ -142,8 +148,8 @@ class _ActiveWindowsTable extends StatelessWidget {
                     ListenableBuilder(
                         listenable: controller.controller,
                         builder: (BuildContext context, Widget? _) => Text(
-                            controller.controller.view != null
-                                ? '${controller.controller.view?.viewId}'
+                            controller.controller.isReady
+                                ? '${controller.controller.rootView.viewId}'
                                 : 'Loading...')),
                   ),
                   DataCell(
@@ -158,12 +164,43 @@ class _ActiveWindowsTable extends StatelessWidget {
                     ListenableBuilder(
                         listenable: controller.controller,
                         builder: (BuildContext context, Widget? _) =>
-                            IconButton(
-                              icon: const Icon(Icons.delete_outlined),
-                              onPressed: () async {
-                                await controller.controller.destroy();
-                              },
-                            )),
+                            Row(children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined),
+                                onPressed: () {
+                                  if (controller.controller.type ==
+                                      WindowArchetype.regular) {
+                                    showRegularWindowEditDialog(context,
+                                        initialWidth:
+                                            controller.controller.size.width,
+                                        initialHeight:
+                                            controller.controller.size.height,
+                                        initialTitle: "",
+                                        initialState: (controller.controller
+                                                as RegularWindowController)
+                                            .state,
+                                        onSave: (double? width, double? height,
+                                            String? title, WindowState? state) {
+                                      (controller.controller
+                                              as RegularWindowController)
+                                          .modify(
+                                              size: width != null &&
+                                                      height != null
+                                                  ? Size(width, height)
+                                                  : null,
+                                              title: title,
+                                              state: state);
+                                    });
+                                  }
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outlined),
+                                onPressed: () async {
+                                  await controller.controller.destroy();
+                                },
+                              )
+                            ])),
                   ),
                 ],
               );
@@ -177,10 +214,12 @@ class _WindowCreatorCard extends StatelessWidget {
   const _WindowCreatorCard(
       {required this.selectedWindow,
       required this.windowManagerModel,
+      required this.positionerSettings,
       required this.windowSettings});
 
   final WindowController? selectedWindow;
   final WindowManagerModel windowManagerModel;
+  final PositionerSettingsModifier positionerSettings;
   final WindowSettings windowSettings;
 
   @override
@@ -207,20 +246,48 @@ class _WindowCreatorCard extends StatelessWidget {
               children: [
                 OutlinedButton(
                   onPressed: () async {
+                    final UniqueKey key = UniqueKey();
                     windowManagerModel.add(KeyedWindowController(
-                        controller: RegularWindowController()));
+                        key: key,
+                        controller: RegularWindowController(
+                          onDestroyed: () => windowManagerModel.remove(key),
+                          onError: (String error) =>
+                              windowManagerModel.remove(key),
+                          title: "Regular",
+                          size: windowSettings.regularSizeNotifier.value,
+                        )));
                   },
                   child: const Text('Regular'),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton(
-                  onPressed: () {
+                  onPressed: windowManagerModel.selected == null ? null : () {
+                    final UniqueKey key = UniqueKey();
                     windowManagerModel.add(KeyedWindowController(
+                        key: key,
                         parent: windowManagerModel.selected,
-                        controller: PopupWindowController()));
+                        controller: PopupWindowController(
+                          parent: windowManagerModel.selected!.rootView,
+                          onDestroyed: () => windowManagerModel.remove(key),
+                          onError: (String error) =>
+                              windowManagerModel.remove(key),
+                          size: windowSettings.popupSizeNotifier.value,
+                          anchorRect:
+                              windowSettings.anchorToWindowNotifier.value
+                                  ? null
+                                  : windowSettings.anchorRectNotifier.value,
+                          positioner: WindowPositioner(
+                              parentAnchor:
+                                  positionerSettings.selected.parentAnchor,
+                              childAnchor:
+                                  positionerSettings.selected.childAnchor,
+                              offset: positionerSettings.selected.offset,
+                              constraintAdjustment: positionerSettings
+                                  .selected.constraintAdjustments),
+                        )));
                   },
-                  child: Text(windowManagerModel.selected?.view?.viewId != null
-                      ? 'Popup of ID ${windowManagerModel.selected!.view?.viewId}'
+                  child: Text(windowManagerModel.selected?.rootView.viewId != null
+                      ? 'Popup of ID ${windowManagerModel.selected!.rootView.viewId}'
                       : 'Popup'),
                 ),
                 const SizedBox(height: 8),
