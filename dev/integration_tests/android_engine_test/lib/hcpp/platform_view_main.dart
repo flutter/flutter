@@ -22,7 +22,8 @@ void main() async {
 }
 
 // This should appear as the yellow line over a blue box. The
-// red box should not be visible unless the platform view has not loaded yet.
+// green box should not be visible unless the platform view has not loaded yet or
+// has been removed from the scene.
 final class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
