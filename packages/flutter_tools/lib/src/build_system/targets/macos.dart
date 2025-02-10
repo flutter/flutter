@@ -489,9 +489,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     assetDirectory.createSync(recursive: true);
 
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-    final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(
-      environment,
-    );
+    final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(environment);
 
     final Depfile assetDepfile = await copyAssets(
       environment,

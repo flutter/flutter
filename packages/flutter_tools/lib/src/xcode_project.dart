@@ -313,12 +313,13 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     if (info == null) {
       return flavor;
     }
-    final String? matchedScheme = info.schemes.where((String schemeName) {
-      if (schemeName.toLowerCase() == parsedScheme.toLowerCase()) {
-        return true;
-      }
-      return false;
-    }).firstOrNull;
+    final String? matchedScheme =
+        info.schemes.where((String schemeName) {
+          if (schemeName.toLowerCase() == parsedScheme.toLowerCase()) {
+            return true;
+          }
+          return false;
+        }).firstOrNull;
     return matchedScheme ?? flavor;
   }
 }

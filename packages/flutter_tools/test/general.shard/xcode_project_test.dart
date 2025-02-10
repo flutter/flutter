@@ -229,8 +229,7 @@ void main() {
           fileSystem: fs,
           logger: BufferLogger.test(),
           artifacts: Artifacts.test(),
-          processManager:
-          FakeProcessManager.any(),
+          processManager: FakeProcessManager.any(),
           defines: <String, String>{kFlavor: 'strawberry'},
         );
         expect(await project.parseFlavorFromConfiguration(env), 'strawberry');
@@ -244,12 +243,8 @@ void main() {
           fileSystem: fs,
           logger: BufferLogger.test(),
           artifacts: Artifacts.test(),
-          processManager:
-          FakeProcessManager.any(),
-          defines: <String, String>{
-            kFlavor: 'strawberry',
-            kXcodeConfiguration: 'Debug',
-          },
+          processManager: FakeProcessManager.any(),
+          defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug'},
         );
         expect(await project.parseFlavorFromConfiguration(env), 'strawberry');
       });
@@ -264,12 +259,8 @@ void main() {
             fileSystem: fs,
             logger: BufferLogger.test(),
             artifacts: Artifacts.test(),
-            processManager:
-            FakeProcessManager.any(),
-            defines: <String, String>{
-              kFlavor: 'strawberry',
-              kXcodeConfiguration: 'Debug-vanilla',
-            },
+            processManager: FakeProcessManager.any(),
+            defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug-vanilla'},
           );
           project.xcodeProject.createSync(recursive: true);
           expect(await project.parseFlavorFromConfiguration(env), 'vanilla');
@@ -290,12 +281,8 @@ void main() {
             fileSystem: fs,
             logger: BufferLogger.test(),
             artifacts: Artifacts.test(),
-            processManager:
-            FakeProcessManager.any(),
-            defines: <String, String>{
-              kFlavor: 'strawberry',
-              kXcodeConfiguration: 'Debug vanilla',
-            },
+            processManager: FakeProcessManager.any(),
+            defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug vanilla'},
           );
           project.xcodeProject.createSync(recursive: true);
           expect(await project.parseFlavorFromConfiguration(env), 'vanilla');
@@ -316,12 +303,8 @@ void main() {
             fileSystem: fs,
             logger: BufferLogger.test(),
             artifacts: Artifacts.test(),
-            processManager:
-            FakeProcessManager.any(),
-            defines: <String, String>{
-              kFlavor: 'strawberry',
-              kXcodeConfiguration: 'Debug-random',
-            },
+            processManager: FakeProcessManager.any(),
+            defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug-random'},
           );
           project.xcodeProject.createSync(recursive: true);
           expect(await project.parseFlavorFromConfiguration(env), 'strawberry');

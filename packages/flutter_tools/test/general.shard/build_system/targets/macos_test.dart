@@ -1004,10 +1004,7 @@ void main() {
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({
-    this.isInstalled = true,
-    this.schemes = const <String>['Runner'],
-  });
+  FakeXcodeProjectInterpreter({this.isInstalled = true, this.schemes = const <String>['Runner']});
 
   @override
   final bool isInstalled;
