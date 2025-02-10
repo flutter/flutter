@@ -214,6 +214,7 @@ template("_compile_platform") {
     inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
     outputs = [ invoker.output_dill ]
+    args = []
 
     if (invoker.summary_only) {
       args += [ "--summary-only" ]
