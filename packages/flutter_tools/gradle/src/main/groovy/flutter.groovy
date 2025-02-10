@@ -5,6 +5,8 @@
 
 import com.android.build.OutputFile
 import com.flutter.gradle.BaseApplicationNameHandler
+import com.flutter.gradle.Deeplink
+import com.flutter.gradle.IntentFilterCheck
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -184,13 +186,15 @@ class FlutterPlugin implements Plugin<Project> {
         Project rootProject = project.rootProject
         if (isFlutterAppProject()) {
             rootProject.tasks.register("generateLockfiles") {
-                rootProject.subprojects.each { subproject ->
-                    String gradlew = (OperatingSystem.current().isWindows()) ?
-                        "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
-                    rootProject.exec {
-                        workingDir(rootProject.projectDir)
-                        executable(gradlew)
-                        args(":${subproject.name}:dependencies", "--write-locks")
+                doLast {
+                    rootProject.subprojects.each { subproject ->
+                        String gradlew = (OperatingSystem.current().isWindows()) ?
+                            "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
+                        rootProject.exec {
+                            workingDir(rootProject.projectDir)
+                            executable(gradlew)
+                            args(":${subproject.name}:dependencies", "--write-locks")
+                        }
                     }
                 }
             }
@@ -546,7 +550,7 @@ class FlutterPlugin implements Plugin<Project> {
                                     schemes.each { scheme ->
                                         hosts.each { host ->
                                             paths.each { path ->
-                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path, intentFilterCheck: intentFilterCheck))
+                                                appLinkSettings.deeplinks.add(new Deeplink(scheme, host, path, intentFilterCheck))
                                             }
                                         }
                                     }
@@ -590,11 +594,13 @@ class FlutterPlugin implements Plugin<Project> {
         }
         // The embedding is set as an API dependency in a Flutter plugin.
         // Therefore, don't make the app project depend on the embedding if there are Flutter
-        // plugins.
+        // plugin dependencies. In release mode, dev dependencies are stripped, so we do not
+        // consider those in the check.
         // This prevents duplicated classes when using custom build types. That is, a custom build
         // type like profile is used, and the plugin and app projects have API dependencies on the
         // embedding.
-        if (!isFlutterAppProject() || getPluginList(project).size() == 0) {
+        List<Map<String, Object>> pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency = flutterBuildMode == "release" ? getPluginListWithoutDevDependencies(project) : getPluginList(project);
+        if (!isFlutterAppProject() || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.size() == 0) {
             addApiDependencies(project, buildType.name,
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
@@ -988,6 +994,24 @@ class FlutterPlugin implements Plugin<Project> {
         return pluginList
     }
 
+    /**
+     * Gets the list of plugins (as map) that support the Android platform and are dependencies of the
+     * Android project excluding dev dependencies.
+     *
+     * The map value contains either the plugins `name` (String),
+     * its `path` (String), or its `dependencies` (List<String>).
+     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
+     */
+    private List<Map<String, Object>> getPluginListWithoutDevDependencies(Project project) {
+        List<Map<String, Object>> pluginListWithoutDevDependencies = []
+        for (Map<String, Object> plugin in getPluginList(project)) {
+            if (!plugin.dev_dependency) {
+                pluginListWithoutDevDependencies += plugin
+            }
+        }
+        return pluginListWithoutDevDependencies
+    }
+
     // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
@@ -1196,11 +1220,6 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty(propDartDefines)) {
             dartDefinesValue = project.property(propDartDefines)
         }
-        String bundleSkSLPathValue
-        final String propBundleSkslPath = "bundle-sksl-path"
-        if (project.hasProperty(propBundleSkslPath)) {
-            bundleSkSLPathValue = project.property(propBundleSkslPath)
-        }
         String performanceMeasurementFileValue
         final String propPerformanceMeasurementFile = "performance-measurement-file"
         if (project.hasProperty(propPerformanceMeasurementFile)) {
@@ -1292,7 +1311,6 @@ class FlutterPlugin implements Plugin<Project> {
                 treeShakeIcons(treeShakeIconsOptionsValue)
                 dartObfuscation(dartObfuscationValue)
                 dartDefines(dartDefinesValue)
-                bundleSkSLPath(bundleSkSLPathValue)
                 performanceMeasurementFile(performanceMeasurementFileValue)
                 codeSizeDirectory(codeSizeDirectoryValue)
                 deferredComponents(deferredComponentsValue)
@@ -1552,31 +1570,6 @@ class AppLinkSettings {
 
 }
 
-class IntentFilterCheck {
-
-    boolean hasAutoVerify
-    boolean hasActionView
-    boolean hasDefaultCategory
-    boolean hasBrowsableCategory
-
-}
-
-class Deeplink {
-    String scheme, host, path
-    IntentFilterCheck intentFilterCheck
-    boolean equals(Object o) {
-        if (o == null) {
-            throw new NullPointerException()
-        }
-        if (o.getClass() != getClass()) {
-            return false
-        }
-        return scheme == o.scheme &&
-                host == o.host &&
-                path == o.path
-    }
-}
-
 abstract class BaseFlutterTask extends DefaultTask {
 
     @Internal
@@ -1647,9 +1640,6 @@ abstract class BaseFlutterTask extends DefaultTask {
 
     @Optional @Input
     String dartDefines
-
-    @Optional @Input
-    String bundleSkSLPath
 
     @Optional @Input
     String codeSizeDirectory
@@ -1740,9 +1730,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (dartDefines != null) {
                 args("--DartDefines=${dartDefines}")
-            }
-            if (bundleSkSLPath != null) {
-                args("-dBundleSkSLPath=${bundleSkSLPath}")
             }
             if (codeSizeDirectory != null) {
                 args("-dCodeSizeDirectory=${codeSizeDirectory}")
