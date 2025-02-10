@@ -46,7 +46,7 @@ import java.util.List;
 public class PlatformViewsController2 implements PlatformViewsAccessibilityDelegate {
   private static final String TAG = "PlatformViewsController2";
 
-  private final PlatformViewRegistryImpl registry;
+  private PlatformViewRegistryImpl registry;
   private AndroidTouchProcessor androidTouchProcessor;
   private Context context;
   private FlutterView flutterView;
@@ -65,13 +65,16 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private Surface overlayerSurface = null;
 
   public PlatformViewsController2() {
-    registry = new PlatformViewRegistryImpl();
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
     platformViews = new SparseArray<>();
     platformViewParent = new SparseArray<>();
     pendingTransactions = new ArrayList<>();
     activeTransactions = new ArrayList<>();
     motionEventTracker = MotionEventTracker.getInstance();
+  }
+
+  public void setRegistry(@NonNull PlatformViewRegistry registry) {
+    this.registry = (PlatformViewRegistryImpl) registry;
   }
 
   @Override
