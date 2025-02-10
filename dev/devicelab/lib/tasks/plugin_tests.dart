@@ -517,6 +517,7 @@ s.dependency 'AppAuth', '1.6.0'
         options: <String>[
           target,
           '-v',
+          '--debug',
           if (target == 'ios') '--no-codesign',
           if (configOnly) '--config-only',
           if (localEngine != null)
