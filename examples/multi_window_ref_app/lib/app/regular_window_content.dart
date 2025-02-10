@@ -58,71 +58,76 @@ class _RegularWindowContentState extends State<RegularWindowContent>
 
   @override
   Widget build(BuildContext context) {
+    final dpr = MediaQuery.of(context).devicePixelRatio;
+
+    final child = Scaffold(
+      appBar: AppBar(title: Text('${widget.window.type}')),
+      body: Center(
+          child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedBuilder(
+                animation: _animation,
+                builder: (context, child) {
+                  return CustomPaint(
+                    size: const Size(200, 200),
+                    painter: _RotatedWireCube(
+                        angle: _animation.value, color: cubeColor),
+                  );
+                },
+              ),
+            ],
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  final UniqueKey key = UniqueKey();
+                  widget.windowManagerModel.add(KeyedWindowController(
+                      key: key,
+                      controller: RegularWindowController(
+                          onDestroyed: () =>
+                              widget.windowManagerModel.remove(key),
+                          onError: (String error) =>
+                              widget.windowManagerModel.remove(key),
+                          title: "Regular",
+                          size: widget.windowSettings.regularSize)));
+                },
+                child: const Text('Create Regular Window'),
+              ),
+              const SizedBox(height: 20),
+              ListenableBuilder(
+                  listenable: widget.window,
+                  builder: (BuildContext context, Widget? _) {
+                    if (!widget.window.isReady) {
+                      return const Text('View not ready');
+                    }
+
+                    return Text(
+                      'View #${widget.window.rootView.viewId}\n'
+                      'Size: ${(widget.window.size.width).toStringAsFixed(1)}\u00D7${(widget.window.size.height).toStringAsFixed(1)}\n'
+                      'Device Pixel Ratio: $dpr',
+                      textAlign: TextAlign.center,
+                    );
+                  })
+            ],
+          ),
+        ],
+      )),
+    );
+
     return ViewAnchor(
         view: ChildWindowRenderer(
             windowManagerModel: widget.windowManagerModel,
             windowSettings: widget.windowSettings,
             positionerSettingsModifier: widget.positionerSettingsModifier,
             controller: widget.controller),
-        child: Scaffold(
-            appBar: AppBar(title: Text('${widget.controller.type}')),
-            body: SingleChildScrollView(
-                child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      AnimatedBuilder(
-                        animation: _animation,
-                        builder: (context, child) {
-                          return CustomPaint(
-                            size: const Size(200, 200),
-                            painter: _RotatedWireCube(
-                                angle: _animation.value, color: cubeColor),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          final UniqueKey key = UniqueKey();
-                          widget.windowManagerModel.add(KeyedWindowController(
-                              key: key,
-                              controller: RegularWindowController(
-                                onDestroyed: () =>
-                                    widget.windowManagerModel.remove(key),
-                                onError: (String error) =>
-                                    widget.windowManagerModel.remove(key),
-                                title: "Regular",
-                                size: widget
-                                    .windowSettings.regularSizeNotifier.value,
-                              )));
-                        },
-                        child: const Text('Create Regular Window'),
-                      ),
-                      const SizedBox(height: 20),
-                      ListenableBuilder(
-                          listenable: widget.controller,
-                          builder: (BuildContext context, Widget? _) {
-                            return Text(
-                              'View #${widget.controller.rootView.viewId}\n'
-                              'Logical Size: ${widget.controller.size?.width ?? "?"}\u00D7${widget.controller.size?.height ?? "?"}\n'
-                              'DPR: ${MediaQuery.of(context).devicePixelRatio}',
-                              textAlign: TextAlign.center,
-                            );
-                          })
-                    ],
-                  ),
-                ],
-              ),
-            ))));
+        child: child);
   }
 }
 

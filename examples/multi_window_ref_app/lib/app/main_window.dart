@@ -7,6 +7,7 @@ import 'window_manager_model.dart';
 import 'positioner_settings.dart';
 import 'custom_positioner_dialog.dart';
 import 'window_controller_render.dart';
+import 'regular_window_edit_dialog.dart';
 
 class MainWindow extends StatefulWidget {
   MainWindow({super.key, required this.mainController}) {
@@ -163,12 +164,43 @@ class _ActiveWindowsTable extends StatelessWidget {
                     ListenableBuilder(
                         listenable: controller.controller,
                         builder: (BuildContext context, Widget? _) =>
-                            IconButton(
-                              icon: const Icon(Icons.delete_outlined),
-                              onPressed: () async {
-                                await controller.controller.destroy();
-                              },
-                            )),
+                            Row(children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined),
+                                onPressed: () {
+                                  if (controller.controller.type ==
+                                      WindowArchetype.regular) {
+                                    showRegularWindowEditDialog(context,
+                                        initialWidth:
+                                            controller.controller.size.width,
+                                        initialHeight:
+                                            controller.controller.size.height,
+                                        initialTitle: "",
+                                        initialState: (controller.controller
+                                                as RegularWindowController)
+                                            .state,
+                                        onSave: (double? width, double? height,
+                                            String? title, WindowState? state) {
+                                      (controller.controller
+                                              as RegularWindowController)
+                                          .modify(
+                                              size: width != null &&
+                                                      height != null
+                                                  ? Size(width, height)
+                                                  : null,
+                                              title: title,
+                                              state: state);
+                                    });
+                                  }
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outlined),
+                                onPressed: () async {
+                                  await controller.controller.destroy();
+                                },
+                              )
+                            ])),
                   ),
                 ],
               );

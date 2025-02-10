@@ -106,6 +106,7 @@ void main() {
   late FakeHttpServer httpServer;
   late BufferLogger logger;
   const bool usesDdcModuleSystem = false;
+  const bool canaryFeatures = false;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -128,6 +129,7 @@ void main() {
           <String, String>{},
           NullSafetyMode.unsound,
           usesDdcModuleSystem,
+          canaryFeatures,
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
         );
@@ -395,6 +397,7 @@ void main() {
         <String, String>{},
         NullSafetyMode.unsound,
         usesDdcModuleSystem,
+        canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
       );
@@ -418,6 +421,7 @@ void main() {
         <String, String>{},
         NullSafetyMode.unsound,
         usesDdcModuleSystem,
+        canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
       );
@@ -444,6 +448,7 @@ void main() {
           <String, String>{},
           NullSafetyMode.unsound,
           usesDdcModuleSystem,
+          canaryFeatures,
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
         ),
@@ -469,6 +474,7 @@ void main() {
           <String, String>{},
           NullSafetyMode.unsound,
           usesDdcModuleSystem,
+          canaryFeatures,
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
         ),
@@ -541,6 +547,7 @@ void main() {
         <String, String>{},
         NullSafetyMode.unsound,
         usesDdcModuleSystem,
+        canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: true,
       );
@@ -983,10 +990,12 @@ void main() {
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.unsound,
         ddcModuleSystem: usesDdcModuleSystem,
+        canaryFeatures: canaryFeatures,
         webRenderer: WebRendererMode.html,
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
+        isWindows: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -1101,10 +1110,12 @@ void main() {
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.sound,
         ddcModuleSystem: usesDdcModuleSystem,
+        canaryFeatures: canaryFeatures,
         webRenderer: WebRendererMode.html,
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
+        isWindows: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -1225,10 +1236,12 @@ void main() {
           chromiumLauncher: null,
           nullSafetyMode: NullSafetyMode.sound,
           ddcModuleSystem: usesDdcModuleSystem,
+          canaryFeatures: canaryFeatures,
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
           rootDirectory: globals.fs.currentDirectory,
+          isWindows: false,
         );
         webDevFS.requireJS.createSync(recursive: true);
         webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1302,10 +1315,12 @@ void main() {
         nativeNullAssertions: true,
         nullSafetyMode: NullSafetyMode.sound,
         ddcModuleSystem: usesDdcModuleSystem,
+        canaryFeatures: canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
+        isWindows: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1354,10 +1369,12 @@ void main() {
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.sound,
         ddcModuleSystem: usesDdcModuleSystem,
+        canaryFeatures: canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
+        isWindows: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1407,10 +1424,12 @@ void main() {
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.sound,
         ddcModuleSystem: usesDdcModuleSystem,
+        canaryFeatures: canaryFeatures,
         webRenderer: WebRendererMode.auto,
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
+        isWindows: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1460,10 +1479,12 @@ void main() {
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.unsound,
         ddcModuleSystem: usesDdcModuleSystem,
+        canaryFeatures: canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
+        isWindows: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1582,6 +1603,7 @@ void main() {
         <String, String>{},
         NullSafetyMode.sound,
         usesDdcModuleSystem,
+        canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
       );
@@ -1632,10 +1654,12 @@ void main() {
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.unsound,
         ddcModuleSystem: usesDdcModuleSystem,
+        canaryFeatures: canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
+        isWindows: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);

@@ -14,8 +14,11 @@ namespace {
 constexpr char kChannelName[] = "flutter/windowing";
 
 // Methods for creating different types of windows.
-constexpr char kCreateWindowMethod[] = "createWindow";
+constexpr char kCreateRegularMethod[] = "createRegular";
 constexpr char kCreatePopupMethod[] = "createPopup";
+
+// Methods for modifying the attributes of windows.
+constexpr char kModifyRegularMethod[] = "modifyRegular";
 
 // The method to destroy a window.
 constexpr char kDestroyWindowMethod[] = "destroyWindow";
@@ -37,7 +40,7 @@ constexpr char kTitleKey[] = "title";
 constexpr char kViewIdKey[] = "viewId";
 
 // Error codes used for responses.
-constexpr char kInvalidValueError[] = "Invalid Value";
+constexpr char kBadArgumentsError[] = "Bad Arguments";
 constexpr char kUnavailableError[] = "Unavailable";
 
 // Retrieves the value associated with |key| from |map|, ensuring it matches
@@ -54,7 +57,7 @@ std::pair<std::optional<T>, bool> GetSingleValueForKeyOrSendError(
     flutter::MethodResult<>& result) {
   auto const it = map->find(flutter::EncodableValue(key));
   if (it == map->end()) {
-    result.Error(kInvalidValueError,
+    result.Error(kBadArgumentsError,
                  "Map does not contain required '" + key + "' key.");
     return {std::nullopt, false};
   }
@@ -65,7 +68,7 @@ std::pair<std::optional<T>, bool> GetSingleValueForKeyOrSendError(
     return {std::nullopt, true};
   }
 
-  result.Error(kInvalidValueError, "Value for '" + key +
+  result.Error(kBadArgumentsError, "Value for '" + key +
                                        "' key must be of type '" +
                                        typeid(T).name() + "'.");
   return {std::nullopt, false};
@@ -87,7 +90,7 @@ std::pair<std::optional<std::vector<T>>, bool> GetListOfValuesForKeyOrSendError(
     flutter::MethodResult<>& result) {
   auto const it = map->find(flutter::EncodableValue(key));
   if (it == map->end()) {
-    result.Error(kInvalidValueError,
+    result.Error(kBadArgumentsError,
                  "Map does not contain required '" + key + "' key.");
     return {std::nullopt, false};
   }
@@ -97,7 +100,7 @@ std::pair<std::optional<std::vector<T>>, bool> GetListOfValuesForKeyOrSendError(
   if (auto const* const array =
           std::get_if<std::vector<flutter::EncodableValue>>(&it->second)) {
     if (Size && array->size() != Size) {
-      result.Error(kInvalidValueError, "Array for '" + key +
+      result.Error(kBadArgumentsError, "Array for '" + key +
                                            "' key must have " +
                                            std::to_string(Size) + " values.");
       return {std::nullopt, false};
@@ -110,7 +113,7 @@ std::pair<std::optional<std::vector<T>>, bool> GetListOfValuesForKeyOrSendError(
       if (std::holds_alternative<T>(value)) {
         decoded_values.push_back(std::get<T>(value));
       } else {
-        result.Error(kInvalidValueError,
+        result.Error(kBadArgumentsError,
                      "Array for '" + key +
                          "' key must only have values of type '" +
                          typeid(T).name() + "'.");
@@ -120,7 +123,7 @@ std::pair<std::optional<std::vector<T>>, bool> GetListOfValuesForKeyOrSendError(
     return {std::move(decoded_values), true};
   }
 
-  result.Error(kInvalidValueError,
+  result.Error(kBadArgumentsError,
                "Value for key '" + key + "' key must be an array.");
   return {std::nullopt, false};
 }
@@ -211,10 +214,12 @@ void WindowingHandler::HandleMethodCall(
     std::unique_ptr<MethodResult<EncodableValue>> result) {
   const std::string& method = method_call.method_name();
 
-  if (method == kCreateWindowMethod) {
+  if (method == kCreateRegularMethod) {
     HandleCreateWindow(WindowArchetype::kRegular, method_call, *result);
   } else if (method == kCreatePopupMethod) {
     HandleCreateWindow(WindowArchetype::kPopup, method_call, *result);
+  } else if (method == kModifyRegularMethod) {
+    HandleModifyWindow(WindowArchetype::kRegular, method_call, *result);
   } else if (method == kDestroyWindowMethod) {
     HandleDestroyWindow(method_call, *result);
   } else {
@@ -228,7 +233,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
   auto const* const arguments = call.arguments();
   auto const* const map = std::get_if<EncodableMap>(arguments);
   if (!map) {
-    result.Error(kInvalidValueError, "Method call argument is not a map.");
+    result.Error(kBadArgumentsError, "Method call argument is not a map.");
     return;
   }
 
@@ -240,7 +245,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
           GetListOfValuesForKeyOrSendError<double, 2>(kSizeKey, map, result);
       success) {
     if (!size_list.has_value()) {
-      result.Error(kInvalidValueError, "Value for the '" +
+      result.Error(kBadArgumentsError, "Value for the '" +
                                            std::string(kSizeKey) +
                                            "' key must not be null.");
       return;
@@ -430,6 +435,29 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
   }
 
   if (archetype == WindowArchetype::kRegular) {
+    // Get value for the 'minSize' key (nullable).
+    if (auto const [list, success] =
+            GetListOfValuesForKeyOrSendError<double, 2>(kMinSizeKey, map,
+                                                        result);
+        success) {
+      if (list.has_value()) {
+        settings.min_size = {list->at(0), list->at(1)};
+      }
+    } else {
+      return;
+    }
+    // Get value for the 'maxSize' key (nullable).
+    if (auto const [list, success] =
+            GetListOfValuesForKeyOrSendError<double, 2>(kMaxSizeKey, map,
+                                                        result);
+        success) {
+      if (list.has_value()) {
+        settings.max_size = {list->at(0), list->at(1)};
+      }
+    } else {
+      return;
+    }
+
     // Get value for the 'title' key (nullable).
     if (auto const [title, success] =
             GetSingleValueForKeyOrSendError<std::string>(kTitleKey, map,
@@ -439,7 +467,6 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
     } else {
       return;
     }
-
     // Get value for the 'state' key (nullable).
     if (auto const [state, success] =
             GetSingleValueForKeyOrSendError<std::string>(kStateKey, map,
@@ -484,12 +511,76 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
   }
 }
 
+void WindowingHandler::HandleModifyWindow(WindowArchetype archetype,
+                                          MethodCall<> const& call,
+                                          MethodResult<>& result) {
+  auto const* const arguments = call.arguments();
+  auto const* const map = std::get_if<EncodableMap>(arguments);
+  if (!map) {
+    result.Error(kBadArgumentsError, "Method call argument is not a map.");
+    return;
+  }
+
+  FlutterViewId view_id = {};
+  WindowModificationSettings settings;
+
+  // Get value for the 'viewId' key (non-nullable)
+  if (auto const [data, success] =
+          GetSingleValueForKeyOrSendError<int>(kViewIdKey, map, result);
+      success) {
+    if (!data.has_value()) {
+      result.Error(kBadArgumentsError, "Value for the '" +
+                                           std::string(kViewIdKey) +
+                                           "' key must not be null.");
+      return;
+    }
+    view_id = *data;
+  } else {
+    return;
+  }
+  // Get value for the 'size' key (nullable).
+  if (auto const [data, success] =
+          GetListOfValuesForKeyOrSendError<double, 2>(kSizeKey, map, result);
+      success) {
+    if (data.has_value()) {
+      settings.size = {data->at(0), data->at(1)};
+    }
+  } else {
+    return;
+  }
+  // Get value for the 'title' key (nullable).
+  if (auto const [data, success] =
+          GetSingleValueForKeyOrSendError<std::string>(kTitleKey, map, result);
+      success) {
+    settings.title = data;
+  } else {
+    return;
+  }
+  // Get value for the 'state' key (nullable).
+  if (auto const [data, success] =
+          GetSingleValueForKeyOrSendError<std::string>(kStateKey, map, result);
+      success) {
+    if (data) {
+      settings.state = StringToWindowState(*data);
+    }
+  } else {
+    return;
+  }
+
+  if (!controller_->ModifyHostWindow(view_id, settings)) {
+    result.Error(kBadArgumentsError, "Can't find window with view ID " +
+                                         std::to_string(view_id) + ".");
+  }
+
+  result.Success();
+}
+
 void WindowingHandler::HandleDestroyWindow(MethodCall<> const& call,
                                            MethodResult<>& result) {
   auto const* const arguments = call.arguments();
   auto const* const map = std::get_if<EncodableMap>(arguments);
   if (!map) {
-    result.Error(kInvalidValueError, "Method call argument is not a map.");
+    result.Error(kBadArgumentsError, "Method call argument is not a map.");
     return;
   }
 
@@ -498,19 +589,19 @@ void WindowingHandler::HandleDestroyWindow(MethodCall<> const& call,
           GetSingleValueForKeyOrSendError<int>(kViewIdKey, map, result);
       success) {
     if (!view_id_opt.has_value()) {
-      result.Error(kInvalidValueError, "Value for the '" +
+      result.Error(kBadArgumentsError, "Value for the '" +
                                            std::string(kViewIdKey) +
                                            "' key must not be null.");
       return;
     }
     if (*view_id_opt < 0) {
-      result.Error(kInvalidValueError,
+      result.Error(kBadArgumentsError,
                    "Value for '" + std::string(kViewIdKey) + "' (" +
                        std::to_string(*view_id_opt) + ") cannot be negative.");
       return;
     }
     if (!controller_->DestroyHostWindow(*view_id_opt)) {
-      result.Error(kInvalidValueError, "Can't find window with view ID " +
+      result.Error(kBadArgumentsError, "Can't find window with view ID " +
                                            std::to_string(*view_id_opt) + ".");
       return;
     }

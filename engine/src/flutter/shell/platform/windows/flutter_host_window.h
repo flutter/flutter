@@ -57,12 +57,6 @@ class FlutterHostWindow {
   // created or has already been destroyed.
   HWND GetWindowHandle() const;
 
-  // Sets whether closing this window will quit the application.
-  void SetQuitOnClose(bool quit_on_close);
-
-  // Returns whether closing this window will quit the application.
-  bool GetQuitOnClose() const;
-
  private:
   friend FlutterHostWindowController;
 
@@ -87,8 +81,17 @@ class FlutterHostWindow {
   // inheriting classes can handle.
   LRESULT HandleMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
+  // Resizes the window to accommodate a client area of the given |client_size|.
+  void SetClientSize(Size const& client_size) const;
+
   // Inserts |content| into the window tree.
   void SetChildContent(HWND content);
+
+  // Sets the window state.
+  void SetState(WindowState state);
+
+  // Sets the window title.
+  void SetTitle(std::string_view title) const;
 
   // Controller for this window.
   FlutterHostWindowController* const window_controller_;

@@ -131,6 +131,16 @@ struct WindowCreationSettings {
   std::optional<WindowPositioner> positioner;
 };
 
+// Settings for modifying a Flutter window.
+struct WindowModificationSettings {
+  // The new requested size, in logical coordinates.
+  std::optional<Size> size;
+  // The new window title.
+  std::optional<std::string> title;
+  // The new window state.
+  std::optional<WindowState> state;
+};
+
 // Window metadata returned as the result of creating a Flutter window.
 struct WindowMetadata {
   // The ID of the view used for this window, which is unique to each window.

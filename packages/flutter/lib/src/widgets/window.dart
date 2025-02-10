@@ -631,7 +631,7 @@ Future<_RegularWindowCreationResult> _createRegular({
 }) async {
   WidgetsFlutterBinding.ensureInitialized();
   final Map<Object?, Object?> creationData =
-      await SystemChannels.windowing.invokeMethod('createWindow', <String, dynamic>{
+      await SystemChannels.windowing.invokeMethod('createRegular', <String, dynamic>{
             'size': <double>[size.width, size.height],
             'minSize':
                 sizeConstraints != null
