@@ -495,7 +495,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         if (offline) '--offline',
         '--directory',
         widgetPreviewScaffoldProject.directory.path,
-        '${rootProject.manifest.appName}:{"path":${rootProject.directory.path}}',
+        // Ensure the path using POSIX separators, otherwise the "path_not_posix" check will fail.
+        '${rootProject.manifest.appName}:{"path":${rootProject.directory.path.replaceAll(r"\", "/")}}',
       ],
       context: PubContext.pubAdd,
       command: pubAdd,
