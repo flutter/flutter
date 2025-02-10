@@ -22,6 +22,43 @@ constexpr Matrix kFlip = Matrix(
   0.0f, 0.0f, 0.0f, 1.0f);
 // clang-format on
 
+// Get the Bezier factor for the superellipse arc in a rounded superellipse.
+//
+// The result will be assigned to output, where [0] will be the factor for the
+// starting tangent and [1] for the ending tangent.
+//
+// These values are computed by brute-force searching for the minimal distance
+// on a rounded superellipse and are not for general purpose superellipses.
+void SuperellipseBezierFactors(Scalar* output, Scalar n) {
+  constexpr Scalar kPrecomputedVariables[][2] = {
+      /*n=2.000*/ {0.02927797, 0.05200645},
+      /*n=2.050*/ {0.02927797, 0.05200645},
+      /*n=2.100*/ {0.03288032, 0.06051731},
+      /*n=2.150*/ {0.03719241, 0.06818433},
+      /*n=2.200*/ {0.04009513, 0.07196947},
+      /*n=2.250*/ {0.04504750, 0.07860258},
+      /*n=2.300*/ {0.05038706, 0.08498836},
+      /*n=2.350*/ {0.05580771, 0.09071105},
+      /*n=2.400*/ {0.06002306, 0.09363976},
+      /*n=2.450*/ {0.06630048, 0.09946086},
+      /*n=2.500*/ {0.07200351, 0.10384857}};
+  constexpr Scalar kNStepInverse = 20;  // = 1 / 0.05
+  constexpr size_t kNumRecords =
+      sizeof(kPrecomputedVariables) / sizeof(kPrecomputedVariables[0]);
+  constexpr Scalar kMinN = 2.00f;
+
+  Scalar steps =
+      std::clamp<Scalar>((n - kMinN) * kNStepInverse, 0, kNumRecords - 1);
+  size_t left = std::clamp<size_t>(static_cast<size_t>(std::floor(steps)), 0,
+                                   kNumRecords - 2);
+  Scalar frac = steps - left;
+
+  output[0] = (1 - frac) * kPrecomputedVariables[left][0] +
+              frac * kPrecomputedVariables[left + 1][0];
+  output[1] = (1 - frac) * kPrecomputedVariables[left][1] +
+              frac * kPrecomputedVariables[left + 1][1];
+}
+
 }  // namespace
 
 PathBuilder::PathBuilder() {
@@ -238,6 +275,24 @@ PathBuilder& PathBuilder::AddRoundSuperellipse(RoundSuperellipse rse) {
     return AddRect(rse.GetBounds());
   }
 
+  auto SuperellipseArcPoints = [](Point* output,
+                                  const RoundSuperellipseParam::Octant& param) {
+    Point start = {param.se_center.x, param.edge_mid.y};
+    const Point& end = param.circle_start;
+    constexpr Point start_tangent = {1, 0};
+    Point circle_start_vector = param.circle_start - param.circle_center;
+    Point end_tangent =
+        Point{-circle_start_vector.y, circle_start_vector.x}.Normalize();
+
+    Scalar factors[2];
+    SuperellipseBezierFactors(factors, param.se_n);
+
+    output[0] = start;
+    output[1] = start + start_tangent * factors[0] * param.se_a;
+    output[2] = end + end_tangent * factors[1] * param.se_a;
+    output[3] = end;
+  };
+
   auto CircularArcPoints = [](Point* output,
                               const RoundSuperellipseParam::Octant& param) {
     Point start_vector = param.circle_start - param.circle_center;
@@ -255,7 +310,7 @@ PathBuilder& PathBuilder::AddRoundSuperellipse(RoundSuperellipse rse) {
     output[3] = circle_end;
   };
 
-  auto AddOctant = [this, &CircularArcPoints](
+  auto AddOctant = [this, &CircularArcPoints, &SuperellipseArcPoints](
                        const RoundSuperellipseParam::Octant& param,
                        bool reverse, bool flip,
                        const Matrix& external_transform) {
@@ -269,7 +324,7 @@ PathBuilder& PathBuilder::AddRoundSuperellipse(RoundSuperellipse rse) {
     CircularArcPoints(circle_points, param);
 
     Point se_points[4];
-    RoundSuperellipseParam::SuperellipseBezierArc(se_points, param);
+    SuperellipseArcPoints(se_points, param);
 
     if (!reverse) {
       AddCubicComponent(transform * se_points[0], transform * se_points[1],
