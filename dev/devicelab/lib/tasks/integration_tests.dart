@@ -143,8 +143,8 @@ TaskFunction createSolidColorTest({required bool enableImpeller}) {
 // Device must have developer settings enabled.
 // Device must be android api 30 or higher.
 TaskFunction createDisplayCutoutTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/display_cutout_rotation/',
+  return IntegrationTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui/',
     'integration_test/display_cutout_test.dart',
     setup: (Device device) async {
       if (device is AndroidDevice) {
@@ -229,8 +229,6 @@ class DriverTest {
     this.extraOptions = const <String>[],
     this.deviceIdOverride,
     this.environment,
-    this.setup,
-    this.tearDown,
   });
 
   final String testDirectory;
@@ -238,12 +236,6 @@ class DriverTest {
   final List<String> extraOptions;
   final String? deviceIdOverride;
   final Map<String, String>? environment;
-
-  /// Run before flutter drive with the result from devices.workingDevice.
-  final Future<void> Function(Device device)? setup;
-
-  /// Run after flutter drive with the result from devices.workingDevice.
-  final Future<void> Function(Device device)? tearDown;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -255,7 +247,6 @@ class DriverTest {
         await device.unlock();
         deviceId = device.deviceId;
       }
-      await setup?.call(await devices.workingDevice);
       await flutter('packages', options: <String>['get']);
 
       final List<String> options = <String>[
@@ -268,7 +259,6 @@ class DriverTest {
         ...extraOptions,
       ];
       await flutter('drive', options: options, environment: environment);
-      await tearDown?.call(await devices.workingDevice);
       return TaskResult.success(null);
     });
   }
@@ -282,6 +272,8 @@ class IntegrationTest {
     this.createPlatforms = const <String>[],
     this.withTalkBack = false,
     this.environment,
+    this.setup,
+    this.tearDown,
   });
 
   final String testDirectory;
@@ -291,11 +283,18 @@ class IntegrationTest {
   final bool withTalkBack;
   final Map<String, String>? environment;
 
+  /// Run before flutter drive with the result from devices.workingDevice.
+  final Future<void> Function(Device device)? setup;
+
+  /// Run after flutter drive with the result from devices.workingDevice.
+  final Future<void> Function(Device device)? tearDown;
+
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
+      await setup?.call(await devices.workingDevice);
       await flutter('packages', options: <String>['get']);
 
       if (createPlatforms.isNotEmpty) {
@@ -316,6 +315,7 @@ class IntegrationTest {
 
       final List<String> options = <String>['-v', '-d', deviceId, testTarget, ...extraOptions];
       await flutter('test', options: options, environment: environment);
+      await tearDown?.call(await devices.workingDevice);
 
       if (withTalkBack) {
         await disableTalkBack();
