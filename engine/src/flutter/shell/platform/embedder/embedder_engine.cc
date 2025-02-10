@@ -243,8 +243,19 @@ bool EmbedderEngine::RunTask(const FlutterTask* task) {
   if (task == nullptr) {
     return false;
   }
-  return thread_host_->PostTask(reinterpret_cast<int64_t>(task->runner),
-                                task->task);
+  auto result = thread_host_->PostTask(reinterpret_cast<int64_t>(task->runner),
+                                       task->task);
+  // Normally the microtask queue is flushed through MessageLoopTaskQueues
+  // observer, but when running with application specified UI task runner,
+  // which is not associated with a task queue so the microtask queue needs to
+  // be flushed manually after running the task.
+  if (result && task_runners_.GetUITaskRunner() &&
+      task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() &&
+      !task_runners_.GetUITaskRunner()->GetTaskQueueId().is_valid()) {
+    shell_->FlushMicrotaskQueue();
+  }
+
+  return result;
 }
 
 bool EmbedderEngine::PostTaskOnEngineManagedNativeThreads(

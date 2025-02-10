@@ -202,6 +202,90 @@ TEST_F(EmbedderTest, ImplicitViewNotNull) {
 
 std::atomic_size_t EmbedderTestTaskRunner::sEmbedderTaskRunnerIdentifiers = {};
 
+TEST_F(EmbedderTest, MergedPlatformUIThreadRuns) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  auto ui_task_runner = CreateNewThread("test_platform_thread");
+  UniqueEngine engine;
+
+  EmbedderTestTaskRunner test_task_runner(
+      ui_task_runner, [&](FlutterTask task) {
+        if (!engine.is_valid()) {
+          return;
+        }
+        FlutterEngineRunTask(engine.get(), &task);
+      });
+
+  fml::AutoResetWaitableEvent signal_latch;
+
+  context.AddNativeCallback(
+      "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        // Assert that the UI isolate is running on platform thread.
+        ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
+        signal_latch.Signal();
+      }));
+
+  ui_task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto task_runner_description =
+        test_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSurface(SkISize::Make(1, 1));
+    builder.SetUITaskRunner(&task_runner_description);
+    builder.SetDartEntrypoint("mergedPlatformUIThreadRuns");
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+  });
+  signal_latch.Wait();
+
+  fml::AutoResetWaitableEvent kill_latch;
+  ui_task_runner->PostTask([&] {
+    engine.reset();
+    ui_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  });
+  kill_latch.Wait();
+}
+
+TEST_F(EmbedderTest, MergedPlatformUIThreadFlushesMicrotasks) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  auto ui_task_runner = CreateNewThread("test_platform_thread");
+  UniqueEngine engine;
+
+  EmbedderTestTaskRunner test_task_runner(
+      // Assert that the UI isolate is running on platform thread.
+      ui_task_runner, [&](FlutterTask task) {
+        if (!engine.is_valid()) {
+          return;
+        }
+        FlutterEngineRunTask(engine.get(), &task);
+      });
+
+  fml::AutoResetWaitableEvent signal_latch;
+
+  context.AddNativeCallback(
+      "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
+        signal_latch.Signal();
+      }));
+
+  ui_task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto task_runner_description =
+        test_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSurface(SkISize::Make(1, 1));
+    builder.SetUITaskRunner(&task_runner_description);
+    builder.SetDartEntrypoint("mergedPlatformUIThreadFlushesMicrotasks");
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+  });
+  signal_latch.Wait();
+
+  fml::AutoResetWaitableEvent kill_latch;
+  ui_task_runner->PostTask([&] {
+    engine.reset();
+    ui_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  });
+  kill_latch.Wait();
+}
+
 TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   fml::AutoResetWaitableEvent latch;
