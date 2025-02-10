@@ -130,7 +130,6 @@ abstract final class FlutterOptions {
   static const String kDartObfuscationOption = 'obfuscate';
   static const String kDartDefinesOption = 'dart-define';
   static const String kDartDefineFromFileOption = 'dart-define-from-file';
-  static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
@@ -938,18 +937,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addBundleSkSLPathOption({required bool hide}) {
-    argParser.addOption(
-      FlutterOptions.kBundleSkSLPathOption,
-      help:
-          'A path to a file containing precompiled SkSL shaders generated '
-          'during "flutter run". These can be included in an application to '
-          'improve the first frame render times.',
-      hide: hide,
-      valueHelp: 'flutter_1.sksl',
-    );
-  }
-
   void addTreeShakeIconsFlag({bool? enabledByDefault}) {
     argParser.addFlag(
       'tree-shake-icons',
@@ -1142,7 +1129,6 @@ abstract class FlutterCommand extends Command<void> {
   void addCommonDesktopBuildOptions({required bool verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
-    addBundleSkSLPathOption(hide: !verboseHelp);
     addDartObfuscationOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
@@ -1417,15 +1403,6 @@ abstract class FlutterCommand extends Command<void> {
         buildMode.isPrecompiled &&
         boolArg('tree-shake-icons');
 
-    final String? bundleSkSLPath =
-        argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
-            ? stringArg(FlutterOptions.kBundleSkSLPathOption)
-            : null;
-
-    if (bundleSkSLPath != null && !globals.fs.isFileSync(bundleSkSLPath)) {
-      throwToolExit('No SkSL shader bundle found at $bundleSkSLPath.');
-    }
-
     final String? performanceMeasurementFile =
         argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
             ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
@@ -1479,7 +1456,6 @@ abstract class FlutterCommand extends Command<void> {
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
       dartDefines: dartDefines,
-      bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
       packageConfigPath: packagesPath ?? packageConfigFile.path,

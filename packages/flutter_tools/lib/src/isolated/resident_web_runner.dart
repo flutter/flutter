@@ -141,9 +141,6 @@ class ResidentWebRunner extends ResidentRunner {
   bool get deviceIsDebuggable => device!.device is! WebServerDevice || debuggingOptions.startPaused;
 
   @override
-  bool get supportsWriteSkSL => false;
-
-  @override
   // Web uses a different plugin registry.
   bool get generateDartPluginRegistry => false;
 

@@ -1310,25 +1310,6 @@ void main() {
   );
 
   testUsingContext(
-    'Passes sksl bundle info the build options',
-    () async {
-      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
-
-      await expectLater(
-        () => createTestCommandRunner(
-          command,
-        ).run(<String>['run', '--no-pub', '--bundle-sksl-path=foo.json']),
-        throwsToolExit(message: 'No SkSL shader bundle found at foo.json'),
-      );
-    },
-    overrides: <Type, Generator>{
-      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
-
-  testUsingContext(
     'Configures web connection options to use web sockets by default',
     () async {
       final RunCommand command = RunCommand();
