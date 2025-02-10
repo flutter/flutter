@@ -15,9 +15,29 @@ namespace impeller {
 struct RoundSuperellipse {
   RoundSuperellipse() = default;
 
+  constexpr static RoundSuperellipse MakeRect(const Rect& rect) {
+    return MakeRectRadii(rect, RoundingRadii());
+  }
+
+  constexpr static RoundSuperellipse MakeOval(const Rect& rect) {
+    return MakeRectRadii(rect, RoundingRadii::MakeRadii(rect.GetSize() * 0.5f));
+  }
+
   constexpr static RoundSuperellipse MakeRectRadius(const Rect& rect,
                                                     Scalar radius) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadius(radius));
+  }
+
+  constexpr static RoundSuperellipse MakeRectXY(const Rect& rect,
+                                                Scalar x_radius,
+                                                Scalar y_radius) {
+    return MakeRectRadii(rect,
+                         RoundingRadii::MakeRadii(Size(x_radius, y_radius)));
+  }
+
+  constexpr static RoundSuperellipse MakeRectXY(const Rect& rect,
+                                                Size corner_radii) {
+    return MakeRectRadii(rect, RoundingRadii::MakeRadii(corner_radii));
   }
 
   static RoundSuperellipse MakeRectRadii(const Rect& rect,
