@@ -97,7 +97,6 @@ class WebDriverService extends DriverService {
       stayResident: true,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
-      usage: globals.flutterUsage,
       analytics: globals.analytics,
       logger: _logger,
       systemClock: globals.systemClock,
@@ -208,7 +207,7 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<void> stop({File? writeSkslOnExit, String? userIdentifier}) async {
+  Future<void> stop({String? userIdentifier}) async {
     final bool appDidFinishPrematurely = _runResult != null;
     await _residentRunner.exitApp();
     await _residentRunner.cleanupAtFinish();
