@@ -941,10 +941,10 @@ void main() {
       final Uri uri = await webDevFS.create();
       webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
       final String webPrecompiledCanvaskitSdk =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdk).path;
+          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdk).path;
       final String webPrecompiledCanvaskitSdkSourcemaps =
           globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps)
+              .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps)
               .path;
       globals.fs.currentDirectory.childDirectory('lib').childFile('web_entrypoint.dart')
         ..createSync(recursive: true)
