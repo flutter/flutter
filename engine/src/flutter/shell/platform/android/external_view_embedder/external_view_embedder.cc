@@ -155,9 +155,6 @@ AndroidExternalViewEmbedder::CreateSurfaceIfNeeded(GrDirectContext* context,
   );
   DlCanvas* overlay_canvas = frame->Canvas();
   overlay_canvas->Clear(DlColor::kTransparent());
-  // Offset the picture since its absolute position on the scene is determined
-  // by the position of the overlay view.
-  overlay_canvas->Translate(-rect.x(), -rect.y());
   slice->render_into(overlay_canvas);
   return frame;
 }
