@@ -4,10 +4,10 @@
 
 /// @docImport 'dart:ui';
 ///
-/// @docImport 'package:flutter/rendering.dart';
 /// @docImport 'package:flutter/widgets.dart';
 ///
 /// @docImport 'box.dart';
+/// @docImport 'paragraph.dart';
 /// @docImport 'proxy_box.dart';
 /// @docImport 'view.dart';
 /// @docImport 'viewport.dart';
