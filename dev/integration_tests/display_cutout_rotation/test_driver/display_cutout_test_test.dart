@@ -66,6 +66,7 @@ Future<void> main() async {
   }
   // Assumption of diplay_cutout_test.dart is that there is a "tall" notch.
   print('Adding Synthetic notch...');
+  // This command will cause android activities to be recreated.
   Process.runSync(adbExecutable, <String>[
     'shell',
     'cmd',
