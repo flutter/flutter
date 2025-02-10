@@ -195,5 +195,5 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/157725
   final _TestRouteTransitionRecord _testRouteTransitionRecord =
       _TestRouteTransitionRecord();
-  _testRouteTransitionRecord.markForRemove();
+  _testRouteTransitionRecord.markForComplete();
 }
