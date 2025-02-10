@@ -266,8 +266,7 @@ const Map<WebRendererMode, HostArtifact> kAmdDartSdkJsMapArtifactMap =
     };
 
 /// The correct precompiled artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format. Only artifacts with sound
-/// null-safety are provided.
+/// DDC with DDC library bundle module format.
 const Map<WebRendererMode, HostArtifact> kDdcLibraryBundleDartSdkJsArtifactMap =
     <WebRendererMode, HostArtifact>{
       WebRendererMode.auto: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdk,
@@ -276,8 +275,7 @@ const Map<WebRendererMode, HostArtifact> kDdcLibraryBundleDartSdkJsArtifactMap =
     };
 
 /// The correct source map artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format. Only artifacts with sound
-/// null-safety are provided.
+/// DDC with DDC library bundle module format.
 const Map<WebRendererMode, HostArtifact> kDdcLibraryBundleDartSdkJsMapArtifactMap =
     <WebRendererMode, HostArtifact>{
       WebRendererMode.auto:

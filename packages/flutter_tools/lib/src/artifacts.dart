@@ -111,8 +111,7 @@ enum HostArtifact {
   webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps,
 
   /// The precompiled SDKs and sourcemaps for web debug builds with the DDC
-  /// library bundle module system. Only SDKs built with sound null-safety are
-  /// provided here.
+  /// library bundle module system.
   webPrecompiledDdcLibraryBundleSdk,
   webPrecompiledDdcLibraryBundleSdkSourcemaps,
   webPrecompiledDdcLibraryBundleCanvaskitSdk,
@@ -465,7 +464,7 @@ class CachedArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'amd-sound',
+          'amd',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -474,7 +473,7 @@ class CachedArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'amd-canvaskit-sound',
+          'amd-canvaskit',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -483,7 +482,7 @@ class CachedArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'amd-canvaskit-html-sound',
+          'amd-canvaskit-html',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -492,7 +491,7 @@ class CachedArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'ddcLibraryBundle-sound',
+          'ddcLibraryBundle',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -501,7 +500,7 @@ class CachedArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'ddcLibraryBundle-canvaskit-sound',
+          'ddcLibraryBundle-canvaskit',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -510,7 +509,7 @@ class CachedArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'ddcLibraryBundle-canvaskit-html-sound',
+          'ddcLibraryBundle-canvaskit-html',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1168,7 +1167,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'amd-sound',
+          'amd',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1177,7 +1176,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'amd-canvaskit-sound',
+          'amd-canvaskit',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1186,7 +1185,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'amd-canvaskit-html-sound',
+          'amd-canvaskit-html',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1195,7 +1194,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'ddcLibraryBundle-sound',
+          'ddcLibraryBundle',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1204,7 +1203,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'ddcLibraryBundle-canvaskit-sound',
+          'ddcLibraryBundle-canvaskit',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1213,7 +1212,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'ddcLibraryBundle-canvaskit-html-sound',
+          'ddcLibraryBundle-canvaskit-html',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1575,7 +1574,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'amd-sound',
+          'amd',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1584,7 +1583,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'amd-canvaskit-sound',
+          'amd-canvaskit',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1593,7 +1592,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'amd-canvaskit-html-sound',
+          'amd-canvaskit-html',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1602,7 +1601,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'ddcLibraryBundle-sound',
+          'ddcLibraryBundle',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1611,7 +1610,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'ddcLibraryBundle-canvaskit-sound',
+          'ddcLibraryBundle-canvaskit',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1620,7 +1619,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
-          'ddcLibraryBundle-canvaskit-html-sound',
+          'ddcLibraryBundle-canvaskit-html',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
