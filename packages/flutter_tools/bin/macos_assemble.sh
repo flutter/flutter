@@ -163,6 +163,9 @@ BuildApp() {
     flutter_args+=("-dPreBuildAction=PrepareFramework")
   fi
 
+  if [[ -n "$FLAVOR" ]]; then
+    flutter_args+=("-dFlavor=${FLAVOR}")
+  fi
   if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
     flutter_args+=("--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}")
   fi
