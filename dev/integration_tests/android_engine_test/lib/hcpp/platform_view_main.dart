@@ -19,7 +19,11 @@ void main() async {
 
   // Run on full screen.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-  runApp(const MainApp(platformView: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view')));
+  runApp(
+    const MainApp(
+      platformView: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),
+    ),
+  );
 }
 
 final class _HybridCompositionAndroidPlatformView extends StatelessWidget {

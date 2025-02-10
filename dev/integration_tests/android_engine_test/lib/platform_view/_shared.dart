@@ -37,11 +37,7 @@ class _MainAppState extends State<MainApp> {
             child: const SizedBox(width: 190, height: 190, child: ColoredBox(color: Colors.green)),
           ),
           if (showPlatformView) ...<Widget>[
-            SizedBox(
-              width: 200,
-              height: 200,
-              child: widget.platformView,
-            ),
+            SizedBox(width: 200, height: 200, child: widget.platformView),
             TextButton(
               key: const ValueKey<String>('RemoveOverlay'),
               onPressed: _togglePlatformView,
