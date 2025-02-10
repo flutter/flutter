@@ -955,7 +955,7 @@ abstract class RouteTransitionRecord {
   @Deprecated(
     'Call markForComplete instead. '
     'This will let route associated future to complete when route is removed. '
-    'This feature was deprecated after 3.27.0-1.0.pre.',
+    'This feature was deprecated after v3.27.0-1.0.pre.',
   )
   void markForRemove() => markForComplete();
 }
