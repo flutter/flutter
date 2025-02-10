@@ -23,7 +23,6 @@
 ../../../flutter/analysis_options.yaml
 ../../../flutter/assets/native_assets_unittests.cc
 ../../../flutter/build
-../../../flutter/build_overrides
 ../../../flutter/buildtools
 ../../../flutter/ci
 ../../../flutter/common/README.md
