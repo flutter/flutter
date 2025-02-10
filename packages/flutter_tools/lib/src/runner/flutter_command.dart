@@ -151,6 +151,7 @@ abstract final class FlutterOptions {
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
   static const String kWebWasmFlag = 'wasm';
+  static const String kWebExperimentalHotReload = 'web-experimental-hot-reload';
 }
 
 /// flutter command categories for usage.
@@ -334,6 +335,11 @@ abstract class FlutterCommand extends Command<void> {
       'web-enable-expression-evaluation',
       defaultsTo: true,
       help: 'Enables expression evaluation in the debugger.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      FlutterOptions.kWebExperimentalHotReload,
+      help: 'Enables new module format that supports hot reload.',
       hide: !verboseHelp,
     );
     argParser.addOption(
@@ -1326,6 +1332,12 @@ abstract class FlutterCommand extends Command<void> {
         extraFrontEndOptions.add(flag);
         extraGenSnapshotOptions.add(flag);
       }
+    }
+
+    // TODO(natebiggs): Delete this when new DDC module system is the default.
+    if (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+        boolArg(FlutterOptions.kWebExperimentalHotReload)) {
+      extraFrontEndOptions.addAll(<String>['--dartdevc-canary', '--dartdevc-module-format=ddc']);
     }
 
     String? codeSizeDirectory;
