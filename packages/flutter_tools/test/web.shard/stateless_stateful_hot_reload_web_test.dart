@@ -11,8 +11,6 @@ import '../src/common.dart';
 void main() {
   testAll(
     chrome: true,
-    additionalCommandArgs: <String>[
-      '--extra-front-end-options=--dartdevc-canary,--dartdevc-module-format=ddc',
-    ],
+    additionalCommandArgs: <String>['--web-experimental-hot-reload'],
   );
 }
