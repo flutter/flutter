@@ -140,13 +140,22 @@ TaskFunction createSolidColorTest({required bool enableImpeller}) {
 }
 
 // Can run on emulator or physical android device.
+// Device must have developer settings enabled.
+// Device must be android api 30 or higher.
 TaskFunction createDisplayCutoutTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/display_cutout_rotation/',
     'integration_test/display_cutout_test.dart',
     setup: (Device device) async {
-      // Only android devices support this cutoutTest.
       if (device is AndroidDevice) {
+        // Test requires developer settings added in 28 and behavior added in 30.
+        final String sdkResult = await device.shellEval('getprop', <String>[
+          'ro.build.version.sdk',
+        ]);
+        if (sdkResult.startsWith('2') || sdkResult.startsWith('1') || sdkResult.length == 1) {
+          print('This test must be run on api 30 or higher.');
+          throw TaskResult.failure('This test should only target android 30+.');
+        }
         print('Adding Synthetic notch...');
         // This command will cause any running android activity to be recreated.
         await device.shellExec('cmd', <String>[
@@ -154,6 +163,9 @@ TaskFunction createDisplayCutoutTest() {
           'enable',
           'com.android.internal.display.cutout.emulation.tall',
         ]);
+      } else {
+        // Only android devices support this cutoutTest.
+        throw TaskResult.failure('This test should only target android');
       }
     },
     tearDown: (Device device) async {
