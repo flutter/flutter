@@ -97,7 +97,7 @@ class SemanticRouteBase extends SemanticRole {
 ///
 /// See also:
 ///
-///   * [RouteName], which provides a description for this route in the absent
+///   * [RouteName], which provides a description for this route in the absence
 ///     of an explicit route label set on the route itself.
 class SemanticRoute extends SemanticRouteBase {
   SemanticRoute(SemanticsObject object) : super(EngineSemanticsRole.route, object) {
@@ -121,7 +121,7 @@ class SemanticRoute extends SemanticRouteBase {
 ///
 /// See also:
 ///
-///   * [RouteName], which provides a description for this route in the absent
+///   * [RouteName], which provides a description for this route in the absence
 ///     of an explicit route label set on the route itself.
 class SemanticDialog extends SemanticRouteBase {
   SemanticDialog(SemanticsObject object) : super(EngineSemanticsRole.dialog, object) {
@@ -138,6 +138,11 @@ class SemanticDialog extends SemanticRouteBase {
 /// reader better understand this section of screen.
 ///
 /// Screen-readers takes advantage of "aria-label" to describe the visual.
+///
+/// See also:
+///
+///   * [RouteName], which provides a description for this route in the absence
+///     of an explicit route label set on the route itself.
 class SemanticAlertDialog extends SemanticRouteBase {
   SemanticAlertDialog(SemanticsObject object) : super(EngineSemanticsRole.alertDialog, object) {
     setAriaRole('alertdialog');
