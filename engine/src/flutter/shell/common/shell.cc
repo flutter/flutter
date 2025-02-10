@@ -635,10 +635,9 @@ void Shell::NotifyLowMemoryWarning() const {
 }
 
 void Shell::FlushMicrotaskQueue() const {
-  if (!weak_engine_) {
-    return;
+  if (engine_) {
+    engine_->FlushMicrotaskQueue();
   }
-  weak_engine_->FlushMicrotaskQueue();
 }
 
 void Shell::RunEngine(RunConfiguration run_configuration) {

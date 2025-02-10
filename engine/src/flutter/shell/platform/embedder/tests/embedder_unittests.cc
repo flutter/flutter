@@ -205,18 +205,21 @@ std::atomic_size_t EmbedderTestTaskRunner::sEmbedderTaskRunnerIdentifiers = {};
 TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   auto ui_task_runner = CreateNewThread("test_ui_thread");
-  auto platform_task_runner = CreateNewThread("test_ui_thread");
+  auto platform_task_runner = CreateNewThread("test_platform_thread");
+  static std::mutex engine_mutex;
   UniqueEngine engine;
 
   EmbedderTestTaskRunner test_ui_task_runner(
       ui_task_runner, [&](FlutterTask task) {
+        std::scoped_lock lock(engine_mutex);
         if (!engine.is_valid()) {
           return;
         }
         FlutterEngineRunTask(engine.get(), &task);
       });
   EmbedderTestTaskRunner test_platform_task_runner(
-      ui_task_runner, [&](FlutterTask task) {
+      platform_task_runner, [&](FlutterTask task) {
+        std::scoped_lock lock(engine_mutex);
         if (!engine.is_valid()) {
           return;
         }
@@ -233,28 +236,35 @@ TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
         signal_latch_ui.Signal();
       }));
 
-  ui_task_runner->PostTask([&]() {
+  platform_task_runner->PostTask([&]() {
     EmbedderConfigBuilder builder(context);
-    const auto task_runner_description =
+    const auto ui_task_runner_description =
         test_ui_task_runner.GetFlutterTaskRunnerDescription();
+    const auto platform_task_runner_description =
+        test_platform_task_runner.GetFlutterTaskRunnerDescription();
     builder.SetSurface(SkISize::Make(1, 1));
-    builder.SetUITaskRunner(&task_runner_description);
+    builder.SetUITaskRunner(&ui_task_runner_description);
+    builder.SetPlatformTaskRunner(&platform_task_runner_description);
     builder.SetDartEntrypoint("canSpecifyCustomUITaskRunner");
     builder.SetPlatformMessageCallback(
         [&](const FlutterPlatformMessage* message) {
           ASSERT_TRUE(platform_task_runner->RunsTasksOnCurrentThread());
           signal_latch_platform.Signal();
         });
-    engine = builder.LaunchEngine();
+    {
+      std::scoped_lock lock(engine_mutex);
+      engine = builder.InitializeEngine();
+    }
+    ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
     ASSERT_TRUE(engine.is_valid());
   });
   signal_latch_ui.Wait();
   signal_latch_platform.Wait();
 
   fml::AutoResetWaitableEvent kill_latch;
-  ui_task_runner->PostTask([&] {
+  platform_task_runner->PostTask([&] {
     engine.reset();
-    ui_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+    platform_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
   });
   kill_latch.Wait();
 }

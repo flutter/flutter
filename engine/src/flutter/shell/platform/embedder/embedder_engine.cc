@@ -249,7 +249,7 @@ bool EmbedderEngine::RunTask(const FlutterTask* task) {
   // observer. When running with application specified UI task runner
   // which is not associated with a task queue, the microtask queue needs to
   // be flushed manually after running the task.
-  if (result && task_runners_.GetUITaskRunner() &&
+  if (result && shell_ && task_runners_.GetUITaskRunner() &&
       task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() &&
       !task_runners_.GetUITaskRunner()->GetTaskQueueId().is_valid()) {
     shell_->FlushMicrotaskQueue();
