@@ -490,7 +490,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
 
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(
-      environment.defines[kXcodeConfiguration],
+      environment,
     );
 
     final Depfile assetDepfile = await copyAssets(

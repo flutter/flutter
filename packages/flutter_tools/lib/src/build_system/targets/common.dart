@@ -304,7 +304,7 @@ class KernelSnapshot extends Target {
       final XcodeBasedProject xcodeProject =
           targetPlatform == TargetPlatform.ios ? flutterProject.ios : flutterProject.macos;
       flavor = await xcodeProject.parseFlavorFromConfiguration(
-        environment.defines[kXcodeConfiguration],
+        environment,
       );
     } else {
       flavor = environment.defines[kFlavor];

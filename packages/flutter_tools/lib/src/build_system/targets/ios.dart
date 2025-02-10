@@ -527,7 +527,7 @@ abstract class IosAssetBundle extends Target {
 
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final String? flavor = await flutterProject.ios.parseFlavorFromConfiguration(
-      environment.defines[kXcodeConfiguration],
+      environment,
     );
 
     // Copy the assets.
