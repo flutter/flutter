@@ -73,9 +73,7 @@ Future<void> _testProject(
   late FlutterRunTestDriver flutter;
 
   final List<String> additionalCommandArgs =
-      useDDCLibraryBundleFormat
-          ? <String>['--web-experimental-hot-reload']
-          : <String>[];
+      useDDCLibraryBundleFormat ? <String>['--web-experimental-hot-reload'] : <String>[];
   final String testName =
       'Hot restart (index.html: $name)'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}';
