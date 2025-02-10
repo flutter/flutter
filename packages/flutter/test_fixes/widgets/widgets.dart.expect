@@ -4,6 +4,8 @@
 
 import 'package:flutter/widgets.dart';
 
+class _TestRouteTransitionRecord extends RouteTransitionRecord {}
+
 void main() {
   // Generic reference variables.
   BuildContext context;
@@ -189,4 +191,9 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/139260
   final NavigatorState state = Navigator.of(context);
   state.focusNode.enclosingScope!;
+
+  // Changes made in https://github.com/flutter/flutter/pull/157725
+    final _TestRouteTransitionRecord _testRouteTransitionRecord =
+        _TestRouteTransitionRecord();
+    _testRouteTransitionRecord.markForComplete();
 }
