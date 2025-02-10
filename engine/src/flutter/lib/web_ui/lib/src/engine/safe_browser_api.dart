@@ -570,7 +570,7 @@ class GlContext {
     js_util.callMethod<void>(glContext, 'activeTexture', <dynamic>[textureUnit]);
   }
 
-  void pixelStorei(int pname, dynamic param) {
+  void pixelStorei(dynamic pname, dynamic param) {
     js_util.callMethod<void>(glContext, 'pixelStorei', <dynamic>[pname, param]);
   }
 

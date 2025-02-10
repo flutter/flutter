@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:test/bootstrap/browser.dart';
-import 'package:test/test.dart';
-//import 'package:ui/src/engine.dart' as engine;
+import 'package:test/test.dart'; //import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
 
@@ -45,6 +44,10 @@ Future<void> testMain() async {
     final DomCanvasElement canvas = createDomCanvasElement(width: 500, height: 500);
     domDocument.body!.append(canvas);
     final DomCanvasRenderingContext2D context = canvas.context2D;
+    final webgl2 = canvas.getContext('experimental-webgl');
+    expect(webgl2 == null, false);
+    final webgl = canvas.getContext('webgl');
+    expect(webgl == null, false);
 
     context.fillStyle = 'yellow';
     context.fillRect(0, 0, 100, 200);

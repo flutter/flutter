@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine/safe_browser_api.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
-import '../safe_browser_api.dart';
+//import '../safe_browser_api.dart';
 import 'paragraph.dart';
 
 /// A single canvas2d context to use for all text information.
@@ -48,8 +49,8 @@ class TextPaint {
   void paintTexture(DomCanvasElement canvas, WebTextCluster textCluster, double x, double y) {
     String text = this.paragraph.text.substring(textCluster.begin(), textCluster.end());
 
-    //final WebGLContext webgl = canvas.getGlContext(webGLVersion);
-    final GlContext webgl = canvas.getContext('webgl')! as GlContext;
+    //final GlContext webgl = canvas.getContext('webgl')! as GlContext;
+    final GlContext webgl = canvas.getContext('webgl') as GlContext;
 
     //final DomCanvasRenderingContext2D webgl =
     //    canvas.getContext('webgl')! as DomCanvasRenderingContext2D;
