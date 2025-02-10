@@ -141,9 +141,12 @@ TaskFunction createSolidColorTest({required bool enableImpeller}) {
 
 // Can run on emulator or physical android device.
 TaskFunction createDisplayCutoutTest() {
+  // Port numbers are set in an attempt to survive destruction and recreation of
+  // the engine that happens during the custom flutter driver used in this test.
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/display_cutout_rotation/',
     'integration_test/display_cutout_test.dart',
+    extraOptions: <String>['--dds-port=37161', '--vm-service-port=41501'],
   ).call;
 }
 
