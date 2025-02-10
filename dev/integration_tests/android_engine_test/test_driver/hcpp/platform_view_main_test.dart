@@ -39,6 +39,8 @@ void main() async {
   });
 
   tearDownAll(() async {
+    await flutterDriver.tap(find.byValueKey('AddOverlay'));
+
     await nativeDriver.close();
     await flutterDriver.close();
   });

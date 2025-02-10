@@ -39,6 +39,8 @@ void main() async {
   });
 
   tearDownAll(() async {
+    await flutterDriver.tap(find.byValueKey('AddOverlay'));
+
     await nativeDriver.close();
     await flutterDriver.close();
   });
@@ -78,6 +80,16 @@ void main() async {
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portait_rotated_back.png'),
+    );
+  }, timeout: Timeout.none);
+
+  test('should hide overlay layer', () async {
+    await flutterDriver.tap(find.byValueKey('RemoveOverlay'));
+    await Future<void>.delayed(const Duration(seconds: 1));
+
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.hide_overlay.png'),
     );
   }, timeout: Timeout.none);
 }
