@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
@@ -273,7 +272,6 @@ void main() {
   testUsingContext(
     'DebugIosApplicationBundle with flavor',
     () async {
-      environment.defines[kBundleSkSLPath] = 'bundle.sksl';
       environment.defines[kBuildMode] = 'debug';
       environment.defines[kCodesignIdentity] = 'ABC123';
       environment.defines[kFlavor] = 'vanilla';
@@ -321,16 +319,6 @@ void main() {
           .childDirectory('App.framework')
           .childFile('App')
           .createSync(recursive: true);
-      // sksl bundle
-      fileSystem
-          .file('bundle.sksl')
-          .writeAsStringSync(
-            json.encode(<String, Object>{
-              'engineRevision': '2',
-              'platform': 'ios',
-              'data': <String, Object>{'A': 'B'},
-            }),
-          );
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
