@@ -253,7 +253,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       linuxPlatform: platform.isLinux,
       macOSPlatform: platform.isMacOS,
       windowsPlatform: platform.isWindows,
-      allowedPlugins: const <String>[],
     );
 
     // Generate initial package_config.json, otherwise the build will fail.
