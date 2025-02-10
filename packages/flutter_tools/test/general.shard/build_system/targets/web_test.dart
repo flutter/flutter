@@ -1151,11 +1151,13 @@ void main() {
               test(
                 'Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines, modeMode=$buildMode sourceMaps=$sourceMaps',
                 () => testbed.run(() async {
-                  final int expectedLevel = level ?? switch (buildMode) {
-                    'debug' => 0,
-                    'profile' || 'release' => 2,
-                    _ => throw UnimplementedError(),
-                  };
+                  final int expectedLevel =
+                      level ??
+                      switch (buildMode) {
+                        'debug' => 0,
+                        'profile' || 'release' => 2,
+                        _ => throw UnimplementedError(),
+                      };
                   environment.defines[kBuildMode] = buildMode;
                   environment.defines[kDartDefines] = encodeDartDefines(defines);
 
