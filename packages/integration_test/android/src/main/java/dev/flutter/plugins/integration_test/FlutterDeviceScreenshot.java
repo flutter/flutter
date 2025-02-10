@@ -65,7 +65,7 @@ class FlutterDeviceScreenshot {
       return null;
     }
   }
-å
+
   /**
    * Whether the app is run with instrumentation.
    *
