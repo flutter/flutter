@@ -415,7 +415,6 @@ void main() {
             artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
           )
           .createSync();
-      environment.defines[kBundleSkSLPath] = 'bundle.sksl';
       fileSystem
           .file(
             artifacts.getArtifactPath(
@@ -435,16 +434,6 @@ void main() {
           )
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
-      // sksl bundle
-      fileSystem
-          .file('bundle.sksl')
-          .writeAsStringSync(
-            json.encode(<String, Object>{
-              'engineRevision': '2',
-              'platform': 'ios',
-              'data': <String, Object>{'A': 'B'},
-            }),
-          );
 
       final String inputKernel = '${environment.buildDir.path}/app.dill';
       fileSystem.file(inputKernel)
@@ -472,13 +461,6 @@ void main() {
         fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
         exists,
       );
-
-      final File skslFile = fileSystem.file(
-        'App.framework/Versions/A/Resources/flutter_assets/io.flutter.shaders.json',
-      );
-
-      expect(skslFile, exists);
-      expect(skslFile.readAsStringSync(), '{"data":{"A":"B"}}');
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
