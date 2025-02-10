@@ -87,16 +87,18 @@ Future<void> frameworkTestsRunner() async {
     await runCommand(flutter, <String>[
       'config',
       '--enable-${Platform.operatingSystem}-desktop',
+      '-v'
     ], workingDirectory: flutterRoot);
     await runCommand(dart, <String>[
       path.join(flutterRoot, 'dev', 'tools', 'examples_smoke_test.dart'),
+      '-v'
     ], workingDirectory: path.join(flutterRoot, 'examples', 'api'));
     for (final FileSystemEntity entity
         in Directory(path.join(flutterRoot, 'examples')).listSync()) {
       if (entity is! Directory || !Directory(path.join(entity.path, 'test')).existsSync()) {
         continue;
       }
-      await runFlutterTest(entity.path);
+      await runFlutterTest(entity.path, options: <String>['-v'],);
     }
   }
 
@@ -258,6 +260,7 @@ Future<void> frameworkTestsRunner() async {
     await runFlutterTest(
       path.join(flutterRoot, 'dev', 'a11y_assessments'),
       tests: <String>['test'],
+      options: <String>['-v'],
     );
     await runDartTest(path.join(flutterRoot, 'dev', 'bots'));
     await runDartTest(
@@ -269,17 +272,19 @@ Future<void> frameworkTestsRunner() async {
     await runFlutterTest(
       path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'),
       fatalWarnings: false,
+      options: <String>['-v'],
     );
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'), options: <String>['-v'],);
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), options: <String>['-v'],);
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools'), options: <String>['-v'],);
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), options: <String>['-v'],);
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'), options: <String>['-v'],);
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'), options: <String>['-v'],);
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'), options: <String>['-v'],);
     await runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter_driver'),
       tests: <String>[path.join('test', 'src', 'real_tests')],
+      options: <String>['-v'],
     );
     await runFlutterTest(
       path.join(flutterRoot, 'packages', 'integration_test'),
@@ -287,6 +292,7 @@ Future<void> frameworkTestsRunner() async {
         '--enable-vmservice',
         // Web-specific tests depend on Chromium, so they run as part of the web_long_running_tests shard.
         '--exclude-tags=web',
+        '-v'
       ],
     );
     // Run java unit tests for integration_test
@@ -294,7 +300,7 @@ Future<void> frameworkTestsRunner() async {
     // Generate Gradle wrapper if it doesn't exist.
     Process.runSync(
       flutter,
-      <String>['build', 'apk', '--config-only'],
+      <String>['build', 'apk', '--config-only', '-v'],
       workingDirectory: path.join(
         flutterRoot,
         'packages',
@@ -309,6 +315,7 @@ Future<void> frameworkTestsRunner() async {
         ':integration_test:testDebugUnitTest',
         '--tests',
         'dev.flutter.plugins.integration_test.FlutterDeviceScreenshotTest',
+        '-v'
       ],
       workingDirectory: path.join(
         flutterRoot,
@@ -318,11 +325,11 @@ Future<void> frameworkTestsRunner() async {
         'android',
       ),
     );
-    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
-    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
-    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
-    await runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'));
+    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), options: <String>['-v'],);
+    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: <String>['-v'],);
+    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: <String>['-v'],);
+    await runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), options: <String>['-v'],);
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: <String>['-v'],);
     const String httpClientWarning =
         'Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses\n'
         'TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request\n'
@@ -334,6 +341,7 @@ Future<void> frameworkTestsRunner() async {
       script: path.join('test', 'bindings_test_failure.dart'),
       expectFailure: true,
       printOutput: false,
+      options: <String>['-v'],
       outputChecker: (CommandResult result) {
         final Iterable<Match> matches = httpClientWarning.allMatches(result.flattenedStdout!);
         if (matches.isEmpty || matches.length > 1) {

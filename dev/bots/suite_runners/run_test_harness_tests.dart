@@ -42,18 +42,21 @@ Future<void> testHarnessTestsRunner() async {
       automatedTests,
       script: path.join('test_smoke_test', 'pass_test.dart'),
       printOutput: false,
+      options: <String>['-v'],
     ),
     () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'fail_test.dart'),
       expectFailure: true,
       printOutput: false,
+      options: <String>['-v'],
     ),
     () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
       expectFailure: true,
       printOutput: false,
+      options: <String>['-v'],
       outputChecker: (CommandResult result) {
         return result.flattenedStdout!.contains('failingPendingTimerTest')
             ? null
@@ -67,6 +70,7 @@ Future<void> testHarnessTestsRunner() async {
       script: path.join('test_smoke_test', 'fail_test_on_exception_after_test.dart'),
       expectFailure: true,
       printOutput: false,
+      options: <String>['-v'],
       outputChecker: (CommandResult result) {
         const String expectedError =
             '══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════\n'
@@ -86,30 +90,35 @@ Future<void> testHarnessTestsRunner() async {
       script: path.join('test_smoke_test', 'crash1_test.dart'),
       expectFailure: true,
       printOutput: false,
+      options: <String>['-v'],
     ),
     () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'crash2_test.dart'),
       expectFailure: true,
       printOutput: false,
+      options: <String>['-v'],
     ),
     () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
       expectFailure: true,
       printOutput: false,
+      options: <String>['-v'],
     ),
     () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
       expectFailure: true,
       printOutput: false,
+      options: <String>['-v'],
     ),
     () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
       expectFailure: true,
       printOutput: false,
+      options: <String>['-v'],
     ),
   ];
 
