@@ -141,12 +141,28 @@ TaskFunction createSolidColorTest({required bool enableImpeller}) {
 
 // Can run on emulator or physical android device.
 TaskFunction createDisplayCutoutTest() {
-  // Port numbers are set inorder to survive destruction and recreation of
-  // the engine that happens during the custom flutter driver used in this test.
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/display_cutout_rotation/',
     'integration_test/display_cutout_test.dart',
-    extraOptions: <String>['--dds-port=37161', '--vm-service-port=41501'],
+    setup: (Device device) async {
+      // Only android devices support this cutoutTest.
+      if (device is AndroidDevice) {
+        await device.shellExec('cmd', <String>[
+          'overlay',
+          'enable',
+          'com.android.internal.display.cutout.emulation.tall',
+        ]);
+      }
+    },
+    tearDown: (Device device) async {
+      if (device is AndroidDevice) {
+        await device.shellExec('cmd', <String>[
+          'overlay',
+          'disable',
+          'com.android.internal.display.cutout.emulation.tall',
+        ]);
+      }
+    },
   ).call;
 }
 
@@ -198,6 +214,8 @@ class DriverTest {
     this.extraOptions = const <String>[],
     this.deviceIdOverride,
     this.environment,
+    this.setup,
+    this.tearDown,
   });
 
   final String testDirectory;
@@ -205,6 +223,8 @@ class DriverTest {
   final List<String> extraOptions;
   final String? deviceIdOverride;
   final Map<String, String>? environment;
+  final Future<void> Function(Device device)? setup;
+  final Future<void> Function(Device device)? tearDown;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -216,6 +236,7 @@ class DriverTest {
         await device.unlock();
         deviceId = device.deviceId;
       }
+      await setup?.call(await devices.workingDevice);
       await flutter('packages', options: <String>['get']);
 
       final List<String> options = <String>[
@@ -228,7 +249,7 @@ class DriverTest {
         ...extraOptions,
       ];
       await flutter('drive', options: options, environment: environment);
-
+      await tearDown?.call(await devices.workingDevice);
       return TaskResult.success(null);
     });
   }
