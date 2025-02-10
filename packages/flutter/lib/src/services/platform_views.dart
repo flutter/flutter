@@ -1453,7 +1453,7 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
   static Future<bool> checkIfSurfaceControlEnabled() async {
     return (await SystemChannels.platform_views_2.invokeMethod<bool>(
       'isSurfaceControlEnabled',
-      {},
+      <String, Object?>{},
     ))!;
   }
 
