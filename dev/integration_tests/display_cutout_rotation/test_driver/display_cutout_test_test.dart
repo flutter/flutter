@@ -44,11 +44,8 @@ Future<void> main() async {
   print('Starting test.');
   try {
     final FlutterDriver driver = await FlutterDriver.connect();
-    print('Connected');
     final String data = await driver.requestData(null, timeout: const Duration(minutes: 1));
-    print('Data recieved');
     await driver.close();
-    print('Driver closed');
     final Map<String, dynamic> result = jsonDecode(data) as Map<String, dynamic>;
     print('Test finished!');
     print(result);
