@@ -217,7 +217,7 @@ void main() {
   state.focusScopeNode;
 
   // Changes made in https://github.com/flutter/flutter/pull/157725
-  final _TestRouteTransitionRecord _testRouteTransitionRecord =
+  final _TestRouteTransitionRecord testRouteTransitionRecord =
       _TestRouteTransitionRecord();
-  _testRouteTransitionRecord.markForRemove();
+  testRouteTransitionRecord.markForComplete();
 }
