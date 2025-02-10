@@ -66,6 +66,7 @@ Future<void> runSmokeTests({
       '/usr/bin/xvfb-run',
     flutterExe.absolute.path,
     'test',
+    '-v',
     '--reporter=expanded',
     '--device-id=${_kPlatform.operatingSystem}',
     integrationTest.absolute.path,
