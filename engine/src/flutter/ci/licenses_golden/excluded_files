@@ -23,7 +23,6 @@
 ../../../flutter/analysis_options.yaml
 ../../../flutter/assets/native_assets_unittests.cc
 ../../../flutter/build
-../../../flutter/build_overrides
 ../../../flutter/buildtools
 ../../../flutter/ci
 ../../../flutter/common/README.md
@@ -999,6 +998,7 @@
 ../../../flutter/third_party/boringssl/src/crypto/evp/scrypt_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/fipsmodule/FIPS.md
 ../../../flutter/third_party/boringssl/src/crypto/fipsmodule/aes/aes_test.cc
+../../../flutter/third_party/boringssl/src/crypto/fipsmodule/aes/gcm_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/fipsmodule/bn/bn_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/fipsmodule/bn/bn_test_to_fuzzer.go
 ../../../flutter/third_party/boringssl/src/crypto/fipsmodule/bn/check_bn_tests.go
@@ -1015,7 +1015,6 @@
 ../../../flutter/third_party/boringssl/src/crypto/fipsmodule/ecdsa/ecdsa_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/fipsmodule/hkdf/hkdf_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/fipsmodule/keccak/keccak_test.cc
-../../../flutter/third_party/boringssl/src/crypto/fipsmodule/modes/gcm_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/fipsmodule/rand/ctrdrbg_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/fipsmodule/service_indicator/service_indicator_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/fipsmodule/sha/sha_test.cc
@@ -1112,6 +1111,7 @@
 ../../../flutter/third_party/boringssl/src/ssl/ssl_internal_test.cc
 ../../../flutter/third_party/boringssl/src/ssl/ssl_test.cc
 ../../../flutter/third_party/boringssl/src/ssl/test
+../../../flutter/third_party/boringssl/src/third_party/fiat/AUTHORS
 ../../../flutter/third_party/boringssl/src/third_party/fiat/METADATA
 ../../../flutter/third_party/boringssl/src/third_party/fiat/README.chromium
 ../../../flutter/third_party/boringssl/src/third_party/fiat/README.md
