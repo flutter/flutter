@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+import 'dart:typed_data';
+
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine/safe_browser_api.dart';
+import 'package:ui/src/engine.dart'; // show CkCanvas, Uint8List;
+//import 'package:ui/src/engine/safe_browser_api.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../dom.dart';
-//import '../safe_browser_api.dart';
+//import '../canvaskit/canvaskit_api.dart';
+//import '../dom.dart';
 import 'paragraph.dart';
 
 /// A single canvas2d context to use for all text information.
@@ -25,12 +29,12 @@ class TextPaint {
 
   final WebParagraph paragraph;
 
-  void paint(DomCanvasElement canvas, WebTextCluster textCluster, double x, double y) {
-    String text = this.paragraph.text.substring(textCluster.begin(), textCluster.end());
+  void paint(DomCanvasElement canvas, WebTextCluster webTextCluster, double x, double y) {
+    String text = this.paragraph.text.substring(webTextCluster.begin, webTextCluster.end);
     final DomCanvasRenderingContext2D context = canvas.context2D;
     context.font = '50px arial';
     context.fillStyle = 'red';
-    context.fillTextCluster(textCluster, x, y);
+    context.fillTextCluster(webTextCluster.textCluster!, x, y);
     /*
     // Loop through all the lines, for each line, loop through all fragments and
     // paint them. The fragment objects have enough information to be painted
@@ -46,27 +50,77 @@ class TextPaint {
      */
   }
 
-  void paintTexture(DomCanvasElement canvas, WebTextCluster textCluster, double x, double y) {
-    String text = this.paragraph.text.substring(textCluster.begin(), textCluster.end());
+  void paintTexture(CkCanvas canvas, WebTextCluster webTextCluster, double x, double y) {
+    String text = this.paragraph.text.substring(webTextCluster.begin, webTextCluster.end);
 
-    //final GlContext webgl = canvas.getContext('webgl')! as GlContext;
-    final GlContext webgl = canvas.getContext('webgl') as GlContext;
+    textContext.font = '50px arial';
+    textContext.fillStyle = 'red';
+    textContext.fillTextCluster(webTextCluster.textCluster!, 0, 0);
 
-    //final DomCanvasRenderingContext2D webgl =
-    //    canvas.getContext('webgl')! as DomCanvasRenderingContext2D;
-    var texture = webgl.createTexture();
-
-    webgl.pixelStorei(webgl.kUnpackFlipYWebGl, true);
-    webgl.bindTexture(webgl.kTexture2D, texture);
-    webgl.texImage2D(webgl.kTexture2D, 0, webgl.kRGBA, webgl.kRGBA, webgl.kUnsignedByte, canvas);
-    webgl.texParameteri(webgl.kTexture2D, webgl.kTextureMagFilter, webgl.kLinear);
-    webgl.texParameteri(webgl.kTexture2D, webgl.kTextureMinFilter, webgl.kLinearMipMapNearest);
-    webgl.generateMipmap(webgl.kTexture2D);
-    webgl.bindTexture(webgl.kTexture2D, null);
+    print('getImageData(${webTextCluster.x.toInt()}, ${webTextCluster.y.toInt()})\n');
+    final Uint8List imageData =
+        textContext
+            .getImageData(0, 0, webTextCluster.x.toInt(), webTextCluster.y.toInt())
+            .data
+            .buffer
+            .asUint8List();
+    print('MakeImage\n');
+    final SkImage? skImage1 = canvasKit.MakeImage(
+      SkImageInfo(
+        alphaType: canvasKit.AlphaType.Premul,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+        width: webTextCluster.x,
+        height: webTextCluster.y,
+      ),
+      imageData,
+      4 * webTextCluster.x,
+    );
+    if (skImage1 == null) {
+      throw StateError('Unable to convert text into SkImage.');
+    }
+    print('createImageBitmap\n');
+    createImageBitmap(CkImage(skImage1) as JSAny, (
+      x: 0,
+      y: 0,
+      width: webTextCluster.x.toInt(),
+      height: webTextCluster.y.toInt(),
+    )).then((DomImageBitmap bitmap) {
+      print('MakeLazyImageFromImageBitmap\n');
+      if (bitmap == null) {
+        throw Exception('Failed to create a bitmap image.');
+      } else {
+        final SkImage? skImage2 = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+        if (skImage2 == null) {
+          throw Exception('Failed to convert text image bitmap to an SkImage.');
+        }
+        print('drawImage\n');
+        canvas.drawImage(CkImage(skImage2), ui.Offset.zero, CkPaint());
+      }
+    });
+    print('This is the end.\n');
+    /*
+    final Future<DomImageBitmap> bitmap = createImageBitmap(CkImage(skImage1) as JSAny, (
+      x: 0,
+      y: 0,
+      width: textCluster.x().toInt(),
+      height: textCluster.y().toInt(),
+    ));
+    await Future.wait(bitmap);
+    */
+    /*
+    final SkImage? skImage2 = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    if (skImage2 == null) {
+      throw Exception('Failed to convert text image bitmap to an SkImage.');
+    }
+    canvas.drawImage(CkImage(skImage2), ui.Offset.zero, CkPaint());
+     */
   }
 
-  void printTextCluster(WebTextCluster textCluster) {
-    String text = this.paragraph.text.substring(textCluster.begin(), textCluster.end());
-    print('[${textCluster.begin()}:${textCluster.end()}) = "${text}"\n');
+  void printTextCluster(WebTextCluster webTextCluster) {
+    String text = this.paragraph.text.substring(webTextCluster.begin, webTextCluster.end);
+    print(
+      '[${webTextCluster.begin}:${webTextCluster.end}) = "${text}", ${webTextCluster.width}, ${webTextCluster.height}\n',
+    );
   }
 }

@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../dom.dart';
+//import '../dom.dart';
 import 'paragraph.dart';
 
 /// A single canvas2d context to use for all text information.
@@ -28,6 +29,17 @@ class TextLayout {
   void performLayout() {
     textContext.font = '50px arial';
     final textMetrics = textContext.measureText(paragraph.text) as DomTextMetrics;
-    textClusters = textMetrics.getTextClusters();
+    final textClusters = textMetrics.getTextClusters();
+    int index = 0;
+    while (index < textClusters.length) {
+      final tc = textClusters[index];
+      if (index < textClusters.length - 1) {
+        final tc1 = textClusters[index + 1];
+        this.textClusters.add(WebTextCluster(tc, tc1.x, textMetrics.height));
+      } else {
+        this.textClusters.add(WebTextCluster(tc, textMetrics.width!, textMetrics.height));
+      }
+      index += 1;
+    }
   }
 }

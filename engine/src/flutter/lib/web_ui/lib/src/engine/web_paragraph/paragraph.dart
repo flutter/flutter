@@ -2,13 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../dom.dart';
+//import '../dom.dart';
 import 'layout.dart';
 import 'paint.dart';
+
+class WebTextCluster {
+  int get begin => _textCluster?.begin ?? 0;
+
+  int get end => _textCluster?.end ?? 0;
+
+  double get x => _textCluster?.x ?? 0.0;
+
+  double get y => _textCluster?.y ?? 0.0;
+
+  double _x1 = 0.0;
+  double _y1 = 0.0;
+
+  double get width => _x1 - (_textCluster?.x ?? 0.0);
+
+  double get height => _y1 - (_textCluster?.y ?? 0.0);
+
+  TextCluster? _textCluster;
+
+  TextCluster? get textCluster => _textCluster;
+
+  WebTextCluster(this._textCluster, this._x1, this._y1);
+}
 
 /// The web implementation of  [ui.ParagraphStyle]
 @immutable
@@ -251,7 +275,7 @@ class WebParagraph implements ui.Paragraph {
     }
   }
 
-  void paintTexture(DomCanvasElement canvas, ui.Offset offset) {
+  void paintTexture(CkCanvas canvas, ui.Offset offset) {
     for (final textCluster in _layout.textClusters) {
       print('[@(${offset.dx}, ${offset.dy}) ');
       _paint.printTextCluster(textCluster);

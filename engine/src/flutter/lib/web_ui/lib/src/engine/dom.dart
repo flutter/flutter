@@ -4217,33 +4217,47 @@ extension JSArrayExtension on JSArray<JSAny?> {
 @staticInterop
 class TextCluster {}
 
-@JS()
-@staticInterop
-class WebTextCluster extends TextCluster {}
-
-extension WebTextClusterExtension on WebTextCluster {
+extension TextClusterExtension on TextCluster {
   @JS('begin')
   external int get _begin;
 
-  int begin() => _begin;
+  int get begin => _begin;
 
   @JS('end')
   external int get _end;
 
-  int end() => _end;
+  int get end => _end;
+
+  @JS('x')
+  external double get _x;
+
+  double get x => _x;
+
+  @JS('y')
+  external double get _y;
+
+  double get y => _y;
 }
 
 extension WebTextMetricsExtension on DomTextMetrics {
+  @JS('actualBoundingBoxAscent')
+  external double _actualBoundingBoxAscent();
+
+  @JS('actualBoundingBoxDescent')
+  external double _actualBoundingBoxDescent();
+
+  double get height => _actualBoundingBoxAscent() + _actualBoundingBoxDescent();
+
   @JS('getTextClusters')
   external JSArray<JSAny?> _getTextClusters();
 
-  List<WebTextCluster> getTextClusters() => _getTextClusters().toDart.cast<WebTextCluster>();
+  List<TextCluster> getTextClusters() => _getTextClusters().toDart.cast<TextCluster>();
 }
 
 extension WebDomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
   @JS('fillTextCluster')
   external void _fillTextCluster(JSAny? textCluster, double x, double y);
 
-  void fillTextCluster(WebTextCluster textCluster, double x, double y) =>
+  void fillTextCluster(TextCluster textCluster, double x, double y) =>
       _fillTextCluster(textCluster.toJSAnyDeep, x, y);
 }
