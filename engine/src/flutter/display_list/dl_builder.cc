@@ -1250,11 +1250,6 @@ void DisplayListBuilder::DrawDiffRoundRect(const DlRoundRect& outer,
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawDRRectFlags);
   drawDiffRoundRect(outer, inner);
 }
-void DisplayListBuilder::DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
-                                               const DlPaint& paint) {
-  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawRSuperellipseFlags);
-  drawRoundSuperellipse(rse);
-}
 void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
   if (rse.IsRect()) {
     drawRect(rse.GetBounds());
@@ -1270,6 +1265,11 @@ void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
       UpdateLayerResult(result);
     }
   }
+}
+void DisplayListBuilder::DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
+                                               const DlPaint& paint) {
+  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawRSuperellipseFlags);
+  drawRoundSuperellipse(rse);
 }
 void DisplayListBuilder::drawPath(const DlPath& path) {
   DisplayListAttributeFlags flags = kDrawPathFlags;

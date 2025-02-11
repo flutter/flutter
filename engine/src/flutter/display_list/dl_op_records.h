@@ -486,7 +486,7 @@ struct TransformResetOp final : TransformClipOpBase {
 // DlRect is 16 more bytes, which packs efficiently into 24 bytes total
 // DlRoundRect is 48 more bytes, which rounds up to 48 bytes
 //         which packs into 56 bytes total
-// DlRoundSuperellipse is 20 more bytes, which packs into 28 bytes total
+// DlRoundSuperellipse is the same as DlRoundRect with a total of 56 bytes.
 // CacheablePath is 128 more bytes, which packs efficiently into 136 bytes total
 //
 // We could pack the clip_op and the bool both into the free 4 bytes after
@@ -581,7 +581,7 @@ struct DrawColorOp final : DrawOpBase {
 // SkOval is same as DlRect
 // DlRoundRect is 48 more bytes, using 52 bytes which rounds up to 56 bytes
 //        total (4 bytes unused)
-// DlRoundSuperellipse is 20 more bytes, using 24 bytes total.
+// DlRoundSuperellipse is the same as DlRoundRect with a total of 56 bytes.
 #define DEFINE_DRAW_1ARG_OP(op_name, arg_type, arg_name)             \
   struct Draw##op_name##Op final : DrawOpBase {                      \
     static constexpr auto kType = DisplayListOpType::kDraw##op_name; \
