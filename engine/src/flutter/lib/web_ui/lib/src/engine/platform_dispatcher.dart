@@ -66,6 +66,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     locales: parseBrowserLanguages(),
     textScaleFactor: findBrowserTextScaleFactor(),
     accessibilityFeatures: computeAccessibilityFeatures(),
+    typographySettings: ui.TypographySettings(
+      lineHeight: 5.0,
+      letterSpacing: 5.0,
+      wordSpacing: 5.0,
+      paragraphSpacing: 5.0,
+    ),
   );
 
   /// Compute accessibility features based on the current value of high contrast flag
@@ -754,6 +760,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       await renderer.renderScene(scene, target);
     }
   }
+
+  @override
+  ui.TypographySettings? get typographySettings => configuration.typographySettings;
 
   /// Additional accessibility features that may be enabled by the platform.
   @override
@@ -1674,6 +1683,7 @@ class PlatformConfiguration {
     this.locales = const <ui.Locale>[],
     this.defaultRouteName = '/',
     this.systemFontFamily,
+    this.typographySettings,
   });
 
   PlatformConfiguration copyWith({
@@ -1685,6 +1695,7 @@ class PlatformConfiguration {
     List<ui.Locale>? locales,
     String? defaultRouteName,
     String? systemFontFamily,
+    ui.TypographySettings? typographySettings,
   }) {
     return PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1695,6 +1706,7 @@ class PlatformConfiguration {
       locales: locales ?? this.locales,
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
+      typographySettings: typographySettings ?? this.typographySettings,
     );
   }
 
@@ -1706,6 +1718,7 @@ class PlatformConfiguration {
   final List<ui.Locale> locales;
   final String defaultRouteName;
   final String? systemFontFamily;
+  final ui.TypographySettings? typographySettings;
 }
 
 /// Helper class to hold navigation target information for AT focus restoration
