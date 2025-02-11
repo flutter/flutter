@@ -3235,7 +3235,7 @@ class EditableTextState extends State<EditableText>
     super.didChangeDependencies();
 
     // Apply platform settings to text style.
-    final TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
+    final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
     _style = widget.style.merge(
       TextStyle(
         height: typographySettings?.lineHeight,
