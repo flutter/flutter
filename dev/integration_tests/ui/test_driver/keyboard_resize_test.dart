@@ -29,10 +29,17 @@ void main() {
       final SerializableFinder defaultTextField = find.byValueKey(keys.kDefaultTextField);
       await driver.waitFor(defaultTextField);
 
+      // The only practical way to detect the software keyboard opening or closing
+      // is to use polling and wait for the layout to change.
+      // We pick a short polling interval to speed up the test for most devices.
+      // In local tests, Pixel 8 Pro API 36 usually only one poll iteration is needed,
+      // older device like Galaxy Tab S3 API 28 takes 2-3 iterations.
+      const Duration pollDelay300Ms = Duration(milliseconds: 300);
+
       bool heightTextDidShrink = false;
       for (int i = 0; i < 20; ++i) {
         await driver.tap(defaultTextField);
-        await Future<void>.delayed(const Duration(milliseconds: 300));
+        await Future<void>.delayed(pollDelay300Ms);
         // Measure the height with keyboard displayed.
         final String heightWithKeyboardShown = await driver.getText(heightText);
         if (double.parse(heightWithKeyboardShown) < double.parse(startHeight)) {
@@ -49,7 +56,7 @@ void main() {
 
       bool heightTextDidExpand = false;
       for (int i = 0; i < 10; ++i) {
-        await Future<void>.delayed(const Duration(milliseconds: 300));
+        await Future<void>.delayed(pollDelay300Ms);
         // Measure the final height.
         final String endHeight = await driver.getText(heightText);
         if (endHeight == startHeight) {
