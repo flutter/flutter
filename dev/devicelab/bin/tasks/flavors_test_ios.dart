@@ -35,7 +35,7 @@ Future<void> main() async {
       return firstInstallFailure ?? TaskResult.success(null);
     });
 
-    await _testIntegrationTestWhenBuiltFromXcode(projectDir);
+    await _testFlavorWhenBuiltFromXcode(projectDir);
 
     return installTestsResult;
   });
@@ -101,7 +101,7 @@ Future<TaskResult> _testInstallBogusFlavor() async {
   return TaskResult.success(null);
 }
 
-Future<TaskResult> _testIntegrationTestWhenBuiltFromXcode(String projectDir) async {
+Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
   final Device device = await devices.workingDevice;
   await inDirectory(projectDir, () async {
     await flutter('clean');
