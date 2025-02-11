@@ -1624,4 +1624,11 @@ public class FlutterJNI {
   }
 
   private native boolean nativeShouldDisableAHB();
+
+  /** Whether the SurfaceControl swapchain required for hcpp is enabled and active. */
+  public boolean IsSurfaceControlEnabled() {
+    return nativeIsSurfaceControlEnabled(nativeShellHolderId);
+  }
+
+  private native boolean nativeIsSurfaceControlEnabled(long nativeShellHolderId);
 }
