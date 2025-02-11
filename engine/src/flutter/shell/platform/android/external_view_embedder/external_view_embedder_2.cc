@@ -95,7 +95,6 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   // If there is no overlay Surface, initialize one on the platform thread. This
   // will only be done once per application launch, as the singular overlay
   // surface is never released.
-  surface_pool_->ResetLayers();
   if (!surface_pool_->HasLayers()) {
     std::shared_ptr<fml::CountDownLatch> latch =
         std::make_shared<fml::CountDownLatch>(1u);
@@ -107,6 +106,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         }));
     latch->Wait();
   }
+  surface_pool_->ResetLayers();
 
   // Create Overlay frame. If overlay surface creation failed,
   // all this work must be skipped.
@@ -131,7 +131,6 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       int restoreCount = overlay_canvas->GetSaveCount();
       overlay_canvas->Save();
       overlay_canvas->ClipRect(overlay->second);
-      overlay_canvas->Clear(flutter::DlColor::kTransparent());
 
       // Diff clip all subsequent intersections.
       for (size_t j = i + 1; j < composition_order_.size(); j++) {
