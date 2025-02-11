@@ -145,6 +145,8 @@ struct WindowModificationSettings {
 struct WindowMetadata {
   // The ID of the view used for this window, which is unique to each window.
   FlutterViewId view_id = 0;
+  /// The archetype of the window.
+  WindowArchetype archetype;
   // Size of the created window, in logical coordinates.
   Size size;
   // The ID of the view used by the parent window. If not set, the window is

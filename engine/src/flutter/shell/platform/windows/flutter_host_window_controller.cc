@@ -55,7 +55,7 @@ std::optional<WindowMetadata> FlutterHostWindowController::CreateHostWindow(
   std::optional<Point> relative_position = window->GetRelativePosition();
   windows_[view_id] = std::move(window);
 
-  WindowMetadata const result = {.view_id = view_id,
+  WindowMetadata result = {.view_id = view_id,
                                  .archetype = settings.archetype,
                                  .size = GetViewSize(view_id),
                                  .parent_id = std::nullopt,

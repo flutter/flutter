@@ -261,13 +261,13 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
             GetSingleValueForKeyOrSendError<int>(kParentViewIdKey, map, result);
         success) {
       if (!parent_view_id.has_value()) {
-        result.Error(kInvalidValueError, "Value for the '" +
+        result.Error(kBadArgumentsError, "Value for the '" +
                                              std::string(kParentViewIdKey) +
                                              "' key must not be null.");
         return;
       }
       if (*parent_view_id < 0) {
-        result.Error(kInvalidValueError,
+        result.Error(kBadArgumentsError,
                      "Value for '" + std::string(kParentViewIdKey) + "' (" +
                          std::to_string(settings.parent_view_id.value()) +
                          ") must be equal or greater than zero.");
@@ -284,7 +284,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
                                                           result);
         success) {
       if (!positioner_map.has_value()) {
-        result.Error(kInvalidValueError, "Value for the '" +
+        result.Error(kBadArgumentsError, "Value for the '" +
                                              std::string(kPositionerKey) +
                                              "' key must not be null.");
         return;
@@ -312,14 +312,14 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
                   kParentAnchorKey, &positioner_map.value(), result);
           success) {
         if (!parent_anchor.has_value()) {
-          result.Error(kInvalidValueError, "Value for the '" +
+          result.Error(kBadArgumentsError, "Value for the '" +
                                                std::string(kParentAnchorKey) +
                                                "' key must not be null.");
           return;
         }
         auto const anchor_opt = StringToWindowPositionerAnchor(*parent_anchor);
         if (!anchor_opt.has_value()) {
-          result.Error(kInvalidValueError,
+          result.Error(kBadArgumentsError,
                        "Value for the '" + std::string(kParentAnchorKey) +
                            "' key is not a valid string representation of "
                            "WindowPositionerAnchor.");
@@ -336,14 +336,14 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
                   kChildAnchorKey, &positioner_map.value(), result);
           success) {
         if (!child_anchor.has_value()) {
-          result.Error(kInvalidValueError, "Value for the '" +
+          result.Error(kBadArgumentsError, "Value for the '" +
                                                std::string(kChildAnchorKey) +
                                                "' key must not be null.");
           return;
         }
         auto const anchor_opt = StringToWindowPositionerAnchor(*child_anchor);
         if (!anchor_opt.has_value()) {
-          result.Error(kInvalidValueError,
+          result.Error(kBadArgumentsError,
                        "Value for the '" + std::string(kChildAnchorKey) +
                            "' key is not a valid string representation of "
                            "WindowPositionerAnchor.");
@@ -360,7 +360,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
                   kOffsetKey, &positioner_map.value(), result);
           success) {
         if (!offset.has_value()) {
-          result.Error(kInvalidValueError, "Value for the '" +
+          result.Error(kBadArgumentsError, "Value for the '" +
                                                std::string(kOffsetKey) +
                                                "' key must not be null.");
           return;
@@ -376,7 +376,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
                   kConstraintAdjustmentKey, &positioner_map.value(), result);
           success) {
         if (!constraint_adjustments.has_value()) {
-          result.Error(kInvalidValueError,
+          result.Error(kBadArgumentsError,
                        "Value for the '" +
                            std::string(kConstraintAdjustmentKey) +
                            "' key must not be null.");
@@ -386,7 +386,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
           auto const adjustment_opt =
               StringToWindowPositionerConstraintAdjustment(adjustment_str);
           if (!adjustment_opt) {
-            result.Error(kInvalidValueError,
+            result.Error(kBadArgumentsError,
                          "Value in the array of the '" +
                              std::string(kConstraintAdjustmentKey) +
                              "' key is not a valid string representation of "
