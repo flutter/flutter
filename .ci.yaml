@@ -14,7 +14,6 @@
 enabled_branches:
   - master
   - flutter-\d+\.\d+-candidate\.\d+
-  - fuchsia_f\d+[a-z]*
 
 platform_properties:
   staging_build_linux:
