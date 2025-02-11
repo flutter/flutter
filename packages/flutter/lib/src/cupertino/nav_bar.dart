@@ -66,11 +66,17 @@ const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// The width of the 'Cancel' button if the search field in a
 /// [CupertinoSliverNavigationBar.search] is active.
+///
+/// Eyeballed on an iPhone 15 simulator running iOS 17.5.
 const double _kSearchFieldCancelButtonWidth = 67.0;
 
 /// The duration of the animation when the search field in
 /// [CupertinoSliverNavigationBar.search] is tapped.
 const Duration _kNavBarSearchDuration = Duration(milliseconds: 300);
+
+/// The curve of the animation when the search field in
+/// [CupertinoSliverNavigationBar.search] is tapped.
+const Curve _kNavBarSearchCurve = Curves.easeInOut;
 
 /// Title text transfer fade.
 const Duration _kNavBarTitleFadeDuration = Duration(milliseconds: 150);
@@ -1260,7 +1266,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
     return MediaQuery.withNoTextScaling(
       child: AnimatedBuilder(
-        animation: _animationController,
+        animation: CurvedAnimation(parent: _animationController, curve: _kNavBarSearchCurve),
         builder: (BuildContext context, Widget? child) {
           return SliverPersistentHeader(
             pinned: true, // iOS navigation bars are always pinned.
