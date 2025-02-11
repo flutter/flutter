@@ -323,7 +323,7 @@ template("_compile_ddc_module") {
       dart_sdk_js_path + ".map",
     ]
 
-    args += [
+    args = [
       "--compile-sdk",
       "dart:core",
 
