@@ -13,7 +13,7 @@
 library;
 
 import 'dart:math';
-import 'dart:ui' as ui show TextHeightBehavior;
+import 'dart:ui' as ui show TextHeightBehavior, TypographySettings;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -703,7 +703,7 @@ class Text extends StatelessWidget {
     if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
-    final TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
+    final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
     effectiveTextStyle = effectiveTextStyle!.merge(
       TextStyle(
         height: typographySettings?.lineHeight,
