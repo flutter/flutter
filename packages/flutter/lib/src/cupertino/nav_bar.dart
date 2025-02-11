@@ -66,7 +66,7 @@ const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// The width of the 'Cancel' button if the search field in a
 /// [CupertinoSliverNavigationBar.search] is active.
-const double _kSearchFieldCancelButtonWidth = 65.0;
+const double _kSearchFieldCancelButtonWidth = 67.0;
 
 /// The duration of the animation when the search field in
 /// [CupertinoSliverNavigationBar.search] is tapped.
@@ -2292,9 +2292,9 @@ class _ActiveSearchableBottom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: _kNavBarEdgePadding),
+      padding: const EdgeInsets.only(left: _kNavBarEdgePadding, top: _kNavBarBottomPadding),
       child: Row(
-        spacing: _kNavBarEdgePadding,
+        spacing: 12.0, // Eyeballed on an iPhone 15 simulator running iOS 17.5.
         children: <Widget>[
           Expanded(child: searchField ?? const SizedBox.shrink()),
           AnimatedBuilder(
@@ -2322,7 +2322,7 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
   const _NavigationBarSearchField({required this.searchField});
 
   static const double verticalPadding = 8.0;
-  static const double searchFieldHeight = 35.0;
+  static const double searchFieldHeight = 36.0;
   final Widget searchField;
 
   @override
@@ -2331,9 +2331,10 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
       child: FocusableActionDetector(
         descendantsAreFocusable: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: _kNavBarEdgePadding,
-            vertical: verticalPadding,
+          padding: const EdgeInsets.only(
+            left: _kNavBarEdgePadding,
+            right: _kNavBarEdgePadding,
+            bottom: verticalPadding,
           ),
           child: SizedBox(height: searchFieldHeight, child: searchField),
         ),
@@ -2342,7 +2343,7 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(searchFieldHeight + verticalPadding * 2);
+  Size get preferredSize => const Size.fromHeight(searchFieldHeight + verticalPadding);
 }
 
 /// This should always be the first child of Hero widgets.
