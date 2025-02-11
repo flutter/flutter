@@ -321,28 +321,66 @@ class _MenuAnchorStateController {
   PopupWindowController? _popupWindowController;
 
   bool get isShowing {
-    assert(_isInitialized);
     if (_overlayPortalController != null) {
       return _overlayPortalController!.isShowing;
-    } else {
+    } else if (_popupWindowController != null) {
       return _popupWindowController!.isShowing;
+    } else {
+      return false;
     }
   }
 
   bool get _isInitialized => _overlayPortalController != null || _popupWindowController != null;
 
-  void initialize(bool isWindowingApp) {
-    if (isWindowingApp) {
-      _popupWindowController ??= PopupWindowController();
-      assert(_popupWindowController != null);
-      assert(_overlayPortalController == null);
-    } else {
-      _overlayPortalController ??= OverlayPortalController(
+  void initSingleWin() {
+    if (_overlayPortalController != null) {
+      return;
+    }
+
+    _overlayPortalController ??= OverlayPortalController(
         debugLabel: kReleaseMode ? null : 'MenuAnchor controller',
       );
       assert(_overlayPortalController != null);
       assert(_popupWindowController == null);
+  }
+
+  void initWindowing() {
+    if (_popupWindowController != null) {
+      return;
     }
+
+    final BuildContext anchorContext = anchor._anchorKey.currentContext!;
+    final RenderBox box = anchorContext.findRenderObject()! as RenderBox;
+    final Offset position = box.localToGlobal(Offset.zero);
+    final WindowPositioner positioner;
+    if (anchor._parent != null) {
+      positioner = WindowPositioner(
+        parentAnchor: WindowPositionerAnchor.topRight,
+        childAnchor: WindowPositionerAnchor.topLeft,
+        offset: anchor.widget.alignmentOffset ?? Offset.zero,
+      );
+    } else {
+      positioner = WindowPositioner(
+        parentAnchor: WindowPositionerAnchor.bottomLeft,
+        childAnchor: WindowPositionerAnchor.topLeft,
+        offset: anchor.widget.alignmentOffset ?? Offset.zero,
+      );
+    }
+
+    _popupWindowController = PopupWindowController(
+      size: const Size(200, 400), // TODO: Get a real size
+      onDestroyed: anchor.hidePopup,
+      onError: (String? error) => anchor.hidePopup(),
+      anchorRect: Rect.fromPoints(
+        position,
+        Offset(position.dx + box.size.width, position.dy + box.size.height),
+      ),
+      positioner: positioner,
+      parent: WindowControllerContext.of(anchorContext)!.controller.rootView
+    );
+
+    assert(_popupWindowController != null);
+    assert(_overlayPortalController == null);
   }
 
   void show() {
@@ -398,6 +436,15 @@ class _MenuAnchorState extends State<MenuAnchor> {
       _internalMenuController = MenuController();
     }
     _menuController._attach(this);
+
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) {
+          if (false) {
+            _overlayController.initSingleWin();
+          } else {
+            _overlayController.initWindowing();
+          }
+        });
   }
 
   @override
@@ -460,14 +507,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
       contents = CompositedTransformTarget(link: widget.layerLink!, child: contents);
     }
 
-    if (WindowingAppContext.of(context) != null) {
-      _overlayController.initialize(true);
-    } else {
-      _overlayController.initialize(false);
-    }
-
     Widget child;
-    if (_overlayController._overlayPortalController != null) {
+    /// TODO: This should be a flag set on the MaterialApp API
+    if (false) {
+      _overlayController.initSingleWin();
       child = OverlayPortal(
         controller: _overlayController._overlayPortalController!,
         overlayChildBuilder: (BuildContext context) {
@@ -533,34 +576,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
       return null;
     }
 
-    final BuildContext anchorContext = _anchorKey.currentContext!;
-    final RenderBox box = anchorContext.findRenderObject()! as RenderBox;
-    final Offset position = box.localToGlobal(Offset.zero);
-    final WindowPositioner positioner;
-    if (_parent != null) {
-      positioner = WindowPositioner(
-        parentAnchor: WindowPositionerAnchor.topRight,
-        childAnchor: WindowPositionerAnchor.topLeft,
-        offset: widget.alignmentOffset ?? Offset.zero,
-      );
-    } else {
-      positioner = WindowPositioner(
-        parentAnchor: WindowPositionerAnchor.bottomLeft,
-        childAnchor: WindowPositionerAnchor.topLeft,
-        offset: widget.alignmentOffset ?? Offset.zero,
-      );
-    }
-
     return PopupWindow(
-      controller: _overlayController._popupWindowController,
-      preferredSize: const Size(200, 400), // TODO: Get a real size
-      onDestroyed: hidePopup,
-      onError: (String? error) => hidePopup(),
-      anchorRect: Rect.fromPoints(
-        position,
-        Offset(position.dx + box.size.width, position.dy + box.size.height),
-      ),
-      positioner: positioner,
+      controller: _overlayController._popupWindowController!,
       child: FocusScope(
         node: _menuScopeNode,
         skipTraversal: true,

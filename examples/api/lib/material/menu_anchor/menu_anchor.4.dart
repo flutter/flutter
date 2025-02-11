@@ -7,11 +7,13 @@ import 'package:flutter/services.dart';
 
 /// Flutter code sample for [MenuAnchor].
 
-void main() => runWidget(WindowingApp(children: <Widget>[
-    RegularWindow(
-        preferredSize: const Size(800, 600),
-        child: MenuApp())
-  ]));
+void main() {
+  final RegularWindowController controller = RegularWindowController(size: const Size(800, 600));
+  runWidget(RegularWindow(
+      controller: controller,
+      child: const MenuApp())
+  );
+}
 
 /// An enhanced enum to define the available menus and their shortcuts.
 ///

@@ -328,6 +328,8 @@ abstract class WindowController with ChangeNotifier {
   /// The archetype of the window.
   WindowArchetype get type;
 
+  bool _isPendingDestroy = false;
+
   /// Destroys this window. If the window is not ready or is already pending
   /// destruction, then nothing happens. Otherwise, we begin destroying the
   /// window.
