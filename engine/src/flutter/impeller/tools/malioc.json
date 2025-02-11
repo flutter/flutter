@@ -6912,11 +6912,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-<<<<<<< HEAD
           "fp16_arithmetic": 32,
-=======
-          "fp16_arithmetic": 43,
->>>>>>> 6c9a555e561509d62cb4219d8c3d7991f6c35bcf
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
