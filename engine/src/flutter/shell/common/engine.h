@@ -979,7 +979,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   void ShutdownPlatformIsolates();
 
   //--------------------------------------------------------------------------
-  /// @brief      Flushes the microtask queue of root isolate.
+  /// @brief      Flushes the microtask queue of the root isolate.
   ///
   void FlushMicrotaskQueue();
 
