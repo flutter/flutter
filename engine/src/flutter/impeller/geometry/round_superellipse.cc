@@ -4,7 +4,7 @@
 
 #include "flutter/impeller/geometry/round_superellipse.h"
 
-#include <cmath>
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 
 namespace impeller {
 
@@ -20,6 +20,14 @@ RoundSuperellipse RoundSuperellipse::MakeRectRadii(
   // as it would still have a valid location and/or 1-dimensional size which
   // might appear when stroked
   return RoundSuperellipse(bounds, in_radii.Scaled(bounds));
+}
+
+[[nodiscard]] bool RoundSuperellipse::Contains(const Point& p) const {
+  if (!bounds_.Contains(p)) {
+    return false;
+  }
+  auto param = RoundSuperellipseParam::MakeBoundsRadii(bounds_, radii_);
+  return param.Contains(p);
 }
 
 }  // namespace impeller
