@@ -125,7 +125,7 @@ class DartProject {
   std::vector<std::string> dart_entrypoint_arguments_;
   // The preference for GPU to be used by flutter engine.
   GpuPreference gpu_preference_ = GpuPreference::NoPreference;
-  // Whether the UI isolate should be running on the platform thread.
+  // Whether the UI isolate should run on the platform thread.
   bool merged_platform_ui_thread_ = false;
 };
 
