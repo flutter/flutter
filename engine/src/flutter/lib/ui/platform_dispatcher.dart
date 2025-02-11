@@ -1886,7 +1886,7 @@ class _PlatformConfiguration {
   /// configuration updates from the embedder yet. The _getScaledFontSize
   /// function should not be called in either case.
   final int? configurationId;
-  
+
   final TypographySettings? typographySettings;
 }
 
