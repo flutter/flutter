@@ -152,6 +152,7 @@
 ../../../flutter/impeller/display_list/dl_golden_unittests.h
 ../../../flutter/impeller/display_list/dl_unittests.cc
 ../../../flutter/impeller/display_list/skia_conversions_unittests.cc
+../../../flutter/impeller/display_list/testing
 ../../../flutter/impeller/docs
 ../../../flutter/impeller/entity/clip_stack_unittests.cc
 ../../../flutter/impeller/entity/contents/filters/blend_filter_contents_unittests.cc
@@ -160,6 +161,7 @@
 ../../../flutter/impeller/entity/contents/filters/matrix_filter_contents_unittests.cc
 ../../../flutter/impeller/entity/contents/host_buffer_unittests.cc
 ../../../flutter/impeller/entity/contents/test
+../../../flutter/impeller/entity/contents/text_contents_unittests.cc
 ../../../flutter/impeller/entity/contents/tiled_texture_contents_unittests.cc
 ../../../flutter/impeller/entity/draw_order_resolver_unittests.cc
 ../../../flutter/impeller/entity/entity_pass_target_unittests.cc
