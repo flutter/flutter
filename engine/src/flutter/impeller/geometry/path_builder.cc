@@ -25,8 +25,8 @@ class RoundSuperellipseBuilder {
   //
   // The resulting curves, which consists of cubic curves, are added by calling
   // `cubic_adder`.
-  RoundSuperellipseBuilder(CubicAdder cubic_adder)
-      : cubic_adder_(cubic_adder) {}
+  explicit RoundSuperellipseBuilder(CubicAdder cubic_adder)
+      : cubic_adder_(std::move(cubic_adder)) {}
 
   // Draws an arc representing 1/4 of a rounded superellipse.
   //
@@ -98,7 +98,7 @@ class RoundSuperellipseBuilder {
     Matrix transform =
         external_transform * Matrix::MakeTranslation(param.offset);
     if (flip) {
-      transform = transform * kFlip_;
+      transform = transform * kFlip;
     }
 
     auto circle_points = CircularArcPoints(param);
@@ -158,7 +158,7 @@ class RoundSuperellipseBuilder {
 
   // A matrix that swaps the coordinates of a point.
   // clang-format off
-  static constexpr Matrix kFlip_ = Matrix(
+  static constexpr Matrix kFlip = Matrix(
     0.0f, 1.0f, 0.0f, 0.0f,
     1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f,
