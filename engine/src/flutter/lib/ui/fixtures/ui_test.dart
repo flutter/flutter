@@ -105,6 +105,7 @@ Future<void> createSingleFrameCodec() async {
   info.image.dispose();
   _validateCodec(codec);
   codec.dispose();
+  assert(codec.debugDisposed);
   descriptor.dispose();
   buffer.dispose();
   assert(buffer.debugDisposed);

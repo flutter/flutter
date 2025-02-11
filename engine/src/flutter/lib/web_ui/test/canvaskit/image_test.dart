@@ -127,6 +127,8 @@ void testMain() {
       imageBuffer,
       getTargetSize: (w, h) => ui.TargetImageSize(width: w ~/ 2, height: h ~/ 2),
     );
+    imageBuffer.dispose();
+
     final ui.FrameInfo frameInfo = await codec.getNextFrame();
 
     expect(activeImages.length, 1);

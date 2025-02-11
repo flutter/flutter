@@ -110,6 +110,7 @@ void main() {
         return ui.TargetImageSize(width: intrinsicWidth ~/ 2, height: intrinsicHeight ~/ 2);
       },
     );
+    buffer.dispose();
     final List<List<int>> decodedFrameInfos = <List<int>>[];
     for (int i = 0; i < 2; i++) {
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
