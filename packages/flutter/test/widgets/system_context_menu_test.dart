@@ -626,4 +626,11 @@ void main() {
     skip: kIsWeb, // [intended]
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
+
+  test('Can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItem', () {
+    const IOSSystemContextMenuItemCopy item = IOSSystemContextMenuItemCopy();
+    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+    item.getData(localizations);
+    // TODO(justinmc): Test all of these, including checking the title for default title ones. Also, remove the TODOs in the main code about these tests.
+  });
 }
