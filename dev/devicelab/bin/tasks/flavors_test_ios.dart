@@ -136,7 +136,7 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
     throw TaskResult.failure('Build failed');
   }
 
-  final String appPath = '$projectDir/$buildDir/$configuration-iphone/$productName.app';
+  final String appPath = '$projectDir/$buildDir/$configuration-iphoneos/$productName.app';
   if (!Directory(appPath).existsSync()) {
     throw TaskResult.failure('App not found at $appPath');
   }
