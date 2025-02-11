@@ -163,6 +163,8 @@ BuildApp() {
     flutter_args+=("-dPreBuildAction=PrepareFramework")
   fi
 
+  # FLAVOR is set by the Flutter CLI in the Flutter/ephemeral/Flutter-Generated.xcconfig
+  # file when the --flavor flag is used, so it may not always be present.
   if [[ -n "$FLAVOR" ]]; then
     flutter_args+=("-dFlavor=${FLAVOR}")
   fi

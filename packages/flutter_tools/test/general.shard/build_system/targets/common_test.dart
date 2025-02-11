@@ -418,7 +418,7 @@ void main() {
             '$flutterPatchedSdkPath/',
             '--target=flutter',
             '--no-print-incremental-dependencies',
-            '-DFLUTTER_APP_FLAVOR=strawberry',
+            '-D$kAppFlavor=strawberry',
             ...buildModeOptions(BuildMode.debug, <String>[]),
             '--no-link-platform',
             '--packages',
@@ -440,7 +440,7 @@ void main() {
   );
 
   testUsingContext(
-    "tool exits when FLUTTER_APP_FLAVOR is already set in user's environment",
+    "tool exits when $kAppFlavor is already set in user's environment",
     () async {
       fileSystem.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
@@ -456,21 +456,17 @@ void main() {
       expect(
         buildResult,
         throwsToolExit(
-          message:
-              'FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.',
+          message: '$kAppFlavor is used by the framework and cannot be set in the environment.',
         ),
       );
     },
     overrides: <Type, Generator>{
-      Platform:
-          () => FakePlatform(
-            environment: <String, String>{'FLUTTER_APP_FLAVOR': 'I was already set'},
-          ),
+      Platform: () => FakePlatform(environment: <String, String>{kAppFlavor: 'I was already set'}),
     },
   );
 
   testUsingContext(
-    'tool exits when FLUTTER_APP_FLAVOR is set in --dart-define or --dart-define-from-file',
+    'tool exits when $kAppFlavor is set in --dart-define or --dart-define-from-file',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
@@ -480,7 +476,7 @@ void main() {
           ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.android)
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
-          ..defines[kDartDefines] = encodeDartDefines(<String>['FLUTTER_APP_FLAVOR', 'strawberry'])
+          ..defines[kDartDefines] = encodeDartDefines(<String>[kAppFlavor, 'strawberry'])
           ..defines[kTrackWidgetCreation] = 'false',
       );
 
@@ -488,7 +484,7 @@ void main() {
         buildResult,
         throwsToolExit(
           message:
-              'FLUTTER_APP_FLAVOR is used by the framework and cannot be set using --dart-define or --dart-define-from-file',
+              '$kAppFlavor is used by the framework and cannot be set using --dart-define or --dart-define-from-file',
         ),
       );
     },
@@ -516,7 +512,7 @@ void main() {
             '$flutterPatchedSdkPath/',
             '--target=flutter',
             '--no-print-incremental-dependencies',
-            '-DFLUTTER_APP_FLAVOR=chocolate',
+            '-D$kAppFlavor=chocolate',
             ...buildModeOptions(BuildMode.debug, <String>[]),
             '--no-link-platform',
             '--packages',
@@ -574,7 +570,7 @@ void main() {
             '$flutterPatchedSdkPath/',
             '--target=flutter',
             '--no-print-incremental-dependencies',
-            '-DFLUTTER_APP_FLAVOR=chocolate',
+            '-D$kAppFlavor=chocolate',
             ...buildModeOptions(BuildMode.debug, <String>[]),
             '--packages',
             '/.dart_tool/package_config.json',

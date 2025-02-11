@@ -104,7 +104,6 @@ Future<TaskResult> _testInstallBogusFlavor() async {
 Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
   final Device device = await devices.workingDevice;
   await inDirectory(projectDir, () async {
-    await flutter('clean');
     // This will put FLAVOR=free in the Flutter/Generated.xcconfig file
     await flutter(
       'build',
@@ -124,6 +123,14 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
   const String productName = 'Paid App';
   const String buildDir = 'build/ios';
 
+  // Delete app bundle before build to ensure checks below do not use previously
+  // built bundle.
+  final String appPath = '$projectDir/$buildDir/$configuration-iphoneos/$productName.app';
+  final Directory appBundle = Directory(appPath);
+  if (appBundle.existsSync()) {
+    appBundle.deleteSync(recursive: true);
+  }
+
   if (!await runXcodeBuild(
     platformDirectory: path.join(projectDir, 'ios'),
     destination: 'id=${device.deviceId}',
@@ -136,8 +143,7 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
     throw TaskResult.failure('Build failed');
   }
 
-  final String appPath = '$projectDir/$buildDir/$configuration-iphoneos/$productName.app';
-  if (!Directory(appPath).existsSync()) {
+  if (!appBundle.existsSync()) {
     throw TaskResult.failure('App not found at $appPath');
   }
 

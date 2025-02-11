@@ -92,8 +92,7 @@ Future<void> main() async {
 
 Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
   await inDirectory(projectDir, () async {
-    await flutter('clean');
-    // This will put FLAVOR=free in the Flutter/Generated.xcconfig file
+    // This will put FLAVOR=free in the Flutter/ephemeral/Flutter-Generated.xcconfig file
     await flutter(
       'build',
       options: <String>['macos', '--config-only', '--debug', '--flavor', 'free'],
@@ -113,6 +112,14 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
   const String configuration = 'Debug-paid';
   const String productName = 'Debug Paid';
   const String buildDir = 'build/macos';
+  final String appPath = '$projectDir/$buildDir/$configuration/$productName.app';
+
+  // Delete app bundle before build to ensure checks below do not use previously
+  // built bundle.
+  final Directory appBundle = Directory(appPath);
+  if (appBundle.existsSync()) {
+    appBundle.deleteSync(recursive: true);
+  }
 
   if (!await runXcodeBuild(
     platformDirectory: path.join(projectDir, 'macos'),
@@ -127,8 +134,7 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
     throw TaskResult.failure('Build failed');
   }
 
-  final String appPath = '$projectDir/$buildDir/$configuration/$productName.app';
-  if (!Directory(appPath).existsSync()) {
+  if (!appBundle.existsSync()) {
     throw TaskResult.failure('App not found at $appPath');
   }
 

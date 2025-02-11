@@ -307,20 +307,19 @@ class KernelSnapshot extends Target {
     } else {
       flavor = environment.defines[kFlavor];
     }
-    if (flavor != null) {
-      if (globals.platform.environment['FLUTTER_APP_FLAVOR'] != null) {
-        throwToolExit(
-          'FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.',
-        );
-      }
-      if (dartDefines.any((String define) => define.startsWith('FLUTTER_APP_FLAVOR'))) {
-        throwToolExit(
-          'FLUTTER_APP_FLAVOR is used by the framework and cannot be '
-          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
-        );
-      }
-      dartDefines.add('FLUTTER_APP_FLAVOR=$flavor');
+    if (flavor == null) {
+      return;
     }
+    if (globals.platform.environment[kAppFlavor] != null) {
+      throwToolExit('$kAppFlavor is used by the framework and cannot be set in the environment.');
+    }
+    if (dartDefines.any((String define) => define.startsWith(kAppFlavor))) {
+      throwToolExit(
+        '$kAppFlavor is used by the framework and cannot be '
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
+      );
+    }
+    dartDefines.add('$kAppFlavor=$flavor');
   }
 }
 
