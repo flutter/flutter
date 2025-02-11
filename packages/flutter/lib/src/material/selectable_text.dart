@@ -369,7 +369,8 @@ class SelectableText extends StatefulWidget {
   /// inherited [DefaultSelectionStyle] (if any);
   /// if none, the selection color is derived from the
   /// [CupertinoThemeData.primaryColor] on Apple platforms
-  /// and [ThemeData.colorScheme.primary] on other platforms with 40% opacity.
+  /// and [ColorScheme.primary] of [ThemeData.colorScheme] on
+  /// other platforms with 40% opacity.
   final Color? selectionColor;
 
   /// Controls how tall the selection highlight boxes are computed to be.
