@@ -67,7 +67,6 @@ dependencies {
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
     compileOnly("com.android.tools.build:gradle:8.7.3")
 
-    testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation("com.android.tools.build:gradle:8.7.3")
     testImplementation("org.mockito:mockito-core:4.8.0")
