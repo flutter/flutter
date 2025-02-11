@@ -310,13 +310,7 @@ class MediaQueryData {
       navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
       gestureSettings = DeviceGestureSettings.fromView(view),
       displayFeatures = view.displayFeatures,
-      typographySettings = const TypographySettings(
-        lineHeight: 5,
-        paragraphSpacing: 5,
-        letterSpacing: 5,
-        wordSpacing: 5,
-      ),
-      // typographySettings = platformData?.typographySettings ?? view.platformDispatcher.accessibilityFeatures.typographySettings,
+      typographySettings = platformData?.typographySettings ?? view.platformDispatcher.typographySettings,
       supportsShowingSystemContextMenu =
           platformData?.supportsShowingSystemContextMenu ??
           view.platformDispatcher.supportsShowingSystemContextMenu;
@@ -659,7 +653,7 @@ class MediaQueryData {
   ///    supported.
   final bool supportsShowingSystemContextMenu;
 
-  final TypographySettings? typographySettings;
+  final ui.TypographySettings? typographySettings;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
@@ -698,7 +692,7 @@ class MediaQueryData {
     NavigationMode? navigationMode,
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
-    TypographySettings? typographySettings,
+    ui.TypographySettings? typographySettings,
     bool? supportsShowingSystemContextMenu,
   }) {
     assert(textScaleFactor == null || textScaler == null);
@@ -976,32 +970,6 @@ class MediaQueryData {
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
-}
-
-/// Typography settings that may be modified by the platform.
-final class TypographySettings {
-  /// Create a new [TypographySettings].
-  const TypographySettings({
-    required this.lineHeight,
-    required this.paragraphSpacing,
-    required this.letterSpacing,
-    required this.wordSpacing,
-  });
-
-  /// The height of this text span, as a multiple of the font size.
-  final double lineHeight;
-
-  /// The amount of space (in logical pixels) to add between each paragraph.
-  final double paragraphSpacing;
-
-  /// The amount of space (in logical pixels) to add between each letter.
-  /// A negative value can be used to bring the letters closer.
-  final double letterSpacing;
-
-  /// The amount of space (in logical pixels) to add at each sequence of
-  /// white-space (i.e. between each word). A negative value can be used to
-  /// bring the words closer.
-  final double wordSpacing;
 }
 
 /// Establishes a subtree in which media queries resolve to the given data.
@@ -1794,15 +1762,15 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool? maybeSupportsAnnounceOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.supportsAnnounce)?.supportsAnnounce;
 
-  static TypographySettings typographySettingsOf(BuildContext context) =>
-      maybeTypographySettingsOf(context) ??
-      TypographySettings(
-        lineHeight: 1.0,
-        paragraphSpacing: 1.0,
-        letterSpacing: 1.0,
-        wordSpacing: 1.0,
-      );
-  static TypographySettings? maybeTypographySettingsOf(BuildContext context) =>
+  // static ui.TypographySettings typographySettingsOf(BuildContext context) =>
+  //     maybeTypographySettingsOf(context) ??
+  //     ui.TypographySettings(
+  //       lineHeight: 1.0,
+  //       paragraphSpacing: 1.0,
+  //       letterSpacing: 1.0,
+  //       wordSpacing: 1.0,
+  //     );
+  static ui.TypographySettings? maybeTypographySettingsOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.typographySettings)?.typographySettings;
 
   /// Returns [MediaQueryData.navigationMode] for the nearest [MediaQuery]
