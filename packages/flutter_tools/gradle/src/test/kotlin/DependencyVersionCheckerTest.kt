@@ -2,19 +2,24 @@ package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.autonomousapps.kit.AbstractGradleProject
-import com.autonomousapps.kit.GradleBuilder
-import com.autonomousapps.kit.GradleProject
-import com.autonomousapps.kit.Source
-import com.autonomousapps.kit.gradle.Dependency
-import com.autonomousapps.kit.gradle.Plugin
 import com.flutter.gradle.DependencyVersionChecker.AGP_NAME
+import com.flutter.gradle.DependencyVersionChecker.GRADLE_NAME
+import com.flutter.gradle.DependencyVersionChecker.JAVA_NAME
+import com.flutter.gradle.DependencyVersionChecker.KGP_NAME
 import com.flutter.gradle.DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY
+import com.flutter.gradle.DependencyVersionChecker.POTENTIAL_JAVA_FIX
 import com.flutter.gradle.DependencyVersionChecker.errorAGPVersion
+import com.flutter.gradle.DependencyVersionChecker.errorGradleVersion
+import com.flutter.gradle.DependencyVersionChecker.errorKGPVersion
 import com.flutter.gradle.DependencyVersionChecker.getErrorMessage
 import com.flutter.gradle.DependencyVersionChecker.getPotentialAGPFix
+import com.flutter.gradle.DependencyVersionChecker.getPotentialGradleFix
+import com.flutter.gradle.DependencyVersionChecker.getPotentialKGPFix
 import com.flutter.gradle.DependencyVersionChecker.getWarnMessage
 import com.flutter.gradle.DependencyVersionChecker.warnAGPVersion
+import com.flutter.gradle.DependencyVersionChecker.warnGradleVersion
+import com.flutter.gradle.DependencyVersionChecker.warnJavaVersion
+import com.flutter.gradle.DependencyVersionChecker.warnKGPVersion
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -24,12 +29,17 @@ import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.internal.extensions.core.extra
-import org.gradle.testkit.runner.GradleRunner
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 const val FAKE_PROJECT_ROOT_DIR = "/fake/root/dir"
+
+// The following values will need to be modified when the corresponding "warn$DepName" versions
+// are updated in DependencyVersionChecker.kt
+const val SUPPORTED_GRADLE_VERSION: String = "7.4.2"
+val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_11
+val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(7, 3, 1)
+const val SUPPORTED_KGP_VERSION: String = "1.8.10"
 
 class DependencyVersionCheckerTest {
     @Test
@@ -76,142 +86,139 @@ class DependencyVersionCheckerTest {
             )
         }
         verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
-        GradleRunner.create().withPluginClasspath()
     }
 
     @Test
-    fun `blah blah`() {
-        val gradleRunner = BlahBlah.gradleProject
-        val result = GradleBuilder.build(gradleRunner.rootDir, ":project:assembleDebug")
+    fun `KGP version in error range results in DependencyValidationException`() {
+        val exampleErrorKgpVersion = "1.6.0"
+        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(kgpVersion = exampleErrorKgpVersion)
+
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
+
+        val dependencyValidationException =
+            assertFailsWith<DependencyValidationException> { DependencyVersionChecker.checkDependencyVersions(mockProject) }
+
+        println(dependencyValidationException.message)
+        assert(
+            dependencyValidationException.message ==
+                getErrorMessage(
+                    KGP_NAME,
+                    exampleErrorKgpVersion,
+                    errorKGPVersion.toString(),
+                    getPotentialKGPFix(FAKE_PROJECT_ROOT_DIR)
+                )
+        )
+        verify { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
 
     @Test
-    fun `how about this`() {
-        val settingsFileContent =
-            """
-            pluginManagement {
+    fun `KGP version in warn range results in warning logs`() {
+        val exampleWarnKgpVersion = "1.8.0"
+        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(kgpVersion = exampleWarnKgpVersion)
 
-                includeBuild("/Users/mackall/development/flutter/flutter/packages/flutter_tools/gradle")
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
+        val mockLogger = mockProject.logger
+        every { mockLogger.error(any()) } returns Unit
 
-                repositories {
-                    google()
-                    mavenCentral()
-                    gradlePluginPortal()
-                }
-            }
+        DependencyVersionChecker.checkDependencyVersions(mockProject)
+        verify {
+            mockLogger.error(
+                getWarnMessage(
+                    KGP_NAME,
+                    exampleWarnKgpVersion,
+                    warnKGPVersion.toString(),
+                    getPotentialKGPFix(FAKE_PROJECT_ROOT_DIR)
+                )
+            )
+        }
+        verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
+    }
 
-            plugins {
-                id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-                id("com.android.application") version "8.7.3" apply false
-                id("org.jetbrains.kotlin.android") version "2.1.0" apply false
-            }
-            """.trimIndent()
+    // No test for Java version in error range, as the lowest supported Java version is also the
+    // lowest possible.
 
-        val buildFileContent =
-            """
-            allprojects {
-                repositories {
-                    google()
-                    mavenCentral()
-                }
-            }
+    @Test
+    fun `Java version in warn range results in warning logs`() {
+        val exampleWarnJavaVersion = JavaVersion.VERSION_1_8
+        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(javaVersion = exampleWarnJavaVersion)
 
-            val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
-            rootProject.layout.buildDirectory.value(newBuildDir)
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
+        val mockLogger = mockProject.logger
+        every { mockLogger.error(any()) } returns Unit
 
-            subprojects {
-                val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
-                project.layout.buildDirectory.value(newSubprojectBuildDir)
-            }
-            subprojects {
-                project.evaluationDependsOn(":app")
-            }
+        DependencyVersionChecker.checkDependencyVersions(mockProject)
+        verify {
+            mockLogger.error(
+                getWarnMessage(
+                    JAVA_NAME,
+                    exampleWarnJavaVersion.toString(),
+                    warnJavaVersion.toString(),
+                    POTENTIAL_JAVA_FIX
+                )
+            )
+        }
+        verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
+    }
 
-            tasks.register<Delete>("clean") {
-                delete(rootProject.layout.buildDirectory)
-            }
-            """.trimIndent()
+    @Test
+    fun `Gradle version in error range results in DependencyValidationException`() {
+        val exampleErrorGradleVersion = "7.0.0"
+        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleErrorGradleVersion)
 
-        val appBuildFileContent =
-            """
-                               plugins {
-                id("com.android.application")
-                id("kotlin-android")
-                // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-                id("dev.flutter.flutter-gradle-plugin")
-            }
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
 
-            android {
-                namespace = "com.example.abc"
-                compileSdk = flutter.compileSdkVersion
-                ndkVersion = flutter.ndkVersion
+        val dependencyValidationException =
+            assertFailsWith<DependencyValidationException> { DependencyVersionChecker.checkDependencyVersions(mockProject) }
 
-                compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_11
-                    targetCompatibility = JavaVersion.VERSION_11
-                }
+        assert(
+            dependencyValidationException.message ==
+                getErrorMessage(
+                    GRADLE_NAME,
+                    exampleErrorGradleVersion,
+                    errorGradleVersion.toString(),
+                    getPotentialGradleFix(FAKE_PROJECT_ROOT_DIR)
+                )
+        )
+        verify { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
+    }
 
-                kotlinOptions {
-                    jvmTarget = JavaVersion.VERSION_11.toString()
-                }
+    @Test
+    fun `Gradle version in warn range results in warning logs`() {
+        val exampleWarnGradleVersion = "7.4.0"
+        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleWarnGradleVersion)
 
-                defaultConfig {
-                    // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-                    applicationId = "com.example.abc"
-                    // You can update the following values to match your application needs.
-                    // For more information, see: https://flutter.dev/to/review-gradle-config.
-                    minSdk = flutter.minSdkVersion
-                    targetSdk = flutter.targetSdkVersion
-                    versionCode = flutter.versionCode
-                    versionName = flutter.versionName
-                }
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
+        val mockLogger = mockProject.logger
+        every { mockLogger.error(any()) } returns Unit
 
-                buildTypes {
-                    release {
-                        // TODO: Add your own signing config for the release build.
-                        // Signing with the debug keys for now, so `flutter run --release` works.
-                        signingConfig = signingConfigs.getByName("debug")
-                    }
-                }
-            }
-
-            flutter {
-                source = "../.."
-            }                             
-            """.trimIndent()
-
-        val localpropertiesContent =
-            """
-            ## This file must *NOT* be checked into Version Control Systems,
-            # as it contains information specific to your local configuration.
-            #
-            # Location of the SDK. This is only used by Gradle.
-            # For customization when using a Version Control System, please read the
-            # header note.
-            #Wed Feb 05 14:41:22 PST 2025
-            sdk.dir=/Users/mackall/Library/Android/sdk
-
-            """.trimIndent()
-
-        val projectDir = File("build/functionalTest")
-        projectDir.mkdirs()
-        val appDir = projectDir.resolve("app")
-        appDir.mkdirs()
-        projectDir.resolve("build.gradle.kts").writeText(buildFileContent)
-        projectDir.resolve("settings.gradle.kts").writeText(settingsFileContent)
-        projectDir.resolve("local.properties").writeText(localpropertiesContent)
-        projectDir.resolve("app/build.gradle.kts").writeText(appBuildFileContent)
-
-        val buildResult =
-            GradleRunner
-                .create()
-                .withPluginClasspath()
-                .withGradleVersion("7.0")
-                .withProjectDir(projectDir)
-                .build()
+        DependencyVersionChecker.checkDependencyVersions(mockProject)
+        verify {
+            mockLogger.error(
+                getWarnMessage(
+                    GRADLE_NAME,
+                    exampleWarnGradleVersion,
+                    warnGradleVersion.toString(),
+                    getPotentialGradleFix(FAKE_PROJECT_ROOT_DIR)
+                )
+            )
+        }
+        verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
 }
 
+// There isn't a way to create a real org.gradle.api.Project object for testing unfortunately, so
+// these tests rely heavily on mocking.
+//
+// TODO(gmackall): We should consider adding functional tests built on top of a testing framework
+//  perhaps like
+//  https://github.com/autonomousapps/dependency-analysis-gradle-plugin/tree/main/testkit
+//  as a way to fill this gap in testing (combined with moving functionality to individual tasks
+//  that can be tested independently).
 object MockProjectFactory {
     fun createMockProjectWithSpecifiedDependencyVersions(
         javaVersion: JavaVersion = SUPPORTED_JAVA_VERSION,
@@ -233,7 +240,6 @@ object MockProjectFactory {
         every { mockAndroidComponentsExtension.pluginVersion } returns agpVersion
 
         // KGP
-        // TODO(gmackall) this should use the actual val
         every { mockProject.hasProperty(eq("kotlin_version")) } returns true
         every { mockProject.properties["kotlin_version"] } returns kgpVersion
 
@@ -250,82 +256,4 @@ object MockProjectFactory {
 
         return mockProject
     }
-}
-
-const val SUPPORTED_GRADLE_VERSION: String = "7.4.2"
-val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_11
-val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(7, 3, 1)
-const val SUPPORTED_KGP_VERSION: String = "1.8.10"
-
-class MyFixture : AbstractGradleProject() {
-    // Injected into functionalTest JVM by the plugin
-    // Also available via AbstractGradleProject.PLUGIN_UNDER_TEST_VERSION
-    private val pluginVersion = System.getProperty("com.autonomousapps.plugin-under-test.version")
-
-    val gradleProject: GradleProject = build()
-
-    private fun build(): GradleProject {
-        return newGradleProjectBuilder()
-            .withSubproject("project") {
-                sources = source
-                withBuildScript {
-                    plugins(Plugin.javaLibrary, Plugin("my-cool-plugin", pluginVersion))
-                    dependencies(Dependency.implementation("com.company:library:1.0"))
-                }
-            }
-            .write()
-    }
-
-    private val source =
-        mutableListOf(
-            Source.java(
-                """
-      package com.example.project;
-
-      public class Project {
-        // do stuff here
-      }
-      """
-            )
-                .withPath(/* packagePath = */ "com.example.project", /* className = */ "Project")
-                .build()
-        )
-}
-
-object BlahBlah : AbstractGradleProject() {
-    // Injected into functionalTest JVM by the plugin
-    // Also available via AbstractGradleProject.PLUGIN_UNDER_TEST_VERSION
-    // private val pluginVersion = System.getProperty("com.autonomousapps.plugin-under-test.version")
-
-    val gradleProject: GradleProject = build()
-
-    private fun build(): GradleProject {
-        return newGradleProjectBuilder(GradleProject.DslKind.KOTLIN).withRootProject {
-            GradleProject.DslKind.KOTLIN
-        }
-            // .withIncludedBuild("/Users/mackall/development/flutter/flutter/packages/flutter_tools/gradle") { GradleProject.DslKind.KOTLIN }
-            .withSubproject("project") {
-                println("sources is null? " + source == null)
-                sources.addLast(source)
-                withBuildScript {
-                    plugins(Plugin.of("com.android.application", "8.7.2"), Plugin("my-cool-plugin", "0.1.0"))
-                    dependencies(Dependency.implementation("com.android.tools.build:gradle:8.7.3"))
-                }
-            }
-            .build()
-            .write()
-    }
-
-    private val source =
-        Source.java(
-            """
-      package com.example.project;
-
-      public class Project {
-        println("blah");
-      }
-      """
-        )
-            .withPath(/* packagePath = */ "com/example/project", /* className = */ "Project")
-            .build()
 }

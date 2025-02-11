@@ -9,7 +9,7 @@ import org.gradle.kotlin.dsl.extra
 import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 
 object DependencyVersionChecker {
-    private const val GRADLE_NAME: String = "Gradle"
+    @VisibleForTesting internal const val GRADLE_NAME: String = "Gradle"
 
     @VisibleForTesting internal const val JAVA_NAME: String = "Java"
 
@@ -25,7 +25,7 @@ object DependencyVersionChecker {
     // The following messages represent best effort guesses at where a Flutter developer should
     // look to upgrade a dependency that is below the corresponding threshold. Developers can
     // change some of these locations, so they are not guaranteed to be accurate.
-    private fun getPotentialGradleFix(projectDirectory: String): String {
+    @VisibleForTesting internal fun getPotentialGradleFix(projectDirectory: String): String {
         return "Your project's gradle version is typically " +
             "defined in the gradle wrapper file. By default, this can be found at " +
             "$projectDirectory/gradle/wrapper/gradle-wrapper.properties. \n" +
@@ -34,7 +34,7 @@ object DependencyVersionChecker {
 
     // The potential java fix does not make use of the project directory,
     // so it left as a constant.
-    private const val POTENTIAL_JAVA_FIX: String =
+    @VisibleForTesting internal const val POTENTIAL_JAVA_FIX: String =
         "The Java version used by Flutter can be " +
             "set with `flutter config --jdk-dir=<path>`. \nFor more information about how Flutter " +
             "chooses which version of Java to use, see the --jdk-dir section of the " +
@@ -51,7 +51,7 @@ object DependencyVersionChecker {
             " block of the buildscript: \"classpath 'com.android.tools.build:gradle:<version>'\".\n"
     }
 
-    private fun getPotentialKGPFix(projectDirectory: String): String {
+    @VisibleForTesting internal fun getPotentialKGPFix(projectDirectory: String): String {
         return "Your project's KGP version is typically " +
             "defined in the plugins block of the `settings.gradle` file " +
             "($projectDirectory/settings.gradle), by a plugin with the id of " +

@@ -9,7 +9,6 @@ plugins {
     groovy
     `kotlin-dsl`
     kotlin("jvm") version "1.9.20"
-    id("com.autonomousapps.testkit") version "0.12"
 }
 
 group = "dev.flutter.plugin"
@@ -68,8 +67,6 @@ dependencies {
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
     compileOnly("com.android.tools.build:gradle:8.7.3")
 
-    testImplementation("com.autonomousapps:gradle-testkit-support:0.17")
-    testImplementation("com.autonomousapps:gradle-testkit-truth:1.6.1")
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation("com.android.tools.build:gradle:8.7.3")
