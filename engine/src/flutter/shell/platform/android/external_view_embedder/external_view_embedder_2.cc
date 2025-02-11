@@ -100,7 +100,6 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   // If there is no overlay Surface, initialize one on the platform thread. This
   // will only be done once per application launch, as the singular overlay
   // surface is never released.
-  surface_pool_->ResetLayers();
   if (!surface_pool_->HasLayers()) {
     std::shared_ptr<fml::CountDownLatch> latch =
         std::make_shared<fml::CountDownLatch>(1u);
@@ -112,12 +111,14 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         }));
     latch->Wait();
   }
+  surface_pool_->ResetLayers();
 
   // Create Overlay frame. If overlay surface creation failed,
   // all this work must be skipped.
   std::unique_ptr<SurfaceFrame> overlay_frame;
   if (surface_pool_->HasLayers()) {
-    for (int64_t view_id : composition_order_) {
+    for (size_t i = 0; i < composition_order_.size(); i++) {
+      int64_t view_id = composition_order_[i];
       std::unordered_map<int64_t, SkRect>::const_iterator overlay =
           overlay_layers.find(view_id);
 
@@ -128,13 +129,26 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         std::shared_ptr<OverlayLayer> layer = surface_pool_->GetLayer(
             context, android_context_, jni_facade_, surface_factory_);
         overlay_frame = layer->surface->AcquireFrame(frame_size_);
+        overlay_frame->Canvas()->Clear(flutter::DlColor::kTransparent());
       }
 
       DlCanvas* overlay_canvas = overlay_frame->Canvas();
       int restore_count = overlay_canvas->GetSaveCount();
       overlay_canvas->Save();
       overlay_canvas->ClipRect(overlay->second);
-      overlay_canvas->Clear(DlColor::kTransparent());
+
+      // For all following platform views that would cover this overlay,
+      // emulate the effect by adding a difference clip. This makes the
+      // overlays appear as if they are under the platform view, when in
+      // reality there is only a single layer.
+      for (size_t j = i + 1; j < composition_order_.size(); j++) {
+        SkRect view_rect = GetViewRect(composition_order_[j], view_params_);
+        overlay_canvas->ClipRect(
+            DlRect::MakeLTRB(view_rect.left(), view_rect.top(),
+                             view_rect.right(), view_rect.bottom()),
+            DlClipOp::kDifference);
+      }
+
       slices_[view_id]->render_into(overlay_canvas);
       overlay_canvas->RestoreToCount(restore_count);
     }
