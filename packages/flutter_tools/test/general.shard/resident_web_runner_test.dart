@@ -1604,6 +1604,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
+    bool recompileRestart = false,
   }) async {
     return const CompilerOutput('foo.dill', 0, <Uri>[]);
   }
@@ -1813,7 +1814,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
