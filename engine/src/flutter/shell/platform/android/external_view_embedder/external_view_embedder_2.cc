@@ -132,12 +132,15 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         overlay_frame->Canvas()->Clear(flutter::DlColor::kTransparent());
       }
 
-      flutter::DlCanvas* overlay_canvas = overlay_frame->Canvas();
-      int restoreCount = overlay_canvas->GetSaveCount();
+      DlCanvas* overlay_canvas = overlay_frame->Canvas();
+      int restore_count = overlay_canvas->GetSaveCount();
       overlay_canvas->Save();
       overlay_canvas->ClipRect(overlay->second);
 
-      // Diff clip all subsequent intersections.
+      // For all following platform views that would cover this overlay,
+      // emulate the effect by adding a difference clip. This makes the
+      // overlays appear as if they are under the platform view, when in
+      // reality there is only a single layer.
       for (size_t j = i + 1; j < composition_order_.size(); j++) {
         SkRect view_rect = GetViewRect(composition_order_[j], view_params_);
         overlay_canvas->ClipRect(
@@ -147,7 +150,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       }
 
       slices_[view_id]->render_into(overlay_canvas);
-      overlay_canvas->RestoreToCount(restoreCount);
+      overlay_canvas->RestoreToCount(restore_count);
     }
   }
   if (overlay_frame != nullptr) {
