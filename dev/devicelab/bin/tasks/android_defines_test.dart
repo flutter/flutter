@@ -9,5 +9,6 @@ import 'package:flutter_devicelab/tasks/integration_tests.dart';
 /// Verify that dart defines work on Android.
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
-  await task(dartDefinesTask());
+  // DO NOT MERGE 
+  await task(createDisplayCutoutTest());
 }
