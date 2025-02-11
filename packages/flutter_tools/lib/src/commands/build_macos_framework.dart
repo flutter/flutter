@@ -51,6 +51,9 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   };
 
   @override
+  bool get regeneratePlatformSpecificToolingDuringVerify => false;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??
