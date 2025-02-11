@@ -31,10 +31,8 @@ export 'skia_client.dart';
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
 bool _isMainBranch(String? branch) {
-  return branch == 'main'
-      || branch == 'master';
+  return branch == 'main' || branch == 'master';
 }
-
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
@@ -91,9 +89,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
   } else if (FlutterSkippingFileComparator.isForEnvironment(platform)) {
     goldenFileComparator = FlutterSkippingFileComparator.fromLocalFileComparator(
       localFileComparator: goldenFileComparator as LocalFileComparator,
-      'Golden file testing is not executed on Cirrus, or LUCI environments '
-      'outside of flutter/flutter, or in test shards that are not configured '
-      'for using goldctl.',
+      'Golden file testing is not executed on LUCI environments outside of '
+      'flutter, or in test shards that are not configured for using goldctl.',
       platform: platform,
       namePrefix: namePrefix,
       log: print,
@@ -212,13 +209,11 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
     final Directory comparisonRoot = switch (suffix) {
       null => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'skia_goldens')),
-      _    => fs.systemTempDirectory.createTempSync(suffix),
+      _ => fs.systemTempDirectory.createTempSync(suffix),
     };
 
     final String testPath = fs.directory(defaultComparator.basedir).path;
-    return comparisonRoot.childDirectory(
-      fs.path.relative(testPath, from: flutterRoot.path),
-    );
+    return comparisonRoot.childDirectory(fs.path.relative(testPath, from: flutterRoot.path));
   }
 
   /// Returns the golden [File] identified by the given [Uri].
@@ -235,14 +230,15 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     assert(
       golden.toString().split('.').last == 'png',
       'Golden files in the Flutter framework must end with the file extension '
-      '.png.'
+      '.png.',
     );
-    return Uri.parse(<String>[
-      if (namePrefix != null)
-        namePrefix!,
-      basedir.pathSegments[basedir.pathSegments.length - 2],
-      golden.toString(),
-    ].join('.'));
+    return Uri.parse(
+      <String>[
+        if (namePrefix != null) namePrefix!,
+        basedir.pathSegments[basedir.pathSegments.length - 2],
+        golden.toString(),
+      ].join('.'),
+    );
   }
 }
 
@@ -324,18 +320,31 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
-    return skiaClient.imgtestAdd(golden.path, goldenFile);
+    try {
+      return await skiaClient.imgtestAdd(golden.path, goldenFile);
+    } on SkiaException catch (e) {
+      // Convert SkiaException -> TestFailure so that this class implements the
+      // contract of GoldenFileComparator, and matchesGoldenFile() converts the
+      // TestFailure into a standard reported test error (with a better stack
+      // trace, for example).
+      //
+      // https://github.com/flutter/flutter/issues/162621
+      throw TestFailure('$e');
+    }
   }
 
   /// Decides based on the current environment if goldens tests should be
   /// executed through Skia Gold.
   static bool isForEnvironment(Platform platform) {
-    final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
-      && platform.environment.containsKey('GOLDCTL')
-      // Luci tryjob environments contain this value to inform the [FlutterPreSubmitComparator].
-      && !platform.environment.containsKey('GOLD_TRYJOB')
-      // Only run on main branch.
-      && _isMainBranch(platform.environment['GIT_BRANCH']);
+    final bool luciPostSubmit =
+        platform.environment.containsKey('SWARMING_TASK_ID') &&
+        platform.environment.containsKey('GOLDCTL')
+        // Luci tryjob environments contain this value to inform the [FlutterPreSubmitComparator].
+        &&
+        !platform.environment.containsKey('GOLD_TRYJOB')
+        // Only run on main branch.
+        &&
+        _isMainBranch(platform.environment['GIT_BRANCH']);
     return luciPostSubmit;
   }
 }
@@ -384,12 +393,14 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     required ProcessManager process,
     required io.HttpClient httpClient,
   }) async {
-    final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
-      localFileComparator,
-      platform: platform,
-      suffix: 'flutter_goldens_presubmit.',
-      fs: fs,
-    );
+    final Directory baseDirectory =
+        testBasedir ??
+        FlutterGoldenFileComparator.getBaseDirectory(
+          localFileComparator,
+          platform: platform,
+          suffix: 'flutter_goldens_presubmit.',
+          fs: fs,
+        );
 
     if (!baseDirectory.existsSync()) {
       baseDirectory.createSync(recursive: true);
@@ -432,11 +443,13 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// Decides based on the current environment if goldens tests should be
   /// executed as pre-submit tests with Skia Gold.
   static bool isForEnvironment(Platform platform) {
-    final bool luciPreSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
-      && platform.environment.containsKey('GOLDCTL')
-      && platform.environment.containsKey('GOLD_TRYJOB')
-      // Only run on the main branch
-      && _isMainBranch(platform.environment['GIT_BRANCH']);
+    final bool luciPreSubmit =
+        platform.environment.containsKey('SWARMING_TASK_ID') &&
+        platform.environment.containsKey('GOLDCTL') &&
+        platform.environment.containsKey('GOLD_TRYJOB')
+        // Only run on the main branch
+        &&
+        _isMainBranch(platform.environment['GIT_BRANCH']);
     return luciPreSubmit;
   }
 }
@@ -444,7 +457,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 /// A [FlutterGoldenFileComparator] for testing conditions that do not execute
 /// golden file tests.
 ///
-/// Currently, this comparator is used on Cirrus, or in Luci environments when executing tests
+/// Currently, this comparator is used on Luci environments when executing tests
 /// outside of the flutter/flutter repository.
 ///
 /// See also:
@@ -517,13 +530,11 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   /// Decides, based on the current environment, if this comparator should be
   /// used.
   ///
-  /// If we are in a CI environment, LUCI or Cirrus, but are not using the other
+  /// If we are in a CI environment, i.e. LUCI, but are not using the other
   /// comparators, we skip. Otherwise we would fallback to the local comparator,
   /// for which failures cannot be resolved in a CI environment.
   static bool isForEnvironment(Platform platform) {
-    return platform.environment.containsKey('SWARMING_TASK_ID')
-      // Some builds are still being run on Cirrus, we should skip these.
-      || platform.environment.containsKey('CIRRUS_CI');
+    return platform.environment.containsKey('SWARMING_TASK_ID');
   }
 }
 
@@ -656,7 +667,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
         'No expectations provided by Skia Gold for test: $golden. '
         'This may be a new test. If this is an unexpected result, check '
         'https://flutter-gold.skia.org.\n'
-        'Validate image output found at $basedir'
+        'Validate image output found at $basedir',
       );
       update(golden, imageBytes);
       return true;
@@ -665,10 +676,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     ComparisonResult result;
     final List<int> goldenBytes = await skiaClient.getImageBytes(testExpectation);
 
-    result = await GoldenFileComparator.compareLists(
-      imageBytes,
-      goldenBytes,
-    );
+    result = await GoldenFileComparator.compareLists(imageBytes, goldenBytes);
 
     if (result.passed) {
       result.dispose();

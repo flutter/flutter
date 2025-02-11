@@ -24,64 +24,78 @@ const String _kFlutterRoot = '/flutter';
 
 // 1x1 transparent pixel
 const List<int> _kTestPngBytes = <int>[
-  137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
-  1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65, 84,
-  120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0, 0, 73, 69,
-  78, 68, 174, 66, 96, 130,
+  137,
+  80,
+  78,
+  71,
+  13,
+  10,
+  26,
+  10,
+  0,
+  0,
+  0,
+  13,
+  73,
+  72,
+  68,
+  82,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  1,
+  8,
+  6,
+  0,
+  0,
+  0,
+  31,
+  21,
+  196,
+  137,
+  0,
+  0,
+  0,
+  11,
+  73,
+  68,
+  65,
+  84,
+  120,
+  1,
+  99,
+  97,
+  0,
+  2,
+  0,
+  0,
+  25,
+  0,
+  5,
+  144,
+  240,
+  54,
+  245,
+  0,
+  0,
+  0,
+  0,
+  73,
+  69,
+  78,
+  68,
+  174,
+  66,
+  96,
+  130,
 ];
 
 void main() {
   group('SkiaGoldClient', () {
-    test('web HTML test', () async {
-      final MemoryFileSystem fs = MemoryFileSystem();
-      final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'GOLDCTL': 'goldctl',
-          'FLUTTER_ROOT': _kFlutterRoot,
-          'FLUTTER_TEST_BROWSER': 'Chrome',
-          'FLUTTER_WEB_RENDERER': 'html',
-        },
-        operatingSystem: 'macos'
-      );
-      final FakeProcessManager process = FakeProcessManager();
-      final FakeHttpClient fakeHttpClient = FakeHttpClient();
-      fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
-      final SkiaGoldClient skiaClient = SkiaGoldClient(
-        workDirectory,
-        fs: fs,
-        process: process,
-        platform: platform,
-        httpClient: fakeHttpClient,
-        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
-      );
-
-      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
-        ..createSync(recursive: true);
-
-      const RunInvocation goldctlInvocation = RunInvocation(
-        <String>[
-          'goldctl',
-          'imgtest', 'add',
-          '--work-dir', '/workDirectory/temp',
-          '--test-name', 'golden_file_test',
-          '--png-file', '/workDirectory/temp/golden_file_test.png',
-          '--passfail',
-          '--add-test-optional-key', 'image_matching_algorithm:fuzzy',
-          '--add-test-optional-key', 'fuzzy_max_different_pixels:20',
-          '--add-test-optional-key', 'fuzzy_pixel_delta_threshold:4',
-        ],
-        null,
-      );
-      process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
-
-      expect(
-        await skiaClient.imgtestAdd('golden_file_test.png', goldenFile),
-        isTrue,
-      );
-    });
-
     test('web CanvasKit test', () async {
       final MemoryFileSystem fs = MemoryFileSystem();
       final FakePlatform platform = FakePlatform(
@@ -91,13 +105,12 @@ void main() {
           'FLUTTER_TEST_BROWSER': 'Chrome',
           'FLUTTER_WEB_RENDERER': 'canvaskit',
         },
-        operatingSystem: 'macos'
+        operatingSystem: 'macos',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -110,36 +123,33 @@ void main() {
       final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
         ..createSync(recursive: true);
 
-      const RunInvocation goldctlInvocation = RunInvocation(
-        <String>[
-          'goldctl',
-          'imgtest', 'add',
-          '--work-dir', '/workDirectory/temp',
-          '--test-name', 'golden_file_test',
-          '--png-file', '/workDirectory/temp/golden_file_test.png',
-          '--passfail',
-        ],
-        null,
-      );
+      const RunInvocation goldctlInvocation = RunInvocation(<String>[
+        'goldctl',
+        'imgtest',
+        'add',
+        '--work-dir',
+        '/workDirectory/temp',
+        '--test-name',
+        'golden_file_test',
+        '--png-file',
+        '/workDirectory/temp/golden_file_test.png',
+        '--passfail',
+      ], null);
       process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
 
-      expect(
-        await skiaClient.imgtestAdd('golden_file_test.png', goldenFile),
-        isTrue,
-      );
+      expect(await skiaClient.imgtestAdd('golden_file_test.png', goldenFile), isTrue);
     });
 
     test('auth performs minimal work if already authorized', () async {
       final MemoryFileSystem fs = MemoryFileSystem();
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-        operatingSystem: 'macos'
+        operatingSystem: 'macos',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -161,13 +171,12 @@ void main() {
       final MemoryFileSystem fs = MemoryFileSystem();
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-        operatingSystem: 'macos'
+        operatingSystem: 'macos',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -179,10 +188,7 @@ void main() {
       final File authFile = fs.file('/workDirectory/temp/auth_opt.json')
         ..createSync(recursive: true);
       authFile.writeAsStringSync(authTemplate(gsutil: true));
-      expect(
-        await skiaClient.clientIsAuthorized(),
-        isFalse,
-      );
+      expect(await skiaClient.clientIsAuthorized(), isFalse);
     });
 
     test('throws for error state from auth', () async {
@@ -190,16 +196,15 @@ void main() {
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{
           'FLUTTER_ROOT': _kFlutterRoot,
-          'GOLD_SERVICE_ACCOUNT' : 'Service Account',
-          'GOLDCTL' : 'goldctl',
+          'GOLD_SERVICE_ACCOUNT': 'Service Account',
+          'GOLDCTL': 'goldctl',
         },
-        operatingSystem: 'macos'
+        operatingSystem: 'macos',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -211,26 +216,19 @@ void main() {
 
       process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
-      expect(
-        skiaClient.auth(),
-        throwsException,
-      );
+      expect(skiaClient.auth(), throwsException);
     });
 
     test('throws for error state from init', () {
       final MemoryFileSystem fs = MemoryFileSystem();
       final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_ROOT': _kFlutterRoot,
-          'GOLDCTL' : 'goldctl',
-        },
-        operatingSystem: 'macos'
+        environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot, 'GOLDCTL': 'goldctl'},
+        operatingSystem: 'macos',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -240,47 +238,49 @@ void main() {
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
-      const RunInvocation gitInvocation = RunInvocation(
-        <String>['git', 'rev-parse', 'HEAD'],
-        '/flutter',
-      );
-      const RunInvocation goldctlInvocation = RunInvocation(
-        <String>[
-          'goldctl',
-          'imgtest', 'init',
-          '--instance', 'flutter',
-          '--work-dir', '/workDirectory/temp',
-          '--commit', '12345678',
-          '--keys-file', '/workDirectory/keys.json',
-          '--failure-file', '/workDirectory/failures.json',
-          '--passfail',
-        ],
-        null,
-      );
+      const RunInvocation gitInvocation = RunInvocation(<String>[
+        'git',
+        'rev-parse',
+        'HEAD',
+      ], '/flutter');
+      const RunInvocation goldctlInvocation = RunInvocation(<String>[
+        'goldctl',
+        'imgtest',
+        'init',
+        '--instance',
+        'flutter',
+        '--work-dir',
+        '/workDirectory/temp',
+        '--commit',
+        '12345678',
+        '--keys-file',
+        '/workDirectory/keys.json',
+        '--failure-file',
+        '/workDirectory/failures.json',
+        '--passfail',
+      ], null);
       process.processResults[gitInvocation] = ProcessResult(12345678, 0, '12345678', '');
-      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
+      process.processResults[goldctlInvocation] = ProcessResult(
+        123,
+        1,
+        'Expected failure',
+        'Expected failure',
+      );
       process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
-      expect(
-        skiaClient.imgtestInit(),
-        throwsException,
-      );
+      expect(skiaClient.imgtestInit(), throwsException);
     });
 
     test('Only calls init once', () async {
       final MemoryFileSystem fs = MemoryFileSystem();
       final FakePlatform platform = FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_ROOT': _kFlutterRoot,
-          'GOLDCTL' : 'goldctl',
-        },
-        operatingSystem: 'macos'
+        environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot, 'GOLDCTL': 'goldctl'},
+        operatingSystem: 'macos',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -290,23 +290,27 @@ void main() {
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
-      const RunInvocation gitInvocation = RunInvocation(
-        <String>['git', 'rev-parse', 'HEAD'],
-        '/flutter',
-      );
-      const RunInvocation goldctlInvocation = RunInvocation(
-        <String>[
-          'goldctl',
-          'imgtest', 'init',
-          '--instance', 'flutter',
-          '--work-dir', '/workDirectory/temp',
-          '--commit', '1234',
-          '--keys-file', '/workDirectory/keys.json',
-          '--failure-file', '/workDirectory/failures.json',
-          '--passfail',
-        ],
-        null,
-      );
+      const RunInvocation gitInvocation = RunInvocation(<String>[
+        'git',
+        'rev-parse',
+        'HEAD',
+      ], '/flutter');
+      const RunInvocation goldctlInvocation = RunInvocation(<String>[
+        'goldctl',
+        'imgtest',
+        'init',
+        '--instance',
+        'flutter',
+        '--work-dir',
+        '/workDirectory/temp',
+        '--commit',
+        '1234',
+        '--keys-file',
+        '/workDirectory/keys.json',
+        '--failure-file',
+        '/workDirectory/failures.json',
+        '--passfail',
+      ], null);
       process.processResults[gitInvocation] = ProcessResult(1234, 0, '1234', '');
       process.processResults[goldctlInvocation] = ProcessResult(5678, 0, '5678', '');
       process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
@@ -327,18 +331,17 @@ void main() {
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{
           'FLUTTER_ROOT': _kFlutterRoot,
-          'GOLDCTL' : 'goldctl',
-          'SWARMING_TASK_ID' : '4ae997b50dfd4d11',
-          'LOGDOG_STREAM_PREFIX' : 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
-          'GOLD_TRYJOB' : 'refs/pull/49815/head',
+          'GOLDCTL': 'goldctl',
+          'SWARMING_TASK_ID': '4ae997b50dfd4d11',
+          'LOGDOG_STREAM_PREFIX': 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
+          'GOLD_TRYJOB': 'refs/pull/49815/head',
         },
-        operatingSystem: 'macos'
+        operatingSystem: 'macos',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -348,28 +351,37 @@ void main() {
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
-      const RunInvocation gitInvocation = RunInvocation(
-        <String>['git', 'rev-parse', 'HEAD'],
-        '/flutter',
-      );
-      const RunInvocation goldctlInvocation = RunInvocation(
-        <String>[
-          'goldctl',
-          'imgtest', 'init',
-          '--instance', 'flutter',
-          '--work-dir', '/workDirectory/temp',
-          '--commit', '1234',
-          '--keys-file', '/workDirectory/keys.json',
-          '--failure-file', '/workDirectory/failures.json',
-          '--passfail',
-          '--crs', 'github',
-          '--patchset_id', '1234',
-          '--changelist', '49815',
-          '--cis', 'buildbucket',
-          '--jobid', '8885996262141582672',
-        ],
-        null,
-      );
+      const RunInvocation gitInvocation = RunInvocation(<String>[
+        'git',
+        'rev-parse',
+        'HEAD',
+      ], '/flutter');
+      const RunInvocation goldctlInvocation = RunInvocation(<String>[
+        'goldctl',
+        'imgtest',
+        'init',
+        '--instance',
+        'flutter',
+        '--work-dir',
+        '/workDirectory/temp',
+        '--commit',
+        '1234',
+        '--keys-file',
+        '/workDirectory/keys.json',
+        '--failure-file',
+        '/workDirectory/failures.json',
+        '--passfail',
+        '--crs',
+        'github',
+        '--patchset_id',
+        '1234',
+        '--changelist',
+        '49815',
+        '--cis',
+        'buildbucket',
+        '--jobid',
+        '8885996262141582672',
+      ], null);
       process.processResults[gitInvocation] = ProcessResult(1234, 0, '1234', '');
       process.processResults[goldctlInvocation] = ProcessResult(5678, 0, '5678', '');
       process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
@@ -390,17 +402,13 @@ void main() {
       final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
         ..createSync(recursive: true);
       final FakePlatform platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-            'GOLDCTL' : 'goldctl',
-          },
-          operatingSystem: 'macos'
+        environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot, 'GOLDCTL': 'goldctl'},
+        operatingSystem: 'macos',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -409,24 +417,27 @@ void main() {
         httpClient: fakeHttpClient,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
-      const RunInvocation goldctlInvocation = RunInvocation(
-        <String>[
-          'goldctl',
-          'imgtest', 'add',
-          '--work-dir', '/workDirectory/temp',
-          '--test-name', 'golden_file_test',
-          '--png-file', '/workDirectory/temp/golden_file_test.png',
-          '--passfail',
-        ],
-        null,
+      const RunInvocation goldctlInvocation = RunInvocation(<String>[
+        'goldctl',
+        'imgtest',
+        'add',
+        '--work-dir',
+        '/workDirectory/temp',
+        '--test-name',
+        'golden_file_test',
+        '--png-file',
+        '/workDirectory/temp/golden_file_test.png',
+        '--passfail',
+      ], null);
+      process.processResults[goldctlInvocation] = ProcessResult(
+        123,
+        1,
+        'Expected failure',
+        'Expected failure',
       );
-      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
       process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
-      expect(
-        skiaClient.imgtestAdd('golden_file_test', goldenFile),
-        throwsException,
-      );
+      expect(skiaClient.imgtestAdd('golden_file_test', goldenFile), throwsException);
     });
 
     test('correctly inits tryjob for luci', () async {
@@ -434,18 +445,17 @@ void main() {
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{
           'FLUTTER_ROOT': _kFlutterRoot,
-          'GOLDCTL' : 'goldctl',
-          'SWARMING_TASK_ID' : '4ae997b50dfd4d11',
-          'LOGDOG_STREAM_PREFIX' : 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
-          'GOLD_TRYJOB' : 'refs/pull/49815/head',
+          'GOLDCTL': 'goldctl',
+          'SWARMING_TASK_ID': '4ae997b50dfd4d11',
+          'LOGDOG_STREAM_PREFIX': 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
+          'GOLD_TRYJOB': 'refs/pull/49815/head',
         },
-        operatingSystem: 'macos'
+        operatingSystem: 'macos',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -459,94 +469,33 @@ void main() {
 
       expect(
         ciArguments,
-        equals(
-          <String>[
-            '--changelist', '49815',
-            '--cis', 'buildbucket',
-            '--jobid', '8885996262141582672',
-          ],
-        ),
+        equals(<String>[
+          '--changelist',
+          '49815',
+          '--cis',
+          'buildbucket',
+          '--jobid',
+          '8885996262141582672',
+        ]),
       );
     });
 
-     test('Creates traceID correctly', () async {
-       final MemoryFileSystem fs = MemoryFileSystem();
-       final FakePlatform platform = FakePlatform(
-         environment: <String, String>{
-           'FLUTTER_ROOT': _kFlutterRoot,
-           'GOLDCTL' : 'goldctl',
-           'SWARMING_TASK_ID' : '4ae997b50dfd4d11',
-           'LOGDOG_STREAM_PREFIX' : 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
-           'GOLD_TRYJOB' : 'refs/pull/49815/head',
-         },
-         operatingSystem: 'linux'
-       );
-       final FakeProcessManager process = FakeProcessManager();
-       final FakeHttpClient fakeHttpClient = FakeHttpClient();
-       fs.directory(_kFlutterRoot).createSync(recursive: true);
-       final Directory workDirectory = fs.directory('/workDirectory')
-         ..createSync(recursive: true);
-       final SkiaGoldClient skiaClient = SkiaGoldClient(
-         workDirectory,
-         fs: fs,
-         process: process,
-         platform: platform,
-         httpClient: fakeHttpClient,
-         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
-       );
-
-       expect(
-         skiaClient.getTraceID('flutter.golden.1'),
-         equals('ae18c7a6aa48e0685525dfe8fdf79003'),
-       );
-     });
-
-     test('Creates traceID correctly - Browser', () async {
-       final MemoryFileSystem fs = MemoryFileSystem();
-       final FakePlatform platform = FakePlatform(
-         environment: <String, String>{
-           'FLUTTER_ROOT': _kFlutterRoot,
-           'GOLDCTL' : 'goldctl',
-           'SWARMING_TASK_ID' : '4ae997b50dfd4d11',
-           'LOGDOG_STREAM_PREFIX' : 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
-           'GOLD_TRYJOB' : 'refs/pull/49815/head',
-           'FLUTTER_TEST_BROWSER' : 'chrome',
-         },
-         operatingSystem: 'linux'
-       );
-       final FakeProcessManager process = FakeProcessManager();
-       final FakeHttpClient fakeHttpClient = FakeHttpClient();
-       fs.directory(_kFlutterRoot).createSync(recursive: true);
-       final Directory workDirectory = fs.directory('/workDirectory')
-         ..createSync(recursive: true);
-       final SkiaGoldClient skiaClient = SkiaGoldClient(
-         workDirectory,
-         fs: fs,
-         process: process,
-         platform: platform,
-         httpClient: fakeHttpClient,
-         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
-       );
-
-       expect(
-         skiaClient.getTraceID('flutter.golden.1'),
-         equals('e9d5c296c48e7126808520e9cc191243'),
-       );
-     });
-
-    test('Creates traceID correctly - locally - should defer to luci traceID', () async {
+    test('Creates traceID correctly', () async {
       final MemoryFileSystem fs = MemoryFileSystem();
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{
           'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL': 'goldctl',
+          'SWARMING_TASK_ID': '4ae997b50dfd4d11',
+          'LOGDOG_STREAM_PREFIX': 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
+          'GOLD_TRYJOB': 'refs/pull/49815/head',
         },
-        operatingSystem: 'macos'
+        operatingSystem: 'linux',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -555,10 +504,58 @@ void main() {
         httpClient: fakeHttpClient,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
-      expect(
-        skiaClient.getTraceID('flutter.golden.1'),
-        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
+
+      expect(skiaClient.getTraceID('flutter.golden.1'), equals('ae18c7a6aa48e0685525dfe8fdf79003'));
+    });
+
+    test('Creates traceID correctly - Browser', () async {
+      final MemoryFileSystem fs = MemoryFileSystem();
+      final FakePlatform platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL': 'goldctl',
+          'SWARMING_TASK_ID': '4ae997b50dfd4d11',
+          'LOGDOG_STREAM_PREFIX': 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
+          'GOLD_TRYJOB': 'refs/pull/49815/head',
+          'FLUTTER_TEST_BROWSER': 'chrome',
+        },
+        operatingSystem: 'linux',
       );
+      final FakeProcessManager process = FakeProcessManager();
+      final FakeHttpClient fakeHttpClient = FakeHttpClient();
+      fs.directory(_kFlutterRoot).createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
+      final SkiaGoldClient skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+      );
+
+      expect(skiaClient.getTraceID('flutter.golden.1'), equals('e9d5c296c48e7126808520e9cc191243'));
+    });
+
+    test('Creates traceID correctly - locally - should defer to luci traceID', () async {
+      final MemoryFileSystem fs = MemoryFileSystem();
+      final FakePlatform platform = FakePlatform(
+        environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
+        operatingSystem: 'macos',
+      );
+      final FakeProcessManager process = FakeProcessManager();
+      final FakeHttpClient fakeHttpClient = FakeHttpClient();
+      fs.directory(_kFlutterRoot).createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
+      final SkiaGoldClient skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+      );
+      expect(skiaClient.getTraceID('flutter.golden.1'), equals('9968695b9ae78cdb77cbb2be621ca2d6'));
     });
 
     test('throws for error state from imgtestAdd', () {
@@ -566,17 +563,13 @@ void main() {
       final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
         ..createSync(recursive: true);
       final FakePlatform platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-            'GOLDCTL' : 'goldctl',
-          },
-          operatingSystem: 'macos'
+        environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot, 'GOLDCTL': 'goldctl'},
+        operatingSystem: 'macos',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -585,24 +578,31 @@ void main() {
         httpClient: fakeHttpClient,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
-      const RunInvocation goldctlInvocation = RunInvocation(
-        <String>[
-          'goldctl',
-          'imgtest', 'add',
-          '--work-dir', '/workDirectory/temp',
-          '--test-name', 'golden_file_test',
-          '--png-file', '/workDirectory/temp/golden_file_test.png',
-          '--passfail',
-        ],
-        null,
+      const RunInvocation goldctlInvocation = RunInvocation(<String>[
+        'goldctl',
+        'imgtest',
+        'add',
+        '--work-dir',
+        '/workDirectory/temp',
+        '--test-name',
+        'golden_file_test',
+        '--png-file',
+        '/workDirectory/temp/golden_file_test.png',
+        '--passfail',
+      ], null);
+      process.processResults[goldctlInvocation] = ProcessResult(
+        123,
+        1,
+        'Expected failure',
+        'Expected failure',
       );
-      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
       process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
       expect(
-          skiaClient.imgtestAdd('golden_file_test', goldenFile),
+        skiaClient.imgtestAdd('golden_file_test', goldenFile),
         throwsA(
-          isA<SkiaException>().having((SkiaException error) => error.message,
+          isA<SkiaException>().having(
+            (SkiaException error) => error.message,
             'message',
             contains('result-state.json'),
           ),
@@ -615,17 +615,13 @@ void main() {
       final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
         ..createSync(recursive: true);
       final FakePlatform platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-            'GOLDCTL' : 'goldctl',
-          },
-          operatingSystem: 'macos'
+        environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot, 'GOLDCTL': 'goldctl'},
+        operatingSystem: 'macos',
       );
       final FakeProcessManager process = FakeProcessManager();
       final FakeHttpClient fakeHttpClient = FakeHttpClient();
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory workDirectory = fs.directory('/workDirectory')
-        ..createSync(recursive: true);
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       final SkiaGoldClient skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
@@ -634,23 +630,30 @@ void main() {
         httpClient: fakeHttpClient,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
-      const RunInvocation goldctlInvocation = RunInvocation(
-        <String>[
-          'goldctl',
-          'imgtest', 'add',
-          '--work-dir', '/workDirectory/temp',
-          '--test-name', 'golden_file_test',
-          '--png-file', '/workDirectory/temp/golden_file_test.png',
-          '--passfail',
-        ],
-        null,
+      const RunInvocation goldctlInvocation = RunInvocation(<String>[
+        'goldctl',
+        'imgtest',
+        'add',
+        '--work-dir',
+        '/workDirectory/temp',
+        '--test-name',
+        'golden_file_test',
+        '--png-file',
+        '/workDirectory/temp/golden_file_test.png',
+        '--passfail',
+      ], null);
+      process.processResults[goldctlInvocation] = ProcessResult(
+        123,
+        1,
+        'Expected failure',
+        'Expected failure',
       );
-      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
       process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
       expect(
         skiaClient.tryjobAdd('golden_file_test', goldenFile),
         throwsA(
-          isA<SkiaException>().having((SkiaException error) => error.message,
+          isA<SkiaException>().having(
+            (SkiaException error) => error.message,
             'message',
             contains('result-state.json'),
           ),
@@ -664,13 +667,12 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-          operatingSystem: 'macos'
+          operatingSystem: 'macos',
         );
         final FakeProcessManager process = FakeProcessManager();
         final FakeHttpClient fakeHttpClient = FakeHttpClient();
         fs.directory(_kFlutterRoot).createSync(recursive: true);
-        final Directory workDirectory = fs.directory('/workDirectory')
-          ..createSync(recursive: true);
+        final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
         final SkiaGoldClient skiaClient = SkiaGoldClient(
           workDirectory,
           fs: fs,
@@ -679,12 +681,10 @@ void main() {
           httpClient: fakeHttpClient,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
         );
-        final Uri imageUrl = Uri.parse(
-          'https://flutter-gold.skia.org/img/images/$expectation.png'
-        );
+        final Uri imageUrl = Uri.parse('https://flutter-gold.skia.org/img/images/$expectation.png');
         final FakeHttpClientRequest fakeImageRequest = FakeHttpClientRequest();
         final FakeHttpImageResponse fakeImageResponse = FakeHttpImageResponse(
-          imageResponseTemplate()
+          imageResponseTemplate(),
         );
 
         fakeHttpClient.request = fakeImageRequest;
@@ -703,7 +703,7 @@ void main() {
       final MemoryFileSystem fs = MemoryFileSystem();
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-        operatingSystem: 'macos'
+        operatingSystem: 'macos',
       );
       fs.directory(_kFlutterRoot).createSync(recursive: true);
       final FakeLocalFileComparator defaultComparator = FakeLocalFileComparator();
@@ -715,10 +715,7 @@ void main() {
         platform: platform,
         fs: fs,
       );
-      expect(
-        basedir.uri,
-        fs.directory('/flutter/bin/cache/pkg/skia_goldens/baz').uri,
-      );
+      expect(basedir.uri, fs.directory('/flutter/bin/cache/pkg/skia_goldens/baz').uri);
     });
 
     test('ignores version number', () {
@@ -726,11 +723,10 @@ void main() {
       final MemoryFileSystem fs = MemoryFileSystem();
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-        operatingSystem: 'macos'
+        operatingSystem: 'macos',
       );
       fs.directory(_kFlutterRoot).createSync(recursive: true);
-      final Directory basedir = fs.directory('flutter/test/library/')
-        ..createSync(recursive: true);
+      final Directory basedir = fs.directory('flutter/test/library/')..createSync(recursive: true);
       final FlutterGoldenFileComparator comparator = FlutterPostSubmitFileComparator(
         basedir.uri,
         FakeSkiaGoldClient(),
@@ -748,7 +744,7 @@ void main() {
       final MemoryFileSystem fs = MemoryFileSystem();
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-        operatingSystem: 'macos'
+        operatingSystem: 'macos',
       );
       fs.directory(_kFlutterRoot).createSync(recursive: true);
       const String libraryName = 'sidedishes';
@@ -765,10 +761,7 @@ void main() {
         namePrefix: namePrefix,
         log: log.add,
       );
-      await comparator.compare(
-        Uint8List.fromList(_kTestPngBytes),
-        Uri.parse(fileName),
-      );
+      await comparator.compare(Uint8List.fromList(_kTestPngBytes), Uri.parse(fileName));
       expect(fakeSkiaClient.testNames.single, '$namePrefix.$libraryName.$fileName');
       expect(log, isEmpty);
     });
@@ -779,7 +772,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-          operatingSystem: 'macos'
+          operatingSystem: 'macos',
         );
         fs.directory(_kFlutterRoot).createSync(recursive: true);
         final Directory basedir = fs.directory('flutter/test/library/')
@@ -800,11 +793,12 @@ void main() {
             );
           },
           throwsA(
-            isA<AssertionError>().having((AssertionError error) => error.toString(),
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
               'description',
               contains(
                 'Golden files in the Flutter framework must end with the file '
-                'extension .png.'
+                'extension .png.',
               ),
             ),
           ),
@@ -817,7 +811,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-          operatingSystem: 'macos'
+          operatingSystem: 'macos',
         );
         fs.directory(_kFlutterRoot).createSync(recursive: true);
         final Directory basedir = fs.directory('flutter/test/library/')
@@ -843,7 +837,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-          operatingSystem: 'macos'
+          operatingSystem: 'macos',
         );
         fs.directory(_kFlutterRoot).createSync(recursive: true);
         final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
@@ -859,6 +853,43 @@ void main() {
         );
         expect(fakeSkiaClient.initCalls, 0);
       });
+
+      test('reports a failure as a TestFailure', () async {
+        final List<String> log = <String>[];
+        final MemoryFileSystem fs = MemoryFileSystem();
+        final FakePlatform platform = FakePlatform(
+          environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
+          operatingSystem: 'macos',
+        );
+        fs.directory(_kFlutterRoot).createSync(recursive: true);
+        final Directory basedir = fs.directory('flutter/test/library/')
+          ..createSync(recursive: true);
+        final FlutterGoldenFileComparator comparator = FlutterPostSubmitFileComparator(
+          basedir.uri,
+          ThrowsOnImgTestAddSkiaClient(
+            message: 'Skia Gold received an unapproved image in post-submit',
+          ),
+          fs: fs,
+          platform: platform,
+          log: log.add,
+        );
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1.png'),
+            );
+          },
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure error) => error.toString(),
+              'description',
+              contains('Skia Gold received an unapproved image in post-submit'),
+            ),
+          ),
+        );
+        expect(log, isEmpty);
+      });
     });
 
     group('Pre-Submit', () {
@@ -867,7 +898,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-          operatingSystem: 'macos'
+          operatingSystem: 'macos',
         );
         fs.directory(_kFlutterRoot).createSync(recursive: true);
         final Directory basedir = fs.directory('flutter/test/library/')
@@ -888,11 +919,12 @@ void main() {
             );
           },
           throwsA(
-            isA<AssertionError>().having((AssertionError error) => error.toString(),
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
               'description',
               contains(
                 'Golden files in the Flutter framework must end with the file '
-                'extension .png.'
+                'extension .png.',
               ),
             ),
           ),
@@ -905,7 +937,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-          operatingSystem: 'macos'
+          operatingSystem: 'macos',
         );
         fs.directory(_kFlutterRoot).createSync(recursive: true);
         final Directory basedir = fs.directory('flutter/test/library/')
@@ -931,7 +963,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-          operatingSystem: 'macos'
+          operatingSystem: 'macos',
         );
         fs.directory(_kFlutterRoot).createSync(recursive: true);
         final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
@@ -969,8 +1001,9 @@ void main() {
         );
         const String hash = '55109a4bed52acc780530f7a9aeff6c0';
         fakeSkiaClient.expectationForTestValues['flutter.golden_test.1'] = hash;
-        fakeSkiaClient.imageBytesValues[hash] =_kTestPngBytes;
-        fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] = 'flutter.golden_test.1';
+        fakeSkiaClient.imageBytesValues[hash] = _kTestPngBytes;
+        fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] =
+            'flutter.golden_test.1';
         await expectLater(
           () async {
             return comparator.compare(
@@ -979,11 +1012,12 @@ void main() {
             );
           },
           throwsA(
-            isA<AssertionError>().having((AssertionError error) => error.toString(),
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
               'description',
               contains(
                 'Golden files in the Flutter framework must end with the file '
-                'extension .png.'
+                'extension .png.',
               ),
             ),
           ),
@@ -1010,8 +1044,9 @@ void main() {
         );
         const String hash = '55109a4bed52acc780530f7a9aeff6c0';
         fakeSkiaClient.expectationForTestValues['flutter.golden_test.1'] = hash;
-        fakeSkiaClient.imageBytesValues[hash] =_kTestPngBytes;
-        fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] = 'flutter.golden_test.1';
+        fakeSkiaClient.imageBytesValues[hash] = _kTestPngBytes;
+        fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] =
+            'flutter.golden_test.1';
         expect(
           await comparator.compare(
             Uint8List.fromList(_kTestPngBytes),
@@ -1022,65 +1057,81 @@ void main() {
         expect(log, isEmpty);
       });
 
-      test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
-        final MemoryFileSystem fs = MemoryFileSystem();
-        final FakePlatform platform = FakePlatform(
-          environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-          operatingSystem: 'macos'
-        );
-        fs.directory(_kFlutterRoot).createSync(recursive: true);
-        final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
+      test(
+        'returns FlutterSkippingGoldenFileComparator when network connection is unavailable',
+        () async {
+          final MemoryFileSystem fs = MemoryFileSystem();
+          final FakePlatform platform = FakePlatform(
+            environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
+            operatingSystem: 'macos',
+          );
+          fs.directory(_kFlutterRoot).createSync(recursive: true);
+          final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
 
-        const String hash = '55109a4bed52acc780530f7a9aeff6c0';
-        fakeSkiaClient.expectationForTestValues['flutter.golden_test.1'] = hash;
-        fakeSkiaClient.imageBytesValues[hash] =_kTestPngBytes;
-        fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] = 'flutter.golden_test.1';
-        final FakeDirectory fakeDirectory = FakeDirectory();
-        fakeDirectory.existsSyncValue = true;
-        fakeDirectory.uri = Uri.parse('/flutter');
+          const String hash = '55109a4bed52acc780530f7a9aeff6c0';
+          fakeSkiaClient.expectationForTestValues['flutter.golden_test.1'] = hash;
+          fakeSkiaClient.imageBytesValues[hash] = _kTestPngBytes;
+          fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] =
+              'flutter.golden_test.1';
+          final FakeDirectory fakeDirectory = FakeDirectory();
+          fakeDirectory.existsSyncValue = true;
+          fakeDirectory.uri = Uri.parse('/flutter');
 
-        fakeSkiaClient.getExpectationForTestThrowable = const OSError("Can't reach Gold");
-        final FlutterGoldenFileComparator comparator1 = await FlutterLocalFileComparator.fromLocalFileComparator(
-          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
-          platform: platform,
-          goldens: fakeSkiaClient,
-          baseDirectory: fakeDirectory,
-          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
-          fs: fs,
-          process: FakeProcessManager(),
-          httpClient: FakeHttpClient(),
-        );
-        expect(comparator1.runtimeType, FlutterSkippingFileComparator);
+          fakeSkiaClient.getExpectationForTestThrowable = const OSError("Can't reach Gold");
+          final FlutterGoldenFileComparator
+          comparator1 = await FlutterLocalFileComparator.fromLocalFileComparator(
+            localFileComparator: LocalFileComparator(
+              Uri.parse('/test'),
+              pathStyle: path.Style.posix,
+            ),
+            platform: platform,
+            goldens: fakeSkiaClient,
+            baseDirectory: fakeDirectory,
+            log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+            fs: fs,
+            process: FakeProcessManager(),
+            httpClient: FakeHttpClient(),
+          );
+          expect(comparator1.runtimeType, FlutterSkippingFileComparator);
 
-        fakeSkiaClient.getExpectationForTestThrowable =  const SocketException("Can't reach Gold");
-        final FlutterGoldenFileComparator comparator2 = await FlutterLocalFileComparator.fromLocalFileComparator(
-          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
-          platform: platform,
-          goldens: fakeSkiaClient,
-          baseDirectory: fakeDirectory,
-          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
-          fs: fs,
-          process: FakeProcessManager(),
-          httpClient: FakeHttpClient(),
-        );
-        expect(comparator2.runtimeType, FlutterSkippingFileComparator);
+          fakeSkiaClient.getExpectationForTestThrowable = const SocketException("Can't reach Gold");
+          final FlutterGoldenFileComparator
+          comparator2 = await FlutterLocalFileComparator.fromLocalFileComparator(
+            localFileComparator: LocalFileComparator(
+              Uri.parse('/test'),
+              pathStyle: path.Style.posix,
+            ),
+            platform: platform,
+            goldens: fakeSkiaClient,
+            baseDirectory: fakeDirectory,
+            log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+            fs: fs,
+            process: FakeProcessManager(),
+            httpClient: FakeHttpClient(),
+          );
+          expect(comparator2.runtimeType, FlutterSkippingFileComparator);
 
-        fakeSkiaClient.getExpectationForTestThrowable =  const FormatException("Can't reach Gold");
-        final FlutterGoldenFileComparator comparator3 = await FlutterLocalFileComparator.fromLocalFileComparator(
-          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
-          platform: platform,
-          goldens: fakeSkiaClient,
-          baseDirectory: fakeDirectory,
-          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
-          fs: fs,
-          process: FakeProcessManager(),
-          httpClient: FakeHttpClient(),
-        );
-        expect(comparator3.runtimeType, FlutterSkippingFileComparator);
+          fakeSkiaClient.getExpectationForTestThrowable = const FormatException("Can't reach Gold");
+          final FlutterGoldenFileComparator
+          comparator3 = await FlutterLocalFileComparator.fromLocalFileComparator(
+            localFileComparator: LocalFileComparator(
+              Uri.parse('/test'),
+              pathStyle: path.Style.posix,
+            ),
+            platform: platform,
+            goldens: fakeSkiaClient,
+            baseDirectory: fakeDirectory,
+            log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+            fs: fs,
+            process: FakeProcessManager(),
+            httpClient: FakeHttpClient(),
+          );
+          expect(comparator3.runtimeType, FlutterSkippingFileComparator);
 
-        // reset property or it will carry on to other tests
-        fakeSkiaClient.getExpectationForTestThrowable = null;
-      });
+          // reset property or it will carry on to other tests
+          fakeSkiaClient.getExpectationForTestThrowable = null;
+        },
+      );
     });
   });
 }
@@ -1115,9 +1166,9 @@ class RunInvocation {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is RunInvocation
-        && _commandEquals(other.command)
-        && other.workingDirectory == workingDirectory;
+    return other is RunInvocation &&
+        _commandEquals(other.command) &&
+        other.workingDirectory == workingDirectory;
   }
 
   @override
@@ -1143,9 +1194,12 @@ class FakeProcessManager extends Fake implements ProcessManager {
     Encoding? stderrEncoding = systemEncoding,
   }) async {
     workingDirectories.add(workingDirectory);
-    final ProcessResult? result = processResults[RunInvocation(command.cast<String>(), workingDirectory)];
+    final ProcessResult? result =
+        processResults[RunInvocation(command.cast<String>(), workingDirectory)];
     if (result == null && fallbackProcessResult == null) {
-      printOnFailure('ProcessManager.run was called with $command ($workingDirectory) unexpectedly - $processResults.');
+      printOnFailure(
+        'ProcessManager.run was called with $command ($workingDirectory) unexpectedly - $processResults.',
+      );
       fail('See above.');
     }
     return result ?? fallbackProcessResult!;
@@ -1191,6 +1245,21 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   Map<String, String> cleanTestNameValues = <String, String>{};
   @override
   String cleanTestName(String fileName) => cleanTestNameValues[fileName] ?? '';
+}
+
+class ThrowsOnImgTestAddSkiaClient extends Fake implements SkiaGoldClient {
+  ThrowsOnImgTestAddSkiaClient({required this.message});
+  final String message;
+
+  @override
+  Future<void> imgtestInit() async {
+    // Assume this function works.
+  }
+
+  @override
+  Future<bool> imgtestAdd(String testName, File goldenFile) {
+    throw SkiaException(message);
+  }
 }
 
 class FakeLocalFileComparator extends Fake implements LocalFileComparator {

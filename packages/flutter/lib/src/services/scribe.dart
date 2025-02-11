@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'text_input.dart';
+library;
 
 import 'package:flutter/foundation.dart';
 
@@ -66,9 +71,7 @@ final class Scribe {
   ///  * [EditableText.stylusHandwritingEnabled], which controls whether
   ///    Flutter's built-in text fields support handwriting input.
   static Future<bool> isFeatureAvailable() async {
-    final bool? result = await _channel.invokeMethod<bool?>(
-      'Scribe.isFeatureAvailable',
-    );
+    final bool? result = await _channel.invokeMethod<bool?>('Scribe.isFeatureAvailable');
 
     if (result == null) {
       throw FlutterError('MethodChannel.invokeMethod unexpectedly returned null.');
@@ -119,9 +122,7 @@ final class Scribe {
   ///   which is the corresponding API on Android that this method attempts to
   ///   mirror.
   static Future<bool> isStylusHandwritingAvailable() async {
-    final bool? result = await _channel.invokeMethod<bool?>(
-      'Scribe.isStylusHandwritingAvailable',
-    );
+    final bool? result = await _channel.invokeMethod<bool?>('Scribe.isStylusHandwritingAvailable');
 
     if (result == null) {
       throw FlutterError('MethodChannel.invokeMethod unexpectedly returned null.');
@@ -150,9 +151,7 @@ final class Scribe {
   ///  * [EditableText.stylusHandwritingEnabled], which controls whether
   ///    Flutter's built-in text fields support handwriting input.
   static Future<void> startStylusHandwriting() {
-    return _channel.invokeMethod<void>(
-      'Scribe.startStylusHandwriting',
-    );
+    return _channel.invokeMethod<void>('Scribe.startStylusHandwriting');
   }
 
   static Rect _getSelectionArea(List<dynamic> args, double devicePixelRatio) {

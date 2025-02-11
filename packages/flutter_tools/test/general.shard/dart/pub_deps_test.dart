@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -33,19 +32,14 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
     await expectLater(
-      () => pub.deps(
-        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      ),
-      throwsToolExit(
-        message: 'Your Flutter SDK download may be corrupt',
-      ),
+      () => pub.deps(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
+      throwsToolExit(message: 'Your Flutter SDK download may be corrupt'),
     );
   });
 
@@ -62,16 +56,13 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
     await expectLater(
-      () => pub.deps(
-        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      ),
+      () => pub.deps(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
       throwsA(
         isA<StateError>().having(
           (StateError e) => e.message,
@@ -94,23 +85,18 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
     await expectLater(
-      () => pub.deps(
-        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      ),
+      () => pub.deps(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
       throwsA(
         isA<StateError>().having(
           (StateError e) => e.message,
           'message',
-          contains(
-            'dart pub --suppress-analytics deps --json had unexpected output',
-          ),
+          contains('dart pub --suppress-analytics deps --json had unexpected output'),
         ),
       ),
     );
@@ -128,42 +114,28 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
     await expectLater(
-      () => pub.deps(
-        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      ),
+      () => pub.deps(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
       throwsA(
         isA<StateError>().having(
           (StateError e) => e.message,
           'message',
-          contains(
-            'Not a JSON object',
-          ),
+          contains('Not a JSON object'),
         ),
       ),
     );
   });
 }
 
-ProcessManager _dartPubDepsReturns(
-  String dartPubDepsOutput, {
-  required FlutterProject project,
-}) {
+ProcessManager _dartPubDepsReturns(String dartPubDepsOutput, {required FlutterProject project}) {
   return FakeProcessManager.list(<FakeCommand>[
     FakeCommand(
-      command: const <String>[
-        _dartBin,
-        'pub',
-        '--suppress-analytics',
-        'deps',
-        '--json',
-      ],
+      command: const <String>[_dartBin, 'pub', '--suppress-analytics', 'deps', '--json'],
       stdout: dartPubDepsOutput,
       workingDirectory: project.directory.path,
     ),
@@ -177,13 +149,7 @@ ProcessManager _dartPubDepsFails(
 }) {
   return FakeProcessManager.list(<FakeCommand>[
     FakeCommand(
-      command: const <String>[
-        _dartBin,
-        'pub',
-        '--suppress-analytics',
-        'deps',
-        '--json'
-      ],
+      command: const <String>[_dartBin, 'pub', '--suppress-analytics', 'deps', '--json'],
       exitCode: exitCode,
       stderr: dartPubDepsError,
       workingDirectory: project.directory.path,

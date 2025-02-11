@@ -25,7 +25,6 @@ import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
 import 'native_assets.dart';
-import 'preview_device.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'web/web_device.dart';
@@ -53,86 +52,76 @@ class FlutterDeviceManager extends DeviceManager {
     required WindowsWorkflow windowsWorkflow,
     required CustomDevicesConfig customDevicesConfig,
     required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  }) : deviceDiscoverers =  <DeviceDiscovery>[
-    AndroidDevices(
-      logger: logger,
-      androidSdk: androidSdk,
-      androidWorkflow: androidWorkflow,
-      processManager: processManager,
-      fileSystem: fileSystem,
-      platform: platform,
-      userMessages: userMessages,
-    ),
-    IOSDevices(
-      platform: platform,
-      xcdevice: xcDevice,
-      iosWorkflow: iosWorkflow,
-      logger: logger,
-    ),
-    IOSSimulators(
-      iosSimulatorUtils: iosSimulatorUtils,
-    ),
-    FlutterTesterDevices(
-      fileSystem: fileSystem,
-      flutterVersion: flutterVersion,
-      processManager: processManager,
-      logger: logger,
-      artifacts: artifacts,
-      nativeAssetsBuilder: nativeAssetsBuilder,
-    ),
-    MacOSDevices(
-      processManager: processManager,
-      macOSWorkflow: macOSWorkflow,
-      logger: logger,
-      platform: platform,
-      fileSystem: fileSystem,
-      operatingSystemUtils: operatingSystemUtils,
-    ),
-    MacOSDesignedForIPadDevices(
-      processManager: processManager,
-      iosWorkflow: iosWorkflow,
-      logger: logger,
-      platform: platform,
-      fileSystem: fileSystem,
-      operatingSystemUtils: operatingSystemUtils,
-    ),
-    PreviewDeviceDiscovery(
-      platform: platform,
-      artifacts: artifacts,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: processManager,
-      featureFlags: featureFlags,
-    ),
-    LinuxDevices(
-      platform: platform,
-      featureFlags: featureFlags,
-      processManager: processManager,
-      logger: logger,
-      fileSystem: fileSystem,
-      operatingSystemUtils: operatingSystemUtils,
-    ),
-    WindowsDevices(
-      processManager: processManager,
-      operatingSystemUtils: operatingSystemUtils,
-      logger: logger,
-      fileSystem: fileSystem,
-      windowsWorkflow: windowsWorkflow,
-    ),
-    WebDevices(
-      featureFlags: featureFlags,
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: processManager,
-      logger: logger,
-    ),
-    CustomDevices(
-      featureFlags: featureFlags,
-      processManager: processManager,
-      logger: logger,
-      config: customDevicesConfig,
-    ),
-  ];
+  }) : deviceDiscoverers = <DeviceDiscovery>[
+         AndroidDevices(
+           logger: logger,
+           androidSdk: androidSdk,
+           androidWorkflow: androidWorkflow,
+           processManager: processManager,
+           fileSystem: fileSystem,
+           platform: platform,
+           userMessages: userMessages,
+         ),
+         IOSDevices(
+           platform: platform,
+           xcdevice: xcDevice,
+           iosWorkflow: iosWorkflow,
+           logger: logger,
+         ),
+         IOSSimulators(iosSimulatorUtils: iosSimulatorUtils),
+         FlutterTesterDevices(
+           fileSystem: fileSystem,
+           flutterVersion: flutterVersion,
+           processManager: processManager,
+           logger: logger,
+           artifacts: artifacts,
+           nativeAssetsBuilder: nativeAssetsBuilder,
+         ),
+         MacOSDevices(
+           processManager: processManager,
+           macOSWorkflow: macOSWorkflow,
+           logger: logger,
+           platform: platform,
+           fileSystem: fileSystem,
+           operatingSystemUtils: operatingSystemUtils,
+         ),
+         MacOSDesignedForIPadDevices(
+           processManager: processManager,
+           iosWorkflow: iosWorkflow,
+           logger: logger,
+           platform: platform,
+           fileSystem: fileSystem,
+           operatingSystemUtils: operatingSystemUtils,
+         ),
+         LinuxDevices(
+           platform: platform,
+           featureFlags: featureFlags,
+           processManager: processManager,
+           logger: logger,
+           fileSystem: fileSystem,
+           operatingSystemUtils: operatingSystemUtils,
+         ),
+         WindowsDevices(
+           processManager: processManager,
+           operatingSystemUtils: operatingSystemUtils,
+           logger: logger,
+           fileSystem: fileSystem,
+           windowsWorkflow: windowsWorkflow,
+         ),
+         WebDevices(
+           featureFlags: featureFlags,
+           fileSystem: fileSystem,
+           platform: platform,
+           processManager: processManager,
+           logger: logger,
+         ),
+         CustomDevices(
+           featureFlags: featureFlags,
+           processManager: processManager,
+           logger: logger,
+           config: customDevicesConfig,
+         ),
+       ];
 
   @override
   final List<DeviceDiscovery> deviceDiscoverers;
