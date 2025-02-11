@@ -3210,6 +3210,16 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
+  - name: Linux_pixel_7pro platform_views_hcpp_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: platform_views_hcpp_scroll_perf__timeline_summary
+
   # linux mokey benchmark
   - name: Linux_mokey platform_view__start_up
     recipe: devicelab/devicelab_drone
