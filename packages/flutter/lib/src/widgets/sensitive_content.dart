@@ -84,7 +84,7 @@ class SensitiveContentSetting {
 
     // Verify that desiredSensitivityLevel should be set in order for sensitive
     // content to remain obscured.
-    if (!shouldSetContentSensitivity(_contentSensitivityState!, desiredSensitivityLevel)) {
+    if (!shouldSetContentSensitivity(desiredSensitivityLevel)) {
       return;
     }
 
@@ -104,89 +104,36 @@ class SensitiveContentSetting {
     // desiredSensitivityLevel.
     _contentSensitivityState!.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
 
+    if (_contentSensitivityState!.getTotalNumberOfWidgets() == 0) {
+      // Restore default content sensitivity setting if there are no more SensitiveContent
+      // widgets in the tree.
+      _sensitiveContentService.setContentSensitivity(_defaultContentSensitivitySetting!);
+      _contentSensitivityState!.currentContentSensitivitySetting =
+          _defaultContentSensitivitySetting!;
+      return;
+    }
+
     // Determine if another sensitivity level needs to be restored.
     ContentSensitivity? contentSensitivityToRestore;
-    if (_contentSensitivityState!.getTotalNumberOfWidgets() == 0) {
-      contentSensitivityToRestore = _defaultContentSensitivitySetting!;
-    } else if (widgetSensitivityLevel == ContentSensitivity.notSensitive) {
-      return;
-    } else {
-      if (shouldSetContentSensitivity(_contentSensitivityState!, ContentSensitivity.notSensitive)) {
-        contentSensitivityToRestore = ContentSensitivity.notSensitive;
-      } else if (should) // TODO(camsim99): here
-    }
-
-    switch(widgetSensitivityLevel) {
+    switch (widgetSensitivityLevel) {
       case ContentSensitivity.sensitive:
-        if (shouldSetContentSensitivity(_contentSensitivityState!, ContentSensitivity.notSensitive)) {
-
+        if (shouldSetContentSensitivity(ContentSensitivity.notSensitive)) {
+          contentSensitivityToRestore = ContentSensitivity.notSensitive;
+        } else if (shouldSetContentSensitivity(ContentSensitivity.autoSensitive)) {
+          contentSensitivityToRestore = ContentSensitivity.autoSensitive;
         }
-      case ContentSensitivity.
-
-    }
-
-    if (no more widgets) {
-      set default
-    } else {
-      sensitive -->if no more left, check auto if theres auto, otherwise set not
-      auto --> if no more left and sensitive not current mode, set not
-      not --> we do not care
-    }
-
-// rewrite:
-else {
-      sensitive --> if (should set not) set not, if (should set auto) set auto otherwise we are done
-      auto --> if (should set not) set not
-      not --> we are done
-    }
-
-
-
-
-    if (widgetSensitivityLevel == ContentSensitivity.sensitive) {
-      if (_contentSensitivityState!.sensitiveWidgetCount == 0) {
-        if (should set auto sensitive) {
-          // what does should set mean? it means: no other sensitive widgets in the tree. but if there are no widgets, we should not set unless it's default
-          set auto sensitive
-        } else {
-          set not sensitive // technically we do need to check sensitive too because it may be default
+      case ContentSensitivity.autoSensitive:
+        if (shouldSetContentSensitivity(ContentSensitivity.notSensitive)) {
+          contentSensitivityToRestore = ContentSensitivity.notSensitive;
         }
-      }
-    } else if (wsl = autoSensitive) {
-      if (current setting == sensitive) {
-        return;
-      } else if (current setting == auto sensitive) {
-        if (auto sentive count == 0) {
-          if (should set not sensitive) {
-            set not sensitive
-          }
-        }
-      }
-    } else {
-      if (current setting == senstive) {
-        return;
-      } else if (current setting == auto sensitive) {
-        return;
-      } else if (current setting == not sensitive) {
-        if (not sensitive count == 0) {
-          set default setting
-        }
-      }
+      case ContentSensitivity.notSensitive:
+      // Removing a not sensitive SensitiveContent widgets when there are other SensitiveContent widgets
+      // in the tree will have no impact, since they have the least severe content sensitivity level.
     }
 
-
-
-
-    ContentSensitivity sensitivityLevelToSet = _defaultContentSensitivitySetting!;
-    if (shouldSetContentSensitivity(_contentSensitivityState!, ContentSensitivity.sensitive)) {
-      sensitivityLevelToSet = ContentSensitivity.sensitive;
-    } else if (shouldSetContentSensitivity(_contentSensitivityState!, ContentSensitivity.autoSensitive)) {
-        sensitivityLevelToSet = ContentSensitivity.autoSensitive;
-    } else if (shouldSetContentSensitivity(_contentSensitivityState!, ContentSensitivity.notSensitive)) {
-        sensitivityLevelToSet = ContentSensitivity.notSensitive;
+    if (contentSensitivityToRestore != null) {
+      _sensitiveContentService.setContentSensitivity(contentSensitivityToRestore);
     }
-
-    _sensitiveContentService.setContentSensitivity(sensitivityLevelToSet);
   }
 
   /// Return whether or not [desiredSensitivityLevel] should be set as the new
@@ -194,10 +141,8 @@ else {
   ///
   /// [desiredSensitivityLevel] should only be set if it is strictly more
   /// severe than any of the other [SensitiveContent] widgets in the widget tree.
-  bool shouldSetContentSensitivity(ContentSensitivityState contentSensitivityState,
-      ContentSensitivity desiredSensitivityLevel) {
-    if (contentSensitivityState.currentContentSensitivitySetting ==
-        desiredSensitivityLevel) {
+  bool shouldSetContentSensitivity(ContentSensitivity desiredSensitivityLevel) {
+    if (_contentSensitivityState!.currentContentSensitivitySetting == desiredSensitivityLevel) {
       return false;
     }
 
@@ -205,10 +150,10 @@ else {
       case ContentSensitivity.sensitive:
         return true;
       case ContentSensitivity.autoSensitive:
-        return contentSensitivityState.sensitiveWidgetCount == 0;
+        return _contentSensitivityState!.sensitiveWidgetCount == 0;
       case ContentSensitivity.notSensitive:
-        return contentSensitivityState.sensitiveWidgetCount +
-                contentSensitivityState.autoSensitiveWidgetCount ==
+        return _contentSensitivityState!.sensitiveWidgetCount +
+                _contentSensitivityState!.autoSensitiveWidgetCount ==
             0;
     }
   }
@@ -217,14 +162,12 @@ else {
 /// Widget to set the [ContentSensitivity] level of content in the widget
 /// tree.
 ///
+/// {@macro flutter.services.ContentSensitivity}
+///
 /// See also:
 ///
-///  * [ContentSensitivity] to understand each of the content sensitivity levels
-///     and how [SensitiveContent] widgets with each level may interact with each other,
-///     e.g. two `SensitiveContent` widgets in the same tree where one has [sensitivityLevel]
-///     [ContentSensitivity.notSensitive] and the other [ContentSensitivity.sensitive] will cause
-///     the widget tree to remain marked sensitive in accordance with [ContentSensitivity.sensitive]
-///     as this is the more severe setting.
+///  * [ContentSensitivity], which has all of the different content sensitivity levels that a
+///    [SensitiveContent] widget can set.
 class SensitiveContent extends StatefulWidget {
   /// Creates a [SensitiveContent].
   const SensitiveContent({
@@ -233,14 +176,15 @@ class SensitiveContent extends StatefulWidget {
     required this.child,
   });
 
-  /// The sensitivity level that the [SensitiveContent] widget should set.
+  /// The sensitivity level that the [SensitiveContent] widget should sets for the
+  /// Android native `View`.
   final ContentSensitivity sensitivityLevel;
 
   /// The child widget of this [SensitiveContent].
   ///
   /// If the [sensitivityLevel] is set to [ContentSensitivity.sensitive], then
-  /// the entire screen will be obscured when the screen is projected regardless
-  /// of the parent/child widgets.
+  /// the entire screen will be obscured when the screen is projected irrespective
+  /// to the parent/child widgets.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
@@ -251,11 +195,11 @@ class SensitiveContent extends StatefulWidget {
 
 class _SensitiveContentState extends State<SensitiveContent> {
   Future<void>? _sensitiveContentRegistrationFuture;
+
   @override
   void initState() {
     super.initState();
-    _sensitiveContentRegistrationFuture =
-        SensitiveContentSetting.register(widget.sensitivityLevel);
+    _sensitiveContentRegistrationFuture = SensitiveContentSetting.register(widget.sensitivityLevel);
   }
 
   @override

@@ -11,7 +11,8 @@ import 'system_channels.dart';
 
 /// The level of sensitivity that content in the widget tree has.
 ///
-/// There are only three levels, and these can be set via a [SensitiveContent] widget. [ContentSensitivity.sensitive] is the most
+/// {@template flutter.services.ContentSensitivity}
+/// There are only three [ContentSensitivity] levels, and these can be set via a [SensitiveContent] widget. [ContentSensitivity.sensitive] is the most
 /// severe setting, and  if it is set, it
 /// will cause the tree to remain marked sensitive even if there are other
 /// `SensitiveContent` widgets in the tree. [ContentSensitivity.autoSensitive]
@@ -23,6 +24,7 @@ import 'system_channels.dart';
 /// widgets in the tree. If there are no `SensitiveContent` widgets in the tree,
 /// the default setting as queried from the embedding will be used. This could be
 /// set by a Flutter developer in native Android; otherwise, Android uses [ContentSensitivity.autoSensitive] by default.
+/// {@endtemplate}
 ///
 /// * See [SensitiveContent] for how to set a [ContentSensitivity] level
 ///   in order for sensitive content to be obscured when the Flutter screen
