@@ -14,10 +14,10 @@ import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
 import io.flutter.plugin.common.MethodChannel;
 
 /**
- * {@link SensitiveContentPlugin} is the implementation of all functionality needed to set the
- * content sensitivity level of a native Flutter Android {@code View}.
+ * {@link SensitiveContentPlugin} is the implementation of all functionality needed to set and
+ * retrieve the content sensitivity level of a native Flutter Android {@code View}.
  *
- * <p>This plugin handles requests for setting content sensitivity sent by the {@link
+ * <p>This plugin handles requests for getting and setting content sensitivity sent by the {@link
  * io.flutter.embedding.engine.systemchannels.SensitiveContentChannel}.
  */
 public class SensitiveContentPlugin
@@ -53,18 +53,18 @@ public class SensitiveContentPlugin
     final View flutterView = mFlutterActivity.findViewById(mFlutterViewId);
     final int initialContentSensitivity = flutterView.getContentSensitivity();
 
-    // Set requestedContentSensitivity on the requested View.
+    if (initialContentSensitivity == requestedContentSensitivity) {
+      // Content sensitivity for the requested View already set to requestedContentSensitivity.
+      result.success(null);
+      return;
+    }
+
+    // Set requestedContentSensitivity on the View.
     flutterView.setContentSensitivity(requestedContentSensitivity);
 
-    // Invalidate the View to force a redraw if we require that the screen
-    // become unobscured, which is the case where the View was previously
-    // marked sensitive but now is no longer.
-    final boolean shouldInvalidateView =
-        initialContentSensitivity == View.CONTENT_SENSITIVITY_SENSITIVE
-            && requestedContentSensitivity != View.CONTENT_SENSITIVITY_SENSITIVE;
-    if (shouldInvalidateView) {
-      flutterView.invalidate();
-    }
+    // Invalidate the View to force a redraw in order to ensure that it updates to be
+    // obscured/unobscured as expected.
+    flutterView.invalidate();
 
     result.success(null);
   }

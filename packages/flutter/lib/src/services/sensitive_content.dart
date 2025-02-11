@@ -9,19 +9,18 @@ import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
 
-/// The level of sensitivity that content in a particular widget tree.
+/// The level of sensitivity that content in the widget tree has.
 ///
-/// There are only three levels and can be set via a
-/// [SensitiveContent] widget. [ContentSensitivity.sensitive] is the most
-/// severe setting and if set with a `SensitiveContent` widget,
+/// There are only three levels, and these can be set via a [SensitiveContent] widget. [ContentSensitivity.sensitive] is the most
+/// severe setting, and  if it is set, it
 /// will cause the tree to remain marked sensitive even if there are other
 /// `SensitiveContent` widgets in the tree. [ContentSensitivity.autoSensitive]
-/// is the second most severe setting and will cause the tree to remain marked
+/// is the second most severe setting, and it will cause the tree to remain marked
 /// auto-sensitive if there are either (1) no other [SensitiveContent] widgets in the tree or (2) there are only other auto-sensitive or not sensitive
 /// `SensitiveContent` widgets in the tree. [ContentSensitive.notSensitive]
-/// is the least severe setting and will cause the tree to remain marked not
+/// is the least severe setting, and it will cause the tree to remain marked not
 /// sensitive as long as there are (1) no other [SensitiveContent] widgets in the tree or (2) there are only other not sensitive `SensitiveContent`
-/// widgets in the tree. If there are no `SensitiveContent` widget in the tree,
+/// widgets in the tree. If there are no `SensitiveContent` widgets in the tree,
 /// the default setting as queried from the embedding will be used. This could be
 /// set by a Flutter developer in native Android; otherwise, Android uses [ContentSensitivity.autoSensitive] by default.
 ///
@@ -35,16 +34,17 @@ enum ContentSensitivity {
   /// hosting the screen will only be marked as sensitive if other [SensitiveContent]
   /// widgets in the Flutter app with the [sensitive] level are present in the widget tree.
   ///
-  /// The sensitive content is unable to be auto-detected by the
-  /// native framework.
+  /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO for how
+  /// this mode behaves on native Android.
+  ///
+  /// This is currently a no-op and thus, will behave the same as [SensitiveContent.notSensitive].
   // TODO(camsim99): Implement `autoSensitive` mode that matches the behavior
   // of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented based on autofill hints.
-  // See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO.
   autoSensitive(id: 0),
 
   /// The widget tree contains sensitive content.
   ///
-  /// When this level is set via a [SensitiveContent] widget, the windowx
+  /// When this level is set via a [SensitiveContent] widget, the window
   /// hosting the screen will be marked as sensitive during an active media
   /// projection session.
   ///
@@ -64,7 +64,8 @@ enum ContentSensitivity {
     required this.id,
   });
 
-  /// Identifier for each sensitivity level.
+  /// Identifier for each [ContentSensitivity] level, which matches the native Android value
+  /// of the constant that each level corresponds to.
   final int id;
 
   /// Retrieve [ContentSensitivity] level by [id].
@@ -85,17 +86,17 @@ enum ContentSensitivity {
 /// Service for setting the content sensitivity of the native Android `View`
 /// that contains the app's widget tree.
 class SensitiveContentService {
-  /// Creates service to set content sensitivity of the Android `View` via
+  /// Creates service to set content sensitivity of an Android `View` via
   /// communication over the sensitive content [MethodChannel].
   SensitiveContentService() {
     sensitiveContentChannel = SystemChannels.sensitiveContent;
   }
 
-  /// The channel used to communicate with the shell side to set the
-  /// content sensitivity of the Android `View`.
+  /// The channel used to communicate with the shell side to get and set the
+  /// content sensitivity of an Android `View`.
   late MethodChannel sensitiveContentChannel;
 
-  /// Sets content sensitivity level of the Android `View` to the level
+  /// Sets content sensitivity level of the Android `View` that contains the app's widget tree to the level
   /// specified by [contentSensitivity] via a call to the native embedder.
   void setContentSensitivity(ContentSensitivity contentSensitivity) {
     try {
