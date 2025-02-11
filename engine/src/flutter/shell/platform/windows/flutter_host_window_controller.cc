@@ -56,10 +56,10 @@ std::optional<WindowMetadata> FlutterHostWindowController::CreateHostWindow(
   windows_[view_id] = std::move(window);
 
   WindowMetadata result = {.view_id = view_id,
-                                 .archetype = settings.archetype,
-                                 .size = GetViewSize(view_id),
-                                 .parent_id = std::nullopt,
-                                 .state = std::nullopt};
+                           .archetype = settings.archetype,
+                           .size = GetViewSize(view_id),
+                           .parent_id = std::nullopt,
+                           .state = std::nullopt};
   if (settings.archetype == WindowArchetype::kRegular) {
     result.state = state;
   }
