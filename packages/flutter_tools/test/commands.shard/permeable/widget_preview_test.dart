@@ -98,7 +98,13 @@ void main() {
     final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
       rootProject: rootProject ?? fs.currentDirectory,
     );
-    await analyzeProject(widgetPreviewScaffoldDir.path);
+    // Don't perform analysis on Windows since `dart pub add` will use '\' for
+    // path dependencies and cause analysis to fail.
+    // TODO(bkonyi): enable analysis on Windows once https://github.com/dart-lang/pub/issues/4520
+    // is resolved.
+    if (!platform.isWindows) {
+      await analyzeProject(widgetPreviewScaffoldDir.path);
+    }
   }
 
   Future<void> cleanWidgetPreview({required Directory rootProject}) async {
