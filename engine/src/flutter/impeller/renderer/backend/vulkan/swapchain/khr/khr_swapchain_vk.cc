@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/swapchain/khr/khr_swapchain_vk.h"
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/swapchain/khr/khr_swapchain_impl_vk.h"
@@ -61,6 +62,15 @@ std::unique_ptr<Surface> KHRSwapchainVK::AcquireNextDrawable(
     return std::move(result.surface);
   }
 
+// When the swapchain says its out-of-date, we attempt to read the underlying
+// surface size and re-create the swapchain at that size automatically (subject
+// to a specific number of retries). However, on some platforms, the surface
+// size reported by the Vulkan API may be stale for several frames. Those
+// platforms must explicitly set the swapchain size using out-of-band (to
+// Vulkan) APIs.
+//
+// TODO(163070): Expose the API to set surface size in impeller.h
+#if !FML_OS_ANDROID
   constexpr const size_t kMaxResizeAttempts = 3u;
   if (resize_retry_count == kMaxResizeAttempts) {
     VALIDATION_LOG << "Attempted to resize the swapchain" << kMaxResizeAttempts
@@ -70,9 +80,10 @@ std::unique_ptr<Surface> KHRSwapchainVK::AcquireNextDrawable(
     return nullptr;
   }
 
-  TRACE_EVENT0("impeller", "RecreateSwapchain");
-
   size_ = impl_->GetCurrentUnderlyingSurfaceSize().value_or(size_);
+#endif  // !FML_OS_ANDROID
+
+  TRACE_EVENT0("impeller", "RecreateSwapchain");
 
   // This swapchain implementation indicates that it is out of date. Tear it
   // down and make a new one.
