@@ -72,6 +72,23 @@ enum class SemanticsRole : int32_t {
   kCell = 5,
   kRow = 6,
   kColumnHeader = 7,
+  kDialog = 8,
+  kAlertDialog = 9,
+  kSearchBox = 10,
+  kDragHandle = 11,
+  kSpinButton = 12,
+  kComboBox = 13,
+  kMenuBar = 14,
+  kMenu = 15,
+  kMenuItem = 16,
+  kList = 17,
+  kListItem = 18,
+  kForm = 19,
+  kTooltip = 20,
+  kScrollBar = 21,
+  kLoadingSpinner = 22,
+  kProgressBar = 23,
+  kHotKey = 24,
 };
 
 /// C/C++ representation of `SemanticsFlags` defined in

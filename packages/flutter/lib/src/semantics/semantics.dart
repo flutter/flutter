@@ -112,12 +112,30 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.tabPanel => _noCheckRequired,
     SemanticsRole.table => _noCheckRequired,
     SemanticsRole.cell => _semanticsCell,
-    SemanticsRole.row => _unimplementedError,
     SemanticsRole.columnHeader => _semanticsColumnHeader,
+    // TODO(chunhtai): add checks when the roles are used in framework.
+    // https://github.com/flutter/flutter/issues/159741.
+    SemanticsRole.row => _unimplemented,
+    SemanticsRole.searchBox => _unimplemented,
+    SemanticsRole.dragHandle => _unimplemented,
+    SemanticsRole.spinButton => _unimplemented,
+    SemanticsRole.comboBox => _unimplemented,
+    SemanticsRole.menuBar => _unimplemented,
+    SemanticsRole.menu => _unimplemented,
+    SemanticsRole.menuItem => _unimplemented,
+    SemanticsRole.list => _unimplemented,
+    SemanticsRole.listItem => _unimplemented,
+    SemanticsRole.form => _unimplemented,
+    SemanticsRole.tooltip => _unimplemented,
+    SemanticsRole.scrollBar => _unimplemented,
+    SemanticsRole.loadingSpinner => _unimplemented,
+    SemanticsRole.progressBar => _unimplemented,
+    SemanticsRole.hotKey => _unimplemented,
   }(node);
 
-  static FlutterError? _unimplementedError(SemanticsNode node) =>
-      FlutterError('This semantics role is not implemented');
+  static FlutterError? _unimplemented(SemanticsNode node) =>
+      FlutterError('Missing checks for role ${node.getSemanticsData().role}');
+
   static FlutterError? _noCheckRequired(SemanticsNode node) => null;
 
   static FlutterError? _semanticsTab(SemanticsNode node) {

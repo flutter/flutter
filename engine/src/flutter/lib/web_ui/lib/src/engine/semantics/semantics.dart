@@ -1776,6 +1776,23 @@ class SemanticsObject {
         return EngineSemanticsRole.row;
       case ui.SemanticsRole.columnHeader:
         return EngineSemanticsRole.columnHeader;
+      // TODO(chunhtai): implement these roles.
+      // https://github.com/flutter/flutter/issues/159741.
+      case ui.SemanticsRole.searchBox:
+      case ui.SemanticsRole.dragHandle:
+      case ui.SemanticsRole.spinButton:
+      case ui.SemanticsRole.comboBox:
+      case ui.SemanticsRole.menuBar:
+      case ui.SemanticsRole.menu:
+      case ui.SemanticsRole.menuItem:
+      case ui.SemanticsRole.list:
+      case ui.SemanticsRole.listItem:
+      case ui.SemanticsRole.form:
+      case ui.SemanticsRole.tooltip:
+      case ui.SemanticsRole.scrollBar:
+      case ui.SemanticsRole.loadingSpinner:
+      case ui.SemanticsRole.progressBar:
+      case ui.SemanticsRole.hotKey:
       case ui.SemanticsRole.none:
       // fallback to checking semantics properties.
     }
