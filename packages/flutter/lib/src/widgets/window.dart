@@ -286,8 +286,8 @@ class WindowControllerContext extends InheritedWidget {
   final WindowController controller;
 
   /// Returns the [WindowContext] if any
-  static WindowControllerContext? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<WindowControllerContext>();
+  static WindowController? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<WindowControllerContext>()?.controller;
   }
 
   @override
