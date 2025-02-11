@@ -312,6 +312,31 @@ TEST_P(DlGoldenTest, DashedLinesTest) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DlGoldenTest, SaveLayerAtFractionalValue) {
+  // Draws a stroked rounded rect at a fractional pixel value. The coverage must
+  // be adjusted so that we still have room to draw it, even though it lies on
+  // the fractional bounds of the saveLayer.
+  DisplayListBuilder builder;
+  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+  auto save_paint = DlPaint().setAlpha(100);
+  builder.SaveLayer(nullptr, &save_paint);
+
+  builder.DrawRoundRect(DlRoundRect::MakeRectRadius(
+                            DlRect::MakeLTRB(10.5, 10.5, 200.5, 200.5), 10),
+                        DlPaint()
+                            .setDrawStyle(DlDrawStyle::kStroke)
+                            .setStrokeWidth(1.5)
+                            .setColor(DlColor::kBlack()));
+  builder.DrawCircle(DlPoint::MakeXY(100, 100), 50.5,
+                     DlPaint().setColor(DlColor::kAqua()));
+  builder.DrawCircle(DlPoint::MakeXY(110, 110), 50.5,
+                     DlPaint().setColor(DlColor::kCyan()));
+
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 namespace {
 int32_t CalculateMaxY(const impeller::testing::Screenshot* img) {
   const uint32_t* ptr = reinterpret_cast<const uint32_t*>(img->GetBytes());
