@@ -360,7 +360,6 @@ class RenderSliverMainAxisGroup extends RenderSliver
     while (child != null) {
       final SliverPhysicalParentData childParentData =
           child.parentData! as SliverPhysicalParentData;
-      final AxisDirection axisDirection = constraints.axisDirection;
       childParentData.paintOffset = switch (constraints.axisDirection) {
         AxisDirection.up => Offset(
           0.0,
@@ -372,7 +371,6 @@ class RenderSliverMainAxisGroup extends RenderSliver
         ),
         AxisDirection.right || AxisDirection.down => childParentData.paintOffset,
       };
-      childParentData.paintOffset = paintOffset;
       child = childAfter(child);
     }
   }
