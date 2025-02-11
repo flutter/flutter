@@ -50,10 +50,11 @@ class NativeDriverSupportPlugin :
                 result.success(versionMap)
             }
             "is_emulator" -> {
-                val isEmulator = when {
-                    Build.MODEL.contains("gphone") -> true
-                    else -> false
-                }
+                val isEmulator =
+                    when {
+                        Build.MODEL.contains("gphone") -> true
+                        else -> false
+                    }
                 result.success(mapOf("emulator" to isEmulator))
             }
             "ping" -> {
