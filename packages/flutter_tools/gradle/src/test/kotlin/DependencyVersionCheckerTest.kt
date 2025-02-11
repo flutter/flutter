@@ -2,6 +2,12 @@ package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.autonomousapps.kit.AbstractGradleProject
+import com.autonomousapps.kit.GradleBuilder
+import com.autonomousapps.kit.GradleProject
+import com.autonomousapps.kit.Source
+import com.autonomousapps.kit.gradle.Dependency
+import com.autonomousapps.kit.gradle.Plugin
 import com.flutter.gradle.DependencyVersionChecker.AGP_NAME
 import com.flutter.gradle.DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY
 import com.flutter.gradle.DependencyVersionChecker.errorAGPVersion
@@ -74,8 +80,13 @@ class DependencyVersionCheckerTest {
     }
 
     @Test
+    fun `blah blah`() {
+        val gradleRunner = BlahBlah.gradleProject
+        val result = GradleBuilder.build(gradleRunner.rootDir, ":project:assembleDebug")
+    }
+
+    @Test
     fun `how about this`() {
-        Project
         val settingsFileContent =
             """
             pluginManagement {
@@ -245,3 +256,76 @@ const val SUPPORTED_GRADLE_VERSION: String = "7.4.2"
 val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_11
 val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(7, 3, 1)
 const val SUPPORTED_KGP_VERSION: String = "1.8.10"
+
+class MyFixture : AbstractGradleProject() {
+    // Injected into functionalTest JVM by the plugin
+    // Also available via AbstractGradleProject.PLUGIN_UNDER_TEST_VERSION
+    private val pluginVersion = System.getProperty("com.autonomousapps.plugin-under-test.version")
+
+    val gradleProject: GradleProject = build()
+
+    private fun build(): GradleProject {
+        return newGradleProjectBuilder()
+            .withSubproject("project") {
+                sources = source
+                withBuildScript {
+                    plugins(Plugin.javaLibrary, Plugin("my-cool-plugin", pluginVersion))
+                    dependencies(Dependency.implementation("com.company:library:1.0"))
+                }
+            }
+            .write()
+    }
+
+    private val source =
+        mutableListOf(
+            Source.java(
+                """
+      package com.example.project;
+
+      public class Project {
+        // do stuff here
+      }
+      """
+            )
+                .withPath(/* packagePath = */ "com.example.project", /* className = */ "Project")
+                .build()
+        )
+}
+
+object BlahBlah : AbstractGradleProject() {
+    // Injected into functionalTest JVM by the plugin
+    // Also available via AbstractGradleProject.PLUGIN_UNDER_TEST_VERSION
+    // private val pluginVersion = System.getProperty("com.autonomousapps.plugin-under-test.version")
+
+    val gradleProject: GradleProject = build()
+
+    private fun build(): GradleProject {
+        return newGradleProjectBuilder(GradleProject.DslKind.KOTLIN).withRootProject {
+            GradleProject.DslKind.KOTLIN
+        }
+            // .withIncludedBuild("/Users/mackall/development/flutter/flutter/packages/flutter_tools/gradle") { GradleProject.DslKind.KOTLIN }
+            .withSubproject("project") {
+                println("sources is null? " + source == null)
+                sources.addLast(source)
+                withBuildScript {
+                    plugins(Plugin.of("com.android.application", "8.7.2"), Plugin("my-cool-plugin", "0.1.0"))
+                    dependencies(Dependency.implementation("com.android.tools.build:gradle:8.7.3"))
+                }
+            }
+            .build()
+            .write()
+    }
+
+    private val source =
+        Source.java(
+            """
+      package com.example.project;
+
+      public class Project {
+        println("blah");
+      }
+      """
+        )
+            .withPath(/* packagePath = */ "com/example/project", /* className = */ "Project")
+            .build()
+}
