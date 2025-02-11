@@ -2267,7 +2267,10 @@ class _InactiveSearchableBottom extends StatelessWidget {
                 // A decoy 'Cancel' button used in the collapsed-to-expanded animation.
                 SizedBox(
                   width: animationController.value * _kSearchFieldCancelButtonWidth,
-                  child: _CancelButton(opacity: 0.4, onPressed: () {}),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: _kNavBarBottomPadding),
+                    child: _CancelButton(opacity: 0.4, onPressed: () {}),
+                  ),
                 ),
               ],
             );
@@ -2296,7 +2299,7 @@ class _ActiveSearchableBottom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: _kNavBarEdgePadding, top: _kNavBarBottomPadding),
+      padding: const EdgeInsets.only(left: _kNavBarEdgePadding, bottom: _kNavBarBottomPadding),
       child: Row(
         spacing: 12.0, // Eyeballed on an iPhone 15 simulator running iOS 17.5.
         children: <Widget>[
