@@ -90,13 +90,17 @@ class DartProject {
   // Defaults to NoPreference.
   GpuPreference gpu_preference() const { return gpu_preference_; }
 
-  // Sets whether the UI isolate should be running on the platform thread.
+  // Sets whether the UI isolate should run on the platform thread.
+  // In a future release, this setting will become a no-op when
+  // Flutter Windows requires merged platform and UI threads.
   void set_merged_platform_ui_thread(bool merged_platform_ui_thread) {
     merged_platform_ui_thread_ = merged_platform_ui_thread;
   }
 
-  // Returns whether the UI isolate should be running on the platform thread.
-  // Defaults to false.
+  // Returns whether the UI isolate should run on the platform thread.
+  // Defaults to false. In a future release, this setting will default
+  // to true.
+  /// this setting will become a no-op when the Skia backend is fully removed.
   bool merged_platform_ui_thread() const { return merged_platform_ui_thread_; }
 
  private:
