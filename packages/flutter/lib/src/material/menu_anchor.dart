@@ -318,31 +318,22 @@ class _MenuAnchorStateController {
   _MenuAnchorStateController({required this.anchor});
 
   final _MenuAnchorState anchor;
-  OverlayPortalController? _overlayPortalController;
+  final OverlayPortalController _overlayPortalController = OverlayPortalController(
+    debugLabel: kReleaseMode ? null : 'MenuAnchor controller',
+  );
   PopupWindowController? _popupWindowController;
+  bool _useWindowing = false;
 
-  bool get isShowing {
-    if (_overlayPortalController != null) {
-      return _overlayPortalController!.isShowing;
-    } else if (_popupWindowController != null) {
-      return _popupWindowController!.isReady;
-    } else {
-      return false;
-    }
+  void init(BuildContext context) {
+    _useWindowing = Windowing.of(context);
   }
 
-  bool get _isInitialized => _overlayPortalController != null || _popupWindowController != null;
-
-  void initSingleWin() {
-    if (_overlayPortalController != null) {
-      return;
+  bool get isShowing {
+    if (_useWindowing) {
+      return _popupWindowController != null;
+    } else {
+      return _overlayPortalController.isShowing;
     }
-
-    _overlayPortalController ??= OverlayPortalController(
-      debugLabel: kReleaseMode ? null : 'MenuAnchor controller',
-    );
-    assert(_overlayPortalController != null);
-    assert(_popupWindowController == null);
   }
 
   void initWindowing() {
@@ -379,31 +370,23 @@ class _MenuAnchorStateController {
       positioner: positioner,
       parent: WindowControllerContext.of(anchorContext)!.controller.rootView,
     );
-
-    assert(_popupWindowController != null);
-    assert(_overlayPortalController == null);
   }
 
   void show() {
-    assert(!_isInitialized);
-    
-    if (Windowing.of(anchor._anchorKey.currentContext!)) {
+    if (_useWindowing) {
       initWindowing();
-    }
-
-    if (_overlayPortalController != null) {
-      _overlayPortalController!.show();
-    } else {
       anchor.showPopup();
+    } else {
+      _overlayPortalController.show();
     }
   }
 
   Future<void> hide() async {
-    assert(_isInitialized);
-    if (_overlayPortalController != null) {
-      _overlayPortalController!.hide();
-    } else {
+    if (_useWindowing) {
       await _popupWindowController!.destroy();
+      _popupWindowController = null;
+    } else {
+      _overlayPortalController.hide();
     }
   }
 }
@@ -506,8 +489,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
     Widget child;
 
+    _overlayController.init(context);
     if (!Windowing.of(context)) {
-      _overlayController.initSingleWin();
       child = OverlayPortal(
         controller: _overlayController._overlayPortalController!,
         overlayChildBuilder: (BuildContext context) {
