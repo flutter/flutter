@@ -120,19 +120,23 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
     throw TaskResult.failure('Generated.xcconfig does not contain FLAVOR=free');
   }
 
+  const String configuration = 'Debug Paid';
+  const String productName = 'Paid App';
+  const String buildDir = 'build/ios';
+
   if (!await runXcodeBuild(
     platformDirectory: path.join(projectDir, 'ios'),
     destination: 'id=${device.deviceId}',
     testName: 'flavors_test_ios',
-    configuration: 'Debug Paid',
+    configuration: configuration,
     scheme: 'paid',
     actions: <String>['clean', 'build'],
-    extraOptions: <String>['BUILD_DIR=${path.join(projectDir, 'build/ios')}'],
+    extraOptions: <String>['BUILD_DIR=${path.join(projectDir, buildDir)}'],
   )) {
     throw TaskResult.failure('Build failed');
   }
 
-  final String appPath = '$projectDir/build/ios/Debug Paid-iphone/Paid App.app';
+  final String appPath = '$projectDir/$buildDir/$configuration-iphone/$productName.app';
   if (!Directory(appPath).existsSync()) {
     throw TaskResult.failure('App not found at $appPath');
   }
