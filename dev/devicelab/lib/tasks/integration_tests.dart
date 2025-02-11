@@ -143,7 +143,7 @@ TaskFunction createSolidColorTest({required bool enableImpeller}) {
 // Device must have developer settings enabled.
 // Device must be android api 30 or higher.
 TaskFunction createDisplayCutoutTest() {
-  return DriverTest(
+  return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/display_cutout_rotation/',
     'integration_test/display_cutout_test.dart',
     setup: (Device device) async {
@@ -282,6 +282,8 @@ class IntegrationTest {
     this.createPlatforms = const <String>[],
     this.withTalkBack = false,
     this.environment,
+    this.setup,
+    this.tearDown,
   });
 
   final String testDirectory;
@@ -291,8 +293,15 @@ class IntegrationTest {
   final bool withTalkBack;
   final Map<String, String>? environment;
 
+  /// Run before flutter drive with the result from devices.workingDevice.
+  final Future<void> Function(Device device)? setup;
+
+  /// Run after flutter drive with the result from devices.workingDevice.
+  final Future<void> Function(Device device)? tearDown;
+
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
+      await setup?.call(await devices.workingDevice);
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
@@ -314,12 +323,13 @@ class IntegrationTest {
         await enableTalkBack();
       }
 
-      final List<String> options = <String>['-v', '-d', deviceId, testTarget, ...extraOptions];
+      final List<String> options = <String>['-d', deviceId, testTarget, ...extraOptions];
       await flutter('test', options: options, environment: environment);
 
       if (withTalkBack) {
         await disableTalkBack();
       }
+      await tearDown?.call(await devices.workingDevice);
 
       return TaskResult.success(null);
     });
