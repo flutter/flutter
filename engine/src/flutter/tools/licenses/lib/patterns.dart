@@ -503,22 +503,6 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     ),
   ),
 
-  // BoringSSL
-  LicenseFileReferencePattern(
-    firstPrefixIndex: 1,
-    indentPrefixIndex: 2,
-    fileIndex: 3,
-    pattern: RegExp(
-      kIndent +
-          r'Licensed under the OpenSSL license \(the "License"\)\. You may not use '
-                  r'this file except in compliance with the License\. You can obtain a copy '
-                  r'in the file (LICENSE) in the source distribution or at '
-                  r'https://www\.openssl\.org/source/license\.html'
-              .replaceAll(' ', _linebreak),
-      multiLine: true,
-    ),
-  ),
-
   // Seen in Microsoft files
   LicenseFileReferencePattern(
     firstPrefixIndex: 1,
@@ -554,16 +538,6 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
 final List<RegExp> csReferencesByType = <RegExp>[
   // used with _tryReferenceByType
   // groups 1 and 2 are the prefix, group 3 is the license type
-  RegExp(
-    kIndent +
-        r'Written by Andy Polyakov <appro@openssl\.org> for the OpenSSL '
-                r'project\. The module is, however, dual licensed under (OpenSSL) and '
-                r'CRYPTOGAMS licenses depending on where you obtain it\. For further '
-                r'details see http://www\.openssl\.org/~appro/cryptogams/\. '
-                r'Permission to use under GPL terms is granted\.'
-            .replaceAll(' ', _linebreak),
-    multiLine: true,
-  ),
 
   // MPL
   // fallback_root_certificates
@@ -583,9 +557,9 @@ final List<RegExp> csReferencesByType = <RegExp>[
   // BoringSSL
   RegExp(
     kIndent +
-        r'Rights for redistribution and usage in source and binary forms are '
-                r'granted according to the (OpenSSL) license\. Warranty of any kind is '
-                r'disclaimed\.'
+        r'Implemented by Andy Polyakov <appro@fy\.chalmers\.se> for the (OpenSSL) project\. '
+                r'Rights for redistribution and usage in source and binary forms are '
+                r'granted according to the License\. Warranty of any kind is disclaimed. '
             .replaceAll(' ', _linebreak),
     multiLine: true,
   ),
