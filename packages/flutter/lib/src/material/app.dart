@@ -30,6 +30,7 @@ import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'scrollbar.dart';
 import 'theme.dart';
 import 'tooltip.dart';
+import 'windowing.dart';
 
 // Examples can assume:
 // typedef GlobalWidgetsLocalizations = DefaultWidgetsLocalizations;
@@ -260,6 +261,7 @@ class MaterialApp extends StatefulWidget {
     )
     this.useInheritedMediaQuery = false,
     this.themeAnimationStyle,
+    this.useWindowingApi = false,
   }) : routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
@@ -311,6 +313,7 @@ class MaterialApp extends StatefulWidget {
     )
     this.useInheritedMediaQuery = false,
     this.themeAnimationStyle,
+    this.useWindowingApi = false,
   }) : assert(routerDelegate != null || routerConfig != null),
        navigatorObservers = null,
        navigatorKey = null,
@@ -790,6 +793,16 @@ class MaterialApp extends StatefulWidget {
   /// {@end-tool}
   final AnimationStyle? themeAnimationStyle;
 
+  /// When true, widgets that normally use an [Overlay] to float on top of the
+  /// the application content will instead opt to use a true native window.
+  /// This includes widgets such as [PopupMenuButton] and [DropdownButton], as
+  /// well as constructs like [showMenu] and [showDialog].
+  ///
+  /// This flag only affects platforms that implement the windowing API.
+  ///
+  /// Defaults to false.
+  final bool useWindowingApi;
+
   @override
   State<MaterialApp> createState() => _MaterialAppState();
 
@@ -1038,6 +1051,10 @@ class _MaterialAppState extends State<MaterialApp> {
           return widget.builder!(context, child);
         },
       );
+    }
+
+    if (widget.useWindowingApi) {
+      childWidget = Windowing(useWindowingApi: widget.useWindowingApi, child: childWidget);
     }
 
     childWidget = ScaffoldMessenger(
