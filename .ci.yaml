@@ -1548,7 +1548,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
 
-  - name: Linux_pixel_7pro android_engine_vulkan_tests
+  - name: Linux_mokey android_engine_vulkan_tests
     recipe: flutter/flutter_drone
     # TODO(matanlurey): https://github.com/flutter/flutter/issues/163025.
     bringup: true
