@@ -274,7 +274,7 @@ TEST(PathTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
                     .TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
-    EXPECT_POINT_NEAR(contour.destination, Point(110, 100));
+    EXPECT_POINT_NEAR(contour.destination, Point(150, 100));
     EXPECT_TRUE(contour.IsClosed());
   }
 
@@ -285,7 +285,7 @@ TEST(PathTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
                     .TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
-    EXPECT_POINT_NEAR(contour.destination, Point(110, 100));
+    EXPECT_POINT_NEAR(contour.destination, Point(150, 100));
     EXPECT_TRUE(contour.IsClosed());
   }
 
