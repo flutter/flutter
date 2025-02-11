@@ -191,7 +191,7 @@ void FlutterWindowsView::ForceRedraw() {
   }
 }
 
-// Called on platform thread.
+// Called on the platform thread.
 bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
   if (!engine_->egl_manager()) {
     SendWindowMetrics(width, height, binding_handler_->GetDpiScale());
