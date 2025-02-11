@@ -89,6 +89,8 @@ abstract class PlatformDispatcher {
 
   void setApplicationLocale(Locale locale) {}
 
+  TypographySettings? get typographySettings;
+
   AccessibilityFeatures get accessibilityFeatures;
 
   VoidCallback? get onAccessibilityFeaturesChanged;
