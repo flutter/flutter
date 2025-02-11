@@ -1218,9 +1218,13 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
         // collapsed while the search field was active are re-expanded.
         setState(() {});
       case AnimationStatus.forward:
-        searchIsActive = true;
+        setState(() {
+          searchIsActive = true;
+        });
       case AnimationStatus.reverse:
-        searchIsActive = false;
+        setState(() {
+          searchIsActive = false;
+        });
     }
   }
 
