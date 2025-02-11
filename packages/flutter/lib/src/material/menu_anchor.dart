@@ -39,6 +39,7 @@ import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
+import 'windowing.dart';
 
 // Examples can assume:
 // bool _throwShotAway = false;
@@ -338,10 +339,10 @@ class _MenuAnchorStateController {
     }
 
     _overlayPortalController ??= OverlayPortalController(
-        debugLabel: kReleaseMode ? null : 'MenuAnchor controller',
-      );
-      assert(_overlayPortalController != null);
-      assert(_popupWindowController == null);
+      debugLabel: kReleaseMode ? null : 'MenuAnchor controller',
+    );
+    assert(_overlayPortalController != null);
+    assert(_popupWindowController == null);
   }
 
   void initWindowing() {
@@ -376,7 +377,7 @@ class _MenuAnchorStateController {
         Offset(position.dx + box.size.width, position.dy + box.size.height),
       ),
       positioner: positioner,
-      parent: WindowControllerContext.of(anchorContext)!.controller.rootView
+      parent: WindowControllerContext.of(anchorContext)!.controller.rootView,
     );
 
     assert(_popupWindowController != null);
@@ -437,14 +438,13 @@ class _MenuAnchorState extends State<MenuAnchor> {
     }
     _menuController._attach(this);
 
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) {
-          if (false) {
-            _overlayController.initSingleWin();
-          } else {
-            _overlayController.initWindowing();
-          }
-        });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Windowing.of(context)) {
+        _overlayController.initWindowing();
+      } else {
+        _overlayController.initSingleWin();
+      }
+    });
   }
 
   @override
@@ -508,8 +508,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
     }
 
     Widget child;
-    /// TODO: This should be a flag set on the MaterialApp API
-    if (false) {
+
+    if (!Windowing.of(context)) {
       _overlayController.initSingleWin();
       child = OverlayPortal(
         controller: _overlayController._overlayPortalController!,
@@ -581,13 +581,13 @@ class _MenuAnchorState extends State<MenuAnchor> {
       child: FocusScope(
         node: _menuScopeNode,
         skipTraversal: true,
-        child:_MenuPanel(
+        child: _MenuPanel(
           orientation: _orientation,
           menuStyle: widget.style,
           clipBehavior: widget.clipBehavior,
           crossAxisUnconstrained: widget.crossAxisUnconstrained,
           children: widget.menuChildren,
-        )
+        ),
       ),
     );
   }
