@@ -76,10 +76,15 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
+    // If the previous frame had platform views, hide the overlay surface.
+    if (previous_frame_view_count_ > 0) {
+      jni_facade_->hideOverlaySurface2();
+    }
     jni_facade_->applyTransaction();
     return;
   }
 
+  bool prev_frame_no_platform_views = previous_frame_view_count_ == 0;
   std::unordered_map<int64_t, SkRect> view_rects;
   for (auto platform_id : composition_order_) {
     view_rects[platform_id] = GetViewRect(platform_id, view_params_);
@@ -143,8 +148,12 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
-       slices = std::move(slices_)]() -> void {
+       slices = std::move(slices_), prev_frame_no_platform_views]() -> void {
         jni_facade->swapTransaction();
+
+        if (prev_frame_no_platform_views) {
+          jni_facade_->showOverlaySurface2();
+        }
 
         for (int64_t view_id : composition_order) {
           SkRect view_rect = GetViewRect(view_id, view_params);

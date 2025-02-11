@@ -65,6 +65,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private final ArrayList<SurfaceControl.Transaction> pendingTransactions;
   private final ArrayList<SurfaceControl.Transaction> activeTransactions;
   private Surface overlayerSurface = null;
+  private SurfaceControl overlaySurfaceControl = null;
 
   public PlatformViewsController2() {
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
@@ -577,6 +578,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       tx.setLayer(surfaceControl, 1000);
       tx.apply();
       overlayerSurface = new Surface(surfaceControl);
+      overlaySurfaceControl = surfaceControl;
     }
 
     return new FlutterOverlaySurface(0, overlayerSurface);
@@ -586,7 +588,30 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlayerSurface != null) {
       overlayerSurface.release();
       overlayerSurface = null;
+      overlaySurfaceControl = null;
     }
+  }
+
+  @TargetApi(API_LEVELS.API_34)
+  @RequiresApi(API_LEVELS.API_34)
+  public void showOverlaySurface() {
+    if (overlaySurfaceControl == null) {
+      return;
+    }
+    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
+    tx.apply();
+  }
+
+  @TargetApi(API_LEVELS.API_34)
+  @RequiresApi(API_LEVELS.API_34)
+  public void hideOverlaySurface() {
+    if (overlaySurfaceControl == null) {
+      return;
+    }
+    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
+    tx.apply();
   }
 
   //// Message Handler ///////
