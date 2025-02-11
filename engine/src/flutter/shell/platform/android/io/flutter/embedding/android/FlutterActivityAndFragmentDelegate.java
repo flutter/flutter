@@ -214,7 +214,7 @@ import java.util.List;
 
     // Regardless of whether or not a FlutterEngine already existed, the PlatformPlugin and
     // SensitiveContentPlugin are bound to a specific Activity. Therefore, they need to be
-    // created and configured every time this delegate attaches to a new Activity.
+    // created and configured every time this delegate attaches the engine to a new Activity.
     // TODO(mattcarroll): the PlatformPlugin needs to be reimagined because it implicitly takes
     //                    control of the entire window. This is unacceptable for non-fullscreen
     //                    use-cases.

@@ -7,13 +7,13 @@ import 'package:flutter/widgets.dart' show AsyncSnapshot, FutureBuilder;
 
 import 'framework.dart';
 
-/// Data structure used to track the number of [SensitiveContent] widgets in the
-/// widget tree with each of the different [ContentSensitivity] levels set.
+/// Data structure used to track the [SensitiveContent] widgets in the
+/// widget tree.
 class ContentSensitivityState {
   /// Creates a [ContentSensitivityState].
   ContentSensitivityState(this.currentContentSensitivitySetting);
 
-  /// The current [ContentSensitivity] level set.
+  /// The current [ContentSensitivity] level set for the entire widget tree.
   ContentSensitivity currentContentSensitivitySetting;
 
   /// The number of [SensitiveContent] widgets that have sensitivity level [ContentSensitivity.sensitive].
@@ -56,7 +56,7 @@ class ContentSensitivityState {
 }
 
 /// Host of the current content sensitivity level for the widget tree that contains
-/// any number [SensitiveContent] widgets.
+/// some number [SensitiveContent] widgets.
 class SensitiveContentSetting {
   SensitiveContentSetting._();
 
@@ -67,35 +67,33 @@ class SensitiveContentSetting {
   static final SensitiveContentSetting _instance = SensitiveContentSetting._();
 
   /// Registers a [SensitiveContent] widget that will help determine the
-  /// [ContentSensitivity] level.
+  /// [ContentSensitivity] level for the widget tree.
   static Future<void> register(ContentSensitivity desiredSensitivityLevel) async {
     await _instance._register(desiredSensitivityLevel);
   }
 
   Future<void> _register(ContentSensitivity desiredSensitivityLevel) async {
-    // Set default content sensitivity level as set in native Android or the default
-    // if unset by the developer (auto sensitive).
+    // Set default content sensitivity level as set in native Android. This will be
+    // auto sensitive if it is otherwise unset by the developer.
     _defaultContentSensitivitySetting ??= ContentSensitivity.getContentSensitivityById(
         await _sensitiveContentService.getContentSensitivity());
-    if (_contentSensitivityState == null) {
-      _contentSensitivityState = ContentSensitivityState(_defaultContentSensitivitySetting);
-    }
+    _contentSensitivityState ??= ContentSensitivityState(_defaultContentSensitivitySetting!);
 
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
-    _contentSensitivityState.addWidgetWithContentSensitivity(desiredSensitivityLevel);
+    _contentSensitivityState!.addWidgetWithContentSensitivity(desiredSensitivityLevel);
 
     // Verify that desiredSensitivityLevel should be set in order for sensitive
     // content to remain obscured.
-    if (!shouldSetContentSensitivity(_contentSensitivityState, desiredSensitivityLevel)) {
+    if (!shouldSetContentSensitivity(_contentSensitivityState!, desiredSensitivityLevel)) {
       return;
     }
 
     // Set content sensitivity level as desiredSensitivityLevel and update stored data.
     _sensitiveContentService.setContentSensitivity(desiredSensitivityLevel);
-    _contentSensitivityState.currentContentSensitivitySetting = desiredSensitivityLevel;
+    _contentSensitivityState!.currentContentSensitivitySetting = desiredSensitivityLevel;
   }
 
-  /// Unregisters a [SensitiveContent] widget from the ContentSensitivityState tracking
+  /// Unregisters a [SensitiveContent] widget from the [ContentSensitivityState] tracking
   /// the content sensitivity level of the widget tree.
   static void unregister(ContentSensitivity widgetSensitivityLevel) {
     _instance._unregister(widgetSensitivityLevel);
@@ -104,41 +102,98 @@ class SensitiveContentSetting {
   void _unregister(ContentSensitivity widgetSensitivityLevel) {
     // Update SensitiveContent widget count for those with
     // desiredSensitivityLevel.
-    _contentSensitivityState.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
+    _contentSensitivityState!.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
 
     // Determine if another sensitivity level needs to be restored.
-    ContentSensitivity sensitivityLevelToSet =
-        _defaultContentSensitivitySetting!; // TODO(camsim99): check if this is necessary.
-    switch (widgetSensitivityLevel) {
+    ContentSensitivity? contentSensitivityToRestore;
+    if (_contentSensitivityState!.getTotalNumberOfWidgets() == 0) {
+      contentSensitivityToRestore = _defaultContentSensitivitySetting!;
+    } else if (widgetSensitivityLevel == ContentSensitivity.notSensitive) {
+      return;
+    } else {
+      if (shouldSetContentSensitivity(_contentSensitivityState!, ContentSensitivity.notSensitive)) {
+        contentSensitivityToRestore = ContentSensitivity.notSensitive;
+      } else if (should) // TODO(camsim99): here
+    }
+
+    switch(widgetSensitivityLevel) {
       case ContentSensitivity.sensitive:
-        if (shouldSetContentSensitivity(
-            _contentSensitivityState, ContentSensitivity.sensitive)) {
-          sensitivityLevelToSet = ContentSensitivity.sensitive;
+        if (shouldSetContentSensitivity(_contentSensitivityState!, ContentSensitivity.notSensitive)) {
+
         }
-        continue auto;
-      auto:
-      case ContentSensitivity.autoSensitive:
-        if (shouldSetContentSensitivity(
-            _contentSensitivityState, ContentSensitivity.autoSensitive)) {
-          sensitivityLevelToSet = ContentSensitivity.autoSensitive;
+      case ContentSensitivity.
+
+    }
+
+    if (no more widgets) {
+      set default
+    } else {
+      sensitive -->if no more left, check auto if theres auto, otherwise set not
+      auto --> if no more left and sensitive not current mode, set not
+      not --> we do not care
+    }
+
+// rewrite:
+else {
+      sensitive --> if (should set not) set not, if (should set auto) set auto otherwise we are done
+      auto --> if (should set not) set not
+      not --> we are done
+    }
+
+
+
+
+    if (widgetSensitivityLevel == ContentSensitivity.sensitive) {
+      if (_contentSensitivityState!.sensitiveWidgetCount == 0) {
+        if (should set auto sensitive) {
+          // what does should set mean? it means: no other sensitive widgets in the tree. but if there are no widgets, we should not set unless it's default
+          set auto sensitive
+        } else {
+          set not sensitive // technically we do need to check sensitive too because it may be default
         }
-        continue not;
-      not:
-      case ContentSensitivity.notSensitive:
-        if (shouldSetContentSensitivity(
-            _contentSensitivityState, ContentSensitivity.notSensitive)) {
-          sensitivityLevelToSet = ContentSensitivity.autoSensitive;
+      }
+    } else if (wsl = autoSensitive) {
+      if (current setting == sensitive) {
+        return;
+      } else if (current setting == auto sensitive) {
+        if (auto sentive count == 0) {
+          if (should set not sensitive) {
+            set not sensitive
+          }
         }
+      }
+    } else {
+      if (current setting == senstive) {
+        return;
+      } else if (current setting == auto sensitive) {
+        return;
+      } else if (current setting == not sensitive) {
+        if (not sensitive count == 0) {
+          set default setting
+        }
+      }
+    }
+
+
+
+
+    ContentSensitivity sensitivityLevelToSet = _defaultContentSensitivitySetting!;
+    if (shouldSetContentSensitivity(_contentSensitivityState!, ContentSensitivity.sensitive)) {
+      sensitivityLevelToSet = ContentSensitivity.sensitive;
+    } else if (shouldSetContentSensitivity(_contentSensitivityState!, ContentSensitivity.autoSensitive)) {
+        sensitivityLevelToSet = ContentSensitivity.autoSensitive;
+    } else if (shouldSetContentSensitivity(_contentSensitivityState!, ContentSensitivity.notSensitive)) {
+        sensitivityLevelToSet = ContentSensitivity.notSensitive;
     }
 
     _sensitiveContentService.setContentSensitivity(sensitivityLevelToSet);
   }
 
   /// Return whether or not [desiredSensitivityLevel] should be set as the new
-  /// [ContentSensitivity] level.
+  /// [ContentSensitivity] level for the widget tree.
   ///
-  /// [desiredSensitivityLevel] should be set only if it is striclty less
-  /// severe than any of the other registered [SensitiveContent] widgets.
+  /// [desiredSensitivityLevel] should only be set if it is strictly more
+  /// severe than any of the other [SensitiveContent] widgets in the widget tree.
   bool shouldSetContentSensitivity(ContentSensitivityState contentSensitivityState,
       ContentSensitivity desiredSensitivityLevel) {
     if (contentSensitivityState.currentContentSensitivitySetting ==

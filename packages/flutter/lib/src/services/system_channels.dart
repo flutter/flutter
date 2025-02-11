@@ -573,24 +573,18 @@ abstract final class SystemChannels {
     'flutter/keyboard',
   );
 
-  /// A [MethodChannel] for setting content sensitivity of Flutter views.
-  /// Currently supported on Android only.
+  /// A [MethodChannel] for setting and getting the content sensitivity of a Flutter Android View.
   ///
-  /// The following outgoing method is defined for this channel (invvoked using
+  /// The following outgoing methods are defined for this channel (invoked using
   /// [OptionalMethodChannel.invokeMethod]):
   ///
-  ///  * `setContentSensitivity`: Sets the content sensitivity level of the native backing
-  ///     for the Flutter view to one of the [ContentSensitivity] levels. The second
-  ///     argument is a JSON object with keys `flutterViewId` for the ID of the Flutter view
-  ///     that this method channel should set the content sensitivity for and
-  ///     `contentSensitivityLevel` for the ID of the `ContentSensitivity` level that the channel
+  ///  * `setContentSensitivity`: Sets the content sensitivity level of the Flutter Android View
+  ///     containing the widget tree to one of the [ContentSensitivity] levels. The second
+  ///     argument is the ID of the `ContentSensitivity` level that the channel
   ///     should set for the relevant Flutter view.
   ///
-  ///  * `getContentSensitivity`: Gets the content sensitivity level of the native backing for the
-  ///     Flutter view, which will be one of the [ContentSensitivity] levels. The second argument is
-  ///     a JSON object with the key `flutterViewId` for the ID of the Flutter view that this method
-  ///    channel should requires the content sensitivity of.
-  // TODO(camsim99): Channge getContentSensitivity JSON to single int.
+  ///  * `getContentSensitivity`: Gets the content sensitivity level of the Flutter Android View
+  ///     containing the widget tree, which will be the ID of one of the [ContentSensitivity] levels.
   static const MethodChannel sensitiveContent = OptionalMethodChannel(
     'flutter/sensitivecontent',
   );
