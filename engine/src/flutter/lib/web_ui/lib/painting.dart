@@ -642,18 +642,12 @@ Future<Codec> instantiateImageCodecFromBuffer(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-}) {
-  try {
-    return engine.renderer.instantiateImageCodec(
-      buffer._list!,
-      targetWidth: targetWidth,
-      targetHeight: targetHeight,
-      allowUpscaling: allowUpscaling,
-    );
-  } finally {
-    buffer.dispose();
-  }
-}
+}) => engine.renderer.instantiateImageCodec(
+  buffer._list!,
+  targetWidth: targetWidth,
+  targetHeight: targetHeight,
+  allowUpscaling: allowUpscaling,
+);
 
 Future<Codec> instantiateImageCodecWithSize(
   ImmutableBuffer buffer, {
