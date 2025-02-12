@@ -153,7 +153,6 @@ TaskFunction createDisplayCutoutTest() {
           'ro.build.version.sdk',
         ]);
         if (sdkResult.startsWith('2') || sdkResult.startsWith('1') || sdkResult.length == 1) {
-          print('This test must be run on api 30 or higher.');
           throw TaskResult.failure('This test should only target android 30+.');
         }
         print('Adding Synthetic notch...');
