@@ -39,8 +39,8 @@ import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
-import 'sksl_writer.dart';
 import 'vmservice.dart';
+import 'web/chrome.dart';
 
 class FlutterDevice {
   FlutterDevice(
@@ -124,15 +124,10 @@ class FlutterDevice {
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
       switch (buildInfo.nullSafetyMode) {
         case NullSafetyMode.unsound:
-          platformDillName = 'ddc_outline.dill';
-          if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-            extraFrontEndOptions.add('--no-sound-null-safety');
-          }
+          // TODO(matanlurey): Should be unreachable, remove as part of https://github.com/flutter/flutter/issues/162846.
+          throw UnsupportedError('Unsound null safety mode is not supported');
         case NullSafetyMode.sound:
-          platformDillName = 'ddc_outline_sound.dill';
-          if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-            extraFrontEndOptions.add('--sound-null-safety');
-          }
+          platformDillName = 'ddc_outline.dill';
         case NullSafetyMode.autodetect:
           throw StateError(
             'Expected buildInfo.nullSafetyMode to be one of unsound or sound, '
@@ -259,7 +254,6 @@ class FlutterDevice {
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
@@ -335,7 +329,6 @@ class FlutterDevice {
                       reloadSources: reloadSources,
                       restart: restart,
                       compileExpression: compileExpression,
-                      getSkSLMethod: getSkSLMethod,
                       flutterProject: FlutterProject.current(),
                       printStructuredErrorLogMethod: printStructuredErrorLogMethod,
                       device: device,
@@ -569,6 +562,7 @@ class FlutterDevice {
         bundleFirstUpload: bundleFirstUpload,
         generator: generator!,
         fullRestart: fullRestart,
+        resetCompiler: fullRestart,
         dillOutputPath: dillOutputPath,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         pathToReload: pathToReload,
@@ -626,9 +620,6 @@ abstract class ResidentHandlers {
   /// the runner requires that all attached devices can support hot restart
   /// before enabling it.
   bool get supportsRestart;
-
-  /// Whether all of the connected devices support gathering SkSL.
-  bool get supportsWriteSkSL;
 
   /// Whether all of the connected devices support hot reload.
   bool get canHotReload;
@@ -890,21 +881,6 @@ abstract class ResidentHandlers {
     return true;
   }
 
-  /// Write the SkSL shaders to a zip file in build directory.
-  ///
-  /// Returns the name of the file, or `null` on failures.
-  Future<String?> writeSkSL() async {
-    if (!supportsWriteSkSL) {
-      throw Exception('writeSkSL is not supported by this runner.');
-    }
-    final FlutterDevice flutterDevice = flutterDevices.first!;
-    final FlutterVmService vmService = flutterDevice.vmService!;
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    final Map<String, Object?>? data = await vmService.getSkSLs(viewId: views.first.id);
-    final Device device = flutterDevice.device!;
-    return sharedSkSlWriter(device, data);
-  }
-
   /// Take a screenshot on the provided [device].
   ///
   /// If the device has a connected vmservice, this method will attempt to hide
@@ -1048,7 +1024,19 @@ abstract class ResidentRunner extends ResidentHandlers {
       artifactDirectory.createSync(recursive: true);
     }
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    _residentDevtoolsHandler = devtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
+    _residentDevtoolsHandler = devtoolsHandler(
+      DevtoolsLauncher.instance,
+      this,
+      globals.logger,
+      ChromiumLauncher(
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        processManager: globals.processManager,
+        operatingSystemUtils: globals.os,
+        browserFinder: findChromeExecutable,
+        logger: globals.logger,
+      ),
+    );
   }
 
   @override
@@ -1099,8 +1087,8 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   String get dillOutputPath =>
       _dillOutputPath ?? globals.fs.path.join(artifactDirectory.path, 'app.dill');
-  String getReloadPath({bool fullRestart = false, required bool swap}) {
-    if (!fullRestart) {
+  String getReloadPath({bool resetCompiler = false, required bool swap}) {
+    if (!resetCompiler) {
       return 'main.dart.incremental.dill';
     }
     return 'main.dart${swap ? '.swap' : ''}.dill';
@@ -1129,9 +1117,6 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
-
-  @override
-  bool get supportsWriteSkSL => supportsServiceProtocol;
 
   bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
@@ -1193,7 +1178,6 @@ abstract class ResidentRunner extends ResidentHandlers {
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
       platform: globals.platform,
-      usage: globals.flutterUsage,
       analytics: globals.analytics,
       projectDir: globals.fs.currentDirectory,
       packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
@@ -1332,7 +1316,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
     required bool allowExistingDdsInstance,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
@@ -1348,7 +1331,6 @@ abstract class ResidentRunner extends ResidentHandlers {
         compileExpression: compileExpression,
         allowExistingDdsInstance: allowExistingDdsInstance,
         hostVmServicePort: debuggingOptions.hostVmServicePort,
-        getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
       );
       await device.vmService!.getFlutterViews();
@@ -1509,9 +1491,6 @@ abstract class ResidentRunner extends ResidentHandlers {
       // Performance related features: `P` should precede `a`, which should precede `M`.
       commandHelp.P.print();
       commandHelp.a.print();
-      if (supportsWriteSkSL) {
-        commandHelp.M.print();
-      }
       if (isRunningDebug) {
         commandHelp.g.print();
       }
@@ -1709,12 +1688,6 @@ class TerminalHandler {
       case 'o':
       case 'O':
         return residentRunner.debugTogglePlatform();
-      case 'M':
-        if (residentRunner.supportsWriteSkSL) {
-          await residentRunner.writeSkSL();
-          return true;
-        }
-        return false;
       case 'p':
         return residentRunner.debugToggleDebugPaintSizeEnabled();
       case 'P':
@@ -1786,7 +1759,6 @@ class TerminalHandler {
       await _commonTerminalInputHandler(command);
       // Catch all exception since this is doing cleanup and rethrowing.
     } catch (error, st) {
-      // ignore: avoid_catches_without_on_clauses
       // Don't print stack traces for known error types.
       if (error is! ToolExit) {
         _logger.printError('$error\n$st');

@@ -72,7 +72,6 @@ void main() {
           InternetAddress.loopbackIPv4,
           <String, String>{},
           <String, String>{},
-          NullSafetyMode.unsound,
           usesDdcModuleSystem,
           canaryFeatures,
           webRenderer: WebRendererMode.canvaskit,
@@ -318,7 +317,6 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
-      NullSafetyMode.unsound,
       usesDdcModuleSystem,
       canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
@@ -339,7 +337,6 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
-      NullSafetyMode.unsound,
       usesDdcModuleSystem,
       canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
@@ -363,7 +360,6 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
-        NullSafetyMode.unsound,
         usesDdcModuleSystem,
         canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
@@ -386,7 +382,6 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
-        NullSafetyMode.unsound,
         usesDdcModuleSystem,
         canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
@@ -810,13 +805,13 @@ void main() {
         expressionCompiler: null,
         extraHeaders: const <String, String>{},
         chromiumLauncher: null,
-        nullSafetyMode: NullSafetyMode.sound,
         ddcModuleSystem: usesDdcModuleSystem,
         canaryFeatures: canaryFeatures,
         webRenderer: WebRendererMode.html,
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
+        isWindows: false,
       );
       webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -828,22 +823,18 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('GENERATED');
       final String webPrecompiledSdk =
-          globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleSoundSdk)
-              .path;
+          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleSdk).path;
       final String webPrecompiledSdkSourcemaps =
           globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleSoundSdkSourcemaps)
+              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleSdkSourcemaps)
               .path;
       final String webPrecompiledCanvaskitSdk =
           globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdk)
+              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk)
               .path;
       final String webPrecompiledCanvaskitSdkSourcemaps =
           globals.artifacts!
-              .getHostArtifact(
-                HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdkSourcemaps,
-              )
+              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
               .path;
       globals.fs.file(webPrecompiledSdk)
         ..createSync(recursive: true)
@@ -937,13 +928,13 @@ void main() {
           expressionCompiler: null,
           extraHeaders: const <String, String>{},
           chromiumLauncher: null,
-          nullSafetyMode: NullSafetyMode.sound,
           ddcModuleSystem: usesDdcModuleSystem,
           canaryFeatures: canaryFeatures,
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
           rootDirectory: globals.fs.currentDirectory,
+          isWindows: false,
         );
         webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
         webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1012,13 +1003,13 @@ void main() {
       chromiumLauncher: null,
       nullAssertions: true,
       nativeNullAssertions: true,
-      nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
       canaryFeatures: canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
+      isWindows: false,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1062,13 +1053,13 @@ void main() {
       expressionCompiler: null,
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
-      nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
       canaryFeatures: canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
+      isWindows: false,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1113,13 +1104,13 @@ void main() {
       expressionCompiler: null,
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
-      nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
       canaryFeatures: canaryFeatures,
       webRenderer: WebRendererMode.auto,
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
+      isWindows: false,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1164,13 +1155,13 @@ void main() {
       expressionCompiler: null,
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
-      nullSafetyMode: NullSafetyMode.unsound,
       ddcModuleSystem: usesDdcModuleSystem,
       canaryFeatures: canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
+      isWindows: false,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1205,7 +1196,6 @@ void main() {
       Uri.base,
       null,
       const <String, String>{},
-      NullSafetyMode.unsound,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
@@ -1240,7 +1230,6 @@ void main() {
       Uri.base,
       null,
       const <String, String>{extraHeaderKey: extraHeaderValue},
-      NullSafetyMode.unsound,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
@@ -1278,7 +1267,6 @@ void main() {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
-      NullSafetyMode.sound,
       usesDdcModuleSystem,
       canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
@@ -1328,13 +1316,13 @@ void main() {
         expressionCompiler: null,
         extraHeaders: const <String, String>{},
         chromiumLauncher: null,
-        nullSafetyMode: NullSafetyMode.unsound,
         ddcModuleSystem: usesDdcModuleSystem,
         canaryFeatures: canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
+        isWindows: false,
       );
       webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1379,6 +1367,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
+    bool recompileRestart = false,
   }) async {
     return output;
   }

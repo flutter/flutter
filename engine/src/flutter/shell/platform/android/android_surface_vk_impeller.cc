@@ -14,6 +14,7 @@
 #include "flutter/impeller/renderer/backend/vulkan/swapchain/swapchain_vk.h"
 #include "flutter/shell/gpu/gpu_surface_vulkan_impeller.h"
 #include "flutter/vulkan/vulkan_native_surface_android.h"
+#include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_swapchain_vk.h"
 
 namespace flutter {
 
@@ -81,7 +82,8 @@ bool AndroidSurfaceVKImpeller::ResourceContextClearCurrent() {
 }
 
 bool AndroidSurfaceVKImpeller::SetNativeWindow(
-    fml::RefPtr<AndroidNativeWindow> window) {
+    fml::RefPtr<AndroidNativeWindow> window,
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
   if (window && (native_window_ == window)) {
     return OnScreenSurfaceResize(window->GetSize());
   }
@@ -92,10 +94,15 @@ bool AndroidSurfaceVKImpeller::SetNativeWindow(
     return false;
   }
 
+  impeller::CreateTransactionCB cb = [jni_facade]() {
+    ASurfaceTransaction* tx = jni_facade->createTransaction();
+    return impeller::android::SurfaceTransaction(tx);
+  };
+
   auto swapchain = impeller::SwapchainVK::Create(
       std::reinterpret_pointer_cast<impeller::Context>(
           surface_context_vk_->GetParent()),
-      window->handle());
+      window->handle(), cb);
 
   if (surface_context_vk_->SetSwapchain(std::move(swapchain))) {
     native_window_ = std::move(window);

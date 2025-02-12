@@ -162,7 +162,7 @@ void Canvas::clipRect(double left,
                       double top,
                       double right,
                       double bottom,
-                      DlCanvas::ClipOp clipOp,
+                      DlClipOp clipOp,
                       bool doAntiAlias) {
   if (display_list_builder_) {
     builder()->ClipRect(DlRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
@@ -173,8 +173,7 @@ void Canvas::clipRect(double left,
 
 void Canvas::clipRRect(const RRect& rrect, bool doAntiAlias) {
   if (display_list_builder_) {
-    builder()->ClipRoundRect(rrect.rrect, DlCanvas::ClipOp::kIntersect,
-                             doAntiAlias);
+    builder()->ClipRoundRect(rrect.rrect, DlClipOp::kIntersect, doAntiAlias);
   }
 }
 
@@ -185,8 +184,7 @@ void Canvas::clipPath(const CanvasPath* path, bool doAntiAlias) {
     return;
   }
   if (display_list_builder_) {
-    builder()->ClipPath(path->path(), DlCanvas::ClipOp::kIntersect,
-                        doAntiAlias);
+    builder()->ClipPath(path->path(), DlClipOp::kIntersect, doAntiAlias);
   }
 }
 
@@ -446,7 +444,7 @@ Dart_Handle Canvas::drawImageRect(const CanvasImage* image,
     const DlPaint* opt_paint =
         paint.paint(dl_paint, kDrawImageRectWithPaintFlags, DlTileMode::kClamp);
     builder()->DrawImageRect(dl_image, src, dst, sampling, opt_paint,
-                             DlCanvas::SrcRectConstraint::kFast);
+                             DlSrcRectConstraint::kFast);
   }
   return Dart_Null();
 }
@@ -511,7 +509,7 @@ void Canvas::drawPicture(Picture* picture) {
 
 void Canvas::drawPoints(Dart_Handle paint_objects,
                         Dart_Handle paint_data,
-                        DlCanvas::PointMode point_mode,
+                        DlPointMode point_mode,
                         const tonic::Float32List& points) {
   Paint paint(paint_objects, paint_data);
 
@@ -522,13 +520,13 @@ void Canvas::drawPoints(Dart_Handle paint_objects,
   if (display_list_builder_) {
     DlPaint dl_paint;
     switch (point_mode) {
-      case DlCanvas::PointMode::kPoints:
+      case DlPointMode::kPoints:
         paint.paint(dl_paint, kDrawPointsAsPointsFlags, DlTileMode::kDecal);
         break;
-      case DlCanvas::PointMode::kLines:
+      case DlPointMode::kLines:
         paint.paint(dl_paint, kDrawPointsAsLinesFlags, DlTileMode::kDecal);
         break;
-      case DlCanvas::PointMode::kPolygon:
+      case DlPointMode::kPolygon:
         paint.paint(dl_paint, kDrawPointsAsPolygonFlags, DlTileMode::kDecal);
         break;
     }
@@ -581,8 +579,8 @@ Dart_Handle Canvas::drawAtlas(Dart_Handle paint_objects,
     return ToDart(error.value());
   }
 
-  static_assert(sizeof(SkRSXform) == sizeof(float) * 4,
-                "SkRSXform doesn't use floats.");
+  static_assert(sizeof(DlRSTransform) == sizeof(float) * 4,
+                "DlRSTransform doesn't use floats.");
   static_assert(sizeof(DlRect) == sizeof(float) * 4,
                 "DlRect doesn't use floats.");
 
@@ -605,7 +603,7 @@ Dart_Handle Canvas::drawAtlas(Dart_Handle paint_objects,
     const DlPaint* opt_paint =
         paint.paint(dl_paint, kDrawAtlasWithPaintFlags, DlTileMode::kClamp);
     builder()->DrawAtlas(
-        dl_image, reinterpret_cast<const SkRSXform*>(transforms.data()),
+        dl_image, reinterpret_cast<const DlRSTransform*>(transforms.data()),
         reinterpret_cast<const DlRect*>(rects.data()), dl_color.data(),
         rects.num_elements() / 4,  // DlRect have four floats.
         blend_mode, sampling, reinterpret_cast<const DlRect*>(cull_rect.data()),

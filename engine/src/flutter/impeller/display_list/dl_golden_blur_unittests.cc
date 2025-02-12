@@ -6,57 +6,17 @@
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/impeller/display_list/testing/render_text_in_canvas.h"
+#include "flutter/impeller/display_list/testing/rmse.h"
 #include "flutter/impeller/geometry/round_rect.h"
 #include "flutter/impeller/golden_tests/screenshot.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
-#include "impeller/typographer/backends/skia/text_frame_skia.h"
-#include "txt/platform.h"
 
 namespace flutter {
 namespace testing {
 
 using impeller::Font;
-
-namespace {
-struct TextRenderOptions {
-  bool stroke = false;
-  SkScalar font_size = 50;
-  DlColor color = DlColor::kYellow();
-  std::shared_ptr<DlMaskFilter> mask_filter;
-};
-
-bool RenderTextInCanvasSkia(DlCanvas* canvas,
-                            const std::string& text,
-                            const std::string_view& font_fixture,
-                            SkPoint position,
-                            const TextRenderOptions& options = {}) {
-  auto c_font_fixture = std::string(font_fixture);
-  auto mapping = flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
-  if (!mapping) {
-    return false;
-  }
-  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
-  SkFont sk_font(font_mgr->makeFromData(mapping), options.font_size);
-  auto blob = SkTextBlob::MakeFromString(text.c_str(), sk_font);
-  if (!blob) {
-    return false;
-  }
-
-  auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
-
-  DlPaint text_paint;
-  text_paint.setColor(options.color);
-  text_paint.setMaskFilter(options.mask_filter);
-  // text_paint.mask_blur_descriptor = options.mask_blur_descriptor;
-  // text_paint.stroke_width = 1;
-  // text_paint.style =
-  //     options.stroke ? Paint::Style::kStroke : Paint::Style::kFill;
-  canvas->DrawTextFrame(frame, position.x(), position.y(), text_paint);
-  return true;
-}
-
-}  // namespace
 
 TEST_P(DlGoldenTest, TextBlurMaskFilterRespectCTM) {
   impeller::Point content_scale = GetContentScale();
@@ -70,13 +30,13 @@ TEST_P(DlGoldenTest, TextBlurMaskFilterRespectCTM) {
         DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/10,
                                /*respect_ctm=*/true);
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
-                                       "Roboto-Regular.ttf",
-                                       SkPoint::Make(101, 101), options));
+                                       "Roboto-Regular.ttf",  //
+                                       DlPoint(101, 101), options));
     options.mask_filter = nullptr;
     options.color = DlColor::kRed();
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
-                                       "Roboto-Regular.ttf",
-                                       SkPoint::Make(100, 100), options));
+                                       "Roboto-Regular.ttf",  //
+                                       DlPoint(100, 100), options));
   };
 
   DisplayListBuilder builder;
@@ -97,13 +57,13 @@ TEST_P(DlGoldenTest, TextBlurMaskFilterDisrespectCTM) {
         DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/10,
                                /*respect_ctm=*/false);
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
-                                       "Roboto-Regular.ttf",
-                                       SkPoint::Make(101, 101), options));
+                                       "Roboto-Regular.ttf",  //
+                                       DlPoint(101, 101), options));
     options.mask_filter = nullptr;
     options.color = DlColor::kRed();
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
-                                       "Roboto-Regular.ttf",
-                                       SkPoint::Make(100, 100), options));
+                                       "Roboto-Regular.ttf",  //
+                                       DlPoint(100, 100), options));
   };
 
   DisplayListBuilder builder;
@@ -111,41 +71,6 @@ TEST_P(DlGoldenTest, TextBlurMaskFilterDisrespectCTM) {
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
-
-namespace {
-double CalculateDistance(const uint8_t* left, const uint8_t* right) {
-  double diff[4] = {
-      static_cast<double>(left[0]) - right[0],  //
-      static_cast<double>(left[1]) - right[1],  //
-      static_cast<double>(left[2]) - right[2],  //
-      static_cast<double>(left[3]) - right[3]   //
-  };
-  return sqrt((diff[0] * diff[0]) +  //
-              (diff[1] * diff[1]) +  //
-              (diff[2] * diff[2]) +  //
-              (diff[3] * diff[3]));
-}
-
-double RMSE(const impeller::testing::Screenshot* left,
-            const impeller::testing::Screenshot* right) {
-  FML_CHECK(left);
-  FML_CHECK(right);
-  FML_CHECK(left->GetWidth() == right->GetWidth());
-  FML_CHECK(left->GetHeight() == right->GetHeight());
-
-  int64_t samples = left->GetWidth() * left->GetHeight();
-  double tally = 0;
-
-  const uint8_t* left_ptr = left->GetBytes();
-  const uint8_t* right_ptr = right->GetBytes();
-  for (int64_t i = 0; i < samples; ++i, left_ptr += 4, right_ptr += 4) {
-    double distance = CalculateDistance(left_ptr, right_ptr);
-    tally += distance * distance;
-  }
-
-  return sqrt(tally / static_cast<double>(samples));
-}
-}  // namespace
 
 // This is a test to make sure that we don't regress "shimmering" in the
 // gaussian blur. Shimmering is abrupt changes in signal when making tiny
@@ -161,13 +86,13 @@ TEST_P(DlGoldenTest, ShimmerTest) {
     canvas->Scale(content_scale.x, content_scale.y);
 
     DlPaint paint;
-    canvas->DrawImage(images[0], SkPoint::Make(10.135, 10.36334),
+    canvas->DrawImage(images[0], DlPoint(10.135, 10.36334),
                       DlImageSampling::kLinear, &paint);
 
-    SkRect save_layer_bounds = SkRect::MakeLTRB(0, 0, 1024, 768);
+    DlRect save_layer_bounds = DlRect::MakeLTRB(0, 0, 1024, 768);
     auto blur = DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kDecal);
-    canvas->ClipRect(SkRect::MakeLTRB(11.125, 10.3737, 911.25, 755.3333));
-    canvas->SaveLayer(&save_layer_bounds, /*paint=*/nullptr, blur.get());
+    canvas->ClipRect(DlRect::MakeLTRB(11.125, 10.3737, 911.25, 755.3333));
+    canvas->SaveLayer(save_layer_bounds, /*paint=*/nullptr, blur.get());
     canvas->Restore();
   };
 
@@ -229,7 +154,6 @@ TEST_P(DlGoldenTest, ShimmerTest) {
 
 TEST_P(DlGoldenTest, StrokedRRectFastBlur) {
   impeller::Point content_scale = GetContentScale();
-
   DlRect rect = DlRect::MakeXYWH(50, 50, 100, 100);
   DlRoundRect rrect = DlRoundRect::MakeRectRadius(rect, 10.0f);
   DlPaint fill = DlPaint().setColor(DlColor::kBlue());
@@ -247,6 +171,38 @@ TEST_P(DlGoldenTest, StrokedRRectFastBlur) {
   builder.DrawRoundRect(rrect.Shift(150, 0), stroke);
   builder.DrawRoundRect(rrect.Shift(0, 150), blur);
   builder.DrawRoundRect(rrect.Shift(150, 150), blur_stroke);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Top left and bottom right circles are expected to be comparable (not exactly
+// equal).
+// See also: https://github.com/flutter/flutter/issues/152778
+TEST_P(DlGoldenTest, LargeDownscaleRrect) {
+  impeller::Point content_scale = GetContentScale();
+  auto draw = [&](DlCanvas* canvas, const std::vector<sk_sp<DlImage>>& images) {
+    canvas->Scale(content_scale.x, content_scale.y);
+    canvas->DrawColor(DlColor(0xff111111));
+    {
+      canvas->Save();
+      canvas->Scale(0.25, 0.25);
+      DlPaint paint;
+      paint.setColor(DlColor::kYellow());
+      paint.setMaskFilter(
+          DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/1000));
+      canvas->DrawCircle(SkPoint::Make(0, 0), 1200, paint);
+      canvas->Restore();
+    }
+
+    DlPaint paint;
+    paint.setColor(DlColor::kYellow());
+    paint.setMaskFilter(
+        DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/250));
+    canvas->DrawCircle(SkPoint::Make(1024, 768), 300, paint);
+  };
+
+  DisplayListBuilder builder;
+  draw(&builder, /*images=*/{});
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

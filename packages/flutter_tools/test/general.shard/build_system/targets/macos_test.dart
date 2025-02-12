@@ -10,8 +10,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
-import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
@@ -34,7 +32,6 @@ void main() {
   late FakeCommand lipoInfoFatCommand;
   late FakeCommand lipoVerifyX86_64Command;
   late FakeCommand lipoExtractX86_64Command;
-  late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
@@ -42,7 +39,6 @@ void main() {
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -60,7 +56,6 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       engineVersion: '2',
-      usage: usage,
       analytics: fakeAnalytics,
     );
 
@@ -417,7 +412,6 @@ void main() {
             artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
           )
           .createSync();
-      environment.defines[kBundleSkSLPath] = 'bundle.sksl';
       fileSystem
           .file(
             artifacts.getArtifactPath(
@@ -437,16 +431,6 @@ void main() {
           )
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
-      // sksl bundle
-      fileSystem
-          .file('bundle.sksl')
-          .writeAsStringSync(
-            json.encode(<String, Object>{
-              'engineRevision': '2',
-              'platform': 'ios',
-              'data': <String, Object>{'A': 'B'},
-            }),
-          );
 
       final String inputKernel = '${environment.buildDir.path}/app.dill';
       fileSystem.file(inputKernel)
@@ -474,13 +458,6 @@ void main() {
         fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
         exists,
       );
-
-      final File skslFile = fileSystem.file(
-        'App.framework/Versions/A/Resources/flutter_assets/io.flutter.shaders.json',
-      );
-
-      expect(skslFile, exists);
-      expect(skslFile.readAsStringSync(), '{"data":{"A":"B"}}');
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -606,10 +583,6 @@ void main() {
 
       await const ReleaseMacOSBundleFlutterAssets().build(environment);
       expect(
-        usage.events,
-        contains(const TestUsageEvent('assemble', 'macos-archive', label: 'success')),
-      );
-      expect(
         fakeAnalytics.sentEvents,
         contains(
           Event.appleUsageEvent(
@@ -636,10 +609,6 @@ void main() {
       await expectLater(
         () => const ReleaseMacOSBundleFlutterAssets().build(environment),
         throwsA(const TypeMatcher<FileSystemException>()),
-      );
-      expect(
-        usage.events,
-        contains(const TestUsageEvent('assemble', 'macos-archive', label: 'fail')),
       );
       expect(
         fakeAnalytics.sentEvents,
