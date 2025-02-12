@@ -12,7 +12,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU();
 
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
-
 String? _computeEffectiveFontFamily(String? fontFamily) {
   return ui_web.debugEmulateFlutterTesterEnvironment && !_testFonts.contains(fontFamily)
       ? _testFonts.first
