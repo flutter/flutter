@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'dart:ui' show DartPerformanceMode;
 
 import 'button_style.dart';
 import 'color_scheme.dart';
@@ -30,6 +31,7 @@ import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
+import 'windowing.dart';
 
 // Examples can assume:
 // enum Commands { heroAndScholar, hurricaneCame }
@@ -581,6 +583,32 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   }
 }
 
+class _PopupMenuInterface<T> {
+  _PopupMenuInterface({
+    required this.items,
+    required this.itemSizes,
+    required this.animation,
+    this.initialValue,
+    this.menuPadding,
+    this.shape,
+    this.color,
+    this.shadowColor,
+    this.surfaceTintColor,
+    this.elevation,
+  });
+
+  final List<PopupMenuEntry<T>> items;
+  final List<Size?> itemSizes;
+  final Animation<double>? animation;
+  final T? initialValue;
+  final EdgeInsetsGeometry? menuPadding;
+  final ShapeBorder? shape;
+  final Color? color;
+  final Color? shadowColor;
+  final Color? surfaceTintColor;
+  final double? elevation;
+}
+
 class _PopupMenu<T> extends StatefulWidget {
   const _PopupMenu({
     super.key,
@@ -592,7 +620,7 @@ class _PopupMenu<T> extends StatefulWidget {
   });
 
   final List<GlobalKey> itemKeys;
-  final _PopupMenuRoute<T> route;
+  final _PopupMenuInterface<T> route;
   final String? semanticLabel;
   final BoxConstraints? constraints;
   final Clip clipBehavior;
@@ -952,7 +980,18 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     }
 
     final Widget menu = _PopupMenu<T>(
-      route: this,
+      route: _PopupMenuInterface<T>(
+        items: items,
+        itemSizes: itemSizes,
+        animation: animation,
+        initialValue: initialValue,
+        menuPadding: menuPadding,
+        shape: shape,
+        color: color,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        elevation: elevation,
+      ),
       itemKeys: itemKeys,
       semanticLabel: semanticLabel,
       constraints: constraints,
@@ -991,6 +1030,180 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   void dispose() {
     _animation?.dispose();
     super.dispose();
+  }
+}
+
+class _PopupWindowRoute<T> extends Route<T> {
+  _PopupWindowRoute({
+    required this.controller,
+    required this.builder,
+    required NavigatorState navigator,
+    AnimationStyle? popUpAnimationStyle,
+  }) : _navigator = navigator,
+       _popUpAnimationStyle = popUpAnimationStyle;
+
+  final PopupWindowController controller;
+  final Widget Function(BuildContext context, Animation<double>? animation) builder;
+
+  @override
+  List<OverlayEntry> get overlayEntries => _overlayEntries;
+  final List<OverlayEntry> _overlayEntries = <OverlayEntry>[];
+  final NavigatorState _navigator;
+  final AnimationStyle? _popUpAnimationStyle;
+
+  late final AnimationController _animationController;
+  late final Animation<double> _animation;
+
+  /// Handle to the performance mode request.
+  ///
+  /// When the route is animating, the performance mode is requested. It is then
+  /// disposed when the animation ends. Requesting [DartPerformanceMode.latency]
+  /// indicates to the engine that the transition is latency sensitive and to delay
+  /// non-essential work while this handle is active.
+  PerformanceModeRequestHandle? _performanceModeRequestHandle;
+
+  @override
+  void install() {
+    assert(_overlayEntries.isEmpty);
+    final Duration duration = _popUpAnimationStyle?.duration ?? _kMenuDuration;
+    _animationController = AnimationController(
+      duration: duration,
+      reverseDuration: duration,
+      debugLabel: 'PopupWindowRoute',
+      vsync: _navigator,
+    );
+    _animation = createAnimation()..addStatusListener(_handleStatusChanged);
+    _overlayEntries.add(
+      OverlayEntry(
+        builder: (BuildContext context) {
+          return PopupWindow(controller: controller, child: builder(context, null));
+        },
+      ),
+    );
+    super.install();
+  }
+
+  /// Called to create the animation that exposes the current progress of
+  /// the transition controlled by the animation controller created by
+  /// [createAnimationController()].
+  Animation<double> createAnimation() {
+    if (_popUpAnimationStyle != AnimationStyle.noAnimation) {
+      return CurvedAnimation(
+        parent: _animationController.view,
+        curve: _popUpAnimationStyle?.curve ?? Curves.linear,
+        reverseCurve:
+            _popUpAnimationStyle?.reverseCurve ?? const Interval(0.0, _kMenuCloseIntervalEnd),
+      );
+    }
+
+    return _animationController.view;
+  }
+
+  @override
+  TickerFuture didPush() {
+    super.didPush();
+    return _animationController.forward();
+  }
+
+  void _handleStatusChanged(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.completed:
+        _performanceModeRequestHandle?.dispose();
+        _performanceModeRequestHandle = null;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        _performanceModeRequestHandle ??= SchedulerBinding.instance.requestPerformanceMode(
+          DartPerformanceMode.latency,
+        );
+      case AnimationStatus.dismissed:
+        // We might still be an active route if a subclass is controlling the
+        // transition and hits the dismissed status. For example, the iOS
+        // back gesture drives this animation to the dismissed status before
+        // removing the route and disposing it.
+        if (!isActive) {
+          navigator!.finalizeRoute(this);
+          _performanceModeRequestHandle?.dispose();
+          _performanceModeRequestHandle = null;
+        }
+    }
+  }
+
+  @override
+  void dispose() {
+    _animation.removeStatusListener(_handleStatusChanged);
+    _animationController.dispose();
+    _performanceModeRequestHandle?.dispose();
+    _performanceModeRequestHandle = null;
+    for (final OverlayEntry entry in _overlayEntries) {
+      entry.dispose();
+    }
+    _overlayEntries.clear();
+    super.dispose();
+  }
+
+  @override
+  void didComplete(T? result) {
+    controller.destroy();
+    super.didComplete(result);
+  }
+}
+
+class _PopupMenuWindowRouteContent<T> extends StatelessWidget {
+  _PopupMenuWindowRouteContent({
+    this.position,
+    required this.items,
+    required this.itemKeys,
+    this.initialValue,
+    this.elevation,
+    this.surfaceTintColor,
+    this.shadowColor,
+    this.semanticLabel,
+    this.shape,
+    this.menuPadding,
+    this.color,
+    required this.capturedThemes,
+    this.constraints,
+    required this.clipBehavior,
+    required this.animation,
+  }) : itemSizes = List<Size?>.filled(items.length, null);
+
+  final RelativeRect? position;
+  final List<PopupMenuEntry<T>> items;
+  final List<GlobalKey> itemKeys;
+  final List<Size?> itemSizes;
+  final T? initialValue;
+  final double? elevation;
+  final Color? surfaceTintColor;
+  final Color? shadowColor;
+  final String? semanticLabel;
+  final ShapeBorder? shape;
+  final EdgeInsetsGeometry? menuPadding;
+  final Color? color;
+  final CapturedThemes capturedThemes;
+  final BoxConstraints? constraints;
+  final Clip clipBehavior;
+  final Animation<double>? animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return _PopupMenu<T>(
+      route: _PopupMenuInterface<T>(
+        items: items,
+        itemSizes: itemSizes,
+        animation: animation,
+        initialValue: initialValue,
+        menuPadding: menuPadding,
+        shape: shape,
+        color: color,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        elevation: elevation,
+      ),
+      itemKeys: itemKeys,
+      semanticLabel: semanticLabel,
+      constraints: constraints,
+      clipBehavior: clipBehavior,
+    );
   }
 }
 
@@ -1127,29 +1340,70 @@ Future<T?> showMenu<T>({
     (int index) => GlobalKey(),
   );
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
-  return navigator.push(
-    _PopupMenuRoute<T>(
-      position: position,
-      positionBuilder: positionBuilder,
-      items: items,
-      itemKeys: menuItemKeys,
-      initialValue: initialValue,
-      elevation: elevation,
-      shadowColor: shadowColor,
-      surfaceTintColor: surfaceTintColor,
-      semanticLabel: semanticLabel,
-      barrierLabel: MaterialLocalizations.of(context).menuDismissLabel,
-      shape: shape,
-      menuPadding: menuPadding,
-      color: color,
-      capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
-      constraints: constraints,
-      clipBehavior: clipBehavior,
-      settings: routeSettings,
-      popUpAnimationStyle: popUpAnimationStyle,
-      requestFocus: requestFocus,
-    ),
-  );
+  final bool useWindowingApi = Windowing.of(context);
+  if (useWindowingApi) {
+    return navigator.push(
+      _PopupMenuRoute<T>(
+        position: position,
+        positionBuilder: positionBuilder,
+        items: items,
+        itemKeys: menuItemKeys,
+        initialValue: initialValue,
+        elevation: elevation,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        semanticLabel: semanticLabel,
+        barrierLabel: MaterialLocalizations.of(context).menuDismissLabel,
+        shape: shape,
+        menuPadding: menuPadding,
+        color: color,
+        capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
+        constraints: constraints,
+        clipBehavior: clipBehavior,
+        settings: routeSettings,
+        popUpAnimationStyle: popUpAnimationStyle,
+        requestFocus: requestFocus,
+      ),
+    );
+  } else {
+    return navigator.push(
+      _PopupWindowRoute<T>(
+        builder: (BuildContext context, Animation<double>? animation) {
+          return _PopupMenuWindowRouteContent<T>(
+            position: position,
+            items: items,
+            itemKeys: menuItemKeys,
+            initialValue: initialValue,
+            elevation: elevation,
+            shadowColor: shadowColor,
+            surfaceTintColor: surfaceTintColor,
+            semanticLabel: semanticLabel,
+            shape: shape,
+            menuPadding: menuPadding,
+            color: color,
+            capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
+            constraints: constraints,
+            clipBehavior: clipBehavior,
+            animation: animation,
+          );
+        },
+        navigator: navigator,
+        popUpAnimationStyle: popUpAnimationStyle,
+        controller: PopupWindowController(
+          parent: WindowControllerContext.of(context)!.controller.rootView,
+          size: Size(400, 300), // TODO: Get a real size
+          anchorRect:
+              position != null
+                  ? Rect.fromLTRB(position.left, position.top, position.right, position.bottom)
+                  : null,
+          positioner: const WindowPositioner(
+            parentAnchor: WindowPositionerAnchor.topLeft,
+            childAnchor: WindowPositionerAnchor.topLeft,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Signature for the callback invoked when a menu item is selected. The
