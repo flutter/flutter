@@ -3228,7 +3228,7 @@ FlutterEngineResult FlutterEngineRunTask(FLUTTER_API_SYMBOL(FlutterEngine)
   }
 
   if (!flutter::EmbedderThreadHost::RunnerIsValid(
-          reinterpret_cast<int64_t>(task->runner))) {
+          reinterpret_cast<intptr_t>(task->runner))) {
     // This task came too late, the embedder has already been destroyed.
     // This is not an error, just ignore the task.
     return kSuccess;

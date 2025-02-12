@@ -13,7 +13,7 @@
 
 namespace flutter {
 
-std::set<int64_t> EmbedderThreadHost::active_runners_;
+std::set<intptr_t> EmbedderThreadHost::active_runners_;
 std::mutex EmbedderThreadHost::active_runners_mutex_;
 
 //------------------------------------------------------------------------------
@@ -325,7 +325,7 @@ void EmbedderThreadHost::InvalidateActiveRunners() {
   }
 }
 
-bool EmbedderThreadHost::RunnerIsValid(int64_t runner) {
+bool EmbedderThreadHost::RunnerIsValid(intptr_t runner) {
   std::lock_guard guard(active_runners_mutex_);
   return active_runners_.find(runner) != active_runners_.end();
 }
@@ -338,7 +338,7 @@ const flutter::TaskRunners& EmbedderThreadHost::GetTaskRunners() const {
   return runners_;
 }
 
-bool EmbedderThreadHost::PostTask(int64_t runner, uint64_t task) const {
+bool EmbedderThreadHost::PostTask(intptr_t runner, uint64_t task) const {
   auto found = runners_map_.find(runner);
   if (found == runners_map_.end()) {
     return false;

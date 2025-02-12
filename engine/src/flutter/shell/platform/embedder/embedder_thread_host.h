@@ -36,18 +36,18 @@ class EmbedderThreadHost {
 
   const flutter::TaskRunners& GetTaskRunners() const;
 
-  bool PostTask(int64_t runner, uint64_t task) const;
+  bool PostTask(intptr_t runner, uint64_t task) const;
 
-  static bool RunnerIsValid(int64_t runner);
+  static bool RunnerIsValid(intptr_t runner);
 
   void InvalidateActiveRunners();
 
  private:
   ThreadHost host_;
   flutter::TaskRunners runners_;
-  std::map<int64_t, fml::RefPtr<EmbedderTaskRunner>> runners_map_;
+  std::map<intptr_t, fml::RefPtr<EmbedderTaskRunner>> runners_map_;
 
-  static std::set<int64_t> active_runners_;
+  static std::set<intptr_t> active_runners_;
   static std::mutex active_runners_mutex_;
 
   static std::unique_ptr<EmbedderThreadHost> CreateEmbedderManagedThreadHost(

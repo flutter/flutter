@@ -284,7 +284,7 @@ bool EmbedderEngine::RunTask(const FlutterTask* task) {
   if (task == nullptr) {
     return false;
   }
-  auto result = thread_host_->PostTask(reinterpret_cast<int64_t>(task->runner),
+  auto result = thread_host_->PostTask(reinterpret_cast<intptr_t>(task->runner),
                                        task->task);
   // If the UI and platform threads are separate, the microtask queue is
   // flushed through MessageLoopTaskQueues observer.

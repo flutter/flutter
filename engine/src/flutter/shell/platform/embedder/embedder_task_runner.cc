@@ -9,7 +9,7 @@
 
 namespace flutter {
 
-std::atomic_int64_t EmbedderTaskRunner::next_unique_id_ = 0;
+std::atomic_intptr_t EmbedderTaskRunner::next_unique_id_ = 0;
 
 EmbedderTaskRunner::EmbedderTaskRunner(DispatchTable table,
                                        size_t embedder_identifier)
