@@ -26,16 +26,7 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   List<Widget> get children;
 
   ///
-  EdgeInsetsGeometry get childrenPadding;
-
-  ///
-  AlignmentGeometry get childrenAlignment;
-
-  ///
-  CrossAxisAlignment get expandedCrossAxisAlignment;
-
-  ///
-  bool get maintainState;
+  ValueChanged<bool>? get onExpansionChanged;
 
   ///
   Duration get expansionDuration;
@@ -47,7 +38,7 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   bool get initiallyExpanded;
 
   ///
-  ValueChanged<bool>? get onExpansionChanged;
+  bool get maintainState;
 
   @override
   void initState() {
@@ -96,13 +87,15 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 
   @protected
   ///
-  Widget buildExpansible(BuildContext context, Widget header, Widget body) {
-    return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]);
-  }
+  Widget buildExpansible(BuildContext context, Widget header, Widget body);
 
   @protected
   ///
   Widget buildHeader(BuildContext context);
+
+  @protected
+  ///
+  Widget buildBody(BuildContext context);
 
   @override
   Widget build(BuildContext context) {
@@ -111,13 +104,7 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 
     final Widget result = Offstage(
       offstage: closed,
-      child: TickerMode(
-        enabled: !closed,
-        child: Padding(
-          padding: childrenPadding,
-          child: Column(crossAxisAlignment: expandedCrossAxisAlignment, children: children),
-        ),
-      ),
+      child: TickerMode(enabled: !closed, child: buildBody(context)),
     );
 
     return AnimatedBuilder(
@@ -126,13 +113,7 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
         return buildExpansible(
           context,
           buildHeader(context),
-          ClipRect(
-            child: Align(
-              alignment: childrenAlignment,
-              heightFactor: heightFactor.value,
-              child: child,
-            ),
-          ),
+          ClipRect(child: Align(heightFactor: heightFactor.value, child: child)),
         );
       },
       child: shouldRemoveChildren ? null : result,

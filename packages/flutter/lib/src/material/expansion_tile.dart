@@ -602,10 +602,6 @@ class _ExpansionTileState extends State<ExpansionTile>
   bool get initiallyExpanded => widget.initiallyExpanded;
 
   @override
-  CrossAxisAlignment get expandedCrossAxisAlignment =>
-      widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center;
-
-  @override
   ValueChanged<bool>? get onExpansionChanged => widget.onExpansionChanged;
 
   @override
@@ -613,14 +609,6 @@ class _ExpansionTileState extends State<ExpansionTile>
 
   @override
   Curve get expansionCurve => Curves.easeIn;
-
-  @override
-  EdgeInsetsGeometry get childrenPadding =>
-      widget.childrenPadding ?? _expansionTileTheme.childrenPadding ?? EdgeInsets.zero;
-
-  @override
-  AlignmentGeometry get childrenAlignment =>
-      widget.expandedAlignment ?? _expansionTileTheme.expandedAlignment ?? Alignment.center;
 
   @override
   void initState() {
@@ -743,6 +731,21 @@ class _ExpansionTileState extends State<ExpansionTile>
           trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
           minTileHeight: widget.minTileHeight,
           internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget buildBody(BuildContext context) {
+    return Align(
+      alignment:
+          widget.expandedAlignment ?? _expansionTileTheme.expandedAlignment ?? Alignment.center,
+      child: Padding(
+        padding: widget.childrenPadding ?? _expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
+          children: children,
         ),
       ),
     );
