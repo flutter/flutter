@@ -160,8 +160,8 @@ class OutlinedButton extends ButtonStyleButton {
   /// [ButtonStyle.iconColor] and [iconSize] is used to construct
   /// [ButtonStyle.iconSize].
   ///
-  /// If [foregroundColor] is provided and [iconColor] is not provided, then the button icon will
-  /// use the provided [foregroundColor].
+  /// If [iconColor] is null, the button icon will use [foregroundColor]. If [foregroundColor] is also
+  /// null, the button icon will use the default icon color.
   ///
   /// If [overlayColor] is specified and its value is [Colors.transparent]
   /// then the pressed/focused/hovered highlights are effectively defeated.

@@ -161,8 +161,8 @@ class ElevatedButton extends ButtonStyleButton {
   /// [ButtonStyle.iconColor] and [iconSize] is used to construct
   /// [ButtonStyle.iconSize].
   ///
-  /// If [foregroundColor] is provided and [iconColor] is not provided, then the button icon will
-  /// use the provided [foregroundColor].
+  /// If [iconColor] is null, the button icon will use [foregroundColor]. If [foregroundColor] is also
+  /// null, the button icon will use the default icon color.
   ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
