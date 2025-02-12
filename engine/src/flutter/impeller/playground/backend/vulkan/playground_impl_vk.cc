@@ -95,7 +95,6 @@ PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
   context_settings.enable_validation = switches_.enable_vulkan_validation;
   context_settings.fatal_missing_validations =
       switches_.enable_vulkan_validation;
-  ;
 
   auto context_vk = ContextVK::Create(std::move(context_settings));
   if (!context_vk || !context_vk->IsValid()) {
@@ -235,6 +234,15 @@ bool PlaygroundImplVK::IsVulkanDriverPresent() {
                     "that does not support Vulkan.";
 #endif  // TARGET_OS_MAC
   return false;
+}
+
+// |PlaygroundImpl|
+Playground::VKProcAddressResolver
+PlaygroundImplVK::CreateVKProcAddressResolver() const {
+  return [](void* instance, const char* proc_name) -> void* {
+    return reinterpret_cast<void*>(::glfwGetInstanceProcAddress(
+        reinterpret_cast<VkInstance>(instance), proc_name));
+  };
 }
 
 }  // namespace impeller
