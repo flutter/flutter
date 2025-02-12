@@ -1125,6 +1125,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   ScrollableState? _scrollableState;
   _NavigationBarSearchField? preferredSizeSearchField;
   late AnimationController _animationController;
+  late CurvedAnimation _searchAnimation;
   late Animation<double> persistentHeightAnimation;
   late Animation<double> largeTitleHeightAnimation;
   bool searchIsActive = false;
@@ -1154,6 +1155,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
     }
     _animationController.dispose();
+    _searchAnimation.dispose();
     super.dispose();
   }
 
@@ -1169,6 +1171,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   void _setupSearchableAnimation() {
     _animationController = AnimationController(vsync: this, duration: _kNavBarSearchDuration);
+    _searchAnimation = CurvedAnimation(parent: _animationController, curve: _kNavBarSearchCurve);
     final Tween<double> persistentHeightTween = Tween<double>(
       begin: _kNavBarPersistentHeight,
       end: 0.0,
@@ -1266,7 +1269,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
     return MediaQuery.withNoTextScaling(
       child: AnimatedBuilder(
-        animation: CurvedAnimation(parent: _animationController, curve: _kNavBarSearchCurve),
+        animation: _searchAnimation,
         builder: (BuildContext context, Widget? child) {
           return SliverPersistentHeader(
             pinned: true, // iOS navigation bars are always pinned.
