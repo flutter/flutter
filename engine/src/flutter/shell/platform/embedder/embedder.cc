@@ -2566,6 +2566,7 @@ FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
   auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
   embedder_engine->NotifyDestroyed();
   embedder_engine->CollectShell();
+  embedder_engine->CollectThreadHost();
   return kSuccess;
 }
 
@@ -3224,6 +3225,13 @@ FlutterEngineResult FlutterEngineRunTask(FLUTTER_API_SYMBOL(FlutterEngine)
                                          const FlutterTask* task) {
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
+  }
+
+  if (!flutter::EmbedderThreadHost::RunnerIsValid(
+          reinterpret_cast<intptr_t>(task->runner))) {
+    // This task came too late, the embedder has already been destroyed.
+    // This is not an error, just ignore the task.
+    return kSuccess;
   }
 
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)->RunTask(task)
