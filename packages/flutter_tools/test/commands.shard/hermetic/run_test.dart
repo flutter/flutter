@@ -104,35 +104,6 @@ void main() {
     );
 
     testUsingContext(
-      'supports --no-sound-null-safety with an overridden NonNullSafeBuilds',
-      () async {
-        fileSystem.file('lib/main.dart').createSync(recursive: true);
-        fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-
-        final FakeDevice device = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.android,
-        );
-
-        testDeviceManager.devices = <Device>[device];
-        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
-        await createTestCommandRunner(command).run(const <String>[
-          'run',
-          '--use-application-binary=app/bar/faz',
-          '--no-sound-null-safety',
-        ]);
-      },
-      overrides: <Type, Generator>{
-        DeviceManager: () => testDeviceManager,
-        FileSystem: () => fileSystem,
-        Logger: () => logger,
-        NonNullSafeBuilds: () => NonNullSafeBuilds.allowed,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
-    testUsingContext(
       'does not support "--use-application-binary" and "--fast-start"',
       () async {
         fileSystem.file('lib/main.dart').createSync(recursive: true);

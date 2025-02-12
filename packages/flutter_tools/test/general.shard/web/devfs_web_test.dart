@@ -916,7 +916,6 @@ void main() {
           BuildMode.debug,
           '',
           treeShakeIcons: false,
-          nullSafetyMode: NullSafetyMode.unsound,
           packageConfigPath: '.dart_tool/package_config.json',
         ),
         enableDwds: false,
