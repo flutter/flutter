@@ -1363,7 +1363,7 @@ void main() {
               sortKey: const OrdinalSortKey(1),
               child: const Text('Flexible Space'),
             ),
-            customizeSemanticsSortKeys: true,
+            useDefaultSemanticsOrder: false,
           ),
         ),
       ),
