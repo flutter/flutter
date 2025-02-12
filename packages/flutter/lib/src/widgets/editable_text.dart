@@ -6072,11 +6072,7 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
 // TODO(justinmc): Some vertical handwriting seems to want to change the
 // selection instead of writing...
 class _Scribe extends StatefulWidget {
-  const _Scribe({
-    required this.child,
-    required this.editableKey,
-    required this.focusNode,
-  });
+  const _Scribe({required this.child, required this.editableKey, required this.focusNode});
 
   final Widget child;
   final GlobalKey editableKey;
@@ -6093,7 +6089,8 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
     vertical: 40.0,
   );
 
-  RenderEditable get _renderEditable => widget.editableKey.currentContext!.findRenderObject()! as RenderEditable;
+  RenderEditable get _renderEditable =>
+      widget.editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
   void initState() {
@@ -6146,8 +6143,7 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
 
   // End ScribeClient.
 
-  void _handlePanDown(DragDownDetails details) {
-  }
+  void _handlePanDown(DragDownDetails details) {}
 
   void _handlePointerDown(PointerDownEvent event) async {
     if (event.kind != ui.PointerDeviceKind.stylus) {
@@ -6167,10 +6163,7 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: _handlePointerDown,
-      child: widget.child,
-    );
+    return Listener(onPointerDown: _handlePointerDown, child: widget.child);
     /*
     return _EmbiggenerMultiChildRenderObjectWidget(
       margin: _handwritingPadding,
@@ -6228,11 +6221,7 @@ class _StylusHandwriting extends StatelessWidget {
       editableKey: editableKey,
       enabled: enabled,
       updateSelectionRects: updateSelectionRects,
-      child: _Scribe(
-        focusNode: focusNode,
-        editableKey: editableKey,
-        child: child,
-      ),
+      child: _Scribe(focusNode: focusNode, editableKey: editableKey, child: child),
     );
   }
 }

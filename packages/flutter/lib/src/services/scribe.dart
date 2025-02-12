@@ -156,7 +156,8 @@ final class Scribe {
 
   static Rect _getSelectionArea(List<dynamic> args, double devicePixelRatio) {
     final Map<dynamic, dynamic> argsMap = args.first as Map<dynamic, dynamic>;
-    final Map<dynamic, dynamic> selectionAreaMap = argsMap['selectionArea'] as Map<dynamic, dynamic>;
+    final Map<dynamic, dynamic> selectionAreaMap =
+        argsMap['selectionArea'] as Map<dynamic, dynamic>;
     final Map<String, double> selectionAreaJson = selectionAreaMap.cast<String, double>();
     return Rect.fromLTRB(
       // Flutter uses logical pixels while Android uses physical pixels, so we
@@ -191,15 +192,22 @@ final class Scribe {
     try {
       return await _handleScribeInputInvocation(call);
     } catch (exception, stack) {
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'services library',
-        context: ErrorDescription('during method call ${call.method}'),
-        informationCollector: () => <DiagnosticsNode>[
-          DiagnosticsProperty<MethodCall>('call', call, style: DiagnosticsTreeStyle.errorProperty),
-        ],
-      ));
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context: ErrorDescription('during method call ${call.method}'),
+          informationCollector:
+              () => <DiagnosticsNode>[
+                DiagnosticsProperty<MethodCall>(
+                  'call',
+                  call,
+                  style: DiagnosticsTreeStyle.errorProperty,
+                ),
+              ],
+        ),
+      );
       rethrow;
     }
   }
