@@ -19,7 +19,6 @@ import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../version.dart';
 import 'compiler_config.dart';
 import 'file_generators/flutter_service_worker_js.dart';
@@ -41,14 +40,12 @@ class WebBuilder {
     required Logger logger,
     required ProcessManager processManager,
     required BuildSystem buildSystem,
-    required Usage usage,
     required Analytics analytics,
     required FlutterVersion flutterVersion,
     required FileSystem fileSystem,
   }) : _logger = logger,
        _processManager = processManager,
        _buildSystem = buildSystem,
-       _flutterUsage = usage,
        _analytics = analytics,
        _flutterVersion = flutterVersion,
        _fileSystem = fileSystem;
@@ -56,7 +53,6 @@ class WebBuilder {
   final Logger _logger;
   final ProcessManager _processManager;
   final BuildSystem _buildSystem;
-  final Usage _flutterUsage;
   final Analytics _analytics;
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
@@ -146,19 +142,12 @@ class WebBuilder {
 
     final String buildSettingsString = _buildEventAnalyticsSettings(configs: compilerConfigs);
 
-    BuildEvent(
-      'web-compile',
-      type: 'web',
-      settings: buildSettingsString,
-      flutterUsage: _flutterUsage,
-    ).send();
     _analytics.send(
       Event.flutterBuildInfo(label: 'web-compile', buildType: 'web', settings: buildSettingsString),
     );
 
     final Duration elapsedDuration = sw.elapsed;
     final String variableName = compilerConfigs.length > 1 ? 'dual-compile' : 'dart2js';
-    _flutterUsage.sendTiming('build', variableName, elapsedDuration);
     _analytics.send(
       Event.timing(
         workflow: 'build',
@@ -261,72 +250,39 @@ enum WebRendererMode {
 
 /// The correct precompiled artifact to use for each build and render mode for DDC with AMD modules.
 // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kAmdDartSdkJsArtifactMap =
-    <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-      WebRendererMode.auto: <NullSafetyMode, HostArtifact>{
-        NullSafetyMode.sound: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk,
-        NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk,
-      },
-      WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact>{
-        NullSafetyMode.sound: HostArtifact.webPrecompiledAmdCanvaskitSoundSdk,
-        NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdCanvaskitSdk,
-      },
-      WebRendererMode.html: <NullSafetyMode, HostArtifact>{
-        NullSafetyMode.sound: HostArtifact.webPrecompiledAmdSoundSdk,
-        NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdSdk,
-      },
-    };
+const Map<WebRendererMode, HostArtifact> kAmdDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.auto: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk,
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdk,
+  WebRendererMode.html: HostArtifact.webPrecompiledAmdSdk,
+};
 
 /// The correct source map artifact to use for each build and render mode for DDC with AMD modules.
 // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kAmdDartSdkJsMapArtifactMap =
-    <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-      WebRendererMode.auto: <NullSafetyMode, HostArtifact>{
-        NullSafetyMode.sound: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdkSourcemaps,
-        NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps,
-      },
-      WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact>{
-        NullSafetyMode.sound: HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps,
-        NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps,
-      },
-      WebRendererMode.html: <NullSafetyMode, HostArtifact>{
-        NullSafetyMode.sound: HostArtifact.webPrecompiledAmdSoundSdkSourcemaps,
-        NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdSdkSourcemaps,
-      },
+const Map<WebRendererMode, HostArtifact> kAmdDartSdkJsMapArtifactMap =
+    <WebRendererMode, HostArtifact>{
+      WebRendererMode.auto: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps,
+      WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps,
+      WebRendererMode.html: HostArtifact.webPrecompiledAmdSdkSourcemaps,
     };
 
 /// The correct precompiled artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format. Only artifacts with sound
-/// null-safety are provided.
-const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>>
-kDdcLibraryBundleDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-  WebRendererMode.auto: <NullSafetyMode, HostArtifact>{
-    NullSafetyMode.sound: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSoundSdk,
-  },
-  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact>{
-    NullSafetyMode.sound: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdk,
-  },
-  WebRendererMode.html: <NullSafetyMode, HostArtifact>{
-    NullSafetyMode.sound: HostArtifact.webPrecompiledDdcLibraryBundleSoundSdk,
-  },
-};
+/// DDC with DDC library bundle module format.
+const Map<WebRendererMode, HostArtifact> kDdcLibraryBundleDartSdkJsArtifactMap =
+    <WebRendererMode, HostArtifact>{
+      WebRendererMode.auto: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdk,
+      WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
+      WebRendererMode.html: HostArtifact.webPrecompiledDdcLibraryBundleSdk,
+    };
 
 /// The correct source map artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format. Only artifacts with sound
-/// null-safety are provided.
-const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>>
-kDdcLibraryBundleDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-  WebRendererMode.auto: <NullSafetyMode, HostArtifact>{
-    NullSafetyMode.sound:
-        HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSoundSdkSourcemaps,
-  },
-  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact>{
-    NullSafetyMode.sound: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdkSourcemaps,
-  },
-  WebRendererMode.html: <NullSafetyMode, HostArtifact>{
-    NullSafetyMode.sound: HostArtifact.webPrecompiledDdcLibraryBundleSoundSdkSourcemaps,
-  },
-};
+/// DDC with DDC library bundle module format.
+const Map<WebRendererMode, HostArtifact> kDdcLibraryBundleDartSdkJsMapArtifactMap =
+    <WebRendererMode, HostArtifact>{
+      WebRendererMode.auto:
+          HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdkSourcemaps,
+      WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps,
+      WebRendererMode.html: HostArtifact.webPrecompiledDdcLibraryBundleSdkSourcemaps,
+    };
 
 String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) {
   final Map<String, Object> values = <String, Object>{};
