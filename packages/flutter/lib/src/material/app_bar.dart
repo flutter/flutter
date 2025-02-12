@@ -751,8 +751,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this is set to true, the app bar will use the default semantic ordering,
   /// which places the flexible space after the main content in the semantics tree.
   ///
-  /// Set this to false  if you want to assign [SemanticsSortKey]s to appbar
-  /// children and customize semantics traversal order.
+  /// Set this to false if you want to customize semantics traversal order in the AppBar.
+  /// You can then assign [SemanticsSortKey]s to AppBar children to control the order.
   ///
   /// Defaults to true.
   ///
