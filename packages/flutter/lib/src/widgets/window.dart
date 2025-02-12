@@ -318,9 +318,6 @@ abstract class WindowController with ChangeNotifier {
   FlutterView get rootView => _view!;
   FlutterView? _view;
 
-  /// Returns true when the window associated with the controller has been created.
-  bool get isShowing => _view != null;
-
   /// The current size of the window. This may differ from the requested size.
   Size get size => _size;
   Size _size = Size.zero;

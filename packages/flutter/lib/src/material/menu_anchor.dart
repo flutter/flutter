@@ -325,7 +325,7 @@ class _MenuAnchorStateController {
     if (_overlayPortalController != null) {
       return _overlayPortalController!.isShowing;
     } else if (_popupWindowController != null) {
-      return _popupWindowController!.isShowing;
+      return _popupWindowController!.isReady;
     } else {
       return false;
     }
@@ -385,7 +385,12 @@ class _MenuAnchorStateController {
   }
 
   void show() {
-    assert(_isInitialized);
+    assert(!_isInitialized);
+    
+    if (Windowing.of(anchor._anchorKey.currentContext!)) {
+      initWindowing();
+    }
+
     if (_overlayPortalController != null) {
       _overlayPortalController!.show();
     } else {
@@ -437,14 +442,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
       _internalMenuController = MenuController();
     }
     _menuController._attach(this);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (Windowing.of(context)) {
-        _overlayController.initWindowing();
-      } else {
-        _overlayController.initSingleWin();
-      }
-    });
   }
 
   @override
