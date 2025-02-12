@@ -319,7 +319,7 @@ TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
     return true;
   };
 
-  Playground::OpenPlaygroundHere(callback);
+  ASSERT_TRUE(Playground::OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing
