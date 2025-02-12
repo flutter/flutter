@@ -1128,6 +1128,16 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: linux_desktop_impeller
 
+  - name: Linux_android_emu android_display_cutout
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_display_cutout
+      presubmit_max_attempts: "2"
+
   - name: Linux android_release_builds_exclude_dev_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3557,6 +3567,7 @@ targets:
       task_name: animated_complex_opacity_perf_macos__e2e_summary
 
   - name: Mac_benchmark basic_material_app_macos__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/162364
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3820,7 +3831,6 @@ targets:
       task_name: flavors_test_macos
 
   - name: Mac_benchmark flutter_gallery_macos__compile
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/160495
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
