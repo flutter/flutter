@@ -14,12 +14,14 @@ import 'package:ui/ui.dart' as ui;
 //import '../dom.dart';
 import 'paragraph.dart';
 
+final textCanvas = createDomOffscreenCanvas(200, 200);
+
 /// A single canvas2d context to use for all text information.
 @visibleForTesting
-final DomCanvasRenderingContext2D textContext =
+final textContext =
     // We don't use this canvas to draw anything, so let's make it as small as
     // possible to save memory.
-    createDomCanvasElement(width: 0, height: 0).context2D;
+    textCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
 
 /// Performs layout on a [CanvasParagraph].
 ///
@@ -58,43 +60,31 @@ class TextPaint {
     textContext.fillTextCluster(webTextCluster.textCluster!, x, y);
     print('fillTextCluster');
 
-    final DomImageData imageData = textContext.getImageData(
-      x.toInt(),
-      y.toInt(),
-      webTextCluster.width.toInt(),
-      webTextCluster.height.toInt(),
-    );
-    final Uint8List list = imageData.data.buffer.asUint8List();
-    print(
-      'getImageData(${webTextCluster.width.toInt()} * ${webTextCluster.height.toInt()} * 4)=${list.length}\n',
-    );
-
-    domWindow.createImageBitmap(imageData).then((DomImageBitmap bitmap) {
-      print('createImageBitmap: ${bitmap.width}, ${bitmap.height}\n');
-      if (bitmap == null) {
-        throw Exception('Failed to create a bitmap image.');
-      } else {
-        //final ui.Image image = canvas.createImageFromImageBitmap(bitmap);
-        //print('createImageFromImageBitmap: ${image.width()}, ${image.height()}\n');
-        /*
-        final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-        if (skImage == null) {
-          throw Exception('Failed to convert text image bitmap to an SkImage.');
-        }
-        print('MakeLazyImageFromImageBitmap: ${skImage.width()}, ${skImage.height()}\n');
-        canvas.drawImage(CkImage(skImage) as ui.Image, ui.Offset(x, y), CkPaint());
-         */
-        final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-        if (skImage == null) {
-          throw Exception('Failed to convert text image bitmap to an SkImage.');
-        }
-        print('MakeLazyImageFromImageBitmap: ${skImage.width()}, ${skImage.height()}\n');
-
-        final CkImage ckImage = CkImage(skImage); //, imageSource: ImageBitmapImageSource(bitmap));
-        canvas.drawImage(ckImage, ui.Offset(x, y), CkPaint());
-        print('drawImage\n');
+    final DomImageBitmap? bitmap = textCanvas.transferToImageBitmap();
+    print('createImageBitmap: ${bitmap?.width}, ${bitmap?.height}\n');
+    if (bitmap == null) {
+      throw Exception('Failed to create a bitmap image.');
+    } else {
+      //final ui.Image image = canvas.createImageFromImageBitmap(bitmap);
+      //print('createImageFromImageBitmap: ${image.width()}, ${image.height()}\n');
+      /*
+      final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+      if (skImage == null) {
+        throw Exception('Failed to convert text image bitmap to an SkImage.');
       }
-    });
+      print('MakeLazyImageFromImageBitmap: ${skImage.width()}, ${skImage.height()}\n');
+      canvas.drawImage(CkImage(skImage) as ui.Image, ui.Offset(x, y), CkPaint());
+        */
+      final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+      if (skImage == null) {
+        throw Exception('Failed to convert text image bitmap to an SkImage.');
+      }
+      print('MakeLazyImageFromImageBitmap: ${skImage.width()}, ${skImage.height()}\n');
+
+      final CkImage ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+      canvas.drawImage(ckImage, ui.Offset(x, y), ui.Paint()..filterQuality = ui.FilterQuality.none);
+      print('drawImage\n');
+    }
   }
 
   void printTextCluster(WebTextCluster webTextCluster) {
