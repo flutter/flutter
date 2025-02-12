@@ -151,6 +151,8 @@ class NextContext extends Context {
         }
 
         await pushWorkingBranch(framework, state.framework);
+      case pb.ReleasePhase.UPDATE_ENGINE_VERSION:
+        '';
       case pb.ReleasePhase.PUBLISH_VERSION:
         final String command = '''
           tool-proxy-cli --tool_proxy=/abns/dart-eng-tool-proxy/prod-dart-eng-tool-proxy-tool-proxy.annealed-tool-proxy \\

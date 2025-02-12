@@ -70,7 +70,7 @@ void main() {
         );
       });
 
-      group('APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION', () {
+      group('APPLY_FRAMEWORK_CHERRYPICKS to UPDATE_ENGINE_VERSION', () {
         const String mirrorRemoteUrl = 'https://github.com/org/repo.git';
         const String upstreamRemoteUrl = 'https://github.com/mirror/repo.git';
         const String engineUpstreamRemoteUrl = 'https://github.com/mirror/engine.git';
@@ -226,7 +226,7 @@ void main() {
 
           final pb.ConductorState finalState = readStateFromFile(fileSystem.file(stateFile));
 
-          expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
+          expect(finalState.currentPhase, ReleasePhase.UPDATE_ENGINE_VERSION);
           expect(stdio.stdout, contains('There was 1 cherrypick that was not auto-applied'));
           expect(
             stdio.stdout,
@@ -239,6 +239,91 @@ void main() {
             contains('Executed command: `git push mirror HEAD:refs/heads/$workingBranch`'),
           );
           expect(stdio.error, isEmpty);
+        });
+      });
+      group('UPDATE_ENGINE_VERSION to PUBLISH_VERSION', () {
+        const String mirrorRemoteUrl = 'https://github.com/org/repo.git';
+        const String upstreamRemoteUrl = 'https://github.com/mirror/repo.git';
+        const String engineUpstreamRemoteUrl = 'https://github.com/mirror/engine.git';
+        const String frameworkCheckoutPath = '$checkoutsParentDirectory/framework';
+        const String engineCheckoutPath = '$checkoutsParentDirectory/engine';
+        const String oldEngineVersion = '000000001';
+        const String frameworkCherrypick = '431ae69b4dd2dd48f7ba0153671e0311014c958b';
+
+        late FakeProcessManager processManager;
+        late FakePlatform platform;
+        late pb.ConductorState state;
+
+        setUp(() {
+          processManager = FakeProcessManager.empty();
+          platform = FakePlatform(
+            environment: <String, String>{
+              'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
+            },
+            operatingSystem: localOperatingSystem,
+            pathSeparator: localPathSeparator,
+          );
+          state =
+              (pb.ConductorState.create()
+                ..releaseChannel = releaseChannel
+                ..releaseVersion = releaseVersion
+                ..framework =
+                    (pb.Repository.create()
+                      ..candidateBranch = candidateBranch
+                      ..checkoutPath = frameworkCheckoutPath
+                      ..cherrypicks.add(
+                        pb.Cherrypick.create()
+                          ..trunkRevision = frameworkCherrypick
+                          ..state = pb.CherrypickState.PENDING,
+                      )
+                      ..mirror =
+                          (pb.Remote.create()
+                            ..name = 'mirror'
+                            ..url = mirrorRemoteUrl)
+                      ..upstream =
+                          (pb.Remote.create()
+                            ..name = 'upstream'
+                            ..url = upstreamRemoteUrl)
+                      ..workingBranch = workingBranch)
+                ..engine =
+                    (pb.Repository.create()
+                      ..candidateBranch = candidateBranch
+                      ..checkoutPath = engineCheckoutPath
+                      ..dartRevision = 'cdef0123'
+                      ..workingBranch = workingBranch
+                      ..upstream =
+                          (pb.Remote.create()
+                            ..name = 'upstream'
+                            ..url = engineUpstreamRemoteUrl))
+                ..currentPhase = ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
+          // create engine repo
+          fileSystem.directory(engineCheckoutPath).createSync(recursive: true);
+          // create framework repo
+          final Directory frameworkDir = fileSystem.directory(frameworkCheckoutPath);
+          final File engineRevisionFile = frameworkDir
+              .childDirectory('bin')
+              .childDirectory('internal')
+              .childFile('engine.version');
+          engineRevisionFile.createSync(recursive: true);
+          engineRevisionFile.writeAsStringSync(oldEngineVersion, flush: true);
+        });
+
+        test('creates a PR with an updated engine.version file', () async {
+          final Checkouts checkouts = Checkouts(
+            fileSystem: fileSystem,
+            parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+              ..createSync(recursive: true),
+            platform: platform,
+            processManager: processManager,
+            stdio: stdio,
+          );
+
+          final CommandRunner<void> runner = createRunner(checkouts: checkouts);
+          await runner.run(<String>['next', '--$kStateOption', stateFile]);
+
+          final pb.ConductorState finalState = readStateFromFile(fileSystem.file(stateFile));
+
+          expect (finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
         });
       });
 

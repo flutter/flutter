@@ -156,6 +156,8 @@ String phaseInstructions(pb.ConductorState state) {
       return <String>[
         'Either all cherrypicks have been auto-applied or there were none.',
       ].join('\n');
+    case ReleasePhase.UPDATE_ENGINE_VERSION:
+      return 'The conductor will now update the engine.version file to point at the previous commit.';
     case ReleasePhase.PUBLISH_VERSION:
       if (!requiresFrameworkPR(state)) {
         return 'Since there are no code changes in this release, no Framework '
