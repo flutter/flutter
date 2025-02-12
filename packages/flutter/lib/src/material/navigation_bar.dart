@@ -299,27 +299,29 @@ class NavigationBar extends StatelessWidget {
               children: <Widget>[
                 for (int i = 0; i < destinations.length; i++)
                   Expanded(
-                    child: Semantics(
-                      role: SemanticsRole.tab,
-                      child: _SelectableAnimatedBuilder(
-                        duration: animationDuration ?? const Duration(milliseconds: 500),
-                        isSelected: i == selectedIndex,
-                        builder: (BuildContext context, Animation<double> animation) {
-                          return _NavigationDestinationInfo(
-                            index: i,
-                            selectedIndex: selectedIndex,
-                            totalNumberOfDestinations: destinations.length,
-                            selectedAnimation: animation,
-                            labelBehavior: effectiveLabelBehavior,
-                            indicatorColor: indicatorColor,
-                            indicatorShape: indicatorShape,
-                            overlayColor: overlayColor,
-                            onTap: _handleTap(i),
-                            labelTextStyle: labelTextStyle,
-                            labelPadding: labelPadding,
-                            child: destinations[i],
-                          );
-                        },
+                    child: MergeSemantics(
+                      child: Semantics(
+                        role: SemanticsRole.tab,
+                        child: _SelectableAnimatedBuilder(
+                          duration: animationDuration ?? const Duration(milliseconds: 500),
+                          isSelected: i == selectedIndex,
+                          builder: (BuildContext context, Animation<double> animation) {
+                            return _NavigationDestinationInfo(
+                              index: i,
+                              selectedIndex: selectedIndex,
+                              totalNumberOfDestinations: destinations.length,
+                              selectedAnimation: animation,
+                              labelBehavior: effectiveLabelBehavior,
+                              indicatorColor: indicatorColor,
+                              indicatorShape: indicatorShape,
+                              overlayColor: overlayColor,
+                              onTap: _handleTap(i),
+                              labelTextStyle: labelTextStyle,
+                              labelPadding: labelPadding,
+                              child: destinations[i],
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
