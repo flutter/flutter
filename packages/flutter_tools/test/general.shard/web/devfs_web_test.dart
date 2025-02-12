@@ -941,17 +941,9 @@ void main() {
       final Uri uri = await webDevFS.create();
       webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
       final String webPrecompiledSdk =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdSoundSdk).path;
+          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdSdk).path;
       final String webPrecompiledSdkSourcemaps =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdSoundSdkSourcemaps).path;
-      final String webPrecompiledCanvaskitSdk =
-          globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps)
-              .path;
-      final String webPrecompiledCanvaskitSdkSourcemaps =
-          globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps)
-              .path;
+          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdSdkSourcemaps).path;
       globals.fs.currentDirectory.childDirectory('lib').childFile('web_entrypoint.dart')
         ..createSync(recursive: true)
         ..writeAsStringSync('GENERATED');
@@ -961,12 +953,6 @@ void main() {
       globals.fs.file(webPrecompiledSdkSourcemaps)
         ..createSync(recursive: true)
         ..writeAsStringSync('THERE');
-      globals.fs.file(webPrecompiledCanvaskitSdk)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('OL');
-      globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('CHUM');
 
       await webDevFS.update(
         mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
@@ -1065,14 +1051,14 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('GENERATED');
       final String webPrecompiledSdk =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdSoundSdk).path;
+          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdSdk).path;
       final String webPrecompiledSdkSourcemaps =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdSoundSdkSourcemaps).path;
+          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdSdkSourcemaps).path;
       final String webPrecompiledCanvaskitSdk =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdk).path;
+          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdk).path;
       final String webPrecompiledCanvaskitSdkSourcemaps =
           globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps)
+              .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps)
               .path;
       final String flutterJs = globals.fs.path.join(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
