@@ -23,6 +23,7 @@ import 'common.dart';
 import 'src/callback.dart' as driver_actions;
 import 'src/channel.dart';
 import 'src/extension.dart';
+import 'src/vm_service_golden_client.dart';
 
 export 'src/vm_service_golden_client.dart';
 
@@ -154,6 +155,8 @@ https://docs.flutter.dev/testing/integration-tests
   ///
   ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
   static IntegrationTestWidgetsFlutterBinding ensureInitialized() {
+    // Change the golden-file comparator if required by the platform.
+    VmServiceProxyGoldenFileComparator.useIfRunningOnDevice();
     if (_instance == null) {
       IntegrationTestWidgetsFlutterBinding();
     }
