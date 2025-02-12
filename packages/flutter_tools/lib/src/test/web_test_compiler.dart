@@ -118,7 +118,7 @@ class WebTestCompiler {
     required BuildInfo buildInfo,
     required WebRendererMode webRenderer,
   }) async {
-    final LanguageVersion languageVersion = LanguageVersion(2, 8);
+    final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
     final String platformDillPath = _fileSystem.path.join(
       _artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
       'ddc_outline.dill',
