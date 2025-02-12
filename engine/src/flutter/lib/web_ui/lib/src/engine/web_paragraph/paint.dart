@@ -50,71 +50,51 @@ class TextPaint {
      */
   }
 
-  void paintTexture(CkCanvas canvas, WebTextCluster webTextCluster, double x, double y) {
+  void paintTexture(CanvasKitCanvas canvas, WebTextCluster webTextCluster, double x, double y) {
     String text = this.paragraph.text.substring(webTextCluster.begin, webTextCluster.end);
 
     textContext.font = '50px arial';
     textContext.fillStyle = 'red';
-    textContext.fillTextCluster(webTextCluster.textCluster!, 0, 0);
+    textContext.fillTextCluster(webTextCluster.textCluster!, x, y);
+    print('fillTextCluster');
 
-    print('getImageData(${webTextCluster.x.toInt()}, ${webTextCluster.y.toInt()})\n');
-    final Uint8List imageData =
-        textContext
-            .getImageData(0, 0, webTextCluster.x.toInt(), webTextCluster.y.toInt())
-            .data
-            .buffer
-            .asUint8List();
-    print('MakeImage\n');
-    final SkImage? skImage1 = canvasKit.MakeImage(
-      SkImageInfo(
-        alphaType: canvasKit.AlphaType.Premul,
-        colorType: canvasKit.ColorType.RGBA_8888,
-        colorSpace: SkColorSpaceSRGB,
-        width: webTextCluster.x,
-        height: webTextCluster.y,
-      ),
-      imageData,
-      4 * webTextCluster.x,
+    final DomImageData imageData = textContext.getImageData(
+      x.toInt(),
+      y.toInt(),
+      webTextCluster.width.toInt(),
+      webTextCluster.height.toInt(),
     );
-    if (skImage1 == null) {
-      throw StateError('Unable to convert text into SkImage.');
-    }
-    print('createImageBitmap\n');
-    createImageBitmap(CkImage(skImage1) as JSAny, (
-      x: 0,
-      y: 0,
-      width: webTextCluster.x.toInt(),
-      height: webTextCluster.y.toInt(),
-    )).then((DomImageBitmap bitmap) {
-      print('MakeLazyImageFromImageBitmap\n');
+    final Uint8List list = imageData.data.buffer.asUint8List();
+    print(
+      'getImageData(${webTextCluster.width.toInt()} * ${webTextCluster.height.toInt()} * 4)=${list.length}\n',
+    );
+
+    domWindow.createImageBitmap(imageData).then((DomImageBitmap bitmap) {
+      print('createImageBitmap: ${bitmap.width}, ${bitmap.height}\n');
       if (bitmap == null) {
         throw Exception('Failed to create a bitmap image.');
       } else {
-        final SkImage? skImage2 = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-        if (skImage2 == null) {
+        //final ui.Image image = canvas.createImageFromImageBitmap(bitmap);
+        //print('createImageFromImageBitmap: ${image.width()}, ${image.height()}\n');
+        /*
+        final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+        if (skImage == null) {
           throw Exception('Failed to convert text image bitmap to an SkImage.');
         }
+        print('MakeLazyImageFromImageBitmap: ${skImage.width()}, ${skImage.height()}\n');
+        canvas.drawImage(CkImage(skImage) as ui.Image, ui.Offset(x, y), CkPaint());
+         */
+        final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+        if (skImage == null) {
+          throw Exception('Failed to convert text image bitmap to an SkImage.');
+        }
+        print('MakeLazyImageFromImageBitmap: ${skImage.width()}, ${skImage.height()}\n');
+
+        final CkImage ckImage = CkImage(skImage); //, imageSource: ImageBitmapImageSource(bitmap));
+        canvas.drawImage(ckImage, ui.Offset(x, y), CkPaint());
         print('drawImage\n');
-        canvas.drawImage(CkImage(skImage2), ui.Offset.zero, CkPaint());
       }
     });
-    print('This is the end.\n');
-    /*
-    final Future<DomImageBitmap> bitmap = createImageBitmap(CkImage(skImage1) as JSAny, (
-      x: 0,
-      y: 0,
-      width: textCluster.x().toInt(),
-      height: textCluster.y().toInt(),
-    ));
-    await Future.wait(bitmap);
-    */
-    /*
-    final SkImage? skImage2 = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-    if (skImage2 == null) {
-      throw Exception('Failed to convert text image bitmap to an SkImage.');
-    }
-    canvas.drawImage(CkImage(skImage2), ui.Offset.zero, CkPaint());
-     */
   }
 
   void printTextCluster(WebTextCluster webTextCluster) {

@@ -275,7 +275,7 @@ class WebParagraph implements ui.Paragraph {
     }
   }
 
-  void paintTexture(CkCanvas canvas, ui.Offset offset) {
+  void paintTexture(CanvasKitCanvas canvas, ui.Offset offset) {
     for (final textCluster in _layout.textClusters) {
       print('[@(${offset.dx}, ${offset.dy}) ');
       _paint.printTextCluster(textCluster);

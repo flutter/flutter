@@ -4241,12 +4241,12 @@ extension TextClusterExtension on TextCluster {
 
 extension WebTextMetricsExtension on DomTextMetrics {
   @JS('actualBoundingBoxAscent')
-  external double _actualBoundingBoxAscent();
+  external double get _actualBoundingBoxAscent;
 
   @JS('actualBoundingBoxDescent')
-  external double _actualBoundingBoxDescent();
+  external double get _actualBoundingBoxDescent;
 
-  double get height => _actualBoundingBoxAscent() + _actualBoundingBoxDescent();
+  double get height => _actualBoundingBoxAscent + _actualBoundingBoxDescent;
 
   @JS('getTextClusters')
   external JSArray<JSAny?> _getTextClusters();

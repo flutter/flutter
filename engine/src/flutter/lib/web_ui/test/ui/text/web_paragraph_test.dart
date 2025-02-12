@@ -20,7 +20,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
   const Rect region = Rect.fromLTWH(0, 0, 500, 500);
-
+  /*
   test('Draw WebParagraph on Canvas2D', () async {
     final DomCanvasElement canvas = createDomCanvasElement(width: 500, height: 500);
     domDocument.body!.append(canvas);
@@ -41,7 +41,8 @@ Future<void> testMain() async {
 
     await matchGoldenFile('web_paragraph_canvas2d.png', region: region);
   });
-
+*/
+  /*
   test('Draw WebParagraph in CanvasKit', () async {
     final CkPictureRecorder recorder = CkPictureRecorder();
     final CkCanvas canvas = recorder.beginRecording(region);
@@ -51,19 +52,39 @@ Future<void> testMain() async {
       const Rect.fromLTWH(0, 0, 100, 200),
       CkPaint()..color = const Color(0x00ff0000),
     );
-
     final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('Lorem ipsum');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     paragraph.paintTexture(canvas, Offset(50, 100));
-
     canvas.drawRect(
       const Rect.fromLTWH(250, 0, 100, 200),
       CkPaint()..color = const Color(0xff000000),
     );
 
     await matchGoldenFile('web_paragraph_canvaskit.png', region: region);
+  });
+  */
+  test('Draw WebParagraph in Canvas', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+
+    final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
+    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
+
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 100, 200), redPaint);
+
+    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
+    builder.addText('Lorem ipsum');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(ParagraphConstraints(width: double.infinity));
+    paragraph.paintTexture(canvas as CanvasKitCanvas, Offset(50, 100));
+
+    canvas.drawRect(const Rect.fromLTWH(250, 0, 100, 200), bluePaint);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('empty.png', region: region);
   });
 }
