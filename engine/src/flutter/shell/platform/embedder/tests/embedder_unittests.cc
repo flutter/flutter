@@ -279,11 +279,11 @@ TEST_F(EmbedderTest, IgnoresStaleTasks) {
 
   EmbedderTestTaskRunner test_ui_task_runner(
       ui_task_runner, [&](FlutterTask task) {
-        // We intentionally do not test for engine.is_valid() here.
+        // The test for engine.is_valid() is intentionally absent here.
         // FlutterEngineRunTask must be able to detect and ignore stale tasks
         // without crashing even if the engine pointer is not null.
         // Because the engine is destroyed on platform thread,
-        // relying on solely engine.is_valid() in UI thread is not safe.
+        // relying solely on engine.is_valid() in UI thread is not safe.
         FlutterEngineRunTask(engine_ptr, &task);
       });
   EmbedderTestTaskRunner test_platform_task_runner(
