@@ -118,17 +118,24 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.os,
   }) {
     addPubOptions();
-    argParser.addFlag(
-      kLaunchPreviewer,
-      defaultsTo: true,
-      help: 'Launches the widget preview environment.',
-      // Should only be used for testing.
-      hide: !verboseHelp,
-    );
+    argParser
+      ..addFlag(
+        kLaunchPreviewer,
+        defaultsTo: true,
+        help: 'Launches the widget preview environment.',
+        // Should only be used for testing.
+        hide: !verboseHelp,
+      )
+      ..addFlag(
+        kUseFlutterWeb,
+        help: 'Launches the widget preview environment using Flutter Web',
+        hide: !verboseHelp,
+      );
   }
 
   static const String kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
   static const String kLaunchPreviewer = 'launch-previewer';
+  static const String kUseFlutterWeb = 'web';
 
   @override
   String get description => 'Starts the widget preview environment.';
@@ -137,6 +144,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   String get name => 'start';
 
   final bool verboseHelp;
+
+  bool get isWeb => boolArg(kUseFlutterWeb);
 
   @override
   final FileSystem fs;
@@ -188,9 +197,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           titleCaseProjectName: 'Widget Preview Scaffold',
           flutterRoot: Cache.flutterRoot!,
           dartSdkVersionBounds: '^${cache.dartSdkBuild}',
-          linux: platform.isLinux,
-          macos: platform.isMacOS,
-          windows: platform.isWindows,
+          linux: platform.isLinux && !isWeb,
+          macos: platform.isMacOS && !isWeb,
+          windows: platform.isWindows && !isWeb,
+          web: isWeb,
         ),
         overwrite: true,
         generateMetadata: false,
@@ -201,7 +211,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       // lazy initialization of the preview scaffold's FlutterManifest before
       // the scaffold project's pubspec has been generated.
       // TODO(bkonyi): add logic to rebuild after SDK updates
-      await initialBuild(widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject);
+      if (!isWeb) {
+        await initialBuild(widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject);
+      }
     }
 
     _previewCodeGenerator = PreviewCodeGenerator(
@@ -238,6 +250,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   }
 
   void onChangeDetected(PreviewMapping previews) {
+    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(previews);
     logger.printStatus('Triggering reload based on change to preview set: $previews');
     _widgetPreviewApp?.restart();
   }
@@ -362,9 +375,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
       // We launch from a prebuilt widget preview scaffold instance to reduce launch times after
       // the first run.
-      final File prebuiltApplicationBinary = fs.file(
-        prebuiltApplicationBinaryPath(widgetPreviewScaffoldProject: widgetPreviewScaffoldProject),
-      );
+      File? prebuiltApplicationBinary;
+      if (!isWeb) {
+        prebuiltApplicationBinary = fs.file(
+          prebuiltApplicationBinaryPath(widgetPreviewScaffoldProject: widgetPreviewScaffoldProject),
+        );
+      }
       const String? kEmptyRoute = null;
       const bool kEnableHotReload = true;
 
@@ -378,8 +394,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             BuildMode.debug,
             null,
             treeShakeIcons: false,
+            extraFrontEndOptions:
+                isWeb ? <String>['--dartdevc-canary', '--dartdevc-module-format=ddc'] : null,
             packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
           ),
+          webEnableExposeUrl: false, // TODO(bkonyi): verify
         ),
         kEnableHotReload, // hot mode
         applicationBinary: prebuiltApplicationBinary,
