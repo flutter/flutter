@@ -4,6 +4,7 @@
 
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import '../base/common.dart';
 import '../base/deferred_component.dart';
@@ -211,9 +212,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       // lazy initialization of the preview scaffold's FlutterManifest before
       // the scaffold project's pubspec has been generated.
       // TODO(bkonyi): add logic to rebuild after SDK updates
-      if (!isWeb) {
-        await initialBuild(widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject);
-      }
+      await initialBuild(widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject);
     }
 
     _previewCodeGenerator = PreviewCodeGenerator(
@@ -263,9 +262,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   Future<void> initialBuild({required FlutterProject widgetPreviewScaffoldProject}) async {
     // TODO(bkonyi): handle error case where desktop device isn't enabled.
     await widgetPreviewScaffoldProject.ensureReadyForPlatformSpecificTooling(
-      linuxPlatform: platform.isLinux,
-      macOSPlatform: platform.isMacOS,
-      windowsPlatform: platform.isWindows,
+      linuxPlatform: platform.isLinux && !isWeb,
+      macOSPlatform: platform.isMacOS && !isWeb,
+      windowsPlatform: platform.isWindows && !isWeb,
+      webPlatform: isWeb,
     );
 
     // Generate initial package_config.json, otherwise the build will fail.
@@ -275,6 +275,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       offline: offline,
       outputMode: PubOutputMode.summaryOnly,
     );
+
+    if (isWeb) {
+      return;
+    }
 
     // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
     logger.printStatus('Performing initial build of the Widget Preview Scaffold...');
@@ -397,6 +401,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             extraFrontEndOptions:
                 isWeb ? <String>['--dartdevc-canary', '--dartdevc-module-format=ddc'] : null,
             packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
+            packageConfig: PackageConfig.parseBytes(
+              widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
+              widgetPreviewScaffoldProject.packageConfig.uri,
+            ),
           ),
           webEnableExposeUrl: false, // TODO(bkonyi): verify
         ),

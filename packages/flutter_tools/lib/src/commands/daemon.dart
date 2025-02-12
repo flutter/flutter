@@ -699,6 +699,7 @@ class AppDomain extends Domain {
     ResidentRunner runner;
 
     if (await device.targetPlatform == TargetPlatform.web_javascript) {
+      print("STARTING WEB APP: ${options.buildInfo.fileSystemRoots}");
       runner = webRunnerFactory!.createWebRunner(
         flutterDevice,
         flutterProject: flutterProject,

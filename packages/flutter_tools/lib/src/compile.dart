@@ -103,6 +103,7 @@ class StdoutHandler {
   StringBuffer _errorBuffer = StringBuffer();
 
   void handler(String message) {
+    print('RESPONSE: $message');
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
       boundaryKey = message.substring(kResultPrefix.length);
@@ -646,7 +647,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
        // Make a copy, we might need to modify it later.
-       fileSystemRoots = List<String>.from(fileSystemRoots);
+       fileSystemRoots = List<String>.from(fileSystemRoots) {
+    print(StackTrace.current);
+  }
 
   final Logger _logger;
   final ProcessManager _processManager;

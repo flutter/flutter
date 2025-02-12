@@ -1124,6 +1124,8 @@ class WebDevFS implements DevFS {
     // the web specific bootstrap logic. To make it easier for DWDS to handle
     // mapping the file name, this is done via an additional file root and
     // special hard-coded scheme.
+    print('RECOMPILING: $mainUri ROOT PATH: $projectRootPath');
+    print('INVALIDATED FILES: $invalidatedFiles');
     final CompilerOutput? compilerOutput = await generator.recompile(
       Uri(scheme: 'org-dartlang-app', path: '/${mainUri.pathSegments.last}'),
       invalidatedFiles,
