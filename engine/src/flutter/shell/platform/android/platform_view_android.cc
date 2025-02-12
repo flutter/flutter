@@ -498,4 +498,9 @@ double PlatformViewAndroid::GetScaledFontSize(double unscaled_font_size,
   return jni_facade_->FlutterViewGetScaledFontSize(unscaled_font_size,
                                                    configuration_id);
 }
+
+bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
+  return android_use_new_platform_view_;
+}
+
 }  // namespace flutter

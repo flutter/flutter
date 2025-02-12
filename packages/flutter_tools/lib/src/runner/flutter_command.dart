@@ -130,7 +130,6 @@ abstract final class FlutterOptions {
   static const String kDartObfuscationOption = 'obfuscate';
   static const String kDartDefinesOption = 'dart-define';
   static const String kDartDefineFromFileOption = 'dart-define-from-file';
-  static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
@@ -152,6 +151,7 @@ abstract final class FlutterOptions {
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
   static const String kWebWasmFlag = 'wasm';
+  static const String kWebExperimentalHotReload = 'web-experimental-hot-reload';
 }
 
 /// flutter command categories for usage.
@@ -335,6 +335,11 @@ abstract class FlutterCommand extends Command<void> {
       'web-enable-expression-evaluation',
       defaultsTo: true,
       help: 'Enables expression evaluation in the debugger.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      FlutterOptions.kWebExperimentalHotReload,
+      help: 'Enables new module format that supports hot reload.',
       hide: !verboseHelp,
     );
     argParser.addOption(
@@ -938,18 +943,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addBundleSkSLPathOption({required bool hide}) {
-    argParser.addOption(
-      FlutterOptions.kBundleSkSLPathOption,
-      help:
-          'A path to a file containing precompiled SkSL shaders generated '
-          'during "flutter run". These can be included in an application to '
-          'improve the first frame render times.',
-      hide: hide,
-      valueHelp: 'flutter_1.sksl',
-    );
-  }
-
   void addTreeShakeIconsFlag({bool? enabledByDefault}) {
     argParser.addFlag(
       'tree-shake-icons',
@@ -1142,7 +1135,6 @@ abstract class FlutterCommand extends Command<void> {
   void addCommonDesktopBuildOptions({required bool verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
-    addBundleSkSLPathOption(hide: !verboseHelp);
     addDartObfuscationOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
@@ -1342,6 +1334,12 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
+    // TODO(natebiggs): Delete this when new DDC module system is the default.
+    if (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+        boolArg(FlutterOptions.kWebExperimentalHotReload)) {
+      extraFrontEndOptions.addAll(<String>['--dartdevc-canary', '--dartdevc-module-format=ddc']);
+    }
+
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
         boolArg(FlutterOptions.kAnalyzeSize)) {
@@ -1417,15 +1415,6 @@ abstract class FlutterCommand extends Command<void> {
         buildMode.isPrecompiled &&
         boolArg('tree-shake-icons');
 
-    final String? bundleSkSLPath =
-        argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
-            ? stringArg(FlutterOptions.kBundleSkSLPathOption)
-            : null;
-
-    if (bundleSkSLPath != null && !globals.fs.isFileSync(bundleSkSLPath)) {
-      throwToolExit('No SkSL shader bundle found at $bundleSkSLPath.');
-    }
-
     final String? performanceMeasurementFile =
         argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
             ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
@@ -1479,7 +1468,6 @@ abstract class FlutterCommand extends Command<void> {
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
       dartDefines: dartDefines,
-      bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
       packageConfigPath: packagesPath ?? packageConfigFile.path,
@@ -1897,7 +1885,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       }
     }
 
-    if (regeneratePlatformSpecificToolingDurifyVerify) {
+    if (regeneratePlatformSpecificToolingDuringVerify) {
       await regeneratePlatformSpecificToolingIfApplicable(project);
     }
 
@@ -1916,7 +1904,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   /// builds sequentially in one-go) may choose to override this and provide `false`, instead
   /// calling [regeneratePlatformSpecificTooling] manually when applicable.
   @visibleForOverriding
-  bool get regeneratePlatformSpecificToolingDurifyVerify => true;
+  bool get regeneratePlatformSpecificToolingDuringVerify => true;
 
   /// Runs [FlutterProject.regeneratePlatformSpecificTooling] for [project] with appropriate configuration.
   ///
