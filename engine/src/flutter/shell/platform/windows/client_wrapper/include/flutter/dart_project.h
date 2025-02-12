@@ -100,7 +100,6 @@ class DartProject {
   // Returns whether the UI isolate should run on the platform thread.
   // Defaults to false. In a future release, this setting will default
   // to true.
-  /// this setting will become a no-op when the Skia backend is fully removed.
   bool merged_platform_ui_thread() const { return merged_platform_ui_thread_; }
 
  private:
