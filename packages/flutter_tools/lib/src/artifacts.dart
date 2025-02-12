@@ -258,7 +258,7 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
     case HostArtifact.webPlatformKernelFolder:
       return 'kernel';
     case HostArtifact.webPlatformDDCKernelDill:
-      return 'ddc_outline_sound.dill';
+      return 'ddc_outline.dill';
     case HostArtifact.webPlatformDart2JSKernelDill:
       return 'dart2js_platform.dill';
     case HostArtifact.flutterWebLibrariesJson:
