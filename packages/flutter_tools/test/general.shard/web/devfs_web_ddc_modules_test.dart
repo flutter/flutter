@@ -823,22 +823,18 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('GENERATED');
       final String webPrecompiledSdk =
-          globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleSoundSdk)
-              .path;
+          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleSdk).path;
       final String webPrecompiledSdkSourcemaps =
           globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleSoundSdkSourcemaps)
+              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleSdkSourcemaps)
               .path;
       final String webPrecompiledCanvaskitSdk =
           globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdk)
+              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk)
               .path;
       final String webPrecompiledCanvaskitSdkSourcemaps =
           globals.artifacts!
-              .getHostArtifact(
-                HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdkSourcemaps,
-              )
+              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
               .path;
       globals.fs.file(webPrecompiledSdk)
         ..createSync(recursive: true)

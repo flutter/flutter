@@ -1205,7 +1205,7 @@ class HybridAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> sendMotionEvent(AndroidMotionEvent event) async {
-    await SystemChannels.platform_views.invokeMethod<dynamic>('touch', event._asList(viewId));
+    await SystemChannels.platform_views_2.invokeMethod<dynamic>('touch', event._asList(viewId));
   }
 }
 

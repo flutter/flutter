@@ -251,40 +251,37 @@ enum WebRendererMode {
 /// The correct precompiled artifact to use for each build and render mode for DDC with AMD modules.
 // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
 const Map<WebRendererMode, HostArtifact> kAmdDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.auto: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk,
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSoundSdk,
-  WebRendererMode.html: HostArtifact.webPrecompiledAmdSoundSdk,
+  WebRendererMode.auto: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk,
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdk,
+  WebRendererMode.html: HostArtifact.webPrecompiledAmdSdk,
 };
 
 /// The correct source map artifact to use for each build and render mode for DDC with AMD modules.
 // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
 const Map<WebRendererMode, HostArtifact> kAmdDartSdkJsMapArtifactMap =
     <WebRendererMode, HostArtifact>{
-      WebRendererMode.auto: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdkSourcemaps,
-      WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps,
-      WebRendererMode.html: HostArtifact.webPrecompiledAmdSoundSdkSourcemaps,
+      WebRendererMode.auto: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps,
+      WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps,
+      WebRendererMode.html: HostArtifact.webPrecompiledAmdSdkSourcemaps,
     };
 
 /// The correct precompiled artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format. Only artifacts with sound
-/// null-safety are provided.
+/// DDC with DDC library bundle module format.
 const Map<WebRendererMode, HostArtifact> kDdcLibraryBundleDartSdkJsArtifactMap =
     <WebRendererMode, HostArtifact>{
-      WebRendererMode.auto: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSoundSdk,
-      WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdk,
-      WebRendererMode.html: HostArtifact.webPrecompiledDdcLibraryBundleSoundSdk,
+      WebRendererMode.auto: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdk,
+      WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
+      WebRendererMode.html: HostArtifact.webPrecompiledDdcLibraryBundleSdk,
     };
 
 /// The correct source map artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format. Only artifacts with sound
-/// null-safety are provided.
+/// DDC with DDC library bundle module format.
 const Map<WebRendererMode, HostArtifact> kDdcLibraryBundleDartSdkJsMapArtifactMap =
     <WebRendererMode, HostArtifact>{
       WebRendererMode.auto:
-          HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSoundSdkSourcemaps,
-      WebRendererMode.canvaskit:
-          HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdkSourcemaps,
-      WebRendererMode.html: HostArtifact.webPrecompiledDdcLibraryBundleSoundSdkSourcemaps,
+          HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdkSourcemaps,
+      WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps,
+      WebRendererMode.html: HostArtifact.webPrecompiledDdcLibraryBundleSdkSourcemaps,
     };
 
 String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) {

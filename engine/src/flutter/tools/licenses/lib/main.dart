@@ -895,13 +895,13 @@ class _RepositoryFuchsiaSdkLinuxLicenseFile extends _RepositorySingleLicenseFile
   }
 }
 
-/// The BoringSSL license file.
+/// The Vulkan validation layers license file.
 ///
 /// This file contains a bunch of different licenses, but other files
 /// refer to it as if it was a monolithic license so we sort of have
 /// to treat the whole thing as a MultiLicense.
-class _RepositoryVulkanApacheLicenseFile extends _RepositorySingleLicenseFile {
-  _RepositoryVulkanApacheLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
+class _RepositoryVulkanValidationApacheLicenseFile extends _RepositorySingleLicenseFile {
+  _RepositoryVulkanValidationApacheLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
     : super(parent, io, _parseLicense(io));
 
   static const String _prefix =
@@ -916,7 +916,28 @@ class _RepositoryVulkanApacheLicenseFile extends _RepositorySingleLicenseFile {
   static License _parseLicense(fs.TextFile io) {
     final String body = io.readString();
     if (!body.startsWith(_prefix)) {
-      throw 'Failed to match Vulkan Apache license prefix.';
+      throw 'Failed to match vulkan-validation-layers license prefix.';
+    }
+    return License.fromBody(body.substring(_prefix.length), origin: io.fullName);
+  }
+}
+
+/// The Vulkan lunarg-vulkantools license file.
+class _RepositoryVulkanLunarGApacheLicenseFile extends _RepositorySingleLicenseFile {
+  _RepositoryVulkanLunarGApacheLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
+    : super(parent, io, _parseLicense(io));
+
+  static const String _prefix =
+      'The majority of files in this project use the Apache 2.0 License.\n'
+      'There are a few exceptions and their license can either be found in the source or their directory homing the source.\n'
+      '\n'
+      '===========================================================================================\n'
+      '\n';
+
+  static License _parseLicense(fs.TextFile io) {
+    final String body = io.readString();
+    if (!body.startsWith(_prefix)) {
+      throw 'Failed to match lunarg-vulkantools Apache license prefix.';
     }
     return License.fromBody(body.substring(_prefix.length), origin: io.fullName);
   }
@@ -1036,8 +1057,10 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
     '/flutter/third_party/libpng/LICENSE': _RepositoryLibPngLicenseFile.new,
     '/flutter/third_party/rapidjson/LICENSE': _RepositoryOpaqueLicenseFile.new,
     '/flutter/third_party/rapidjson/license.txt': _RepositoryOpaqueLicenseFile.new,
+    '/flutter/third_party/vulkan-deps/lunarg-vulkantools/src/LICENSE.txt':
+        _RepositoryVulkanLunarGApacheLicenseFile.new,
     '/flutter/third_party/vulkan-deps/vulkan-validation-layers/src/LICENSE.txt':
-        _RepositoryVulkanApacheLicenseFile.new,
+        _RepositoryVulkanValidationApacheLicenseFile.new,
     '/fuchsia/sdk/linux/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
     '/fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl': _RepositorySourceFile.new,
     '/fuchsia/sdk/mac/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,

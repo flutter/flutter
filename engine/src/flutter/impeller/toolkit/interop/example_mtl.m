@@ -5,8 +5,16 @@
 #include <assert.h>
 #include <stdio.h>
 
+#define GLFW_INCLUDE_NONE
 #include "GLFW/glfw3.h"
+#define GLFW_EXPOSE_NATIVE_COCOA
+#import "GLFW/glfw3native.h"
+
 #include "impeller.h"
+
+#include <AppKit/AppKit.h>
+#include <Metal/Metal.h>
+#include <QuartzCore/QuartzCore.h>
 
 void GLFWErrorCallback(int error, const char* description) {
   // NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling)
@@ -14,38 +22,42 @@ void GLFWErrorCallback(int error, const char* description) {
   fflush(stderr);
 }
 
-void* ProcAddressCallback(const char* proc_name, void* user_data) {
-  return glfwGetProcAddress(proc_name);
-}
-
 int main(int argc, char const* argv[]) {
   glfwSetErrorCallback(GLFWErrorCallback);
   [[maybe_unused]] int result = glfwInit();
   assert(result == GLFW_TRUE);
 
-  glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+  if (glfwGetPlatform() != GLFW_PLATFORM_COCOA) {
+    // NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling)
+    fprintf(stderr,
+            "Metal is only available on macOS. Please try either Vulkan or "
+            "OpenGL (ES).\n");
+    fflush(stderr);
+    return -1;
+  }
+
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
   GLFWwindow* window =
-      glfwCreateWindow(800, 600, "Impeller Example", NULL, NULL);
+      glfwCreateWindow(800, 600, "Impeller Example (Metal)", NULL, NULL);
   assert(window != NULL);
 
   int framebuffer_width, framebuffer_height;
   glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
 
-  // The GL context must be current on the calling thread.
-  glfwMakeContextCurrent(window);
-
-  ImpellerContext context = ImpellerContextCreateOpenGLESNew(
-      IMPELLER_VERSION, ProcAddressCallback, NULL);
+  ImpellerContext context = ImpellerContextCreateMetalNew(IMPELLER_VERSION);
   assert(context != NULL);
 
-  ImpellerISize surface_size = {};
-  surface_size.width = framebuffer_width;
-  surface_size.height = framebuffer_height;
-
-  ImpellerSurface surface = ImpellerSurfaceCreateWrappedFBONew(
-      context, 0u, kImpellerPixelFormatRGBA8888, &surface_size);
-  assert(surface != NULL);
+  // This example assumes Automatic Reference Counting (ARC) in Objective-C is
+  // enabled.
+  NSWindow* cocoa_window = glfwGetCocoaWindow(window);
+  assert(cocoa_window != NULL);
+  CAMetalLayer* layer = [CAMetalLayer layer];
+  layer.framebufferOnly = NO;
+  layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+  layer.device = MTLCreateSystemDefaultDevice();
+  cocoa_window.contentView.layer = layer;
+  cocoa_window.contentView.wantsLayer = YES;
 
   ImpellerDisplayList dl = NULL;
 
@@ -74,12 +86,19 @@ int main(int argc, char const* argv[]) {
 
   while (!glfwWindowShouldClose(window)) {
     glfwWaitEvents();
+
+    // React to window resizes.
+    layer.drawableSize = layer.bounds.size;
+
+    ImpellerSurface surface = ImpellerSurfaceCreateWrappedMetalDrawableNew(
+        context, (__bridge void*)layer.nextDrawable);
+    assert(surface != NULL);
     ImpellerSurfaceDrawDisplayList(surface, dl);
-    glfwSwapBuffers(window);
+    ImpellerSurfacePresent(surface);
+    ImpellerSurfaceRelease(surface);
   }
 
   ImpellerDisplayListRelease(dl);
-  ImpellerSurfaceRelease(surface);
   ImpellerContextRelease(context);
 
   glfwMakeContextCurrent(NULL);

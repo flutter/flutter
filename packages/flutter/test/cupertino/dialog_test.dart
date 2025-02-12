@@ -711,6 +711,7 @@ void main() {
                             SemanticsFlag.scopesRoute,
                             SemanticsFlag.namesRoute,
                           ],
+                          role: SemanticsRole.alertDialog,
                           label: 'Alert',
                           children: <TestSemantics>[
                             TestSemantics(
