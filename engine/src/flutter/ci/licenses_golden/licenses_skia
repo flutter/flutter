@@ -1,4 +1,4 @@
-Signature: 47ee0b6597c82e2dc49a18e5334dd194
+Signature: f0a725016c8fc8471bc7977e2a363602
 
 ====================================================================================================
 LIBRARY: etc1
@@ -7368,7 +7368,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Rect.h + ../../.
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Shape.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Shape.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Transform.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Transform_graphite.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Transform.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlCaps.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlCaps.mm + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlCommandBuffer.h + ../../../flutter/third_party/skia/LICENSE
@@ -7580,7 +7580,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Rect.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Shape.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Shape.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Transform.cpp
-FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Transform_graphite.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/Transform.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlCaps.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlCaps.mm
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/mtl/MtlCommandBuffer.h
@@ -8035,8 +8035,8 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/tessellate/VertexChunkP
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/BuiltInCodeSnippetID.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ClientMappedBufferManager.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ClientMappedBufferManager.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ClipStack_graphite.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ClipStack_graphite.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ClipStack.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ClipStack.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/CommandTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ComputePipeline.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/ComputePipeline.h + ../../../flutter/third_party/skia/LICENSE
@@ -8247,8 +8247,8 @@ FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/tessellate/VertexChunkPat
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/BuiltInCodeSnippetID.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ClientMappedBufferManager.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ClientMappedBufferManager.h
-FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ClipStack_graphite.cpp
-FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ClipStack_graphite.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ClipStack.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ClipStack.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/CommandTypes.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ComputePipeline.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/ComputePipeline.h

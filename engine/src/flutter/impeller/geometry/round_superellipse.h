@@ -140,7 +140,7 @@ inline std::ostream& operator<<(std::ostream& out,
                                 const impeller::RoundSuperellipse& rr) {
   out << "("                                 //
       << "rect: " << rr.GetBounds() << ", "  //
-      << "radii: " << rr.GetRadii();         //
+      << "radii: " << rr.GetRadii();
   out << ")";
   return out;
 }
