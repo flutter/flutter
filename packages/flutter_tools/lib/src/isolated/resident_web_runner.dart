@@ -141,9 +141,6 @@ class ResidentWebRunner extends ResidentRunner {
   bool get deviceIsDebuggable => device!.device is! WebServerDevice || debuggingOptions.startPaused;
 
   @override
-  bool get supportsWriteSkSL => false;
-
-  @override
   // Web uses a different plugin registry.
   bool get generateDartPluginRegistry => false;
 
@@ -306,7 +303,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           extraHeaders: debuggingOptions.webHeaders,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
-          nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
           canaryFeatures: debuggingOptions.buildInfo.canaryFeatures ?? false,
@@ -782,13 +778,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           ..writeAsStringSync(websocketUri.toString());
       }
       _logger.printStatus('Debug service listening on $websocketUri');
-      if (debuggingOptions.buildInfo.nullSafetyMode != NullSafetyMode.sound) {
-        _logger.printStatus('');
-        _logger.printStatus('Running without sound null safety ⚠️', emphasis: true);
-        _logger.printStatus(
-          'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
-        );
-      }
     }
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
