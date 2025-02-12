@@ -609,7 +609,7 @@ class ListTile extends StatelessWidget {
   ///
   /// If this property is null, then [ListTileThemeData.contentPadding] is used. If that is also
   /// null and [ThemeData.useMaterial3] is true, then a default value of
-  /// `EdgeInsetsDirectional.only(start: 16.0, end: 24.0)` will be used. Otherwise a default value
+  /// `EdgeInsetsDirectional.only(start: 16.0, end: 24.0)` will be used. Otherwise, a default value
   /// of `EdgeInsets.symmetric(horizontal: 16.0)` will be used.
   final EdgeInsetsGeometry? contentPadding;
 
