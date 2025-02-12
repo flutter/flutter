@@ -5899,6 +5899,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: build_android_host_app_with_module_aar
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
     runIf:
       - dev/**
       - packages/flutter_tools/**
