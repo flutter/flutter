@@ -1885,7 +1885,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       }
     }
 
-    if (regeneratePlatformSpecificToolingDurifyVerify) {
+    if (regeneratePlatformSpecificToolingDuringVerify) {
       await regeneratePlatformSpecificToolingIfApplicable(project);
     }
 
@@ -1904,7 +1904,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   /// builds sequentially in one-go) may choose to override this and provide `false`, instead
   /// calling [regeneratePlatformSpecificTooling] manually when applicable.
   @visibleForOverriding
-  bool get regeneratePlatformSpecificToolingDurifyVerify => true;
+  bool get regeneratePlatformSpecificToolingDuringVerify => true;
 
   /// Runs [FlutterProject.regeneratePlatformSpecificTooling] for [project] with appropriate configuration.
   ///
