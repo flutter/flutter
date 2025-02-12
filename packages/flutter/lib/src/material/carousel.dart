@@ -1535,16 +1535,22 @@ class CarouselController extends ScrollController {
     }
   }
 
-  /// Animates the controlled scroll view to the given item index.
+  /// Animates the controlled carousel to the given item index.
   ///
-  /// The animation lasts for the given duration and follows the given curve.
-  /// The returned [Future] resolves when the animation completes.
+  /// For [CarouselView], this will scroll the carousel so the item at [index] becomes
+  /// the leading item.
   ///
-  /// If the [CarouselView] is not attached to a [CarouselController] or the
-  /// method does nothing.
+  /// For [CarouselView.weighted], this will scroll the carousel so the first item with
+  /// maximum weight becomes the leading item, with [index] determining the final layout
+  /// position. With [consumeMaxWeight] set to true, the item with the maximum weight
+  /// will be the leading item.
   ///
-  /// By default, the animation will use a [Duration] of 300 milliseconds
-  /// and a [Curve] of [Curves.ease].
+  /// The animation uses the provided [Duration] and [Curve]. The returned [Future]
+  /// completes when the animation finishes.
+  ///
+  /// The [Duration] defaults to 300 milliseconds and [Curve] defaults to [Curves.ease].
+  ///
+  /// Does nothing if the carousel is not attached to this controller.
   Future<void> animateToItem(
     int index, {
     Duration duration = const Duration(milliseconds: 300),
@@ -1553,6 +1559,8 @@ class CarouselController extends ScrollController {
     if (!hasClients || _carouselState == null) {
       return;
     }
+    assert(index >= 0, 'index must be greater than or equal to 0');
+    assert(index <= _carouselState!.widget.children.length, 'index must be less than or equal to children.length');
 
     final bool hasFlexWeights = _carouselState!._flexWeights?.isNotEmpty ?? false;
 
@@ -1567,15 +1575,23 @@ class CarouselController extends ScrollController {
   }
 
   double _getTargetOffset(_CarouselPosition position, int index, bool hasFlexWeights) {
+    if (index == 0){
+      return 0.0;
+    }
+
     if (!hasFlexWeights) {
       return index * _carouselState!._itemExtent!;
     }
 
-    final List<int> weights = _carouselState!._flexWeights!;
-    final double dimension = position.viewportDimension;
+    final _CarouselViewState carouselState = _carouselState!;
+    final List<int> weights = carouselState._flexWeights!;
     final int totalWeight = weights.reduce((int a, int b) => a + b);
+    final double dimension = position.viewportDimension;
 
-    return dimension * (weights.first / totalWeight) * index;
+    final bool isLastItem = index == carouselState.widget.children.length - 1;
+    final int newIndex = carouselState._consumeMaxWeight && isLastItem ? index : index - 1;
+
+    return dimension * (weights.first / totalWeight) * newIndex;
   }
 
   @override
