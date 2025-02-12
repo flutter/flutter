@@ -1076,13 +1076,15 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
   final PreferredSizeWidget? bottom;
 
-  /// Modes that determine how to display the navigation bar's [bottom] and scrolling behavior.
+  /// Modes that determine how to display the navigation bar's [bottom], or the
+  /// search field in a [CupertinoSliverNavigationBar.search].
   ///
-  /// Defaults to [NavigationBarBottomMode.automatic] if this is null and a [bottom] is provided.
+  /// If null, defaults to [NavigationBarBottomMode.automatic] if either a
+  /// [bottom] is provided or this is a [CupertinoSliverNavigationBar.search].
   final NavigationBarBottomMode? bottomMode;
 
   /// Called when the search field in [CupertinoSliverNavigationBar.search]
-  /// is tapped, toggling the search state between active and inactive.
+  /// is tapped, toggling between an active and an inactive search state.
   final ValueChanged<bool>? onSearchableBottomTap;
 
   /// True if the navigation bar's background color has no transparency.
@@ -1220,21 +1222,20 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   }
 
   void _handleSearchFieldStatusChanged(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.completed:
-      case AnimationStatus.dismissed:
-        // Rebuild so that the leading, middle, and trailing widgets that were
-        // collapsed while the search field was active are re-expanded.
-        setState(() {});
-      case AnimationStatus.forward:
-        setState(() {
+    // If the search animation is stopped, rebuild so that the leading, middle,
+    // and trailing widgets that were collapsed while the search field was
+    // active are re-expanded. Otherwise, rebuild to update this widget with the
+    // animation controller's values.
+    setState(() {
+      switch (status) {
+        case AnimationStatus.forward:
           searchIsActive = true;
-        });
-      case AnimationStatus.reverse:
-        setState(() {
+        case AnimationStatus.reverse:
           searchIsActive = false;
-        });
-    }
+        case AnimationStatus.completed:
+        case AnimationStatus.dismissed:
+      }
+    });
   }
 
   void _onSearchFieldTap() {
