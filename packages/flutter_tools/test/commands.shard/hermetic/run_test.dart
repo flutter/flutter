@@ -104,35 +104,6 @@ void main() {
     );
 
     testUsingContext(
-      'supports --no-sound-null-safety with an overridden NonNullSafeBuilds',
-      () async {
-        fileSystem.file('lib/main.dart').createSync(recursive: true);
-        fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-
-        final FakeDevice device = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.android,
-        );
-
-        testDeviceManager.devices = <Device>[device];
-        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
-        await createTestCommandRunner(command).run(const <String>[
-          'run',
-          '--use-application-binary=app/bar/faz',
-          '--no-sound-null-safety',
-        ]);
-      },
-      overrides: <Type, Generator>{
-        DeviceManager: () => testDeviceManager,
-        FileSystem: () => fileSystem,
-        Logger: () => logger,
-        NonNullSafeBuilds: () => NonNullSafeBuilds.allowed,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
-    testUsingContext(
       'does not support "--use-application-binary" and "--fast-start"',
       () async {
         fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -1300,25 +1271,6 @@ void main() {
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
         throwsA(isA<RPCError>()),
-      );
-    },
-    overrides: <Type, Generator>{
-      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
-
-  testUsingContext(
-    'Passes sksl bundle info the build options',
-    () async {
-      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
-
-      await expectLater(
-        () => createTestCommandRunner(
-          command,
-        ).run(<String>['run', '--no-pub', '--bundle-sksl-path=foo.json']),
-        throwsToolExit(message: 'No SkSL shader bundle found at foo.json'),
       );
     },
     overrides: <Type, Generator>{
