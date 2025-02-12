@@ -9,5 +9,5 @@ void main() {
   );
   runWidget(RegularWindow(
       controller: controller,
-      child: MaterialApp(home: MainWindow(mainController: controller))));
+      child: MaterialApp(useWindowingApi: true, home: MainWindow(mainController: controller))));
 }

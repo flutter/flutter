@@ -361,8 +361,8 @@ class _MenuAnchorStateController {
 
     _popupWindowController = PopupWindowController(
       size: const Size(200, 400), // TODO: Get a real size
-      onDestroyed: anchor.hidePopup,
-      onError: (String? error) => anchor.hidePopup(),
+      onDestroyed: _onHide,
+      onError: (String? error) => _onHide,
       anchorRect: Rect.fromPoints(
         position,
         Offset(position.dx + box.size.width, position.dy + box.size.height),
@@ -370,6 +370,11 @@ class _MenuAnchorStateController {
       positioner: positioner,
       parent: WindowControllerContext.of(anchorContext)!.controller.rootView,
     );
+  }
+
+  void _onHide() {
+    _popupWindowController = null;
+    anchor.hidePopup();
   }
 
   void show() {
@@ -384,7 +389,6 @@ class _MenuAnchorStateController {
   Future<void> hide() async {
     if (_useWindowing) {
       await _popupWindowController!.destroy();
-      _popupWindowController = null;
     } else {
       _overlayPortalController.hide();
     }
