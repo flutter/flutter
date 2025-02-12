@@ -147,25 +147,22 @@ TaskFunction createDisplayCutoutTest() {
     '${flutterDirectory.path}/dev/integration_tests/display_cutout_rotation/',
     'integration_test/display_cutout_test.dart',
     setup: (Device device) async {
-      if (device is AndroidDevice) {
-        // Test requires developer settings added in 28 and behavior added in 30.
-        final String sdkResult = await device.shellEval('getprop', <String>[
-          'ro.build.version.sdk',
-        ]);
-        if (sdkResult.startsWith('2') || sdkResult.startsWith('1') || sdkResult.length == 1) {
-          throw TaskResult.failure('This test should only target android 30+.');
-        }
-        print('Adding Synthetic notch...');
-        // This command will cause any running android activity to be recreated.
-        await device.shellExec('cmd', <String>[
-          'overlay',
-          'enable',
-          'com.android.internal.display.cutout.emulation.tall',
-        ]);
-      } else {
+      if (device is! AndroidDevice) {
         // Only android devices support this cutoutTest.
         throw TaskResult.failure('This test should only target android');
       }
+      // Test requires developer settings added in 28 and behavior added in 30.
+      final String sdkResult = await device.shellEval('getprop', <String>['ro.build.version.sdk']);
+      if (sdkResult.startsWith('2') || sdkResult.startsWith('1') || sdkResult.length == 1) {
+        throw TaskResult.failure('This test should only target android 30+.');
+      }
+      print('Adding Synthetic notch...');
+      // This command will cause any running android activity to be recreated.
+      await device.shellExec('cmd', <String>[
+        'overlay',
+        'enable',
+        'com.android.internal.display.cutout.emulation.tall',
+      ]);
     },
     tearDown: (Device device) async {
       if (device is AndroidDevice) {
