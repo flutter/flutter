@@ -7,8 +7,9 @@
 #include <cmath>
 #include <utility>
 
-#include "impeller/geometry/scalar.h"
-#include "impeller/geometry/wangs_formula.h"
+#include "flutter/fml/logging.h"
+#include "flutter/impeller/geometry/scalar.h"
+#include "flutter/impeller/geometry/wangs_formula.h"
 
 namespace impeller {
 
@@ -183,6 +184,20 @@ static inline Scalar QuadraticSolveDerivative(Scalar t,
          2 * t * (p2 - p1);
 }
 
+static inline Scalar ConicSolve(Scalar t,
+                                Scalar p0,
+                                Scalar p1,
+                                Scalar p2,
+                                Scalar w) {
+  auto u = (1 - t);
+  auto coefficient_p0 = t * t;
+  auto coefficient_p1 = 2 * t * u * w;
+  auto coefficient_p2 = u * u;
+
+  return ((p0 * coefficient_p0 + p1 * coefficient_p1 + p2 * coefficient_p2) /
+          (coefficient_p0 + coefficient_p1 + coefficient_p2));
+}
+
 static inline Scalar CubicSolve(Scalar t,
                                 Scalar p0,
                                 Scalar p1,
@@ -307,6 +322,111 @@ std::optional<Vector2> QuadraticPathComponent::GetEndDirection() const {
     return (p2 - p1).Normalize();
   }
   return std::nullopt;
+}
+
+Point ConicPathComponent::Solve(Scalar time) const {
+  return {
+      ConicSolve(time, p1.x, cp.x, p2.x, weight.x),  // x
+      ConicSolve(time, p1.y, cp.y, p2.y, weight.y),  // y
+  };
+}
+
+void ConicPathComponent::AppendPolylinePoints(
+    Scalar scale_factor,
+    std::vector<Point>& points) const {
+  for (auto quad : ToQuadraticPathComponents()) {
+    quad.AppendPolylinePoints(scale_factor, points);
+  }
+}
+
+void ConicPathComponent::ToLinearPathComponents(Scalar scale,
+                                                VertexWriter& writer) const {
+  for (auto quad : ToQuadraticPathComponents()) {
+    quad.ToLinearPathComponents(scale, writer);
+  }
+}
+
+size_t ConicPathComponent::CountLinearPathComponents(Scalar scale) const {
+  size_t count = 0;
+  for (auto quad : ToQuadraticPathComponents()) {
+    count += quad.CountLinearPathComponents(scale);
+  }
+  return count;
+}
+
+std::vector<Point> ConicPathComponent::Extrema() const {
+  std::vector<Point> points;
+  for (auto quad : ToQuadraticPathComponents()) {
+    auto quad_extrema = quad.Extrema();
+    points.insert(points.end(), quad_extrema.begin(), quad_extrema.end());
+  }
+  return points;
+}
+
+std::optional<Vector2> ConicPathComponent::GetStartDirection() const {
+  if (p1 != cp) {
+    return (p1 - cp).Normalize();
+  }
+  if (p1 != p2) {
+    return (p1 - p2).Normalize();
+  }
+  return std::nullopt;
+}
+
+std::optional<Vector2> ConicPathComponent::GetEndDirection() const {
+  if (p2 != cp) {
+    return (p2 - cp).Normalize();
+  }
+  if (p2 != p1) {
+    return (p2 - p1).Normalize();
+  }
+  return std::nullopt;
+}
+
+void ConicPathComponent::SubdivideToQuadraticPoints(
+    std::array<Point, 5>& points) const {
+  // Observe that scale will always be smaller than 1 because fW > 0.
+  const Scalar scale = 1.0f / (1.0f + weight.x);
+
+  // The subdivided control points below are the sums of the following three
+  // terms. Because the terms are multiplied by something <1, and the resulting
+  // control points lie within the control points of the original then the
+  // terms and the sums below will not overflow. Note that fW * scale
+  // approaches 1 as fW becomes very large.
+  Point tp1 = p1 * scale;
+  Point tcp = cp * weight.x * scale;
+  Point tp2 = p2 * scale;
+
+  // Calculate the subdivided control points
+  Point sub_p1 = tp1 + tcp;
+  Point sub_p2 = tcp + tp2;
+
+  // p2 = (t0 + 2*t1 + t2) / 2. Divide the terms by 2 before the sum to keep
+  // the sum for p2 from overflowing.
+  Point sub_cp = (tp1 + tcp + tcp + tp2) * 0.5f;
+
+  FML_DCHECK(sub_p1.IsFinite() && sub_cp.IsFinite() && sub_p2.IsFinite());
+
+  points[0] = p1;
+  points[1] = sub_p1;
+  points[2] = sub_cp;
+  points[3] = sub_p2;
+  points[4] = p2;
+
+  // Update w.
+  // dst[0].fW = dst[1].fW = subdivide_w_value(fW);
+}
+
+std::vector<QuadraticPathComponent>
+ConicPathComponent::ToQuadraticPathComponents() const {
+  std::array<Point, 5> points;
+  SubdivideToQuadraticPoints(points);
+
+  std::vector<QuadraticPathComponent> vector(2);
+  vector.emplace_back(points[0], points[1], points[2]);
+  vector.emplace_back(points[2], points[3], points[4]);
+
+  return vector;
 }
 
 Point CubicPathComponent::Solve(Scalar time) const {
