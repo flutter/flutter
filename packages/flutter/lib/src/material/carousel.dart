@@ -1542,7 +1542,7 @@ class CarouselController extends ScrollController {
   ///
   /// For [CarouselView.weighted], this will scroll the carousel so the first item with
   /// maximum weight becomes the leading item, with [index] determining the final layout
-  /// position. With [consumeMaxWeight] set to true, the item with the maximum weight
+  /// position. With `consumeMaxWeight` set to true, the item with the maximum weight
   /// will be the leading item.
   ///
   /// The animation uses the provided [Duration] and [Curve]. The returned [Future]
@@ -1560,7 +1560,10 @@ class CarouselController extends ScrollController {
       return;
     }
     assert(index >= 0, 'index must be greater than or equal to 0');
-    assert(index <= _carouselState!.widget.children.length, 'index must be less than or equal to children.length');
+    assert(
+      index <= _carouselState!.widget.children.length,
+      'index must be less than or equal to children.length',
+    );
 
     final bool hasFlexWeights = _carouselState!._flexWeights?.isNotEmpty ?? false;
 
@@ -1575,7 +1578,7 @@ class CarouselController extends ScrollController {
   }
 
   double _getTargetOffset(_CarouselPosition position, int index, bool hasFlexWeights) {
-    if (index == 0){
+    if (index == 0) {
       return 0.0;
     }
 
