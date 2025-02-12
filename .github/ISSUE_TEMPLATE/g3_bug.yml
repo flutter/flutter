@@ -2,7 +2,7 @@ name: Report a bug
 description: |
   You found a bug in Flutter causing your application to crash or
   throw an exception, a widget is buggy, or something looks wrong.
-labels: 'from: g3'
+labels: 'from: customer: google'
 body:
   - type: markdown
     attributes:
@@ -21,9 +21,13 @@ body:
         Before filling the form fields, please consider the following:
         - Ensure that you have searched the [existing issues](https://github.com/flutter/flutter/issues)
         - Read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
-- type: checkboxes
-  id: priority-indicator
-  attributes:
+  - type: markdown
+    attributes:
+      value: |
+        Flutter GitHub issues are public and so you must avoid posting any Google confidential information in them. 
+  - type: checkboxes
+    id: priority-indicator
+    attributes:
     label: Help us understand the severity of this issue
     description: Please only choose one
     options:
