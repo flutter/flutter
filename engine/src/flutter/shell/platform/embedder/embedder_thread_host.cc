@@ -13,6 +13,9 @@
 
 namespace flutter {
 
+std::set<int64_t> EmbedderThreadHost::active_runners_;
+std::mutex EmbedderThreadHost::active_runners_mutex_;
+
 //------------------------------------------------------------------------------
 /// @brief      Attempts to create a task runner from an embedder task runner
 ///             description. The first boolean in the pair indicate whether the
@@ -67,7 +70,7 @@ CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
                                 fml::TimePoint target_time) -> void {
         FlutterTask task = {
             // runner
-            reinterpret_cast<FlutterTaskRunner>(task_runner),
+            reinterpret_cast<FlutterTaskRunner>(task_runner->unique_id()),
             // task
             task_baton,
         };
@@ -306,12 +309,26 @@ EmbedderThreadHost::EmbedderThreadHost(
     const flutter::TaskRunners& runners,
     const std::set<fml::RefPtr<EmbedderTaskRunner>>& embedder_task_runners)
     : host_(std::move(host)), runners_(runners) {
+  std::lock_guard guard(active_runners_mutex_);
   for (const auto& runner : embedder_task_runners) {
-    runners_map_[reinterpret_cast<int64_t>(runner.get())] = runner;
+    runners_map_[runner->unique_id()] = runner;
+    active_runners_.insert(runner->unique_id());
   }
 }
 
 EmbedderThreadHost::~EmbedderThreadHost() = default;
+
+void EmbedderThreadHost::InvalidateActiveRunners() {
+  std::lock_guard guard(active_runners_mutex_);
+  for (const auto& runner : runners_map_) {
+    active_runners_.erase(runner.first);
+  }
+}
+
+bool EmbedderThreadHost::RunnerIsValid(int64_t runner) {
+  std::lock_guard guard(active_runners_mutex_);
+  return active_runners_.find(runner) != active_runners_.end();
+}
 
 bool EmbedderThreadHost::IsValid() const {
   return runners_.IsValid();
