@@ -505,14 +505,11 @@ enum CustomDimensionsEnum {
   commandResultEventMaxRss, // cd44
   commandRunAndroidEmbeddingVersion, // cd45
   commandPackagesAndroidEmbeddingVersion, // cd46
-  @Deprecated('Exists for indexing only, not in use.')
   // ignore: unused_field
   _nullSafetyDeprecatedDoNotUse, // cd47
   obsolete1, // cd48 (was fastReassemble)
-  @Deprecated('Exists for indexing only, not in use.')
   // ignore: unused_field
   _nullSafeMigratedLibrariesDoNotUse, // cd49
-  @Deprecated('Exists for indexing only, not in use.')
   // ignore: unused_field
   _nullSafeTotalLibrariesDoNotUse, // cd50
   hotEventCompileTimeInMs, // cd51
