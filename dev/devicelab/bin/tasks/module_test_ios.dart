@@ -18,6 +18,11 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
+    // TODO(matanlurey): Remove after default.
+    // https://github.com/flutter/flutter/issues/160257
+    section('Opt-in to --explicit-package-dependencies');
+    await flutter('config', options: <String>['--explicit-package-dependencies']);
+
     // Update pod repo.
     await eval(
       'pod',

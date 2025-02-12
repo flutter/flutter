@@ -112,7 +112,7 @@ class BuildAarCommand extends BuildSubCommand {
   }
 
   @override
-  bool get regeneratePlatformSpecificToolingDurifyVerify => false;
+  bool get regeneratePlatformSpecificToolingDuringVerify => false;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
