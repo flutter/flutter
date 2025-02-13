@@ -3952,6 +3952,52 @@ void main() {
     textField = tester.widget(find.byType(TextField));
     expect(textField.textInputAction, TextInputAction.next);
   });
+
+  testWidgets('items can be constrainted to be smaller than the text field with menuStyle', (
+    WidgetTester tester,
+  ) async {
+    const String longLabel = 'This is a long text that it can overflow.';
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(value: 0, label: longLabel),
+            ],
+            menuStyle: MenuStyle(maximumSize: WidgetStatePropertyAll<Size>(Size(150.0, 50.0))),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(findMenuItemButton(longLabel)).width, 150.0);
+
+    // The overwrite of menuStyle is different when a width is provided,
+    // So it needs to be tested separately.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            width: 200.0,
+            dropdownMenuEntries: menuChildren,
+            menuStyle: const MenuStyle(
+              maximumSize: WidgetStatePropertyAll<Size>(Size(150.0, 50.0)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 150.0);
+  });
 }
 
 enum TestMenu {
