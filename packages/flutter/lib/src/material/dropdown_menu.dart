@@ -1090,10 +1090,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                       (Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item),
                     ),
                     if (widget.label != null)
-                      Padding(
-                        // See RenderEditable.floatingCursorAddedMargin for the default horizontal padding.
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: DefaultTextStyle(style: effectiveTextStyle!, child: widget.label!),
+                      ExcludeSemantics(
+                        child: Padding(
+                          // See RenderEditable.floatingCursorAddedMargin for the default horizontal padding.
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: DefaultTextStyle(style: effectiveTextStyle!, child: widget.label!),
+                        ),
                       ),
                     trailingButton,
                     leadingButton,
