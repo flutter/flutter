@@ -400,47 +400,48 @@ enum SemanticsRole {
   /// An input field for users to enter search terms.
   searchBox,
 
-  /// A control that used for dragging across content.
+  /// A control used for dragging across content.
   ///
-  /// e.g, the drag handle of [ReorderableList].
+  /// For example, the drag handle of [ReorderableList].
   dragHandle,
 
   /// A control to cycle through content on tap.
   ///
-  /// e.g, the next and previous month button of a [CalendarDatePicker].
+  /// For example, the next and previous month button of a [CalendarDatePicker].
   spinButton,
 
   /// A input field with a dropdown list box attached.
   ///
-  /// e.g, a [DropDownMenu]
+  /// For example, a [DropDownMenu]
   comboBox,
 
   /// Contains a list of [menu].
   ///
-  /// e.g, a [MenuBar].
+  /// For example, a [MenuBar].
   menuBar,
 
   /// A button that opens a dropdown that contains multiple [menuItem]s.
   ///
-  /// e.g, a [MenuAnchor] or [DropDownButton].
+  /// For example, a [MenuAnchor] or [DropDownButton].
   menu,
 
-  /// Items in a dropdown created by [menu] or [comboBox].
+  /// A item in a dropdown created by [menu] or [comboBox].
   menuItem,
 
-  /// A container to display multiple [listItem] in vertical or horizontal
+  /// A container to display multiple [listItem]s in vertical or horizontal
   /// layout.
   ///
-  /// e.g, a [LisView] or [Column].
+  /// For example, a [LisView] or [Column].
   list,
 
   /// An item in a [list].
   listItem,
 
-  /// An area that resembles a form.
+  /// An area that represents a form.
   form,
 
-  /// A pop up when hover over a component to provide contextual explanation.
+  /// A pop up displayed when hovering over a component to provide contextual
+  /// explanation.
   tooltip,
 
   /// A control that controls the scrolling of content within a viewing
@@ -449,18 +450,18 @@ enum SemanticsRole {
 
   /// A graphic object that spins to indicate the application is busy.
   ///
-  /// e.g, a [CircularProgressIndicator].
+  /// For example, a [CircularProgressIndicator].
   loadingSpinner,
 
   /// A graphic object that shows progress along a line.
   ///
-  /// e.g, a [LinearProgressIndicator].
+  /// For example, a [LinearProgressIndicator].
   progressBar,
 
   /// A keyboard shortcut field that allows the user to enter a combination or
   /// sequence of keystrokes.
   ///
-  /// e.g, [Shortcuts].
+  /// For example, [Shortcuts].
   hotKey,
 }
 
