@@ -104,6 +104,8 @@ final int _kUnblockedUserActions =
 /// A static class to conduct semantics role checks.
 sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _checkSemanticsData(SemanticsNode node) => switch (node.role) {
+    SemanticsRole.alertDialog => _noCheckRequired,
+    SemanticsRole.dialog => _noCheckRequired,
     SemanticsRole.none => _noCheckRequired,
     SemanticsRole.tab => _semanticsTab,
     SemanticsRole.tabBar => _semanticsTabBar,
