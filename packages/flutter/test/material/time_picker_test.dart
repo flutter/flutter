@@ -128,16 +128,15 @@ void main() {
     addTearDown(tester.view.reset);
 
     // When use24HourFormat: false, should show AM/PM indicators
-    await mediaQueryBoilerplate(tester, materialType: MaterialType.material2);
+    await pumpShowTimePicker24HourFormat(tester, materialType: MaterialType.material2, use24HourFormat: false);
     expect(find.text(amString), findsOneWidget);
     expect(find.text(pmString), findsOneWidget);
     await tester.tap(find.text(okString)); // Dismiss the dialog
     await tester.pumpAndSettle();
 
     // When use24HourFormat: true, should not show AM/PM indicators
-    await mediaQueryBoilerplate(
+    await pumpShowTimePicker24HourFormat(
       tester,
-      use24HourFormat: true,
       materialType: MaterialType.material2,
     );
     expect(find.text(amString), findsNothing);
@@ -168,16 +167,15 @@ void main() {
     addTearDown(tester.view.reset);
 
     // When use24HourFormat: false, should show AM/PM indicators
-    await mediaQueryBoilerplate(tester, materialType: MaterialType.material3);
+    await pumpShowTimePicker24HourFormat(tester, materialType: MaterialType.material3, use24HourFormat: false);
     expect(find.text(amString), findsOneWidget);
     expect(find.text(pmString), findsOneWidget);
     await tester.tap(find.text(okString)); // Dismiss the dialog
     await tester.pumpAndSettle();
 
     // When use24HourFormat: true, should not show AM/PM indicators
-    await mediaQueryBoilerplate(
+    await pumpShowTimePicker24HourFormat(
       tester,
-      use24HourFormat: true,
       materialType: MaterialType.material3,
     );
     expect(find.text(amString), findsNothing);
@@ -2378,6 +2376,73 @@ Future<void> mediaQueryBoilerplate(
                               onEntryModeChanged: onEntryModeChange,
                               orientation: orientation,
                               use24HourFormat: use24HourFormat ?? false,
+                            );
+                          },
+                          child: const Text('X'),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  if (tapButton) {
+    await tester.tap(find.text('X'));
+  }
+  await tester.pumpAndSettle();
+}
+
+/// Test the time picker for 24-hour format.
+Future<void> pumpShowTimePicker24HourFormat(
+  WidgetTester tester, {
+  TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
+  TextScaler textScaler = TextScaler.noScaling,
+  TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
+  String? helpText,
+  String? hourLabelText,
+  String? minuteLabelText,
+  String? errorInvalidText,
+  bool accessibleNavigation = false,
+  EntryModeChangeCallback? onEntryModeChange,
+  bool tapButton = true,
+  required MaterialType materialType,
+  bool use24HourFormat = true,
+}) async {
+  await tester.pumpWidget(
+    Theme(
+      data: ThemeData(useMaterial3: materialType == MaterialType.material3),
+      child: Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: MediaQueryData(
+            alwaysUse24HourFormat: use24HourFormat,
+            textScaler: textScaler,
+            accessibleNavigation: accessibleNavigation,
+            size: tester.view.physicalSize / tester.view.devicePixelRatio,
+          ),
+          child: Material(
+            child: Center(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Navigator(
+                  onGenerateRoute: (RouteSettings settings) {
+                    return MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return TextButton(
+                          onPressed: () {
+                            showTimePicker(
+                              context: context,
+                              initialTime: initialTime,
+                              use24HourFormat: use24HourFormat,
                             );
                           },
                           child: const Text('X'),

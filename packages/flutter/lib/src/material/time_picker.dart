@@ -3219,7 +3219,7 @@ Future<TimeOfDay?> showTimePicker({
       if (use24HourFormat) {
         // Override MediaQuery with specified 24-hour format
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: use24HourFormat),
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
           child: builder == null ? dialog : builder(context, dialog),
         );
       }
