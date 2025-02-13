@@ -4,11 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-@Preview()
-WidgetPreview preview() {
-  return const WidgetPreview(name: 'My First Preview', child: FlutterLogo(size: 100));
-}
-
 void main() {
   runApp(
     const DecoratedBox(

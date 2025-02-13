@@ -129,7 +129,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       )
       ..addFlag(
         kUseFlutterWeb,
-        help: 'Launches the widget preview environment using Flutter Web',
+        help: 'Launches the widget preview environment using Flutter Web.',
         hide: !verboseHelp,
       );
   }
