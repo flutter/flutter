@@ -279,6 +279,7 @@ TEST(FlutterWindowsViewTest, Shutdown) {
     EXPECT_CALL(*engine_ptr, running).WillOnce(Return(true));
     EXPECT_CALL(*engine_ptr, RemoveView(view_id)).Times(1);
     EXPECT_CALL(*engine_ptr, running).WillOnce(Return(true));
+    EXPECT_CALL(*engine_ptr, running).WillOnce(Return(true));
     EXPECT_CALL(*engine_ptr, PostRasterThreadTask)
         .WillOnce([](fml::closure callback) {
           callback();

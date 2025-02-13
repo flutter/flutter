@@ -15,6 +15,20 @@ namespace {
 
 constexpr wchar_t kWindowClassName[] = L"FLUTTER_HOST_WINDOW";
 
+// RAII wrapper for global Win32 ATOMs.
+struct AtomRAII {
+  AtomRAII(wchar_t const* name) : atom(GlobalAddAtom(name)) {}
+  ~AtomRAII() { GlobalDeleteAtom(atom); }
+  ATOM const atom;
+};
+
+// Atom representing a window property that stores a pointer to this host
+// window. This property serves as an alternative way to access the window in
+// |FlutterHostWindow::GetThisFromHandle| for windows created from existing
+// views, since the `GWLP_USERDATA` of such windows may point to something other
+// than a |FlutterHostWindow|.
+AtomRAII const kWindowPropAtom(kWindowClassName);
+
 // Clamps |size| to the size of the virtual screen. Both the parameter and
 // return size are in physical coordinates.
 flutter::Size ClampToVirtualScreen(flutter::Size size) {
@@ -303,6 +317,40 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
             window_size ? *window_size : Size{CW_USEDEFAULT, CW_USEDEFAULT}};
   }();
 
+  // Set up the view.
+  FlutterWindowsEngine* const engine = window_controller_->engine();
+  auto view_window = std::make_unique<FlutterWindow>(
+      initial_window_rect.width(), initial_window_rect.height(),
+      engine->windows_proc_table());
+
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::move(view_window));
+  if (!view) {
+    FML_LOG(ERROR) << "Failed to create view";
+    return;
+  }
+
+  view_controller_ =
+      std::make_unique<FlutterWindowsViewController>(nullptr, std::move(view));
+
+  // Launch the engine if it is not running already.
+  if (!engine->running() && !engine->Run()) {
+    FML_LOG(ERROR) << "Failed to launch engine";
+    return;
+  }
+  // Must happen after engine is running.
+  view_controller_->view()->SendInitialBounds();
+  // The Windows embedder listens to accessibility updates using the
+  // view's HWND. The embedder's accessibility features may be stale if
+  // the app was in headless mode.
+  view_controller_->engine()->UpdateAccessibilityFeatures();
+
+  // Ensure that basic setup of the view controller was successful.
+  if (!view_controller_->view()) {
+    FML_LOG(ERROR) << "Failed to set up the view controller";
+    return;
+  }
+
   // Register the window class.
   if (!IsClassRegistered(kWindowClassName)) {
     auto const idi_app_icon = 101;
@@ -354,44 +402,6 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
                window_rect.top - top_dropshadow_height, 0, 0,
                SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 
-  // Set up the view.
-  RECT client_rect;
-  GetClientRect(hwnd, &client_rect);
-  int const width = client_rect.right - client_rect.left;
-  int const height = client_rect.bottom - client_rect.top;
-
-  FlutterWindowsEngine* const engine = window_controller_->engine();
-  auto view_window = std::make_unique<FlutterWindow>(
-      width, height, engine->windows_proc_table());
-
-  std::unique_ptr<FlutterWindowsView> view =
-      engine->CreateView(std::move(view_window));
-  if (!view) {
-    FML_LOG(ERROR) << "Failed to create view";
-    return;
-  }
-
-  view_controller_ =
-      std::make_unique<FlutterWindowsViewController>(nullptr, std::move(view));
-
-  // Launch the engine if it is not running already.
-  if (!engine->running() && !engine->Run()) {
-    FML_LOG(ERROR) << "Failed to launch engine";
-    return;
-  }
-  // Must happen after engine is running.
-  view_controller_->view()->SendInitialBounds();
-  // The Windows embedder listens to accessibility updates using the
-  // view's HWND. The embedder's accessibility features may be stale if
-  // the app was in headless mode.
-  view_controller_->engine()->UpdateAccessibilityFeatures();
-
-  // Ensure that basic setup of the view controller was successful.
-  if (!view_controller_->view()) {
-    FML_LOG(ERROR) << "Failed to set up the view controller";
-    return;
-  }
-
   UpdateTheme(hwnd);
 
   SetChildContent(view_controller_->view()->GetWindowHandle());
@@ -426,24 +436,44 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
   window_handle_ = hwnd;
 }
 
-FlutterHostWindow::~FlutterHostWindow() {
-  if (HWND const hwnd = window_handle_) {
-    window_handle_ = nullptr;
-    DestroyWindow(hwnd);
+FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
+                                     HWND hwnd,
+                                     FlutterWindowsView* view)
+    : window_controller_(controller), window_handle_(hwnd) {
+  if (!SetProp(hwnd, MAKEINTATOM(kWindowPropAtom.atom), this)) {
+    FML_LOG(ERROR) << "Failed to set up entry in the window property list";
+    return;
+  }
+  child_content_ = view->GetWindowHandle();
+}
 
-    // Unregisters the window class. It will fail silently if there are
-    // other windows using the class, as only the last window can
-    // successfully unregister the class.
+FlutterHostWindow::~FlutterHostWindow() {
+  HWND const hwnd = window_handle_;
+  window_handle_ = nullptr;
+  if (view_controller_) {
+    DestroyWindow(hwnd);
+    // Unregister the window class. Fail silently if other windows are still
+    // using the class, as only the last window can successfully unregister it.
     if (!UnregisterClass(kWindowClassName, GetModuleHandle(nullptr))) {
-      // Clears the error information after the failed unregistering.
+      // Clear the error state after the failed unregistration.
       SetLastError(ERROR_SUCCESS);
     }
   }
 }
 
 FlutterHostWindow* FlutterHostWindow::GetThisFromHandle(HWND hwnd) {
+  // For native windows created by the runner, retrieve the instance pointer
+  // from a window property.
+  if (HANDLE const data = GetProp(hwnd, MAKEINTATOM(kWindowPropAtom.atom))) {
+    return reinterpret_cast<FlutterHostWindow*>(data);
+  }
+  // Otherwise, retrieve the instance pointer from the window's user data.
   return reinterpret_cast<FlutterHostWindow*>(
       GetWindowLongPtr(hwnd, GWLP_USERDATA));
+}
+
+bool FlutterHostWindow::HasThisAsProperty(HWND hwnd) {
+  return GetProp(hwnd, MAKEINTATOM(kWindowPropAtom.atom)) != nullptr;
 }
 
 HWND FlutterHostWindow::GetWindowHandle() const {
@@ -487,12 +517,6 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
                                          WPARAM wparam,
                                          LPARAM lparam) {
   switch (message) {
-    case WM_DESTROY:
-      if (window_handle_ && quit_on_close_) {
-        PostQuitMessage(0);
-      }
-      return 0;
-
     case WM_DPICHANGED: {
       auto* const new_scaled_window_rect = reinterpret_cast<RECT*>(lparam);
       LONG const width =
@@ -565,6 +589,18 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
 
     default:
       break;
+  }
+
+  if (!view_controller_) {
+    return 0;
+  }
+
+  if (window_handle_) {
+    LRESULT* result;
+    if (view_controller_->engine()->lifecycle_manager()->WindowProc(
+            hwnd, message, wparam, lparam, result)) {
+      return 0;
+    }
   }
 
   return DefWindowProc(hwnd, message, wparam, lparam);

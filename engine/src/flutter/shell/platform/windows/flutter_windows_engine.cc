@@ -207,6 +207,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
         FlutterWindowsEngine* that =
             static_cast<FlutterWindowsEngine*>(user_data);
         BASE_DCHECK(that->lifecycle_manager_);
+        that->ForwardToHostWindowController(hwnd, msg, wpar, lpar);
         return that->lifecycle_manager_->WindowProc(hwnd, msg, wpar, lpar,
                                                     result);
       },
@@ -790,6 +791,34 @@ void FlutterWindowsEngine::SetLifecycleState(flutter::AppLifecycleState state) {
   if (lifecycle_manager_) {
     lifecycle_manager_->SetLifecycleState(state);
   }
+}
+
+void FlutterWindowsEngine::ForwardToHostWindowController(HWND hwnd,
+                                                         UINT message,
+                                                         WPARAM wparam,
+                                                         LPARAM lparam) const {
+  if (!host_window_controller_) {
+    return;
+  }
+  if (!FlutterHostWindow::HasThisAsProperty(hwnd)) {
+    host_window_controller_->CreateHostWindowFromExisting(
+        hwnd, GetViewFromTopLevelWindow(hwnd));
+  }
+  host_window_controller_->HandleMessage(hwnd, message, wparam, lparam);
+}
+
+FlutterWindowsView* FlutterWindowsEngine::GetViewFromTopLevelWindow(
+    HWND hwnd) const {
+  std::shared_lock read_lock(views_mutex_);
+  auto const iterator =
+      std::find_if(views_.begin(), views_.end(), [hwnd](auto const& pair) {
+        FlutterWindowsView* const view = pair.second;
+        return GetParent(view->GetWindowHandle()) == hwnd;
+      });
+  if (iterator != views_.end()) {
+    return iterator->second;
+  }
+  return nullptr;
 }
 
 void FlutterWindowsEngine::SendSystemLocales() {
