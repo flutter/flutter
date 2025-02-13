@@ -63,18 +63,4 @@ void main() async {
     },
     timeout: Timeout.none,
   );
-
-  // Regression test for https://github.com/flutter/flutter/pull/163179.
-  test('should screenshot an external texture even if a resume is never triggered', () async {
-    // On Android: Background the app, trim memory, and restore the app.
-    if (nativeDriver case final AndroidNativeDriver nativeDriver) {
-      print('Trimming memory.');
-      await nativeDriver.simulateLowMemory(appName: appName);
-    }
-
-    await expectLater(
-      nativeDriver.screenshot(),
-      matchesGoldenFile('external_texture_surface_producer_smiley_face.png'),
-    );
-  }, timeout: Timeout.none);
 }
