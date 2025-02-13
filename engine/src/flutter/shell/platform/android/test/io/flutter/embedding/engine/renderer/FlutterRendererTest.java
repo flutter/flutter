@@ -781,7 +781,7 @@ public class FlutterRendererTest {
     flutterRenderer.onTrimMemory(TRIM_MEMORY_BACKGROUND);
 
     // Verify.
-    verify(callback, never()).onSurfaceCleanup();
+    verify(callback).onSurfaceCleanup();
   }
 
   @Test
