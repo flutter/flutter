@@ -271,6 +271,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The padding around the time picker dialog when the entry mode is
   /// [TimePickerEntryMode.dial] or [TimePickerEntryMode.dialOnly].
+  ///
+  /// It will also be used to seperate actions with the time picker dial.
   final EdgeInsetsGeometry? padding;
 
   /// The shape of the [Dialog] that the time picker is presented in.
