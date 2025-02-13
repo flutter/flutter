@@ -160,7 +160,6 @@ class WebTestCompiler {
       config: _config,
     );
     final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
-    print('USING WEB TEST COMPILER!');
     final ResidentCompiler residentCompiler = ResidentCompiler(
       _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       buildMode: buildInfo.mode,

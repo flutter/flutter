@@ -5,6 +5,7 @@
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/deferred_component.dart';
@@ -14,6 +15,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../convert.dart';
@@ -24,6 +26,7 @@ import '../linux/build_linux.dart';
 import '../macos/build_macos.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 import '../widget_preview/preview_code_generator.dart';
 import '../widget_preview/preview_detector.dart';
 import '../windows/build_windows.dart';
@@ -40,6 +43,9 @@ class WidgetPreviewCommand extends FlutterCommand {
     required Platform platform,
     required ShutdownHooks shutdownHooks,
     required OperatingSystemUtils os,
+    required FlutterVersion flutterVersion,
+    required ProcessManager processManager,
+    required BuildSystem buildSystem,
   }) {
     addSubcommand(
       WidgetPreviewStartCommand(
@@ -51,6 +57,9 @@ class WidgetPreviewCommand extends FlutterCommand {
         platform: platform,
         shutdownHooks: shutdownHooks,
         os: os,
+        flutterVersion: flutterVersion,
+        processManager: processManager,
+        buildSystem: buildSystem,
       ),
     );
     addSubcommand(
@@ -117,6 +126,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.platform,
     required this.shutdownHooks,
     required this.os,
+    required this.flutterVersion,
+    required this.processManager,
+    required this.buildSystem,
   }) {
     addPubOptions();
     argParser
@@ -164,6 +176,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   final ShutdownHooks shutdownHooks;
 
   final OperatingSystemUtils os;
+
+  final FlutterVersion flutterVersion;
+
+  final ProcessManager processManager;
+
+  final BuildSystem buildSystem;
 
   late final PreviewDetector _previewDetector = PreviewDetector(
     logger: logger,
@@ -410,7 +428,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         ),
         kEnableHotReload, // hot mode
         applicationBinary: prebuiltApplicationBinary,
-        trackWidgetCreation: false,
+        trackWidgetCreation: true,
         projectRootPath: widgetPreviewScaffoldProject.directory.path,
       );
     } on Exception catch (error) {

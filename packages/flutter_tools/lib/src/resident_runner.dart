@@ -145,7 +145,6 @@ class FlutterDevice {
         platformDillName,
       );
 
-      print('FILE SYSTEM ROOTS: ${buildInfo.fileSystemRoots}');
       generator = ResidentCompiler(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
         buildMode: buildInfo.mode,

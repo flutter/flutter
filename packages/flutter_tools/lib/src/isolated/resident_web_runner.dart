@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:dwds/dwds.dart';
 import 'package:package_config/package_config.dart';
@@ -594,7 +593,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       const String generatedImport = 'web_plugin_registrant.dart';
 
       Uri? importedEntrypoint = packageConfig!.toPackageUri(mainUri);
-      print('IMPORTED ENTRYPOINT: $mainUri $importedEntrypoint');
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
         final String parent = _fileSystem.file(mainUri).parent.path;
@@ -602,7 +600,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           ..addFileSystemRoot(parent)
           ..addFileSystemRoot(_fileSystem.directory('test').absolute.path);
         importedEntrypoint = Uri(scheme: 'org-dartlang-app', path: '/${mainUri.pathSegments.last}');
-        print('UPDATED IMPORTED ENTRYPOINT: $importedEntrypoint');
       }
       final LanguageVersion languageVersion = determineLanguageVersion(
         _fileSystem.file(mainUri),
@@ -637,7 +634,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         return UpdateFSReport();
       }
     }
-    print('DEBUGGING OPTIONS PACKAGE CONFIG PATH: ${debuggingOptions.buildInfo.packageConfigPath}');
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
       lastCompiled: device!.devFS!.lastCompiled,
       urisToMonitor: device!.devFS!.sources,
