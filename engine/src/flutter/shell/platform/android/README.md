@@ -157,7 +157,9 @@ completion:
 
 ![Example](https://github.com/flutter/flutter/assets/168174/8a75dd27-66e1-4c4f-88af-667a73b909b6)
 
-> [!NOTE] > `--compile-commands-dir` must point to an Android build output:
+> [!NOTE]
+>
+> `--compile-commands-dir` must point to an Android build output:
 >
 > ```jsonc
 > {
