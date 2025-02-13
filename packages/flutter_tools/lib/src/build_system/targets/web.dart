@@ -233,31 +233,27 @@ class Dart2JSTarget extends Dart2WebTarget {
   };
 
   @override
-  Iterable<File> buildFiles(Environment environment) {
-    final result = environment.buildDir.listSync(recursive: true).whereType<File>().where((
-      File file,
-    ) {
-      if (file.basename == 'main.dart.js') {
-        return true;
-      }
-      if (file.basename == 'main.dart.js.map') {
-        return compilerConfig.sourceMaps;
-      }
-      final RegExp partFileRegex = RegExp(r'main\.dart\.js_[0-9].*\.part\.js');
-      if (partFileRegex.hasMatch(file.basename)) {
-        return true;
-      }
-
-      if (compilerConfig.sourceMaps) {
-        final RegExp partFileSourceMapRegex = RegExp(r'main\.dart\.js_[0-9].*.part\.js\.map');
-        if (partFileSourceMapRegex.hasMatch(file.basename)) {
+  Iterable<File> buildFiles(Environment environment) =>
+      environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
+        if (file.basename == 'main.dart.js') {
           return true;
         }
-      }
-      return false;
-    });
-    return result;
-  }
+        if (file.basename == 'main.dart.js.map') {
+          return compilerConfig.sourceMaps;
+        }
+        final RegExp partFileRegex = RegExp(r'main\.dart\.js_[0-9].*\.part\.js');
+        if (partFileRegex.hasMatch(file.basename)) {
+          return true;
+        }
+
+        if (compilerConfig.sourceMaps) {
+          final RegExp partFileSourceMapRegex = RegExp(r'main\.dart\.js_[0-9].*.part\.js\.map');
+          if (partFileSourceMapRegex.hasMatch(file.basename)) {
+            return true;
+          }
+        }
+        return false;
+      });
 
   @override
   Iterable<String> get buildPatternStems => <String>[
