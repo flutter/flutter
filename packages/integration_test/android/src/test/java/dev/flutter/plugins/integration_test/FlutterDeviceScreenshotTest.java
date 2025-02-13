@@ -57,6 +57,7 @@ public class FlutterDeviceScreenshotTest extends AndroidJUnitRunner {
         try (MockedStatic<View> mockedStatic = Mockito.mockStatic(View.class)) {
             FlutterView mockFlutterView = mock(FlutterView.class);
             FlutterFragmentActivity mockFlutterFragmentActivity = mock(FlutterFragmentActivity.class);
+            mockFlutterActivity.flutterViewId = 123;
             when(mockFlutterFragmentActivity.findViewById(mockFlutterFragmentActivity.flutterViewId))
                     .thenReturn(mockFlutterView);
             assertEquals(
