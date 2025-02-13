@@ -746,10 +746,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool forceMaterialTransparency;
 
   /// {@template flutter.material.appbar.useDefaultSemanticsOrder}
-  /// Whether to use the default semantic ordering for the app bar's children.
+  /// Whether to use the default semantic ordering for the app bar's children for
+  /// accessibility traversal order.
   ///
   /// If this is set to true, the app bar will use the default semantic ordering,
   /// which places the flexible space after the main content in the semantics tree.
+  /// This affects how screen readers and other assistive technologies navigate the app bar's content.
   ///
   /// Set this to false if you want to customize semantics traversal order in the app bar.
   /// You can then assign [SemanticsSortKey]s to app bar's children to control the order.
@@ -757,7 +759,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Defaults to true.
   ///
   /// See also:
-  ///  * [SemanticsSortKey], which is the keys for accessibility traversal order sorting.
+  ///  * [SemanticsSortKey], which are keys used to define the accessibility traversal order.
   /// {@endtemplate}
   final bool useDefaultSemanticsOrder;
 
