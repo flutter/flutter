@@ -1028,10 +1028,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _fontSizeObserver = null;
   }
 
+  /// Updates [typographySettings] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [typographySettings] changed.
   void _updateTypographySettings(ui.TypographySettings value) {
-    configuration = configuration.copyWith(typographySettings: value);
-    invokeOnPlatformConfigurationChanged();
-    invokeOnMetricsChanged();
+    if (configuration.typographySettings != value) {
+      configuration = configuration.copyWith(typographySettings: value);
+      invokeOnPlatformConfigurationChanged();
+      invokeOnMetricsChanged();
+    }
   }
 
   num get _fontSize => parseFontSize(domDocument.documentElement!) ?? _defaultRootFontSize;
