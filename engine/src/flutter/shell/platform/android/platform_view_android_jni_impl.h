@@ -124,6 +124,10 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
                               int32_t viewHeight,
                               MutatorsStack mutators_stack) override;
 
+  void showOverlaySurface2() override;
+
+  void hideOverlaySurface2() override;
+
   void onEndFrame2() override;
 
  private:

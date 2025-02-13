@@ -1265,15 +1265,15 @@ flutter:
       await residentRunner.run();
 
       final File generatedLocalizationsFile = globals.fs
-          .directory('.dart_tool')
-          .childDirectory('flutter_gen')
-          .childDirectory('gen_l10n')
+          .directory('lib')
+          .childDirectory('l10n')
           .childFile('app_localizations.dart');
-      expect(generatedLocalizationsFile.existsSync(), isTrue);
+      expect(generatedLocalizationsFile, exists);
 
       // Completing this future ensures that the daemon can exit correctly.
       expect(await residentRunner.waitForAppToFinish(), 1);
     }),
+    overrides: <Type, Generator>{FeatureFlags: enableExplicitPackageDependencies},
   );
 
   testUsingContext(
@@ -1785,7 +1785,6 @@ flutter:
                   BuildMode.debug,
                   '',
                   treeShakeIcons: false,
-                  nullSafetyMode: NullSafetyMode.unsound,
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
                 target: null,
@@ -1795,7 +1794,7 @@ flutter:
 
       expect(
         residentCompiler!.initializeFromDill,
-        globals.fs.path.join(getBuildDirectory(), 'fbbe6a61fb7a1de317d381f8df4814e5.cache.dill'),
+        globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
       );
       expect(
         residentCompiler.librariesSpec,
@@ -1844,7 +1843,7 @@ flutter:
 
       expect(
         residentCompiler!.initializeFromDill,
-        globals.fs.path.join(getBuildDirectory(), '80b1a4cf4e7b90e1ab5f72022a0bc624.cache.dill'),
+        globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
       );
       expect(
         residentCompiler.librariesSpec,
@@ -1860,7 +1859,7 @@ flutter:
       );
       expect(
         residentCompiler.platformDill,
-        'file:///HostArtifact.webPlatformKernelFolder/ddc_outline_sound.dill',
+        'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
       );
     },
     overrides: <Type, Generator>{
