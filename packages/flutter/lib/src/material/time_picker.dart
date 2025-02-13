@@ -2324,7 +2324,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   static const Size _kTimePickerPortraitSize = Size(310, 468);
   static const Size _kTimePickerLandscapeSize = Size(524, 342);
   static const Size _kTimePickerLandscapeSizeM2 = Size(508, 300);
-  static const Size _kTimePickerInputSize = Size(312, 216);
+  static const Size _kTimePickerInputSize = Size(312, 252);
 
   // Absolute minimum dialog sizes, which is the point at which it begins
   // scrolling to fit everything in.
@@ -2507,7 +2507,10 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     final Widget actions = Padding(
-      padding: EdgeInsetsDirectional.only(start: theme.useMaterial3 ? 0 : 4),
+      padding: EdgeInsetsDirectional.only(
+        start: theme.useMaterial3 ? 0 : 4,
+        top: (pickerTheme.padding ?? defaultTheme.padding).vertical / 2,
+      ),
       child: Row(
         children: <Widget>[
           if (_entryMode.value == TimePickerEntryMode.dial ||
@@ -2606,13 +2609,14 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                 restorationId: 'time_picker_scroll_view_vertical',
                 child: AnimatedContainer(
                   width: allowedSize.width,
-                  height: allowedSize.height,
                   duration: _kDialogSizeAnimationDuration,
                   curve: Curves.easeIn,
+                  constraints: BoxConstraints(maxHeight: allowedSize.height),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Expanded(
+                      Flexible(
                         child: Form(
                           key: _formKey,
                           autovalidateMode: _autovalidateMode.value,
