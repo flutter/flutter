@@ -6,6 +6,7 @@
 import com.android.build.OutputFile
 import com.flutter.gradle.BaseApplicationNameHandler
 import com.flutter.gradle.Deeplink
+import com.flutter.gradle.DependencyVersionChecker
 import com.flutter.gradle.IntentFilterCheck
 import com.flutter.gradle.VersionUtils
 import groovy.json.JsonGenerator
@@ -301,10 +302,7 @@ class FlutterPlugin implements Plugin<Project> {
         final Boolean shouldSkipDependencyChecks = project.hasProperty("skipDependencyChecks") && project.getProperty("skipDependencyChecks")
         if (!shouldSkipDependencyChecks) {
             try {
-                final String dependencyCheckerPluginPath = Paths.get(flutterRoot.absolutePath,
-                        "packages", "flutter_tools", "gradle", "src", "main", "kotlin_scripts",
-                        "dependency_version_checker.gradle.kts")
-                project.apply from: dependencyCheckerPluginPath
+                DependencyVersionChecker.checkDependencyVersions(project)
             } catch (Exception e) {
                 if (!project.hasProperty("usesUnsupportedDependencyVersions") || !project.usesUnsupportedDependencyVersions) {
                     // Possible bug in dependency checking code - warn and do not block build.

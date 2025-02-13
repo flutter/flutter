@@ -817,10 +817,14 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   } else {
     auto cvg = vertices->GetCoverage(Matrix{});
     FML_CHECK(cvg.has_value());
-    src_coverage =
-        // Covered by FML_CHECK.
-        // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-        vertices->GetTextureCoordinateCoverage().value_or(cvg.value());
+    auto texture_coverage = vertices->GetTextureCoordinateCoverage();
+    if (texture_coverage.has_value()) {
+      src_coverage =
+          Rect::MakeOriginSize(texture_coverage->GetOrigin(),
+                               texture_coverage->GetSize().Max({1, 1}));
+    } else {
+      src_coverage = cvg.value();
+    }
   }
   src_contents = src_paint.CreateContents();
 
