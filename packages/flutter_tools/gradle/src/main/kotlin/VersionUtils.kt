@@ -25,47 +25,42 @@ object VersionUtils {
         val v2Parts = version2.split(".", "-")
         val maxSize = max(v1Parts.size, v2Parts.size)
 
-        for (i in 0..maxSize-1) {
-            val v1Part: String = if (i < v1Parts.size) v1Parts[i] else "0"
-            val v2Part: String = if (i < v2Parts.size) v2Parts[i] else "0"
+        for (i in 0..maxSize - 1) {
+            val v1Part: String = v1Parts.getOrNull(i) ?: "0"
+            val v2Part: String = v2Parts.getOrNull(i) ?: "0"
 
-            val v1Num: Int = v1Part.toIntOrNull() ?: 0
-            val v2Num: Int = v2Part.toIntOrNull() ?: 0
-            if (v1Num != v2Num) {
-                if (v1Num > v2Num) {
-                    return version1
-                } else {
-                    return version2
+            val v1Num: Int? = v1Part.toIntOrNull()
+            val v2Num: Int? = v2Part.toIntOrNull()
+            when {
+                v1Num != null && v2Num != null -> { // Both are numbers
+                    if (v1Num != v2Num) {
+                        return if (v1Num > v2Num) version1 else version2
+                    }
                 }
-            }
-
-            if (v1Part.toIntOrNull() !== null && v2Part.toIntOrNull() === null) {
-                return version1
-            } else if (v1Part.toIntOrNull() === null && v2Part.toIntOrNull() !== null) {
-                return version2
-            } else if (v1Part != v2Part) {
-                if (comparePreReleaseIdentifiers(v1Part, v2Part)) {
-                    return version1
-                } else {
-                    return version2
+                v1Num != null && v2Num == null ->
+                    return version1 // v1 is a number, v2 is not, so v1 is newer.
+                v1Num == null && v2Num != null ->
+                    return version2 // v1 is not a number, v2 is, so v2 is newer.
+                v1Num == null && v2Num == null -> { // Both are not numbers (pre-release identifiers)
+                    if (v1Part != v2Part) {
+                        return if (comparePreReleaseIdentifiers(v1Part, v2Part)) version1 else version2
+                    }
                 }
             }
         }
 
         // If versions are equal, return the longest version string
-        if (version1.length >= version2.length) {
-            return version1
-        } else {
-            return version2
-        }
+        return if (version1.length >= version2.length) version1 else version2
     }
 
-    fun comparePreReleaseIdentifiers(
+    /** Compares only non digits and returns true if v1Part is than v2Part. */
+    private fun comparePreReleaseIdentifiers(
         v1Part: String,
         v2Part: String
     ): Boolean {
-        val v1PreRelease = v1Part.replace(Regex("\\d"), "")
-        val v2PreRelease = v2Part.replace(Regex("\\d"), "")
+        val digits = Regex("\\d")
+        val v1PreRelease = v1Part.replace(digits, "")
+        val v2PreRelease = v2Part.replace(digits, "")
         return v1PreRelease < v2PreRelease
     }
 }
