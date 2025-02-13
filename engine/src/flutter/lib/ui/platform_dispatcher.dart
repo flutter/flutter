@@ -328,7 +328,6 @@ class PlatformDispatcher {
   // Updates the metrics of the window with the given id.
   void _updateWindowMetrics(int viewId, _ViewConfiguration viewConfiguration) {
     assert(_views.containsKey(viewId), 'View $viewId does not exist.');
-    print('_updateWindowMetrics dart:uis');
     _views[viewId]!._viewConfiguration = viewConfiguration;
     _invoke(onMetricsChanged, _onMetricsChangedZone);
   }
