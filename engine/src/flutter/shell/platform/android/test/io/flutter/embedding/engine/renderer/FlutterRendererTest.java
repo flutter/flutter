@@ -793,7 +793,7 @@ public class FlutterRendererTest {
 
     // Create and set a mock callback.
     TextureRegistry.SurfaceProducer.Callback callback =
-            mock(TextureRegistry.SurfaceProducer.Callback.class);
+        mock(TextureRegistry.SurfaceProducer.Callback.class);
     producer.setCallback(callback);
 
     // Trim memory.
