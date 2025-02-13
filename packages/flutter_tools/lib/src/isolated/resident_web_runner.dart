@@ -17,7 +17,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -207,19 +206,33 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   void printHelp({bool details = true}) {
-    if (details) {
-      return printHelpDetails();
+    // Prefer to keep this aligned with resident_runner.dart as much as possible.
+    globals.printStatus('Flutter run key commands.');
+    if (debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc &&
+        (debuggingOptions.buildInfo.canaryFeatures ?? false)) {
+      // Hot reload is only supported with these flags enabled.
+      commandHelp.r.print();
     }
-    const String fire = '🔥';
-    const String rawMessage = '  To hot restart changes while running, press "r" or "R".';
-    final String message = _logger.terminal.color(
-      fire + _logger.terminal.bolden(rawMessage),
-      TerminalColor.red,
-    );
-    _logger.printStatus(message);
-    const String quitMessage = 'To quit, press "q".';
-    _logger.printStatus('For a more detailed help message, press "h". $quitMessage');
-    _logger.printStatus('');
+    if (supportsRestart) {
+      commandHelp.R.print();
+    }
+    if (details) {
+      // TODO(srujzs): Some of these maybe don't make sense for the web e.g.
+      // toggling the platform. Printing this is existing behavior, but we
+      // should pare down this list as needed.
+      printHelpDetails();
+      commandHelp.hWithDetails.print();
+    } else {
+      commandHelp.hWithoutDetails.print();
+    }
+    // TODO(srujzs): Detach just quits the app. For now, don't tell users about
+    // a faulty feature.
+    // if (stopAppDuringCleanup) {
+    //   commandHelp.d.print();
+    // }
+    commandHelp.c.print();
+    commandHelp.q.print();
+    globals.printStatus('');
     printDebuggerList();
   }
 
