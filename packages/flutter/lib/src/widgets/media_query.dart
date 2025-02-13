@@ -113,6 +113,7 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.supportsShowingSystemContextMenu].
   supportsShowingSystemContextMenu,
 
+  /// Specifies the aspect corresponding to [MediaQueryData.typographySettings].
   typographySettings,
 }
 
@@ -213,9 +214,9 @@ class MediaQueryData {
     this.supportsAnnounce = false,
     this.navigationMode = NavigationMode.traditional,
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
-    this.typographySettings,
     this.displayFeatures = const <ui.DisplayFeature>[],
     this.supportsShowingSystemContextMenu = false,
+    this.typographySettings,
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
        assert(
@@ -310,10 +311,10 @@ class MediaQueryData {
       navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
       gestureSettings = DeviceGestureSettings.fromView(view),
       displayFeatures = view.displayFeatures,
-      typographySettings = platformData?.typographySettings ?? view.platformDispatcher.typographySettings,
       supportsShowingSystemContextMenu =
           platformData?.supportsShowingSystemContextMenu ??
-          view.platformDispatcher.supportsShowingSystemContextMenu;
+          view.platformDispatcher.supportsShowingSystemContextMenu,
+      typographySettings = platformData?.typographySettings ?? view.platformDispatcher.typographySettings;
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
     return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
@@ -653,6 +654,10 @@ class MediaQueryData {
   ///    supported.
   final bool supportsShowingSystemContextMenu;
 
+  /// The typography settings for the view this media query is derived from.
+  ///
+  /// This contains platform specific settings for typography, such a line height,
+  /// word spacing, letter spacing, and paragraph spacing.
   final ui.TypographySettings? typographySettings;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
@@ -692,8 +697,8 @@ class MediaQueryData {
     NavigationMode? navigationMode,
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
-    ui.TypographySettings? typographySettings,
     bool? supportsShowingSystemContextMenu,
+    ui.TypographySettings? typographySettings,
   }) {
     assert(textScaleFactor == null || textScaler == null);
     if (textScaleFactor != null) {
@@ -719,9 +724,9 @@ class MediaQueryData {
       navigationMode: navigationMode ?? this.navigationMode,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
-      typographySettings: typographySettings ?? this.typographySettings,
       supportsShowingSystemContextMenu:
           supportsShowingSystemContextMenu ?? this.supportsShowingSystemContextMenu,
+      typographySettings: typographySettings ?? this.typographySettings,
     );
   }
 
@@ -920,7 +925,8 @@ class MediaQueryData {
         other.navigationMode == navigationMode &&
         other.gestureSettings == gestureSettings &&
         listEquals(other.displayFeatures, displayFeatures) &&
-        other.supportsShowingSystemContextMenu == supportsShowingSystemContextMenu;
+        other.supportsShowingSystemContextMenu == supportsShowingSystemContextMenu &&
+        other.typographySettings == typographySettings;
   }
 
   @override
@@ -943,6 +949,7 @@ class MediaQueryData {
     gestureSettings,
     Object.hashAll(displayFeatures),
     supportsShowingSystemContextMenu,
+    typographySettings,
   );
 
   @override
@@ -967,6 +974,7 @@ class MediaQueryData {
       'gestureSettings: $gestureSettings',
       'displayFeatures: $displayFeatures',
       'supportsShowingSystemContextMenu: $supportsShowingSystemContextMenu',
+      'typographySettings: $typographySettings',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -1762,14 +1770,14 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool? maybeSupportsAnnounceOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.supportsAnnounce)?.supportsAnnounce;
 
-  // static ui.TypographySettings typographySettingsOf(BuildContext context) =>
-  //     maybeTypographySettingsOf(context) ??
-  //     ui.TypographySettings(
-  //       lineHeight: 1.0,
-  //       paragraphSpacing: 1.0,
-  //       letterSpacing: 1.0,
-  //       wordSpacing: 1.0,
-  //     );
+  /// Returns the [MediaQueryData.typographySettings] for the
+  /// nearest [MediaQuery] ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.typographySettings] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static ui.TypographySettings? maybeTypographySettingsOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.typographySettings)?.typographySettings;
 
