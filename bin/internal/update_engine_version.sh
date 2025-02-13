@@ -37,7 +37,8 @@ LS_FILES_OUT="$(git ls-files "bin/internal/engine.version")"
 
 # If we already have a git tracked engine.version file
 if [ -n "$LS_FILES_OUT" ]; then
-  PREVIOUS_COMMIT="$(git rev-parse HEAD~1)"
+  # git rev-parse HEAD~1 would not work in shallow clones
+  PREVIOUS_COMMIT="$(git cat-file -p HEAD | grep parent | head -n 1 | cut --delimiter=' ' --fields=2)"
   ENGINE_VERSION_FILE_CONTENTS="$(cat "$FLUTTER_ROOT/bin/internal/engine.version")"
   if [[ "$PREVIOUS_COMMIT" == "$ENGINE_VERSION_FILE_CONTENTS" ]]; then
     # Our engine.version file should be the source of truth
