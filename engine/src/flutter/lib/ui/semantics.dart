@@ -415,7 +415,7 @@ enum SemanticsRole {
   /// For example, a [DropDownMenu]
   comboBox,
 
-  /// Contains a list of [menu].
+  /// Contains a list of [menu]s.
   ///
   /// For example, a [MenuBar].
   menuBar,
