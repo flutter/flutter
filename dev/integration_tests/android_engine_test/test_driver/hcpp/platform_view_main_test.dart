@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:android_driver_extensions/native_driver.dart';
 import 'package:android_driver_extensions/skia_gold.dart';
 import 'package:flutter_driver/flutter_driver.dart';
@@ -39,9 +41,18 @@ void main() async {
   });
 
   tearDownAll(() async {
+    await flutterDriver.tap(find.byValueKey('AddOverlay'));
+
     await nativeDriver.close();
     await flutterDriver.close();
   });
+
+  test('verify that HCPP is supported and enabled', () async {
+    final Map<String, Object?> response =
+        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+
+    expect(response['supported'], true);
+  }, timeout: Timeout.none);
 
   test('should screenshot an HCPP platform view', () async {
     await expectLater(
@@ -61,6 +72,18 @@ void main() async {
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile('$goldenPrefix.platform_view_portait_rotated_back.png'),
+    );
+  }, timeout: Timeout.none);
+
+  // Note: this doesn't reset the app so if additional test cases are added
+  // make sure to press the button again.
+  test('should remove overlay when platform view is removed', () async {
+    await flutterDriver.tap(find.byValueKey('RemoveOverlay'));
+    await Future<void>.delayed(const Duration(seconds: 1));
+
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.removed_overlay.png'),
     );
   }, timeout: Timeout.none);
 }

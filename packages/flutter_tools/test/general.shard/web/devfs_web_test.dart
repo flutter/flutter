@@ -916,7 +916,6 @@ void main() {
           BuildMode.debug,
           '',
           treeShakeIcons: false,
-          nullSafetyMode: NullSafetyMode.unsound,
           packageConfigPath: '.dart_tool/package_config.json',
         ),
         enableDwds: false,
@@ -941,10 +940,10 @@ void main() {
       final Uri uri = await webDevFS.create();
       webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
       final String webPrecompiledCanvaskitSdk =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdk).path;
+          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdk).path;
       final String webPrecompiledCanvaskitSdkSourcemaps =
           globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps)
+              .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps)
               .path;
       globals.fs.currentDirectory.childDirectory('lib').childFile('web_entrypoint.dart')
         ..createSync(recursive: true)
@@ -1053,10 +1052,10 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('GENERATED');
       final String webPrecompiledCanvaskitSdk =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdk).path;
+          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdk).path;
       final String webPrecompiledCanvaskitSdkSourcemaps =
           globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps)
+              .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps)
               .path;
       final String flutterJs = globals.fs.path.join(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,

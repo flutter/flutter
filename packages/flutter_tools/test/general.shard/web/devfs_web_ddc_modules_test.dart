@@ -824,13 +824,11 @@ void main() {
         ..writeAsStringSync('GENERATED');
       final String webPrecompiledCanvaskitSdk =
           globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdk)
+              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk)
               .path;
       final String webPrecompiledCanvaskitSdkSourcemaps =
           globals.artifacts!
-              .getHostArtifact(
-                HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdkSourcemaps,
-              )
+              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
               .path;
       globals.fs.file(webPrecompiledCanvaskitSdk)
         ..createSync(recursive: true)

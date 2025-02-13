@@ -237,7 +237,6 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
-    displayNullSafetyMode(buildInfo);
     final WebBuilder webBuilder = WebBuilder(
       logger: globals.logger,
       processManager: globals.processManager,

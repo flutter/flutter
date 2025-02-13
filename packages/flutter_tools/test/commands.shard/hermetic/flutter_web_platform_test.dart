@@ -53,9 +53,8 @@ void main() {
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform_test.');
 
     for (final HostArtifact artifact in <HostArtifact>[
-      HostArtifact.webPrecompiledAmdCanvaskitSoundSdk,
       HostArtifact.webPrecompiledAmdCanvaskitSdk,
-      HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdk,
+      HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
     ]) {
       final File artifactFile = artifacts.getHostArtifact(artifact) as File;
       artifactFile.createSync();
@@ -103,7 +102,7 @@ void main() {
         shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js')),
       );
       final String contents = await response.readAsString();
-      expect(contents, HostArtifact.webPrecompiledAmdCanvaskitSoundSdk.name);
+      expect(contents, HostArtifact.webPrecompiledAmdCanvaskitSdk.name);
       await webPlatform.close();
     },
     overrides: <Type, Generator>{
@@ -155,7 +154,7 @@ void main() {
         shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js')),
       );
       final String contents = await response.readAsString();
-      expect(contents, HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdk.name);
+      expect(contents, HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk.name);
       await webPlatform.close();
     },
     overrides: <Type, Generator>{
