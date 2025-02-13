@@ -990,14 +990,46 @@ void main() {
   );
 
   testUsingContext(
-    'printHelp without details shows hot restart help message',
+    'printHelp without details shows only hot restart help message',
     () async {
       final BufferLogger logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       residentWebRunner.printHelp(details: false);
 
-      expect(logger.statusText, contains('To hot restart changes'));
+      expect(logger.statusText, contains('Hot restart'));
+      expect(logger.statusText.contains('Hot reload'), false);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'printHelp without details shows hot restart and hot reload help message '
+    'if using DDC library bundle format',
+    () async {
+      final BufferLogger logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        debuggingOptions: DebuggingOptions.enabled(
+          const BuildInfo(
+            BuildMode.debug,
+            null,
+            trackWidgetCreation: true,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+            extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--dartdevc-canary'],
+          ),
+        ),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+      residentWebRunner.printHelp(details: false);
+
+      expect(logger.statusText, contains('Hot restart'));
+      expect(logger.statusText, contains('Hot reload'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1532,6 +1564,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   late DartDevelopmentService dds;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   Future<LaunchResult> startApp(

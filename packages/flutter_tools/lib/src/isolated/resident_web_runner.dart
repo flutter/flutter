@@ -12,6 +12,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide
 
 import '../application_package.dart';
 import '../base/async_guard.dart';
+import '../base/command_help.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -104,6 +105,12 @@ class ResidentWebRunner extends ResidentRunner {
          stayResident: stayResident,
          machine: machine,
          devtoolsHandler: devtoolsHandler,
+         commandHelp: CommandHelp(
+           logger: logger,
+           terminal: globals.terminal,
+           platform: globals.platform,
+           outputPreferences: globals.outputPreferences,
+         ),
        );
 
   final FileSystem _fileSystem;
@@ -207,7 +214,7 @@ class ResidentWebRunner extends ResidentRunner {
   @override
   void printHelp({bool details = true}) {
     // Prefer to keep this aligned with resident_runner.dart as much as possible.
-    globals.printStatus('Flutter run key commands.');
+    _logger.printStatus('Flutter run key commands.');
     if (debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc &&
         (debuggingOptions.buildInfo.canaryFeatures ?? false)) {
       // Hot reload is only supported with these flags enabled.
@@ -232,7 +239,7 @@ class ResidentWebRunner extends ResidentRunner {
     // }
     commandHelp.c.print();
     commandHelp.q.print();
-    globals.printStatus('');
+    _logger.printStatus('');
     printDebuggerList();
   }
 
@@ -488,10 +495,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             // has some internal error, we should still surface it to make
             // debugging easier.
             String reloadFailedMessage = 'Hot reload failed:';
-            globals.printError(reloadFailedMessage);
+            _logger.printError(reloadFailedMessage);
             for (final ReasonForCancelling reason in contents.notices) {
               reloadFailedMessage += reason.toString();
-              globals.printError(reason.toString());
+              _logger.printError(reason.toString());
             }
             return OperationResult(1, reloadFailedMessage);
           }

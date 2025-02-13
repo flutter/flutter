@@ -992,6 +992,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     String? dillOutputPath,
     this.machine = false,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
+    CommandHelp? commandHelp,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -1001,12 +1002,14 @@ abstract class ResidentRunner extends ResidentHandlers {
                ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
                : globals.fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle(),
-       commandHelp = CommandHelp(
-         logger: globals.logger,
-         terminal: globals.terminal,
-         platform: globals.platform,
-         outputPreferences: globals.outputPreferences,
-       ) {
+       commandHelp =
+           commandHelp ??
+           CommandHelp(
+             logger: globals.logger,
+             terminal: globals.terminal,
+             platform: globals.platform,
+             outputPreferences: globals.outputPreferences,
+           ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
