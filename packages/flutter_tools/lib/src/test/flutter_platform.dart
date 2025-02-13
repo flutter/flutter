@@ -246,6 +246,11 @@ void main() {
     autoUpdateGoldenFiles = $updateGoldens;
 ''');
   }
+  if (integrationTest) {
+    buffer.write('''
+    VmServiceProxyGoldenFileComparator.useIfRunningOnDevice();
+''');
+  }
   if (testConfigFile != null) {
     buffer.write('''
     return () => test_config.testExecutable(_testMain);
