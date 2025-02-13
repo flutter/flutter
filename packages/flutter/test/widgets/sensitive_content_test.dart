@@ -2,14 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // Default contetn sensitivity setting for testing.
-  const ContentSensitivity defaultContentSensitivitySetting = ContentSensitivity.autoSensitive;
+  // Default content sensitivity setting for testing.
+  final int defaultContentSensitivitySettingId = ContentSensitivity.autoSensitive.id;
+  final ContentSensitivity defaultContentSensitivitySetting =
+      ContentSensitivity.getContentSensitivityById(defaultContentSensitivitySettingId);
 
-  setUp(() async {
+  // The state of content sensitivity in the app.
+  final SensitiveContentSetting sensitiveContentSetting = SensitiveContentSetting.instance;
+
+  setUp(() {
     // Mock calls to the sensitive content method channel.
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.sensitiveContent,
@@ -17,7 +23,9 @@ void main() {
         if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
           expect(methodCall.arguments, isA<int>());
         } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-          return defaultContentSensitivitySetting;
+          print('CAMILLE: getContentSensitivity called');
+          print('CAMILLE: returning default setting ID: $defaultContentSensitivitySettingId');
+          return defaultContentSensitivitySettingId;
         }
         return null;
       },
@@ -31,115 +39,241 @@ void main() {
     );
   });
 
-  test('one SenstiveContent widget sets content sensitivity for tree as expected', () {});
+  testWidgets('one SenstiveContent widget sets content sensitivity for tree as expected', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      SensitiveContent(sensitivityLevel: ContentSensitivity.sensitive, child: Container()),
+    );
 
-  test(
-      'disposing only SensitiveContent widget in the tree sets content sensitivity back to the default as expected',
-      () {});
+    expect(
+      sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+      equals(ContentSensitivity.sensitive),
+    );
+    expect(sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
+  });
+
+  testWidgets(
+    'disposing only SensitiveContent widget in the tree sets content sensitivity back to the default as expected',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        SensitiveContent(sensitivityLevel: ContentSensitivity.sensitive, child: Container()),
+      );
+      expect(
+        sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+        equals(ContentSensitivity.sensitive),
+      );
+
+      await tester.pumpWidget(Container());
+      expect(
+        sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+        equals(defaultContentSensitivitySetting),
+      );
+      expect(sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount, equals(0));
+    },
+  );
 
   group(
-      'one sensitive SensitiveContent widget in the tree determines content sensitivity for tree as expected',
-      () {
-    // Tests with other sensitive widget(s):
-    test('with another sensitive widget', () {});
+    'one sensitive SensitiveContent widget in the tree determines content sensitivity for tree as expected',
+    () {
+      // Tests with other sensitive widget(s):
+      testWidgets('with another sensitive widget', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          Column(
+            children: <Widget>[
+              SensitiveContent(sensitivityLevel: ContentSensitivity.sensitive, child: Container()),
+              SensitiveContent(sensitivityLevel: ContentSensitivity.sensitive, child: Container()),
+            ],
+          ),
+        );
 
-    test('when it gets disposed with another sensitive widget', () {});
+        expect(
+          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          equals(ContentSensitivity.sensitive),
+        );
+        expect(
+          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
+          equals(2),
+        );
+      });
 
-    test('with two other sensitive widgets', () {});
+      testWidgets('when it gets disposed with another sensitive widget', (
+        WidgetTester tester,
+      ) async {
+        final Widget sc = SensitiveContent(
+          key: Key('hi'),
+          sensitivityLevel: ContentSensitivity.sensitive,
+          child: Container(),
+        );
+        final Widget sc2 = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.sensitive,
+          child: Container(),
+        );
 
-    test('with two other sensitive widgets and one gets disposed', () {});
+        await tester.pumpWidget(Column(children: <Widget>[sc, sc2]));
 
-    // Tests with auto sensitive widget(s):
-    test('with one auto sensitive widget', () {});
+        SensitiveContentState state = tester.firstState<SensitiveContentState>(
+          find.byType(SensitiveContent),
+        );
+        // todo: camille figure out dilemma, probably want to create wrapper class for testing
 
-    test('when it gets disposed with one auto sensitive widget', () {});
+        // await tester.pumpWidget(Column(children: [sc]));
+      });
 
-    test('with one auto sensitive widget that gets disposed', () {});
+      testWidgets('with two other sensitive widgets', (WidgetTester tester) async {});
 
-    test('with two auto sensitive widgets and one gets disposed', () {});
+      testWidgets(
+        'with two other sensitive widgets and one gets disposed',
+        (WidgetTester tester) async {},
+      );
 
-    // Tests with not sensitive widget(s):
-    test('with one not sensitive widget', () {});
+      // Tests with auto sensitive widget(s):
+      testWidgets('with one auto sensitive widget', (WidgetTester tester) async {});
 
-    test('when it gets disposed with one not sensitive widget', () {});
+      testWidgets(
+        'when it gets disposed with one auto sensitive widget',
+        (WidgetTester tester) async {},
+      );
 
-    test('with one not sensitive widget that gets disposed', () {});
+      testWidgets(
+        'with one auto sensitive widget that gets disposed',
+        (WidgetTester tester) async {},
+      );
 
-    test('with two not sensitive widgets and one gets disposed', () {});
+      testWidgets(
+        'with two auto sensitive widgets and one gets disposed',
+        (WidgetTester tester) async {},
+      );
 
-    // Tests with an auto sensitive and a not sensitive widget(s):
-    test('with one not sensitive widget and one auto sensitive widget', () {});
+      // Tests with not sensitive widget(s):
+      testWidgets('with one not sensitive widget', (WidgetTester tester) async {});
 
-    test(
-        'when it gets disposed with one not sensitive widget and one auto sensitive widget', () {});
+      testWidgets(
+        'when it gets disposed with one not sensitive widget',
+        (WidgetTester tester) async {},
+      );
 
-    test(
+      testWidgets(
+        'with one not sensitive widget that gets disposed',
+        (WidgetTester tester) async {},
+      );
+
+      testWidgets(
+        'with two not sensitive widgets and one gets disposed',
+        (WidgetTester tester) async {},
+      );
+
+      // Tests with an auto sensitive and a not sensitive widget(s):
+      testWidgets(
+        'with one not sensitive widget and one auto sensitive widget',
+        (WidgetTester tester) async {},
+      );
+
+      testWidgets(
+        'when it gets disposed with one not sensitive widget and one auto sensitive widget',
+        (WidgetTester tester) async {},
+      );
+
+      testWidgets(
         'with one not sensitive widget and one auto sensitive widget and auto sensitive widget gets disposed',
-        () {});
+        (WidgetTester tester) async {},
+      );
 
-    test(
+      testWidgets(
         'with one not sensitive widget and one auto sensitive widget and not sensitive widget gets disposed',
-        () {});
+        (WidgetTester tester) async {},
+      );
 
-    // Tests with another sensitive widget, an auto sensitive, and a not sensitive widget:
-    test('with another sensitive widget, one not sensitive widget, and one auto sensitive widget',
-        () {});
+      // Tests with another sensitive widget, an auto sensitive, and a not sensitive widget:
+      testWidgets(
+        'with another sensitive widget, one not sensitive widget, and one auto sensitive widget',
+        (WidgetTester tester) async {},
+      );
 
-    test(
+      testWidgets(
         'when it gets disposed with another sensitive widget, one not sensitive widget, and one auto sensitive widget',
-        () {});
+        (WidgetTester tester) async {},
+      );
 
-    test(
+      testWidgets(
         'with another sensitive widget, one not sensitive widget, and one auto sensitive widget and the auto sensitive widget is disposed',
-        () {});
+        (WidgetTester tester) async {},
+      );
 
-    test(
+      testWidgets(
         'with another sensitive widget, one not sensitive widget, and one auto sensitive widget and the not sensitive widget is disposed',
-        () {});
+        (WidgetTester tester) async {},
+      );
 
-    // Tests with mutliple non-sensitive (auto sensitive, not sensitive) widgets:
-    test(
+      // Tests with mutliple non-sensitive (auto sensitive, not sensitive) widgets:
+      testWidgets(
         'with two auto sensitive widgets and one not sensitive widget and one auto sensitive widget gets disposed',
-        () {});
+        (WidgetTester tester) async {},
+      );
 
-    test(
+      testWidgets(
         'with one auto sensitive widgets and two not sensitive widgets and one not sensitive widget gets disposed',
-        () {});
-  });
+        (WidgetTester tester) async {},
+      );
+    },
+  );
 
   group(
-      'one auto-sensitive (with no sensitive SensitiveContent widgets in the tree) determines content sensitivity for tree as expected',
-      () {
-    // Tests with other auto sensitive widget(s):
-    test('with another auto sensitive widget', () {});
+    'one auto-sensitive (with no sensitive SensitiveContent widgets in the tree) determines content sensitivity for tree as expected',
+    () {
+      // Tests with other auto sensitive widget(s):
+      testWidgets('with another auto sensitive widget', (WidgetTester tester) async {});
 
-    test('when it gets disposed with another auto sensitive widget', () {});
+      testWidgets(
+        'when it gets disposed with another auto sensitive widget',
+        (WidgetTester tester) async {},
+      );
 
-    // Tests with not sensitive widget(s):
-    test('with one not sensitive widget', () {});
+      // Tests with not sensitive widget(s):
+      testWidgets('with one not sensitive widget', (WidgetTester tester) async {});
 
-    test('when it gets disposed with one not sensitive widget', () {});
+      testWidgets(
+        'when it gets disposed with one not sensitive widget',
+        (WidgetTester tester) async {},
+      );
 
-    test('with one not sensitive widget that gets disposed', () {});
+      testWidgets(
+        'with one not sensitive widget that gets disposed',
+        (WidgetTester tester) async {},
+      );
 
-    test('with two not sensitive widgets and one gets disposed', () {});
+      testWidgets(
+        'with two not sensitive widgets and one gets disposed',
+        (WidgetTester tester) async {},
+      );
 
-    // Tests with another auto sensitive widget and a not sensitive widget(s):
-    test('with another auto sensitive widget and one not sensitive widget', () {});
+      // Tests with another auto sensitive widget and a not sensitive widget(s):
+      testWidgets(
+        'with another auto sensitive widget and one not sensitive widget',
+        (WidgetTester tester) async {},
+      );
 
-    test('when it gets disposed with another auto sensitive widget and one not sensitive widget',
-        () {});
+      testWidgets(
+        'when it gets disposed with another auto sensitive widget and one not sensitive widget',
+        (WidgetTester tester) async {},
+      );
 
-    test(
+      testWidgets(
         'with another auto sensitive widget and one not sensitive widget and the not sensitive widget gets disposed',
-        () {});
-  });
+        (WidgetTester tester) async {},
+      );
+    },
+  );
 
   group(
-      'one not sensitive (with no sensitive or auto sensitive SensitiveContent widgets in the tree) SensitiveContent widget in the tree determines content sensitivity for tree as expected',
-      () {
-    test('with another not sensitive widget', () {});
+    'one not sensitive (with no sensitive or auto sensitive SensitiveContent widgets in the tree) SensitiveContent widget in the tree determines content sensitivity for tree as expected',
+    () {
+      testWidgets('with another not sensitive widget', (WidgetTester tester) async {});
 
-    test('when it gets disposed with one not sensitive widget', () {});
-  });
+      testWidgets(
+        'when it gets disposed with one not sensitive widget',
+        (WidgetTester tester) async {},
+      );
+    },
+  );
 }
