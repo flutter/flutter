@@ -191,12 +191,6 @@ class Tooltip extends StatefulWidget {
   }) : assert(
          (message == null) != (richMessage == null),
          'Either `message` or `richMessage` must be specified',
-       ),
-       assert(
-         richMessage == null || textStyle == null,
-         'If `richMessage` is specified, `textStyle` will have no effect. '
-         'If you wish to provide a `textStyle` for a rich tooltip, add the '
-         '`textStyle` directly to the `richMessage` InlineSpan.',
        );
 
   /// The text to display in the tooltip.
@@ -843,22 +837,24 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
 
     final TooltipThemeData tooltipTheme = _tooltipTheme;
-    final _TooltipOverlay overlayChild = _TooltipOverlay(
-      richMessage: widget.richMessage ?? TextSpan(text: widget.message),
-      height: widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight(),
-      padding: widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding(),
-      margin: widget.margin ?? tooltipTheme.margin ?? _defaultMargin,
-      onEnter: _handleMouseEnter,
-      onExit: _handleMouseExit,
-      decoration: widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration,
-      textStyle: widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle,
+    final Widget overlayChild = DefaultTextStyle.merge(
+      style: defaultTextStyle.merge(tooltipTheme.textStyle).merge(widget.textStyle),
       textAlign: widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign,
-      animation: _overlayAnimation,
-      target: target,
-      verticalOffset:
-          widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
-      preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
-      ignorePointer: widget.ignorePointer ?? widget.message != null,
+      child: _TooltipOverlay(
+        richMessage: widget.richMessage ?? TextSpan(text: widget.message),
+        height: widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight(),
+        padding: widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding(),
+        margin: widget.margin ?? tooltipTheme.margin ?? _defaultMargin,
+        onEnter: _handleMouseEnter,
+        onExit: _handleMouseExit,
+        decoration: widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration,
+        animation: _overlayAnimation,
+        target: target,
+        verticalOffset:
+            widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
+        preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
+        ignorePointer: widget.ignorePointer ?? widget.message != null,
+      ),
     );
 
     return SelectionContainer.maybeOf(context) == null
@@ -978,8 +974,6 @@ class _TooltipOverlay extends StatelessWidget {
     this.padding,
     this.margin,
     this.decoration,
-    this.textStyle,
-    this.textAlign,
     required this.animation,
     required this.target,
     required this.verticalOffset,
@@ -994,8 +988,6 @@ class _TooltipOverlay extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final Decoration? decoration;
-  final TextStyle? textStyle;
-  final TextAlign? textAlign;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
@@ -1010,20 +1002,13 @@ class _TooltipOverlay extends StatelessWidget {
       opacity: animation,
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: height),
-        child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.bodyMedium!,
-          child: Semantics(
-            container: true,
-            child: Container(
-              decoration: decoration,
-              padding: padding,
-              margin: margin,
-              child: Center(
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: Text.rich(richMessage, style: textStyle, textAlign: textAlign),
-              ),
-            ),
+        child: Semantics(
+          container: true,
+          child: Container(
+            decoration: decoration,
+            padding: padding,
+            margin: margin,
+            child: Center(widthFactor: 1.0, heightFactor: 1.0, child: Text.rich(richMessage)),
           ),
         ),
       ),
