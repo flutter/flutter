@@ -767,9 +767,10 @@ public class FlutterRendererTest {
 
   @Test
   @SuppressWarnings({"deprecation", "removal"})
-  public void ImageReaderSurfaceProducerIsCleanedUpOnTrimMemory() {
+  public void ImageReaderSurfaceProducerIsNotCleanedUpOnTrimMemory() {
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    // Intentionally leaves setReleaseMemoryIfRequested to the default, false.
 
     // Create and set a mock callback.
     TextureRegistry.SurfaceProducer.Callback callback =
@@ -780,7 +781,26 @@ public class FlutterRendererTest {
     flutterRenderer.onTrimMemory(TRIM_MEMORY_BACKGROUND);
 
     // Verify.
-    verify(callback).onSurfaceCleanup();
+    verify(callback, never()).onSurfaceCleanup();
+  }
+
+  @Test
+  @SuppressWarnings({"deprecation", "removal"})
+  public void ImageReaderSurfaceProducerCleanedUpOnTrimMemoryWhenEnabled() {
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    producer.setReleaseMemoryIfRequested(true);
+
+    // Create and set a mock callback.
+    TextureRegistry.SurfaceProducer.Callback callback =
+            mock(TextureRegistry.SurfaceProducer.Callback.class);
+    producer.setCallback(callback);
+
+    // Trim memory.
+    flutterRenderer.onTrimMemory(TRIM_MEMORY_BACKGROUND);
+
+    // Verify.
+    verify(callback, never()).onSurfaceCleanup();
   }
 
   private static class TestSurfaceState {
@@ -792,6 +812,7 @@ public class FlutterRendererTest {
     // Regression test for https://github.com/flutter/flutter/issues/160933.
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    producer.setReleaseMemoryIfRequested(true);
 
     // Ensure the callbacks were actually called.
     // Note this needs to be an object in order to be accessed in the callback.
@@ -843,6 +864,7 @@ public class FlutterRendererTest {
     // Regression test for https://github.com/flutter/flutter/issues/156434.
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    producer.setReleaseMemoryIfRequested(true);
 
     // Create and set a mock callback.
     TextureRegistry.SurfaceProducer.Callback callback =
@@ -865,6 +887,7 @@ public class FlutterRendererTest {
   public void ImageReaderSurfaceProducerIsCreatedOnLifecycleResume() throws Exception {
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    producer.setReleaseMemoryIfRequested(true);
 
     // Create a callback.
     CountDownLatch latch = new CountDownLatch(1);
