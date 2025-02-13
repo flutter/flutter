@@ -68,12 +68,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     locales: parseBrowserLanguages(),
     textScaleFactor: findBrowserTextScaleFactor(),
     accessibilityFeatures: computeAccessibilityFeatures(),
-    // typographySettings: ui.TypographySettings(
-    //   lineHeight: 5.0,
-    //   letterSpacing: 5.0,
-    //   wordSpacing: 5.0,
-    //   paragraphSpacing: 5.0,
-    // ),
+    // typographySettings: computeTypographySettings(),
   );
 
   /// Compute accessibility features based on the current value of high contrast flag
