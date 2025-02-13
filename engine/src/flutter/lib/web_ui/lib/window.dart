@@ -109,16 +109,16 @@ abstract class SingletonFlutterWindow extends FlutterView {
 
 class TypographySettings {
   const TypographySettings({
-    required this.lineHeight,
-    required this.letterSpacing,
-    required this.wordSpacing,
-    required this.paragraphSpacing,
+    this.lineHeight,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.paragraphSpacing,
   });
 
-  final double lineHeight;
-  final double letterSpacing;
-  final double wordSpacing;
-  final double paragraphSpacing;
+  final double? lineHeight;
+  final double? letterSpacing;
+  final double? wordSpacing;
+  final double? paragraphSpacing;
 }
 
 abstract class AccessibilityFeatures {
