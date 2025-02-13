@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <cstring>
 #define FML_USED_ON_EMBEDDER
 
 #include <android/log.h>
 #include <sys/system_properties.h>
+#include <cstring>
 #include <optional>
 #include <string>
 #include <vector>
