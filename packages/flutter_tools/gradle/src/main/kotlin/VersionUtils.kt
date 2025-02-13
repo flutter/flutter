@@ -25,7 +25,7 @@ object VersionUtils {
         val v2Parts = version2.split(".", "-")
         val maxSize = max(v1Parts.size, v2Parts.size)
 
-        for (i in 1..maxSize) {
+        for (i in 0..maxSize-1) {
             val v1Part: String = if (i < v1Parts.size) v1Parts[i] else "0"
             val v2Part: String = if (i < v2Parts.size) v2Parts[i] else "0"
 

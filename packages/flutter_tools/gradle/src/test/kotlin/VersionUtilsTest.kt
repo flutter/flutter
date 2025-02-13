@@ -22,6 +22,8 @@ class VersionUtilsTest {
         versionComparison("8.7-rc-1", "8.7", expected = "8.7")
         versionComparison("8.7-rc-1", "8.7.2", expected = "8.7.2")
         versionComparison("8.7.2", "8.7.1", expected = "8.7.2")
+        versionComparison("7.0.2", "8.7.1", expected = "8.7.1")
+        versionComparison("8.1", "7.5", expected = "8.1")
     }
 
     fun versionComparison(
