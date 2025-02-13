@@ -108,15 +108,10 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
         borderRadius: BorderRadius.all(_kToolbarBorderRadius),
       ),
       child: BackdropFilter(
-        // Flutter web doesn't support ImageFilter.compose on CanvasKit yet
-        // (https://github.com/flutter/flutter/issues/120123).
-        filter:
-            kIsWeb
-                ? ImageFilter.blur(sigmaX: _kToolbarBlurSigma, sigmaY: _kToolbarBlurSigma)
-                : ImageFilter.compose(
-                  outer: ColorFilter.matrix(_matrixWithSaturation(_kToolbarSaturationBoost)),
-                  inner: ImageFilter.blur(sigmaX: _kToolbarBlurSigma, sigmaY: _kToolbarBlurSigma),
-                ),
+        filter: ImageFilter.compose(
+          outer: ColorFilter.matrix(_matrixWithSaturation(_kToolbarSaturationBoost)),
+          inner: ImageFilter.blur(sigmaX: _kToolbarBlurSigma, sigmaY: _kToolbarBlurSigma),
+        ),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: _kToolbarBackgroundColor.resolveFrom(context),

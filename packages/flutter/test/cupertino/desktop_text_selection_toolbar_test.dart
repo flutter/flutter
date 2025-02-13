@@ -41,12 +41,7 @@ void main() {
       // for blur and saturation, but checking if it's a _ComposeImageFilter
       // should be enough. Outer and inner parameters don't matter, we just need
       // a new _ComposeImageFilter to get its runtimeType.
-      //
-      // As web doesn't support ImageFilter.compose, we use just blur when
-      // kIsWeb.
-      kIsWeb
-          ? ImageFilter.blur().runtimeType
-          : ImageFilter.compose(outer: ImageFilter.blur(), inner: ImageFilter.blur()).runtimeType,
+      ImageFilter.compose(outer: ImageFilter.blur(), inner: ImageFilter.blur()).runtimeType,
     );
   });
 
