@@ -3952,6 +3952,7 @@ void main() {
     textField = tester.widget(find.byType(TextField));
     expect(textField.textInputAction, TextInputAction.next);
   });
+
   testWidgets('items can be constrainted to be smaller than the text field with menuStyle', (
     WidgetTester tester,
   ) async {
