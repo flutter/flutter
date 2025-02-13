@@ -116,7 +116,8 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.columnHeader => _semanticsColumnHeader,
   }(node);
 
-  static FlutterError? _unimplementedError(SemanticsNode node) => FlutterError('This semantics role is not implemented');
+  static FlutterError? _unimplementedError(SemanticsNode node) =>
+      FlutterError('This semantics role is not implemented');
   static FlutterError? _noCheckRequired(SemanticsNode node) => null;
 
   static FlutterError? _semanticsTab(SemanticsNode node) {
