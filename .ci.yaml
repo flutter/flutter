@@ -2739,15 +2739,6 @@ targets:
         ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_view__start_up
 
-  - name: Linux_pixel_7pro frame_policy_delay_test_android
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: frame_policy_delay_test_android
-
   # linux mokey benchmark
   - name: Linux_mokey fullscreen_textfield_perf
     recipe: devicelab/devicelab_drone
