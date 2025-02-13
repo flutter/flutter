@@ -32,7 +32,7 @@ void InitJavaVM(JavaVM* vm) {
 }
 
 JNIEnv* AttachCurrentThread() {
-  FML_DCHECK(g_jvm != nullptr)
+  FML_CHECK(g_jvm != nullptr)
       << "Trying to attach to current thread without calling InitJavaVM first.";
 
   JNIEnv* env = nullptr;
@@ -53,9 +53,9 @@ JNIEnv* AttachCurrentThread() {
     args.name = thread_name;
   }
   [[maybe_unused]] jint ret = g_jvm->AttachCurrentThread(&env, &args);
-  FML_DCHECK(JNI_OK == ret);
+  FML_CHECK(JNI_OK == ret);
 
-  FML_DCHECK(tls_jni_detach.get() == nullptr);
+  FML_CHECK(tls_jni_detach.get() == nullptr);
   tls_jni_detach.reset(new JNIDetach());
 
   return env;

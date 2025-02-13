@@ -3222,7 +3222,7 @@ targets:
 
   - name: Linux_pixel_7pro platform_views_hcpp_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     bringup: true
     timeout: 60
     properties:

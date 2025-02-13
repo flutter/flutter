@@ -2021,7 +2021,7 @@ bool PlatformViewAndroidJNIImpl::RequestDartDeferredLibrary(
 
 ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction() {
   JNIEnv* env = fml::jni::AttachCurrentThread();
-
+  FML_CHECK(env != nullptr);
   auto java_object = java_object_.get(env);
   if (java_object.is_null()) {
     return nullptr;
@@ -2034,7 +2034,8 @@ ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction() {
     return nullptr;
   }
   FML_CHECK(fml::jni::CheckException(env));
-
+  FML_CHECK(impeller::android::GetProcTable()
+                .ASurfaceTransaction_fromJava.IsAvailable());
   return impeller::android::GetProcTable().ASurfaceTransaction_fromJava(
       env, transaction.obj());
 }
