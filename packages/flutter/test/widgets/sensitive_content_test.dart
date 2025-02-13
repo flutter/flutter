@@ -40,10 +40,16 @@ void main() {
   group(
       'one sensitive SensitiveContent widget in the tree determines content sensitivity for tree as expected',
       () {
+    // Tests with other sensitive widget(s):
     test('with another sensitive widget', () {});
 
     test('when it gets disposed with another sensitive widget', () {});
 
+    test('with two other sensitive widgets', () {});
+
+    test('with two other sensitive widgets and one gets disposed', () {});
+
+    // Tests with auto sensitive widget(s):
     test('with one auto sensitive widget', () {});
 
     test('when it gets disposed with one auto sensitive widget', () {});
@@ -52,6 +58,7 @@ void main() {
 
     test('with two auto sensitive widgets and one gets disposed', () {});
 
+    // Tests with not sensitive widget(s):
     test('with one not sensitive widget', () {});
 
     test('when it gets disposed with one not sensitive widget', () {});
@@ -60,6 +67,7 @@ void main() {
 
     test('with two not sensitive widgets and one gets disposed', () {});
 
+    // Tests with an auto sensitive and a not sensitive widget(s):
     test('with one not sensitive widget and one auto sensitive widget', () {});
 
     test(
@@ -73,6 +81,7 @@ void main() {
         'with one not sensitive widget and one auto sensitive widget and not sensitive widget gets disposed',
         () {});
 
+    // Tests with another sensitive widget, an auto sensitive, and a not sensitive widget:
     test('with another sensitive widget, one not sensitive widget, and one auto sensitive widget',
         () {});
 
@@ -88,6 +97,7 @@ void main() {
         'with another sensitive widget, one not sensitive widget, and one auto sensitive widget and the not sensitive widget is disposed',
         () {});
 
+    // Tests with mutliple non-sensitive (auto sensitive, not sensitive) widgets:
     test(
         'with two auto sensitive widgets and one not sensitive widget and one auto sensitive widget gets disposed',
         () {});
@@ -98,18 +108,23 @@ void main() {
   });
 
   group(
-      'one auto-sensitive and no sensitive SensitiveContent widgets in the tree determines content sensitivity for tree as expected',
+      'one auto-sensitive (with no sensitive SensitiveContent widgets in the tree) determines content sensitivity for tree as expected',
       () {
+    // Tests with other auto sensitive widget(s):
     test('with another auto sensitive widget', () {});
 
     test('when it gets disposed with another auto sensitive widget', () {});
 
+    // Tests with not sensitive widget(s):
     test('with one not sensitive widget', () {});
 
     test('when it gets disposed with one not sensitive widget', () {});
 
-    test('with one not sensitive widget which gets disposed', () {});
+    test('with one not sensitive widget that gets disposed', () {});
 
+    test('with two not sensitive widgets and one gets disposed', () {});
+
+    // Tests with another auto sensitive widget and a not sensitive widget(s):
     test('with another auto sensitive widget and one not sensitive widget', () {});
 
     test('when it gets disposed with another auto sensitive widget and one not sensitive widget',
@@ -118,12 +133,10 @@ void main() {
     test(
         'with another auto sensitive widget and one not sensitive widget and the not sensitive widget gets disposed',
         () {});
-
-    test('with two not sensitive widgets and one not sensitive widget gets disposed', () {});
   });
 
   group(
-      'one not sensitive SensitiveContent widget in the tree determines content sensitivity for tree as expected',
+      'one not sensitive (with no sensitive or auto sensitive SensitiveContent widgets in the tree) SensitiveContent widget in the tree determines content sensitivity for tree as expected',
       () {
     test('with another not sensitive widget', () {});
 
