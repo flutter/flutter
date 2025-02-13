@@ -328,6 +328,7 @@ class PlatformDispatcher {
   // Updates the metrics of the window with the given id.
   void _updateWindowMetrics(int viewId, _ViewConfiguration viewConfiguration) {
     assert(_views.containsKey(viewId), 'View $viewId does not exist.');
+    print('_updateWindowMetrics dart:uis');
     _views[viewId]!._viewConfiguration = viewConfiguration;
     _invoke(onMetricsChanged, _onMetricsChangedZone);
   }
@@ -1121,6 +1122,9 @@ class PlatformDispatcher {
   /// This option is used by [showTimePicker].
   bool get alwaysUse24HourFormat => _configuration.alwaysUse24HourFormat;
 
+  /// The system-reported typography settings if any.
+  ///
+  /// If any of the settings change, [onMetricsChanged] will be called.
   TypographySettings? get typographySettings => _configuration.typographySettings;
 
   /// The system-reported text scale.
@@ -1887,6 +1891,7 @@ class _PlatformConfiguration {
   /// function should not be called in either case.
   final int? configurationId;
 
+  /// Additional typography settings that may be enabled by the platform.
   final TypographySettings? typographySettings;
 }
 

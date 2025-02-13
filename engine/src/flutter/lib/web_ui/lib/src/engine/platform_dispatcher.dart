@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
+import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -29,6 +30,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _addBrightnessMediaQueryListener();
     HighContrastSupport.instance.addListener(_updateHighContrast);
     _addFontSizeObserver();
+    _addTypographySettingsObserver();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
     _appLifecycleState.addListener(_setAppLifecycleState);
@@ -66,12 +68,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     locales: parseBrowserLanguages(),
     textScaleFactor: findBrowserTextScaleFactor(),
     accessibilityFeatures: computeAccessibilityFeatures(),
-    typographySettings: ui.TypographySettings(
-      lineHeight: 5.0,
-      letterSpacing: 5.0,
-      wordSpacing: 5.0,
-      paragraphSpacing: 5.0,
-    ),
+    // typographySettings: ui.TypographySettings(
+    //   lineHeight: 5.0,
+    //   letterSpacing: 5.0,
+    //   wordSpacing: 5.0,
+    //   paragraphSpacing: 5.0,
+    // ),
   );
 
   /// Compute accessibility features based on the current value of high contrast flag
@@ -86,6 +88,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   void dispose() {
     _removeBrightnessMediaQueryListener();
     _disconnectFontSizeObserver();
+    _disconnectTypographySettingsObserver();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
     _appLifecycleState.removeListener(_setAppLifecycleState);
@@ -997,6 +1000,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Updates [textScaleFactor] with the new value.
   DomMutationObserver? _fontSizeObserver;
 
+  /// Watches for typography settings changes.
+  DomMutationObserver? _typographySettingsObserver;
+
   /// Set the callback function for updating [textScaleFactor] based on
   /// font-size changes in the browser's <html> element.
   void _addFontSizeObserver() {
@@ -1025,6 +1031,135 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   void _disconnectFontSizeObserver() {
     _fontSizeObserver?.disconnect();
     _fontSizeObserver = null;
+  }
+
+  void _updateTypographySettings(ui.TypographySettings value) {
+    configuration = configuration.copyWith(typographySettings: value);
+    invokeOnPlatformConfigurationChanged();
+    invokeOnMetricsChanged();
+  }
+
+  num get _fontSize => parseFontSize(domDocument.documentElement!) ?? _defaultRootFontSize;
+
+  void _addTypographySettingsObserver() {
+    const String styleAttribute = 'style';
+
+    _typographySettingsObserver = createDomMutationObserver((
+      JSArray<JSAny?> mutations,
+      DomMutationObserver _,
+    ) {
+      for (final JSAny? mutation in mutations.toDart) {
+        final DomMutationRecord record = mutation! as DomMutationRecord;
+        if (record.type == 'childList' &&
+            record.addedNodes != null &&
+            record.addedNodes!.isNotEmpty) {
+          for (int index = 0; index < record.addedNodes!.length; index += 1) {
+            final DomNode node = record.addedNodes!.elementAt(index);
+            final String? nodeName = js_util.getProperty(node, 'nodeName') as String?;
+            if (nodeName != null && nodeName == 'STYLE') {
+              if (node.text != null && node.text!.contains('line-height:1.5 !important;')) {
+                // Detect bookmarklet.
+                // Extract CSS rules.
+                final String cssText = node.text!;
+                final RegExp lineHeightRegex = RegExp(
+                  r'line-height\s*:\s*([\d.]+)\s*!important',
+                  caseSensitive: false,
+                );
+                final RegExp wordSpacingRegex = RegExp(
+                  r'word-spacing\s*:\s*([\w.-]+)\s*!important',
+                  caseSensitive: false,
+                );
+                final RegExp letterSpacingRegex = RegExp(
+                  r'letter-spacing\s*:\s*([\w.-]+)\s*!important',
+                  caseSensitive: false,
+                );
+
+                final RegExpMatch? lineHeightMatch = lineHeightRegex.firstMatch(cssText);
+                final RegExpMatch? wordSpacingMatch = wordSpacingRegex.firstMatch(cssText);
+                final RegExpMatch? letterSpacingMatch = letterSpacingRegex.firstMatch(cssText);
+
+                double? lineHeightValue;
+                double? wordSpacingValue;
+                double? letterSpacingValue;
+
+                if (lineHeightMatch != null) {
+                  lineHeightValue = double.tryParse(lineHeightMatch.group(1)!);
+                }
+                if (wordSpacingMatch != null) {
+                  final String wordSpacingString = wordSpacingMatch.group(1)!;
+                  wordSpacingValue = _parseCssLength(
+                    wordSpacingString,
+                    _fontSize.toDouble(),
+                    _fontSize.toDouble(),
+                  );
+                }
+                if (letterSpacingMatch != null) {
+                  final String letterSpacingString = letterSpacingMatch.group(1)!;
+                  letterSpacingValue = _parseCssLength(
+                    letterSpacingString,
+                    _fontSize.toDouble(),
+                    _fontSize.toDouble(),
+                  );
+                }
+                if (lineHeightValue == null &&
+                    wordSpacingValue == null &&
+                    letterSpacingValue == null) {
+                  return;
+                }
+                _updateTypographySettings(
+                  ui.TypographySettings(
+                    lineHeight: lineHeightValue,
+                    letterSpacing: letterSpacingValue,
+                    wordSpacing: wordSpacingValue,
+                  ),
+                );
+              }
+            }
+          }
+        }
+      }
+    });
+
+    _typographySettingsObserver!.observe(
+      domDocument.documentElement!,
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: <String>[styleAttribute],
+    );
+  }
+
+  double? _parseCssLength(String cssLength, double fontSize, double rootFontSize) {
+    final RegExp pixelRegex = RegExp(r'([\d.]+)\s*px', caseSensitive: false);
+    final RegExp emRegex = RegExp(r'([\d.]+)\s*em', caseSensitive: false);
+    final RegExp remRegex = RegExp(r'([\d.]+)\s*rem', caseSensitive: false);
+
+    final RegExpMatch? pixelMatch = pixelRegex.firstMatch(cssLength);
+    final RegExpMatch? emMatch = emRegex.firstMatch(cssLength);
+    final RegExpMatch? remMatch = remRegex.firstMatch(cssLength);
+
+    if (pixelMatch != null) {
+      return double.tryParse(pixelMatch.group(1)!);
+    } else if (emMatch != null) {
+      final double? emValue = double.tryParse(emMatch.group(1)!);
+      if (emValue != null) {
+        return emValue * fontSize;
+      }
+      return null;
+    } else if (remMatch != null) {
+      final double? remValue = double.tryParse(remMatch.group(1)!);
+      if (remValue != null) {
+        return remValue * rootFontSize;
+      }
+      return null;
+    } else {
+      return double.tryParse(cssLength);
+    }
+  }
+
+  void _disconnectTypographySettingsObserver() {
+    _typographySettingsObserver?.disconnect();
+    _typographySettingsObserver = null;
   }
 
   void _setAppLifecycleState(ui.AppLifecycleState state) {
