@@ -853,6 +853,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       decoration: widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration,
       textStyle: widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle,
       textAlign: widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign,
+      defaultTextStyle: defaultTextStyle.merge(tooltipTheme.textStyle),
+      defaultTextAlign: tooltipTheme.textAlign ?? _defaultTextAlign,
       animation: _overlayAnimation,
       target: target,
       verticalOffset:
@@ -980,6 +982,8 @@ class _TooltipOverlay extends StatelessWidget {
     this.decoration,
     this.textStyle,
     this.textAlign,
+    required this.defaultTextStyle,
+    required this.defaultTextAlign,
     required this.animation,
     required this.target,
     required this.verticalOffset,
@@ -996,6 +1000,8 @@ class _TooltipOverlay extends StatelessWidget {
   final Decoration? decoration;
   final TextStyle? textStyle;
   final TextAlign? textAlign;
+  final TextStyle defaultTextStyle;
+  final TextAlign defaultTextAlign;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
@@ -1011,7 +1017,8 @@ class _TooltipOverlay extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: height),
         child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.bodyMedium!,
+          style: defaultTextStyle,
+          textAlign: defaultTextAlign,
           child: Semantics(
             container: true,
             child: Container(

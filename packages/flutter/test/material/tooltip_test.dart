@@ -3390,6 +3390,44 @@ void main() {
 
     await gesture.removePointer();
   });
+
+  testWidgets('Tooltip should pass its default text style down to widget spans', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(
+          tooltipTheme: const TooltipThemeData(
+            textStyle: TextStyle(fontStyle: FontStyle.italic, debugLabel: 'italic'),
+            textAlign: TextAlign.end,
+          ),
+        ),
+        home: Tooltip(
+          key: tooltipKey,
+          richMessage: const WidgetSpan(child: Text(tooltipText)),
+          child: Container(width: 100.0, height: 100.0, color: Colors.green[500]),
+        ),
+      ),
+    );
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final Finder defaultTextStyle = find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(DefaultTextStyle),
+    );
+    final DefaultTextStyle textStyle = tester.widget<DefaultTextStyle>(defaultTextStyle.first);
+    expect(textStyle.textAlign, TextAlign.end);
+    expect(textStyle.style.color, Colors.white);
+    expect(textStyle.style.fontStyle, FontStyle.italic);
+    expect(textStyle.style.fontFamily, 'Roboto');
+    expect(textStyle.style.decoration, TextDecoration.none);
+    expect(
+      textStyle.style.debugLabel,
+      '(((englishLike bodyMedium 2021).merge((blackMountainView bodyMedium).apply)).copyWith).merge(italic)',
+    );
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
