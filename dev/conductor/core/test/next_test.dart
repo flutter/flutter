@@ -248,7 +248,6 @@ void main() {
         const String frameworkCheckoutPath = '$checkoutsParentDirectory/framework';
         const String engineCheckoutPath = '$checkoutsParentDirectory/engine';
         const String oldEngineVersion = '000000001';
-        const String frameworkCherrypick = '431ae69b4dd2dd48f7ba0153671e0311014c958b';
 
         late FakeProcessManager processManager;
         late FakePlatform platform;
@@ -271,11 +270,6 @@ void main() {
                     (pb.Repository.create()
                       ..candidateBranch = candidateBranch
                       ..checkoutPath = frameworkCheckoutPath
-                      ..cherrypicks.add(
-                        pb.Cherrypick.create()
-                          ..trunkRevision = frameworkCherrypick
-                          ..state = pb.CherrypickState.PENDING,
-                      )
                       ..mirror =
                           (pb.Remote.create()
                             ..name = 'mirror'
@@ -295,7 +289,7 @@ void main() {
                           (pb.Remote.create()
                             ..name = 'upstream'
                             ..url = engineUpstreamRemoteUrl))
-                ..currentPhase = ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
+                ..currentPhase = ReleasePhase.UPDATE_ENGINE_VERSION);
           // create engine repo
           fileSystem.directory(engineCheckoutPath).createSync(recursive: true);
           // create framework repo
@@ -309,6 +303,7 @@ void main() {
         });
 
         test('creates a PR with an updated engine.version file', () async {
+          writeStateToFile(fileSystem.file(stateFile), state, <String>[]);
           final Checkouts checkouts = Checkouts(
             fileSystem: fileSystem,
             parentDirectory: fileSystem.directory(checkoutsParentDirectory)

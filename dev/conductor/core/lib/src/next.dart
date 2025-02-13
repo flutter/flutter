@@ -152,7 +152,20 @@ class NextContext extends Context {
 
         await pushWorkingBranch(framework, state.framework);
       case pb.ReleasePhase.UPDATE_ENGINE_VERSION:
-        '';
+        final Remote upstream = Remote.upstream(state.framework.upstream.url);
+        final FrameworkRepository framework = FrameworkRepository(
+          checkouts,
+          initialRef: state.framework.workingBranch,
+          upstreamRemote: upstream,
+          previousCheckoutLocation: state.framework.checkoutPath,
+        );
+        final String rev = await framework.reverseParse('HEAD');
+        final File engineVersionFile = (await framework.checkoutDirectory)
+            .childDirectory('bin')
+            .childDirectory('internal')
+            .childFile('engine.version');
+
+        engineVersionFile.writeAsStringSync(rev);
       case pb.ReleasePhase.PUBLISH_VERSION:
         final String command = '''
           tool-proxy-cli --tool_proxy=/abns/dart-eng-tool-proxy/prod-dart-eng-tool-proxy-tool-proxy.annealed-tool-proxy \\
