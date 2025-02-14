@@ -426,7 +426,7 @@ void main() {
         devtoolsHandler: createNoOpHandler,
       );
 
-      mockDevice.dds = DartDevelopmentService(logger: test_fakes.FakeLogger());
+      mockDevice.dds = DartDevelopmentService(logger: logger);
 
       expect(mockDevice.isRunning, false);
       final Completer<DebugConnectionInfo> connectionInfoCompleter =
@@ -469,7 +469,7 @@ void main() {
         devtoolsHandler: createNoOpHandler,
       );
 
-      mockDevice.dds = DartDevelopmentService(logger: test_fakes.FakeLogger());
+      mockDevice.dds = DartDevelopmentService(logger: logger);
 
       expect(mockDevice.isRunning, false);
       final Completer<DebugConnectionInfo> connectionInfoCompleter =
