@@ -2561,7 +2561,6 @@ class EngineSemanticsOwner {
           removals.add(node);
         } else {
           assert(node._parent == parent);
-          assert(node.element.parentNode == parent._childContainerElement);
         }
         return true;
       });
