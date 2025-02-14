@@ -607,7 +607,44 @@ class RenderTable extends RenderBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.role = SemanticsRole.table;
+    config.isSemanticBoundary = true;
     config.explicitChildNodes = true;
+  }
+
+  @override
+  void assembleSemanticsNode(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    assert(_children.length == _rows * _columns);
+    final List<SemanticsNode> rows = <SemanticsNode>[];
+
+    for (int i = 0; i < _rows; i++) {
+      final Rect rect = getRowBox(i);
+      // Skip row if it's empty
+      if (rect.height == 0) {
+        continue;
+      }
+      final SemanticsNode newChild = SemanticsNode(
+        showOnScreen: () {
+          showOnScreen(descendant: this, rect: rect);
+        },
+      );
+
+      final SemanticsConfiguration configuration =
+          SemanticsConfiguration()
+            ..indexInParent = i
+            ..role = SemanticsRole.row;
+      final List<SemanticsNode> cells = children.skip(i * _columns).take(_columns).toList();
+      newChild
+        ..updateWith(config: configuration, childrenInInversePaintOrder: cells)
+        ..rect = rect;
+
+      rows.add(newChild);
+    }
+
+    node.updateWith(config: config, childrenInInversePaintOrder: rows);
   }
 
   /// Replaces the children of this table with the given cells.
