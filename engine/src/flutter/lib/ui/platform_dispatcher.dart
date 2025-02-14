@@ -1506,6 +1506,88 @@ class PlatformDispatcher {
   // configurationId does not match any configuration.
   @Native<Double Function(Double, Int)>(symbol: 'PlatformConfigurationNativeApi::GetScaledFontSize')
   external static double _getScaledFontSize(double unscaledFontSize, int configurationId);
+
+  /// Color palette preferred by the operating system UI widgets.
+  ///
+  /// On platforms that do not support a UI color palette this value is null.
+  ///
+  /// As of the current release, system colors are supported on web only.
+  ///
+  /// This is typically used in conjunction with
+  /// [AccessibilityFeatures.highContrast]. In particular, on Windows, when
+  /// a user enables high-contrast mode, they may also pick specific colors that
+  /// should be used by application user interfaces.
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  ///   * https://developer.mozilla.org/en-US/docs/Web/CSS/system-color
+  ///   * https://developer.mozilla.org/en-US/docs/Web/CSS/@media/forced-colors
+  Map<String, SystemColor>? get systemColors => null;
+
+  /// Standard system color names, as defined by W3C CSS specification.
+  ///
+  /// System color names in Flutter are case-sensitive. This is to make sure
+  /// color names can be easily used as [Map] keys. This is in contrast to CSS,
+  /// where system color names are not case-sensitive. That is, specifying
+  /// `background-color: aCcEnTcOlOr` is equivalent to specifying
+  /// `background-color: AccentColor`. In Flutter,
+  /// `systemColorNames['aCcEnTcOlOr']` will fail to find the respective color.
+  /// Always use the exact name string defined in this list.
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  static const List<String> systemColorNames = <String>[
+    'AccentColor',
+    'AccentColorText',
+    'ActiveText',
+    'ButtonBorder',
+    'ButtonFace',
+    'ButtonText',
+    'Canvas',
+    'CanvasText',
+    'Field',
+    'FieldText',
+    'GrayText',
+    'Highlight',
+    'HighlightText',
+    'LinkText',
+    'Mark',
+    'MarkText',
+    'SelectedItem',
+    'SelectedItemText',
+    'VisitedText',
+  ];
+}
+
+/// A color specified in the operating system UI color palette.
+final class SystemColor {
+  /// Creates an instance of a system color.
+  ///
+  /// [name] is the name of the color.
+  ///
+  /// [value] is the color value, if this color name is supported.
+  SystemColor({required this.name, this.value});
+
+  /// The name of the color.
+  ///
+  /// This value is guaranteed to be one of
+  /// [PlatformDispatcher.systemColorNames].
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  final String name;
+
+  /// The color value used for the color named [name], if supported.
+  ///
+  /// If [isSupported] is false, the [value] is null. If [isSupported] is true,
+  /// tha [value] is not null.
+  final Color? value;
+
+  /// Whether the current platform supports a color with the give [name].
+  bool get isSupported => value != null;
 }
 
 /// Configuration of the platform.
