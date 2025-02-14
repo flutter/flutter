@@ -5,7 +5,8 @@
 package com.flutter.gradle
 
 data class AppLinkSettings(
-    val applicationId: String,
-    val deeplinkingFlagEnabled: Boolean,
-    val deeplinks: MutableSet<Deeplink>
-)
+    val applicationId: String
+) {
+    var deeplinkingFlagEnabled = false
+    val deeplinks = mutableSetOf<Deeplink>()
+}
