@@ -541,13 +541,22 @@ void PathBuilder::AddConicComponent(const Point& p1,
                                     const Point& cp,
                                     const Point& p2,
                                     Scalar weight) {
-  auto& points = prototype_.points;
-  points.push_back(p1);
-  points.push_back(cp);
-  points.push_back(p2);
-  points.emplace_back(weight, weight);
-  prototype_.components.push_back(Path::ComponentType::kConic);
-  prototype_.bounds.reset();
+  if (!std::isfinite(weight)) {
+    AddLinearComponent(p1, cp);
+    AddLinearComponent(cp, p2);
+  } else if (weight <= 0) {
+    AddLinearComponent(p1, p2);
+  } else if (weight == 1) {
+    AddQuadraticComponent(p1, cp, p2);
+  } else {
+    auto& points = prototype_.points;
+    points.push_back(p1);
+    points.push_back(cp);
+    points.push_back(p2);
+    points.emplace_back(weight, weight);
+    prototype_.components.push_back(Path::ComponentType::kConic);
+    prototype_.bounds.reset();
+  }
 }
 
 void PathBuilder::AddCubicComponent(const Point& p1,

@@ -376,7 +376,12 @@ TEST(DisplayListSkConversions, ToSkRSTransform) {
 // This tests the new conic subdivision code in the Impeller conic path
 // component object vs the code we used to rely on inside Skia
 TEST(DisplayListSkConversions, ConicToQuads) {
-  SkScalar weights[3] = {0.5f, 1.0f, SK_ScalarSqrt2 * 0.5f};
+  SkScalar weights[4] = {
+      0.02f,
+      0.5f,
+      SK_ScalarSqrt2 * 0.5f,
+      1.0f,
+  };
 
   for (SkScalar weight : weights) {
     SkPoint sk_points[5];
@@ -404,7 +409,12 @@ TEST(DisplayListSkConversions, ConicToQuads) {
 TEST(DisplayListSkConversions, ConicPathToQuads) {
   // If we execute conicTo with a weight of exactly 1.0, SkPath will turn
   // it into a quadTo, so we avoid that by using 0.999
-  SkScalar weights[3] = {0.5f, 1.0f - kEhCloseEnough, SK_ScalarSqrt2 * 0.5f};
+  SkScalar weights[4] = {
+      0.02f,
+      0.5f,
+      SK_ScalarSqrt2 * 0.5f,
+      1.0f - kEhCloseEnough,
+  };
 
   for (SkScalar weight : weights) {
     SkPath sk_path;

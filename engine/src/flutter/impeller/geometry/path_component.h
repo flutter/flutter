@@ -267,7 +267,7 @@ struct ConicPathComponent {
 
   std::optional<Vector2> GetEndDirection() const;
 
-  std::vector<QuadraticPathComponent> ToQuadraticPathComponents() const;
+  std::array<QuadraticPathComponent, 2> ToQuadraticPathComponents() const;
 
   void SubdivideToQuadraticPoints(std::array<Point, 5>& points) const;
 };

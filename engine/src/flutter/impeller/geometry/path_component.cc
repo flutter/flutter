@@ -385,48 +385,52 @@ std::optional<Vector2> ConicPathComponent::GetEndDirection() const {
 
 void ConicPathComponent::SubdivideToQuadraticPoints(
     std::array<Point, 5>& points) const {
-  // Observe that scale will always be smaller than 1 because fW > 0.
+  FML_DCHECK(weight.IsFinite() && weight.x > 0 && weight.y > 0);
+
+  // Observe that scale will always be smaller than 1 because weight > 0.
   const Scalar scale = 1.0f / (1.0f + weight.x);
 
   // The subdivided control points below are the sums of the following three
   // terms. Because the terms are multiplied by something <1, and the resulting
   // control points lie within the control points of the original then the
-  // terms and the sums below will not overflow. Note that fW * scale
-  // approaches 1 as fW becomes very large.
+  // terms and the sums below will not overflow. Note that weight * scale
+  // approaches 1 as weight becomes very large.
   Point tp1 = p1 * scale;
-  Point tcp = cp * weight.x * scale;
+  Point tcp = cp * (weight.x * scale);
   Point tp2 = p2 * scale;
 
   // Calculate the subdivided control points
-  Point sub_p1 = tp1 + tcp;
-  Point sub_p2 = tcp + tp2;
+  Point sub_cp1 = tp1 + tcp;
+  Point sub_cp2 = tcp + tp2;
 
-  // p2 = (t0 + 2*t1 + t2) / 2. Divide the terms by 2 before the sum to keep
-  // the sum for p2 from overflowing.
-  Point sub_cp = (tp1 + tcp + tcp + tp2) * 0.5f;
+  // The middle point shared by the 2 sub-divisions, the interpolation of
+  // the original curve at its halfway point.
+  Point sub_mid = (tp1 + tcp + tcp + tp2) * 0.5f;
 
-  FML_DCHECK(sub_p1.IsFinite() && sub_cp.IsFinite() && sub_p2.IsFinite());
+  FML_DCHECK(sub_cp1.IsFinite() && sub_mid.IsFinite() && sub_cp2.IsFinite());
 
   points[0] = p1;
-  points[1] = sub_p1;
-  points[2] = sub_cp;
-  points[3] = sub_p2;
+  points[1] = sub_cp1;
+  points[2] = sub_mid;
+  points[3] = sub_cp2;
   points[4] = p2;
 
   // Update w.
-  // dst[0].fW = dst[1].fW = subdivide_w_value(fW);
+  // Currently this method only subdivides a single time directly to 2
+  // quadratics, but if we eventually want to keep the weights for further
+  // subdivision, this was the code that did it in Skia:
+  // sub_w1 = sub_w2 = SkScalarSqrt(SK_ScalarHalf + w * SK_ScalarHalf)
 }
 
-std::vector<QuadraticPathComponent>
+std::array<QuadraticPathComponent, 2>
 ConicPathComponent::ToQuadraticPathComponents() const {
   std::array<Point, 5> points;
   SubdivideToQuadraticPoints(points);
 
-  std::vector<QuadraticPathComponent> vector(2);
-  vector.emplace_back(points[0], points[1], points[2]);
-  vector.emplace_back(points[2], points[3], points[4]);
-
-  return vector;
+  return {
+      QuadraticPathComponent(points[0], points[1], points[2]),
+      QuadraticPathComponent(points[2], points[3], points[4]),
+  };
 }
 
 Point CubicPathComponent::Solve(Scalar time) const {

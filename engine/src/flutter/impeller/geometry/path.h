@@ -265,31 +265,4 @@ static_assert(sizeof(Path) == sizeof(std::shared_ptr<struct Anonymous>));
 
 }  // namespace impeller
 
-namespace std {
-
-template <class T>
-inline std::ostream& operator<<(std::ostream& out,
-                                const impeller::Path::ComponentType& t) {
-  switch (t) {
-    case impeller::Path::ComponentType::kContour:
-      out << "kContour";
-      break;
-    case impeller::Path::ComponentType::kLinear:
-      out << "kContour";
-      break;
-    case impeller::Path::ComponentType::kQuadratic:
-      out << "kContour";
-      break;
-    case impeller::Path::ComponentType::kConic:
-      out << "kContour";
-      break;
-    case impeller::Path::ComponentType::kCubic:
-      out << "kContour";
-      break;
-  }
-  return out;
-}
-
-}  // namespace std
-
 #endif  // FLUTTER_IMPELLER_GEOMETRY_PATH_H_
