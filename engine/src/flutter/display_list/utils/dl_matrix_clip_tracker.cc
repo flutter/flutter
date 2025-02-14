@@ -71,7 +71,7 @@ void DisplayListMatrixClipState::clipOval(const DlRect& bounds,
 namespace {
 inline std::array<DlRect, 2> RoundingRadiiSafeRects(
     const DlRect& bounds,
-    const RoundingRadii& radii) {
+    const impeller::RoundingRadii& radii) {
   return {
       bounds.Expand(  //
           -std::max(radii.top_left.width, radii.bottom_left.width), 0,
@@ -111,7 +111,7 @@ void DisplayListMatrixClipState::clipRSuperellipse(
     DlClipOp op,
     bool is_aa) {
   DlRect bounds = rse.GetBounds();
-  if (rrect.IsRect()) {
+  if (rse.IsRect()) {
     return clipRect(bounds, op, is_aa);
   }
   if (rse.IsOval()) {
@@ -126,7 +126,7 @@ void DisplayListMatrixClipState::clipRSuperellipse(
         cull_rect_ = DlRect();
         return;
       }
-      auto safe_rects = RoundingRadiiSafeRects(bounds, rrect.GetRadii());
+      auto safe_rects = RoundingRadiiSafeRects(bounds, rse.GetRadii());
       adjustCullRect(safe_rects[0], op, is_aa);
       adjustCullRect(safe_rects[1], op, is_aa);
       break;
