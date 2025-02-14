@@ -403,6 +403,8 @@ class Surface extends DisplayCanvas {
       if (_glContext != 0) {
         _grContext = canvasKit.MakeGrContext(glContext.toDouble());
         if (_grContext == null) {
+          // TODO(harryterkelsen): Make this error message more descriptive by
+          // reporting the number of currently live Surfaces, https://github.com/flutter/flutter/issues/162868.
           throw CanvasKitError(
             'Failed to initialize CanvasKit. '
             'CanvasKit.MakeGrContext returned null.',
