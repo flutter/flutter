@@ -18,6 +18,8 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
+import '../base/platform.dart';
+import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -52,6 +54,9 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required DebuggingOptions debuggingOptions,
     UrlTunneller? urlTunneller,
     required Logger logger,
+    required Terminal terminal,
+    required Platform platform,
+    required OutputPreferences outputPreferences,
     required FileSystem fileSystem,
     required SystemClock systemClock,
     required Analytics analytics,
@@ -69,6 +74,9 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       systemClock: systemClock,
       fileSystem: fileSystem,
       logger: logger,
+      terminal: terminal,
+      platform: platform,
+      outputPreferences: outputPreferences,
     );
   }
 }
@@ -88,6 +96,9 @@ class ResidentWebRunner extends ResidentRunner {
     required DebuggingOptions debuggingOptions,
     required FileSystem fileSystem,
     required Logger logger,
+    required Terminal terminal,
+    required Platform platform,
+    required OutputPreferences outputPreferences,
     required SystemClock systemClock,
     required Analytics analytics,
     UrlTunneller? urlTunneller,
@@ -95,6 +106,7 @@ class ResidentWebRunner extends ResidentRunner {
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
+       _platform = platform,
        _systemClock = systemClock,
        _analytics = analytics,
        _urlTunneller = urlTunneller,
@@ -107,14 +119,15 @@ class ResidentWebRunner extends ResidentRunner {
          devtoolsHandler: devtoolsHandler,
          commandHelp: CommandHelp(
            logger: logger,
-           terminal: globals.terminal,
-           platform: globals.platform,
-           outputPreferences: globals.outputPreferences,
+           terminal: terminal,
+           platform: platform,
+           outputPreferences: outputPreferences,
          ),
        );
 
   final FileSystem _fileSystem;
   final Logger _logger;
+  final Platform _platform;
   final SystemClock _systemClock;
   final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
@@ -152,7 +165,17 @@ class ResidentWebRunner extends ResidentRunner {
 
   bool get _enableDwds => debuggingEnabled;
 
-  // TODO(srujzs): We should support this. Currently, it quits the app.
+  @override
+  bool get reloadIsRestart =>
+      // Web behavior when not using the DDC library bundle format is to restart
+      // when a reload is issued. We can't use `canHotReload` to signal this
+      // since we still want a reload command to succeed, but to do a hot
+      // restart.
+      debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
+      debuggingOptions.buildInfo.canaryFeatures != true;
+
+  // TODO(srujzs): Return true when web supports detaching.
+  // https://github.com/flutter/flutter/issues/163329
   @override
   bool get supportsDetach => false;
 
@@ -213,20 +236,6 @@ class ResidentWebRunner extends ResidentRunner {
   Future<void> _cleanupAndExit() async {
     await _cleanup();
     appFinished();
-  }
-
-  @override
-  void printHelp({required bool details, bool reloadIsRestart = false}) {
-    super.printHelp(
-      details: details,
-      // Web behavior when not using the DDC library bundle format is to restart
-      // when a reload is issued. We can't set `canHotReload` to the negation of
-      // this since we still want a reload command to succeed, but to do a hot
-      // restart.
-      reloadIsRestart:
-          debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
-          debuggingOptions.buildInfo.canaryFeatures != true,
-    );
   }
 
   @override
@@ -316,7 +325,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           isWasm: debuggingOptions.webUseWasm,
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
-          isWindows: globals.platform.isWindows,
+          isWindows: _platform.isWindows,
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {

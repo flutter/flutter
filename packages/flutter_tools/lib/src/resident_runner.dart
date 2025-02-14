@@ -625,10 +625,8 @@ abstract class ResidentHandlers {
 
   /// Called to print help to the terminal.
   ///
-  /// If [details] is true, prints out extra help information. If
-  /// [reloadIsRestart] is true, implies hot reload is implemented as hot
-  /// restart.
-  void printHelp({required bool details, bool reloadIsRestart = false});
+  /// If [details] is true, prints out extra help information.
+  void printHelp({required bool details});
 
   /// Perform a hot reload or hot restart of all attached applications.
   ///
@@ -1142,6 +1140,9 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   bool get canHotReload => hotMode;
 
+  /// Whether the hot reload support is implemented as hot restart.
+  bool get reloadIsRestart => false;
+
   /// Start the app and keep the process running during its lifetime.
   ///
   /// Returns the exit code that we should use for the flutter tool process; 0
@@ -1464,7 +1465,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   @override
-  void printHelp({required bool details, bool reloadIsRestart = false}) {
+  void printHelp({required bool details}) {
     logger.printStatus('Flutter run key commands.');
     // Don't print the command in the case where the runner implements reload as
     // restart since it's misleading.
