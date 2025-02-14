@@ -23,7 +23,7 @@ void main() {
   const String candidateBranch = 'flutter-1.2-candidate.3';
   const String workingBranch = 'cherrypicks-$candidateBranch';
   const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
-  const String revision3 = 'ffffffffffffffffffffffffffffffffffffffff';
+  const String revision2 = 'ffffffffffffffffffffffffffffffffffffffff';
   const String releaseVersion = '1.2.0-3.0.pre';
   const String releaseChannel = 'beta';
   const String stateFile = '/state-file.json';
@@ -154,7 +154,7 @@ void main() {
                 'Create candidate branch version $candidateBranch for $releaseChannel',
               ],
             ),
-            const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
+            const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
           ]);
           writeStateToFile(fileSystem.file(stateFile), state, <String>[]);
           final Checkouts checkouts = Checkouts(
@@ -207,7 +207,7 @@ void main() {
                 'Create candidate branch version $candidateBranch for $releaseChannel',
               ],
             ),
-            const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
+            const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
             const FakeCommand(
               command: <String>['git', 'push', 'mirror', 'HEAD:refs/heads/$workingBranch'],
             ),
@@ -303,6 +303,35 @@ void main() {
         });
 
         test('creates a PR with an updated engine.version file', () async {
+          // Respond "yes" to the prompt to push branch
+          stdio.stdin.add('y');
+          processManager.addCommands(const <FakeCommand>[
+            FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+            FakeCommand(command: <String>['git', 'checkout', 'cherrypicks-$candidateBranch']),
+            FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision1),
+            FakeCommand(
+              command: <String>['git', 'status', '--porcelain'],
+              stdout: 'MM bin/internal/engine.version',
+            ),
+            FakeCommand(command: <String>['git', 'add', '--all']),
+            FakeCommand(
+              command: <String>[
+                'git',
+                'commit',
+                '--message',
+                'Create engine.version file pointing to $revision1',
+              ],
+            ),
+            FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
+            FakeCommand(
+              command: <String>[
+                'git',
+                'push',
+                'mirror',
+                'HEAD:refs/heads/cherrypicks-$candidateBranch',
+              ],
+            ),
+          ]);
           writeStateToFile(fileSystem.file(stateFile), state, <String>[]);
           final Checkouts checkouts = Checkouts(
             fileSystem: fileSystem,
@@ -318,7 +347,13 @@ void main() {
 
           final pb.ConductorState finalState = readStateFromFile(fileSystem.file(stateFile));
 
-          expect (finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
+          expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
+          expect(
+            fileSystem
+                .file('$frameworkCheckoutPath/bin/internal/engine.version')
+                .readAsStringSync(),
+            revision1,
+          );
         });
       });
 
