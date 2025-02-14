@@ -4,23 +4,15 @@
 
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_swapchain_impl_vk.h"
 
-#include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_formats.h"
+#include "impeller/renderer/backend/vulkan/swapchain/ahb/external_semaphore_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
 #include "impeller/toolkit/android/surface_transaction.h"
 #include "impeller/toolkit/android/surface_transaction_stats.h"
 
 namespace impeller {
-
-//------------------------------------------------------------------------------
-/// The maximum number of presents pending in the compositor after which the
-/// acquire calls will block. This value is 2 images given to the system
-/// compositor and one for the raster thread, Because the semaphore is acquired
-/// when the CPU begins working on the texture
-///
-static constexpr const size_t kMaxPendingPresents = 3u;
 
 static TextureDescriptor ToSwapchainTextureDescriptor(
     const android::HardwareBufferDescriptor& ahb_desc) {
@@ -36,14 +28,50 @@ static TextureDescriptor ToSwapchainTextureDescriptor(
   return desc;
 }
 
+AHBFrameSynchronizerVK::AHBFrameSynchronizerVK(const vk::Device& device) {
+  auto acquire_res = device.createFenceUnique(
+      vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled});
+  if (acquire_res.result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create synchronizer.";
+    return;
+  }
+  acquire = std::move(acquire_res.value);
+  is_valid = true;
+}
+
+AHBFrameSynchronizerVK::~AHBFrameSynchronizerVK() = default;
+
+bool AHBFrameSynchronizerVK::IsValid() const {
+  return is_valid;
+}
+
+bool AHBFrameSynchronizerVK::WaitForFence(const vk::Device& device) {
+  if (auto result = device.waitForFences(
+          *acquire,                             // fence
+          true,                                 // wait all
+          std::numeric_limits<uint64_t>::max()  // timeout (ns)
+      );
+      result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Fence wait failed: " << vk::to_string(result);
+    return false;
+  }
+  if (auto result = device.resetFences(*acquire);
+      result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not reset fence: " << vk::to_string(result);
+    return false;
+  }
+  return true;
+}
+
 std::shared_ptr<AHBSwapchainImplVK> AHBSwapchainImplVK::Create(
     const std::weak_ptr<Context>& context,
     std::weak_ptr<android::SurfaceControl> surface_control,
+    const CreateTransactionCB& cb,
     const ISize& size,
     bool enable_msaa,
     size_t swapchain_image_count) {
   auto impl = std::shared_ptr<AHBSwapchainImplVK>(
-      new AHBSwapchainImplVK(context, std::move(surface_control), size,
+      new AHBSwapchainImplVK(context, std::move(surface_control), cb, size,
                              enable_msaa, swapchain_image_count));
   return impl->IsValid() ? impl : nullptr;
 }
@@ -51,11 +79,11 @@ std::shared_ptr<AHBSwapchainImplVK> AHBSwapchainImplVK::Create(
 AHBSwapchainImplVK::AHBSwapchainImplVK(
     const std::weak_ptr<Context>& context,
     std::weak_ptr<android::SurfaceControl> surface_control,
+    const CreateTransactionCB& cb,
     const ISize& size,
     bool enable_msaa,
     size_t swapchain_image_count)
-    : surface_control_(std::move(surface_control)),
-      pending_presents_(std::make_shared<fml::Semaphore>(kMaxPendingPresents)) {
+    : surface_control_(std::move(surface_control)), cb_(cb) {
   desc_ = android::HardwareBufferDescriptor::MakeForSwapchainImage(size);
   pool_ =
       std::make_shared<AHBTexturePoolVK>(context, desc_, swapchain_image_count);
@@ -64,6 +92,15 @@ AHBSwapchainImplVK::AHBSwapchainImplVK(
   }
   transients_ = std::make_shared<SwapchainTransientsVK>(
       context, ToSwapchainTextureDescriptor(desc_), enable_msaa);
+
+  for (auto i = 0u; i < kMaxPendingPresents; i++) {
+    auto sync = std::make_unique<AHBFrameSynchronizerVK>(
+        ContextVK::Cast(*context.lock()).GetDeviceHolder()->GetDevice());
+    if (!sync->IsValid()) {
+      return;
+    }
+    frame_data_.push_back(std::move(sync));
+  }
 
   auto control = surface_control_.lock();
   is_valid_ = control && control->IsValid();
@@ -85,17 +122,17 @@ const android::HardwareBufferDescriptor& AHBSwapchainImplVK::GetDescriptor()
 }
 
 std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
-  {
-    TRACE_EVENT0("impeller", "CompositorPendingWait");
-    if (!pending_presents_->Wait()) {
-      return nullptr;
-    }
+  auto context = transients_->GetContext().lock();
+  if (!context) {
+    return nullptr;
   }
 
   frame_index_ = (frame_index_ + 1) % kMaxPendingPresents;
-  AutoSemaSignaler auto_sema_signaler =
-      std::make_shared<fml::ScopedCleanupClosure>(
-          [sema = pending_presents_]() { sema->Signal(); });
+
+  if (!frame_data_[frame_index_]->WaitForFence(
+          ContextVK::Cast(*context).GetDevice())) {
+    return nullptr;
+  }
 
   if (!is_valid_) {
     return nullptr;
@@ -110,14 +147,12 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
 
   // Import the render ready semaphore that will block onscreen rendering until
   // it is ready.
-  if (!SubmitWaitForRenderReady(pool_entry.render_ready_fence,
-                                pool_entry.texture)) {
+  if (!ImportRenderReady(pool_entry.render_ready_fence, pool_entry.texture)) {
     VALIDATION_LOG << "Could wait on render ready fence.";
     return nullptr;
   }
 
 #if IMPELLER_DEBUG
-  auto context = transients_->GetContext().lock();
   if (context) {
     ContextVK::Cast(*context).GetGPUTracer()->MarkFrameStart();
   }
@@ -125,14 +160,13 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
 
   auto surface = SurfaceVK::WrapSwapchainImage(
       transients_, pool_entry.texture,
-      [signaler = auto_sema_signaler, weak = weak_from_this(),
-       texture = pool_entry.texture]() {
+      [weak = weak_from_this(), texture = pool_entry.texture]() {
         auto thiz = weak.lock();
         if (!thiz) {
           VALIDATION_LOG << "Swapchain died before image could be presented.";
           return false;
         }
-        return thiz->Present(signaler, texture);
+        return thiz->Present(texture);
       });
 
   if (!surface) {
@@ -143,7 +177,6 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
 }
 
 bool AHBSwapchainImplVK::Present(
-    const AutoSemaSignaler& signaler,
     const std::shared_ptr<AHBTextureSourceVK>& texture) {
   auto control = surface_control_.lock();
   if (!control || !control->IsValid()) {
@@ -163,77 +196,80 @@ bool AHBSwapchainImplVK::Present(
     return false;
   }
 
-  auto fence = SubmitSignalForPresentReady(texture);
+  auto present_ready = SubmitSignalForPresentReady(texture);
 
-  if (!fence) {
+  if (!present_ready) {
     VALIDATION_LOG << "Could not submit completion signal.";
     return false;
   }
 
-  android::SurfaceTransaction transaction;
+  android::SurfaceTransaction transaction = cb_();
   if (!transaction.SetContents(control.get(),               //
                                texture->GetBackingStore(),  //
-                               fence->CreateFD()            //
+                               present_ready->CreateFD()    //
                                )) {
     VALIDATION_LOG << "Could not set swapchain image contents on the surface "
                       "control.";
     return false;
   }
-  return transaction.Apply([signaler, texture, weak = weak_from_this()](
-                               ASurfaceTransactionStats* stats) {
-    auto thiz = weak.lock();
-    if (!thiz) {
-      return;
-    }
-    thiz->OnTextureUpdatedOnSurfaceControl(signaler, texture, stats);
-  });
+  return transaction.Apply(
+      [texture, weak = weak_from_this()](ASurfaceTransactionStats* stats) {
+        auto thiz = weak.lock();
+        if (!thiz) {
+          return;
+        }
+        thiz->OnTextureUpdatedOnSurfaceControl(texture, stats);
+      });
 }
 
 void AHBSwapchainImplVK::AddFinalCommandBuffer(
     std::shared_ptr<CommandBuffer> cmd_buffer) {
-  frame_data_[frame_index_].command_buffer = std::move(cmd_buffer);
+  frame_data_[frame_index_]->final_cmd_buffer = std::move(cmd_buffer);
 }
 
-std::shared_ptr<ExternalFenceVK>
+std::shared_ptr<ExternalSemaphoreVK>
 AHBSwapchainImplVK::SubmitSignalForPresentReady(
     const std::shared_ptr<AHBTextureSourceVK>& texture) const {
   auto context = transients_->GetContext().lock();
   if (!context) {
     return nullptr;
   }
-  auto fence = std::make_shared<ExternalFenceVK>(context);
-  if (!fence || !fence->IsValid()) {
+
+  auto present_ready = std::make_shared<ExternalSemaphoreVK>(context);
+  if (!present_ready || !present_ready->IsValid()) {
     return nullptr;
   }
 
-  auto command_buffer = frame_data_[frame_index_].command_buffer;
+  auto& sync = frame_data_[frame_index_];
+  auto command_buffer = sync->final_cmd_buffer;
   if (!command_buffer) {
     return nullptr;
   }
   CommandBufferVK& command_buffer_vk = CommandBufferVK::Cast(*command_buffer);
   const auto command_encoder_vk = command_buffer_vk.GetCommandBuffer();
-  command_buffer_vk.Track(fence->GetSharedHandle());
-
   if (!command_buffer_vk.EndCommandBuffer()) {
     return nullptr;
   }
+  sync->present_ready = present_ready;
 
   vk::SubmitInfo submit_info;
   vk::PipelineStageFlags wait_stage =
       vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  if (frame_data_[frame_index_].semaphore) {
-    submit_info.setPWaitSemaphores(&frame_data_[frame_index_].semaphore.get());
+  if (sync->render_ready) {
+    submit_info.setPWaitSemaphores(&sync->render_ready.get());
     submit_info.setWaitSemaphoreCount(1);
     submit_info.setWaitDstStageMask(wait_stage);
   }
   submit_info.setCommandBuffers(command_encoder_vk);
+  submit_info.setPSignalSemaphores(&sync->present_ready->GetHandle());
+  submit_info.setSignalSemaphoreCount(1);
 
   auto result = ContextVK::Cast(*context).GetGraphicsQueue()->Submit(
-      submit_info, fence->GetHandle());
+      submit_info, *sync->acquire);
   if (result != vk::Result::eSuccess) {
     return nullptr;
   }
-  return fence;
+  return present_ready;
 }
 
 vk::UniqueSemaphore AHBSwapchainImplVK::CreateRenderReadySemaphore(
@@ -251,7 +287,6 @@ vk::UniqueSemaphore AHBSwapchainImplVK::CreateRenderReadySemaphore(
   const auto& device = context_vk.GetDevice();
 
   auto signal_wait = device.createSemaphoreUnique({});
-
   if (signal_wait.result != vk::Result::eSuccess) {
     return {};
   }
@@ -282,19 +317,19 @@ vk::UniqueSemaphore AHBSwapchainImplVK::CreateRenderReadySemaphore(
   return std::move(signal_wait.value);
 }
 
-bool AHBSwapchainImplVK::SubmitWaitForRenderReady(
+bool AHBSwapchainImplVK::ImportRenderReady(
     const std::shared_ptr<fml::UniqueFD>& render_ready_fence,
     const std::shared_ptr<AHBTextureSourceVK>& texture) {
-  // If there is no render ready fence, we are already ready to render into
-  // the texture. There is nothing more to do.
-  if (!render_ready_fence || !render_ready_fence->is_valid()) {
-    frame_data_[frame_index_].semaphore = {};
-    return true;
-  }
-
   auto context = transients_->GetContext().lock();
   if (!context) {
     return false;
+  }
+
+  // If there is no render ready fence, we are already ready to render into
+  // the texture. There is nothing more to do.
+  if (!render_ready_fence || !render_ready_fence->is_valid()) {
+    frame_data_[frame_index_]->render_ready = {};
+    return true;
   }
 
   auto semaphore = CreateRenderReadySemaphore(render_ready_fence);
@@ -303,12 +338,11 @@ bool AHBSwapchainImplVK::SubmitWaitForRenderReady(
   }
   // This semaphore will be later used to block the onscreen render pass
   // from starting until the system is done reading the onscreen.
-  frame_data_[frame_index_].semaphore = std::move(semaphore);
+  frame_data_[frame_index_]->render_ready = std::move(semaphore);
   return true;
 }
 
 void AHBSwapchainImplVK::OnTextureUpdatedOnSurfaceControl(
-    const AutoSemaSignaler& signaler,
     std::shared_ptr<AHBTextureSourceVK> texture,
     ASurfaceTransactionStats* stats) {
   auto control = surface_control_.lock();

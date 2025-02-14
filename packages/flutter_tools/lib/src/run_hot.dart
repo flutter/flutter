@@ -253,12 +253,10 @@ class HotRunner extends ResidentRunner {
         reloadSources: _reloadSourcesService,
         restart: _restartService,
         compileExpression: _compileExpressionService,
-        getSkSLMethod: writeSkSL,
         allowExistingDdsInstance: allowExistingDdsInstance,
       );
       // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) {
-      // ignore: avoid_catches_without_on_clauses
       if (error is! Exception && error is! String) {
         rethrow;
       }
@@ -536,7 +534,7 @@ class HotRunner extends ResidentRunner {
           bundleFirstUpload: isFirstUpload,
           bundleDirty: !isFirstUpload && rebuildBundle,
           fullRestart: fullRestart,
-          pathToReload: getReloadPath(fullRestart: fullRestart, swap: _swap),
+          pathToReload: getReloadPath(resetCompiler: fullRestart, swap: _swap),
           invalidatedFiles: invalidationResult.uris!,
           packageConfig: invalidationResult.packageConfig!,
           dillOutputPath: dillOutputPath,
@@ -716,7 +714,6 @@ class HotRunner extends ResidentRunner {
 
     // Send timing analytics.
     final Duration elapsedDuration = restartTimer.elapsed;
-    globals.flutterUsage.sendTiming('hot', 'restart', elapsedDuration);
     _analytics.send(
       Event.timing(
         workflow: 'hot',
@@ -1046,7 +1043,6 @@ class HotRunner extends ResidentRunner {
         sdkName,
         emulator,
         reason,
-        globals.flutterUsage,
         globals.analytics,
       );
       if (result.code != 0) {
@@ -1145,7 +1141,6 @@ class HotRunner extends ResidentRunner {
     if ((reassembleResult.reassembleViews.length == 1) &&
         !reassembleResult.failedReassemble &&
         shouldReportReloadTime) {
-      globals.flutterUsage.sendTiming('hot', 'reload', reloadDuration);
       _analytics.send(
         Event.timing(
           workflow: 'hot',
@@ -1179,13 +1174,6 @@ class HotRunner extends ResidentRunner {
     }
     commandHelp.c.print();
     commandHelp.q.print();
-    if (debuggingOptions.buildInfo.nullSafetyMode != NullSafetyMode.sound) {
-      globals.printStatus('');
-      globals.printStatus('Running without sound null safety ⚠️', emphasis: true);
-      globals.printStatus(
-        'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
-      );
-    }
     globals.printStatus('');
     printDebuggerList();
   }
@@ -1298,7 +1286,6 @@ typedef ReloadSourcesHelper =
       String? sdkName,
       bool? emulator,
       String? reason,
-      Usage usage,
       Analytics analytics,
     );
 
@@ -1312,7 +1299,6 @@ Future<OperationResult> defaultReloadSourcesHelper(
   String? sdkName,
   bool? emulator,
   String? reason,
-  Usage usage,
   Analytics analytics,
 ) async {
   final Stopwatch vmReloadTimer = Stopwatch()..start();
@@ -1348,22 +1334,12 @@ Future<OperationResult> defaultReloadSourcesHelper(
       (await Future.wait(allReportsFutures)).whereType<DeviceReloadReport>();
   final vm_service.ReloadReport? reloadReport = reports.isEmpty ? null : reports.first.reports[0];
   if (reloadReport == null || !HotRunner.validateReloadReport(reloadReport)) {
-    // Reload failed.
-    HotEvent(
-      'reload-reject',
-      targetPlatform: targetPlatform!,
-      sdkName: sdkName!,
-      emulator: emulator!,
-      fullRestart: false,
-      reason: reason,
-      usage: usage,
-    ).send();
     analytics.send(
       Event.hotRunnerInfo(
         label: 'reload-reject',
-        targetPlatform: targetPlatform,
-        sdkName: sdkName,
-        emulator: emulator,
+        targetPlatform: targetPlatform!,
+        sdkName: sdkName!,
+        emulator: emulator!,
         fullRestart: false,
         reason: reason,
       ),

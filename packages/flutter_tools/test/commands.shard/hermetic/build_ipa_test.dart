@@ -6,11 +6,9 @@ import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -74,10 +72,8 @@ class FakePlistUtils extends Fake implements PlistParser {
 void main() {
   late MemoryFileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
-  late ProcessUtils processUtils;
   late FakePlistUtils plistUtils;
   late BufferLogger logger;
-  late Artifacts artifacts;
   late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
@@ -86,10 +82,8 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    artifacts = Artifacts.test(fileSystem: fileSystem);
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
-    processUtils = ProcessUtils(logger: logger, processManager: fakeProcessManager);
     plistUtils = FakePlistUtils();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
@@ -172,6 +166,8 @@ void main() {
         '-configuration',
         'Release',
         if (verbose) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
+        '-allowProvisioningUpdates',
+        '-allowProvisioningDeviceRegistration',
         '-workspace',
         'Runner.xcworkspace',
         '-scheme',
@@ -232,12 +228,10 @@ void main() {
     'ipa build fails when there is no ios project',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       createCoreMockProjectFiles();
@@ -259,12 +253,10 @@ void main() {
     'ipa build fails in debug with code analysis',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       createCoreMockProjectFiles();
@@ -288,12 +280,10 @@ void main() {
     'ipa build fails on non-macOS platform',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fileSystem.file('pubspec.yaml').createSync();
@@ -323,12 +313,10 @@ void main() {
     'ipa build fails when export plist does not exist',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       createMinimalMockProjectFiles();
@@ -354,12 +342,10 @@ void main() {
     () async {
       final Directory bogus = fileSystem.directory('bogus')..createSync();
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       createMinimalMockProjectFiles();
@@ -383,12 +369,10 @@ void main() {
     'ipa build fails when --export-options-plist and --export-method are used together',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       createMinimalMockProjectFiles();
@@ -418,12 +402,10 @@ void main() {
     'ipa build reports method from --export-method when used',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -454,12 +436,10 @@ void main() {
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -510,12 +490,10 @@ void main() {
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -566,12 +544,10 @@ void main() {
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -621,12 +597,10 @@ void main() {
     'ipa build accepts "enterprise" export method when on Xcode versions <= 15.3',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -656,12 +630,10 @@ void main() {
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -711,12 +683,10 @@ void main() {
     'ipa build accepts legacy methods when on Xcode versions <= 15.3',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -758,12 +728,10 @@ void main() {
         exportArchiveCommand(exportOptionsPlist: exportOptions.path),
       ]);
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(
@@ -788,12 +756,10 @@ void main() {
     'ipa build reports when IPA fails',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -849,12 +815,10 @@ void main() {
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -886,12 +850,10 @@ void main() {
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -945,12 +907,10 @@ void main() {
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1006,12 +966,10 @@ void main() {
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1066,12 +1024,10 @@ void main() {
     'ipa build invokes xcode build with verbosity',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1098,12 +1054,10 @@ void main() {
     'ipa build invokes xcode build without disablePortPublication',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1131,12 +1085,10 @@ void main() {
     'ipa build --no-codesign skips codesigning and IPA creation',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1193,12 +1145,10 @@ void main() {
     'code size analysis fails when app not found',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       createMinimalMockProjectFiles();
@@ -1224,12 +1174,10 @@ void main() {
     'Performs code size analysis and sends analytics',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       createMinimalMockProjectFiles();
@@ -1291,12 +1239,10 @@ void main() {
       );
       final File exportOptions = fileSystem.file('ExportOptions.plist')..createSync();
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1335,12 +1281,10 @@ void main() {
     'Trace error if xcresult is empty.',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1377,12 +1321,10 @@ void main() {
     'Display xcresult issues on console if parsed.',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1423,12 +1365,10 @@ void main() {
     'Do not display xcresult issues that needs to be discarded.',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1477,12 +1417,10 @@ void main() {
     'Trace if xcresult bundle does not exist.',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1516,12 +1454,10 @@ void main() {
     'Extra error message for provision profile issue in xcresult bundle.',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1591,12 +1527,10 @@ void main() {
       };
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -1657,12 +1591,10 @@ void main() {
       };
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -1721,12 +1653,10 @@ void main() {
       };
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -1780,12 +1710,10 @@ void main() {
       };
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -1830,12 +1758,10 @@ void main() {
       };
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -1927,12 +1853,10 @@ void main() {
       createMinimalMockProjectFiles();
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -2021,12 +1945,10 @@ void main() {
       createMinimalMockProjectFiles();
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -2099,12 +2021,10 @@ void main() {
       createMinimalMockProjectFiles();
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -2175,12 +2095,10 @@ void main() {
       createMinimalMockProjectFiles();
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -2251,12 +2169,10 @@ void main() {
       createMinimalMockProjectFiles();
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -2328,12 +2244,10 @@ void main() {
       createMinimalMockProjectFiles();
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -2448,12 +2362,10 @@ void main() {
       createMinimalMockProjectFiles();
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -2541,12 +2453,10 @@ void main() {
       createMinimalMockProjectFiles();
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
@@ -2633,12 +2543,10 @@ void main() {
       createMinimalMockProjectFiles();
 
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);

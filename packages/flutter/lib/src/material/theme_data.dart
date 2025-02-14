@@ -286,7 +286,6 @@ class ThemeData with Diagnosticable {
     Color? highlightColor,
     Color? hintColor,
     Color? hoverColor,
-    Color? indicatorColor,
     Color? primaryColor,
     Color? primaryColorDark,
     Color? primaryColorLight,
@@ -365,6 +364,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.27.0-0.1.pre.',
     )
     Color? dialogBackgroundColor,
+    @Deprecated(
+      'Use TabBarThemeData.indicatorColor instead. '
+      'This feature was deprecated after v3.28.0-1.0.pre.',
+    )
+    Color? indicatorColor,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -459,7 +463,6 @@ class ThemeData with Diagnosticable {
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
-    indicatorColor ??= colorScheme.secondary == primaryColor ? Colors.white : colorScheme.secondary;
     hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
     // The default [buttonTheme] is here because it doesn't use the defaults for
     // [disabledColor], [highlightColor], and [splashColor].
@@ -580,6 +583,7 @@ class ThemeData with Diagnosticable {
     // DEPRECATED (newest deprecations at the bottom)
     buttonBarTheme ??= const ButtonBarThemeData();
     dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
+    indicatorColor ??= colorScheme.secondary == primaryColor ? Colors.white : colorScheme.secondary;
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
@@ -609,7 +613,6 @@ class ThemeData with Diagnosticable {
       highlightColor: highlightColor,
       hintColor: hintColor,
       hoverColor: hoverColor,
-      indicatorColor: indicatorColor,
       primaryColor: primaryColor,
       primaryColorDark: primaryColorDark,
       primaryColorLight: primaryColorLight,
@@ -673,6 +676,7 @@ class ThemeData with Diagnosticable {
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme: buttonBarTheme,
       dialogBackgroundColor: dialogBackgroundColor,
+      indicatorColor: indicatorColor,
     );
   }
 
@@ -715,7 +719,6 @@ class ThemeData with Diagnosticable {
     required this.highlightColor,
     required this.hintColor,
     required this.hoverColor,
-    required this.indicatorColor,
     required this.primaryColor,
     required this.primaryColorDark,
     required this.primaryColorLight,
@@ -787,6 +790,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.27.0-0.1.pre.',
     )
     required this.dialogBackgroundColor,
+    @Deprecated(
+      'Use TabBarThemeData.indicatorColor instead. '
+      'This feature was deprecated after v3.28.0-1.0.pre.',
+    )
+    required this.indicatorColor,
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
        _buttonBarTheme = buttonBarTheme,
@@ -1153,10 +1161,14 @@ class ThemeData with Diagnosticable {
   /// A larger value translates to a spacing increase (less dense), and a
   /// smaller value translates to a spacing decrease (more dense).
   ///
-  /// In Material Design 3, the [visualDensity] does not override the value of
-  /// [IconButton.visualDensity] which defaults to [VisualDensity.standard]
-  /// for all platforms. To override the default value of [IconButton.visualDensity],
-  /// use [ThemeData.iconButtonTheme] instead.
+  /// In Material Design 3, the [visualDensity] does not override the default
+  /// visual for the following components which are set to [VisualDensity.standard]
+  /// for all platforms:
+  ///
+  ///  * [IconButton] - To override the default value of [IconButton.visualDensity],
+  ///    use [ThemeData.iconButtonTheme] instead.
+  ///  * [Checkbox] - To override the default value of [Checkbox.visualDensity],
+  ///    use [ThemeData.checkboxTheme] instead.
   /// {@endtemplate}
   final VisualDensity visualDensity;
 
@@ -1203,9 +1215,6 @@ class ThemeData with Diagnosticable {
   /// The hover color used to indicate when a pointer is hovering over a
   /// component.
   final Color hoverColor;
-
-  /// The color of the selected tab indicator in a tab bar.
-  final Color indicatorColor;
 
   /// The background color for major parts of the app (toolbars, tab bars, etc)
   ///
@@ -1451,6 +1460,13 @@ class ThemeData with Diagnosticable {
   )
   final Color dialogBackgroundColor;
 
+  /// The color of the selected tab indicator in a tab bar.
+  @Deprecated(
+    'Use TabBarThemeData.indicatorColor instead. '
+    'This feature was deprecated after v3.28.0-1.0.pre.',
+  )
+  final Color indicatorColor;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1486,7 +1502,6 @@ class ThemeData with Diagnosticable {
     Color? highlightColor,
     Color? hintColor,
     Color? hoverColor,
-    Color? indicatorColor,
     Color? primaryColor,
     Color? primaryColorDark,
     Color? primaryColorLight,
@@ -1568,6 +1583,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.27.0-0.1.pre.',
     )
     Color? dialogBackgroundColor,
+    @Deprecated(
+      'Use TabBarThemeData.indicatorColor instead. '
+      'This feature was deprecated after v3.28.0-1.0.pre.',
+    )
+    Color? indicatorColor,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
 
@@ -1628,7 +1648,6 @@ class ThemeData with Diagnosticable {
       highlightColor: highlightColor ?? this.highlightColor,
       hintColor: hintColor ?? this.hintColor,
       hoverColor: hoverColor ?? this.hoverColor,
-      indicatorColor: indicatorColor ?? this.indicatorColor,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryColorDark: primaryColorDark ?? this.primaryColorDark,
       primaryColorLight: primaryColorLight ?? this.primaryColorLight,
@@ -1692,6 +1711,7 @@ class ThemeData with Diagnosticable {
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme: buttonBarTheme ?? _buttonBarTheme,
       dialogBackgroundColor: dialogBackgroundColor ?? this.dialogBackgroundColor,
+      indicatorColor: indicatorColor ?? this.indicatorColor,
     );
   }
 
@@ -1835,7 +1855,6 @@ class ThemeData with Diagnosticable {
       highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t)!,
       hintColor: Color.lerp(a.hintColor, b.hintColor, t)!,
       hoverColor: Color.lerp(a.hoverColor, b.hoverColor, t)!,
-      indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t)!,
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t)!,
       primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t)!,
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t)!,
@@ -1921,6 +1940,7 @@ class ThemeData with Diagnosticable {
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
       dialogBackgroundColor: Color.lerp(a.dialogBackgroundColor, b.dialogBackgroundColor, t)!,
+      indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t)!,
     );
   }
 
@@ -1957,7 +1977,6 @@ class ThemeData with Diagnosticable {
         other.highlightColor == highlightColor &&
         other.hintColor == hintColor &&
         other.hoverColor == hoverColor &&
-        other.indicatorColor == indicatorColor &&
         other.primaryColor == primaryColor &&
         other.primaryColorDark == primaryColorDark &&
         other.primaryColorLight == primaryColorLight &&
@@ -2020,7 +2039,8 @@ class ThemeData with Diagnosticable {
         other.tooltipTheme == tooltipTheme &&
         // DEPRECATED (newest deprecations at the bottom)
         other.buttonBarTheme == buttonBarTheme &&
-        other.dialogBackgroundColor == dialogBackgroundColor;
+        other.dialogBackgroundColor == dialogBackgroundColor &&
+        other.indicatorColor == indicatorColor;
   }
 
   @override
@@ -2056,7 +2076,6 @@ class ThemeData with Diagnosticable {
       highlightColor,
       hintColor,
       hoverColor,
-      indicatorColor,
       primaryColor,
       primaryColorDark,
       primaryColorLight,
@@ -2120,6 +2139,7 @@ class ThemeData with Diagnosticable {
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme,
       dialogBackgroundColor,
+      indicatorColor,
     ];
     return Object.hashAll(values);
   }
@@ -2296,14 +2316,6 @@ class ThemeData with Diagnosticable {
         'hoverColor',
         hoverColor,
         defaultValue: defaultData.hoverColor,
-        level: DiagnosticLevel.debug,
-      ),
-    );
-    properties.add(
-      ColorProperty(
-        'indicatorColor',
-        indicatorColor,
-        defaultValue: defaultData.indicatorColor,
         level: DiagnosticLevel.debug,
       ),
     );
@@ -2758,6 +2770,14 @@ class ThemeData with Diagnosticable {
         'dialogBackgroundColor',
         dialogBackgroundColor,
         defaultValue: defaultData.dialogBackgroundColor,
+        level: DiagnosticLevel.debug,
+      ),
+    );
+    properties.add(
+      ColorProperty(
+        'indicatorColor',
+        indicatorColor,
+        defaultValue: defaultData.indicatorColor,
         level: DiagnosticLevel.debug,
       ),
     );

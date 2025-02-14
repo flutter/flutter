@@ -25,7 +25,6 @@ import '../drive/drive_service.dart';
 import '../drive/web_driver_service.dart' show Browser;
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
-import '../macos/macos_ipad_device.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart'
     show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
@@ -155,12 +154,6 @@ class DriveCommand extends RunCommandBase {
             'Location of the Chrome binary. '
             'Works only if "browser-name" is set to "chrome".',
       )
-      ..addOption(
-        'write-sksl-on-exit',
-        help:
-            'Attempts to write an SkSL file when the drive process is finished '
-            'to the provided file, overwriting it if necessary.',
-      )
       ..addMultiOption(
         'test-arguments',
         help:
@@ -270,9 +263,6 @@ class DriveCommand extends RunCommandBase {
       if (device is! AndroidDevice) {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
-      if (device is MacOSDesignedForIPadDevice) {
-        throwToolExit('Mac Designed for iPad is currently not supported for flutter drive.');
-      }
     }
     return super.validateCommand();
   }
@@ -284,6 +274,15 @@ class DriveCommand extends RunCommandBase {
       throwToolExit(null);
     }
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
+      // A very common source of error is holding "flutter drive" wrong,
+      // and providing the "test_driver/foo_test.dart" as the target, when
+      // the intention was to provide "lib/foo.dart".
+      if (_fileSystem.path.isWithin('test_driver', targetFile)) {
+        _logger.printError(
+          'The file path passed to --target should be an app entrypoint that '
+          'contains a "main()". Did you mean "flutter drive --driver $targetFile"?',
+        );
+      }
       throwToolExit('Test file not found: $testFile');
     }
     final Device? device = await targetedDevice;
@@ -376,11 +375,7 @@ class DriveCommand extends RunCommandBase {
       if (boolArg('keep-app-running')) {
         _logger.printStatus('Leaving the application running.');
       } else {
-        final File? skslFile =
-            stringArg('write-sksl-on-exit') != null
-                ? _fileSystem.file(stringArg('write-sksl-on-exit'))
-                : null;
-        await driverService.stop(userIdentifier: userIdentifier, writeSkslOnExit: skslFile);
+        await driverService.stop(userIdentifier: userIdentifier);
       }
       if (testResult != 0) {
         throwToolExit(null);
