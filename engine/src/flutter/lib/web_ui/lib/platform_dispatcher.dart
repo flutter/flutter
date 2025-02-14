@@ -151,6 +151,38 @@ abstract class PlatformDispatcher {
   set onFrameDataChanged(VoidCallback? callback) {}
 
   double scaleFontSize(double unscaledFontSize);
+
+  Map<String, SystemColor>? get systemColors;
+
+  // IMPORTANT: keep this list in sync with the mobile version of [PlatformDispatcher.systemColorNames]
+  static const List<String> systemColorNames = <String>[
+    'AccentColor',
+    'AccentColorText',
+    'ActiveText',
+    'ButtonBorder',
+    'ButtonFace',
+    'ButtonText',
+    'Canvas',
+    'CanvasText',
+    'Field',
+    'FieldText',
+    'GrayText',
+    'Highlight',
+    'HighlightText',
+    'LinkText',
+    'Mark',
+    'MarkText',
+    'SelectedItem',
+    'SelectedItemText',
+    'VisitedText',
+  ];
+}
+
+final class SystemColor {
+  SystemColor({required this.name, this.value});
+  final String name;
+  final Color? value;
+  bool get isSupported => value != null;
 }
 
 enum FramePhase {

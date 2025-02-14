@@ -405,6 +405,9 @@ class MockHighContrastSupport implements HighContrastSupport {
   final List<HighContrastListener> _listeners = <HighContrastListener>[];
 
   @override
+  SystemColorPaletteDetector systemColorPaletteDetector = SystemColorPaletteDetector();
+
+  @override
   bool get isHighContrastEnabled => isEnabled;
 
   void invokeListeners(bool val) {
@@ -422,6 +425,9 @@ class MockHighContrastSupport implements HighContrastSupport {
   void removeListener(HighContrastListener listener) {
     _listeners.remove(listener);
   }
+
+  @override
+  Map<String, ui.SystemColor>? get systemColors => systemColorPaletteDetector.systemColors;
 }
 
 class MockAppLifecycleState extends AppLifecycleState {
