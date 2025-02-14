@@ -583,7 +583,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       touchesPackageConfig: true,
     );
 
-    logger.printStatus('Running pub get');
     // Generate package_config.json.
     await pub.get(
       context: PubContext.create,
