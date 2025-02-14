@@ -1414,112 +1414,157 @@ void main() {
     },
   );
 
-  testWidgets('CarouselView animateToItem with itemExtent', (WidgetTester tester) async {
-    final CarouselController controller = CarouselController(initialItem: 5);
-    addTearDown(controller.dispose);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CarouselView(
-            itemExtent: 350,
-            enableSplash: false,
-            controller: controller,
-            children: List<Widget>.generate(20, (int index) {
-              return Center(child: Text('Item $index'));
-            }),
-          ),
-        ),
-      ),
+  group('CarouselController.animateToItem', () {
+    testWidgets('CarouselView.weighted horizontal, not reversed, flexWeights [7,1]', (
+      WidgetTester tester,
+    ) async {
+      await runCarouselTest(
+        tester: tester,
+        flexWeights: <int>[7, 1],
+        numberOfChildren: 20,
+        scrollDirection: Axis.horizontal,
+        reverse: false,
+      );
+    });
+
+    testWidgets('CarouselView.weighted horizontal, reversed, flexWeights [7,1]', (
+      WidgetTester tester,
+    ) async {
+      await runCarouselTest(
+        tester: tester,
+        flexWeights: <int>[7, 1],
+        numberOfChildren: 20,
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+      );
+    });
+
+    testWidgets('CarouselView.weighted vertical, not reversed, flexWeights [7,1]', (
+      WidgetTester tester,
+    ) async {
+      await runCarouselTest(
+        tester: tester,
+        flexWeights: <int>[7, 1],
+        numberOfChildren: 20,
+        scrollDirection: Axis.vertical,
+        reverse: false,
+      );
+    });
+
+    testWidgets('CarouselView.weighted vertical, reversed, flexWeights [7,1]', (
+      WidgetTester tester,
+    ) async {
+      await runCarouselTest(
+        tester: tester,
+        flexWeights: <int>[7, 1],
+        numberOfChildren: 20,
+        scrollDirection: Axis.vertical,
+        reverse: true,
+      );
+    });
+
+    testWidgets(
+      'CarouselView.weighted horizontal, not reversed, flexWeights [1,7] and consumeMaxWeight false',
+      (WidgetTester tester) async {
+        await runCarouselTest(
+          tester: tester,
+          flexWeights: <int>[1, 7],
+          numberOfChildren: 20,
+          scrollDirection: Axis.horizontal,
+          reverse: false,
+          consumeMaxWeight: false,
+        );
+      },
     );
-    await tester.pumpAndSettle();
 
-    double realOffset() {
-      return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
-    }
+    testWidgets('CarouselView.weighted horizontal, reversed, flexWeights [1,7]', (
+      WidgetTester tester,
+    ) async {
+      await runCarouselTest(
+        tester: tester,
+        flexWeights: <int>[1, 7],
+        numberOfChildren: 20,
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+      );
+    });
 
-    // Scroll to the last item.
-    controller.animateToItem(
-      19,
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.easeInOut,
+    testWidgets(
+      'CarouselView.weighted vertical, not reversed, flexWeights [1,7] and consumeMaxWeight false',
+      (WidgetTester tester) async {
+        await runCarouselTest(
+          tester: tester,
+          flexWeights: <int>[1, 7],
+          numberOfChildren: 20,
+          scrollDirection: Axis.vertical,
+          consumeMaxWeight: false,
+          reverse: false,
+        );
+      },
     );
-    await tester.pumpAndSettle();
 
-    // Verify that the last item is visible.
-    expect(find.text('Item 19'), findsOneWidget);
-    expect(realOffset(), controller.offset);
-
-    // Scroll to the first item.
-    controller.animateToItem(
-      0,
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.easeInOut,
+    testWidgets(
+      'CarouselView.weighted vertical, reversed, flexWeights [1,7] and consumeMaxWeight false',
+      (WidgetTester tester) async {
+        await runCarouselTest(
+          tester: tester,
+          flexWeights: <int>[1, 7],
+          numberOfChildren: 20,
+          scrollDirection: Axis.vertical,
+          consumeMaxWeight: false,
+          reverse: true,
+        );
+      },
     );
-    await tester.pumpAndSettle();
 
-    // Verify that the first item is visible.
-    expect(find.text('Item 0'), findsOneWidget);
-    expect(realOffset(), controller.offset);
-
-    // Scroll to the middle item.
-    controller.animateToItem(
-      10,
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.easeInOut,
+    testWidgets(
+      'CarouselView.weighted vertical, reversed, flexWeights [1,7] and consumeMaxWeight',
+      (WidgetTester tester) async {
+        await runCarouselTest(
+          tester: tester,
+          flexWeights: <int>[1, 7],
+          numberOfChildren: 20,
+          scrollDirection: Axis.vertical,
+          reverse: true,
+        );
+      },
     );
-    await tester.pumpAndSettle();
 
-    // Verify that the middle item is visible.
-    expect(find.text('Item 10'), findsOneWidget);
-    expect(realOffset(), controller.offset);
-  });
+    testWidgets('CarouselView horizontal, not reversed', (WidgetTester tester) async {
+      await runCarouselTest(
+        tester: tester,
+        numberOfChildren: 20,
+        scrollDirection: Axis.horizontal,
+        reverse: false,
+      );
+    });
 
-  testWidgets('CarouselView animateToItem with flexWeights', (WidgetTester tester) async {
-    final CarouselController controller = CarouselController();
-    addTearDown(controller.dispose);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CarouselView.weighted(
-            flexWeights: const <int>[7, 1],
-            controller: controller,
-            itemSnapping: true,
-            children: List<Widget>.generate(20, (int index) {
-              return Center(child: Text('Item $index'));
-            }),
-          ),
-        ),
-      ),
-    );
-    // await tester.pumpAndSettle();
+    testWidgets('CarouselView horizontal, reversed', (WidgetTester tester) async {
+      await runCarouselTest(
+        tester: tester,
+        numberOfChildren: 10,
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+      );
+    });
 
-    double realOffset() {
-      return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
-    }
+    testWidgets('CarouselView vertical, not reversed', (WidgetTester tester) async {
+      await runCarouselTest(
+        tester: tester,
+        numberOfChildren: 10,
+        scrollDirection: Axis.vertical,
+        reverse: false,
+      );
+    });
 
-    // Scroll to the middle item.
-    controller.animateToItem(
-      10,
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.easeInOut,
-    );
-    await tester.pumpAndSettle();
-
-    // Verify that the middle item is visible.
-    expect(find.text('Item 10'), findsOneWidget);
-    expect(realOffset(), controller.offset);
-
-    // Scroll to the first item.
-    controller.animateToItem(
-      0,
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.easeInOut,
-    );
-    await tester.pumpAndSettle();
-
-    // Verify that the first item is visible.
-    expect(find.text('Item 0'), findsOneWidget);
-    expect(realOffset(), controller.offset);
+    testWidgets('CarouselView vertical, reversed', (WidgetTester tester) async {
+      await runCarouselTest(
+        tester: tester,
+        numberOfChildren: 10,
+        scrollDirection: Axis.vertical,
+        reverse: true,
+      );
+    });
   });
 }
 
@@ -1538,4 +1583,78 @@ Future<TestGesture> hoverPointerOverCarouselItem(WidgetTester tester, Key key) a
   await gesture.addPointer();
   await gesture.moveTo(center);
   return gesture;
+}
+
+Future<void> runCarouselTest({
+  required WidgetTester tester,
+  List<int> flexWeights = const <int>[],
+  bool consumeMaxWeight = true,
+  required int numberOfChildren,
+  required Axis scrollDirection,
+  required bool reverse,
+}) async {
+  final CarouselController controller = CarouselController();
+  addTearDown(controller.dispose);
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body:
+            (flexWeights.isEmpty)
+                ? CarouselView(
+                  scrollDirection: scrollDirection,
+                  reverse: reverse,
+                  controller: controller,
+                  itemSnapping: true,
+                  itemExtent: 300,
+                  children: List<Widget>.generate(numberOfChildren, (int index) {
+                    return Center(child: Text('Item $index'));
+                  }),
+                )
+                : CarouselView.weighted(
+                  flexWeights: flexWeights,
+                  scrollDirection: scrollDirection,
+                  reverse: reverse,
+                  controller: controller,
+                  itemSnapping: true,
+                  consumeMaxWeight: consumeMaxWeight,
+                  children: List<Widget>.generate(numberOfChildren, (int index) {
+                    return Center(child: Text('Item $index'));
+                  }),
+                ),
+      ),
+    ),
+  );
+
+  double realOffset() {
+    return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+  }
+
+  final int middleIndex =
+      reverse
+          ? (numberOfChildren - 1 - (numberOfChildren / 2).round())
+          : (numberOfChildren / 2).round();
+
+  controller.animateToItem(
+    middleIndex,
+    duration: const Duration(milliseconds: 100),
+    curve: Curves.easeInOut,
+  );
+  await tester.pumpAndSettle();
+
+  // Verify that the middle item is visible.
+  if (flexWeights.isNotEmpty && consumeMaxWeight) {
+    expect(find.text('Item ${middleIndex - 1}'), findsOneWidget);
+    expect(realOffset(), controller.offset);
+  } else {
+    expect(find.text('Item $middleIndex'), findsOneWidget);
+    expect(realOffset(), controller.offset);
+  }
+
+  // Scroll to the first item.
+  controller.animateToItem(0, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+  await tester.pumpAndSettle();
+
+  // Verify that the first item is visible.
+  expect(find.text('Item 0'), findsOneWidget);
+  expect(realOffset(), controller.offset);
 }
