@@ -1593,7 +1593,14 @@ class CarouselController extends ScrollController {
             ? (index > maxWeightIndex ? index - 1 : maxWeightIndex)
             : index;
 
-    return dimension * (weights.first / totalWeight) * newIndex;
+    double targetOffset = dimension * (weights.first / totalWeight) * newIndex;
+
+    // If the target offset is out of the scrollable range, clamp it.
+    if (position.minScrollExtent <= targetOffset || targetOffset <= position.maxScrollExtent) {
+      targetOffset = targetOffset.clamp(position.minScrollExtent, position.maxScrollExtent);
+    }
+
+    return targetOffset;
   }
 
   @override
