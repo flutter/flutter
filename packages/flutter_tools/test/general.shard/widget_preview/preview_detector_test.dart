@@ -130,7 +130,7 @@ void main() {
       await completer.future;
     });
 
-    testUsingContext('can changes in the pubspec.yaml', () async {
+    testUsingContext('can detect changes in the pubspec.yaml', () async {
       // Create an initial pubspec.
       populatePubspec(projectRoot, 'abc');
 

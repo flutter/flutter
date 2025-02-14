@@ -187,11 +187,9 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         fileSystem: globals.fs,
       ),
       BuildCommand(
-        artifacts: globals.artifacts!,
         fileSystem: globals.fs,
         buildSystem: globals.buildSystem,
         osUtils: globals.os,
-        processUtils: globals.processUtils,
         verboseHelp: verboseHelp,
         androidSdk: globals.androidSdk,
         logger: globals.logger,
@@ -220,6 +218,8 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        terminal: globals.terminal,
+        outputPreferences: globals.outputPreferences,
         signals: globals.signals,
       ),
       EmulatorsCommand(),
@@ -250,6 +250,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         nativeAssetsBuilder: globals.nativeAssetsBuilder,
       ),
       WidgetPreviewCommand(
+        verboseHelp: verboseHelp,
         logger: globals.logger,
         fs: globals.fs,
         projectFactory: globals.projectFactory,
