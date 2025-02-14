@@ -40,6 +40,8 @@ extension on Annotation {
 /// Convenience getters for examining [String] paths.
 extension on String {
   bool get isDartFile => endsWith('.dart');
+  bool get isPubspec => endsWith('pubspec.yaml');
+  bool get doesContainDartTool => contains('.dart_tool');
   bool get isGeneratedPreviewFile => endsWith(PreviewCodeGenerator.generatedPreviewFilePath);
 }
 
@@ -55,8 +57,6 @@ class PreviewDetector {
     required this.onChangeDetected,
     required this.onPubspecChangeDetected,
   });
-
-  static const String kPubspecFileName = 'pubspec.yaml';
 
   final FileSystem fs;
   final Logger logger;
@@ -75,6 +75,12 @@ class PreviewDetector {
     final Watcher watcher = Watcher(projectRoot.path);
     _fileWatcher = watcher.events.listen((WatchEvent event) async {
       final String eventPath = event.path;
+      // If the pubspec has changed, new dependencies or assets could have been added, requiring
+      // the preview scaffold's pubspec to be updated.
+      if (eventPath.isPubspec && !eventPath.doesContainDartTool) {
+        onPubspecChangeDetected();
+        return;
+      }
       // Only trigger a reload when changes to Dart sources are detected. We
       // ignore the generated preview file to avoid getting stuck in a loop.
       if (!eventPath.isDartFile || eventPath.isGeneratedPreviewFile) {
