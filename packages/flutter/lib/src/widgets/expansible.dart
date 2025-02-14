@@ -121,7 +121,9 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 
   @protected
   ///
-  Widget buildExpansible(BuildContext context, Widget header, Widget body);
+  Widget buildExpansible(BuildContext context, Widget header, Widget body) {
+    return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]);
+  }
 
   @protected
   ///
