@@ -1540,6 +1540,9 @@ class CarouselController extends ScrollController {
   /// For [CarouselView], this will scroll the carousel so the item at [index] becomes
   /// the leading item.
   ///
+  /// If the [index] is less than 0, the carousel will scroll to the first item.
+  /// If the [index] is greater than the number of items, the carousel will scroll
+  /// to the last item.
   /// For [CarouselView.weighted], this will scroll the carousel so the first item with
   /// maximum weight becomes the leading item, with [index] determining the final layout
   /// position. With `consumeMaxWeight` set to true, the item with the maximum weight
@@ -1559,13 +1562,9 @@ class CarouselController extends ScrollController {
     if (!hasClients || _carouselState == null) {
       return;
     }
-    assert(index >= 0, 'index must be greater than or equal to 0');
-    assert(
-      index <= _carouselState!.widget.children.length,
-      'index must be less than or equal to children.length',
-    );
 
     final bool hasFlexWeights = _carouselState!._flexWeights?.isNotEmpty ?? false;
+    index = index.clamp(0, _carouselState!.widget.children.length - 1);
 
     await Future.wait<void>(<Future<void>>[
       for (final _CarouselPosition position in positions.cast<_CarouselPosition>())
@@ -1578,10 +1577,6 @@ class CarouselController extends ScrollController {
   }
 
   double _getTargetOffset(_CarouselPosition position, int index, bool hasFlexWeights) {
-    if (index == 0) {
-      return 0.0;
-    }
-
     if (!hasFlexWeights) {
       return index * _carouselState!._itemExtent!;
     }
@@ -1591,8 +1586,12 @@ class CarouselController extends ScrollController {
     final int totalWeight = weights.reduce((int a, int b) => a + b);
     final double dimension = position.viewportDimension;
 
-    final bool isLastItem = index == carouselState.widget.children.length - 1;
-    final int newIndex = carouselState._consumeMaxWeight && isLastItem ? index : index - 1;
+    final int maxWeightIndex = weights.indexOf(weights.reduce((int a, int b) => a > b ? a : b));
+
+    final int newIndex =
+        carouselState._consumeMaxWeight
+            ? (index > maxWeightIndex ? index - 1 : maxWeightIndex)
+            : index;
 
     return dimension * (weights.first / totalWeight) * newIndex;
   }
