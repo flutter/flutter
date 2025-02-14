@@ -99,7 +99,7 @@ public class FlutterFragment extends Fragment
         ComponentCallbacks2,
         FlutterActivityAndFragmentDelegate.DelegateFactory {
   /**
-   * The ID of the {@code FlutterView} created by this fragment's attached activity.
+   * The ID of the {@code FlutterView} created by this Fragment's attached activity.
    *
    * <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For more,
    * see {@link android.view.View#findViewById}.
