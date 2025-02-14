@@ -72,7 +72,7 @@ class ExpansionTileController extends ExpansibleController<ExpansionTile> {
   static ExpansionTileController of(BuildContext context) {
     final _ExpansionTileState? result = context.findAncestorStateOfType<_ExpansionTileState>();
     if (result != null) {
-      return result.controller as ExpansionTileController;
+      return result._tileController;
     }
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary(
@@ -114,8 +114,7 @@ class ExpansionTileController extends ExpansibleController<ExpansionTile> {
   ///    encloses the given context. Also includes some sample code in its
   ///    documentation.
   static ExpansionTileController? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<_ExpansionTileState>()!.controller
-        as ExpansionTileController;
+    return context.findAncestorStateOfType<_ExpansionTileState>()?._tileController;
   }
 }
 
@@ -521,6 +520,7 @@ class _ExpansionTileState extends State<ExpansionTile>
   late Animation<Color?> _backgroundColor;
 
   late ExpansionTileThemeData _expansionTileTheme;
+  late ExpansionTileController _tileController;
   Timer? _timer;
 
   @override
@@ -542,11 +542,11 @@ class _ExpansionTileState extends State<ExpansionTile>
   Curve get expansionCurve => Curves.easeIn;
 
   @override
-  ExpansibleController<ExpansionTile> get controller =>
-      widget.controller ?? ExpansionTileController();
+  ExpansibleController<ExpansionTile> get controller => _tileController;
 
   @override
   void initState() {
+    _tileController = widget.controller ?? ExpansionTileController();
     super.initState();
     _iconTurns = animationController.drive(_halfTween.chain(_easeInTween));
     _border = animationController.drive(_borderTween.chain(_easeOutTween));
