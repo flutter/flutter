@@ -622,7 +622,7 @@ class RenderTable extends RenderBox {
 
     for (int i = 0; i < _rows; i++) {
       final Rect rect = getRowBox(i);
-      // Skip row if it's invisible
+      // Skip row if it's empty
       if (rect.height == 0) {
         continue;
       }
