@@ -350,7 +350,7 @@ bool DisplayListMatrixClipState::rsuperellipse_covers_cull(
     return false;
   }
   auto outer = content.GetBounds();
-  auto param = RoundSuperellipseParam::MakeBoundsRadii(outer, content.GetRadii());
+  auto param = impeller::RoundSuperellipseParam::MakeBoundsRadii(outer, content.GetRadii());
   for (auto corner : corners) {
     if (!outer.Contains(corner)) {
       return false;
