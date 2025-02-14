@@ -17,16 +17,13 @@ constexpr wchar_t kWindowClassName[] = L"FLUTTER_HOST_WINDOW";
 
 // RAII wrapper for global Win32 ATOMs.
 struct AtomRAII {
-  AtomRAII(wchar_t const* name) : atom(GlobalAddAtom(name)) {}
+  explicit AtomRAII(wchar_t const* name) : atom(GlobalAddAtom(name)) {}
   ~AtomRAII() { GlobalDeleteAtom(atom); }
   ATOM const atom;
 };
 
-// Atom representing a window property that stores a pointer to this host
-// window. This property serves as an alternative way to access the window in
-// |FlutterHostWindow::GetThisFromHandle| for windows created from existing
-// views, since the `GWLP_USERDATA` of such windows may point to something other
-// than a |FlutterHostWindow|.
+// Atom used as the identifier for a window property that stores a pointer to a
+// |FlutterHostWindow| instance.
 AtomRAII const kWindowPropAtom(kWindowClassName);
 
 // Clamps |size| to the size of the virtual screen. Both the parameter and
@@ -226,7 +223,7 @@ bool IsClassRegistered(LPCWSTR class_name) {
          0;
 }
 
-// Convert std::string to std::wstring.
+// Converts std::string to std::wstring.
 std::wstring StringToWstring(std::string_view str) {
   if (str.empty()) {
     return {};
@@ -252,7 +249,7 @@ std::wstring StringToWstring(std::string_view str) {
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #endif
 
-// Update the window frame's theme to match the system theme.
+// Updates the window frame's theme to match the system theme.
 void UpdateTheme(HWND window) {
   // Registry key for app theme preference.
   const wchar_t kGetPreferredBrightnessRegKey[] =
@@ -272,6 +269,31 @@ void UpdateTheme(HWND window) {
     BOOL enable_dark_mode = light_mode == 0;
     DwmSetWindowAttribute(window, DWMWA_USE_IMMERSIVE_DARK_MODE,
                           &enable_dark_mode, sizeof(enable_dark_mode));
+  }
+}
+
+// Associates |instance| with the window |hwnd| as a window property.
+// Can be retrieved later using GetInstanceProperty.
+// Logs an error if setting the property fails.
+void SetInstanceProperty(HWND hwnd, flutter::FlutterHostWindow* instance) {
+  if (!SetProp(hwnd, MAKEINTATOM(kWindowPropAtom.atom), instance)) {
+    FML_LOG(ERROR) << "Failed to set up instance entry in the property list: "
+                   << GetLastErrorAsString();
+  }
+}
+
+// Retrieves the instance pointer set with SetInstanceProperty, or returns
+// nullptr if the property was not set.
+flutter::FlutterHostWindow* GetInstanceProperty(HWND hwnd) {
+  return reinterpret_cast<flutter::FlutterHostWindow*>(
+      GetProp(hwnd, MAKEINTATOM(kWindowPropAtom.atom)));
+}
+
+// Removes the instance property associated with |hwnd| previously set with
+// SetInstanceProperty. Logs an error if the property is not found.
+void RemoveInstanceProperty(HWND hwnd) {
+  if (!RemoveProp(hwnd, MAKEINTATOM(kWindowPropAtom.atom))) {
+    FML_LOG(ERROR) << "Failed to locate instance entry in the property list";
   }
 }
 
@@ -440,16 +462,14 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
                                      HWND hwnd,
                                      FlutterWindowsView* view)
     : window_controller_(controller), window_handle_(hwnd) {
-  if (!SetProp(hwnd, MAKEINTATOM(kWindowPropAtom.atom), this)) {
-    FML_LOG(ERROR) << "Failed to set up entry in the window property list";
-    return;
-  }
+  SetInstanceProperty(hwnd, this);
   child_content_ = view->GetWindowHandle();
 }
 
 FlutterHostWindow::~FlutterHostWindow() {
-  HWND const hwnd = window_handle_;
-  window_handle_ = nullptr;
+  RemoveInstanceProperty(window_handle_);
+  HWND const hwnd = std::exchange(window_handle_, nullptr);
+
   if (view_controller_) {
     DestroyWindow(hwnd);
     // Unregister the window class. Fail silently if other windows are still
@@ -462,18 +482,7 @@ FlutterHostWindow::~FlutterHostWindow() {
 }
 
 FlutterHostWindow* FlutterHostWindow::GetThisFromHandle(HWND hwnd) {
-  // For native windows created by the runner, retrieve the instance pointer
-  // from a window property.
-  if (HANDLE const data = GetProp(hwnd, MAKEINTATOM(kWindowPropAtom.atom))) {
-    return reinterpret_cast<FlutterHostWindow*>(data);
-  }
-  // Otherwise, retrieve the instance pointer from the window's user data.
-  return reinterpret_cast<FlutterHostWindow*>(
-      GetWindowLongPtr(hwnd, GWLP_USERDATA));
-}
-
-bool FlutterHostWindow::HasThisAsProperty(HWND hwnd) {
-  return GetProp(hwnd, MAKEINTATOM(kWindowPropAtom.atom)) != nullptr;
+  return GetInstanceProperty(hwnd);
 }
 
 HWND FlutterHostWindow::GetWindowHandle() const {
@@ -496,10 +505,9 @@ LRESULT FlutterHostWindow::WndProc(HWND hwnd,
                                    LPARAM lparam) {
   if (message == WM_NCCREATE) {
     auto* const create_struct = reinterpret_cast<CREATESTRUCT*>(lparam);
-    SetWindowLongPtr(hwnd, GWLP_USERDATA,
-                     reinterpret_cast<LONG_PTR>(create_struct->lpCreateParams));
     auto* const window =
         static_cast<FlutterHostWindow*>(create_struct->lpCreateParams);
+    SetInstanceProperty(hwnd, window);
     window->window_handle_ = hwnd;
 
     EnableFullDpiSupportIfAvailable(hwnd);

@@ -36,13 +36,8 @@ class FlutterHostWindow {
                     FlutterWindowsView* view);
   virtual ~FlutterHostWindow();
 
-  // Returns the instance pointer for |hwnd| or nulllptr if invalid.
+  // Returns the instance pointer for |hwnd| or nullptr if invalid.
   static FlutterHostWindow* GetThisFromHandle(HWND hwnd);
-
-  // Returns true if |hwnd| has an instance pointer set as a window property.
-  // This is the case only if |hwnd| was created by the runner with an
-  // associated |FlutterHostWindow|.
-  static bool HasThisAsProperty(HWND hwnd);
 
   // Returns the current window state.
   WindowState GetState() const;

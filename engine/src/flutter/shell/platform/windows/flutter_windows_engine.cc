@@ -800,7 +800,7 @@ void FlutterWindowsEngine::ForwardToHostWindowController(HWND hwnd,
   if (!host_window_controller_) {
     return;
   }
-  if (!FlutterHostWindow::HasThisAsProperty(hwnd)) {
+  if (!FlutterHostWindow::GetThisFromHandle(hwnd)) {
     host_window_controller_->CreateHostWindowFromExisting(
         hwnd, GetViewFromTopLevelWindow(hwnd));
   }
