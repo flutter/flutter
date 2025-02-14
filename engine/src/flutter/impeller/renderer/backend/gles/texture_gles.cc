@@ -7,7 +7,6 @@
 #include <optional>
 #include <utility>
 
-#include "GLES3/gl3.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/trace_event.h"
