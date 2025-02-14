@@ -68,6 +68,10 @@ enum class SemanticsRole : int32_t {
   kTab = 1,
   kTabBar = 2,
   kTabPanel = 3,
+  kTable = 4,
+  kCell = 5,
+  kRow = 6,
+  kColumnHeader = 7,
 };
 
 /// C/C++ representation of `SemanticsFlags` defined in
