@@ -643,6 +643,7 @@ public class FlutterRendererTest {
   public void ImageReaderSurfaceProducerTrimMemoryCallback() {
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    producer.setReleaseMemoryIfRequested(true);
     FlutterRenderer.ImageReaderSurfaceProducer texture =
         (FlutterRenderer.ImageReaderSurfaceProducer) producer;
 
