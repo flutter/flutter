@@ -131,12 +131,18 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         kUseFlutterWeb,
         help: 'Launches the widget preview environment using Flutter Web.',
         hide: !verboseHelp,
+      )
+      ..addFlag(
+        kHeadlessWeb,
+        help: 'Launches Chrome in headless mode for testing.',
+        hide: !verboseHelp,
       );
   }
 
   static const String kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
   static const String kLaunchPreviewer = 'launch-previewer';
   static const String kUseFlutterWeb = 'web';
+  static const String kHeadlessWeb = 'headless-web';
 
   @override
   String get description => 'Starts the widget preview environment.';
@@ -407,6 +413,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             ),
           ),
           webEnableExposeUrl: false, // TODO(bkonyi): verify
+          webRunHeadless: boolArg(kHeadlessWeb),
         ),
         kEnableHotReload, // hot mode
         applicationBinary: prebuiltApplicationBinary,

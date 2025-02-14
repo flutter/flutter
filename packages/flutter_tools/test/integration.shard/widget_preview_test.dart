@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -59,7 +60,11 @@ void main() {
       flutterBin,
       'widget-preview',
       'start',
-      if (useWeb) '--web',
+      '--verbose',
+      if (useWeb) ...<String>[
+        '--${WidgetPreviewStartCommand.kUseFlutterWeb}',
+        '--${WidgetPreviewStartCommand.kHeadlessWeb}',
+      ],
     ], workingDirectory: tempDir.path);
 
     final Completer<void> completer = Completer<void>();
