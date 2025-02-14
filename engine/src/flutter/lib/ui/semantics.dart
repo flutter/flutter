@@ -348,14 +348,14 @@ enum SemanticsRole {
 
   /// A tab button.
   ///
-  /// see also:
+  /// See also:
   ///
   ///  * [tabBar], which is the role for containers of tab buttons.
   tab,
 
   /// Contains tab buttons.
   ///
-  /// see also:
+  /// See also:
   ///
   ///  * [tab], which is the role for tab buttons.
   tabBar,
@@ -368,6 +368,34 @@ enum SemanticsRole {
 
   /// An alert dialog.
   alertDialog,
+
+  /// A table structure containing data arranged in rows and columns.
+  ///
+  /// See also:
+  ///
+  /// * [cell], [row], [columnHeader] for table related roles.
+  table,
+
+  /// A cell in a [table] that does not contain column or row header information.
+  ///
+  /// See also:
+  ///
+  /// * [table],[row], [columnHeader] for table related roles.
+  cell,
+
+  /// A row of [cell]s or or [columnHeader]s in a [table].
+  ///
+  /// See also:
+  ///
+  /// * [table] ,[cell],[columnHeader] for table related roles.
+  row,
+
+  /// A cell in a [table] contains header information for a column.
+  ///
+  /// See also:
+  ///
+  /// * [table] ,[cell], [row] for table related roles.
+  columnHeader,
 }
 
 /// A Boolean value that can be associated with a semantics node.
