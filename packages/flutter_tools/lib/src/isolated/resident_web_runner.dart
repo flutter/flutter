@@ -152,6 +152,10 @@ class ResidentWebRunner extends ResidentRunner {
 
   bool get _enableDwds => debuggingEnabled;
 
+  // TODO(srujzs): We should support this. Currently, it quits the app.
+  @override
+  bool get supportsDetach => false;
+
   ConnectionResult? _connectionResult;
   StreamSubscription<vmservice.Event>? _stdOutSub;
   StreamSubscription<vmservice.Event>? _stdErrSub;
@@ -212,35 +216,17 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
-  void printHelp({bool details = true}) {
-    // Prefer to keep this aligned with resident_runner.dart as much as possible.
-    _logger.printStatus('Flutter run key commands.');
-    if (debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc &&
-        (debuggingOptions.buildInfo.canaryFeatures ?? false)) {
-      // Hot reload is only supported with these flags enabled.
-      commandHelp.r.print();
-    }
-    if (supportsRestart) {
-      commandHelp.R.print();
-    }
-    if (details) {
-      // TODO(srujzs): Some of these maybe don't make sense for the web e.g.
-      // toggling the platform. Printing this is existing behavior, but we
-      // should pare down this list as needed.
-      printHelpDetails();
-      commandHelp.hWithDetails.print();
-    } else {
-      commandHelp.hWithoutDetails.print();
-    }
-    // TODO(srujzs): Detach just quits the app. For now, don't tell users about
-    // a faulty feature.
-    // if (stopAppDuringCleanup) {
-    //   commandHelp.d.print();
-    // }
-    commandHelp.c.print();
-    commandHelp.q.print();
-    _logger.printStatus('');
-    printDebuggerList();
+  void printHelp({required bool details, bool reloadIsRestart = false}) {
+    super.printHelp(
+      details: details,
+      // Web behavior when not using the DDC library bundle format is to restart
+      // when a reload is issued. We can't set `canHotReload` to the negation of
+      // this since we still want a reload command to succeed, but to do a hot
+      // restart.
+      reloadIsRestart:
+          debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
+          debuggingOptions.buildInfo.canaryFeatures != true,
+    );
   }
 
   @override
