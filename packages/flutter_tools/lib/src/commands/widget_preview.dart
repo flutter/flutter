@@ -145,6 +145,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   static const String kHeadlessWeb = 'headless-web';
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    // Ensure the Flutter Web SDK is installed.
+    DevelopmentArtifact.web,
+  };
+
+  @override
   String get description => 'Starts the widget preview environment.';
 
   @override

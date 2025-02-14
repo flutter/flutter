@@ -85,6 +85,16 @@ void main() {
       printOnFailure('STDERR: $msg');
     });
 
+    unawaited(
+      process!.exitCode.then((int exitCode) {
+        if (completer.isCompleted) {
+          return;
+        }
+        completer.completeError(
+          TestFailure('The widget previewer exited unexpectedly (exit code: $exitCode)'),
+        );
+      }),
+    );
     await completer.future;
     process!.kill();
     process = null;
