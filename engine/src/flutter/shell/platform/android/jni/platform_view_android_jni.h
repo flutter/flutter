@@ -239,6 +239,10 @@ class PlatformViewAndroidJNI {
                                       int32_t viewHeight,
                                       MutatorsStack mutators_stack) = 0;
 
+  virtual void showOverlaySurface2() = 0;
+
+  virtual void hideOverlaySurface2() = 0;
+
   //----------------------------------------------------------------------------
   /// @brief      Computes the locale Android would select.
   ///

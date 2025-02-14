@@ -253,7 +253,6 @@ class HotRunner extends ResidentRunner {
         reloadSources: _reloadSourcesService,
         restart: _restartService,
         compileExpression: _compileExpressionService,
-        getSkSLMethod: writeSkSL,
         allowExistingDdsInstance: allowExistingDdsInstance,
       );
       // Catches all exceptions, non-Exception objects are rethrown.
@@ -1175,13 +1174,6 @@ class HotRunner extends ResidentRunner {
     }
     commandHelp.c.print();
     commandHelp.q.print();
-    if (debuggingOptions.buildInfo.nullSafetyMode != NullSafetyMode.sound) {
-      globals.printStatus('');
-      globals.printStatus('Running without sound null safety ⚠️', emphasis: true);
-      globals.printStatus(
-        'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
-      );
-    }
     globals.printStatus('');
     printDebuggerList();
   }

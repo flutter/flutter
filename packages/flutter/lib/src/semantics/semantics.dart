@@ -104,12 +104,20 @@ final int _kUnblockedUserActions =
 /// A static class to conduct semantics role checks.
 sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _checkSemanticsData(SemanticsNode node) => switch (node.role) {
+    SemanticsRole.alertDialog => _noCheckRequired,
+    SemanticsRole.dialog => _noCheckRequired,
     SemanticsRole.none => _noCheckRequired,
     SemanticsRole.tab => _semanticsTab,
     SemanticsRole.tabBar => _semanticsTabBar,
     SemanticsRole.tabPanel => _noCheckRequired,
+    SemanticsRole.table => _noCheckRequired,
+    SemanticsRole.cell => _semanticsCell,
+    SemanticsRole.row => _unimplementedError,
+    SemanticsRole.columnHeader => _semanticsColumnHeader,
   }(node);
 
+  static FlutterError? _unimplementedError(SemanticsNode node) =>
+      FlutterError('This semantics role is not implemented');
   static FlutterError? _noCheckRequired(SemanticsNode node) => null;
 
   static FlutterError? _semanticsTab(SemanticsNode node) {
@@ -137,6 +145,20 @@ sealed class _DebugSemanticsRoleChecks {
       return error == null;
     });
     return error;
+  }
+
+  static FlutterError? _semanticsCell(SemanticsNode node) {
+    if (node.parent?.role != SemanticsRole.table) {
+      return FlutterError('A cell must be a child of a table');
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsColumnHeader(SemanticsNode node) {
+    if (node.parent?.role != SemanticsRole.table) {
+      return FlutterError('A columnHeader must be a child of a table');
+    }
+    return null;
   }
 }
 
