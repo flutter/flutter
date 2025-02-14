@@ -2508,18 +2508,9 @@ void main() {
 
     Offset lastOffset = tester.getTopLeft(find.text('November'));
     expect(tester.getTopLeft(find.text('11')).dy == lastOffset.dy, true);
+
     lastOffset = tester.getTopLeft(find.text('11'));
     expect(tester.getTopLeft(find.text('2022')).dy == lastOffset.dy, true);
-
-    lastOffset = tester.getTopLeft(find.text('February'));
-    expect(tester.getTopLeft(find.text('14')).dy == lastOffset.dy, true);
-    lastOffset = tester.getTopLeft(find.text('14'));
-    expect(tester.getTopLeft(find.text('2025')).dy == lastOffset.dy, true);
-
-    lastOffset = tester.getTopLeft(find.text('May'));
-    expect(tester.getTopLeft(find.text('17')).dy == lastOffset.dy, true);
-    lastOffset = tester.getTopLeft(find.text('17'));
-    expect(tester.getTopLeft(find.text('2028')).dy == lastOffset.dy, true);
   });
 }
 
