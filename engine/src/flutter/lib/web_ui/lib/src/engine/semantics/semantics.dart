@@ -1290,7 +1290,13 @@ class SemanticsObject {
   /// is not created. This is necessary for "aria-label" to function correctly.
   /// The browser will ignore the [label] of HTML element that contain child
   /// elements.
+  ///
+  /// This element is omitted for table and row roles, which require a strict
+  /// table->row->cell hierarchy. Intermediate containers would disrupt their traversal.
   DomElement? getOrCreateChildContainer() {
+    if (role == ui.SemanticsRole.table || role == ui.SemanticsRole.row) {
+      return null;
+    }
     if (_childContainerElement == null) {
       _childContainerElement = createDomElement('flt-semantics-container');
       _childContainerElement!.style
@@ -1606,7 +1612,7 @@ class SemanticsObject {
       for (int i = 0; i < len; i++) {
         owner._detachObject(_currentChildrenInRenderOrder![i].id);
       }
-      _childContainerElement!.remove();
+      _childContainerElement?.remove();
       _childContainerElement = null;
       _currentChildrenInRenderOrder = null;
       return;
@@ -1648,7 +1654,7 @@ class SemanticsObject {
     // Trivial case: previous list was empty => just populate the container.
     if (_currentChildrenInRenderOrder == null || _currentChildrenInRenderOrder!.isEmpty) {
       for (final SemanticsObject child in childrenInRenderOrder) {
-        containerElement!.append(child.element);
+        (containerElement ?? element).append(child.element);
         owner._attachObject(parent: this, child: child);
       }
       _currentChildrenInRenderOrder = childrenInRenderOrder;
@@ -1732,9 +1738,9 @@ class SemanticsObject {
       final SemanticsObject child = childrenInRenderOrder[i];
       if (!stationaryIds.contains(child.id)) {
         if (refNode == null) {
-          containerElement!.append(child.element);
+          (containerElement ?? element).append(child.element);
         } else {
-          containerElement!.insertBefore(child.element, refNode);
+          (containerElement ?? element).insertBefore(child.element, refNode);
         }
         owner._attachObject(parent: this, child: child);
       } else {
