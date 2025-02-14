@@ -9,6 +9,33 @@ import 'ticker_provider.dart';
 import 'transitions.dart';
 
 ///
+class ExpansibleController<S extends StatefulWidget> {
+  ExpansibleStateMixin<S>? _state;
+
+  ///
+  bool get isExpanded {
+    assert(_state != null);
+    return _state!.isExpanded;
+  }
+
+  ///
+  void expand() {
+    assert(_state != null);
+    if (!isExpanded) {
+      _state!.toggleExpansion();
+    }
+  }
+
+  ///
+  void collapse() {
+    assert(_state != null);
+    if (isExpanded) {
+      _state!.toggleExpansion();
+    }
+  }
+}
+
+///
 mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
   ///
   bool get isExpanded => _isExpanded;
@@ -40,6 +67,9 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   bool get maintainState;
 
+  ///
+  ExpansibleController<S> get controller;
+
   @override
   void initState() {
     super.initState();
@@ -53,10 +83,14 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       parent: animationController.drive(heightFactorTween),
       curve: expansionCurve,
     );
+
+    assert(controller._state == null);
+    controller._state = this;
   }
 
   @override
   void dispose() {
+    controller._state = null;
     _animationController.dispose();
     _heightFactor.dispose();
     super.dispose();

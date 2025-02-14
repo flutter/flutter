@@ -35,78 +35,9 @@ import 'theme_data.dart';
 /// The controller's [expand] and [collapse] methods cause the
 /// the [ExpansionTile] to rebuild, so they may not be called from
 /// a build method.
-class ExpansionTileController {
+class ExpansionTileController extends ExpansibleController<ExpansionTile> {
   /// Create a controller to be used with [ExpansionTile.controller].
   ExpansionTileController();
-
-  _ExpansionTileState? _state;
-
-  /// Whether the [ExpansionTile] built with this controller is in expanded state.
-  ///
-  /// This property doesn't take the animation into account. It reports `true`
-  /// even if the expansion animation is not completed.
-  ///
-  /// See also:
-  ///
-  ///  * [expand], which expands the [ExpansionTile].
-  ///  * [collapse], which collapses the [ExpansionTile].
-  ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
-  bool get isExpanded {
-    assert(_state != null);
-    return _state!.isExpanded;
-  }
-
-  /// Expands the [ExpansionTile] that was built with this controller;
-  ///
-  /// Normally the tile is expanded automatically when the user taps on the header.
-  /// It is sometimes useful to trigger the expansion programmatically due
-  /// to external changes.
-  ///
-  /// If the tile is already in the expanded state (see [isExpanded]), calling
-  /// this method has no effect.
-  ///
-  /// Calling this method may cause the [ExpansionTile] to rebuild, so it may
-  /// not be called from a build method.
-  ///
-  /// Calling this method will trigger an [ExpansionTile.onExpansionChanged] callback.
-  ///
-  /// See also:
-  ///
-  ///  * [collapse], which collapses the tile.
-  ///  * [isExpanded] to check whether the tile is expanded.
-  ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
-  void expand() {
-    assert(_state != null);
-    if (!isExpanded) {
-      _state!.toggleExpansion();
-    }
-  }
-
-  /// Collapses the [ExpansionTile] that was built with this controller.
-  ///
-  /// Normally the tile is collapsed automatically when the user taps on the header.
-  /// It can be useful sometimes to trigger the collapse programmatically due
-  /// to some external changes.
-  ///
-  /// If the tile is already in the collapsed state (see [isExpanded]), calling
-  /// this method has no effect.
-  ///
-  /// Calling this method may cause the [ExpansionTile] to rebuild, so it may
-  /// not be called from a build method.
-  ///
-  /// Calling this method will trigger an [ExpansionTile.onExpansionChanged] callback.
-  ///
-  /// See also:
-  ///
-  ///  * [expand], which expands the tile.
-  ///  * [isExpanded] to check whether the tile is expanded.
-  ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
-  void collapse() {
-    assert(_state != null);
-    if (isExpanded) {
-      _state!.toggleExpansion();
-    }
-  }
 
   /// Finds the [ExpansionTileController] for the closest [ExpansionTile] instance
   /// that encloses the given context.
@@ -141,7 +72,7 @@ class ExpansionTileController {
   static ExpansionTileController of(BuildContext context) {
     final _ExpansionTileState? result = context.findAncestorStateOfType<_ExpansionTileState>();
     if (result != null) {
-      return result._tileController;
+      return result.controller as ExpansionTileController;
     }
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary(
@@ -183,7 +114,8 @@ class ExpansionTileController {
   ///    encloses the given context. Also includes some sample code in its
   ///    documentation.
   static ExpansionTileController? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<_ExpansionTileState>()?._tileController;
+    return context.findAncestorStateOfType<_ExpansionTileState>()!.controller
+        as ExpansionTileController;
   }
 }
 
@@ -589,7 +521,6 @@ class _ExpansionTileState extends State<ExpansionTile>
   late Animation<Color?> _backgroundColor;
 
   late ExpansionTileThemeData _expansionTileTheme;
-  late ExpansionTileController _tileController;
   Timer? _timer;
 
   @override
@@ -611,6 +542,10 @@ class _ExpansionTileState extends State<ExpansionTile>
   Curve get expansionCurve => Curves.easeIn;
 
   @override
+  ExpansibleController<ExpansionTile> get controller =>
+      widget.controller ?? ExpansionTileController();
+
+  @override
   void initState() {
     super.initState();
     _iconTurns = animationController.drive(_halfTween.chain(_easeInTween));
@@ -618,15 +553,10 @@ class _ExpansionTileState extends State<ExpansionTile>
     _headerColor = animationController.drive(_headerColorTween.chain(_easeInTween));
     _iconColor = animationController.drive(_iconColorTween.chain(_easeInTween));
     _backgroundColor = animationController.drive(_backgroundColorTween.chain(_easeOutTween));
-
-    assert(widget.controller?._state == null);
-    _tileController = widget.controller ?? ExpansionTileController();
-    _tileController._state = this;
   }
 
   @override
   void dispose() {
-    _tileController._state = null;
     _timer?.cancel();
     _timer = null;
     super.dispose();
