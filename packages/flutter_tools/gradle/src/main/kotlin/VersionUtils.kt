@@ -17,6 +17,7 @@ object VersionUtils {
      * another example, "8.7-rc-2" vs "8.7.2" will always consider "8.7.2" to be the most recent
      * version.
      */
+    @JvmStatic
     fun mostRecentSemanticVersion(
         version1: String,
         version2: String
