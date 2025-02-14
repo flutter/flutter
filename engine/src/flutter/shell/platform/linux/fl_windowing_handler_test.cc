@@ -13,14 +13,14 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-static FlValue* make_create_regular_args(int64_t width,
-                                         int64_t height,
+static FlValue* make_create_regular_args(double width,
+                                         double height,
                                          const gchar* title,
                                          const gchar* state) {
   FlValue* args = fl_value_new_map();
   g_autoptr(FlValue) size_value = fl_value_new_list();
-  fl_value_append_take(size_value, fl_value_new_int(width));
-  fl_value_append_take(size_value, fl_value_new_int(height));
+  fl_value_append_take(size_value, fl_value_new_float(width));
+  fl_value_append_take(size_value, fl_value_new_float(height));
   fl_value_set_string(args, "size", size_value);
   if (title != nullptr) {
     fl_value_set_string_take(args, "title", fl_value_new_string(title));
@@ -47,16 +47,16 @@ static int64_t parse_create_regular_response(FlMethodResponse* response) {
 }
 
 static FlValue* make_modify_regular_args(int64_t view_id,
-                                         int64_t width,
-                                         int64_t height,
+                                         double width,
+                                         double height,
                                          const gchar* title,
                                          const gchar* state) {
   FlValue* args = fl_value_new_map();
   fl_value_set_string_take(args, "viewId", fl_value_new_int(view_id));
   if (width >= 0 && height >= 0) {
     g_autoptr(FlValue) size_value = fl_value_new_list();
-    fl_value_append_take(size_value, fl_value_new_int(width));
-    fl_value_append_take(size_value, fl_value_new_int(height));
+    fl_value_append_take(size_value, fl_value_new_float(width));
+    fl_value_append_take(size_value, fl_value_new_float(height));
     fl_value_set_string(args, "size", size_value);
   }
   if (title != nullptr) {

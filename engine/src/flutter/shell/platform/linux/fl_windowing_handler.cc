@@ -68,8 +68,8 @@ static GtkWindow* fl_windowing_handler_create_window(
   return GTK_WINDOW(window);
 }
 
-static FlMethodResponse* create_regular(int64_t width,
-                                        int64_t height,
+static FlMethodResponse* create_regular(double width,
+                                        double height,
                                         const gchar* title,
                                         FlWindowState state,
                                         gpointer user_data) {
@@ -125,8 +125,8 @@ static FlMethodResponse* create_regular(int64_t width,
 }
 
 static FlMethodResponse* modify_regular(int64_t view_id,
-                                        int64_t width,
-                                        int64_t height,
+                                        double width,
+                                        double height,
                                         const gchar* title,
                                         FlWindowState state,
                                         gpointer user_data) {

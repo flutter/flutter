@@ -32,14 +32,14 @@ typedef enum {
  */
 
 typedef struct {
-  FlMethodResponse* (*create_regular)(int64_t width,
-                                      int64_t height,
+  FlMethodResponse* (*create_regular)(double width,
+                                      double height,
                                       const gchar* title,
                                       FlWindowState state,
                                       gpointer user_data);
   FlMethodResponse* (*modify_regular)(int64_t view_id,
-                                      int64_t width,
-                                      int64_t height,
+                                      double width,
+                                      double height,
                                       const gchar* title,
                                       FlWindowState state,
                                       gpointer user_data);

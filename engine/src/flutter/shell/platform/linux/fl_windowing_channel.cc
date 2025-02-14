@@ -38,9 +38,9 @@ static gboolean is_valid_size_argument(FlValue* value) {
   return fl_value_get_type(value) == FL_VALUE_TYPE_LIST &&
          fl_value_get_length(value) == 2 &&
          fl_value_get_type(fl_value_get_list_value(value, 0)) ==
-             FL_VALUE_TYPE_INT &&
+             FL_VALUE_TYPE_FLOAT &&
          fl_value_get_type(fl_value_get_list_value(value, 1)) ==
-             FL_VALUE_TYPE_INT;
+             FL_VALUE_TYPE_FLOAT;
 }
 
 static gboolean parse_state_value(FlValue* value, FlWindowState* state) {
@@ -76,8 +76,8 @@ static FlMethodResponse* create_regular(FlWindowingChannel* self,
     return FL_METHOD_RESPONSE(fl_method_error_response_new(
         kBadArgumentsError, "Missing/invalid size argument", nullptr));
   }
-  int64_t width = fl_value_get_int(fl_value_get_list_value(size_value, 0));
-  int64_t height = fl_value_get_int(fl_value_get_list_value(size_value, 1));
+  double width = fl_value_get_float(fl_value_get_list_value(size_value, 0));
+  double height = fl_value_get_float(fl_value_get_list_value(size_value, 1));
 
   FlValue* title_value = fl_value_lookup_string(args, kTitleKey);
   const gchar* title = nullptr;
@@ -117,16 +117,16 @@ static FlMethodResponse* modify_regular(FlWindowingChannel* self,
   }
   int64_t view_id = fl_value_get_int(view_id_value);
 
-  int64_t width = -1;
-  int64_t height = -1;
+  double width = -1;
+  double height = -1;
   FlValue* size_value = fl_value_lookup_string(args, kSizeKey);
   if (size_value != nullptr) {
     if (!is_valid_size_argument(size_value)) {
       return FL_METHOD_RESPONSE(fl_method_error_response_new(
           kBadArgumentsError, "Invalid size argument", nullptr));
     }
-    width = fl_value_get_int(fl_value_get_list_value(size_value, 0));
-    height = fl_value_get_int(fl_value_get_list_value(size_value, 1));
+    width = fl_value_get_float(fl_value_get_list_value(size_value, 0));
+    height = fl_value_get_float(fl_value_get_list_value(size_value, 1));
   }
   FlValue* title_value = fl_value_lookup_string(args, kTitleKey);
   const gchar* title = nullptr;
