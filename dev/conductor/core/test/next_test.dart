@@ -309,11 +309,7 @@ void main() {
             FakeCommand(command: <String>['git', 'fetch', 'upstream']),
             FakeCommand(command: <String>['git', 'checkout', 'cherrypicks-$candidateBranch']),
             FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision1),
-            FakeCommand(
-              command: <String>['git', 'status', '--porcelain'],
-              stdout: 'MM bin/internal/engine.version',
-            ),
-            FakeCommand(command: <String>['git', 'add', '--all']),
+            FakeCommand(command: <String>['git', 'add', 'bin/internal/engine.version', '--force']),
             FakeCommand(
               command: <String>[
                 'git',

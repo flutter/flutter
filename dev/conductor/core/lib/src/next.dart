@@ -166,9 +166,15 @@ class NextContext extends Context {
             .childFile('engine.version');
 
         engineVersionFile.writeAsStringSync(rev);
+
+        // Must force add since it is gitignored
+        await framework.git.run(
+          const <String>['add', 'bin/internal/engine.version', '--force'],
+          'adding engine.version file',
+          workingDirectory: (await framework.checkoutDirectory).path,
+        );
         final String revision = await framework.commit(
           'Create engine.version file pointing to $rev',
-          addFirst: true,
         );
         // append to list of cherrypicks so we know a PR is required
         state.framework.cherrypicks.add(
