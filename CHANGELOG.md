@@ -30,6 +30,8 @@ INTERNAL NOTE
 ### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
 Initial stable release.
 
+- [flutter/163236](https://github.com/flutter/flutter/pull/163236) Disable Vulkan on older Exynos SoC to work around Android HardwareBuffer import error.
+
 ## Flutter 3.27 Changes
 
 ### [3.27.2](https://github.com/flutter/flutter/releases/tag/3.27.2)
