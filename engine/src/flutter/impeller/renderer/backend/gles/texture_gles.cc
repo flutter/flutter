@@ -7,6 +7,7 @@
 #include <optional>
 #include <utility>
 
+#include "GLES3/gl3.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/trace_event.h"
@@ -588,7 +589,13 @@ bool TextureGLES::SetAsFramebufferAttachment(
   }
   const auto& gl = reactor_->GetProcTable();
 
-  switch (type_) {
+  Type type = type_;
+  // When binding to a GL_READ_FRAMEBUFFER, any multisampled
+  // textures must be bound as single sampled.
+  if (target == GL_READ_FRAMEBUFFER && type == Type::kTextureMultisampled) {
+    type = Type::kTexture;
+  }
+  switch (type) {
     case Type::kTexture:
       gl.FramebufferTexture2D(target,                             // target
                               ToAttachmentType(attachment_type),  // attachment
