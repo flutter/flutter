@@ -444,16 +444,12 @@ enum SemanticsRole {
   /// explanation.
   tooltip,
 
-  /// A control that controls the scrolling of content within a viewing
-  /// area.
-  scrollBar,
-
   /// A graphic object that spins to indicate the application is busy.
   ///
   /// For example, a [CircularProgressIndicator].
   loadingSpinner,
 
-  /// A graphic object that shows progress along a line.
+  /// A graphic object that shows progress with a numeric number.
   ///
   /// For example, a [LinearProgressIndicator].
   progressBar,

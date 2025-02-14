@@ -278,7 +278,6 @@ enum SemanticsRole {
   listItem,
   form,
   tooltip,
-  scrollBar,
   loadingSpinner,
   progressBar,
   hotKey,

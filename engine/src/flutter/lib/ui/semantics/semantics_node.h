@@ -85,10 +85,9 @@ enum class SemanticsRole : int32_t {
   kListItem = 18,
   kForm = 19,
   kTooltip = 20,
-  kScrollBar = 21,
-  kLoadingSpinner = 22,
-  kProgressBar = 23,
-  kHotKey = 24,
+  kLoadingSpinner = 21,
+  kProgressBar = 22,
+  kHotKey = 23,
 };
 
 /// C/C++ representation of `SemanticsFlags` defined in

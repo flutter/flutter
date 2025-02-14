@@ -127,7 +127,6 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.listItem => _unimplemented,
     SemanticsRole.form => _unimplemented,
     SemanticsRole.tooltip => _unimplemented,
-    SemanticsRole.scrollBar => _unimplemented,
     SemanticsRole.loadingSpinner => _unimplemented,
     SemanticsRole.progressBar => _unimplemented,
     SemanticsRole.hotKey => _unimplemented,

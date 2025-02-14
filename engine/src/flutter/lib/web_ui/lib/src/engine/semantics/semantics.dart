@@ -1789,7 +1789,6 @@ class SemanticsObject {
       case ui.SemanticsRole.listItem:
       case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
-      case ui.SemanticsRole.scrollBar:
       case ui.SemanticsRole.loadingSpinner:
       case ui.SemanticsRole.progressBar:
       case ui.SemanticsRole.hotKey:
