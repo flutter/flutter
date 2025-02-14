@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/fml/logging.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 
 namespace flutter {
 
@@ -102,8 +103,8 @@ void DisplayListMatrixClipState::clipRSuperellipse(
     DlClipOp op,
     bool is_aa) {
   DlRect bounds = rse.GetBounds();
-  if (rse.IsRect()) {
-    return clipRect(bounds, op, is_aa);
+  if (rse.IsOval()) {
+    return clipOval(bounds, op, is_aa);
   }
   switch (op) {
     case DlClipOp::kIntersect:
@@ -348,7 +349,16 @@ bool DisplayListMatrixClipState::rsuperellipse_covers_cull(
   if (!getLocalCullCorners(corners)) {
     return false;
   }
-  // TODO(dkwingsmt): Implement Contains
+  auto outer = content.GetBounds();
+  auto param = RoundSuperellipseParam::MakeBoundsRadii(outer, content.GetRadii());
+  for (auto corner : corners) {
+    if (!outer.Contains(corner)) {
+      return false;
+    }
+    if (!param.Contains(corner)) {
+      return false;
+    }
+  }
   return true;
 }
 
