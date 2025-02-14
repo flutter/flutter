@@ -2487,6 +2487,40 @@ void main() {
     expect(testWidth, equals(largestWidth));
     expect(widths.indexOf(largestWidth), equals(1));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+
+  // Regression test for https://github.com/flutter/flutter/issues/161773
+  testWidgets('CupertinoDatePicker date value baseline alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: 400,
+            height: 400,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              onDateTimeChanged: (_) {},
+              initialDateTime: DateTime(2025, 2, 14),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    void checkBaseline({required String month, required String day, required String year}) {
+      Offset lastOffset = tester.getTopLeft(find.text(month));
+      expect(tester.getTopLeft(find.text(day)).dy == lastOffset.dy, true);
+      lastOffset = tester.getTopLeft(find.text(day));
+      expect(tester.getTopLeft(find.text(year)).dy == lastOffset.dy, true);
+    }
+
+    checkBaseline(month: 'November', day: '11', year: '2022');
+    checkBaseline(month: 'December', day: '12', year: '2023');
+    checkBaseline(month: 'January', day: '13', year: '2024');
+    checkBaseline(month: 'February', day: '14', year: '2025');
+    checkBaseline(month: 'March', day: '15', year: '2026');
+    checkBaseline(month: 'April', day: '16', year: '2027');
+    checkBaseline(month: 'May', day: '17', year: '2028');
+  });
 }
 
 Widget _buildPicker({
