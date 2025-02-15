@@ -9,7 +9,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter, lerpDouble;
+import 'dart:ui' show ImageFilter, SemanticsRole, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -463,6 +463,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                           child: CupertinoPopupSurface(
                             isSurfacePainted: false,
                             child: Semantics(
+                              role: SemanticsRole.alertDialog,
                               namesRoute: true,
                               scopesRoute: true,
                               explicitChildNodes: true,
@@ -683,7 +684,7 @@ class CupertinoPopupSurface extends StatelessWidget {
       isVibrancePainted = debugIsVibrancePainted;
       return true;
     }());
-    if ((kIsWeb && !isSkiaWeb) || !isVibrancePainted) {
+    if (!isVibrancePainted) {
       if (blurSigma == 0) {
         return null;
       }
@@ -1332,6 +1333,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           namesRoute: true,
           scopesRoute: true,
           explicitChildNodes: true,
+          role: SemanticsRole.dialog,
           label: 'Alert',
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
