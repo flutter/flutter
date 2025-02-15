@@ -59,6 +59,9 @@ class HighContrastSupport {
 class SystemColorPaletteDetector {
   SystemColorPaletteDetector() {
     final hostDetector = createDomHTMLDivElement();
+    hostDetector.style
+      ..position = 'absolute'
+      ..transform = 'translate(-10000, -10000)';
     domDocument.body!.appendChild(hostDetector);
 
     final colorDetectors = <String, DomHTMLElement>{};
