@@ -28,7 +28,8 @@ INTERNAL NOTE
 ## Flutter 3.29 Changes
 
 ### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
-Initial stable release.
+
+- [flutter/162969](https://github.com/flutter/flutter/issues/162969) DrawVertices may crash when using shaders built with certain parameters.
 
 ## Flutter 3.27 Changes
 
