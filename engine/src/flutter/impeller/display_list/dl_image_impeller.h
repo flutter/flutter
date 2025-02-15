@@ -7,6 +7,7 @@
 
 #include "flutter/display_list/image/dl_image.h"
 #include "impeller/core/texture.h"
+#include "include/core/SkBitmap.h"
 
 namespace impeller {
 
@@ -16,6 +17,16 @@ class DlImageImpeller final : public flutter::DlImage {
  public:
   static sk_sp<DlImageImpeller> Make(
       std::shared_ptr<Texture> texture,
+      OwningContext owning_context = OwningContext::kIO
+#if FML_OS_IOS_SIMULATOR
+      ,
+      bool is_fake_image = false
+#endif  // FML_OS_IOS_SIMULATOR
+  );
+
+  static sk_sp<DlImageImpeller> MakeDeferred(
+      std::shared_ptr<Texture> texture,
+      SkBitmap bytes,
       OwningContext owning_context = OwningContext::kIO
 #if FML_OS_IOS_SIMULATOR
       ,
@@ -48,6 +59,9 @@ class DlImageImpeller final : public flutter::DlImage {
   bool isUIThreadSafe() const override;
 
   // |DlImage|
+  bool isDeferredUpload() const override;
+
+  // |DlImage|
   SkISize dimensions() const override;
 
   // |DlImage|
@@ -56,6 +70,13 @@ class DlImageImpeller final : public flutter::DlImage {
   // |DlImage|
   OwningContext owning_context() const override { return owning_context_; }
 
+  // |DlImage|
+  const uint8_t* GetDeferredData() const override {
+    return reinterpret_cast<const uint8_t*>(lazy_data_.getAddr(0, 0));
+  }
+
+  void SetUploaded() const override { is_deferred_ = false; }
+
 #if FML_OS_IOS_SIMULATOR
   // |DlImage|
   bool IsFakeImage() const override { return is_fake_image_; }
@@ -63,12 +84,16 @@ class DlImageImpeller final : public flutter::DlImage {
 
  private:
   std::shared_ptr<Texture> texture_;
+  SkBitmap lazy_data_;
   OwningContext owning_context_;
+  mutable bool is_deferred_;
 #if FML_OS_IOS_SIMULATOR
   bool is_fake_image_ = false;
 #endif  // FML_OS_IOS_SIMULATOR
 
   explicit DlImageImpeller(std::shared_ptr<Texture> texture,
+                           SkBitmap lazy_data,
+                           bool is_deferred,
                            OwningContext owning_context = OwningContext::kIO
 #if FML_OS_IOS_SIMULATOR
                            ,

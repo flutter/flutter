@@ -126,6 +126,16 @@ class DlImage : public SkRefCnt {
   ///             image.
   virtual std::optional<std::string> get_error() const;
 
+  //----------------------------------------------------------------------------
+  /// @return     Whether the backing texture still needs to be populated from
+  ///             the uploaded image data.
+  virtual bool isDeferredUpload() const { return false; }
+
+  /// Retrieve the deferred upload data.
+  virtual const uint8_t* GetDeferredData() const { return nullptr; }
+
+  virtual void SetUploaded() const {}
+
 #if FML_OS_IOS_SIMULATOR
   virtual bool IsFakeImage() const { return false; }
 #endif  // FML_OS_IOS_SIMULATOR

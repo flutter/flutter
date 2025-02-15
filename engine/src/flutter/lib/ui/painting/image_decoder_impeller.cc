@@ -403,9 +403,8 @@ void ImageDecoderImpeller::UploadTextureToPrivate(
     const std::shared_ptr<impeller::Context>& context,
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
     const SkImageInfo& image_info,
-    const std::shared_ptr<SkBitmap>& bitmap,
     const std::optional<SkImageInfo>& resize_info,
-    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch) {
+    const std::shared_ptr<const fml::SyncSwitch>& gpu_disabled_switch) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!context) {
     result(nullptr, "No Impeller context is available");
@@ -442,61 +441,6 @@ void ImageDecoderImpeller::UploadTextureToPrivate(
                       "Image upload failed due to loss of GPU access.");
                 });
           }));
-}
-
-std::pair<sk_sp<DlImage>, std::string>
-ImageDecoderImpeller::UploadTextureToStorage(
-    const std::shared_ptr<impeller::Context>& context,
-    std::shared_ptr<SkBitmap> bitmap) {
-  TRACE_EVENT0("impeller", __FUNCTION__);
-  if (!context) {
-    return std::make_pair(nullptr, "No Impeller context is available");
-  }
-  if (!bitmap) {
-    return std::make_pair(nullptr, "No texture bitmap is available");
-  }
-  const auto image_info = bitmap->info();
-  const auto pixel_format =
-      impeller::skia_conversions::ToPixelFormat(image_info.colorType());
-  if (!pixel_format) {
-    std::string decode_error(impeller::SPrintF(
-        "Unsupported pixel format (SkColorType=%d)", image_info.colorType()));
-    FML_DLOG(ERROR) << decode_error;
-    return std::make_pair(nullptr, decode_error);
-  }
-
-  impeller::TextureDescriptor texture_descriptor;
-  texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
-  texture_descriptor.format = pixel_format.value();
-  texture_descriptor.size = {image_info.width(), image_info.height()};
-  texture_descriptor.mip_count = 1;
-
-  auto texture =
-      context->GetResourceAllocator()->CreateTexture(texture_descriptor);
-  if (!texture) {
-    std::string decode_error("Could not create Impeller texture.");
-    FML_DLOG(ERROR) << decode_error;
-    return std::make_pair(nullptr, decode_error);
-  }
-
-  auto mapping = std::make_shared<fml::NonOwnedMapping>(
-      reinterpret_cast<const uint8_t*>(bitmap->getAddr(0, 0)),  // data
-      texture_descriptor.GetByteSizeOfBaseMipLevel(),           // size
-      [bitmap](auto, auto) mutable { bitmap.reset(); }          // proc
-  );
-
-  if (!texture->SetContents(mapping)) {
-    std::string decode_error("Could not copy contents into Impeller texture.");
-    FML_DLOG(ERROR) << decode_error;
-    return std::make_pair(nullptr, decode_error);
-  }
-
-  texture->SetLabel(impeller::SPrintF("ui.Image(%p)", texture.get()).c_str());
-
-  context->DisposeThreadLocalCachedResources();
-
-  return std::make_pair(impeller::DlImageImpeller::Make(std::move(texture)),
-                        std::string());
 }
 
 // |ImageDecoder|
@@ -544,8 +488,10 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
 
         // Always decompress on the concurrent runner.
         auto bitmap_result = DecompressTexture(
-            raw_descriptor, target_size, max_size_supported,
-            /*supports_wide_gamut=*/supports_wide_gamut,
+            raw_descriptor,                               //
+            target_size,                                  //
+            max_size_supported,                           //
+            /*supports_wide_gamut=*/supports_wide_gamut,  //
             context->GetCapabilities(), context->GetResourceAllocator());
         if (!bitmap_result.device_buffer) {
           result(nullptr, bitmap_result.decode_error);
@@ -557,7 +503,6 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
           UploadTextureToPrivate(result, context,              //
                                  bitmap_result.device_buffer,  //
                                  bitmap_result.image_info,     //
-                                 bitmap_result.sk_bitmap,      //
                                  bitmap_result.resize_info,    //
                                  gpu_disabled_switch           //
           );

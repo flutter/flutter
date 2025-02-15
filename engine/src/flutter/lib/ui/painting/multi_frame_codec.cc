@@ -6,10 +6,22 @@
 
 #include <utility>
 
+#include "display_list/image/dl_image.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/painting/display_list_image_gpu.h"
 #include "flutter/lib/ui/painting/image.h"
+#include "fml/mapping.h"
+#include "impeller/core/texture_descriptor.h"
+#include "impeller/display_list/skia_conversions.h"
+#include "include/core/SkImageInfo.h"
+#include "lib/ui/painting/image_encoding_impeller.h"
 #if IMPELLER_SUPPORTS_RENDERING
+#include "flutter/impeller/core/device_buffer.h"
+#include "flutter/impeller/core/device_buffer_descriptor.h"
+#include "flutter/impeller/core/formats.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
+#include "flutter/impeller/renderer/command_buffer.h"
+#include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 #endif  // IMPELLER_SUPPORTS_RENDERING
 #include "third_party/dart/runtime/include/dart_api.h"
@@ -144,10 +156,57 @@ MultiFrameCodec::State::GetNextFrameImage(
 
 #if IMPELLER_SUPPORTS_RENDERING
   if (is_impeller_enabled_) {
-    // This is safe regardless of whether the GPU is available or not because
-    // without mipmap creation there is no command buffer encoding done.
-    return ImageDecoderImpeller::UploadTextureToStorage(
-        impeller_context, std::make_shared<SkBitmap>(bitmap));
+    sk_sp<DlImage> image;
+    std::string error;
+
+    gpu_disable_sync_switch->Execute(
+        fml::SyncSwitch::Handlers()
+            .SetIfFalse([&] {
+              std::shared_ptr<impeller::DeviceBuffer> device_buffer =
+                  impeller_context->GetResourceAllocator()
+                      ->CreateBufferWithCopy(fml::NonOwnedMapping(
+                          reinterpret_cast<uint8_t*>(bitmap.getAddr(0, 0)),
+                          bitmap.computeByteSize()));
+              if (device_buffer == nullptr) {
+                error = "Failed to allocate device buffer for upload.";
+              }
+              ImageDecoderImpeller::UploadTextureToPrivate(
+                  [&image, &error](sk_sp<DlImage> image_result,
+                                   std::string error_result) {
+                    image = std::move(image_result);
+                    error = std::move(error_result);
+                  },
+                  impeller_context,        //
+                  device_buffer,           //
+                  info,                    //
+                  std::nullopt,            //
+                  gpu_disable_sync_switch  //
+              );
+            })
+            .SetIfTrue([&] {
+              const auto pixel_format =
+                  impeller::skia_conversions::ToPixelFormat(info.colorType());
+              FML_LOG(ERROR) << "Background decode";
+              if (!pixel_format.has_value()) {
+                error = "Invalid pixel format";
+                return;
+              }
+
+              impeller::TextureDescriptor texture_descriptor;
+              texture_descriptor.storage_mode =
+                  impeller::StorageMode::kDevicePrivate;
+              texture_descriptor.format = pixel_format.value();
+              texture_descriptor.size = {info.width(), info.height()};
+              texture_descriptor.mip_count = texture_descriptor.size.MipCount();
+              texture_descriptor.compression_type =
+                  impeller::CompressionType::kLossy;
+              std::shared_ptr<impeller::Texture> texture =
+                  impeller_context->GetResourceAllocator()->CreateTexture(
+                      texture_descriptor);
+
+              image = impeller::DlImageImpeller::MakeDeferred(texture, bitmap);
+            }));
+    return std::make_pair(image, error);
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 

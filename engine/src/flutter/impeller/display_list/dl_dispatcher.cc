@@ -13,6 +13,8 @@
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "flutter/fml/logging.h"
+#include "fml/mapping.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
@@ -1237,6 +1239,51 @@ void FirstPassDispatcher::setImageFilter(const flutter::DlImageFilter* filter) {
     has_image_filter_ = false;
   } else {
     has_image_filter_ = true;
+  }
+}
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::drawImage(const sk_sp<flutter::DlImage> image,
+                                    const DlPoint& point,
+                                    flutter::DlImageSampling sampling,
+                                    bool render_with_attributes) {
+  if (image->isDeferredUpload()) {
+    deferred_images_.push_back(image);
+  }
+}
+
+void FirstPassDispatcher::UploadDeferredImages(Context& context) {
+  if (deferred_images_.empty()) {
+    return;
+  }
+  std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
+  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+  for (auto& image : deferred_images_) {
+    // TODO(jonahwilliams): release the data here.
+    auto device_buffer = context.GetResourceAllocator()->CreateBufferWithCopy(
+        fml::NonOwnedMapping(image->GetDeferredData(),
+                             image->GetApproximateByteSize()));
+    blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer),
+                       image->impeller_texture());
+    image->SetUploaded();
+  }
+  blit_pass->EncodeCommands();
+  deferred_images_.clear();
+  if (!context.EnqueueCommandBuffer(std::move(cmd_buffer))) {
+    VALIDATION_LOG << "Failed to upload deferred GPU image.";
+  }
+}
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::drawImageRect(
+    const sk_sp<flutter::DlImage> image,
+    const DlRect& src,
+    const DlRect& dst,
+    flutter::DlImageSampling sampling,
+    bool render_with_attributes,
+    flutter::DlSrcRectConstraint constraint) {
+  if (image->isDeferredUpload()) {
+    deferred_images_.push_back(image);
   }
 }
 
