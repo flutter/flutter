@@ -15,8 +15,6 @@ class HighContrastSupport {
   static HighContrastSupport instance = HighContrastSupport();
   static const String _highContrastMediaQueryString = '(forced-colors: active)';
 
-  final systemColorPaletteDetector = SystemColorPaletteDetector();
-
   final List<HighContrastListener> _listeners = <HighContrastListener>[];
 
   /// Reference to css media query that indicates whether high contrast is on.
@@ -52,9 +50,29 @@ class HighContrastSupport {
       listener(isHighContrastEnabled);
     }
   }
-
-  Map<String, ui.SystemColor>? get systemColors => systemColorPaletteDetector.systemColors;
 }
+
+const List<String> systemColorNames = <String>[
+  'AccentColor',
+  'AccentColorText',
+  'ActiveText',
+  'ButtonBorder',
+  'ButtonFace',
+  'ButtonText',
+  'Canvas',
+  'CanvasText',
+  'Field',
+  'FieldText',
+  'GrayText',
+  'Highlight',
+  'HighlightText',
+  'LinkText',
+  'Mark',
+  'MarkText',
+  'SelectedItem',
+  'SelectedItemText',
+  'VisitedText',
+];
 
 class SystemColorPaletteDetector {
   SystemColorPaletteDetector() {
@@ -66,7 +84,7 @@ class SystemColorPaletteDetector {
 
     final colorDetectors = <String, DomHTMLElement>{};
 
-    for (final systemColorName in ui.PlatformDispatcher.systemColorNames) {
+    for (final systemColorName in systemColorNames) {
       final detector = createDomHTMLDivElement();
       detector.style.backgroundColor = systemColorName;
       detector.innerText = '$systemColorName detector';
@@ -90,6 +108,8 @@ class SystemColorPaletteDetector {
     });
     systemColors = results;
   }
+
+  static SystemColorPaletteDetector instance = SystemColorPaletteDetector();
 
   late final Map<String, ui.SystemColor> systemColors;
 }

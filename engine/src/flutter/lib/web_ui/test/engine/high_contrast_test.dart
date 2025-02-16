@@ -71,8 +71,30 @@ void testMain() {
   });
 
   test('ForcedColorPaletteDetector', () {
+    const systemColorNames = <String>[
+      'AccentColor',
+      'AccentColorText',
+      'ActiveText',
+      'ButtonBorder',
+      'ButtonFace',
+      'ButtonText',
+      'Canvas',
+      'CanvasText',
+      'Field',
+      'FieldText',
+      'GrayText',
+      'Highlight',
+      'HighlightText',
+      'LinkText',
+      'Mark',
+      'MarkText',
+      'SelectedItem',
+      'SelectedItemText',
+      'VisitedText',
+    ];
+
     final detector = SystemColorPaletteDetector();
-    expect(detector.systemColors.keys, containsAll(ui.PlatformDispatcher.systemColorNames));
+    expect(detector.systemColors.keys, containsAll(systemColorNames));
 
     expect(
       detector.systemColors.values.where((color) => color.isSupported),
@@ -84,5 +106,66 @@ void testMain() {
       // colors.
       hasLength(greaterThan(15)),
     );
+  });
+
+  test('SystemColor', () {
+    const supportedColor = ui.SystemColor(
+      name: 'SupportedColor',
+      value: ui.Color.fromRGBO(1, 2, 3, 0.5),
+    );
+    expect(supportedColor.name, 'SupportedColor');
+    expect(supportedColor.value, isNotNull);
+    expect(supportedColor.isSupported, isTrue);
+
+    const unsupportedColor = ui.SystemColor(name: 'UnsupportedColor');
+    expect(unsupportedColor.name, 'UnsupportedColor');
+    expect(unsupportedColor.value, isNull);
+    expect(unsupportedColor.isSupported, isFalse);
+
+    expect(ui.SystemColor.accentColor.name, 'AccentColor');
+    expect(ui.SystemColor.accentColorText.name, 'AccentColorText');
+    expect(ui.SystemColor.activeText.name, 'ActiveText');
+    expect(ui.SystemColor.buttonBorder.name, 'ButtonBorder');
+    expect(ui.SystemColor.buttonFace.name, 'ButtonFace');
+    expect(ui.SystemColor.buttonText.name, 'ButtonText');
+    expect(ui.SystemColor.canvas.name, 'Canvas');
+    expect(ui.SystemColor.canvasText.name, 'CanvasText');
+    expect(ui.SystemColor.field.name, 'Field');
+    expect(ui.SystemColor.fieldText.name, 'FieldText');
+    expect(ui.SystemColor.grayText.name, 'GrayText');
+    expect(ui.SystemColor.highlight.name, 'Highlight');
+    expect(ui.SystemColor.highlightText.name, 'HighlightText');
+    expect(ui.SystemColor.linkText.name, 'LinkText');
+    expect(ui.SystemColor.mark.name, 'Mark');
+    expect(ui.SystemColor.markText.name, 'MarkText');
+    expect(ui.SystemColor.selectedItem.name, 'SelectedItem');
+    expect(ui.SystemColor.selectedItemText.name, 'SelectedItemText');
+    expect(ui.SystemColor.visitedText.name, 'VisitedText');
+
+    final allColors = <ui.SystemColor>[
+      ui.SystemColor.accentColor,
+      ui.SystemColor.accentColorText,
+      ui.SystemColor.activeText,
+      ui.SystemColor.buttonBorder,
+      ui.SystemColor.buttonFace,
+      ui.SystemColor.buttonText,
+      ui.SystemColor.canvas,
+      ui.SystemColor.canvasText,
+      ui.SystemColor.field,
+      ui.SystemColor.fieldText,
+      ui.SystemColor.grayText,
+      ui.SystemColor.highlight,
+      ui.SystemColor.highlightText,
+      ui.SystemColor.linkText,
+      ui.SystemColor.mark,
+      ui.SystemColor.markText,
+      ui.SystemColor.selectedItem,
+      ui.SystemColor.selectedItemText,
+      ui.SystemColor.visitedText,
+    ];
+
+    for (final color in allColors) {
+      expect(color.value != null, color.isSupported);
+    }
   });
 }

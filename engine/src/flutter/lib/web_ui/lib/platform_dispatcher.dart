@@ -151,38 +151,38 @@ abstract class PlatformDispatcher {
   set onFrameDataChanged(VoidCallback? callback) {}
 
   double scaleFontSize(double unscaledFontSize);
-
-  Map<String, SystemColor>? get systemColors;
-
-  // IMPORTANT: keep this list in sync with the mobile version of [PlatformDispatcher.systemColorNames]
-  static const List<String> systemColorNames = <String>[
-    'AccentColor',
-    'AccentColorText',
-    'ActiveText',
-    'ButtonBorder',
-    'ButtonFace',
-    'ButtonText',
-    'Canvas',
-    'CanvasText',
-    'Field',
-    'FieldText',
-    'GrayText',
-    'Highlight',
-    'HighlightText',
-    'LinkText',
-    'Mark',
-    'MarkText',
-    'SelectedItem',
-    'SelectedItemText',
-    'VisitedText',
-  ];
 }
 
 final class SystemColor {
-  SystemColor({required this.name, this.value});
+  const SystemColor({required this.name, this.value});
   final String name;
   final Color? value;
   bool get isSupported => value != null;
+  static bool get platformProvidesSystemColors => true;
+
+  static SystemColor _lookUp(String name) {
+    return engine.SystemColorPaletteDetector.instance.systemColors[name]!;
+  }
+
+  static final SystemColor accentColor = _lookUp('AccentColor');
+  static final SystemColor accentColorText = _lookUp('AccentColorText');
+  static final SystemColor activeText = _lookUp('ActiveText');
+  static final SystemColor buttonBorder = _lookUp('ButtonBorder');
+  static final SystemColor buttonFace = _lookUp('ButtonFace');
+  static final SystemColor buttonText = _lookUp('ButtonText');
+  static final SystemColor canvas = _lookUp('Canvas');
+  static final SystemColor canvasText = _lookUp('CanvasText');
+  static final SystemColor field = _lookUp('Field');
+  static final SystemColor fieldText = _lookUp('FieldText');
+  static final SystemColor grayText = _lookUp('GrayText');
+  static final SystemColor highlight = _lookUp('Highlight');
+  static final SystemColor highlightText = _lookUp('HighlightText');
+  static final SystemColor linkText = _lookUp('LinkText');
+  static final SystemColor mark = _lookUp('Mark');
+  static final SystemColor markText = _lookUp('MarkText');
+  static final SystemColor selectedItem = _lookUp('SelectedItem');
+  static final SystemColor selectedItemText = _lookUp('SelectedItemText');
+  static final SystemColor visitedText = _lookUp('VisitedText');
 }
 
 enum FramePhase {
