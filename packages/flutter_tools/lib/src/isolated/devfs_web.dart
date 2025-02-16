@@ -385,6 +385,7 @@ class WebAssetServer implements AssetReader {
                       globals.fs.file(entrypoint).absolute.uri,
                     ),
                   ),
+                  packageConfigPath: buildInfo.packageConfigPath,
                 ).strategy
                 : FrontendServerRequireStrategyProvider(
                   ReloadConfiguration.none,
@@ -396,6 +397,7 @@ class WebAssetServer implements AssetReader {
                       globals.fs.file(entrypoint).absolute.uri,
                     ),
                   ),
+                  packageConfigPath: buildInfo.packageConfigPath,
                 ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,
