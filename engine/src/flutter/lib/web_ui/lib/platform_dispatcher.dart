@@ -164,25 +164,62 @@ final class SystemColor {
     return engine.SystemColorPaletteDetector.instance.systemColors[name]!;
   }
 
-  static final SystemColor accentColor = _lookUp('AccentColor');
-  static final SystemColor accentColorText = _lookUp('AccentColorText');
-  static final SystemColor activeText = _lookUp('ActiveText');
-  static final SystemColor buttonBorder = _lookUp('ButtonBorder');
-  static final SystemColor buttonFace = _lookUp('ButtonFace');
-  static final SystemColor buttonText = _lookUp('ButtonText');
-  static final SystemColor canvas = _lookUp('Canvas');
-  static final SystemColor canvasText = _lookUp('CanvasText');
-  static final SystemColor field = _lookUp('Field');
-  static final SystemColor fieldText = _lookUp('FieldText');
-  static final SystemColor grayText = _lookUp('GrayText');
-  static final SystemColor highlight = _lookUp('Highlight');
-  static final SystemColor highlightText = _lookUp('HighlightText');
-  static final SystemColor linkText = _lookUp('LinkText');
-  static final SystemColor mark = _lookUp('Mark');
-  static final SystemColor markText = _lookUp('MarkText');
-  static final SystemColor selectedItem = _lookUp('SelectedItem');
-  static final SystemColor selectedItemText = _lookUp('SelectedItemText');
-  static final SystemColor visitedText = _lookUp('VisitedText');
+  static SystemColor get accentColor => _accentColor;
+  static final SystemColor _accentColor = _lookUp('AccentColor');
+
+  static SystemColor get accentColorText => _accentColorText;
+  static final SystemColor _accentColorText = _lookUp('AccentColorText');
+
+  static SystemColor get activeText => _activeText;
+  static final SystemColor _activeText = _lookUp('ActiveText');
+
+  static SystemColor get buttonBorder => _buttonBorder;
+  static final SystemColor _buttonBorder = _lookUp('ButtonBorder');
+
+  static SystemColor get buttonFace => _buttonFace;
+  static final SystemColor _buttonFace = _lookUp('ButtonFace');
+
+  static SystemColor get buttonText => _buttonText;
+  static final SystemColor _buttonText = _lookUp('ButtonText');
+
+  static SystemColor get canvas => _canvas;
+  static final SystemColor _canvas = _lookUp('Canvas');
+
+  static SystemColor get canvasText => _canvasText;
+  static final SystemColor _canvasText = _lookUp('CanvasText');
+
+  static SystemColor get field => _field;
+  static final SystemColor _field = _lookUp('Field');
+
+  static SystemColor get fieldText => _fieldText;
+  static final SystemColor _fieldText = _lookUp('FieldText');
+
+  static SystemColor get grayText => _grayText;
+  static final SystemColor _grayText = _lookUp('GrayText');
+
+  static SystemColor get highlight => _highlight;
+  static final SystemColor _highlight = _lookUp('Highlight');
+
+  static SystemColor get highlightText => _highlightText;
+  static final SystemColor _highlightText = _lookUp('HighlightText');
+
+  static SystemColor get linkText => _linkText;
+  static final SystemColor _linkText = _lookUp('LinkText');
+
+  static SystemColor get mark => _mark;
+  static final SystemColor _mark = _lookUp('Mark');
+
+  static SystemColor get markText => _markText;
+  static final SystemColor _markText = _lookUp('MarkText');
+
+  static SystemColor get selectedItem => _selectedItem;
+  static final SystemColor _selectedItem = _lookUp('SelectedItem');
+
+  static SystemColor get selectedItemText => _selectedItemText;
+  static final SystemColor _selectedItemText = _lookUp('SelectedItemText');
+
+  static SystemColor get visitedText => _visitedText;
+  static final SystemColor _visitedText = _lookUp('VisitedText');
 }
 
 enum FramePhase {
