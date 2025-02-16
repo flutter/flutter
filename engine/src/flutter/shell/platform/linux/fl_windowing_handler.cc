@@ -120,8 +120,17 @@ static FlMethodResponse* create_regular(double width,
   g_hash_table_insert(priv->windows_by_view_id,
                       GINT_TO_POINTER(fl_view_get_id(view)), data);
 
+  // We don't know the current size and dimensions, so just reflect back what
+  // was requested.
+  double initial_width = width;
+  double initial_height = height;
+  FlWindowState initial_state = state;
+  if (initial_state == FL_WINDOW_STATE_UNDEFINED) {
+    initial_state = FL_WINDOW_STATE_RESTORED;
+  }
+
   return fl_windowing_channel_make_create_regular_response(
-      fl_view_get_id(view));
+      fl_view_get_id(view), initial_width, initial_height, initial_state);
 }
 
 static FlMethodResponse* modify_regular(int64_t view_id,

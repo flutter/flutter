@@ -43,7 +43,7 @@ static gboolean is_valid_size_argument(FlValue* value) {
              FL_VALUE_TYPE_FLOAT;
 }
 
-static gboolean parse_state_value(FlValue* value, FlWindowState* state) {
+static gboolean parse_window_state_value(FlValue* value, FlWindowState* state) {
   if (fl_value_get_type(value) != FL_VALUE_TYPE_STRING) {
     return FALSE;
   }
@@ -61,6 +61,21 @@ static gboolean parse_state_value(FlValue* value, FlWindowState* state) {
   }
 
   return FALSE;
+}
+
+static const gchar* window_state_to_string(FlWindowState state) {
+  switch (state) {
+    case FL_WINDOW_STATE_UNDEFINED:
+      return nullptr;
+    case FL_WINDOW_STATE_RESTORED:
+      return "WindowState.restored";
+    case FL_WINDOW_STATE_MAXIMIZED:
+      return "WindowState.maximized";
+    case FL_WINDOW_STATE_MINIMIZED:
+      return "WindowState.minimized";
+  }
+
+  return nullptr;
 }
 
 // Called when a regular window should be created.
@@ -91,7 +106,7 @@ static FlMethodResponse* create_regular(FlWindowingChannel* self,
   FlWindowState state = FL_WINDOW_STATE_UNDEFINED;
   FlValue* state_value = fl_value_lookup_string(args, kStateKey);
   if (state_value != nullptr) {
-    if (!parse_state_value(state_value, &state)) {
+    if (!parse_window_state_value(state_value, &state)) {
       return FL_METHOD_RESPONSE(fl_method_error_response_new(
           kBadArgumentsError, "Invalid state argument", nullptr));
     }
@@ -140,7 +155,7 @@ static FlMethodResponse* modify_regular(FlWindowingChannel* self,
   FlWindowState state = FL_WINDOW_STATE_UNDEFINED;
   FlValue* state_value = fl_value_lookup_string(args, kStateKey);
   if (state_value != nullptr) {
-    if (!parse_state_value(state_value, &state)) {
+    if (!parse_window_state_value(state_value, &state)) {
       return FL_METHOD_RESPONSE(fl_method_error_response_new(
           kBadArgumentsError, "Invalid state argument", nullptr));
     }
@@ -230,9 +245,18 @@ FlWindowingChannel* fl_windowing_channel_new(FlBinaryMessenger* messenger,
 }
 
 FlMethodResponse* fl_windowing_channel_make_create_regular_response(
-    int64_t view_id) {
+    int64_t view_id,
+    double width,
+    double height,
+    FlWindowState state) {
   g_autoptr(FlValue) result = fl_value_new_map();
   fl_value_set_string_take(result, kViewIdKey, fl_value_new_int(view_id));
+  g_autoptr(FlValue) size_value = fl_value_new_list();
+  fl_value_append_take(size_value, fl_value_new_float(width));
+  fl_value_append_take(size_value, fl_value_new_float(height));
+  fl_value_set_string(result, kSizeKey, size_value);
+  fl_value_set_string_take(result, kStateKey,
+                           fl_value_new_string(window_state_to_string(state)));
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 

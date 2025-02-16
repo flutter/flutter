@@ -38,11 +38,26 @@ static int64_t parse_create_regular_response(FlMethodResponse* response) {
   FlValue* result = fl_method_success_response_get_result(
       FL_METHOD_SUCCESS_RESPONSE(response));
   EXPECT_EQ(fl_value_get_type(result), FL_VALUE_TYPE_MAP);
+
   FlValue* view_id_value = fl_value_lookup_string(result, "viewId");
   EXPECT_NE(view_id_value, nullptr);
   EXPECT_EQ(fl_value_get_type(view_id_value), FL_VALUE_TYPE_INT);
   int64_t view_id = fl_value_get_int(view_id_value);
   EXPECT_GT(view_id, 0);
+
+  FlValue* size_value = fl_value_lookup_string(result, "size");
+  EXPECT_NE(size_value, nullptr);
+  EXPECT_EQ(fl_value_get_type(size_value), FL_VALUE_TYPE_LIST);
+  EXPECT_EQ(fl_value_get_length(size_value), 2u);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_list_value(size_value, 0)),
+            FL_VALUE_TYPE_FLOAT);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_list_value(size_value, 1)),
+            FL_VALUE_TYPE_FLOAT);
+
+  FlValue* state_value = fl_value_lookup_string(result, "state");
+  EXPECT_NE(state_value, nullptr);
+  EXPECT_EQ(fl_value_get_type(state_value), FL_VALUE_TYPE_STRING);
+
   return view_id;
 }
 

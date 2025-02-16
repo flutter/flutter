@@ -62,7 +62,10 @@ FlWindowingChannel* fl_windowing_channel_new(FlBinaryMessenger* messenger,
                                              gpointer user_data);
 
 FlMethodResponse* fl_windowing_channel_make_create_regular_response(
-    int64_t view_id);
+    int64_t view_id,
+    double width,
+    double height,
+    FlWindowState state);
 
 FlMethodResponse* fl_windowing_channel_make_modify_regular_response();
 
