@@ -107,6 +107,9 @@ class SystemColorPaletteDetector {
       results[systemColorName] = ui.SystemColor(name: systemColorName, value: value);
     });
     systemColors = results;
+
+    // Once colors have been detected, this element is no longer needed.
+    hostDetector.remove();
   }
 
   static SystemColorPaletteDetector instance = SystemColorPaletteDetector();
