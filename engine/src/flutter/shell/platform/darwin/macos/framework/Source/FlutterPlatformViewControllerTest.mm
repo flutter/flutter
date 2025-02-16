@@ -141,6 +141,46 @@ TEST(FlutterPlatformViewController, TestCreateAndDispose) {
   EXPECT_TRUE(disposed);
 }
 
+TEST(FlutterPlatformViewController, TestReset) {
+  // Use id so we can access handleMethodCall method.
+  id platformViewController = [[FlutterPlatformViewController alloc] init];
+  TestFlutterPlatformViewFactory* factory = [TestFlutterPlatformViewFactory alloc];
+
+  [platformViewController registerViewFactory:factory withId:@"MockPlatformView"];
+
+  FlutterMethodCall* methodCallOnCreate =
+      [FlutterMethodCall methodCallWithMethodName:@"create"
+                                        arguments:@{
+                                          @"id" : @3,
+                                          @"viewType" : @"MockPlatformView"
+                                        }];
+
+  __block bool created = false;
+  FlutterResult resultOnCreate = ^(id result) {
+    // If a platform view is successfully created, the result is nil.
+    if (result == nil) {
+      created = true;
+    } else {
+      created = false;
+    }
+  };
+
+  [platformViewController handleMethodCall:methodCallOnCreate result:resultOnCreate];
+
+  EXPECT_TRUE(created);
+
+  // Creating with the same id should fail.
+  [platformViewController handleMethodCall:methodCallOnCreate result:resultOnCreate];
+
+  EXPECT_FALSE(created);
+
+  // After a reset, creating with the same id should succeed.
+  [platformViewController reset];
+  [platformViewController handleMethodCall:methodCallOnCreate result:resultOnCreate];
+
+  EXPECT_TRUE(created);
+}
+
 TEST(FlutterPlatformViewController, TestDisposeOnMissingViewId) {
   // Use id so we can access handleMethodCall method.
   id platformViewController = [[FlutterPlatformViewController alloc] init];
