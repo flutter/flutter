@@ -123,6 +123,22 @@ void main() {
     expect(border.left.width, 5.0);
   });
 
+  testWidgets('Divider custom radius', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Divider(radius: BorderRadius.circular(5))),
+      ),
+    );
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+    expect(borderRadius.bottomLeft, const Radius.circular(5));
+    expect(borderRadius.bottomRight, const Radius.circular(5));
+    expect(borderRadius.topLeft, const Radius.circular(5));
+    expect(borderRadius.topRight, const Radius.circular(5));
+  });
+
   testWidgets('Vertical Divider Test 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
