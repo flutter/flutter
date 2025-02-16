@@ -1284,9 +1284,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   @override
   double scaleFontSize(double unscaledFontSize) => unscaledFontSize * textScaleFactor;
-
-  @override
-  Map<String, ui.SystemColor>? get systemColors => HighContrastSupport.instance.systemColors;
 }
 
 bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData? data) {
