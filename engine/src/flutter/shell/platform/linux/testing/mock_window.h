@@ -39,4 +39,7 @@ class MockWindow {
 }  // namespace testing
 }  // namespace flutter
 
+// Calls original gtk_widget_destroy.
+void fl_gtk_widget_destroy(GtkWidget* widget);
+
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_WINDOW_H_

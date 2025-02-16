@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <dlfcn.h>
+
 #include "flutter/shell/platform/linux/testing/mock_window.h"
 
 using namespace flutter::testing;
@@ -93,4 +95,10 @@ void gtk_widget_show(GtkWidget* widget) {}
 
 void gtk_widget_destroy(GtkWidget* widget) {
   mock->gtk_widget_destroy(widget);
+}
+
+void fl_gtk_widget_destroy(GtkWidget* widget) {
+  void (*destroy)(GtkWidget*) = reinterpret_cast<void (*)(GtkWidget*)>(
+      dlsym(RTLD_NEXT, "gtk_widget_destroy"));
+  destroy(widget);
 }
