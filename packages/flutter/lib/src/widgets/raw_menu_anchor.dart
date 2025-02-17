@@ -291,7 +291,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   Size? _viewSize;
   ui.Offset? _menuPosition;
 
-  @nonVirtual
   AnimationStatus get animationStatus {
     if (!isOpen) {
       return AnimationStatus.dismissed;
@@ -300,7 +299,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   }
 
   AnimationStatus? _animationStatus;
-
   set animationStatus(AnimationStatus? status) {
     assert(mounted);
     if (_animationStatus != status) {
@@ -442,7 +440,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ///
   /// Unless the menu needs to be opened immediately, this method should be
   /// called instead of [open]. Doing so enables a [menuController] that
-  /// inherits from [MenuControllerDecorator] to modify the opening sequence.
+  /// inherits from [MenuControllerDecorator] run opening animations.
   ///
   /// The optional `position` argument should specify the location of the menu
   /// in the local coordinates of the [RawMenuAnchor].
@@ -456,7 +454,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ///
   /// Unless the menu needs to be closed immediately, this method should be
   /// called instead of [close]. Doing so enables a [menuController] that
-  /// inherits from [MenuControllerDecorator] to modify the closing sequence.
+  /// inherits from [MenuControllerDecorator] to run closing animations.
   void requestClose() {
     assert(_debugMenuInfo('Requesting Close $this'));
     menuController._handleCloseRequest();
@@ -533,8 +531,6 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     debugLabel: kReleaseMode ? null : 'MenuAnchor controller',
   );
 
-  @override
-  Offset? _menuPosition;
   bool get _isRootOverlayAnchor => _parent is! _RawMenuAnchorState;
 
   // If we are a nested menu, we still want to use the same overlay as the
