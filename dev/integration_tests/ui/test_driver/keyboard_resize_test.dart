@@ -37,7 +37,10 @@ void main() {
       const Duration pollDelay300Ms = Duration(milliseconds: 300);
 
       bool heightTextDidShrink = false;
-      for (int i = 0; i < 20; ++i) {
+      // TODO(harri35): Reconsider this polling duration when the root cause is found.
+      // Sometimes it can take up to 21.3 seconds for the keyboard to open,
+      // so we allow ample time here (200 * pollDelay300Ms = 60 sec)
+      for (int i = 0; i < 200; ++i) {
         await driver.tap(defaultTextField);
         await Future<void>.delayed(pollDelay300Ms);
         // Measure the height with keyboard displayed.
