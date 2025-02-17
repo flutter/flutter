@@ -376,6 +376,76 @@ void main() {
     );
   });
 
+
+  testWidgets(
+    'Legacy indeterminate CircularProgressIndicator renders correctly with year2023 disabled and circularTrackColor is passed on theme',
+    (WidgetTester tester) async {
+      const Color circularTrackColor = Color(0XFF0000FF);
+      final ThemeData theme = ThemeData(
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          circularTrackColor: circularTrackColor,
+          year2023: false,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      );
+
+      final Finder indicatorFinder = find.byType(CircularProgressIndicator);
+
+      // Verify that both track and active indicator are painted correctly.
+      expect(
+        indicatorFinder,
+        paints
+          ..arc(
+            rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
+            color: circularTrackColor,
+            strokeWidth: 4.0,
+            strokeCap: StrokeCap.round,
+            style: PaintingStyle.stroke,
+          )
+          ..arc(
+            rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
+            color: theme.colorScheme.primary,
+            strokeWidth: 4.0,
+            strokeCap: StrokeCap.round,
+            style: PaintingStyle.stroke,
+          ),
+      );
+
+      await expectLater(
+        indicatorFinder,
+        matchesGoldenFile(
+            'circular_progress_indicator_theme_year2023_false_legacy.png'),
+      );
+
+      // Re-verify that the track's color is as specified.
+      expect(
+        indicatorFinder,
+        paints
+          ..arc(
+            rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
+            color: circularTrackColor,
+            strokeWidth: 4.0,
+            strokeCap: StrokeCap.round,
+            style: PaintingStyle.stroke,
+          ),
+      );
+
+      await expectLater(
+        indicatorFinder,
+        matchesGoldenFile(
+            'circular_progress_indicator_theme_year2023_false_legacy_track_color.png'),
+      );
+    },
+  );
+
   testWidgets(
     'Opt into 2024 CircularProgressIndicator appearance with ProgressIndicatorThemeData.year2023',
     (WidgetTester tester) async {
