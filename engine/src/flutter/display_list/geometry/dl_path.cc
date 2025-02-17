@@ -346,16 +346,26 @@ Path DlPath::ConvertToImpellerPath(const SkPath& path, const DlPoint& shift) {
         builder.QuadraticCurveTo(ToDlPoint(data.points[1]),
                                  ToDlPoint(data.points[2]));
         break;
-      case SkPath::kConic_Verb: {
-        // One subdivision only works for sweeps up to 90 degrees.
-        std::array<DlPoint, 5> points;
-        impeller::ConicPathComponent conic(
-            ToDlPoint(data.points[0]), ToDlPoint(data.points[1]),
-            ToDlPoint(data.points[2]), iterator.conicWeight());
-        conic.SubdivideToQuadraticPoints(points);
-        builder.QuadraticCurveTo(points[1], points[2]);
-        builder.QuadraticCurveTo(points[3], points[4]);
-      } break;
+      case SkPath::kConic_Verb:
+        // We might eventually have conic conversion math that deals with
+        // degenerate conics gracefully (or just handle them directly),
+        // but until then, we will detect and ignore them.
+        if (data.points[0] != data.points[1]) {
+          if (data.points[1] != data.points[2]) {
+            std::array<DlPoint, 5> points;
+            impeller::ConicPathComponent conic(
+                ToDlPoint(data.points[0]), ToDlPoint(data.points[1]),
+                ToDlPoint(data.points[2]), iterator.conicWeight());
+            conic.SubdivideToQuadraticPoints(points);
+            builder.QuadraticCurveTo(points[1], points[2]);
+            builder.QuadraticCurveTo(points[3], points[4]);
+          } else {
+            builder.LineTo(ToDlPoint(data.points[1]));
+          }
+        } else if (data.points[1] != data.points[2]) {
+          builder.LineTo(ToDlPoint(data.points[2]));
+        }
+        break;
       case SkPath::kCubic_Verb:
         builder.CubicCurveTo(ToDlPoint(data.points[1]),
                              ToDlPoint(data.points[2]),
