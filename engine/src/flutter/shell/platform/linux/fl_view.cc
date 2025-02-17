@@ -153,9 +153,7 @@ static gboolean get_mouse_button(GdkEvent* event, int64_t* button) {
       *button = kFlutterPointerButtonMouseForward;
       return TRUE;
     default:
-      *button = 1 << event_button;
-      // return FALSE;
-      return TRUE;
+      return FALSE;
   }
 }
 
