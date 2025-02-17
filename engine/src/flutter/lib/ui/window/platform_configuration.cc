@@ -49,6 +49,9 @@ void PlatformConfiguration::DidCreateIsolate() {
   send_view_focus_event_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_sendViewFocusEvent")));
+  set_engine_handle_.Set(
+      tonic::DartState::Current(),
+      Dart_GetField(library, tonic::ToDart("_setEngineHandle")));
   update_window_metrics_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_updateWindowMetrics")));
@@ -165,6 +168,20 @@ bool PlatformConfiguration::SendFocusEvent(const ViewFocusEvent& event) {
                                         tonic::ToDart(event.state()),
                                         tonic::ToDart(event.direction()),
                                     }));
+  return true;
+}
+
+bool PlatformConfiguration::SetEngineHandle(int64_t engine_handle) {
+  std::shared_ptr<tonic::DartState> dart_state =
+      set_engine_handle_.dart_state().lock();
+  if (!dart_state) {
+    return false;
+  }
+  tonic::DartState::Scope scope(dart_state);
+  tonic::CheckAndHandleError(tonic::DartInvoke(set_engine_handle_.Get(),
+                                               {
+                                                   tonic::ToDart(engine_handle),
+                                               }));
   return true;
 }
 
