@@ -1593,9 +1593,7 @@ class CarouselController extends ScrollController {
             ? (index > maxWeightIndex ? index - 1 : maxWeightIndex)
             : index;
 
-    final double targetOffset = dimension * (weights.first / totalWeight) * newIndex;
-
-    return clampDouble(targetOffset, position.minScrollExtent, position.maxScrollExtent);
+    return dimension * (weights.first / totalWeight) * newIndex;
   }
 
   @override
