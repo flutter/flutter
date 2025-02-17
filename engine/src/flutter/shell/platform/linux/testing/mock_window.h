@@ -26,6 +26,12 @@ class MockWindow {
               gtk_window_set_title,
               (GtkWindow * window, const gchar* title));
   MOCK_METHOD(void,
+              gtk_window_set_geometry_hints,
+              (GtkWindow * window,
+               GtkWidget* widget,
+               GdkGeometry* geometry,
+               GdkWindowHints geometry_mask));
+  MOCK_METHOD(void,
               gtk_window_resize,
               (GtkWindow * window, gint width, gint height));
   MOCK_METHOD(void, gtk_window_maximize, (GtkWindow * window));

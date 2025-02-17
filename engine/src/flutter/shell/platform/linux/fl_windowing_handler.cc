@@ -68,8 +68,9 @@ static GtkWindow* fl_windowing_handler_create_window(
   return GTK_WINDOW(window);
 }
 
-static FlMethodResponse* create_regular(double width,
-                                        double height,
+static FlMethodResponse* create_regular(FlWindowingSize* size,
+                                        FlWindowingSize* min_size,
+                                        FlWindowingSize* max_size,
                                         const gchar* title,
                                         FlWindowState state,
                                         gpointer user_data) {
@@ -93,7 +94,7 @@ static FlMethodResponse* create_regular(double width,
         "Internal error", "Failed to create window", nullptr));
   }
 
-  gtk_window_set_default_size(GTK_WINDOW(window), width, height);
+  gtk_window_set_default_size(GTK_WINDOW(window), size->width, size->height);
   if (title != nullptr) {
     gtk_window_set_title(GTK_WINDOW(window), title);
   }
@@ -109,6 +110,25 @@ static FlMethodResponse* create_regular(double width,
       break;
   }
 
+  GdkGeometry geometry;
+  GdkWindowHints geometry_mask = static_cast<GdkWindowHints>(0);
+  if (min_size != nullptr) {
+    geometry.min_width = min_size->width;
+    geometry.min_height = min_size->height;
+    geometry_mask =
+        static_cast<GdkWindowHints>(geometry_mask | GDK_HINT_MIN_SIZE);
+  }
+  if (max_size != nullptr) {
+    geometry.max_width = max_size->width;
+    geometry.max_height = max_size->height;
+    geometry_mask =
+        static_cast<GdkWindowHints>(geometry_mask | GDK_HINT_MAX_SIZE);
+  }
+  if (geometry_mask != 0) {
+    gtk_window_set_geometry_hints(GTK_WINDOW(window), nullptr, &geometry,
+                                  geometry_mask);
+  }
+
   WindowData* data = window_data_new(GTK_WINDOW(window), view);
   data->first_frame_cb_id =
       g_signal_connect(view, "first-frame", G_CALLBACK(first_frame_cb), data);
@@ -122,20 +142,18 @@ static FlMethodResponse* create_regular(double width,
 
   // We don't know the current size and dimensions, so just reflect back what
   // was requested.
-  double initial_width = width;
-  double initial_height = height;
+  FlWindowingSize* initial_size = size;
   FlWindowState initial_state = state;
   if (initial_state == FL_WINDOW_STATE_UNDEFINED) {
     initial_state = FL_WINDOW_STATE_RESTORED;
   }
 
   return fl_windowing_channel_make_create_regular_response(
-      fl_view_get_id(view), initial_width, initial_height, initial_state);
+      fl_view_get_id(view), initial_size, initial_state);
 }
 
 static FlMethodResponse* modify_regular(int64_t view_id,
-                                        double width,
-                                        double height,
+                                        FlWindowingSize* size,
                                         const gchar* title,
                                         FlWindowState state,
                                         gpointer user_data) {
@@ -147,8 +165,8 @@ static FlMethodResponse* modify_regular(int64_t view_id,
         "Bad Arguments", "No window with given view ID", nullptr));
   }
 
-  if (width > 0 && height > 0) {
-    gtk_window_resize(data->window, width, height);
+  if (size != nullptr) {
+    gtk_window_resize(data->window, size->width, size->height);
   }
 
   if (title != nullptr) {

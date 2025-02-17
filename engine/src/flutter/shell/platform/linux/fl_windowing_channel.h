@@ -24,6 +24,12 @@ typedef enum {
   FL_WINDOW_STATE_MINIMIZED
 } FlWindowState;
 
+// Size dimensions used in windowing channel.
+typedef struct {
+  double width;
+  double height;
+} FlWindowingSize;
+
 /**
  * FlWindowingChannel:
  *
@@ -32,14 +38,14 @@ typedef enum {
  */
 
 typedef struct {
-  FlMethodResponse* (*create_regular)(double width,
-                                      double height,
+  FlMethodResponse* (*create_regular)(FlWindowingSize* size,
+                                      FlWindowingSize* min_size,
+                                      FlWindowingSize* max_size,
                                       const gchar* title,
                                       FlWindowState state,
                                       gpointer user_data);
   FlMethodResponse* (*modify_regular)(int64_t view_id,
-                                      double width,
-                                      double height,
+                                      FlWindowingSize* size,
                                       const gchar* title,
                                       FlWindowState state,
                                       gpointer user_data);
@@ -63,8 +69,7 @@ FlWindowingChannel* fl_windowing_channel_new(FlBinaryMessenger* messenger,
 
 FlMethodResponse* fl_windowing_channel_make_create_regular_response(
     int64_t view_id,
-    double width,
-    double height,
+    FlWindowingSize* size,
     FlWindowState state);
 
 FlMethodResponse* fl_windowing_channel_make_modify_regular_response();

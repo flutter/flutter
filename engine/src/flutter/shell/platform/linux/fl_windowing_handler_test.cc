@@ -13,22 +13,19 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-static FlValue* make_create_regular_args(double width,
-                                         double height,
-                                         const gchar* title,
-                                         const gchar* state) {
-  FlValue* args = fl_value_new_map();
+static void set_size_arg(FlValue* args,
+                         const gchar* name,
+                         double width,
+                         double height) {
   g_autoptr(FlValue) size_value = fl_value_new_list();
   fl_value_append_take(size_value, fl_value_new_float(width));
   fl_value_append_take(size_value, fl_value_new_float(height));
-  fl_value_set_string(args, "size", size_value);
-  if (title != nullptr) {
-    fl_value_set_string_take(args, "title", fl_value_new_string(title));
-  }
-  if (state != nullptr) {
-    fl_value_set_string_take(args, "state", fl_value_new_string(state));
-  }
+  fl_value_set_string(args, name, size_value);
+}
 
+static FlValue* make_create_regular_args(double width, double height) {
+  FlValue* args = fl_value_new_map();
+  set_size_arg(args, "size", width, height);
   return args;
 }
 
@@ -61,26 +58,9 @@ static int64_t parse_create_regular_response(FlMethodResponse* response) {
   return view_id;
 }
 
-static FlValue* make_modify_regular_args(int64_t view_id,
-                                         double width,
-                                         double height,
-                                         const gchar* title,
-                                         const gchar* state) {
+static FlValue* make_modify_regular_args(int64_t view_id) {
   FlValue* args = fl_value_new_map();
   fl_value_set_string_take(args, "viewId", fl_value_new_int(view_id));
-  if (width >= 0 && height >= 0) {
-    g_autoptr(FlValue) size_value = fl_value_new_list();
-    fl_value_append_take(size_value, fl_value_new_float(width));
-    fl_value_append_take(size_value, fl_value_new_float(height));
-    fl_value_set_string(args, "size", size_value);
-  }
-  if (title != nullptr) {
-    fl_value_set_string_take(args, "title", fl_value_new_string(title));
-  }
-  if (state != nullptr) {
-    fl_value_set_string_take(args, "state", fl_value_new_string(state));
-  }
-
   return args;
 }
 
@@ -102,8 +82,80 @@ TEST(FlWindowingHandlerTest, CreateRegular) {
   EXPECT_CALL(mock_window, gtk_window_new);
   EXPECT_CALL(mock_window, gtk_window_set_default_size(::testing::_, 800, 600));
 
-  g_autoptr(FlValue) args =
-      make_create_regular_args(800, 600, nullptr, nullptr);
+  g_autoptr(FlValue) args = make_create_regular_args(800, 600);
+
+  gboolean called = FALSE;
+  fl_mock_binary_messenger_invoke_standard_method(
+      messenger, "flutter/windowing", "createRegular", args,
+      [](FlMockBinaryMessenger* messenger, FlMethodResponse* response,
+         gpointer user_data) {
+        parse_create_regular_response(response);
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
+      },
+      &called);
+  EXPECT_TRUE(called);
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlWindowingHandlerTest, CreateRegularMinSize) {
+  flutter::testing::fl_ensure_gtk_init();
+  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  g_autoptr(FlEngine) engine =
+      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+  g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
+
+  EXPECT_CALL(mock_window, gtk_window_new);
+  EXPECT_CALL(mock_window,
+              gtk_window_set_geometry_hints(
+                  ::testing::_, nullptr,
+                  ::testing::Pointee(::testing::AllOf(
+                      ::testing::Field(&GdkGeometry::min_width, 100),
+                      ::testing::Field(&GdkGeometry::min_height, 200))),
+                  GDK_HINT_MIN_SIZE));
+
+  g_autoptr(FlValue) args = make_create_regular_args(800, 600);
+  set_size_arg(args, "minSize", 100, 200);
+
+  gboolean called = FALSE;
+  fl_mock_binary_messenger_invoke_standard_method(
+      messenger, "flutter/windowing", "createRegular", args,
+      [](FlMockBinaryMessenger* messenger, FlMethodResponse* response,
+         gpointer user_data) {
+        parse_create_regular_response(response);
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
+      },
+      &called);
+  EXPECT_TRUE(called);
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlWindowingHandlerTest, CreateRegularMaxSize) {
+  flutter::testing::fl_ensure_gtk_init();
+  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  g_autoptr(FlEngine) engine =
+      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+  g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
+
+  EXPECT_CALL(mock_window, gtk_window_new);
+  EXPECT_CALL(mock_window,
+              gtk_window_set_geometry_hints(
+                  ::testing::_, nullptr,
+                  ::testing::Pointee(::testing::AllOf(
+                      ::testing::Field(&GdkGeometry::max_width, 1000),
+                      ::testing::Field(&GdkGeometry::max_height, 2000))),
+                  GDK_HINT_MAX_SIZE));
+
+  g_autoptr(FlValue) args = make_create_regular_args(800, 600);
+  set_size_arg(args, "maxSize", 1000, 2000);
+
   gboolean called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "createRegular", args,
@@ -132,8 +184,9 @@ TEST(FlWindowingHandlerTest, CreateRegularWithTitle) {
   EXPECT_CALL(mock_window,
               gtk_window_set_title(::testing::_, ::testing::StrEq("TITLE")));
 
-  g_autoptr(FlValue) args =
-      make_create_regular_args(800, 600, "TITLE", nullptr);
+  g_autoptr(FlValue) args = make_create_regular_args(800, 600);
+  fl_value_set_string_take(args, "title", fl_value_new_string("TITLE"));
+
   gboolean called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "createRegular", args,
@@ -161,8 +214,10 @@ TEST(FlWindowingHandlerTest, CreateRegularMaximized) {
   EXPECT_CALL(mock_window, gtk_window_new);
   EXPECT_CALL(mock_window, gtk_window_maximize(::testing::_));
 
-  g_autoptr(FlValue) args =
-      make_create_regular_args(800, 600, nullptr, "WindowState.maximized");
+  g_autoptr(FlValue) args = make_create_regular_args(800, 600);
+  fl_value_set_string_take(args, "state",
+                           fl_value_new_string("WindowState.maximized"));
+
   gboolean called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "createRegular", args,
@@ -190,8 +245,10 @@ TEST(FlWindowingHandlerTest, CreateRegularMinimized) {
   EXPECT_CALL(mock_window, gtk_window_new);
   EXPECT_CALL(mock_window, gtk_window_iconify(::testing::_));
 
-  g_autoptr(FlValue) args =
-      make_create_regular_args(800, 600, nullptr, "WindowState.minimized");
+  g_autoptr(FlValue) args = make_create_regular_args(800, 600);
+  fl_value_set_string_take(args, "state",
+                           fl_value_new_string("WindowState.minimized"));
+
   gboolean called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "createRegular", args,
@@ -219,8 +276,8 @@ TEST(FlWindowingHandlerTest, ModifyRegularSize) {
   EXPECT_CALL(mock_window, gtk_window_new);
   EXPECT_CALL(mock_window, gtk_window_resize(::testing::_, 1024, 768));
 
-  g_autoptr(FlValue) create_args =
-      make_create_regular_args(800, 600, nullptr, nullptr);
+  g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
+
   int64_t view_id = -1;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "createRegular", create_args,
@@ -232,8 +289,9 @@ TEST(FlWindowingHandlerTest, ModifyRegularSize) {
       &view_id);
   EXPECT_GT(view_id, 0);
 
-  g_autoptr(FlValue) modify_args =
-      make_modify_regular_args(view_id, 1024, 768, nullptr, nullptr);
+  g_autoptr(FlValue) modify_args = make_modify_regular_args(view_id);
+  set_size_arg(modify_args, "size", 1024, 768);
+
   gboolean modify_called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "modifyRegular", modify_args,
@@ -262,8 +320,8 @@ TEST(FlWindowingHandlerTest, ModifyRegularTitle) {
   EXPECT_CALL(mock_window,
               gtk_window_set_title(::testing::_, ::testing::StrEq("TITLE")));
 
-  g_autoptr(FlValue) create_args =
-      make_create_regular_args(800, 600, nullptr, nullptr);
+  g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
+
   int64_t view_id = -1;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "createRegular", create_args,
@@ -275,8 +333,9 @@ TEST(FlWindowingHandlerTest, ModifyRegularTitle) {
       &view_id);
   EXPECT_GT(view_id, 0);
 
-  g_autoptr(FlValue) modify_args =
-      make_modify_regular_args(view_id, -1, -1, "TITLE", nullptr);
+  g_autoptr(FlValue) modify_args = make_modify_regular_args(view_id);
+  fl_value_set_string_take(modify_args, "title", fl_value_new_string("TITLE"));
+
   gboolean modify_called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "modifyRegular", modify_args,
@@ -303,8 +362,8 @@ TEST(FlWindowingHandlerTest, ModifyRegularMaximize) {
 
   EXPECT_CALL(mock_window, gtk_window_new);
 
-  g_autoptr(FlValue) create_args =
-      make_create_regular_args(800, 600, nullptr, nullptr);
+  g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
+
   int64_t view_id = -1;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "createRegular", create_args,
@@ -318,8 +377,10 @@ TEST(FlWindowingHandlerTest, ModifyRegularMaximize) {
 
   EXPECT_CALL(mock_window, gtk_window_maximize(::testing::_));
 
-  g_autoptr(FlValue) modify_args = make_modify_regular_args(
-      view_id, -1, -1, nullptr, "WindowState.maximized");
+  g_autoptr(FlValue) modify_args = make_modify_regular_args(view_id);
+  fl_value_set_string_take(modify_args, "state",
+                           fl_value_new_string("WindowState.maximized"));
+
   gboolean modify_called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "modifyRegular", modify_args,
@@ -347,8 +408,10 @@ TEST(FlWindowingHandlerTest, ModifyRegularUnmaximize) {
   EXPECT_CALL(mock_window, gtk_window_new);
   EXPECT_CALL(mock_window, gtk_window_maximize(::testing::_));
 
-  g_autoptr(FlValue) create_args =
-      make_create_regular_args(800, 600, nullptr, "WindowState.maximized");
+  g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
+  fl_value_set_string_take(create_args, "state",
+                           fl_value_new_string("WindowState.maximized"));
+
   int64_t view_id = -1;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "createRegular", create_args,
@@ -364,8 +427,10 @@ TEST(FlWindowingHandlerTest, ModifyRegularUnmaximize) {
       .WillOnce(::testing::Return(TRUE));
   EXPECT_CALL(mock_window, gtk_window_unmaximize(::testing::_));
 
-  g_autoptr(FlValue) modify_args = make_modify_regular_args(
-      view_id, -1, -1, nullptr, "WindowState.restored");
+  g_autoptr(FlValue) modify_args = make_modify_regular_args(view_id);
+  fl_value_set_string_take(modify_args, "state",
+                           fl_value_new_string("WindowState.restored"));
+
   gboolean modify_called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "modifyRegular", modify_args,
@@ -392,8 +457,8 @@ TEST(FlWindowingHandlerTest, ModifyRegularMinimize) {
 
   EXPECT_CALL(mock_window, gtk_window_new);
 
-  g_autoptr(FlValue) create_args =
-      make_create_regular_args(800, 600, nullptr, nullptr);
+  g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
+
   int64_t view_id = -1;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "createRegular", create_args,
@@ -407,8 +472,10 @@ TEST(FlWindowingHandlerTest, ModifyRegularMinimize) {
 
   EXPECT_CALL(mock_window, gtk_window_iconify(::testing::_));
 
-  g_autoptr(FlValue) modify_args = make_modify_regular_args(
-      view_id, -1, -1, nullptr, "WindowState.minimized");
+  g_autoptr(FlValue) modify_args = make_modify_regular_args(view_id);
+  fl_value_set_string_take(modify_args, "state",
+                           fl_value_new_string("WindowState.minimized"));
+
   gboolean modify_called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "modifyRegular", modify_args,
@@ -436,8 +503,10 @@ TEST(FlWindowingHandlerTest, ModifyRegularUnminimize) {
   EXPECT_CALL(mock_window, gtk_window_new);
   EXPECT_CALL(mock_window, gtk_window_iconify(::testing::_));
 
-  g_autoptr(FlValue) create_args =
-      make_create_regular_args(800, 600, nullptr, "WindowState.minimized");
+  g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
+  fl_value_set_string_take(create_args, "state",
+                           fl_value_new_string("WindowState.minimized"));
+
   int64_t view_id = -1;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "createRegular", create_args,
@@ -453,8 +522,10 @@ TEST(FlWindowingHandlerTest, ModifyRegularUnminimize) {
       .WillOnce(::testing::Return(GDK_WINDOW_STATE_ICONIFIED));
   EXPECT_CALL(mock_window, gtk_window_deiconify(::testing::_));
 
-  g_autoptr(FlValue) modify_args = make_modify_regular_args(
-      view_id, -1, -1, nullptr, "WindowState.restored");
+  g_autoptr(FlValue) modify_args = make_modify_regular_args(view_id);
+  fl_value_set_string_take(modify_args, "state",
+                           fl_value_new_string("WindowState.restored"));
+
   gboolean modify_called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "modifyRegular", modify_args,
@@ -476,8 +547,8 @@ TEST(FlWindowingHandlerTest, ModifyUnknownWindow) {
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  g_autoptr(FlValue) args =
-      make_modify_regular_args(99, -1, -1, nullptr, nullptr);
+  g_autoptr(FlValue) args = make_modify_regular_args(99);
+
   gboolean called = FALSE;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "modifyRegular", args,
@@ -511,8 +582,8 @@ TEST(FlWindowingHandlerTest, DestroyWindow) {
   EXPECT_CALL(mock_window, gtk_window_new);
   EXPECT_CALL(mock_window, gtk_widget_destroy);
 
-  g_autoptr(FlValue) create_args =
-      make_create_regular_args(800, 600, nullptr, nullptr);
+  g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
+
   int64_t view_id = -1;
   fl_mock_binary_messenger_invoke_standard_method(
       messenger, "flutter/windowing", "createRegular", create_args,

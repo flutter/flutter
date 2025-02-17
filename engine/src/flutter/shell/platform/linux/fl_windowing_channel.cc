@@ -15,6 +15,8 @@ static constexpr char kModifyRegularMethod[] = "modifyRegular";
 static constexpr char kDestroyWindowMethod[] = "destroyWindow";
 
 static constexpr char kSizeKey[] = "size";
+static constexpr char kMinSizeKey[] = "minSize";
+static constexpr char kMaxSizeKey[] = "maxSize";
 static constexpr char kTitleKey[] = "title";
 static constexpr char kStateKey[] = "state";
 static constexpr char kViewIdKey[] = "viewId";
@@ -41,6 +43,13 @@ static gboolean is_valid_size_argument(FlValue* value) {
              FL_VALUE_TYPE_FLOAT &&
          fl_value_get_type(fl_value_get_list_value(value, 1)) ==
              FL_VALUE_TYPE_FLOAT;
+}
+
+static FlWindowingSize* parse_size_value(FlValue* value) {
+  FlWindowingSize* size = g_new0(FlWindowingSize, 1);
+  size->width = fl_value_get_float(fl_value_get_list_value(value, 0));
+  size->height = fl_value_get_float(fl_value_get_list_value(value, 1));
+  return size;
 }
 
 static gboolean parse_window_state_value(FlValue* value, FlWindowState* state) {
@@ -91,8 +100,27 @@ static FlMethodResponse* create_regular(FlWindowingChannel* self,
     return FL_METHOD_RESPONSE(fl_method_error_response_new(
         kBadArgumentsError, "Missing/invalid size argument", nullptr));
   }
-  double width = fl_value_get_float(fl_value_get_list_value(size_value, 0));
-  double height = fl_value_get_float(fl_value_get_list_value(size_value, 1));
+  g_autofree FlWindowingSize* size = parse_size_value(size_value);
+
+  FlValue* min_size_value = fl_value_lookup_string(args, kMinSizeKey);
+  g_autofree FlWindowingSize* min_size = nullptr;
+  if (min_size_value != nullptr) {
+    if (!is_valid_size_argument(min_size_value)) {
+      return FL_METHOD_RESPONSE(fl_method_error_response_new(
+          kBadArgumentsError, "Invalid minSize argument", nullptr));
+    }
+    min_size = parse_size_value(min_size_value);
+  }
+
+  FlValue* max_size_value = fl_value_lookup_string(args, kMaxSizeKey);
+  g_autofree FlWindowingSize* max_size = nullptr;
+  if (max_size_value != nullptr) {
+    if (!is_valid_size_argument(max_size_value)) {
+      return FL_METHOD_RESPONSE(fl_method_error_response_new(
+          kBadArgumentsError, "Invalid maxSize argument", nullptr));
+    }
+    max_size = parse_size_value(max_size_value);
+  }
 
   FlValue* title_value = fl_value_lookup_string(args, kTitleKey);
   const gchar* title = nullptr;
@@ -112,7 +140,7 @@ static FlMethodResponse* create_regular(FlWindowingChannel* self,
     }
   }
 
-  return self->vtable->create_regular(width, height, title, state,
+  return self->vtable->create_regular(size, min_size, max_size, title, state,
                                       self->user_data);
 }
 
@@ -132,16 +160,14 @@ static FlMethodResponse* modify_regular(FlWindowingChannel* self,
   }
   int64_t view_id = fl_value_get_int(view_id_value);
 
-  double width = -1;
-  double height = -1;
+  g_autofree FlWindowingSize* size = nullptr;
   FlValue* size_value = fl_value_lookup_string(args, kSizeKey);
   if (size_value != nullptr) {
     if (!is_valid_size_argument(size_value)) {
       return FL_METHOD_RESPONSE(fl_method_error_response_new(
           kBadArgumentsError, "Invalid size argument", nullptr));
     }
-    width = fl_value_get_float(fl_value_get_list_value(size_value, 0));
-    height = fl_value_get_float(fl_value_get_list_value(size_value, 1));
+    size = parse_size_value(size_value);
   }
   FlValue* title_value = fl_value_lookup_string(args, kTitleKey);
   const gchar* title = nullptr;
@@ -161,7 +187,7 @@ static FlMethodResponse* modify_regular(FlWindowingChannel* self,
     }
   }
 
-  return self->vtable->modify_regular(view_id, width, height, title, state,
+  return self->vtable->modify_regular(view_id, size, title, state,
                                       self->user_data);
 }
 
@@ -246,14 +272,13 @@ FlWindowingChannel* fl_windowing_channel_new(FlBinaryMessenger* messenger,
 
 FlMethodResponse* fl_windowing_channel_make_create_regular_response(
     int64_t view_id,
-    double width,
-    double height,
+    FlWindowingSize* size,
     FlWindowState state) {
   g_autoptr(FlValue) result = fl_value_new_map();
   fl_value_set_string_take(result, kViewIdKey, fl_value_new_int(view_id));
   g_autoptr(FlValue) size_value = fl_value_new_list();
-  fl_value_append_take(size_value, fl_value_new_float(width));
-  fl_value_append_take(size_value, fl_value_new_float(height));
+  fl_value_append_take(size_value, fl_value_new_float(size->width));
+  fl_value_append_take(size_value, fl_value_new_float(size->height));
   fl_value_set_string(result, kSizeKey, size_value);
   fl_value_set_string_take(result, kStateKey,
                            fl_value_new_string(window_state_to_string(state)));

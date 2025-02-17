@@ -67,6 +67,13 @@ void gtk_window_set_title(GtkWindow* window, const gchar* title) {
   mock->gtk_window_set_title(window, title);
 }
 
+void gtk_window_set_geometry_hints(GtkWindow* window,
+                                   GtkWidget* widget,
+                                   GdkGeometry* geometry,
+                                   GdkWindowHints geometry_mask) {
+  mock->gtk_window_set_geometry_hints(window, widget, geometry, geometry_mask);
+}
+
 void gtk_window_resize(GtkWindow* window, gint width, gint height) {
   mock->gtk_window_resize(window, width, height);
 }
