@@ -446,7 +446,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   /// in the local coordinates of the [RawMenuAnchor].
   void requestOpen({Offset? position}) {
     assert(_debugMenuInfo('Requesting Open $this'));
-    _menuPosition = position;
     menuController._handleOpenRequest(position: position);
   }
 
@@ -1084,9 +1083,9 @@ abstract mixin class MenuControllerDecorator implements MenuController {
   /// Mark the menu as opened and set the [animationStatus] to
   /// [AnimationStatus.completed].
   @mustCallSuper
-  void markMenuOpened() {
+  void markMenuOpened({ui.Offset? position}) {
     if (!_anchor!.isOpen) {
-      _anchor!.open(position: _anchor!._menuPosition);
+      _anchor!.open(position: position);
     }
     _anchor!.animationStatus = AnimationStatus.completed;
   }
