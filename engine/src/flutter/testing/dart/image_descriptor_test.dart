@@ -21,6 +21,8 @@ void main() {
     expect(descriptor.bytesPerPixel, 1);
 
     final Codec codec = await descriptor.instantiateCodec();
+    buffer.dispose();
+    descriptor.dispose();
     expect(codec.frameCount, 1);
     codec.dispose();
   });
@@ -35,6 +37,8 @@ void main() {
     expect(descriptor.bytesPerPixel, 4);
 
     final Codec codec = await descriptor.instantiateCodec();
+    buffer.dispose();
+    descriptor.dispose();
     expect(codec.frameCount, 1);
     codec.dispose();
   });
@@ -49,6 +53,8 @@ void main() {
     expect(descriptor.bytesPerPixel, 4);
 
     final Codec codec = await descriptor.instantiateCodec();
+    buffer.dispose();
+    descriptor.dispose();
     expect(codec.frameCount, 4);
     expect(codec.repetitionCount, -1);
     codec.dispose();
@@ -70,6 +76,8 @@ void main() {
     expect(descriptor.bytesPerPixel, 4);
 
     final Codec codec = await descriptor.instantiateCodec();
+    buffer.dispose();
+    descriptor.dispose();
     expect(codec.frameCount, 1);
     codec.dispose();
   });
@@ -84,6 +92,8 @@ void main() {
     expect(descriptor.bytesPerPixel, 4);
 
     final Codec codec = await descriptor.instantiateCodec();
+    buffer.dispose();
+    descriptor.dispose();
     expect(codec.frameCount, 1);
     codec.dispose();
   }, skip: !(Platform.isAndroid || Platform.isIOS || Platform.isMacOS || Platform.isWindows));

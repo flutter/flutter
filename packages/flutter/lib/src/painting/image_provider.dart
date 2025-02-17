@@ -1618,9 +1618,15 @@ class FileImage extends ImageProvider<FileImage> {
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
-    return (file.runtimeType == File)
-        ? decode(await ui.ImmutableBuffer.fromFilePath(file.path))
-        : decode(await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes()));
+    final ui.ImmutableBuffer buffer =
+        (file.runtimeType == File)
+            ? await ui.ImmutableBuffer.fromFilePath(file.path)
+            : await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes());
+    try {
+      return await decode(buffer);
+    } finally {
+      buffer.dispose();
+    }
   }
 
   @override
@@ -1700,7 +1706,12 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 
   Future<ui.Codec> _loadAsync(MemoryImage key, {required _SimpleDecoderCallback decode}) async {
     assert(key == this);
-    return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
+    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    try {
+      return await decode(buffer);
+    } finally {
+      buffer.dispose();
+    }
   }
 
   @override

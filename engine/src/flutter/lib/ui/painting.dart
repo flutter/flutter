@@ -2441,12 +2441,16 @@ Future<Codec> instantiateImageCodec(
   bool allowUpscaling = true,
 }) async {
   final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(list);
-  return instantiateImageCodecFromBuffer(
-    buffer,
-    targetWidth: targetWidth,
-    targetHeight: targetHeight,
-    allowUpscaling: allowUpscaling,
-  );
+  try {
+    return await instantiateImageCodecFromBuffer(
+      buffer,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+      allowUpscaling: allowUpscaling,
+    );
+  } finally {
+    buffer.dispose();
+  }
 }
 
 /// Instantiates an image [Codec].
@@ -2459,10 +2463,6 @@ Future<Codec> instantiateImageCodec(
 /// The [buffer] parameter is the binary image data (e.g a PNG or GIF binary data).
 /// The data can be for either static or animated images. The following image
 /// formats are supported: {@macro dart.ui.imageFormats}
-///
-/// The [buffer] will be disposed by this method once the codec has been created,
-/// so the caller must relinquish ownership of the [buffer] when they call this
-/// method.
 ///
 /// The [targetWidth] and [targetHeight] arguments specify the size of the
 /// output image, in image pixels. If they are not equal to the intrinsic
@@ -2551,17 +2551,13 @@ Future<Codec> instantiateImageCodecWithSize(
 }) async {
   getTargetSize ??= _getDefaultImageSize;
   final ImageDescriptor descriptor = await ImageDescriptor.encoded(buffer);
-  try {
-    final TargetImageSize targetSize = getTargetSize(descriptor.width, descriptor.height);
-    assert(targetSize.width == null || targetSize.width! > 0);
-    assert(targetSize.height == null || targetSize.height! > 0);
-    return descriptor.instantiateCodec(
-      targetWidth: targetSize.width,
-      targetHeight: targetSize.height,
-    );
-  } finally {
-    buffer.dispose();
-  }
+  final TargetImageSize targetSize = getTargetSize(descriptor.width, descriptor.height);
+  assert(targetSize.width == null || targetSize.width! > 0);
+  assert(targetSize.height == null || targetSize.height! > 0);
+  return descriptor.instantiateCodec(
+    targetWidth: targetSize.width,
+    targetHeight: targetSize.height,
+  );
 }
 
 TargetImageSize _getDefaultImageSize(int intrinsicWidth, int intrinsicHeight) {

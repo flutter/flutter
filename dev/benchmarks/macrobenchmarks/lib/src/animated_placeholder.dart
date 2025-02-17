@@ -63,10 +63,14 @@ class DelayedBase64Image extends ImageProvider<int> {
   @override
   ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: Future<ui.Codec>.delayed(
-        delay,
-        () async => decode(await ImmutableBuffer.fromUint8List(base64.decode(data))),
-      ),
+      codec: Future<ui.Codec>.delayed(delay, () async {
+        final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(base64.decode(data));
+        try {
+          return await decode(buffer);
+        } finally {
+          buffer.dispose();
+        }
+      }),
       scale: 1.0,
     );
   }
