@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_WINDOWING_LINUX_FL_WINDOWING_HANDLER_H_
-#define FLUTTER_SHELL_WINDOWING_LINUX_FL_WINDOWING_HANDLER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_WINDOWING_HANDLER_H_
+#define FLUTTER_SHELL_PLATFORM_LINUX_FL_WINDOWING_HANDLER_H_
 
 #include <gtk/gtk.h>
 
@@ -44,4 +44,4 @@ FlWindowingHandler* fl_windowing_handler_new(FlEngine* engine);
 
 G_END_DECLS
 
-#endif  // FLUTTER_SHELL_WINDOWING_LINUX_FL_WINDOWING_HANDLER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_WINDOWING_HANDLER_H_
