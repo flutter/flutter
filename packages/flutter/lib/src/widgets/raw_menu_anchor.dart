@@ -982,7 +982,7 @@ class _MenuController extends MenuController {
   @override
   void closeChildren() {
     assert(_anchor != null);
-    _anchor!.closeChildren();
+    _anchor?.closeChildren();
   }
 
   @override
@@ -992,7 +992,7 @@ class _MenuController extends MenuController {
 
   @override
   void _handleCloseRequest() {
-    _anchor!.close();
+    _anchor?.close();
   }
 
   // ignore: use_setters_to_change_properties
@@ -1086,6 +1086,7 @@ abstract mixin class MenuControllerDecorator implements MenuController {
   /// [AnimationStatus.completed].
   @mustCallSuper
   void markMenuOpened() {
+    assert(_anchor != null, "$MenuControllerDecorator.markMenuOpened was called on a $MenuController that isn't attached to a menu anchor.");
     if (!_anchor!.isOpen) {
       // Use the previously set position.
       _anchor!.open(position: _anchor!._menuPosition);
@@ -1097,8 +1098,8 @@ abstract mixin class MenuControllerDecorator implements MenuController {
   /// to [AnimationStatus.dismissed].
   @mustCallSuper
   void markMenuClosed() {
-    _anchor!
-      ..animationStatus = AnimationStatus.dismissed
+    _anchor
+      ?..animationStatus = AnimationStatus.dismissed
       ..close();
   }
 
