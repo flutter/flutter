@@ -1568,7 +1568,6 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
       spy.messages.clear();
 
-      // Test for mobile Safari.
       expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'words');
 
       spy.messages.clear();
