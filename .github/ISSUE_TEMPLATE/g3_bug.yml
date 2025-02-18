@@ -24,7 +24,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Flutter GitHub issues are public and so you must avoid posting any Google confidential information in them. 
+        Flutter GitHub issues are public and so you must avoid posting any Google confidential information in them.
   - type: checkboxes
     id: priority-indicator
     attributes:
