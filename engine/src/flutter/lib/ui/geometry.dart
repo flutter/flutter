@@ -1533,7 +1533,7 @@ class RRect extends _RRectLike {
     Radius topRight = Radius.zero,
     Radius bottomRight = Radius.zero,
     Radius bottomLeft = Radius.zero,
-  }) : super(
+  }) : this._raw(
          top: rect.top,
          left: rect.left,
          right: rect.right,
