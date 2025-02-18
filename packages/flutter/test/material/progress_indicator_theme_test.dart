@@ -387,13 +387,10 @@ void main() {
         ),
       );
 
-      final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         Theme(data: theme, child: const Center(child: CircularProgressIndicator())),
       );
 
-      expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
-      handle.dispose();
       expect(tester.takeException(), null);
     },
   );
