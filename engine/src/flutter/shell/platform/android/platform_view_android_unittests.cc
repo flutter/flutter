@@ -15,15 +15,10 @@ TEST(AndroidPlatformView, SelectsVulkanBasedOnApiLevel) {
   settings.enable_software_rendering = false;
   settings.enable_impeller = true;
 
-  int api_level = android_get_device_api_level();
-  EXPECT_GT(api_level, 0);
-  if (api_level >= 29) {
-    EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings),
-              AndroidRenderingAPI::kImpellerVulkan);
-  } else {
-    EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings),
-              AndroidRenderingAPI::kImpellerOpenGLES);
-  }
+  EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings, 29),
+            AndroidRenderingAPI::kImpellerVulkan);
+  EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings, 24),
+            AndroidRenderingAPI::kImpellerOpenGLES);
 }
 
 TEST(AndroidPlatformView, SoftwareRenderingNotSupportedWithImpeller) {
