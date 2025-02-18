@@ -625,3 +625,11 @@ void testPointerActions() {
     });
   };
 }
+
+@pragma('vm:external-name', 'ReportEngineHandle')
+external void _reportEngineHandle(int? handle);
+
+@pragma('vm:entry-point')
+void providesEngineHandle() {
+  _reportEngineHandle(PlatformDispatcher.instance.engineHandle);
+}
