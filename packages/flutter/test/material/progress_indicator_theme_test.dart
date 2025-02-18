@@ -378,7 +378,7 @@ void main() {
 
 
   testWidgets(
-    'Legacy indeterminate CircularProgressIndicator renders with year2023 disabled and circularTrackColor is passed on theme',
+    'CircularProgressIndicator.year2023 set to false and provided circularTrackColor does not throw exception',
     (WidgetTester tester) async {
       const Color circularTrackColor = Color(0XFF0000FF);
       final ThemeData theme = ThemeData(
@@ -395,6 +395,7 @@ void main() {
 
       expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
       handle.dispose();
+      expect(tester.takeException(), null);
     },
   );
 
