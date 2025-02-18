@@ -35,7 +35,7 @@ struct AutoErrorCheck {
         return;
       }
       if (GLErrorIsFatal(error)) {
-        FML_LOG(ERROR) << "Fatal GL Error " << GLErrorToString(error) << "("
+        FML_LOG(FATAL) << "Fatal GL Error " << GLErrorToString(error) << "("
                        << error << ")" << " encountered on call to " << name;
       } else {
         FML_LOG(ERROR) << "GL Error " << GLErrorToString(error) << "(" << error
@@ -107,7 +107,7 @@ struct GLProc {
   ///
   template <class... Args>
   auto operator()(Args&&... args) const {
-    // #if defined(IMPELLER_DEBUG) && !defined(NDEBUG)
+#if defined(IMPELLER_DEBUG) && !defined(NDEBUG)
     AutoErrorCheck error(error_fn, name);
     // We check for the existence of extensions, and reset the function pointer
     // but it's still called unconditionally below, and will segfault. This
@@ -118,7 +118,7 @@ struct GLProc {
       FML_LOG(IMPORTANT) << name
                          << BuildGLArguments(std::forward<Args>(args)...);
     }
-    // #endif  // defined(IMPELLER_DEBUG) && !defined(NDEBUG)
+#endif  // defined(IMPELLER_DEBUG) && !defined(NDEBUG)
     return function(std::forward<Args>(args)...);
   }
 

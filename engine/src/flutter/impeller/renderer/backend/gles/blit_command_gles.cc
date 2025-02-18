@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/gles/blit_command_gles.h"
-#include <cstring>
 
 #include "flutter/fml/closure.h"
 #include "fml/trace_event.h"
