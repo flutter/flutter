@@ -621,6 +621,12 @@ public class FlutterFragmentActivity extends FragmentActivity
   }
 
   @Override
+  @SuppressWarnings("MissingSuperCall")
+  public void onBackPressed() {
+    flutterFragment.onBackPressed();
+  }
+
+  @Override
   public void onRequestPermissionsResult(
       int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
