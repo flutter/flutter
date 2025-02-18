@@ -862,7 +862,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// The [stretch] parameter determines whether the nav bar should stretch to
 /// fill the over-scroll area. The nav bar can still expand and contract as the
 /// user scrolls, but it will also stretch when the user over-scrolls if the
-/// [stretch] value is `true`. Defaults to `false`.
+/// [stretch] value is `true`. Defaults to `true`.
 ///
 /// {@tool dartpad}
 /// This example shows [CupertinoSliverNavigationBar] in action inside a [CustomScrollView].
@@ -899,7 +899,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
-    this.stretch = false,
+    this.stretch = true,
     this.bottom,
     this.bottomMode,
   }) : assert(
@@ -957,7 +957,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
-    this.stretch = false,
+    this.stretch = true,
     this.bottomMode = NavigationBarBottomMode.automatic,
     this.onSearchableBottomTap,
   }) : assert(
@@ -1091,7 +1091,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// accessing overscrolls. This may be undesirable for using overscroll-based
   /// widgets like the [CupertinoSliverRefreshControl].
   ///
-  /// Defaults to `false`.
+  /// Defaults to `true`.
   final bool stretch;
 
   /// The search field used in [CupertinoSliverNavigationBar.search].
