@@ -720,6 +720,9 @@ class RunCommand extends RunCommandBase {
         fileSystem: globals.fs,
         analytics: globals.analytics,
         logger: globals.logger,
+        terminal: globals.terminal,
+        platform: globals.platform,
+        outputPreferences: globals.outputPreferences,
         systemClock: globals.systemClock,
       );
     }
