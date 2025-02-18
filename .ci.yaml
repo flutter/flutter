@@ -1125,7 +1125,6 @@ targets:
   - name: Linux_android_emu android_display_cutout
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "linux"]
