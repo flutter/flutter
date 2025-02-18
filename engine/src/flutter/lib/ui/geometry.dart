@@ -1414,59 +1414,39 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  RRect? lerp(RRect? b, double t) {
+  T lerpTo(T? b, double t) {
+    assert(this is T);
     if (b == null) {
-      if (a == null) {
-        return null;
-      } else {
-        final double k = 1.0 - t;
-        return RRect._raw(
-          left: a.left * k,
-          top: a.top * k,
-          right: a.right * k,
-          bottom: a.bottom * k,
-          tlRadiusX: math.max(0, a.tlRadiusX * k),
-          tlRadiusY: math.max(0, a.tlRadiusY * k),
-          trRadiusX: math.max(0, a.trRadiusX * k),
-          trRadiusY: math.max(0, a.trRadiusY * k),
-          brRadiusX: math.max(0, a.brRadiusX * k),
-          brRadiusY: math.max(0, a.brRadiusY * k),
-          blRadiusX: math.max(0, a.blRadiusX * k),
-          blRadiusY: math.max(0, a.blRadiusY * k),
-        );
-      }
+      final double k = 1.0 - t;
+      return _create(
+        left: left * k,
+        top: top * k,
+        right: right * k,
+        bottom: bottom * k,
+        tlRadiusX: math.max(0, tlRadiusX * k),
+        tlRadiusY: math.max(0, tlRadiusY * k),
+        trRadiusX: math.max(0, trRadiusX * k),
+        trRadiusY: math.max(0, trRadiusY * k),
+        brRadiusX: math.max(0, brRadiusX * k),
+        brRadiusY: math.max(0, brRadiusY * k),
+        blRadiusX: math.max(0, blRadiusX * k),
+        blRadiusY: math.max(0, blRadiusY * k),
+      );
     } else {
-      if (a == null) {
-        return RRect._raw(
-          left: b.left * t,
-          top: b.top * t,
-          right: b.right * t,
-          bottom: b.bottom * t,
-          tlRadiusX: math.max(0, b.tlRadiusX * t),
-          tlRadiusY: math.max(0, b.tlRadiusY * t),
-          trRadiusX: math.max(0, b.trRadiusX * t),
-          trRadiusY: math.max(0, b.trRadiusY * t),
-          brRadiusX: math.max(0, b.brRadiusX * t),
-          brRadiusY: math.max(0, b.brRadiusY * t),
-          blRadiusX: math.max(0, b.blRadiusX * t),
-          blRadiusY: math.max(0, b.blRadiusY * t),
-        );
-      } else {
-        return RRect._raw(
-          left: _lerpDouble(a.left, b.left, t),
-          top: _lerpDouble(a.top, b.top, t),
-          right: _lerpDouble(a.right, b.right, t),
-          bottom: _lerpDouble(a.bottom, b.bottom, t),
-          tlRadiusX: math.max(0, _lerpDouble(a.tlRadiusX, b.tlRadiusX, t)),
-          tlRadiusY: math.max(0, _lerpDouble(a.tlRadiusY, b.tlRadiusY, t)),
-          trRadiusX: math.max(0, _lerpDouble(a.trRadiusX, b.trRadiusX, t)),
-          trRadiusY: math.max(0, _lerpDouble(a.trRadiusY, b.trRadiusY, t)),
-          brRadiusX: math.max(0, _lerpDouble(a.brRadiusX, b.brRadiusX, t)),
-          brRadiusY: math.max(0, _lerpDouble(a.brRadiusY, b.brRadiusY, t)),
-          blRadiusX: math.max(0, _lerpDouble(a.blRadiusX, b.blRadiusX, t)),
-          blRadiusY: math.max(0, _lerpDouble(a.blRadiusY, b.blRadiusY, t)),
-        );
-      }
+      return _create(
+        left: _lerpDouble(left, b.left, t),
+        top: _lerpDouble(top, b.top, t),
+        right: _lerpDouble(right, b.right, t),
+        bottom: _lerpDouble(bottom, b.bottom, t),
+        tlRadiusX: math.max(0, _lerpDouble(tlRadiusX, b.tlRadiusX, t)),
+        tlRadiusY: math.max(0, _lerpDouble(tlRadiusY, b.tlRadiusY, t)),
+        trRadiusX: math.max(0, _lerpDouble(trRadiusX, b.trRadiusX, t)),
+        trRadiusY: math.max(0, _lerpDouble(trRadiusY, b.trRadiusY, t)),
+        brRadiusX: math.max(0, _lerpDouble(brRadiusX, b.brRadiusX, t)),
+        brRadiusY: math.max(0, _lerpDouble(brRadiusY, b.brRadiusY, t)),
+        blRadiusX: math.max(0, _lerpDouble(blRadiusX, b.blRadiusX, t)),
+        blRadiusY: math.max(0, _lerpDouble(blRadiusY, b.blRadiusY, t)),
+      );
     }
   }
 
@@ -1810,59 +1790,13 @@ class RRect extends _RRectLike<RRect> {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static RRect? lerp(RRect? a, RRect? b, double t) {
-    if (b == null) {
-      if (a == null) {
+    if (a == null) {
+      if (b == null) {
         return null;
-      } else {
-        final double k = 1.0 - t;
-        return RRect._raw(
-          left: a.left * k,
-          top: a.top * k,
-          right: a.right * k,
-          bottom: a.bottom * k,
-          tlRadiusX: math.max(0, a.tlRadiusX * k),
-          tlRadiusY: math.max(0, a.tlRadiusY * k),
-          trRadiusX: math.max(0, a.trRadiusX * k),
-          trRadiusY: math.max(0, a.trRadiusY * k),
-          brRadiusX: math.max(0, a.brRadiusX * k),
-          brRadiusY: math.max(0, a.brRadiusY * k),
-          blRadiusX: math.max(0, a.blRadiusX * k),
-          blRadiusY: math.max(0, a.blRadiusY * k),
-        );
       }
-    } else {
-      if (a == null) {
-        return RRect._raw(
-          left: b.left * t,
-          top: b.top * t,
-          right: b.right * t,
-          bottom: b.bottom * t,
-          tlRadiusX: math.max(0, b.tlRadiusX * t),
-          tlRadiusY: math.max(0, b.tlRadiusY * t),
-          trRadiusX: math.max(0, b.trRadiusX * t),
-          trRadiusY: math.max(0, b.trRadiusY * t),
-          brRadiusX: math.max(0, b.brRadiusX * t),
-          brRadiusY: math.max(0, b.brRadiusY * t),
-          blRadiusX: math.max(0, b.blRadiusX * t),
-          blRadiusY: math.max(0, b.blRadiusY * t),
-        );
-      } else {
-        return RRect._raw(
-          left: _lerpDouble(a.left, b.left, t),
-          top: _lerpDouble(a.top, b.top, t),
-          right: _lerpDouble(a.right, b.right, t),
-          bottom: _lerpDouble(a.bottom, b.bottom, t),
-          tlRadiusX: math.max(0, _lerpDouble(a.tlRadiusX, b.tlRadiusX, t)),
-          tlRadiusY: math.max(0, _lerpDouble(a.tlRadiusY, b.tlRadiusY, t)),
-          trRadiusX: math.max(0, _lerpDouble(a.trRadiusX, b.trRadiusX, t)),
-          trRadiusY: math.max(0, _lerpDouble(a.trRadiusY, b.trRadiusY, t)),
-          brRadiusX: math.max(0, _lerpDouble(a.brRadiusX, b.brRadiusX, t)),
-          brRadiusY: math.max(0, _lerpDouble(a.brRadiusY, b.brRadiusY, t)),
-          blRadiusX: math.max(0, _lerpDouble(a.blRadiusX, b.blRadiusX, t)),
-          blRadiusY: math.max(0, _lerpDouble(a.blRadiusY, b.blRadiusY, t)),
-        );
-      }
+      return b.lerpTo(null, 1 - t);
     }
+    return a.lerpTo(b, t);
   }
 
   @override
@@ -2139,60 +2073,14 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  static RSuperellipse? lerp(RRect? a, RRect? b, double t) {
-    if (b == null) {
-      if (a == null) {
+  static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
+    if (a == null) {
+      if (b == null) {
         return null;
-      } else {
-        final double k = 1.0 - t;
-        return RSuperellipse._raw(
-          left: a.left * k,
-          top: a.top * k,
-          right: a.right * k,
-          bottom: a.bottom * k,
-          tlRadiusX: math.max(0, a.tlRadiusX * k),
-          tlRadiusY: math.max(0, a.tlRadiusY * k),
-          trRadiusX: math.max(0, a.trRadiusX * k),
-          trRadiusY: math.max(0, a.trRadiusY * k),
-          brRadiusX: math.max(0, a.brRadiusX * k),
-          brRadiusY: math.max(0, a.brRadiusY * k),
-          blRadiusX: math.max(0, a.blRadiusX * k),
-          blRadiusY: math.max(0, a.blRadiusY * k),
-        );
       }
-    } else {
-      if (a == null) {
-        return RSuperellipse._raw(
-          left: b.left * t,
-          top: b.top * t,
-          right: b.right * t,
-          bottom: b.bottom * t,
-          tlRadiusX: math.max(0, b.tlRadiusX * t),
-          tlRadiusY: math.max(0, b.tlRadiusY * t),
-          trRadiusX: math.max(0, b.trRadiusX * t),
-          trRadiusY: math.max(0, b.trRadiusY * t),
-          brRadiusX: math.max(0, b.brRadiusX * t),
-          brRadiusY: math.max(0, b.brRadiusY * t),
-          blRadiusX: math.max(0, b.blRadiusX * t),
-          blRadiusY: math.max(0, b.blRadiusY * t),
-        );
-      } else {
-        return RSuperellipse._raw(
-          left: _lerpDouble(a.left, b.left, t),
-          top: _lerpDouble(a.top, b.top, t),
-          right: _lerpDouble(a.right, b.right, t),
-          bottom: _lerpDouble(a.bottom, b.bottom, t),
-          tlRadiusX: math.max(0, _lerpDouble(a.tlRadiusX, b.tlRadiusX, t)),
-          tlRadiusY: math.max(0, _lerpDouble(a.tlRadiusY, b.tlRadiusY, t)),
-          trRadiusX: math.max(0, _lerpDouble(a.trRadiusX, b.trRadiusX, t)),
-          trRadiusY: math.max(0, _lerpDouble(a.trRadiusY, b.trRadiusY, t)),
-          brRadiusX: math.max(0, _lerpDouble(a.brRadiusX, b.brRadiusX, t)),
-          brRadiusY: math.max(0, _lerpDouble(a.brRadiusY, b.brRadiusY, t)),
-          blRadiusX: math.max(0, _lerpDouble(a.blRadiusX, b.blRadiusX, t)),
-          blRadiusY: math.max(0, _lerpDouble(a.blRadiusY, b.blRadiusY, t)),
-        );
-      }
+      return b.lerpTo(null, 1 - t);
     }
+    return a.lerpTo(b, t);
   }
 
   @override
