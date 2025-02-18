@@ -2,9 +2,12 @@
 
 ## Overview
 
-The most important thing is for any test, project, or app to have compatible versions. 
+**The most important thing is for any test, project, or app to have compatible versions. **
+
 If versions need to be different then a comment explaining why and what is being evaluated should be included. 
-All chosen versions should pass the minimum versions checks defined in [gradle_utils.dart](https://github.com/flutter/flutter/blob/a16c447abcb695b4ca907d59e66dc87f4f7178d3/packages/flutter_tools/lib/src/android/gradle_utils.dart#L63)
+All chosen versions should pass the minimum versions checks defined in [DependencyVersionChecker](https://github.com/flutter/flutter/blob/master/packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt) 
+
+If the versions chosen are not known by [gradle_utils.dart](https://github.com/flutter/flutter/blob/a16c447abcb695b4ca907d59e66dc87f4f7178d3/packages/flutter_tools/lib/src/android/gradle_utils.dart#L63) then update gradle_utils.dart. 
 
 ## Specifics
 
