@@ -26,7 +26,7 @@ TEST(AndroidPlatformView, SoftwareRenderingNotSupportedWithImpeller) {
   settings.enable_software_rendering = true;
   settings.enable_impeller = true;
 
-  ASSERT_DEATH(FlutterMain::SelectedRenderingAPI(settings), "");
+  ASSERT_DEATH(FlutterMain::SelectedRenderingAPI(settings, 29), "");
 }
 
 TEST(AndroidPlatformView, FallsBackToGLESonEmulator) {
