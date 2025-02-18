@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
-
 import '../dom.dart';
 
 /// Controls the capitalization of the text.
