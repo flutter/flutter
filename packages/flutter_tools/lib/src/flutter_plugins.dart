@@ -244,7 +244,15 @@ bool _writeFlutterPluginsList(
   final String? oldPluginsFileStringContent = _readFileContent(pluginsFile);
   bool pluginsChanged = true;
   if (oldPluginsFileStringContent != null) {
-    pluginsChanged = oldPluginsFileStringContent.contains(pluginsMap.toString());
+    Object? decodedJson;
+    try {
+      decodedJson = jsonDecode(oldPluginsFileStringContent);
+      if (decodedJson is Map<String, Object?>) {
+        final String jsonOfNewPluginsMap = jsonEncode(pluginsMap);
+        final String jsonOfOldPluginsMap = jsonEncode(decodedJson[_kFlutterPluginsPluginListKey]);
+        pluginsChanged = jsonOfNewPluginsMap != jsonOfOldPluginsMap;
+      }
+    } on FormatException catch (_) {}
   }
   final String pluginFileContent = json.encode(result);
   pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
@@ -363,20 +371,11 @@ List<Map<String, Object?>> _extractPlatformMaps(Iterable<Plugin> plugins, String
   ];
 }
 
-Future<void> _writeAndroidPluginRegistrant(
-  FlutterProject project,
-  List<Plugin> plugins, {
-  required bool releaseMode,
-}) async {
-  Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
+Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     AndroidPlugin.kConfigKey,
   );
-  // TODO(camsim99): Remove dev dependencies from release builds for all platforms. See https://github.com/flutter/flutter/issues/161348.
-  if (releaseMode) {
-    methodChannelPlugins = methodChannelPlugins.where((Plugin p) => !p.isDevDependency);
-  }
-
   final List<Map<String, Object?>> androidPlugins = _extractPlatformMaps(
     methodChannelPlugins,
     AndroidPlugin.kConfigKey,
@@ -909,37 +908,12 @@ List<Plugin> _filterPluginsByVariant(
 Future<void> writeWindowsPluginFiles(
   FlutterProject project,
   List<Plugin> plugins,
-  TemplateRenderer templateRenderer, {
-  Iterable<String>? allowedPlugins,
-}) async {
+  TemplateRenderer templateRenderer,
+) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     WindowsPlugin.kConfigKey,
   );
-  if (allowedPlugins != null) {
-    final List<Plugin> disallowedPlugins =
-        methodChannelPlugins.toList()
-          ..removeWhere((Plugin plugin) => allowedPlugins.contains(plugin.name));
-    if (disallowedPlugins.isNotEmpty) {
-      final StringBuffer buffer = StringBuffer();
-      buffer.writeln(
-        'The Flutter Preview device does not support the following plugins from your pubspec.yaml:',
-      );
-      buffer.writeln();
-      buffer.writeln(disallowedPlugins.map((Plugin p) => p.name).toList().toString());
-      buffer.writeln();
-      buffer.writeln(
-        'In order to build a Flutter app with plugins, you must use another target platform,',
-      );
-      buffer.writeln(
-        'such as Windows. Type `flutter doctor` into your terminal to see which target platforms',
-      );
-      buffer.writeln(
-        'are ready to be used, and how to get required dependencies for other platforms.',
-      );
-      throwToolExit(buffer.toString());
-    }
-  }
   final List<Plugin> win32Plugins = _filterPluginsByVariant(
     methodChannelPlugins,
     WindowsPlugin.kConfigKey,
@@ -1204,7 +1178,7 @@ Future<void> injectBuildTimePluginFilesForWebPlatform(
 
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
 ///
-/// The injected files are required by the flutter app as soon as possible, so
+/// The injected files are required by the Flutter app as soon as possible, so
 /// it can be built.
 ///
 /// Files written by this method end up in platform-specific locations that are
@@ -1221,22 +1195,22 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
-  Iterable<String>? allowedPlugins,
   DarwinDependencyManagement? darwinDependencyManagement,
   bool? releaseMode,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  List<Plugin> plugins = await findPlugins(project);
+
+  if (releaseMode ?? false) {
+    plugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
+  }
+
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
     plugins,
     pluginResolutionType: _PluginResolutionType.nativeOrDart,
   );
 
   if (androidPlatform) {
-    await _writeAndroidPluginRegistrant(
-      project,
-      pluginsByPlatform[AndroidPlugin.kConfigKey]!,
-      releaseMode: releaseMode ?? false,
-    );
+    await _writeAndroidPluginRegistrant(project, pluginsByPlatform[AndroidPlugin.kConfigKey]!);
   }
   if (iosPlatform) {
     await _writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
@@ -1252,7 +1226,6 @@ Future<void> injectPlugins(
       project,
       pluginsByPlatform[WindowsPlugin.kConfigKey]!,
       globals.templateRenderer,
-      allowedPlugins: allowedPlugins,
     );
   }
   if (iosPlatform || macOSPlatform) {

@@ -18,7 +18,11 @@ new contributions will only be accepted in `src/main/kotlin` (and `src/test/kotl
 
 ### Testing
 
-Tests can be run in Android Studio, or directly with Gradle: `./gradle test` 
+To run the tests from the CLI, you first need to download the Gradle wrapper.
+1. Ensure you have run gclient sync recently (i.e., from the root of your framework checkout, run `gclient sync -D`).
+2. From this directory, run `../../../engine/src/flutter/third_party/gradle/bin/gradle wrapper`.
+
+Tests can be run in Android Studio, or directly with Gradle: `./gradlew test` 
 (note that this directory does not contain a version controlled Gradle file. You can find one in 
 the engines `third_party` directory at 
 `<flutter_root>/engine/src/flutter/third_party/gradle/bin/gradle`).
@@ -30,3 +34,6 @@ e.g `./gradlew test --tests "com.flutter.gradle.BaseApplicationNameHandlerTest.s
 
 Sometimes changing a test name and then running it will cause an IDE error. To get Android Studio back
 to a good state on Mac, run `Help > "Repair IDE"`, and then in the popup window `"Rescan project indexes > Everything works now."`
+
+To add a new test, add a class under `src/test/kotlin`, with methods annotated with `@Test`.
+These tests will get automatically run on CI by `packages/flutter_tools/test/integration.shard/android_run_flutter_gradle_plugin_tests_test.dart`.
