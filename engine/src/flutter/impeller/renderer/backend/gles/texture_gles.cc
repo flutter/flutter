@@ -597,13 +597,7 @@ bool TextureGLES::SetAsFramebufferAttachment(
   }
   const auto& gl = reactor_->GetProcTable();
 
-  Type type = type_;
-  // When binding to a GL_READ_FRAMEBUFFER, any multisampled
-  // textures must be bound as single sampled.
-  if (target == GL_READ_FRAMEBUFFER && type == Type::kTextureMultisampled) {
-    type = Type::kTexture;
-  }
-  switch (type) {
+  switch (ComputeTypeForBinding(target)) {
     case Type::kTexture:
       gl.FramebufferTexture2D(target,                             // target
                               ToAttachmentType(attachment_type),  // attachment
