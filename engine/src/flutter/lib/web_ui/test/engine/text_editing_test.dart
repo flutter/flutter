@@ -1569,10 +1569,7 @@ Future<void> testMain() async {
       spy.messages.clear();
 
       // Test for mobile Safari.
-      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'words');
-      }
+      expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'words');
 
       spy.messages.clear();
       hideKeyboard();
