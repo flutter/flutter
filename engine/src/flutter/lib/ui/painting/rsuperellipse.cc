@@ -40,8 +40,8 @@ RSuperellipse DartConverter<flutter::RSuperellipse>::FromDart(
       .bottom_right = flutter::DlSize(buffer[8], buffer[9]),
   };
 
-  result.rsuperellipse =
-      flutter::DlRoundSuperellipse::MakeRectRadii(raw_rect.GetPositive(), radii);
+  result.rsuperellipse = flutter::DlRoundSuperellipse::MakeRectRadii(
+      raw_rect.GetPositive(), radii);
 
   result.is_null = false;
   return result;
