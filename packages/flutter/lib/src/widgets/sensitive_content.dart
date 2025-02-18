@@ -75,19 +75,19 @@ class SensitiveContentSetting {
   /// Registers a [SensitiveContent] widget that will help determine the
   /// [ContentSensitivity] level for the widget tree.
   static Future<void> register(ContentSensitivity desiredSensitivityLevel) async {
-    print('CAMILLE: registering!');
+    // print('CAMILLE: registering!');
     await instance._register(desiredSensitivityLevel);
   }
 
   Future<void> _register(ContentSensitivity desiredSensitivityLevel) async {
     // Set default content sensitivity level as set in native Android. This will be
     // auto sensitive if it is otherwise unset by the developer.
-    print('CAMILLE: default about to be queried!');
-    print('CAMILLE: current default: $_defaultContentSensitivitySetting');
+    // print('CAMILLE: default about to be queried!');
+    // print('CAMILLE: current default: $_defaultContentSensitivitySetting');
     _defaultContentSensitivitySetting ??= ContentSensitivity.getContentSensitivityById(
       await _sensitiveContentService.getContentSensitivity(),
     );
-    print('CAMILLE: default received!');
+    // print('CAMILLE: default received!');
     _contentSensitivityState ??= ContentSensitivityState(_defaultContentSensitivitySetting!);
 
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
@@ -211,7 +211,7 @@ class SensitiveContentState extends State<SensitiveContent> {
 
   @override
   void dispose() {
-    print('CAMILLE: dispose called');
+    // print('CAMILLE: dispose called');
     SensitiveContentSetting.unregister(widget.sensitivityLevel);
     super.dispose();
   }

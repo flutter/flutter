@@ -23,8 +23,8 @@ void main() {
         if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
           expect(methodCall.arguments, isA<int>());
         } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-          print('CAMILLE: getContentSensitivity called');
-          print('CAMILLE: returning default setting ID: $defaultContentSensitivitySettingId');
+          // print('CAMILLE: getContentSensitivity called');
+          // print('CAMILLE: returning default setting ID: $defaultContentSensitivitySettingId');
           return defaultContentSensitivitySettingId;
         }
         return null;
@@ -113,9 +113,19 @@ void main() {
         await tester.pumpWidget(Column(children: <Widget>[sc, sc2]));
 
         SensitiveContentState state = tester.firstState<SensitiveContentState>(
-          find.byType(SensitiveContent),
+          find.byKey(Key('hi')),
         );
-        // todo: camille figure out dilemma, probably want to create wrapper class for testing
+        print(state);
+        state.dispose();
+        tester.pumpAndSettle();
+        print('heeeyyyyyyyyyyyy!');
+        addTearDown(() {
+          print('>>>>>>>>>>>>>> camille: Test finished!');
+        });
+        tester.pumpWidget(Container());
+        // debugDumpApp();
+
+        // todo: camille figure out dilemma, probably want to create wrapper class for testing; go with wrapper method (mon)
 
         // await tester.pumpWidget(Column(children: [sc]));
       });
