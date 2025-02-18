@@ -36,6 +36,7 @@ Future<void> writeResponseData(
   await file.writeAsString(resultString);
 }
 
+// CAMILLE: why would we do this?
 /// Adaptor to run an integration test using `flutter drive`.
 ///
 /// To run an integration test `<test_name>.dart` using `flutter drive`, put a file named
