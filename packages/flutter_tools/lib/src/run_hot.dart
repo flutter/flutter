@@ -1162,8 +1162,7 @@ class HotRunner extends ResidentRunner {
   Future<void> evictDirtyAssets() async {
     final List<Future<void>> futures = <Future<void>>[];
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS!.assetPathsToEvict.isEmpty &&
-          device.devFS!.shaderPathsToEvict.isEmpty) {
+      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
