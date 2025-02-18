@@ -413,7 +413,7 @@ TEST_P(DlGoldenTest, BaselineHE) {
   int32_t left_max_y = CalculateMaxY(left.get());
   int32_t right_max_y = CalculateMaxY(right.get());
   int32_t y_diff = std::abs(left_max_y - right_max_y);
-  FML_LOG(ERROR) << "y diff: " << y_diff;  //  TEsting.
+  EXPECT_TRUE(y_diff <= 2) << "y diff: " << y_diff;
 }
 
 TEST_P(DlGoldenTest, MaintainsSpace) {
