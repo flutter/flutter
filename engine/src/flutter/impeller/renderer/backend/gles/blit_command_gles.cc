@@ -366,8 +366,8 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
           case TextureCoordinateSystem::kRenderToTexture:
             // The texture is upside down, and must be inverted when copying
             // byte data out.
-            FlipImage(data + destination_offset, 4, source_region.GetHeight(),
-                      source_region.GetWidth());
+            FlipImage(data + destination_offset, source_region.GetWidth(),
+                      source_region.GetHeight(), 4);
         }
       });
 
