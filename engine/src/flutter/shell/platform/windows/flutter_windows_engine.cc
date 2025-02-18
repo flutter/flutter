@@ -146,6 +146,10 @@ FlutterLocale CovertToFlutterLocale(const LanguageInfo& info) {
 
 }  // namespace
 
+int64_t FlutterWindowsEngine::next_engine_handle_ = 1;
+std::map<int64_t, FlutterWindowsEngine*>
+    FlutterWindowsEngine::handle_to_engine_;
+
 FlutterWindowsEngine::FlutterWindowsEngine(
     const FlutterProjectBundle& project,
     std::shared_ptr<WindowsProcTable> windows_proc_table)
@@ -156,6 +160,9 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   if (windows_proc_table_ == nullptr) {
     windows_proc_table_ = std::make_shared<WindowsProcTable>();
   }
+
+  engine_handle_ = next_engine_handle_++;
+  handle_to_engine_[engine_handle_] = this;
 
   gl_ = egl::ProcTable::Create();
 
@@ -231,6 +238,16 @@ FlutterWindowsEngine::FlutterWindowsEngine(
 FlutterWindowsEngine::~FlutterWindowsEngine() {
   messenger_->SetEngine(nullptr);
   Stop();
+  handle_to_engine_.erase(engine_handle_);
+}
+
+FlutterWindowsEngine* FlutterWindowsEngine::GetEngineForHandle(
+    int64_t engine_handle) {
+  auto it = handle_to_engine_.find(engine_handle);
+  if (it == handle_to_engine_.end()) {
+    return nullptr;
+  }
+  return it->second;
 }
 
 void FlutterWindowsEngine::SetSwitches(
@@ -309,6 +326,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = argv.empty() ? nullptr : argv.data();
+  args.engine_handle = engine_handle_;
 
   // Fail if conflicting non-default entrypoints are specified in the method
   // argument and the project.
