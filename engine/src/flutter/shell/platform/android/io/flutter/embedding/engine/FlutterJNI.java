@@ -250,7 +250,7 @@ public class FlutterJNI {
    * VM Service URI for the VM instance.
    *
    * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
-   * String, long)} is run.
+   * String, long, int)} is run.
    */
   @Nullable
   public static String getVMServiceUri() {
@@ -261,7 +261,7 @@ public class FlutterJNI {
    * VM Service URI for the VM instance.
    *
    * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
-   * String, long)} is run.
+   * String, long, int)} is run.
    *
    * @deprecated replaced by {@link #getVMServiceUri()}.
    */
@@ -451,7 +451,8 @@ public class FlutterJNI {
    * #attachToNative()}.
    *
    * <p>Static methods that should be only called once such as {@link #init(Context, String[],
-   * String, String, String, long)} shouldn't be called again on the spawned FlutterJNI instance.
+   * String, String, String, long, int)} shouldn't be called again on the spawned FlutterJNI
+   * instance.
    */
   @UiThread
   @NonNull
