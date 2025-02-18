@@ -376,7 +376,6 @@ void main() {
     );
   });
 
-
   testWidgets(
     'CircularProgressIndicator.year2023 set to false and provided circularTrackColor does not throw exception',
     (WidgetTester tester) async {
