@@ -15,26 +15,21 @@ void main() {
   runApp(const MenuControllerDecoratorApp());
 }
 
-class MenuControllerDecoratorExample extends StatefulWidget {
-  const MenuControllerDecoratorExample({super.key});
-
-  @override
-  State<MenuControllerDecoratorExample> createState() => _MenuControllerDecoratorExampleState();
-}
-
-class _MenuControllerDecoratorExampleState extends State<MenuControllerDecoratorExample>
-    with SingleTickerProviderStateMixin, MenuControllerDecorator {
-  @override
-  MenuController menuController = MenuController();
-  late final AnimationController animationController;
-
-  @override
-  void initState() {
-    super.initState();
-    // Use an unbounded animation controller to allow simulations to run
-    // indefinitely.
-    animationController = AnimationController.unbounded(vsync: this);
-  }
+class AnimatedMenuController extends MenuControllerDecorator {
+  const AnimatedMenuController({required super.menuController, required this.animationController});
+  final AnimationController animationController;
+  SpringSimulation get forwardSpring => SpringSimulation(
+    SpringDescription.withDampingRatio(mass: 1.0, stiffness: 150, ratio: 0.7),
+    animationController.value,
+    1.0,
+    0.0,
+  );
+  SpringSimulation get reverseSpring => SpringSimulation(
+    SpringDescription.withDampingRatio(mass: 1.0, stiffness: 200, ratio: 0.7),
+    animationController.value,
+    0.0,
+    0.0,
+  );
 
   @override
   void handleMenuOpenRequest({ui.Offset? position}) {
@@ -51,6 +46,31 @@ class _MenuControllerDecoratorExampleState extends State<MenuControllerDecorator
     // forward.
     animationController.animateBackWith(reverseSpring).whenComplete(markMenuClosed);
   }
+}
+
+class MenuControllerDecoratorExample extends StatefulWidget {
+  const MenuControllerDecoratorExample({super.key});
+
+  @override
+  State<MenuControllerDecoratorExample> createState() => _MenuControllerDecoratorExampleState();
+}
+
+class _MenuControllerDecoratorExampleState extends State<MenuControllerDecoratorExample>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController animationController;
+  late final AnimatedMenuController menuController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Use an unbounded animation controller to allow simulations to run
+    // indefinitely.
+    animationController = AnimationController.unbounded(vsync: this);
+    menuController = AnimatedMenuController(
+      menuController: MenuController(),
+      animationController: animationController,
+    );
+  }
 
   @override
   void dispose() {
@@ -61,7 +81,7 @@ class _MenuControllerDecoratorExampleState extends State<MenuControllerDecorator
   @override
   Widget build(BuildContext context) {
     return RawMenuAnchor(
-      controller: this,
+      controller: menuController,
       overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
         // Center the menu below the anchor.
         final ui.Offset position = info.anchorRect.bottomCenter.translate(-75, 4);
@@ -77,7 +97,7 @@ class _MenuControllerDecoratorExampleState extends State<MenuControllerDecorator
               child: TapRegion(
                 groupId: info.tapRegionGroupId,
                 onTapOutside: (PointerDownEvent event) {
-                  close();
+                  menuController.close();
                 },
                 child: ScaleTransition(
                   scale: animationController.view,
@@ -117,30 +137,17 @@ class _MenuControllerDecoratorExampleState extends State<MenuControllerDecorator
       builder: (BuildContext context, MenuController menuController, Widget? child) {
         return FilledButton(
           onPressed: () {
-            if (animationStatus.isForwardOrCompleted) {
+            if (menuController.animationStatus.isForwardOrCompleted) {
               menuController.close();
             } else {
               menuController.open();
             }
           },
-          child: Text(animationStatus.isForwardOrCompleted ? 'Close' : 'Open'),
+          child: Text(menuController.animationStatus.isForwardOrCompleted ? 'Close' : 'Open'),
         );
       },
     );
   }
-
-  SpringSimulation get forwardSpring => SpringSimulation(
-    SpringDescription.withDampingRatio(mass: 1.0, stiffness: 150, ratio: 0.7),
-    animationController.value,
-    1.0,
-    0.0,
-  );
-  SpringSimulation get reverseSpring => SpringSimulation(
-    SpringDescription.withDampingRatio(mass: 1.0, stiffness: 200, ratio: 0.7),
-    animationController.value,
-    0.0,
-    0.0,
-  );
 }
 
 class MenuControllerDecoratorApp extends StatelessWidget {

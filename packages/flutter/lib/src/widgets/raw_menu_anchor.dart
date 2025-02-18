@@ -291,11 +291,9 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   Size? _viewSize;
   ui.Offset? _menuPosition;
 
+  @nonVirtual
   AnimationStatus get animationStatus {
-    if (!isOpen) {
-      return AnimationStatus.dismissed;
-    }
-    return _animationStatus ?? AnimationStatus.completed;
+    return isOpen ? _animationStatus ?? AnimationStatus.completed : AnimationStatus.dismissed;
   }
 
   AnimationStatus? _animationStatus;
@@ -314,9 +312,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   bool get isRoot => _parent == null;
 
   /// The [MenuController] that is used by the [_RawMenuAnchorBaseMixin].
-  ///
-  /// If an overridding widget does not provide a [MenuController], then
-  /// [_RawMenuAnchorBaseMixin] will create and manage its own.
   MenuController get menuController;
 
   /// Whether this menu layer is open.
@@ -440,13 +435,14 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ///
   /// Unless the menu needs to be opened immediately, this method should be
   /// called instead of [open]. Doing so enables a [menuController] that
-  /// inherits from [MenuControllerDecorator] to customize the opening sequence
-  /// with [MenuControllerDecorator.handleMenuOpenRequest].
+  /// inherits from [MenuControllerDecorator] to customize the menu opening
+  /// sequence with [MenuControllerDecorator.handleMenuOpenRequest].
   ///
   /// The optional `position` argument should specify the location of the menu
   /// in the local coordinates of the [RawMenuAnchor].
   void requestOpen({Offset? position}) {
     assert(_debugMenuInfo('Requesting Open $this'));
+    _menuPosition = position;
     menuController._handleOpenRequest(position: position);
   }
 
@@ -454,7 +450,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ///
   /// Unless the menu needs to be closed immediately, this method should be
   /// called instead of [close]. Doing so allows [menuController]s that inherit
-  /// from [MenuControllerDecorator] to customize the closing sequence with
+  /// from [MenuControllerDecorator] to customize the menu closing sequence with
   /// [MenuControllerDecorator.handleMenuCloseRequest].
   void requestClose() {
     assert(_debugMenuInfo('Requesting Close $this'));
@@ -842,7 +838,7 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
 /// * [RawMenuAnchor], a widget that defines a region that has submenu.
 abstract class MenuController {
   /// Creates a [MenuController].
-  factory MenuController() => _MenuController();
+  factory MenuController() => _DefaultMenuController();
   const MenuController._();
 
   /// Opens the menu that this [MenuController] is associated with.
@@ -855,7 +851,10 @@ abstract class MenuController {
   ///
   /// If the menu's anchor point is scrolled by an ancestor, or the view changes
   /// size, then any open menu will automatically close.
-  void open({Offset? position});
+  void open({Offset? position}) {
+    assert(_anchor != null);
+    _anchor!.requestOpen(position: position);
+  }
 
   /// Close the menu that this [MenuController] is associated with.
   ///
@@ -866,11 +865,16 @@ abstract class MenuController {
   /// If the menu's anchor point (either a [MenuBar] or a [MenuAnchor]) is
   /// scrolled by an ancestor, or the view changes size, then any open menu will
   /// automatically close.
-  void close();
+  void close() {
+    _anchor?.requestClose();
+  }
 
   /// Close the children of the menu associated with this [MenuController],
   /// without closing the menu itself.
-  void closeChildren();
+  void closeChildren() {
+    assert(_anchor != null);
+    _anchor!.closeChildren();
+  }
 
   /// Whether or not the menu associated with this [MenuController] is open.
   ///
@@ -879,7 +883,7 @@ abstract class MenuController {
   /// [AnimationStatus] is [AnimationStatus.dismissed], and open when the
   /// [AnimationStatus] is [AnimationStatus.completed],
   /// [AnimationStatus.forward], or [AnimationStatus.reverse].
-  bool get isOpen;
+  bool get isOpen => _anchor?.isOpen ?? false;
 
   /// The [AnimationStatus] of the menu associated with this [MenuController].
   ///
@@ -898,7 +902,9 @@ abstract class MenuController {
   /// Because [isOpen] reflects whether the menu's overlay is mounted, [isOpen]
   /// will only be false when the [animationStatus] is
   /// [AnimationStatus.dismissed].
-  AnimationStatus get animationStatus;
+  AnimationStatus get animationStatus {
+    return _anchor?.animationStatus ?? AnimationStatus.dismissed;
+  }
 
   /// The anchor that this controller controls.
   ///
@@ -906,19 +912,23 @@ abstract class MenuController {
   /// it controls.
   _RawMenuAnchorBaseMixin? get _anchor;
 
-  // Called by the _anchor to trigger the menu opening sequence.
-  //
-  // Typically called in response to open() being called on the MenuController.
-  void _handleOpenRequest({Offset? position});
-
-  // Called by the _anchor to trigger the menu closing sequence.
-  void _handleCloseRequest();
-
   // Attach this controller to an anchor.
   void _attach(_RawMenuAnchorBaseMixin anchor);
 
   // Detach the controller from an anchor.
   void _detach(_RawMenuAnchorBaseMixin anchor);
+
+  // Called by the _anchor to trigger the menu opening sequence.
+  //
+  // Typically called in response to open() being called on the MenuController.
+  void _handleOpenRequest({Offset? position}) {
+    _anchor!.open(position: position);
+  }
+
+  // Called by the _anchor to trigger the menu closing sequence.
+  void _handleCloseRequest() {
+    _anchor!.close();
+  }
 
   /// Returns the [MenuController] of the ancestor [RawMenuAnchor] nearest to
   /// the given `context`, if one exists. Otherwise, returns null.
@@ -954,46 +964,11 @@ abstract class MenuController {
 }
 
 // The default implementation of [MenuController].
-class _MenuController extends MenuController {
-  _MenuController() : super._();
+class _DefaultMenuController extends MenuController {
+  _DefaultMenuController() : super._();
 
   @override
   _RawMenuAnchorBaseMixin? _anchor;
-
-  @override
-  bool get isOpen => _anchor?.isOpen ?? false;
-
-  @override
-  AnimationStatus get animationStatus {
-    return _anchor?.animationStatus ?? AnimationStatus.dismissed;
-  }
-
-  @override
-  void open({Offset? position}) {
-    assert(_anchor != null);
-    _anchor!.requestOpen(position: position);
-  }
-
-  @override
-  void close() {
-    _anchor?.requestClose();
-  }
-
-  @override
-  void closeChildren() {
-    assert(_anchor != null);
-    _anchor!.closeChildren();
-  }
-
-  @override
-  void _handleOpenRequest({Offset? position}) {
-    _anchor!.open(position: position);
-  }
-
-  @override
-  void _handleCloseRequest() {
-    _anchor?.close();
-  }
 
   // ignore: use_setters_to_change_properties
   @override
@@ -1037,12 +1012,18 @@ class _MenuController extends MenuController {
 ///
 /// See also:
 /// * [MenuController], a controller used to open and close a menu anchor.
-abstract mixin class MenuControllerDecorator implements MenuController {
+abstract class MenuControllerDecorator extends MenuController {
   /// Creates a [MenuControllerDecorator].
-  const MenuControllerDecorator();
+  const MenuControllerDecorator({required this.menuController})
+    : assert(
+        menuController is! MenuControllerDecorator,
+        'A $MenuControllerDecorator cannot be used as the $MenuController for another $MenuControllerDecorator. '
+        'Use a $MenuController instead of a $MenuControllerDecorator.',
+      ),
+      super._();
 
   /// The [MenuController] that this [MenuControllerDecorator] is decorating.
-  MenuController get menuController;
+  final MenuController menuController;
 
   @override
   bool get isOpen => menuController.isOpen;
@@ -1053,7 +1034,7 @@ abstract mixin class MenuControllerDecorator implements MenuController {
   @override
   _RawMenuAnchorBaseMixin? get _anchor => menuController._anchor;
 
-  /// Called when [MenuController.close] is invoked by the attached
+  /// Called when [MenuController.open] is invoked by the attached
   /// [menuController]. Implementations should begin animating the menu open.
   ///
   /// Once the menu has finished animating open, [markMenuOpened] should be
@@ -1063,6 +1044,10 @@ abstract mixin class MenuControllerDecorator implements MenuController {
   /// The `position` argument is the position passed to [MenuController.open],
   /// and describes the location of the menu relative to the menu anchor. If no
   /// position was passed, this will be null.
+  ///
+  /// If the `position` value changes, [handleMenuOpenRequest] may be called
+  /// when the menu is already open or opening. In this case, the menu should be
+  /// repositioned to the new location without restarting the opening animation.
   ///
   /// If the opening animation is canceled, users should not call
   /// [markMenuOpened].
@@ -1086,13 +1071,7 @@ abstract mixin class MenuControllerDecorator implements MenuController {
   /// [AnimationStatus.completed].
   @mustCallSuper
   void markMenuOpened() {
-    assert(
-      _anchor != null,
-      '$MenuControllerDecorator.markMenuOpened was called on a $MenuController that '
-      "isn't attached to a menu anchor.",
-    );
     if (!_anchor!.isOpen) {
-      // Use the previously set position.
       _anchor!.open(position: _anchor!._menuPosition);
     }
     _anchor!.animationStatus = AnimationStatus.completed;
@@ -1102,8 +1081,8 @@ abstract mixin class MenuControllerDecorator implements MenuController {
   /// to [AnimationStatus.dismissed].
   @mustCallSuper
   void markMenuClosed() {
-    _anchor
-      ?..animationStatus = AnimationStatus.dismissed
+    _anchor!
+      ..animationStatus = AnimationStatus.dismissed
       ..close();
   }
 
@@ -1152,13 +1131,13 @@ abstract mixin class MenuControllerDecorator implements MenuController {
   @override
   void _handleOpenRequest({ui.Offset? position}) {
     assert(_anchor != null);
+    handleMenuOpenRequest(position: position);
     switch (animationStatus) {
       case AnimationStatus.forward:
       case AnimationStatus.completed:
         break;
       case AnimationStatus.dismissed:
       case AnimationStatus.reverse:
-        handleMenuOpenRequest(position: position);
         _anchor!.animationStatus = AnimationStatus.forward;
     }
 

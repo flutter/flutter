@@ -14,6 +14,26 @@ void main() {
   runApp(const NestedMenuControllerDecoratorApp());
 }
 
+class AnimatedMenuController extends MenuControllerDecorator {
+  const AnimatedMenuController({required super.menuController, required this.animationController});
+  final AnimationController animationController;
+
+  @override
+  void handleMenuOpenRequest({ui.Offset? position}) {
+    // Call whenComplete() rather than whenCompleteOrCancel() to avoid marking
+    // the menu as opened when the [AnimationStatus] moves from forward to
+    // reverse.
+    animationController.forward().whenComplete(markMenuOpened);
+  }
+
+  @override
+  void handleMenuCloseRequest() {
+    // Animate the children of this menu closed.
+    closeChildren();
+    animationController.reverse().whenComplete(markMenuClosed);
+  }
+}
+
 class NestedMenuControllerDecoratorExample extends StatelessWidget {
   const NestedMenuControllerDecoratorExample({super.key});
 
@@ -93,9 +113,8 @@ class Menu extends StatefulWidget {
   State<Menu> createState() => MenuState();
 }
 
-class MenuState extends State<Menu> with SingleTickerProviderStateMixin, MenuControllerDecorator {
-  @override
-  final MenuController menuController = MenuController();
+class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
+  late final AnimatedMenuController menuController;
   late final AnimationController animationController;
   late final CurvedAnimation animation;
   bool get isSubmenu => MenuController.maybeOf(context) != null;
@@ -108,20 +127,10 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin, MenuCon
       duration: const Duration(milliseconds: 200),
     );
     animation = CurvedAnimation(parent: animationController, curve: Curves.easeOutQuart);
-  }
-
-  // Call whenComplete() rather than whenCompleteOrCancel() to avoid marking
-  // the menu as opened when the [AnimationStatus] moves from forward to
-  // reverse.
-  @override
-  void handleMenuOpenRequest({ui.Offset? position}) {
-    animationController.forward().whenComplete(markMenuOpened);
-  }
-
-  @override
-  void handleMenuCloseRequest() {
-    closeChildren();
-    animationController.reverse().whenComplete(markMenuClosed);
+    menuController = AnimatedMenuController(
+      menuController: MenuController(),
+      animationController: animationController,
+    );
   }
 
   @override
@@ -134,7 +143,7 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin, MenuCon
   @override
   Widget build(BuildContext context) {
     return RawMenuAnchor(
-      controller: this,
+      controller: menuController,
       overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
         final ui.Offset position =
             isSubmenu ? info.anchorRect.topRight : info.anchorRect.bottomLeft;
@@ -147,11 +156,11 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin, MenuCon
             scopesRoute: true,
             child: ExcludeFocus(
               // Remove focus while the menu is closing.
-              excluding: animationStatus == AnimationStatus.reverse,
+              excluding: animation.status == AnimationStatus.reverse,
               child: TapRegion(
                 groupId: info.tapRegionGroupId,
                 onTapOutside: (PointerDownEvent event) {
-                  close();
+                  menuController.close();
                 },
                 child: FadeTransition(
                   opacity: animation,

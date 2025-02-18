@@ -749,6 +749,170 @@ void main() {
     },
   );
 
+  testWidgets('MenuController can be changed', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    final MenuController groupController = MenuController();
+
+    final MenuController newController = MenuController();
+    final MenuController newGroupController = MenuController();
+
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          controller: controller,
+          child: Menu(
+            controller: groupController,
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isTrue);
+    expect(groupController.isOpen, isTrue);
+    expect(newController.isOpen, isFalse);
+    expect(newGroupController.isOpen, isFalse);
+
+    // Swap the controllers.
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          controller: newController,
+          child: Menu(
+            controller: newGroupController,
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isFalse);
+    expect(groupController.isOpen, isFalse);
+    expect(newController.isOpen, isTrue);
+    expect(newGroupController.isOpen, isTrue);
+
+    // Close the new controller.
+    newController.close();
+    await tester.pump();
+
+    expect(newController.isOpen, isFalse);
+    expect(newGroupController.isOpen, isFalse);
+    expect(find.text(Tag.a.text), findsNothing);
+  });
+
+  testWidgets('[Group] MenuController can be moved to a different menu', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          controller: controller,
+          child: Menu(
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isTrue);
+
+    // Swap the controllers.
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          key: UniqueKey(),
+          controller: controller,
+          child: Menu(
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(Tag.a.text), findsNothing);
+    expect(controller.isOpen, isFalse);
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isTrue);
+
+    // Close the menu.
+    controller.close();
+    await tester.pump();
+
+    expect(controller.isOpen, isFalse);
+    expect(find.text(Tag.a.text), findsNothing);
+  });
+
+  testWidgets('[Default] MenuController can be moved to a different menu', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          controller: MenuController(),
+          child: Menu(
+            controller: controller,
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isTrue);
+
+    // Swap the controllers.
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          controller: MenuController(),
+          child: Menu(
+            key: UniqueKey(),
+            controller: controller,
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(Tag.a.text), findsNothing);
+    expect(controller.isOpen, isFalse);
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isTrue);
+
+    // Close the menu.
+    controller.close();
+    await tester.pump();
+
+    expect(controller.isOpen, isFalse);
+    expect(find.text(Tag.a.text), findsNothing);
+  });
+
   testWidgets('MenuController.maybeOf does not notify dependents when MenuController changes', (
     WidgetTester tester,
   ) async {
@@ -2268,7 +2432,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  group('DecoratedMenuController', () {
+  group('MenuControllerDecorator', () {
     testWidgets('External controller triggers opening and closing animations', (
       WidgetTester tester,
     ) async {
@@ -2345,7 +2509,7 @@ void main() {
     ) async {
       final Key panelKey = UniqueKey();
       late AnimationController animationController;
-      late MenuControllerDecorator decoratedMenuController;
+      late MenuControllerDecorator decorator;
 
       await tester.pumpWidget(
         App(
@@ -2357,7 +2521,7 @@ void main() {
               AnimationController animation,
             ) {
               animationController = animation;
-              decoratedMenuController = decoratedController;
+              decorator = decoratedController;
               return Menu(
                 menuPanel: SizedBox(key: panelKey),
                 controller: decoratedController,
@@ -2369,44 +2533,44 @@ void main() {
       );
 
       // Overlay is closed, animation is at 0.
-      expect(decoratedMenuController.isOpen, isFalse);
+      expect(decorator.isOpen, isFalse);
       expect(animationController.value, equals(0));
       expect(find.byKey(panelKey), findsNothing);
 
       // Open menu
-      decoratedMenuController.open();
+      decorator.open();
 
-      expect(decoratedMenuController.isOpen, isTrue);
+      expect(decorator.isOpen, isTrue);
       expect(find.byKey(panelKey), findsNothing);
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(decoratedMenuController.isOpen, isTrue);
+      expect(decorator.isOpen, isTrue);
       expect(animationController.value, closeTo(0.5, 0.01));
       expect(find.byKey(panelKey), findsOneWidget);
 
       await tester.pump(const Duration(milliseconds: 101));
 
       // Fully open
-      expect(decoratedMenuController.isOpen, isTrue);
+      expect(decorator.isOpen, isTrue);
       expect(animationController.value, equals(1));
       expect(find.byKey(panelKey), findsOneWidget);
 
       // Close menu
-      decoratedMenuController.close();
+      decorator.close();
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(decoratedMenuController.isOpen, isTrue);
+      expect(decorator.isOpen, isTrue);
       expect(animationController.value, closeTo(0.5, 0.01));
       expect(find.byKey(panelKey), findsOneWidget);
 
       await tester.pump(const Duration(milliseconds: 101));
 
       // Fully closed
-      expect(decoratedMenuController.isOpen, isFalse);
+      expect(decorator.isOpen, isFalse);
       expect(animationController.value, equals(0));
       expect(find.byKey(panelKey), findsNothing);
     });
@@ -2700,7 +2864,7 @@ void main() {
     testWidgets('Decorated controller transitions through all menu animation states', (
       WidgetTester tester,
     ) async {
-      late MenuControllerDecorator decoratedMenuController;
+      late MenuControllerDecorator decorator;
       late Animation<double> menuAnimation;
 
       await tester.pumpWidget(
@@ -2712,7 +2876,7 @@ void main() {
               MenuControllerDecorator decoratedController,
               Animation<double> animation,
             ) {
-              decoratedMenuController = decoratedController;
+              decorator = decoratedController;
               menuAnimation = animation;
               return Menu(
                 menuPanel: const SizedBox(),
@@ -2728,12 +2892,12 @@ void main() {
       // animation, are in sync. This is done before and after a pump to ensure
       // that the status is updated synchronously and stays updated.
       Future<void> statusMatches(AnimationStatus status) async {
-        expect(decoratedMenuController.animationStatus, status);
+        expect(decorator.animationStatus, status);
         expect(menuAnimation.status, status);
 
         await tester.pump();
 
-        expect(decoratedMenuController.animationStatus, status);
+        expect(decorator.animationStatus, status);
         expect(menuAnimation.status, status);
       }
 
@@ -2741,7 +2905,7 @@ void main() {
       await statusMatches(AnimationStatus.dismissed);
 
       // Test: closed -> opening
-      decoratedMenuController.open();
+      decorator.open();
 
       await statusMatches(AnimationStatus.forward);
 
@@ -2751,21 +2915,21 @@ void main() {
       await statusMatches(AnimationStatus.completed);
 
       // Test: opened -> closing
-      decoratedMenuController.close();
+      decorator.close();
 
       await statusMatches(AnimationStatus.reverse);
 
       await tester.pump(const Duration(milliseconds: 100));
 
       // Test: closing -> opening
-      decoratedMenuController.open();
+      decorator.open();
 
       await statusMatches(AnimationStatus.forward);
 
       await tester.pump(const Duration(milliseconds: 50));
 
       // Test: opening -> closing
-      decoratedMenuController.close();
+      decorator.close();
 
       await statusMatches(AnimationStatus.reverse);
 
@@ -2775,16 +2939,16 @@ void main() {
       await statusMatches(AnimationStatus.dismissed);
 
       // Test: closed -> opened (forced with markMenuOpened)
-      decoratedMenuController.markMenuOpened();
+      decorator.markMenuOpened();
 
       await statusMatches(AnimationStatus.completed);
 
       // Test: opened -> closed (forced with markMenuClosed)
-      decoratedMenuController.markMenuClosed();
+      decorator.markMenuClosed();
 
       await statusMatches(AnimationStatus.dismissed);
 
-      decoratedMenuController.open();
+      decorator.open();
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
@@ -2792,23 +2956,23 @@ void main() {
       await statusMatches(AnimationStatus.forward);
 
       // Test: opening -> opened (forced with markMenuOpened)
-      decoratedMenuController.markMenuOpened();
+      decorator.markMenuOpened();
 
       await statusMatches(AnimationStatus.completed);
 
       // Test: closing -> closed (forced with markMenuClosed)
-      decoratedMenuController.close();
+      decorator.close();
 
       await statusMatches(AnimationStatus.reverse);
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      decoratedMenuController.markMenuClosed();
+      decorator.markMenuClosed();
 
       await statusMatches(AnimationStatus.dismissed);
 
-      decoratedMenuController.open();
+      decorator.open();
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
@@ -2816,16 +2980,16 @@ void main() {
       await statusMatches(AnimationStatus.forward);
 
       // Test: opening -> closed (forced with markMenuClosed)
-      decoratedMenuController.markMenuClosed();
+      decorator.markMenuClosed();
 
       await statusMatches(AnimationStatus.dismissed);
 
-      decoratedMenuController.open();
+      decorator.open();
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      decoratedMenuController.close();
+      decorator.close();
 
       await statusMatches(AnimationStatus.reverse);
 
@@ -2833,12 +2997,304 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       // Test: closing -> opened (forced with markMenuOpened)
-      decoratedMenuController.markMenuOpened();
+      decorator.markMenuOpened();
 
       await statusMatches(AnimationStatus.completed);
     });
 
-    testWidgets('handleMenuCloseRequest is called on ancestor scroll', (WidgetTester tester) async {
+    testWidgets('External controller can be changed', (WidgetTester tester) async {
+      final MenuController controllerTwo = MenuController();
+      late MenuController decorator;
+
+      await tester.pumpWidget(
+        App(
+          DecoratedMenu(
+            controller: controller,
+            builder: (
+              BuildContext context,
+              MenuControllerDecorator decoratedController,
+              AnimationController animation,
+            ) {
+              decorator = decoratedController;
+              return Menu(
+                consumeOutsideTaps: true,
+                menuPanel: SizeTransition(sizeFactor: animation, child: const SizedBox()),
+                controller: decoratedController,
+                child: const AnchorButton(Tag.anchor),
+              );
+            },
+          ),
+        ),
+      );
+
+      controller.open();
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(controller.isOpen, isTrue);
+      expect(controller.animationStatus, equals(AnimationStatus.forward));
+      expect(decorator.isOpen, isTrue);
+      expect(decorator.animationStatus, equals(AnimationStatus.forward));
+
+      await tester.pumpWidget(
+        App(
+          DecoratedMenu(
+            controller: controllerTwo,
+            builder: (
+              BuildContext context,
+              MenuControllerDecorator decoratedController,
+              AnimationController animation,
+            ) {
+              decorator = decoratedController;
+              return Menu(
+                consumeOutsideTaps: true,
+                menuPanel: SizeTransition(sizeFactor: animation, child: const SizedBox()),
+                controller: decoratedController,
+                child: const AnchorButton(Tag.anchor),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(controller.isOpen, isFalse);
+      expect(controller.animationStatus, equals(AnimationStatus.dismissed));
+
+      expect(controllerTwo.isOpen, isTrue);
+      expect(controllerTwo.animationStatus, equals(AnimationStatus.forward));
+
+      expect(decorator.isOpen, isTrue);
+      expect(decorator.animationStatus, equals(AnimationStatus.forward));
+
+      controllerTwo.close();
+
+      await tester.pump();
+
+      expect(controllerTwo.animationStatus, equals(AnimationStatus.reverse));
+      expect(decorator.animationStatus, equals(AnimationStatus.reverse));
+
+      decorator.open();
+
+      await tester.pump();
+
+      expect(controllerTwo.animationStatus, equals(AnimationStatus.forward));
+      expect(decorator.animationStatus, equals(AnimationStatus.forward));
+    });
+
+    testWidgets('External controller position is passed to handleMenuOpenRequest.', (
+      WidgetTester tester,
+    ) async {
+      Offset? position;
+      await tester.pumpWidget(
+        App(
+          DecoratedMenu(
+            controller: controller,
+            onOpenRequest: (ui.Offset? value) {
+              position = value;
+            },
+            builder: (
+              BuildContext context,
+              MenuControllerDecorator decoratedController,
+              AnimationController animation,
+            ) {
+              return Menu(
+                consumeOutsideTaps: true,
+                menuPanel: SizeTransition(sizeFactor: animation, child: const SizedBox()),
+                controller: decoratedController,
+                child: const AnchorButton(Tag.anchor),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Pass empty position.
+      controller.open();
+      await tester.pump();
+
+      expect(position, isNull);
+
+      // Pass position.
+
+      controller.open(position: const Offset(100, 100));
+      await tester.pump();
+
+      expect(position, equals(const Offset(100, 100)));
+    });
+
+    testWidgets('Open position is passed to handleMenuOpenRequest.', (WidgetTester tester) async {
+      late MenuController decorator;
+      Offset? position;
+      await tester.pumpWidget(
+        App(
+          DecoratedMenu(
+            controller: controller,
+            onOpenRequest: (ui.Offset? value) {
+              position = value;
+            },
+            builder: (
+              BuildContext context,
+              MenuControllerDecorator decoratedController,
+              AnimationController animation,
+            ) {
+              decorator = decoratedController;
+              return Menu(
+                consumeOutsideTaps: true,
+                menuPanel: SizeTransition(sizeFactor: animation, child: const SizedBox()),
+                controller: decoratedController,
+                child: const AnchorButton(Tag.anchor),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Pass empty position.
+      decorator.open();
+      await tester.pump();
+
+      expect(position, isNull);
+
+      decorator.open(position: const Offset(100, 100));
+      await tester.pump();
+
+      expect(position, equals(const Offset(100, 100)));
+
+      controller.open();
+      await tester.pump();
+
+      expect(position, isNull);
+
+      controller.open(position: const Offset(200, 200));
+      await tester.pump();
+
+      expect(position, equals(const Offset(200, 200)));
+    });
+
+    testWidgets('Position is passed to handleMenuOpenRequest.', (WidgetTester tester) async {
+      Offset? position;
+
+      await tester.pumpWidget(
+        App(
+          DecoratedMenu(
+            controller: controller,
+            onOpenRequest: (ui.Offset? value) {
+              position = value;
+            },
+            builder: (
+              BuildContext context,
+              MenuControllerDecorator decoratedController,
+              AnimationController animation,
+            ) {
+              return Menu(
+                consumeOutsideTaps: true,
+                menuPanel: SizeTransition(sizeFactor: animation, child: const SizedBox()),
+                controller: decoratedController,
+                child: const AnchorButton(Tag.anchor),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Pass empty position.
+      controller.open();
+      await tester.pump();
+
+      expect(position, isNull);
+
+      // Pass position.
+      controller.open(position: const Offset(100, 100));
+      await tester.pump();
+
+      expect(position, equals(const Offset(100, 100)));
+    });
+
+    testWidgets('Position is passed to handleMenuOpenRequest.', (WidgetTester tester) async {
+      Offset? position;
+
+      await tester.pumpWidget(
+        App(
+          DecoratedMenu(
+            controller: controller,
+            onOpenRequest: (ui.Offset? value) {
+              position = value;
+            },
+            builder: (
+              BuildContext context,
+              MenuControllerDecorator decoratedController,
+              AnimationController animation,
+            ) {
+              return Menu(
+                consumeOutsideTaps: true,
+                menuPanel: SizeTransition(sizeFactor: animation, child: const SizedBox()),
+                controller: decoratedController,
+                child: const AnchorButton(Tag.anchor),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Pass empty position.
+      controller.open();
+      await tester.pump();
+
+      expect(position, isNull);
+
+      // Pass position.
+      controller.open(position: const Offset(100, 100));
+      await tester.pump();
+
+      expect(position, equals(const Offset(100, 100)));
+    });
+
+    testWidgets('Position is received by overlayBuilder', (WidgetTester tester) async {
+      Offset? position;
+
+      await tester.pumpWidget(
+        App(
+          DecoratedMenu(
+            controller: controller,
+            onOpenRequest: (ui.Offset? value) {
+              position = value;
+            },
+            builder: (
+              BuildContext context,
+              MenuControllerDecorator decoratedController,
+              AnimationController animation,
+            ) {
+              return Menu(
+                consumeOutsideTaps: true,
+                overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
+                  position = info.position;
+                  return Positioned(left: position?.dx, top: position?.dy, child: const SizedBox());
+                },
+                controller: decoratedController,
+                child: const AnchorButton(Tag.anchor),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Pass empty position.
+      controller.open();
+      await tester.pump();
+
+      expect(position, isNull);
+
+      // Pass position.
+      controller.open(position: const Offset(100, 100));
+      await tester.pump();
+
+      expect(position, equals(const Offset(100, 100)));
+    });
+
+    testWidgets('Ancestor scroll triggers handleMenuCloseRequest', (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       late Animation<double> rootMenuAnimation;
@@ -2905,9 +3361,7 @@ void main() {
       expect(rootMenuAnimation.value, equals(0.0));
     });
 
-    testWidgets('handleMenuCloseRequest is called on view size changes', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('View size change triggers handleMenuCloseRequest', (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       late Animation<double> rootMenuAnimation;
@@ -2983,9 +3437,7 @@ void main() {
       expect(rootMenuAnimation.value, equals(0.0));
     });
 
-    testWidgets('handleMenuCloseRequest is called on DismissMenuAction', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('DismissMenuAction triggers handleMenuCloseRequest', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
@@ -3047,7 +3499,7 @@ void main() {
       expect(controller.animationStatus, equals(AnimationStatus.dismissed));
     });
 
-    testWidgets('handleMenuCloseRequest is called on outside taps', (WidgetTester tester) async {
+    testWidgets('Outside tap triggers handleMenuCloseRequest', (WidgetTester tester) async {
       final MenuController groupController = MenuController();
 
       await tester.pumpWidget(
@@ -3103,6 +3555,53 @@ void main() {
       expect(controller.isOpen, isFalse);
       expect(controller.animationStatus, equals(AnimationStatus.dismissed));
     });
+
+    testWidgets(
+      'Throws an AssertionError if a MenuControllerDecorator wraps a MenuControllerDecorator',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          App(
+            DecoratedMenu(
+              controller: controller,
+              builder: (
+                BuildContext context,
+                MenuControllerDecorator decoratedController,
+                AnimationController animation,
+              ) {
+                return DecoratedMenu(
+                  controller: decoratedController,
+                  builder: (
+                    BuildContext context,
+                    MenuControllerDecorator decoratedController,
+                    AnimationController animation,
+                  ) {
+                    return Menu(
+                      controller: decoratedController,
+                      consumeOutsideTaps: true,
+                      menuPanel: const SizedBox(),
+                      child: const SizedBox(),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        );
+
+        expect(
+          tester.takeException(),
+          isInstanceOf<AssertionError>().having(
+            (AssertionError e) => e.message,
+            'message',
+            contains(
+              'A $MenuControllerDecorator cannot be used as the $MenuController '
+              'for another $MenuControllerDecorator. Use a $MenuController instead of a '
+              '$MenuControllerDecorator.',
+            ),
+          ),
+        );
+      },
+    );
   });
 }
 
@@ -3428,7 +3927,7 @@ class Panel extends StatelessWidget {
 class Menu extends StatefulWidget {
   const Menu({
     super.key,
-    required this.menuPanel,
+    this.menuPanel,
     this.controller,
     this.child,
     this.builder,
@@ -3437,14 +3936,16 @@ class Menu extends StatefulWidget {
     this.onClose,
     this.useRootOverlay = false,
     this.consumeOutsideTaps = false,
+    this.overlayBuilder,
   });
-  final Widget menuPanel;
+  final Widget? menuPanel;
   final Widget? child;
   final bool useRootOverlay;
   final VoidCallback? onOpen;
   final VoidCallback? onClose;
   final FocusNode? focusNode;
   final RawMenuAnchorChildBuilder? builder;
+  final RawMenuAnchorOverlayBuilder? overlayBuilder;
   final MenuController? controller;
   final bool consumeOutsideTaps;
 
@@ -3464,13 +3965,15 @@ class _MenuState extends State<Menu> {
       consumeOutsideTaps: widget.consumeOutsideTaps,
       useRootOverlay: widget.useRootOverlay,
       builder: widget.builder,
-      overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
-        return Positioned(
-          top: info.anchorRect.bottom,
-          left: info.anchorRect.left,
-          child: widget.menuPanel,
-        );
-      },
+      overlayBuilder:
+          widget.overlayBuilder ??
+          (BuildContext context, RawMenuOverlayInfo info) {
+            return Positioned(
+              top: info.anchorRect.bottom,
+              left: info.anchorRect.left,
+              child: widget.menuPanel!,
+            );
+          },
       child: widget.child,
     );
   }
@@ -3514,25 +4017,18 @@ class AnchorButton extends StatelessWidget {
   }
 }
 
-class DecoratedMenu extends StatefulWidget {
-  const DecoratedMenu({super.key, required this.controller, required this.builder});
-
-  final MenuController controller;
-  final Widget Function(BuildContext, MenuControllerDecorator, AnimationController) builder;
-
-  @override
-  State<DecoratedMenu> createState() => _DecoratedMenuState();
-}
-
-class _DecoratedMenuState extends State<DecoratedMenu>
-    with SingleTickerProviderStateMixin, MenuControllerDecorator {
-  late final AnimationController animationController;
+class AnimatedMenuController extends MenuControllerDecorator {
+  const AnimatedMenuController({
+    required super.menuController,
+    required this.animationController,
+    required this.onOpenRequest,
+  });
+  final AnimationController animationController;
+  final void Function(Offset?)? onOpenRequest;
 
   @override
-  MenuController get menuController => widget.controller;
-
-  @override
-  void handleMenuOpenRequest({Offset? position}) {
+  void handleMenuOpenRequest({ui.Offset? position}) {
+    onOpenRequest?.call(position);
     animationController.forward().whenComplete(markMenuOpened);
   }
 
@@ -3544,14 +4040,35 @@ class _DecoratedMenuState extends State<DecoratedMenu>
   @override
   void markMenuOpened() {
     super.markMenuOpened();
-    animationController.value = 1;
+    animationController.value = 1.0;
   }
 
   @override
   void markMenuClosed() {
     super.markMenuClosed();
-    animationController.value = 0;
+    animationController.value = 0.0;
   }
+}
+
+class DecoratedMenu extends StatefulWidget {
+  const DecoratedMenu({
+    super.key,
+    required this.controller,
+    required this.builder,
+    this.onOpenRequest,
+  });
+
+  final MenuController controller;
+  final Widget Function(BuildContext, MenuControllerDecorator, AnimationController) builder;
+  final void Function(Offset? position)? onOpenRequest;
+
+  @override
+  State<DecoratedMenu> createState() => _DecoratedMenuState();
+}
+
+class _DecoratedMenuState extends State<DecoratedMenu> with SingleTickerProviderStateMixin {
+  late final AnimationController animationController;
+  late MenuControllerDecorator decoratedController;
 
   @override
   void initState() {
@@ -3560,6 +4077,23 @@ class _DecoratedMenuState extends State<DecoratedMenu>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
+    decoratedController = AnimatedMenuController(
+      menuController: widget.controller,
+      animationController: animationController,
+      onOpenRequest: widget.onOpenRequest,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant DecoratedMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      decoratedController = AnimatedMenuController(
+        menuController: widget.controller,
+        animationController: animationController,
+        onOpenRequest: widget.onOpenRequest,
+      );
+    }
   }
 
   @override
@@ -3570,7 +4104,7 @@ class _DecoratedMenuState extends State<DecoratedMenu>
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder.call(context, this, animationController);
+    return widget.builder.call(context, decoratedController, animationController);
   }
 }
 

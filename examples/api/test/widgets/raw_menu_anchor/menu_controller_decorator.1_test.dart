@@ -33,19 +33,19 @@ void main() {
 
     expect(
       tester.getRect(panel),
-      rectMoreOrLessEquals(const Rect.fromLTRB(347.8, 324.0, 524.8, 324.0), epsilon: 0.1),
+      rectMoreOrLessEquals(const ui.Rect.fromLTRB(347.8, 324.0, 524.8, 324.0), epsilon: 0.1),
     );
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(
       tester.getRect(panel),
-      rectMoreOrLessEquals(const Rect.fromLTRB(347.8, 324.0, 524.8, 499.7), epsilon: 0.1),
+      rectMoreOrLessEquals(const ui.Rect.fromLTRB(347.8, 324.0, 524.8, 499.7), epsilon: 0.1),
     );
 
     await tester.pump(const Duration(milliseconds: 101));
     expect(
       tester.getRect(panel),
-      rectMoreOrLessEquals(const Rect.fromLTRB(347.8, 324.0, 524.8, 516.0), epsilon: 0.1),
+      rectMoreOrLessEquals(const ui.Rect.fromLTRB(347.8, 324.0, 524.8, 516.0), epsilon: 0.1),
     );
 
     expect(find.textContaining('Submenu'), findsNWidgets(4));
