@@ -322,6 +322,22 @@ void testMain() {
       expect(transferToImageBitmapCalls, 1);
     }, skip: !Surface.offscreenCanvasSupported);
 
+    test('throws error if CanvasKit.MakeGrContext returns null', () async {
+      final Object originalMakeGrContext = js_util.getProperty(canvasKit, 'MakeGrContext');
+      js_util.setProperty(canvasKit, 'originalMakeGrContext', originalMakeGrContext);
+      js_util.setProperty(
+        canvasKit,
+        'MakeGrContext',
+        js_util.allowInterop((int glContext) {
+          return null;
+        }),
+      );
+      final Surface surface = Surface();
+      expect(() => surface.ensureSurface(const BitmapSize(10, 10)), throwsA(isA<CanvasKitError>()));
+      js_util.setProperty(canvasKit, 'MakeGrContext', originalMakeGrContext);
+      // Skipping on Firefox for now since Firefox headless doesn't support WebGL
+    }, skip: isFirefox);
+
     test('can recover from MakeSWCanvasSurface failure', () async {
       debugOverrideJsConfiguration(
         <String, Object?>{'canvasKitForceCpuOnly': true}.jsify() as JsFlutterConfiguration?,
