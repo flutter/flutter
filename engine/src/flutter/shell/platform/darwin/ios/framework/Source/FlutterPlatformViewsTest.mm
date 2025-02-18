@@ -3494,8 +3494,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/SkISize::Make(800, 600));
   XCTAssertFalse([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
   auto embeddedViewParams_2 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
@@ -3512,8 +3511,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/SkISize::Make(800, 600));
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface_submit_true)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 }
 
 - (void)
@@ -3566,7 +3564,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
     [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                       withParams:std::move(embeddedViewParams)];
 
-    // Not calling |[flutterPlatformViewsController submitFrame:withIosContext:grContext:]| so that
+    // Not calling |[flutterPlatformViewsController submitFrame:withIosContext:]| so that
     // the platform views are not added to flutter_view_.
 
     XCTAssertNotNil(gMockPlatformView);
@@ -3721,8 +3719,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/SkISize::Make(800, 600));
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -3752,8 +3749,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/SkISize::Make(800, 600));
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] >
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -3836,8 +3832,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/SkISize::Make(800, 600));
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -3867,8 +3862,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/SkISize::Make(800, 600));
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] <
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -4339,8 +4333,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         /*frame_size=*/SkISize::Make(800, 600));
     XCTAssertTrue([flutterPlatformViewsController
            submitFrame:std::move(mock_surface)
-        withIosContext:std::make_shared<flutter::IOSContextNoop>()
-             grContext:nil]);
+        withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 2UL);
@@ -4369,8 +4362,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         /*frame_size=*/SkISize::Make(800, 600));
     XCTAssertTrue([flutterPlatformViewsController
            submitFrame:std::move(mock_surface)
-        withIosContext:std::make_shared<flutter::IOSContextNoop>()
-             grContext:nil]);
+        withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
@@ -4444,8 +4436,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/SkISize::Make(800, 600));
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
-                                    grContext:nil];
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
 
   UIView* someView = [[UIView alloc] init];
   [flutterView addSubview:someView];
@@ -4522,8 +4513,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/SkISize::Make(800, 600));
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
-                                    grContext:nil];
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
 
   XCTAssertEqual(flutterView.subviews.count, 1u);
 }
@@ -4536,19 +4526,18 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 }
 
 - (void)testLayerPool {
-  // Create an IOSContext and GrDirectContext.
+  // Create an IOSContext.
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   [engine run];
   XCTAssertTrue(engine.platformView != nullptr);
   auto ios_context = engine.platformView->GetIosContext();
-  auto gr_context = ios_context->GetMainContext();
 
   auto pool = flutter::OverlayLayerPool{};
 
   // Add layers to the pool.
-  pool.CreateLayer(gr_context.get(), ios_context, MTLPixelFormatBGRA8Unorm);
+  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm);
   XCTAssertEqual(pool.size(), 1u);
-  pool.CreateLayer(gr_context.get(), ios_context, MTLPixelFormatBGRA8Unorm);
+  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm);
   XCTAssertEqual(pool.size(), 2u);
 
   // Mark all layers as unused.
@@ -4642,8 +4631,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   });
 
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
-                                    grContext:nil];
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
 
   XCTAssertTrue(submit_info.has_value());
   XCTAssertEqual(*submit_info->frame_damage, SkIRect::MakeWH(800, 600));
