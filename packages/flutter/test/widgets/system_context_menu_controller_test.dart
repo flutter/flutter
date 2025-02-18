@@ -8,9 +8,28 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../services/text_input_utils.dart';
 import '../system_context_menu_utils.dart';
+import 'clipboard_utils.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() async {
+    final MockClipboard mockClipboard = MockClipboard();
+    TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      mockClipboard.handleMethodCall,
+    );
+    // Fill the clipboard so that the Paste option is available in the text
+    // selection menu.
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+  });
+
+  tearDown(() {
+    TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
+  });
 
   test('showing and hiding one controller', () {
     // Create an active connection, which is required to show the system menu.
@@ -500,8 +519,9 @@ void main() {
     final List<IOSSystemContextMenuItem> defaultItems = SystemContextMenu.getDefaultItems(
       editableTextState,
     );
-    expect(defaultItems, hasLength(1));
-    expect(defaultItems.first, const IOSSystemContextMenuItemSelectAll());
+    expect(defaultItems, hasLength(2));
+    expect(defaultItems[1], const IOSSystemContextMenuItemSelectAll());
+    expect(defaultItems.first, const IOSSystemContextMenuItemPaste());
 
     final (startGlyphHeight: double startGlyphHeight, endGlyphHeight: double endGlyphHeight) =
         editableTextState.getGlyphHeights();
