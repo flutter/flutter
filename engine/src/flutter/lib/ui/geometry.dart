@@ -1196,6 +1196,46 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   /// The bottom-left [Radius].
   Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
 
+  /// Returns a new [RRect] translated by the given offset.
+  T shift(Offset offset) {
+    return _create(
+      left: left + offset.dx,
+      top: top + offset.dy,
+      right: right + offset.dx,
+      bottom: bottom + offset.dy,
+      tlRadiusX: tlRadiusX,
+      tlRadiusY: tlRadiusY,
+      trRadiusX: trRadiusX,
+      trRadiusY: trRadiusY,
+      blRadiusX: blRadiusX,
+      blRadiusY: blRadiusY,
+      brRadiusX: brRadiusX,
+      brRadiusY: brRadiusY,
+    );
+  }
+
+  /// Returns a new [RRect] with edges and radii moved outwards by the given
+  /// delta.
+  T inflate(double delta) {
+    return _create(
+      left: left - delta,
+      top: top - delta,
+      right: right + delta,
+      bottom: bottom + delta,
+      tlRadiusX: math.max(0, tlRadiusX + delta),
+      tlRadiusY: math.max(0, tlRadiusY + delta),
+      trRadiusX: math.max(0, trRadiusX + delta),
+      trRadiusY: math.max(0, trRadiusY + delta),
+      blRadiusX: math.max(0, blRadiusX + delta),
+      blRadiusY: math.max(0, blRadiusY + delta),
+      brRadiusX: math.max(0, brRadiusX + delta),
+      brRadiusY: math.max(0, brRadiusY + delta),
+    );
+  }
+
+  /// Returns a new [RRect] with edges and radii moved inwards by the given delta.
+  T deflate(double delta) => inflate(-delta);
+
   /// The distance between the left and right edges of this rectangle.
   double get width => right - left;
 
@@ -1337,13 +1377,45 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
     return min;
   }
 
-  /// Returns a new [RRect] translated by the given offset.
-  T shift(Offset offset) {
+  /// Scales all radii so that on each side their sum will not exceed the size
+  /// of the width/height.
+  ///
+  /// Skia already handles RRects with radii that are too large in this way.
+  /// Therefore, this method is only needed for RRect use cases that require
+  /// the appropriately scaled radii values.
+  ///
+  /// See the [Skia scaling implementation](https://github.com/google/skia/blob/main/src/core/SkRRect.cpp)
+  /// for more details.
+  T scaleRadii() {
+    double scale = 1.0;
+    scale = _getMin(scale, blRadiusY, tlRadiusY, height);
+    scale = _getMin(scale, tlRadiusX, trRadiusX, width);
+    scale = _getMin(scale, trRadiusY, brRadiusY, height);
+    scale = _getMin(scale, brRadiusX, blRadiusX, width);
+    assert(scale >= 0);
+
+    if (scale < 1.0) {
+      return _create(
+        top: top,
+        left: left,
+        right: right,
+        bottom: bottom,
+        tlRadiusX: tlRadiusX * scale,
+        tlRadiusY: tlRadiusY * scale,
+        trRadiusX: trRadiusX * scale,
+        trRadiusY: trRadiusY * scale,
+        blRadiusX: blRadiusX * scale,
+        blRadiusY: blRadiusY * scale,
+        brRadiusX: brRadiusX * scale,
+        brRadiusY: brRadiusY * scale,
+      );
+    }
+
     return _create(
-      left: left + offset.dx,
-      top: top + offset.dy,
-      right: right + offset.dx,
-      bottom: bottom + offset.dy,
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
       tlRadiusX: tlRadiusX,
       tlRadiusY: tlRadiusY,
       trRadiusX: trRadiusX,
@@ -1353,50 +1425,6 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
       brRadiusX: brRadiusX,
       brRadiusY: brRadiusY,
     );
-  }
-
-  /// Returns a new [RRect] with edges and radii moved outwards by the given
-  /// delta.
-  T inflate(double delta) {
-    return _create(
-      left: left - delta,
-      top: top - delta,
-      right: right + delta,
-      bottom: bottom + delta,
-      tlRadiusX: math.max(0, tlRadiusX + delta),
-      tlRadiusY: math.max(0, tlRadiusY + delta),
-      trRadiusX: math.max(0, trRadiusX + delta),
-      trRadiusY: math.max(0, trRadiusY + delta),
-      blRadiusX: math.max(0, blRadiusX + delta),
-      blRadiusY: math.max(0, blRadiusY + delta),
-      brRadiusX: math.max(0, brRadiusX + delta),
-      brRadiusY: math.max(0, brRadiusY + delta),
-    );
-  }
-
-  /// Returns a new [RRect] with edges and radii moved inwards by the given delta.
-  T deflate(double delta) => inflate(-delta);
-
-  // Returns a scale for all radii so that on each side their sum will not exceed the size
-  // of the width/height.
-  //
-  // Skia already handles RRects with radii that are too large in this way.
-  // Therefore, this method is only needed for RRect use cases that require
-  // the appropriately scaled radii values.
-  //
-  // See the [Skia scaling implementation](https://github.com/google/skia/blob/main/src/core/SkRRect.cpp)
-  // for more details.
-  double _radiiScale() {
-    double scale = 1.0;
-    scale = _getMin(scale, blRadiusY, tlRadiusY, height);
-    scale = _getMin(scale, tlRadiusX, trRadiusX, width);
-    scale = _getMin(scale, trRadiusY, brRadiusY, height);
-    scale = _getMin(scale, brRadiusX, blRadiusX, width);
-    assert(scale >= 0);
-    return scale >= 1.0 ? 1.0 : scale;
-    if (scale >= 1.0) {
-      return 1.0;
-    }
   }
 
   /// Linearly interpolate between two rounded rectangles.
@@ -1489,7 +1517,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
     brRadiusY,
   );
 
-  String _toString(String className) {
+  String _toString({required String className}) {
     final String rect =
         '${left.toStringAsFixed(1)}, '
         '${top.toStringAsFixed(1)}, '
@@ -1701,26 +1729,6 @@ class RRect extends _RRectLike<RRect> {
   /// A rounded rectangle with all the values set to zero.
   static const RRect zero = RRect._raw();
 
-  /// Scales all radii so that on each side their sum will not exceed the size
-  /// of the width/height.
-  RRect scaleRadii() {
-    double scale = _radiiScale();
-    return RRect._raw(
-      top: top,
-      left: left,
-      right: right,
-      bottom: bottom,
-      tlRadiusX: tlRadiusX * scale,
-      tlRadiusY: tlRadiusY * scale,
-      trRadiusX: trRadiusX * scale,
-      trRadiusY: trRadiusY * scale,
-      blRadiusX: blRadiusX * scale,
-      blRadiusY: blRadiusY * scale,
-      brRadiusX: brRadiusX * scale,
-      brRadiusY: brRadiusY * scale,
-    );
-  }
-
   /// Whether the point specified by the given offset (which is assumed to be
   /// relative to the origin) lies inside the rounded rectangle.
   ///
@@ -1801,7 +1809,7 @@ class RRect extends _RRectLike<RRect> {
 
   @override
   String toString() {
-    return _toString('RRect');
+    return _toString(className: 'RRect');
   }
 }
 
@@ -2085,7 +2093,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
 
   @override
   String toString() {
-    return _toString('RRect');
+    return _toString(className: 'RSuperellipse');
   }
 }
 
