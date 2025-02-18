@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/gles/blit_command_gles.h"
+#include <cstring>
 
 #include "flutter/fml/closure.h"
 #include "fml/trace_event.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/geometry/point.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
@@ -314,6 +316,7 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
   }
 
   const auto& gl = reactor.GetProcTable();
+  TextureCoordinateSystem coord_system = source->GetCoordinateSystem();
 
   GLuint read_fbo = GL_NONE;
   fml::ScopedCleanupClosure delete_fbos(
@@ -328,10 +331,29 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
   }
 
   DeviceBufferGLES::Cast(*destination)
-      .UpdateBufferData([&gl, this](uint8_t* data, size_t length) {
-        gl.ReadPixels(source_region.GetX(), source_region.GetY(),
-                      source_region.GetWidth(), source_region.GetHeight(),
-                      GL_RGBA, GL_UNSIGNED_BYTE, data + destination_offset);
+      .UpdateBufferData([&gl, this, coord_system,
+                         rows = source->GetSize().height](uint8_t* data,
+                                                          size_t length) {
+        switch (coord_system) {
+          case TextureCoordinateSystem::kUploadFromHost:
+            gl.ReadPixels(source_region.GetX(), source_region.GetY(),
+                          source_region.GetWidth(), source_region.GetHeight(),
+                          GL_RGBA, GL_UNSIGNED_BYTE, data + destination_offset);
+            break;
+          case TextureCoordinateSystem::kRenderToTexture:
+            // The texture is upside down, and must be inverted when copying
+            // byte data out.
+            size_t offset = destination_offset;
+            size_t row_bytes = source_region.GetWidth() * 4;
+            for (auto i = 0u; i < source_region.GetHeight(); i++) {
+              gl.ReadPixels(
+                  source_region.GetX(),
+                  source_region.GetY() + (source_region.GetHeight() - 1 - i),
+                  source_region.GetWidth(), 1, GL_RGBA, GL_UNSIGNED_BYTE,
+                  data + offset);
+              offset += row_bytes;
+            }
+        }
       });
 
   return true;
