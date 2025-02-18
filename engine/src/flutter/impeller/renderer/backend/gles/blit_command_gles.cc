@@ -15,6 +15,29 @@
 
 namespace impeller {
 
+namespace {
+static void FlipImage(uint8_t* buffer,
+                      size_t width,
+                      size_t height,
+                      size_t stride) {
+  if (buffer == nullptr || stride == 0) {
+    return;
+  }
+
+  const auto byte_width = width * stride;
+
+  for (size_t top = 0; top < height; top++) {
+    size_t bottom = height - top - 1;
+    if (top >= bottom) {
+      break;
+    }
+    auto* top_row = buffer + byte_width * top;
+    auto* bottom_row = buffer + byte_width * bottom;
+    std::swap_ranges(top_row, top_row + byte_width, bottom_row);
+  }
+}
+}  // namespace
+
 BlitEncodeGLES::~BlitEncodeGLES() = default;
 
 static void DeleteFBO(const ProcTableGLES& gl, GLuint fbo, GLenum type) {
@@ -332,26 +355,19 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
   DeviceBufferGLES::Cast(*destination)
       .UpdateBufferData([&gl, this, coord_system,
                          rows = source->GetSize().height](uint8_t* data,
+
                                                           size_t length) {
+        gl.ReadPixels(source_region.GetX(), source_region.GetY(),
+                      source_region.GetWidth(), source_region.GetHeight(),
+                      GL_RGBA, GL_UNSIGNED_BYTE, data + destination_offset);
         switch (coord_system) {
           case TextureCoordinateSystem::kUploadFromHost:
-            gl.ReadPixels(source_region.GetX(), source_region.GetY(),
-                          source_region.GetWidth(), source_region.GetHeight(),
-                          GL_RGBA, GL_UNSIGNED_BYTE, data + destination_offset);
             break;
           case TextureCoordinateSystem::kRenderToTexture:
             // The texture is upside down, and must be inverted when copying
             // byte data out.
-            size_t offset = destination_offset;
-            size_t row_bytes = source_region.GetWidth() * 4;
-            for (auto i = 0u; i < source_region.GetHeight(); i++) {
-              gl.ReadPixels(
-                  source_region.GetX(),
-                  source_region.GetY() + (source_region.GetHeight() - 1 - i),
-                  source_region.GetWidth(), 1, GL_RGBA, GL_UNSIGNED_BYTE,
-                  data + offset);
-              offset += row_bytes;
-            }
+            FlipImage(data + destination_offset, 4, source_region.GetHeight(),
+                      source_region.GetWidth());
         }
       });
 
