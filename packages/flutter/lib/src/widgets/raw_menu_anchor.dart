@@ -440,7 +440,8 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ///
   /// Unless the menu needs to be opened immediately, this method should be
   /// called instead of [open]. Doing so enables a [menuController] that
-  /// inherits from [MenuControllerDecorator] run opening animations.
+  /// inherits from [MenuControllerDecorator] to customize the opening sequence
+  /// with [MenuControllerDecorator.handleMenuOpenRequest].
   ///
   /// The optional `position` argument should specify the location of the menu
   /// in the local coordinates of the [RawMenuAnchor].
@@ -452,8 +453,9 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   /// Request that the [menuController] begin the menu closing sequence.
   ///
   /// Unless the menu needs to be closed immediately, this method should be
-  /// called instead of [close]. Doing so enables a [menuController] that
-  /// inherits from [MenuControllerDecorator] to run closing animations.
+  /// called instead of [close]. Doing so allows [menuController]s that inherit
+  /// from [MenuControllerDecorator] to customize the closing sequence with
+  /// [MenuControllerDecorator.handleMenuCloseRequest].
   void requestClose() {
     assert(_debugMenuInfo('Requesting Close $this'));
     menuController._handleCloseRequest();
@@ -1083,9 +1085,10 @@ abstract mixin class MenuControllerDecorator implements MenuController {
   /// Mark the menu as opened and set the [animationStatus] to
   /// [AnimationStatus.completed].
   @mustCallSuper
-  void markMenuOpened({ui.Offset? position}) {
+  void markMenuOpened() {
     if (!_anchor!.isOpen) {
-      _anchor!.open(position: position);
+      // Use the previously set position.
+      _anchor!.open(position: _anchor!._menuPosition);
     }
     _anchor!.animationStatus = AnimationStatus.completed;
   }
