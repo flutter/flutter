@@ -63,11 +63,17 @@ struct _FlView {
   // Accessible tree from Flutter, exposed as an AtkPlug.
   FlViewAccessible* view_accessible;
 
-  // Signal subscripton for cursor changes.
+  // Signal subscription for cursor changes.
   guint cursor_changed_cb_id;
 
   GCancellable* cancellable;
 };
+
+// 8 corresponds to mouse back button on both x11 and wayland
+static constexpr guint kMouseButtonBack = 8;
+
+// 9 corresponds to mouse forward button on both x11 and wayland
+static constexpr guint kMouseButtonForward = 9;
 
 enum { SIGNAL_FIRST_FRAME, LAST_SIGNAL };
 
@@ -146,10 +152,10 @@ static gboolean get_mouse_button(GdkEvent* event, int64_t* button) {
     case 3:
       *button = kFlutterPointerButtonMouseSecondary;
       return TRUE;
-    case 8:
+    case kMouseButtonBack:
       *button = kFlutterPointerButtonMouseBack;
       return TRUE;
-    case 9:
+    case kMouseButtonForward:
       *button = kFlutterPointerButtonMouseForward;
       return TRUE;
     default:
