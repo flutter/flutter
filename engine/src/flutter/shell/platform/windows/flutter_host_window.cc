@@ -354,12 +354,7 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
 
   view_controller_ =
       std::make_unique<FlutterWindowsViewController>(nullptr, std::move(view));
-
-  // Launch the engine if it is not running already.
-  if (!engine->running() && !engine->Run()) {
-    FML_LOG(ERROR) << "Failed to launch engine";
-    return;
-  }
+  FML_CHECK(engine->running());
   // Must happen after engine is running.
   view_controller_->view()->SendInitialBounds();
   // The Windows embedder listens to accessibility updates using the
@@ -463,6 +458,7 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
                                      FlutterWindowsView* view)
     : window_controller_(controller), window_handle_(hwnd) {
   SetInstanceProperty(hwnd, this);
+  FML_CHECK(view != nullptr);
   child_content_ = view->GetWindowHandle();
 }
 
@@ -524,6 +520,14 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
                                          UINT message,
                                          WPARAM wparam,
                                          LPARAM lparam) {
+  if (window_handle_ && view_controller_) {
+    LRESULT* result;
+    if (view_controller_->engine()->lifecycle_manager()->WindowProc(
+            hwnd, message, wparam, lparam, result)) {
+      return 0;
+    }
+  }
+
   switch (message) {
     case WM_DPICHANGED: {
       auto* const new_scaled_window_rect = reinterpret_cast<RECT*>(lparam);
@@ -601,14 +605,6 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
 
   if (!view_controller_) {
     return 0;
-  }
-
-  if (window_handle_) {
-    LRESULT* result;
-    if (view_controller_->engine()->lifecycle_manager()->WindowProc(
-            hwnd, message, wparam, lparam, result)) {
-      return 0;
-    }
   }
 
   return DefWindowProc(hwnd, message, wparam, lparam);

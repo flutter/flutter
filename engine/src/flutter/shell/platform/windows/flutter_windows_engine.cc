@@ -801,8 +801,15 @@ void FlutterWindowsEngine::ForwardToHostWindowController(HWND hwnd,
     return;
   }
   if (!FlutterHostWindow::GetThisFromHandle(hwnd)) {
-    host_window_controller_->CreateHostWindowFromExisting(
-        hwnd, GetViewFromTopLevelWindow(hwnd));
+    if (FlutterWindowsView* const view = GetViewFromTopLevelWindow(hwnd)) {
+      host_window_controller_->CreateHostWindowFromExisting(hwnd, view);
+    } else {
+      FML_LOG(ERROR)
+          << "Failed to retrieve FlutterWindowsView from top-level window: "
+             "the view's native window must be a child of the top-level "
+             "window.";
+      return;
+    }
   }
   host_window_controller_->HandleMessage(hwnd, message, wparam, lparam);
 }

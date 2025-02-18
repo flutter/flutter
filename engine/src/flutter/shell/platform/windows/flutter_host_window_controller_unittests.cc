@@ -65,6 +65,7 @@ class FlutterHostWindowControllerTest : public WindowsTest {
     SetDpiAwareness();
     FlutterWindowsEngineBuilder builder(GetContext());
     engine_ = builder.Build();
+    engine_->Run();
     controller_ = std::make_unique<FlutterHostWindowController>(engine_.get());
   }
 

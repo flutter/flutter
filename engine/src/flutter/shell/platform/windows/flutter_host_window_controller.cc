@@ -62,8 +62,8 @@ std::optional<WindowMetadata> FlutterHostWindowController::CreateHostWindow(
 void FlutterHostWindowController::CreateHostWindowFromExisting(
     HWND hwnd,
     FlutterWindowsView* view) {
+  FML_CHECK(view != nullptr);
   auto window = std::make_unique<FlutterHostWindow>(this, hwnd, view);
-
   FlutterViewId const view_id = view->view_id();
   windows_[view_id] = std::move(window);
 }
@@ -128,49 +128,46 @@ LRESULT FlutterHostWindowController::HandleMessage(HWND hwnd,
                                                    UINT message,
                                                    WPARAM wparam,
                                                    LPARAM lparam) {
-  if (engine_->running()) {
-    switch (message) {
-      case WM_NCDESTROY:
-        if (engine_->running()) {
-          auto const it = std::find_if(
-              windows_.begin(), windows_.end(), [hwnd](auto const& pair) {
-                return pair.second->GetWindowHandle() == hwnd;
-              });
-          if (it != windows_.end()) {
-            FlutterViewId const view_id = it->first;
-            bool const quit_on_close = it->second->quit_on_close_;
-            windows_.erase(it);
-            SendOnWindowDestroyed(view_id);
-            if (quit_on_close) {
-              PostQuitMessage(0);
-            }
-          }
+  switch (message) {
+    case WM_NCDESTROY: {
+      auto const it = std::find_if(
+          windows_.begin(), windows_.end(), [hwnd](auto const& pair) {
+            return pair.second->GetWindowHandle() == hwnd;
+          });
+      if (it != windows_.end()) {
+        FlutterViewId const view_id = it->first;
+        bool const quit_on_close = it->second->quit_on_close_;
+        windows_.erase(it);
+        SendOnWindowDestroyed(view_id);
+        if (quit_on_close) {
+          PostQuitMessage(0);
         }
-        return 0;
-      case WM_SIZE: {
-        auto const it = std::find_if(
-            windows_.begin(), windows_.end(), [hwnd](auto const& pair) {
-              return pair.second->GetWindowHandle() == hwnd;
-            });
-        if (it != windows_.end()) {
-          auto& [view_id, window] = *it;
-          if (window->archetype_ == WindowArchetype::kRegular) {
-            window->state_ =
-                (wparam == SIZE_MAXIMIZED)   ? WindowState::kMaximized
-                : (wparam == SIZE_MINIMIZED) ? WindowState::kMinimized
-                                             : WindowState::kRestored;
-          }
-          SendOnWindowChanged(view_id, GetViewSize(view_id), std::nullopt);
-        }
-      } break;
-      default:
-        break;
+      }
+      return 0;
     }
+    case WM_SIZE: {
+      auto const it = std::find_if(
+          windows_.begin(), windows_.end(), [hwnd](auto const& pair) {
+            return pair.second->GetWindowHandle() == hwnd;
+          });
+      if (it != windows_.end()) {
+        auto& [view_id, window] = *it;
+        if (window->archetype_ == WindowArchetype::kRegular) {
+          window->state_ = (wparam == SIZE_MAXIMIZED) ? WindowState::kMaximized
+                           : (wparam == SIZE_MINIMIZED)
+                               ? WindowState::kMinimized
+                               : WindowState::kRestored;
+        }
+        SendOnWindowChanged(view_id, GetViewSize(view_id), std::nullopt);
+      }
+    } break;
+    default:
+      break;
+  }
 
-    if (FlutterHostWindow* const window =
-            FlutterHostWindow::GetThisFromHandle(hwnd)) {
-      return window->HandleMessage(hwnd, message, wparam, lparam);
-    }
+  if (FlutterHostWindow* const window =
+          FlutterHostWindow::GetThisFromHandle(hwnd)) {
+    return window->HandleMessage(hwnd, message, wparam, lparam);
   }
   return DefWindowProc(hwnd, message, wparam, lparam);
 }
