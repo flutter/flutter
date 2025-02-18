@@ -30,6 +30,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../reporting/unified_analytics.dart';
+import '../version.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
 
@@ -1433,6 +1434,8 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines.add('FLUTTER_APP_FLAVOR=$flavor');
     }
 
+    _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
+
     return BuildInfo(
       buildMode,
       flavor,
@@ -1468,6 +1471,48 @@ abstract class FlutterCommand extends Command<void> {
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
     );
+  }
+
+  // This adds the Dart defines used to access various Flutter version information at runtime.
+  void _addFlutterVersionToDartDefines(FlutterVersion version, List<String> dartDefines) {
+    const String flutterVersionDefine = 'FLUTTER_VERSION';
+    const String flutterChannelDefine = 'FLUTTER_CHANNEL';
+    const String flutterGitUrlDefine = 'FLUTTER_GIT_URL';
+    const String flutterFrameworkRevisionDefine = 'FLUTTER_FRAMEWORK_REVISION';
+    const String flutterEngineRevisionDefine = 'FLUTTER_ENGINE_REVISION';
+    const String flutterDartVersionDefine = 'FLUTTER_DART_VERSION';
+
+    const List<String> flutterVersionDartDefines = <String>[
+      flutterVersionDefine,
+      flutterChannelDefine,
+      flutterGitUrlDefine,
+      flutterFrameworkRevisionDefine,
+      flutterEngineRevisionDefine,
+      flutterDartVersionDefine,
+    ];
+
+    for (final String dartDefine in flutterVersionDartDefines) {
+      if (globals.platform.environment[dartDefine] != null) {
+        throwToolExit(
+          '$dartDefine is used by the framework and cannot be set in the environment. '
+          'Use FlutterVersion to access it in Flutter code',
+        );
+      }
+      if (dartDefines.any((String define) => define.startsWith(dartDefine))) {
+        throwToolExit(
+          '$dartDefine is used by the framework and cannot be '
+          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}. '
+          'Use FlutterVersion to access it in Flutter code',
+        );
+      }
+    }
+
+    dartDefines.add('$flutterVersionDefine=${version.frameworkVersion}');
+    dartDefines.add('$flutterChannelDefine=${version.channel}');
+    dartDefines.add('$flutterGitUrlDefine=${version.repositoryUrl}');
+    dartDefines.add('$flutterFrameworkRevisionDefine=${version.frameworkRevisionShort}');
+    dartDefines.add('$flutterEngineRevisionDefine=${version.engineRevisionShort}');
+    dartDefines.add('$flutterDartVersionDefine=${version.dartSdkVersion}');
   }
 
   void setupApplicationPackages() {
