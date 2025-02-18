@@ -83,7 +83,7 @@ void main() {
     expect(
       tester.getTopLeft(find.text('initial')) -
           tester.getTopLeft(find.byType(CupertinoSearchTextField)),
-      const Offset(31.5, 8.0),
+      const Offset(31.5, 9.5),
     );
   });
 
