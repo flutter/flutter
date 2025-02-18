@@ -131,7 +131,7 @@ platform_properties:
         ]
       os: Linux
       device_type: "SM-S921U1"
-      
+
   mac:
     properties:
       contexts: >-
