@@ -46,9 +46,8 @@ constexpr float k2OverSqrtPi = 1.12837916709551257390f;
 // sqrt(2)
 constexpr float kSqrt2 = 1.41421356237309504880f;
 
-// sqrt(2) / 2 == 1/sqrt(2)
+// 1/sqrt(2)
 constexpr float k1OverSqrt2 = 0.70710678118654752440f;
-constexpr float kSqrt2Over2 = 0.70710678118654752440f;
 
 // phi
 constexpr float kPhi = 1.61803398874989484820f;
