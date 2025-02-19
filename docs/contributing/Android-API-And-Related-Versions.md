@@ -14,17 +14,12 @@ If the versions chosen are not known by [gradle_utils.dart](https://github.com/f
 
 ## Specifics
 
-- "compileSdk" version should be `flutter.compileSdkVersion` or if a pure android project the highest number that has proven stable and is available in CIPD. 
-- "targetSdk" takes human level effort to update. This is by design of the AGP team. The version should be `flutter.targetSdkVersion` or the highest number that has proven stable and is available in cipd. This number may lag behind compile sdk because of the effort to update.
-- "AGP" version should be the version set in flutter templates or newer. If the version is intentionally different there should be a comment explaining why.
-- "gradle" version should be the version set in flutter templates or newere. If the version is intentionally different there should be a comment explaining why.
-- "kotlin" version should be the version set in flutter templates or newere. If the version is intentionally different there should be a comment explaining why.
-
 ### compileSdk 
 
-Must be higher then or equal to `targetSdk`. 
-Should be `compileSdk` instead of `compileSdkVersion`. 
-Should be the max value available in CIPD if not `flutter.compileSdkVersion`
+- Must be higher then or equal to `targetSdk`. 
+- Should be `compileSdk` instead of `compileSdkVersion`. 
+- Should be the max stable value available in CIPD if not `flutter.compileSdkVersion`.
+- Must have a comment if an api level lower than max is chosen intentionally. 
 
 ```
 // OK
@@ -49,8 +44,11 @@ android {
 
 ### targetSdk 
 
-Must be higher then or equal to `minSdk`. 
-Should be `targetSdk` instead of `targetSdkVersion`.
+- Must be higher then or equal to `minSdk`. 
+- Should be `targetSdk` instead of `targetSdkVersion`.
+- `targetSdk` takes human level effort to update. This is a design decision by the AGP team.
+- `targetSdk` may lag behind compile sdk because of the effort to update.
+- If the `targetSdk` version is intentionally different there should be a comment explaining why.
 
 ```
 // OK
@@ -74,8 +72,10 @@ defaultConfig {
 ```
 
 ### AGP
-
 AKA `com.android.application`, `com.android.tools.build:gradle` `com.android.library`
+
+- "AGP" version should be the version set in flutter templates or newer.
+- If the version is intentionally different there should be a comment explaining why.
 
 
 ```
@@ -97,6 +97,11 @@ dependencies {
 
 Gradle versions are the least likley to break across minor version updates. 
 
+- In new code the "gradle" version should be the version set in flutter templates or newer.
+- In older code any gradle version that works with the other version constraints is ok. 
+- In practice our customers use a large variety of gradle versions.  
+- If the version is intentionally different there should be a comment explaining why.
+
 ```
 // OK 
 distributionUrl=https\://services.gradle.org/distributions/gradle-8.12.1-bin.zip
@@ -104,7 +109,10 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-8.12.1-bin.zip
 
 ### kotlin 
 
-Changing kotlin versions is most likley to have an issue with another dependency. 
+Changing kotlin versions is most likley to have an issue with another dependency and not the code under test.
+
+- "kotlin" version should be the version set in flutter templates or newer.
+- If the version is intentionally different there should be a comment explaining why.
 
 ```
 // Ok
