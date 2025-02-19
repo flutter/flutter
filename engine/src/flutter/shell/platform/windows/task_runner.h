@@ -48,7 +48,7 @@ class TaskRunner : public TaskRunnerWindow::Delegate {
 
   // Polls the event loop once. This will only process tasks scheduled through
   // the task runner. It will not process messages sent to other windows.
-  void PollOnce();
+  void PollOnce(std::chrono::milliseconds timeout);
 
   // Post a task to the event loop or run it immediately if this is being called
   // from the runner's thread.

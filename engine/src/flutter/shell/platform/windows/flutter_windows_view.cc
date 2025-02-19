@@ -18,7 +18,7 @@
 namespace flutter {
 
 namespace {
-// The maximum duration to block the platform thread for while waiting
+// The maximum duration to block the Windows event loop while waiting
 // for a window resize operation to complete.
 constexpr std::chrono::milliseconds kWindowResizeTimeout{100};
 
@@ -233,7 +233,7 @@ bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
       break;
     }
     lock.unlock();
-    engine_->task_runner()->PollOnce();
+    engine_->task_runner()->PollOnce(kWindowResizeTimeout);
   }
   return true;
 }

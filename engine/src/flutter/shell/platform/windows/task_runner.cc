@@ -92,8 +92,8 @@ void TaskRunner::PostTask(TaskClosure closure) {
   EnqueueTask(std::move(task));
 }
 
-void TaskRunner::PollOnce() {
-  task_runner_window_->PollOnce();
+void TaskRunner::PollOnce(std::chrono::milliseconds timeout) {
+  task_runner_window_->PollOnce(timeout);
 }
 
 void TaskRunner::EnqueueTask(Task task) {

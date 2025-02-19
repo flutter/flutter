@@ -36,7 +36,7 @@ class TaskRunnerWindow {
   void AddDelegate(Delegate* delegate);
   void RemoveDelegate(Delegate* delegate);
 
-  void PollOnce();
+  void PollOnce(std::chrono::milliseconds timeout);
 
   ~TaskRunnerWindow();
 

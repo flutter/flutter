@@ -74,9 +74,9 @@ void TaskRunnerWindow::RemoveDelegate(Delegate* delegate) {
   }
 }
 
-void TaskRunnerWindow::PollOnce() {
+void TaskRunnerWindow::PollOnce(std::chrono::milliseconds timeout) {
   MSG msg;
-  ::SetTimer(window_handle_, kPollTimeoutTimerId, 100, nullptr);
+  ::SetTimer(window_handle_, kPollTimeoutTimerId, timeout.count(), nullptr);
   if (GetMessage(&msg, window_handle_, 0, 0)) {
     TranslateMessage(&msg);
     DispatchMessage(&msg);
@@ -135,6 +135,8 @@ TaskRunnerWindow::HandleMessage(UINT const message,
         return 0;
       }
       FML_DCHECK(wparam == kTimerId);
+      ProcessTasks();
+      return 0;
     case WM_NULL:
       ProcessTasks();
       return 0;
