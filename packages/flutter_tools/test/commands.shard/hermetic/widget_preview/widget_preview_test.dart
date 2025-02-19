@@ -160,8 +160,6 @@ flutter:
           asset: package/assetUri
   shaders:
     - shaderUri
-  models:
-    - modelUri
   deferred-components:
     - name: deferredComponent
       libraries:
