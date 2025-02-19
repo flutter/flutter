@@ -419,7 +419,7 @@ if (!is_fuchsia) {
     deps += [ "//flutter/lib/web_ui/flutter_js" ]
 
     # flutter_ddc_modules
-    sources += get_target_outputs(":flutter_dartdevc_canvaskit_kernel_sdk_amd")
+    sources = get_target_outputs(":flutter_dartdevc_canvaskit_kernel_sdk_amd")
     sources += get_target_outputs(
             ":flutter_dartdevc_canvaskit_kernel_sdk_ddcLibraryBundle")
 
