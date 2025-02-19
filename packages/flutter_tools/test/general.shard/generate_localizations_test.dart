@@ -1689,6 +1689,33 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           expect(content, contains("String get helloWorld => 'Hello {name}'"));
         },
       );
+
+      testWithoutContext('translations can copy the placeholder definitions for plurals', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "helloWorld": "{count, plural, one{Hello World!} other{Hello Worlds!}}",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''',
+          'de': '''
+{
+  "helloWorld": "{count, plural, one{Hallo Welt!} other{Hallo Welten!}}",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''',
+        });
+        final String content = getSyntheticGeneratedFileContent(locale: 'en');
+        expect(content, contains('String helloWorld(num count) {'));
+      });
     });
 
     group('DateTime tests', () {
