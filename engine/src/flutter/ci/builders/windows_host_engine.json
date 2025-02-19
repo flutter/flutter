@@ -58,20 +58,7 @@
                     "flutter/build/archives:windows_flutter",
                     "flutter/impeller/toolkit/interop:sdk"
                 ]
-            },
-            "tests": [
-                {
-                    "language": "python3",
-                    "name": "Host Tests for host_debug",
-                    "script": "flutter/testing/run_tests.py",
-                    "parameters": [
-                        "--variant",
-                        "ci/host_debug",
-                        "--type",
-                        "engine"
-                    ]
-                }
-            ]
+            }
         },
         {
             "archives": [

@@ -5,6 +5,10 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
@@ -14,6 +18,7 @@ import 'package:test_api/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('WidgetPreviewStartCommand', () {
@@ -21,15 +26,31 @@ void main() {
     late ProcessManager processManager;
     late WidgetPreviewStartCommand command;
     late FlutterProject rootProject;
+    late Logger logger;
+    final Platform platform = FakePlatform.fromPlatform(const LocalPlatform());
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       processManager = FakeProcessManager.any();
-      command = WidgetPreviewStartCommand();
+      logger = BufferLogger.test();
+      command = WidgetPreviewStartCommand(
+        fs: fileSystem,
+        projectFactory: FakeFlutterProjectFactory(),
+        logger: logger,
+        cache: Cache.test(processManager: processManager, platform: platform),
+        platform: platform,
+        shutdownHooks: ShutdownHooks(),
+        os: OperatingSystemUtils(
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
+      );
       rootProject = FakeFlutterProject(
         projectRoot: 'some_project',
         fileSystem: fileSystem,
-        logger: BufferLogger.test(),
+        logger: logger,
       );
     });
 

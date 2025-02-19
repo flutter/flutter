@@ -13,6 +13,7 @@
 #include "flutter/shell/platform/linux/fl_mouse_cursor_handler.h"
 #include "flutter/shell/platform/linux/fl_renderer.h"
 #include "flutter/shell/platform/linux/fl_task_runner.h"
+#include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
@@ -60,6 +61,17 @@ typedef void (*FlEngineUpdateSemanticsHandler)(
     FlEngine* engine,
     const FlutterSemanticsUpdate2* update,
     gpointer user_data);
+
+/**
+ * fl_engine_new_with_binary_messenger:
+ * @binary_messenger: an #FlBinaryMessenger.
+ *
+ * Creates a new engine with a custom binary messenger. Used for testing.
+ *
+ * Returns: a new #FlEngine.
+ */
+FlEngine* fl_engine_new_with_binary_messenger(
+    FlBinaryMessenger* binary_messenger);
 
 /**
  * fl_engine_new_with_renderer:
@@ -573,6 +585,16 @@ void fl_engine_request_app_exit(FlEngine* engine);
  * Returns: a #FlKeyboardManager.
  */
 FlKeyboardManager* fl_engine_get_keyboard_manager(FlEngine* engine);
+
+/**
+ * fl_engine_get_text_input_handler:
+ * @engine: an #FlEngine.
+ *
+ * Gets the text input handler used by this engine.
+ *
+ * Returns: a #FlTextInputHandler.
+ */
+FlTextInputHandler* fl_engine_get_text_input_handler(FlEngine* engine);
 
 /**
  * fl_engine_get_mouse_cursor_handler:

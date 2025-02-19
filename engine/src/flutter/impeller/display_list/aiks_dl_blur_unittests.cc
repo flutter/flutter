@@ -470,6 +470,28 @@ TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, MaskBlurOnZeroDimensionIsSkippedWideGamut) {
+  // Making sure this test is run on a wide gamut enabled backend
+  EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
+            PixelFormat::kB10G10R10A10XR);
+
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10));
+
+  // Zero height above
+  builder.DrawRect(DlRect::MakeLTRB(100, 250, 500, 250), paint);
+  // Regular rect
+  builder.DrawRect(DlRect::MakeLTRB(100, 300, 500, 600), paint);
+  // Zero width to the right
+  builder.DrawRect(DlRect::MakeLTRB(550, 300, 550, 600), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 struct MaskBlurTestConfig {
   DlBlurStyle style = DlBlurStyle::kNormal;
   Scalar sigma = 1.0f;
@@ -1365,6 +1387,30 @@ TEST_P(AiksTest,
       builder.Restore();
     }
   }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, BlurGradientWithOpacity) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  std::vector<DlColor> colors = {DlColor(0xFFFF0000), DlColor(0xFF00FF00)};
+  std::vector<Scalar> stops = {0.0, 1.0};
+
+  auto gradient = DlColorSource::MakeLinear(
+      {0, 0}, {400, 400}, 2, colors.data(), stops.data(), DlTileMode::kClamp);
+
+  DlPaint save_paint;
+  save_paint.setOpacity(0.5);
+  builder.SaveLayer(nullptr, &save_paint);
+
+  DlPaint paint;
+  paint.setColorSource(gradient);
+  paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 1));
+  builder.DrawRect(SkRect::MakeXYWH(100, 100, 200, 200), paint);
+
+  builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
