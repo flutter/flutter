@@ -583,8 +583,8 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   }
 }
 
-class _PopupMenuInterface<T> {
-  _PopupMenuInterface({
+class _PopupMenuData<T> {
+  _PopupMenuData({
     required this.items,
     required this.itemSizes,
     required this.animation,
@@ -613,14 +613,14 @@ class _PopupMenu<T> extends StatefulWidget {
   const _PopupMenu({
     super.key,
     required this.itemKeys,
-    required this.route,
+    required this.data,
     required this.semanticLabel,
     this.constraints,
     required this.clipBehavior,
   });
 
   final List<GlobalKey> itemKeys;
-  final _PopupMenuInterface<T> route;
+  final _PopupMenuData<T> data;
   final String? semanticLabel;
   final BoxConstraints? constraints;
   final Clip clipBehavior;
@@ -641,8 +641,8 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
   @override
   void didUpdateWidget(covariant _PopupMenu<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.route.items.length != widget.route.items.length ||
-        oldWidget.route.animation != widget.route.animation) {
+    if (oldWidget.data.items.length != widget.data.items.length ||
+        oldWidget.data.animation != widget.data.animation) {
       _setOpacities();
     }
   }
@@ -654,12 +654,12 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
     final List<CurvedAnimation> newOpacities = <CurvedAnimation>[];
     final double unit =
         1.0 /
-        (widget.route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
-    for (int i = 0; i < widget.route.items.length; i += 1) {
+        (widget.data.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
+    for (int i = 0; i < widget.data.items.length; i += 1) {
       final double start = (i + 1) * unit;
       final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
       final CurvedAnimation opacity = CurvedAnimation(
-        parent: widget.route.animation!,
+        parent: widget.data.animation!,
         curve: Interval(start, end),
       );
       newOpacities.add(opacity);
@@ -679,24 +679,24 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
   Widget build(BuildContext context) {
     final double unit =
         1.0 /
-        (widget.route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
+        (widget.data.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     final List<Widget> children = <Widget>[];
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final PopupMenuThemeData defaults =
         theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
 
-    for (int i = 0; i < widget.route.items.length; i += 1) {
+    for (int i = 0; i < widget.data.items.length; i += 1) {
       final CurvedAnimation opacity = _opacities[i];
-      Widget item = widget.route.items[i];
-      if (widget.route.initialValue != null &&
-          widget.route.items[i].represents(widget.route.initialValue)) {
+      Widget item = widget.data.items[i];
+      if (widget.data.initialValue != null &&
+          widget.data.items[i].represents(widget.data.initialValue)) {
         item = ColoredBox(color: Theme.of(context).highlightColor, child: item);
       }
       children.add(
         _MenuItem(
           onLayout: (Size size) {
-            widget.route.itemSizes[i] = size;
+            widget.data.itemSizes[i] = size;
           },
           child: FadeTransition(key: widget.itemKeys[i], opacity: opacity, child: item),
         ),
@@ -705,7 +705,7 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
 
     final CurveTween opacity = CurveTween(curve: const Interval(0.0, 1.0 / 3.0));
     final CurveTween width = CurveTween(curve: Interval(0.0, unit));
-    final CurveTween height = CurveTween(curve: Interval(0.0, unit * widget.route.items.length));
+    final CurveTween height = CurveTween(curve: Interval(0.0, unit * widget.data.items.length));
 
     final Widget child = ConstrainedBox(
       constraints:
@@ -719,7 +719,7 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
           explicitChildNodes: true,
           label: widget.semanticLabel,
           child: SingleChildScrollView(
-            padding: widget.route.menuPadding ?? popupMenuTheme.menuPadding ?? defaults.menuPadding,
+            padding: widget.data.menuPadding ?? popupMenuTheme.menuPadding ?? defaults.menuPadding,
             child: ListBody(children: children),
           ),
         ),
@@ -727,26 +727,26 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
     );
 
     return AnimatedBuilder(
-      animation: widget.route.animation!,
+      animation: widget.data.animation!,
       builder: (BuildContext context, Widget? child) {
         return FadeTransition(
-          opacity: opacity.animate(widget.route.animation!),
+          opacity: opacity.animate(widget.data.animation!),
           child: Material(
-            shape: widget.route.shape ?? popupMenuTheme.shape ?? defaults.shape,
-            color: widget.route.color ?? popupMenuTheme.color ?? defaults.color,
+            shape: widget.data.shape ?? popupMenuTheme.shape ?? defaults.shape,
+            color: widget.data.color ?? popupMenuTheme.color ?? defaults.color,
             clipBehavior: widget.clipBehavior,
             type: MaterialType.card,
-            elevation: widget.route.elevation ?? popupMenuTheme.elevation ?? defaults.elevation!,
+            elevation: widget.data.elevation ?? popupMenuTheme.elevation ?? defaults.elevation!,
             shadowColor:
-                widget.route.shadowColor ?? popupMenuTheme.shadowColor ?? defaults.shadowColor,
+                widget.data.shadowColor ?? popupMenuTheme.shadowColor ?? defaults.shadowColor,
             surfaceTintColor:
-                widget.route.surfaceTintColor ??
+                widget.data.surfaceTintColor ??
                 popupMenuTheme.surfaceTintColor ??
                 defaults.surfaceTintColor,
             child: Align(
               alignment: AlignmentDirectional.topEnd,
-              widthFactor: width.evaluate(widget.route.animation!),
-              heightFactor: height.evaluate(widget.route.animation!),
+              widthFactor: width.evaluate(widget.data.animation!),
+              heightFactor: height.evaluate(widget.data.animation!),
               child: child,
             ),
           ),
@@ -980,7 +980,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     }
 
     final Widget menu = _PopupMenu<T>(
-      route: _PopupMenuInterface<T>(
+      data: _PopupMenuData<T>(
         items: items,
         itemSizes: itemSizes,
         animation: animation,
@@ -1191,7 +1191,7 @@ class _PopupMenuWindowRouteContent<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _PopupMenu<T>(
-      route: _PopupMenuInterface<T>(
+      data: _PopupMenuData<T>(
         items: items,
         itemSizes: itemSizes,
         animation: animation,
