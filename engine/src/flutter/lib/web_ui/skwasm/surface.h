@@ -74,9 +74,9 @@ class Surface {
                               ImageByteFormat format,
                               uint32_t callbackId);
 
+  void init();
  private:
   void _runWorker();
-  void _init();
   void _resizeCanvasToFit(int width, int height);
   void _recreateSurface();
 

@@ -29,11 +29,11 @@ mergeInto(LibraryManager.library, {
       if (!threadId) {
         addEventListener("message", eventListener);
       } else {
-        PThread.pthreads[threadId].addEventListener("message", eventListener);
-        PThread.pthreads[threadId].postMessage({
+        _wasmWorkers[threadId].addEventListener("message", eventListener);
+        _wasmWorkers[threadId].postMessage({
           skwasmMessage: 'syncTimeOrigin',
           timeOrigin: performance.timeOrigin,
-        });    
+        });
       }
     };
     skwasm_getCurrentTimestamp = function() {
@@ -41,10 +41,16 @@ mergeInto(LibraryManager.library, {
     };
     skwasm_postMessage = function(message, transfers, threadId) {
       if (threadId) {
-        PThread.pthreads[threadId].postMessage(message, transfers);
+        _wasmWorkers[threadId].postMessage(message, transfers);
       } else {
         postMessage(message, transfers);
       }
+    };
+    _skwasm_initThread = function(threadId, surface) {
+      _wasmWorkers[threadId].postMessage({
+        skwasmMessage: 'initSurface',
+        surface: surface
+      });
     };
   },
   $skwasm_threading_setup__deps: ['$skwasm_registerMessageListener', '$skwasm_getCurrentTimestamp', '$skwasm_postMessage'],
@@ -54,4 +60,6 @@ mergeInto(LibraryManager.library, {
   $skwasm_getCurrentTimestamp__deps: ['$skwasm_threading_setup'],
   $skwasm_postMessage: function () {},
   $skwasm_postMessage__deps: ['$skwasm_threading_setup'],
+  skwasm_initThread: function() {},
+  skwasm_initThread__deps: ['$skwasm_threading_setup'],
 });

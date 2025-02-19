@@ -7,7 +7,7 @@
 using namespace Skwasm;
 
 Surface::Surface() : _thread(0) {
-  _init();
+  init();
 }
 
 SKWASM_EXPORT bool skwasm_isMultiThreaded() {

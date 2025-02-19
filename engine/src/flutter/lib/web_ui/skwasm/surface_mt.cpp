@@ -5,23 +5,16 @@
 #include "surface.h"
 
 #include "skwasm_support.h"
+#include <emscripten/wasm_worker.h>
 
 using namespace Skwasm;
 
 Surface::Surface() {
   assert(emscripten_is_main_browser_thread());
 
-  pthread_attr_t attr;
-  pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+  _thread = emscripten_malloc_wasm_worker(1024);
+  skwasm_initThread(_thread, this);
 
-  pthread_create(
-      &_thread, &attr,
-      [](void* context) -> void* {
-        static_cast<Surface*>(context)->_runWorker();
-        return nullptr;
-      },
-      this);
   // Listen to messages from the worker
   skwasm_connectThread(_thread);
 }

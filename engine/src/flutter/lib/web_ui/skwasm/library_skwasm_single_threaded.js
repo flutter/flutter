@@ -20,6 +20,9 @@ mergeInto(LibraryManager.library, {
         messageListener(message);
       })
     };
+    // _skwasm_initThread = function(threadId, surface) {
+    //   _surface_init(surface);
+    // };
   },
   $skwasm_threading_setup__deps: ['$skwasm_registerMessageListener', '$skwasm_getCurrentTimestamp', '$skwasm_postMessage'],
   $skwasm_registerMessageListener: function() {},
@@ -28,4 +31,6 @@ mergeInto(LibraryManager.library, {
   $skwasm_getCurrentTimestamp__deps: ['$skwasm_threading_setup'],
   $skwasm_postMessage: function () {},
   $skwasm_postMessage__deps: ['$skwasm_threading_setup'],
+  skwasm_initThread: function() {},
+  skwasm_initThread__deps: ['$skwasm_threading_setup'],
 });

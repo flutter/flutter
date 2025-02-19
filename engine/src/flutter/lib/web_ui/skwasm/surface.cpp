@@ -60,12 +60,12 @@ void Surface::setCallbackHandler(CallbackHandler* callbackHandler) {
 
 // Worker thread only
 void Surface::_runWorker() {
-  _init();
+  init();
   emscripten_exit_with_live_runtime();
 }
 
 // Worker thread only
-void Surface::_init() {
+void Surface::init() {
   // Listen to messages from the main thread
   skwasm_connectThread(0);
   _glContext = skwasm_createOffscreenCanvas(256, 256);
@@ -215,6 +215,10 @@ SkwasmObject TextureSourceWrapper::getTextureSource() {
 
 SKWASM_EXPORT Surface* surface_create() {
   return new Surface();
+}
+
+SKWASM_EXPORT void surface_init(Surface *surface) {
+  surface->init();
 }
 
 SKWASM_EXPORT unsigned long surface_getThreadId(Surface* surface) {

@@ -47,6 +47,7 @@ extern void skwasm_dispatchRasterizeImage(unsigned long threadId,
 extern void skwasm_postRasterizeResult(Skwasm::Surface* surface,
                                        SkData* data,
                                        uint32_t callbackId);
+extern void skwasm_initThread(unsigned long threadId, Skwasm::Surface* surface);
 }
 
 #endif  // FLUTTER_LIB_WEB_UI_SKWASM_SKWASM_SUPPORT_H_
