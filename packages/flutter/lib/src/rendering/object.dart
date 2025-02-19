@@ -2617,7 +2617,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return true;
     }());
     _needsLayout = false;
-    markNeedsPaint();
   }
 
   /// Compute the layout for this render object.
@@ -2787,6 +2786,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       _debugMutationsLocked = false;
       return true;
     }());
+    assert(!_needsLayout || _needsPaint);
     if (!_needsLayout) {
       markNeedsPaint();
     }
@@ -3282,7 +3282,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(_layerHandle.layer != null);
     assert(!_layerHandle.layer!.attached);
     RenderObject? node = parent;
-    while (node is RenderObject) {
+    while (node != null) {
       if (node.isRepaintBoundary) {
         if (node._layerHandle.layer == null) {
           // Looks like the subtree here has never been painted. Let it handle itself.
