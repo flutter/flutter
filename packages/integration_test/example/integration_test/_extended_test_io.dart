@@ -44,6 +44,11 @@ void main() {
     //   ]);
     // await run.exitCode;
     ////////////////////////////////////////////////////////////////////////
+    // CAMILLE: we may be able to call screncap without adb shell, adb shell means run this command on the device
+    // if dart:ui is used it has to be on device (flutter, flutter_test -- flutter_tester device, integration_test) (so if any are in transitive deps, you know what it is)
+    // flutter driver is a termainl, we know what vm service is being used on the app so let's connect to it and do stuff, so when we see FlutterDriver.connect() all this is doing
+    // is looking at env var (FLUTTER_VM_URL) and connecting to app via VM service protocol. so really flutter_driver test is a dart script and you are running from host machine.
+    // there, adb is available. platform channels or ffi or dart:ui, then it has to be integration_test, flutter, flutter_test (things running on device)
 
     // Build our app.
     app.main();

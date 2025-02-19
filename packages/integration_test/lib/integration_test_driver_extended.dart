@@ -105,7 +105,10 @@ Future<void> integrationDriver({
       final Map<String, Object?>? args =
           (response.data!['args'] as Map<String, Object?>?)?.cast<String, Object?>();
 
-      // CAMILLE: why does we bneed on screenshot?
+      // CAMILLE: why does we need on screenshot?
+      // first web renderer (html) uses div and anchor and img tags and the like in combination with canvas tags to render app
+      // browser cannot take pic of itself. communicates with cfrome driver || flutter driver to take screenshots
+      // new rendered (canvaskit/wasm) it is not a surface like a vanvas and now can convert this directly to an image
       final bool screenshotSuccess = await onScreenshot!(screenshotName, screenshotImage, args);
       onScreenshotResults[screenshotName] = screenshotSuccess;
       if (screenshotSuccess) {
