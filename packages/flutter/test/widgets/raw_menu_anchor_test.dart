@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 // Tests that apply to select constructors have a suffix:
 //  * [Default]: Applies to [RawMenuAnchor]
@@ -3558,6 +3559,9 @@ void main() {
 
     testWidgets(
       'Throws an AssertionError if a MenuControllerDecorator wraps a MenuControllerDecorator',
+      experimentalLeakTesting:
+          LeakTesting.settings
+              .withIgnoredAll(), // leaking by design because of exception. See https://github.com/dart-lang/leak_tracker/blob/main/doc/leak_tracking/TROUBLESHOOT.md#4-the-test-throws-flutter-exception
       (WidgetTester tester) async {
         await tester.pumpWidget(
           App(
