@@ -67,7 +67,6 @@ class RenderCanvas extends DisplayCanvas {
     final DomCSSStyleDeclaration style = canvasElement.style;
     style.width = '${logicalWidth}px';
     style.height = '${logicalHeight}px';
-    print('Setting RenderCanvas to $logicalWidth px by $logicalHeight px');
     _currentDevicePixelRatio = devicePixelRatio;
   }
 
@@ -120,8 +119,6 @@ class RenderCanvas extends DisplayCanvas {
     _pixelHeight = size.height;
     canvasElement.width = _pixelWidth.toDouble();
     canvasElement.height = _pixelHeight.toDouble();
-    print('Calling RenderCanvas._ensureSize with size: $size');
-    print(StackTrace.current);
     _updateLogicalHtmlCanvasSize();
   }
 

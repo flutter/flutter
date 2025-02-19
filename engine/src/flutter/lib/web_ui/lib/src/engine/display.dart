@@ -40,9 +40,12 @@ class EngineFlutterDisplay extends ui.Display {
   ///
   /// This value cannot be overriden by tests, for example.
   double get browserDevicePixelRatio {
-    final double ratio = domWindow.devicePixelRatio;
+    double ratio = domWindow.devicePixelRatio;
     // Guard against WebOS returning 0.
-    return (ratio == 0.0) ? 1.0 : ratio;
+    ratio = (ratio == 0.0) ? 1.0 : ratio;
+
+    final double scale = domWindow.visualViewport?.scale ?? 1.0;
+    return ratio * scale;
   }
 
   /// Overrides the default device pixel ratio.
