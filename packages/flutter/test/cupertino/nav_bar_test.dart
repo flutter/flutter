@@ -2609,6 +2609,8 @@ void main() {
   });
 
   testWidgets('CupertinoSliverNavigationBar.search golden tests', (WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 850));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       const CupertinoApp(
         home: RepaintBoundary(

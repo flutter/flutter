@@ -2309,7 +2309,10 @@ class _ActiveSearchableBottom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: _kNavBarEdgePadding, bottom: _kNavBarBottomPadding),
+      padding: const EdgeInsetsDirectional.only(
+        start: _kNavBarEdgePadding,
+        bottom: _kNavBarBottomPadding,
+      ),
       child: Row(
         spacing: 12.0, // Eyeballed on an iPhone 15 simulator running iOS 17.5.
         children: <Widget>[
@@ -2348,9 +2351,9 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
       child: FocusableActionDetector(
         descendantsAreFocusable: false,
         child: Padding(
-          padding: const EdgeInsets.only(
-            left: _kNavBarEdgePadding,
-            right: _kNavBarEdgePadding,
+          padding: const EdgeInsetsDirectional.only(
+            start: _kNavBarEdgePadding,
+            end: _kNavBarEdgePadding,
             bottom: verticalPadding,
           ),
           child: SizedBox(height: searchFieldHeight, child: searchField),
