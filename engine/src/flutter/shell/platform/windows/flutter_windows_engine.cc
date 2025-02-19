@@ -198,7 +198,8 @@ FlutterWindowsEngine::FlutterWindowsEngine(
       std::find(switches.begin(), switches.end(),
                 "--enable-multi-window=true") != switches.end();
 
-  egl_manager_ = egl::Manager::Create();
+  egl_manager_ = egl::Manager::Create(
+      static_cast<egl::GpuPreference>(project_->gpu_preference()));
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
