@@ -302,10 +302,10 @@ abstract class CupertinoLocalizations {
   /// indicate that a tap outside dismisses the context menu.
   String get menuDismissLabel;
 
-  /// The label for the cancel button in modal views, used in [CupertinoNavigationBar].
+  /// The label for the cancel button in modal views, used in [CupertinoNavigationBar] and [CupertinoSliverNavigationBar].
   String get cancelButtonLabel;
 
-  /// The label for the back button, used in [CupertinoNavigationBar].
+  /// The label for the back button, used in [CupertinoNavigationBar] and [CupertinoSliverNavigationBar].
   String get backButtonLabel;
 
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
