@@ -2632,10 +2632,10 @@ typedef struct {
   /// platform thread.
   FlutterViewFocusChangeRequestCallback view_focus_change_request_callback;
 
-  /// Opaque handle provided by the engine. Accessible in Dart code through
-  /// `PlatformDispatcher.instance.engineHandle`. Can be used in native code to
+  /// Opaque identifier provided by the engine. Accessible in Dart code through
+  /// `PlatformDispatcher.instance.engineId`. Can be used in native code to
   /// retrieve the engine instance that is running the Dart code.
-  int64_t engine_handle;
+  int64_t engine_id;
 } FlutterProjectArgs;
 
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES

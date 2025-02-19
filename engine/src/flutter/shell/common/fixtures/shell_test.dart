@@ -641,10 +641,10 @@ void testSendViewFocusEvent() {
   notifyNative();
 }
 
-@pragma('vm:external-name', 'ReportEngineHandle')
-external void _reportEngineHandle(int? handle);
+@pragma('vm:external-name', 'ReportEngineId')
+external void _reportEngineId(int? identifier);
 
 @pragma('vm:entry-point')
-void providesEngineHandle() {
-  _reportEngineHandle(PlatformDispatcher.instance.engineHandle);
+void providesEngineId() {
+  _reportEngineId(PlatformDispatcher.instance.engineId);
 }

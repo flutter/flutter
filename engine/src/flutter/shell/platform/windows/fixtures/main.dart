@@ -397,10 +397,10 @@ void mergedUIThread() {
   signal();
 }
 
-@pragma('vm:external-name', 'NotifyEngineHandle')
-external void notifyEngineHandle(int? handle);
+@pragma('vm:external-name', 'NotifyEngineId')
+external void notifyEngineId(int? handle);
 
 @pragma('vm:entry-point')
-void testEngineHandle() {
-  notifyEngineHandle(ui.PlatformDispatcher.instance.engineHandle);
+void testEngineId() {
+  notifyEngineId(ui.PlatformDispatcher.instance.engineId);
 }

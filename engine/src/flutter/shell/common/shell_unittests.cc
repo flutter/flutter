@@ -5006,7 +5006,7 @@ TEST_F(ShellTest, SendViewFocusEvent) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, ProvidesEngineHandle) {
+TEST_F(ShellTest, ProvidesEngineId) {
   Settings settings = CreateSettingsForFixture();
   TaskRunners task_runners = GetTaskRunnersForFixture();
   fml::AutoResetWaitableEvent latch;
@@ -5014,7 +5014,7 @@ TEST_F(ShellTest, ProvidesEngineHandle) {
   int reported_handle = 0;
 
   AddNativeCallback(
-      "ReportEngineHandle", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+      "ReportEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
         Dart_Handle exception = nullptr;
         reported_handle =
             tonic::DartConverter<int64_t>::FromArguments(args, 0, exception);
@@ -5028,8 +5028,8 @@ TEST_F(ShellTest, ProvidesEngineHandle) {
   ASSERT_TRUE(shell->IsSetup());
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEngineHandle(99);
-  configuration.SetEntrypoint("providesEngineHandle");
+  configuration.SetEngineId(99);
+  configuration.SetEntrypoint("providesEngineId");
   RunEngine(shell.get(), std::move(configuration));
 
   latch.Wait();
