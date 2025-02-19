@@ -197,25 +197,23 @@ abstract class FlutterVersion {
 
   final String flutterRoot;
 
-  String? _frameworkAge;
+  String _getTimeSinceCommit({String? revision}) {
+    return _runGit(
+      FlutterVersion.gitLog(<String>[
+        '-n',
+        '1',
+        '--pretty=format:%ar',
+        if (revision != null) revision,
+      ]).join(' '),
+      globals.processUtils,
+      flutterRoot,
+    );
+  }
 
   // TODO(fujino): calculate this relative to frameworkCommitDate for
   // _FlutterVersionFromFile so we don't need a git call.
-  String get frameworkAge {
-    return _frameworkAge ??= _runGit(
-      FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '),
-      globals.processUtils,
-      flutterRoot,
-    );
-  }
-
-  String get engineAge {
-    return _frameworkAge ??= _runGit(
-      FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%ar', engineRevision]).join(' '),
-      globals.processUtils,
-      flutterRoot,
-    );
-  }
+  late final String frameworkAge = _getTimeSinceCommit();
+  late final String engineAge = _getTimeSinceCommit(revision: engineRevision);
 
   void ensureVersionFile();
 

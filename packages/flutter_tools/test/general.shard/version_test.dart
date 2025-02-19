@@ -168,6 +168,19 @@ void main() {
               ],
               stdout: getChannelUpToDateVersion().toString(),
             ),
+            const FakeCommand(
+              command: <String>[
+                'git',
+                '-c',
+                'log.showSignature=false',
+                'log',
+                '-n',
+                '1',
+                '--pretty=format:%ar',
+                'abcdefg',
+              ],
+              stdout: '2 seconds ago',
+            ),
             FakeCommand(
               command: const <String>[
                 'git',
@@ -199,7 +212,7 @@ void main() {
             flutterVersion.toString(),
             'Flutter • channel $channel • $flutterUpstreamUrl\n'
             'Framework • revision 1234abcd (1 second ago) • ${getChannelUpToDateVersion()}\n'
-            'Engine • revision abcdefg (1 second ago) • ${getChannelUpToDateVersion()}\n'
+            'Engine • revision abcdefg (2 seconds ago) • ${getChannelUpToDateVersion()}\n'
             'Tools • Dart 2.12.0 • DevTools 2.8.0',
           );
           expect(flutterVersion.frameworkAge, '1 second ago');
@@ -856,6 +869,19 @@ void main() {
             '-n',
             '1',
             '--pretty=format:%ar',
+          ],
+          stdout: '1 second ago',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'git',
+            '-c',
+            'log.showSignature=false',
+            'log',
+            '-n',
+            '1',
+            '--pretty=format:%ar',
+            'deadbeef',
           ],
           stdout: '1 second ago',
         ),
