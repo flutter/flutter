@@ -93,7 +93,7 @@ dependencies {
 }
 ```
 
-### gradle 
+### gradle
 
 Gradle versions are the least likley to break across minor version updates.
 
