@@ -437,8 +437,8 @@ class ModuleTest {
 Future<void> main() async {
   await task(
     combine(<TaskFunction>[
-      ModuleTest(gradleVersion: '8.4').call,
-      ModuleTest(gradleVersion: '8.4-rc-3').call,
+      ModuleTest(gradleVersion: '8.10.2').call,
+      ModuleTest(gradleVersion: '8.13-rc-1').call,
     ]),
   );
 }
