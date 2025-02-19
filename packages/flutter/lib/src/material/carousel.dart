@@ -1586,12 +1586,7 @@ class CarouselController extends ScrollController {
     final int totalWeight = weights.reduce((int a, int b) => a + b);
     final double dimension = position.viewportDimension;
 
-    final int maxWeightIndex = weights.indexOf(weights.reduce((int a, int b) => a > b ? a : b));
-
-    final int newIndex =
-        carouselState._consumeMaxWeight
-            ? (index > maxWeightIndex ? index - 1 : maxWeightIndex)
-            : index;
+    final int newIndex = carouselState._consumeMaxWeight ? index - 1 : index;
 
     return dimension * (weights.first / totalWeight) * newIndex;
   }
