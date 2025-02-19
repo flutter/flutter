@@ -331,6 +331,16 @@ class FlutterWindowsEngine {
   // Allows swapping out embedder_api_ calls in tests.
   friend class EngineModifier;
 
+  // Forwards the window message to the top-level window manager.
+  void ForwardToHostWindowController(HWND hwnd,
+                                     UINT message,
+                                     WPARAM wparam,
+                                     LPARAM lparam) const;
+
+  // Returns the root view associated with the top-level window with |hwnd| as
+  // the window handle.
+  FlutterWindowsView* GetViewFromTopLevelWindow(HWND hwnd) const;
+
   // Sends system locales to the engine.
   //
   // Should be called just after the engine is run, and after any relevant
