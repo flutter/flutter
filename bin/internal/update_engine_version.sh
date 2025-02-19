@@ -54,7 +54,9 @@ if [ -z "$ENGINE_VERSION" ] && [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROO
   fi
 fi
 
-if [[ "$BRANCH" != "stable" && "$BRANCH" != "beta" ]]; then
+# If the engine.version is tracked by git; do not override it.
+TRACKED_ENGINE="$(git -C "$flutterRoot" ls-files bin/internal/engine.version)"
+if [[ -z "$TRACKED_ENGINE" ]]; then
   # Write the engine version out so downstream tools know what to look for.
   echo $ENGINE_VERSION > "$FLUTTER_ROOT/bin/internal/engine.version"
 

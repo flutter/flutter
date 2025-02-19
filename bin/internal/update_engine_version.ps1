@@ -53,7 +53,9 @@ if ([string]::IsNullOrEmpty($engineVersion) -and (Test-Path "$flutterRoot\DEPS" 
     }
 }
 
-if (($branch -ne "stable" -and $branch -ne "beta")) {
+# If the engine.version is tracked by git; do not override it.
+$trackedEngine = (git -C "$flutterRoot" ls-files bin/internal/engine.version) | Out-String
+if ($trackedEngine.length -eq 0) {
     # Write the engine version out so downstream tools know what to look for.
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
     [System.IO.File]::WriteAllText("$flutterRoot\bin\internal\engine.version", $engineVersion, $utf8NoBom)
