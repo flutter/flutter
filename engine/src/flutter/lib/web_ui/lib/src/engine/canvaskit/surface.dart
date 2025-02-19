@@ -137,6 +137,8 @@ class Surface extends DisplayCanvas {
     _surface!.flush();
   }
 
+  static int _iterationsSinceLastDebugPrint = 0;
+
   Future<void> rasterizeToCanvas(
     BitmapSize bitmapSize,
     RenderCanvas canvas,
@@ -152,6 +154,12 @@ class Surface extends DisplayCanvas {
       DomImageBitmap bitmap;
       if (useOffscreenCanvas) {
         bitmap = _offscreenCanvas!.transferToImageBitmap();
+        if (_iterationsSinceLastDebugPrint % 100 == 0) {
+          print('OFFSCREENCANVAS SIZE = ${_offscreenCanvas!.width} x ${_offscreenCanvas!.height}');
+          print('GIVEN BITMAPSIZE = $bitmapSize');
+          print('CREATED BITMAP SIZE = ${bitmap.width} x ${bitmap.height}');
+        }
+        _iterationsSinceLastDebugPrint++;
       } else {
         bitmapSource = _canvasElement! as JSObject;
         bitmap = await createImageBitmap(bitmapSource, (
@@ -271,6 +279,9 @@ class Surface extends DisplayCanvas {
         }
       }
     }
+
+    print('createOrUpdateSurface called with size: $size');
+    print(StackTrace.current);
 
     // If we reached here, then this is the first frame and we haven't made a
     // surface yet, we are forcing a new context, or the size of the surface
