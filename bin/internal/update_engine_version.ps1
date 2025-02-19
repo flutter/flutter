@@ -19,6 +19,12 @@ $ErrorActionPreference = "Stop"
 $progName = Split-Path -parent $MyInvocation.MyCommand.Definition
 $flutterRoot = (Get-Item $progName).parent.parent.FullName
 
+# On stable, beta, and release tags, the engine.version is tracked by git - do not override it.
+$trackedEngine = (git -C "$flutterRoot" ls-files bin/internal/engine.version) | Out-String
+if ($trackedEngine.length -ne 0) {
+  return
+}
+
 # Allow overriding the intended engine version via FLUTTER_PREBUILT_ENGINE_VERSION.
 #
 # This is for systems, such as Github Actions, where we know ahead of time the
@@ -53,15 +59,11 @@ if ([string]::IsNullOrEmpty($engineVersion) -and (Test-Path "$flutterRoot\DEPS" 
     }
 }
 
-# If the engine.version is tracked by git; do not override it.
-$trackedEngine = (git -C "$flutterRoot" ls-files bin/internal/engine.version) | Out-String
-if ($trackedEngine.length -eq 0) {
-    # Write the engine version out so downstream tools know what to look for.
-    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-    [System.IO.File]::WriteAllText("$flutterRoot\bin\internal\engine.version", $engineVersion, $utf8NoBom)
+# Write the engine version out so downstream tools know what to look for.
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText("$flutterRoot\bin\internal\engine.version", $engineVersion, $utf8NoBom)
 
-    # The realm on CI is passed in.
-    if ($Env:FLUTTER_REALM) {
-        [System.IO.File]::WriteAllText("$flutterRoot\bin\internal\engine.realm", $Env:FLUTTER_REALM, $utf8NoBom)
-    }
+# The realm on CI is passed in.
+if ($Env:FLUTTER_REALM) {
+    [System.IO.File]::WriteAllText("$flutterRoot\bin\internal\engine.realm", $Env:FLUTTER_REALM, $utf8NoBom)
 }
