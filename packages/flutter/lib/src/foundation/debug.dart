@@ -141,6 +141,8 @@ String? connectedVmServiceUri;
 /// [FlutterMemoryAllocations] should not increase size of the Flutter application
 /// if memory allocations are disabled.
 ///
+/// Should be called only from within an assert.
+///
 /// Returns true to make it easier to be wrapped into `assert`.
 bool maybeDispatchObjectCreated(String library, String className, Object object) {
   if (kFlutterMemoryAllocationsEnabled) {
@@ -154,6 +156,8 @@ bool maybeDispatchObjectCreated(String library, String className, Object object)
 }
 
 /// If memory allocations tracking is enabled, dispatch object disposal.
+///
+/// Should be called only from within an assert.
 ///
 /// Returns true to make it easier to be wrapped into `assert`.
 bool maybeDispatchObjectDisposed(Object object) {
