@@ -2494,6 +2494,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         }());
         owner!._nodesNeedingLayout.add(this);
         owner!.requestVisualUpdate();
+        markNeedsPaint();
       }
     }
   }
@@ -2786,8 +2787,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       _debugMutationsLocked = false;
       return true;
     }());
+    if (!_needsLayout) {
+      markNeedsPaint();
+    }
     _needsLayout = false;
-    markNeedsPaint();
 
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
       FlutterTimeline.finishSync();
