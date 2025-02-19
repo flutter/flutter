@@ -36,7 +36,7 @@ struct _FlView {
   // Signal subscription for engine restart signal.
   guint on_pre_engine_restart_cb_id;
 
-  // Signal subscription for updating sematics signal.
+  // Signal subscription for updating semantics signal.
   guint update_semantics_cb_id;
 
   // ID for this view.
