@@ -82,6 +82,118 @@ void main() {
       RRect.fromRectAndCorners(rect, topRight: radius1, bottomRight: radius2),
     );
 
+    // some with topLeft
+    borderRadius = const BorderRadius.some(
+      topLeft: radius1,
+      rest: radius2
+    );
+    expect(borderRadius, hasOneLineDescription);
+    expect(borderRadius.topLeft, radius1);
+    expect(borderRadius.topRight, radius2);
+    expect(borderRadius.bottomLeft, radius2);
+    expect(borderRadius.bottomRight, radius2);
+    expect(
+      borderRadius.toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius1,
+        topRight: radius2,
+        bottomLeft: radius2,
+        bottomRight: radius2,
+      ),
+    );
+
+    // some with topRight
+    borderRadius = const BorderRadius.some(
+      topRight: radius1,
+      rest: radius2
+    );
+    expect(borderRadius, hasOneLineDescription);
+    expect(borderRadius.topLeft, radius2);
+    expect(borderRadius.topRight, radius1);
+    expect(borderRadius.bottomLeft, radius2);
+    expect(borderRadius.bottomRight, radius2);
+    expect(
+      borderRadius.toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius2,
+        topRight: radius1,
+        bottomLeft: radius2,
+        bottomRight: radius2,
+      ),
+    );
+
+    // some with bottomLeft
+    borderRadius = const BorderRadius.some(
+      bottomLeft: radius1,
+      rest: radius2
+    );
+    expect(borderRadius, hasOneLineDescription);
+    expect(borderRadius.topLeft, radius2);
+    expect(borderRadius.topRight, radius2);
+    expect(borderRadius.bottomLeft, radius1);
+    expect(borderRadius.bottomRight, radius2);
+    expect(
+      borderRadius.toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius2,
+        topRight: radius2,
+        bottomLeft: radius1,
+        bottomRight: radius2,
+      ),
+    );
+
+    // some with bottomRight
+    borderRadius = const BorderRadius.some(
+      bottomRight: radius1,
+      rest: radius2
+    );
+    expect(borderRadius, hasOneLineDescription);
+    expect(borderRadius.topLeft, radius2);
+    expect(borderRadius.topRight, radius2);
+    expect(borderRadius.bottomLeft, radius2);
+    expect(borderRadius.bottomRight, radius1);
+    expect(
+      borderRadius.toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius2,
+        topRight: radius2,
+        bottomLeft: radius2,
+        bottomRight: radius1,
+      ),
+    );
+
+    const Radius radius3 = Radius.elliptical(1.0, 2.0);
+    const Radius radius4 = Radius.elliptical(3.0, 5.0);
+    const Radius radius5 = Radius.elliptical(7.0, 11.0);
+
+    // some with all
+    borderRadius = const BorderRadius.some(
+      topLeft: radius1,
+      topRight: radius2,
+      bottomLeft: radius3,
+      bottomRight: radius4,
+      rest: radius5
+    );
+    expect(borderRadius, hasOneLineDescription);
+    expect(borderRadius.topLeft, radius1);
+    expect(borderRadius.topRight, radius2);
+    expect(borderRadius.bottomLeft, radius3);
+    expect(borderRadius.bottomRight, radius4);
+    expect(
+      borderRadius.toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius1,
+        topRight: radius2,
+        bottomLeft: radius3,
+        bottomRight: radius4,
+      ),
+    );
+
     expect(
       const BorderRadius.only(
         topLeft: Radius.elliptical(1.0, 2.0),
