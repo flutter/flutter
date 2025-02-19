@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -48,5 +49,56 @@ void main() {
     });
   });
 
-  group('Memory allocations', () {});
+  group('Memory allocations', () {
+    ObjectEvent? dispatchedEvent;
+    final FocusNode object = FocusNode();
+
+    void listener(ObjectEvent event) {
+      expect(dispatchedEvent, null);
+      dispatchedEvent = event;
+    }
+
+    setUp(() {
+      dispatchedEvent = null;
+      FlutterMemoryAllocations.instance.addListener(listener);
+    });
+
+    tearDown(() {
+      FlutterMemoryAllocations.instance.removeListener(listener);
+    });
+
+    test('debugMaybeDispatchObjectCreated', () async {
+      debugMaybeDispatchObjectCreated('library', 'class', object);
+
+      if (kFlutterMemoryAllocationsEnabled) {
+        final ObjectEvent? theEvent = dispatchedEvent;
+
+        if (theEvent is! ObjectCreated) {
+          fail('Expected ObjectCreated event');
+        }
+
+        expect(theEvent.object, object);
+        expect(theEvent.library, 'library');
+        expect(theEvent.className, 'class');
+      } else {
+        expect(dispatchedEvent, isNull);
+      }
+    });
+
+    test('debugMaybeDispatchObjectDisposed', () async {
+      debugMaybeDispatchObjectDisposed(object);
+
+      if (kFlutterMemoryAllocationsEnabled) {
+        final ObjectEvent? theEvent = dispatchedEvent;
+
+        if (theEvent is! ObjectDisposed) {
+          fail('Expected ObjectDisposed event');
+        }
+
+        expect(theEvent.object, object);
+      } else {
+        expect(dispatchedEvent, isNull);
+      }
+    });
+  });
 }
