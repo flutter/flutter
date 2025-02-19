@@ -11,6 +11,8 @@ library;
 
 import 'dart:ui' as ui show Brightness;
 
+import 'package:flutter/foundation.dart';
+
 import 'assertions.dart';
 import 'platform.dart';
 import 'print.dart';
@@ -132,3 +134,31 @@ String? activeDevToolsServerAddress;
 
 /// The uri for the connected vm service protocol.
 String? connectedVmServiceUri;
+
+/// If memory allocations are enabled, dispatch object creation.
+///
+/// This method is not member of FlutterMemoryAllocations, because
+/// [FlutterMemoryAllocations] should not increase size of the Flutter application
+/// if memory allocations are disabled.
+///
+/// Returns true to make it easier to be wrapped into `assert`.
+bool maybeDispatchObjectCreated(String library, String className, Object object) {
+  if (kFlutterMemoryAllocationsEnabled) {
+    FlutterMemoryAllocations.instance.dispatchObjectCreated(
+      library: 'package:flutter/animation.dart',
+      className: className,
+      object: object,
+    );
+  }
+  return true;
+}
+
+/// If memory allocations are enabled, dispatch object disposal.
+///
+/// Returns true to make it easier to be wrapped into `assert`.
+bool maybeDispatchObjectDisposed(Object object) {
+  if (kFlutterMemoryAllocationsEnabled) {
+    FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: object);
+  }
+  return true;
+}
