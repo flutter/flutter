@@ -442,7 +442,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   /// in the local coordinates of the [RawMenuAnchor].
   void requestOpen({Offset? position}) {
     assert(_debugMenuInfo('Requesting Open $this'));
-    _menuPosition = position;
     menuController._handleOpenRequest(position: position);
   }
 
@@ -1081,8 +1080,8 @@ abstract class MenuControllerDecorator extends MenuController {
   /// to [AnimationStatus.dismissed].
   @mustCallSuper
   void markMenuClosed() {
-    _anchor!
-      ..animationStatus = AnimationStatus.dismissed
+    _anchor
+      ?..animationStatus = AnimationStatus.dismissed
       ..close();
   }
 
@@ -1117,31 +1116,31 @@ abstract class MenuControllerDecorator extends MenuController {
       return;
     }
 
-    switch (animationStatus) {
-      case AnimationStatus.forward:
-      case AnimationStatus.completed:
-        handleMenuCloseRequest();
-        _anchor!.animationStatus = AnimationStatus.reverse;
-      case AnimationStatus.dismissed:
-      case AnimationStatus.reverse:
-        return;
+    if (!_anchor!.animationStatus.isForwardOrCompleted) {
+      // Menu is already closing or closed, so return.
+      return;
     }
+
+    handleMenuCloseRequest();
+    _anchor!.animationStatus = AnimationStatus.reverse;
   }
 
   @override
   void _handleOpenRequest({ui.Offset? position}) {
     assert(_anchor != null);
-    handleMenuOpenRequest(position: position);
-    switch (animationStatus) {
-      case AnimationStatus.forward:
-      case AnimationStatus.completed:
-        break;
-      case AnimationStatus.dismissed:
-      case AnimationStatus.reverse:
-        _anchor!.animationStatus = AnimationStatus.forward;
+    if (_anchor!.animationStatus.isForwardOrCompleted) {
+      if (position == _anchor!._menuPosition) {
+        // The menu is already open and not being moved, so return.
+        return;
+      }
     }
 
-    // Regardless of [AnimationStatus], the menu should be opened to handle
+    handleMenuOpenRequest(position: position);
+    if (!_anchor!.animationStatus.isCompleted) {
+      _anchor!.animationStatus = AnimationStatus.forward;
+    }
+
+    // Regardless of [AnimationStatus], the menu should handle
     // position changes.
     _anchor!.open(position: position);
   }
