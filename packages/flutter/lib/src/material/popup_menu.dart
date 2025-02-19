@@ -1341,7 +1341,7 @@ Future<T?> showMenu<T>({
   );
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
   final bool useWindowingApi = Windowing.of(context);
-  if (useWindowingApi) {
+  if (!useWindowingApi) {
     return navigator.push(
       _PopupMenuRoute<T>(
         position: position,
