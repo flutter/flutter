@@ -1434,7 +1434,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
 
   // Linearly interpolate between this object and another of the same shape.
   T _lerpTo(T? b, double t) {
-    assert(this.runtimeType == T);
+    assert(runtimeType == T);
     if (b == null) {
       final double k = 1.0 - t;
       return _create(
