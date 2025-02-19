@@ -35,7 +35,7 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         final String buildOutput = await evalFlutter(
           'build',
-          options: <String>['ios', '--no-codesign', '--release'],
+          options: <String>['ios', '--no-codesign', '--release', '--verbose'],
         );
         if (!buildOutput.contains('-destination generic/platform=watchOS')) {
           print(buildOutput);
