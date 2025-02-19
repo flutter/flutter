@@ -1001,8 +1001,10 @@ class _TheaterElement extends MultiChildRenderObjectElement {
     super.moveRenderObjectChild(child, oldSlot, newSlot);
     assert(() {
       final _TheaterParentData parentData = child.parentData! as _TheaterParentData;
-      return parentData.overlayEntry ==
+      final OverlayEntry entryAtNewSlot =
           ((widget as _Theater).children[newSlot.index] as _OverlayEntryWidget).entry;
+      assert(parentData.overlayEntry == entryAtNewSlot);
+      return true;
     }());
   }
 
@@ -1237,6 +1239,51 @@ class _RenderTheater extends RenderBox
       _clipBehavior = value;
       markNeedsPaint();
       markNeedsSemanticsUpdate();
+    }
+  }
+
+  //int get numberOfPaintTransformListeners => _numberOfPaintTransformListeners;
+  //int _numberOfPaintTransformListeners = 0;
+  //set numberOfPaintTransformListeners(int newListenerCount) {
+  //  assert(newListenerCount >= 0);
+  //  if (newListenerCount > 0 && _numberOfPaintTransformListeners == 0) {
+  //    _scheduleMarkNeedsLayout();
+  //  }
+  //  _numberOfPaintTransformListeners = newListenerCount;
+  //}
+
+  bool _frameCallbackScheduled = false;
+  void _scheduleMarkNeedsLayout() {
+    if (_frameCallbackScheduled) {
+      return;
+    }
+    _frameCallbackScheduled = true;
+    SchedulerBinding.instance.scheduleFrameCallback(
+      _frameCallback,
+      rescheduling: true,
+      scheduleNewFrame: false,
+    );
+  }
+
+  void _frameCallback(Duration _) {
+    _frameCallbackScheduled = false;
+    bool hasPaintTransformListeners = false;
+    for (
+      _TheaterParentData? parentData = firstChild?.parentData as _TheaterParentData?;
+      parentData != null;
+      parentData = parentData.nextSibling?.parentData as _TheaterParentData?
+    ) {
+      final Iterator<RenderBox>? iterator = parentData.paintOrderIterator;
+      if (iterator != null) {
+        while (iterator.moveNext()) {
+          assert(iterator.current is _RenderDeferredLayoutBox);
+
+        }
+      }
+    }
+    // mark things as dirty, assert _numberOfPaintTransformListeners == count.
+    if (hasPaintTransformListeners) {
+      _scheduleMarkNeedsLayout();
     }
   }
 
@@ -2558,3 +2605,5 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     }
   }
 }
+
+class _RenderPaintTransformListeningBox extends
