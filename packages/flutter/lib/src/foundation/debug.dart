@@ -144,7 +144,7 @@ String? connectedVmServiceUri;
 /// Should be called only from within an assert.
 ///
 /// Returns true to make it easier to be wrapped into `assert`.
-bool maybeDispatchObjectCreated(String library, String className, Object object) {
+bool debugMaybeDispatchObjectCreated(String library, String className, Object object) {
   if (kFlutterMemoryAllocationsEnabled) {
     FlutterMemoryAllocations.instance.dispatchObjectCreated(
       library: 'package:flutter/animation.dart',
@@ -160,7 +160,7 @@ bool maybeDispatchObjectCreated(String library, String className, Object object)
 /// Should be called only from within an assert.
 ///
 /// Returns true to make it easier to be wrapped into `assert`.
-bool maybeDispatchObjectDisposed(Object object) {
+bool debugMaybeDispatchObjectDisposed(Object object) {
   if (kFlutterMemoryAllocationsEnabled) {
     FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: object);
   }

@@ -47,4 +47,6 @@ void main() {
       expect(printBuffer.toString(), matches(r'^Action "throws" took .+'));
     });
   });
+
+  group('Memory allocations', () {});
 }
