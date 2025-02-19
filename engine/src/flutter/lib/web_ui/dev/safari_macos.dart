@@ -39,6 +39,11 @@ class SafariMacOsEnvironment extends BrowserEnvironment {
       try {
         if (retryCount > 0) {
           print('Retry #$retryCount');
+          print('Killing safaridriver and Safari')
+          ProcessResult killDriver = Process.runSync('killall', <String>['-9', 'safaridriver']);
+          print('Killed safaridriver: ${killDriver.exitCode}');
+          ProcessResult killSafari = Process.runSync('killall', <String>['-9', 'Safari']);
+          print('Killed Safari: ${killSafari.exitCode}');
         }
         retryCount += 1;
         await _startDriverProcess();
@@ -70,6 +75,7 @@ $stackTrace
   Future<void> _startDriverProcess() async {
     _portNumber = await pickUnusedPort();
     print('Starting safaridriver on port $_portNumber');
+    int maxRetryCount = 2;
 
     try {
       _driverProcess = await Process.start('safaridriver', <String>['-p', _portNumber.toString()]);
@@ -88,18 +94,48 @@ $stackTrace
 
       await _waitForSafariDriverServerReady();
 
-      // Smoke-test the web driver process by connecting to it and asking for a
-      // list of windows. It doesn't matter how many windows there are.
-      webDriver = await createDriver(
-        uri: _driverUri,
-        desired: <String, dynamic>{'browserName': packageTestRuntime.identifier},
-      );
+      for (int retryCount = 0; retryCount < maxRetryCount; retryCount++) {
+        try {
+          print('Starting web driver on $_driverUri');
+         // Smoke-test the web driver process by connecting to it and asking for a
+        // list of windows. It doesn't matter how many windows there are.
+          webDriver = await createDriver(
+            uri: _driverUri,
+            desired: <String, dynamic>{'browserName': packageTestRuntime.identifier},
+          );
 
-      await webDriver!.windows.toList();
+          await webDriver!.windows.toList();
+          break;
+        } catch(_) {
+          await _closeWebDriver();
+          rethrow;
+        }
+      }
     } catch (_) {
       print('safaridriver failed to start.');
 
-      final badDriver = webDriver;
+      await _closeWebDriver();
+
+      // Try to kill gracefully using SIGTERM first.
+      _driverProcess.kill();
+      await _driverProcess.exitCode.timeout(
+        const Duration(seconds: 2),
+        onTimeout: () async {
+          // If the process fails to exit gracefully in a reasonable amount of
+          // time, kill it forcefully.
+          print('safaridriver failed to exit normally. Killing with SIGKILL.');
+          _driverProcess.kill(ProcessSignal.sigkill);
+          return 0;
+        },
+      );
+
+      // Rethrow the error to allow the caller to retry, if need be.
+      rethrow;
+    }
+  }
+
+  Future<void> _closeWebDriver() async {
+     final badDriver = webDriver;
       webDriver = null; // let's not keep faulty driver around
 
       if (badDriver != null) {
@@ -122,23 +158,6 @@ $stackTrace
 ''');
         }
       }
-
-      // Try to kill gracefully using SIGTERM first.
-      _driverProcess.kill();
-      await _driverProcess.exitCode.timeout(
-        const Duration(seconds: 2),
-        onTimeout: () async {
-          // If the process fails to exit gracefully in a reasonable amount of
-          // time, kill it forcefully.
-          print('safaridriver failed to exit normally. Killing with SIGKILL.');
-          _driverProcess.kill(ProcessSignal.sigkill);
-          return 0;
-        },
-      );
-
-      // Rethrow the error to allow the caller to retry, if need be.
-      rethrow;
-    }
   }
 
   /// The Safari Driver process cannot instantly spawn a server, so this function
