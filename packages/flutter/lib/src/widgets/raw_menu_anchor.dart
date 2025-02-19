@@ -926,7 +926,7 @@ abstract class MenuController {
 
   // Called by the _anchor to trigger the menu closing sequence.
   void _handleCloseRequest() {
-    _anchor!.close();
+    _anchor?.close();
   }
 
   /// Returns the [MenuController] of the ancestor [RawMenuAnchor] nearest to
