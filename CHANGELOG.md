@@ -30,6 +30,8 @@ INTERNAL NOTE
 ### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
 Initial stable release.
 
+- [flutter/163304](https://github.com/flutter/flutter/issues/163304) Fixes crash when using backdrop filter on GLES backend.
+
 ## Flutter 3.27 Changes
 
 ### [3.27.2](https://github.com/flutter/flutter/releases/tag/3.27.2)
