@@ -163,6 +163,7 @@ if (enable_unittests) {
       "layers/clip_path_layer_unittests.cc",
       "layers/clip_rect_layer_unittests.cc",
       "layers/clip_rrect_layer_unittests.cc",
+      "layers/clip_rsuperellipse_layer_unittests.cc",
       "layers/color_filter_layer_unittests.cc",
       "layers/container_layer_unittests.cc",
       "layers/display_list_layer_unittests.cc",
