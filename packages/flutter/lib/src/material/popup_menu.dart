@@ -599,7 +599,7 @@ class _PopupMenuInterface<T> {
 
   final List<PopupMenuEntry<T>> items;
   final List<Size?> itemSizes;
-  final Animation<double>? animation;
+  final Animation<double> animation;
   final T? initialValue;
   final EdgeInsetsGeometry? menuPadding;
   final ShapeBorder? shape;
@@ -1043,7 +1043,7 @@ class _PopupWindowRoute<T> extends Route<T> {
        _popUpAnimationStyle = popUpAnimationStyle;
 
   final PopupWindowController controller;
-  final Widget Function(BuildContext context, Animation<double>? animation) builder;
+  final Widget Function(BuildContext context, Animation<double> animation) builder;
 
   @override
   List<OverlayEntry> get overlayEntries => _overlayEntries;
@@ -1076,7 +1076,9 @@ class _PopupWindowRoute<T> extends Route<T> {
     _overlayEntries.add(
       OverlayEntry(
         builder: (BuildContext context) {
-          return PopupWindow(controller: controller, child: builder(context, null));
+          return ViewAnchor(
+            view: PopupWindow(controller: controller, child: builder(context, createAnimation())),
+            child: Container());
         },
       ),
     );
@@ -1182,7 +1184,7 @@ class _PopupMenuWindowRouteContent<T> extends StatelessWidget {
   final CapturedThemes capturedThemes;
   final BoxConstraints? constraints;
   final Clip clipBehavior;
-  final Animation<double>? animation;
+  final Animation<double> animation;
 
   @override
   Widget build(BuildContext context) {
@@ -1368,7 +1370,7 @@ Future<T?> showMenu<T>({
   } else {
     return navigator.push(
       _PopupWindowRoute<T>(
-        builder: (BuildContext context, Animation<double>? animation) {
+        builder: (BuildContext context, Animation<double> animation) {
           return _PopupMenuWindowRouteContent<T>(
             position: position,
             items: items,

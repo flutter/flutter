@@ -9,7 +9,14 @@ import 'package:flutter/material.dart';
 // This is the type used by the popup menu below.
 enum SampleItem { itemOne, itemTwo, itemThree }
 
-void main() => runApp(const PopupMenuApp());
+void main() {
+  runWidget(
+    RegularWindow(
+      controller: RegularWindowController(size: Size(1280, 720)),
+      child: const PopupMenuApp(),
+    ),
+  );
+}
 
 class PopupMenuApp extends StatelessWidget {
   const PopupMenuApp({super.key});
