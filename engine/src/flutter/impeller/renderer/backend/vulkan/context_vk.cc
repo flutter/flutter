@@ -144,6 +144,7 @@ void ContextVK::Setup(Settings settings) {
   TRACE_EVENT0("impeller", "ContextVK::Setup");
 
   if (!settings.proc_address_callback) {
+    VALIDATION_LOG << "Missing proc address callback.";
     return;
   }
 
@@ -155,7 +156,7 @@ void ContextVK::Setup(Settings settings) {
     fml::RequestAffinity(fml::CpuAffinity::kNotPerformance);
 #ifdef FML_OS_ANDROID
     if (::setpriority(PRIO_PROCESS, gettid(), -5) != 0) {
-      FML_LOG(ERROR) << "Failed to set Workers task runner priority";
+      VALIDATION_LOG << "Failed to set Workers task runner priority";
     }
 #endif  // FML_OS_ANDROID
   });
@@ -464,6 +465,7 @@ void ContextVK::Setup(Settings settings) {
       std::make_unique<DriverInfoVK>(device_holder->physical_device);
   workarounds_ = GetWorkaroundsFromDriverInfo(*driver_info);
   caps->ApplyWorkarounds(workarounds_);
+  sampler_library->ApplyWorkarounds(workarounds_);
 
   device_holder_ = std::move(device_holder);
   idle_waiter_vk_ = std::make_shared<IdleWaiterVK>(device_holder_);
@@ -483,7 +485,7 @@ void ContextVK::Setup(Settings settings) {
   descriptor_pool_recycler_ = std::move(descriptor_pool_recycler);
   device_name_ = std::string(physical_device_properties.deviceName);
   command_queue_vk_ = std::make_shared<CommandQueueVK>(weak_from_this());
-  should_disable_surface_control_ = settings.disable_surface_control;
+  should_enable_surface_control_ = settings.enable_surface_control;
   should_batch_cmd_buffers_ = !workarounds_.batch_submit_command_buffer_timeout;
   is_valid_ = true;
 
@@ -729,8 +731,10 @@ const std::unique_ptr<DriverInfoVK>& ContextVK::GetDriverInfo() const {
   return driver_info_;
 }
 
-bool ContextVK::GetShouldDisableSurfaceControlSwapchain() const {
-  return should_disable_surface_control_;
+bool ContextVK::GetShouldEnableSurfaceControlSwapchain() const {
+  return should_enable_surface_control_ &&
+         CapabilitiesVK::Cast(*device_capabilities_)
+             .SupportsExternalSemaphoreExtensions();
 }
 
 RuntimeStageBackend ContextVK::GetRuntimeStageBackend() const {

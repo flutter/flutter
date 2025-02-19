@@ -653,12 +653,6 @@ class AndroidDevice extends Device {
       if (debuggingOptions.traceSystrace) ...<String>['--ez', 'trace-systrace', 'true'],
       if (traceToFile != null) ...<String>['--es', 'trace-to-file', traceToFile],
       if (debuggingOptions.endlessTraceBuffer) ...<String>['--ez', 'endless-trace-buffer', 'true'],
-      if (debuggingOptions.dumpSkpOnShaderCompilation) ...<String>[
-        '--ez',
-        'dump-skp-on-shader-compilation',
-        'true',
-      ],
-      if (debuggingOptions.cacheSkSL) ...<String>['--ez', 'cache-sksl', 'true'],
       if (debuggingOptions.purgePersistentCache) ...<String>[
         '--ez',
         'purge-persistent-cache',
@@ -1085,7 +1079,7 @@ class AdbLogReader extends DeviceLogReader {
       ]);
     }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
-    return AdbLogReader._(process, device.name, logger);
+    return AdbLogReader._(process, device.displayName, logger);
   }
 
   int? _appPid;
@@ -1152,12 +1146,15 @@ class AdbLogReader extends DeviceLogReader {
     RegExp(r'^[F]\/[\S^:]+:\s+'),
   ];
 
-  // E/SurfaceSyncer(22636): Failed to find sync for id=9
-  // Some versions of Android spew this out. It is inactionable to the end user
-  // and causes no problems for the application.
-  static final RegExp _surfaceSyncerSpam = RegExp(
-    r'^E/SurfaceSyncer\(\s*\d+\): Failed to find sync for id=\d+',
-  );
+  static final List<RegExp> _filteredMessagees = <RegExp>[
+    // E/SurfaceSyncer(22636): Failed to find sync for id=9
+    // Some versions of Android spew this out. It is inactionable to the end user
+    // and causes no problems for the application.
+    RegExp(r'^E/SurfaceSyncer\(\s*\d+\): Failed to find sync for id=\d+'),
+    // See https://github.com/flutter/flutter/issues/160598
+    RegExp(r'ViewPostIme pointer'),
+    RegExp(r'mali.instrumentation.graph.work'),
+  ];
 
   // 'F/libc(pid): Fatal signal 11'
   static final RegExp _fatalLog = RegExp(r'^F\/libc\s*\(\s*\d+\):\sFatal signal (\d+)');
@@ -1213,7 +1210,7 @@ class AdbLogReader extends DeviceLogReader {
           }
         }
       } else if (_appPid != null && int.parse(logMatch.group(1)!) == _appPid) {
-        acceptLine = !_surfaceSyncerSpam.hasMatch(line);
+        acceptLine = !_filteredMessagees.any((RegExp e) => e.hasMatch(line));
 
         if (_fatalLog.hasMatch(line)) {
           // Hit fatal signal, app is now crashing

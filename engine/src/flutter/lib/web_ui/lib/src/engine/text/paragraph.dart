@@ -159,8 +159,8 @@ class ParagraphLine {
   /// ellipsized, this returns [startIndex];
   late final int visibleEndIndex = switch (fragments) {
     [] => startIndex,
-    [...final List<LayoutFragment> rest, EllipsisFragment()] || final List<LayoutFragment> rest =>
-      rest.last.end,
+    [...final List<LayoutFragment> rest, EllipsisFragment()] ||
+    final List<LayoutFragment> rest => rest.last.end,
   };
 
   /// The number of new line characters at the end of the line.
@@ -1108,24 +1108,9 @@ String? _textDecorationToCssString(
     }
   }
   if (decorationStyle != null) {
-    decorations.write(_decorationStyleToCssString(decorationStyle));
+    decorations.write(decorationStyle.name);
   }
   return decorations.isEmpty ? null : decorations.toString();
-}
-
-String? _decorationStyleToCssString(ui.TextDecorationStyle decorationStyle) {
-  switch (decorationStyle) {
-    case ui.TextDecorationStyle.dashed:
-      return 'dashed';
-    case ui.TextDecorationStyle.dotted:
-      return 'dotted';
-    case ui.TextDecorationStyle.double:
-      return 'double';
-    case ui.TextDecorationStyle.solid:
-      return 'solid';
-    case ui.TextDecorationStyle.wavy:
-      return 'wavy';
-  }
 }
 
 /// Converts [align] to its corresponding CSS value.

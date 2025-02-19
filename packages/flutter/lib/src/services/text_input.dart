@@ -44,6 +44,7 @@ export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 export 'autofill.dart' show AutofillConfiguration, AutofillScope;
 export 'text_editing.dart' show TextSelection;
+
 // TODO(a14n): the following export leads to Segmentation fault, see https://github.com/flutter/flutter/issues/106332
 // export 'text_editing_delta.dart' show TextEditingDelta;
 
@@ -203,6 +204,15 @@ class TextInputType {
   /// On Android this is remapped to the [url] keyboard type as it always shows a space bar.
   static const TextInputType webSearch = TextInputType._(11);
 
+  /// Optimized for social media.
+  ///
+  /// Requests a keyboard that includes keys useful for handles and tags.
+  ///
+  /// On iOS, requests a default keyboard with ready access to the "@" and "#" keys.
+  ///
+  /// On Android this is remapped to the [emailAddress] keyboard type as it always shows the "@" key.
+  static const TextInputType twitter = TextInputType._(12);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
     text,
@@ -217,6 +227,7 @@ class TextInputType {
     streetAddress,
     none,
     webSearch,
+    twitter,
   ];
 
   // Corresponding string name for each of the [values].
@@ -233,6 +244,7 @@ class TextInputType {
     'address',
     'none',
     'webSearch',
+    'twitter',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
@@ -702,6 +714,7 @@ class TextInputConfiguration {
       smartQuotesType: smartQuotesType ?? this.smartQuotesType,
       enableSuggestions: enableSuggestions ?? this.enableSuggestions,
       enableInteractiveSelection: enableInteractiveSelection ?? this.enableInteractiveSelection,
+      actionLabel: actionLabel ?? this.actionLabel,
       inputAction: inputAction ?? this.inputAction,
       textCapitalization: textCapitalization ?? this.textCapitalization,
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
@@ -760,6 +773,81 @@ class TextInputConfiguration {
       if (autofill != null) 'autofill': autofill,
       'enableDeltaModel': enableDeltaModel,
     };
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TextInputConfiguration &&
+        other.viewId == viewId &&
+        other.inputType == inputType &&
+        other.readOnly == readOnly &&
+        other.obscureText == obscureText &&
+        other.autocorrect == autocorrect &&
+        other.smartDashesType == smartDashesType &&
+        other.smartQuotesType == smartQuotesType &&
+        other.enableSuggestions == enableSuggestions &&
+        other.enableInteractiveSelection == enableInteractiveSelection &&
+        other.actionLabel == actionLabel &&
+        other.inputAction == inputAction &&
+        other.keyboardAppearance == keyboardAppearance &&
+        other.textCapitalization == textCapitalization &&
+        other.autofillConfiguration == autofillConfiguration &&
+        other.enableIMEPersonalizedLearning == enableIMEPersonalizedLearning &&
+        listEquals(other.allowedMimeTypes, allowedMimeTypes) &&
+        other.enableDeltaModel == enableDeltaModel;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      viewId,
+      inputType,
+      readOnly,
+      obscureText,
+      autocorrect,
+      smartDashesType,
+      smartQuotesType,
+      enableSuggestions,
+      enableInteractiveSelection,
+      actionLabel,
+      inputAction,
+      keyboardAppearance,
+      textCapitalization,
+      autofillConfiguration,
+      enableIMEPersonalizedLearning,
+      Object.hashAll(allowedMimeTypes),
+      enableDeltaModel,
+    );
+  }
+
+  @override
+  String toString() {
+    final List<String> description = <String>[
+      if (viewId != null) 'viewId: $viewId',
+      'inputType: $inputType',
+      'readOnly: $readOnly',
+      'obscureText: $obscureText',
+      'autocorrect: $autocorrect',
+      'smartDashesType: $smartDashesType',
+      'smartQuotesType: $smartQuotesType',
+      'enableSuggestions: $enableSuggestions',
+      'enableInteractiveSelection: $enableInteractiveSelection',
+      if (actionLabel != null) 'actionLabel: $actionLabel',
+      'inputAction: $inputAction',
+      'keyboardAppearance: $keyboardAppearance',
+      'textCapitalization: $textCapitalization',
+      'autofillConfiguration: $autofillConfiguration',
+      'enableIMEPersonalizedLearning: $enableIMEPersonalizedLearning',
+      'allowedMimeTypes: $allowedMimeTypes',
+      'enableDeltaModel: $enableDeltaModel',
+    ];
+    return 'TextInputConfiguration(${description.join(', ')})';
   }
 }
 
@@ -1086,13 +1174,21 @@ enum SelectionChangedCause {
   /// of text.
   drag,
 
-  // TODO(justinmc): Rename this to stylusHandwriting.
-  // https://github.com/flutter/flutter/issues/159223
   /// The user used stylus handwriting to change the selection.
   ///
   /// Currently, this is only supported on iPadOS 14+ via the Scribble feature,
   /// or on Android API 34+ via the Scribe feature.
-  scribble,
+  stylusHandwriting;
+
+  /// The user used stylus handwriting to change the selection.
+  ///
+  /// Currently, this is only supported on iPadOS 14+ via the Scribble feature,
+  /// or on Android API 34+ via the Scribe feature.
+  @Deprecated(
+    'Use stylusHandwriting instead. '
+    'This feature was deprecated after v3.28.0-0.1.pre.',
+  )
+  static const SelectionChangedCause scribble = stylusHandwriting;
 }
 
 /// A mixin for manipulating the selection, provided for toolbar or shortcut

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -53,6 +55,7 @@ class TestSemantics {
     this.scrollIndex,
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
+    this.role = SemanticsRole.none,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        tags = tags?.toSet() ?? <SemanticsTag>{};
@@ -76,6 +79,7 @@ class TestSemantics {
     this.scrollIndex,
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
+    this.role = SemanticsRole.none,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -115,6 +119,7 @@ class TestSemantics {
     this.scrollIndex,
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
+    this.role = SemanticsRole.none,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        transform = _applyRootChildScale(transform),
@@ -242,6 +247,11 @@ class TestSemantics {
   final Set<SemanticsTag> tags;
 
   final int? headingLevel;
+
+  /// The expected role for the node.
+  ///
+  /// Defaults to SemanticsRole.none if not set.
+  final SemanticsRole role;
 
   bool _matches(
     SemanticsNode? node,
@@ -376,6 +386,10 @@ class TestSemantics {
       return fail(
         'expected node id $id to have headingLevel $headingLevel but found headingLevel ${node.headingLevel}',
       );
+    }
+
+    if (role != node.role) {
+      return fail('expected node id $id to have role $role but found role ${node.role}');
     }
 
     if (children.isEmpty) {
@@ -546,6 +560,8 @@ class SemanticsTester {
     String? label,
     String? value,
     String? hint,
+    String? increasedValue,
+    String? decreasedValue,
     TextDirection? textDirection,
     List<SemanticsAction>? actions,
     List<SemanticsFlag>? flags,
@@ -581,6 +597,12 @@ class SemanticsTester {
         return false;
       }
       if (hint != null && node.hint != hint) {
+        return false;
+      }
+      if (increasedValue != null && node.increasedValue != increasedValue) {
+        return false;
+      }
+      if (decreasedValue != null && node.decreasedValue != decreasedValue) {
         return false;
       }
       if (attributedHint != null &&
@@ -781,6 +803,9 @@ class SemanticsTester {
     if (node.textDirection != null) {
       buf.writeln('  textDirection: ${node.textDirection},');
     }
+    if (node.role != SemanticsRole.none) {
+      buf.writeln('  role: ${node.role},');
+    }
     if (node.hasChildren) {
       buf.writeln('  children: <TestSemantics>[');
       for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {
@@ -899,6 +924,8 @@ class _IncludesNodeWith extends Matcher {
     this.label,
     this.value,
     this.hint,
+    this.increasedValue,
+    this.decreasedValue,
     this.textDirection,
     this.actions,
     this.flags,
@@ -914,6 +941,8 @@ class _IncludesNodeWith extends Matcher {
              actions != null ||
              flags != null ||
              tags != null ||
+             increasedValue != null ||
+             decreasedValue != null ||
              scrollPosition != null ||
              scrollExtentMax != null ||
              scrollExtentMin != null ||
@@ -926,6 +955,8 @@ class _IncludesNodeWith extends Matcher {
   final String? label;
   final String? value;
   final String? hint;
+  final String? increasedValue;
+  final String? decreasedValue;
   final TextDirection? textDirection;
   final List<SemanticsAction>? actions;
   final List<SemanticsFlag>? flags;
@@ -946,6 +977,8 @@ class _IncludesNodeWith extends Matcher {
           label: label,
           value: value,
           hint: hint,
+          increasedValue: increasedValue,
+          decreasedValue: decreasedValue,
           textDirection: textDirection,
           actions: actions,
           flags: flags,
@@ -983,6 +1016,8 @@ class _IncludesNodeWith extends Matcher {
       if (actions != null) 'actions "${actions!.join(', ')}"',
       if (flags != null) 'flags "${flags!.join(', ')}"',
       if (tags != null) 'tags "${tags!.join(', ')}"',
+      if (increasedValue != null) 'increasedValue "$increasedValue"',
+      if (decreasedValue != null) 'decreasedValue "$decreasedValue"',
       if (scrollPosition != null) 'scrollPosition "$scrollPosition"',
       if (scrollExtentMax != null) 'scrollExtentMax "$scrollExtentMax"',
       if (scrollExtentMin != null) 'scrollExtentMin "$scrollExtentMin"',
@@ -1004,6 +1039,8 @@ Matcher includesNodeWith({
   AttributedString? attributedValue,
   String? hint,
   AttributedString? attributedHint,
+  String? increasedValue,
+  String? decreasedValue,
   TextDirection? textDirection,
   List<SemanticsAction>? actions,
   List<SemanticsFlag>? flags,
@@ -1022,6 +1059,8 @@ Matcher includesNodeWith({
     hint: hint,
     attributedHint: attributedHint,
     textDirection: textDirection,
+    increasedValue: increasedValue,
+    decreasedValue: decreasedValue,
     actions: actions,
     flags: flags,
     tags: tags,

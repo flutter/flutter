@@ -48,15 +48,8 @@ abstract class FeatureFlags {
   /// Whether native assets compilation and bundling is enabled.
   bool get isNativeAssetsEnabled => false;
 
-  /// Whether native assets compilation and bundling is enabled.
-  bool get isPreviewDeviceEnabled => true;
-
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
-
-  /// Whether apps are automatically migrated to add Swift Package Manager
-  /// integration. Requires [isSwiftPackageManagerEnabled].
-  bool get isSwiftPackageManagerMigrationEnabled => false;
 
   /// Whether explicit package dependency management is enabled.
   bool get isExplicitPackageDependenciesEnabled => false;
@@ -79,9 +72,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterCustomDevicesFeature,
   cliAnimation,
   nativeAssets,
-  previewDevice,
   swiftPackageManager,
-  swiftPackageManagerMigration,
   explicitPackageDependencies,
 ];
 
@@ -164,30 +155,11 @@ const Feature nativeAssets = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
-/// Enable Flutter preview prebuilt device.
-const Feature previewDevice = Feature(
-  name: 'Flutter preview prebuilt device',
-  configSetting: 'enable-flutter-preview',
-  environmentOverride: 'FLUTTER_PREVIEW_DEVICE',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-);
-
 /// Enable Swift Package Manager as a darwin dependency manager.
 const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-  stable: FeatureChannelSetting(available: true),
-);
-
-/// Enable migrating iOS and macOS apps to add Swift Package Manager integration.
-const Feature swiftPackageManagerMigration = Feature(
-  name: 'migrate iOS and macOS apps to add Swift Package Manager integration',
-  configSetting: 'enable-swift-package-manager-migration',
-  environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER_MIGRATION',
   master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
   stable: FeatureChannelSetting(available: true),

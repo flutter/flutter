@@ -827,7 +827,7 @@ void main() {
 
     expect(tester.getSize(find.byType(TextButton)), const Size(134.0, 48.0));
     expect(tester.getSize(find.byType(Text)), const Size(126.0, 42.0));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/61016
+  });
 
   testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (
     WidgetTester tester,
@@ -2546,5 +2546,28 @@ void main() {
     final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
     final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
     expect(buttonTopRight.dx, iconTopRight.dx + 16.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/162839.
+  testWidgets('TextButton icon uses provided foregroundColor over default icon color', (
+    WidgetTester tester,
+  ) async {
+    const Color foregroundColor = Color(0xFFFF1234);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextButton.icon(
+              style: TextButton.styleFrom(foregroundColor: foregroundColor),
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+              label: const Text('Button'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(iconStyle(tester, Icons.add).color, foregroundColor);
   });
 }

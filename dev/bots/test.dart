@@ -22,10 +22,6 @@
 // supported, or run with `--dry-run` to get a list of tests that _would_ have
 // been executed.
 //
-// If the CIRRUS_TASK_NAME environment variable exists, it is used to determine
-// the shard and sub-shard, by parsing it in the form shard-subshard-platform,
-// ignoring the platform.
-//
 // For local testing you can just set the SHARD and SUBSHARD environment
 // variables. For example, to run all the framework tests you can just set
 // SHARD=framework_tests. Some shards support named subshards, like
@@ -56,11 +52,11 @@ import 'package:path/path.dart' as path;
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
+import 'suite_runners/run_android_engine_tests.dart';
 import 'suite_runners/run_android_java11_integration_tool_tests.dart';
 import 'suite_runners/run_android_preview_integration_tool_tests.dart';
 import 'suite_runners/run_customer_testing_tests.dart';
 import 'suite_runners/run_docs_tests.dart';
-import 'suite_runners/run_flutter_driver_android_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_framework_coverage_tests.dart';
 import 'suite_runners/run_framework_tests.dart';
@@ -76,8 +72,6 @@ typedef ShardRunner = Future<void> Function();
 /// Environment variables to override the local engine when running `pub test`,
 /// if such flags are provided to `test.dart`.
 final Map<String, String> localEngineEnv = <String, String>{};
-
-const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
@@ -125,9 +119,6 @@ Future<void> main(List<String> args) async {
     if (dryRunArgSet) {
       enableDryRun();
     }
-    if (Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
-      printProgress('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
-    }
     final WebTestsSuite webTestsSuite = WebTestsSuite(flutterTestArgs);
     await selectShard(<String, ShardRunner>{
       'add_to_app_life_cycle_tests': addToAppLifeCycleRunner,
@@ -140,15 +131,16 @@ Future<void> main(List<String> args) async {
       'android_preview_tool_integration_tests': androidPreviewIntegrationToolTestsRunner,
       'android_java11_tool_integration_tests': androidJava11IntegrationToolTestsRunner,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
-      // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
-      'web_tests': webTestsSuite.runWebHtmlUnitTests,
-      // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=canvaskit`
+      // All the unit/widget tests run using `flutter test --platform=chrome`
       'web_canvaskit_tests': webTestsSuite.runWebCanvasKitUnitTests,
-      // All the unit/widget tests run using `flutter test --platform=chrome --wasm --web-renderer=skwasm`
+      // All the unit/widget tests run using `flutter test --platform=chrome --wasm`
       'web_skwasm_tests': webTestsSuite.runWebSkwasmUnitTests,
       // All web integration tests
       'web_long_running_tests': webTestsSuite.webLongRunningTestsRunner,
-      'flutter_driver_android': runFlutterDriverAndroidTests,
+      'android_engine_vulkan_tests':
+          () => runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
+      'android_engine_opengles_tests':
+          () => runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
@@ -352,7 +344,6 @@ Future<void> _runBuildTests() async {
         ..add(
           Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_app_with_extensions')),
         )
-        ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'platform_interaction')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'spell_check')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));

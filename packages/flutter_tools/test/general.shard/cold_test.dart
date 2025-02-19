@@ -210,6 +210,9 @@ class FakeDevice extends Fake implements Device {
   String get name => 'test';
 
   @override
+  String get displayName => name;
+
+  @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   bool wasDisposed = false;
@@ -240,7 +243,6 @@ class TestFlutterDevice extends FlutterDevice {
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,

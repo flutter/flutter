@@ -46,6 +46,7 @@ void main() {
     double? menuHeight,
     Widget? leadingIcon,
     Widget? label,
+    InputDecorationTheme? decorationTheme,
   }) {
     return MaterialApp(
       theme: themeData,
@@ -56,6 +57,7 @@ void main() {
           width: width,
           menuHeight: menuHeight,
           dropdownMenuEntries: entries,
+          inputDecorationTheme: decorationTheme,
         ),
       ),
     );
@@ -716,6 +718,64 @@ void main() {
     expect(box.size.width, customWidth);
   });
 
+  testWidgets('The width is determined by the menu entries', (WidgetTester tester) async {
+    const double entryLabelWidth = 100;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: 'Flutter',
+                labelWidget: SizedBox(width: entryLabelWidth),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final double width = tester.getSize(find.byType(DropdownMenu<int>)).width;
+    const double menuEntryPadding = 24.0; // See _kDefaultHorizontalPadding.
+    const double leadingWidth = 16.0;
+    const double trailingWidth = 56.0;
+
+    expect(width, entryLabelWidth + leadingWidth + trailingWidth + menuEntryPadding);
+  });
+
+  testWidgets('The width is determined by the label when it is longer than menu entries', (
+    WidgetTester tester,
+  ) async {
+    const double labelWidth = 120;
+    const double entryLabelWidth = 100;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            label: SizedBox(width: labelWidth),
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: 'Flutter',
+                labelWidget: SizedBox(width: entryLabelWidth),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final double width = tester.getSize(find.byType(DropdownMenu<int>)).width;
+    const double leadingWidth = 16.0;
+    const double trailingWidth = 56.0;
+    const double labelPadding = 8.0; // See RenderEditable.floatingCursorAddedMargin.
+
+    expect(width, labelWidth + labelPadding + leadingWidth + trailingWidth);
+  });
+
   testWidgets('The width of MenuAnchor respects MenuAnchor.expandedInsets', (
     WidgetTester tester,
   ) async {
@@ -960,7 +1020,7 @@ void main() {
     // Default text field (without leading icon).
     await tester.pumpWidget(buildTest(themeData, menuChildren, label: const Text('label')));
 
-    final Finder label = find.text('label');
+    final Finder label = find.text('label').first;
     final Offset labelTopLeft = tester.getTopLeft(label);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -983,7 +1043,7 @@ void main() {
 
     final Finder leadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double iconWidth = tester.getSize(leadingIcon).width;
-    final Finder updatedLabel = find.text('label');
+    final Finder updatedLabel = find.text('label').first;
     final Offset updatedLabelTopLeft = tester.getTopLeft(updatedLabel);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -1007,7 +1067,7 @@ void main() {
 
     final Finder largeLeadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double largeIconWidth = tester.getSize(largeLeadingIcon).width;
-    final Finder updatedLabel1 = find.text('label');
+    final Finder updatedLabel1 = find.text('label').first;
     final Offset updatedLabelTopLeft1 = tester.getTopLeft(updatedLabel1);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -1038,7 +1098,7 @@ void main() {
       ),
     );
 
-    final Finder label = find.text('label');
+    final Finder label = find.text('label').first;
     final Offset labelTopRight = tester.getTopRight(label);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -1070,7 +1130,7 @@ void main() {
     final Finder leadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double iconWidth = tester.getSize(leadingIcon).width;
     final Offset dropdownMenuTopRight = tester.getTopRight(find.byType(DropdownMenu<TestMenu>));
-    final Finder updatedLabel = find.text('label');
+    final Finder updatedLabel = find.text('label').first;
     final Offset updatedLabelTopRight = tester.getTopRight(updatedLabel);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -1108,7 +1168,7 @@ void main() {
     final Offset updatedDropdownMenuTopRight = tester.getTopRight(
       find.byType(DropdownMenu<TestMenu>),
     );
-    final Finder updatedLabel1 = find.text('label');
+    final Finder updatedLabel1 = find.text('label').first;
     final Offset updatedLabelTopRight1 = tester.getTopRight(updatedLabel1);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -1121,6 +1181,60 @@ void main() {
       updatedLabelTopRight1.dx,
       equals(updatedDropdownMenuTopRight.dx - largeIconWidth - leadingIconToInputPadding),
     );
+  });
+
+  testWidgets('The icon in the menu button should be aligned with the icon of '
+      'the text field - LTR', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.ltr,
+            child: DropdownMenu<TestMenu>(
+              leadingIcon: const Icon(Icons.search),
+              label: const Text('label'),
+              dropdownMenuEntries: menuChildrenWithIcons,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder dropdownIcon =
+        find.descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText)).last;
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    final Finder itemLeadingIcon = find.byKey(leadingIconKey(TestMenu.mainMenu0)).last;
+
+    expect(tester.getRect(dropdownIcon).left, tester.getRect(itemLeadingIcon).left);
+  });
+
+  testWidgets('The icon in the menu button should be aligned with the icon of '
+      'the text field - RTL', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.rtl,
+            child: DropdownMenu<TestMenu>(
+              leadingIcon: const Icon(Icons.search),
+              label: const Text('label'),
+              dropdownMenuEntries: menuChildrenWithIcons,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder dropdownIcon =
+        find.descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText)).last;
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    final Finder itemLeadingIcon = find.byKey(leadingIconKey(TestMenu.mainMenu0)).last;
+
+    expect(tester.getRect(dropdownIcon).right, tester.getRect(itemLeadingIcon).right);
   });
 
   testWidgets('DropdownMenu has default trailing icon button', (WidgetTester tester) async {
@@ -1170,6 +1284,71 @@ void main() {
     expect(iconButton, findsNothing);
     iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
     expect(iconButton, findsOneWidget);
+  });
+
+  testWidgets('Trailing IconButton height respects InputDecorationTheme.suffixIconConstraints', (
+    WidgetTester tester,
+  ) async {
+    final ThemeData themeData = ThemeData();
+
+    // Default suffix icon constraints.
+    await tester.pumpWidget(buildTest(themeData, menuChildren));
+    await tester.pump();
+
+    final Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+    expect(tester.getSize(iconButton), const Size(48, 48));
+
+    // Custom suffix icon constraints.
+    await tester.pumpWidget(
+      buildTest(
+        themeData,
+        menuChildren,
+        decorationTheme: const InputDecorationTheme(
+          suffixIconConstraints: BoxConstraints(minWidth: 66, minHeight: 62),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.getSize(iconButton), const Size(66, 62));
+  });
+
+  testWidgets('InputDecorationTheme.isCollapsed reduces height', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+
+    // Default height.
+    await tester.pumpWidget(buildTest(themeData, menuChildren));
+    await tester.pump();
+
+    final Finder textField = find.byType(TextField).first;
+    expect(tester.getSize(textField).height, 56);
+
+    // Collapsed height.
+    await tester.pumpWidget(
+      buildTest(
+        themeData,
+        menuChildren,
+        decorationTheme: const InputDecorationTheme(isCollapsed: true),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.getSize(textField).height, 48); // IconButton min height.
+
+    // Collapsed height with custom suffix icon constraints.
+    await tester.pumpWidget(
+      buildTest(
+        themeData,
+        menuChildren,
+        decorationTheme: const InputDecorationTheme(
+          isCollapsed: true,
+          suffixIconConstraints: BoxConstraints(maxWidth: 24, maxHeight: 24),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.getSize(textField).height, 24);
   });
 
   testWidgets('Do not crash when resize window during menu opening', (WidgetTester tester) async {
@@ -2858,7 +3037,7 @@ void main() {
     ); // Because "Unread" contains "read".
 
     // Test custom search algorithm.
-    await tester.pumpWidget(dropdownMenu(searchCallback: (_, __) => 0));
+    await tester.pumpWidget(dropdownMenu(searchCallback: (_, _) => 0));
     await tester.pump();
     await tester.enterText(find.byType(TextField), 'read');
     await tester.pump();
@@ -3780,6 +3959,103 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('DropdownMenu passes maxLines to TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren))),
+    );
+    TextField textField = tester.widget(find.byType(TextField));
+    // Default behavior.
+    expect(textField.maxLines, 1);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren, maxLines: null),
+        ),
+      ),
+    );
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.maxLines, null);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren, maxLines: 2),
+        ),
+      ),
+    );
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.maxLines, 2);
+  });
+
+  testWidgets('DropdownMenu passes textInputAction to TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren))),
+    );
+    TextField textField = tester.widget(find.byType(TextField));
+    // Default behavior.
+    expect(textField.textInputAction, null);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            dropdownMenuEntries: menuChildren,
+            textInputAction: TextInputAction.next,
+          ),
+        ),
+      ),
+    );
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textInputAction, TextInputAction.next);
+  });
+
+  testWidgets('items can be constrainted to be smaller than the text field with menuStyle', (
+    WidgetTester tester,
+  ) async {
+    const String longLabel = 'This is a long text that it can overflow.';
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(value: 0, label: longLabel),
+            ],
+            menuStyle: MenuStyle(maximumSize: WidgetStatePropertyAll<Size>(Size(150.0, 50.0))),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(findMenuItemButton(longLabel)).width, 150.0);
+
+    // The overwrite of menuStyle is different when a width is provided,
+    // So it needs to be tested separately.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            width: 200.0,
+            dropdownMenuEntries: menuChildren,
+            menuStyle: const MenuStyle(
+              maximumSize: WidgetStatePropertyAll<Size>(Size(150.0, 50.0)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 150.0);
+  });
 }
 
 enum TestMenu {

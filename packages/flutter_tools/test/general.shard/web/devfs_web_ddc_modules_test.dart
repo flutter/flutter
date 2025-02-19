@@ -51,6 +51,7 @@ void main() {
   late FakeHttpServer httpServer;
   late BufferLogger logger;
   const bool usesDdcModuleSystem = true;
+  const bool canaryFeatures = true;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -71,8 +72,8 @@ void main() {
           InternetAddress.loopbackIPv4,
           <String, String>{},
           <String, String>{},
-          NullSafetyMode.unsound,
           usesDdcModuleSystem,
+          canaryFeatures,
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
         );
@@ -316,8 +317,8 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
-      NullSafetyMode.unsound,
       usesDdcModuleSystem,
+      canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
     );
@@ -336,8 +337,8 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
-      NullSafetyMode.unsound,
       usesDdcModuleSystem,
+      canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
     );
@@ -359,8 +360,8 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
-        NullSafetyMode.unsound,
         usesDdcModuleSystem,
+        canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
       ),
@@ -381,8 +382,8 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
-        NullSafetyMode.unsound,
         usesDdcModuleSystem,
+        canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
       ),
@@ -767,126 +768,6 @@ void main() {
   });
 
   runInTestbed(
-    'Can start web server with specified DDC module system assets',
-    () async {
-      final String path = globals.fs.path.join('lib', 'main.dart');
-      final File outputFile = globals.fs.file(path)..createSync(recursive: true);
-      outputFile.parent.childFile('a.sources').writeAsStringSync('');
-      outputFile.parent.childFile('a.json').writeAsStringSync('{}');
-      outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-      outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
-
-      final ResidentCompiler residentCompiler =
-          FakeResidentCompiler()..output = const CompilerOutput('a', 0, <Uri>[]);
-
-      final WebDevFS webDevFS = WebDevFS(
-        hostname: 'localhost',
-        port: 0,
-        tlsCertPath: null,
-        tlsCertKeyPath: null,
-        packagesFilePath: '.dart_tool/package_config.json',
-        urlTunneller: null,
-        useSseForDebugProxy: true,
-        useSseForDebugBackend: true,
-        useSseForInjectedClient: true,
-        nullAssertions: true,
-        nativeNullAssertions: true,
-        buildInfo: const BuildInfo(
-          BuildMode.debug,
-          '',
-          treeShakeIcons: false,
-          nullSafetyMode: NullSafetyMode.unsound,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
-        enableDwds: false,
-        enableDds: false,
-        entrypoint: Uri.base,
-        testMode: true,
-        expressionCompiler: null,
-        extraHeaders: const <String, String>{},
-        chromiumLauncher: null,
-        nullSafetyMode: NullSafetyMode.unsound,
-        ddcModuleSystem: usesDdcModuleSystem,
-        webRenderer: WebRendererMode.html,
-        isWasm: false,
-        useLocalCanvasKit: false,
-        rootDirectory: globals.fs.currentDirectory,
-      );
-      webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
-      webDevFS.flutterJs.createSync(recursive: true);
-      webDevFS.stackTraceMapper.createSync(recursive: true);
-
-      final Uri uri = await webDevFS.create();
-      webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
-      final String webPrecompiledSdk =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledDdcSdk).path;
-      final String webPrecompiledSdkSourcemaps =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledDdcSdkSourcemaps).path;
-      final String webPrecompiledCanvaskitSdk =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledDdcCanvaskitSdk).path;
-      final String webPrecompiledCanvaskitSdkSourcemaps =
-          globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledDdcCanvaskitSdkSourcemaps)
-              .path;
-      globals.fs.currentDirectory.childDirectory('lib').childFile('web_entrypoint.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('GENERATED');
-      globals.fs.file(webPrecompiledSdk)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('HELLO');
-      globals.fs.file(webPrecompiledSdkSourcemaps)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('THERE');
-      globals.fs.file(webPrecompiledCanvaskitSdk)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('OL');
-      globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('CHUM');
-
-      await webDevFS.update(
-        mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
-        generator: residentCompiler,
-        trackWidgetCreation: true,
-        bundleFirstUpload: true,
-        invalidatedFiles: <Uri>[],
-        packageConfig: PackageConfig.empty,
-        pathToReload: '',
-        dillOutputPath: 'out.dill',
-        shaderCompiler: const FakeShaderCompiler(),
-      );
-
-      expect(webDevFS.webAssetServer.getFile('ddc_module_loader.js'), isNotNull);
-      expect(webDevFS.webAssetServer.getFile('stack_trace_mapper.js'), isNotNull);
-      expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
-      expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
-      expect(webDevFS.webAssetServer.getFile('flutter.js'), isNotNull);
-      expect(webDevFS.webAssetServer.getFile('flutter_service_worker.js'), isNotNull);
-      expect(webDevFS.webAssetServer.getFile('version.json'), isNotNull);
-      expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'HELLO');
-      expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
-
-      // Update to the SDK.
-      globals.fs.file(webPrecompiledSdk).writeAsStringSync('BELLOW');
-
-      // New SDK should be visible..
-      expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
-
-      // Generated entrypoint.
-      expect(
-        await webDevFS.webAssetServer.dartSourceContents('web_entrypoint.dart'),
-        contains('GENERATED'),
-      );
-
-      // served on localhost
-      expect(uri.host, 'localhost');
-
-      await webDevFS.destroy();
-    },
-    overrides: <Type, Generator>{Artifacts: Artifacts.test},
-  );
-
-  runInTestbed(
     'Can start web server with specified assets in sound null safety mode',
     () async {
       final String path = globals.fs.path.join('lib', 'main.dart');
@@ -924,12 +805,13 @@ void main() {
         expressionCompiler: null,
         extraHeaders: const <String, String>{},
         chromiumLauncher: null,
-        nullSafetyMode: NullSafetyMode.sound,
         ddcModuleSystem: usesDdcModuleSystem,
-        webRenderer: WebRendererMode.html,
+        canaryFeatures: canaryFeatures,
+        webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
+        isWindows: false,
       );
       webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -940,28 +822,20 @@ void main() {
       globals.fs.currentDirectory.childDirectory('lib').childFile('web_entrypoint.dart')
         ..createSync(recursive: true)
         ..writeAsStringSync('GENERATED');
-      final String webPrecompiledSdk =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledDdcSoundSdk).path;
-      final String webPrecompiledSdkSourcemaps =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledDdcSoundSdkSourcemaps).path;
       final String webPrecompiledCanvaskitSdk =
-          globals.artifacts!.getHostArtifact(HostArtifact.webPrecompiledDdcCanvaskitSoundSdk).path;
+          globals.artifacts!
+              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk)
+              .path;
       final String webPrecompiledCanvaskitSdkSourcemaps =
           globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledDdcCanvaskitSoundSdkSourcemaps)
+              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
               .path;
-      globals.fs.file(webPrecompiledSdk)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('HELLO');
-      globals.fs.file(webPrecompiledSdkSourcemaps)
-        ..createSync(recursive: true)
-        ..writeAsStringSync('THERE');
       globals.fs.file(webPrecompiledCanvaskitSdk)
         ..createSync(recursive: true)
-        ..writeAsStringSync('OL');
+        ..writeAsStringSync('HELLO');
       globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
         ..createSync(recursive: true)
-        ..writeAsStringSync('CHUM');
+        ..writeAsStringSync('THERE');
 
       await webDevFS.update(
         mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
@@ -986,7 +860,7 @@ void main() {
       expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 
       // Update to the SDK.
-      globals.fs.file(webPrecompiledSdk).writeAsStringSync('BELLOW');
+      globals.fs.file(webPrecompiledCanvaskitSdk).writeAsStringSync('BELLOW');
 
       // New SDK should be visible..
       expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
@@ -1042,12 +916,13 @@ void main() {
           expressionCompiler: null,
           extraHeaders: const <String, String>{},
           chromiumLauncher: null,
-          nullSafetyMode: NullSafetyMode.sound,
           ddcModuleSystem: usesDdcModuleSystem,
+          canaryFeatures: canaryFeatures,
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
           rootDirectory: globals.fs.currentDirectory,
+          isWindows: false,
         );
         webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
         webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1116,12 +991,13 @@ void main() {
       chromiumLauncher: null,
       nullAssertions: true,
       nativeNullAssertions: true,
-      nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
+      canaryFeatures: canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
+      isWindows: false,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1165,12 +1041,13 @@ void main() {
       expressionCompiler: null,
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
-      nullSafetyMode: NullSafetyMode.sound,
       ddcModuleSystem: usesDdcModuleSystem,
+      canaryFeatures: canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
+      isWindows: false,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1178,56 +1055,6 @@ void main() {
     await webDevFS.create();
 
     expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.canvaskit);
-
-    await webDevFS.destroy();
-  });
-
-  runInTestbed('Can start web server with auto detect enabled', () async {
-    final String path = globals.fs.path.join('lib', 'main.dart');
-    final File outputFile = globals.fs.file(path)..createSync(recursive: true);
-    outputFile.parent.childFile('a.sources').writeAsStringSync('');
-    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
-    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-
-    final WebDevFS webDevFS = WebDevFS(
-      hostname: 'localhost',
-      port: 0,
-      tlsCertPath: null,
-      tlsCertKeyPath: null,
-      packagesFilePath: '.dart_tool/package_config.json',
-      urlTunneller: null,
-      useSseForDebugProxy: true,
-      useSseForDebugBackend: true,
-      useSseForInjectedClient: true,
-      nullAssertions: true,
-      nativeNullAssertions: true,
-      buildInfo: const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        dartDefines: <String>['FLUTTER_WEB_AUTO_DETECT=true'],
-        packageConfigPath: '.dart_tool/package_config.json',
-      ),
-      enableDwds: false,
-      enableDds: false,
-      entrypoint: Uri.base,
-      testMode: true,
-      expressionCompiler: null,
-      extraHeaders: const <String, String>{},
-      chromiumLauncher: null,
-      nullSafetyMode: NullSafetyMode.sound,
-      ddcModuleSystem: usesDdcModuleSystem,
-      webRenderer: WebRendererMode.auto,
-      isWasm: false,
-      useLocalCanvasKit: false,
-      rootDirectory: globals.fs.currentDirectory,
-    );
-    webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
-    webDevFS.stackTraceMapper.createSync(recursive: true);
-
-    await webDevFS.create();
-
-    expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.auto);
 
     await webDevFS.destroy();
   });
@@ -1265,12 +1092,13 @@ void main() {
       expressionCompiler: null,
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
-      nullSafetyMode: NullSafetyMode.unsound,
       ddcModuleSystem: usesDdcModuleSystem,
+      canaryFeatures: canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
+      isWindows: false,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1305,7 +1133,6 @@ void main() {
       Uri.base,
       null,
       const <String, String>{},
-      NullSafetyMode.unsound,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
@@ -1340,7 +1167,6 @@ void main() {
       Uri.base,
       null,
       const <String, String>{extraHeaderKey: extraHeaderValue},
-      NullSafetyMode.unsound,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
@@ -1378,8 +1204,8 @@ void main() {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
-      NullSafetyMode.sound,
       usesDdcModuleSystem,
+      canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
     );
@@ -1427,12 +1253,13 @@ void main() {
         expressionCompiler: null,
         extraHeaders: const <String, String>{},
         chromiumLauncher: null,
-        nullSafetyMode: NullSafetyMode.unsound,
         ddcModuleSystem: usesDdcModuleSystem,
+        canaryFeatures: canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
+        isWindows: false,
       );
       webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1477,6 +1304,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
+    bool recompileRestart = false,
   }) async {
     return output;
   }

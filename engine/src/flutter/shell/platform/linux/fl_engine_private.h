@@ -8,9 +8,12 @@
 #include <glib-object.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_display_monitor.h"
+#include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_mouse_cursor_handler.h"
 #include "flutter/shell/platform/linux/fl_renderer.h"
 #include "flutter/shell/platform/linux/fl_task_runner.h"
+#include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
@@ -60,6 +63,17 @@ typedef void (*FlEngineUpdateSemanticsHandler)(
     gpointer user_data);
 
 /**
+ * fl_engine_new_with_binary_messenger:
+ * @binary_messenger: an #FlBinaryMessenger.
+ *
+ * Creates a new engine with a custom binary messenger. Used for testing.
+ *
+ * Returns: a new #FlEngine.
+ */
+FlEngine* fl_engine_new_with_binary_messenger(
+    FlBinaryMessenger* binary_messenger);
+
+/**
  * fl_engine_new_with_renderer:
  * @project: an #FlDartProject.
  * @renderer: an #FlRenderer.
@@ -82,6 +96,16 @@ FlEngine* fl_engine_new_with_renderer(FlDartProject* project,
 FlRenderer* fl_engine_get_renderer(FlEngine* engine);
 
 /**
+ * fl_engine_get_display_monitor:
+ * @engine: an #FlEngine.
+ *
+ * Gets the display monitor used by this engine.
+ *
+ * Returns: an #FlDisplayMonitor.
+ */
+FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* engine);
+
+/**
  * fl_engine_start:
  * @engine: an #FlEngine.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
@@ -102,6 +126,18 @@ gboolean fl_engine_start(FlEngine* engine, GError** error);
  * Returns: a mutable pointer to the embedder API proc table.
  */
 FlutterEngineProcTable* fl_engine_get_embedder_api(FlEngine* engine);
+
+/**
+ * fl_engine_notify_display_update:
+ * @engine: an #FlEngine.
+ * @displays: displays present on the system.
+ * @displays_length: length of @displays.
+ *
+ * Notify the current displays that are in the system.
+ */
+void fl_engine_notify_display_update(FlEngine* engine,
+                                     const FlutterEngineDisplay* displays,
+                                     size_t displays_length);
 
 /**
  * fl_engine_add_view:
@@ -213,6 +249,7 @@ void fl_engine_set_update_semantics_handler(
 /**
  * fl_engine_send_window_metrics_event:
  * @engine: an #FlEngine.
+ * @display_id: the display this view is rendering on.
  * @view_id: the view that the event occured on.
  * @width: width of the window in pixels.
  * @height: height of the window in pixels.
@@ -221,6 +258,7 @@ void fl_engine_set_update_semantics_handler(
  * Sends a window metrics event to the engine.
  */
 void fl_engine_send_window_metrics_event(FlEngine* engine,
+                                         FlutterEngineDisplayId display_id,
                                          FlutterViewId view_id,
                                          size_t width,
                                          size_t height,
@@ -537,6 +575,26 @@ void fl_engine_update_accessibility_features(FlEngine* engine, int32_t flags);
  * Request the application exits.
  */
 void fl_engine_request_app_exit(FlEngine* engine);
+
+/**
+ * fl_engine_get_keyboard_manager:
+ * @engine: an #FlEngine.
+ *
+ * Gets the keyboard manager used by this engine.
+ *
+ * Returns: a #FlKeyboardManager.
+ */
+FlKeyboardManager* fl_engine_get_keyboard_manager(FlEngine* engine);
+
+/**
+ * fl_engine_get_text_input_handler:
+ * @engine: an #FlEngine.
+ *
+ * Gets the text input handler used by this engine.
+ *
+ * Returns: a #FlTextInputHandler.
+ */
+FlTextInputHandler* fl_engine_get_text_input_handler(FlEngine* engine);
 
 /**
  * fl_engine_get_mouse_cursor_handler:

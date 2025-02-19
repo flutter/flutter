@@ -417,19 +417,18 @@ void DlDispatcherBase::transformReset() {
   GetCanvas().Transform(initial_matrix_);
 }
 
-static Entity::ClipOperation ToClipOperation(
-    flutter::DlCanvas::ClipOp clip_op) {
+static Entity::ClipOperation ToClipOperation(flutter::DlClipOp clip_op) {
   switch (clip_op) {
-    case flutter::DlCanvas::ClipOp::kDifference:
+    case flutter::DlClipOp::kDifference:
       return Entity::ClipOperation::kDifference;
-    case flutter::DlCanvas::ClipOp::kIntersect:
+    case flutter::DlClipOp::kIntersect:
       return Entity::ClipOperation::kIntersect;
   }
 }
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::clipRect(const DlRect& rect,
-                                ClipOp clip_op,
+                                flutter::DlClipOp clip_op,
                                 bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
@@ -439,7 +438,7 @@ void DlDispatcherBase::clipRect(const DlRect& rect,
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::clipOval(const DlRect& bounds,
-                                ClipOp clip_op,
+                                flutter::DlClipOp clip_op,
                                 bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
@@ -449,7 +448,7 @@ void DlDispatcherBase::clipOval(const DlRect& bounds,
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::clipRoundRect(const DlRoundRect& rrect,
-                                     ClipOp sk_op,
+                                     flutter::DlClipOp sk_op,
                                      bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
@@ -470,7 +469,9 @@ void DlDispatcherBase::clipRoundRect(const DlRoundRect& rrect,
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::clipPath(const DlPath& path, ClipOp sk_op, bool is_aa) {
+void DlDispatcherBase::clipPath(const DlPath& path,
+                                flutter::DlClipOp sk_op,
+                                bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
   auto clip_op = ToClipOperation(sk_op);
@@ -642,14 +643,30 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
                                bool use_center) {
   AUTO_DEPTH_WATCHER(1u);
 
-  PathBuilder builder;
-  builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
-                 use_center);
-  GetCanvas().DrawPath(builder.TakePath(), paint_);
+  if (paint_.stroke_width >
+      std::max(oval_bounds.GetWidth(), oval_bounds.GetHeight())) {
+    // This is a special case for rendering arcs whose stroke width is so large
+    // you are effectively drawing a sector of a circle.
+    // https://github.com/flutter/flutter/issues/158567
+    DlRect expanded_rect = oval_bounds.Expand(Size(paint_.stroke_width / 2));
+    PathBuilder builder;
+    Paint fill_paint = paint_;
+    fill_paint.style = Paint::Style::kFill;
+    fill_paint.stroke_width = 1;
+    builder.AddArc(expanded_rect, Degrees(start_degrees),
+                   Degrees(sweep_degrees),
+                   /*use_center=*/true);
+    GetCanvas().DrawPath(builder.TakePath(), fill_paint);
+  } else {
+    PathBuilder builder;
+    builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
+                   use_center);
+    GetCanvas().DrawPath(builder.TakePath(), paint_);
+  }
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::drawPoints(PointMode mode,
+void DlDispatcherBase::drawPoints(flutter::DlPointMode mode,
                                   uint32_t count,
                                   const DlPoint points[]) {
   AUTO_DEPTH_WATCHER(1u);
@@ -657,7 +674,7 @@ void DlDispatcherBase::drawPoints(PointMode mode,
   Paint paint = paint_;
   paint.style = Paint::Style::kStroke;
   switch (mode) {
-    case flutter::DlCanvas::PointMode::kPoints: {
+    case flutter::DlPointMode::kPoints: {
       // Cap::kButt is also treated as a square.
       PointStyle point_style = paint.stroke_cap == Cap::kRound
                                    ? PointStyle::kRound
@@ -668,14 +685,14 @@ void DlDispatcherBase::drawPoints(PointMode mode,
       }
       GetCanvas().DrawPoints(points, count, radius, paint, point_style);
     } break;
-    case flutter::DlCanvas::PointMode::kLines:
+    case flutter::DlPointMode::kLines:
       for (uint32_t i = 1; i < count; i += 2) {
         Point p0 = points[i - 1];
         Point p1 = points[i];
         GetCanvas().DrawLine(p0, p1, paint, /*reuse_depth=*/i > 1);
       }
       break;
-    case flutter::DlCanvas::PointMode::kPolygon:
+    case flutter::DlPointMode::kPolygon:
       if (count > 1) {
         Point p0 = points[0];
         for (uint32_t i = 1; i < count; i++) {
@@ -712,23 +729,23 @@ void DlDispatcherBase::drawImage(const sk_sp<flutter::DlImage> image,
   const auto src = DlRect::MakeWH(size.width, size.height);
   const auto dest = DlRect::MakeXYWH(point.x, point.y, size.width, size.height);
 
-  drawImageRect(image,                      // image
-                src,                        // source rect
-                dest,                       // destination rect
-                sampling,                   // sampling options
-                render_with_attributes,     // render with attributes
-                SrcRectConstraint::kStrict  // constraint
+  drawImageRect(image,                                 // image
+                src,                                   // source rect
+                dest,                                  // destination rect
+                sampling,                              // sampling options
+                render_with_attributes,                // render with attributes
+                flutter::DlSrcRectConstraint::kStrict  // constraint
   );
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::drawImageRect(
-    const sk_sp<flutter::DlImage> image,
-    const DlRect& src,
-    const DlRect& dst,
-    flutter::DlImageSampling sampling,
-    bool render_with_attributes,
-    SrcRectConstraint constraint = SrcRectConstraint::kFast) {
+void DlDispatcherBase::drawImageRect(const sk_sp<flutter::DlImage> image,
+                                     const DlRect& src,
+                                     const DlRect& dst,
+                                     flutter::DlImageSampling sampling,
+                                     bool render_with_attributes,
+                                     flutter::DlSrcRectConstraint constraint =
+                                         flutter::DlSrcRectConstraint::kFast) {
   AUTO_DEPTH_WATCHER(1u);
 
   GetCanvas().DrawImageRect(
@@ -758,7 +775,7 @@ void DlDispatcherBase::drawImageNine(const sk_sp<flutter::DlImage> image,
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
-                                 const SkRSXform xform[],
+                                 const RSTransform xform[],
                                  const DlRect tex[],
                                  const flutter::DlColor colors[],
                                  int count,
@@ -1112,9 +1129,10 @@ void FirstPassDispatcher::drawTextFrame(
       (matrix_ * Matrix::MakeTranslation(Point(x, y))).GetMaxBasisLengthXY());
 
   renderer_.GetLazyGlyphAtlas()->AddTextFrame(
-      text_frame,                                       //
-      scale,                                            //
-      Point(x, y),                                      //
+      text_frame,   //
+      scale,        //
+      Point(x, y),  //
+      matrix_,
       (properties.stroke || text_frame->HasColor())     //
           ? std::optional<GlyphProperties>(properties)  //
           : std::nullopt                                //

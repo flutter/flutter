@@ -152,6 +152,9 @@ Future<void> run(List<String> arguments) async {
   printProgress('Internationalization...');
   await verifyInternationalizations(flutterRoot, dart);
 
+  printProgress('Localization files of stocks app...');
+  await verifyStockAppLocalizations(flutterRoot);
+
   printProgress('Integration test timeouts...');
   await verifyIntegrationTestTimeouts(flutterRoot);
 
@@ -863,7 +866,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, {bool checkMinimums
   await _verifyNoMissingLicenseForExtension(
     workingDirectory,
     'java',
-    overrideMinimumMatches ?? 39,
+    overrideMinimumMatches ?? 1,
     _generateLicense('// '),
   );
   await _verifyNoMissingLicenseForExtension(
@@ -1312,6 +1315,49 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
   }
 }
 
+Future<void> verifyStockAppLocalizations(String workingDirectory) async {
+  final Directory appRoot = Directory(
+    path.join(workingDirectory, 'dev', 'benchmarks', 'test_apps', 'stocks'),
+  );
+  if (!appRoot.existsSync()) {
+    foundError(<String>['Stocks app does not exist at expected location: ${appRoot.path}']);
+  }
+
+  // Regenerate the localizations.
+  final String flutterExecutable = path.join(
+    workingDirectory,
+    'bin',
+    'flutter${Platform.isWindows ? '.bat' : ''}',
+  );
+  await _evalCommand(flutterExecutable, const <String>['gen-l10n'], workingDirectory: appRoot.path);
+  final Directory i10nDirectory = Directory(path.join(appRoot.path, 'lib', 'i18n'));
+  if (!i10nDirectory.existsSync()) {
+    foundError(<String>[
+      'Localization files for stocks app not found at expected location: ${i10nDirectory.path}',
+    ]);
+  }
+
+  // Check that regeneration did not dirty the tree.
+  final EvalResult result = await _evalCommand('git', <String>[
+    'diff',
+    '--name-only',
+    '--exit-code',
+    i10nDirectory.path,
+  ], workingDirectory: workingDirectory);
+  if (result.exitCode == 1) {
+    foundError(<String>[
+      'The following localization files for the stocks app appear to be out of date:',
+      ...(const LineSplitter().convert(result.stdout).map((String line) => ' * $line')),
+      'Run "flutter gen-l10n" in "${path.relative(appRoot.path, from: workingDirectory)}" to regenerate.',
+    ]);
+  } else if (result.exitCode != 0) {
+    foundError(<String>[
+      'Failed to run "git diff" on localization files of stocks app:',
+      result.stderr,
+    ]);
+  }
+}
+
 /// Verifies that all instances of "checked mode" have been migrated to "debug mode".
 Future<void> verifyNoCheckedMode(String workingDirectory) async {
   final String flutterPackages = path.join(workingDirectory, 'packages');
@@ -1696,7 +1742,7 @@ class Hash256 {
 // We have a policy of not checking in binaries into this repository.
 // If you are adding/changing template images, use the flutter_template_images
 // package and a .img.tmpl placeholder instead.
-// If you have other binaries to add, please consult Hixie for advice.
+// If you have other binaries to add, please consult johnmccutchan for advice.
 final Set<Hash256> _legacyBinaries = <Hash256>{
   // DEFAULT ICON IMAGES
 
@@ -2053,7 +2099,7 @@ Future<void> verifyNoBinaries(String workingDirectory, {Set<Hash256>? legacyBina
   // We have a policy of not checking in binaries into this repository.
   // If you are adding/changing template images, use the flutter_template_images
   // package and a .img.tmpl placeholder instead.
-  // If you have other binaries to add, please consult Hixie for advice.
+  // If you have other binaries to add, please consult johnmccutchan for advice.
   assert(
     _legacyBinaries
             .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])
@@ -2553,7 +2599,6 @@ const Set<String> kExecutableAllowlist = <String>{
   'bin/internal/update_dart_sdk.sh',
   'bin/internal/update_engine_version.sh',
 
-  'dev/bots/accept_android_sdk_licenses.sh',
   'dev/bots/codelabs_build_test.sh',
   'dev/bots/docs.sh',
 

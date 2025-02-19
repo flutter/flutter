@@ -13,7 +13,9 @@ import 'package:webdriver/async_io.dart' as async_io;
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -29,14 +31,23 @@ class WebDriverService extends DriverService {
   WebDriverService({
     required ProcessUtils processUtils,
     required String dartSdkPath,
+    required Platform platform,
     required Logger logger,
+    required Terminal terminal,
+    required OutputPreferences outputPreferences,
   }) : _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
-       _logger = logger;
+       _platform = platform,
+       _logger = logger,
+       _terminal = terminal,
+       _outputPreferences = outputPreferences;
 
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
+  final Platform _platform;
   final Logger _logger;
+  final Terminal _terminal;
+  final OutputPreferences _outputPreferences;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -93,9 +104,11 @@ class WebDriverService extends DriverService {
       stayResident: true,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
-      usage: globals.flutterUsage,
       analytics: globals.analytics,
       logger: _logger,
+      terminal: _terminal,
+      platform: _platform,
+      outputPreferences: _outputPreferences,
       systemClock: globals.systemClock,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
@@ -143,7 +156,6 @@ class WebDriverService extends DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
     PackageConfig packageConfig, {
     bool? headless,
     String? chromeBinary,
@@ -195,9 +207,9 @@ class WebDriverService extends DriverService {
     final int result = await _processUtils.stream(
       <String>[_dartSdkPath, ...arguments, testFile],
       environment: <String, String>{
+        ..._platform.environment,
         'VM_SERVICE_URL': _webUri.toString(),
         ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
-        ...environment,
       },
     );
     await webDriver.quit();
@@ -205,7 +217,7 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<void> stop({File? writeSkslOnExit, String? userIdentifier}) async {
+  Future<void> stop({String? userIdentifier}) async {
     final bool appDidFinishPrematurely = _runResult != null;
     await _residentRunner.exitApp();
     await _residentRunner.cleanupAtFinish();

@@ -24,7 +24,6 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
 /// All currently implemented targets.
@@ -164,12 +163,6 @@ class AssembleCommand extends FlutterCommand {
   String get category => FlutterCommandCategory.project;
 
   @override
-  Future<CustomDimensions> get usageValues async => CustomDimensions(
-    commandBuildBundleTargetPlatform: _environment.defines[kTargetPlatform],
-    commandBuildBundleIsModule: _flutterProject.isModule,
-  );
-
-  @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => Event.commandUsageValues(
     workflow: commandPath,
     commandHasTerminal: hasTerminal,
@@ -258,7 +251,6 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
-      usage: globals.flutterUsage,
       analytics: globals.analytics,
       platform: globals.platform,
       engineVersion: artifacts.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,

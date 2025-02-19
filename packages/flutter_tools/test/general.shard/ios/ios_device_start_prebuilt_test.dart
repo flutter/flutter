@@ -365,6 +365,12 @@ void main() {
       expect(
         logger.errorText,
         contains(
+          'Your debugging device seems wirelessly connected. Consider plugging it in and trying again.',
+        ),
+      );
+      expect(
+        logger.errorText,
+        contains(
           'Click "Allow" to the prompt asking if you would like to find and connect devices on your local network.',
         ),
       );
@@ -527,9 +533,7 @@ void main() {
             '--trace-allowlist="foo"',
             '--trace-skia-allowlist="skia.a,skia.b"',
             '--endless-trace-buffer',
-            '--dump-skp-on-shader-compilation',
             '--verbose-logging',
-            '--cache-sksl',
             '--purge-persistent-cache',
             '--enable-impeller=false',
             '--enable-embedder-api',
@@ -581,8 +585,6 @@ void main() {
         traceSystrace: true,
         traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
-        dumpSkpOnShaderCompilation: true,
-        cacheSkSL: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.disabled,

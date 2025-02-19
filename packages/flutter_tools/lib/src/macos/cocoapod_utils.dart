@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/error_handling_io.dart';
 import '../base/fingerprint.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../plugins.dart';
 import '../project.dart';
+import 'swift_package_manager.dart';
 
 /// For a given build, determines whether dependencies have changed since the
 /// last call to processPods, then calls processPods with that information.
@@ -33,12 +35,19 @@ Future<void> processPodsIfNeeded(
     iosPlatform: project.ios.existsSync(),
     macOSPlatform: project.macos.existsSync(),
     forceCocoaPodsOnly: forceCocoaPodsOnly,
+
+    // TODO(matanlurey): Ideally processPodsIfNeeded would not be used at all, and it would definitely
+    //  not call refreshPluginsList, but until that happens (https://github.com/flutter/flutter/issues/157391)
+    //  we have to reproduce some of the work that otherwise would be handled by underlying commands, otherwise
+    //  this call to refreshPluginsList would overwrite the correct plugins list generated elsewhere.
+    determineDevDependencies:
+        featureFlags.isExplicitPackageDependenciesEnabled && buildMode.isRelease,
+
     // TODO(matanlurey): As-per discussion on https://github.com/flutter/flutter/pull/157393
     //  we'll assume that iOS/MacOS builds do not use or rely on the `.flutter-plugins` legacy
     //  file being generated. A better long-term fix would be not to have a call to refreshPluginsList
     //  at all, and instead have it implicitly run by the FlutterCommand instead. See
     //  https://github.com/flutter/flutter/issues/157391 for details.
-    determineDevDependencies: false,
     generateLegacyPlugins: false,
   );
 
@@ -61,8 +70,15 @@ Future<void> processPodsIfNeeded(
       await globals.cocoaPods?.setupPodfile(xcodeProject);
     }
 
-    // Delete Swift Package Manager manifest to invalidate fingerprinter
-    ErrorHandlingFileSystem.deleteIfExists(xcodeProject.flutterPluginSwiftPackageManifest);
+    // Generate an empty Swift Package Manager manifest to invalidate fingerprinter
+    final SwiftPackageManager swiftPackageManager = SwiftPackageManager(
+      fileSystem: globals.localFileSystem,
+      templateRenderer: globals.templateRenderer,
+    );
+    final SupportedPlatform platform =
+        xcodeProject is IosProject ? SupportedPlatform.ios : SupportedPlatform.macos;
+
+    await swiftPackageManager.generatePluginsSwiftPackage(const <Plugin>[], platform, xcodeProject);
   }
 
   // If the Xcode project, Podfile, generated plugin Swift Package, or podhelper

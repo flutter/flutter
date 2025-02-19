@@ -357,7 +357,7 @@ class Size extends OffsetBase {
   ///
   ///  * [Size.fromRadius], which is more convenient when the available size
   ///    is the radius of a circle.
-  const Size.square(double dimension) : super(dimension, dimension); // ignore: use_super_parameters
+  const Size.square(double dimension) : super(dimension, dimension);
 
   /// Creates a [Size] with the given [width] and an infinite [height].
   const Size.fromWidth(double width) : super(width, double.infinity);
@@ -1747,7 +1747,7 @@ class RRect {
 ///
 /// Used by [Canvas.drawAtlas]. This is a more efficient way to represent these
 /// simple transformations than a full matrix.
-// Modeled after Skia's SkRSXform.
+// Modeled after Impeller's RSTransform.
 class RSTransform {
   /// Creates an RSTransform.
   ///

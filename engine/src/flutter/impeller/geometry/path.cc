@@ -60,7 +60,7 @@ bool Path::IsEmpty() const {
 }
 
 bool Path::IsSingleContour() const {
-  return data_->single_countour;
+  return data_->single_contour;
 }
 
 /// Determine required storage for points and indices.
@@ -168,6 +168,11 @@ void Path::WritePolyline(Scalar scale, VertexWriter& writer) const {
   if (started_contour) {
     writer.EndContour();
   }
+}
+
+Path::ComponentType Path::GetComponentTypeAtIndex(size_t index) const {
+  auto& components = data_->components;
+  return components[index];
 }
 
 bool Path::GetLinearComponentAtIndex(size_t index,

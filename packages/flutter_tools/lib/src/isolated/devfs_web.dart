@@ -40,6 +40,7 @@ import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
+import '../web/module_metadata.dart';
 import '../web_template.dart';
 
 typedef DwdsLauncher =
@@ -50,10 +51,12 @@ typedef DwdsLauncher =
       required ToolConfiguration toolConfiguration,
     });
 
-// A minimal index for projects that do not yet support web.
+// A minimal index for projects that do not yet support web. A meta tag is used
+// to ensure loaded scripts are always parsed as UTF-8.
 const String _kDefaultIndex = '''
 <html>
     <head>
+        <meta charset='utf-8'>
         <base href="/">
     </head>
     <body>
@@ -124,11 +127,17 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
-    this._nullSafetyMode,
-    this._ddcModuleSystem, {
+    this._ddcModuleSystem,
+    this._canaryFeatures, {
     required this.webRenderer,
     required this.useLocalCanvasKit,
-  }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref();
+  }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref() {
+    // TODO(srujzs): Remove this assertion when the library bundle format is
+    // supported without canary mode.
+    if (_ddcModuleSystem) {
+      assert(_canaryFeatures);
+    }
+  }
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -137,9 +146,29 @@ class WebAssetServer implements AssetReader {
   final Map<String, String> _modules;
   final Map<String, String> _digests;
 
+  // The generation number that maps to the number of hot restarts. This is used
+  // to suffix a query to source paths in order to cache-bust.
+  int _hotRestartGeneration = 0;
+
   int get selectedPort => _httpServer.port;
 
-  void performRestart(List<String> modules) {
+  /// Given a list of [modules] that need to be loaded, compute module names and
+  /// digests.
+  ///
+  /// If [writeRestartScripts] is true, writes a list of sources mapped to their
+  /// ids to the file system that can then be consumed by the hot restart
+  /// callback.
+  ///
+  /// For example:
+  /// ```json
+  /// [
+  ///   {
+  ///     "src": "<file_name>",
+  ///     "id": "<id>",
+  ///   },
+  /// ]
+  /// ```
+  void performRestart(List<String> modules, {required bool writeRestartScripts}) {
     for (final String module in modules) {
       // We skip computing the digest by using the hashCode of the underlying buffer.
       // Whenever a file is updated, the corresponding Uint8List.view it corresponds
@@ -150,6 +179,47 @@ class WebAssetServer implements AssetReader {
       _modules[name] = path;
       _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
     }
+    if (writeRestartScripts && _hotRestartGeneration > 0) {
+      final List<Map<String, String>> srcIdsList = <Map<String, String>>[];
+      for (final String src in modules) {
+        srcIdsList.add(<String, String>{'src': '$src?gen=$_hotRestartGeneration', 'id': src});
+      }
+      writeFile('restart_scripts.json', json.encode(srcIdsList));
+    }
+    _hotRestartGeneration++;
+  }
+
+  /// Given a list of [modules] that need to be reloaded, writes a file that
+  /// contains a list of objects each with two fields:
+  ///
+  /// `src`: A string that corresponds to the file path containing a DDC library
+  /// bundle.
+  /// `libraries`: An array of strings containing the libraries that were
+  /// compiled in `src`.
+  ///
+  /// For example:
+  /// ```json
+  /// [
+  ///   {
+  ///     "src": "<file_name>",
+  ///     "libraries": ["<lib1>", "<lib2>"],
+  ///   },
+  /// ]
+  /// ```
+  ///
+  /// The path of the output file should stay consistent across the lifetime of
+  /// the app.
+  void performReload(List<String> modules) {
+    final List<Map<String, Object>> moduleToLibrary = <Map<String, Object>>[];
+    for (final String module in modules) {
+      final ModuleMetadata metadata = ModuleMetadata.fromJson(
+        json.decode(utf8.decode(_webMemoryFS.metadataFiles['$module.metadata']!.toList()))
+            as Map<String, dynamic>,
+      );
+      final List<String> libraries = metadata.libraries.keys.toList();
+      moduleToLibrary.add(<String, Object>{'src': module, 'libraries': libraries});
+    }
+    writeFile('reload_scripts.json', json.encode(moduleToLibrary));
   }
 
   @visibleForTesting
@@ -179,8 +249,7 @@ class WebAssetServer implements AssetReader {
     bool enableDds,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler,
-    Map<String, String> extraHeaders,
-    NullSafetyMode nullSafetyMode, {
+    Map<String, String> extraHeaders, {
     required WebRendererMode webRenderer,
     required bool isWasm,
     required bool useLocalCanvasKit,
@@ -188,7 +257,13 @@ class WebAssetServer implements AssetReader {
     DwdsLauncher dwdsLauncher = Dwds.start,
     // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
     bool ddcModuleSystem = false,
+    bool canaryFeatures = false,
   }) async {
+    // TODO(srujzs): Remove this assertion when the library bundle format is
+    // supported without canary mode.
+    if (ddcModuleSystem) {
+      assert(canaryFeatures);
+    }
     InternetAddress address;
     if (hostname == 'any') {
       address = InternetAddress.anyIPv4;
@@ -226,16 +301,16 @@ class WebAssetServer implements AssetReader {
     }
 
     final PackageConfig packageConfig = buildInfo.packageConfig;
-    final Map<String, String> digests = <String, String>{};
     final Map<String, String> modules = <String, String>{};
+    final Map<String, String> digests = <String, String>{};
     final WebAssetServer server = WebAssetServer(
       httpServer,
       packageConfig,
       address,
       modules,
       digests,
-      nullSafetyMode,
       ddcModuleSystem,
+      canaryFeatures,
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
     );
@@ -300,7 +375,7 @@ class WebAssetServer implements AssetReader {
       toolConfiguration: ToolConfiguration(
         loadStrategy:
             ddcModuleSystem
-                ? FrontendServerDdcStrategyProvider(
+                ? FrontendServerDdcLibraryBundleStrategyProvider(
                   ReloadConfiguration.none,
                   server,
                   PackageUriMapper(packageConfig),
@@ -310,6 +385,7 @@ class WebAssetServer implements AssetReader {
                       globals.fs.file(entrypoint).absolute.uri,
                     ),
                   ),
+                  packageConfigPath: buildInfo.packageConfigPath,
                 ).strategy
                 : FrontendServerRequireStrategyProvider(
                   ReloadConfiguration.none,
@@ -321,6 +397,7 @@ class WebAssetServer implements AssetReader {
                       globals.fs.file(entrypoint).absolute.uri,
                     ),
                   ),
+                  packageConfigPath: buildInfo.packageConfigPath,
                 ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,
@@ -354,8 +431,8 @@ class WebAssetServer implements AssetReader {
     return server;
   }
 
-  final NullSafetyMode _nullSafetyMode;
   final bool _ddcModuleSystem;
+  final bool _canaryFeatures;
   final HttpServer _httpServer;
   final WebMemoryFS _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -673,19 +750,15 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   File get _resolveDartSdkJsFile {
-    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap =
-        _ddcModuleSystem ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
-    return globals.fs.file(
-      globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!),
-    );
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
+        _ddcModuleSystem ? kDdcLibraryBundleDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
+    return globals.fs.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _resolveDartSdkJsMapFile {
-    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap =
-        _ddcModuleSystem ? kDdcDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
-    return globals.fs.file(
-      globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!),
-    );
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
+        _ddcModuleSystem ? kDdcLibraryBundleDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
+    return globals.fs.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   @override
@@ -760,14 +833,21 @@ class WebDevFS implements DevFS {
     required this.chromiumLauncher,
     required this.nullAssertions,
     required this.nativeNullAssertions,
-    required this.nullSafetyMode,
     required this.ddcModuleSystem,
+    required this.canaryFeatures,
     required this.webRenderer,
     required this.isWasm,
     required this.useLocalCanvasKit,
     required this.rootDirectory,
+    required this.isWindows,
     this.testMode = false,
-  }) : _port = port;
+  }) : _port = port {
+    // TODO(srujzs): Remove this assertion when the library bundle format is
+    // supported without canary mode.
+    if (ddcModuleSystem) {
+      assert(canaryFeatures);
+    }
+  }
 
   final Uri entrypoint;
   final String hostname;
@@ -782,17 +862,18 @@ class WebDevFS implements DevFS {
   final Map<String, String> extraHeaders;
   final bool testMode;
   final bool ddcModuleSystem;
+  final bool canaryFeatures;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
   final bool nullAssertions;
   final bool nativeNullAssertions;
   final int _port;
-  final NullSafetyMode nullSafetyMode;
   final String? tlsCertPath;
   final String? tlsCertKeyPath;
   final WebRendererMode webRenderer;
   final bool isWasm;
   final bool useLocalCanvasKit;
+  final bool isWindows;
 
   late WebAssetServer webAssetServer;
 
@@ -888,12 +969,12 @@ class WebDevFS implements DevFS {
       entrypoint,
       expressionCompiler,
       extraHeaders,
-      nullSafetyMode,
       webRenderer: webRenderer,
       isWasm: isWasm,
       useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,
       ddcModuleSystem: ddcModuleSystem,
+      canaryFeatures: canaryFeatures,
     );
 
     final int selectedPort = webAssetServer.selectedPort;
@@ -955,6 +1036,7 @@ class WebDevFS implements DevFS {
     AssetBundle? bundle,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
+    bool resetCompiler = false,
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
@@ -983,11 +1065,12 @@ class WebDevFS implements DevFS {
       webAssetServer.writeFile(
         'main.dart.js',
         ddcModuleSystem
-            ? generateDDCBootstrapScript(
+            ? generateDDCLibraryBundleBootstrapScript(
               entrypoint: entrypoint,
               ddcModuleLoaderUrl: 'ddc_module_loader.js',
               mapperUrl: 'stack_trace_mapper.js',
               generateLoadingIndicator: enableDwds,
+              isWindows: isWindows,
             )
             : generateBootstrapScript(
               requireUrl: 'require.js',
@@ -995,19 +1078,24 @@ class WebDevFS implements DevFS {
               generateLoadingIndicator: enableDwds,
             ),
       );
+      const String onLoadEndBootstrap = 'on_load_end_bootstrap.js';
+      if (ddcModuleSystem) {
+        webAssetServer.writeFile(onLoadEndBootstrap, generateDDCLibraryBundleOnLoadEndBootstrap());
+      }
       webAssetServer.writeFile(
         'main_module.bootstrap.js',
         ddcModuleSystem
-            ? generateDDCMainModule(
+            ? generateDDCLibraryBundleMainModule(
               entrypoint: entrypoint,
               nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
-              exportedMain: pathToJSIdentifier(entrypoint.split('.')[0]),
+              onLoadEndBootstrap: onLoadEndBootstrap,
             )
             : generateMainModule(
               entrypoint: entrypoint,
               nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
+              loaderRootDirectory: _baseUri.toString(),
             ),
       );
       // TODO(zanderso): refactor the asset code in this and the regular devfs to
@@ -1030,7 +1118,7 @@ class WebDevFS implements DevFS {
     await _validateTemplateFile('index.html');
     await _validateTemplateFile('flutter_bootstrap.js');
     final DateTime candidateCompileTime = DateTime.now();
-    if (fullRestart) {
+    if (resetCompiler) {
       generator.reset();
     }
 
@@ -1046,6 +1134,7 @@ class WebDevFS implements DevFS {
       projectRootPath: projectRootPath,
       fs: globals.fs,
       dartPluginRegistrant: dartPluginRegistrant,
+      recompileRestart: fullRestart,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport();
@@ -1075,7 +1164,11 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
-    webAssetServer.performRestart(modules);
+    if (fullRestart) {
+      webAssetServer.performRestart(modules, writeRestartScripts: ddcModuleSystem);
+    } else {
+      webAssetServer.performReload(modules);
+    }
     return UpdateFSReport(
       success: true,
       syncedBytes: codeFile.lengthSync(),
