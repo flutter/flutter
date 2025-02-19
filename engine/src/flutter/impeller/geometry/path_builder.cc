@@ -252,17 +252,6 @@ PathBuilder& PathBuilder::QuadraticCurveTo(Point controlPoint,
   return *this;
 }
 
-PathBuilder& PathBuilder::ConicCurveTo(Point controlPoint,
-                                       Point point,
-                                       Scalar weight,
-                                       bool relative) {
-  point = relative ? current_ + point : point;
-  controlPoint = relative ? current_ + controlPoint : controlPoint;
-  AddConicComponent(current_, controlPoint, point, weight);
-  current_ = point;
-  return *this;
-}
-
 PathBuilder& PathBuilder::SetConvexity(Convexity value) {
   prototype_.convexity = value;
   return *this;
@@ -280,33 +269,22 @@ PathBuilder& PathBuilder::CubicCurveTo(Point controlPoint1,
   return *this;
 }
 
-PathBuilder& PathBuilder::AddQuadraticCurve(const Point& p1,
-                                            const Point& cp,
-                                            const Point& p2) {
+PathBuilder& PathBuilder::AddQuadraticCurve(Point p1, Point cp, Point p2) {
   MoveTo(p1);
   AddQuadraticComponent(p1, cp, p2);
   return *this;
 }
 
-PathBuilder& PathBuilder::AddConicCurve(const Point& p1,
-                                        const Point& cp,
-                                        const Point& p2,
-                                        Scalar weight) {
-  MoveTo(p1);
-  AddConicComponent(p1, cp, p2, weight);
-  return *this;
-}
-
-PathBuilder& PathBuilder::AddCubicCurve(const Point& p1,
-                                        const Point& cp1,
-                                        const Point& cp2,
-                                        const Point& p2) {
+PathBuilder& PathBuilder::AddCubicCurve(Point p1,
+                                        Point cp1,
+                                        Point cp2,
+                                        Point p2) {
   MoveTo(p1);
   AddCubicComponent(p1, cp1, cp2, p2);
   return *this;
 }
 
-PathBuilder& PathBuilder::AddRect(const Rect& rect) {
+PathBuilder& PathBuilder::AddRect(Rect rect) {
   auto origin = rect.GetOrigin();
   auto size = rect.GetSize();
 
@@ -537,28 +515,6 @@ void PathBuilder::AddQuadraticComponent(const Point& p1,
   prototype_.bounds.reset();
 }
 
-void PathBuilder::AddConicComponent(const Point& p1,
-                                    const Point& cp,
-                                    const Point& p2,
-                                    Scalar weight) {
-  if (!std::isfinite(weight)) {
-    AddLinearComponent(p1, cp);
-    AddLinearComponent(cp, p2);
-  } else if (weight <= 0) {
-    AddLinearComponent(p1, p2);
-  } else if (weight == 1) {
-    AddQuadraticComponent(p1, cp, p2);
-  } else {
-    auto& points = prototype_.points;
-    points.push_back(p1);
-    points.push_back(cp);
-    points.push_back(p2);
-    points.emplace_back(weight, weight);
-    prototype_.components.push_back(Path::ComponentType::kConic);
-    prototype_.bounds.reset();
-  }
-}
-
 void PathBuilder::AddCubicComponent(const Point& p1,
                                     const Point& cp1,
                                     const Point& cp2,
@@ -728,13 +684,6 @@ PathBuilder& PathBuilder::Shift(Point offset) {
         quad->p2 += offset;
         quad->cp += offset;
       } break;
-      case Path::ComponentType::kConic: {
-        auto* conic =
-            reinterpret_cast<ConicPathComponent*>(&points[storage_offset]);
-        conic->p1 += offset;
-        conic->p2 += offset;
-        conic->cp += offset;
-      } break;
       case Path::ComponentType::kCubic: {
         auto* cubic =
             reinterpret_cast<CubicPathComponent*>(&points[storage_offset]);
@@ -815,13 +764,6 @@ std::optional<std::pair<Point, Point>> PathBuilder::GetMinMaxCoveragePoints()
              reinterpret_cast<const QuadraticPathComponent*>(
                  &points[storage_offset])
                  ->Extrema()) {
-          clamp(extrema);
-        }
-        break;
-      case Path::ComponentType::kConic:
-        for (const auto& extrema : reinterpret_cast<const ConicPathComponent*>(
-                                       &points[storage_offset])
-                                       ->Extrema()) {
           clamp(extrema);
         }
         break;
