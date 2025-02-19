@@ -135,7 +135,7 @@ String? activeDevToolsServerAddress;
 /// The uri for the connected vm service protocol.
 String? connectedVmServiceUri;
 
-/// If memory allocations are enabled, dispatch object creation.
+/// If memory allocation tracking is enabled, dispatch object creation.
 ///
 /// This method is not member of FlutterMemoryAllocations, because
 /// [FlutterMemoryAllocations] should not increase size of the Flutter application
@@ -153,7 +153,7 @@ bool maybeDispatchObjectCreated(String library, String className, Object object)
   return true;
 }
 
-/// If memory allocations are enabled, dispatch object disposal.
+/// If memory allocations tracking is enabled, dispatch object disposal.
 ///
 /// Returns true to make it easier to be wrapped into `assert`.
 bool maybeDispatchObjectDisposed(Object object) {
