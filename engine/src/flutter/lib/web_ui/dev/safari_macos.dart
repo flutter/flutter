@@ -96,8 +96,8 @@ $stackTrace
       for (int retryCount = 0; retryCount < maxRetryCount; retryCount++) {
         try {
           print('Starting web driver on $_driverUri');
-         // Smoke-test the web driver process by connecting to it and asking for a
-        // list of windows. It doesn't matter how many windows there are.
+          // Smoke-test the web driver process by connecting to it and asking for a
+          // list of windows. It doesn't matter how many windows there are.
           webDriver = await createDriver(
             uri: _driverUri,
             desired: <String, dynamic>{'browserName': packageTestRuntime.identifier},
@@ -105,7 +105,7 @@ $stackTrace
 
           await webDriver!.windows.toList();
           break;
-        } catch(_) {
+        } catch (_) {
           await _closeWebDriver();
           rethrow;
         }
@@ -134,29 +134,29 @@ $stackTrace
   }
 
   Future<void> _closeWebDriver() async {
-     final badDriver = webDriver;
-      webDriver = null; // let's not keep faulty driver around
+    final badDriver = webDriver;
+    webDriver = null; // let's not keep faulty driver around
 
-      if (badDriver != null) {
-        // This means the launch process got to a point where a WebDriver
-        // instance was created, but it failed the smoke test. To make sure no
-        // stray driver sessions are left hanging, try to close the session.
-        try {
-          // The method is called "quit" but all it does is close the session.
-          //
-          // See: https://www.w3.org/TR/webdriver2/#delete-session
-          await badDriver.quit();
-        } catch (error, stackTrace) {
-          // Just print. Do not rethrow. The attempt to close the session is
-          // only a best-effort thing.
-          print('''
+    if (badDriver != null) {
+      // This means the launch process got to a point where a WebDriver
+      // instance was created, but it failed the smoke test. To make sure no
+      // stray driver sessions are left hanging, try to close the session.
+      try {
+        // The method is called "quit" but all it does is close the session.
+        //
+        // See: https://www.w3.org/TR/webdriver2/#delete-session
+        await badDriver.quit();
+      } catch (error, stackTrace) {
+        // Just print. Do not rethrow. The attempt to close the session is
+        // only a best-effort thing.
+        print('''
 Failed to close driver session. Will try to kill the safaridriver process.
 
 Error: $error
 $stackTrace
 ''');
-        }
       }
+    }
   }
 
   /// The Safari Driver process cannot instantly spawn a server, so this function
