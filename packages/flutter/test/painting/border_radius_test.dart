@@ -389,6 +389,168 @@ void main() {
       RRect.fromRectAndCorners(rect, topLeft: radius1, bottomLeft: radius2),
     );
 
+    // some with topStart
+    borderRadius = const BorderRadiusDirectional.some(
+      topStart: radius1,
+      rest: radius2
+    );
+    expect(borderRadius, hasOneLineDescription);
+    expect(borderRadius.topStart, radius1);
+    expect(borderRadius.topEnd, radius2);
+    expect(borderRadius.bottomStart, radius2);
+    expect(borderRadius.bottomEnd, radius2);
+    expect(
+      borderRadius.resolve(TextDirection.ltr).toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius1,
+        topRight: radius2,
+        bottomLeft: radius2,
+        bottomRight: radius2,
+      ),
+    );
+    expect(
+      borderRadius.resolve(TextDirection.rtl).toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius2,
+        topRight: radius1,
+        bottomLeft: radius2,
+        bottomRight: radius2,
+      ),
+    );
+
+    // some with topEnd
+    borderRadius = const BorderRadiusDirectional.some(
+      topEnd: radius1,
+      rest: radius2
+    );
+    expect(borderRadius, hasOneLineDescription);
+    expect(borderRadius.topStart, radius2);
+    expect(borderRadius.topEnd, radius1);
+    expect(borderRadius.bottomStart, radius2);
+    expect(borderRadius.bottomEnd, radius2);
+    expect(
+      borderRadius.resolve(TextDirection.ltr).toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius2,
+        topRight: radius1,
+        bottomLeft: radius2,
+        bottomRight: radius2,
+      ),
+    );
+    expect(
+      borderRadius.resolve(TextDirection.rtl).toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius1,
+        topRight: radius2,
+        bottomLeft: radius2,
+        bottomRight: radius2,
+      ),
+    );
+
+    // some with bottomStart
+    borderRadius = const BorderRadiusDirectional.some(
+      bottomStart: radius1,
+      rest: radius2
+    );
+    expect(borderRadius, hasOneLineDescription);
+    expect(borderRadius.topStart, radius2);
+    expect(borderRadius.topEnd, radius2);
+    expect(borderRadius.bottomStart, radius1);
+    expect(borderRadius.bottomEnd, radius2);
+    expect(
+      borderRadius.resolve(TextDirection.ltr).toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius2,
+        topRight: radius2,
+        bottomLeft: radius1,
+        bottomRight: radius2,
+      ),
+    );
+    expect(
+      borderRadius.resolve(TextDirection.rtl).toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius2,
+        topRight: radius2,
+        bottomLeft: radius2,
+        bottomRight: radius1,
+      ),
+    );
+
+    // some with bottomEnd
+    borderRadius = const BorderRadiusDirectional.some(
+      bottomEnd: radius1,
+      rest: radius2
+    );
+    expect(borderRadius, hasOneLineDescription);
+    expect(borderRadius.topStart, radius2);
+    expect(borderRadius.topEnd, radius2);
+    expect(borderRadius.bottomStart, radius2);
+    expect(borderRadius.bottomEnd, radius1);
+    expect(
+      borderRadius.resolve(TextDirection.ltr).toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius2,
+        topRight: radius2,
+        bottomLeft: radius2,
+        bottomRight: radius1,
+      ),
+    );
+    expect(
+      borderRadius.resolve(TextDirection.rtl).toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius2,
+        topRight: radius2,
+        bottomLeft: radius1,
+        bottomRight: radius2,
+      ),
+    );
+
+    const Radius radius3 = Radius.elliptical(1.0, 2.0);
+    const Radius radius4 = Radius.elliptical(3.0, 5.0);
+    const Radius radius5 = Radius.elliptical(7.0, 11.0);
+
+    // some with all
+    borderRadius = const BorderRadiusDirectional.some(
+      topStart: radius1,
+      topEnd: radius2,
+      bottomStart: radius3,
+      bottomEnd: radius4,
+      rest: radius5
+    );
+    expect(borderRadius, hasOneLineDescription);
+    expect(borderRadius.topStart, radius1);
+    expect(borderRadius.topEnd, radius2);
+    expect(borderRadius.bottomStart, radius3);
+    expect(borderRadius.bottomEnd, radius4);
+    expect(
+      borderRadius.resolve(TextDirection.ltr).toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius1,
+        topRight: radius2,
+        bottomLeft: radius3,
+        bottomRight: radius4,
+      ),
+    );
+    expect(
+      borderRadius.resolve(TextDirection.rtl).toRRect(rect),
+      RRect.fromRectAndCorners(
+        rect,
+        topLeft: radius2,
+        topRight: radius1,
+        bottomLeft: radius4,
+        bottomRight: radius3,
+      ),
+    );
+
     expect(
       const BorderRadiusDirectional.only(
         topStart: Radius.elliptical(1.0, 2.0),
