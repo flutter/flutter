@@ -41,6 +41,9 @@
 namespace flutter {
 
 namespace {
+
+static constexpr int kMinAPILevelHCPP = 34;
+
 AndroidContext::ContextSettings CreateContextSettings(
     const Settings& p_settings) {
   AndroidContext::ContextSettings settings;
@@ -133,14 +136,16 @@ PlatformViewAndroid::PlatformViewAndroid(
         delegate.OnPlatformViewGetSettings().enable_impeller  //
     );
     android_surface_ = surface_factory_->CreateSurface();
-    // TODO(jonahwilliams): we need to expose the runtime check for the
-    // correct extensions and allowlist for this to work correctly.
     android_use_new_platform_view_ =
         android_context->RenderingApi() ==
             AndroidRenderingAPI::kImpellerVulkan &&
-        delegate.OnPlatformViewGetSettings().enable_surface_control;
+        (android_get_device_api_level() >= kMinAPILevelHCPP) &&
+        delegate.OnPlatformViewGetSettings().enable_surface_control &&
+        impeller::ContextVK::Cast(*android_context->GetImpellerContext())
+            .GetShouldEnableSurfaceControlSwapchain();
     FML_CHECK(android_surface_ && android_surface_->IsValid())
-        << "Could not create an OpenGL, Vulkan or Software surface to set up "
+        << "Could not create an OpenGL, Vulkan or Software surface to set "
+           "up "
            "rendering.";
   }
 }
@@ -493,4 +498,9 @@ double PlatformViewAndroid::GetScaledFontSize(double unscaled_font_size,
   return jni_facade_->FlutterViewGetScaledFontSize(unscaled_font_size,
                                                    configuration_id);
 }
+
+bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
+  return android_use_new_platform_view_;
+}
+
 }  // namespace flutter
