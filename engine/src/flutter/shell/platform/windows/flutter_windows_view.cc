@@ -121,9 +121,7 @@ FlutterWindowsView::FlutterWindowsView(
 FlutterWindowsView::~FlutterWindowsView() {
   // The view owns the child window.
   // Notify the engine the view's child window will no longer be visible.
-  if (engine_->running()) {
-    engine_->OnWindowStateEvent(GetWindowHandle(), WindowStateEvent::kHide);
-  }
+  engine_->OnWindowStateEvent(GetWindowHandle(), WindowStateEvent::kHide);
 
   if (surface_) {
     DestroyWindowSurface(*engine_, std::move(surface_));
@@ -815,9 +813,7 @@ void FlutterWindowsView::OnDwmCompositionChanged() {
 }
 
 void FlutterWindowsView::OnWindowStateEvent(HWND hwnd, WindowStateEvent event) {
-  if (engine_->running()) {
-    engine_->OnWindowStateEvent(hwnd, event);
-  }
+  engine_->OnWindowStateEvent(hwnd, event);
 }
 
 bool FlutterWindowsView::NeedsVsync() const {
