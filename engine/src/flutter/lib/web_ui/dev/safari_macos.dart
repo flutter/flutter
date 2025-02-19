@@ -39,7 +39,6 @@ class SafariMacOsEnvironment extends BrowserEnvironment {
       try {
         if (retryCount > 0) {
           print('Retry #$retryCount');
-          print('Killing safaridriver and Safari')
           ProcessResult killDriver = Process.runSync('killall', <String>['-9', 'safaridriver']);
           print('Killed safaridriver: ${killDriver.exitCode}');
           ProcessResult killSafari = Process.runSync('killall', <String>['-9', 'Safari']);
