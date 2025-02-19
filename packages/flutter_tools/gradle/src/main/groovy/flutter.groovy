@@ -6,7 +6,9 @@
 import com.android.build.OutputFile
 import com.flutter.gradle.BaseApplicationNameHandler
 import com.flutter.gradle.Deeplink
+import com.flutter.gradle.DependencyVersionChecker
 import com.flutter.gradle.IntentFilterCheck
+import com.flutter.gradle.VersionUtils
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -300,10 +302,7 @@ class FlutterPlugin implements Plugin<Project> {
         final Boolean shouldSkipDependencyChecks = project.hasProperty("skipDependencyChecks") && project.getProperty("skipDependencyChecks")
         if (!shouldSkipDependencyChecks) {
             try {
-                final String dependencyCheckerPluginPath = Paths.get(flutterRoot.absolutePath,
-                        "packages", "flutter_tools", "gradle", "src", "main", "kotlin_scripts",
-                        "dependency_version_checker.gradle.kts")
-                project.apply from: dependencyCheckerPluginPath
+                DependencyVersionChecker.checkDependencyVersions(project)
             } catch (Exception e) {
                 if (!project.hasProperty("usesUnsupportedDependencyVersions") || !project.usesUnsupportedDependencyVersions) {
                     // Possible bug in dependency checking code - warn and do not block build.
@@ -791,38 +790,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    /**
-     * Compares semantic versions ignoring labels.
-     *
-     * If the versions are equal (ignoring labels), returns one of the two strings arbitrarily.
-     *
-     * If minor or patch are omitted (non-conformant to semantic versioning), they are considered zero.
-     * If the provided versions in both are equal, the longest version string is returned.
-     * For example, "2.8.0" vs "2.8" will always consider "2.8.0" to be the most recent version.
-     * TODO: Remove this or compareVersionStrings. This does not handle strings like "8.6-rc-2".
-     */
-    static String mostRecentSemanticVersion(String version1, String version2) {
-        List version1Tokenized = version1.tokenize(".")
-        List version2Tokenized = version2.tokenize(".")
-        int version1numTokens = version1Tokenized.size()
-        int version2numTokens = version2Tokenized.size()
-        int minNumTokens = Math.min(version1numTokens, version2numTokens)
-        for (int i = 0; i < minNumTokens; i++) {
-            int num1 = version1Tokenized[i].toInteger()
-            int num2 = version2Tokenized[i].toInteger()
-            if (num1 > num2) {
-                return version1
-            }
-            if (num2 > num1) {
-                return version2
-            }
-        }
-        if (version1numTokens > version2numTokens) {
-            return version1
-        }
-        return version2
-    }
-
     private void forceNdkDownload(Project gradleProject, String flutterSdkRootPath) {
         // If the project is already configuring a native build, we don't need to do anything.
         Boolean forcingNotRequired = gradleProject.android.externalNativeBuild.cmake.path != null
@@ -890,7 +857,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
 
                     String pluginNdkVersion = pluginProject.android.ndkVersion ?: ndkVersionIfUnspecified
-                    maxPluginNdkVersion = mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
+                    maxPluginNdkVersion = VersionUtils.mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
                     if (pluginNdkVersion != projectNdkVersion) {
                         pluginsWithDifferentNdkVersion.add(new Tuple(pluginProject.name, pluginNdkVersion))
                     }
@@ -1220,11 +1187,6 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty(propDartDefines)) {
             dartDefinesValue = project.property(propDartDefines)
         }
-        String bundleSkSLPathValue
-        final String propBundleSkslPath = "bundle-sksl-path"
-        if (project.hasProperty(propBundleSkslPath)) {
-            bundleSkSLPathValue = project.property(propBundleSkslPath)
-        }
         String performanceMeasurementFileValue
         final String propPerformanceMeasurementFile = "performance-measurement-file"
         if (project.hasProperty(propPerformanceMeasurementFile)) {
@@ -1316,7 +1278,6 @@ class FlutterPlugin implements Plugin<Project> {
                 treeShakeIcons(treeShakeIconsOptionsValue)
                 dartObfuscation(dartObfuscationValue)
                 dartDefines(dartDefinesValue)
-                bundleSkSLPath(bundleSkSLPathValue)
                 performanceMeasurementFile(performanceMeasurementFileValue)
                 codeSizeDirectory(codeSizeDirectoryValue)
                 deferredComponents(deferredComponentsValue)
@@ -1648,9 +1609,6 @@ abstract class BaseFlutterTask extends DefaultTask {
     String dartDefines
 
     @Optional @Input
-    String bundleSkSLPath
-
-    @Optional @Input
     String codeSizeDirectory
 
     @Optional @Input
@@ -1739,9 +1697,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (dartDefines != null) {
                 args("--DartDefines=${dartDefines}")
-            }
-            if (bundleSkSLPath != null) {
-                args("-dBundleSkSLPath=${bundleSkSLPath}")
             }
             if (codeSizeDirectory != null) {
                 args("-dCodeSizeDirectory=${codeSizeDirectory}")

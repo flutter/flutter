@@ -78,7 +78,7 @@ mixin SemanticsBinding on BindingBase {
   final ObserverList<ValueSetter<ui.SemanticsActionEvent>> _semanticsActionListeners =
       ObserverList<ValueSetter<ui.SemanticsActionEvent>>();
 
-  /// Adds a listener that is called for every [SemanticsActionEvent] received.
+  /// Adds a listener that is called for every [ui.SemanticsActionEvent] received.
   ///
   /// The listeners are called before [performSemanticsAction] is invoked.
   ///
