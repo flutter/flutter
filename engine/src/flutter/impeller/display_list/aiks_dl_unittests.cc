@@ -1036,15 +1036,15 @@ TEST_P(AiksTest, DepthValuesForPolygonMode) {
 // by re-uploading it.
 TEST_P(AiksTest, ToImageFromImage) {
   DisplayListBuilder builder;
-  DlPath path = DlPath::MakeArc(DlRect::MakeLTRB(100, 100, 400, 400),
-                                DlDegrees(0), DlDegrees(90),
+  DlPath path = DlPath::MakeArc(DlRect::MakeLTRB(0, 0, 100, 100), DlDegrees(0),
+                                DlDegrees(90),
                                 /*use_center=*/true);
 
   builder.DrawPath(path, DlPaint().setColor(DlColor::kRed()));
 
   AiksContext renderer(GetContext(), nullptr);
   auto texture =
-      DisplayListToTexture(builder.Build(), ISize(600, 600), renderer);
+      DisplayListToTexture(builder.Build(), ISize(100, 100), renderer);
 
   // First, Readback the texture data into a host buffer.
   impeller::DeviceBufferDescriptor desc;
@@ -1091,15 +1091,15 @@ TEST_P(AiksTest, ToImageFromImage) {
   DisplayListBuilder canvas;
   DlPaint paint = DlPaint();
   canvas.DrawRect(
-      DlRect::MakeLTRB(0, 0, 600, 600),
+      DlRect::MakeLTRB(0, 0, 100, 100),
       DlPaint().setColor(DlColor::kBlue()).setDrawStyle(DlDrawStyle::kStroke));
   canvas.DrawImage(DlImageImpeller::Make(texture), DlPoint(0, 0),
                    DlImageSampling::kNearestNeighbor, &paint);
 
   canvas.DrawRect(
-      DlRect::MakeLTRB(0, 600, 600, 1200),
+      DlRect::MakeLTRB(0, 100, 100, 200),
       DlPaint().setColor(DlColor::kRed()).setDrawStyle(DlDrawStyle::kStroke));
-  canvas.DrawImage(DlImageImpeller::Make(reupload_texture), DlPoint(0, 600),
+  canvas.DrawImage(DlImageImpeller::Make(reupload_texture), DlPoint(0, 100),
                    DlImageSampling::kNearestNeighbor, &paint);
   OpenPlaygroundHere(canvas.Build());
 }
