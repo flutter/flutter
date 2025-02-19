@@ -1035,14 +1035,14 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
 class _PopupWindowRoute<T> extends Route<T> {
   _PopupWindowRoute({
-    required this.controller,
+    required this.controllerBuilder,
     required this.builder,
     required NavigatorState navigator,
     AnimationStyle? popUpAnimationStyle,
   }) : _navigator = navigator,
        _popUpAnimationStyle = popUpAnimationStyle;
 
-  final PopupWindowController controller;
+  final PopupWindowController Function() controllerBuilder;
   final Widget Function(BuildContext context, Animation<double> animation) builder;
 
   @override
@@ -1053,6 +1053,7 @@ class _PopupWindowRoute<T> extends Route<T> {
 
   late final AnimationController _animationController;
   late final Animation<double> _animation;
+  late final PopupWindowController _controller;
 
   /// Handle to the performance mode request.
   ///
@@ -1073,11 +1074,12 @@ class _PopupWindowRoute<T> extends Route<T> {
       vsync: _navigator,
     );
     _animation = createAnimation()..addStatusListener(_handleStatusChanged);
+    _controller = controllerBuilder();
     _overlayEntries.add(
       OverlayEntry(
         builder: (BuildContext context) {
           return ViewAnchor(
-            view: PopupWindow(controller: controller, child: builder(context, createAnimation())),
+            view: PopupWindow(controller: _controller, child: builder(context, createAnimation())),
             child: Container());
         },
       ),
@@ -1145,7 +1147,7 @@ class _PopupWindowRoute<T> extends Route<T> {
 
   @override
   void didComplete(T? result) {
-    controller.destroy();
+    _controller.destroy();
     super.didComplete(result);
   }
 }
@@ -1391,18 +1393,19 @@ Future<T?> showMenu<T>({
         },
         navigator: navigator,
         popUpAnimationStyle: popUpAnimationStyle,
-        controller: PopupWindowController(
+        controllerBuilder: () {
+          final Size size = Size(100, 200);  // TODO: Get a real size
+          final RelativeRect resultingPosition = position ?? positionBuilder!.call(context, BoxConstraints.loose(size));
+          return PopupWindowController(
           parent: WindowControllerContext.of(context)!.controller.rootView,
-          size: Size(400, 300), // TODO: Get a real size
-          anchorRect:
-              position != null
-                  ? Rect.fromLTRB(position.left, position.top, position.right, position.bottom)
-                  : null,
+          size: size,
+          anchorRect:Rect.fromLTRB(resultingPosition.left, resultingPosition.top, resultingPosition.right, resultingPosition.bottom),
           positioner: const WindowPositioner(
-            parentAnchor: WindowPositionerAnchor.topLeft,
+            parentAnchor: WindowPositionerAnchor.topRight,
             childAnchor: WindowPositionerAnchor.topLeft,
           ),
-        ),
+        ); 
+        }
       ),
     );
   }
