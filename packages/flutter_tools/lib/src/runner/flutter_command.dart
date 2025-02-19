@@ -184,6 +184,30 @@ abstract class FlutterCommand extends Command<void> {
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
 
+  /// The dart define used for adding the Flutter version at runtime.
+  @visibleForTesting
+  static const String flutterVersionDefine = 'FLUTTER_VERSION';
+
+  /// The dart define used for adding the Flutter channel at runtime.
+  @visibleForTesting
+  static const String flutterChannelDefine = 'FLUTTER_CHANNEL';
+
+  /// The dart define used for adding the Flutter git URL at runtime.
+  @visibleForTesting
+  static const String flutterGitUrlDefine = 'FLUTTER_GIT_URL';
+
+  /// The dart define used for adding the Flutter framework revision at runtime.
+  @visibleForTesting
+  static const String flutterFrameworkRevisionDefine = 'FLUTTER_FRAMEWORK_REVISION';
+
+  /// The dart define used for adding the Flutter engine revision at runtime.
+  @visibleForTesting
+  static const String flutterEngineRevisionDefine = 'FLUTTER_ENGINE_REVISION';
+
+  /// The dart define used for adding the Dart version at runtime.
+  @visibleForTesting
+  static const String flutterDartVersionDefine = 'FLUTTER_DART_VERSION';
+
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
@@ -1506,13 +1530,6 @@ abstract class FlutterCommand extends Command<void> {
 
   // This adds the Dart defines used to access various Flutter version information at runtime.
   void _addFlutterVersionToDartDefines(FlutterVersion version, List<String> dartDefines) {
-    const String flutterVersionDefine = 'FLUTTER_VERSION';
-    const String flutterChannelDefine = 'FLUTTER_CHANNEL';
-    const String flutterGitUrlDefine = 'FLUTTER_GIT_URL';
-    const String flutterFrameworkRevisionDefine = 'FLUTTER_FRAMEWORK_REVISION';
-    const String flutterEngineRevisionDefine = 'FLUTTER_ENGINE_REVISION';
-    const String flutterDartVersionDefine = 'FLUTTER_DART_VERSION';
-
     const List<String> flutterVersionDartDefines = <String>[
       flutterVersionDefine,
       flutterChannelDefine,
@@ -1538,12 +1555,14 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    dartDefines.add('$flutterVersionDefine=${version.frameworkVersion}');
-    dartDefines.add('$flutterChannelDefine=${version.channel}');
-    dartDefines.add('$flutterGitUrlDefine=${version.repositoryUrl}');
-    dartDefines.add('$flutterFrameworkRevisionDefine=${version.frameworkRevisionShort}');
-    dartDefines.add('$flutterEngineRevisionDefine=${version.engineRevisionShort}');
-    dartDefines.add('$flutterDartVersionDefine=${version.dartSdkVersion}');
+    dartDefines.addAll(<String>[
+      '$flutterVersionDefine=${version.frameworkVersion}',
+      '$flutterChannelDefine=${version.channel}',
+      '$flutterGitUrlDefine=${version.repositoryUrl}',
+      '$flutterFrameworkRevisionDefine=${version.frameworkRevisionShort}',
+      '$flutterEngineRevisionDefine=${version.engineRevisionShort}',
+      '$flutterDartVersionDefine=${version.dartSdkVersion}',
+    ]);
   }
 
   void setupApplicationPackages() {
