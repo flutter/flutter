@@ -19,7 +19,12 @@
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/testing/testing.h"
+#include "fml/synchronization/count_down_latch.h"
 #include "imgui.h"
+#include "impeller/core/device_buffer.h"
+#include "impeller/core/device_buffer_descriptor.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/geometry/scalar.h"
@@ -419,10 +424,10 @@ TEST_P(AiksTest, CanDrawPoints) {
   builder.DrawPaint(background);
   builder.Translate(200, 200);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(DlPointMode::kPoints, points.size(), points.data(),
                      paint_round);
   builder.Translate(150, 0);
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(DlPointMode::kPoints, points.size(), points.data(),
                      paint_square);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -459,10 +464,10 @@ TEST_P(AiksTest, CanDrawPointsWithTextureMap) {
   DisplayListBuilder builder(DlRect::MakeSize(GetWindowSize()));
   builder.Translate(200, 200);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(DlPointMode::kPoints, points.size(), points.data(),
                      paint_round);
   builder.Translate(150, 0);
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(DlPointMode::kPoints, points.size(), points.data(),
                      paint_square);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -821,8 +826,7 @@ TEST_P(AiksTest, CanDrawScaledPointsSmallScaleLargeRadius) {
   builder.Translate(200, 200);
   builder.Scale(0.000001, 0.000001);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, point.size(), point.data(),
-                     paint);
+  builder.DrawPoints(DlPointMode::kPoints, point.size(), point.data(), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -842,8 +846,7 @@ TEST_P(AiksTest, CanDrawScaledPointsLargeScaleSmallRadius) {
   builder.Translate(200, 200);
   builder.Scale(1000000, 1000000);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, point.size(), point.data(),
-                     paint);
+  builder.DrawPoints(DlPointMode::kPoints, point.size(), point.data(), paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
@@ -896,8 +899,7 @@ TEST_P(AiksTest, BackdropRestoreUsesCorrectCoverageForFirstRestoredClip) {
 
   DlPaint paint;
   // Add a difference clip that cuts out the bottom right corner
-  builder.ClipRect(DlRect::MakeLTRB(50, 50, 100, 100),
-                   DlCanvas::ClipOp::kDifference);
+  builder.ClipRect(DlRect::MakeLTRB(50, 50, 100, 100), DlClipOp::kDifference);
 
   // Draw a red rectangle that's going to be completely covered by green later.
   paint.setColor(DlColor::kRed());
@@ -995,8 +997,7 @@ TEST_P(AiksTest, DepthValuesForLineMode) {
       DlPoint::MakeXY(0, 100),  DlPoint::MakeXY(400, 500),
       DlPoint::MakeXY(0, 150),  DlPoint::MakeXY(400, 600)};
 
-  builder.DrawPoints(DisplayListBuilder::PointMode::kLines, points.size(),
-                     points.data(),
+  builder.DrawPoints(DlPointMode::kLines, points.size(), points.data(),
                      DlPaint().setColor(DlColor::kBlue()).setStrokeWidth(10));
   builder.Restore();
 
@@ -1024,12 +1025,83 @@ TEST_P(AiksTest, DepthValuesForPolygonMode) {
       DlPoint::MakeXY(0, 100),  DlPoint::MakeXY(400, 500),
       DlPoint::MakeXY(0, 150),  DlPoint::MakeXY(400, 600)};
 
-  builder.DrawPoints(DisplayListBuilder::PointMode::kPolygon, points.size(),
-                     points.data(),
+  builder.DrawPoints(DlPointMode::kPolygon, points.size(), points.data(),
                      DlPaint().setColor(DlColor::kBlue()).setStrokeWidth(10));
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Verifies that an image rasterized and readback is in the correct orientation
+// by re-uploading it.
+TEST_P(AiksTest, ToImageFromImage) {
+  DisplayListBuilder builder;
+  DlPath path = DlPath::MakeArc(DlRect::MakeLTRB(0, 0, 100, 100), DlDegrees(0),
+                                DlDegrees(90),
+                                /*use_center=*/true);
+
+  builder.DrawPath(path, DlPaint().setColor(DlColor::kRed()));
+
+  AiksContext renderer(GetContext(), nullptr);
+  auto texture =
+      DisplayListToTexture(builder.Build(), ISize(100, 100), renderer);
+
+  // First, Readback the texture data into a host buffer.
+  impeller::DeviceBufferDescriptor desc;
+  desc.size = texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
+  desc.readback = true;
+  desc.storage_mode = StorageMode::kHostVisible;
+
+  auto device_buffer = GetContext()->GetResourceAllocator()->CreateBuffer(desc);
+  {
+    auto cmd_buffer = GetContext()->CreateCommandBuffer();
+    auto blit_pass = cmd_buffer->CreateBlitPass();
+
+    blit_pass->AddCopy(texture, device_buffer);
+    blit_pass->EncodeCommands();
+
+    auto latch = std::make_shared<fml::CountDownLatch>(1u);
+    GetContext()->GetCommandQueue()->Submit(
+        {cmd_buffer},
+        [latch](CommandBuffer::Status status) { latch->CountDown(); });
+    latch->Wait();
+  }
+
+  impeller::TextureDescriptor tex_desc = texture->GetTextureDescriptor();
+  auto reupload_texture =
+      GetContext()->GetResourceAllocator()->CreateTexture(tex_desc);
+
+  // Next, Re-upload the data into a new texture.
+  {
+    auto cmd_buffer = GetContext()->CreateCommandBuffer();
+    auto blit_pass = cmd_buffer->CreateBlitPass();
+    blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer),
+                       reupload_texture);
+    blit_pass->ConvertTextureToShaderRead(texture);
+    blit_pass->EncodeCommands();
+
+    auto latch = std::make_shared<fml::CountDownLatch>(1u);
+    GetContext()->GetCommandQueue()->Submit(
+        {cmd_buffer},
+        [latch](CommandBuffer::Status status) { latch->CountDown(); });
+    latch->Wait();
+  }
+
+  // Draw the results side by side. These should look the same.
+  DisplayListBuilder canvas;
+  DlPaint paint = DlPaint();
+  canvas.DrawRect(
+      DlRect::MakeLTRB(0, 0, 100, 100),
+      DlPaint().setColor(DlColor::kBlue()).setDrawStyle(DlDrawStyle::kStroke));
+  canvas.DrawImage(DlImageImpeller::Make(texture), DlPoint(0, 0),
+                   DlImageSampling::kNearestNeighbor, &paint);
+
+  canvas.DrawRect(
+      DlRect::MakeLTRB(0, 100, 100, 200),
+      DlPaint().setColor(DlColor::kRed()).setDrawStyle(DlDrawStyle::kStroke));
+  canvas.DrawImage(DlImageImpeller::Make(reupload_texture), DlPoint(0, 100),
+                   DlImageSampling::kNearestNeighbor, &paint);
+  OpenPlaygroundHere(canvas.Build());
 }
 
 }  // namespace testing

@@ -68,7 +68,7 @@ static Point NegPos(Scalar v) {
   return {std::min(v, 0.0f), std::max(v, 0.0f)};
 }
 
-static void SetupFragInfo(
+static bool SetupFragInfo(
     RRectBlurPipeline::FragmentShader::FragInfo& frag_info,
     Scalar blurSigma,
     Point center,
@@ -96,6 +96,15 @@ static void SetupFragInfo(
   frag_info.scale =
       0.5 * computeErf7(frag_info.sInv * 0.5 *
                         (std::max(rSize.x, rSize.y) - 0.5 * radius));
+
+  return frag_info.center.IsFinite() &&           //
+         frag_info.adjust.IsFinite() &&           //
+         std::isfinite(frag_info.minEdge) &&      //
+         std::isfinite(frag_info.r1) &&           //
+         std::isfinite(frag_info.exponent) &&     //
+         std::isfinite(frag_info.sInv) &&         //
+         std::isfinite(frag_info.exponentInv) &&  //
+         std::isfinite(frag_info.scale);
 }
 
 std::optional<Rect> SolidRRectBlurContents::GetCoverage(
@@ -119,10 +128,15 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   using VS = RRectBlurPipeline::VertexShader;
   using FS = RRectBlurPipeline::FragmentShader;
 
-  // Clamp the max kernel width/height to 1000 to limit the extent
+  Matrix basis_invert = entity.GetTransform().Basis().Invert();
+  Vector2 max_sigmas =
+      Vector2((basis_invert * Vector2(500.f, 0.f)).GetLength(),
+              (basis_invert * Vector2(0.f, 500.f)).GetLength());
+  Scalar max_sigma = std::min(max_sigmas.x, max_sigmas.y);
+  // Clamp the max kernel width/height to 1000 (@ 2x) to limit the extent
   // of the blur and to kEhCloseEnough to prevent NaN calculations
-  // trying to evaluate a Guassian distribution with a sigma of 0.
-  Scalar blur_sigma = std::clamp(sigma_.sigma, kEhCloseEnough, 250.0f);
+  // trying to evaluate a Gaussian distribution with a sigma of 0.
+  auto blur_sigma = std::clamp(sigma_.sigma, kEhCloseEnough, max_sigma);
   // Increase quality by making the radius a bit bigger than the typical
   // sigma->radius conversion we use for slower blurs.
   Scalar blur_radius = PadForSigma(blur_sigma);
@@ -159,8 +173,11 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
                                       positive_rect.GetWidth() * 0.5f),
                            std::clamp(corner_radii_.height, kEhCloseEnough,
                                       positive_rect.GetHeight() * 0.5f));
-  SetupFragInfo(frag_info, blur_sigma, positive_rect.GetCenter(),
-                Point(positive_rect.GetSize()), radius);
+  if (!SetupFragInfo(frag_info, blur_sigma, positive_rect.GetCenter(),
+                     Point(positive_rect.GetSize()), radius)) {
+    return true;
+  }
+
   auto& host_buffer = renderer.GetTransientsBuffer();
   pass.SetCommandLabel("RRect Shadow");
   pass.SetPipeline(renderer.GetRRectBlurPipeline(opts));
