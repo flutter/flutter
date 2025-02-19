@@ -4122,6 +4122,7 @@ targets:
       - DEPS
 
   - name: Mac_arm64 module_test_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/163595
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
