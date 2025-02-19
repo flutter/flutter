@@ -1406,9 +1406,9 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
             // Check that formatType is a valid intl.DateFormat.
             if (!validDateFormats.contains(formatType.value)) {
               throw L10nParserException(
-                'Date format "${formatType.value!}" for placeholder '
+                'For message "${message.resourceId}" the date format "${formatType.value!}" for placeholder '
                 '$identifierName does not have a corresponding DateFormat '
-                "constructor\n. Check the intl library's DateFormat class "
+                'constructor in locale "$locale"\n. Check the intl library\'s DateFormat class '
                 'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
                 'to "true".',
                 _inputFileNames[locale]!,

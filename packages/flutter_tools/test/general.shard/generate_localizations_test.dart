@@ -1735,6 +1735,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               (L10nException e) => e.message,
               'message',
               allOf(
+                contains('message "springBegins"'),
+                contains('locale "en"'),
                 contains('asdf'),
                 contains('springStartDate'),
                 contains('does not have a corresponding DateFormat'),
@@ -2338,6 +2340,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               (L10nException e) => e.message,
               'message',
               allOf(
+                contains('message "courseCompletion"'),
+                contains('locale "en"'),
                 contains('asdf'),
                 contains('progress'),
                 contains('does not have a corresponding NumberFormat'),
@@ -2441,6 +2445,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
                 (L10nException e) => e.message,
                 'message',
                 allOf(
+                  contains('message "helloWorlds"'),
                   contains('is not properly formatted'),
                   contains('Ensure that it is a map with string valued keys'),
                 ),
@@ -2491,6 +2496,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
                 (L10nException e) => e.message,
                 'message',
                 allOf(
+                  contains('message "genderSelect"'),
                   contains('is not properly formatted'),
                   contains('Ensure that it is a map with string valued keys'),
                 ),
@@ -2604,8 +2610,12 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         } on L10nException {
           expect(
             logger.errorText,
-            contains(
-              'Date format "yMMMMMd" for placeholder today does not have a corresponding DateFormat constructor',
+            allOf(
+              contains('message "datetime"'),
+              contains('locale "en"'),
+              contains(
+                'date format "yMMMMMd" for placeholder today does not have a corresponding DateFormat constructor',
+              ),
             ),
           );
         }
