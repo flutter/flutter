@@ -30,6 +30,7 @@ INTERNAL NOTE
 ### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
 Initial stable release.
 
+- [flutter/163304](https://github.com/flutter/flutter/issues/163304) Fixes crash when using backdrop filter on GLES backend.
 - [flutter/161334](https://github.com/flutter/flutter/issues/161334) Disable Vulkan on certain Xclipse GPU models.
 
 ## Flutter 3.27 Changes
