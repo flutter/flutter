@@ -558,6 +558,21 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
     this.bottomEnd = Radius.zero,
   });
 
+  /// Creates a border radius where only the specified corners are set while the
+  /// unspecified corners are set to [rest].
+  const BorderRadiusDirectional.some({
+    Radius? topStart,
+    Radius? topEnd,
+    Radius? bottomStart,
+    Radius? bottomEnd,
+    required Radius rest,
+  }) : this.only(
+    topStart: topStart ?? rest,
+    topEnd: topEnd ?? rest,
+    bottomStart: bottomStart ?? rest,
+    bottomEnd: bottomEnd ?? rest,
+  );
+
   /// A border radius with all zero radii.
   ///
   /// Consider using [BorderRadius.zero] instead, since that object has the same
