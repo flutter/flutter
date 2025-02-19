@@ -390,6 +390,24 @@ class EdgeInsets extends EdgeInsetsGeometry {
       right = horizontal,
       bottom = vertical;
 
+  /// Creates insets where only the specified offsets are set, while the unspecified ones
+  /// are set to [rest].
+  ///
+  /// {@tool snippet}
+  ///
+  /// 40 pixel margin below, and typical eight pixel margins on all other sides:
+  ///
+  /// ```dart
+  /// const EdgeInsets.some(bottom: 40, rest: 8)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsets.some({double? left, double? top, double? right, double? bottom, required double rest})
+    : left = left ?? rest,
+    top = top ?? rest,
+    right = right ?? rest,
+    bottom = bottom ?? rest;
+
+
   /// Creates insets that match the given view padding.
   ///
   /// If you need the current system padding or view insets in the context of a
