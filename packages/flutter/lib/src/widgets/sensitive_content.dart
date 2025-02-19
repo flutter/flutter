@@ -75,19 +75,15 @@ class SensitiveContentSetting {
   /// Registers a [SensitiveContent] widget that will help determine the
   /// [ContentSensitivity] level for the widget tree.
   static Future<void> register(ContentSensitivity desiredSensitivityLevel) async {
-    // print('CAMILLE: registering!');
     await instance._register(desiredSensitivityLevel);
   }
 
   Future<void> _register(ContentSensitivity desiredSensitivityLevel) async {
     // Set default content sensitivity level as set in native Android. This will be
     // auto sensitive if it is otherwise unset by the developer.
-    // print('CAMILLE: default about to be queried!');
-    // print('CAMILLE: current default: $_defaultContentSensitivitySetting');
     _defaultContentSensitivitySetting ??= ContentSensitivity.getContentSensitivityById(
       await _sensitiveContentService.getContentSensitivity(),
     );
-    // print('CAMILLE: default received!');
     _contentSensitivityState ??= ContentSensitivityState(_defaultContentSensitivitySetting!);
 
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
@@ -143,6 +139,8 @@ class SensitiveContentSetting {
     }
 
     if (contentSensitivityToRestore != null) {
+      // Set content sensitivity level as contentSensitivityToRestore and update stored data.
+      _contentSensitivityState!.currentContentSensitivitySetting = contentSensitivityToRestore;
       _sensitiveContentService.setContentSensitivity(contentSensitivityToRestore);
     }
   }
@@ -197,10 +195,10 @@ class SensitiveContent extends StatefulWidget {
   final Widget child;
 
   @override
-  State<SensitiveContent> createState() => SensitiveContentState();
+  State<SensitiveContent> createState() => _SensitiveContentState();
 }
 
-class SensitiveContentState extends State<SensitiveContent> {
+class _SensitiveContentState extends State<SensitiveContent> {
   Future<void>? _sensitiveContentRegistrationFuture;
 
   @override
@@ -211,7 +209,6 @@ class SensitiveContentState extends State<SensitiveContent> {
 
   @override
   void dispose() {
-    // print('CAMILLE: dispose called');
     SensitiveContentSetting.unregister(widget.sensitivityLevel);
     super.dispose();
   }
