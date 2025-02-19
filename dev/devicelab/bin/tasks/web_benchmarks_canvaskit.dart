@@ -8,10 +8,6 @@ import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
 /// Runs all Web benchmarks using the CanvasKit rendering backend.
 Future<void> main() async {
   await task(() async {
-    return runWebBenchmark((
-      webRenderer: 'canvaskit',
-      useWasm: false,
-      forceSingleThreadedSkwasm: false,
-    ));
+    return runWebBenchmark((useWasm: false, forceSingleThreadedSkwasm: false));
   });
 }

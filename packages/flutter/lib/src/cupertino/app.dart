@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -186,7 +187,7 @@ class CupertinoApp extends StatefulWidget {
     @Deprecated(
       'Remove this parameter as it is now ignored. '
       'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
+      'This feature was deprecated after v3.7.0-29.0.pre.',
     )
     this.useInheritedMediaQuery = false,
   }) : routeInformationProvider = null,
@@ -228,7 +229,7 @@ class CupertinoApp extends StatefulWidget {
     @Deprecated(
       'Remove this parameter as it is now ignored. '
       'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
+      'This feature was deprecated after v3.7.0-29.0.pre.',
     )
     this.useInheritedMediaQuery = false,
   }) : assert(routerDelegate != null || routerConfig != null),
@@ -432,7 +433,7 @@ class CupertinoApp extends StatefulWidget {
   @Deprecated(
     'This setting is now ignored. '
     'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-    'This feature was deprecated after v3.7.0-29.0.pre.'
+    'This feature was deprecated after v3.7.0-29.0.pre.',
   )
   final bool useInheritedMediaQuery;
 
@@ -442,8 +443,7 @@ class CupertinoApp extends StatefulWidget {
   /// The [HeroController] used for Cupertino page transitions.
   ///
   /// Used by [CupertinoTabView] and [CupertinoApp].
-  static HeroController createCupertinoHeroController() =>
-      HeroController(); // Linear tweening.
+  static HeroController createCupertinoHeroController() => HeroController(); // Linear tweening.
 }
 
 /// Describes how [Scrollable] widgets behave for [CupertinoApp]s.
@@ -464,7 +464,7 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   const CupertinoScrollBehavior();
 
   @override
-  Widget buildScrollbar(BuildContext context , Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
     switch (getPlatform(context)) {
@@ -472,10 +472,7 @@ class CupertinoScrollBehavior extends ScrollBehavior {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         assert(details.controller != null);
-        return CupertinoScrollbar(
-          controller: details.controller,
-          child: child,
-        );
+        return CupertinoScrollbar(controller: details.controller, child: child);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -502,7 +499,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   }
 
   @override
-  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) => MultitouchDragStrategy.averageBoundaryPointers;
+  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) =>
+      MultitouchDragStrategy.averageBoundaryPointers;
 }
 
 class _CupertinoAppState extends State<CupertinoApp> {
@@ -528,27 +526,62 @@ class _CupertinoAppState extends State<CupertinoApp> {
   // _CupertinoLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
     return <LocalizationsDelegate<dynamic>>[
-      if (widget.localizationsDelegates != null)
-        ...widget.localizationsDelegates!,
+      if (widget.localizationsDelegates != null) ...widget.localizationsDelegates!,
       DefaultCupertinoLocalizations.delegate,
     ];
   }
 
-  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-    return CupertinoButton.filled(
+  Widget _exitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required GlobalKey key,
+  }) {
+    return CupertinoButton(
+      key: key,
+      color: _widgetSelectionButtonsBackgroundColor(context),
       padding: EdgeInsets.zero,
       onPressed: onPressed,
-      child: const Icon(
-        CupertinoIcons.search,
+      child: Icon(
+        CupertinoIcons.xmark,
         size: 28.0,
-        color: CupertinoColors.white,
+        color: _widgetSelectionButtonsForegroundColor(context),
+        semanticLabel: 'Exit Select Widget mode.',
       ),
     );
   }
 
+  Widget _moveExitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    bool isLeftAligned = true,
+  }) {
+    return CupertinoButton(
+      onPressed: onPressed,
+      padding: EdgeInsets.zero,
+      child: Icon(
+        isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
+        size: 32.0,
+        color: _widgetSelectionButtonsBackgroundColor(context),
+        semanticLabel:
+            'Move "Exit Select Widget mode" button to the ${isLeftAligned ? 'right' : 'left'}.',
+      ),
+    );
+  }
+
+  Color _widgetSelectionButtonsForegroundColor(BuildContext context) {
+    return CupertinoTheme.of(context).primaryContrastingColor;
+  }
+
+  Color _widgetSelectionButtonsBackgroundColor(BuildContext context) {
+    return CupertinoTheme.of(context).primaryColor;
+  }
+
   WidgetsApp _buildWidgetApp(BuildContext context) {
     final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
-    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
+    final Color color = CupertinoDynamicColor.resolve(
+      widget.color ?? effectiveThemeData.primaryColor,
+      context,
+    );
 
     if (_usesRouter) {
       return WidgetsApp.router(
@@ -572,7 +605,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
         showPerformanceOverlay: widget.showPerformanceOverlay,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+        exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+        moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
@@ -606,7 +640,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
       showPerformanceOverlay: widget.showPerformanceOverlay,
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-      inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+      exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+      moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
@@ -615,7 +650,16 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   @override
   Widget build(BuildContext context) {
-    final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData()).resolveFrom(context);
+    final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData())
+        .resolveFrom(context);
+
+    // Prefer theme brightness if set, otherwise check system brightness.
+    final Brightness brightness =
+        effectiveThemeData.brightness ?? MediaQuery.platformBrightnessOf(context);
+
+    SystemChrome.setSystemUIOverlayStyle(
+      brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+    );
 
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),
@@ -628,9 +672,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
             cursorColor: effectiveThemeData.primaryColor,
             child: HeroControllerScope(
               controller: _heroController,
-              child: Builder(
-                builder: _buildWidgetApp,
-              ),
+              child: Builder(builder: _buildWidgetApp),
             ),
           ),
         ),

@@ -14,7 +14,7 @@ import 'platform_view.dart';
 import 'selection_container.dart';
 
 const String _viewType = 'Browser__WebContextMenuViewType__';
-const String _kClassName = 'web-electable-region-context-menu';
+const String _kClassName = 'web-selectable-region-context-menu';
 // These css rules hides the dom element with the class name.
 const String _kClassSelectionRule = '.$_kClassName::selection { background: transparent; }';
 const String _kClassRule = '''
@@ -38,10 +38,7 @@ typedef RegisterViewFactory = void Function(String, Object Function(int viewId),
 /// documentation.
 class PlatformSelectableRegionContextMenu extends StatelessWidget {
   /// See `_platform_selectable_region_context_menu_io.dart`.
-  PlatformSelectableRegionContextMenu({
-    required this.child,
-    super.key,
-  }) {
+  PlatformSelectableRegionContextMenu({required this.child, super.key}) {
     if (_registeredViewType == null) {
       _register();
     }
@@ -78,10 +75,19 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   @visibleForTesting
   static RegisterViewFactory? debugOverrideRegisterViewFactory;
 
+  /// Resets the view factory registration to its initial state.
+  @visibleForTesting
+  static void debugResetRegistry() {
+    _registeredViewType = null;
+  }
+
   // Registers the view factories for the interceptor widgets.
   static void _register() {
     assert(_registeredViewType == null);
-    _registeredViewType = _registerWebSelectionCallback((web.HTMLElement element, web.MouseEvent event) {
+    _registeredViewType = _registerWebSelectionCallback((
+      web.HTMLElement element,
+      web.MouseEvent event,
+    ) {
       final SelectionContainerDelegate? client = _activeClient;
       if (client != null) {
         // Converts the html right click event to flutter coordinate.
@@ -98,33 +104,37 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
 
         web.window.getSelection()
           ?..removeAllRanges()
-           ..addRange(range);
+          ..addRange(range);
       }
     });
   }
 
   static String _registerWebSelectionCallback(_WebSelectionCallBack callback) {
-    _registerViewFactory(_viewType, (int viewId) {
+    // Create css style for _kClassName.
+    final web.HTMLStyleElement styleElement =
+        web.document.createElement('style') as web.HTMLStyleElement;
+    web.document.head!.append(styleElement as JSAny);
+    final web.CSSStyleSheet sheet = styleElement.sheet!;
+    sheet.insertRule(_kClassRule, 0);
+    sheet.insertRule(_kClassSelectionRule, 1);
+
+    _registerViewFactory(_viewType, (int viewId, {Object? params}) {
       final web.HTMLElement htmlElement = web.document.createElement('div') as web.HTMLElement;
       htmlElement
         ..style.width = '100%'
         ..style.height = '100%'
         ..classList.add(_kClassName);
 
-      // Create css style for _kClassName.
-      final web.HTMLStyleElement styleElement = web.document.createElement('style') as web.HTMLStyleElement;
-      web.document.head!.append(styleElement as JSAny);
-      final web.CSSStyleSheet sheet = styleElement.sheet!;
-      sheet.insertRule(_kClassRule, 0);
-      sheet.insertRule(_kClassSelectionRule, 1);
-
-      htmlElement.addEventListener('mousedown', (web.Event event) {
-        final web.MouseEvent mouseEvent = event as web.MouseEvent;
-        if (mouseEvent.button != _kRightClickButton) {
-          return;
-        }
-        callback(htmlElement, mouseEvent);
-      }.toJS);
+      htmlElement.addEventListener(
+        'mousedown',
+        (web.Event event) {
+          final web.MouseEvent mouseEvent = event as web.MouseEvent;
+          if (mouseEvent.button != _kRightClickButton) {
+            return;
+          }
+          callback(htmlElement, mouseEvent);
+        }.toJS,
+      );
       return htmlElement;
     }, isVisible: false);
     return _viewType;
@@ -133,14 +143,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: <Widget>[
-        const Positioned.fill(
-          child: HtmlElementView(
-            viewType: _viewType,
-          ),
-        ),
-        child,
-      ],
+      children: <Widget>[const Positioned.fill(child: HtmlElementView(viewType: _viewType)), child],
     );
   }
 }

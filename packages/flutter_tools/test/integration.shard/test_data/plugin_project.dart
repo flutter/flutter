@@ -9,15 +9,14 @@ import 'deferred_components_project.dart';
 /// Project which can load native plugins
 class PluginProject extends BasicProject {
   @override
-  final DeferredComponentsConfig? deferredComponents =
-      PluginDeferredComponentsConfig();
+  final DeferredComponentsConfig? deferredComponents = PluginDeferredComponentsConfig();
 }
 
 class PluginDeferredComponentsConfig extends BasicDeferredComponentsConfig {
   @override
   String get androidBuild => r'''
 buildscript {
-    ext.kotlin_version = '1.8.22'
+    ext.kotlin_version = '2.1.0'
     repositories {
         google()
         mavenCentral()

@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compute_dev_dependencies.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
@@ -25,7 +24,7 @@ const String _dartBin = 'bin/cache/dart-sdk/bin/dart';
 //     pubspec.yaml
 //   /package_a
 //     pubspec.yaml
-//   /pacakge_b
+//   /package_b
 //     pubspec.yaml
 //   /package_c
 //     pubspec.yaml
@@ -46,7 +45,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
@@ -65,8 +63,7 @@ void main() {
     // name: package_a
     // dependencies:
     //   package_b:
-    final ProcessManager processes = _dartPubDepsReturns(
-      '''
+    final ProcessManager processes = _dartPubDepsReturns('''
     {
       "root": "my_app",
       "packages": [
@@ -99,9 +96,7 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''',
-      project: project,
-    );
+    }''', project: project);
 
     final Set<String> dependencies = await computeExclusiveDevDependencies(
       pub(processes),
@@ -109,11 +104,7 @@ void main() {
       logger: logger,
     );
 
-    expect(
-      dependencies,
-      isEmpty,
-      reason: 'There are no dev_dependencies of "my_app".',
-    );
+    expect(dependencies, isEmpty, reason: 'There are no dev_dependencies of "my_app".');
   });
 
   test('dev dependency', () async {
@@ -129,8 +120,7 @@ void main() {
     //
     // # /package_a/pubspec.yaml
     // name: package_a
-    final ProcessManager processes = _dartPubDepsReturns(
-      '''
+    final ProcessManager processes = _dartPubDepsReturns('''
     {
       "root": "my_app",
       "packages": [
@@ -161,9 +151,7 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''',
-      project: project,
-    );
+    }''', project: project);
 
     final Set<String> dependencies = await computeExclusiveDevDependencies(
       pub(processes),
@@ -171,11 +159,9 @@ void main() {
       logger: logger,
     );
 
-    expect(
-      dependencies,
-      <String>{'package_b'},
-      reason: 'There is a single dev_dependency of my_app: package_b.',
-    );
+    expect(dependencies, <String>{
+      'package_b',
+    }, reason: 'There is a single dev_dependency of my_app: package_b.');
   });
 
   test('dev used as a non-dev dependency transitively', () async {
@@ -193,8 +179,7 @@ void main() {
     // name: package_a
     // dependencies:
     //   package_b:
-    final ProcessManager processes = _dartPubDepsReturns(
-      '''
+    final ProcessManager processes = _dartPubDepsReturns('''
     {
       "root": "my_app",
       "packages": [
@@ -229,9 +214,7 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''',
-      project: project,
-    );
+    }''', project: project);
 
     final Set<String> dependencies = await computeExclusiveDevDependencies(
       pub(processes),
@@ -268,8 +251,7 @@ void main() {
     //
     // # /package_c/pubspec.yaml
     // name: package_c
-    final ProcessManager processes = _dartPubDepsReturns(
-      '''
+    final ProcessManager processes = _dartPubDepsReturns('''
     {
       "root": "my_app",
       "packages": [
@@ -315,9 +297,7 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''',
-      project: project,
-    );
+    }''', project: project);
 
     final Set<String> dependencies = await computeExclusiveDevDependencies(
       pub(processes),
@@ -325,14 +305,12 @@ void main() {
       logger: logger,
     );
 
-    expect(
-      dependencies,
-      <String>{'package_c'},
-      reason: 'package_b is excluded but package_c should not',
-    );
+    expect(dependencies, <String>{
+      'package_c',
+    }, reason: 'package_b is excluded but package_c should not');
   });
 
-    test('omitted devDependencies in app package', () async {
+  test('omitted devDependencies in app package', () async {
     // Simulates the following:
     //
     // # /my_app/pubspec.yaml
@@ -363,9 +341,7 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''',
-      project: project,
-    );
+    }''', project: project);
 
     final Set<String> dependencies = await computeExclusiveDevDependencies(
       pub(processes),
@@ -381,8 +357,7 @@ void main() {
   });
 
   test('throws and logs on invalid JSON', () async {
-    final ProcessManager processes = _dartPubDepsReturns(
-      '''
+    final ProcessManager processes = _dartPubDepsReturns('''
     {
       "root": "my_app",
       "packages": [
@@ -415,16 +390,10 @@ void main() {
           "directDependencies": []
         }
       ]
-    }''',
-      project: project,
-    );
+    }''', project: project);
 
     await expectLater(
-      computeExclusiveDevDependencies(
-        pub(processes),
-        project: project,
-        logger: logger,
-      ),
+      computeExclusiveDevDependencies(pub(processes), project: project, logger: logger),
       throwsA(
         isA<StateError>().having(
           (StateError e) => e.message,
@@ -442,19 +411,10 @@ void main() {
   });
 }
 
-ProcessManager _dartPubDepsReturns(
-  String dartPubDepsOutput, {
-  required FlutterProject project,
-}) {
+ProcessManager _dartPubDepsReturns(String dartPubDepsOutput, {required FlutterProject project}) {
   return FakeProcessManager.list(<FakeCommand>[
     FakeCommand(
-      command: const <String>[
-        _dartBin,
-        'pub',
-        '--suppress-analytics',
-        'deps',
-        '--json',
-      ],
+      command: const <String>[_dartBin, 'pub', '--suppress-analytics', 'deps', '--json'],
       stdout: dartPubDepsOutput,
       workingDirectory: project.directory.path,
     ),

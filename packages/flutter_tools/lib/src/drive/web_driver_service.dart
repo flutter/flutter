@@ -13,7 +13,9 @@ import 'package:webdriver/async_io.dart' as async_io;
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -29,14 +31,23 @@ class WebDriverService extends DriverService {
   WebDriverService({
     required ProcessUtils processUtils,
     required String dartSdkPath,
+    required Platform platform,
     required Logger logger,
+    required Terminal terminal,
+    required OutputPreferences outputPreferences,
   }) : _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
-       _logger = logger;
+       _platform = platform,
+       _logger = logger,
+       _terminal = terminal,
+       _outputPreferences = outputPreferences;
 
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
+  final Platform _platform;
   final Logger _logger;
+  final Terminal _terminal;
+  final OutputPreferences _outputPreferences;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -71,28 +82,33 @@ class WebDriverService extends DriverService {
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
       target: mainPath,
-      debuggingOptions: buildInfo.isRelease ?
-        DebuggingOptions.disabled(
-          buildInfo,
-          port: debuggingOptions.port,
-          hostname: debuggingOptions.hostname,
-          webRenderer: debuggingOptions.webRenderer,
-          webUseWasm: debuggingOptions.webUseWasm,
-        )
-        : DebuggingOptions.enabled(
-          buildInfo,
-          port: debuggingOptions.port,
-          hostname: debuggingOptions.hostname,
-          disablePortPublication: debuggingOptions.disablePortPublication,
-          webRenderer: debuggingOptions.webRenderer,
-          webUseWasm: debuggingOptions.webUseWasm,
-        ),
+      debuggingOptions:
+          buildInfo.isRelease
+              ? DebuggingOptions.disabled(
+                buildInfo,
+                port: debuggingOptions.port,
+                hostname: debuggingOptions.hostname,
+                webRenderer: debuggingOptions.webRenderer,
+                webUseWasm: debuggingOptions.webUseWasm,
+                webHeaders: debuggingOptions.webHeaders,
+              )
+              : DebuggingOptions.enabled(
+                buildInfo,
+                port: debuggingOptions.port,
+                hostname: debuggingOptions.hostname,
+                disablePortPublication: debuggingOptions.disablePortPublication,
+                webRenderer: debuggingOptions.webRenderer,
+                webUseWasm: debuggingOptions.webUseWasm,
+                webHeaders: debuggingOptions.webHeaders,
+              ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
-      usage: globals.flutterUsage,
       analytics: globals.analytics,
       logger: _logger,
+      terminal: _terminal,
+      platform: _platform,
+      outputPreferences: _outputPreferences,
       systemClock: globals.systemClock,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
@@ -116,7 +132,7 @@ class WebDriverService extends DriverService {
     if (_runResult != null) {
       throwToolExit(
         'Application exited before the test started. Check web driver logs '
-        'for possible application-side errors.'
+        'for possible application-side errors.',
       );
     }
 
@@ -140,7 +156,6 @@ class WebDriverService extends DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
     PackageConfig packageConfig, {
     bool? headless,
     String? chromeBinary,
@@ -169,7 +184,7 @@ class WebDriverService extends DriverService {
         'Unable to start a WebDriver session for web testing.\n'
         'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
         'For instructions on how to obtain and run a WebDriver server, see:\n'
-        'https://flutter.dev/to/integration-test-on-web\n'
+        'https://flutter.dev/to/integration-test-on-web\n',
       );
     }
 
@@ -189,21 +204,20 @@ class WebDriverService extends DriverService {
       await window.setLocation(const math.Point<int>(0, 0));
       await window.setSize(math.Rectangle<int>(0, 0, x, y));
     }
-    final int result = await _processUtils.stream(<String>[
-      _dartSdkPath,
-      ...arguments,
-      testFile,
-    ], environment: <String, String>{
-      'VM_SERVICE_URL': _webUri.toString(),
-      ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
-      ...environment,
-    });
+    final int result = await _processUtils.stream(
+      <String>[_dartSdkPath, ...arguments, testFile],
+      environment: <String, String>{
+        ..._platform.environment,
+        'VM_SERVICE_URL': _webUri.toString(),
+        ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
+      },
+    );
     await webDriver.quit();
     return result;
   }
 
   @override
-  Future<void> stop({File? writeSkslOnExit, String? userIdentifier}) async {
+  Future<void> stop({String? userIdentifier}) async {
     final bool appDidFinishPrematurely = _runResult != null;
     await _residentRunner.exitApp();
     await _residentRunner.cleanupAtFinish();
@@ -211,12 +225,16 @@ class WebDriverService extends DriverService {
     if (appDidFinishPrematurely) {
       throwToolExit(
         'Application exited before the test finished. Check web driver logs '
-        'for possible application-side errors.'
+        'for possible application-side errors.',
       );
     }
   }
 
-  Map<String, String> _additionalDriverEnvironment(async_io.WebDriver webDriver, String? browserName, bool? androidEmulator) {
+  Map<String, String> _additionalDriverEnvironment(
+    async_io.WebDriver webDriver,
+    String? browserName,
+    bool? androidEmulator,
+  ) {
     return <String, String>{
       'DRIVER_SESSION_ID': webDriver.id,
       'DRIVER_SESSION_URI': webDriver.uri.toString(),
@@ -224,12 +242,18 @@ class WebDriverService extends DriverService {
       'DRIVER_SESSION_CAPABILITIES': json.encode(webDriver.capabilities),
       'SUPPORT_TIMELINE_ACTION': (Browser.fromCliName(browserName) == Browser.chrome).toString(),
       'FLUTTER_WEB_TEST': 'true',
-      'ANDROID_CHROME_ON_EMULATOR': (Browser.fromCliName(browserName) == Browser.androidChrome && androidEmulator!).toString(),
+      'ANDROID_CHROME_ON_EMULATOR':
+          (Browser.fromCliName(browserName) == Browser.androidChrome && androidEmulator!)
+              .toString(),
     };
   }
 
   @override
-  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions) async {
+  Future<void> reuseApplication(
+    Uri vmServiceUri,
+    Device device,
+    DebuggingOptions debuggingOptions,
+  ) async {
     throwToolExit('--use-existing-app is not supported with flutter web driver');
   }
 }
@@ -281,80 +305,69 @@ Map<String, dynamic> getDesiredCapabilities(
   bool? headless, {
   List<String> webBrowserFlags = const <String>[],
   String? chromeBinary,
-}) =>
-    switch (browser) {
-      Browser.chrome => <String, dynamic>{
-          'acceptInsecureCerts': true,
-          'browserName': 'chrome',
-          'goog:loggingPrefs': <String, String>{
-            async_io.LogType.browser: 'INFO',
-            async_io.LogType.performance: 'ALL',
-          },
-          'goog:chromeOptions': <String, dynamic>{
-            if (chromeBinary != null) 'binary': chromeBinary,
-            'w3c': true,
-            'args': <String>[
-              '--bwsi',
-              '--disable-background-timer-throttling',
-              '--disable-default-apps',
-              '--disable-extensions',
-              '--disable-popup-blocking',
-              '--disable-translate',
-              '--no-default-browser-check',
-              '--no-sandbox',
-              '--no-first-run',
-              if (headless!) '--headless',
-              ...webBrowserFlags,
-            ],
-            'perfLoggingPrefs': <String, String>{
-              'traceCategories': 'devtools.timeline,'
-                  'v8,blink.console,benchmark,blink,'
-                  'blink.user_timing',
-            },
-          },
-        },
-      Browser.firefox => <String, dynamic>{
-          'acceptInsecureCerts': true,
-          'browserName': 'firefox',
-          'moz:firefoxOptions': <String, dynamic>{
-            'args': <String>[
-              if (headless!) '-headless',
-              ...webBrowserFlags,
-            ],
-            'prefs': <String, dynamic>{
-              'dom.file.createInChild': true,
-              'dom.timeout.background_throttling_max_budget': -1,
-              'media.autoplay.default': 0,
-              'media.gmp-manager.url': '',
-              'media.gmp-provider.enabled': false,
-              'network.captive-portal-service.enabled': false,
-              'security.insecure_field_warning.contextual.enabled': false,
-              'test.currentTimeOffsetSeconds': 11491200,
-            },
-            'log': <String, String>{'level': 'trace'},
-          },
-        },
-      Browser.edge => <String, dynamic>{
-          'acceptInsecureCerts': true,
-          'browserName': 'edge',
-        },
-      Browser.safari => <String, dynamic>{
-          'browserName': 'safari',
-        },
-      Browser.iosSafari => <String, dynamic>{
-          'platformName': 'ios',
-          'browserName': 'safari',
-          'safari:useSimulator': true,
-        },
-      Browser.androidChrome => <String, dynamic>{
-          'browserName': 'chrome',
-          'platformName': 'android',
-          'goog:chromeOptions': <String, dynamic>{
-            'androidPackage': 'com.android.chrome',
-            'args': <String>[
-              '--disable-fullscreen',
-              ...webBrowserFlags,
-            ],
-          },
-        },
-    };
+}) => switch (browser) {
+  Browser.chrome => <String, dynamic>{
+    'acceptInsecureCerts': true,
+    'browserName': 'chrome',
+    'goog:loggingPrefs': <String, String>{
+      async_io.LogType.browser: 'INFO',
+      async_io.LogType.performance: 'ALL',
+    },
+    'goog:chromeOptions': <String, dynamic>{
+      if (chromeBinary != null) 'binary': chromeBinary,
+      'w3c': true,
+      'args': <String>[
+        '--bwsi',
+        '--disable-background-timer-throttling',
+        '--disable-default-apps',
+        '--disable-extensions',
+        '--disable-popup-blocking',
+        '--disable-translate',
+        '--no-default-browser-check',
+        '--no-sandbox',
+        '--no-first-run',
+        if (headless!) '--headless',
+        ...webBrowserFlags,
+      ],
+      'perfLoggingPrefs': <String, String>{
+        'traceCategories':
+            'devtools.timeline,'
+            'v8,blink.console,benchmark,blink,'
+            'blink.user_timing',
+      },
+    },
+  },
+  Browser.firefox => <String, dynamic>{
+    'acceptInsecureCerts': true,
+    'browserName': 'firefox',
+    'moz:firefoxOptions': <String, dynamic>{
+      'args': <String>[if (headless!) '-headless', ...webBrowserFlags],
+      'prefs': <String, dynamic>{
+        'dom.file.createInChild': true,
+        'dom.timeout.background_throttling_max_budget': -1,
+        'media.autoplay.default': 0,
+        'media.gmp-manager.url': '',
+        'media.gmp-provider.enabled': false,
+        'network.captive-portal-service.enabled': false,
+        'security.insecure_field_warning.contextual.enabled': false,
+        'test.currentTimeOffsetSeconds': 11491200,
+      },
+      'log': <String, String>{'level': 'trace'},
+    },
+  },
+  Browser.edge => <String, dynamic>{'acceptInsecureCerts': true, 'browserName': 'edge'},
+  Browser.safari => <String, dynamic>{'browserName': 'safari'},
+  Browser.iosSafari => <String, dynamic>{
+    'platformName': 'ios',
+    'browserName': 'safari',
+    'safari:useSimulator': true,
+  },
+  Browser.androidChrome => <String, dynamic>{
+    'browserName': 'chrome',
+    'platformName': 'android',
+    'goog:chromeOptions': <String, dynamic>{
+      'androidPackage': 'com.android.chrome',
+      'args': <String>['--disable-fullscreen', ...webBrowserFlags],
+    },
+  },
+};
