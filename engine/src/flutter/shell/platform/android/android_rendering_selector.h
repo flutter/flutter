@@ -15,6 +15,6 @@ enum class AndroidRenderingAPI {
   kSkiaOpenGLES
 };
 
-} // namespace flutter
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_RENDERING_SELECTOR_H_
