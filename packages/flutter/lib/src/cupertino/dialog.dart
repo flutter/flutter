@@ -567,7 +567,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// [CupertinoPopupSurface].
   ///
   /// Eyeballed from the iOS 17 simulator.
-  static const double defaultBlurSigma = 30.0;
+  static const double defaultBlurSigma = 45.0;
 
   /// The default corner radius of a [CupertinoPopupSurface].
   static const BorderRadius _clipper = BorderRadius.all(Radius.circular(14));
