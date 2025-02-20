@@ -93,26 +93,29 @@ void main() {
         expect(logger.statusText, isEmpty);
         expect(logger.errorText, isEmpty);
       });
-      
-      testWithoutContext('isSimctlInstalled is false when simctl list throws process exception', () {
-        fakeProcessManager.addCommand(
-          const FakeCommand(
-            command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
-            exception: ProcessException('xcrun', <String>['simctl']),
-          ),
-        );
-        final Xcode xcode = Xcode.test(
-          processManager: fakeProcessManager,
-          xcodeProjectInterpreter: xcodeProjectInterpreter,
-          logger: logger,
-        );
 
-        expect(xcode.isSimctlInstalled, isFalse);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.statusText, isEmpty);
-        expect(logger.errorText, isEmpty);
-        expect(logger.traceText, contains('ProcessException'));
-      });
+      testWithoutContext(
+        'isSimctlInstalled is false when simctl list throws process exception',
+        () {
+          fakeProcessManager.addCommand(
+            const FakeCommand(
+              command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
+              exception: ProcessException('xcrun', <String>['simctl']),
+            ),
+          );
+          final Xcode xcode = Xcode.test(
+            processManager: fakeProcessManager,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+            logger: logger,
+          );
+
+          expect(xcode.isSimctlInstalled, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+          expect(logger.statusText, isEmpty);
+          expect(logger.errorText, isEmpty);
+          expect(logger.traceText, contains('ProcessException'));
+        },
+      );
 
       group('isDevicectlInstalled', () {
         testWithoutContext('is true when Xcode is 15+ and devicectl succeeds', () {
