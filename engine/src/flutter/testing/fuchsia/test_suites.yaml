@@ -15,7 +15,7 @@
   package: common_cpp_unittests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/dart_plugin_registrant_unittests#meta/dart_plugin_registrant_unittests.cm
   packages:
-    - oot_flutter_aot_runner-0.far
+    - flutter_aot_product_runner-0.far
     - dart_plugin_registrant_unittests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/dart-aot-runner-integration-test#meta/dart-aot-runner-integration-test.cm
   packages:
