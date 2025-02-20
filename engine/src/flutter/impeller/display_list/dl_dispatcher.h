@@ -374,20 +374,6 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   // |flutter::DlOpReceiver|
   void setImageFilter(const flutter::DlImageFilter* filter) override;
 
-    // |flutter::DlOpReceiver|
-  void drawImage(const sk_sp<flutter::DlImage> image,
-    const DlPoint& point,
-    flutter::DlImageSampling sampling,
-    bool render_with_attributes) override;
-
-      // |flutter::DlOpReceiver|
-void drawImageRect(const sk_sp<flutter::DlImage> image,
-        const DlRect& src,
-        const DlRect& dst,
-        flutter::DlImageSampling sampling,
-        bool render_with_attributes,
-        flutter::DlSrcRectConstraint constraint) override;
-
   std::pair<std::unordered_map<int64_t, BackdropData>, size_t> TakeBackdropData();
 
   void UploadDeferredImages(Context& context);
@@ -398,7 +384,6 @@ void drawImageRect(const sk_sp<flutter::DlImage> image,
   const ContentContext& renderer_;
   Matrix matrix_;
   std::vector<Matrix> stack_;
-  std::vector<sk_sp<flutter::DlImage>> deferred_images_;
   std::unordered_map<int64_t, BackdropData> backdrop_data_;
   // note: cull rects are always in the global coordinate space.
   std::vector<Rect> cull_rect_state_;

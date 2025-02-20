@@ -114,7 +114,7 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
     SkISize target_size,
     impeller::ISize max_texture_size,
     bool supports_wide_gamut,
-    bool has_gpu_access,
+    bool is_gpu_disabled,
     const std::shared_ptr<const impeller::Capabilities>& capabilities,
     const std::shared_ptr<impeller::Allocator>& allocator) {
   TRACE_EVENT0("impeller", __FUNCTION__);
@@ -241,7 +241,7 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
 
   if (source_size.width() > max_texture_size.width ||
       source_size.height() > max_texture_size.height ||
-      !capabilities->SupportsTextureToTextureBlits() || !has_gpu_access) {
+      !capabilities->SupportsTextureToTextureBlits() || is_gpu_disabled) {
     //----------------------------------------------------------------------------
     /// 2. If the decoded image isn't the requested target size and the src size
     ///    exceeds the device max texture size, perform a slow CPU resize. This
@@ -275,11 +275,13 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
     buffer->Flush();
 
     return DecompressResult{.device_buffer = std::move(buffer),
-                            .image_info = scaled_bitmap->info()};
+                            .image_info = scaled_bitmap->info(),
+                            .sk_bitmap = bitmap};
   }
 
   return DecompressResult{.device_buffer = std::move(buffer),
                           .image_info = bitmap->info(),
+                          .sk_bitmap = bitmap,
                           .resize_info = resize_info};
 }
 
@@ -499,13 +501,19 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
         auto max_size_supported =
             context->GetResourceAllocator()->GetMaxTextureSizeSupported();
 
+        bool is_gpu_disabled = false;
+        gpu_disabled_switch->Execute(
+            fml::SyncSwitch::Handlers()
+                .SetIfFalse([&] { is_gpu_disabled = false; })
+                .SetIfTrue([&] { is_gpu_disabled = true; }));
+
         // Always decompress on the concurrent runner.
         DecompressResult bitmap_result = DecompressTexture(
             raw_descriptor,                               //
             target_size,                                  //
             max_size_supported,                           //
             /*supports_wide_gamut=*/supports_wide_gamut,  //
-            /*has_gpu_access=*/false,                     //
+            /*is_gpu_disabled=*/is_gpu_disabled,          //
             context->GetCapabilities(), context->GetResourceAllocator());
         if (!bitmap_result.device_buffer) {
           result(nullptr, bitmap_result.decode_error);

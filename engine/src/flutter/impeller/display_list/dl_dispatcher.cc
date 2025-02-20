@@ -11,6 +11,9 @@
 #include <vector>
 
 #include "display_list/dl_sampling_options.h"
+#include "display_list/effects/color_sources/dl_image_color_source.h"
+#include "display_list/effects/color_sources/dl_runtime_effect_color_source.h"
+#include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "flutter/fml/logging.h"
 #include "fml/mapping.h"
@@ -722,7 +725,7 @@ void DlDispatcherBase::drawImage(const sk_sp<flutter::DlImage> image,
     return;
   }
 
-  auto texture = image->impeller_texture();
+  auto texture = GetCanvas().GetOrUploadTexture(image);
   if (!texture) {
     return;
   }
@@ -751,7 +754,7 @@ void DlDispatcherBase::drawImageRect(const sk_sp<flutter::DlImage> image,
   AUTO_DEPTH_WATCHER(1u);
 
   GetCanvas().DrawImageRect(
-      image->impeller_texture(),                       // image
+      GetCanvas().GetOrUploadTexture(image),           // image
       src,                                             // source rect
       dst,                                             // destination rect
       render_with_attributes ? paint_ : Paint(),       // paint
@@ -768,7 +771,7 @@ void DlDispatcherBase::drawImageNine(const sk_sp<flutter::DlImage> image,
   AUTO_DEPTH_WATCHER(9u);
 
   NinePatchConverter converter = {};
-  converter.DrawNinePatch(image->impeller_texture(),
+  converter.DrawNinePatch(GetCanvas().GetOrUploadTexture(image),
                           Rect::MakeLTRB(center.GetLeft(), center.GetTop(),
                                          center.GetRight(), center.GetBottom()),
                           dst, ToSamplerDescriptor(filter), &GetCanvas(),
@@ -788,7 +791,7 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
   AUTO_DEPTH_WATCHER(1u);
 
   auto geometry =
-      DlAtlasGeometry(atlas->impeller_texture(),                        //
+      DlAtlasGeometry(GetCanvas().GetOrUploadTexture(atlas),            //
                       xform,                                            //
                       tex,                                              //
                       colors,                                           //
@@ -1239,48 +1242,6 @@ void FirstPassDispatcher::setImageFilter(const flutter::DlImageFilter* filter) {
     has_image_filter_ = false;
   } else {
     has_image_filter_ = true;
-  }
-}
-
-// |flutter::DlOpReceiver|
-void FirstPassDispatcher::drawImage(const sk_sp<flutter::DlImage> image,
-                                    const DlPoint& point,
-                                    flutter::DlImageSampling sampling,
-                                    bool render_with_attributes) {
-  if (image->isDeferredUpload()) {
-    deferred_images_.push_back(image);
-  }
-}
-
-void FirstPassDispatcher::UploadDeferredImages(Context& context) {
-  if (deferred_images_.empty()) {
-    return;
-  }
-  std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
-  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-  for (sk_sp<flutter::DlImage>& image : deferred_images_) {
-    std::shared_ptr<DeviceBuffer> device_buffer = image->GetDeviceBuffer();
-    blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer),
-                       image->impeller_texture());
-    image->SetUploaded();
-  }
-  blit_pass->EncodeCommands();
-  deferred_images_.clear();
-  if (!context.EnqueueCommandBuffer(std::move(cmd_buffer))) {
-    VALIDATION_LOG << "Failed to upload deferred GPU image.";
-  }
-}
-
-// |flutter::DlOpReceiver|
-void FirstPassDispatcher::drawImageRect(
-    const sk_sp<flutter::DlImage> image,
-    const DlRect& src,
-    const DlRect& dst,
-    flutter::DlImageSampling sampling,
-    bool render_with_attributes,
-    flutter::DlSrcRectConstraint constraint) {
-  if (image->isDeferredUpload()) {
-    deferred_images_.push_back(image);
   }
 }
 
