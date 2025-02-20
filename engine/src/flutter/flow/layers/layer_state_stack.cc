@@ -470,6 +470,12 @@ class ClipRSuperellipseEntry : public LayerStateStack::StateEntry {
                                         DlClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
+    // MutatorsStack doesn't support non-Skia classes, and therefore this method
+    // has to use approximate RRect, which might cause trouble for certain
+    // embedded apps.
+    // TODO(dkwingsmt): Make this method push a correct ClipRoundedSuperellipse
+    // mutator.
+    // https://github.com/flutter/flutter/issues/163716
     mutators_stack->PushClipRRect(ToApproximateSkRRect(clip_rsuperellipse_));
   }
 
