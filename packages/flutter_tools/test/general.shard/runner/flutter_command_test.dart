@@ -28,6 +28,7 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../commands.shard/hermetic/run_test.dart' show TestRunCommandThatOnlyValidates;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
@@ -1270,21 +1271,13 @@ flutter:
     });
 
     group('Flutter version', () {
-      const List<String> flutterVersionDartDefines = <String>[
-        'FLUTTER_VERSION',
-        'FLUTTER_CHANNEL',
-        'FLUTTER_GIT_URL',
-        'FLUTTER_FRAMEWORK_REVISION',
-        'FLUTTER_ENGINE_REVISION',
-        'FLUTTER_DART_VERSION',
-      ];
-
-      for (final String dartDefine in flutterVersionDartDefines) {
+      for (final String dartDefine in FlutterCommand.flutterVersionDartDefines) {
         testUsingContext(
           "tool exits when $dartDefine is already set in user's environment",
           () async {
-            final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
-            final CommandRunner<void> runner = createTestCommandRunner(command);
+            final CommandRunner<void> runner = createTestCommandRunner(
+              TestRunCommandThatOnlyValidates(),
+            );
 
             await expectLater(
               runner.run(<String>['run', '--no-pub', '--no-hot']),
@@ -1297,9 +1290,7 @@ flutter:
           },
           overrides: <Type, Generator>{
             DeviceManager:
-                () =>
-                    _TestDeviceManager(logger: BufferLogger.test())
-                      ..devices = <Device>[FakeDevice('name', 'id')],
+                () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
             Platform:
                 () => FakePlatform(environment: <String, String>{dartDefine: 'I was already set'}),
             Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -1317,8 +1308,9 @@ flutter:
         testUsingContext(
           'tool exits when $dartDefine is set in --dart-define or --dart-define-from-file',
           () async {
-            final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
-            final CommandRunner<void> runner = createTestCommandRunner(command);
+            final CommandRunner<void> runner = createTestCommandRunner(
+              TestRunCommandThatOnlyValidates(),
+            );
 
             expect(
               runner.run(<String>[
@@ -1350,9 +1342,7 @@ flutter:
           },
           overrides: <Type, Generator>{
             DeviceManager:
-                () =>
-                    _TestDeviceManager(logger: BufferLogger.test())
-                      ..devices = <Device>[FakeDevice('name', 'id')],
+                () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
             Platform: () => FakePlatform(),
             Cache: () => Cache.test(processManager: FakeProcessManager.any()),
             FileSystem: () {
