@@ -18,7 +18,7 @@ import 'system_channels.dart';
 /// `SensitiveContent` widgets in the tree. [ContentSensitivity.autoSensitive]
 /// is the second most severe setting, and it will cause the tree to remain marked
 /// auto-sensitive if there are either (1) no other [SensitiveContent] widgets in the tree or (2) there are only other auto-sensitive or not sensitive
-/// `SensitiveContent` widgets in the tree. [ContentSensitive.notSensitive]
+/// `SensitiveContent` widgets in the tree. [ContentSensitivity.notSensitive]
 /// is the least severe setting, and it will cause the tree to remain marked not
 /// sensitive as long as there are (1) no other [SensitiveContent] widgets in the tree or (2) there are only other not sensitive `SensitiveContent`
 /// widgets in the tree. If there are no `SensitiveContent` widgets in the tree,
@@ -62,9 +62,7 @@ enum ContentSensitivity {
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
   notSensitive(id: 2);
 
-  const ContentSensitivity({
-    required this.id,
-  });
+  const ContentSensitivity({required this.id});
 
   /// Identifier for each [ContentSensitivity] level, which matches the native Android value
   /// of the constant that each level corresponds to.
@@ -114,11 +112,13 @@ class SensitiveContentService {
 
   /// Gets content sensitivity level of the Android `View` that contains
   /// the app's widget tree.
-  Future<int> getContentSensitivity() async {
+  // TODO(camsim99): Rename or refactor to signify that this returns ID
+  Future<int?> getContentSensitivity() async {
     try {
-      final int? result =
-          await sensitiveContentChannel.invokeMethod<int>('SensitiveContent.getContentSensitivity');
-      return result!;
+      final int? result = await sensitiveContentChannel.invokeMethod<int>(
+        'SensitiveContent.getContentSensitivity',
+      );
+      return result;
     } catch (e) {
       // Content sensitivity failed to be set.
       throw FlutterError('Failed to retrieve content sensitivity: $e');

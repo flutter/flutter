@@ -1515,7 +1515,7 @@ public class FlutterFragment extends Fragment
       @Nullable Activity activity, @NonNull FlutterEngine flutterEngine) {
     if (activity != null) {
       return new SensitiveContentPlugin(
-          activity, FLUTTER_VIEW_ID, flutterEngine.getSensitiveContentChannel());
+          FLUTTER_VIEW_ID, activity, flutterEngine.getSensitiveContentChannel());
     } else {
       return null;
     }
