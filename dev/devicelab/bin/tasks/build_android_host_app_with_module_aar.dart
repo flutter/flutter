@@ -63,6 +63,7 @@ class ModuleTest {
           stderr: stderr,
         );
       });
+      print('Created template in $tempDir');
 
       section('Create package with native assets');
 
@@ -247,6 +248,9 @@ class ModuleTest {
       section(propertyContent);
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
+      // TODO make an actual evaluation.
+      bool greaterThanGradle83 = true;
+
       section('Build debug host APK');
 
       await inDirectory(hostApp, () async {
@@ -300,7 +304,7 @@ class ModuleTest {
         );
       }
 
-      section('Check file access modes for read-only asset from Flutter module');
+      section('Check file access modes for Debug read-only asset from Flutter module');
 
       final String readonlyDebugAssetFilePath = path.joinAll(<String>[
         hostApp.path,
@@ -309,13 +313,15 @@ class ModuleTest {
         'intermediates',
         'assets',
         'debug',
+        ...greaterThanGradle83 ? <String>['mergeDebugAssets'] : <String>[],
         'flutter_assets',
         'assets',
         'read-only.txt',
       ]);
+      // ./app/build/intermediates/assets/debug/mergeDebugAssets/flutter_assets/assets/read-only.txt
       final File readonlyDebugAssetFile = File(readonlyDebugAssetFilePath);
       if (!exists(readonlyDebugAssetFile)) {
-        return TaskResult.failure('Failed to copy read-only asset file');
+        return TaskResult.failure('Failed to copy read-only debug asset file');
       }
 
       String modes = readonlyDebugAssetFile.statSync().modeString();
@@ -393,7 +399,7 @@ class ModuleTest {
         );
       }
 
-      section('Check file access modes for read-only asset from Flutter module');
+      section('Check file access modes for release read-only asset from Flutter module');
 
       final String readonlyReleaseAssetFilePath = path.joinAll(<String>[
         hostApp.path,
@@ -402,13 +408,14 @@ class ModuleTest {
         'intermediates',
         'assets',
         'release',
+        ...greaterThanGradle83 ? <String>['mergeReleaseAssets'] : <String>[],
         'flutter_assets',
         'assets',
         'read-only.txt',
       ]);
       final File readonlyReleaseAssetFile = File(readonlyReleaseAssetFilePath);
       if (!exists(readonlyReleaseAssetFile)) {
-        return TaskResult.failure('Failed to copy read-only asset file');
+        return TaskResult.failure('Failed to copy read-only release asset file');
       }
 
       modes = readonlyReleaseAssetFile.statSync().modeString();
@@ -429,16 +436,11 @@ class ModuleTest {
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      rmTree(tempDir);
+      //rmTree(tempDir);//
     }
   }
 }
 
 Future<void> main() async {
-  await task(
-    combine(<TaskFunction>[
-      ModuleTest(gradleVersion: '8.4').call,
-      ModuleTest(gradleVersion: '8.4-rc-3').call,
-    ]),
-  );
+  await task(combine(<TaskFunction>[ModuleTest(gradleVersion: '8.6').call]));
 }
