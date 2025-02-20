@@ -1258,11 +1258,8 @@ void FirstPassDispatcher::UploadDeferredImages(Context& context) {
   }
   std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
   std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-  for (auto& image : deferred_images_) {
-    // TODO(jonahwilliams): release the data here.
-    auto device_buffer = context.GetResourceAllocator()->CreateBufferWithCopy(
-        fml::NonOwnedMapping(image->GetDeferredData(),
-                             image->GetApproximateByteSize()));
+  for (sk_sp<flutter::DlImage>& image : deferred_images_) {
+    std::shared_ptr<DeviceBuffer> device_buffer = image->GetDeviceBuffer();
     blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer),
                        image->impeller_texture());
     image->SetUploaded();

@@ -4,6 +4,7 @@
 
 #include "impeller/display_list/dl_image_impeller.h"
 
+#include "fml/logging.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 
@@ -141,6 +142,19 @@ size_t DlImageImpeller::GetApproximateByteSize() const {
     size += texture_->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
   }
   return size;
+}
+
+// |DlImage|
+void DlImageImpeller::SetUploaded() const {
+  is_deferred_ = false;
+  bytes_ = nullptr;
+}
+
+// |DlImage|
+const std::shared_ptr<impeller::DeviceBuffer> DlImageImpeller::GetDeviceBuffer()
+    const {
+  FML_DCHECK(is_deferred_);
+  return bytes_;
 }
 
 }  // namespace impeller

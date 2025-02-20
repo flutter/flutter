@@ -132,11 +132,14 @@ class DlImage : public SkRefCnt {
   ///             the uploaded image data.
   virtual bool isDeferredUpload() const { return false; }
 
-  /// Retrieve the deferred upload data.
-  virtual const uint8_t* GetDeferredData() const { return nullptr; }
-
+  /// @brief Mark this deferred image as having already uploaded the deferred
+  ///        data and clear the device buffer.
   virtual void SetUploaded() const {}
 
+  /// @brief Retrieve the device buffer backing this image, if it is a deferred
+  ///        Impeller image.
+  ///
+  /// Otherwise returns `nullptr`.
   virtual const std::shared_ptr<impeller::DeviceBuffer> GetDeviceBuffer()
       const {
     return nullptr;
