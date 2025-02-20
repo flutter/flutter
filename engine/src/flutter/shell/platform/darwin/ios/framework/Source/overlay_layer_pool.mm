@@ -69,7 +69,7 @@ void OverlayLayerPool::CreateLayer(const std::shared_ptr<IOSContext>& ios_contex
 
   CALayer* ca_layer = overlay_view.layer;
   std::unique_ptr<IOSSurface> ios_surface = IOSSurface::Create(ios_context, ca_layer);
-  std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface(gr_context);
+  std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface();
 
   layer = std::make_shared<OverlayLayer>(overlay_view, overlay_view_wrapper,
                                          std::move(ios_surface), std::move(surface));
