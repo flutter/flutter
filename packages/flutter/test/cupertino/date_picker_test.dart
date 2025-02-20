@@ -2507,10 +2507,10 @@ void main() {
     );
 
     Offset lastOffset = tester.getTopLeft(find.text('November'));
-    expect(tester.getTopLeft(find.text('11')).dy == lastOffset.dy, true);
+    expect(tester.getTopLeft(find.text('11')).dy, lastOffset.dy);
 
     lastOffset = tester.getTopLeft(find.text('11'));
-    expect(tester.getTopLeft(find.text('2022')).dy == lastOffset.dy, true);
+    expect(tester.getTopLeft(find.text('2022')).dy, lastOffset.dy);
   });
 }
 
