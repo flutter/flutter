@@ -232,7 +232,7 @@ class OptionalParameter {
 class Placeholder {
   Placeholder(this.resourceId, this.name, Map<String, Object?> attributes)
     : example = _stringAttribute(resourceId, name, attributes, 'example'),
-      type = _stringAttribute(resourceId, name, attributes, 'type'),
+      _type = _stringAttribute(resourceId, name, attributes, 'type'),
       format = _stringAttribute(resourceId, name, attributes, 'format'),
       optionalParameters = _optionalParameters(resourceId, name, attributes),
       isCustomDateFormat = _boolAttribute(resourceId, name, attributes, 'isCustomDateFormat');
@@ -244,7 +244,12 @@ class Placeholder {
   final List<OptionalParameter> optionalParameters;
   final bool? isCustomDateFormat;
   // The following will be initialized after all messages are parsed in the Message constructor.
-  String? type;
+  String? _type;
+  String? get type => _type;
+  set type(String? value) {
+    _type = value;
+  }
+
   bool isPlural = false;
   bool isSelect = false;
   bool isDateTime = false;
@@ -584,7 +589,9 @@ class Message {
       return x && !y && !z || !x && y && !z || !x && !y && z || !x && !y && !z;
     }
 
-    for (final Placeholder placeholder in templatePlaceholders.values) {
+    for (final Placeholder placeholder in templatePlaceholders.values.followedBy(
+      localePlaceholders.values.expand((Map<String, Placeholder> e) => e.values),
+    )) {
       if (!atMostOneOf(placeholder.isPlural, placeholder.isDateTime, placeholder.isSelect)) {
         throw L10nException('Placeholder is used as plural/select/datetime in certain languages.');
       } else if (placeholder.isPlural) {
