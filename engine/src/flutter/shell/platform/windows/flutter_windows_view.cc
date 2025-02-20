@@ -673,11 +673,9 @@ void FlutterWindowsView::OnFramePresented() {
       return;
     case ResizeState::kFrameGenerated: {
       // A frame was generated for a pending resize.
+      resize_status_ = ResizeState::kDone;
       // Unblock the platform thread.
-      engine_->task_runner()->PostTask([this] {
-        std::unique_lock<std::mutex> lock(resize_mutex_);
-        resize_status_ = ResizeState::kDone;
-      });
+      engine_->task_runner()->PostTask([this] {});
 
       lock.unlock();
 

@@ -13,7 +13,7 @@ namespace flutter {
 static const uintptr_t kTimerId = 0;
 
 // Timer used for PollOnce timeout.
-static const UINT_PTR kPollTimeoutTimerId = 1;
+static const uintptr_t kPollTimeoutTimerId = 1;
 
 TaskRunnerWindow::TaskRunnerWindow() {
   WNDCLASS window_class = RegisterWindowClass();
