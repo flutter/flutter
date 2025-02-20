@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.process.ExecSpec
+import java.io.File
 import java.nio.file.Paths
 
 class BaseFlutterTaskHelper(
@@ -11,6 +12,15 @@ class BaseFlutterTaskHelper(
 ) {
     @VisibleForTesting
     internal val gradleErrorMessage = "Invalid Flutter source directory: ${baseFlutterTask.sourceDir}"
+
+    @VisibleForTesting
+    internal lateinit var getAllArguments: List<String>
+
+    @VisibleForTesting
+    internal lateinit var flutterExecutablePath: String
+
+    @VisibleForTesting
+    internal lateinit var workingDirectoryFile: File
 
     fun checkPreConditions() {
         if (baseFlutterTask.sourceDir == null || !baseFlutterTask.sourceDir!!.isDirectory) {
@@ -35,10 +45,15 @@ class BaseFlutterTaskHelper(
         return ruleNames
     }
 
+    @VisibleForTesting
     internal fun createExecSpecActionFromTask(): Action<ExecSpec> =
         Action<ExecSpec> {
             executable(baseFlutterTask.flutterExecutable?.absolutePath)
+            flutterExecutablePath = "foo"
+
             workingDir(baseFlutterTask.sourceDir)
+            workingDirectoryFile = workingDir
+
             baseFlutterTask.localEngine?.let {
                 args("--local-engine", baseFlutterTask.localEngine)
                 args("--local-engine-src-path", baseFlutterTask.localEngineSrcPath)
@@ -46,7 +61,7 @@ class BaseFlutterTaskHelper(
             baseFlutterTask.localEngineHost?.let {
                 args("--local-engine-host", baseFlutterTask.localEngineHost)
             }
-            if (baseFlutterTask.verbose) {
+            if (baseFlutterTask.verbose == true) {
                 args("--verbose")
             } else {
                 args("--quiet")
@@ -58,7 +73,7 @@ class BaseFlutterTaskHelper(
             baseFlutterTask.performanceMeasurementFile?.let {
                 args("--performance-measurement-file=${baseFlutterTask.performanceMeasurementFile}")
             }
-            if (!baseFlutterTask.fastStart || baseFlutterTask.buildMode != "debug") {
+            if (!baseFlutterTask.fastStart!! || baseFlutterTask.buildMode != "debug") {
                 args("-dTargetFile=${baseFlutterTask.targetPath}")
             } else {
                 args("-dTargetFile=${Paths.get(baseFlutterTask.flutterRoot.absolutePath, "examples", "splash", "lib", "main.dart")}")
@@ -102,5 +117,7 @@ class BaseFlutterTaskHelper(
             args("-dAndroidArchs=${baseFlutterTask.targetPlatformValues.joinToString(" ")}")
             args("-dMinSdkVersion=${baseFlutterTask.minSdkVersion}")
             args(generateRuleNames(baseFlutterTask))
+
+            getAllArguments = args
         }
 }

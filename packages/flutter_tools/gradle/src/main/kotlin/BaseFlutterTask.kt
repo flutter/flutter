@@ -21,7 +21,7 @@ abstract class BaseFlutterTask : DefaultTask() {
     var flutterExecutable: File? = null
 
     @Input
-    lateinit var buildMode: String
+    var buildMode: String? = null
 
     @Input
     var minSdkVersion: Int? = null
@@ -40,14 +40,14 @@ abstract class BaseFlutterTask : DefaultTask() {
 
     @Optional
     @Input
-    var fastStart: Boolean = false
+    var fastStart: Boolean? = null
 
     @Input
     lateinit var targetPath: String
 
     @Optional
     @Input
-    var verbose: Boolean = false
+    var verbose: Boolean? = null
 
     @Optional
     @Input
@@ -143,7 +143,7 @@ abstract class BaseFlutterTask : DefaultTask() {
     fun buildBundle() {
         // might be passing in the Task instead of the parameter
         // below sourceDir is the parameter
-        val helper: BaseFlutterTaskHelper = BaseFlutterTaskHelper(baseFlutterTask = this)
+        val helper = BaseFlutterTaskHelper(baseFlutterTask = this)
         helper.checkPreConditions()
 
         intermediateDir.mkdirs()
