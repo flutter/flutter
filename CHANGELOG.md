@@ -30,6 +30,19 @@ INTERNAL NOTE
 ### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
 
 - [flutter/162969](https://github.com/flutter/flutter/issues/162969) DrawVertices may crash when using shaders built with certain parameters.
+- [flutter/161625](https://github.com/flutter/flutter/pull/161625) - Adds text
+  tests.
+- [flutter/162351](https://github.com/flutter/flutter/pull/162351) - Fixes
+  floating point math in text.
+- [flutter/162415](https://github.com/flutter/flutter/pull/162415) - Fixes
+  aspect ratio of glyphs.
+- [flutter/162555](https://github.com/flutter/flutter/pull/162555) - Increase
+  glyph atlas resolution.
+- [flutter/162824](https://github.com/flutter/flutter/pull/162824) - Fixes
+  subpixel alignment of glyphs.
+
+- [flutter/163304](https://github.com/flutter/flutter/issues/163304) Fixes crash when using backdrop filter on GLES backend.
+- [flutter/161334](https://github.com/flutter/flutter/issues/161334) Disable Vulkan on certain Xclipse GPU models.
 
 ## Flutter 3.27 Changes
 

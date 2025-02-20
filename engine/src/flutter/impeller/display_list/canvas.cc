@@ -1681,6 +1681,14 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   return input_texture;
 }
 
+bool Canvas::SupportsBlitToOnscreen() const {
+  return renderer_.GetContext()
+             ->GetCapabilities()
+             ->SupportsTextureToTextureBlits() &&
+         renderer_.GetContext()->GetBackendType() !=
+             Context::BackendType::kOpenGLES;
+}
+
 bool Canvas::BlitToOnscreen(bool is_onscreen) {
   auto command_buffer = renderer_.GetContext()->CreateCommandBuffer();
   command_buffer->SetLabel("EntityPass Root Command Buffer");
@@ -1688,9 +1696,7 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
                               .inline_pass_context->GetPassTarget()
                               .GetRenderTarget();
 
-  if (renderer_.GetContext()
-          ->GetCapabilities()
-          ->SupportsTextureToTextureBlits()) {
+  if (SupportsBlitToOnscreen()) {
     auto blit_pass = command_buffer->CreateBlitPass();
     blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),
                        render_target_.GetRenderTargetTexture());
