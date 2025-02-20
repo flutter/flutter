@@ -41,8 +41,6 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 
 # Test for fusion repository
 if ([string]::IsNullOrEmpty($engineVersion) -and (Test-Path "$flutterRoot\DEPS" -PathType Leaf) -and (Test-Path "$flutterRoot\engine\src\.gn" -PathType Leaf)) {
-    # Calculate the engine hash from tracked git files.
-    $branch = (git -C "$flutterRoot" rev-parse --abbrev-ref HEAD)
     if ($null -eq $Env:LUCI_CONTEXT) {
         $ErrorActionPreference = "Continue"
         git -C "$flutterRoot" remote get-url upstream *> $null
