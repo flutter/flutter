@@ -342,9 +342,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       _buttonHeldDown = false;
       _animate();
     }
-    final RenderBox rb = context.findRenderObject()! as RenderBox;
-    final Offset localPosition = rb.globalToLocal(event.globalPosition);
-    if (rb.paintBounds.inflate(CupertinoButton.tapMoveSlop()).contains(localPosition)) {
+    final RenderBox renderObject = context.findRenderObject()! as RenderBox;
+    final Offset localPosition = renderObject.globalToLocal(event.globalPosition);
+    if (renderObject.paintBounds.inflate(CupertinoButton.tapMoveSlop()).contains(localPosition)) {
       _handleTap();
     }
   }
@@ -357,9 +357,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handTapMove(TapMoveDetails event) {
-    final RenderBox rb = context.findRenderObject()! as RenderBox;
-    final Offset localPosition = rb.globalToLocal(event.globalPosition);
-    final bool buttonShouldHeldDown = rb.paintBounds
+    final RenderBox renderObject = context.findRenderObject()! as RenderBox;
+    final Offset localPosition = renderObject.globalToLocal(event.globalPosition);
+    final bool buttonShouldHeldDown = renderObject.paintBounds
         .inflate(CupertinoButton.tapMoveSlop())
         .contains(localPosition);
     if (buttonShouldHeldDown != _buttonHeldDown) {

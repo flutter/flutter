@@ -89,4 +89,6 @@ const Map<CupertinoButtonSize, double> kCupertinoButtonMinSize = <CupertinoButto
 ///
 /// The opacity changes when the position moved is this distance away from the button.
 /// This variable is effective on mobile platforms. For desktop platforms, a distance of 0 is used.
+///
+/// This value was obtained through actual testing on an iOS 18.1 simulator.
 const double kCupertinoButtonTapMoveSlop = 70.0;

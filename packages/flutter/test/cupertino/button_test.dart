@@ -902,7 +902,7 @@ void main() {
       },
     );
     addTearDown(gesture.removePointer);
-    // Check opacity
+    // Check opacity.
     final FadeTransition opacity = tester.widget(
       find.descendant(of: find.byType(CupertinoButton), matching: find.byType(FadeTransition)),
     );
@@ -920,31 +920,35 @@ void main() {
     expect(opacity.opacity.value, 0.4);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-    'When lifting up outside the button slop after moving, onPressed should not be triggered.',
-    (WidgetTester tester) async {
-      bool value = false;
-      await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoButton(
-            onPressed: () {
-              value = true;
-            },
-            child: const Text('Tap me'),
-          ),
+  testWidgets('onPressed trigger takes into account MoveSlop.', (WidgetTester tester) async {
+    bool value = false;
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoButton(
+          onPressed: () {
+            value = true;
+          },
+          child: const Text('Tap me'),
         ),
-      );
-      final TestGesture gesture = await tester.startGesture(
-        tester.getTopLeft(find.byType(CupertinoButton)),
-      );
-      await gesture.moveTo(
-        tester.getBottomRight(find.byType(CupertinoButton)) +
-            Offset(0, CupertinoButton.tapMoveSlop()),
-      );
-      await gesture.up();
-      expect(value, isFalse);
-    },
-  );
+      ),
+    );
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CupertinoButton)));
+    await gesture.moveTo(
+      tester.getBottomRight(find.byType(CupertinoButton)) +
+          Offset(0, CupertinoButton.tapMoveSlop()),
+    );
+    await gesture.up();
+    expect(value, isFalse);
+
+    gesture = await tester.startGesture(tester.getTopLeft(find.byType(CupertinoButton)));
+    await gesture.moveTo(
+      tester.getBottomRight(find.byType(CupertinoButton)) +
+          Offset(0, CupertinoButton.tapMoveSlop()),
+    );
+    await gesture.moveBy(const Offset(0, -1));
+    await gesture.up();
+    expect(value, isTrue);
+  });
 }
 
 Widget boilerplate({required Widget child}) {

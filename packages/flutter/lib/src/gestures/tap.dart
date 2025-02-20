@@ -506,7 +506,11 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
 
   /// A pointer that triggered a tap has moved.
   ///
-  /// This triggers when the pointer moves after the tap gesture has been recognized.
+  /// This callback is triggered after the tap gesture has been recognized and the pointer starts to move.
+  ///
+  /// If the pointer moves beyond the `postAcceptSlopTolerance` distance, the tap will be canceled.
+  /// To make `onTapMove` more useful, consider setting `postAcceptSlopTolerance` to a larger value,
+  /// or to `null` for no limit on movement.
   ///
   /// See also:
   ///
