@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -19,6 +20,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 
 void main() {
@@ -48,10 +50,16 @@ void main() {
       fs: fileSystem,
       fakeFlutterVersion: flutterVersion,
     );
+    fileSystem.currentDirectory.childFile('pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+name: my_app
+environement:
+  sdk: '^3.5.0'
+''');
 
     flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+    writePackageConfigFile(directory: flutterProject.directory);
   });
 
   testUsingContext(

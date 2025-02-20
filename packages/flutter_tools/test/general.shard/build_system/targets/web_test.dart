@@ -23,6 +23,7 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fake_pub_deps.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
 
 const List<String> _kDart2jsLinuxArgs = <String>[
@@ -61,6 +62,10 @@ void main() {
   setUp(() {
     testbed = Testbed(
       setup: () {
+        globals.fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+name: foo
+''');
+
         globals.fs.directory('.dart_tool').childFile('package_config.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
