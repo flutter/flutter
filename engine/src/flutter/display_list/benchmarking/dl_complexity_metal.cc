@@ -332,7 +332,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawDiffRoundRect(
 void DisplayListMetalComplexityCalculator::MetalHelper::drawRoundSuperellipse(
     const DlRoundSuperellipse& rse) {
   // Drawing RSEs on Skia falls back to RRect.
-  drawRoundRect(rse.approximation());
+  drawRoundRect(rse.ToApproximateRoundRect());
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawPath(

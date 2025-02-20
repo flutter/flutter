@@ -206,16 +206,13 @@ inline const SkRRect ToSkRRect(const DlRoundRect& round_rect) {
 };
 
 // Approximates a rounded superellipse with a round rectangle to the
-/// best practical accuracy.
+// best practical accuracy.
 //
 // Skia does not support rounded superellipses directly, so rendering
 // `DlRoundSuperellipses` on Skia requires falling back to RRect.
 inline constexpr const SkRRect ToApproximateSkRRect(
     const DlRoundSuperellipse& rse) {
-  // Experiments have shown that using the same corner radii for the RRect
-  // provides an approximation that is close to optimal, as achieving a perfect
-  // match is not feasible.
-  return ToSkRRect(DlRoundRect::MakeRectRadii(rse.GetBounds(), rse.GetRadii()));
+  return ToSkRRect(rse.ToApproximateRoundRect());
 };
 
 inline constexpr SkMatrix ToSkMatrix(const DlMatrix& matrix) {
