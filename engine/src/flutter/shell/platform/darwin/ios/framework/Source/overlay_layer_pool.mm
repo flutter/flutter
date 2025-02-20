@@ -53,7 +53,6 @@ std::shared_ptr<OverlayLayer> OverlayLayerPool::GetNextLayer() {
   return result;
 }
 
-
 void OverlayLayerPool::CreateLayer(const std::shared_ptr<IOSContext>& ios_context,
                                    MTLPixelFormat pixel_format,
                                    CGFloat screenScale) {
@@ -71,8 +70,8 @@ void OverlayLayerPool::CreateLayer(const std::shared_ptr<IOSContext>& ios_contex
   std::unique_ptr<IOSSurface> ios_surface = IOSSurface::Create(ios_context, ca_layer);
   std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface();
 
-  layer = std::make_shared<OverlayLayer>(overlay_view, overlay_view_wrapper,
-                                         std::move(ios_surface), std::move(surface));
+  layer = std::make_shared<OverlayLayer>(overlay_view, overlay_view_wrapper, std::move(ios_surface),
+                                         std::move(surface));
   // The overlay view wrapper masks the overlay view.
   // This is required to keep the backing surface size unchanged between frames.
   //
