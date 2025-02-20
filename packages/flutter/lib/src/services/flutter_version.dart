@@ -4,9 +4,8 @@
 
 // @docImport 'dart:io'
 
-/// [FlutterVersion] contains various meta information about with which
-/// Flutter version this app was compiled.
-/// It tries to mimic the information that is seen when executing `flutter --version`.
+/// Details about the Flutter version this app was compiled with,
+/// corresponding to the output of `flutter --version`.
 ///
 /// When this Flutter version was build from a fork, or when Flutter runs in a
 /// custom embedder, these values might be unreliable.
@@ -24,11 +23,11 @@ abstract final class FlutterVersion {
   static const String? channel =
       bool.hasEnvironment('FLUTTER_CHANNEL') ? String.fromEnvironment('FLUTTER_CHANNEL') : null;
 
-  /// The link to the Git URL from which Flutter is obtained.
+  /// The URL of the Git repository from which Flutter was obtained.
   static const String? gitUrl =
       bool.hasEnvironment('FLUTTER_GIT_URL') ? String.fromEnvironment('FLUTTER_GIT_URL') : null;
 
-  /// The Flutter framework revision.
+  /// The Flutter framework revision, as a (short) Git commit ID.
   static const String? frameworkRevision =
       bool.hasEnvironment('FLUTTER_FRAMEWORK_REVISION')
           ? String.fromEnvironment('FLUTTER_FRAMEWORK_REVISION')
