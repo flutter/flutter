@@ -5,6 +5,28 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "multi_window_ref_app",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--local-engine=host_debug_unopt_arm64",
+                "--local-engine-host=host_debug_unopt_arm64",
+            ]
+        },
+        {
+            "name": "multi_window_ref_app (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "multi_window_ref_app (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
             "name": "(Windows) Attach",
             "type": "cppvsdbg",
             "request": "attach",
