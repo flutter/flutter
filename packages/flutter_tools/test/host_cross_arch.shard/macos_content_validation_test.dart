@@ -18,7 +18,7 @@ void main() {
 
     // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
     // See https://github.com/flutter/flutter/issues/160257 for details.
-    if (!featureFlags.isExplicitPackageDependenciesEnabled) {
+    if (!explicitPackageDependencies.master.enabledByDefault) {
       processManager.runSync(<String>[flutterBin, 'config', '--explicit-package-dependencies']);
     }
   });
@@ -26,7 +26,7 @@ void main() {
   tearDownAll(() {
     // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
     // See https://github.com/flutter/flutter/issues/160257 for details.
-    if (!featureFlags.isExplicitPackageDependenciesEnabled) {
+    if (!explicitPackageDependencies.master.enabledByDefault) {
       processManager.runSync(<String>[flutterBin, 'config', '--no-explicit-package-dependencies']);
     }
   });
