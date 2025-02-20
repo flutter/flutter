@@ -1038,7 +1038,7 @@ void main() {
     expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.9280824661254883);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.996379017829895);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))),
@@ -1073,7 +1073,7 @@ void main() {
     expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.9280824661254883);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.996379017829895);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))),
@@ -1334,18 +1334,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    largeTitleOpacity =
-        tester
-            .firstRenderObject<RenderAnimatedOpacity>(
-              find.ancestor(
-                of: flying(tester, find.text('Page 2')),
-                matching: find.byType(FadeTransition),
-              ),
-            )
-            .opacity
-            .value;
-
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), largeTitleOpacity);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.4096236079931259);
 
     largeTitleOffset = tester.getTopLeft(flying(tester, find.text('Page 2')));
 
@@ -1381,7 +1370,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.2601277381181717);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.4096236079931259);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))),
@@ -1392,8 +1381,8 @@ void main() {
   testWidgets('Searchable-to-searchable transition does not fade', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
-      from: const CupertinoSliverNavigationBar.search(),
-      to: const CupertinoSliverNavigationBar.search(),
+      from: const CupertinoSliverNavigationBar.search(searchField: CupertinoSearchTextField()),
+      to: const CupertinoSliverNavigationBar.search(searchField: CupertinoSearchTextField()),
       fromTitle: 'Page 1',
       toTitle: 'Page 2',
     );

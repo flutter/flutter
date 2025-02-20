@@ -1252,7 +1252,23 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               ? Visibility(visible: !searchIsActive, child: widget.trailing!)
               : null,
       userLargeTitle: widget.largeTitle,
-      userBottom: widget.bottom,
+      userBottom:
+          (widget._searchable
+              ? searchIsActive
+                  ? _ActiveSearchableBottom(
+                    animationController: _animationController,
+                    animation: persistentHeightAnimation,
+                    searchField: widget.searchField,
+                    onSearchFieldTap: _onSearchFieldTap,
+                  )
+                  : _InactiveSearchableBottom(
+                    animationController: _animationController,
+                    animation: persistentHeightAnimation,
+                    searchField: preferredSizeSearchField,
+                    onSearchFieldTap: _onSearchFieldTap,
+                  )
+              : widget.bottom) ??
+          const SizedBox.shrink(),
       padding: widget.padding,
       large: true,
       staticBar: false, // This one scrolls.
@@ -1284,23 +1300,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               stretchConfiguration:
                   widget.stretch && !searchIsActive ? OverScrollHeaderStretchConfiguration() : null,
               enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
-              bottom:
-                  (widget._searchable
-                      ? searchIsActive
-                          ? _ActiveSearchableBottom(
-                            animationController: _animationController,
-                            animation: persistentHeightAnimation,
-                            searchField: widget.searchField,
-                            onSearchFieldTap: _onSearchFieldTap,
-                          )
-                          : _InactiveSearchableBottom(
-                            animationController: _animationController,
-                            animation: persistentHeightAnimation,
-                            searchField: preferredSizeSearchField,
-                            onSearchFieldTap: _onSearchFieldTap,
-                          )
-                      : widget.bottom) ??
-                  const SizedBox.shrink(),
               bottomMode:
                   searchIsActive
                       ? NavigationBarBottomMode.always
@@ -1334,7 +1333,6 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
     required this.alwaysShowMiddle,
     required this.stretchConfiguration,
     required this.enableBackgroundFilterBlur,
-    required this.bottom,
     required this.bottomMode,
     required this.bottomHeight,
     required this.controller,
@@ -1355,7 +1353,6 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
   final double largeTitleHeight;
   final bool alwaysShowMiddle;
   final bool enableBackgroundFilterBlur;
-  final Widget bottom;
   final NavigationBarBottomMode bottomMode;
   final double bottomHeight;
   final AnimationController controller;
@@ -1524,7 +1521,6 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
         alwaysShowMiddle != oldDelegate.alwaysShowMiddle ||
         heroTag != oldDelegate.heroTag ||
         enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur ||
-        bottom != oldDelegate.bottom ||
         bottomMode != oldDelegate.bottomMode ||
         bottomHeight != oldDelegate.bottomHeight ||
         controller != oldDelegate.controller;
@@ -2916,9 +2912,9 @@ class _NavigationBarComponentsTransition {
     // Fade out only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
     if (topNavBarBottom == null ||
-        topNavBarBottom.child is! _NavigationBarSearchField ||
-        bottomNavBarBottom.child is! _NavigationBarSearchField) {
-      child = FadeTransition(opacity: fadeOutBy(0.6), child: child);
+        topNavBarBottom.child is! _InactiveSearchableBottom ||
+        bottomNavBarBottom.child is! _InactiveSearchableBottom) {
+      child = FadeTransition(opacity: fadeOutBy(0.6, curve: Curves.easeInOut), child: child);
     }
 
     return PositionedTransition(rect: animation.drive(positionTween), child: child);
@@ -3156,9 +3152,9 @@ class _NavigationBarComponentsTransition {
     // Fade in only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
     if (bottomNavBarBottom == null ||
-        bottomNavBarBottom.child is! _NavigationBarSearchField ||
-        topNavBarBottom.child is! _NavigationBarSearchField) {
-      child = FadeTransition(opacity: fadeInFrom(0.3), child: child);
+        bottomNavBarBottom.child is! _InactiveSearchableBottom ||
+        topNavBarBottom.child is! _InactiveSearchableBottom) {
+      child = FadeTransition(opacity: fadeInFrom(0.3, curve: Curves.easeInOut), child: child);
     }
 
     return PositionedTransition(rect: animation.drive(positionTween), child: child);
