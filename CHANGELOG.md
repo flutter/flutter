@@ -44,6 +44,8 @@ INTERNAL NOTE
 - [flutter/161334](https://github.com/flutter/flutter/issues/161334) Disable Vulkan on certain Xclipse GPU models.
 - [flutter/163429](https://github.com/flutter/flutter/issues/163429) Fixes jittery scrolling on iOS devices.
 
+- [flutter/163236](https://github.com/flutter/flutter/pull/163236) Disable Vulkan on older Exynos SoC to work around Android HardwareBuffer import error.
+
 ## Flutter 3.27 Changes
 
 ### [3.27.2](https://github.com/flutter/flutter/releases/tag/3.27.2)
