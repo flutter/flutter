@@ -358,12 +358,7 @@ class FlutterProject {
     if (!directory.existsSync() || isPlugin) {
       return;
     }
-    await refreshPluginsList(
-      this,
-      iosPlatform: iosPlatform,
-      macOSPlatform: macOSPlatform,
-      determineDevDependencies: releaseMode ?? false,
-    );
+    await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
     if (androidPlatform) {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
