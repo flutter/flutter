@@ -21,6 +21,7 @@ public interface TextureRegistry {
    * Creates and registers a {@link SurfaceProducer}, or a Flutter-managed {@link Surface}.
    *
    * <p>Uses the {@link SurfaceLifecycle#manual} lifecycle implicitly.
+   *
    * @return A SurfaceProducer.
    */
   @NonNull
@@ -30,6 +31,7 @@ public interface TextureRegistry {
 
   /**
    * Creates and a {@link SurfaceProducer}, or a Flutter-managed {@link Surface}.
+   *
    * @param lifecycle Whether to automatically reset the last image and release the surface.
    * @return A SurfaceProducer.
    */

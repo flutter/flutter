@@ -24,7 +24,8 @@ class ImageExternalTextureVKImpeller : public ImageExternalTexture {
       const fml::jni::ScopedJavaGlobalRef<jobject>&
           hardware_buffer_texture_entry,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-      const ImageExternalTexture::ImageLifecycle lifecycle = ImageExternalTexture::ImageLifecycle::kReset);
+      const ImageExternalTexture::ImageLifecycle lifecycle =
+          ImageExternalTexture::ImageLifecycle::kReset);
 
   ~ImageExternalTextureVKImpeller() override;
 

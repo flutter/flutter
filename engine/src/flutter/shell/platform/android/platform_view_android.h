@@ -93,7 +93,8 @@ class PlatformViewAndroid final : public PlatformView {
   void RegisterImageTexture(
       int64_t texture_id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-      const ImageExternalTexture::ImageLifecycle lifecycle = ImageExternalTexture::ImageLifecycle::kReset);
+      const ImageExternalTexture::ImageLifecycle lifecycle =
+          ImageExternalTexture::ImageLifecycle::kReset);
 
   // |PlatformView|
   void LoadDartDeferredLibrary(

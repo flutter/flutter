@@ -1253,7 +1253,9 @@ public class FlutterRenderer implements TextureRegistry {
   }
 
   private void registerImageTexture(
-      long textureId, @NonNull TextureRegistry.ImageConsumer imageTexture, boolean resetOnBackground) {
+      long textureId,
+      @NonNull TextureRegistry.ImageConsumer imageTexture,
+      boolean resetOnBackground) {
     flutterJNI.registerImageTexture(textureId, imageTexture, resetOnBackground);
   }
 

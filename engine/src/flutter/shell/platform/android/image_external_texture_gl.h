@@ -21,7 +21,8 @@ class ImageExternalTextureGL : public ImageExternalTexture {
       int64_t id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& image_textury_entry,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-      const ImageExternalTexture::ImageLifecycle lifecycle = ImageExternalTexture::ImageLifecycle::kReset);
+      const ImageExternalTexture::ImageLifecycle lifecycle =
+          ImageExternalTexture::ImageLifecycle::kReset);
 
  protected:
   // |ImageExternalTexture|
