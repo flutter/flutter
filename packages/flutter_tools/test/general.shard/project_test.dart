@@ -31,12 +31,6 @@ import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart';
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   // TODO(zanderso): remove once FlutterProject is fully refactored.
   // this is safe since no tests have expectations on the test logger.
   final BufferLogger logger = BufferLogger.test();
@@ -278,59 +272,6 @@ void main() {
         await project.regeneratePlatformSpecificTooling();
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
-
-      testUsingContext(
-        'omitted release mode does not determine dev dependencies',
-        () async {
-          // Create a plugin.
-          await aPluginProject();
-          // Create a project that depends on that plugin.
-          final FlutterProject project = await projectWithPluginDependency();
-          // Don't bother with Android, we just want the manifest.
-          project.directory.childDirectory('android').deleteSync(recursive: true);
-
-          await project.regeneratePlatformSpecificTooling();
-          expect(
-            project.flutterPluginsDependenciesFile.readAsStringSync(),
-            isNot(contains('"dev_dependency":true')),
-          );
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: enableExplicitPackageDependencies,
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
-        },
-      );
-
-      testUsingContext(
-        'specified release mode determines dev dependencies',
-        () async {
-          // Create a plugin.
-          await aPluginProject();
-          // Create a project that depends on that plugin.
-          final FlutterProject project = await projectWithPluginDependency();
-          // Don't bother with Android, we just want the manifest.
-          project.directory.childDirectory('android').deleteSync(recursive: true);
-
-          await project.regeneratePlatformSpecificTooling(releaseMode: true);
-          expect(
-            project.flutterPluginsDependenciesFile.readAsStringSync(),
-            contains('"dev_dependency":true'),
-          );
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: enableExplicitPackageDependencies,
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
-        },
-      );
-
       testUsingContext(
         'injects plugins for macOS',
         () async {
@@ -1786,40 +1727,6 @@ Future<FlutterProject> someProject({
   androidDirectory
       .childFile('AndroidManifest.xml')
       .writeAsStringSync(androidManifestOverride ?? '<manifest></manifest>');
-  return FlutterProject.fromDirectory(directory);
-}
-
-Future<FlutterProject> projectWithPluginDependency() async {
-  final Directory directory = globals.fs.directory('some_project');
-  directory.childDirectory('.dart_tool').childFile('package_config.json')
-    ..createSync(recursive: true)
-    ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "my_plugin",
-      "rootUri": "/plugin_project",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
-  directory.childFile('pubspec.yaml')
-    ..createSync(recursive: true)
-    ..writeAsStringSync('''
-name: app_name
-flutter:
-
-dependencies:
-  my_plugin:
-    sdk: flutter
-''');
-  directory.childDirectory('ios').createSync(recursive: true);
-  final Directory androidDirectory = directory.childDirectory('android')
-    ..createSync(recursive: true);
-  androidDirectory.childFile('AndroidManifest.xml').writeAsStringSync('<manifest></manifest>');
   return FlutterProject.fromDirectory(directory);
 }
 
