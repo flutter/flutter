@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 /// @docImport 'dart:developer';
-///
-/// @docImport 'package:flutter/foundation.dart';
 /// @docImport 'package:flutter/rendering.dart';
 /// @docImport 'package:flutter/widgets.dart';
 library;
@@ -147,7 +145,7 @@ String? connectedVmServiceUri;
 bool debugMaybeDispatchObjectCreated(String library, String className, Object object) {
   if (kFlutterMemoryAllocationsEnabled) {
     FlutterMemoryAllocations.instance.dispatchObjectCreated(
-      library: 'package:flutter/animation.dart',
+      library: library,
       className: className,
       object: object,
     );

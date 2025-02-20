@@ -51,7 +51,7 @@ void main() {
 
   group('Memory allocations', () {
     ObjectEvent? dispatchedEvent;
-    final FocusNode object = FocusNode();
+    final Object object = List<int>.filled(1, 0);
 
     void listener(ObjectEvent event) {
       expect(dispatchedEvent, null);
