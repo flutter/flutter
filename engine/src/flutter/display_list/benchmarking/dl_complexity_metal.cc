@@ -331,8 +331,8 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawDiffRoundRect(
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawRoundSuperellipse(
     const DlRoundSuperellipse& rse) {
-  // Round superellipse is only supported by Impeller.
-  return;
+  // Drawing RSEs on Skia falls back to RRect.
+  drawRoundRect(rse.approximation());
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawPath(

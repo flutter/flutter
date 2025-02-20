@@ -337,8 +337,8 @@ void DisplayListGLComplexityCalculator::GLHelper::drawDiffRoundRect(
 
 void DisplayListGLComplexityCalculator::GLHelper::drawRoundSuperellipse(
     const DlRoundSuperellipse& rse) {
-  // Round superellipse is only supported by Impeller.
-  return;
+  // Drawing RSEs on Skia falls back to RRect.
+  drawRoundRect(rse.approximation());
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawPath(const DlPath& path) {
