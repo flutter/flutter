@@ -172,6 +172,8 @@ class Xcode {
 
   /// Verifies that simctl is installed by trying to run it.
   bool get isSimctlInstalled {
+    // This command will error if additional components need to be installed in
+    // xcode 9.2 and above.
     _isSimctlInstalled ??= _processUtils.exitsHappySync(<String>[
       ...xcrunCommand(),
       'simctl',
