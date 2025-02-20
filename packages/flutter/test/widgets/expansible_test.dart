@@ -171,10 +171,43 @@ void main() {
       ),
     );
 
-    // This text should be offstage while ExpansionTile collapsed
+    // This text should be offstage while the expansible widget is collapsed.
     expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
     expect(find.text('Maintaining State'), findsNothing);
-    // This text shouldn't be there while ExpansionTile collapsed
+    // This text is not displayed while the expansible widget is collapsed.
     expect(find.text('Discarding State'), findsNothing);
+  });
+
+  testWidgets('Respects expansionDuration and expansionCurve', (WidgetTester tester) async {
+    final ExpansibleController<TestExpansibleWidget> controller =
+        ExpansibleController<TestExpansibleWidget>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TestExpansibleWidget(
+          controller: controller,
+          expansionDuration: const Duration(milliseconds: 120),
+          expansionCurve: Curves.easeOut,
+          children: const <Widget>[SizedBox(height: 50.0, child: Placeholder())],
+        ),
+      ),
+    );
+
+    expect(find.byType(Placeholder), findsNothing);
+
+    await tester.tap(find.text('Header'));
+
+    // One pump to start the animation, and more pumps to get to different
+    // points in the animation.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 90.08984375);
+
+    // The animation has completed.
+    await tester.pump(const Duration(milliseconds: 60) + const Duration(microseconds: 1));
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 98.0);
+
+    // SInce the animation has completed, the vertical position doesn't change.
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 98.0);
   });
 }

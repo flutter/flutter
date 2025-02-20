@@ -181,12 +181,12 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     super.dispose();
   }
 
-  @protected
-  @mustCallSuper
   /// Toggles the expansion state of the widget.
   ///
   /// This method is called when the user taps the header or when the
   /// [controller] is used to programmatically expand or collapse the widget.
+  @protected
+  @mustCallSuper
   void toggleExpansion() {
     setState(() {
       _isExpanded = !_isExpanded;
@@ -207,26 +207,26 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     onExpansionChanged?.call(_isExpanded);
   }
 
-  @protected
   /// Lays out the widget with the results of [buildHeader] and [buildBody].
   ///
   /// By default, this method puts the header and body in a [Column], but it can
   /// be overridden to further customize the layout of the header and body.
+  @protected
   Widget buildExpansible(BuildContext context, Widget header, Widget body) {
     return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]);
   }
 
-  @protected
   /// Builds the always displayed header.
   ///
   /// When the header is tapped, call [toggleExpansion] to trigger the
   /// expansion.
+  @protected
   Widget buildHeader(BuildContext context);
 
-  @protected
   /// Builds the collapsible body.
   ///
   /// The body is composed of the list of [children].
+  @protected
   Widget buildBody(BuildContext context);
 
   @override
