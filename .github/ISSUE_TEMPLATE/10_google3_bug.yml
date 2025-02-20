@@ -1,7 +1,8 @@
-name: Report a bug
+name: Report a google3 bug
 description: |
   You found a bug in Flutter causing your application to crash or
   throw an exception, a widget is buggy, or something looks wrong.
+title: "[Google3 Bug]: "
 labels: 'customer: google'
 body:
   - type: markdown
@@ -28,13 +29,13 @@ body:
   - type: checkboxes
     id: priority-indicator
     attributes:
-    label: Help us understand the severity of this issue
-    description: Please only choose one
-    options:
-      - label: causing severe production issues e.g. malfunctions or data loss
-      - label: blocking next binary release
-      - label: blocking a client feature launch within a quarter
-      - label: nice-to-have but does not block a launch within the next quarter
+      label: Help us understand the severity of this issue
+      description: Please only choose one
+      options:
+        - label: causing severe production issues e.g. malfunctions or data loss
+        - label: blocking next binary release
+        - label: blocking a client feature launch within a quarter
+        - label: nice-to-have but does not block a launch within the next quarter
   - type: textarea
     attributes:
       label: Steps to reproduce
