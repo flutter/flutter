@@ -1311,7 +1311,7 @@ void main() {
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    double largeTitleOpacity =
+    final double largeTitleOpacity =
         tester
             .firstRenderObject<RenderAnimatedOpacity>(
               find.ancestor(
