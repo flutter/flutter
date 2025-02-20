@@ -14,6 +14,7 @@
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/geometry/geometry_asserts.h"
+#include "impeller/playground/playground.h"
 #include "impeller/renderer/render_target.h"
 
 namespace impeller {
@@ -276,6 +277,18 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
 
   canvas->Restore();
   EXPECT_TRUE(canvas->RequiresReadback());
+}
+
+TEST_P(AiksTest, SupportsBlitToOnscreen) {
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
+                                 /*requires_readback=*/true);
+
+  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+    EXPECT_FALSE(canvas->SupportsBlitToOnscreen());
+  } else {
+    EXPECT_TRUE(canvas->SupportsBlitToOnscreen());
+  }
 }
 
 }  // namespace testing
