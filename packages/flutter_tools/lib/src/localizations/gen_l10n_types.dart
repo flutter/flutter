@@ -232,7 +232,7 @@ class OptionalParameter {
 class Placeholder {
   Placeholder(this.resourceId, this.name, Map<String, Object?> attributes)
     : example = _stringAttribute(resourceId, name, attributes, 'example'),
-      _type = _stringAttribute(resourceId, name, attributes, 'type'),
+      type = _stringAttribute(resourceId, name, attributes, 'type'),
       format = _stringAttribute(resourceId, name, attributes, 'format'),
       optionalParameters = _optionalParameters(resourceId, name, attributes),
       isCustomDateFormat = _boolAttribute(resourceId, name, attributes, 'isCustomDateFormat');
@@ -244,11 +244,7 @@ class Placeholder {
   final List<OptionalParameter> optionalParameters;
   final bool? isCustomDateFormat;
   // The following will be initialized after all messages are parsed in the Message constructor.
-  String? _type;
-  String? get type => _type;
-  set type(String? value) {
-    _type = value;
-  }
+  String? type;
 
   bool isPlural = false;
   bool isSelect = false;
