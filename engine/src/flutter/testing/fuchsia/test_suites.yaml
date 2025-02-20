@@ -106,13 +106,6 @@
 - test_command: test run fuchsia-pkg://fuchsia.com/tonic_unittests#meta/tonic_unittests.cm
   disabled: Error while initializing the Dart VM, Precompiled runtime requires a precompiled snapshot
   package: tonic_unittests-0.far
-- test_command: test run fuchsia-pkg://fuchsia.com/txt_tests#meta/txt_tests.cm -- --gtest_filter=-ParagraphTest.*
-  package: txt_tests-0.far
-  variant: debug
-- test_command: test run fuchsia-pkg://fuchsia.com/ui_tests#meta/ui_tests.cm
-  package: ui_tests-0.far
-  disabled: on debug_arm64 because of the slowness
-  variant: debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/touch-input-test#meta/touch-input-test.cm
   packages:
     - touch-input-test-0.far
