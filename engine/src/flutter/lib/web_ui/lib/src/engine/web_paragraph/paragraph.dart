@@ -231,7 +231,7 @@ class WebParagraph implements ui.Paragraph {
   @override
   void layout(ui.ParagraphConstraints constraints) {
     try {
-      _layout.performLayout();
+      _layout.performLayout(constraints.width);
     } catch (e) {
       printWarning(
         'Canvas 2D threw an exception while laying '
@@ -243,17 +243,15 @@ class WebParagraph implements ui.Paragraph {
   }
 
   /// Paints this paragraph instance on a [canvas] at the given [offset].
-  void paint(DomCanvasElement canvas, ui.Offset offset) {
-    for (final textCluster in _layout.textClusters) {
-      //_paint.printTextCluster(_layout.textMetrics!, textCluster);
-      _paint.paint(canvas, textCluster, offset.dx, offset.dy);
+  void paintOnCanvas2D(DomCanvasElement canvas, ui.Offset offset) {
+    for (final line in _layout.lines) {
+      _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
     }
   }
 
-  void paintTexture(CanvasKitCanvas canvas, ui.Offset offset) {
-    for (final textCluster in _layout.textClusters) {
-      //_paint.printTextCluster(_layout.textMetrics!, textCluster);
-      _paint.paintTexture(canvas, _layout.textMetrics!, textCluster, offset.dx, offset.dy);
+  void paintOnCanvasKit(CanvasKitCanvas canvas, ui.Offset offset) {
+    for (final line in _layout.lines) {
+      _paint.paintLineOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
     }
   }
 

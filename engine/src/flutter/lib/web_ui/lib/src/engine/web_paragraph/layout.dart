@@ -5,8 +5,11 @@
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+//import '../canvaskit/text_fragmenter.dart';
 
 import 'paragraph.dart';
+import 'wrapper.dart';
+import 'code_unit_flags.dart';
 
 /// A single canvas2d context to use for all text information.
 @visibleForTesting
@@ -23,12 +26,88 @@ class TextLayout {
 
   final WebParagraph paragraph;
 
+  List<CodeUnitFlags> codeUnitFlags = <CodeUnitFlags>[];
   List<WebTextCluster> textClusters = <WebTextCluster>[];
   DomTextMetrics? textMetrics;
+  List<TextRun> runs = <TextRun>[];
+  List<TextLine> lines = <TextLine>[];
 
-  void performLayout() {
+  bool hasFlag(ClusterRange cluster, int flag) {
+    return codeUnitFlags[cluster.start].hasFlag(flag);
+  }
+
+  void performLayout(double width) {
     textContext.font = '50px arial';
     this.textMetrics = textContext.measureText(paragraph.text) as DomTextMetrics;
     this.textClusters = textMetrics!.getTextClusters();
+
+    this.extractUnicodeInfo();
+
+    this.extractRuns();
+
+    final TextWrapper wrapper = TextWrapper(paragraph.text, this);
+    wrapper.breakLines(width);
   }
+
+  void extractUnicodeInfo() {
+    // Fill out the entire flag list
+    for (int i = 0; i <= paragraph.text.length; ++i) {
+       codeUnitFlags.add(CodeUnitFlags(CodeUnitFlags.kNoCodeUnitFlag));
+    }
+    // Get the information from the browser
+    final SegmentationResult result = segmentText(paragraph.text);
+
+    // Fill out grapheme flags
+    for (final grapheme in result.graphemes) {
+      codeUnitFlags[grapheme].graphemeStart = true;
+    }
+    // Fill out word flags
+    for (final word in result.words) {
+      codeUnitFlags[word].wordBreak = true;
+    }
+    // Fill out line break flags
+    for (int index = 0; index < result.breaks.length; index += 2) {
+      final int lineBreak = result.breaks[index];
+      if (result.breaks[index + 1] == 0) {
+        codeUnitFlags[lineBreak].softLineBreak = true;
+      } else {
+        codeUnitFlags[lineBreak].hardLineBreak = true;
+      }
+    }
+    // TODO: Use hardcoded algorithm from C++ SkUnicode
+    // Add whitespaces
+    for (int i = 0; i < paragraph.text.length; ++i) {
+       codeUnitFlags[i].whitespace = paragraph.text[i] == ' ';
+    }
+  }
+
+  void extractRuns() {
+    // Currently we assume run == textCluster
+  }
+}
+
+class ClusterRange {
+  ClusterRange(this.start, this.end);
+  bool isEmpty() { return start == end; }
+  int width() { return end - start; }
+
+  final int start;
+  final int end;
+}
+
+class TextRun {
+  TextRun(this.textLayout, this.clusterRange);
+
+  final TextLayout textLayout;
+  final ClusterRange clusterRange;
+}
+
+class TextLine {
+  TextLine(this.textLayout, this.clusterRange, this.width, this.whitespacesRange, this.whitespacesWidth);
+
+  final TextLayout textLayout;
+  final ClusterRange clusterRange;
+  final ClusterRange whitespacesRange;
+  final double width;
+  final double whitespacesWidth;
 }

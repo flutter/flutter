@@ -10,6 +10,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'paragraph.dart';
+import 'layout.dart';
 
 final DomOffscreenCanvas textCanvas = createDomOffscreenCanvas(500, 500);
 final textContext = textCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
@@ -22,35 +23,26 @@ class TextPaint {
 
   final WebParagraph paragraph;
 
-  void paint(DomCanvasElement canvas, WebTextCluster webTextCluster, double x, double y) {
-    String text = this.paragraph.text.substring(webTextCluster.begin, webTextCluster.end);
-    final DomCanvasRenderingContext2D context = canvas.context2D;
-    context.font = '50px arial';
-    context.fillStyle = 'black';
-    context.fillTextCluster(webTextCluster, x, y);
-    print('fillTextCluster("${text}", ${x}, ${y})\n');
-    /*
-    // Loop through all the lines, for each line, loop through all fragments and
-    // paint them. The fragment objects have enough information to be painted
-    // individually.
-    final List<ParagraphLine> lines = paragraph.lines;
+  void paintLineOnCanvas2D(DomCanvasElement canvas, TextLayout layout, TextLine line, double x, double y) {
 
-    for (final ParagraphLine line in lines) {
-      for (final LayoutFragment fragment in line.fragments) {
-        _paintBackground(canvas, offset, fragment);f
-        _paintText(canvas, offset, line, fragment);
-      }
+    for (int i = line.clusterRange.start; i < line.clusterRange.end; i++) {
+      final clusterText = layout.textClusters[i];
+      String text = this.paragraph.text.substring(clusterText.begin, clusterText.end);
+      final DomCanvasRenderingContext2D context = canvas.context2D;
+      context.font = '50px arial';
+      context.fillStyle = 'black';
+      context.fillTextCluster(clusterText, x, y);
     }
-     */
   }
 
-  void paintTexture(
-    CanvasKitCanvas canvas,
-    DomTextMetrics textMetrics,
-    WebTextCluster webTextCluster,
-    double x,
-    double y,
-  ) {
+  void paintLineOnCanvasKit(CanvasKitCanvas canvas, TextLayout layout, TextLine line, double x, double y) {
+    for (int i = line.clusterRange.start; i < line.clusterRange.end; i++) {
+      final clusterText = layout.textClusters[i];
+      paintCluster(canvas, layout.textMetrics!, clusterText, x, y);
+    }
+  }
+
+  void paintCluster(CanvasKitCanvas canvas, DomTextMetrics textMetrics, WebTextCluster webTextCluster, double x, double y) {
     String text = this.paragraph.text.substring(webTextCluster.begin, webTextCluster.end);
     final DomRectReadOnly box = textMetrics.getActualBoundingBox(
       webTextCluster.begin,
@@ -70,7 +62,6 @@ class TextPaint {
 
     final CkImage ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
     canvas.drawImage(ckImage, ui.Offset(x, y), ui.Paint()..filterQuality = ui.FilterQuality.none);
-    print('drawImage("${text}", ${x}, ${y})\n');
   }
 
   void printTextCluster(DomTextMetrics textMetrics, WebTextCluster webTextCluster) {

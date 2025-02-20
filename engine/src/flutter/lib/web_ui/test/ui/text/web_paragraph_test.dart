@@ -33,7 +33,7 @@ Future<void> testMain() async {
     builder.addText('Lorem ipsum dolor sit');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(ParagraphConstraints(width: double.infinity));
-    paragraph.paint(canvas, Offset(0, 100));
+    paragraph.paintOnCanvas2D(canvas, Offset(0, 100));
 
     context.fillStyle = 'blue';
     context.fillRect(250, 0, 100, 200);
@@ -55,7 +55,7 @@ Future<void> testMain() async {
     builder.addText('Lorem ipsum dolor sit');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(ParagraphConstraints(width: double.infinity));
-    paragraph.paintTexture(canvas as CanvasKitCanvas, Offset(0, 100));
+    paragraph.paintOnCanvasKit(canvas as CanvasKitCanvas, Offset(0, 100));
 
     canvas.drawRect(const Rect.fromLTWH(250, 0, 100, 200), bluePaint);
     await matchGoldenFile('web_paragraph_canvas.png', region: region);
