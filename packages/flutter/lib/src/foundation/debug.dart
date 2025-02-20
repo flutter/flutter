@@ -11,9 +11,8 @@ library;
 
 import 'dart:ui' as ui show Brightness;
 
-import 'package:flutter/foundation.dart';
-
 import 'assertions.dart';
+import 'memory_allocations.dart';
 import 'platform.dart';
 import 'print.dart';
 
