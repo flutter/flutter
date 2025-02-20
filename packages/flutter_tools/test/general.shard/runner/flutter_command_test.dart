@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/run.dart' show RunCommand;
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/pre_run_validator.dart';
@@ -28,7 +29,6 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../../commands.shard/hermetic/run_test.dart' show TestRunCommandThatOnlyValidates;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
@@ -1276,7 +1276,7 @@ flutter:
           "tool exits when $dartDefine is already set in user's environment",
           () async {
             final CommandRunner<void> runner = createTestCommandRunner(
-              TestRunCommandThatOnlyValidates(),
+              _TestRunCommandThatOnlyValidates(),
             );
 
             await expectLater(
@@ -1309,7 +1309,7 @@ flutter:
           'tool exits when $dartDefine is set in --dart-define or --dart-define-from-file',
           () async {
             final CommandRunner<void> runner = createTestCommandRunner(
-              TestRunCommandThatOnlyValidates(),
+              _TestRunCommandThatOnlyValidates(),
             );
 
             expect(
@@ -1569,4 +1569,14 @@ class FakeClock extends Fake implements SystemClock {
   DateTime now() {
     return DateTime.fromMillisecondsSinceEpoch(times.removeAt(0));
   }
+}
+
+class _TestRunCommandThatOnlyValidates extends RunCommand {
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+
+  @override
+  bool get shouldRunPub => false;
 }
