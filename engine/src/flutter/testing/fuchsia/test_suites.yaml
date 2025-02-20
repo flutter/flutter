@@ -14,6 +14,7 @@
 - test_command: test run fuchsia-pkg://fuchsia.com/common_cpp_unittests#meta/common_cpp_unittests.cm
   package: common_cpp_unittests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/dart_plugin_registrant_unittests#meta/dart_plugin_registrant_unittests.cm
+  disabled: Error while initializing the Dart VM, Precompiled runtime requires a precompiled snapshot
   package: dart_plugin_registrant_unittests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/dart-aot-runner-integration-test#meta/dart-aot-runner-integration-test.cm
   packages:
@@ -44,6 +45,7 @@
 - test_command: test run fuchsia-pkg://fuchsia.com/display_list_tests#meta/display_list_tests.cm
   package: display_list_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/embedder_a11y_unittests#meta/embedder_a11y_unittests.cm
+  disabled: Error while initializing the Dart VM, Precompiled runtime requires a precompiled snapshot
   package: embedder_a11y_unittests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/embedder_proctable_unittests#meta/embedder_proctable_unittests.cm
   package: embedder_proctable_unittests-0.far
@@ -73,6 +75,7 @@
     - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/mouse-input/mouse-input-view/mouse-input-view/mouse-input-view.far
 - test_command: test run fuchsia-pkg://fuchsia.com/no_dart_plugin_registrant_unittests#meta/no_dart_plugin_registrant_unittests.cm
+  disabled: Error while initializing the Dart VM, Precompiled runtime requires a precompiled snapshot
   package: no_dart_plugin_registrant_unittests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/runtime_tests#meta/runtime_tests.cm
   package: runtime_tests-0.far
@@ -90,6 +93,7 @@
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/text-input/text-input-view/text-input-view/text-input-view.far
   variant: debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/tonic_unittests#meta/tonic_unittests.cm
+  disabled: Error while initializing the Dart VM, Precompiled runtime requires a precompiled snapshot
   package: tonic_unittests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/txt_tests#meta/txt_tests.cm -- --gtest_filter=-ParagraphTest.*
   package: txt_tests-0.far
