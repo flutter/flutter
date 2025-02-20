@@ -65,9 +65,14 @@ class SensitiveContentSetting {
   ContentSensitivity? _defaultContentSensitivitySetting;
 
   @visibleForTesting
+  /// [SensitiveContentSetting] instance for the widget tree.
   static final SensitiveContentSetting instance = SensitiveContentSetting._();
 
   @visibleForTesting
+  /// The state of content sensitivity in the widget tree.
+  ///
+  /// Contains the number of widgets with each [ContentSensitivity] level and
+  /// the current [ContentSensitivity] setting.
   ContentSensitivityState? getContentSenstivityState() {
     return _contentSensitivityState;
   }
@@ -81,8 +86,14 @@ class SensitiveContentSetting {
   Future<void> _register(ContentSensitivity desiredSensitivityLevel) async {
     // Set default content sensitivity level as set in native Android. This will be
     // auto sensitive if it is otherwise unset by the developer.
+    final int? currentContentSensitivityId = await _sensitiveContentService.getContentSensitivity();
+    if (currentContentSensitivityId == null) {
+      // TODO(camsim99): Add not supported method and boolean to check with.
+      // Sensitive content not supported on this device (Android API < 35).
+      return;
+    }
     _defaultContentSensitivitySetting ??= ContentSensitivity.getContentSensitivityById(
-      await _sensitiveContentService.getContentSensitivity(),
+      currentContentSensitivityId,
     );
     _contentSensitivityState ??= ContentSensitivityState(_defaultContentSensitivitySetting!);
 
@@ -107,6 +118,11 @@ class SensitiveContentSetting {
   }
 
   void _unregister(ContentSensitivity widgetSensitivityLevel) {
+    if (_contentSensitivityState == null) {
+      // SensitiveContent not supported for device.
+      return;
+    }
+
     // Update SensitiveContent widget count for those with
     // desiredSensitivityLevel.
     _contentSensitivityState!.removeWidgetWithContentSensitivity(widgetSensitivityLevel);

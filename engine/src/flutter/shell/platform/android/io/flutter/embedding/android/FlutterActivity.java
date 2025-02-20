@@ -1325,7 +1325,7 @@ public class FlutterActivity extends Activity
   public SensitiveContentPlugin provideSensitiveContentPlugin(
       @Nullable Activity activity, @NonNull FlutterEngine flutterEngine) {
     return new SensitiveContentPlugin(
-        activity, FLUTTER_VIEW_ID, flutterEngine.getSensitiveContentChannel());
+        FLUTTER_VIEW_ID, activity, flutterEngine.getSensitiveContentChannel());
   }
 
   /**

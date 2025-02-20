@@ -28,8 +28,8 @@ public class SensitiveContentPlugin
   private final SensitiveContentChannel mSensitiveContentChannel;
 
   public SensitiveContentPlugin(
-      @NonNull Activity activity,
       @NonNull int flutterViewId,
+      @NonNull Activity activity,
       @NonNull SensitiveContentChannel sensitiveContentChannel) {
     mFlutterActivity = activity;
     mFlutterViewId = flutterViewId;
@@ -47,6 +47,7 @@ public class SensitiveContentPlugin
       @NonNull int requestedContentSensitivity, @NonNull MethodChannel.Result result) {
     if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
       // This feature is only available on > API 35.
+      result.success(null);
       return;
     }
 
@@ -77,6 +78,7 @@ public class SensitiveContentPlugin
   public void getContentSensitivity(@NonNull MethodChannel.Result result) {
     if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
       // This feature is only available on > API 35.
+      result.success(null);
       return;
     }
 
