@@ -386,6 +386,17 @@ class EngineSceneBuilder implements ui.SceneBuilder {
   }) => pushLayer<ClipRRectLayer>(ClipRRectLayer(ClipRRectOperation(rrect, clipBehavior)));
 
   @override
+  ui.ClipRSuperellipseEngineLayer pushClipRSuperellipse(
+    ui.RSuperellipse rse, {
+    required ui.Clip clipBehavior,
+    ui.ClipRSuperellipseEngineLayer? oldLayer,
+  }) {
+    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    return pushLayer<ClipRRectLayer>(ClipRRectLayer(ClipRRectOperation(rrect, clipBehavior)));
+  }
+
+  @override
   ui.ClipRectEngineLayer pushClipRect(
     ui.Rect rect, {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
