@@ -5,7 +5,7 @@
 
 # Please keep the list alphabetical order.
 
-- test_command: test run fuchsia-pkg://fuchsia.com/assets_unittests#meta/assets_untitests.cm
+- test_command: test run fuchsia-pkg://fuchsia.com/assets_unittests#meta/assets_unittests.cm
   package: assets_unittests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/client_wrapper_unittests#meta/client_wrapper_unittests.cm
   package: client_wrapper_unittests-0.far
