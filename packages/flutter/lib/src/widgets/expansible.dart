@@ -22,6 +22,9 @@ import 'transitions.dart';
 /// the expansible widget to rebuild, so they may not be called from
 /// a build method.
 class ExpansibleController<S extends StatefulWidget> {
+  /// Creates a controller to be used with [ExpansibleStateMixin.controller].
+  ExpansibleController();
+
   ExpansibleStateMixin<S>? _state;
 
   /// Whether the expansible widget built with this controller is in expanded
@@ -148,11 +151,13 @@ mixin ExpansibleStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 
   /// If provided, the controller can be used to programmatically expand and
   /// collapse the widget.
-  ExpansibleController<S> get controller;
+  ExpansibleController<S> get controller => _fallbackController;
+  late ExpansibleController<S> _fallbackController;
 
   @override
   void initState() {
     super.initState();
+    _fallbackController = ExpansibleController<S>();
     _animationController = AnimationController(duration: expansionDuration, vsync: this);
     _isExpanded = PageStorage.maybeOf(context)?.readState(context) as bool? ?? initiallyExpanded;
     if (_isExpanded) {
