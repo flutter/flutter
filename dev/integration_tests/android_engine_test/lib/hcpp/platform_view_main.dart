@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
+import '../platform_view/_shared.dart';
 import '../src/allow_list_devices.dart';
 
 void main() async {
@@ -27,32 +28,11 @@ void main() async {
 
   // Run on full screen.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-  runApp(const MainApp());
-}
-
-final class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  // This should appear as the yellow line over a blue box. The
-  // green box should not be visible unless the platform view has not loaded yet.
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Stack(
-        alignment: AlignmentDirectional.center,
-        children: <Widget>[
-          SizedBox(width: 190, height: 190, child: ColoredBox(color: Colors.green)),
-          SizedBox(
-            width: 200,
-            height: 200,
-            child: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),
-          ),
-          SizedBox(width: 800, height: 25, child: ColoredBox(color: Colors.yellow)),
-        ],
-      ),
-    );
-  }
+  runApp(
+    const MainApp(
+      platformView: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),
+    ),
+  );
 }
 
 final class _HybridCompositionAndroidPlatformView extends StatelessWidget {
@@ -60,7 +40,6 @@ final class _HybridCompositionAndroidPlatformView extends StatelessWidget {
 
   final String viewType;
 
-  // TODO(jonahwilliams): swap this out with new platform view APIs.
   @override
   Widget build(BuildContext context) {
     return PlatformViewLink(

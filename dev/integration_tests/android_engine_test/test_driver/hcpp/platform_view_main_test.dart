@@ -41,6 +41,8 @@ void main() async {
   });
 
   tearDownAll(() async {
+    await flutterDriver.tap(find.byValueKey('AddOverlay'));
+
     await nativeDriver.close();
     await flutterDriver.close();
   });
@@ -70,6 +72,18 @@ void main() async {
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile('$goldenPrefix.platform_view_portait_rotated_back.png'),
+    );
+  }, timeout: Timeout.none);
+
+  // Note: this doesn't reset the app so if additional test cases are added
+  // make sure to press the button again.
+  test('should remove overlay when platform view is removed', () async {
+    await flutterDriver.tap(find.byValueKey('RemoveOverlay'));
+    await Future<void>.delayed(const Duration(seconds: 1));
+
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.removed_overlay.png'),
     );
   }, timeout: Timeout.none);
 }
