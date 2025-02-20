@@ -5,10 +5,8 @@
 import 'dart:convert';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -43,20 +41,16 @@ void main() {
     late File registrant;
 
     // Environment overrides
-    late Artifacts artifacts;
     late FileSystem fileSystem;
     late ProcessManager processManager;
     late BuildSystem buildSystem;
-    late ProcessUtils processUtils;
     late BufferLogger logger;
 
     setUp(() {
       // Prepare environment overrides
       fileSystem = MemoryFileSystem.test();
-      artifacts = Artifacts.test(fileSystem: fileSystem);
       processManager = FakeProcessManager.any();
       logger = BufferLogger.test();
-      processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
       buildSystem = TestBuildSystem.all(BuildResult(success: true));
       // Write some initial state into our testing filesystem
@@ -74,13 +68,11 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-            artifacts: artifacts,
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
             logger: BufferLogger.test(),
             osUtils: FakeOperatingSystemUtils(),
-            processUtils: processUtils,
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -106,13 +98,11 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-            artifacts: artifacts,
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
             logger: logger,
             osUtils: FakeOperatingSystemUtils(),
-            processUtils: processUtils,
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -137,12 +127,10 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-            artifacts: artifacts,
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
             logger: logger,
-            processUtils: processUtils,
             osUtils: FakeOperatingSystemUtils(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
@@ -170,12 +158,10 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-            artifacts: artifacts,
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
             logger: logger,
-            processUtils: processUtils,
             osUtils: FakeOperatingSystemUtils(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
@@ -202,12 +188,10 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-            artifacts: artifacts,
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
             logger: logger,
-            processUtils: processUtils,
             osUtils: FakeOperatingSystemUtils(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);

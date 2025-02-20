@@ -879,7 +879,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     });
   }
 
-  void handlePressed(MenuController controller) {
+  void handlePressed(MenuController controller, {bool focusForKeyboard = true}) {
     if (controller.isOpen) {
       currentHighlight = null;
       controller.close();
@@ -889,7 +889,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         _enableFilter = false;
       }
       controller.open();
-      _internalFocudeNode.requestFocus();
+      if (focusForKeyboard) {
+        _internalFocudeNode.requestFocus();
+      }
     }
     setState(() {});
   }
@@ -967,11 +969,19 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     final double? anchorWidth = getWidth(_anchorKey);
     if (widget.width != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
-        minimumSize: MaterialStatePropertyAll<Size?>(Size(widget.width!, 0.0)),
+        minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
+          final double? effectiveMaximumWidth =
+              effectiveMenuStyle!.maximumSize?.resolve(states)?.width;
+          return Size(math.min(widget.width!, effectiveMaximumWidth ?? 0.0), 0.0);
+        }),
       );
     } else if (anchorWidth != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
-        minimumSize: MaterialStatePropertyAll<Size?>(Size(anchorWidth, 0.0)),
+        minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
+          final double? effectiveMaximumWidth =
+              effectiveMenuStyle!.maximumSize?.resolve(states)?.width;
+          return Size(math.min(anchorWidth, effectiveMaximumWidth ?? 0.0), 0.0);
+        }),
       );
     }
 
@@ -1039,7 +1049,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               !widget.enabled
                   ? null
                   : () {
-                    handlePressed(controller);
+                    handlePressed(controller, focusForKeyboard: !canRequestFocus());
                   },
           onChanged: (String text) {
             controller.open();
@@ -1071,11 +1081,24 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                 ? textField
                 : _DropdownMenuBody(
                   width: widget.width,
+                  // The children, except the text field, are used to compute the preferred width,
+                  // which is the width of the longest children, plus the width of trailingButton
+                  // and leadingButton.
+                  //
+                  // See _RenderDropdownMenuBody layout logic.
                   children: <Widget>[
                     textField,
                     ..._initialMenu!.map(
                       (Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item),
                     ),
+                    if (widget.label != null)
+                      ExcludeSemantics(
+                        child: Padding(
+                          // See RenderEditable.floatingCursorAddedMargin for the default horizontal padding.
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: DefaultTextStyle(style: effectiveTextStyle!, child: widget.label!),
+                        ),
+                      ),
                     trailingButton,
                     leadingButton,
                   ],
@@ -1309,9 +1332,11 @@ class _RenderDropdownMenuBody extends RenderBox
         continue;
       }
       final double maxIntrinsicWidth = child.getMinIntrinsicWidth(height);
+      // Add the width of leading icon.
       if (child == lastChild) {
         width += maxIntrinsicWidth;
       }
+      // Add the width of trailing icon.
       if (child == childBefore(lastChild!)) {
         width += maxIntrinsicWidth;
       }
@@ -1336,11 +1361,11 @@ class _RenderDropdownMenuBody extends RenderBox
         continue;
       }
       final double maxIntrinsicWidth = child.getMaxIntrinsicWidth(height);
-      // Add the width of leading Icon.
+      // Add the width of leading icon.
       if (child == lastChild) {
         width += maxIntrinsicWidth;
       }
-      // Add the width of trailing Icon.
+      // Add the width of trailing icon.
       if (child == childBefore(lastChild!)) {
         width += maxIntrinsicWidth;
       }

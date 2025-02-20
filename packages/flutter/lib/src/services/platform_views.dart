@@ -888,12 +888,6 @@ abstract class AndroidViewController extends PlatformViewController {
   /// call's future has completed.
   bool get requiresViewComposition => false;
 
-  /// True if the experimental hybrid composition controller is enabled.
-  ///
-  /// This value may change during [create], but will not change after that
-  /// call's future has completed.
-  bool get useNewHybridComposition => false;
-
   /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
   /// to the view.
   ///
@@ -1163,6 +1157,11 @@ class HybridAndroidViewController extends AndroidViewController {
 
   final _AndroidViewControllerInternals _internals = _Hybrid2AndroidViewControllerInternals();
 
+  /// Perform a runtime check to determine if HCPP mode is supported on the
+  /// current device.
+  static Future<bool> checkIfSupported() =>
+      _Hybrid2AndroidViewControllerInternals.checkIfSurfaceControlEnabled();
+
   @override
   bool get _createRequiresSize => false;
 
@@ -1178,9 +1177,6 @@ class HybridAndroidViewController extends AndroidViewController {
       useNewController: true,
     );
   }
-
-  @override
-  bool get useNewHybridComposition => true;
 
   @override
   int? get textureId {
@@ -1205,6 +1201,11 @@ class HybridAndroidViewController extends AndroidViewController {
   @override
   Future<void> setOffset(Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
+  }
+
+  @override
+  Future<void> sendMotionEvent(AndroidMotionEvent event) async {
+    await SystemChannels.platform_views_2.invokeMethod<dynamic>('touch', event._asList(viewId));
   }
 }
 
@@ -1444,7 +1445,18 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
   }
 }
 
+// The HCPP platform view controller.
+//
+// This is only supported via an opt in on Impeller Android.
 class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInternals {
+  // Determine if HCPP can be used.
+  static Future<bool> checkIfSurfaceControlEnabled() async {
+    return (await SystemChannels.platform_views_2.invokeMethod<bool>(
+      'isSurfaceControlEnabled',
+      <String, Object?>{},
+    ))!;
+  }
+
   @override
   int get textureId {
     throw UnimplementedError('Not supported for hybrid composition.');

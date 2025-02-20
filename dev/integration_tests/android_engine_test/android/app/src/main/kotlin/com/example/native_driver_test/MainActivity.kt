@@ -32,17 +32,6 @@ class MainActivity : FlutterActivity() {
                 add(NativeDriverSupportPlugin())
             }
 
-        // TODO(jonahwilliams): make platform view controllers share platform view registry.
-        flutterEngine
-            .platformViewsController2
-            .registry
-            .apply {
-                registerViewFactory("blue_orange_gradient_platform_view", BlueOrangeGradientPlatformViewFactory())
-                registerViewFactory("blue_orange_gradient_surface_view_platform_view", BlueOrangeGradientSurfaceViewPlatformViewFactory())
-                registerViewFactory("changing_color_button_platform_view", ChangingColorButtonPlatformViewFactory())
-                registerViewFactory("box_platform_view", BoxPlatformViewFactory())
-            }
-
         flutterEngine
             .platformViewsController
             .registry

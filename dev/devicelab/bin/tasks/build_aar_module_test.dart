@@ -93,7 +93,7 @@ Future<void> main() async {
       section('Build release AAR');
 
       await inDirectory(projectDir, () async {
-        await flutter('build', options: <String>['aar', '--verbose']);
+        await flutter('build', options: <String>['aar']);
       });
 
       final String repoPath = path.join(projectDir.path, 'build', 'host', 'outputs', 'repo');

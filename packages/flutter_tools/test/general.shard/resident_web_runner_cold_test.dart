@@ -9,6 +9,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -67,6 +69,9 @@ name: my_app
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
@@ -101,6 +106,9 @@ name: my_app
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
@@ -131,6 +139,9 @@ name: my_app
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
@@ -160,6 +171,9 @@ name: my_app
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
@@ -193,6 +207,9 @@ name: my_app
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,

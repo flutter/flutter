@@ -1616,6 +1616,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
+                          role: SemanticsRole.alertDialog,
                           children: <TestSemantics>[
                             TestSemantics(id: 5, label: 'title', textDirection: TextDirection.ltr),
                             // The content semantics does not merge into the semantics
@@ -1803,6 +1804,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
+                          role: SemanticsRole.dialog,
                           children: <TestSemantics>[
                             // Title semantics does not merge into the semantics
                             // node 4.
@@ -2817,6 +2819,43 @@ void main() {
     // The dialog is showing and the text field still has focus.
     expect(find.text(dialogText), findsOneWidget);
     expect(getTextFieldFocusNode()?.hasFocus, true);
+  });
+
+  testWidgets('requestFocus works correctly in showDialog.', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(body: TextField(focusNode: focusNode)),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+
+    showDialog<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: true,
+      builder: (BuildContext context) => const Text('dialog'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, true);
+    expect(focusNode.hasFocus, false);
+
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    showDialog<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: false,
+      builder: (BuildContext context) => const Text('dialog'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
+    expect(focusNode.hasFocus, true);
   });
 }
 
