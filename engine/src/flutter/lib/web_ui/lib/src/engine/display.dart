@@ -44,6 +44,10 @@ class EngineFlutterDisplay extends ui.Display {
     // Guard against WebOS returning 0.
     ratio = (ratio == 0.0) ? 1.0 : ratio;
 
+    // The device pixel ratio is also affected by the scale factor of the
+    // viewport. For example, on Chrome for Android, if the page is requested
+    // with "Request Desktop Site" enabled, then the viewport size will be
+    // very large, with the viewport scale less than 1.
     final double scale = domWindow.visualViewport?.scale ?? 1.0;
     return ratio * scale;
   }
