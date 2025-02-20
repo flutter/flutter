@@ -5565,65 +5565,62 @@ void main() {
               home: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   builderSetState = setState;
-                return Navigator(
-                  onDidRemovePage: (Page<void> page) {
-                    final bool pageIsPresent = pages.where((_Page testPage) {
-                      return testPage.toString() == page.name;
-                    }).isNotEmpty;
-                    if (!pageIsPresent) {
-                      return;
-                    }
-                    setState(() {
-                      pages.removeWhere((_Page testPage) {
-                        return testPage.toString() == page.name;
+                  return Navigator(
+                    onDidRemovePage: (Page<void> page) {
+                      final bool pageIsPresent =
+                          pages.where((_Page testPage) {
+                            return testPage.toString() == page.name;
+                          }).isNotEmpty;
+                      if (!pageIsPresent) {
+                        return;
+                      }
+                      setState(() {
+                        pages.removeWhere((_Page testPage) {
+                          return testPage.toString() == page.name;
+                        });
                       });
-                    });
-                  },
-                  pages: pages.map((_Page page) {
-                    switch (page) {
-                      case _Page.home:
-                        return MaterialPage<void>(
-                          name: _Page.home.toString(),
-                          child: _LinksPage(
-                            title: 'Home page',
-                            buttons: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    pages.add(_Page.one);
-                                  });
-                                },
-                                child: const Text('Go to _Page.one'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    pages.add(_Page.noPop);
-                                  });
-                                },
-                                child: const Text('Go to _Page.noPop'),
-                              ),
-                            ],
-                          ),
-                        );
-                      case _Page.one:
-                        return MaterialPage<void>(
-                          name: _Page.one.toString(),
-                          child: const _LinksPage(
-                            title: 'Page one',
-                          ),
-                        );
-                      case _Page.noPop:
-                        return MaterialPage<void>(
-                          name: _Page.noPop.toString(),
-                          child: const _LinksPage(
-                            title: 'Cannot pop page',
-                            canPop: false,
-                          ),
-                        );
-                    }
-                  }).toList(),
-                );
+                    },
+                    pages:
+                        pages.map((_Page page) {
+                          switch (page) {
+                            case _Page.home:
+                              return MaterialPage<void>(
+                                name: _Page.home.toString(),
+                                child: _LinksPage(
+                                  title: 'Home page',
+                                  buttons: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          pages.add(_Page.one);
+                                        });
+                                      },
+                                      child: const Text('Go to _Page.one'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          pages.add(_Page.noPop);
+                                        });
+                                      },
+                                      child: const Text('Go to _Page.noPop'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            case _Page.one:
+                              return MaterialPage<void>(
+                                name: _Page.one.toString(),
+                                child: const _LinksPage(title: 'Page one'),
+                              );
+                            case _Page.noPop:
+                              return MaterialPage<void>(
+                                name: _Page.noPop.toString(),
+                                child: const _LinksPage(title: 'Cannot pop page', canPop: false),
+                              );
+                          }
+                        }).toList(),
+                  );
                 },
               ),
             ),

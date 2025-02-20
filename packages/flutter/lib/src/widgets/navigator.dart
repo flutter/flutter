@@ -3747,17 +3747,18 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
   void _handleHistoryChanged() {
+    // If this Navigator handles back gestures, then rebuild when canPop changes
+    // so that the PopScope can be updated.
     final bool navigatorCanPop = canPop();
-    if (navigatorCanPop != _lastCanPop) {
+    if (_handlesBackGestures && navigatorCanPop != _lastCanPop) {
       ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
         if (!mounted) {
           return;
         }
-        setState(() {
-          _lastCanPop = navigatorCanPop;
-        });
+        setState(() {});
       });
     }
+    _lastCanPop = navigatorCanPop;
 
     final bool routeBlocksPop;
     if (!navigatorCanPop) {
@@ -3957,8 +3958,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // If this is a nested Navigator, handle system backs so that the root
     // Navigator doesn't get all of them.
-    _handlesBackGestures = widget.handlesBacksWhenNested
-        && Navigator.maybeOf(context, rootNavigator: true) != this;
+    _handlesBackGestures =
+        widget.handlesBacksWhenNested && Navigator.maybeOf(context, rootNavigator: true) != this;
   }
 
   /// Dispose all lingering router entries immediately.
