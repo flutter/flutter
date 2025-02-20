@@ -45,7 +45,7 @@ public class SensitiveContentPlugin
   @Override
   public void setContentSensitivity(
       @NonNull int requestedContentSensitivity, @NonNull MethodChannel.Result result) {
-    if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
+    if (!isSupported()) {
       // This feature is only available on > API 35.
       result.success(null);
       return;
@@ -76,7 +76,7 @@ public class SensitiveContentPlugin
    */
   @Override
   public void getContentSensitivity(@NonNull MethodChannel.Result result) {
-    if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
+    if (!isSupported()) {
       // This feature is only available on > API 35.
       result.success(null);
       return;
@@ -90,11 +90,15 @@ public class SensitiveContentPlugin
   /**
    * Returns whether or not marking content sensitivity is supported on the device.
    *
-   * It is supported on devices running Android API < 35.
-  */
+   * <p>It is supported on devices running Android API < 35.
+   */
   @Override
   public void isSupported(@NonNull MethodChannel.Result result) {
-    result.success(Build.VERSION.SDK_INT < API_LEVELS.API_35);
+    result.success(isSupported());
+  }
+
+  private boolean isSupported() {
+    return Build.VERSION.SDK_INT >= API_LEVELS.API_35;
   }
 
   /**

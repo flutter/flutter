@@ -9,48 +9,25 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 
-import org.mockito.ArgumentCaptor;
 import android.app.Activity;
 import android.view.View;
-import android.view.ViewStructure;
-import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InputMethodSubtype;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
-import io.flutter.embedding.engine.loader.FlutterLoader;
-import io.flutter.embedding.engine.renderer.FlutterRenderer;
-import io.flutter.plugin.common.JSONMethodCodec;
+import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.common.StandardMethodCodec;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
+import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-import org.robolectric.shadow.api.Shadow;
-import org.robolectric.shadows.ShadowAutofillManager;
-import org.robolectric.shadows.ShadowBuild;
-import org.robolectric.shadows.ShadowInputMethodManager;
-import org.robolectric.Robolectric;
-import android.os.Build;
-import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
-import io.flutter.plugin.common.MethodChannel;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Test;
-import io.flutter.plugin.common.BinaryMessenger;
-import io.flutter.plugin.common.StandardMethodCodec;
 
 @RunWith(AndroidJUnit4.class)
 public class SensitiveContentPluginTest {
@@ -72,7 +49,8 @@ public class SensitiveContentPluginTest {
     DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
     SensitiveContentChannel.SensitiveContentMethodHandler mockHandler =
         mock(SensitiveContentChannel.SensitiveContentMethodHandler.class);
-    SensitiveContentChannel sensitiveContentChannel = new SensitiveContentChannel(mockBinaryMessenger);
+    SensitiveContentChannel sensitiveContentChannel =
+        new SensitiveContentChannel(mockBinaryMessenger);
 
     sensitiveContentChannel.setSensitiveContentMethodHandler(mockHandler);
 
@@ -84,9 +62,7 @@ public class SensitiveContentPluginTest {
     final int contentSensitivityLevel = 2;
 
     sendToBinaryMessageHandler(
-        binaryMessageHandler,
-        "SensitiveContent.setContentSensitivity",
-        contentSensitivityLevel);
+        binaryMessageHandler, "SensitiveContent.setContentSensitivity", contentSensitivityLevel);
 
     verify(mockHandler)
         .setContentSensitivity(eq(contentSensitivityLevel), any(MethodChannel.Result.class));
@@ -99,7 +75,9 @@ public class SensitiveContentPluginTest {
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(new SensitiveContentPlugin(fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        spy(
+            new SensitiveContentPlugin(
+                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
 
     sensitiveContentPlugin.setContentSensitivity(1, mockResult);
@@ -110,12 +88,15 @@ public class SensitiveContentPluginTest {
 
   @Test
   @Config(minSdk = 35)
-  public void setContentSensitivty_setsContentSensitivityWhenRunningAboveApi35WhenSettingDifferentStateAsCurrent() {
+  public void
+      setContentSensitivty_setsContentSensitivityWhenRunningAboveApi35WhenSettingDifferentStateAsCurrent() {
     final int fakeFlutterViewId = 51;
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(new SensitiveContentPlugin(fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        spy(
+            new SensitiveContentPlugin(
+                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
     final View mockFlutterView = mock(View.class);
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
     final int testCurrentContentSensitivityValue = 0;
@@ -133,12 +114,15 @@ public class SensitiveContentPluginTest {
 
   @Test
   @Config(minSdk = 35)
-  public void setContentSensitivty_doesNotSetContentSensitivityWhenRunningAboveApi35WhenSettingSameStateAsCurrent() {
+  public void
+      setContentSensitivty_doesNotSetContentSensitivityWhenRunningAboveApi35WhenSettingSameStateAsCurrent() {
     final int fakeFlutterViewId = 13;
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(new SensitiveContentPlugin(fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        spy(
+            new SensitiveContentPlugin(
+                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
     final View mockFlutterView = mock(View.class);
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
     final int testCurrentContentSensitivityValue = 1;
@@ -161,7 +145,9 @@ public class SensitiveContentPluginTest {
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(new SensitiveContentPlugin(fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        spy(
+            new SensitiveContentPlugin(
+                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
 
     sensitiveContentPlugin.getContentSensitivity(mockResult);
@@ -170,14 +156,16 @@ public class SensitiveContentPluginTest {
     verify(mockResult).success(null);
   }
 
-@Test
+  @Test
   @Config(minSdk = 35)
   public void getContentSensitivity_getsContentSensitivityWhenRunningAboveApi35() {
     final int fakeFlutterViewId = 80;
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(new SensitiveContentPlugin(fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        spy(
+            new SensitiveContentPlugin(
+                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
     final View mockFlutterView = mock(View.class);
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
     final int testCurrentContentSensitivityValue = 2;
@@ -190,4 +178,37 @@ public class SensitiveContentPluginTest {
     verify(mockResult).success(testCurrentContentSensitivityValue);
   }
 
+  @Test
+  @Config(maxSdk = 34)
+  public void isSupported_returnsFalseWhenRunningBelowApi35() {
+    final int fakeFlutterViewId = 13;
+    final Activity mockFlutterActivity = mock(Activity.class);
+    final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
+    final SensitiveContentPlugin sensitiveContentPlugin =
+        spy(
+            new SensitiveContentPlugin(
+                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+    final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
+
+    sensitiveContentPlugin.isSupported(mockResult);
+
+    verify(mockResult).success(false);
+  }
+
+  @Test
+  @Config(minSdk = 35)
+  public void isSupported_returnsTrueWhenRunningAboveApi35() {
+    final int fakeFlutterViewId = 13;
+    final Activity mockFlutterActivity = mock(Activity.class);
+    final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
+    final SensitiveContentPlugin sensitiveContentPlugin =
+        spy(
+            new SensitiveContentPlugin(
+                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+    final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
+
+    sensitiveContentPlugin.isSupported(mockResult);
+
+    verify(mockResult).success(true);
+  }
 }

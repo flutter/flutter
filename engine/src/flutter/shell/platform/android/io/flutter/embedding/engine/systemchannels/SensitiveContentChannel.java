@@ -94,6 +94,6 @@ public class SensitiveContentChannel {
     void getContentSensitivity(@NonNull MethodChannel.Result result);
 
     /** Returns whether or not marking content sensitivity is supported on the device. */
-    @Override
-    public void isSupported(@NonNull MethodChannel.Result result);
+    void isSupported(@NonNull MethodChannel.Result result);
+  }
 }
