@@ -269,6 +269,73 @@ TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
   kill_latch.Wait();
 }
 
+TEST_F(EmbedderTest, IgnoresStaleTasks) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  auto ui_task_runner = CreateNewThread("test_ui_thread");
+  auto platform_task_runner = CreateNewThread("test_platform_thread");
+  static std::mutex engine_mutex;
+  UniqueEngine engine;
+  FlutterEngine engine_ptr;
+
+  EmbedderTestTaskRunner test_ui_task_runner(
+      ui_task_runner, [&](FlutterTask task) {
+        // The check for engine.is_valid() is intentionally absent here.
+        // FlutterEngineRunTask must be able to detect and ignore stale tasks
+        // without crashing even if the engine pointer is not null.
+        // Because the engine is destroyed on platform thread,
+        // relying solely on engine.is_valid() in UI thread is not safe.
+        FlutterEngineRunTask(engine_ptr, &task);
+      });
+  EmbedderTestTaskRunner test_platform_task_runner(
+      platform_task_runner, [&](FlutterTask task) {
+        std::scoped_lock lock(engine_mutex);
+        if (!engine.is_valid()) {
+          return;
+        }
+        FlutterEngineRunTask(engine.get(), &task);
+      });
+
+  fml::AutoResetWaitableEvent init_latch;
+
+  platform_task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto ui_task_runner_description =
+        test_ui_task_runner.GetFlutterTaskRunnerDescription();
+    const auto platform_task_runner_description =
+        test_platform_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetUITaskRunner(&ui_task_runner_description);
+    builder.SetPlatformTaskRunner(&platform_task_runner_description);
+    {
+      std::scoped_lock lock(engine_mutex);
+      engine = builder.InitializeEngine();
+    }
+    init_latch.Signal();
+  });
+
+  init_latch.Wait();
+  engine_ptr = engine.get();
+
+  auto flutter_engine = reinterpret_cast<EmbedderEngine*>(engine.get());
+
+  // Schedule task on UI thread that will likely run after the engine has shut
+  // down.
+  flutter_engine->GetTaskRunners().GetUITaskRunner()->PostDelayedTask(
+      []() {}, fml::TimeDelta::FromMilliseconds(50));
+
+  fml::AutoResetWaitableEvent kill_latch;
+  platform_task_runner->PostTask([&] {
+    engine.reset();
+    platform_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  });
+  kill_latch.Wait();
+
+  // Ensure that the schedule task indeed runs.
+  kill_latch.Reset();
+  ui_task_runner->PostDelayedTask([&]() { kill_latch.Signal(); },
+                                  fml::TimeDelta::FromMilliseconds(50));
+  kill_latch.Wait();
+}
+
 TEST_F(EmbedderTest, MergedPlatformUIThread) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   auto task_runner = CreateNewThread("test_thread");

@@ -44,6 +44,10 @@ class PlaygroundImplVK final : public PlaygroundImpl {
   std::unique_ptr<Surface> AcquireSurfaceFrame(
       std::shared_ptr<Context> context) override;
 
+  // |PlaygroundImpl|
+  Playground::VKProcAddressResolver CreateVKProcAddressResolver()
+      const override;
+
   PlaygroundImplVK(const PlaygroundImplVK&) = delete;
 
   PlaygroundImplVK& operator=(const PlaygroundImplVK&) = delete;
