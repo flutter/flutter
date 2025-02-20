@@ -80,7 +80,6 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
 }
 
 static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
-    bool use_software_rendering,
     const flutter::TaskRunners& task_runners,
     AndroidRenderingAPI android_rendering_api,
     bool enable_opengl_gpu_tracing,
@@ -113,7 +112,6 @@ PlatformViewAndroid::PlatformViewAndroid(
           task_runners,
           jni_facade,
           CreateAndroidContext(
-              rendering_api == AndroidRenderingAPI::kSoftware,
               task_runners,
               rendering_api,
               delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,
