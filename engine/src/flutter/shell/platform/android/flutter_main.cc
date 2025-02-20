@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "shell/platform/android/android_rendering_selector.h"
 #define FML_USED_ON_EMBEDDER
 
 #include <android/log.h>
@@ -23,6 +22,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
+#include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "impeller/base/validation.h"
