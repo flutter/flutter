@@ -1418,20 +1418,6 @@ abstract class FlutterCommand extends Command<void> {
     final String? defaultFlavor = project.manifest.defaultFlavor;
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
-    if (flavor != null) {
-      if (globals.platform.environment['FLUTTER_APP_FLAVOR'] != null) {
-        throwToolExit(
-          'FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.',
-        );
-      }
-      if (dartDefines.any((String define) => define.startsWith('FLUTTER_APP_FLAVOR'))) {
-        throwToolExit(
-          'FLUTTER_APP_FLAVOR is used by the framework and cannot be '
-          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
-        );
-      }
-      dartDefines.add('FLUTTER_APP_FLAVOR=$flavor');
-    }
 
     return BuildInfo(
       buildMode,
@@ -1911,17 +1897,9 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       return;
     }
 
+    releaseMode ??= getBuildMode().isRelease;
     await project.regeneratePlatformSpecificTooling(
-      // TODO(matanlurey): Move this up, i.e. releaseMode ??= getBuildMode().release.
-      //
-      // As it stands, this is a breaking change until https://github.com/flutter/flutter/issues/162704 is
-      // implemented, as the build_ios_framework command (and similar) will start querying
-      // for getBuildMode(), causing an error (meta-build commands like build ios-framework do not have
-      // a single build mode). Once ios-framework and macos-framework are migrated, then this can be
-      // cleaned up.
-      releaseMode:
-          featureFlags.isExplicitPackageDependenciesEnabled &&
-          (releaseMode ?? getBuildMode().isRelease),
+      releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && releaseMode,
     );
   }
 
