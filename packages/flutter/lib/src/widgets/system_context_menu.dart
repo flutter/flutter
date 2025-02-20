@@ -117,7 +117,6 @@ class SystemContextMenu extends StatefulWidget {
     return MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false;
   }
 
-  // TODO(justinmc): Test?
   /// The default [items] for the given [EditableTextState].
   ///
   /// For example, [IOSSystemContextMenuItemCopy] will only be included when the
@@ -194,7 +193,6 @@ sealed class IOSSystemContextMenuItem {
   /// platform.
   String? get title => null;
 
-  // TODO(justinmc): Test a raw usage of SystemContextMenuController that uses this.
   /// Returns the representation of this class used by method channels.
   IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations);
 

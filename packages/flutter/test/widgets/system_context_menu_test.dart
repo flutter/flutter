@@ -627,10 +627,75 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
-  test('Can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItem', () {
-    const IOSSystemContextMenuItemCopy item = IOSSystemContextMenuItemCopy();
-    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-    item.getData(localizations);
-    // TODO(justinmc): Test all of these, including checking the title for default title ones. Also, remove the TODOs in the main code about these tests.
-  });
+  test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemCopy',
+    () {
+      const IOSSystemContextMenuItemCopy item = IOSSystemContextMenuItemCopy();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      expect(item.getData(localizations), const IOSSystemContextMenuItemDataCopy());
+    },
+  );
+
+  test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemCut',
+    () {
+      const IOSSystemContextMenuItemCut item = IOSSystemContextMenuItemCut();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      expect(item.getData(localizations), const IOSSystemContextMenuItemDataCut());
+    },
+  );
+
+  test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemPaste',
+    () {
+      const IOSSystemContextMenuItemPaste item = IOSSystemContextMenuItemPaste();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      expect(item.getData(localizations), const IOSSystemContextMenuItemDataPaste());
+    },
+  );
+
+  test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemSelectAll',
+    () {
+      const IOSSystemContextMenuItemSelectAll item = IOSSystemContextMenuItemSelectAll();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      expect(item.getData(localizations), const IOSSystemContextMenuItemDataSelectAll());
+    },
+  );
+
+  test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemLookUp',
+    () {
+      const IOSSystemContextMenuItemLookUp item = IOSSystemContextMenuItemLookUp();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      expect(
+        item.getData(localizations),
+        IOSSystemContextMenuItemDataLookUp(title: localizations.lookUpButtonLabel),
+      );
+    },
+  );
+
+  test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemSearchWeb',
+    () {
+      const IOSSystemContextMenuItemSearchWeb item = IOSSystemContextMenuItemSearchWeb();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      expect(
+        item.getData(localizations),
+        IOSSystemContextMenuItemDataSearchWeb(title: localizations.searchWebButtonLabel),
+      );
+    },
+  );
+
+  test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemShare',
+    () {
+      const IOSSystemContextMenuItemShare item = IOSSystemContextMenuItemShare();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      expect(
+        item.getData(localizations),
+        IOSSystemContextMenuItemDataShare(title: localizations.shareButtonLabel),
+      );
+    },
+  );
 }
