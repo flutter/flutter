@@ -10,8 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '_goldens_io.dart' if (dart.library.js_interop) '_goldens_web.dart'
-    as flutter_goldens;
+import '_goldens_io.dart' if (dart.library.js_interop) '_goldens_web.dart' as flutter_goldens;
 
 /// If true, leak tracking is enabled for all `testWidgets`.
 ///
@@ -44,9 +43,11 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   if (_isLeakTrackingEnabled()) {
     LeakTesting.enable();
     LeakTracking.warnForUnsupportedPlatforms = false;
-    LeakTesting.settings = LeakTesting.settings.withIgnored(
-      createdByTestHelpers: true,
-    );
+    // Customized link to documentation on how to troubleshoot leaks,
+    // to print in the error message.
+    LeakTracking.troubleshootingDocumentationLink =
+        'https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Leak-tracking.md';
+    LeakTesting.settings = LeakTesting.settings.withIgnored(createdByTestHelpers: true);
   }
 
   // Enable golden file testing using Skia Gold.

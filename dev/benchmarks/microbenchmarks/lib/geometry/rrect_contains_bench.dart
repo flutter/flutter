@@ -28,3 +28,10 @@ Future<void> execute() async {
   );
   printer.printToStdout();
 }
+
+//
+//  Note that the benchmark is normally run by benchmark_collection.dart.
+//
+Future<void> main() async {
+  return execute();
+}

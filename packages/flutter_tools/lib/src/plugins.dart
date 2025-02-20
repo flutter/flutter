@@ -19,6 +19,7 @@ class Plugin {
     this.flutterConstraint,
     required this.dependencies,
     required this.isDirectDependency,
+    required this.isDevDependency,
     this.implementsPackage,
   });
 
@@ -68,6 +69,7 @@ class Plugin {
     VersionConstraint? flutterConstraint,
     List<String> dependencies, {
     required FileSystem fileSystem,
+    required bool isDevDependency,
     Set<String>? appDependencies,
   }) {
     final List<String> errors = validatePluginYaml(pluginYaml);
@@ -82,6 +84,7 @@ class Plugin {
         flutterConstraint,
         dependencies,
         fileSystem,
+        isDevDependency: isDevDependency,
         appDependencies != null && appDependencies.contains(name),
       );
     }
@@ -92,6 +95,7 @@ class Plugin {
       flutterConstraint,
       dependencies,
       fileSystem,
+      isDevDependency: isDevDependency,
       appDependencies != null && appDependencies.contains(name),
     );
   }
@@ -103,13 +107,16 @@ class Plugin {
     VersionConstraint? flutterConstraint,
     List<String> dependencies,
     FileSystem fileSystem,
-    bool isDirectDependency,
-  ) {
-    assert (pluginYaml['platforms'] != null, 'Invalid multi-platform plugin specification $name.');
+    bool isDirectDependency, {
+    required bool isDevDependency,
+  }) {
+    assert(pluginYaml['platforms'] != null, 'Invalid multi-platform plugin specification $name.');
     final YamlMap platformsYaml = pluginYaml['platforms'] as YamlMap;
 
-    assert (_validateMultiPlatformYaml(platformsYaml).isEmpty,
-            'Invalid multi-platform plugin specification $name.');
+    assert(
+      _validateMultiPlatformYaml(platformsYaml).isEmpty,
+      'Invalid multi-platform plugin specification $name.',
+    );
 
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
 
@@ -123,28 +130,38 @@ class Plugin {
     }
 
     if (_providesImplementationForPlatform(platformsYaml, IOSPlugin.kConfigKey)) {
-      platforms[IOSPlugin.kConfigKey] =
-          IOSPlugin.fromYaml(name, platformsYaml[IOSPlugin.kConfigKey] as YamlMap);
+      platforms[IOSPlugin.kConfigKey] = IOSPlugin.fromYaml(
+        name,
+        platformsYaml[IOSPlugin.kConfigKey] as YamlMap,
+      );
     }
 
     if (_providesImplementationForPlatform(platformsYaml, LinuxPlugin.kConfigKey)) {
-      platforms[LinuxPlugin.kConfigKey] =
-          LinuxPlugin.fromYaml(name, platformsYaml[LinuxPlugin.kConfigKey] as YamlMap);
+      platforms[LinuxPlugin.kConfigKey] = LinuxPlugin.fromYaml(
+        name,
+        platformsYaml[LinuxPlugin.kConfigKey] as YamlMap,
+      );
     }
 
     if (_providesImplementationForPlatform(platformsYaml, MacOSPlugin.kConfigKey)) {
-      platforms[MacOSPlugin.kConfigKey] =
-          MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey] as YamlMap);
+      platforms[MacOSPlugin.kConfigKey] = MacOSPlugin.fromYaml(
+        name,
+        platformsYaml[MacOSPlugin.kConfigKey] as YamlMap,
+      );
     }
 
     if (_providesImplementationForPlatform(platformsYaml, WebPlugin.kConfigKey)) {
-      platforms[WebPlugin.kConfigKey] =
-          WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey] as YamlMap);
+      platforms[WebPlugin.kConfigKey] = WebPlugin.fromYaml(
+        name,
+        platformsYaml[WebPlugin.kConfigKey] as YamlMap,
+      );
     }
 
     if (_providesImplementationForPlatform(platformsYaml, WindowsPlugin.kConfigKey)) {
-      platforms[WindowsPlugin.kConfigKey] =
-          WindowsPlugin.fromYaml(name, platformsYaml[WindowsPlugin.kConfigKey] as YamlMap);
+      platforms[WindowsPlugin.kConfigKey] = WindowsPlugin.fromYaml(
+        name,
+        platformsYaml[WindowsPlugin.kConfigKey] as YamlMap,
+      );
     }
 
     // TODO(stuartmorgan): Consider merging web into this common handling; the
@@ -158,20 +175,21 @@ class Plugin {
       WindowsPlugin.kConfigKey,
     ];
     final Map<String, String> defaultPackages = <String, String>{};
-    final Map<String, DartPluginClassAndFilePair> dartPluginClasses = <String, DartPluginClassAndFilePair>{};
+    final Map<String, DartPluginClassAndFilePair> dartPluginClasses =
+        <String, DartPluginClassAndFilePair>{};
     for (final String platform in sharedHandlingPlatforms) {
-        final String? defaultPackage = _getDefaultPackageForPlatform(platformsYaml, platform);
-        if (defaultPackage != null) {
-          defaultPackages[platform] = defaultPackage;
-        }
-        final DartPluginClassAndFilePair? dartPair = _getPluginDartClassForPlatform(
-          platformsYaml,
-          platformKey: platform,
-          pluginName: name,
-        );
-        if (dartPair != null) {
-          dartPluginClasses[platform] = dartPair;
-        }
+      final String? defaultPackage = _getDefaultPackageForPlatform(platformsYaml, platform);
+      if (defaultPackage != null) {
+        defaultPackages[platform] = defaultPackage;
+      }
+      final DartPluginClassAndFilePair? dartPair = _getPluginDartClassForPlatform(
+        platformsYaml,
+        platformKey: platform,
+        pluginName: name,
+      );
+      if (dartPair != null) {
+        dartPluginClasses[platform] = dartPair;
+      }
     }
 
     return Plugin(
@@ -184,6 +202,7 @@ class Plugin {
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
       implementsPackage: pluginYaml['implements'] != null ? pluginYaml['implements'] as String : '',
+      isDevDependency: isDevDependency,
     );
   }
 
@@ -194,8 +213,9 @@ class Plugin {
     VersionConstraint? flutterConstraint,
     List<String> dependencies,
     FileSystem fileSystem,
-    bool isDirectDependency,
-  ) {
+    bool isDirectDependency, {
+    required bool isDevDependency,
+  }) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String? pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
     if (pluginClass != null) {
@@ -211,12 +231,11 @@ class Plugin {
       }
 
       final String iosPrefix = pluginYaml['iosPrefix'] as String? ?? '';
-      platforms[IOSPlugin.kConfigKey] =
-          IOSPlugin(
-            name: name,
-            classPrefix: iosPrefix,
-            pluginClass: pluginClass,
-          );
+      platforms[IOSPlugin.kConfigKey] = IOSPlugin(
+        name: name,
+        classPrefix: iosPrefix,
+        pluginClass: pluginClass,
+      );
     }
     return Plugin(
       name: name,
@@ -227,6 +246,7 @@ class Plugin {
       flutterConstraint: flutterConstraint,
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
+      isDevDependency: isDevDependency,
     );
   }
 
@@ -239,7 +259,11 @@ class Plugin {
   ///       pluginClass: SamplePlugin
   ///     ios:
   ///       pluginClass: SamplePlugin
-  static YamlMap createPlatformsYamlMap(List<String> platforms, String pluginClass, String androidPackage) {
+  static YamlMap createPlatformsYamlMap(
+    List<String> platforms,
+    String pluginClass,
+    String androidPackage,
+  ) {
     final Map<String, dynamic> map = <String, dynamic>{};
     for (final String platform in platforms) {
       map[platform] = <String, String>{
@@ -281,7 +305,8 @@ class Plugin {
 
     if (usesNewPluginFormat) {
       if (yaml['platforms'] != null && yaml['platforms'] is! YamlMap) {
-        const String errorMessage = 'flutter.plugin.platforms should be a map with the platform name as the key';
+        const String errorMessage =
+            'flutter.plugin.platforms should be a map with the platform name as the key';
         return <String>[errorMessage];
       }
       return _validateMultiPlatformYaml(yaml['platforms'] as YamlMap?);
@@ -326,10 +351,8 @@ class Plugin {
     return <String>[
       if (yaml['androidPackage'] is! String?)
         'The "androidPackage" must either be null or a string.',
-      if (yaml['iosPrefix'] is! String?)
-        'The "iosPrefix" must either be null or a string.',
-      if (yaml['pluginClass'] is! String?)
-        'The "pluginClass" must either be null or a string.',
+      if (yaml['iosPrefix'] is! String?) 'The "iosPrefix" must either be null or a string.',
+      if (yaml['pluginClass'] is! String?) 'The "pluginClass" must either be null or a string.',
     ];
   }
 
@@ -354,7 +377,7 @@ class Plugin {
   }
 
   static DartPluginClassAndFilePair? _getPluginDartClassForPlatform(
-    YamlMap platformsYaml,{
+    YamlMap platformsYaml, {
     required String platformKey,
     required String pluginName,
   }) {
@@ -363,9 +386,8 @@ class Plugin {
     }
     if ((platformsYaml[platformKey] as YamlMap).containsKey(kDartPluginClass)) {
       final String dartClass = (platformsYaml[platformKey] as YamlMap)[kDartPluginClass] as String;
-      final String dartFileName = (platformsYaml[platformKey] as YamlMap)[kDartFileName]
-        as String?
-        ?? '$pluginName.dart';
+      final String dartFileName =
+          (platformsYaml[platformKey] as YamlMap)[kDartFileName] as String? ?? '$pluginName.dart';
       return (dartClass: dartClass, dartFileName: dartFileName);
     }
     return null;
@@ -407,22 +429,24 @@ class Plugin {
   /// If [false], the plugin is a dependency of another plugin.
   final bool isDirectDependency;
 
+  /// Whether this plugin is exclusively used as a dev dependency of the app.
+  ///
+  /// If [false], the plugin is either:
+  /// - _Not_ a dev dependency
+  /// - _Not_ a dev dependency of some dependency that itself is not a dev
+  ///   dependency
+  ///
+  /// Dev dependencies are intended to be stripped out in release builds.
+  final bool isDevDependency;
+
   /// Expected path to the plugin's Package.swift. Returns null if the plugin
   /// does not support the [platform] or the [platform] is not iOS or macOS.
-  String? pluginSwiftPackageManifestPath(
-    FileSystem fileSystem,
-    String platform,
-  ) {
+  String? pluginSwiftPackageManifestPath(FileSystem fileSystem, String platform) {
     final String? platformDirectoryName = _darwinPluginDirectoryName(platform);
     if (platformDirectoryName == null) {
       return null;
     }
-    return fileSystem.path.join(
-      path,
-      platformDirectoryName,
-      name,
-      'Package.swift',
-    );
+    return fileSystem.path.join(path, platformDirectoryName, name, 'Package.swift');
   }
 
   /// Expected path to the plugin's podspec. Returns null if the plugin does
@@ -438,15 +462,13 @@ class Plugin {
   String? _darwinPluginDirectoryName(String platform) {
     final PluginPlatform? platformPlugin = platforms[platform];
     if (platformPlugin == null ||
-        (platform != IOSPlugin.kConfigKey &&
-            platform != MacOSPlugin.kConfigKey)) {
+        (platform != IOSPlugin.kConfigKey && platform != MacOSPlugin.kConfigKey)) {
       return null;
     }
 
     // iOS and macOS code can be shared in "darwin" directory, otherwise
     // respectively in "ios" or "macos" directories.
-    if (platformPlugin is DarwinPlugin &&
-        (platformPlugin as DarwinPlugin).sharedDarwinSource) {
+    if (platformPlugin is DarwinPlugin && (platformPlugin as DarwinPlugin).sharedDarwinSource) {
       return 'darwin';
     }
     return platform;
@@ -455,10 +477,7 @@ class Plugin {
 
 /// Metadata associated with the resolution of a platform interface of a plugin.
 class PluginInterfaceResolution {
-  PluginInterfaceResolution({
-    required this.plugin,
-    required this.platform,
-  });
+  PluginInterfaceResolution({required this.plugin, required this.platform});
 
   /// The plugin.
   final Plugin plugin;
@@ -466,7 +485,7 @@ class PluginInterfaceResolution {
   final String platform;
 
   Map<String, String> toMap() {
-    return <String, String> {
+    return <String, String>{
       'pluginName': plugin.name,
       'platform': platform,
       'dartClass': plugin.pluginDartClassPlatforms[platform]?.dartClass ?? '',

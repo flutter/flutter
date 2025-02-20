@@ -150,7 +150,7 @@
   "menuDismissLabel": "Opusti meni",
   "lookUpButtonLabel": "Pogled gor",
   "searchWebButtonLabel": "Iskanje v spletu",
-  "shareButtonLabel": "Deli …",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Deli",
+  "clearButtonTooltip": "Počisti besedilo",
+  "selectedDateLabel": "Izbrano"
 }

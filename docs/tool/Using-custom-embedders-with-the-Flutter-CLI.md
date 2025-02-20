@@ -59,7 +59,7 @@ Successfully added custom device to config file at
 "/home/hannes/.config/flutter/custom_devices.json".
 ```
 
-If your device is a little more complicated to setup, for example if your device is the one the flutter SDK is running on, you can configure it by editing the config file directly. (As mentioned above, I heavily recommend VS Code for that)
+If your device is a little more complicated to set up, for example if your device is the one the flutter SDK is running on, you can configure it by editing the config file directly. (As mentioned above, I heavily recommend VS Code for that)
 
 ### That's it
 

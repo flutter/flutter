@@ -1,6 +1,6 @@
 {
   "scriptCategory": "dense",
-  "timeOfDayFormat": "ah:mm",
+  "timeOfDayFormat": "h:mm a",
   "openAppDrawerTooltip": "नेविगेशन मेन्यू खोलें",
   "backButtonTooltip": "वापस जाएं",
   "closeButtonTooltip": "बंद करें",
@@ -144,7 +144,7 @@
   "menuDismissLabel": "मेन्यू खारिज करें",
   "lookUpButtonLabel": "लुक अप बटन",
   "searchWebButtonLabel": "वेब पर खोजें",
-  "shareButtonLabel": "शेयर करें…",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "शेयर करें",
+  "clearButtonTooltip": "टेक्स्ट मिटाएं",
+  "selectedDateLabel": "चुनी गई"
 }

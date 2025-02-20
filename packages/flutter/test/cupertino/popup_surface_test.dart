@@ -12,8 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FilterTest extends StatelessWidget {
-  const _FilterTest(Widget child, {this.brightness = Brightness.light})
-      : _child = child;
+  const _FilterTest(Widget child, {this.brightness = Brightness.light}) : _child = child;
   final Brightness brightness;
   final Widget _child;
 
@@ -38,20 +37,18 @@ class _FilterTest extends StatelessWidget {
                     height: tileHeight,
                     width: tileWidth,
                     child: ColoredBox(
-                      color: HSVColor.fromAHSV(
-                        0.5 + a / 8,
-                        h * 45,
-                        0.5 + s / 8,
-                        0.5 + b / 8,
-                      ).toColor(),
+                      color:
+                          HSVColor.fromAHSV(
+                            0.5 + a / 8,
+                            h * 45,
+                            0.5 + s / 8,
+                            0.5 + b / 8,
+                          ).toColor(),
                     ),
                   ),
           Padding(
             padding: const EdgeInsets.all(32),
-            child: CupertinoTheme(
-              data: CupertinoThemeData(brightness: brightness),
-              child: _child,
-            ),
+            child: CupertinoTheme(data: CupertinoThemeData(brightness: brightness), child: _child),
           ),
         ],
       ),
@@ -60,16 +57,21 @@ class _FilterTest extends StatelessWidget {
 }
 
 void main() {
+  void disableVibranceForTest() {
+    CupertinoPopupSurface.debugIsVibrancePainted = false;
+    addTearDown(() {
+      CupertinoPopupSurface.debugIsVibrancePainted = true;
+    });
+  }
+
   // Golden displays the color filter effect of the CupertinoPopupSurface
   // when the ambient brightness is light.
-  testWidgets('Brightness.light color filter', (WidgetTester tester) async {
+  testWidgets(
+    'Brightness.light color filter',
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const _FilterTest(
-          CupertinoPopupSurface(
-            blurSigma: 0,
-            isSurfacePainted: false,
-            child: SizedBox(),
-          ),
+          CupertinoPopupSurface(blurSigma: 0, isSurfacePainted: false, child: SizedBox()),
         ),
       );
 
@@ -83,14 +85,12 @@ void main() {
 
   // Golden displays the color filter effect of the CupertinoPopupSurface
   // when the ambient brightness is dark.
-  testWidgets('Brightness.dark color filter', (WidgetTester tester) async {
+  testWidgets(
+    'Brightness.dark color filter',
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const _FilterTest(
-          CupertinoPopupSurface(
-            blurSigma: 0,
-            isSurfacePainted: false,
-            child: SizedBox(),
-          ),
+          CupertinoPopupSurface(blurSigma: 0, isSurfacePainted: false, child: SizedBox()),
           brightness: Brightness.dark,
         ),
       );
@@ -105,15 +105,13 @@ void main() {
 
   // Golden displays color tiles without CupertinoPopupSurface being
   // displayed.
-  testWidgets('Setting debugIsVibrancePainted to false removes the color filter', (WidgetTester tester) async {
+  testWidgets('Setting debugIsVibrancePainted to false removes the color filter', (
+    WidgetTester tester,
+  ) async {
+    disableVibranceForTest();
     await tester.pumpWidget(
       const _FilterTest(
-        CupertinoPopupSurface(
-          blurSigma: 0,
-          isSurfacePainted: false,
-          debugIsVibrancePainted: false,
-          child: SizedBox(),
-        ),
+        CupertinoPopupSurface(blurSigma: 0, isSurfacePainted: false, child: SizedBox()),
       ),
     );
 
@@ -136,14 +134,9 @@ void main() {
   // Golden displays the surface color of the CupertinoPopupSurface
   // in light mode.
   testWidgets('Brightness.light surface color', (WidgetTester tester) async {
+    disableVibranceForTest();
     await tester.pumpWidget(
-       const _FilterTest(
-        CupertinoPopupSurface(
-          blurSigma: 0,
-          debugIsVibrancePainted: false,
-          child: SizedBox(),
-        ),
-      ),
+      const _FilterTest(CupertinoPopupSurface(blurSigma: 0, child: SizedBox())),
     );
 
     await expectLater(
@@ -155,57 +148,48 @@ void main() {
   // Golden displays the surface color of the CupertinoPopupSurface
   // in dark mode.
   testWidgets('Brightness.dark surface color', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const _FilterTest(
-          CupertinoPopupSurface(
-            blurSigma: 0,
-            debugIsVibrancePainted: false,
-            child: SizedBox(),
-          ),
-          brightness: Brightness.dark,
-        ),
-      );
+    disableVibranceForTest();
+    await tester.pumpWidget(
+      const _FilterTest(
+        CupertinoPopupSurface(blurSigma: 0, child: SizedBox()),
+        brightness: Brightness.dark,
+      ),
+    );
 
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('cupertinoPopupSurface.surface-color.dark.png'),
-      );
-    },
-  );
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoPopupSurface.surface-color.dark.png'),
+    );
+  });
 
   // Golden displays a CupertinoPopupSurface with the color removed. The result
   // should only display color tiles.
-  testWidgets('Setting isSurfacePainted to false removes the surface color', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const _FilterTest(
-          CupertinoPopupSurface(
-            blurSigma: 0,
-            isSurfacePainted: false,
-            debugIsVibrancePainted: false,
-            child: SizedBox(),
-          ),
-          brightness: Brightness.dark,
-        ),
-      );
+  testWidgets('Setting isSurfacePainted to false removes the surface color', (
+    WidgetTester tester,
+  ) async {
+    disableVibranceForTest();
+    await tester.pumpWidget(
+      const _FilterTest(
+        CupertinoPopupSurface(blurSigma: 0, isSurfacePainted: false, child: SizedBox()),
+        brightness: Brightness.dark,
+      ),
+    );
 
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('cupertinoPopupSurface.surface-color.removed.png'),
-      );
-    },
-  );
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoPopupSurface.surface-color.removed.png'),
+    );
+  });
 
   // Goldens display a CupertinoPopupSurface with no vibrance or surface
   // color, with blur sigmas of 5 and 30 (default).
-  testWidgets('Positive blurSigma applies blur', (WidgetTester tester) async {
+  testWidgets(
+    'Positive blurSigma applies blur',
+    (WidgetTester tester) async {
+      disableVibranceForTest();
       await tester.pumpWidget(
         const _FilterTest(
-          CupertinoPopupSurface(
-            isSurfacePainted: false,
-            debugIsVibrancePainted: false,
-            blurSigma: 5,
-            child: SizedBox(),
-          ),
+          CupertinoPopupSurface(isSurfacePainted: false, blurSigma: 5, child: SizedBox()),
         ),
       );
 
@@ -215,13 +199,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        const _FilterTest(
-          CupertinoPopupSurface(
-            isSurfacePainted: false,
-            debugIsVibrancePainted: false,
-            child: SizedBox(),
-          ),
-        ),
+        const _FilterTest(CupertinoPopupSurface(isSurfacePainted: false, child: SizedBox())),
       );
 
       await expectLater(
@@ -237,14 +215,10 @@ void main() {
   // the blur sigma is 0 and vibrance and surface are not painted, no popup
   // surface is displayed.
   testWidgets('Setting blurSigma to zero removes blur', (WidgetTester tester) async {
+    disableVibranceForTest();
     await tester.pumpWidget(
       const _FilterTest(
-        CupertinoPopupSurface(
-          isSurfacePainted: false,
-          debugIsVibrancePainted: false,
-          blurSigma: 0,
-          child: SizedBox(),
-        ),
+        CupertinoPopupSurface(isSurfacePainted: false, blurSigma: 0, child: SizedBox()),
       ),
     );
 
@@ -265,27 +239,18 @@ void main() {
 
     await tester.pumpWidget(
       const _FilterTest(
-        CupertinoPopupSurface(
-          isSurfacePainted: false,
-          debugIsVibrancePainted: false,
-          blurSigma: 0,
-          child: SizedBox(),
-        ),
+        CupertinoPopupSurface(isSurfacePainted: false, blurSigma: 0, child: SizedBox()),
       ),
     );
   });
 
   testWidgets('Setting a blurSigma to a negative number throws', (WidgetTester tester) async {
-     try {
+    try {
+      disableVibranceForTest();
       await tester.pumpWidget(
         _FilterTest(
-          CupertinoPopupSurface(
-            isSurfacePainted: false,
-            debugIsVibrancePainted: false,
-            blurSigma: -1,
-            child: const SizedBox(),
-          ),
-      ),
+          CupertinoPopupSurface(isSurfacePainted: false, blurSigma: -1, child: const SizedBox()),
+        ),
       );
 
       fail('CupertinoPopupSurface did not throw when provided a negative blur sigma.');
@@ -296,6 +261,44 @@ void main() {
       );
     }
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/154887.
+  testWidgets(
+    "Applying a FadeTransition to the CupertinoPopupSurface doesn't cause transparency",
+    (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(
+        duration: const Duration(milliseconds: 100),
+        vsync: const TestVSync(),
+      );
+      addTearDown(controller.dispose);
+      controller.forward();
+
+      await tester.pumpWidget(
+        _FilterTest(
+          FadeTransition(
+            opacity: controller,
+            child: const CupertinoPopupSurface(child: SizedBox()),
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Golden should display a CupertinoPopupSurface with no transparency
+      // directly underneath the surface. A small amount of transparency should be
+      // present on the upper-left corner of the screen.
+      //
+      // If transparency (gray and white grid) is present underneath the surface,
+      // the blendmode is being incorrectly applied.
+      await expectLater(
+        find.byType(CupertinoApp),
+        matchesGoldenFile('cupertinoPopupSurface.blendmode-fix.0.png'),
+      );
+
+      await tester.pumpAndSettle();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 
   // Golden displays a CupertinoPopupSurface with all enabled features.
   //
@@ -308,34 +311,23 @@ void main() {
   // pixels are blurred with an ImageFilter.blur. This test verifies that this
   // order does not change.
   testWidgets('Saturation is applied before blur', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const _FilterTest(
-        CupertinoPopupSurface(
-          child: SizedBox(),
-        ),
-      ),
-    );
+    await tester.pumpWidget(const _FilterTest(CupertinoPopupSurface(child: SizedBox())));
 
     await expectLater(
       find.byType(CupertinoApp),
       matchesGoldenFile('cupertinoPopupSurface.composition.png'),
     );
 
-     await tester.pumpWidget(
+    disableVibranceForTest();
+    await tester.pumpWidget(
       const _FilterTest(
         Stack(
           fit: StackFit.expand,
           children: <Widget>[
-          CupertinoPopupSurface(
-            isSurfacePainted: false,
-            blurSigma: 0,
-            child: SizedBox(),
-          ),
-          CupertinoPopupSurface(
-            debugIsVibrancePainted: false,
-            child: SizedBox(),
-          )
-        ]),
+            CupertinoPopupSurface(isSurfacePainted: false, blurSigma: 0, child: SizedBox()),
+            CupertinoPopupSurface(child: SizedBox()),
+          ],
+        ),
       ),
     );
 

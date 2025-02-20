@@ -8,6 +8,7 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
+import '../base/dds.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -32,6 +33,7 @@ class IntegrationTestTestDevice implements TestDevice {
   final DebuggingOptions debuggingOptions;
   final String? userIdentifier;
   final CompileExpression? compileExpression;
+  late final DartDevelopmentService _ddsLauncher = DartDevelopmentService(logger: globals.logger);
 
   ApplicationPackage? _applicationPackage;
   final Completer<void> _finished = Completer<void>();
@@ -62,19 +64,34 @@ class IntegrationTestTestDevice implements TestDevice {
     if (!launchResult.started) {
       throw TestDeviceException('Unable to start the app on the device.', StackTrace.current);
     }
-    final Uri? vmServiceUri = launchResult.vmServiceUri;
+    Uri? vmServiceUri = launchResult.vmServiceUri;
     if (vmServiceUri == null) {
-      throw TestDeviceException('The VM Service is not available on the test device.', StackTrace.current);
+      throw TestDeviceException(
+        'The VM Service is not available on the test device.',
+        StackTrace.current,
+      );
     }
 
     // No need to set up the log reader because the logs are captured and
     // streamed to the package:test_core runner.
 
+    if (debuggingOptions.enableDds) {
+      globals.printTrace('test $id: Starting Dart Development Service');
+      await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
+        vmServiceUri,
+        debuggingOptions: debuggingOptions,
+      );
+      globals.printTrace(
+        'test $id: Dart Development Service started at ${_ddsLauncher.uri}, forwarding to VM service at $vmServiceUri.',
+      );
+      vmServiceUri = _ddsLauncher.uri;
+    }
+
     _gotProcessVmServiceUri.complete(vmServiceUri);
 
     globals.printTrace('test $id: Connecting to vm service');
     final FlutterVmService vmService = await connectToVmService(
-      vmServiceUri,
+      vmServiceUri!,
       logger: globals.logger,
       compileExpression: compileExpression,
     ).timeout(
@@ -82,7 +99,9 @@ class IntegrationTestTestDevice implements TestDevice {
       onTimeout: () => throw TimeoutException('Connecting to the VM Service timed out.'),
     );
 
-    globals.printTrace('test $id: Finding the correct isolate with the integration test service extension');
+    globals.printTrace(
+      'test $id: Finding the correct isolate with the integration test service extension',
+    );
     final vm_service.IsolateRef isolateRef = await vmService.findExtensionIsolate(
       kIntegrationTestMethod,
     );
@@ -98,9 +117,7 @@ class IntegrationTestTestDevice implements TestDevice {
       vmService.service.callServiceExtension(
         kIntegrationTestMethod,
         isolateId: isolateRef.id,
-        args: <String, String>{
-          kIntegrationTestData: event,
-        },
+        args: <String, String>{kIntegrationTestData: event},
       );
     });
 
@@ -108,9 +125,7 @@ class IntegrationTestTestDevice implements TestDevice {
       (String s) => controller.local.sink.add(s),
       onError: (Object error, StackTrace stack) => controller.local.sink.addError(error, stack),
     );
-    unawaited(vmService.service.onDone.whenComplete(
-      () => controller.local.sink.close(),
-    ));
+    unawaited(vmService.service.onDone.whenComplete(() => controller.local.sink.close()));
 
     return controller.foreign;
   }
@@ -131,6 +146,7 @@ class IntegrationTestTestDevice implements TestDevice {
     }
 
     await device.dispose();
+    _ddsLauncher.shutdown();
     _finished.complete();
   }
 

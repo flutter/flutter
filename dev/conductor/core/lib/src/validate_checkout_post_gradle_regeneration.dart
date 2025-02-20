@@ -13,7 +13,7 @@ sealed class CheckoutStatePostGradleRegeneration {
       return const NoDiff();
     }
 
-    final List<String> changes = gitStatusOutput.trim().split('\n');
+    final List<String> changes = gitStatusOutput.split('\n');
     final List<String> changedPaths = <String>[];
     for (final String line in changes) {
       final RegExpMatch? match = pattern.firstMatch(line);
@@ -23,10 +23,11 @@ sealed class CheckoutStatePostGradleRegeneration {
       changedPaths.add(match.group(1)!);
     }
 
-    final List<String> nonLockfileDiffs = changedPaths.where((String path) {
-      final String extension = context.extension(path);
-      return extension != '.lockfile';
-    }).toList();
+    final List<String> nonLockfileDiffs =
+        changedPaths.where((String path) {
+          final String extension = context.extension(path);
+          return extension != '.lockfile';
+        }).toList();
 
     if (nonLockfileDiffs.isNotEmpty) {
       return NonLockfileChanges(nonLockfileDiffs);

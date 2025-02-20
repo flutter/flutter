@@ -5,7 +5,7 @@ _See also: [Package migration to 1.0.0](../Package-migration-to-1.0.0.md)
 
 ## Automatic release
 
-The packages in flutter/packages are automatically released with a Github Action workflow named [“release”](https://github.com/flutter/packages/blob/main/.github/workflows/release.yml). If a commit on master branch contains version updates to one or more packages, the “release” CI will publish the new versions to pub.dev and push the release tag to GitHub. The “release” CI passes if
+The packages in flutter/packages are automatically released with a GitHub Action workflow named [“release”](https://github.com/flutter/packages/blob/main/.github/workflows/release.yml). If a commit on master branch contains version updates to one or more packages, the “release” CI will publish the new versions to pub.dev and push the release tag to GitHub. The “release” CI passes if
 1. the release process is successful, or
 2. there are no version updates in the commit, or
 3. the new versions have already been published.

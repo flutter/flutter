@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 /// Flutter code sample for [CupertinoContextMenu].
 
@@ -27,9 +26,7 @@ class ContextMenuExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('CupertinoContextMenu Sample'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoContextMenu Sample')),
       child: Center(
         child: SizedBox(
           width: 100,

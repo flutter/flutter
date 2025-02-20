@@ -87,7 +87,7 @@ Flutter's View, not to the Android View they're actually trying to tap on.
 
 ### Background
 
-Explaining our problems with accessbility (or "a11y") requires a brief detour
+Explaining our problems with accessibility (or "a11y") requires a brief detour
 into explaining a11y itself on Android, and how a11y typically works on Flutter.
 
 Android itself builds up a tree of a11y nodes for each Android View rendered to

@@ -32,7 +32,6 @@ import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
-import 'fuchsia/fuchsia_sdk.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
@@ -71,8 +70,6 @@ Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
-FuchsiaArtifacts? get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
-FuchsiaSdk? get fuchsiaSdk => context.get<FuchsiaSdk>();
 Usage get flutterUsage => context.get<Usage>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 XCDevice? get xcdevice => context.get<XCDevice>();
@@ -86,11 +83,9 @@ BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector
 final BotDetector _defaultBotDetector = BotDetector(
   httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
   platform: platform,
-  persistentToolState: persistentToolState ?? PersistentToolState(
-    fileSystem: fs,
-    logger: logger,
-    platform: platform,
-  ),
+  persistentToolState:
+      persistentToolState ??
+      PersistentToolState(fileSystem: fs, logger: logger, platform: platform),
 );
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
@@ -107,10 +102,8 @@ FileSystem get fs => ErrorHandlingFileSystem(
   platform: platform,
 );
 
-FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? FileSystemUtils(
-  fileSystem: fs,
-  platform: platform,
-);
+FileSystemUtils get fsUtils =>
+    context.get<FileSystemUtils>() ?? FileSystemUtils(fileSystem: fs, platform: platform);
 
 const ProcessManager _kLocalProcessManager = LocalProcessManager();
 
@@ -125,7 +118,7 @@ UserMessages get userMessages => context.get<UserMessages>()!;
 
 final OutputPreferences _default = OutputPreferences(
   wrapText: stdio.hasTerminal,
-  showColor:  platform.stdoutSupportsAnsi,
+  showColor: platform.stdoutSupportsAnsi,
   stdio: stdio,
 );
 OutputPreferences get outputPreferences => context.get<OutputPreferences>() ?? _default;
@@ -143,14 +136,14 @@ ProcessInfo get processInfo => context.get<ProcessInfo>()!;
 /// Set [color] to a [TerminalColor] to color the output, if the logger
 /// supports it. The [color] defaults to [TerminalColor.red].
 void printError(
-    String message, {
-      StackTrace? stackTrace,
-      bool? emphasis,
-      TerminalColor? color,
-      int? indent,
-      int? hangingIndent,
-      bool? wrap,
-    }) {
+  String message, {
+  StackTrace? stackTrace,
+  bool? emphasis,
+  TerminalColor? color,
+  int? indent,
+  int? hangingIndent,
+  bool? wrap,
+}) {
   logger.printError(
     message,
     stackTrace: stackTrace,
@@ -169,13 +162,13 @@ void printError(
 /// Set [color] to a [TerminalColor] to color the output, if the logger
 /// supports it. The [color] defaults to [TerminalColor.cyan].
 void printWarning(
-    String message, {
-      bool? emphasis,
-      TerminalColor? color,
-      int? indent,
-      int? hangingIndent,
-      bool? wrap,
-    }) {
+  String message, {
+  bool? emphasis,
+  TerminalColor? color,
+  int? indent,
+  int? hangingIndent,
+  bool? wrap,
+}) {
   logger.printWarning(
     message,
     emphasis: emphasis ?? false,
@@ -196,14 +189,14 @@ void printWarning(
 /// If `indent` is provided, each line of the message will be prepended by the
 /// specified number of whitespaces.
 void printStatus(
-    String message, {
-      bool? emphasis,
-      bool? newline,
-      TerminalColor? color,
-      int? indent,
-      int? hangingIndent,
-      bool? wrap,
-    }) {
+  String message, {
+  bool? emphasis,
+  bool? newline,
+  TerminalColor? color,
+  int? indent,
+  int? hangingIndent,
+  bool? wrap,
+}) {
   logger.printStatus(
     message,
     emphasis: emphasis ?? false,
@@ -215,7 +208,6 @@ void printStatus(
   );
 }
 
-
 /// Display the [message] inside a box.
 ///
 /// For example, this is the generated output:
@@ -226,9 +218,7 @@ void printStatus(
 ///
 /// If a terminal is attached, the lines in [message] are automatically wrapped based on
 /// the available columns.
-void printBox(String message, {
-  String? title,
-}) {
+void printBox(String message, {String? title}) {
   logger.printBox(message, title: title);
 }
 
@@ -251,8 +241,9 @@ final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
 Stdio get stdio => context.get<Stdio>() ?? (_stdioInstance ??= Stdio());
 Stdio? _stdioInstance;
 
-PlistParser get plistParser => context.get<PlistParser>() ?? (
-    _plistInstance ??= PlistParser(
+PlistParser get plistParser =>
+    context.get<PlistParser>() ??
+    (_plistInstance ??= PlistParser(
       fileSystem: fs,
       processManager: processManager,
       logger: logger,
@@ -272,11 +263,8 @@ final ShutdownHooks shutdownHooks = ShutdownHooks();
 // have only one instance created with the singleton LocalSignals instance
 // and the catchable signals it considers to be fatal.
 LocalFileSystem? _instance;
-LocalFileSystem get localFileSystem => _instance ??= LocalFileSystem(
-  LocalSignals.instance,
-  Signals.defaultExitSignals,
-  shutdownHooks,
-);
+LocalFileSystem get localFileSystem =>
+    _instance ??= LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, shutdownHooks);
 
 /// Gradle utils in the current [AppContext].
 GradleUtils? get gradleUtils => context.get<GradleUtils>();
@@ -284,22 +272,24 @@ GradleUtils? get gradleUtils => context.get<GradleUtils>();
 CocoaPods? get cocoaPods => context.get<CocoaPods>();
 
 FlutterProjectFactory get projectFactory {
-  return context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(
-    logger: logger,
-    fileSystem: fs,
-  );
+  return context.get<FlutterProjectFactory>() ??
+      FlutterProjectFactory(logger: logger, fileSystem: fs);
 }
 
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
 
-PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
+PreRunValidator get preRunValidator =>
+    context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
 
 // Used to build RegExp instances which can detect the VM service message.
-final RegExp kVMServiceMessageRegExp = RegExp(r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+final RegExp kVMServiceMessageRegExp = RegExp(
+  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
+);
 
 // The official tool no longer allows non-null safe builds. This can be
 // overridden in other clients.
-NonNullSafeBuilds get nonNullSafeBuilds => context.get<NonNullSafeBuilds>() ?? NonNullSafeBuilds.notAllowed;
+NonNullSafeBuilds get nonNullSafeBuilds =>
+    context.get<NonNullSafeBuilds>() ?? NonNullSafeBuilds.notAllowed;
 
 /// Contains information about the JRE/JDK to use for Java-dependent operations.
 ///
@@ -307,4 +297,5 @@ NonNullSafeBuilds get nonNullSafeBuilds => context.get<NonNullSafeBuilds>() ?? N
 /// the host machine.
 Java? get java => context.get<Java>();
 
-TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder => context.get<TestCompilerNativeAssetsBuilder>();
+TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder =>
+    context.get<TestCompilerNativeAssetsBuilder>();

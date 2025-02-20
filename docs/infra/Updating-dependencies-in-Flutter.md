@@ -8,7 +8,7 @@ Instead of manually updating dependencies in a `pubspec.yaml` file, use the [`up
 
 Sometimes you need to prevent a dependency from being updated when you run `flutter update-packages --force-upgrade`.
 
-In that case, first pin the dependency in [`kManuallyPinnedDependencies`](https://github.com/flutter/flutter/blob/5bd34ef541575eddae6aaa82fc76a59ae7e464c3/packages/flutter_tools/lib/src/update_packages_pins.dart#L17) and a include a comment with a link to an issue to unpin the dependency.
+In that case, first pin the dependency in [`kManuallyPinnedDependencies`](https://github.com/flutter/flutter/blob/5bd34ef541575eddae6aaa82fc76a59ae7e464c3/packages/flutter_tools/lib/src/update_packages_pins.dart#L17) and include a comment with a link to an issue to unpin the dependency.
 
 You can then re-run `flutter update-packages --force-upgrade`.
 

@@ -24,18 +24,71 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 INTERNAL NOTE
 -->
+## Flutter 3.27 Changes
+
+### [3.27.4](https://github.com/flutter/flutter/releases/tag/3.27.4)
+- [flutter/162132](https://github.com/flutter/flutter/pull/162132) On all platforms DropdownMenu's menuChildren might be placed somewhere far from menuAnchor.
+
+### [3.27.3](https://github.com/flutter/flutter/releases/tag/3.27.3)
+- [flutter/159212](https://github.com/flutter/flutter/issues/159212) Track (via Google Analytics) if the Dart AOT Android "Deferred Components" feature is being meaningfully used.
+- [flutter/160631](https://github.com/flutter/flutter/issues/160631) Fixes an issue with Material 3 Tab Bar animations.
+- [flutter/159289](https://github.com/flutter/flutter/issues/159289) Fixes an issue with fullscreen route transitions.
+- [flutter/162132](https://github.com/flutter/flutter/issues/162132) Fixes an issue that incorrectly positions `MenuAnchor`s in nested overlays.
+
+### [3.27.2](https://github.com/flutter/flutter/releases/tag/3.27.2)
+
+- [flutter/159729](https://github.com/flutter/flutter/issues/159729) Flutter module template triggers a warning when built for Android.
+- [flutter/161176](https://github.com/flutter/flutter/issues/161176) Dropdown Menu can create an infinite loop.
+- [flutter/161330](https://github.com/flutter/flutter/issues/161330) Using ScrollViewKeyboardDismissBehavior.onDrag in a SingleChildScrollView causes text fields to immediately unfocus if the keyboard opening scrolls the text field to keep it visible.
+- [flutter/160127](https://github.com/flutter/flutter/issues/160127) Some Flutter web plugins do not add the `crossOrigin` property to <img> tags.
+- [flutter/160155](https://github.com/flutter/flutter/issues/160155) Failed assertion in web engine: "The targeted input element must be the active input element".
+- [flutter/160199](https://github.com/flutter/flutter/issues/160199) Some images on the web render blank.
+- [flutter/160459](https://github.com/flutter/flutter/issues/160459) Incorrect Z order rendering in drawPoints may cause lines to overlap when one should be drawn in front of the other.
+- [flutter/160409](https://github.com/flutter/flutter/issues/160409) App may crashes because of obsolete engine assertion.
+- [flutter/158192](https://github.com/flutter/flutter/issues/158192) Positions of display cutouts on Android may not update - as returned by MediaQuery and used by SafeArea - upon screen orientation change.
+
+### [3.27.1](https://github.com/flutter/flutter/releases/tag/3.27.1)
+
+- [flutter/160041](https://github.com/flutter/flutter/issues/160041) - [Impeller][Android] Disables Impeller on older Android devices.
+- [flutter/160206](https://github.com/flutter/flutter/issues/160206) - [Impeller][Android] Disables Android HardwareBuffer based swapchains on all devices.
+- [flutter/160208](https://github.com/flutter/flutter/issues/160208) - [iOS] Fixes an issue on iOS preventing the ability to tap web view links in some plugins.
+
+### [3.27.0](https://github.com/flutter/flutter/releases/tag/3.27.0)
+Initial stable release.
+
 ## Flutter 3.24 Changes
 
+### [3.24.5](https://github.com/flutter/flutter/releases/tag/3.24.5)
+- [flutter/158125](https://github.com/flutter/flutter/pull/158125) - [iOS] Fixed a tool issue causing failures when `flutter build ios-framework --xcframework` copies Flutter debug symbols.
+- [flutter/56301](https://github.com/flutter/engine/pull/56301) - [Android] Fixes a crash on Android devices when the surface is released unexpectedly when using PlatformView's.
+
+### [3.24.4](https://github.com/flutter/flutter/releases/tag/3.24.4)
+- [dart 3.5.4 changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#354---2024-10-17)
+- [flutter/154915](https://github.com/flutter/engine/pull/55366) - [macOS] Comply with the new Apple privacy manifest policy for the macOS Flutter engine framework and prevent the "Missing privacy manifest" warning when submitting a macOS app to the App Store.
+- [flutter/153471](https://github.com/flutter/flutter/issues/153471) - [Tool] Fixes RPCError crash when setting up log filtering for Android devices.
+
+### [3.24.3](https://github.com/flutter/flutter/releases/tag/3.24.3)
+- [dart 3.5.3 changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#353---2024-09-11)
+- [flutter/154275](https://github.com/flutter/flutter/issues/154275) - [Android] Fixes performance issues on Android caused by engine threads not matching the core count.
+- [flutter/154276](https://github.com/flutter/flutter/issues/154276) - [Impeller] Fixes an issue on iOS preventing mesh gradients from rendering correctly.
+- [flutter/154349](https://github.com/flutter/flutter/issues/154349) - [Wasm] Fixes an issue on web causing Platform Views to break when compiled to Wasm.
+- [flutter/154564](https://github.com/flutter/flutter/issues/154564) - [Impeller][iOS] Fixes an issue when using Impeller on iOS when using backdrop filters on older iPads, causing the GPU to hang.
+- [flutter/154712](https://github.com/flutter/flutter/issues/154712) - [iOS] Fixes an issue on iOS causing video playback to flicker.
+- [flutter/154892](https://github.com/flutter/flutter/issues/154892) - [Impeller][iOS] Fixes an issue when using Impeller on iOS causing a memory leak when using Platform Views.
+- [flutter/154536](https://github.com/flutter/flutter/issues/154536) - [Tool] Fixes a CLI crash that occurs when shutting down after running a Flutter app on a browser.
+- [flutter/154720](https://github.com/flutter/flutter/pull/154720) - Fixes an issue with the `Drawer` widget, causing it to open or close incorrectly.
+- [flutter/154944](https://github.com/flutter/flutter/pull/154944) - [Tool] Fixes a Flutter tool crash that occurs when building Flutter modules for Android when using AGP 8.0+.
+
 ### [3.24.2](https://github.com/flutter/flutter/releases/tag/3.24.2)
-- [Dart 3.5.2](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#352---2024-08-28)
-- [flutter/153949](https://github.com/flutter/flutter/issues/153949): Fixes a crash on Android when deleting `EditableText` inside `CupertinoPageRoute`, with a CJK (chinese, japanese, korean) keyboard.
-- [flutter/153939](https://github.com/flutter/flutter/issues/153939): Fixes an issue on iOS where Flutter `TextField`s may stop accepting input.
-- [flutter/152420](https://github.com/flutter/flutter/issues/152420): Fixes scrolling jank on Android and iOS when a `SelectionArea`/`SelectableRegion` is used as a child of a Scrollable like `ListView` or `PageView`.
-- [flutter/154199](https://github.com/flutter/flutter/pull/154199): Removes excessive logging when building a freshly created template app for Android.
-- [flutter/153967](https://github.com/flutter/flutter/pull/153967): Fixes a host build failure on macOS when the `native assets` experiment is enabled, and there are no native asset frameworks to codesign.
-- [flutter/153769](https://github.com/flutter/flutter/pull/153769): When running a Flutter app, display a concise error message when connection to the device is lost.
-- [flutter/154270](https://github.com/flutter/flutter/pull/154270): Prevent preemptive gradle crash for android builds that would fail to build anyway but with a confusing error message.
-- [flutter/54735](https://github.com/flutter/engine/pull/54735):  Fixes an error on Flutter Web where `onTap` is called twice on various widgets (`GestureDetector`, `InkWell`) when semantics are enabled.
+- [Dart 3.5.2 Changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#352---2024-08-28)
+- [flutter/153949](https://github.com/flutter/flutter/issues/153949) - Fixes a crash on Android when deleting `EditableText` inside `CupertinoPageRoute`, with a CJK (chinese, japanese, korean) keyboard.
+- [flutter/153939](https://github.com/flutter/flutter/issues/153939) - Fixes an issue on iOS where Flutter `TextField`s may stop accepting input.
+- [flutter/152420](https://github.com/flutter/flutter/issues/152420) - Fixes scrolling jank on Android and iOS when a `SelectionArea`/`SelectableRegion` is used as a child of a Scrollable like `ListView` or `PageView`.
+- [flutter/154199](https://github.com/flutter/flutter/pull/154199) - Removes excessive logging when building a freshly created template app for Android.
+- [flutter/153967](https://github.com/flutter/flutter/pull/153967) - Fixes a host build failure on macOS when the `native assets` experiment is enabled, and there are no native asset frameworks to codesign.
+- [flutter/153769](https://github.com/flutter/flutter/pull/153769) - When running a Flutter app, display a concise error message when connection to the device is lost.
+- [flutter/154270](https://github.com/flutter/flutter/pull/154270) - Prevent preemptive gradle crash for android builds that would fail to build anyway but with a confusing error message.
+- [flutter/54735](https://github.com/flutter/engine/pull/54735) - Fixes an error on Flutter Web where `onTap` is called twice on various widgets (`GestureDetector`, `InkWell`) when semantics are enabled.
 
 ### [3.24.1](https://github.com/flutter/flutter/releases/tag/3.24.1)
 

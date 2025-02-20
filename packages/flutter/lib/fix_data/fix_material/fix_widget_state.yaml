@@ -26,6 +26,34 @@
 #     * ThemeDate: fix_theme_data.yaml
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/154972
+  - title: "Replace with 'WidgetStateInputBorder'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'resolveWith'
+      inClass: 'MaterialStateOutlineInputBorder'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'material.dart' ]
+          constructor: 'resolveWith'
+          inClass: 'WidgetStateInputBorder'
+
+  # Changes made in https://github.com/flutter/flutter/pull/154972
+  - title: "Replace with 'WidgetStateInputBorder'"
+    date: 2024-02-01
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'resolveWith'
+      inClass: 'MaterialStateUnderlineInputBorder'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'material.dart' ]
+          constructor: 'resolveWith'
+          inClass: 'WidgetStateInputBorder'
+
   # Changes made in https://github.com/flutter/flutter/pull/142151
   - title: "Replace with 'WidgetState'"
     date: 2024-02-01

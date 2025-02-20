@@ -3,7 +3,7 @@
   "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "నావిగేషన్ మెనూను తెరువు",
   "backButtonTooltip": "వెనుకకు",
-  "closeButtonTooltip": "మూసివేయి",
+  "closeButtonTooltip": "మూసివేయండి",
   "deleteButtonTooltip": "తొలగించండి",
   "nextMonthTooltip": "తర్వాత నెల",
   "previousMonthTooltip": "మునుపటి నెల",
@@ -144,7 +144,7 @@
   "menuDismissLabel": "మెనూను తీసివేయండి",
   "lookUpButtonLabel": "వెతకండి",
   "searchWebButtonLabel": "వెబ్‌లో సెర్చ్ చేయండి",
-  "shareButtonLabel": "షేర్ చేయండి...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "షేర్ చేయండి",
+  "clearButtonTooltip": "టెక్స్ట్‌ను క్లియర్ చేయండి",
+  "selectedDateLabel": "ఎంచుకోబడింది"
 }

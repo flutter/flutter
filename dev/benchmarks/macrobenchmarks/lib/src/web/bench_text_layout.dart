@@ -9,7 +9,8 @@ import 'package:flutter/material.dart';
 
 import 'recorder.dart';
 
-const String chars = '1234567890'
+const String chars =
+    '1234567890'
     'abcdefghijklmnopqrstuvwxyz'
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     '!@#%^&()[]{}<>,./?;:"`~-_=+|';
@@ -27,50 +28,36 @@ class ParagraphGenerator {
 
   /// Randomizes the given [text] and creates a paragraph with a unique
   /// font-size so that the engine doesn't reuse a cached ruler.
-  ui.Paragraph generate(
-    String text, {
-    int? maxLines,
-    bool hasEllipsis = false,
-  }) {
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(
-      fontFamily: 'sans-serif',
-      maxLines: maxLines,
-      ellipsis: hasEllipsis ? '...' : null,
-    ))
-      // Start from a font-size of 8.0 and go up by 0.01 each time.
-      ..pushStyle(ui.TextStyle(fontSize: 8.0 + _counter * 0.01))
-      ..addText(_randomize(text));
+  ui.Paragraph generate(String text, {int? maxLines, bool hasEllipsis = false}) {
+    final ui.ParagraphBuilder builder =
+        ui.ParagraphBuilder(
+            ui.ParagraphStyle(
+              fontFamily: 'sans-serif',
+              maxLines: maxLines,
+              ellipsis: hasEllipsis ? '...' : null,
+            ),
+          )
+          // Start from a font-size of 8.0 and go up by 0.01 each time.
+          ..pushStyle(ui.TextStyle(fontSize: 8.0 + _counter * 0.01))
+          ..addText(_randomize(text));
     _counter++;
     return builder.build();
   }
-}
-
-/// Which mode to run [BenchBuildColorsGrid] in.
-enum _TestMode {
-  /// Uses the HTML rendering backend with the canvas 2D text layout.
-  useCanvasTextLayout,
-
-  /// Uses CanvasKit for everything.
-  useCanvasKit,
 }
 
 /// Repeatedly lays out a paragraph.
 ///
 /// Creates a different paragraph each time in order to avoid hitting the cache.
 class BenchTextLayout extends RawRecorder {
-  BenchTextLayout.canvas()
-      : super(name: canvasBenchmarkName);
+  BenchTextLayout() : super(name: benchmarkName);
 
-  BenchTextLayout.canvasKit()
-      : super(name: canvasKitBenchmarkName);
-
-  static const String canvasBenchmarkName = 'text_canvas_layout';
-  static const String canvasKitBenchmarkName = 'text_canvaskit_layout';
+  static const String benchmarkName = 'text_canvaskit_layout';
 
   final ParagraphGenerator generator = ParagraphGenerator();
 
   static const String singleLineText = '*** ** ****';
-  static const String multiLineText = '*** ****** **** *** ******** * *** '
+  static const String multiLineText =
+      '*** ****** **** *** ******** * *** '
       '******* **** ********** *** ******* '
       '**** ***** *** ******** *** ********* '
       '** * *** ******* ***********';
@@ -143,23 +130,19 @@ class BenchTextLayout extends RawRecorder {
 /// use the same paragraph instance because the layout method will shortcircuit
 /// in that case.
 class BenchTextCachedLayout extends RawRecorder {
-  BenchTextCachedLayout.canvas()
-      : super(name: canvasBenchmarkName);
+  BenchTextCachedLayout() : super(name: benchmarkName);
 
-  BenchTextCachedLayout.canvasKit()
-      : super(name: canvasKitBenchmarkName);
-
-  static const String canvasBenchmarkName = 'text_canvas_cached_layout';
-  static const String canvasKitBenchmarkName = 'text_canvas_kit_cached_layout';
+  static const String benchmarkName = 'text_canvas_kit_cached_layout';
 
   @override
   void body(Profile profile) {
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
-        ..pushStyle(ui.TextStyle(fontSize: 12.0))
-        ..addText(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
-          'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-        );
+    final ui.ParagraphBuilder builder =
+        ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
+          ..pushStyle(ui.TextStyle(fontSize: 12.0))
+          ..addText(
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
+            'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          );
     final ui.Paragraph paragraph = builder.build();
     profile.record('layout', () {
       paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -179,11 +162,7 @@ int _counter = 0;
 /// The benchmark constructs a tabbed view, where each tab displays a list of
 /// colors. Each color's description is made of several [Text] nodes.
 class BenchBuildColorsGrid extends WidgetBuildRecorder {
-  BenchBuildColorsGrid.canvas()
-      : _mode = _TestMode.useCanvasTextLayout, super(name: canvasBenchmarkName);
-
-  BenchBuildColorsGrid.canvasKit()
-      : _mode = _TestMode.useCanvasKit, super(name: canvasKitBenchmarkName);
+  BenchBuildColorsGrid() : super(name: benchmarkName);
 
   /// Disables tracing for this benchmark.
   ///
@@ -193,47 +172,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
   @override
   bool get isTracingEnabled => false;
 
-  static const String canvasBenchmarkName = 'text_canvas_color_grid';
-  static const String canvasKitBenchmarkName = 'text_canvas_kit_color_grid';
-
-  /// Whether to use the new canvas-based text measurement implementation.
-  final _TestMode _mode;
-
-  num _textLayoutMicros = 0;
-
-  @override
-  Future<void> setUpAll() async {
-    super.setUpAll();
-    registerEngineBenchmarkValueListener('text_layout', (num value) {
-      _textLayoutMicros += value;
-    });
-  }
-
-  @override
-  Future<void> tearDownAll() async {
-    stopListeningToEngineBenchmarkValues('text_layout');
-  }
-
-  @override
-  void frameWillDraw() {
-    super.frameWillDraw();
-    _textLayoutMicros = 0;
-  }
-
-  @override
-  void frameDidDraw() {
-    // We need to do this before calling [super.frameDidDraw] because the latter
-    // updates the value of [showWidget] in preparation for the next frame.
-    // TODO(yjbanov): https://github.com/flutter/flutter/issues/53877
-    if (showWidget && _mode != _TestMode.useCanvasKit) {
-      profile!.addDataPoint(
-        'text_layout',
-        Duration(microseconds: _textLayoutMicros.toInt()),
-        reported: true,
-      );
-    }
-    super.frameDidDraw();
-  }
+  static const String benchmarkName = 'text_canvas_kit_color_grid';
 
   @override
   Widget createWidget() {
@@ -253,95 +192,53 @@ class Palette {
   final String name;
   final MaterialColor primary;
   final MaterialAccentColor? accent;
-  final int
-      threshold; // titles for indices > threshold are white, otherwise black
+  final int threshold; // titles for indices > threshold are white, otherwise black
 }
 
 final List<Palette> allPalettes = <Palette>[
+  Palette(name: 'RED', primary: Colors.red, accent: Colors.redAccent, threshold: 300),
+  Palette(name: 'PINK', primary: Colors.pink, accent: Colors.pinkAccent, threshold: 200),
+  Palette(name: 'PURPLE', primary: Colors.purple, accent: Colors.purpleAccent, threshold: 200),
   Palette(
-      name: 'RED',
-      primary: Colors.red,
-      accent: Colors.redAccent,
-      threshold: 300),
+    name: 'DEEP PURPLE',
+    primary: Colors.deepPurple,
+    accent: Colors.deepPurpleAccent,
+    threshold: 200,
+  ),
+  Palette(name: 'INDIGO', primary: Colors.indigo, accent: Colors.indigoAccent, threshold: 200),
+  Palette(name: 'BLUE', primary: Colors.blue, accent: Colors.blueAccent, threshold: 400),
   Palette(
-      name: 'PINK',
-      primary: Colors.pink,
-      accent: Colors.pinkAccent,
-      threshold: 200),
+    name: 'LIGHT BLUE',
+    primary: Colors.lightBlue,
+    accent: Colors.lightBlueAccent,
+    threshold: 500,
+  ),
+  Palette(name: 'CYAN', primary: Colors.cyan, accent: Colors.cyanAccent, threshold: 600),
+  Palette(name: 'TEAL', primary: Colors.teal, accent: Colors.tealAccent, threshold: 400),
+  Palette(name: 'GREEN', primary: Colors.green, accent: Colors.greenAccent, threshold: 500),
   Palette(
-      name: 'PURPLE',
-      primary: Colors.purple,
-      accent: Colors.purpleAccent,
-      threshold: 200),
-  Palette(
-      name: 'DEEP PURPLE',
-      primary: Colors.deepPurple,
-      accent: Colors.deepPurpleAccent,
-      threshold: 200),
-  Palette(
-      name: 'INDIGO',
-      primary: Colors.indigo,
-      accent: Colors.indigoAccent,
-      threshold: 200),
-  Palette(
-      name: 'BLUE',
-      primary: Colors.blue,
-      accent: Colors.blueAccent,
-      threshold: 400),
-  Palette(
-      name: 'LIGHT BLUE',
-      primary: Colors.lightBlue,
-      accent: Colors.lightBlueAccent,
-      threshold: 500),
-  Palette(
-      name: 'CYAN',
-      primary: Colors.cyan,
-      accent: Colors.cyanAccent,
-      threshold: 600),
-  Palette(
-      name: 'TEAL',
-      primary: Colors.teal,
-      accent: Colors.tealAccent,
-      threshold: 400),
-  Palette(
-      name: 'GREEN',
-      primary: Colors.green,
-      accent: Colors.greenAccent,
-      threshold: 500),
-  Palette(
-      name: 'LIGHT GREEN',
-      primary: Colors.lightGreen,
-      accent: Colors.lightGreenAccent,
-      threshold: 600),
-  Palette(
-      name: 'LIME',
-      primary: Colors.lime,
-      accent: Colors.limeAccent,
-      threshold: 800),
+    name: 'LIGHT GREEN',
+    primary: Colors.lightGreen,
+    accent: Colors.lightGreenAccent,
+    threshold: 600,
+  ),
+  Palette(name: 'LIME', primary: Colors.lime, accent: Colors.limeAccent, threshold: 800),
   Palette(name: 'YELLOW', primary: Colors.yellow, accent: Colors.yellowAccent),
   Palette(name: 'AMBER', primary: Colors.amber, accent: Colors.amberAccent),
+  Palette(name: 'ORANGE', primary: Colors.orange, accent: Colors.orangeAccent, threshold: 700),
   Palette(
-      name: 'ORANGE',
-      primary: Colors.orange,
-      accent: Colors.orangeAccent,
-      threshold: 700),
-  Palette(
-      name: 'DEEP ORANGE',
-      primary: Colors.deepOrange,
-      accent: Colors.deepOrangeAccent,
-      threshold: 400),
+    name: 'DEEP ORANGE',
+    primary: Colors.deepOrange,
+    accent: Colors.deepOrangeAccent,
+    threshold: 400,
+  ),
   Palette(name: 'BROWN', primary: Colors.brown, threshold: 200),
   Palette(name: 'GREY', primary: Colors.grey, threshold: 500),
   Palette(name: 'BLUE GREY', primary: Colors.blueGrey, threshold: 500),
 ];
 
 class ColorItem extends StatelessWidget {
-  const ColorItem({
-    super.key,
-    required this.index,
-    required this.color,
-    this.prefix = '',
-  });
+  const ColorItem({super.key, required this.index, required this.color, this.prefix = ''});
 
   final int index;
   final Color color;
@@ -363,10 +260,7 @@ class ColorItem extends StatelessWidget {
           bottom: false,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('$_counter:$prefix$index'),
-              Text(colorString()),
-            ],
+            children: <Widget>[Text('$_counter:$prefix$index'), Text(colorString())],
           ),
         ),
       ),
@@ -375,34 +269,18 @@ class ColorItem extends StatelessWidget {
 }
 
 class PaletteTabView extends StatelessWidget {
-  const PaletteTabView({
-    super.key,
-    required this.colors,
-  });
+  const PaletteTabView({super.key, required this.colors});
 
   final Palette colors;
 
-  static const List<int> primaryKeys = <int>[
-    50,
-    100,
-    200,
-    300,
-    400,
-    500,
-    600,
-    700,
-    800,
-    900,
-  ];
+  static const List<int> primaryKeys = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
   static const List<int> accentKeys = <int>[100, 200, 400, 700];
 
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final TextStyle whiteTextStyle =
-        textTheme.bodyMedium!.copyWith(color: Colors.white);
-    final TextStyle blackTextStyle =
-        textTheme.bodyMedium!.copyWith(color: Colors.black);
+    final TextStyle whiteTextStyle = textTheme.bodyMedium!.copyWith(color: Colors.white);
+    final TextStyle blackTextStyle = textTheme.bodyMedium!.copyWith(color: Colors.black);
     return Scrollbar(
       child: ListView(
         itemExtent: kColorItemHeight,
@@ -416,10 +294,8 @@ class PaletteTabView extends StatelessWidget {
           if (colors.accent != null)
             ...accentKeys.map<Widget>((int index) {
               return DefaultTextStyle(
-                style:
-                    index > colors.threshold ? whiteTextStyle : blackTextStyle,
-                child: ColorItem(
-                    index: index, color: colors.accent![index]!, prefix: 'A'),
+                style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
+                child: ColorItem(index: index, color: colors.accent![index]!, prefix: 'A'),
               );
             }),
         ],
@@ -441,16 +317,17 @@ class ColorsDemo extends StatelessWidget {
           title: const Text('Colors'),
           bottom: TabBar(
             isScrollable: true,
-            tabs: allPalettes
-                .map<Widget>(
-                    (Palette swatch) => Tab(text: '$_counter:${swatch.name}'))
-                .toList(),
+            tabs:
+                allPalettes
+                    .map<Widget>((Palette swatch) => Tab(text: '$_counter:${swatch.name}'))
+                    .toList(),
           ),
         ),
         body: TabBarView(
-          children: allPalettes.map<Widget>((Palette colors) {
-            return PaletteTabView(colors: colors);
-          }).toList(),
+          children:
+              allPalettes.map<Widget>((Palette colors) {
+                return PaletteTabView(colors: colors);
+              }).toList(),
         ),
       ),
     );

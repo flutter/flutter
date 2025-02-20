@@ -3,7 +3,19 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' show Directory, File, FileSystemEntity, HttpClient, HttpClientRequest, HttpClientResponse, Platform, Process, RawSocket, SocketDirection, SocketException;
+import 'dart:io'
+    show
+        Directory,
+        File,
+        FileSystemEntity,
+        HttpClient,
+        HttpClientRequest,
+        HttpClientResponse,
+        Platform,
+        Process,
+        RawSocket,
+        SocketDirection,
+        SocketException;
 import 'dart:math' as math;
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
@@ -16,7 +28,6 @@ import '../utils.dart';
 typedef ShardRunner = Future<void> Function();
 
 class WebTestsSuite {
-
   WebTestsSuite(this.flutterTestArgs);
 
   /// Tests that we don't run on Web.
@@ -38,12 +49,6 @@ class WebTestsSuite {
   //
   // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
   static const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String>>{
-    'html': <String>[
-      // These tests are not compilable on the web due to dependencies on
-      // VM-specific functionality.
-      'test/services/message_codecs_vm_test.dart',
-      'test/examples/sector_layout_test.dart',
-    ],
     'canvaskit': <String>[
       // These tests are not compilable on the web due to dependencies on
       // VM-specific functionality.
@@ -59,31 +64,26 @@ class WebTestsSuite {
       'test/rendering/platform_view_test.dart',
     ],
     'skwasm': <String>[
-    // These tests are not compilable on the web due to dependencies on
-    // VM-specific functionality.
-    'test/services/message_codecs_vm_test.dart',
-    'test/examples/sector_layout_test.dart',
+      // These tests are not compilable on the web due to dependencies on
+      // VM-specific functionality.
+      'test/services/message_codecs_vm_test.dart',
+      'test/examples/sector_layout_test.dart',
 
-    // These tests are broken and need to be fixed.
-    // TODO(jacksongardner): https://github.com/flutter/flutter/issues/71604
-    'test/material/text_field_test.dart',
-    'test/widgets/performance_overlay_test.dart',
+      // These tests are broken and need to be fixed.
+      // TODO(jacksongardner): https://github.com/flutter/flutter/issues/71604
+      'test/material/text_field_test.dart',
+      'test/widgets/performance_overlay_test.dart',
     ],
   };
 
-  /// The number of Cirrus jobs that run Web tests in parallel.
+  /// The number of jobs that run Web tests in parallel.
   ///
-  /// The default is 8 shards. Typically .cirrus.yml would define the
-  /// WEB_SHARD_COUNT environment variable rather than relying on the default.
-  ///
-  /// WARNING: if you change this number, also change .cirrus.yml
-  /// and make sure it runs _all_ shards.
+  /// This used to use the `WEB_SHARD_COUNT` environment variable, but that
+  /// was never re-added in the migration to LUCI, so instead the count is
+  /// hardcoded below.
   ///
   /// The last shard also runs the Web plugin tests.
-  int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
-    ? int.parse(Platform.environment['WEB_SHARD_COUNT']!)
-    : 8;
-
+  int get webShardCount => 8;
 
   static const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
@@ -91,7 +91,6 @@ class WebTestsSuite {
 
   /// Coarse-grained integration tests running on the Web.
   Future<void> webLongRunningTestsRunner() async {
-
     final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
     final String engineRealmFile = path.join(flutterRoot, 'bin', 'internal', 'engine.realm');
     final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
@@ -105,7 +104,7 @@ class WebTestsSuite {
           testAppDirectory: path.join('packages', 'integration_test', 'example'),
           target: path.join('test_driver', 'failure.dart'),
           buildMode: buildMode,
-          renderer: 'canvaskit',
+          webRenderer: 'canvaskit',
           // This test intentionally fails and prints stack traces in the browser
           // logs. To avoid confusion, silence browser output.
           silenceBrowserOutput: true,
@@ -115,7 +114,7 @@ class WebTestsSuite {
           target: path.join('integration_test', 'example_test.dart'),
           driver: path.join('test_driver', 'integration_test.dart'),
           buildMode: buildMode,
-          renderer: 'canvaskit',
+          webRenderer: 'canvaskit',
           expectWriteResponseFile: true,
           expectResponseFileContent: 'null',
         ),
@@ -124,7 +123,7 @@ class WebTestsSuite {
           target: path.join('integration_test', 'extended_test.dart'),
           driver: path.join('test_driver', 'extended_integration_test.dart'),
           buildMode: buildMode,
-          renderer: 'canvaskit',
+          webRenderer: 'canvaskit',
           expectWriteResponseFile: true,
           expectResponseFileContent: '''
 {
@@ -143,33 +142,64 @@ class WebTestsSuite {
       ],
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
-      () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'debug', renderer: 'html'),
-      () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'profile', renderer: 'canvaskit'),
-      () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'release', renderer: 'html'),
+      () => _runWebE2eTest(
+        'profile_diagnostics_integration',
+        buildMode: 'debug',
+        renderer: 'canvaskit',
+      ),
+      () => _runWebE2eTest(
+        'profile_diagnostics_integration',
+        buildMode: 'profile',
+        renderer: 'canvaskit',
+      ),
+      () => _runWebE2eTest(
+        'profile_diagnostics_integration',
+        buildMode: 'release',
+        renderer: 'canvaskit',
+      ),
 
       // This test is only known to work in debug mode.
-      () => _runWebE2eTest('scroll_wheel_integration', buildMode: 'debug', renderer: 'html'),
+      () => _runWebE2eTest('scroll_wheel_integration', buildMode: 'debug', renderer: 'canvaskit'),
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
       // These tests have been extremely flaky, so we are temporarily disabling them until we figure out how to make them more robust.
       () => _runWebE2eTest('text_editing_integration', buildMode: 'debug', renderer: 'canvaskit'),
-      () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'html'),
-      () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'html'),
+      () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'canvaskit'),
+      () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'canvaskit'),
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
-      () => _runWebE2eTest('url_strategy_integration', buildMode: 'debug', renderer: 'html'),
+      () => _runWebE2eTest('url_strategy_integration', buildMode: 'debug', renderer: 'canvaskit'),
       () => _runWebE2eTest('url_strategy_integration', buildMode: 'profile', renderer: 'canvaskit'),
-      () => _runWebE2eTest('url_strategy_integration', buildMode: 'release', renderer: 'html'),
+      () => _runWebE2eTest('url_strategy_integration', buildMode: 'release', renderer: 'canvaskit'),
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
-      () => _runWebE2eTest('capabilities_integration_canvaskit', buildMode: 'debug', renderer: 'auto'),
-      () => _runWebE2eTest('capabilities_integration_canvaskit', buildMode: 'profile', renderer: 'canvaskit'),
-      () => _runWebE2eTest('capabilities_integration_html', buildMode: 'release', renderer: 'html'),
+      () => _runWebE2eTest(
+        'capabilities_integration_canvaskit',
+        buildMode: 'debug',
+        renderer: 'canvaskit',
+      ),
+      () => _runWebE2eTest(
+        'capabilities_integration_canvaskit',
+        buildMode: 'profile',
+        renderer: 'canvaskit',
+      ),
+      () => _runWebE2eTest(
+        'capabilities_integration_canvaskit',
+        buildMode: 'release',
+        renderer: 'canvaskit',
+      ),
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
-      // CacheWidth and CacheHeight are only currently supported in CanvasKit mode, so we don't run the test in HTML mode.
-      () => _runWebE2eTest('cache_width_cache_height_integration', buildMode: 'debug', renderer: 'auto'),
-      () => _runWebE2eTest('cache_width_cache_height_integration', buildMode: 'profile', renderer: 'canvaskit'),
+      () => _runWebE2eTest(
+        'cache_width_cache_height_integration',
+        buildMode: 'debug',
+        renderer: 'canvaskit',
+      ),
+      () => _runWebE2eTest(
+        'cache_width_cache_height_integration',
+        buildMode: 'profile',
+        renderer: 'canvaskit',
+      ),
 
       () => _runWebTreeshakeTest(),
 
@@ -177,25 +207,50 @@ class WebTestsSuite {
         testAppDirectory: path.join(flutterRoot, 'examples', 'hello_world'),
         target: 'test_driver/smoke_web_engine.dart',
         buildMode: 'profile',
-        renderer: 'auto',
+        webRenderer: 'canvaskit',
       ),
       () => _runGalleryE2eWebTest('debug'),
-      () => _runGalleryE2eWebTest('debug', canvasKit: true),
       () => _runGalleryE2eWebTest('profile'),
-      () => _runGalleryE2eWebTest('profile', canvasKit: true),
       () => _runGalleryE2eWebTest('release'),
-      () => _runGalleryE2eWebTest('release', canvasKit: true),
-      () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
+      () =>
+          runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
       () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
-      () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
-      () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent),
-      () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn),
-      () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsNonceOn),
-      () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
-      () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
-      () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
-      () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent),
-      () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn),
+      () => runWebServiceWorkerTest(
+        headless: true,
+        testType: ServiceWorkerTestType.withFlutterJsShort,
+      ),
+      () => runWebServiceWorkerTest(
+        headless: true,
+        testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent,
+      ),
+      () => runWebServiceWorkerTest(
+        headless: true,
+        testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn,
+      ),
+      () => runWebServiceWorkerTest(
+        headless: true,
+        testType: ServiceWorkerTestType.withFlutterJsNonceOn,
+      ),
+      () => runWebServiceWorkerTestWithCachingResources(
+        headless: true,
+        testType: ServiceWorkerTestType.withoutFlutterJs,
+      ),
+      () => runWebServiceWorkerTestWithCachingResources(
+        headless: true,
+        testType: ServiceWorkerTestType.withFlutterJs,
+      ),
+      () => runWebServiceWorkerTestWithCachingResources(
+        headless: true,
+        testType: ServiceWorkerTestType.withFlutterJsShort,
+      ),
+      () => runWebServiceWorkerTestWithCachingResources(
+        headless: true,
+        testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent,
+      ),
+      () => runWebServiceWorkerTestWithCachingResources(
+        headless: true,
+        testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn,
+      ),
       () => runWebServiceWorkerTestWithGeneratedEntrypoint(headless: true),
       () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
       () => runWebServiceWorkerTestWithCustomServiceWorkerVersion(headless: true),
@@ -206,34 +261,30 @@ class WebTestsSuite {
       () => _runWebDebugTest('lib/stack_trace.dart'),
       () => _runWebDebugTest('lib/framework_stack_trace.dart'),
       () => _runWebDebugTest('lib/web_directory_loading.dart'),
-      () => _runWebDebugTest('lib/web_resources_cdn_test.dart',
-        additionalArguments: <String>[
-          '--dart-define=TEST_FLUTTER_ENGINE_VERSION=$engineVersion',
-        ]),
+      () => _runWebDebugTest(
+        'lib/web_resources_cdn_test.dart',
+        additionalArguments: <String>['--dart-define=TEST_FLUTTER_ENGINE_VERSION=$engineVersion'],
+      ),
       () => _runWebDebugTest('test/test.dart'),
       () => _runWebDebugTest('lib/null_safe_main.dart'),
-      () => _runWebDebugTest('lib/web_define_loading.dart',
+      () => _runWebDebugTest(
+        'lib/web_define_loading.dart',
         additionalArguments: <String>[
           '--dart-define=test.valueA=Example,A',
           '--dart-define=test.valueB=Value',
-        ]
+        ],
       ),
-      () => _runWebReleaseTest('lib/web_define_loading.dart',
+      () => _runWebReleaseTest(
+        'lib/web_define_loading.dart',
         additionalArguments: <String>[
           '--dart-define=test.valueA=Example,A',
           '--dart-define=test.valueB=Value',
-        ]
+        ],
       ),
       () => _runWebDebugTest('lib/assertion_test.dart'),
       () => _runWebReleaseTest('lib/assertion_test.dart'),
       () => _runWebDebugTest('lib/sound_mode.dart'),
       () => _runWebReleaseTest('lib/sound_mode.dart'),
-      () => _runFlutterWebTest(
-        'html',
-        path.join(flutterRoot, 'packages', 'integration_test'),
-        <String>['test/web_extension_test.dart'],
-        false,
-      ),
       () => _runFlutterWebTest(
         'canvaskit',
         path.join(flutterRoot, 'packages', 'integration_test'),
@@ -257,10 +308,6 @@ class WebTestsSuite {
     await _stopChromeDriver();
   }
 
-  Future<void> runWebHtmlUnitTests() {
-    return _runWebUnitTests('html', false);
-  }
-
   Future<void> runWebCanvasKitUnitTests() {
     return _runWebUnitTests('canvaskit', false);
   }
@@ -278,7 +325,7 @@ class WebTestsSuite {
     await _runFlutterDriverWebTest(
       target: path.join('test_driver', '$name.dart'),
       buildMode: buildMode,
-      renderer: renderer,
+      webRenderer: renderer,
       testAppDirectory: path.join(flutterRoot, 'dev', 'integration_tests', 'web_e2e_tests'),
     );
   }
@@ -286,7 +333,7 @@ class WebTestsSuite {
   Future<void> _runFlutterDriverWebTest({
     required String target,
     required String buildMode,
-    required String renderer,
+    required String webRenderer,
     required String testAppDirectory,
     String? driver,
     bool expectFailure = false,
@@ -295,15 +342,11 @@ class WebTestsSuite {
     String expectResponseFileContent = '',
   }) async {
     printProgress('${green}Running integration tests $target in $buildMode mode.$reset');
-    await runCommand(
-      flutter,
-      <String>[ 'clean' ],
-      workingDirectory: testAppDirectory,
-    );
+    await runCommand(flutter, <String>['clean'], workingDirectory: testAppDirectory);
     // This must match the testOutputsDirectory defined in flutter_driver's driver/common.dart.
-    final String driverOutputPath = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? path.join(testAppDirectory, 'build');
-    final String responseFile =
-        path.join(driverOutputPath, 'integration_response_data.json');
+    final String driverOutputPath =
+        Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? path.join(testAppDirectory, 'build');
+    final String responseFile = path.join(driverOutputPath, 'integration_response_data.json');
     if (File(responseFile).existsSync()) {
       File(responseFile).deleteSync();
     }
@@ -318,13 +361,20 @@ class WebTestsSuite {
         '-d',
         'web-server',
         '--$buildMode',
-        '--web-renderer=$renderer',
+        if (webRenderer == 'skwasm') ...<String>[
+          // See: WebRendererMode.dartDefines[skwasm]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=true',
+        ],
+        if (webRenderer == 'canvaskit') ...<String>[
+          // See: WebRendererMode.dartDefines[canvaskit]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=false',
+        ],
       ],
       expectNonZeroExit: expectFailure,
       workingDirectory: testAppDirectory,
-      environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      },
+      environment: <String, String>{'FLUTTER_WEB': 'true'},
       removeLine: (String line) {
         if (!silenceBrowserOutput) {
           return false;
@@ -357,25 +407,19 @@ class WebTestsSuite {
   // The app is compiled in `--profile` mode to prevent the compiler from
   // minifying the symbols.
   Future<void> _runWebTreeshakeTest() async {
-    final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web_e2e_tests');
-    final String target = path.join('lib', 'treeshaking_main.dart');
-    await runCommand(
-      flutter,
-      <String>[ 'clean' ],
-      workingDirectory: testAppDirectory,
+    final String testAppDirectory = path.join(
+      flutterRoot,
+      'dev',
+      'integration_tests',
+      'web_e2e_tests',
     );
+    final String target = path.join('lib', 'treeshaking_main.dart');
+    await runCommand(flutter, <String>['clean'], workingDirectory: testAppDirectory);
     await runCommand(
       flutter,
-      <String>[
-        'build',
-        'web',
-        '--target=$target',
-        '--profile',
-      ],
+      <String>['build', 'web', '--target=$target', '--profile'],
       workingDirectory: testAppDirectory,
-      environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      },
+      environment: <String, String>{'FLUTTER_WEB': 'true'},
     );
 
     final File mainDartJs = File(path.join(testAppDirectory, 'build', 'web', 'main.dart.js'));
@@ -409,7 +453,7 @@ class WebTestsSuite {
     if (count > kMaxExpectedDebugFillProperties) {
       throw Exception(
         'Too many occurrences of "$word" in compiled JavaScript.\n'
-        'Expected no more than $kMaxExpectedDebugFillProperties, but found $count.'
+        'Expected no more than $kMaxExpectedDebugFillProperties, but found $count.',
       );
     }
   }
@@ -419,34 +463,25 @@ class WebTestsSuite {
   ///
   /// This is not a performance test.
   ///
-  /// If [canvasKit] is set to true, runs the test in CanvasKit mode.
-  ///
   /// The test is written using `package:integration_test` (despite the "e2e" in
   /// the name, which is there for historic reasons).
-  Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false }) async {
-    // TODO(yjbanov): this is temporarily disabled due to https://github.com/flutter/flutter/issues/147731
-    if (buildMode == 'debug' && canvasKit) {
-      print('SKIPPED: Gallery e2e web test in debug CanvasKit mode due to https://github.com/flutter/flutter/issues/147731');
-      return;
-    }
-    printProgress('${green}Running flutter_gallery integration test in --$buildMode using ${canvasKit ? 'CanvasKit' : 'HTML'} renderer.$reset');
-    final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery');
-    await runCommand(
-      flutter,
-      <String>[ 'clean' ],
-      workingDirectory: testAppDirectory,
+  Future<void> _runGalleryE2eWebTest(String buildMode) async {
+    printProgress(
+      '${green}Running flutter_gallery integration test in --$buildMode using CanvasKit renderer.$reset',
     );
+    final String testAppDirectory = path.join(
+      flutterRoot,
+      'dev',
+      'integration_tests',
+      'flutter_gallery',
+    );
+    await runCommand(flutter, <String>['clean'], workingDirectory: testAppDirectory);
     await runCommand(
       flutter,
       <String>[
         ...flutterTestArgs,
         'drive',
-        if (canvasKit)
-          '--dart-define=FLUTTER_WEB_USE_SKIA=true',
-        if (!canvasKit)
-          '--dart-define=FLUTTER_WEB_USE_SKIA=false',
-        if (!canvasKit)
-          '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
+        '--dart-define=FLUTTER_WEB_USE_SKIA=true',
         '--driver=test_driver/transitions_perf_e2e_test.dart',
         '--target=test_driver/transitions_perf_e2e.dart',
         '--browser-name=chrome',
@@ -455,9 +490,7 @@ class WebTestsSuite {
         '--$buildMode',
       ],
       workingDirectory: testAppDirectory,
-      environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      },
+      environment: <String, String>{'FLUTTER_WEB': 'true'},
     );
   }
 
@@ -466,24 +499,12 @@ class WebTestsSuite {
     final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
 
     // Build the app.
+    await runCommand(flutter, <String>['clean'], workingDirectory: testAppDirectory);
     await runCommand(
       flutter,
-      <String>[ 'clean' ],
+      <String>['build', 'web', '--$buildMode', '-t', entrypoint],
       workingDirectory: testAppDirectory,
-    );
-    await runCommand(
-      flutter,
-      <String>[
-        'build',
-        'web',
-        '--$buildMode',
-        '-t',
-        entrypoint,
-      ],
-      workingDirectory: testAppDirectory,
-      environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      },
+      environment: <String, String>{'FLUTTER_WEB': 'true'},
     );
 
     // Run the app.
@@ -497,24 +518,20 @@ class WebTestsSuite {
     );
 
     if (!result.contains('--- TEST SUCCEEDED ---')) {
-      foundError(<String>[
-        result,
-        '${red}Web stack trace integration test failed.$reset',
-      ]);
+      foundError(<String>[result, '${red}Web stack trace integration test failed.$reset']);
     }
   }
 
   /// Debug mode is special because `flutter build web` doesn't build in debug mode.
   ///
   /// Instead, we use `flutter run --debug` and sniff out the standard output.
-  Future<void> _runWebDebugTest(String target, {
-    List<String> additionalArguments = const<String>[],
+  Future<void> _runWebDebugTest(
+    String target, {
+    List<String> additionalArguments = const <String>[],
   }) async {
     final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
     bool success = false;
-    final Map<String, String> environment = <String, String>{
-      'FLUTTER_WEB': 'true',
-    };
+    final Map<String, String> environment = <String, String>{'FLUTTER_WEB': 'true'};
     adjustEnvironmentToEnableFlutterAsserts(environment);
     final CommandResult result = await runCommand(
       flutter,
@@ -526,7 +543,6 @@ class WebTestsSuite {
         'chrome',
         '--web-run-headless',
         '--dart-define=FLUTTER_WEB_USE_SKIA=false',
-        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
         ...additionalArguments,
         '-t',
         target,
@@ -559,18 +575,15 @@ class WebTestsSuite {
   }
 
   /// Run a web integration test in release mode.
-  Future<void> _runWebReleaseTest(String target, {
-    List<String> additionalArguments = const<String>[],
+  Future<void> _runWebReleaseTest(
+    String target, {
+    List<String> additionalArguments = const <String>[],
   }) async {
     final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
     final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
 
     // Build the app.
-    await runCommand(
-      flutter,
-      <String>[ 'clean' ],
-      workingDirectory: testAppDirectory,
-    );
+    await runCommand(flutter, <String>['clean'], workingDirectory: testAppDirectory);
     await runCommand(
       flutter,
       <String>[
@@ -583,9 +596,7 @@ class WebTestsSuite {
         target,
       ],
       workingDirectory: testAppDirectory,
-      environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      },
+      environment: <String, String>{'FLUTTER_WEB': 'true'},
     );
 
     // Run the app.
@@ -599,35 +610,43 @@ class WebTestsSuite {
     );
 
     if (!result.contains('--- TEST SUCCEEDED ---')) {
-      foundError(<String>[
-        result,
-        '${red}Web release mode test failed.$reset',
-      ]);
+      foundError(<String>[result, '${red}Web release mode test failed.$reset']);
     }
   }
 
   Future<void> _runWebUnitTests(String webRenderer, bool useWasm) async {
     final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
 
-    final Directory flutterPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter'));
-    final Directory flutterPackageTestDirectory = Directory(path.join(flutterPackageDirectory.path, 'test'));
+    final Directory flutterPackageDirectory = Directory(
+      path.join(flutterRoot, 'packages', 'flutter'),
+    );
+    final Directory flutterPackageTestDirectory = Directory(
+      path.join(flutterPackageDirectory.path, 'test'),
+    );
 
-    final List<String> allTests = flutterPackageTestDirectory
-      .listSync()
-      .whereType<Directory>()
-      .expand((Directory directory) => directory
-        .listSync(recursive: true)
-        .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
-      )
-      .whereType<File>()
-      .map<String>((File file) => path.relative(file.path, from: flutterPackageDirectory.path))
-      .where((String filePath) => !kWebTestFileKnownFailures[webRenderer]!.contains(path.split(filePath).join('/')))
-      .toList()
-      // Finally we shuffle the list because we want the average cost per file to be uniformly
-      // distributed. If the list is not sorted then different shards and batches may have
-      // very different characteristics.
-      // We use a constant seed for repeatability.
-      ..shuffle(math.Random(0));
+    final List<String> allTests =
+        flutterPackageTestDirectory
+            .listSync()
+            .whereType<Directory>()
+            .expand(
+              (Directory directory) => directory
+                  .listSync(recursive: true)
+                  .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart')),
+            )
+            .whereType<File>()
+            .map<String>(
+              (File file) => path.relative(file.path, from: flutterPackageDirectory.path),
+            )
+            .where(
+              (String filePath) =>
+                  !kWebTestFileKnownFailures[webRenderer]!.contains(path.split(filePath).join('/')),
+            )
+            .toList()
+          // Finally we shuffle the list because we want the average cost per file to be uniformly
+          // distributed. If the list is not sorted then different shards and batches may have
+          // very different characteristics.
+          // We use a constant seed for repeatability.
+          ..shuffle(math.Random(0));
 
     assert(webShardCount >= 1);
     final int testsPerShard = (allTests.length / webShardCount).ceil();
@@ -635,29 +654,24 @@ class WebTestsSuite {
 
     // This for loop computes all but the last shard.
     for (int index = 0; index < webShardCount - 1; index += 1) {
-      subshards['$index'] = () => _runFlutterWebTest(
-        webRenderer,
-        flutterPackageDirectory.path,
-        allTests.sublist(
-          index * testsPerShard,
-          (index + 1) * testsPerShard,
-        ),
-        useWasm,
-      );
+      subshards['$index'] =
+          () => _runFlutterWebTest(
+            webRenderer,
+            flutterPackageDirectory.path,
+            allTests.sublist(index * testsPerShard, (index + 1) * testsPerShard),
+            useWasm,
+          );
     }
 
     // The last shard also runs the flutter_web_plugins tests.
     //
     // We make sure the last shard ends in _last so it's easier to catch mismatches
-    // between `.cirrus.yml` and `test.dart`.
+    // between `.ci.yaml` and `test.dart`.
     subshards['${webShardCount - 1}_last'] = () async {
       await _runFlutterWebTest(
         webRenderer,
         flutterPackageDirectory.path,
-        allTests.sublist(
-          (webShardCount - 1) * testsPerShard,
-          allTests.length,
-        ),
+        allTests.sublist((webShardCount - 1) * testsPerShard, allTests.length),
         useWasm,
       );
       await _runFlutterWebTest(
@@ -695,20 +709,29 @@ class WebTestsSuite {
         '-v',
         '--platform=chrome',
         if (useWasm) '--wasm',
-        '--web-renderer=$webRenderer',
+        if (webRenderer == 'skwasm') ...<String>[
+          // See: WebRendererMode.dartDefines[skwasm]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=true',
+        ],
+        if (webRenderer == 'canvaskit') ...<String>[
+          // See: WebRendererMode.dartDefines[canvaskit]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=false',
+        ],
         '--dart-define=DART_HHH_BOT=$runningInDartHHHBot',
         ...flutterTestArgs,
         ...tests,
       ],
       workingDirectory: workingDirectory,
-      environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      },
+      environment: <String, String>{'FLUTTER_WEB': 'true'},
     );
     // metriciFile is a transitional file that needs to be deleted once it is parsed.
     // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
     // https://github.com/flutter/flutter/issues/146003
-    metricFile.deleteSync();
+    if (!dryRun) {
+      metricFile.deleteSync();
+    }
   }
 
   // The `chromedriver` process created by this test.
@@ -759,7 +782,8 @@ class WebTestsSuite {
     final HttpClientRequest request = await client.getUrl(chromeDriverUrl);
     final HttpClientResponse response = await request.close();
     final String responseString = await response.transform(utf8.decoder).join();
-    final Map<String, dynamic> webDriverStatus = json.decode(responseString) as Map<String, dynamic>;
+    final Map<String, dynamic> webDriverStatus =
+        json.decode(responseString) as Map<String, dynamic>;
     client.close();
     final bool webDriverReady = (webDriverStatus['value'] as Map<String, dynamic>)['ready'] as bool;
     if (!webDriverReady) {

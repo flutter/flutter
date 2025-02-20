@@ -144,7 +144,7 @@
   "menuDismissLabel": "මෙනුව අස් කරන්න",
   "lookUpButtonLabel": "උඩ බලන්න",
   "searchWebButtonLabel": "වෙබය සොයන්න",
-  "shareButtonLabel": "බෙදා ගන්න...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "බෙදා ගන්න",
+  "clearButtonTooltip": "පෙළ හිස් කරන්න",
+  "selectedDateLabel": "තෝරන ලදි"
 }
