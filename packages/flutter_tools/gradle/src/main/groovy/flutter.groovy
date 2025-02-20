@@ -14,7 +14,6 @@ import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
 import org.apache.tools.ant.taskdefs.condition.Os
-import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -23,14 +22,11 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
-import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFiles
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
