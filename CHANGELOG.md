@@ -39,9 +39,9 @@ INTERNAL NOTE
   glyph atlas resolution.
 - [flutter/162824](https://github.com/flutter/flutter/pull/162824) - Fixes
   subpixel alignment of glyphs.
-
 - [flutter/163304](https://github.com/flutter/flutter/issues/163304) Fixes crash when using backdrop filter on GLES backend.
 - [flutter/161334](https://github.com/flutter/flutter/issues/161334) Disable Vulkan on certain Xclipse GPU models.
+- [flutter/163672](https://github.com/flutter/flutter/pull/163672) - Check for tracked engine.version before overriding
 
 ## Flutter 3.27 Changes
 
