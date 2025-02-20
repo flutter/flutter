@@ -6,6 +6,8 @@
 #define FLUTTER_IMPELLER_DISPLAY_LIST_DL_IMAGE_IMPELLER_H_
 
 #include "flutter/display_list/image/dl_image.h"
+#include "fml/logging.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/core/texture.h"
 #include "include/core/SkBitmap.h"
 
@@ -26,7 +28,7 @@ class DlImageImpeller final : public flutter::DlImage {
 
   static sk_sp<DlImageImpeller> MakeDeferred(
       std::shared_ptr<Texture> texture,
-      SkBitmap bytes,
+      std::shared_ptr<DeviceBuffer> bytes,
       OwningContext owning_context = OwningContext::kIO
 #if FML_OS_IOS_SIMULATOR
       ,
@@ -72,10 +74,17 @@ class DlImageImpeller final : public flutter::DlImage {
 
   // |DlImage|
   const uint8_t* GetDeferredData() const override {
-    return reinterpret_cast<const uint8_t*>(lazy_data_.getAddr(0, 0));
+    FML_DCHECK(is_deferred_);
+    return reinterpret_cast<const uint8_t*>(bytes_->OnGetContents());
   }
 
   void SetUploaded() const override { is_deferred_ = false; }
+
+  const std::shared_ptr<impeller::DeviceBuffer> GetDeviceBuffer()
+      const override {
+    FML_DCHECK(is_deferred_);
+    return bytes_;
+  }
 
 #if FML_OS_IOS_SIMULATOR
   // |DlImage|
@@ -84,7 +93,7 @@ class DlImageImpeller final : public flutter::DlImage {
 
  private:
   std::shared_ptr<Texture> texture_;
-  SkBitmap lazy_data_;
+  std::shared_ptr<DeviceBuffer> bytes_;
   OwningContext owning_context_;
   mutable bool is_deferred_;
 #if FML_OS_IOS_SIMULATOR
@@ -92,7 +101,7 @@ class DlImageImpeller final : public flutter::DlImage {
 #endif  // FML_OS_IOS_SIMULATOR
 
   explicit DlImageImpeller(std::shared_ptr<Texture> texture,
-                           SkBitmap lazy_data,
+                           std::shared_ptr<DeviceBuffer> bytes,
                            bool is_deferred,
                            OwningContext owning_context = OwningContext::kIO
 #if FML_OS_IOS_SIMULATOR

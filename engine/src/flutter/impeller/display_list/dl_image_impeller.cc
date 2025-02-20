@@ -35,7 +35,7 @@ sk_sp<DlImageImpeller> DlImageImpeller::Make(std::shared_ptr<Texture> texture,
 // static
 sk_sp<DlImageImpeller> DlImageImpeller::MakeDeferred(
     std::shared_ptr<Texture> texture,
-    SkBitmap bytes,
+    std::shared_ptr<DeviceBuffer> bytes,
     OwningContext owning_context
 #if FML_OS_IOS_SIMULATOR
     ,
@@ -78,7 +78,7 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
 }
 
 DlImageImpeller::DlImageImpeller(std::shared_ptr<Texture> texture,
-                                 SkBitmap data,
+                                 std::shared_ptr<DeviceBuffer> bytes,
                                  bool is_deferred,
                                  OwningContext owning_context
 #ifdef FML_OS_IOS_SIMULATOR
@@ -87,7 +87,7 @@ DlImageImpeller::DlImageImpeller(std::shared_ptr<Texture> texture,
 #endif  // FML_OS_IOS_SIMULATOR
                                  )
     : texture_(std::move(texture)),
-      lazy_data_(std::move(data)),
+      bytes_(std::move(bytes)),
       owning_context_(owning_context),
       is_deferred_(is_deferred)
 #ifdef FML_OS_IOS_SIMULATOR

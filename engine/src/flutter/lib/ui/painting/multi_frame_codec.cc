@@ -156,56 +156,30 @@ MultiFrameCodec::State::GetNextFrameImage(
 
 #if IMPELLER_SUPPORTS_RENDERING
   if (is_impeller_enabled_) {
+    std::shared_ptr<impeller::DeviceBuffer> device_buffer =
+        impeller_context->GetResourceAllocator()->CreateBufferWithCopy(
+            fml::NonOwnedMapping(
+                reinterpret_cast<uint8_t*>(bitmap.getAddr(0, 0)),
+                bitmap.computeByteSize()));
+    if (device_buffer == nullptr) {
+      return std::make_pair(nullptr,
+                            "Failed to allocate device buffer for upload");
+    }
+
     sk_sp<DlImage> image;
     std::string error;
-
-    gpu_disable_sync_switch->Execute(
-        fml::SyncSwitch::Handlers()
-            .SetIfFalse([&] {
-              std::shared_ptr<impeller::DeviceBuffer> device_buffer =
-                  impeller_context->GetResourceAllocator()
-                      ->CreateBufferWithCopy(fml::NonOwnedMapping(
-                          reinterpret_cast<uint8_t*>(bitmap.getAddr(0, 0)),
-                          bitmap.computeByteSize()));
-              if (device_buffer == nullptr) {
-                error = "Failed to allocate device buffer for upload.";
-              }
-              ImageDecoderImpeller::UploadTextureToPrivate(
-                  [&image, &error](sk_sp<DlImage> image_result,
-                                   std::string error_result) {
-                    image = std::move(image_result);
-                    error = std::move(error_result);
-                  },
-                  impeller_context,        //
-                  device_buffer,           //
-                  info,                    //
-                  std::nullopt,            //
-                  gpu_disable_sync_switch  //
-              );
-            })
-            .SetIfTrue([&] {
-              const auto pixel_format =
-                  impeller::skia_conversions::ToPixelFormat(info.colorType());
-              FML_LOG(ERROR) << "Background decode";
-              if (!pixel_format.has_value()) {
-                error = "Invalid pixel format";
-                return;
-              }
-
-              impeller::TextureDescriptor texture_descriptor;
-              texture_descriptor.storage_mode =
-                  impeller::StorageMode::kDevicePrivate;
-              texture_descriptor.format = pixel_format.value();
-              texture_descriptor.size = {info.width(), info.height()};
-              texture_descriptor.mip_count = texture_descriptor.size.MipCount();
-              texture_descriptor.compression_type =
-                  impeller::CompressionType::kLossy;
-              std::shared_ptr<impeller::Texture> texture =
-                  impeller_context->GetResourceAllocator()->CreateTexture(
-                      texture_descriptor);
-
-              image = impeller::DlImageImpeller::MakeDeferred(texture, bitmap);
-            }));
+    ImageDecoderImpeller::UploadTextureToPrivate(
+        [&image, &error](sk_sp<DlImage> image_result,
+                         std::string error_result) {
+          image = std::move(image_result);
+          error = std::move(error_result);
+        },
+        impeller_context,        //
+        device_buffer,           //
+        info,                    //
+        std::nullopt,            //
+        gpu_disable_sync_switch  //
+    );
     return std::make_pair(image, error);
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING

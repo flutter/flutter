@@ -41,7 +41,6 @@ class ImpellerAllocator : public SkBitmap::Allocator {
 
 struct DecompressResult {
   std::shared_ptr<impeller::DeviceBuffer> device_buffer;
-  std::shared_ptr<SkBitmap> sk_bitmap;
   SkImageInfo image_info;
   std::optional<SkImageInfo> resize_info = std::nullopt;
   std::string decode_error;
@@ -69,6 +68,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
       SkISize target_size,
       impeller::ISize max_texture_size,
       bool supports_wide_gamut,
+      bool has_gpu_access,
       const std::shared_ptr<const impeller::Capabilities>& capabilities,
       const std::shared_ptr<impeller::Allocator>& allocator);
 
@@ -98,6 +98,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
   static std::pair<sk_sp<DlImage>, std::string> UnsafeUploadTextureToPrivate(
       const std::shared_ptr<impeller::Context>& context,
       const std::shared_ptr<impeller::DeviceBuffer>& buffer,
+      const std::shared_ptr<impeller::Texture>& texture,
       const SkImageInfo& image_info,
       const std::optional<SkImageInfo>& resize_info);
 

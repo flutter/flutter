@@ -12,6 +12,7 @@
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/macros.h"
+#include "impeller/core/device_buffer.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
@@ -135,6 +136,11 @@ class DlImage : public SkRefCnt {
   virtual const uint8_t* GetDeferredData() const { return nullptr; }
 
   virtual void SetUploaded() const {}
+
+  virtual const std::shared_ptr<impeller::DeviceBuffer> GetDeviceBuffer()
+      const {
+    return nullptr;
+  }
 
 #if FML_OS_IOS_SIMULATOR
   virtual bool IsFakeImage() const { return false; }
