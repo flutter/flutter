@@ -42,6 +42,7 @@ Future<void> runTasks(
   String? resultsPath,
   List<String>? taskArgs,
   bool useEmulator = false,
+  bool noReboot = false,
   @visibleForTesting Map<String, String>? isolateParams,
   @visibleForTesting void Function(String) print = print,
   @visibleForTesting List<String>? logs,
@@ -64,6 +65,7 @@ Future<void> runTasks(
         luciBuilder: luciBuilder,
         isolateParams: isolateParams,
         useEmulator: useEmulator,
+        noReboot: noReboot,
       );
 
       if (!result.succeeded) {
@@ -116,6 +118,7 @@ Future<TaskResult> rerunTask(
   String? gitBranch,
   String? luciBuilder,
   bool useEmulator = false,
+  bool noReboot = false,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   section('Running task "$taskName"');
@@ -130,6 +133,7 @@ Future<TaskResult> rerunTask(
     taskArgs: taskArgs,
     isolateParams: isolateParams,
     useEmulator: useEmulator,
+    noReboot: noReboot,
   );
 
   print('Task result:');
@@ -169,6 +173,7 @@ Future<TaskResult> runTask(
   String? deviceId,
   List<String>? taskArgs,
   bool useEmulator = false,
+  bool noReboot = false,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
@@ -243,6 +248,8 @@ Future<TaskResult> runTask(
     isolateParams =
         isolateParams == null ? <String, String>{} : Map<String, String>.of(isolateParams);
     isolateParams['runProcessCleanup'] = terminateStrayDartProcesses.toString();
+    isolateParams['noReboot'] = noReboot.toString();
+
     final VmService service = result.vmService;
     final String isolateId = result.isolate.id!;
     final Map<String, dynamic> taskResultJson =
