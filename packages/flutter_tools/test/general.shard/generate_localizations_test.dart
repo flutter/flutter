@@ -2182,7 +2182,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         "description": "The first day of spring",
         "placeholders": {
           "springStartDate": {
-            "format": "MMMMd"
+            "format": "MMMd"
           }
         }
       }
@@ -2194,7 +2194,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
                 (L10nException e) => e.message,
                 'message',
                 contains(
-                  'The placeholder, springStartDate, has its "type" resource attribute set to the "null" type in locale "ja", but it is "DateTime" in the template placeholder.',
+                  'The placeholder, springStartDate, has its "type" resource attribute set to the "Object" type in locale "ja", but it is "DateTime" in the template placeholder.',
                 ),
               ),
             ),
