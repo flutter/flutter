@@ -3720,6 +3720,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   late GlobalKey<OverlayState> _overlayKey;
   final _History _history = _History();
   bool _handlesBackGestures = false;
+  late bool _isRootNavigator;
   bool? _lastCanPop;
 
   /// A set for entries that are waiting to dispose until their subtrees are
@@ -3842,6 +3843,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     ServicesBinding.instance.accessibilityFocus.addListener(_recordLastFocus);
     _history.addListener(_handleHistoryChanged);
+
+    _isRootNavigator = _getIsRootNavigator();
   }
 
   // Record the last focused node in route entry.
@@ -3949,6 +3952,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    assert(_isRootNavigator == _getIsRootNavigator());
     _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
       if (entry.route.navigator == this) {
@@ -3958,9 +3962,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // If this is a nested Navigator, handle system backs so that the root
     // Navigator doesn't get all of them.
-    _handlesBackGestures =
-        widget.handlesBacksWhenNested && Navigator.maybeOf(context, rootNavigator: true) != this;
+    _handlesBackGestures = widget.handlesBacksWhenNested && !_isRootNavigator;
   }
+
+  bool _getIsRootNavigator() => Navigator.maybeOf(context, rootNavigator: true) == this;
 
   /// Dispose all lingering router entries immediately.
   void _forcedDisposeAllRouteEntries() {
@@ -4119,6 +4124,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       assert(observer.navigator == null);
       NavigatorObserver._navigators[observer] = this;
     }
+
+    // Do this in activate, not didChangeDependencies, to minimize the number of
+    // times it needs to be called.
+    _isRootNavigator = _getIsRootNavigator();
   }
 
   @protected
