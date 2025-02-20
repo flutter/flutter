@@ -7,17 +7,13 @@
 
 #include <memory>
 
-#include "flutter/assets/asset_manager.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/unique_fd.h"
-#include "flutter/lib/ui/window/viewport_metrics.h"
-#include "flutter/runtime/platform_data.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
+#include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
-#include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 
 namespace flutter {
@@ -119,6 +115,7 @@ class AndroidShellHolder {
   bool is_valid_ = false;
   uint64_t next_pointer_flow_id_ = 0;
   std::unique_ptr<APKAssetProvider> apk_asset_provider_;
+  AndroidRenderingAPI android_rendering_api_;
 
   //----------------------------------------------------------------------------
   /// @brief      Constructor with its components injected.
@@ -136,7 +133,8 @@ class AndroidShellHolder {
                      const std::shared_ptr<ThreadHost>& thread_host,
                      std::unique_ptr<Shell> shell,
                      std::unique_ptr<APKAssetProvider> apk_asset_provider,
-                     const fml::WeakPtr<PlatformViewAndroid>& platform_view);
+                     const fml::WeakPtr<PlatformViewAndroid>& platform_view,
+                     AndroidRenderingAPI rendering_api);
   static void ThreadDestructCallback(void* value);
   std::optional<RunConfiguration> BuildRunConfiguration(
       const std::string& entrypoint,

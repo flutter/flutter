@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "shell/platform/android/android_rendering_selector.h"
 #define FML_USED_ON_EMBEDDER
 
 #include <android/log.h>
@@ -15,22 +16,17 @@
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/native_library.h"
-#include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
-#include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "impeller/base/validation.h"
 #include "impeller/toolkit/android/proc_table.h"
-#include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "txt/platform.h"
 
 namespace flutter {
@@ -116,8 +112,7 @@ void FlutterMain::Init(JNIEnv* env,
     }
   }
 
-  settings.android_rendering_api = SelectedRenderingAPI(settings);
-  switch (settings.android_rendering_api) {
+  switch (SelectedRenderingAPI(settings)) {
     case AndroidRenderingAPI::kSoftware:
     case AndroidRenderingAPI::kSkiaOpenGLES:
       settings.enable_impeller = false;

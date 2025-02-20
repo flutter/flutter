@@ -10,6 +10,7 @@
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
 #include "flutter/runtime/dart_service_isolate.h"
+#include "flutter/shell/platform/android/android_rendering_selector.h"
 
 namespace flutter {
 
