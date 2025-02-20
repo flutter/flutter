@@ -208,6 +208,17 @@ abstract class FlutterCommand extends Command<void> {
   @visibleForTesting
   static const String flutterDartVersionDefine = 'FLUTTER_DART_VERSION';
 
+  /// List of all dart defines used for adding Flutter version information at runtime
+  @visibleForTesting
+  static const List<String> flutterVersionDartDefines = <String>[
+    flutterVersionDefine,
+    flutterChannelDefine,
+    flutterGitUrlDefine,
+    flutterFrameworkRevisionDefine,
+    flutterEngineRevisionDefine,
+    flutterDartVersionDefine,
+  ];
+
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
@@ -1530,15 +1541,6 @@ abstract class FlutterCommand extends Command<void> {
 
   // This adds the Dart defines used to access various Flutter version information at runtime.
   void _addFlutterVersionToDartDefines(FlutterVersion version, List<String> dartDefines) {
-    const List<String> flutterVersionDartDefines = <String>[
-      flutterVersionDefine,
-      flutterChannelDefine,
-      flutterGitUrlDefine,
-      flutterFrameworkRevisionDefine,
-      flutterEngineRevisionDefine,
-      flutterDartVersionDefine,
-    ];
-
     for (final String dartDefine in flutterVersionDartDefines) {
       if (globals.platform.environment[dartDefine] != null) {
         throwToolExit(
