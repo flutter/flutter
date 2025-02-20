@@ -51,6 +51,13 @@ public class SensitiveContentChannel {
                 result.error("error", exception.getMessage(), null);
               }
               break;
+            case "SensitiveContent.isSupported":
+              try {
+                sensitiveContentMethodHandler.isSupported(result);
+              } catch (IllegalStateException exception) {
+                result.error("error", exception.getMessage(), null);
+              }
+              break;
             default:
               Log.v(
                   TAG, "Method " + method + " is not implemented for the SensitiveContentChannel.");
@@ -85,5 +92,8 @@ public class SensitiveContentChannel {
 
     /** Returns the current content sensitivity level of a Flutter Android {@code View}. */
     void getContentSensitivity(@NonNull MethodChannel.Result result);
-  }
+
+    /** Returns whether or not marking content sensitivity is supported on the device. */
+    @Override
+    public void isSupported(@NonNull MethodChannel.Result result);
 }

@@ -112,13 +112,26 @@ class SensitiveContentService {
 
   /// Gets content sensitivity level of the Android `View` that contains
   /// the app's widget tree.
-  // TODO(camsim99): Rename or refactor to signify that this returns ID
-  Future<int?> getContentSensitivity() async {
+  Future<int> getContentSensitivity() async {
     try {
       final int? result = await sensitiveContentChannel.invokeMethod<int>(
         'SensitiveContent.getContentSensitivity',
       );
-      return result;
+      return result!;
+    } catch (e) {
+      // Content sensitivity failed to be set.
+      throw FlutterError('Failed to retrieve content sensitivity: $e');
+    }
+  }
+
+  /// Returns whether or not setting content sensitivity levels is supported
+  /// on the device.
+  Future<bool> isSupported() async {
+    try {
+      final bool? result = await sensitiveContentChannel.invokeMethod<bool>(
+        'SensitiveContent.isSupported',
+      );
+      return result!;
     } catch (e) {
       // Content sensitivity failed to be set.
       throw FlutterError('Failed to retrieve content sensitivity: $e');

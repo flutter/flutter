@@ -24,6 +24,8 @@ void main() {
           expect(methodCall.arguments, isA<int>());
         } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
           return defaultContentSensitivitySettingId;
+        } else if (methodCall.method == 'SensitiveContent.isSupported') {
+          return true;
         }
         return null;
       },
