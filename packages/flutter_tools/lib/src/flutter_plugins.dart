@@ -244,9 +244,8 @@ bool _writeFlutterPluginsList(
   final String? oldPluginsFileStringContent = _readFileContent(pluginsFile);
   bool pluginsChanged = true;
   if (oldPluginsFileStringContent != null) {
-    Object? decodedJson;
     try {
-      decodedJson = jsonDecode(oldPluginsFileStringContent);
+      final Object? decodedJson = jsonDecode(oldPluginsFileStringContent);
       if (decodedJson is Map<String, Object?>) {
         final String jsonOfNewPluginsMap = jsonEncode(pluginsMap);
         final String jsonOfOldPluginsMap = jsonEncode(decodedJson[_kFlutterPluginsPluginListKey]);
@@ -1100,12 +1099,17 @@ void _createPlatformPluginSymlinks(
 /// dependencies declared in `pubspec.yaml`.
 ///
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
+///
+/// Unless explicitly specified, [determineDevDependencies] is disabled by
+/// default; if set to `true`, plugins that are development-only dependencies
+/// may be labeled or, depending on the platform, omitted from metadata or
+/// platform-specific artifacts.
 Future<void> refreshPluginsList(
   FlutterProject project, {
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
-  bool? determineDevDependencies,
+  bool determineDevDependencies = false,
   bool? generateLegacyPlugins,
 }) async {
   final List<Plugin> plugins = await findPlugins(
