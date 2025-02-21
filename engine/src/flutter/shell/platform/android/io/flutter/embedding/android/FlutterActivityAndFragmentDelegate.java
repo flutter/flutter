@@ -761,7 +761,7 @@ import java.util.List;
     }
 
     // Null out the platformPlugin and sensitiveContentPlugin to avoid a possible
-    // retain cycle between the plugin, this Fragment, and this Fragment's Activity.
+    // retain cycle between the plugins, this Fragment, and this Fragment's Activity.
     if (platformPlugin != null) {
       platformPlugin.destroy();
       platformPlugin = null;
@@ -1201,7 +1201,8 @@ import java.util.List;
 
     /**
      * Hook for host to create/provide a {@link SensitiveContentPlugin} if the associated Flutter
-     * experience should set content sensitivity.
+     * experience should set content sensitivity for the {@link FlutterView} that {@code activity}
+     * creates.
      */
     @Nullable
     SensitiveContentPlugin provideSensitiveContentPlugin(
