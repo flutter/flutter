@@ -23,7 +23,6 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
-import '../../src/throwing_pub.dart';
 
 void main() {
   late FileSystem fileSystem;

@@ -117,7 +117,7 @@ void main() {
         ..writeAsStringSync(kExamplesPubspecYaml);
       flutter.childFile('pubspec.yaml').writeAsStringSync(kFlutterPubspecYaml);
       Cache.flutterRoot = flutterSdk.absolute.path;
-      pub = FakePub(fileSystem);
+      pub = FakePub();
       processManager = FakeProcessManager.empty();
     });
 
@@ -368,9 +368,8 @@ void main() {
 }
 
 class FakePub extends Fake implements Pub {
-  FakePub(this.fileSystem);
+  FakePub();
 
-  final FileSystem fileSystem;
   final List<String> pubGetDirectories = <String>[];
   final List<String> pubBatchDirectories = <String>[];
   final List<String> pubspecYamls = <String>[];
