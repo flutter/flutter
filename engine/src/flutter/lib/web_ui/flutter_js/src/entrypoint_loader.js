@@ -174,7 +174,9 @@ export class FlutterEntrypointLoader {
         importsPromise = Promise.resolve({});
       }
       const compiledDartApp = await compiledDartAppPromise;
-      const dartApp = await compiledDartApp.instantiate(await importsPromise);
+      const dartApp = await compiledDartApp.instantiate(await importsPromise, {
+        loadDynamicModule: async (uri) => await fetch(uri)
+      });
       await dartApp.invokeMain();
     }
   }

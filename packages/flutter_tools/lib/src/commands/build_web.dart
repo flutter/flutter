@@ -128,6 +128,14 @@ class BuildWebCommand extends BuildSubCommand {
       help: 'Whether to strip the resulting wasm file of static symbol names.',
       defaultsTo: true,
     );
+    argParser.addOption(
+      'dynamic-module-interface',
+      help: 'Yaml file specifying the dynamic interface for dynamic modules.',
+    );
+    argParser.addOption(
+      'dynamic-module-entrypoint',
+      help: 'Dart file containing a dynamic module entrypoint.',
+    );
   }
 
   final FileSystem _fileSystem;
@@ -177,6 +185,9 @@ class BuildWebCommand extends BuildSubCommand {
     final bool sourceMaps = boolArg('source-maps');
     final bool minify = boolArg('minify');
 
+    final String? dynamicModuleInterface = stringArg('dynamic-module-interface');
+    final String? dynamicModuleEntryPoint = stringArg('dynamic-module-entrypoint');
+
     final List<WebCompilerConfig> compilerConfigs;
 
     if (useWasm) {
@@ -194,6 +205,8 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: optimizationLevel,
           stripWasm: boolArg('strip-wasm'),
           sourceMaps: sourceMaps,
+          dynamicModuleEntryPoint: dynamicModuleEntryPoint,
+          dynamicModuleInterface: dynamicModuleInterface,
         ),
         JsCompilerConfig(
           csp: boolArg('csp'),
