@@ -11,6 +11,7 @@
 #include "flutter/impeller/entity/vk/modern_shaders_vk.h"
 #include "flutter/shell/gpu/gpu_surface_vulkan.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "include/gpu/ganesh/GrDirectContext.h"
 #include "shell/gpu/gpu_surface_vulkan_impeller.h"
 
@@ -76,6 +77,14 @@ EmbedderSurfaceVulkanImpeller::EmbedderSurfaceVulkanImpeller(
     return;
   }
 
+  auto aiks_context = std::make_shared<impeller::AiksContext>(
+      context_, impeller::TypographerContextSkia::Make());
+  if (!aiks_context->IsValid()) {
+    FML_DLOG(ERROR) << "Could not create valid Impeller Context.";
+    return;
+  }
+  aiks_context_ = aiks_context;
+
   FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan).";
 
   valid_ = true;
@@ -112,7 +121,8 @@ bool EmbedderSurfaceVulkanImpeller::IsValid() const {
 
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceVulkanImpeller::CreateGPUSurface() {
-  return std::make_unique<GPUSurfaceVulkanImpeller>(this, context_);
+  return std::make_unique<GPUSurfaceVulkanImpeller>(this, context_,
+                                                    aiks_context_);
 }
 
 // |EmbedderSurface|

@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/embedder/embedder_external_view_embedder.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 #include "flutter/shell/platform/embedder/embedder_surface_gl_skia.h"
+#include "impeller/display_list/aiks_context.h"
 
 namespace impeller {
 class ContextGLES;
@@ -34,6 +35,7 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
   EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table_;
   bool fbo_reset_after_present_;
   std::shared_ptr<impeller::ContextGLES> impeller_context_;
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<ReactorWorker> worker_;
 

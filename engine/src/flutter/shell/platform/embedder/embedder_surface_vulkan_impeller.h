@@ -12,6 +12,7 @@
 #include "flutter/shell/platform/embedder/embedder_external_view_embedder.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 
 namespace flutter {
@@ -61,6 +62,7 @@ class EmbedderSurfaceVulkanImpeller final : public EmbedderSurface,
   VulkanDispatchTable vulkan_dispatch_table_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<impeller::ContextVK> context_;
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
 
   // |EmbedderSurface|
   bool IsValid() const override;

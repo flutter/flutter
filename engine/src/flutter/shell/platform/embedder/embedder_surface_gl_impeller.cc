@@ -11,6 +11,7 @@
 #include "impeller/entity/gles/modern_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
 namespace flutter {
 
@@ -92,6 +93,14 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
     FML_LOG(ERROR) << "Could not add reactor worker.";
     return;
   }
+
+  auto aiks_context = std::make_shared<impeller::AiksContext>(
+      impeller_context_, impeller::TypographerContextSkia::Make());
+  if (!aiks_context->IsValid()) {
+    FML_DLOG(ERROR) << "Could not create valid Impeller Context.";
+    return;
+  }
+  aiks_context_ = aiks_context;
 
   gl_dispatch_table_.gl_clear_current_callback();
   FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGL).";
@@ -178,6 +187,7 @@ std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
   return std::make_unique<GPUSurfaceGLImpeller>(
       this,                     // GPU surface GL delegate
       impeller_context_,        // Impeller context
+      aiks_context_,            // aiks context
       !external_view_embedder_  // render to surface
   );
 }
