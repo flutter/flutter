@@ -4253,6 +4253,12 @@ extension WebTextMetricsExtension on DomTextMetrics {
   external DomRectReadOnly _getActualBoundingBox(int begin, int end);
 
   DomRectReadOnly getActualBoundingBox(int begin, int end) => _getActualBoundingBox(begin, end);
+
+  @JS('getSelectionRects')
+  external JSArray<JSAny> _getSelectionRects(int begin, int end);
+
+  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
+      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
 }
 
 extension WebDomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
