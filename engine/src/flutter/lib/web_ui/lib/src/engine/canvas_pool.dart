@@ -524,8 +524,8 @@ class CanvasPool extends _SaveStackTracking {
   void clipRSuperellipse(ui.RSuperellipse rse) {
     // TODO(dkwingsmt): Properly implement clipRSuperellipse on Web instead of falling
     // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    ui.RRect rrect = rse.toApproximateRRect();
-    super.clipRRect(rrect);
+    final ui.RRect rrect = rse.toApproximateRRect();
+    super.clipRSuperellipse(rse);
     if (_canvas != null) {
       _clipRRect(context, rrect);
     }

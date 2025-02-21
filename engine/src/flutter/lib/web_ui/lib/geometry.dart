@@ -445,23 +445,6 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
     required double blRadiusY,
   });
 
-  Float32List _getValue32() {
-    final Float32List result = Float32List(12);
-    result[0] = left;
-    result[1] = top;
-    result[2] = right;
-    result[3] = bottom;
-    result[4] = tlRadiusX;
-    result[5] = tlRadiusY;
-    result[6] = trRadiusX;
-    result[7] = trRadiusY;
-    result[8] = brRadiusX;
-    result[9] = brRadiusY;
-    result[10] = blRadiusX;
-    result[11] = blRadiusY;
-    return result;
-  }
-
   final double left;
   final double top;
   final double right;
