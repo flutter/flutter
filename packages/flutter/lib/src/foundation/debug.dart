@@ -143,10 +143,10 @@ String? connectedVmServiceUri;
 /// Should be called only from within an assert.
 ///
 /// Returns true to make it easier to be wrapped into `assert`.
-bool debugMaybeDispatchObjectCreated(String library, String className, Object object) {
+bool debugMaybeDispatchCreated(String flutterLibrary, String className, Object object) {
   if (kFlutterMemoryAllocationsEnabled) {
     FlutterMemoryAllocations.instance.dispatchObjectCreated(
-      library: library,
+      library: 'package:flutter/$flutterLibrary.dart',
       className: className,
       object: object,
     );
@@ -159,7 +159,7 @@ bool debugMaybeDispatchObjectCreated(String library, String className, Object ob
 /// Should be called only from within an assert.
 ///
 /// Returns true to make it easier to be wrapped into `assert`.
-bool debugMaybeDispatchObjectDisposed(Object object) {
+bool debugMaybeDispatchDisposed(Object object) {
   if (kFlutterMemoryAllocationsEnabled) {
     FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: object);
   }
