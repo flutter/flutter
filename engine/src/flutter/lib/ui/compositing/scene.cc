@@ -95,7 +95,7 @@ static sk_sp<DlImage> CreateDeferredImage(
                         kRGBA_8888_SkColorType, kPremul_SkAlphaType);
   return DlDeferredImageGPUSkia::MakeFromLayerTree(
       image_info, std::move(layer_tree), std::move(snapshot_delegate),
-      raster_task_runner, std::move(unref_queue));
+      raster_task_runner, unref_queue);
 #endif  //  SLIMPELLER
 }
 
