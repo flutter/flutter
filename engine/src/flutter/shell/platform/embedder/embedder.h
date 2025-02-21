@@ -1703,6 +1703,10 @@ typedef struct {
   /// Specify a callback that is used to set the thread priority for embedder
   /// task runners.
   void (*thread_priority_setter)(FlutterThreadPriority);
+  /// Specify the task runner for the thread on which the UI tasks will be run.
+  /// This may be same as platform_task_runner, in which case the Flutter engine
+  /// will run the UI isolate on platform thread.
+  const FlutterTaskRunnerDescription* ui_task_runner;
 } FlutterCustomTaskRunners;
 
 typedef struct {
@@ -2598,8 +2602,8 @@ FlutterEngineResult FlutterEngineCollectAOTData(FlutterEngineAOTData data);
 ///             engine may need the embedder to post tasks back to it before
 ///             `FlutterEngineRun` has returned. Embedders can only post tasks
 ///             to the engine if they have a handle to the engine. In such
-///             cases, embedders are advised to get the engine handle via the
-///             `FlutterInitializeCall`. Then they can call
+///             cases, embedders are advised to get the engine handle by calling
+///             `FlutterEngineInitialize`. Then they can call
 ///             `FlutterEngineRunInitialized` knowing that they will be able to
 ///             service custom tasks on other threads with the engine handle.
 ///
