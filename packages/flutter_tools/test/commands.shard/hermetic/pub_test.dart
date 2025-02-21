@@ -159,7 +159,12 @@ void main() {
       expect(json.decode(packageConfigFile.readAsStringSync()), <String, Object>{
         'configVersion': 2,
         'packages': <Object?>[
-          <String, Object?>{'name': 'my_app', 'rootUri': '../', 'packageUri': 'lib/'},
+          <String, Object?>{
+            'name': 'my_app',
+            'rootUri': '../',
+            'packageUri': 'lib/',
+            'languageVersion': '3.7',
+          },
         ],
       });
     },
