@@ -51,10 +51,6 @@ FLUTTER_ASSERT_ARC
   return MTLPixelFormatBGRA8Unorm;
 }
 - (BOOL)isWideGamutSupported {
-  if (!self.delegate.isUsingImpeller) {
-    return NO;
-  }
-
   FML_DCHECK(self.screen);
 
   // This predicates the decision on the capabilities of the iOS device's

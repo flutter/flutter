@@ -13,7 +13,6 @@
 
 @protocol FlutterViewEngineDelegate <NSObject>
 
-@property(nonatomic, readonly) BOOL isUsingImpeller;
 @property(nonatomic, readonly) FlutterPlatformViewsController* platformViewsController;
 
 - (flutter::Rasterizer::Screenshot)takeScreenshot:(flutter::Rasterizer::ScreenshotType)type
