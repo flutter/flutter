@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
@@ -1484,6 +1482,9 @@ void createFakeDartPlugins(
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
   Set<String> dependencies = <String>{};
+
+  @override
+  String get appName => 'myapp';
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
