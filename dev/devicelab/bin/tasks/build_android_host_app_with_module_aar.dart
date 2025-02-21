@@ -12,6 +12,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
+import 'package:pub_semver/pub_semver.dart';
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
@@ -33,10 +34,14 @@ TaskFunction combine(List<TaskFunction> tasks) {
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
 class ModuleTest {
-  ModuleTest({this.gradleVersion = '7.6.3'});
+  ModuleTest({this.gradleVersion = '7.6.3', Version? agpVersion})
+    : agpVersion = agpVersion ?? Version(8, 3, 0);
 
   static const String buildTarget = 'module-gradle';
+  // gradleVersion is a String because gradle does not follow dart semver
+  // rules for rc candidates.
   final String gradleVersion;
+  final Version agpVersion;
   final StringBuffer stdout = StringBuffer();
   final StringBuffer stderr = StringBuffer();
 
@@ -63,7 +68,7 @@ class ModuleTest {
           stderr: stderr,
         );
       });
-      print('Created template in $tempDir');
+      print('Created template in $tempDir.');
 
       section('Create package with native assets');
 
@@ -238,7 +243,7 @@ class ModuleTest {
         Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
-      // Modify gradle version to passed in version.
+      // Modify gradle version to the passed in version.
       // This is somehow the wrong file.
       final File gradleWrapperProperties = File(
         path.join(hostApp.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'),
@@ -248,8 +253,15 @@ class ModuleTest {
       section(propertyContent);
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
-      // TODO make an actual evaluation.
-      bool greaterThanGradle83 = true;
+      // Modify AGP version to the passed in version.
+      // /Users/reidbaker/flutter-work/dev/integration_tests/pure_android_host_apps/android_host_app_v2_embedding/build.gradle
+      final File topBuildDotGradle = File(path.join(hostApp.path, 'build.gradle'));
+      String topBuildContent = await topBuildDotGradle.readAsString();
+      topBuildContent = topBuildContent.replaceFirst('REPLACEME', agpVersion.toString());
+      section(topBuildContent);
+      await topBuildDotGradle.writeAsString(topBuildContent, flush: true);
+
+      final bool greaterThanGradle83 = agpVersion.compareTo(Version(8, 3, 0)) >= 0;
 
       section('Build debug host APK');
 
@@ -436,11 +448,22 @@ class ModuleTest {
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      //rmTree(tempDir);//
+      rmTree(tempDir);
     }
   }
 }
 
 Future<void> main() async {
-  await task(combine(<TaskFunction>[ModuleTest(gradleVersion: '8.6').call]));
+  await task(
+    combine(<TaskFunction>[
+      // Pre AGP 8.3
+      ModuleTest(gradleVersion: '8.4', agpVersion: Version.parse('8.1.0')).call,
+      // Newer gradle, older AGP
+      ModuleTest(gradleVersion: '8.12.1', agpVersion: Version.parse('8.1.0')).call,
+      // Post AGP 8.3
+      ModuleTest(gradleVersion: '8.10.2', agpVersion: Version.parse('8.7.0')).call,
+      // Ensure gradle rc candidates can work
+      ModuleTest(gradleVersion: '8.13-rc-1', agpVersion: Version.parse('8.8.1')).call,
+    ]),
+  );
 }
