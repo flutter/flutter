@@ -131,10 +131,12 @@ class BuildWebCommand extends BuildSubCommand {
     argParser.addOption(
       'dynamic-module-interface',
       help: 'Yaml file specifying the dynamic interface for dynamic modules.',
+      hide: true,
     );
     argParser.addOption(
       'dynamic-module-entrypoint',
       help: 'Dart file containing a dynamic module entrypoint.',
+      hide: true,
     );
   }
 

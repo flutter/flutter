@@ -175,7 +175,15 @@ export class FlutterEntrypointLoader {
       }
       const compiledDartApp = await compiledDartAppPromise;
       const dartApp = await compiledDartApp.instantiate(await importsPromise, {
-        loadDynamicModule: async (uri) => await fetch(uri)
+        loadDynamicModule: async (wasmUri, mjsUri) => {
+          const wasmBytes = fetch(wasmUri);
+          let mjsRuntimeUri = resolveUrlWithSegments(entrypointBaseUrl, mjsUri);
+          if (this._ttPolicy != null) {
+            mjsRuntimeUri = this._ttPolicy.createScriptURL(mjsRuntimeUri);
+          }
+          const mjsModule = import(mjsRuntimeUri);
+          return [await wasmBytes, await mjsModule];
+        }
       });
       await dartApp.invokeMain();
     }

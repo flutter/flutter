@@ -189,11 +189,11 @@ class WasmCompilerConfig extends WebCompilerConfig {
       ...super._buildKeyMap,
       'stripWasm': stripWasm,
       'sourceMaps': sourceMaps,
-      // Each interface will define a separate chain of dynamic modules.
-      // And each dynamic entrypoint for that interface requires a new build.
+      // Each dynamic module interface will define a separate set of dynamic modules
+      // and each dynamic entrypoint for that interface requires a new build.
       // No entrypoint indicates this is the main module.
-      'dynamicModuleInterface': dynamicModuleInterface,
-      'dynamicModuleEntryPoint': dynamicModuleEntryPoint,
+      if (dynamicModuleInterface != null) 'dynamicModuleInterface': dynamicModuleInterface,
+      if (dynamicModuleEntryPoint != null) 'dynamicModuleEntryPoint': dynamicModuleEntryPoint,
     };
     return jsonEncode(settings);
   }
