@@ -400,12 +400,12 @@ void main() {
 
     expect(getHeaderHeight(), 300);
 
-    // Scrolling down 150px the header height becomes 150px
+    // After scrolling down 150px, the header height becomes 150px
     await tester.drag(find.byType(NestedScrollView), const Offset(0, -150));
     await tester.pumpAndSettle();
     expect(getHeaderHeight(), 150);
 
-    // Scrolling down another 150px the header height becomes 100px
+    // After scrolling down an additional 150px, the header height becomes 100px
     await tester.drag(find.byType(NestedScrollView), const Offset(0, -150));
     await tester.pumpAndSettle();
     expect(getHeaderHeight(), 100);
