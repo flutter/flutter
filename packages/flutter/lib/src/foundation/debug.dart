@@ -140,6 +140,8 @@ String? connectedVmServiceUri;
 /// [FlutterMemoryAllocations] should not increase size of the Flutter application
 /// if memory allocations are disabled.
 ///
+/// [flutterLibrary] is the name of the Flutter library where the object is declared.
+///
 /// Should be called only from within an assert.
 ///
 /// Returns true to make it easier to be wrapped into `assert`.
