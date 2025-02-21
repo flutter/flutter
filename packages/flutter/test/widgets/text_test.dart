@@ -1702,6 +1702,47 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Changing leadingDistribution should trigger a layout update', (
+    WidgetTester tester,
+  ) async {
+    late StateSetter setState;
+    TextLeadingDistribution leadingDistribution = TextLeadingDistribution.even;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return MaterialApp(
+            home: Scaffold(
+              body: Text(
+                'Hello',
+                style: TextStyle(
+                  fontSize: 30,
+                  height: 10,
+                  leadingDistribution: leadingDistribution,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    final StrutStyle? after = tester.renderObject<RenderParagraph>(find.text('Hello')).strutStyle;
+    expect(after, isNotNull);
+    expect(after?.leadingDistribution, TextLeadingDistribution.even);
+
+    setState(() {
+      leadingDistribution = TextLeadingDistribution.proportional;
+    });
+    await tester.pump();
+
+    final StrutStyle? before = tester.renderObject<RenderParagraph>(find.text('Hello')).strutStyle;
+    expect(before, isNotNull);
+    expect(before?.leadingDistribution, TextLeadingDistribution.proportional);
+
+    expect(before, isNot(after));
+  });
 }
 
 Future<void> _pumpTextWidget({
