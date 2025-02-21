@@ -66,21 +66,10 @@ void main() {
 name: foo
 ''');
 
-        globals.fs.directory('.dart_tool').childFile('package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "foo",
-      "rootUri": "../foo/",
-      "packageUri": "lib/",
-      "languageVersion": "2.7"
-    }
-  ]
-}
-''');
+        writePackageConfigFile(
+          packages: <String, String>{'foo': 'foo/'},
+          languageVersions: <String, String>{'foo': '2.7'},
+        );
         globals.fs.currentDirectory.childDirectory('bar').createSync();
         processManager = FakeProcessManager.empty();
         globals.fs
