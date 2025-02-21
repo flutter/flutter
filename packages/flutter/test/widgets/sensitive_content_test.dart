@@ -15,12 +15,19 @@ void main() {
   // The state of content sensitivity in the app.
   final SensitiveContentSetting sensitiveContentSetting = SensitiveContentSetting.instance;
 
+  // The number of method channel calls to `SensitiveContent.setContentSensitivity`.
+  int setContentSensitivityCallCount = 0;
+
   setUp(() {
+    // Reset number of method channel calls to `SensitiveContent.setContentSensitivity`.
+    setContentSensitivityCallCount = 0;
+
     // Mock calls to the sensitive content method channel.
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.sensitiveContent,
       (MethodCall methodCall) async {
         if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
+          setContentSensitivityCallCount++;
           expect(methodCall.arguments, isA<int>());
         } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
           return defaultContentSensitivitySettingId;
@@ -51,6 +58,7 @@ void main() {
       equals(ContentSensitivity.sensitive),
     );
     expect(sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
+    expect(setContentSensitivityCallCount, 1);
   });
 
   testWidgets(
@@ -91,6 +99,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
           equals(2),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       testWidgets('when it gets disposed with another sensitive widget', (
@@ -125,6 +134,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       testWidgets('with two other sensitive widgets', (WidgetTester tester) async {
@@ -151,6 +161,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
           equals(3),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       testWidgets('with two other sensitive widgets and one gets disposed', (
@@ -189,6 +200,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
           equals(2),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       // Tests with auto sensitive widget(s):
@@ -216,6 +228,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       testWidgets('when it gets disposed with one auto sensitive widget', (
@@ -236,6 +249,8 @@ void main() {
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, asc1]));
 
+        expect(setContentSensitivityCallCount, 1);
+
         final DisposeTesterState sc1DiposeTesterState = tester.firstState<DisposeTesterState>(
           find.byKey(sc1Key),
         );
@@ -254,6 +269,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 2);
       });
 
       testWidgets('with one auto sensitive widget that gets disposed', (WidgetTester tester) async {
@@ -290,6 +306,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(0),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       testWidgets('with two auto sensitive widgets and one gets disposed', (
@@ -332,6 +349,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       // Tests with not sensitive widget(s):
@@ -359,6 +377,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       testWidgets('when it gets disposed with one not sensitive widget', (
@@ -379,6 +398,8 @@ void main() {
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, nsc1]));
 
+        expect(setContentSensitivityCallCount, 1);
+
         final DisposeTesterState sc1DiposeTesterState = tester.firstState<DisposeTesterState>(
           find.byKey(sc1Key),
         );
@@ -397,6 +418,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 2);
       });
 
       testWidgets('with one not sensitive widget that gets disposed', (WidgetTester tester) async {
@@ -433,6 +455,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(0),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       testWidgets('with two not sensitive widgets and one gets disposed', (
@@ -475,6 +498,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       // Tests with an auto sensitive and a not sensitive widget(s):
@@ -512,6 +536,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       testWidgets(
@@ -536,6 +561,8 @@ void main() {
 
           await tester.pumpWidget(Column(children: <Widget>[sc1, asc1, nsc1]));
 
+          expect(setContentSensitivityCallCount, 1);
+
           final DisposeTesterState sc1DiposeTesterState = tester.firstState<DisposeTesterState>(
             find.byKey(sc1Key),
           );
@@ -558,6 +585,7 @@ void main() {
             sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
+          expect(setContentSensitivityCallCount, 2);
         },
       );
 
@@ -605,6 +633,7 @@ void main() {
             sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
+          expect(setContentSensitivityCallCount, 1);
         },
       );
 
@@ -652,6 +681,7 @@ void main() {
             sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(0),
           );
+          expect(setContentSensitivityCallCount, 1);
         },
       );
 
@@ -694,6 +724,7 @@ void main() {
             sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
+          expect(setContentSensitivityCallCount, 1);
         },
       );
 
@@ -745,6 +776,7 @@ void main() {
             sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
+          expect(setContentSensitivityCallCount, 1);
         },
       );
 
@@ -796,6 +828,7 @@ void main() {
             sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
+          expect(setContentSensitivityCallCount, 1);
         },
       );
 
@@ -847,6 +880,7 @@ void main() {
             sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(0),
           );
+          expect(setContentSensitivityCallCount, 1);
         },
       );
 
@@ -900,6 +934,7 @@ void main() {
             sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
+          expect(setContentSensitivityCallCount, 1);
         },
       );
 
@@ -951,6 +986,7 @@ void main() {
             sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
+          expect(setContentSensitivityCallCount, 1);
         },
       );
     },
@@ -980,6 +1016,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(2),
         );
+        expect(setContentSensitivityCallCount, 0);
       });
 
       testWidgets('when it gets disposed with another auto sensitive widget', (
@@ -1014,6 +1051,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 0);
       });
 
       // Tests with not sensitive widget(s):
@@ -1041,6 +1079,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 0);
       });
 
       testWidgets('when it gets disposed with one not sensitive widget', (
@@ -1079,6 +1118,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       testWidgets('with one not sensitive widget that gets disposed', (WidgetTester tester) async {
@@ -1115,6 +1155,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(0),
         );
+        expect(setContentSensitivityCallCount, 0);
       });
 
       testWidgets('with two not sensitive widgets and one gets disposed', (
@@ -1157,6 +1198,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 0);
       });
 
       // Tests with another auto sensitive widget and a not sensitive widget(s):
@@ -1190,6 +1232,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 0);
       });
 
       testWidgets(
@@ -1232,6 +1275,7 @@ void main() {
             sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
+          expect(setContentSensitivityCallCount, 0);
         },
       );
 
@@ -1275,6 +1319,7 @@ void main() {
             sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(0),
           );
+          expect(setContentSensitivityCallCount, 0);
         },
       );
     },
@@ -1303,6 +1348,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(2),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
 
       testWidgets('when it gets disposed with one not sensitive widget', (
@@ -1337,6 +1383,7 @@ void main() {
           sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
           equals(1),
         );
+        expect(setContentSensitivityCallCount, 1);
       });
     },
   );
