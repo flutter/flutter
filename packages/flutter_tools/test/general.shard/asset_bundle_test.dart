@@ -92,7 +92,7 @@ void main() {
     testUsingContext(
       'wildcard directories do not include subdirectories',
       () async {
-        writePackageConfigFile();
+        writePackageConfigFile(directory: globals.fs.currentDirectory);
         globals.fs.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 dependencies:
@@ -501,7 +501,7 @@ flutter:
           userMessages: UserMessages(),
         );
 
-        writePackageConfigFile();
+        writePackageConfigFile(directory: fileSystem.currentDirectory);
         fileSystem.file('pubspec.yaml')
           ..createSync()
           ..writeAsStringSync(r'''
@@ -555,7 +555,7 @@ flutter:
           fileSystem: fileSystem,
           userMessages: UserMessages(),
         );
-        writePackageConfigFile();
+        writePackageConfigFile(directory: fileSystem.currentDirectory);
         fileSystem.file('pubspec.yaml')
           ..createSync()
           ..writeAsStringSync(r'''
@@ -590,7 +590,7 @@ flutter:
 
         final BufferLogger logger = BufferLogger.test();
         final FakePlatform platform = FakePlatform();
-        writePackageConfigFile();
+        writePackageConfigFile(directory: fileSystem.currentDirectory);
         fileSystem.file('pubspec.yaml')
           ..createSync()
           ..writeAsStringSync(r'''
