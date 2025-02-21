@@ -456,13 +456,10 @@ class ModuleTest {
 Future<void> main() async {
   await task(
     combine(<TaskFunction>[
+      // 3 tests comes close to timeout.
       // Pre AGP 8.3
       ModuleTest(gradleVersion: '8.4', agpVersion: Version.parse('8.1.0')).call,
-      // Newer gradle, older AGP
-      ModuleTest(gradleVersion: '8.12.1', agpVersion: Version.parse('8.1.0')).call,
-      // Post AGP 8.3
-      ModuleTest(gradleVersion: '8.10.2', agpVersion: Version.parse('8.7.0')).call,
-      // Ensure gradle rc candidates can work
+      // Post AGP 8.3 + rc candidates can work
       ModuleTest(gradleVersion: '8.13-rc-1', agpVersion: Version.parse('8.8.1')).call,
     ]),
   );
