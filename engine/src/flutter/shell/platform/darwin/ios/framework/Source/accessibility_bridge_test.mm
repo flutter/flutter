@@ -756,7 +756,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   XCTAssertNil(rootNode.accessibilityValue);
 }
 
-- (void)testSemanticObjectWithNoAccessibiltyFlagNotMarkedAsResponsiveToUserInteraction {
+- (void)testSemanticObjectWithNoAccessibilityFlagNotMarkedAsResponsiveToUserInteraction {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -801,7 +801,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   XCTAssertFalse(rootNode.accessibilityRespondsToUserInteraction);
 }
 
-- (void)testSemanticObjectWithAccessibiltyFlagsMarkedAsResponsiveToUserInteraction {
+- (void)testSemanticObjectWithAccessibilityFlagsMarkedAsResponsiveToUserInteraction {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -847,6 +847,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   XCTAssertTrue(rootNode.accessibilityRespondsToUserInteraction);
 }
 
+// Regression test for:
+// https://github.com/flutter/flutter/issues/158477
 - (void)testLabeledParentAndChildNotInteractive {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
