@@ -1728,20 +1728,20 @@ void main() {
       ),
     );
 
-    final StrutStyle? after = tester.renderObject<RenderParagraph>(find.text('Hello')).strutStyle;
-    expect(after, isNotNull);
-    expect(after?.leadingDistribution, TextLeadingDistribution.even);
+    final StrutStyle? before = tester.renderObject<RenderParagraph>(find.text('Hello')).strutStyle;
+    expect(before, isNotNull);
+    expect(before?.leadingDistribution, TextLeadingDistribution.even);
 
     setState(() {
       leadingDistribution = TextLeadingDistribution.proportional;
     });
     await tester.pump();
 
-    final StrutStyle? before = tester.renderObject<RenderParagraph>(find.text('Hello')).strutStyle;
-    expect(before, isNotNull);
-    expect(before?.leadingDistribution, TextLeadingDistribution.proportional);
+    final StrutStyle? after = tester.renderObject<RenderParagraph>(find.text('Hello')).strutStyle;
+    expect(after, isNotNull);
+    expect(after?.leadingDistribution, TextLeadingDistribution.proportional);
 
-    expect(before, isNot(after));
+    expect(after, isNot(after));
   });
 }
 
