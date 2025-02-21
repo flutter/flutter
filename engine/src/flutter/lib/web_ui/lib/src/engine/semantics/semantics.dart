@@ -38,6 +38,21 @@ import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
 
+bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
+  if (a == b) {
+    return true;
+  }
+  if ((a == null) != (b == null)) {
+    return false;
+  }
+  // They most both be non-null now.
+  if (a!.length != b!.length) {
+    return false;
+  }
+
+  return a.toSet().containsAll(b);
+}
+
 class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   const EngineAccessibilityFeatures(this._index);
 
@@ -239,6 +254,7 @@ class SemanticsNodeUpdate {
     required this.headingLevel,
     this.linkUrl,
     required this.role,
+    required this.controlsVisibilityOfNodes,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -348,6 +364,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsRole role;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final List<String>? controlsVisibilityOfNodes;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -672,6 +691,10 @@ abstract class SemanticRole {
     if (semanticsObject.isIdentifierDirty) {
       _updateIdentifier();
     }
+
+    if (semanticsObject.isControlsVisibilityOfNodesDirty) {
+      _updateControls();
+    }
   }
 
   void _updateIdentifier() {
@@ -680,6 +703,24 @@ abstract class SemanticRole {
     } else {
       removeAttribute('flt-semantics-identifier');
     }
+  }
+
+  void _updateControls() {
+    if (semanticsObject.hasControlsVisibilityOfNodes) {
+      final List<String> elementIds = <String>[];
+      for (final String identifier in semanticsObject.controlsVisibilityOfNodes!) {
+        final Set<int>? semanticNodeIds = SemanticsObject.identifiersToIds[identifier];
+        if (semanticNodeIds == null) {
+          continue;
+        }
+        elementIds.addAll(semanticNodeIds.map<String>((int id) => 'flt-semantic-node-${id}'));
+      }
+      if (elementIds.isNotEmpty) {
+        setAttribute('aria-controls', elementIds.join(' '));
+        return;
+      }
+    }
+    removeAttribute('aria-controls');
   }
 
   /// Whether this role was disposed of.
@@ -862,6 +903,8 @@ abstract class SemanticBehavior {
 class SemanticsObject {
   /// Creates a semantics tree node with the given [id] and [owner].
   SemanticsObject(this.id, this.owner);
+
+  static final Map<String, Set<int>> identifiersToIds = <String, Set<int>>{};
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   int get flags => _flags;
@@ -1277,6 +1320,24 @@ class SemanticsObject {
   /// The role of this node.
   late ui.SemanticsRole role;
 
+  /// List of nodes whose visibilities are control by this node.
+  ///
+  /// The list contains [identifier]s of those nodes.
+  List<String>? controlsVisibilityOfNodes;
+
+  /// Whether this object contains a non-empty link URL.
+  bool get hasControlsVisibilityOfNodes =>
+      controlsVisibilityOfNodes != null && controlsVisibilityOfNodes!.isNotEmpty;
+
+  static const int _controlsVisibilityOfNodesIndex = 1 << 27;
+
+  /// Whether the [linkUrl] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isControlsVisibilityOfNodesDirty => _isDirty(_controlsVisibilityOfNodesIndex);
+  void _markControlsVisibilityOfNodesDirty() {
+    _dirtyFields |= _controlsVisibilityOfNodesIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1423,7 +1484,19 @@ class SemanticsObject {
     }
 
     if (_identifier != update.identifier) {
+      if (_identifier != null) {
+        final Set<int>? ids = identifiersToIds[_identifier];
+        if (ids != null) {
+          ids.remove(id);
+          if (ids.isEmpty) {
+            identifiersToIds.remove(_identifier);
+          }
+        }
+      }
       _identifier = update.identifier;
+      if (_identifier != null) {
+        identifiersToIds.putIfAbsent(_identifier!, () => <int>{}).add(id);
+      }
       _markIdentifierDirty();
     }
 
@@ -1568,6 +1641,11 @@ class SemanticsObject {
     }
 
     role = update.role;
+
+    if (!unorderedListEqual<String>(controlsVisibilityOfNodes, update.controlsVisibilityOfNodes)) {
+      controlsVisibilityOfNodes = update.controlsVisibilityOfNodes;
+      _markControlsVisibilityOfNodesDirty();
+    }
 
     // Apply updates to the DOM.
     _updateRole();
