@@ -185,7 +185,7 @@ MultiFrameCodec::State::GetNextFrameImage(
 void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     std::unique_ptr<tonic::DartPersistentValue> callback,
     const fml::RefPtr<fml::TaskRunner>& ui_task_runner,
-    fml::WeakPtr<GrDirectContext> resourceContext,
+    const fml::WeakPtr<GrDirectContext>& resourceContext,
     fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
     const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
     size_t trace_id,
