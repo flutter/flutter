@@ -662,6 +662,7 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
           fieldOffset = nextFieldOffset;
         });
       }
+      bottomInset = MediaQuery.viewInsetsOf(rootOverlayContext).bottom;
     });
   }
 
@@ -693,7 +694,6 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
 
   @override
   Widget build(BuildContext context) {
-    bottomInset = MediaQuery.viewInsetsOf(rootOverlayContext).bottom;
     return CompositedTransformFollower(
       link: widget.optionsLayerLink,
       followerAnchor: switch (widget.optionsViewOpenDirection) {
