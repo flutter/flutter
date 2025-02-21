@@ -4,8 +4,6 @@
 
 #define FML_USED_ON_EMBEDDER
 
-#include "flutter/shell/platform/android/android_shell_holder.h"
-
 #include <pthread.h>
 #include <sys/resource.h>
 #include <sys/time.h>
@@ -25,6 +23,8 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/android_display.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
+#include "flutter/shell/platform/android/android_shell_holder.h"
+#include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 
@@ -81,8 +81,11 @@ static PlatformData GetDefaultPlatformData() {
 
 AndroidShellHolder::AndroidShellHolder(
     const flutter::Settings& settings,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
-    : settings_(settings), jni_facade_(jni_facade) {
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+    AndroidRenderingAPI android_rendering_api)
+    : settings_(settings),
+      jni_facade_(jni_facade),
+      android_rendering_api_(android_rendering_api) {
   static size_t thread_host_count = 1;
   auto thread_label = std::to_string(thread_host_count++);
 

@@ -38,7 +38,8 @@ namespace flutter {
 class AndroidShellHolder {
  public:
   AndroidShellHolder(const flutter::Settings& settings,
-                     std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
+                     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+                     AndroidRenderingAPI android_rendering_api);
 
   ~AndroidShellHolder();
 
@@ -115,7 +116,7 @@ class AndroidShellHolder {
   bool is_valid_ = false;
   uint64_t next_pointer_flow_id_ = 0;
   std::unique_ptr<APKAssetProvider> apk_asset_provider_;
-  AndroidRenderingAPI android_rendering_api_;
+  const AndroidRenderingAPI android_rendering_api_;
 
   //----------------------------------------------------------------------------
   /// @brief      Constructor with its components injected.

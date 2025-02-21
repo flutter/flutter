@@ -81,6 +81,10 @@ const flutter::Settings& FlutterMain::GetSettings() const {
   return settings_;
 }
 
+flutter::AndroidRenderingAPI FlutterMain::GetAndroidRenderingAPI() {
+  return android_rendering_api_;
+}
+
 void FlutterMain::Init(JNIEnv* env,
                        jclass clazz,
                        jobject context,
