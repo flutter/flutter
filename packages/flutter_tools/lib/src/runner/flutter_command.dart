@@ -30,7 +30,6 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../reporting/unified_analytics.dart';
-import '../version.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
 
@@ -182,41 +181,6 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
-
-  /// The dart define used for adding the Flutter version at runtime.
-  @visibleForTesting
-  static const String flutterVersionDefine = 'FLUTTER_VERSION';
-
-  /// The dart define used for adding the Flutter channel at runtime.
-  @visibleForTesting
-  static const String flutterChannelDefine = 'FLUTTER_CHANNEL';
-
-  /// The dart define used for adding the Flutter git URL at runtime.
-  @visibleForTesting
-  static const String flutterGitUrlDefine = 'FLUTTER_GIT_URL';
-
-  /// The dart define used for adding the Flutter framework revision at runtime.
-  @visibleForTesting
-  static const String flutterFrameworkRevisionDefine = 'FLUTTER_FRAMEWORK_REVISION';
-
-  /// The dart define used for adding the Flutter engine revision at runtime.
-  @visibleForTesting
-  static const String flutterEngineRevisionDefine = 'FLUTTER_ENGINE_REVISION';
-
-  /// The dart define used for adding the Dart version at runtime.
-  @visibleForTesting
-  static const String flutterDartVersionDefine = 'FLUTTER_DART_VERSION';
-
-  /// List of all dart defines used for adding Flutter version information at runtime
-  @visibleForTesting
-  static const List<String> flutterVersionDartDefines = <String>[
-    flutterVersionDefine,
-    flutterChannelDefine,
-    flutterGitUrlDefine,
-    flutterFrameworkRevisionDefine,
-    flutterEngineRevisionDefine,
-    flutterDartVersionDefine,
-  ];
 
   @override
   ArgParser get argParser => _argParser;
@@ -1455,8 +1419,6 @@ abstract class FlutterCommand extends Command<void> {
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
 
-    _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
-
     return BuildInfo(
       buildMode,
       flavor,
@@ -1492,34 +1454,6 @@ abstract class FlutterCommand extends Command<void> {
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
     );
-  }
-
-  // This adds the Dart defines used to access various Flutter version information at runtime.
-  void _addFlutterVersionToDartDefines(FlutterVersion version, List<String> dartDefines) {
-    for (final String dartDefine in flutterVersionDartDefines) {
-      if (globals.platform.environment[dartDefine] != null) {
-        throwToolExit(
-          '$dartDefine is used by the framework and cannot be set in the environment. '
-          'Use FlutterVersion to access it in Flutter code',
-        );
-      }
-      if (dartDefines.any((String define) => define.startsWith(dartDefine))) {
-        throwToolExit(
-          '$dartDefine is used by the framework and cannot be '
-          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}. '
-          'Use FlutterVersion to access it in Flutter code',
-        );
-      }
-    }
-
-    dartDefines.addAll(<String>[
-      '$flutterVersionDefine=${version.frameworkVersion}',
-      '$flutterChannelDefine=${version.channel}',
-      '$flutterGitUrlDefine=${version.repositoryUrl}',
-      '$flutterFrameworkRevisionDefine=${version.frameworkRevisionShort}',
-      '$flutterEngineRevisionDefine=${version.engineRevisionShort}',
-      '$flutterDartVersionDefine=${version.dartSdkVersion}',
-    ]);
   }
 
   void setupApplicationPackages() {
@@ -1917,7 +1851,10 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     }
 
     if (regeneratePlatformSpecificToolingDuringVerify) {
-      await regeneratePlatformSpecificToolingIfApplicable(project);
+      await regeneratePlatformSpecificToolingIfApplicable(
+        project,
+        releaseMode: getBuildMode().isRelease,
+      );
     }
 
     setupApplicationPackages();
@@ -1939,10 +1876,6 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
 
   /// Runs [FlutterProject.regeneratePlatformSpecificTooling] for [project] with appropriate configuration.
   ///
-  /// By default, this uses [getBuildMode] to determine and provide whether a release build is being made,
-  /// but sub-commands (such as commands that do _meta_ builds, or builds that make multiple different builds
-  /// sequentially in one-go) may choose to overide this and make the call at a different point in time.
-  ///
   /// This method should only be called when [shouldRunPub] is `true`:
   /// ```dart
   /// if (shouldRunPub) {
@@ -1957,13 +1890,11 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   @nonVirtual
   Future<void> regeneratePlatformSpecificToolingIfApplicable(
     FlutterProject project, {
-    bool? releaseMode,
+    required bool releaseMode,
   }) async {
     if (!shouldRunPub) {
       return;
     }
-
-    releaseMode ??= getBuildMode().isRelease;
     await project.regeneratePlatformSpecificTooling(
       releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && releaseMode,
     );
