@@ -6694,7 +6694,6 @@ targets:
 
   # windows mokey test
   - name: Windows_mokey native_assets_android
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/156063
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
