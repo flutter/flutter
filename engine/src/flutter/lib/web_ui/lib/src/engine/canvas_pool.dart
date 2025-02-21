@@ -520,6 +520,17 @@ class CanvasPool extends _SaveStackTracking {
     }
   }
 
+  @override
+  void clipRSuperellipse(ui.RSuperellipse rse) {
+    // TODO(dkwingsmt): Properly implement clipRSuperellipse on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    ui.RRect rrect = rse.toApproximateRRect();
+    super.clipRRect(rrect);
+    if (_canvas != null) {
+      _clipRRect(context, rrect);
+    }
+  }
+
   void _clipRRect(DomCanvasRenderingContext2D ctx, ui.RRect rrect) {
     final ui.Path path = ui.Path()..addRRect(rrect);
     _runPath(ctx, path as SurfacePath);
@@ -1242,6 +1253,13 @@ class _SaveStackTracking {
   void clipRRect(ui.RRect rrect) {
     clipStack ??= <SaveClipEntry>[];
     clipStack!.add(SaveClipEntry.rrect(rrect, _currentTransform.clone()));
+  }
+
+  /// Adds a round rectangle to clipping stack.
+  @mustCallSuper
+  void clipRSuperellipse(ui.RSuperellipse rse) {
+    clipStack ??= <SaveClipEntry>[];
+    clipStack!.add(SaveClipEntry.rrect(rse.toApproximateRRect(), _currentTransform.clone()));
   }
 
   /// Adds a path to clipping stack.

@@ -49,7 +49,7 @@ abstract class SceneBuilder {
   });
   ClipRSuperellipseEngineLayer pushClipRSuperellipse(
     RSuperellipse rse, {
-    Clip clipBehavior = Clip.antiAlias,
+    required Clip clipBehavior,
     ClipRSuperellipseEngineLayer? oldLayer,
   });
   ClipPathEngineLayer pushClipPath(

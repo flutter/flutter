@@ -419,6 +419,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
     required this.brRadiusY,
     required this.blRadiusX,
     required this.blRadiusY,
+    required bool uniformRadii,
   }) : assert(tlRadiusX >= 0),
        assert(tlRadiusY >= 0),
        assert(trRadiusX >= 0),
@@ -426,7 +427,8 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
        assert(brRadiusX >= 0),
        assert(brRadiusY >= 0),
        assert(blRadiusX >= 0),
-       assert(blRadiusY >= 0);
+       assert(blRadiusY >= 0),
+       webOnlyUniformRadii = uniformRadii;
 
   T _create({
     required double left,
@@ -771,6 +773,7 @@ class RRect extends _RRectLike<RRect> {
         blRadiusY: radiusY,
         brRadiusX: radiusX,
         brRadiusY: radiusY,
+        uniformRadii: radiusX == radiusY,
       );
 
   RRect.fromLTRBR(double left, double top, double right, double bottom, Radius radius)
@@ -787,6 +790,7 @@ class RRect extends _RRectLike<RRect> {
         blRadiusY: radius.y,
         brRadiusX: radius.x,
         brRadiusY: radius.y,
+        uniformRadii: radius.x == radius.y,
       );
 
   RRect.fromRectXY(Rect rect, double radiusX, double radiusY)
@@ -803,6 +807,7 @@ class RRect extends _RRectLike<RRect> {
         blRadiusY: radiusY,
         brRadiusX: radiusX,
         brRadiusY: radiusY,
+        uniformRadii: radiusX == radiusY,
       );
 
   RRect.fromRectAndRadius(Rect rect, Radius radius)
@@ -819,6 +824,7 @@ class RRect extends _RRectLike<RRect> {
         blRadiusY: radius.y,
         brRadiusX: radius.x,
         brRadiusY: radius.y,
+        uniformRadii: radius.x == radius.y,
       );
 
   RRect.fromLTRBAndCorners(
@@ -843,6 +849,14 @@ class RRect extends _RRectLike<RRect> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
+         uniformRadii:
+             topLeft.x == topLeft.y &&
+             topLeft.x == topRight.x &&
+             topLeft.x == topRight.y &&
+             topLeft.x == bottomLeft.x &&
+             topLeft.x == bottomLeft.y &&
+             topLeft.x == bottomRight.x &&
+             topLeft.x == bottomRight.y,
        );
 
   RRect.fromRectAndCorners(
@@ -864,6 +878,14 @@ class RRect extends _RRectLike<RRect> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
+         uniformRadii:
+             topLeft.x == topLeft.y &&
+             topLeft.x == topRight.x &&
+             topLeft.x == topRight.y &&
+             topLeft.x == bottomLeft.x &&
+             topLeft.x == bottomLeft.y &&
+             topLeft.x == bottomRight.x &&
+             topLeft.x == bottomRight.y,
        );
 
   const RRect._raw({
@@ -879,6 +901,7 @@ class RRect extends _RRectLike<RRect> {
     super.brRadiusY = 0.0,
     super.blRadiusX = 0.0,
     super.blRadiusY = 0.0,
+    super.uniformRadii = false,
   });
 
   @override
@@ -995,6 +1018,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radiusY,
         brRadiusX: radiusX,
         brRadiusY: radiusY,
+        uniformRadii: radiusX == radiusY,
       );
 
   RSuperellipse.fromLTRBR(double left, double top, double right, double bottom, Radius radius)
@@ -1011,6 +1035,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radius.y,
         brRadiusX: radius.x,
         brRadiusY: radius.y,
+        uniformRadii: radius.x == radius.y,
       );
 
   RSuperellipse.fromRectXY(Rect rect, double radiusX, double radiusY)
@@ -1027,6 +1052,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radiusY,
         brRadiusX: radiusX,
         brRadiusY: radiusY,
+        uniformRadii: radiusX == radiusY,
       );
 
   RSuperellipse.fromRectAndRadius(Rect rect, Radius radius)
@@ -1043,6 +1069,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radius.y,
         brRadiusX: radius.x,
         brRadiusY: radius.y,
+        uniformRadii: radius.x == radius.y,
       );
 
   RSuperellipse.fromLTRBAndCorners(
@@ -1067,6 +1094,14 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
+         uniformRadii:
+             topLeft.x == topLeft.y &&
+             topLeft.x == topRight.x &&
+             topLeft.x == topRight.y &&
+             topLeft.x == bottomLeft.x &&
+             topLeft.x == bottomLeft.y &&
+             topLeft.x == bottomRight.x &&
+             topLeft.x == bottomRight.y,
        );
 
   RSuperellipse.fromRectAndCorners(
@@ -1088,6 +1123,14 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
+         uniformRadii:
+             topLeft.x == topLeft.y &&
+             topLeft.x == topRight.x &&
+             topLeft.x == topRight.y &&
+             topLeft.x == bottomLeft.x &&
+             topLeft.x == bottomLeft.y &&
+             topLeft.x == bottomRight.x &&
+             topLeft.x == bottomRight.y,
        );
 
   const RSuperellipse._raw({
@@ -1103,6 +1146,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     super.brRadiusY = 0.0,
     super.blRadiusX = 0.0,
     super.blRadiusY = 0.0,
+    super.uniformRadii = false,
   });
 
   @override

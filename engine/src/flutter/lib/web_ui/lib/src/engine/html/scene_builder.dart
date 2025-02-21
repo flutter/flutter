@@ -156,9 +156,11 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ui.ClipRSuperellipseEngineLayer pushClipRSuperellipse(
     ui.RSuperellipse rse, {
     ui.Clip? clipBehavior,
-    ui.ClipRRectEngineLayer? oldLayer,
+    ui.ClipRSuperellipseEngineLayer? oldLayer,
   }) {
-    return _pushSurface<PersistedClipRSuperellipse>(PersistedClipRSuperellipse(oldLayer, rse, clipBehavior));
+    return _pushSurface<PersistedClipRSuperellipse>(
+      PersistedClipRSuperellipse(oldLayer, rse, clipBehavior),
+    );
   }
 
   /// Pushes a path clip operation onto the operation stack.
