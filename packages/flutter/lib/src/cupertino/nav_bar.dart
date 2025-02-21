@@ -66,11 +66,17 @@ const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// The width of the 'Cancel' button if the search field in a
 /// [CupertinoSliverNavigationBar.search] is active.
-const double _kSearchFieldCancelButtonWidth = 65.0;
+///
+/// Eyeballed on an iPhone 15 simulator running iOS 17.5.
+const double _kSearchFieldCancelButtonWidth = 67.0;
 
 /// The duration of the animation when the search field in
 /// [CupertinoSliverNavigationBar.search] is tapped.
 const Duration _kNavBarSearchDuration = Duration(milliseconds: 300);
+
+/// The curve of the animation when the search field in
+/// [CupertinoSliverNavigationBar.search] is tapped.
+const Curve _kNavBarSearchCurve = Curves.easeInOut;
 
 /// Title text transfer fade.
 const Duration _kNavBarTitleFadeDuration = Duration(milliseconds: 150);
@@ -1073,13 +1079,15 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
   final PreferredSizeWidget? bottom;
 
-  /// Modes that determine how to display the navigation bar's [bottom] and scrolling behavior.
+  /// Modes that determine how to display the navigation bar's [bottom], or the
+  /// search field in a [CupertinoSliverNavigationBar.search].
   ///
-  /// Defaults to [NavigationBarBottomMode.automatic] if this is null and a [bottom] is provided.
+  /// If null, defaults to [NavigationBarBottomMode.automatic] if either a
+  /// [bottom] is provided or this is a [CupertinoSliverNavigationBar.search].
   final NavigationBarBottomMode? bottomMode;
 
   /// Called when the search field in [CupertinoSliverNavigationBar.search]
-  /// is tapped, toggling the search state between active and inactive.
+  /// is tapped, toggling between an active and an inactive search state.
   final ValueChanged<bool>? onSearchableBottomTap;
 
   /// True if the navigation bar's background color has no transparency.
@@ -1122,6 +1130,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   ScrollableState? _scrollableState;
   _NavigationBarSearchField? preferredSizeSearchField;
   late AnimationController _animationController;
+  late CurvedAnimation _searchAnimation;
   late Animation<double> persistentHeightAnimation;
   late Animation<double> largeTitleHeightAnimation;
   bool searchIsActive = false;
@@ -1151,6 +1160,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
     }
     _animationController.dispose();
+    _searchAnimation.dispose();
     super.dispose();
   }
 
@@ -1166,6 +1176,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   void _setupSearchableAnimation() {
     _animationController = AnimationController(vsync: this, duration: _kNavBarSearchDuration);
+    _searchAnimation = CurvedAnimation(parent: _animationController, curve: _kNavBarSearchCurve);
     final Tween<double> persistentHeightTween = Tween<double>(
       begin: _kNavBarPersistentHeight,
       end: 0.0,
@@ -1214,17 +1225,20 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   }
 
   void _handleSearchFieldStatusChanged(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.completed:
-      case AnimationStatus.dismissed:
-        // Rebuild so that the leading, middle, and trailing widgets that were
-        // collapsed while the search field was active are re-expanded.
-        setState(() {});
-      case AnimationStatus.forward:
-        searchIsActive = true;
-      case AnimationStatus.reverse:
-        searchIsActive = false;
-    }
+    // If the search animation is stopped, rebuild so that the leading, middle,
+    // and trailing widgets that were collapsed while the search field was
+    // active are re-expanded. Otherwise, rebuild to update this widget with the
+    // animation controller's values.
+    setState(() {
+      switch (status) {
+        case AnimationStatus.forward:
+          searchIsActive = true;
+        case AnimationStatus.reverse:
+          searchIsActive = false;
+        case AnimationStatus.completed:
+        case AnimationStatus.dismissed:
+      }
+    });
   }
 
   void _onSearchFieldTap() {
@@ -1276,7 +1290,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
     return MediaQuery.withNoTextScaling(
       child: AnimatedBuilder(
-        animation: _animationController,
+        animation: _searchAnimation,
         builder: (BuildContext context, Widget? child) {
           return SliverPersistentHeader(
             pinned: true, // iOS navigation bars are always pinned.
@@ -2278,7 +2292,10 @@ class _InactiveSearchableBottom extends StatelessWidget {
                 // A decoy 'Cancel' button used in the collapsed-to-expanded animation.
                 SizedBox(
                   width: animationController.value * _kSearchFieldCancelButtonWidth,
-                  child: _CancelButton(opacity: 0.4, onPressed: () {}),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: _kNavBarBottomPadding),
+                    child: _CancelButton(opacity: 0.4, onPressed: () {}),
+                  ),
                 ),
               ],
             );
@@ -2307,9 +2324,12 @@ class _ActiveSearchableBottom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: _kNavBarEdgePadding),
+      padding: const EdgeInsetsDirectional.only(
+        start: _kNavBarEdgePadding,
+        bottom: _kNavBarBottomPadding,
+      ),
       child: Row(
-        spacing: _kNavBarEdgePadding,
+        spacing: 12.0, // Eyeballed on an iPhone 15 simulator running iOS 17.5.
         children: <Widget>[
           Expanded(child: searchField ?? const SizedBox.shrink()),
           AnimatedBuilder(
@@ -2337,7 +2357,7 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
   const _NavigationBarSearchField({required this.searchField});
 
   static const double verticalPadding = 8.0;
-  static const double searchFieldHeight = 35.0;
+  static const double searchFieldHeight = 36.0;
   final Widget searchField;
 
   @override
@@ -2346,9 +2366,10 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
       child: FocusableActionDetector(
         descendantsAreFocusable: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: _kNavBarEdgePadding,
-            vertical: verticalPadding,
+          padding: const EdgeInsetsDirectional.only(
+            start: _kNavBarEdgePadding,
+            end: _kNavBarEdgePadding,
+            bottom: verticalPadding,
           ),
           child: SizedBox(height: searchFieldHeight, child: searchField),
         ),
@@ -2357,7 +2378,7 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(searchFieldHeight + verticalPadding * 2);
+  Size get preferredSize => const Size.fromHeight(searchFieldHeight + verticalPadding);
 }
 
 /// This should always be the first child of Hero widgets.
