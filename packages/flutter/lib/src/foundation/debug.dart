@@ -134,15 +134,16 @@ String? activeDevToolsServerAddress;
 /// The uri for the connected vm service protocol.
 String? connectedVmServiceUri;
 
-/// If memory allocation tracking is enabled, dispatch object creation.
+/// If memory allocation tracking is enabled, dispatch Flutter object creation.
 ///
 /// This method is not member of FlutterMemoryAllocations, because
 /// [FlutterMemoryAllocations] should not increase size of the Flutter application
 /// if memory allocations are disabled.
 ///
-/// [flutterLibrary] is the name of the Flutter library where the object is declared.
+/// The [flutterLibrary] argument is the name of the Flutter library where
+/// the object is declared. For example, 'widgets' for widgets.dart.
 ///
-/// Should be called only from within an assert.
+/// Should be called only from within an assert and only inside Flutter Framework.
 ///
 /// Returns true to make it easier to be wrapped into `assert`.
 bool debugMaybeDispatchCreated(String flutterLibrary, String className, Object object) {
