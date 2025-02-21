@@ -611,6 +611,9 @@ abstract class ResidentHandlers {
   /// Whether all of the connected devices support hot reload.
   bool get canHotReload;
 
+  /// Whether an application can be detached without being stopped.
+  bool get supportsDetach;
+
   // TODO(bkonyi): remove when ready to serve DevTools from DDS.
   ResidentDevtoolsHandler? get residentDevtoolsHandler;
 
@@ -621,6 +624,8 @@ abstract class ResidentHandlers {
   FileSystem? get fileSystem;
 
   /// Called to print help to the terminal.
+  ///
+  /// If [details] is true, prints out extra help information.
   void printHelp({required bool details});
 
   /// Perform a hot reload or hot restart of all attached applications.
@@ -965,9 +970,6 @@ abstract class ResidentHandlers {
   Future<void> cleanupAfterSignal();
 
   /// Tear down the runner and leave the application running.
-  ///
-  /// This is not supported on web devices where the runner is running
-  /// the application server as well.
   Future<void> detach();
 
   /// Tear down the runner and exit the application.
@@ -992,6 +994,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     String? dillOutputPath,
     this.machine = false,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
+    CommandHelp? commandHelp,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -1001,12 +1004,14 @@ abstract class ResidentRunner extends ResidentHandlers {
                ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
                : globals.fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle(),
-       commandHelp = CommandHelp(
-         logger: globals.logger,
-         terminal: globals.terminal,
-         platform: globals.platform,
-         outputPreferences: globals.outputPreferences,
-       ) {
+       commandHelp =
+           commandHelp ??
+           CommandHelp(
+             logger: globals.logger,
+             terminal: globals.terminal,
+             platform: globals.platform,
+             outputPreferences: globals.outputPreferences,
+           ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
@@ -1131,6 +1136,9 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   bool get canHotReload => hotMode;
+
+  /// Whether the hot reload support is implemented as hot restart.
+  bool get reloadIsRestart => false;
 
   /// Start the app and keep the process running during its lifetime.
   ///
@@ -1426,7 +1434,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
       if (includeVmService) {
         // Caution: This log line is parsed by device lab tests.
-        globals.printStatus(
+        logger.printStatus(
           'A Dart VM Service on ${device.device!.displayName} '
           'is available at: ${device.vmService!.httpAddress}',
         );
@@ -1435,14 +1443,14 @@ abstract class ResidentRunner extends ResidentHandlers {
         if (_residentDevtoolsHandler!.printDtdUri) {
           final Uri? dtdUri = residentDevtoolsHandler!.dtdUri;
           if (dtdUri != null) {
-            globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri\n');
+            logger.printStatus('The Dart Tooling Daemon is available at: $dtdUri\n');
           }
         }
         final Uri? uri = devToolsServerAddress!.uri?.replace(
           queryParameters: <String, dynamic>{'uri': '${device.vmService!.httpAddress}'},
         );
         if (uri != null) {
-          globals.printStatus(
+          logger.printStatus(
             'The Flutter DevTools debugger and profiler '
             'on ${device.device!.displayName} '
             'is available at: ${urlToDisplayString(uri)}',
@@ -1451,6 +1459,32 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
     }
     _reportedDebuggers = true;
+  }
+
+  @override
+  void printHelp({required bool details}) {
+    logger.printStatus('Flutter run key commands.');
+    // Don't print the command in the case where the runner implements reload as
+    // restart since it's misleading.
+    if (canHotReload && !reloadIsRestart) {
+      commandHelp.r.print();
+    }
+    if (supportsRestart) {
+      commandHelp.R.print();
+    }
+    if (details) {
+      printHelpDetails();
+      commandHelp.hWithDetails.print();
+    } else {
+      commandHelp.hWithoutDetails.print();
+    }
+    if (supportsDetach) {
+      commandHelp.d.print();
+    }
+    commandHelp.c.print();
+    commandHelp.q.print();
+    logger.printStatus('');
+    printDebuggerList();
   }
 
   void printHelpDetails() {
