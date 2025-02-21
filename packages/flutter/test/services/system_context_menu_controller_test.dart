@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../services/text_input_utils.dart';
 import '../system_context_menu_utils.dart';
-import 'clipboard_utils.dart';
+import '../widgets/clipboard_utils.dart';
+import 'text_input_utils.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
