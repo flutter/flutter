@@ -637,7 +637,8 @@ class _RawAutocompleteOptions extends StatefulWidget {
 
 class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
   VoidCallback? removeCompositionCallback;
-  late double _bottomInset;
+  late BuildContext rootOverlayContext;
+  double bottomInset = 0.0;
   Offset fieldOffset = Offset.zero;
 
   // Get the field offset if the field's position changes when its layer tree
@@ -670,12 +671,7 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
     removeCompositionCallback = widget.optionsLayerLink.leader?.addCompositionCallback(
       _onLeaderComposition,
     );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    rootOverlayContext = Overlay.of(context).context;
   }
 
   @override
@@ -697,6 +693,7 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
 
   @override
   Widget build(BuildContext context) {
+    bottomInset = MediaQuery.viewInsetsOf(rootOverlayContext).bottom;
     return CompositedTransformFollower(
       link: widget.optionsLayerLink,
       followerAnchor: switch (widget.optionsViewOpenDirection) {
@@ -712,7 +709,7 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
           optionsViewOpenDirection: widget.optionsViewOpenDirection,
           textDirection: Directionality.of(context),
           fieldConstraints: widget.fieldConstraints,
-          bottomInset: _bottomInset,
+          bottomInset: bottomInset,
         ),
         child: TextFieldTapRegion(
           child: AutocompleteHighlightedOption(

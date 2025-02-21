@@ -3214,11 +3214,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          resizeToAvoidBottomInset: false,
           body: Column(
             children: <Widget>[
               RawAutocomplete<String>(
-                optionsBuilder: (TextEditingValue textEditingValue) => <String>['Options'],
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['aaa'],
                 fieldViewBuilder: (
                   BuildContext context,
                   TextEditingController textEditingController,
@@ -3247,19 +3246,20 @@ void main() {
     );
 
     await tester.tap(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
 
     final double initialSize = tester.getSize(find.byType(Placeholder)).height;
 
-    // Add a bottom inset to simulate the keyboard opening.
     tester.view.viewInsets = const FakeViewPadding(bottom: bottomInset);
     addTearDown(tester.view.reset);
     await tester.pump();
 
     await tester.tap(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'aa');
     await tester.pump();
 
     // The options view has shrunk to the available height between the text field and the keyboard.
     expect(tester.getSize(find.byType(Placeholder)).height, initialSize - (bottomInset / 3));
-  }, variant: TargetPlatformVariant.mobile());
+  });
 }
