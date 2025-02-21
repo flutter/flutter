@@ -1258,8 +1258,9 @@ class _SaveStackTracking {
   /// Adds a round rectangle to clipping stack.
   @mustCallSuper
   void clipRSuperellipse(ui.RSuperellipse rse) {
-    clipStack ??= <SaveClipEntry>[];
-    clipStack!.add(SaveClipEntry.rrect(rse.toApproximateRRect(), _currentTransform.clone()));
+    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    clipRRect(rse.toApproximateRRect());
   }
 
   /// Adds a path to clipping stack.

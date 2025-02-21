@@ -229,6 +229,14 @@ class SurfaceCanvas implements ui.Canvas {
   }
 
   @override
+  void drawRSuperellipse(ui.RSuperellipse rse, ui.Paint paint) {
+    assert(rsuperellipseIsValid(rse));
+    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    _drawRRect(rse.toApproximateRRect(), paint);
+  }
+
+  @override
   void drawOval(ui.Rect rect, ui.Paint paint) {
     assert(rectIsValid(rect));
     _drawOval(rect, paint);
