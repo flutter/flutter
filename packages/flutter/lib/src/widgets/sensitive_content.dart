@@ -60,10 +60,11 @@ class ContentSensitivityState {
 class SensitiveContentSetting {
   SensitiveContentSetting._();
 
-  bool _contentSenstivityIsSupported = false;
+  bool? _contentSenstivityIsSupported;
   ContentSensitivityState? _contentSensitivityState;
-  final SensitiveContentService _sensitiveContentService = SensitiveContentService();
   ContentSensitivity? _defaultContentSensitivitySetting;
+
+  final SensitiveContentService _sensitiveContentService = SensitiveContentService();
 
   @visibleForTesting
   /// [SensitiveContentSetting] instance for the widget tree.
@@ -85,18 +86,21 @@ class SensitiveContentSetting {
   }
 
   Future<void> _register(ContentSensitivity desiredSensitivityLevel) async {
-    _contentSenstivityIsSupported = await _sensitiveContentService.isSupported();
-    if (!_contentSenstivityIsSupported) {
+    _contentSenstivityIsSupported ??= await _sensitiveContentService.isSupported();
+    if (!_contentSenstivityIsSupported!) {
       // Setting content sensitivity is not supported on this device.
       return;
     }
 
-    // Set default content sensitivity level as set in native Android. This will be
-    // auto sensitive if it is otherwise unset by the developer.
     final int currentContentSensitivityId = await _sensitiveContentService.getContentSensitivity();
+
+    // If needed, set default content sensitivity level as set in native Android. This will be
+    // auto sensitive if it is otherwise unset by the developer.
     _defaultContentSensitivitySetting ??= ContentSensitivity.getContentSensitivityById(
       currentContentSensitivityId,
     );
+
+    // If needed, then set the initial content sensitivity state.
     _contentSensitivityState ??= ContentSensitivityState(_defaultContentSensitivitySetting!);
 
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
@@ -120,7 +124,7 @@ class SensitiveContentSetting {
   }
 
   void _unregister(ContentSensitivity widgetSensitivityLevel) {
-    if (!_contentSenstivityIsSupported) {
+    if (!_contentSenstivityIsSupported!) {
       // Setting content sensitivity is not supported on this device.
       return;
     }
@@ -153,7 +157,8 @@ class SensitiveContentSetting {
         }
       case ContentSensitivity.notSensitive:
       // Removing a not sensitive SensitiveContent widgets when there are other SensitiveContent widgets
-      // in the tree will have no impact, since they have the least severe content sensitivity level.
+      // in the tree will have no impact on the content sensitivity setting for the widget tree since
+      // they have the least severe content sensitivity level.
     }
 
     if (contentSensitivityToRestore != null) {
@@ -193,10 +198,10 @@ class SensitiveContentSetting {
 ///
 /// See also:
 ///
-///  * [ContentSensitivity], which has all of the different content sensitivity levels that a
+///  * [ContentSensitivity], which are the different content sensitivity levels that a
 ///    [SensitiveContent] widget can set.
 class SensitiveContent extends StatefulWidget {
-  /// Creates a [SensitiveContent].
+  /// Creates a [SensitiveContent] widget.
   const SensitiveContent({super.key, required this.sensitivityLevel, required this.child});
 
   /// The sensitivity level that the [SensitiveContent] widget should sets for the
