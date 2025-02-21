@@ -138,7 +138,7 @@ class SkwasmCanvas implements SceneCanvas {
   void clipRSuperellipse(ui.RSuperellipse rse, {bool doAntiAlias = true}) {
     // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
     // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    clipRRect(rse.toApproximateRRect());
+    clipRRect(rse.toApproximateRRect(), doAntiAlias: doAntiAlias);
   }
 
   @override
