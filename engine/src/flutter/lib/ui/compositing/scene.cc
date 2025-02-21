@@ -113,8 +113,7 @@ void Scene::RasterizeToImage(uint32_t width,
   auto image = CanvasImage::Create();
   auto dl_image = CreateDeferredImage(
       dart_state->IsImpellerEnabled(), BuildLayerTree(width, height),
-      std::move(snapshot_delegate), std::move(raster_task_runner),
-      std::move(unref_queue));
+      std::move(snapshot_delegate), std::move(raster_task_runner), unref_queue);
   image->set_image(dl_image);
   image->AssociateWithDartWrapper(raw_image_handle);
 }

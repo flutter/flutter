@@ -101,12 +101,11 @@ static void PrintWideGamutWarningOnce() {
     layer.contentsScale = screenScale;
     layer.rasterizationScale = screenScale;
     layer.framebufferOnly = flutter::Settings::kSurfaceDataAccessible ? NO : YES;
-    BOOL isWideGamutSupported = self.isWideGamutSupported;
-    if (_isWideGamutEnabled && isWideGamutSupported) {
+    if (_isWideGamutEnabled && self.isWideGamutSupported) {
       fml::CFRef<CGColorSpaceRef> srgb(CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB));
       layer.colorspace = srgb;
       layer.pixelFormat = MTLPixelFormatBGRA10_XR;
-    } else if (_isWideGamutEnabled && !isWideGamutSupported) {
+    } else if (_isWideGamutEnabled && !self.isWideGamutSupported) {
       PrintWideGamutWarningOnce();
     }
   }
@@ -114,19 +113,9 @@ static void PrintWideGamutWarningOnce() {
   [super layoutSubviews];
 }
 
-static BOOL _forceSoftwareRendering;
-
-+ (BOOL)forceSoftwareRendering {
-  return _forceSoftwareRendering;
-}
-
-+ (void)setForceSoftwareRendering:(BOOL)forceSoftwareRendering {
-  _forceSoftwareRendering = forceSoftwareRendering;
-}
-
 + (Class)layerClass {
   return flutter::GetCoreAnimationLayerClassForRenderingAPI(
-      flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering));
+      flutter::GetRenderingAPIForProcess(/*force_software=*/false));
 }
 
 - (void)drawLayer:(CALayer*)layer inContext:(CGContextRef)context {

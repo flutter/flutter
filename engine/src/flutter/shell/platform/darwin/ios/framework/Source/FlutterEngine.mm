@@ -264,7 +264,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (void)recreatePlatformViewsController {
-  _renderingApi = flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering);
+  _renderingApi = flutter::GetRenderingAPIForProcess(/*force_software=*/false);
   _platformViewsController = [[FlutterPlatformViewsController alloc] init];
 }
 
@@ -801,8 +801,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   } else if (settings.route.empty() == false) {
     self.initialRoute = [NSString stringWithUTF8String:settings.route.c_str()];
   }
-
-  FlutterView.forceSoftwareRendering = settings.enable_software_rendering;
 
   auto platformData = [self.dartProject defaultPlatformData];
 
