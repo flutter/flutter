@@ -20,7 +20,7 @@ void writePackageConfig(FileSystemEntity entity, {Iterable<Package> packages = c
       const JsonEncoder jsonEncoder = JsonEncoder.withIndent('  ');
       entity
         ..createSync(recursive: true)
-        ..writeAsStringSync(jsonEncoder.convert(PackageConfig(packages)));
+        ..writeAsStringSync(jsonEncoder.convert(PackageConfig.toJson(PackageConfig(packages))));
   }
 }
 
