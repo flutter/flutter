@@ -13,8 +13,8 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
 
 /**
- * {@link SensitiveContentChannel} is a platform channel that is used by the framework to set the
- * content sensitivity of a native Flutter Android {@code View}.
+ * {@link SensitiveContentChannel} is a platform channel that is used by the framework to get and
+ * set the content sensitivity of a native Flutter Android {@code View}.
  */
 public class SensitiveContentChannel {
   private static final String TAG = "SensitiveContentChannel";
@@ -74,8 +74,8 @@ public class SensitiveContentChannel {
   }
 
   /**
-   * Sets the {@link SensitiveContentMethodHandler} which receives all requests to set a particular
-   * content sensitivty level sent through this channel.
+   * Sets the {@link SensitiveContentMethodHandler} which receives all requests to get and set a
+   * particular content sensitivty level sent through this channel.
    */
   public void setSensitiveContentMethodHandler(
       @Nullable SensitiveContentMethodHandler sensitiveContentMethodHandler) {

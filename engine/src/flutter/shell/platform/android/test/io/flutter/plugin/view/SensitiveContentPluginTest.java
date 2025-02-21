@@ -8,7 +8,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -75,9 +74,8 @@ public class SensitiveContentPluginTest {
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(
-            new SensitiveContentPlugin(
-                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        new SensitiveContentPlugin(
+            fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel);
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
 
     sensitiveContentPlugin.setContentSensitivity(1, mockResult);
@@ -94,9 +92,8 @@ public class SensitiveContentPluginTest {
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(
-            new SensitiveContentPlugin(
-                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        new SensitiveContentPlugin(
+            fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel);
     final View mockFlutterView = mock(View.class);
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
     final int testCurrentContentSensitivityValue = 0;
@@ -120,9 +117,8 @@ public class SensitiveContentPluginTest {
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(
-            new SensitiveContentPlugin(
-                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        new SensitiveContentPlugin(
+            fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel);
     final View mockFlutterView = mock(View.class);
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
     final int testCurrentContentSensitivityValue = 1;
@@ -145,9 +141,8 @@ public class SensitiveContentPluginTest {
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(
-            new SensitiveContentPlugin(
-                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        new SensitiveContentPlugin(
+            fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel);
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
 
     sensitiveContentPlugin.getContentSensitivity(mockResult);
@@ -163,9 +158,8 @@ public class SensitiveContentPluginTest {
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(
-            new SensitiveContentPlugin(
-                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        new SensitiveContentPlugin(
+            fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel);
     final View mockFlutterView = mock(View.class);
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
     final int testCurrentContentSensitivityValue = 2;
@@ -185,9 +179,8 @@ public class SensitiveContentPluginTest {
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(
-            new SensitiveContentPlugin(
-                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        new SensitiveContentPlugin(
+            fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel);
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
 
     sensitiveContentPlugin.isSupported(mockResult);
@@ -202,9 +195,8 @@ public class SensitiveContentPluginTest {
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
-        spy(
-            new SensitiveContentPlugin(
-                fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel));
+        new SensitiveContentPlugin(
+            fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel);
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
 
     sensitiveContentPlugin.isSupported(mockResult);

@@ -90,7 +90,7 @@ public class SensitiveContentPlugin
   /**
    * Returns whether or not marking content sensitivity is supported on the device.
    *
-   * <p>It is supported on devices running Android API < 35.
+   * <p>It is supported on devices running Android API >= 35.
    */
   @Override
   public void isSupported(@NonNull MethodChannel.Result result) {

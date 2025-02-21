@@ -650,7 +650,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     return scribeChannel;
   }
 
-  /** System channel that handles setting content sensitivity. */
+  /** System channel that handles getting and setting content sensitivity. */
   @NonNull
   public SensitiveContentChannel getSensitiveContentChannel() {
     return sensitiveContentChannel;
