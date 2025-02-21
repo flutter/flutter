@@ -735,6 +735,13 @@ extension DomElementExtension on DomElement {
   external void setPointerCapture(num? pointerId);
 }
 
+extension type DomCSS(JSObject _) implements JSObject {
+  external bool supports(String proeprty, String value);
+}
+
+@JS('CSS')
+external DomCSS get domCSS;
+
 @JS()
 @staticInterop
 class DomCSSStyleDeclaration {}
