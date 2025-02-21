@@ -1134,6 +1134,31 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     brRadiusY: brRadiusY,
   );
 
+  // Approximates a rounded superellipse with a round rectangle to the
+  // best practical accuracy.
+  //
+  // This workaround is needed until the rounded superellipse is implemented on
+  // Web. https://github.com/flutter/flutter/issues/163718
+  RRect toApproximateRRect() {
+    // Experiments have shown that using the same corner radii for the RRect
+    // provides an approximation that is close to optimal, as achieving a perfect
+    // match is not feasible.
+    return RRect._raw(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      tlRadiusX: tlRadiusX,
+      tlRadiusY: tlRadiusY,
+      trRadiusX: trRadiusX,
+      trRadiusY: trRadiusY,
+      blRadiusX: blRadiusX,
+      blRadiusY: blRadiusY,
+      brRadiusX: brRadiusX,
+      brRadiusY: brRadiusY,
+    );
+  }
+
   static const RSuperellipse zero = RSuperellipse._raw();
 
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {

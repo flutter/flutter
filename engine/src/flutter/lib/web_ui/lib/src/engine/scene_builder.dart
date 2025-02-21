@@ -393,7 +393,7 @@ class EngineSceneBuilder implements ui.SceneBuilder {
   }) {
     // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
     // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    return pushLayer<ClipRRectLayer>(ClipRRectLayer(ClipRRectOperation(rrect, clipBehavior)));
+    return pushLayer<ClipRRectLayer>(ClipRRectLayer(ClipRRectOperation(rse.toApproximateRRect(), clipBehavior)));
   }
 
   @override
