@@ -1741,7 +1741,7 @@ void main() {
     expect(after, isNotNull);
     expect(after?.leadingDistribution, TextLeadingDistribution.proportional);
 
-    expect(after, isNot(after));
+    expect(before, isNot(after));
   });
 }
 
