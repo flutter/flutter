@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_TEXT_FRAME_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_TEXT_FRAME_H_
 
-#include <cstdint>
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_run.h"
 
@@ -89,7 +88,7 @@ class TextFrame {
   // with. As long as the frame generation matches the atlas generation,
   // the contents are guaranteed to be populated and do not need to be
   // processed.
-  std::pair<size_t, intptr_t> GetAtlasGenerationAndID() const;
+  size_t GetAtlasGeneration() const;
 
   TextFrame& operator=(TextFrame&& other) = default;
 
@@ -111,7 +110,7 @@ class TextFrame {
 
   void ClearFrameBounds();
 
-  void SetAtlasGeneration(size_t value, intptr_t atlas_id);
+  void SetAtlasGeneration(size_t value);
 
   std::vector<TextRun> runs_;
   Rect bounds_;
@@ -122,7 +121,6 @@ class TextFrame {
   std::vector<FrameBounds> bound_values_;
   Scalar scale_ = 0;
   size_t generation_ = 0;
-  intptr_t atlas_id_ = 0;
   Point offset_;
   std::optional<GlyphProperties> properties_;
   Matrix transform_;

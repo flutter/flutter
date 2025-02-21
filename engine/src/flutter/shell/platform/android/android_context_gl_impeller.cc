@@ -13,6 +13,7 @@
 #include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
 #include "impeller/entity/gles3/entity_shaders_gles.h"
 #include "impeller/entity/gles3/framebuffer_blend_shaders_gles.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
 namespace flutter {
 
@@ -198,7 +199,15 @@ AndroidContextGLImpeller::AndroidContextGLImpeller(
   offscreen_config_ = std::move(offscreen_config);
   onscreen_context_ = std::move(onscreen_context);
   offscreen_context_ = std::move(offscreen_context);
-  SetImpellerContext(impeller_context);
+
+  auto aiks_context = std::make_shared<impeller::AiksContext>(
+      impeller_context, impeller::TypographerContextSkia::Make());
+  if (!aiks_context->IsValid()) {
+    FML_DLOG(ERROR) << "Could not create valid Impeller Context.";
+    return;
+  }
+
+  SetImpellerContext(aiks_context);
 
   is_valid_ = true;
 }

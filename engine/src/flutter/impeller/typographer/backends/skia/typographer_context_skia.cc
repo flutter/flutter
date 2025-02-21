@@ -415,17 +415,14 @@ TypographerContextSkia::CollectNewGlyphs(
   std::vector<FontGlyphPair> new_glyphs;
   std::vector<Rect> glyph_sizes;
   size_t generation_id = atlas->GetAtlasGeneration();
-  intptr_t atlas_id = reinterpret_cast<intptr_t>(atlas.get());
   for (const auto& frame : text_frames) {
-    auto [frame_generation_id, frame_atlas_id] =
-        frame->GetAtlasGenerationAndID();
     if (atlas->IsValid() && frame->IsFrameComplete() &&
-        frame_generation_id == generation_id && frame_atlas_id == atlas_id &&
+        frame->GetAtlasGeneration() == generation_id &&
         !frame->GetFrameBounds(0).is_placeholder) {
       continue;
     }
     frame->ClearFrameBounds();
-    frame->SetAtlasGeneration(generation_id, atlas_id);
+    frame->SetAtlasGeneration(generation_id);
 
     for (const auto& run : frame->GetRuns()) {
       auto metrics = run.GetFont().GetMetrics();

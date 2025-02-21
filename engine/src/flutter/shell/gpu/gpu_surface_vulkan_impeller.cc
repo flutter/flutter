@@ -18,7 +18,6 @@
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/surface.h"
-#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
 namespace flutter {
 
@@ -48,15 +47,10 @@ class WrappedTextureSourceVK : public impeller::TextureSourceVK {
 
 GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     GPUSurfaceVulkanDelegate* delegate,
-    std::shared_ptr<impeller::Context> context)
+    std::shared_ptr<impeller::Context> context,
+    std::shared_ptr<impeller::AiksContext> aiks_context)
     : delegate_(delegate) {
   if (!context || !context->IsValid()) {
-    return;
-  }
-
-  auto aiks_context = std::make_shared<impeller::AiksContext>(
-      context, impeller::TypographerContextSkia::Make());
-  if (!aiks_context->IsValid()) {
     return;
   }
 

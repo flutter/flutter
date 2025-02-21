@@ -141,7 +141,8 @@ PlatformViewAndroid::PlatformViewAndroid(
             AndroidRenderingAPI::kImpellerVulkan &&
         (android_get_device_api_level() >= kMinAPILevelHCPP) &&
         delegate.OnPlatformViewGetSettings().enable_surface_control &&
-        impeller::ContextVK::Cast(*android_context->GetImpellerContext())
+        impeller::ContextVK::Cast(
+            *android_context->GetImpellerContext()->GetContext())
             .GetShouldEnableSurfaceControlSwapchain();
     FML_CHECK(android_surface_ && android_surface_->IsValid())
         << "Could not create an OpenGL, Vulkan or Software surface to set "
@@ -300,10 +301,10 @@ void PlatformViewAndroid::RegisterExternalTexture(
       // Impeller GLES.
       RegisterTexture(std::make_shared<SurfaceTextureExternalTextureGLImpeller>(
           std::static_pointer_cast<impeller::ContextGLES>(
-              android_context_->GetImpellerContext()),  //
-          texture_id,                                   //
-          surface_texture,                              //
-          jni_facade_                                   //
+              android_context_->GetImpellerContext()->GetContext()),  //
+          texture_id,                                                 //
+          surface_texture,                                            //
+          jni_facade_                                                 //
           ));
       break;
     case AndroidRenderingAPI::kSkiaOpenGLES:
@@ -325,10 +326,10 @@ void PlatformViewAndroid::RegisterExternalTexture(
              "android-surface-plugins";
       RegisterTexture(std::make_shared<SurfaceTextureExternalTextureVKImpeller>(
           std::static_pointer_cast<impeller::ContextVK>(
-              android_context_->GetImpellerContext()),  //
-          texture_id,                                   //
-          surface_texture,                              //
-          jni_facade_                                   //
+              android_context_->GetImpellerContext()->GetContext()),  //
+          texture_id,                                                 //
+          surface_texture,                                            //
+          jni_facade_                                                 //
           ));
   }
 }
@@ -341,7 +342,7 @@ void PlatformViewAndroid::RegisterImageTexture(
       // Impeller GLES.
       RegisterTexture(std::make_shared<ImageExternalTextureGLImpeller>(
           std::static_pointer_cast<impeller::ContextGLES>(
-              android_context_->GetImpellerContext()),
+              android_context_->GetImpellerContext()->GetContext()),
           texture_id, image_texture_entry, jni_facade_));
       break;
     case AndroidRenderingAPI::kSkiaOpenGLES:
@@ -353,7 +354,7 @@ void PlatformViewAndroid::RegisterImageTexture(
     case AndroidRenderingAPI::kImpellerVulkan:
       RegisterTexture(std::make_shared<ImageExternalTextureVKImpeller>(
           std::static_pointer_cast<impeller::ContextVK>(
-              android_context_->GetImpellerContext()),
+              android_context_->GetImpellerContext()->GetContext()),
           texture_id, image_texture_entry, jni_facade_));
       break;
     case AndroidRenderingAPI::kSoftware:

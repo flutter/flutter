@@ -146,13 +146,12 @@ const FrameBounds& TextFrame::GetFrameBounds(size_t index) const {
   return bound_values_[index];
 }
 
-std::pair<size_t, intptr_t> TextFrame::GetAtlasGenerationAndID() const {
-  return std::make_pair(generation_, atlas_id_);
+size_t TextFrame::GetAtlasGeneration() const {
+  return generation_;
 }
 
-void TextFrame::SetAtlasGeneration(size_t value, intptr_t atlas_id) {
+void TextFrame::SetAtlasGeneration(size_t value) {
   generation_ = value;
-  atlas_id_ = atlas_id;
 }
 
 }  // namespace impeller

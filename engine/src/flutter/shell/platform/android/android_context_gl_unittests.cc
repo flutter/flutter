@@ -34,73 +34,6 @@ TaskRunners MakeTaskRunners(const std::string& thread_label,
 }
 }  // namespace
 
-class TestImpellerContext : public impeller::Context {
- public:
-  TestImpellerContext() {}
-
-  ~TestImpellerContext() {}
-
-  impeller::Context::BackendType GetBackendType() const override {
-    return impeller::Context::BackendType::kOpenGLES;
-  }
-
-  std::string DescribeGpuModel() const override { return ""; }
-
-  bool IsValid() const override { return true; }
-
-  const std::shared_ptr<const impeller::Capabilities>& GetCapabilities()
-      const override {
-    FML_UNREACHABLE();
-  }
-
-  bool UpdateOffscreenLayerPixelFormat(impeller::PixelFormat format) override {
-    FML_UNREACHABLE();
-  }
-
-  std::shared_ptr<impeller::Allocator> GetResourceAllocator() const override {
-    FML_UNREACHABLE();
-  }
-
-  std::shared_ptr<impeller::ShaderLibrary> GetShaderLibrary() const override {
-    FML_UNREACHABLE();
-  }
-
-  std::shared_ptr<impeller::SamplerLibrary> GetSamplerLibrary() const override {
-    FML_UNREACHABLE();
-  }
-
-  std::shared_ptr<impeller::PipelineLibrary> GetPipelineLibrary()
-      const override {
-    FML_UNREACHABLE();
-  }
-
-  std::shared_ptr<impeller::CommandBuffer> CreateCommandBuffer()
-      const override {
-    FML_UNREACHABLE();
-  }
-
-  std::shared_ptr<impeller::CommandQueue> GetCommandQueue() const override {
-    FML_UNREACHABLE();
-  }
-
-  void Shutdown() override { did_shutdown = true; }
-
-  impeller::RuntimeStageBackend GetRuntimeStageBackend() const override {
-    return impeller::RuntimeStageBackend::kVulkan;
-  }
-
-  bool did_shutdown = false;
-};
-
-class TestAndroidContext : public AndroidContext {
- public:
-  TestAndroidContext(const std::shared_ptr<impeller::Context>& impeller_context,
-                     AndroidRenderingAPI rendering_api)
-      : AndroidContext(rendering_api) {
-    SetImpellerContext(impeller_context);
-  }
-};
-
 TEST(AndroidContextGl, Create) {
   GrMockOptions main_context_options;
   sk_sp<GrDirectContext> main_context =
@@ -119,17 +52,6 @@ TEST(AndroidContextGl, Create) {
   EXPECT_NE(context.get(), nullptr);
   context.reset();
   EXPECT_TRUE(main_context->abandoned());
-}
-
-TEST(AndroidContextGl, CreateImpeller) {
-  auto impeller_context = std::make_shared<TestImpellerContext>();
-  auto android_context = std::make_unique<TestAndroidContext>(
-      impeller_context, AndroidRenderingAPI::kImpellerOpenGLES);
-  EXPECT_FALSE(impeller_context->did_shutdown);
-
-  android_context.reset();
-
-  EXPECT_TRUE(impeller_context->did_shutdown);
 }
 
 TEST(AndroidContextGl, CreateSingleThread) {

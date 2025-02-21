@@ -34,7 +34,9 @@
 #define ALLOW_IMPELLER (IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_VULKAN)
 
 #if ALLOW_IMPELLER
-#include <vulkan/vulkan.h>                                        // nogncheck
+#include <vulkan/vulkan.h>  // nogncheck
+#include <memory>
+#include "impeller/display_list/aiks_context.h"                   // nogncheck
 #include "impeller/entity/vk/entity_shaders_vk.h"                 // nogncheck
 #include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"      // nogncheck
 #include "impeller/entity/vk/modern_shaders_vk.h"                 // nogncheck
@@ -42,7 +44,8 @@
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"  // nogncheck
 #include "impeller/renderer/context.h"                            // nogncheck
 #include "impeller/renderer/vk/compute_shaders_vk.h"              // nogncheck
-#include "shell/gpu/gpu_surface_vulkan_impeller.h"                // nogncheck
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"  // nogncheck
+#include "shell/gpu/gpu_surface_vulkan_impeller.h"  // nogncheck
 
 static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
   return {
@@ -62,6 +65,7 @@ struct ImpellerVulkanContextHolder {
   ImpellerVulkanContextHolder() = default;
   ImpellerVulkanContextHolder(ImpellerVulkanContextHolder&&) = default;
   std::shared_ptr<impeller::ContextVK> context;
+  std::shared_ptr<impeller::AiksContext> aiks_context;
   std::shared_ptr<impeller::SurfaceContextVK> surface_context;
 
   bool Initialize(bool enable_validation);
@@ -77,6 +81,13 @@ bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
   context = impeller::ContextVK::Create(std::move(context_settings));
   if (!context || !context->IsValid()) {
     VALIDATION_LOG << "Could not create Vulkan context.";
+    return false;
+  }
+
+  aiks_context = std::make_shared<impeller::AiksContext>(
+      context, impeller::TypographerContextSkia::Make());
+  if (!aiks_context->IsValid()) {
+    VALIDATION_LOG << "Could not create valid Impeller Context.";
     return false;
   }
 
@@ -211,7 +222,8 @@ class TesterPlatformView : public PlatformView,
     if (delegate_.OnPlatformViewGetSettings().enable_impeller) {
       FML_DCHECK(impeller_context_holder_.context);
       auto surface = std::make_unique<GPUSurfaceVulkanImpeller>(
-          nullptr, impeller_context_holder_.surface_context);
+          nullptr, impeller_context_holder_.surface_context,
+          impeller_context_holder_.aiks_context);
       FML_DCHECK(surface->IsValid());
       return surface;
     }

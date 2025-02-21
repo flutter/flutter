@@ -10,6 +10,7 @@
 #include "flutter/impeller/entity/vk/framebuffer_blend_shaders_vk.h"
 #include "flutter/impeller/entity/vk/modern_shaders_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "shell/platform/android/context/android_context.h"
 
 namespace flutter {
@@ -74,7 +75,15 @@ AndroidContextVKImpeller::AndroidContextVKImpeller(
     : AndroidContext(AndroidRenderingAPI::kImpellerVulkan),
       vulkan_dylib_(fml::NativeLibrary::Create("libvulkan.so")) {
   auto impeller_context = CreateImpellerContext(vulkan_dylib_, settings);
-  SetImpellerContext(impeller_context);
+
+  auto aiks_context = std::make_shared<impeller::AiksContext>(
+      impeller_context, impeller::TypographerContextSkia::Make());
+  if (!aiks_context->IsValid()) {
+    FML_DLOG(ERROR) << "Could not create valid Impeller Context.";
+    return;
+  }
+
+  SetImpellerContext(aiks_context);
   is_valid_ = !!impeller_context;
 }
 

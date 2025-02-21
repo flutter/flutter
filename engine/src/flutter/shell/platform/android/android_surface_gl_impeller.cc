@@ -36,9 +36,10 @@ bool AndroidSurfaceGLImpeller::IsValid() const {
 std::unique_ptr<Surface> AndroidSurfaceGLImpeller::CreateGPUSurface(
     GrDirectContext* gr_context) {
   auto surface = std::make_unique<GPUSurfaceGLImpeller>(
-      this,                                    // delegate
-      android_context_->GetImpellerContext(),  // context
-      true                                     // render to surface
+      this,                                                  // delegate
+      android_context_->GetImpellerContext()->GetContext(),  // context
+      android_context_->GetImpellerContext(),                // aiks context
+      true  // render to surface
   );
   if (!surface->IsValid()) {
     return nullptr;
@@ -96,16 +97,17 @@ std::unique_ptr<Surface> AndroidSurfaceGLImpeller::CreateSnapshotSurface() {
     return nullptr;
   }
   return std::make_unique<GPUSurfaceGLImpeller>(
-      this,                                    // delegate
-      android_context_->GetImpellerContext(),  // context
-      true                                     // render to surface
+      this,                                                  // delegate
+      android_context_->GetImpellerContext()->GetContext(),  // context
+      android_context_->GetImpellerContext(),                // context
+      true  // render to surface
   );
 }
 
 // |AndroidSurface|
 std::shared_ptr<impeller::Context>
 AndroidSurfaceGLImpeller::GetImpellerContext() {
-  return android_context_->GetImpellerContext();
+  return android_context_->GetImpellerContext()->GetContext();
 }
 
 // |GPUSurfaceGLDelegate|

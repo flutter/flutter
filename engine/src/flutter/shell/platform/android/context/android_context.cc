@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/context/android_context.h"
+#include "impeller/display_list/aiks_context.h"
 
 namespace flutter {
 
@@ -14,7 +15,7 @@ AndroidContext::~AndroidContext() {
     main_context_->releaseResourcesAndAbandonContext();
   }
   if (impeller_context_) {
-    impeller_context_->Shutdown();
+    impeller_context_->GetContext()->Shutdown();
   }
 };
 
@@ -35,12 +36,13 @@ sk_sp<GrDirectContext> AndroidContext::GetMainSkiaContext() const {
   return main_context_;
 }
 
-std::shared_ptr<impeller::Context> AndroidContext::GetImpellerContext() const {
+std::shared_ptr<impeller::AiksContext> AndroidContext::GetImpellerContext()
+    const {
   return impeller_context_;
 }
 
 void AndroidContext::SetImpellerContext(
-    const std::shared_ptr<impeller::Context>& context) {
+    const std::shared_ptr<impeller::AiksContext>& context) {
   impeller_context_ = context;
 }
 

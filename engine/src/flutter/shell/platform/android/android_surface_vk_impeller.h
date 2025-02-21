@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
+#include "impeller/display_list/aiks_context.h"
 #include "shell/gpu/gpu_surface_vulkan_impeller.h"
 
 namespace flutter {
@@ -51,6 +52,7 @@ class AndroidSurfaceVKImpeller : public AndroidSurface {
 
  private:
   std::shared_ptr<impeller::SurfaceContextVK> surface_context_vk_;
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
   fml::RefPtr<AndroidNativeWindow> native_window_;
   // The first GPU Surface is initialized as soon as the
   // AndroidSurfaceVulkanImpeller is created. This ensures that the pipelines
