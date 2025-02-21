@@ -5,11 +5,11 @@
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-//import '../canvaskit/text_fragmenter.dart';
 
 import 'paragraph.dart';
 import 'wrapper.dart';
 import 'code_unit_flags.dart';
+import 'unicode_properties.dart';
 
 /// A single canvas2d context to use for all text information.
 @visibleForTesting
@@ -74,15 +74,14 @@ class TextLayout {
         codeUnitFlags[lineBreak].hardLineBreak = true;
       }
     }
-    // TODO: Use hardcoded algorithm from C++ SkUnicode
     // Add whitespaces
     for (int i = 0; i < paragraph.text.length; ++i) {
-       codeUnitFlags[i].whitespace = paragraph.text[i] == ' ';
+       codeUnitFlags[i].whitespace = UnicodeProperties.isWhitespace(paragraph.text.codeUnitAt(i));
     }
   }
 
   void extractRuns() {
-    // Currently we assume run == textCluster
+    // TODO: Implement bidi (via SkUnicode API in CanvasKit)
   }
 }
 
