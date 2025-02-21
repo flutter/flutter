@@ -194,7 +194,8 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   enable_impeller_ = std::find(switches.begin(), switches.end(),
                                "--enable-impeller=true") != switches.end();
 
-  egl_manager_ = egl::Manager::Create();
+  egl_manager_ = egl::Manager::Create(
+      static_cast<egl::GpuPreference>(project_->gpu_preference()));
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
@@ -292,6 +293,12 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   custom_task_runners.platform_task_runner = &platform_task_runner;
   custom_task_runners.thread_priority_setter =
       &WindowsPlatformThreadPrioritySetter;
+
+  if (project_->merged_platform_ui_thread()) {
+    FML_LOG(WARNING)
+        << "Running with merged platform and UI thread. Experimental.";
+    custom_task_runners.ui_task_runner = &platform_task_runner;
+  }
 
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);

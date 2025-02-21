@@ -9,16 +9,12 @@
 #include <dlfcn.h>
 #include <jni.h>
 #include <memory>
-#include <sstream>
 #include <utility>
 
 #include "impeller/toolkit/android/shadow_realm.h"
-#include "include/android/SkImageAndroid.h"
 #include "unicode/uchar.h"
 
-#include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/constants.h"
-#include "flutter/fml/file.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/platform/android/jni_util.h"
@@ -33,6 +29,7 @@
 #include "flutter/shell/platform/android/image_external_texture_gl.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
+#include "impeller/toolkit/android/proc_table.h"
 
 #define ANDROID_SHELL_HOLDER \
   (reinterpret_cast<AndroidShellHolder*>(shell_holder))
@@ -65,45 +62,63 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_bitmap_config_class = nullptr;
 // Called By Native
 
 static jmethodID g_flutter_callback_info_constructor = nullptr;
-jobject CreateFlutterCallbackInformation(
-    JNIEnv* env,
-    const std::string& callbackName,
-    const std::string& callbackClassName,
-    const std::string& callbackLibraryPath) {
-  return env->NewObject(g_flutter_callback_info_class->obj(),
-                        g_flutter_callback_info_constructor,
-                        env->NewStringUTF(callbackName.c_str()),
-                        env->NewStringUTF(callbackClassName.c_str()),
-                        env->NewStringUTF(callbackLibraryPath.c_str()));
-}
 
 static jfieldID g_jni_shell_holder_field = nullptr;
+
+#define FLUTTER_FOR_EACH_JNI_METHOD(V)                                        \
+  V(g_handle_platform_message_method, handlePlatformMessage,                  \
+    "(Ljava/lang/String;Ljava/nio/ByteBuffer;IJ)V")                           \
+  V(g_handle_platform_message_response_method, handlePlatformMessageResponse, \
+    "(ILjava/nio/ByteBuffer;)V")                                              \
+  V(g_update_semantics_method, updateSemantics,                               \
+    "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V")      \
+  V(g_on_display_platform_view_method, onDisplayPlatformView,                 \
+    "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
+    "FlutterMutatorsStack;)V")                                                \
+  V(g_on_begin_frame_method, onBeginFrame, "()V")                             \
+  V(g_on_end_frame_method, onEndFrame, "()V")                                 \
+  V(g_on_display_overlay_surface_method, onDisplayOverlaySurface, "(IIIII)V") \
+  V(g_create_transaction_method, createTransaction,                           \
+    "()Landroid/view/SurfaceControl$Transaction;")                            \
+  V(g_swap_transaction_method, swapTransactions, "()V")                       \
+  V(g_apply_transaction_method, applyTransactions, "()V")                     \
+  V(g_create_overlay_surface2_method, createOverlaySurface2,                  \
+    "()Lio/flutter/embedding/engine/FlutterOverlaySurface;")                  \
+  V(g_destroy_overlay_surface2_method, destroyOverlaySurface2, "()V")         \
+  V(g_on_display_platform_view2_method, onDisplayPlatformView2,               \
+    "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
+    "FlutterMutatorsStack;)V")                                                \
+  V(g_on_end_frame2_method, endFrame2, "()V")                                 \
+  V(g_show_overlay_surface2_method, showOverlaySurface2, "()V")               \
+  V(g_hide_overlay_surface2_method, hideOverlaySurface2, "()V")               \
+  V(g_get_scaled_font_size_method, getScaledFontSize, "(FI)F")                \
+  V(g_update_custom_accessibility_actions_method,                             \
+    updateCustomAccessibilityActions,                                         \
+    "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V")                            \
+  V(g_on_first_frame_method, onFirstFrame, "()V")                             \
+  V(g_on_engine_restart_method, onPreEngineRestart, "()V")                    \
+  V(g_create_overlay_surface_method, createOverlaySurface,                    \
+    "()Lio/flutter/embedding/engine/FlutterOverlaySurface;")                  \
+  V(g_destroy_overlay_surfaces_method, destroyOverlaySurfaces, "()V")
+
+//
+
+#define FLUTTER_DECLARE_JNI(global_field, jni_name, jni_arg) \
+  static jmethodID global_field = nullptr;
+
+#define FLUTTER_BIND_JNI(global_field, jni_name, jni_arg)               \
+  global_field =                                                        \
+      env->GetMethodID(g_flutter_jni_class->obj(), #jni_name, jni_arg); \
+  if (global_field == nullptr) {                                        \
+    FML_LOG(ERROR) << "Could not locate " << #jni_name << " method.";   \
+    return false;                                                       \
+  }
 
 static jmethodID g_jni_constructor = nullptr;
 
 static jmethodID g_long_constructor = nullptr;
 
-static jmethodID g_handle_platform_message_method = nullptr;
-
-static jmethodID g_handle_platform_message_response_method = nullptr;
-
-static jmethodID g_update_semantics_method = nullptr;
-
-static jmethodID g_update_custom_accessibility_actions_method = nullptr;
-
-static jmethodID g_get_scaled_font_size_method = nullptr;
-
-static jmethodID g_on_first_frame_method = nullptr;
-
-static jmethodID g_on_engine_restart_method = nullptr;
-
-static jmethodID g_create_overlay_surface_method = nullptr;
-
-static jmethodID g_destroy_overlay_surfaces_method = nullptr;
-
-static jmethodID g_on_begin_frame_method = nullptr;
-
-static jmethodID g_on_end_frame_method = nullptr;
+FLUTTER_FOR_EACH_JNI_METHOD(FLUTTER_DECLARE_JNI)
 
 static jmethodID g_java_weak_reference_get_method = nullptr;
 
@@ -130,11 +145,6 @@ static jmethodID g_compute_platform_resolved_locale_method = nullptr;
 static jmethodID g_request_dart_deferred_library_method = nullptr;
 
 // Called By Java
-static jmethodID g_on_display_platform_view_method = nullptr;
-
-// static jmethodID g_on_composite_platform_view_method = nullptr;
-
-static jmethodID g_on_display_overlay_surface_method = nullptr;
 
 static jmethodID g_overlay_surface_id_method = nullptr;
 
@@ -292,8 +302,11 @@ static jobject LookupCallbackInformation(JNIEnv* env,
   if (cbInfo == nullptr) {
     return nullptr;
   }
-  return CreateFlutterCallbackInformation(env, cbInfo->name, cbInfo->class_name,
-                                          cbInfo->library_path);
+  return env->NewObject(g_flutter_callback_info_class->obj(),
+                        g_flutter_callback_info_constructor,
+                        env->NewStringUTF(cbInfo->name.c_str()),
+                        env->NewStringUTF(cbInfo->class_name.c_str()),
+                        env->NewStringUTF(cbInfo->library_path.c_str()));
 }
 
 static void SetViewportMetrics(JNIEnv* env,
@@ -367,6 +380,12 @@ static void UpdateDisplayMetrics(JNIEnv* env,
                                  jobject jcaller,
                                  jlong shell_holder) {
   ANDROID_SHELL_HOLDER->UpdateDisplayMetrics();
+}
+
+static bool IsSurfaceControlEnabled(JNIEnv* env,
+                                    jobject jcaller,
+                                    jlong shell_holder) {
+  return ANDROID_SHELL_HOLDER->IsSurfaceControlEnabled();
 }
 
 static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
@@ -859,6 +878,11 @@ bool RegisterApi(JNIEnv* env) {
           .signature = "()Z",
           .fnPtr = reinterpret_cast<void*>(
               &impeller::android::ShadowRealm::ShouldDisableAHB),
+      },
+      {
+          .name = "nativeIsSurfaceControlEnabled",
+          .signature = "(J)Z",
+          .fnPtr = reinterpret_cast<void*>(&IsSurfaceControlEnabled),
       }};
 
   if (env->RegisterNatives(g_flutter_jni_class->obj(), flutter_jni_methods,
@@ -890,83 +914,7 @@ bool RegisterApi(JNIEnv* env) {
     return false;
   }
 
-  g_handle_platform_message_method =
-      env->GetMethodID(g_flutter_jni_class->obj(), "handlePlatformMessage",
-                       "(Ljava/lang/String;Ljava/nio/ByteBuffer;IJ)V");
-
-  if (g_handle_platform_message_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate handlePlatformMessage method";
-    return false;
-  }
-
-  g_handle_platform_message_response_method = env->GetMethodID(
-      g_flutter_jni_class->obj(), "handlePlatformMessageResponse",
-      "(ILjava/nio/ByteBuffer;)V");
-
-  if (g_handle_platform_message_response_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate handlePlatformMessageResponse method";
-    return false;
-  }
-
-  g_get_scaled_font_size_method = env->GetMethodID(
-      g_flutter_jni_class->obj(), "getScaledFontSize", "(FI)F");
-
-  if (g_get_scaled_font_size_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate FlutterJNI#getScaledFontSize method";
-    return false;
-  }
-
-  g_update_semantics_method = env->GetMethodID(
-      g_flutter_jni_class->obj(), "updateSemantics",
-      "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V");
-
-  if (g_update_semantics_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate updateSemantics method";
-    return false;
-  }
-
-  g_update_custom_accessibility_actions_method = env->GetMethodID(
-      g_flutter_jni_class->obj(), "updateCustomAccessibilityActions",
-      "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V");
-
-  if (g_update_custom_accessibility_actions_method == nullptr) {
-    FML_LOG(ERROR)
-        << "Could not locate updateCustomAccessibilityActions method";
-    return false;
-  }
-
-  g_on_first_frame_method =
-      env->GetMethodID(g_flutter_jni_class->obj(), "onFirstFrame", "()V");
-
-  if (g_on_first_frame_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate onFirstFrame method";
-    return false;
-  }
-
-  g_on_engine_restart_method =
-      env->GetMethodID(g_flutter_jni_class->obj(), "onPreEngineRestart", "()V");
-
-  if (g_on_engine_restart_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate onEngineRestart method";
-    return false;
-  }
-
-  g_create_overlay_surface_method =
-      env->GetMethodID(g_flutter_jni_class->obj(), "createOverlaySurface",
-                       "()Lio/flutter/embedding/engine/FlutterOverlaySurface;");
-
-  if (g_create_overlay_surface_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate createOverlaySurface method";
-    return false;
-  }
-
-  g_destroy_overlay_surfaces_method = env->GetMethodID(
-      g_flutter_jni_class->obj(), "destroyOverlaySurfaces", "()V");
-
-  if (g_destroy_overlay_surfaces_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate destroyOverlaySurfaces method";
-    return false;
-  }
+  FLUTTER_FOR_EACH_JNI_METHOD(FLUTTER_BIND_JNI)
 
   fml::jni::ScopedJavaLocalRef<jclass> overlay_surface_class(
       env, env->FindClass("io/flutter/embedding/engine/FlutterOverlaySurface"));
@@ -1093,40 +1041,6 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   if (g_mutators_stack_push_cliprrect_method == nullptr) {
     FML_LOG(ERROR)
         << "Could not locate FlutterMutatorsStack.pushClipRRect method";
-    return false;
-  }
-
-  g_on_display_platform_view_method =
-      env->GetMethodID(g_flutter_jni_class->obj(), "onDisplayPlatformView",
-                       "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"
-                       "FlutterMutatorsStack;)V");
-
-  if (g_on_display_platform_view_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate onDisplayPlatformView method";
-    return false;
-  }
-
-  g_on_begin_frame_method =
-      env->GetMethodID(g_flutter_jni_class->obj(), "onBeginFrame", "()V");
-
-  if (g_on_begin_frame_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate onBeginFrame method";
-    return false;
-  }
-
-  g_on_end_frame_method =
-      env->GetMethodID(g_flutter_jni_class->obj(), "onEndFrame", "()V");
-
-  if (g_on_end_frame_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate onEndFrame method";
-    return false;
-  }
-
-  g_on_display_overlay_surface_method = env->GetMethodID(
-      g_flutter_jni_class->obj(), "onDisplayOverlaySurface", "(IIIII)V");
-
-  if (g_on_display_overlay_surface_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate onDisplayOverlaySurface method";
     return false;
   }
 
@@ -1911,6 +1825,217 @@ bool PlatformViewAndroidJNIImpl::RequestDartDeferredLibrary(
 
   FML_CHECK(fml::jni::CheckException(env));
   return true;
+}
+
+// New Platform View Support.
+
+ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return nullptr;
+  }
+
+  fml::jni::ScopedJavaLocalRef<jobject> transaction(
+      env,
+      env->CallObjectMethod(java_object.obj(), g_create_transaction_method));
+  if (transaction.is_null()) {
+    return nullptr;
+  }
+  FML_CHECK(fml::jni::CheckException(env));
+
+  return impeller::android::GetProcTable().ASurfaceTransaction_fromJava(
+      env, transaction.obj());
+}
+
+void PlatformViewAndroidJNIImpl::swapTransaction() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_swap_transaction_method);
+
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::applyTransaction() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_apply_transaction_method);
+
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
+PlatformViewAndroidJNIImpl::createOverlaySurface2() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return nullptr;
+  }
+
+  fml::jni::ScopedJavaLocalRef<jobject> overlay(
+      env, env->CallObjectMethod(java_object.obj(),
+                                 g_create_overlay_surface2_method));
+  FML_CHECK(fml::jni::CheckException(env));
+
+  if (overlay.is_null()) {
+    return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(0,
+                                                                     nullptr);
+  }
+
+  jint overlay_id =
+      env->CallIntMethod(overlay.obj(), g_overlay_surface_id_method);
+
+  jobject overlay_surface =
+      env->CallObjectMethod(overlay.obj(), g_overlay_surface_surface_method);
+
+  auto overlay_window = fml::MakeRefCounted<AndroidNativeWindow>(
+      ANativeWindow_fromSurface(env, overlay_surface));
+
+  return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+      overlay_id, std::move(overlay_window));
+}
+
+void PlatformViewAndroidJNIImpl::destroyOverlaySurface2() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_destroy_overlay_surface2_method);
+
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
+    int32_t view_id,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    int32_t viewWidth,
+    int32_t viewHeight,
+    MutatorsStack mutators_stack) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  jobject mutatorsStack = env->NewObject(g_mutators_stack_class->obj(),
+                                         g_mutators_stack_init_method);
+
+  std::vector<std::shared_ptr<Mutator>>::const_iterator iter =
+      mutators_stack.Begin();
+  while (iter != mutators_stack.End()) {
+    switch ((*iter)->GetType()) {
+      case kTransform: {
+        const SkMatrix& matrix = (*iter)->GetMatrix();
+        SkScalar matrix_array[9];
+        matrix.get9(matrix_array);
+        fml::jni::ScopedJavaLocalRef<jfloatArray> transformMatrix(
+            env, env->NewFloatArray(9));
+
+        env->SetFloatArrayRegion(transformMatrix.obj(), 0, 9, matrix_array);
+        env->CallVoidMethod(mutatorsStack,
+                            g_mutators_stack_push_transform_method,
+                            transformMatrix.obj());
+        break;
+      }
+      case kClipRect: {
+        const SkRect& rect = (*iter)->GetRect();
+        env->CallVoidMethod(
+            mutatorsStack, g_mutators_stack_push_cliprect_method,
+            static_cast<int>(rect.left()), static_cast<int>(rect.top()),
+            static_cast<int>(rect.right()), static_cast<int>(rect.bottom()));
+        break;
+      }
+      case kClipRRect: {
+        const SkRRect& rrect = (*iter)->GetRRect();
+        const SkRect& rect = rrect.rect();
+        const SkVector& upper_left = rrect.radii(SkRRect::kUpperLeft_Corner);
+        const SkVector& upper_right = rrect.radii(SkRRect::kUpperRight_Corner);
+        const SkVector& lower_right = rrect.radii(SkRRect::kLowerRight_Corner);
+        const SkVector& lower_left = rrect.radii(SkRRect::kLowerLeft_Corner);
+        SkScalar radiis[8] = {
+            upper_left.x(),  upper_left.y(),  upper_right.x(), upper_right.y(),
+            lower_right.x(), lower_right.y(), lower_left.x(),  lower_left.y(),
+        };
+        fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
+            env, env->NewFloatArray(8));
+        env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
+        env->CallVoidMethod(
+            mutatorsStack, g_mutators_stack_push_cliprrect_method,
+            static_cast<int>(rect.left()), static_cast<int>(rect.top()),
+            static_cast<int>(rect.right()), static_cast<int>(rect.bottom()),
+            radiisArray.obj());
+        break;
+      }
+      // TODO(cyanglaz): Implement other mutators.
+      // https://github.com/flutter/flutter/issues/58426
+      case kClipPath:
+      case kOpacity:
+      case kBackdropFilter:
+        break;
+    }
+    ++iter;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_on_display_platform_view2_method,
+                      view_id, x, y, width, height, viewWidth, viewHeight,
+                      mutatorsStack);
+
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::onEndFrame2() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_on_end_frame2_method);
+
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::showOverlaySurface2() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_show_overlay_surface2_method);
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::hideOverlaySurface2() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_hide_overlay_surface2_method);
+  FML_CHECK(fml::jni::CheckException(env));
 }
 
 }  // namespace flutter
