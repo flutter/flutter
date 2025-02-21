@@ -39,7 +39,7 @@ enum ContentSensitivity {
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO for how
   /// this mode behaves on native Android.
   ///
-  /// This is currently a no-op and thus, will behave the same as [SensitiveContent.notSensitive].
+  /// This is currently a no-op and thus, will behave the same as [ContentSensitivity.notSensitive].
   // TODO(camsim99): Implement `autoSensitive` mode that matches the behavior
   // of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented based on autofill hints.
   autoSensitive(id: 0),
