@@ -31,12 +31,6 @@
     - 'x64'
     - 'arm64'
   variant: debug
-- test_command: test run fuchsia-pkg://fuchsia.com/dart_runner_tests#meta/dart_runner_tests.cm
-  package: dart_runner_tests-0.far
-- test_command: test run fuchsia-pkg://fuchsia.com/dart_utils_tests#meta/dart_utils_tests.cm
-  package: dart_utils_tests-0.far
-- test_command: test run fuchsia-pkg://fuchsia.com/dart_utils_tests#meta/dart_utils_tests.cm
-  package: dart_utils_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/dart_plugin_registrant_unittests#meta/dart_plugin_registrant_unittests.cm
   disabled: Error while initializing the Dart VM, Precompiled runtime requires a precompiled snapshot
   package: dart_plugin_registrant_unittests-0.far
@@ -51,9 +45,6 @@
   variant: x64
 - test_command: test run fuchsia-pkg://fuchsia.com/display_list_tests#meta/display_list_tests.cm
   package: display_list_tests-0.far
-- test_command: test run fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm
-  package: embedder_tests-0.far
-  variant: debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/embedder_a11y_unittests#meta/embedder_a11y_unittests.cm
   disabled: Error while initializing the Dart VM, Precompiled runtime requires a precompiled snapshot
   package: embedder_a11y_unittests-0.far
@@ -74,12 +65,6 @@
   variant: debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/flutter_runner_tests#meta/flutter_runner_tests.cm
   package: flutter_runner_tests-0.far
-- test_command: test run fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_missing_tests#meta/flutter_runner_tzdata_missing_tests.cm
-  package: flutter_runner_tzdata_missing_tests-0.far
-- test_command: test run fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_tests#meta/flutter_runner_tzdata_tests.cm
-  package: flutter_runner_tzdata_tests-0.far
-- test_command: test run fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_tests#meta/flutter_runner_tzdata_tests.cm
-  package: flutter_runner_tzdata_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_missing_tests#meta/flutter_runner_tzdata_missing_tests.cm
   package: flutter_runner_tzdata_missing_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_tests#meta/flutter_runner_tzdata_tests.cm
