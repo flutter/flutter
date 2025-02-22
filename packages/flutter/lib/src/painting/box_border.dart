@@ -456,6 +456,19 @@ class Border extends BoxBorder {
        right = vertical,
        bottom = horizontal;
 
+  /// Creates a border with only the specified sides set and the unspecified
+  /// sides set to [rest].
+  const Border.some({
+    BorderSide? top,
+    BorderSide? right,
+    BorderSide? bottom,
+    BorderSide? left,
+    required BorderSide rest,
+  }) : top = top ?? rest,
+       right = right ?? rest,
+       bottom = bottom ?? rest,
+       left = left ?? rest;
+
   /// A uniform border with all sides the same color and width.
   ///
   /// The sides default to black solid borders, one logical pixel wide.
