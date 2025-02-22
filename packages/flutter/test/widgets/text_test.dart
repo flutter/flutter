@@ -1728,18 +1728,18 @@ void main() {
       ),
     );
 
-    final StrutStyle? before = tester.renderObject<RenderParagraph>(find.text('Hello')).strutStyle;
+    final Text before = tester.firstWidget(find.text('Hello')) as Text;
     expect(before, isNotNull);
-    expect(before?.leadingDistribution, TextLeadingDistribution.even);
+    expect(before.style?.leadingDistribution, TextLeadingDistribution.even);
 
     setState(() {
       leadingDistribution = TextLeadingDistribution.proportional;
     });
     await tester.pump();
 
-    final StrutStyle? after = tester.renderObject<RenderParagraph>(find.text('Hello')).strutStyle;
+    final Text after = tester.firstWidget(find.text('Hello')) as Text;
     expect(after, isNotNull);
-    expect(after?.leadingDistribution, TextLeadingDistribution.proportional);
+    expect(after.style?.leadingDistribution, TextLeadingDistribution.proportional);
 
     expect(before, isNot(after));
   });
