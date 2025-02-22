@@ -545,6 +545,7 @@ Future<Image> _createBlueGreenImage() async {
   final Codec codec = await descriptor.instantiateCodec();
   final FrameInfo frame = await codec.getNextFrame();
   codec.dispose();
+  descriptor.dispose();
   return frame.image;
 }
 

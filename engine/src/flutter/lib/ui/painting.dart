@@ -2565,6 +2565,7 @@ Future<Codec> instantiateImageCodecWithSize(
       targetHeight: targetSize.height,
     );
   } finally {
+    descriptor.dispose();
     buffer.dispose();
   }
 }

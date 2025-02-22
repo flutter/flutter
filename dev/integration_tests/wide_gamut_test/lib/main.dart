@@ -240,6 +240,7 @@ Future<ui.Image> _loadImage() async {
   final ui.Codec codec = await descriptor.instantiateCodec();
   final ui.FrameInfo frameInfo = await codec.getNextFrame();
   codec.dispose();
+  descriptor.dispose();
   return frameInfo.image;
 }
 
