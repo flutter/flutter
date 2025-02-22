@@ -30,9 +30,13 @@ void writePackageConfig(FileSystemEntity entity, {Iterable<Package> packages = c
 /// ```dart
 /// writePackageConfig(project.packageConfig);
 /// ```
+/// ... that always worrks, even if the file did not previously exist.
 void writePackageConfigForProject(
   FlutterProject project, {
   Iterable<Package> packages = const <Package>[],
 }) {
-  writePackageConfig(project.packageConfig, packages: packages);
+  writePackageConfig(
+    project.directory.childDirectory('.dart_tool').childFile('package_config.json'),
+    packages: packages,
+  );
 }

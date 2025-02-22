@@ -80,6 +80,7 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
+    Cache.flutterRoot = '';
   });
 
   setUp(() {
@@ -112,9 +113,13 @@ void main() {
         .file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj'))
         .createSync();
     writePackageConfig(
-      fileSystem.directory('${Cache.flutterRoot!}/packages/flutter_tools'),
+      fileSystem.directory('${Cache.flutterRoot!}packages/flutter_tools'),
       packages: <Package>[
-        Package('flutter_template_images', Uri(path: '/flutter_template_images')),
+        Package(
+          'flutter_template_images',
+          fileSystem.directory('flutter_template_images').absolute.uri,
+          packageUriRoot: Uri(path: 'lib/'),
+        ),
       ],
     );
     createCoreMockProjectFiles();

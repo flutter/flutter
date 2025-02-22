@@ -149,7 +149,9 @@ void main() {
           templateImagesDirectory.createSync(recursive: true);
           writePackageConfig(
             globals.fs.directory(globals.fs.path.join('flutter', 'packages', 'flutter_tools')),
-            packages: <Package>[Package('flutter_template_images', templateImagesDirectory.uri)],
+            packages: <Package>[
+              Package('flutter_template_images', templateImagesDirectory.absolute.uri),
+            ],
           );
           flutterManifest.writeAsStringSync('{"files":[]}');
         },

@@ -505,7 +505,10 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   // Project files.
   writePackageConfig(
     fileSystem.currentDirectory,
-    packages: <Package>[Package('foo', Uri(path: '../')), Package('fizz', Uri(path: '../bar'))],
+    packages: <Package>[
+      Package('foo', fileSystem.currentDirectory.uri, packageUriRoot: Uri(path: 'lib/')),
+      Package('fizz', fileSystem.directory('bar').absolute.uri, packageUriRoot: Uri(path: 'lib/')),
+    ],
   );
   fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: foo
