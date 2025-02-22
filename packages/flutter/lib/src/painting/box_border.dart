@@ -825,6 +825,23 @@ class BorderDirectional extends BoxBorder {
     this.bottom = BorderSide.none,
   });
 
+  /// Creates a border with only the specified sides set and the unspecified
+  /// sides set to [rest].
+  ///
+  /// The [start] and [end] sides represent the horizontal sides; the start side
+  /// is on the leading edge given the reading direction, and the end side is on
+  /// the trailing edge. They are resolved during [paint].
+  const BorderDirectional.some({
+    BorderSide? top,
+    BorderSide? start,
+    BorderSide? end,
+    BorderSide? bottom,
+    required BorderSide rest,
+  }) : top = top ?? rest,
+       start = start ?? rest,
+       end = end ?? rest,
+       bottom = bottom ?? rest;
+
   /// Creates a [BorderDirectional] that represents the addition of the two
   /// given [BorderDirectional]s.
   ///
