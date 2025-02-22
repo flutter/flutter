@@ -64,8 +64,9 @@ static constexpr const char* kBLC[] = {
 
 }  // anonymous namespace
 
-FlutterMain::FlutterMain(const flutter::Settings& settings)
-    : settings_(settings) {}
+FlutterMain::FlutterMain(const flutter::Settings& settings,
+                         flutter::AndroidRenderingAPI android_rendering_api)
+    : settings_(settings), android_rendering_api_(android_rendering_api) {}
 
 FlutterMain::~FlutterMain() = default;
 
@@ -116,8 +117,8 @@ void FlutterMain::Init(JNIEnv* env,
     }
   }
 
-  selected_rendering_api_ = SelectedRenderingAPI(settings);
-  switch (selected_rendering_api_ ) {
+  AndroidRenderingAPI android_rendering_api = SelectedRenderingAPI(settings);
+  switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
     case AndroidRenderingAPI::kSkiaOpenGLES:
       settings.enable_impeller = false;
@@ -187,8 +188,7 @@ void FlutterMain::Init(JNIEnv* env,
 
   // Not thread safe. Will be removed when FlutterMain is refactored to no
   // longer be a singleton.
-  g_flutter_main.reset(new FlutterMain(settings));
-
+  g_flutter_main.reset(new FlutterMain(settings, android_rendering_api));
   g_flutter_main->SetupDartVMServiceUriCallback(env);
 }
 

@@ -34,10 +34,11 @@ class FlutterMain {
 
  private:
   const flutter::Settings settings_;
-  flutter::AndroidRenderingAPI android_rendering_api_;
+  const flutter::AndroidRenderingAPI android_rendering_api_;
   DartServiceIsolate::CallbackHandle vm_service_uri_callback_ = 0;
 
-  explicit FlutterMain(const flutter::Settings& settings);
+  explicit FlutterMain(const flutter::Settings& settings,
+                       flutter::AndroidRenderingAPI android_rendering_api);
 
   static void Init(JNIEnv* env,
                    jclass clazz,
