@@ -316,7 +316,7 @@ void main() {
     );
   });
 
-  test('Border.dimension', () {
+  test('Border.dimensions', () {
     final Border insideBorder = Border.all(width: 10);
     expect(insideBorder.dimensions, const EdgeInsets.all(10));
 
