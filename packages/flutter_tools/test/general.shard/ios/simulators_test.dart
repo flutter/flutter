@@ -921,8 +921,16 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       xcodeBadSimctl = Xcode.test(processManager: fakeProcessManagerBadSimctl);
       logger = BufferLogger.test();
       simControl = SimControl(logger: logger, processManager: fakeProcessManager, xcode: xcode);
-      simulatorUtils = IOSSimulatorUtils(logger: logger, processManager: fakeProcessManager, xcode: xcode);
-      simulatorUtilsBadSimctl = IOSSimulatorUtils(logger: logger, processManager: fakeProcessManager, xcode: xcodeBadSimctl);
+      simulatorUtils = IOSSimulatorUtils(
+        logger: logger,
+        processManager: fakeProcessManager,
+        xcode: xcode,
+      );
+      simulatorUtilsBadSimctl = IOSSimulatorUtils(
+        logger: logger,
+        processManager: fakeProcessManager,
+        xcode: xcodeBadSimctl,
+      );
     });
 
     testWithoutContext('getConnectedDevices succeeds', () async {
@@ -993,12 +1001,15 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('IOSSimulatorUtils.getAttachedDevices handles simctl not properly installed', () async {
-      final List<IOSSimulator> devices = await simulatorUtilsBadSimctl.getAttachedDevices();
+    testWithoutContext(
+      'IOSSimulatorUtils.getAttachedDevices handles simctl not properly installed',
+      () async {
+        final List<IOSSimulator> devices = await simulatorUtilsBadSimctl.getAttachedDevices();
 
-      expect(devices, isEmpty);
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    });
+        expect(devices, isEmpty);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
 
     testWithoutContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
       final IOSSimulator iosSimulatorA = IOSSimulator(
@@ -1240,12 +1251,16 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('IOSSimulatorUtils.getAvailableIOSRuntimes handles simctl not properly installed', () async {
-      final List<IOSSimulatorRuntime> runtimes = await simulatorUtilsBadSimctl.getAvailableIOSRuntimes();
+    testWithoutContext(
+      'IOSSimulatorUtils.getAvailableIOSRuntimes handles simctl not properly installed',
+      () async {
+        final List<IOSSimulatorRuntime> runtimes =
+            await simulatorUtilsBadSimctl.getAvailableIOSRuntimes();
 
-      expect(runtimes, isEmpty);
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    });
+        expect(runtimes, isEmpty);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
   });
 
   group('startApp', () {
