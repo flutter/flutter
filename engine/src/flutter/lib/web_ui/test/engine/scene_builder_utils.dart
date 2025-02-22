@@ -155,6 +155,9 @@ class StubSceneCanvas implements SceneCanvas {
   void drawRRect(ui.RRect rrect, ui.Paint paint) {}
 
   @override
+  void drawRSuperellipse(ui.RSuperellipse rse, ui.Paint paint) {}
+
+  @override
   void drawRawAtlas(
     ui.Image atlas,
     Float32List rstTransforms,

@@ -543,6 +543,9 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
 void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
                                    const Paint& paint) {
   if (paint.style == Paint::Style::kFill) {
+    // TODO(dkwingsmt): Investigate if RSE can use the `AttemptDrawBlurredRRect`
+    // optimization at some point, such as a large enough mask radius.
+    // https://github.com/flutter/flutter/issues/163893
     Entity entity;
     entity.SetTransform(GetCurrentTransform());
     entity.SetBlendMode(paint.blend_mode);
