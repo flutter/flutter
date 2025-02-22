@@ -38,6 +38,8 @@ File? findPackageConfigFile(Directory dir) {
     // parentDir exists if the candidateDir exists, then we can just check that
     // the candidate dir exists (if it doesn't, then identicalSync would throw
     // which is probably not what findPackageConfigFile is intende to do).
+    //
+    // See https://github.com/flutter/flutter/issues/163901.
     if (candidateDir.existsSync() && fileSystem.identicalSync(parentDir.path, candidateDir.path)) {
       return null;
     }
