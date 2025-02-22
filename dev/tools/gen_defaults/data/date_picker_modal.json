@@ -67,7 +67,7 @@
   "md.comp.date-picker.modal.year-selection.year.selected.label-text.color": "onPrimary",
   "md.comp.date-picker.modal.year-selection.year.selected.pressed.state-layer.color": "onPrimary",
   "md.comp.date-picker.modal.year-selection.year.state-layer.height": 36.0,
-  "md.comp.date-picker.modal.year-selection.year.state-layer.shape": "md.sys.shape.corner.full",
+  "md.comp.date-picker.modal.year-selection.year.state-layer.shape": "md.sys.shape.corner.extra-large",
   "md.comp.date-picker.modal.year-selection.year.state-layer.width": 72.0,
   "md.comp.date-picker.modal.year-selection.year.unselected.focus.state-layer.color": "onSurfaceVariant",
   "md.comp.date-picker.modal.year-selection.year.unselected.hover.state-layer.color": "onSurfaceVariant",
