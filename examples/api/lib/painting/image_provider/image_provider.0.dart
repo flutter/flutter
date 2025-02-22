@@ -68,13 +68,7 @@ class CustomNetworkImage extends ImageProvider<Uri> {
           })
           .whenComplete(chunkEvents.close)
           .then<ui.ImmutableBuffer>(ui.ImmutableBuffer.fromUint8List)
-          .then<ui.Codec>((ui.ImmutableBuffer buffer) async {
-            try {
-              return await decode(buffer);
-            } finally {
-              buffer.dispose();
-            }
-          }),
+          .then<ui.Codec>(decode),
       chunkEvents: chunkEvents.stream,
       scale: 1.0,
       debugLabel: '"key"',

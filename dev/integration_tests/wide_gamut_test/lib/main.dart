@@ -238,8 +238,6 @@ Future<ui.Image> _loadImage() async {
   );
   final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(buffer);
   final ui.Codec codec = await descriptor.instantiateCodec();
-  buffer.dispose();
-  descriptor.dispose();
   final ui.FrameInfo frameInfo = await codec.getNextFrame();
   codec.dispose();
   return frameInfo.image;

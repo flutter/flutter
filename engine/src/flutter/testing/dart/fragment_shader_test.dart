@@ -536,16 +536,13 @@ Future<Image> _createBlueGreenImage() async {
       i += bytesPerPixel;
     }
   }
-  final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(pixels);
   final ImageDescriptor descriptor = ImageDescriptor.raw(
-    buffer,
+    await ImmutableBuffer.fromUint8List(pixels),
     width: length,
     height: length,
     pixelFormat: PixelFormat.rgba8888,
   );
   final Codec codec = await descriptor.instantiateCodec();
-  buffer.dispose();
-  descriptor.dispose();
   final FrameInfo frame = await codec.getNextFrame();
   codec.dispose();
   return frame.image;

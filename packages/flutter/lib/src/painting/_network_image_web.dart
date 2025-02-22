@@ -251,12 +251,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       throw image_provider.NetworkImageLoadException(statusCode: request.status, uri: resolved);
     }
 
-    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-    try {
-      return await decode(buffer);
-    } finally {
-      buffer.dispose();
-    }
+    return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
   }
 
   @override

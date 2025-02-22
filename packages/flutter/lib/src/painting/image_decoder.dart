@@ -24,15 +24,12 @@ import 'binding.dart';
 /// in tests.
 Future<ui.Image> decodeImageFromList(Uint8List bytes) async {
   final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+  final ui.Codec codec = await PaintingBinding.instance.instantiateImageCodecWithSize(buffer);
+  final ui.FrameInfo frameInfo;
   try {
-    final ui.Codec codec = await PaintingBinding.instance.instantiateImageCodecWithSize(buffer);
-    try {
-      final ui.FrameInfo frameInfo = await codec.getNextFrame();
-      return frameInfo.image;
-    } finally {
-      codec.dispose();
-    }
+    frameInfo = await codec.getNextFrame();
   } finally {
-    buffer.dispose();
+    codec.dispose();
   }
+  return frameInfo.image;
 }
