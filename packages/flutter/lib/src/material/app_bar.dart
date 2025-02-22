@@ -1213,6 +1213,7 @@ class _AppBarState extends State<AppBar> {
               ??
               (theme.useMaterial3 ? theme.colorScheme.surfaceTint : null),
           shape: widget.shape ?? appBarTheme.shape ?? defaults.shape,
+          animateColor: true,
           child: Semantics(explicitChildNodes: true, child: appBar),
         ),
       ),
