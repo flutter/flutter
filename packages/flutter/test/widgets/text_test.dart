@@ -1706,21 +1706,29 @@ void main() {
   testWidgets('Changing leadingDistribution should trigger a layout update', (
     WidgetTester tester,
   ) async {
+    final GlobalKey textKey = GlobalKey();
     late StateSetter setState;
     TextLeadingDistribution leadingDistribution = TextLeadingDistribution.even;
+
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter stateSetter) {
           setState = stateSetter;
           return MaterialApp(
             home: Scaffold(
-              body: Text(
-                'Hello',
-                style: TextStyle(
-                  fontSize: 30,
-                  height: 10,
-                  leadingDistribution: leadingDistribution,
-                ),
+              body: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    key: textKey,
+                    'Hello',
+                    style: TextStyle(
+                      fontSize: 30,
+                      height: 10,
+                      leadingDistribution: leadingDistribution,
+                    ),
+                  ),
+                ],
               ),
             ),
           );
@@ -1728,18 +1736,18 @@ void main() {
       ),
     );
 
-    final Text before = tester.firstWidget(find.text('Hello')) as Text;
+    final StrutStyle? before = tester.renderObject<RenderParagraph>(find.text('Hello')).strutStyle;
     expect(before, isNotNull);
-    expect(before.style?.leadingDistribution, TextLeadingDistribution.even);
+    expect(before?.leadingDistribution, TextLeadingDistribution.even);
 
     setState(() {
       leadingDistribution = TextLeadingDistribution.proportional;
     });
     await tester.pump();
 
-    final Text after = tester.firstWidget(find.text('Hello')) as Text;
+    final StrutStyle? after = tester.renderObject<RenderParagraph>(find.text('Hello')).strutStyle;
     expect(after, isNotNull);
-    expect(after.style?.leadingDistribution, TextLeadingDistribution.proportional);
+    expect(after?.leadingDistribution, TextLeadingDistribution.proportional);
 
     expect(before, isNot(after));
   });
