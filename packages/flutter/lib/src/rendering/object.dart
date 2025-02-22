@@ -2692,7 +2692,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
     final bool isRelayoutBoundary =
-        !parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject;
+        !parentUsesSize || sizedByParent || constraints.isTight || parent == null;
     final RenderObject relayoutBoundary = isRelayoutBoundary ? this : parent!._relayoutBoundary!;
     assert(() {
       _debugCanParentUseSize = parentUsesSize;

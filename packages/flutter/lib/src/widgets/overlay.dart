@@ -24,6 +24,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'layout_builder.dart';
 import 'lookup_boundary.dart';
 import 'ticker_provider.dart';
 
@@ -356,21 +357,25 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   // mutated. The reason for that is it's allowed to add/remove/move deferred
   // children to a _RenderTheater during performLayout, but the affected
   // children don't have to be laid out in the same performLayout call.
-  late final Iterable<RenderBox> _paintOrderIterable = _createChildIterable(reversed: false);
+  late final Iterable<_RenderDeferredLayoutBox> _paintOrderIterable = _createChildIterable(
+    reversed: false,
+  );
   // An Iterable that traverse the children in the child model in
   // hit-test order (from closest to the user to the farthest to the user).
-  late final Iterable<RenderBox> _hitTestOrderIterable = _createChildIterable(reversed: true);
+  late final Iterable<_RenderDeferredLayoutBox> _hitTestOrderIterable = _createChildIterable(
+    reversed: true,
+  );
 
   // The following uses sync* because hit-testing is lazy, and LinkedList as a
   // Iterable doesn't support concurrent modification.
-  Iterable<RenderBox> _createChildIterable({required bool reversed}) sync* {
+  Iterable<_RenderDeferredLayoutBox> _createChildIterable({required bool reversed}) sync* {
     final LinkedList<_OverlayEntryLocation>? children = _sortedTheaterSiblings;
     if (children == null || children.isEmpty) {
       return;
     }
     _OverlayEntryLocation? candidate = reversed ? children.last : children.first;
     while (candidate != null) {
-      final RenderBox? renderBox = candidate._overlayChildRenderBox;
+      final _RenderDeferredLayoutBox? renderBox = candidate._overlayChildRenderBox;
       candidate = reversed ? candidate.previous : candidate.next;
       if (renderBox != null) {
         yield renderBox;
@@ -1134,9 +1139,9 @@ class _TheaterParentData extends StackParentData {
   // _overlayStateMounted is set to null in _OverlayEntryWidgetState's dispose
   // method. This property is only accessed during layout, paint and hit-test so
   // the `value!` should be safe.
-  Iterator<RenderBox>? get paintOrderIterator =>
+  Iterator<_RenderDeferredLayoutBox>? get paintOrderIterator =>
       overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.iterator;
-  Iterator<RenderBox>? get hitTestOrderIterator =>
+  Iterator<_RenderDeferredLayoutBox>? get hitTestOrderIterator =>
       overlayEntry?._overlayEntryStateNotifier?.value!._hitTestOrderIterable.iterator;
 
   // A convenience method for traversing `paintOrderIterator` with a
@@ -1252,40 +1257,38 @@ class _RenderTheater extends RenderBox
   //  _numberOfPaintTransformListeners = newListenerCount;
   //}
 
-  bool _frameCallbackScheduled = false;
-  void _scheduleMarkNeedsLayout() {
-    if (_frameCallbackScheduled) {
-      return;
-    }
-    _frameCallbackScheduled = true;
-    SchedulerBinding.instance.scheduleFrameCallback(
-      _frameCallback,
-      rescheduling: true,
-      scheduleNewFrame: false,
-    );
-  }
+  //bool _frameCallbackScheduled = false;
+  //void _scheduleMarkNeedsLayout() {
+  //  if (_frameCallbackScheduled) {
+  //    return;
+  //  }
+  //  _frameCallbackScheduled = true;
+  //  SchedulerBinding.instance.scheduleFrameCallback(
+  //    _frameCallback,
+  //    rescheduling: true,
+  //    scheduleNewFrame: false,
+  //  );
+  //}
 
-  void _frameCallback(Duration _) {
-    _frameCallbackScheduled = false;
-    bool hasPaintTransformListeners = false;
-    for (
-      _TheaterParentData? parentData = firstChild?.parentData as _TheaterParentData?;
-      parentData != null;
-      parentData = parentData.nextSibling?.parentData as _TheaterParentData?
-    ) {
-      final Iterator<RenderBox>? iterator = parentData.paintOrderIterator;
-      if (iterator != null) {
-        while (iterator.moveNext()) {
-          assert(iterator.current is _RenderDeferredLayoutBox);
-
-        }
-      }
-    }
-    // mark things as dirty, assert _numberOfPaintTransformListeners == count.
-    if (hasPaintTransformListeners) {
-      _scheduleMarkNeedsLayout();
-    }
-  }
+  //void _frameCallback(Duration _) {
+  //  _frameCallbackScheduled = false;
+  //  bool hasPaintTransformListeners = false;
+  //  for (
+  //    _TheaterParentData? parentData = firstChild?.parentData as _TheaterParentData?;
+  //    parentData != null;
+  //    parentData = parentData.nextSibling?.parentData as _TheaterParentData?
+  //  ) {
+  //    final Iterator<_RenderDeferredLayoutBox>? iterator = parentData.paintOrderIterator;
+  //    if (iterator != null) {
+  //      while (iterator.moveNext()) {}
+  //    }
+  //  }
+  //  // mark things as dirty, assert _numberOfPaintTransformListeners == count.
+  //  // Only reschedule if there are children that care about paint transforms.
+  //  if (hasPaintTransformListeners) {
+  //    _scheduleMarkNeedsLayout();
+  //  }
+  //}
 
   // Adding/removing deferred child does not affect the layout of other children,
   // or that of the Overlay, so there's no need to invalidate the layout of the
@@ -1305,7 +1308,7 @@ class _RenderTheater extends RenderBox
 
     // After adding `child` to the render tree, we want to make sure it will be
     // laid out in the same frame. This is done by calling markNeedsLayout on the
-    // layout surrogate. This ensures `child` is reachable via tree walk (see
+    // layout surrogate. This ensures `child` is added to the dirty list (see
     // _RenderLayoutSurrogateProxyBox.performLayout).
     child._layoutSurrogate.markNeedsLayout();
   }
@@ -1841,6 +1844,24 @@ class OverlayPortal extends StatefulWidget {
     required this.overlayChildBuilder,
     this.child,
   }) : _targetRootOverlay = true;
+
+  OverlayPortal.nameTBD({
+    Key? key,
+    required OverlayPortalController controller,
+    required Widget Function(BuildContext, Size, Matrix4, Size) overlayChildBuilder,
+    required Widget? child,
+  }) : this(
+         key: key,
+         controller: controller,
+         overlayChildBuilder: (BuildContext _) {
+           return _OverlayChildLayoutBuilder(
+             builder: (BuildContext context, (Size, Matrix4, Size) layoutInfo) {
+               return overlayChildBuilder(context, layoutInfo.$1, layoutInfo.$2, layoutInfo.$3);
+             },
+           );
+         },
+         child: child,
+       );
 
   /// The controller to show, hide and bring to top the overlay child.
   final OverlayPortalController controller;
@@ -2523,6 +2544,11 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
       _debugMutationsLocked = true;
       return true;
     }());
+    //if (layoutCallback case final VoidCallback layoutCallback?) {
+    //  invokeLayoutCallback((Constraints _) {
+    //    layoutCallback();
+    //  });
+    //}
     // This method is directly being invoked from `PipelineOwner.flushLayout`,
     // or from `_layoutSurrogate`'s performLayout.
     assert(parent != null);
@@ -2546,6 +2572,12 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
     final Offset offset = childParentData.offset;
     transform.translate(offset.dx, offset.dy);
   }
+
+  //@override
+  //void dispose() {
+  //  layoutCallback = null;
+  //  super.dispose();
+  //}
 }
 
 // A RenderProxyBox that makes sure its `deferredLayoutChild` has a greater
@@ -2564,9 +2596,17 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     }
   }
 
+  // Asserts in box.dart prenvent us from accessing size from the deferred
+  // layout child during layout.
+  Size? overlayPortalSize;
+
   @override
   void performLayout() {
-    super.performLayout();
+    overlayPortalSize =
+        size =
+            (child?..layout(constraints, parentUsesSize: true))?.size ??
+            computeSizeForNoChild(constraints);
+
     final _RenderDeferredLayoutBox? deferredChild = _deferredLayoutChild;
     if (deferredChild == null) {
       return;
@@ -2606,4 +2646,181 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   }
 }
 
-class _RenderPaintTransformListeningBox extends
+class _OverlayChildLayoutBuilder extends LayoutBuilderBase<(Size, Matrix4, Size)> {
+  const _OverlayChildLayoutBuilder({required super.builder});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
+}
+
+// A RenderBox that:
+//  - has exactly one child during layout
+//  - matches the size and the paint transform of its parent and its theater
+//  - is a relayout boundary, and gets marked dirty for relayout every frame
+//    (but only when a frame is already scheduled)
+//  - runs a layout callback in performLayout.
+//
+// Additionally, like RenderDeferredLayoutBox, this RenderBox also uses the Stack
+// layout algorithm so developers can use Positioned.
+class _RenderLayoutBuilder extends RenderProxyBox
+    with _RenderTheaterMixin, RenderConstrainedLayoutBuilder<(Size, Matrix4, Size), RenderBox> {
+  @override
+  Iterable<RenderBox> _childrenInPaintOrder() {
+    final RenderBox? child = this.child;
+    return child == null
+        ? const Iterable<RenderBox>.empty()
+        : Iterable<RenderBox>.generate(1, (int i) => child);
+  }
+
+  @override
+  Iterable<RenderBox> _childrenInHitTestOrder() => _childrenInPaintOrder();
+
+  @override
+  _RenderTheater get theater => switch (parent) {
+    final _RenderDeferredLayoutBox parent => parent.theater,
+    _ => throw FlutterError('$parent of $this is not a _RenderDeferredLayoutBox'),
+  };
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void performResize() => size = constraints.biggest;
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final Offset offset = childParentData.offset;
+    transform.translate(offset.dx, offset.dy);
+  }
+
+  @override
+  (Size, Matrix4, Size) get layoutInfo => _layoutInfo!;
+  // The size here is the child size of the regular child in its own parent's coordinates.
+  (Size, Matrix4, Size)? _layoutInfo;
+  (Size, Matrix4, Size) _computeNewLayoutInfo() {
+    final _RenderTheater theater = this.theater;
+    final _RenderDeferredLayoutBox parent = this.parent! as _RenderDeferredLayoutBox;
+    final _RenderLayoutSurrogateProxyBox layoutSurrogate = parent._layoutSurrogate;
+    assert(layoutSurrogate.hasSize);
+    assert(layoutSurrogate.child?.hasSize ?? true);
+    assert(
+      layoutSurrogate.child == null ||
+          layoutSurrogate.child!.debugSize == layoutSurrogate.debugSize,
+    );
+    assert(
+          layoutSurrogate.child?.getTransformTo(layoutSurrogate).isIdentity() ?? true,
+    );
+
+    assert(() {
+      for (
+        RenderObject? node = layoutSurrogate;
+        node != null && node != theater;
+        node = node.parent
+      ) {
+        assert(node is! RenderFollowerLayer);
+        assert(node.depth > theater.depth);
+      }
+      return true;
+    }());
+    // The paint transform we're about to compute is only useful if this RenderBox
+    // uses the same coordinates as the theater.
+    assert(getTransformTo(theater).isIdentity());
+    assert(size == theater.debugSize);
+    return (
+      parent._layoutSurrogate.overlayPortalSize!,
+      layoutSurrogate.getTransformTo(theater),
+      size,
+    );
+  }
+
+  int? _callbackId;
+  @override
+  void performLayout() {
+    final (Size, Matrix4, Size) newLayoutInfo = _computeNewLayoutInfo();
+    if (newLayoutInfo != _layoutInfo) {
+      _layoutInfo = newLayoutInfo;
+      rebuildIfNecessary();
+    }
+    assert(_callbackId == null);
+    _callbackId ??= SchedulerBinding.instance.scheduleFrameCallback(
+      _frameCallback,
+      scheduleNewFrame: false,
+    );
+    layoutChild(child!, constraints);
+  }
+
+  // This RenderObject is a child of _RenderDeferredLayouts which in turn is a
+  // child of _RenderTheater. None of them does speculative layout and
+  // _RenderDeferredLayouts don't participate in _RenderTheater's intrinsics
+  // calculations. Since the layout callback may mutate the live render tree
+  // during layout, intrinsic calculations are neither available nor needed.
+  static const String _speculativeLayoutErrorMessage =
+      'This RenderObject should not be reachable in intrinsic dimension calculations.';
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    assert(debugCannotComputeDryLayout(reason: _speculativeLayoutErrorMessage));
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    assert(debugCannotComputeDryLayout(reason: _speculativeLayoutErrorMessage));
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    assert(debugCannotComputeDryLayout(reason: _speculativeLayoutErrorMessage));
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    assert(debugCannotComputeDryLayout(reason: _speculativeLayoutErrorMessage));
+    return 0.0;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(debugCannotComputeDryLayout(reason: _speculativeLayoutErrorMessage));
+    return Size.zero;
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    assert(
+      debugCannotComputeDryLayout(
+        reason:
+            'Calculating the dry baseline would require running the layout callback '
+            'speculatively, which might mutate the live render object tree.',
+      ),
+    );
+    return null;
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return child!.hitTest(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.paintChild(child!, offset);
+  }
+
+  void _frameCallback(Duration _) {
+    assert(!debugDisposed!);
+    _callbackId = null;
+    markNeedsLayout();
+  }
+
+  @override
+  void dispose() {
+    if (_callbackId case final int callbackId) {
+      SchedulerBinding.instance.cancelFrameCallbackWithId(callbackId);
+    }
+    super.dispose();
+  }
+}

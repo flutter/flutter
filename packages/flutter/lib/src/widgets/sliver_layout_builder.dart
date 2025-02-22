@@ -24,7 +24,7 @@ typedef SliverLayoutWidgetBuilder =
 /// See also:
 ///
 ///  * [LayoutBuilder], the non-sliver version of this widget.
-class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
+class SliverLayoutBuilder extends LayoutBuilderBase<SliverConstraints> {
   /// Creates a sliver widget that defers its building until layout.
   const SliverLayoutBuilder({super.key, required super.builder});
 
@@ -41,6 +41,9 @@ class _RenderSliverLayoutBuilder extends RenderSliver
     assert(child == this.child);
     return 0;
   }
+
+  @override
+  SliverConstraints get layoutInfo => constraints;
 
   @override
   void performLayout() {
