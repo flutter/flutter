@@ -46,7 +46,7 @@ public class SensitiveContentPlugin
   public void setContentSensitivity(
       @NonNull int requestedContentSensitivity, @NonNull MethodChannel.Result result) {
     if (!isSupported()) {
-      // This feature is only available on > API 35.
+      // This feature is only available on >= API 35.
       result.success(null);
       return;
     }
@@ -77,7 +77,7 @@ public class SensitiveContentPlugin
   @Override
   public void getContentSensitivity(@NonNull MethodChannel.Result result) {
     if (!isSupported()) {
-      // This feature is only available on > API 35.
+      // This feature is only available on >= API 35.
       result.success(null);
       return;
     }
