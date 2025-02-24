@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/wide_gamut_test/lib/main.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -269,7 +270,7 @@ class _MyHomePageState extends State<MyHomePage> {
             _image = value;
           }),
         );
-      case Setup.image ||
+      const case, Setup.image ||
           Setup.blur ||
           Setup.none ||
           Setup.container ||

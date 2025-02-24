@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/new_gallery/lib/demos/cupertino/cupertino_alert_demo.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -95,7 +96,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> with Restoratio
       AlertDemoType.alertButtons => localizations.demoCupertinoAlertButtonsTitle,
       AlertDemoType.alertButtonsOnly => localizations.demoCupertinoAlertButtonsOnlyTitle,
       AlertDemoType.actionSheet => localizations.demoCupertinoActionSheetTitle,
-    };
+    }
   }
 
   static Route<String> _alertDemoDialog(BuildContext context, Object? arguments) {

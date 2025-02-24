@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/flutter_gallery/lib/demo/material/list_demo.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -205,7 +206,7 @@ class _ListDemoState extends State<ListDemo> {
       _MaterialListType.twoLine => 'Additional item information.',
       _MaterialListType.threeLine =>
         'Even more additional list item information appears on line three.',
-    };
+    }
     return MergeSemantics(
       child: ListTile(
         isThreeLine: _itemType == _MaterialListType.threeLine,
@@ -228,7 +229,7 @@ class _ListDemoState extends State<ListDemo> {
       _MaterialListType.twoLine => 'Two-line',
       _MaterialListType.threeLine => 'Three-line',
       null => null,
-    };
+    }
 
     Iterable<Widget> listTiles = items.map<Widget>((String item) => buildListTile(context, item));
     if (_showDividers != null) {

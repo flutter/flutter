@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/new_gallery/lib/studies/reply/mailbox_body.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -44,7 +45,7 @@ class MailboxBody extends StatelessWidget {
           MailboxPageType.trash => model.trashEmails,
           MailboxPageType.spam => model.spamEmails,
           MailboxPageType.drafts => model.draftEmails,
-        };
+        }
 
         return SafeArea(
           bottom: false,

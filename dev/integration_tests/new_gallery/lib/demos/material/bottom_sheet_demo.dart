@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/new_gallery/lib/demos/material/bottom_sheet_demo.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -17,14 +18,14 @@ class BottomSheetDemo extends StatelessWidget {
     return switch (type) {
       BottomSheetDemoType.persistent => localizations.demoBottomSheetPersistentTitle,
       BottomSheetDemoType.modal => localizations.demoBottomSheetModalTitle,
-    };
+    }
   }
 
   Widget _bottomSheetDemo(BuildContext context) {
     return switch (type) {
       BottomSheetDemoType.persistent => _PersistentBottomSheetDemo(),
       BottomSheetDemoType.modal => _ModalBottomSheetDemo(),
-    };
+    }
   }
 
   @override

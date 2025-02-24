@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/conductor/core/lib/src/repository.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -28,7 +29,7 @@ class Remote {
   final RemoteName _name;
 
   /// The name of the remote.
-  String get name => switch (_name) {
+  String get name => switch (name) {
     RemoteName.upstream => 'upstream',
     RemoteName.mirror => 'mirror',
   };

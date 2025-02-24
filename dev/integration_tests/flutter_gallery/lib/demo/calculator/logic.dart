@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/flutter_gallery/lib/demo/calculator/logic.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -79,7 +80,7 @@ class OperationToken extends ExpressionToken {
       Operation.Subtraction => ' - ',
       Operation.Multiplication => '  \u00D7  ',
       Operation.Division => '  \u00F7  ',
-    };
+    }
   }
 }
 

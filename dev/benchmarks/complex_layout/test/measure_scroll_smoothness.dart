@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/benchmarks/complex_layout/test/measure_scroll_smoothness.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -72,7 +73,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
       TestScenario.resampleOn59Hz => 'resample on with 59Hz input',
       TestScenario.resampleOff90Hz => 'resample off with 90Hz input',
       TestScenario.resampleOff59Hz => 'resample off with 59Hz input',
-    };
+    }
   }
 
   @override

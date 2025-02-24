@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/new_gallery/lib/data/gallery_options.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -94,11 +95,11 @@ class GalleryOptions {
       ThemeMode.light => Brightness.light,
       ThemeMode.dark => Brightness.dark,
       ThemeMode.system => WidgetsBinding.instance.platformDispatcher.platformBrightness,
-    };
+    }
     return switch (brightness) {
       Brightness.light => SystemUiOverlayStyle.dark,
       Brightness.dark => SystemUiOverlayStyle.light,
-    };
+    }
   }
 
   GalleryOptions copyWith({

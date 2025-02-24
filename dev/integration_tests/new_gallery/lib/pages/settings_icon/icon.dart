@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/new_gallery/lib/pages/settings_icon/icon.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -36,7 +37,7 @@ class _SettingsIconPainter extends CustomPainter {
     final double dx = switch (Directionality.of(context)) {
       TextDirection.rtl => size.width - unitWidth * _scaling / 2,
       TextDirection.ltr => unitWidth * _scaling / 2,
-    };
+    }
     _center = Offset(dx, size.height - unitHeight * _scaling / 2);
   }
 

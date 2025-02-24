@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/new_gallery/test_driver/transitions_perf_test.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -216,7 +217,7 @@ Future<void> runDemos(
   }
 
   if (scrollToTopWhenDone) {
-    await scrollToTop(demoItem!, driver);
+    await scrollToTop(demoItem, driver);
   }
 }
 

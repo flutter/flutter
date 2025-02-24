@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/benchmarks/macrobenchmarks/lib/src/web/bench_build_material_checkbox.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -35,7 +36,7 @@ class BenchBuildMaterialCheckbox extends WidgetBuildRecorder {
       null => true,
       true => false,
       false => null,
-    };
+    }
 
     return Row(
       children: List<Widget>.generate(10, (int i) {

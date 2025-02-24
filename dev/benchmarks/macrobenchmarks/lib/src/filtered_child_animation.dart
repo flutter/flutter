@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/benchmarks/macrobenchmarks/lib/src/filtered_child_animation.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -59,7 +60,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     setState(() => _filterType = selected ? type : null);
   }
 
-  String get _title => switch (_filterType) {
+  String get _title => switch (filterType) {
     FilterType.opacity => 'Fading Child Animation',
     FilterType.rotateTransform => 'Transformed Child Animation',
     FilterType.rotateFilter => 'Matrix Filtered Child Animation',

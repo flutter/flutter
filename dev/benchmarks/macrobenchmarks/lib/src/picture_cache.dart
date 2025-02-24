@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/benchmarks/macrobenchmarks/lib/src/picture_cache.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -164,7 +165,7 @@ class ListItem extends StatelessWidget {
       < 10000 => count.toString(),
       < 100000 => '${(count / 10000).toStringAsPrecision(2)}w',
       _ => '${(count / 10000).floor()}w',
-    };
+    }
   }
 
   Widget _buildUserInfo() {

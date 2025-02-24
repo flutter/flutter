@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/benchmarks/macrobenchmarks/lib/src/very_long_picture_scrolling.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -136,7 +137,7 @@ class PaintTest extends CustomPainter {
         < 0 => (paintPos, Offset(x, halfHeight * (1 - waveData[index] / 32768))),
         > 0 => (paintNeg, Offset(x, halfHeight * (1 - waveData[index] / 32767))),
         _ => (paintZero, Offset(x, halfHeight + 1)),
-      };
+      }
       final Offset p0 = Offset(x, halfHeight);
       if (consolidate) {
         if (listPaint != null && listPaint != curPaint) {
@@ -208,7 +209,7 @@ class PaintSomeTest extends CustomPainter {
         < 0 => (paintPos, Offset(x, halfHeight * (1 - waveData[index] / 32768))),
         > 0 => (paintNeg, Offset(x, halfHeight * (1 - waveData[index] / 32767))),
         _ => (paintZero, Offset(x, halfHeight + 1)),
-      };
+      }
       final Offset p0 = Offset(x, halfHeight);
       canvas.drawLine(p0, p1, curPaint);
       x += zoomFactor;

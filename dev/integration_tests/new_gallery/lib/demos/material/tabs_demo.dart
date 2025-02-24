@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/new_gallery/lib/demos/material/tabs_demo.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -16,7 +17,7 @@ class TabsDemo extends StatelessWidget {
     return switch (type) {
       TabsDemoType.scrollable => _TabsScrollableDemo(),
       TabsDemoType.nonScrollable => _TabsNonScrollableDemo(),
-    };
+    }
   }
 }
 

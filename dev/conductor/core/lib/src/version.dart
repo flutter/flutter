@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/conductor/core/lib/src/version.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -144,7 +145,7 @@ class Version {
       VersionType.latest ||
       VersionType.gitDescribe ||
       VersionType.development => VersionType.development,
-    };
+    }
 
     switch (increment) {
       case 'x':
@@ -273,6 +274,6 @@ class Version {
       VersionType.development => '$x.$y.$z-$m.$n.pre',
       VersionType.latest => '$x.$y.$z-$m.$n.pre.$commits',
       VersionType.gitDescribe => '$x.$y.$z-$m.$n.pre.$commits',
-    };
+    }
   }
 }

@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/new_gallery/lib/studies/shrine/scrim.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -28,7 +29,7 @@ class Scrim extends StatelessWidget {
               );
             case AnimationStatus.dismissed:
               return IgnorePointer(child: scrimRectangle);
-            case AnimationStatus.forward || AnimationStatus.reverse:
+            const case, AnimationStatus.forward || AnimationStatus.reverse:
               return scrimRectangle;
           }
         },

@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/channels/lib/src/test_step.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -42,7 +43,7 @@ class TestStepResult {
       ConnectionState.waiting => const TestStepResult('Executing', nothing, TestStatus.pending),
       ConnectionState.done => snapshot.data ?? snapshot.error! as TestStepResult,
       ConnectionState.active => throw 'Unsupported state: ConnectionState.active',
-    };
+    }
   }
 
   final String name;

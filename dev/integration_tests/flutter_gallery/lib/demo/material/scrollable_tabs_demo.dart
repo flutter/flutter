@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/flutter_gallery/lib/demo/material/scrollable_tabs_demo.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -146,7 +147,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo>
                   TabsDemoStyle.iconsAndText => Tab(text: page.text, icon: Icon(page.icon)),
                   TabsDemoStyle.iconsOnly => Tab(icon: Icon(page.icon)),
                   TabsDemoStyle.textOnly => Tab(text: page.text),
-                };
+                }
               }).toList(),
         ),
       ),

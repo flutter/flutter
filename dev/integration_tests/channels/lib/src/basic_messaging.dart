@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/channels/lib/src/basic_messaging.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -36,7 +37,7 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
       _dateTime => DateTime.fromMillisecondsSinceEpoch(buffer.getInt64()),
       _pair => Pair(readValue(buffer), readValue(buffer)),
       _ => super.readValueOfType(type, buffer),
-    };
+    }
   }
 }
 

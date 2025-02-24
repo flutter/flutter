@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/new_gallery/lib/data/demos.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -45,7 +46,7 @@ enum GalleryDemoCategory {
       study => null,
       material || cupertino => toString(),
       other => localizations.homeCategoryReference,
-    };
+    }
   }
 }
 

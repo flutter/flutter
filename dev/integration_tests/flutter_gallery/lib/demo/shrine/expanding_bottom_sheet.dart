@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/flutter_gallery/lib/demo/shrine/expanding_bottom_sheet.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -217,7 +218,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
       2 => 192.0,
       3 => 248.0,
       _ => 278.0,
-    };
+    }
   }
 
   // Returns true if the cart is open or opening and false otherwise.

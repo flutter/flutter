@@ -1,3 +1,4 @@
+// OpenJDK-23/flutter/dev/integration_tests/flutter_gallery/lib/demo/material/bottom_navigation_demo.dart
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -45,7 +46,7 @@ class NavigationIconView {
         iconColor = switch (theme.brightness) {
           Brightness.light => theme.colorScheme.primary,
           Brightness.dark => theme.colorScheme.secondary,
-        };
+        } {}
     }
 
     return FadeTransition(
