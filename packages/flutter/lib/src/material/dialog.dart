@@ -1395,6 +1395,12 @@ Widget _buildMaterialDialogTransitions(
 /// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
 /// to allow users to cycle through dialog widgets without leaving the dialog.
 ///
+/// {@template flutter.material.dialog.requestFocus}
+/// The `requestFocus` argument is used to specify whether the dialog should
+/// request focus when shown.
+/// {@endtemplate}
+/// {@macro flutter.widgets.navigator.Route.requestFocus}
+///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// If the application has multiple [Navigator] objects, it may be necessary to
@@ -1459,6 +1465,7 @@ Future<T?> showDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  bool? requestFocus,
   AnimationStyle? animationStyle,
 }) {
   assert(_debugIsActive(context));
@@ -1485,6 +1492,7 @@ Future<T?> showDialog<T>({
       themes: themes,
       anchorPoint: anchorPoint,
       traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
+      requestFocus: requestFocus,
       animationStyle: animationStyle,
     ),
   );
@@ -1509,6 +1517,7 @@ Future<T?> showAdaptiveDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  bool? requestFocus,
   AnimationStyle? animationStyle,
 }) {
   final ThemeData theme = Theme.of(context);
@@ -1528,6 +1537,7 @@ Future<T?> showAdaptiveDialog<T>({
         routeSettings: routeSettings,
         anchorPoint: anchorPoint,
         traversalEdgeBehavior: traversalEdgeBehavior,
+        requestFocus: requestFocus,
         animationStyle: animationStyle,
       );
     case TargetPlatform.iOS:
@@ -1540,6 +1550,7 @@ Future<T?> showAdaptiveDialog<T>({
         useRootNavigator: useRootNavigator,
         anchorPoint: anchorPoint,
         routeSettings: routeSettings,
+        requestFocus: requestFocus,
       );
   }
 }

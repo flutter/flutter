@@ -11,11 +11,22 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:test/test.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../../src/common.dart';
+import '../../../src/context.dart';
+
+// Note: this test isn't under the general.shard since tests under that directory
+// have a 2000ms time out and these tests write to the real file system and watch
+// directories for changes. This can be slow on heavily loaded machines and cause
+// flaky failures.
 
 Directory createBasicProjectStructure(FileSystem fs) {
   return fs.systemTempDirectory.createTempSync('root');
+}
+
+void populatePubspec(Directory projectRoot, String contents) {
+  projectRoot.childFile('pubspec.yaml')
+    ..createSync(recursive: true)
+    ..writeAsStringSync(contents);
 }
 
 PreviewPath addPreviewContainingFile(Directory projectRoot, List<String> path) {
@@ -44,9 +55,14 @@ void main() {
     late PreviewDetector previewDetector;
     late Directory projectRoot;
     void Function(PreviewMapping)? onChangeDetected;
+    void Function()? onPubspecChangeDetected;
 
     void onChangeDetectedRoot(PreviewMapping mapping) {
       onChangeDetected!(mapping);
+    }
+
+    void onPubspecChangeDetectedRoot() {
+      onPubspecChangeDetected!();
     }
 
     setUp(() {
@@ -57,6 +73,7 @@ void main() {
         logger: logger,
         fs: fs,
         onChangeDetected: onChangeDetectedRoot,
+        onPubspecChangeDetected: onPubspecChangeDetectedRoot,
       );
     });
 
@@ -115,6 +132,23 @@ void main() {
       // Update the file with an existing preview to remove the preview and ensure it triggers
       // the preview detector.
       addNonPreviewContainingFile(projectRoot, <String>['baz.dart']);
+      await completer.future;
+    });
+
+    testUsingContext('can detect changes in the pubspec.yaml', () async {
+      // Create an initial pubspec.
+      populatePubspec(projectRoot, 'abc');
+
+      final Completer<void> completer = Completer<void>();
+      onPubspecChangeDetected = () {
+        completer.complete();
+      };
+      // Initialize the file watcher.
+      final PreviewMapping initialPreviews = await previewDetector.initialize(projectRoot);
+      expect(initialPreviews, isEmpty);
+
+      // Change the contents of the pubspec and verify the callback is invoked.
+      populatePubspec(projectRoot, 'foo');
       await completer.future;
     });
   });
