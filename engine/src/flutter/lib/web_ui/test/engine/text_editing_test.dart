@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
@@ -3640,8 +3641,8 @@ void cleanTestFlags() {
 
 void checkInputEditingState(DomElement? element, String text, int start, int end) {
   expect(element, isNotNull);
-  expect(domInstanceOfString(element, 'HTMLInputElement'), true);
-  final DomHTMLInputElement input = element! as DomHTMLInputElement;
+  expect(domInstanceOfString(element! as JSObject, 'HTMLInputElement'), true);
+  final DomHTMLInputElement input = element as DomHTMLInputElement;
   expect(defaultTextEditingRoot.ownerDocument?.activeElement, input);
   expect(input.value, text);
   expect(input.selectionStart, start);

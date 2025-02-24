@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -502,7 +503,7 @@ class AutofillInfo {
   void applyToDomElement(DomHTMLElement domElement, {bool focusedElement = false}) {
     final String? autofillHint = this.autofillHint;
     final String? placeholder = this.placeholder;
-    if (domInstanceOfString(domElement, 'HTMLInputElement')) {
+    if (domInstanceOfString(domElement as JSObject, 'HTMLInputElement')) {
       final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       if (placeholder != null) {
         element.placeholder = placeholder;
@@ -517,7 +518,7 @@ class AutofillInfo {
         }
       }
       element.autocomplete = autofillHint ?? 'on';
-    } else if (domInstanceOfString(domElement, 'HTMLTextAreaElement')) {
+    } else if (domInstanceOfString(domElement as JSObject, 'HTMLTextAreaElement')) {
       final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       if (placeholder != null) {
         element.placeholder = placeholder;
@@ -830,8 +831,8 @@ class EditingState {
   /// [domElement] can be a [InputElement] or a [TextAreaElement] depending on
   /// the [InputType] of the text field.
   factory EditingState.fromDomElement(DomHTMLElement? domElement) {
-    if (domInstanceOfString(domElement, 'HTMLInputElement')) {
-      final DomHTMLInputElement element = domElement! as DomHTMLInputElement;
+    if (domElement != null && domInstanceOfString(domElement as JSObject, 'HTMLInputElement')) {
+      final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       if (element.selectionDirection == 'backward') {
         return EditingState(
           text: element.value,
@@ -845,8 +846,9 @@ class EditingState {
           extentOffset: element.selectionEnd?.toInt(),
         );
       }
-    } else if (domInstanceOfString(domElement, 'HTMLTextAreaElement')) {
-      final DomHTMLTextAreaElement element = domElement! as DomHTMLTextAreaElement;
+    } else if (domElement != null &&
+        domInstanceOfString(domElement as JSObject, 'HTMLTextAreaElement')) {
+      final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       if (element.selectionDirection == 'backward') {
         return EditingState(
           text: element.value,
@@ -959,12 +961,13 @@ class EditingState {
   ///
   ///  * [applyTextToDomElement], which is used for non-focused elements.
   void applyToDomElement(DomHTMLElement? domElement) {
-    if (domInstanceOfString(domElement, 'HTMLInputElement')) {
-      final DomHTMLInputElement element = domElement! as DomHTMLInputElement;
+    if (domElement != null && domInstanceOfString(domElement as JSObject, 'HTMLInputElement')) {
+      final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       element.value = text;
       element.setSelectionRange(minOffset, maxOffset);
-    } else if (domInstanceOfString(domElement, 'HTMLTextAreaElement')) {
-      final DomHTMLTextAreaElement element = domElement! as DomHTMLTextAreaElement;
+    } else if (domElement != null &&
+        domInstanceOfString(domElement as JSObject, 'HTMLTextAreaElement')) {
+      final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       element.value = text;
       element.setSelectionRange(minOffset, maxOffset);
     } else {
@@ -982,11 +985,12 @@ class EditingState {
   ///
   ///  * [applyToDomElement], which is used for focused elements.
   void applyTextToDomElement(DomHTMLElement? domElement) {
-    if (domInstanceOfString(domElement, 'HTMLInputElement')) {
-      final DomHTMLInputElement element = domElement! as DomHTMLInputElement;
+    if (domElement != null && domInstanceOfString(domElement as JSObject, 'HTMLInputElement')) {
+      final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       element.value = text;
-    } else if (domInstanceOfString(domElement, 'HTMLTextAreaElement')) {
-      final DomHTMLTextAreaElement element = domElement! as DomHTMLTextAreaElement;
+    } else if (domElement != null &&
+        domInstanceOfString(domElement as JSObject, 'HTMLTextAreaElement')) {
+      final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       element.value = text;
     } else {
       throw UnsupportedError('Unsupported DOM element type');
@@ -1529,7 +1533,7 @@ abstract class DefaultTextEditingStrategy
   }
 
   void maybeSendAction(DomEvent e) {
-    if (domInstanceOfString(e, 'KeyboardEvent')) {
+    if (domInstanceOfString(e as JSObject, 'KeyboardEvent')) {
       final DomKeyboardEvent event = e as DomKeyboardEvent;
       if (event.keyCode == _kReturnKeyCode) {
         onAction!(inputConfiguration.inputAction);

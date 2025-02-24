@@ -530,7 +530,7 @@ abstract class _BaseAdapter {
   void addEventListener(DomEventTarget target, String eventName, DartDomEventListener handler) {
     JSVoid loggedHandler(DomEvent event) {
       if (_debugLogPointerEvents) {
-        if (domInstanceOfString(event, 'PointerEvent')) {
+        if (domInstanceOfString(event as JSObject, 'PointerEvent')) {
           final DomPointerEvent pointerEvent = event as DomPointerEvent;
           final ui.Offset offset = computeEventOffsetToTarget(event, _view);
           print(
@@ -730,7 +730,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
       return;
     }
 
-    assert(domInstanceOfString(event, 'WheelEvent'));
+    assert(domInstanceOfString(event as JSObject, 'WheelEvent'));
     if (_debugLogPointerEvents) {
       print(event.type);
     }

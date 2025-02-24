@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -776,7 +777,7 @@ class BitmapCanvas extends EngineCanvas {
       ..top = '0px'
       ..width = widthPx
       ..height = heightPx;
-    if (!domInstanceOfString(imageElement, 'HTMLImageElement')) {
+    if (!domInstanceOfString(imageElement as JSObject, 'HTMLImageElement')) {
       imageElement.style.backgroundSize = '$widthPx $heightPx';
     }
   }
@@ -1090,7 +1091,7 @@ class BitmapCanvas extends EngineCanvas {
     }
     final DomNode? firstChild = rootElement.firstChild;
     if (firstChild != null) {
-      if (domInstanceOfString(firstChild, 'HTMLElement')) {
+      if (domInstanceOfString(firstChild as JSObject, 'HTMLElement')) {
         final DomHTMLElement maybeCanvas = firstChild as DomHTMLElement;
         if (maybeCanvas.tagName.toLowerCase() == 'canvas') {
           maybeCanvas.style.zIndex = '-1';
