@@ -30,6 +30,15 @@ import 'ticker_provider.dart';
 
 const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
 
+/// The signature of the widget builder callback taken by [OverlayPortal.nameTBD].
+typedef OverlayChildLayoutBuilder =
+    Widget Function(
+      BuildContext context,
+      Size childSize,
+      Matrix4 childPaintTransform,
+      Size theaterSize,
+    );
+
 // Examples can assume:
 // late BuildContext context;
 
@@ -1805,18 +1814,12 @@ class OverlayPortal extends StatefulWidget {
   OverlayPortal.nameTBD({
     Key? key,
     required OverlayPortalController controller,
-    required Widget Function(BuildContext, Size, Matrix4, Size) overlayChildBuilder,
+    required OverlayChildLayoutBuilder overlayChildBuilder,
     required Widget? child,
   }) : this(
          key: key,
          controller: controller,
-         overlayChildBuilder: (BuildContext _) {
-           return _OverlayChildLayoutBuilder(
-             builder: (BuildContext context, (Size, Matrix4, Size) layoutInfo) {
-               return overlayChildBuilder(context, layoutInfo.$1, layoutInfo.$2, layoutInfo.$3);
-             },
-           );
-         },
+         overlayChildBuilder: (_) => _OverlayChildLayoutBuilder(userSuppliedBuilder: overlayChildBuilder),
          child: child,
        );
 
@@ -2548,10 +2551,8 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
 
   @override
   void performLayout() {
-    overlayPortalSize =
-        size =
-            (child?..layout(constraints, parentUsesSize: true))?.size ??
-            computeSizeForNoChild(constraints);
+    super.performLayout();
+    overlayPortalSize = size;
 
     final _RenderDeferredLayoutBox? deferredChild = _deferredLayoutChild;
     if (deferredChild == null) {
@@ -2592,11 +2593,24 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   }
 }
 
-class _OverlayChildLayoutBuilder extends LayoutBuilderBase<(Size, Matrix4, Size)> {
-  const _OverlayChildLayoutBuilder({required super.builder});
+class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<(Size, Matrix4, Size)> {
+  const _OverlayChildLayoutBuilder({required this.userSuppliedBuilder});
+
+  final OverlayChildLayoutBuilder userSuppliedBuilder;
+
+  Widget _builder(BuildContext context, (Size, Matrix4, Size) layoutInfo) {
+    return userSuppliedBuilder(context, layoutInfo.$1, layoutInfo.$2, layoutInfo.$3);
+  }
+
+  @override
+  Widget Function(BuildContext context, (Size, Matrix4, Size) layoutInfo) get builder => _builder;
 
   @override
   RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
+
+  @override
+  bool updateShouldRebuild(_OverlayChildLayoutBuilder oldWidget) =>
+      oldWidget.userSuppliedBuilder != userSuppliedBuilder;
 }
 
 // A RenderBox that:
@@ -2640,6 +2654,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
     transform.translate(offset.dx, offset.dy);
   }
 
+  @protected
   @override
   (Size, Matrix4, Size) get layoutInfo => _layoutInfo!;
   // The size here is the child size of the regular child in its own parent's coordinates.

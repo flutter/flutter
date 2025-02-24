@@ -962,6 +962,7 @@ class _RenderSmartLayoutBuilder extends RenderProxyBox
     }
   }
 
+  @protected
   @override
   BoxConstraints get layoutInfo => constraints;
 }
