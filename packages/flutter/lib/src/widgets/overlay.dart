@@ -1819,7 +1819,8 @@ class OverlayPortal extends StatefulWidget {
   }) : this(
          key: key,
          controller: controller,
-         overlayChildBuilder: (_) => _OverlayChildLayoutBuilder(userSuppliedBuilder: overlayChildBuilder),
+         overlayChildBuilder:
+             (_) => _OverlayChildLayoutBuilder(userSuppliedBuilder: overlayChildBuilder),
          child: child,
        );
 
@@ -2677,7 +2678,20 @@ class _RenderLayoutBuilder extends RenderProxyBox
         node != null && node != theater;
         node = node.parent
       ) {
-        assert(node is! RenderFollowerLayer);
+        if (node is RenderFollowerLayer) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary(
+              'The paint transform cannot be reliably computed because of RenderFollowerLayer(s)',
+            ),
+            node.describeForError('The RenderFollowerLayer was'),
+            ErrorDescription(
+              'RenderFollowerLayer establishes its paint transform only after the layout phase.',
+            ),
+            ErrorHint(
+              'Consider replacing the corresponding CompositeTransformFollower with OverlayPortal.nameTBD if possible.',
+            ),
+          ]);
+        }
         assert(node.depth > theater.depth);
       }
       return true;

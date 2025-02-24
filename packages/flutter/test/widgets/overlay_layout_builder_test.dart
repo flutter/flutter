@@ -287,4 +287,53 @@ void main() {
     );
     expect(regularChildSize, Size.zero);
   });
+
+  testWidgets('Screams if RenderFollower is spotted in path', (WidgetTester tester) async {
+    late final OverlayEntry overlayEntry;
+    addTearDown(
+      () =>
+          overlayEntry
+            ..remove()
+            ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return CompositedTransformFollower(
+                  link: LayerLink(),
+                  child: OverlayPortal.nameTBD(
+                    controller: controller1,
+                    overlayChildBuilder: (
+                      BuildContext context,
+                      Size childSize,
+                      Matrix4 transform,
+                      Size theaterSize,
+                    ) {
+                      return const SizedBox();
+                    },
+                    child: null,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      phase: EnginePhase.layout,
+    );
+
+    expect(
+      tester.takeException(),
+      isA<FlutterError>().having(
+        (FlutterError error) => error.message,
+        'message',
+        contains('RenderFollowerLayer'),
+      ),
+    );
+  });
 }
