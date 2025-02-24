@@ -18,6 +18,7 @@ copy("impeller") {
     "tile_mode.glsl",
     "transform.glsl",
     "types.glsl",
+    "math.glsl"
   ]
   outputs = [ "$root_out_dir/shader_lib/impeller/{{source_file_part}}" ]
 }
