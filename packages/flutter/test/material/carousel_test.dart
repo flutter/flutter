@@ -1565,6 +1565,48 @@ void main() {
         reverse: true,
       );
     });
+
+    testWidgets('CarouselView positions items correctly', (WidgetTester tester) async {
+      const int numberOfChildren = 5;
+      final CarouselController controller = CarouselController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[2, 3, 1],
+              controller: controller,
+              itemSnapping: true,
+              children: List<Widget>.generate(numberOfChildren, (int index) {
+                return Center(child: Text('Item $index'));
+              }),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Get the RenderBox of the CarouselView to determine its position and boundaries.
+      final RenderBox carouselBox = tester.renderObject(find.byType(CarouselView));
+      final Offset carouselPos = carouselBox.localToGlobal(Offset.zero);
+      final double carouselLeft = carouselPos.dx;
+      final double carouselRight = carouselLeft + carouselBox.size.width;
+
+      for (int i = 0; i < numberOfChildren; i++) {
+        controller.animateToItem(i, curve: Curves.easeInOut);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Item $i'), findsOneWidget);
+
+        // Get the item's RenderBox and determine its position.
+        final RenderBox itemBox = tester.renderObject(find.text('Item $i'));
+        final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
+
+        // Validate that the item is positioned within the CarouselView boundaries.
+        expect(itemRect.left, greaterThanOrEqualTo(carouselLeft));
+        expect(itemRect.right, lessThanOrEqualTo(carouselRight));
+      }
+    });
   });
 }
 
@@ -1629,6 +1671,11 @@ Future<void> runCarouselTest({
     return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
   }
 
+  // Calculate the index of the middle item.
+  // The calculation depends on the scroll direction (normal or reverse).
+  // For reverse scrolling, the middle item is calculated taking into account the end of the list,
+  // reversing the calculation so that the item that appears in the middle when scrolling is the correct one.
+  // For normal scrolling, we simply get the middle item.
   final int middleIndex =
       reverse
           ? (numberOfChildren - 1 - (numberOfChildren / 2).round())
