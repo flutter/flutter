@@ -32,6 +32,8 @@ constexpr const char* kEGLImageExternalExtension300 =
     "GL_OES_EGL_image_external_essl3";
 }  // namespace
 
+static const uint32_t kMaxUniformBufferSize = 6208;
+
 static uint32_t ParseMSLVersion(const std::string& msl_version) {
   std::stringstream sstream(msl_version);
   std::string version_part;
@@ -257,6 +259,24 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
   return compiler;
 }
 
+namespace {
+uint32_t CalculateUBOSize(const spirv_cross::ParsedIR* ir,
+                          const spirv_cross::Compiler* compiler) {
+  spirv_cross::ShaderResources resources = compiler->get_shader_resources();
+  uint32_t result = 0;
+  for (const spirv_cross::Resource& ubo : resources.uniform_buffers) {
+    const spirv_cross::SPIRType& ubo_type =
+        compiler->get_type(ubo.base_type_id);
+    uint32_t size = compiler->get_declared_struct_size(ubo_type);
+    result += size;
+    std::cout << "Uniform buffer \"" << ubo.name << "\" is " << size
+              << " bytes in size." << std::endl;
+  }
+  return result;
+}
+
+}  // namespace
+
 Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
                    const SourceOptions& source_options,
                    Reflector::Options reflector_options)
@@ -407,6 +427,14 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
   if (!sl_compiler) {
     COMPILER_ERROR(error_stream_)
         << "Could not create compiler for target platform.";
+    return;
+  }
+
+  uint32_t ubo_size =
+      CalculateUBOSize(parsed_ir.get(), sl_compiler.GetCompiler());
+  if (ubo_size > kMaxUniformBufferSize) {
+    COMPILER_ERROR(error_stream_) << "Uniform buffer size exceeds max ("
+                                  << kMaxUniformBufferSize << "): " << ubo_size;
     return;
   }
 
