@@ -347,6 +347,13 @@ class PlatformConfiguration final {
   ///
   bool RemoveView(int64_t view_id);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Notify the isolate that the focus state of a native view has
+  ///             changed.
+  ///
+  /// @param[in]  event  The focus event describing the change.
+  ///
+  /// @return     Whether the focus event was sent.
   bool SendFocusEvent(const ViewFocusEvent& event);
 
   //----------------------------------------------------------------------------
