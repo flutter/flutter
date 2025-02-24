@@ -13,12 +13,12 @@ copy("impeller") {
     "external_texture_oes.glsl",
     "gaussian.glsl",
     "gradient.glsl",
+    "math.glsl",
     "path.glsl",
     "texture.glsl",
     "tile_mode.glsl",
     "transform.glsl",
     "types.glsl",
-    "math.glsl"
   ]
   outputs = [ "$root_out_dir/shader_lib/impeller/{{source_file_part}}" ]
 }
