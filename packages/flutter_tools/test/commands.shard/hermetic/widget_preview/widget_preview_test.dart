@@ -16,9 +16,9 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/test.dart';
 import 'package:test_api/fake.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/fakes.dart';
+import '../../../src/common.dart';
+import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 
 void main() {
   group('WidgetPreviewStartCommand', () {
@@ -89,7 +89,6 @@ void main() {
         }
 
         expect(updated.shaders, root.shaders.map(WidgetPreviewStartCommand.transformAssetUri));
-        expect(updated.models, root.models.map(WidgetPreviewStartCommand.transformAssetUri));
 
         expect(updated.deferredComponents?.length, root.deferredComponents?.length);
         if (root.deferredComponents != null) {
@@ -161,8 +160,6 @@ flutter:
           asset: package/assetUri
   shaders:
     - shaderUri
-  models:
-    - modelUri
   deferred-components:
     - name: deferredComponent
       libraries:
