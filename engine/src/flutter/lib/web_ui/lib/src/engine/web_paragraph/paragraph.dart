@@ -194,6 +194,8 @@ class WebParagraph implements ui.Paragraph {
   double get width => _width;
   double _width = 0;
 
+  List<TextLine> get lines => _layout.lines;
+
   @override
   List<ui.TextBox> getBoxesForPlaceholders() => _boxesForPlaceholders;
   late List<ui.TextBox> _boxesForPlaceholders;

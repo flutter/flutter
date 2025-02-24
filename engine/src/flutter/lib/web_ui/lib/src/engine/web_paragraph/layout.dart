@@ -40,6 +40,9 @@ class TextLayout {
     textContext.font = '50px arial';
     this.textMetrics = textContext.measureText(paragraph.text) as DomTextMetrics;
     this.textClusters = textMetrics!.getTextClusters();
+    this.lines.clear();
+    this.runs.clear();
+    this.codeUnitFlags.clear();
 
     this.extractUnicodeInfo();
 
@@ -90,8 +93,8 @@ class ClusterRange {
   bool isEmpty() { return start == end; }
   int width() { return end - start; }
 
-  final int start;
-  final int end;
+  int start;
+  int end;
 }
 
 class TextRun {
