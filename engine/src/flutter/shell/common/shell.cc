@@ -2115,7 +2115,7 @@ void Shell::OnPlatformViewRemoveView(int64_t view_id,
 }
 
 void Shell::OnPlatformViewSendViewFocusEvent(const ViewFocusEvent& event) {
-  TRACE_EVENT0("flutter", "Shell::RemoveView");
+  TRACE_EVENT0("flutter", "Shell:: OnPlatformViewSendViewFocusEvent");
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
