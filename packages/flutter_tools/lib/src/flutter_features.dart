@@ -12,9 +12,9 @@ class FlutterFeatureFlags implements FeatureFlags {
     required FlutterVersion flutterVersion,
     required Config config,
     required Platform platform,
-  }) : _flutterVersion = flutterVersion,
-       _config = config,
-       _platform = platform;
+  })  : _flutterVersion = flutterVersion,
+        _config = config,
+        _platform = platform;
 
   final FlutterVersion _flutterVersion;
   final Config _config;
@@ -54,6 +54,9 @@ class FlutterFeatureFlags implements FeatureFlags {
 
   @override
   bool get isNativeAssetsEnabled => isEnabled(nativeAssets);
+
+  @override
+  bool get isDartDataAssetsEnabled => isEnabled(dartDataAssets);
 
   @override
   bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);

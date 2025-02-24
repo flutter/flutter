@@ -13,13 +13,16 @@ import '../../dart/package_map.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
-import '../exceptions.dart';
 import 'common.dart';
+import 'web.dart';
+
+export '../../isolated/native_assets/native_assets.dart'
+    show CodeAsset, DartBuildResult, DataAsset, DynamicLoadingBundled;
 
 /// Runs the dart build of the app.
 abstract class DartBuild extends Target {
   const DartBuild({@visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner})
-    : _buildRunner = buildRunner;
+      : _buildRunner = buildRunner;
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
 
@@ -41,8 +44,7 @@ abstract class DartBuild extends Target {
       final Uri projectUri = environment.projectDir.uri;
       final String? runPackageName =
           packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
-      final FlutterNativeAssetsBuildRunner buildRunner =
-          _buildRunner ??
+      final FlutterNativeAssetsBuildRunner buildRunner = _buildRunner ??
           FlutterNativeAssetsBuildRunnerImpl(
             environment.packageConfigPath,
             packageConfig,
@@ -84,21 +86,21 @@ abstract class DartBuild extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
-    ),
-    // If different packages are resolved, different native assets might need to be built.
-    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
-    // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
-  ];
+        Source.pattern(
+          '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
+        ),
+        // If different packages are resolved, different native assets might need to be built.
+        Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+        // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
+      ];
 
   @override
   String get name => 'dart_build';
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/$dartBuildResultFilename'),
-  ];
+        Source.pattern('{BUILD_DIR}/$dartBuildResultFilename'),
+      ];
 
   /// Dependent build [Target]s can use this to consume the result of the
   /// [DartBuild] target.
@@ -106,6 +108,9 @@ abstract class DartBuild extends Target {
     final File dartBuildResultJsonFile = environment.buildDir.childFile(
       DartBuild.dartBuildResultFilename,
     );
+    if (!dartBuildResultJsonFile.existsSync()) {
+      return const DartBuildResult.empty();
+    }
     return DartBuildResult.fromJson(
       json.decode(dartBuildResultJsonFile.readAsStringSync()) as Map<String, Object?>,
     );
@@ -120,6 +125,17 @@ class DartBuildForNative extends DartBuild {
 
   @override
   List<Target> get dependencies => const <Target>[KernelSnapshot()];
+}
+
+class DartBuildForWeb extends DartBuild {
+  const DartBuildForWeb(this.compileTargets, {@visibleForTesting super.buildRunner});
+
+  final List<Dart2WebTarget> compileTargets;
+
+  @override
+  List<Target> get dependencies => <Target>[
+        ...compileTargets,
+      ];
 }
 
 /// Installs the code assets from a [DartBuild] Flutter app.
@@ -171,12 +187,12 @@ class InstallCodeAssets extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
-    ),
-    // If different packages are resolved, different native assets might need to be built.
-    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
-  ];
+        Source.pattern(
+          '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
+        ),
+        // If different packages are resolved, different native assets might need to be built.
+        Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+      ];
 
   @override
   String get name => 'install_code_assets';
@@ -190,8 +206,15 @@ class InstallCodeAssets extends Target {
 
 TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String name) {
   final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
-  if (targetPlatformEnvironment == null) {
-    throw MissingDefineException(kTargetPlatform, name);
+  if (targetPlatformEnvironment != null) {
+    return getTargetPlatformForName(targetPlatformEnvironment);
   }
-  return getTargetPlatformForName(targetPlatformEnvironment);
+
+  // HACK: Currently the web builds don't actually specify `kTargetPlatform`
+  // in environment defines. Even if they would, they wouldn't specify it
+  // precisely because web can compile to JavaScript and to Wasm (so
+  // `TargetPlatform.web_javascript` isn't actually always the case).
+  //
+  // For now we just use this as the JS target platform.
+  return TargetPlatform.web_javascript;
 }

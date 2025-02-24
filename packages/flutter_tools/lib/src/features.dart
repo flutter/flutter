@@ -48,6 +48,9 @@ abstract class FeatureFlags {
   /// Whether native assets compilation and bundling is enabled.
   bool get isNativeAssetsEnabled => false;
 
+  /// Whether dart data assets building and bundling is enabled.
+  bool get isDartDataAssetsEnabled => false;
+
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
@@ -72,6 +75,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterCustomDevicesFeature,
   cliAnimation,
   nativeAssets,
+  dartDataAssets,
   swiftPackageManager,
   explicitPackageDependencies,
 ];
@@ -155,6 +159,16 @@ const Feature nativeAssets = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
+/// Enable dart data assets building and bundling.
+const Feature dartDataAssets = Feature(
+  name: 'dart data assets building and bundling',
+  configSetting: 'enable-dart-data-assets',
+  environmentOverride: 'FLUTTER_DART_DATA_ASSETS',
+  master: FeatureChannelSetting(
+    available: true,
+  ),
+);
+
 /// Enable Swift Package Manager as a darwin dependency manager.
 const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
@@ -169,8 +183,7 @@ const Feature swiftPackageManager = Feature(
 const Feature explicitPackageDependencies = Feature.fullyEnabled(
   name: 'support for dev_dependency plugins',
   configSetting: 'explicit-package-dependencies',
-  extraHelpText:
-      'Plugins that are resolved as result of being in "dev_dependencies" of a '
+  extraHelpText: 'Plugins that are resolved as result of being in "dev_dependencies" of a '
       'package are not included in release builds of an app. By enabling this '
       'feature, the synthetic "package:flutter_gen" can no longer be generated '
       'and the legacy ".flutter-plugins" tool artifact is no longer generated.\n'
@@ -206,9 +219,9 @@ class Feature {
     this.environmentOverride,
     this.configSetting,
     this.extraHelpText,
-  }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
-       beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
-       stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
+  })  : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
+        beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
+        stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
 
   /// The user visible name for this feature.
   final String name;

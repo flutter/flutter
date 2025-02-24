@@ -22,7 +22,7 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 
   @override
   String windowsBuildDirectory(FlutterProject project) =>
-      nativeAssetsBuildUri(project.directory.uri, OS.windows).toFilePath();
+      nativeAssetsBuildUri(project.directory.uri, false, OS.windows).toFilePath();
 }
 
 Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {

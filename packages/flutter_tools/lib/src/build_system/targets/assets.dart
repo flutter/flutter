@@ -33,6 +33,7 @@ import 'native_assets.dart';
 Future<Depfile> copyAssets(
   Environment environment,
   Directory outputDirectory, {
+  required DartBuildResult dartBuildResult,
   Map<String, DevFSContent> additionalContent = const <String, DevFSContent>{},
   required TargetPlatform targetPlatform,
   required BuildMode buildMode,
@@ -41,14 +42,14 @@ Future<Depfile> copyAssets(
 }) async {
   final File pubspecFile = environment.projectDir.childFile('pubspec.yaml');
   // Only the default asset bundle style is supported in assemble.
-  final AssetBundle assetBundle =
-      AssetBundleFactory.defaultInstance(
-        logger: environment.logger,
-        fileSystem: environment.fileSystem,
-        platform: environment.platform,
-        splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
-      ).createBundle();
+  final AssetBundle assetBundle = AssetBundleFactory.defaultInstance(
+    logger: environment.logger,
+    fileSystem: environment.fileSystem,
+    platform: environment.platform,
+    splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
+  ).createBundle();
   final int resultCode = await assetBundle.build(
+    dartBuildResult: dartBuildResult,
     manifestPath: pubspecFile.path,
     packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
@@ -140,19 +141,17 @@ Future<Depfile> copyAssets(
                 }
               }
             case AssetKind.font:
-              doCopy =
-                  !await iconTreeShaker.subsetFont(
-                    input: content.file as File,
-                    outputPath: file.path,
-                    relativePath: entry.key,
-                  );
+              doCopy = !await iconTreeShaker.subsetFont(
+                input: content.file as File,
+                outputPath: file.path,
+                relativePath: entry.key,
+              );
             case AssetKind.shader:
-              doCopy =
-                  !await shaderCompiler.compileShader(
-                    input: content.file as File,
-                    outputPath: file.path,
-                    targetPlatform: targetPlatform,
-                  );
+              doCopy = !await shaderCompiler.compileShader(
+                input: content.file as File,
+                outputPath: file.path,
+                targetPlatform: targetPlatform,
+              );
           }
           if (doCopy) {
             await (content.file as File).copy(file.path);
@@ -192,20 +191,19 @@ Future<Depfile> copyAssets(
               // and the native APIs will look for files this way.
 
               // If deferred components are disabled, then copy assets to regular location.
-              final File file =
-                  environment.defines[kDeferredComponents] == 'true'
-                      ? environment.fileSystem.file(
-                        environment.fileSystem.path.join(
-                          componentOutputDir.path,
-                          buildMode.cliName,
-                          'deferred_assets',
-                          'flutter_assets',
-                          entry.key,
-                        ),
-                      )
-                      : environment.fileSystem.file(
-                        environment.fileSystem.path.join(outputDirectory.path, entry.key),
-                      );
+              final File file = environment.defines[kDeferredComponents] == 'true'
+                  ? environment.fileSystem.file(
+                      environment.fileSystem.path.join(
+                        componentOutputDir.path,
+                        buildMode.cliName,
+                        'deferred_assets',
+                        'flutter_assets',
+                        entry.key,
+                      ),
+                    )
+                  : environment.fileSystem.file(
+                      environment.fileSystem.path.join(outputDirectory.path, entry.key),
+                    );
               outputs.add(file);
               file.parent.createSync(recursive: true);
               final DevFSContent content = entry.value.content;
@@ -241,16 +239,20 @@ class CopyAssets extends Target {
   String get name => 'copy_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+        DartBuildForNative(),
+        KernelSnapshot(),
+        InstallCodeAssets(),
+      ];
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart',
-    ),
-    ...IconTreeShaker.inputs,
-    ...ShaderCompiler.inputs,
-  ];
+        Source.pattern(
+          '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart',
+        ),
+        ...IconTreeShaker.inputs,
+        ...ShaderCompiler.inputs,
+      ];
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -267,9 +269,11 @@ class CopyAssets extends Target {
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory output = environment.buildDir.childDirectory('flutter_assets');
     output.createSync(recursive: true);
+    final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       output,
+      dartBuildResult: dartBuildResult,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],

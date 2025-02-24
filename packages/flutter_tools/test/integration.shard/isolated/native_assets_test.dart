@@ -332,15 +332,13 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
   final Directory frameworksFolder = appBundle.childDirectory('Frameworks');
   expect(frameworksFolder, exists);
   const String frameworkName = packageName;
-  final File dylib = frameworksFolder
-      .childDirectory('$frameworkName.framework')
-      .childFile(frameworkName);
+  final File dylib =
+      frameworksFolder.childDirectory('$frameworkName.framework').childFile(frameworkName);
   expect(dylib, exists);
-  final String infoPlist =
-      frameworksFolder
-          .childDirectory('$frameworkName.framework')
-          .childFile('Info.plist')
-          .readAsStringSync();
+  final String infoPlist = frameworksFolder
+      .childDirectory('$frameworkName.framework')
+      .childFile('Info.plist')
+      .readAsStringSync();
   expect(infoPlist, '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -445,9 +443,8 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
   );
   expect(frameworksFolder, exists);
   const String frameworkName = packageName;
-  final File dylib = frameworksFolder
-      .childDirectory('$frameworkName.framework')
-      .childFile(frameworkName);
+  final File dylib =
+      frameworksFolder.childDirectory('$frameworkName.framework').childFile(frameworkName);
   expect(dylib, exists);
 }
 
