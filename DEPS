@@ -157,6 +157,7 @@ vars = {
   "upstream_ffi": "https://github.com/dart-lang/ffi.git",
   "upstream_flatbuffers": "https://github.com/google/flatbuffers.git",
   "upstream_freetype2": "https://gitlab.freedesktop.org/freetype/freetype.git",
+  "upstream_gcloud": "https://github.com/dart-lang/gcloud.git",
   "upstream_glfw": "https://github.com/glfw/glfw.git",
   "upstream_googleapis": "https://github.com/google/googleapis.dart.git",
   "upstream_googletest": "https://github.com/google/googletest.git",
@@ -526,8 +527,8 @@ deps = {
   'engine/src/flutter/third_party/pkg/flutter_packages':
   Var('flutter_git') + '/mirrors/packages' + '@' + '25454e63851fe7933f04d025606e68c1eac4fe0f', # various
 
-  'engine/src/flutter/third_party/pkg/labs':
-  Var('dart_git') + '/labs.git' + '@' + 'bdd42446fe2db6d5526ee72d47b44c33281fab10', # gcloud 0.8.10-wip
+  'engine/src/flutter/third_party/pkg/gcloud':
+  Var('flutter_git') + '/third_party/gcloud.git' + '@' + 'a5276b85c4714378e84b1fb478b8feeeb686ac26', # 0.8.6-dev
 
   'engine/src/flutter/third_party/pkg/googleapis':
   Var('flutter_git') + '/third_party/googleapis.dart.git' + '@' + '526011f56d98eab183cc6075ee1392e8303e43e2', # various

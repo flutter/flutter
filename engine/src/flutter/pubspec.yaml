@@ -202,7 +202,7 @@ dependency_overrides:
   frontend_server_client:
     path: ./third_party/dart/third_party/pkg/webdev/frontend_server_client
   gcloud:
-    path: ./third_party/pkg/labs/pkgs/gcloud
+    path: ./third_party/pkg/gcloud
   glob:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/glob
   googleapis:
