@@ -91,7 +91,8 @@ constexpr char kTextPlainFormat[] = "text/plain";
  */
 @interface FlutterEngine () <FlutterBinaryMessenger,
                              FlutterMouseCursorPluginDelegate,
-                             FlutterKeyboardManagerDelegate>
+                             FlutterKeyboardManagerDelegate,
+                             FlutterTextInputPluginDelegate>
 
 /**
  * A mutable array that holds one bool value that determines if responses to platform messages are
@@ -480,6 +481,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   // dispatched to various Flutter key responders, and whether the event is
   // propagated to the next NSResponder.
   FlutterKeyboardManager* _keyboardManager;
+
+  // The text input plugin that handles text editing state for text fields.
+  FlutterTextInputPlugin* _textInputPlugin;
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
@@ -521,6 +525,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   _isResponseValid = [[NSMutableArray alloc] initWithCapacity:1];
   [_isResponseValid addObject:@YES];
   _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
+  _textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self];
 
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
