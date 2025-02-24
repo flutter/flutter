@@ -184,7 +184,7 @@ void main() {
     expect(rect, const Rect.fromLTWH(123.0, 37.0, 12.0, 23.0));
   });
 
-  testWidgets('Rebuilds properly', (WidgetTester tester) async {
+  testWidgets('Rebuilds when the layout info changes', (WidgetTester tester) async {
     late StateSetter setState;
     Matrix4 transform = Matrix4.identity();
     late final OverlayEntry overlayEntry;

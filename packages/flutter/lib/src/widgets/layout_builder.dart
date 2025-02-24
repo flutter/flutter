@@ -22,8 +22,15 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// Similar to the [Builder] widget except that the implementation calls the [builder]
 /// function at layout time and provides the [LayoutInfo] that is required to
 /// configure the child widget subtree.
+///
 /// This is useful when the child widget tree relies on information that are only
 /// available during layout, and doesn't depend on the child's intrinsic size.
+///
+/// The equality of the [LayoutInfo] type is used by the implementation to avoid
+/// unnecessary rebuilds: if the new [LayoutInfo] computed in [performLayout] is
+/// the same as (defined by [LayoutInfo]'s [==] operator) the previous [LayoutInfo],
+/// the implementation will try to avoid calling the [builder] again unless
+/// [updateShouldRebuild] returns true.
 ///
 /// Subclasses must return a [RenderObject] that mixes in [RenderConstrainedLayoutBuilder].
 abstract class AbstractLayoutBuilder<LayoutInfo> extends RenderObjectWidget {
