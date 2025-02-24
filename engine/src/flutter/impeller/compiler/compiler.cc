@@ -260,8 +260,7 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
 }
 
 namespace {
-uint32_t CalculateUBOSize(const spirv_cross::ParsedIR* ir,
-                          const spirv_cross::Compiler* compiler) {
+uint32_t CalculateUBOSize(const spirv_cross::Compiler* compiler) {
   spirv_cross::ShaderResources resources = compiler->get_shader_resources();
   uint32_t result = 0;
   for (const spirv_cross::Resource& ubo : resources.uniform_buffers) {
@@ -428,8 +427,7 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
     return;
   }
 
-  uint32_t ubo_size =
-      CalculateUBOSize(parsed_ir.get(), sl_compiler.GetCompiler());
+  uint32_t ubo_size = CalculateUBOSize(sl_compiler.GetCompiler());
   if (ubo_size > kMaxUniformBufferSize) {
     COMPILER_ERROR(error_stream_) << "Uniform buffer size exceeds max ("
                                   << kMaxUniformBufferSize << "): " << ubo_size;
