@@ -1053,6 +1053,8 @@ void Canvas::SaveLayer(const Paint& paint,
   Point local_position = Point(0, 0);
   if (backdrop_filter) {
     local_position = subpass_coverage.GetOrigin() - GetGlobalPassPosition();
+    // The backdrop filter proc does not outlive the canvas instance
+    // making the capture of "this" relatively safe.
     Canvas::BackdropFilterProc backdrop_filter_proc =
         [backdrop_filter = backdrop_filter, &canvas = *this](
             const FilterInput::Ref& input, const Matrix& effect_transform,
@@ -1693,12 +1695,12 @@ std::shared_ptr<Texture> Canvas::GetOrUploadTexture(
     std::shared_ptr<DeviceBuffer> device_buffer = image->GetDeviceBuffer();
     blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer),
                        image->impeller_texture());
-    image->SetUploaded();
     blit_pass->EncodeCommands();
 
     if (!renderer_.GetContext()->EnqueueCommandBuffer(std::move(cmd_buffer))) {
       VALIDATION_LOG << "Failed to upload deferred GPU image.";
     }
+    image->SetUploaded();
   }
   return image->impeller_texture();
 }

@@ -164,17 +164,17 @@ MultiFrameCodec::State::GetNextFrameImage(
     sk_sp<DlImage> image;
     std::string error;
     ImageDecoderImpeller::UploadTextureToPrivate(
+        /*result=*/
         [&image, &error](sk_sp<DlImage> image_result,
                          std::string error_result) {
           image = std::move(image_result);
           error = std::move(error_result);
         },
-        impeller_context,        //
-        device_buffer,           //
-        info,                    //
-        std::nullopt,            //
-        gpu_disable_sync_switch  //
-    );
+        /*context=*/impeller_context,
+        /*buffer=*/device_buffer,
+        /*image_info=*/info,
+        /*resize_info=*/std::nullopt,
+        /*gpu_disabled_switch=*/gpu_disable_sync_switch);
     return std::make_pair(image, error);
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING

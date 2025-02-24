@@ -1130,14 +1130,12 @@ TEST_P(AiksTest, DrawDeferredImage) {
 
     uint8_t* data = buffer->OnGetContents();
     for (auto i = 0u; i < buffer_desc.size; i += 4) {
-      data[i] = 255;
-      data[i + 1] = 0;
-      data[i + 2] = 0;
-      data[i + 3] = 255;
+      memset(reinterpret_cast<void*>(data[i]), 0xFF0000FF, 4);
     }
     buffer->Flush();
 
     deferred_images[i] = DlImageImpeller::MakeDeferred(texture, buffer);
+    EXPECT_TRUE(deferred_images[i]->isDeferredUpload());
   }
 
   DisplayListBuilder builder;
