@@ -15,7 +15,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpImplicitView();
+  setUpUnitTests();
 
   Future<Image> createTestImageByColor(Color color) async {
     final PictureRecorder recorder = PictureRecorder();
