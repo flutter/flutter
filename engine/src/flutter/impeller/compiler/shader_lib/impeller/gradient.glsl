@@ -84,14 +84,14 @@ vec2 IPComputeConicalT(vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
 
     float scale_x = abs(1.0 - f);
     float scale_y = scale_x;
-    float r1 = abs(r1 - r0) / d_center;
-    bool is_focal_on_circle = abs(r1 - 1.0) < scalar_nearly_zero;
+    float local_r1 = abs(r1 - r0) / d_center;
+    bool is_focal_on_circle = abs(local_r1 - 1.0) < scalar_nearly_zero;
     if (is_focal_on_circle) {
       scale_x *= 0.5;
       scale_y *= 0.5;
     } else {
-      scale_x *= r1 / (r1 * r1 - 1.0);
-      scale_y /= sqrt(abs(r1 * r1 - 1.0));
+      scale_x *= local_r1 / (local_r1 * local_r1 - 1.0);
+      scale_y /= sqrt(abs(local_r1 * local_r1 - 1.0));
     }
     transform =
         mat3(scale_x, 0.0, 0.0, 0.0, scale_y, 0.0, 0.0, 0.0, 1.0) * transform;
@@ -99,9 +99,9 @@ vec2 IPComputeConicalT(vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
     vec2 pt = (transform * vec3(pos.xy, 1.0)).xy;
 
     // Continue with step 5 onward.
-    float inv_r1 = 1.0 / r1;
+    float inv_r1 = 1.0 / local_r1;
     float d_radius_sign = sign(1.0 - f);
-    bool is_well_behaved = !is_focal_on_circle && r1 > 1.0;
+    bool is_well_behaved = !is_focal_on_circle && local_r1 > 1.0;
 
     float x_t = -1.0;
     if (is_focal_on_circle) {
