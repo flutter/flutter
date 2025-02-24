@@ -2139,6 +2139,10 @@ extension DomVisualViewportExtension on DomVisualViewport {
   @JS('width')
   external JSNumber? get _width;
   double? get width => _width?.toDartDouble;
+
+  @JS('scale')
+  external JSNumber? get _scale;
+  double? get scale => _scale?.toDartDouble;
 }
 
 @JS()
