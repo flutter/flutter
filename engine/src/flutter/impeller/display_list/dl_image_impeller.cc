@@ -37,12 +37,7 @@ sk_sp<DlImageImpeller> DlImageImpeller::Make(std::shared_ptr<Texture> texture,
 sk_sp<DlImageImpeller> DlImageImpeller::MakeDeferred(
     std::shared_ptr<Texture> texture,
     std::shared_ptr<DeviceBuffer> bytes,
-    OwningContext owning_context
-#if FML_OS_IOS_SIMULATOR
-    ,
-    bool is_fake_image = false
-#endif  // FML_OS_IOS_SIMULATOR
-) {
+    OwningContext owning_context) {
   return sk_sp<DlImageImpeller>(
       new DlImageImpeller(std::move(texture), std::move(bytes),
                           /*is_deferred=*/true, owning_context));

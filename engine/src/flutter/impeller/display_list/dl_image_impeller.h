@@ -28,12 +28,7 @@ class DlImageImpeller final : public flutter::DlImage {
   static sk_sp<DlImageImpeller> MakeDeferred(
       std::shared_ptr<Texture> texture,
       std::shared_ptr<DeviceBuffer> bytes,
-      OwningContext owning_context = OwningContext::kIO
-#if FML_OS_IOS_SIMULATOR
-      ,
-      bool is_fake_image = false
-#endif  // FML_OS_IOS_SIMULATOR
-  );
+      OwningContext owning_context = OwningContext::kIO);
 
   static sk_sp<DlImageImpeller> MakeFromYUVTextures(
       AiksContext* aiks_context,

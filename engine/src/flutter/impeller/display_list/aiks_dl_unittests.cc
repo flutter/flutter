@@ -3,9 +3,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cstdint>
 #include <vector>
 #include "display_list/dl_sampling_options.h"
 #include "display_list/dl_tile_mode.h"
+#include "display_list/effects/color_sources/dl_image_color_source.h"
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
@@ -27,6 +29,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/geometry/rstransform.h"
 #include "impeller/geometry/scalar.h"
 
 namespace impeller {
@@ -1102,6 +1105,55 @@ TEST_P(AiksTest, ToImageFromImage) {
   canvas.DrawImage(DlImageImpeller::Make(reupload_texture), DlPoint(0, 100),
                    DlImageSampling::kNearestNeighbor, &paint);
   OpenPlaygroundHere(canvas.Build());
+}
+
+TEST_P(AiksTest, DrawDeferredImage) {
+  // Create a new deferred image for each draw.
+  sk_sp<DlImageImpeller> deferred_images[3];
+  for (auto i = 0u; i < 3; i++) {
+    TextureDescriptor desc;
+    desc.size = {100, 100};
+    desc.storage_mode = StorageMode::kDevicePrivate;
+    desc.mip_count = 1;
+    desc.format = PixelFormat::kR8G8B8A8UNormInt;
+
+    DeviceBufferDescriptor buffer_desc;
+    buffer_desc.size = desc.GetByteSizeOfBaseMipLevel();
+    buffer_desc.readback = false;
+    buffer_desc.storage_mode = StorageMode::kHostVisible;
+
+    auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+    auto buffer =
+        GetContext()->GetResourceAllocator()->CreateBuffer(buffer_desc);
+    ASSERT_TRUE(texture);
+    ASSERT_TRUE(buffer);
+
+    uint8_t* data = buffer->OnGetContents();
+    for (auto i = 0u; i < buffer_desc.size; i += 4) {
+      data[i] = 255;
+      data[i + 1] = 0;
+      data[i + 2] = 0;
+      data[i + 3] = 255;
+    }
+    buffer->Flush();
+
+    deferred_images[i] = DlImageImpeller::MakeDeferred(texture, buffer);
+  }
+
+  DisplayListBuilder builder;
+  builder.DrawImage(deferred_images[0], Point{0, 0}, DlImageSampling::kLinear);
+
+  RSTransform xform[1] = {RSTransform::Make(Point(100, 0), 1, Radians(0))};
+  Rect rect[1] = {Rect::MakeLTRB(0, 0, 100, 100)};
+  builder.DrawAtlas(deferred_images[1], xform, rect, nullptr, 1,
+                    DlBlendMode::kSrcOver, DlImageSampling::kLinear, nullptr);
+
+  std::shared_ptr<DlColorSource> image_source = DlImageColorSource::MakeImage(
+      deferred_images[2], DlTileMode::kClamp, DlTileMode::kClamp);
+  builder.DrawRect(Rect::MakeLTRB(0, 100, 100, 200),
+                   DlPaint().setColorSource(image_source));
+
+  OpenPlaygroundHere(builder.Build());
 }
 
 }  // namespace testing
