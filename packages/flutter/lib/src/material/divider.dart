@@ -101,9 +101,9 @@ class Divider extends StatelessWidget {
   /// also null, then this defaults to 0.0.
   final double? endIndent;
 
-  /// The amount of radius for the border of the divider
+  /// The amount of radius for the border of the divider.
   ///
-  /// if this is null, then the default radius of [BoxDecoration] will be used
+  /// If this is null, then the default radius of [BoxDecoration] will be used.
   final BorderRadiusGeometry? radius;
 
   /// The color to use when painting the line.
@@ -291,9 +291,9 @@ class VerticalDivider extends StatelessWidget {
   /// {@end-tool}
   final Color? color;
 
-  /// The amount of radius for the border of the divider
+  /// The amount of radius for the border of the divider.
   ///
-  /// if this is null, then the default radius of [BoxDecoration] will be used
+  /// If this is null, then the default radius of [BoxDecoration] will be used.
   final BorderRadiusGeometry? radius;
 
   @override
