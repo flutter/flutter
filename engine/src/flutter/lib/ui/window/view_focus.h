@@ -50,14 +50,15 @@ class ViewFocusChangeRequest {
  public:
   ViewFocusChangeRequest(int64_t view_id,
                          ViewFocusState state,
-                         ViewFocusDirection direction)
-      : view_id_(view_id), state_(state), direction_(direction) {}
+                         ViewFocusDirection direction);
 
-  int64_t view_id() const { return view_id_; }
-  ViewFocusState state() const { return state_; }
-  ViewFocusDirection direction() const { return direction_; }
+  int64_t view_id() const;
+  ViewFocusState state() const;
+  ViewFocusDirection direction() const;
 
  private:
+  ViewFocusChangeRequest() = delete;
+
   int64_t view_id_;
   ViewFocusState state_;
   ViewFocusDirection direction_;
