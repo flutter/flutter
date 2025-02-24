@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart' show ContentSensitivity, SensitiveContentService;
-import 'package:flutter/widgets.dart' show AsyncSnapshot, FutureBuilder;
 
+import 'async.dart' show AsyncSnapshot, FutureBuilder;
 import 'framework.dart';
 
 /// Data structure used to track the [SensitiveContent] widgets in the
@@ -205,7 +205,7 @@ class SensitiveContent extends StatefulWidget {
   const SensitiveContent({super.key, required this.sensitivityLevel, required this.child});
 
   /// The sensitivity level that the [SensitiveContent] widget should sets for the
-  /// Android native `View`.
+  /// Android native `View` hosting the widget tree.
   final ContentSensitivity sensitivityLevel;
 
   /// The child widget of this [SensitiveContent].

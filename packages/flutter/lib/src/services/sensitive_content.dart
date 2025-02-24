@@ -13,19 +13,20 @@ import 'system_channels.dart';
 ///
 /// {@template flutter.services.ContentSensitivity}
 /// There are only three [ContentSensitivity] levels, and these can be set via a
-/// [SensitiveContent] widget. [ContentSensitivity.sensitive] is the most
-/// severe setting, and  if it is set, it will cause the tree to remain marked
-/// sensitive even if there are other `SensitiveContent` widgets in the tree.
-/// [ContentSensitivity.autoSensitive] is the second most severe setting, and it
-/// will cause the tree to remain marked auto-sensitive if there are either (1) no
-/// other `SensitiveContent` widgets in the tree or (2) there are only other
-/// auto-sensitive or not sensitive `SensitiveContent` widgets in the tree.
-/// [ContentSensitivity.notSensitive] is the least severe setting, and it will
-/// cause the tree to remain marked not sensitive as long as there are (1) no
-/// other `SensitiveContent` widgets in the tree or (2) there are only other not
-/// sensitive `SensitiveContent` widgets in the tree. If there are no `SensitiveContent`
-/// widgets in the tree, the default setting as queried from the embedding will
-/// be used. This could be set by a Flutter developer in native Android; otherwise,
+/// [SensitiveContent] widget.
+///
+/// [ContentSensitivity.sensitive] is the most severe setting, and  if it is set,
+/// it will cause the tree to remain marked  sensitive even if there are other
+/// `SensitiveContent` widgets in the tree. [ContentSensitivity.autoSensitive] is
+/// the second most severe setting, and it will cause the tree to remain marked
+/// auto-sensitive if there are either (1) no other `SensitiveContent` widgets in
+/// the tree or (2) there are only other auto-sensitive or not sensitive
+/// `SensitiveContent` widgets in the tree. [ContentSensitivity.notSensitive] is
+/// the least severe setting, and it will cause the tree to remain marked not sensitive
+/// as long as there are (1) no other `SensitiveContent` widgets in the tree or (2) there
+/// are only other not sensitive `SensitiveContent` widgets in the tree. If there are no
+/// `SensitiveContent` widgets in the tree, the default setting as queried from the embedding
+/// will be used. This could be set by a Flutter developer in native Android; otherwise,
 /// Android uses [ContentSensitivity.autoSensitive] by default.
 /// {@endtemplate}
 ///
@@ -44,7 +45,8 @@ enum ContentSensitivity {
   ///
   /// This is currently a no-op and thus, will behave the same as [ContentSensitivity.notSensitive].
   // TODO(camsim99): Implement `autoSensitive` mode that matches the behavior
-  // of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented based on autofill hints.
+  // of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented based on autofill hints; see
+  // https://github.com/flutter/flutter/issues/160879.
   autoSensitive(id: 0),
 
   /// The widget tree contains sensitive content.
