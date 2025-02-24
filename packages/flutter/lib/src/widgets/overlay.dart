@@ -1247,49 +1247,6 @@ class _RenderTheater extends RenderBox
     }
   }
 
-  //int get numberOfPaintTransformListeners => _numberOfPaintTransformListeners;
-  //int _numberOfPaintTransformListeners = 0;
-  //set numberOfPaintTransformListeners(int newListenerCount) {
-  //  assert(newListenerCount >= 0);
-  //  if (newListenerCount > 0 && _numberOfPaintTransformListeners == 0) {
-  //    _scheduleMarkNeedsLayout();
-  //  }
-  //  _numberOfPaintTransformListeners = newListenerCount;
-  //}
-
-  //bool _frameCallbackScheduled = false;
-  //void _scheduleMarkNeedsLayout() {
-  //  if (_frameCallbackScheduled) {
-  //    return;
-  //  }
-  //  _frameCallbackScheduled = true;
-  //  SchedulerBinding.instance.scheduleFrameCallback(
-  //    _frameCallback,
-  //    rescheduling: true,
-  //    scheduleNewFrame: false,
-  //  );
-  //}
-
-  //void _frameCallback(Duration _) {
-  //  _frameCallbackScheduled = false;
-  //  bool hasPaintTransformListeners = false;
-  //  for (
-  //    _TheaterParentData? parentData = firstChild?.parentData as _TheaterParentData?;
-  //    parentData != null;
-  //    parentData = parentData.nextSibling?.parentData as _TheaterParentData?
-  //  ) {
-  //    final Iterator<_RenderDeferredLayoutBox>? iterator = parentData.paintOrderIterator;
-  //    if (iterator != null) {
-  //      while (iterator.moveNext()) {}
-  //    }
-  //  }
-  //  // mark things as dirty, assert _numberOfPaintTransformListeners == count.
-  //  // Only reschedule if there are children that care about paint transforms.
-  //  if (hasPaintTransformListeners) {
-  //    _scheduleMarkNeedsLayout();
-  //  }
-  //}
-
   // Adding/removing deferred child does not affect the layout of other children,
   // or that of the Overlay, so there's no need to invalidate the layout of the
   // Overlay.
@@ -2544,11 +2501,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
       _debugMutationsLocked = true;
       return true;
     }());
-    //if (layoutCallback case final VoidCallback layoutCallback?) {
-    //  invokeLayoutCallback((Constraints _) {
-    //    layoutCallback();
-    //  });
-    //}
     // This method is directly being invoked from `PipelineOwner.flushLayout`,
     // or from `_layoutSurrogate`'s performLayout.
     assert(parent != null);
@@ -2572,12 +2524,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
     final Offset offset = childParentData.offset;
     transform.translate(offset.dx, offset.dy);
   }
-
-  //@override
-  //void dispose() {
-  //  layoutCallback = null;
-  //  super.dispose();
-  //}
 }
 
 // A RenderProxyBox that makes sure its `deferredLayoutChild` has a greater
@@ -2708,9 +2654,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
       layoutSurrogate.child == null ||
           layoutSurrogate.child!.debugSize == layoutSurrogate.debugSize,
     );
-    assert(
-          layoutSurrogate.child?.getTransformTo(layoutSurrogate).isIdentity() ?? true,
-    );
+    assert(layoutSurrogate.child?.getTransformTo(layoutSurrogate).isIdentity() ?? true);
 
     assert(() {
       for (
@@ -2802,7 +2746,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    return child!.hitTest(result, position: position);
+    return child?.hitTest(result, position: position) ?? false;
   }
 
   @override
