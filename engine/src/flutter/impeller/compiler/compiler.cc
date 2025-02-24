@@ -32,6 +32,9 @@ constexpr const char* kEGLImageExternalExtension300 =
     "GL_OES_EGL_image_external_essl3";
 }  // namespace
 
+// This value should be <= 7372. UBOs can be larger on some devices but a
+// performance cost will be paid.
+// https://docs.qualcomm.com/bundle/publicresource/topics/80-78185-2/best_practices.html?product=1601111740035277#buffer-best-practices
 static const uint32_t kMaxUniformBufferSize = 6208;
 
 static uint32_t ParseMSLVersion(const std::string& msl_version) {
