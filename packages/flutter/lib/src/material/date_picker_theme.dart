@@ -84,6 +84,8 @@ class DatePickerThemeData with Diagnosticable {
     this.cancelButtonStyle,
     this.confirmButtonStyle,
     this.locale,
+    this.toggleButtonTextStyle,
+    this.subHeaderForegroundColor,
   });
 
   /// Overrides the default value of [Dialog.backgroundColor].
@@ -360,6 +362,17 @@ class DatePickerThemeData with Diagnosticable {
   /// picker. It defaults to the ambient locale provided by [Localizations].
   final Locale? locale;
 
+  /// Overrides the default text style used for the text of toggle mode button
+  ///
+  /// The [TextStyle.color] of [toggleButtonTextStyle] is not used, [subHeaderForegroundColor]
+  /// is used instead.
+  final TextStyle? toggleButtonTextStyle;
+
+  /// Overrides the default color used for text labels and icons of sub header foreground.
+  ///
+  /// This is used instead of the [TextStyle.color] property of [toggleButtonTextStyle].
+  final Color? subHeaderForegroundColor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DatePickerThemeData copyWith({
@@ -401,6 +414,8 @@ class DatePickerThemeData with Diagnosticable {
     ButtonStyle? cancelButtonStyle,
     ButtonStyle? confirmButtonStyle,
     Locale? locale,
+    TextStyle? toggleButtonTextStyle,
+    Color? subHeaderForegroundColor,
   }) {
     return DatePickerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -445,6 +460,8 @@ class DatePickerThemeData with Diagnosticable {
       cancelButtonStyle: cancelButtonStyle ?? this.cancelButtonStyle,
       confirmButtonStyle: confirmButtonStyle ?? this.confirmButtonStyle,
       locale: locale ?? this.locale,
+      toggleButtonTextStyle: toggleButtonTextStyle ?? this.toggleButtonTextStyle,
+      subHeaderForegroundColor: subHeaderForegroundColor ?? this.subHeaderForegroundColor,
     );
   }
 
@@ -570,6 +587,12 @@ class DatePickerThemeData with Diagnosticable {
       cancelButtonStyle: ButtonStyle.lerp(a?.cancelButtonStyle, b?.cancelButtonStyle, t),
       confirmButtonStyle: ButtonStyle.lerp(a?.confirmButtonStyle, b?.confirmButtonStyle, t),
       locale: t < 0.5 ? a?.locale : b?.locale,
+      toggleButtonTextStyle: TextStyle.lerp(a?.toggleButtonTextStyle, b?.toggleButtonTextStyle, t),
+      subHeaderForegroundColor: Color.lerp(
+        a?.subHeaderForegroundColor,
+        b?.subHeaderForegroundColor,
+        t,
+      ),
     );
   }
 
@@ -623,6 +646,8 @@ class DatePickerThemeData with Diagnosticable {
     cancelButtonStyle,
     confirmButtonStyle,
     locale,
+    toggleButtonTextStyle,
+    subHeaderForegroundColor,
   ]);
 
   @override
@@ -668,7 +693,9 @@ class DatePickerThemeData with Diagnosticable {
         other.inputDecorationTheme == inputDecorationTheme &&
         other.cancelButtonStyle == cancelButtonStyle &&
         other.confirmButtonStyle == confirmButtonStyle &&
-        other.locale == locale;
+        other.locale == locale &&
+        other.toggleButtonTextStyle == toggleButtonTextStyle &&
+        other.subHeaderForegroundColor == subHeaderForegroundColor;
   }
 
   @override
@@ -842,6 +869,16 @@ class DatePickerThemeData with Diagnosticable {
       ),
     );
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'toggleButtonTextStyle',
+        toggleButtonTextStyle,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      ColorProperty('subHeaderForegroundColor', subHeaderForegroundColor, defaultValue: null),
+    );
   }
 }
 
@@ -956,6 +993,13 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   Color? get headerBackgroundColor => _isDark ? _colors.surface : _colors.primary;
+
+  @override
+  Color? get subHeaderForegroundColor => _colors.onSurface.withOpacity(0.60);
+
+  @override
+  TextStyle? get toggleButtonTextStyle =>
+      _textTheme.titleSmall?.apply(color: subHeaderForegroundColor);
 
   @override
   ButtonStyle get cancelButtonStyle {
@@ -1129,6 +1173,14 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   Color? get backgroundColor => _colors.surfaceContainerHigh;
+
+  @override
+  Color? get subHeaderForegroundColor => _colors.onSurface.withOpacity(0.60);
+
+  @override
+  TextStyle? get toggleButtonTextStyle => _textTheme.titleSmall?.apply(
+    color: subHeaderForegroundColor,
+  );
 
   @override
   ButtonStyle get cancelButtonStyle {

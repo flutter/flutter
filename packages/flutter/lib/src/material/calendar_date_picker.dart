@@ -13,7 +13,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'color_scheme.dart';
 import 'date.dart';
 import 'date_picker_theme.dart';
 import 'debug.dart';
@@ -24,7 +23,6 @@ import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
-import 'text_theme.dart';
 import 'theme.dart';
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
@@ -431,9 +429,12 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
-    final Color controlColor = colorScheme.onSurface.withOpacity(0.60);
+    final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
+    final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
+    final TextStyle? buttonTextStyle =
+        datePickerTheme.toggleButtonTextStyle ?? defaults.toggleButtonTextStyle;
+    final Color? toggleModeForegroundColor =
+        datePickerTheme.subHeaderForegroundColor ?? defaults.subHeaderForegroundColor;
 
     return SizedBox(
       height: _subHeaderHeight,
@@ -458,12 +459,12 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
                             child: Text(
                               widget.title,
                               overflow: TextOverflow.ellipsis,
-                              style: textTheme.titleSmall?.copyWith(color: controlColor),
+                              style: buttonTextStyle?.apply(color: toggleModeForegroundColor),
                             ),
                           ),
                           RotationTransition(
                             turns: _controller,
-                            child: Icon(Icons.arrow_drop_down, color: controlColor),
+                            child: Icon(Icons.arrow_drop_down, color: toggleModeForegroundColor),
                           ),
                         ],
                       ),
@@ -784,7 +785,9 @@ class _MonthPickerState extends State<_MonthPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final Color controlColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.60);
+    final Color? subHeaderForegroundColor =
+        DatePickerTheme.of(context).subHeaderForegroundColor ??
+        DatePickerTheme.defaults(context).subHeaderForegroundColor;
 
     return Semantics(
       container: true,
@@ -800,13 +803,13 @@ class _MonthPickerState extends State<_MonthPicker> {
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.chevron_left),
-                    color: controlColor,
+                    color: subHeaderForegroundColor,
                     tooltip: _isDisplayingFirstMonth ? null : _localizations.previousMonthTooltip,
                     onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
                   ),
                   IconButton(
                     icon: const Icon(Icons.chevron_right),
-                    color: controlColor,
+                    color: subHeaderForegroundColor,
                     tooltip: _isDisplayingLastMonth ? null : _localizations.nextMonthTooltip,
                     onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
                   ),
