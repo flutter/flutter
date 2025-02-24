@@ -218,7 +218,7 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 - (void)sendKeyboardChannelMessage:(NSData* _Nullable)message;
 
 @property(readonly, nonatomic, strong) FlutterKeyboardManager* manager;
-@property(readonly, nonatomic, strong) id<FlutterKeyboardManagerViewDelegate> viewDelegateMock;
+@property(readonly, nonatomic, strong) id<FlutterKeyboardManagerEventContext> eventContextMock;
 @property(nonatomic, nullable, strong) NSResponder* nextResponder;
 
 #pragma mark - Private
@@ -249,7 +249,7 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
   NSObject<FlutterBinaryMessenger>* _messengerMock;
   FlutterBinaryMessageHandler _keyboardHandler;
 
-  NSObject<FlutterKeyboardManagerViewDelegate>* _viewDelegateMock;
+  NSObject<FlutterKeyboardManagerEventContext>* _eventContextMock;
 }
 
 - (nonnull instancetype)init {
@@ -283,9 +283,9 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
       .ignoringNonObjectArgs()
       .andCall(self, @selector(handleEmbedderEvent:callback:userData:));
 
-  _viewDelegateMock = OCMStrictProtocolMock(@protocol(FlutterKeyboardManagerViewDelegate));
-  OCMStub([_viewDelegateMock nextResponder]).andReturn(_nextResponder);
-  OCMStub([_viewDelegateMock onTextInputKeyEvent:[OCMArg any]])
+  _eventContextMock = OCMStrictProtocolMock(@protocol(FlutterKeyboardManagerEventContext));
+  OCMStub([_eventContextMock nextResponder]).andReturn(_nextResponder);
+  OCMStub([_eventContextMock onTextInputKeyEvent:[OCMArg any]])
       .andCall(self, @selector(handleTextInputKeyEvent:));
 
   id keyboardLayoutMock = OCMStrictClassMock([FlutterKeyboardLayout class]);
@@ -433,7 +433,7 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 - (bool)keyboardChannelGetPressedState;
 - (bool)racingConditionBetweenKeyAndText;
 - (bool)correctLogicalKeyForLayouts;
-- (bool)shouldNotHoldStrongReferenceToViewDelegate;
+- (bool)shouldNotHoldStrongReferenceToDelegate;
 @end
 
 namespace flutter::testing {
@@ -470,9 +470,8 @@ TEST(FlutterKeyboardManagerUnittests, CorrectLogicalKeyForLayouts) {
   ASSERT_TRUE([[FlutterKeyboardManagerUnittestsObjC alloc] correctLogicalKeyForLayouts]);
 }
 
-TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate) {
-  ASSERT_TRUE(
-      [[FlutterKeyboardManagerUnittestsObjC alloc] shouldNotHoldStrongReferenceToViewDelegate]);
+TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToDelegate) {
+  ASSERT_TRUE([[FlutterKeyboardManagerUnittestsObjC alloc] shouldNotHoldStrongReferenceToDelegate]);
 }
 
 }  // namespace flutter::testing
@@ -486,14 +485,14 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   [tester recordEmbedderCallsTo:embedderCallbacks];
 
   // Case: The responder reports FALSE
-  [tester.manager handleEvent:keyDownEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyDownEvent(0x50) withContext:tester.eventContextMock];
   EXPECT_EQ([embedderCallbacks count], 1u);
   embedderCallbacks[0](FALSE);
   OCMVerify([tester.nextResponder keyDown:checkKeyDownEvent(0x50)]);
   [embedderCallbacks removeAllObjects];
 
   // Case: The responder reports TRUE
-  [tester.manager handleEvent:keyUpEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyUpEvent(0x50) withContext:tester.eventContextMock];
   EXPECT_EQ([embedderCallbacks count], 1u);
   embedderCallbacks[0](TRUE);
   // [owner.nextResponder keyUp:] should not be called, otherwise an error will be thrown.
@@ -507,7 +506,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   // Send a down event first so we can send an up event later.
   [tester respondEmbedderCallsWith:false];
   [tester respondChannelCallsWith:false];
-  [tester.manager handleEvent:keyDownEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyDownEvent(0x50) withContext:tester.eventContextMock];
 
   NSMutableArray<FlutterAsyncKeyCallback>* embedderCallbacks =
       [NSMutableArray<FlutterAsyncKeyCallback> array];
@@ -517,7 +516,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   [tester recordChannelCallsTo:channelCallbacks];
 
   // Case: Both responders report TRUE.
-  [tester.manager handleEvent:keyUpEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyUpEvent(0x50) withContext:tester.eventContextMock];
   EXPECT_EQ([embedderCallbacks count], 1u);
   EXPECT_EQ([channelCallbacks count], 1u);
   embedderCallbacks[0](TRUE);
@@ -531,11 +530,11 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   // Case: One responder reports TRUE.
   [tester respondEmbedderCallsWith:false];
   [tester respondChannelCallsWith:false];
-  [tester.manager handleEvent:keyDownEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyDownEvent(0x50) withContext:tester.eventContextMock];
 
   [tester recordEmbedderCallsTo:embedderCallbacks];
   [tester recordChannelCallsTo:channelCallbacks];
-  [tester.manager handleEvent:keyUpEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyUpEvent(0x50) withContext:tester.eventContextMock];
   EXPECT_EQ([embedderCallbacks count], 1u);
   EXPECT_EQ([channelCallbacks count], 1u);
   embedderCallbacks[0](FALSE);
@@ -547,7 +546,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   [channelCallbacks removeAllObjects];
 
   // Case: Both responders report FALSE.
-  [tester.manager handleEvent:keyDownEvent(0x53) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyDownEvent(0x53) withContext:tester.eventContextMock];
   EXPECT_EQ([embedderCallbacks count], 1u);
   EXPECT_EQ([channelCallbacks count], 1u);
   embedderCallbacks[0](FALSE);
@@ -567,7 +566,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   // Send a down event first so we can send an up event later.
   [tester respondEmbedderCallsWith:false];
   [tester respondChannelCallsWith:false];
-  [tester.manager handleEvent:keyDownEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyDownEvent(0x50) withContext:tester.eventContextMock];
 
   NSMutableArray<FlutterAsyncKeyCallback>* callbacks =
       [NSMutableArray<FlutterAsyncKeyCallback> array];
@@ -576,7 +575,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   // Case: Primary responder responds TRUE. The event shouldn't be handled by
   // the secondary responder.
   [tester respondTextInputWith:FALSE];
-  [tester.manager handleEvent:keyUpEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyUpEvent(0x50) withContext:tester.eventContextMock];
   EXPECT_EQ([callbacks count], 1u);
   callbacks[0](TRUE);
   // [owner.nextResponder keyUp:] should not be called, otherwise an error will be thrown.
@@ -584,13 +583,13 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
 
   // Send a down event first so we can send an up event later.
   [tester respondEmbedderCallsWith:false];
-  [tester.manager handleEvent:keyDownEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyDownEvent(0x50) withContext:tester.eventContextMock];
 
   // Case: Primary responder responds FALSE. The secondary responder returns
   // TRUE.
   [tester recordEmbedderCallsTo:callbacks];
   [tester respondTextInputWith:TRUE];
-  [tester.manager handleEvent:keyUpEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyUpEvent(0x50) withContext:tester.eventContextMock];
   EXPECT_EQ([callbacks count], 1u);
   callbacks[0](FALSE);
   // [owner.nextResponder keyUp:] should not be called, otherwise an error will be thrown.
@@ -598,7 +597,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
 
   // Case: Primary responder responds FALSE. The secondary responder returns FALSE.
   [tester respondTextInputWith:FALSE];
-  [tester.manager handleEvent:keyDownEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyDownEvent(0x50) withContext:tester.eventContextMock];
   EXPECT_EQ([callbacks count], 1u);
   callbacks[0](FALSE);
   OCMVerify([tester.nextResponder keyDown:checkKeyDownEvent(0x50)]);
@@ -614,7 +613,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   [tester respondEmbedderCallsWith:false];
   [tester respondChannelCallsWith:false];
   [tester respondTextInputWith:false];
-  [tester.manager handleEvent:keyDownEvent(0x50) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyDownEvent(0x50) withContext:tester.eventContextMock];
 
   // Passes if no error is thrown.
   return true;
@@ -626,7 +625,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   [tester respondEmbedderCallsWith:false];
   [tester respondChannelCallsWith:false];
   [tester respondTextInputWith:false];
-  [tester.manager handleEvent:keyDownEvent(kVK_ANSI_A) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyDownEvent(kVK_ANSI_A) withContext:tester.eventContextMock];
 
   NSDictionary* pressingRecords = [tester.manager getPressedState];
   EXPECT_EQ([pressingRecords count], 1u);
@@ -641,7 +640,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   [tester respondEmbedderCallsWith:false];
   [tester respondChannelCallsWith:false];
   [tester respondTextInputWith:false];
-  [tester.manager handleEvent:keyDownEvent(kVK_ANSI_A) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyDownEvent(kVK_ANSI_A) withContext:tester.eventContextMock];
 
   FlutterMethodCall* getKeyboardStateMethodCall =
       [FlutterMethodCall methodCallWithMethodName:@"getKeyboardState" arguments:nil];
@@ -676,7 +675,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   // Tap key U, which is converted by IME into a pure text message "ư".
 
   [tester.manager handleEvent:keyDownEvent(kKeyCodeEmpty, @"ư", @"ư")
-             withViewDelegate:tester.viewDelegateMock];
+                  withContext:tester.eventContextMock];
   EXPECT_EQ([keyCallbacks count], 1u);
   EXPECT_EQ([allCalls count], 1u);
   EXPECT_EQ(allCalls[0], @(kEmbedderCall));
@@ -687,7 +686,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   [keyCallbacks removeAllObjects];
   [allCalls removeAllObjects];
 
-  [tester.manager handleEvent:keyUpEvent(kKeyCodeEmpty) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyUpEvent(kKeyCodeEmpty) withContext:tester.eventContextMock];
   EXPECT_EQ([keyCallbacks count], 1u);
   keyCallbacks[0](false);
   EXPECT_EQ([keyCallbacks count], 1u);
@@ -699,8 +698,8 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   // slow.
 
   [tester.manager handleEvent:keyDownEvent(kVK_ANSI_O, @"o", @"o")
-             withViewDelegate:tester.viewDelegateMock];
-  [tester.manager handleEvent:keyUpEvent(kVK_ANSI_O) withViewDelegate:tester.viewDelegateMock];
+                  withContext:tester.eventContextMock];
+  [tester.manager handleEvent:keyUpEvent(kVK_ANSI_O) withContext:tester.eventContextMock];
   EXPECT_EQ([keyCallbacks count], 1u);
   EXPECT_EQ([allCalls count], 1u);
   EXPECT_EQ(allCalls[0], @(kEmbedderCall));
@@ -708,8 +707,8 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   // Tap key C, which results in two Backspace messages first - and here they
   // arrive before the key O messages are responded.
 
-  [tester.manager handleEvent:keyDownEvent(kVK_Delete) withViewDelegate:tester.viewDelegateMock];
-  [tester.manager handleEvent:keyUpEvent(kVK_Delete) withViewDelegate:tester.viewDelegateMock];
+  [tester.manager handleEvent:keyDownEvent(kVK_Delete) withContext:tester.eventContextMock];
+  [tester.manager handleEvent:keyUpEvent(kVK_Delete) withContext:tester.eventContextMock];
   EXPECT_EQ([keyCallbacks count], 1u);
   EXPECT_EQ([allCalls count], 1u);
 
@@ -747,8 +746,8 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
 
   auto sendTap = [&](uint16_t keyCode, NSString* chars, NSString* charsUnmod) {
     [tester.manager handleEvent:keyDownEvent(keyCode, chars, charsUnmod)
-               withViewDelegate:tester.viewDelegateMock];
-    [tester.manager handleEvent:keyUpEvent(keyCode) withViewDelegate:tester.viewDelegateMock];
+                    withContext:tester.eventContextMock];
+    [tester.manager handleEvent:keyUpEvent(keyCode) withContext:tester.eventContextMock];
   };
 
   /* US keyboard layout */
@@ -826,7 +825,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate
   return TRUE;
 }
 
-- (bool)shouldNotHoldStrongReferenceToViewDelegate {
+- (bool)shouldNotHoldStrongReferenceToDelegate {
   __strong FlutterKeyboardManager* strongKeyboardManager;
   __weak id weakDelegate;
 
