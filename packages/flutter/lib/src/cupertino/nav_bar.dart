@@ -1122,12 +1122,14 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     }
 
     if (target != null) {
-      position.animateTo(
-        target,
-        // Eyeballed on an iPhone 16 simulator running iOS 18.
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.fastEaseInToSlowEaseOut,
-      );
+      Future.microtask(() {
+        position.animateTo(
+          target!,
+          // Eyeballed on an iPhone 16 simulator running iOS 18.
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.fastEaseInToSlowEaseOut,
+        );
+      });
     }
   }
 
