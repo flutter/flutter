@@ -106,7 +106,7 @@ class DartProject {
     ui_thread_policy_ = policy;
   }
 
-  // REturns the policy for UI isolate.
+  // Returns the policy for UI isolate.
   // Defaults to UIThreadPolicy::Default.
   UIThreadPolicy ui_thread_policy() const { return ui_thread_policy_; }
 
