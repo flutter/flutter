@@ -2585,7 +2585,7 @@ FlutterEngineResult FlutterEngineSendViewFocusEvent(
     return LOG_EMBEDDER_ERROR(kInvalidArguments,
                               "View focus event must not be null.");
   }
-  // The engine must be running to remove a view.
+  // The engine must be running to focus a view.
   auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
   if (!embedder_engine->IsValid()) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
