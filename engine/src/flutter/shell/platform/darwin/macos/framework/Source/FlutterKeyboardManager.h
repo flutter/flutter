@@ -34,7 +34,7 @@
 
 @end
 
-@protocol FlutterKeyboardManagerViewDelegate
+@protocol FlutterKeyboardManagerEventContext
 
 @required
 /**
@@ -87,7 +87,7 @@
  * the next responder afterwards.
  */
 - (void)handleEvent:(nonnull NSEvent*)event
-    withViewDelegate:(nonnull id<FlutterKeyboardManagerViewDelegate>)viewDelegate;
+        withContext:(nonnull id<FlutterKeyboardManagerEventContext>)eventContext;
 
 /**
  * Returns yes if is event currently being redispatched.

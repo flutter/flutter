@@ -44,27 +44,27 @@ typedef void (^VoidBlock)();
 
 }  // namespace
 
-@interface FlutterEventWithViewDelegate : NSObject
+@interface FlutterEventWithContext : NSObject
 
 @property(nonatomic, readonly) NSEvent* event;
-@property(nonatomic, readonly) id<FlutterKeyboardManagerViewDelegate> viewDelegate;
+@property(nonatomic, readonly) id<FlutterKeyboardManagerEventContext> context;
 
 - (instancetype)initWithEvent:(NSEvent*)event
-                 viewDelegate:(nonnull id<FlutterKeyboardManagerViewDelegate>)viewDelegate;
+                      context:(nonnull id<FlutterKeyboardManagerEventContext>)context;
 
 @end
 
-@implementation FlutterEventWithViewDelegate {
+@implementation FlutterEventWithContext {
   NSEvent* _event;
-  id<FlutterKeyboardManagerViewDelegate> _viewDelegate;
+  id<FlutterKeyboardManagerEventContext> _context;
 }
 
 - (instancetype)initWithEvent:(NSEvent*)event
-                 viewDelegate:(id<FlutterKeyboardManagerViewDelegate>)viewDelegate {
+                      context:(id<FlutterKeyboardManagerEventContext>)context {
   self = [super init];
   if (self) {
     _event = event;
-    _viewDelegate = viewDelegate;
+    _context = context;
   }
   return self;
 }
@@ -83,7 +83,7 @@ typedef void (^VoidBlock)();
  */
 @property(nonatomic) NSMutableArray<id<FlutterKeyPrimaryResponder>>* primaryResponders;
 
-@property(nonatomic) NSMutableArray<FlutterEventWithViewDelegate*>* pendingEvents;
+@property(nonatomic) NSMutableArray<FlutterEventWithContext*>* pendingEvents;
 
 @property(nonatomic) BOOL processingEvent;
 
@@ -114,7 +114,7 @@ typedef void (^VoidBlock)();
  * This function is called by processNextEvent.
  */
 - (void)performProcessEvent:(NSEvent*)event
-               viewDelegate:(nonnull id<FlutterKeyboardManagerViewDelegate>)viewDelegate
+                withContext:(nonnull id<FlutterKeyboardManagerEventContext>)context
                    onFinish:(nonnull VoidBlock)onFinish;
 
 /**
@@ -122,7 +122,7 @@ typedef void (^VoidBlock)();
  * and potentially to the next responder.
  */
 - (void)dispatchTextEvent:(nonnull NSEvent*)pendingEvent
-             viewDelegate:(nonnull id<FlutterKeyboardManagerViewDelegate>)viewDelegate;
+              withContext:(nonnull id<FlutterKeyboardManagerEventContext>)context;
 
 /**
  * Clears the current layout and build a new one based on the current layout.
@@ -202,7 +202,7 @@ typedef void (^VoidBlock)();
 }
 
 - (void)handleEvent:(nonnull NSEvent*)event
-    withViewDelegate:(nonnull id<FlutterKeyboardManagerViewDelegate>)viewDelegate {
+        withContext:(nonnull id<FlutterKeyboardManagerEventContext>)context {
   // The `handleEvent` does not process the event immediately, but instead put
   // events into a queue. Events are processed one by one by `processNextEvent`.
 
@@ -213,8 +213,7 @@ typedef void (^VoidBlock)();
     return;
   }
 
-  [_pendingEvents addObject:[[FlutterEventWithViewDelegate alloc] initWithEvent:event
-                                                                   viewDelegate:viewDelegate]];
+  [_pendingEvents addObject:[[FlutterEventWithContext alloc] initWithEvent:event context:context]];
   [self processNextEvent];
 }
 
@@ -232,7 +231,7 @@ typedef void (^VoidBlock)();
     _processingEvent = TRUE;
   }
 
-  FlutterEventWithViewDelegate* pendingEvent = [_pendingEvents firstObject];
+  FlutterEventWithContext* pendingEvent = [_pendingEvents firstObject];
   [_pendingEvents removeObjectAtIndex:0];
 
   __weak __typeof__(self) weakSelf = self;
@@ -240,13 +239,11 @@ typedef void (^VoidBlock)();
     weakSelf.processingEvent = FALSE;
     [weakSelf processNextEvent];
   };
-  [self performProcessEvent:pendingEvent.event
-               viewDelegate:pendingEvent.viewDelegate
-                   onFinish:onFinish];
+  [self performProcessEvent:pendingEvent.event withContext:pendingEvent.context onFinish:onFinish];
 }
 
 - (void)performProcessEvent:(NSEvent*)event
-               viewDelegate:(id<FlutterKeyboardManagerViewDelegate>)viewDelegate
+                withContext:(id<FlutterKeyboardManagerEventContext>)context
                    onFinish:(VoidBlock)onFinish {
   // Having no primary responders require extra logic, but Flutter hard-codes
   // all primary responders, so this is a situation that Flutter will never
@@ -263,7 +260,7 @@ typedef void (^VoidBlock)();
     anyHandled = anyHandled || handled;
     if (unreplied == 0) {
       if (!anyHandled) {
-        [weakSelf dispatchTextEvent:event viewDelegate:viewDelegate];
+        [weakSelf dispatchTextEvent:event withContext:context];
       }
       onFinish();
     }
@@ -275,11 +272,11 @@ typedef void (^VoidBlock)();
 }
 
 - (void)dispatchTextEvent:(NSEvent*)event
-             viewDelegate:(id<FlutterKeyboardManagerViewDelegate>)viewDelegate {
-  if ([viewDelegate onTextInputKeyEvent:event]) {
+              withContext:(id<FlutterKeyboardManagerEventContext>)context {
+  if ([context onTextInputKeyEvent:event]) {
     return;
   }
-  NSResponder* nextResponder = viewDelegate.nextResponder;
+  NSResponder* nextResponder = context.nextResponder;
   if (nextResponder == nil) {
     return;
   }

@@ -158,7 +158,7 @@ struct MouseState {
 /**
  * Private interface declaration for FlutterViewController.
  */
-@interface FlutterViewController () <FlutterViewDelegate, FlutterKeyboardManagerViewDelegate>
+@interface FlutterViewController () <FlutterViewDelegate, FlutterKeyboardManagerEventContext>
 
 /**
  * The tracking area used to generate hover events, if enabled.
@@ -844,15 +844,15 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 }
 
 - (void)keyDown:(NSEvent*)event {
-  [_engine.keyboardManager handleEvent:event withViewDelegate:self];
+  [_engine.keyboardManager handleEvent:event withContext:self];
 }
 
 - (void)keyUp:(NSEvent*)event {
-  [_engine.keyboardManager handleEvent:event withViewDelegate:self];
+  [_engine.keyboardManager handleEvent:event withContext:self];
 }
 
 - (void)flagsChanged:(NSEvent*)event {
-  [_engine.keyboardManager handleEvent:event withViewDelegate:self];
+  [_engine.keyboardManager handleEvent:event withContext:self];
 }
 
 - (void)mouseEntered:(NSEvent*)event {
