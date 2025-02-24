@@ -667,7 +667,6 @@ Future<Codec> instantiateImageCodecWithSize(
     } else {
       codec = await engine.renderer.instantiateImageCodec(buffer._list!);
       info = await codec.getNextFrame();
-
       final int width = info.image.width;
       final int height = info.image.height;
       final TargetImageSize targetSize = getTargetSize(width, height);
