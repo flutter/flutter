@@ -659,31 +659,28 @@ Future<Codec> instantiateImageCodecWithSize(
   ImmutableBuffer buffer, {
   TargetImageSizeCallback? getTargetSize,
 }) async {
+  Codec? codec;
+  FrameInfo? info;
   try {
     if (getTargetSize == null) {
       return engine.renderer.instantiateImageCodec(buffer._list!);
     } else {
-      final Codec codec = await engine.renderer.instantiateImageCodec(buffer._list!);
-      try {
-        final FrameInfo info = await codec.getNextFrame();
-        try {
-          final int width = info.image.width;
-          final int height = info.image.height;
-          final TargetImageSize targetSize = getTargetSize(width, height);
-          return engine.renderer.instantiateImageCodec(
-            buffer._list!,
-            targetWidth: targetSize.width,
-            targetHeight: targetSize.height,
-            allowUpscaling: false,
-          );
-        } finally {
-          info.image.dispose();
-        }
-      } finally {
-        codec.dispose();
-      }
+      codec = await engine.renderer.instantiateImageCodec(buffer._list!);
+      info = await codec.getNextFrame();
+
+      final int width = info.image.width;
+      final int height = info.image.height;
+      final TargetImageSize targetSize = getTargetSize(width, height);
+      return engine.renderer.instantiateImageCodec(
+        buffer._list!,
+        targetWidth: targetSize.width,
+        targetHeight: targetSize.height,
+        allowUpscaling: false,
+      );
     }
   } finally {
+    info?.image.dispose();
+    codec?.dispose();
     buffer.dispose();
   }
 }
