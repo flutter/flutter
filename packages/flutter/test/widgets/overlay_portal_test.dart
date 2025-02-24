@@ -2802,12 +2802,18 @@ void main() {
       late Matrix4 computedPaintTransform;
       double zOffset = 123.0;
 
+      late final OverlayEntry entry;
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry = OverlayEntry(
                 builder: (BuildContext context) {
                   return StatefulBuilder(
                     builder: (BuildContext context, StateSetter setter) {
