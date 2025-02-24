@@ -59,9 +59,9 @@ class ViewFocusChangeRequest {
  private:
   ViewFocusChangeRequest() = delete;
 
-  int64_t view_id_;
-  ViewFocusState state_;
-  ViewFocusDirection direction_;
+  int64_t view_id_ = 0;
+  ViewFocusState state_ = ViewFocusState::kUnfocused;
+  ViewFocusDirection direction_ = ViewFocusDirection::kUndefined;
 };
 
 }  // namespace flutter
