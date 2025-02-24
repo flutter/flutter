@@ -32,7 +32,7 @@ enum CacheExtentStyle {
   viewport,
 }
 
-/// Specifies an order in which to paint the slivers of a [ScrollView].
+/// Specifies an order in which to paint the slivers of a [Viewport].
 ///
 /// The slivers of a [ScrollView] are the list returned by
 /// [ScrollView.buildSlivers].  For a [CustomScrollView], this is
@@ -51,17 +51,19 @@ enum CacheExtentStyle {
 enum SliverPaintOrder {
   /// The first sliver paints on top, and the last sliver on bottom.
   ///
-  /// The slivers are painted in the reverse order of [ScrollView.buildSlivers]
-  /// (for example, the reverse order of [CustomScrollView.slivers]),
-  /// and hit-tested in the same order as [ScrollView.buildSlivers].
+  /// The slivers are painted in the reverse order of [Viewport.slivers]
+  /// (for example, the reverse order of [ScrollView.buildSlivers]
+  /// or [CustomScrollView.slivers]),
+  /// and hit-tested in the same order as [Viewport.slivers].
   ///
   /// This is the default order.
   firstIsTop,
 
   /// The last sliver paints on top, and the first sliver on bottom.
   ///
-  /// The slivers are painted in the same order as [ScrollView.buildSlivers]
-  /// (for example, the same order as [CustomScrollView.slivers]),
+  /// The slivers are painted in the same order as [Viewport.slivers]
+  /// (for example, the same order as [ScrollView.buildSlivers]
+  /// or [CustomScrollView.slivers]),
   /// and hit-tested in the reverse order.
   lastIsTop,
 }
