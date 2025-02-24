@@ -2591,15 +2591,15 @@ FlutterEngineResult FlutterEngineSendViewFocusEvent(
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
-  int64_t view_id = SAFE_ACCESS(event, view_id, kFlutterImplicitViewId);
-  FlutterViewFocusState state = SAFE_ACCESS(event, state, kUnfocused);
-  FlutterViewFocusDirection direction =
-      SAFE_ACCESS(event, direction, kUndefined);
+  if (!STRUCT_HAS_MEMBER(event, direction)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The event struct has invalid size.");
+  }
 
   flutter::ViewFocusEvent flutter_event(
-      view_id,  //
-      static_cast<flutter::ViewFocusState>(state),
-      static_cast<flutter::ViewFocusDirection>(direction));
+      event->view_id,  //
+      static_cast<flutter::ViewFocusState>(event->state),
+      static_cast<flutter::ViewFocusDirection>(event->direction));
 
   embedder_engine->GetShell().GetPlatformView()->SendViewFocusEvent(
       flutter_event);
