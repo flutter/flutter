@@ -220,7 +220,8 @@ void TextInputPlugin::HandleMethodCall(
     FlutterWindowsView* view = engine_->view(view_id_);
     if (view == nullptr) {
       result->Error(kInternalConsistencyError,
-                    "Text input is not available in Windows headless mode");
+                    "Text input is not available when corresponding view "
+                    "cannot be found");
       return;
     }
     if (active_model_ != nullptr && active_model_->composing()) {
@@ -339,7 +340,8 @@ void TextInputPlugin::HandleMethodCall(
     FlutterWindowsView* view = engine_->view(view_id_);
     if (view == nullptr) {
       result->Error(kInternalConsistencyError,
-                    "Text input is not available in Windows headless mode");
+                    "Text input is not available when corresponding view "
+                    "cannot be found");
       return;
     }
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
@@ -368,7 +370,8 @@ void TextInputPlugin::HandleMethodCall(
     FlutterWindowsView* view = engine_->view(view_id_);
     if (view == nullptr) {
       result->Error(kInternalConsistencyError,
-                    "Text input is not available in Windows headless mode");
+                    "Text input is not available when corresponding view "
+                    "cannot be found");
       return;
     }
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {

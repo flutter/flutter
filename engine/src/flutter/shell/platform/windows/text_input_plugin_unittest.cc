@@ -244,9 +244,10 @@ TEST_F(TextInputPluginTest, ClearClientRequiresView) {
   messenger.SimulateEngineMessage(kChannelName, message->data(),
                                   message->size(), reply_handler);
 
-  EXPECT_EQ(reply,
-            "[\"Internal Consistency Error\",\"Text input is not available in "
-            "Windows headless mode\",null]");
+  EXPECT_EQ(
+      reply,
+      "[\"Internal Consistency Error\",\"Text input is not available when "
+      "corresponding view cannot be found\",null]");
 }
 
 // Verify that the embedder sends state update messages to the framework during
@@ -711,9 +712,10 @@ TEST_F(TextInputPluginTest, SetMarkedTextRectRequiresView) {
   messenger.SimulateEngineMessage(kChannelName, message->data(),
                                   message->size(), reply_handler);
 
-  EXPECT_EQ(reply,
-            "[\"Internal Consistency Error\",\"Text input is not available in "
-            "Windows headless mode\",null]");
+  EXPECT_EQ(
+      reply,
+      "[\"Internal Consistency Error\",\"Text input is not available when "
+      "corresponding view cannot be found\",null]");
 }
 
 }  // namespace testing
