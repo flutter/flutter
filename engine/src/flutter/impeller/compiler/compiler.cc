@@ -269,8 +269,6 @@ uint32_t CalculateUBOSize(const spirv_cross::ParsedIR* ir,
         compiler->get_type(ubo.base_type_id);
     uint32_t size = compiler->get_declared_struct_size(ubo_type);
     result += size;
-    std::cout << "Uniform buffer \"" << ubo.name << "\" is " << size
-              << " bytes in size." << std::endl;
   }
   return result;
 }
