@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/tools/scene_importer.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -396,6 +395,90 @@ void main() {
       );
 
       expect(await residentWebRunner.run(), 0);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
+    },
+  );
+
+  testUsingContext(
+    'Detach keeps device running',
+    () async {
+      final BufferLogger logger = BufferLogger.test();
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      fileSystem.directory('web').deleteSync(recursive: true);
+      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
+        flutterDevice,
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        fileSystem: fileSystem,
+        logger: logger,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
+        analytics: globals.analytics,
+        systemClock: globals.systemClock,
+        devtoolsHandler: createNoOpHandler,
+      );
+
+      mockDevice.dds = DartDevelopmentService(logger: logger);
+
+      expect(mockDevice.isRunning, false);
+      final Completer<DebugConnectionInfo> connectionInfoCompleter =
+          Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+      expect(mockDevice.isRunning, true);
+      await residentWebRunner.detach();
+      expect(residentWebRunner.stopAppDuringCleanup, false);
+      await residentWebRunner.exit();
+      await residentWebRunner.cleanupAtFinish();
+      expect(mockDevice.isRunning, true);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
+    },
+  );
+
+  testUsingContext(
+    'Quit stops device',
+    () async {
+      final BufferLogger logger = BufferLogger.test();
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      fileSystem.directory('web').deleteSync(recursive: true);
+      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
+        flutterDevice,
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        fileSystem: fileSystem,
+        logger: logger,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
+        analytics: globals.analytics,
+        systemClock: globals.systemClock,
+        devtoolsHandler: createNoOpHandler,
+      );
+
+      mockDevice.dds = DartDevelopmentService(logger: logger);
+
+      expect(mockDevice.isRunning, false);
+      final Completer<DebugConnectionInfo> connectionInfoCompleter =
+          Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+      expect(mockDevice.isRunning, true);
+      expect(residentWebRunner.stopAppDuringCleanup, true);
+      await residentWebRunner.cleanupAtFinish();
+      expect(mockDevice.isRunning, false);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1593,6 +1676,8 @@ class FakeDevice extends Fake implements Device {
 
   int count = 0;
 
+  bool isRunning = false;
+
   @override
   Future<String> get sdkNameAndVersion async => 'SDK Name and Version';
 
@@ -1613,6 +1698,7 @@ class FakeDevice extends Fake implements Device {
     bool ipv6 = false,
     String? userIdentifier,
   }) async {
+    isRunning = true;
     return LaunchResult.succeeded();
   }
 
@@ -1622,6 +1708,7 @@ class FakeDevice extends Fake implements Device {
       throw StateError('stopApp called more than once.');
     }
     count += 1;
+    isRunning = false;
     return true;
   }
 }
@@ -1727,7 +1814,6 @@ class FakeWebDevFS extends Fake implements WebDevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
-    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
