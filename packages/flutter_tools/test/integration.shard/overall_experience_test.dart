@@ -38,42 +38,42 @@ void main() {
     () async {
       final String tempDirectory =
           fileSystem.systemTempDirectory
-              .createTempSync('flutter_overall_experience_test.')
-              .resolveSymbolicLinksSync();
-      final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
-      final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
-      bool? existsDuringTest;
-      try {
-        expect(fileSystem.file(pidFile).existsSync(), isFalse);
-        final ProcessTestResult result = await runFlutter(
-          <String>['run', '-dflutter-tester', '--pid-file', pidFile],
-          testDirectory,
-          <Transition>[
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
+    final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
+    final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
+    bool? existsDuringTest;
+    try {
+      expect(fileSystem.file(pidFile).existsSync(), isFalse);
+      final ProcessTestResult result = await runFlutter(
+        <String>['run', '-dflutter-tester', '--pid-file', pidFile],
+        testDirectory,
+        <Transition>[
             Barrier(
               'q Quit (terminate the application on the device).',
               handler: (String line) {
-                existsDuringTest = fileSystem.file(pidFile).existsSync();
-                return 'q';
+            existsDuringTest = fileSystem.file(pidFile).existsSync();
+            return 'q';
               },
             ),
-            Barrier('Application finished.'),
-          ],
-        );
-        expect(existsDuringTest, isNot(isNull));
-        expect(existsDuringTest, isTrue);
-        expect(result.exitCode, 0, reason: 'subprocess failed; $result');
-        expect(fileSystem.file(pidFile).existsSync(), isFalse);
-        // This first test ignores the stdout and stderr, so that if the
-        // first run outputs "building flutter", or the "there's a new
-        // flutter" banner, or other such first-run messages, they won't
-        // fail the tests. This does mean that running this test first is
-        // actually important in the case where you're running the tests
-        // manually. (On CI, all those messages are expected to be seen
-        // long before we get here, e.g. because we run "flutter doctor".)
-      } finally {
-        tryToDelete(fileSystem.directory(tempDirectory));
-      }
-    },
+          Barrier('Application finished.'),
+        ],
+      );
+      expect(existsDuringTest, isNot(isNull));
+      expect(existsDuringTest, isTrue);
+      expect(result.exitCode, 0, reason: 'subprocess failed; $result');
+      expect(fileSystem.file(pidFile).existsSync(), isFalse);
+      // This first test ignores the stdout and stderr, so that if the
+      // first run outputs "building flutter", or the "there's a new
+      // flutter" banner, or other such first-run messages, they won't
+      // fail the tests. This does mean that running this test first is
+      // actually important in the case where you're running the tests
+      // manually. (On CI, all those messages are expected to be seen
+      // long before we get here, e.g. because we run "flutter doctor".)
+    } finally {
+      tryToDelete(fileSystem.directory(tempDirectory));
+    }
+  },
     // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
     skip: Platform.isWindows,
   );
@@ -81,8 +81,8 @@ void main() {
   testWithoutContext('flutter run handle SIGUSR1/2 run', () async {
     final String tempDirectory =
         fileSystem.systemTempDirectory
-            .createTempSync('flutter_overall_experience_test.')
-            .resolveSymbolicLinksSync();
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
     final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
     final String testDirectory = fileSystem.path.join(
       flutterRoot,
@@ -133,7 +133,7 @@ void main() {
           Multiple(
             <Pattern>[RegExp(r'^Restarted application in .+m?s.$'), 'called main', 'called paint'],
             handler: (String line) {
-              return 'q';
+            return 'q';
             },
           ),
           Barrier('Application finished.'),
@@ -179,8 +179,8 @@ void main() {
   testWithoutContext('flutter run can hot reload and hot restart, handle "p" key', () async {
     final String tempDirectory =
         fileSystem.systemTempDirectory
-            .createTempSync('flutter_overall_experience_test.')
-            .resolveSymbolicLinksSync();
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
     final String testDirectory = fileSystem.path.join(
       flutterRoot,
       'dev',
@@ -217,19 +217,19 @@ void main() {
           Multiple(
             <Pattern>['ready', 'called main', 'called paint'],
             handler: (String line) {
-              return 'p';
+            return 'p';
             },
           ),
           Multiple(
             <Pattern>['ready', 'called paint', 'called debugPaintSize'],
-            handler: (String line) {
-              return 'p';
+              handler: (String line) {
+            return 'p';
             },
           ),
           Multiple(
             <Pattern>['ready', 'called paint'],
             handler: (String line) {
-              return 'q';
+            return 'q';
             },
           ),
           Barrier('Application finished.'),
@@ -293,8 +293,8 @@ void main() {
     );
     final String tempDirectory =
         fileSystem.systemTempDirectory
-            .createTempSync('flutter_overall_experience_test.')
-            .resolveSymbolicLinksSync();
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
     final String testScript = fileSystem.path.join('lib', 'overflow.dart');
     try {
       final ProcessTestResult result = await runFlutter(
@@ -382,13 +382,13 @@ void main() {
         Barrier(
           finalLine,
           handler: (String line) {
-            return 'h';
+          return 'h';
           },
         ),
         Barrier(
           finalLine,
           handler: (String line) {
-            return 'q';
+          return 'q';
           },
         ),
         Barrier('Application finished.'),

@@ -69,7 +69,7 @@ abstract class AotAssemblyBase extends Target {
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<DarwinArch> darwinArchs =
         environment.defines[kIosArchs]?.split(' ').map(getIOSArchForName).toList() ??
-        <DarwinArch>[DarwinArch.arm64];
+            <DarwinArch>[DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
@@ -150,18 +150,19 @@ class AotAssemblyRelease extends AotAssemblyBase {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.artifact(Artifact.engineDartBinary),
-    Source.artifact(Artifact.skyEnginePath),
-    // TODO(zanderso): cannot reference gen_snapshot with artifacts since
-    // it resolves to a file (ios/gen_snapshot) that never exists. This was
-    // split into gen_snapshot_arm64 and gen_snapshot_armv7.
-    // Source.artifact(Artifact.genSnapshot,
-    //   platform: TargetPlatform.ios,
-    //   mode: BuildMode.release,
-    // ),
-  ];
+        Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
+        Source.pattern('{BUILD_DIR}/app.dill'),
+        Source.artifact(Artifact.engineDartBinary),
+        Source.artifact(Artifact.skyEnginePath),
+        // TODO(zanderso): cannot reference gen_snapshot with artifacts since
+        // it resolves to a file (ios/gen_snapshot) that never exists. This was
+        // split into gen_snapshot_arm64 and gen_snapshot_armv7.
+        // Source.artifact(Artifact.genSnapshot,
+        //   platform: TargetPlatform.ios,
+        //   mode: BuildMode.release,
+        // ),
+      ];
 
   @override
   List<Source> get outputs => const <Source>[Source.pattern('{OUTPUT_DIR}/App.framework/App')];
@@ -179,18 +180,19 @@ class AotAssemblyProfile extends AotAssemblyBase {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.artifact(Artifact.engineDartBinary),
-    Source.artifact(Artifact.skyEnginePath),
-    // TODO(zanderso): cannot reference gen_snapshot with artifacts since
-    // it resolves to a file (ios/gen_snapshot) that never exists. This was
-    // split into gen_snapshot_arm64 and gen_snapshot_armv7.
-    // Source.artifact(Artifact.genSnapshot,
-    //   platform: TargetPlatform.ios,
-    //   mode: BuildMode.profile,
-    // ),
-  ];
+        Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
+        Source.pattern('{BUILD_DIR}/app.dill'),
+        Source.artifact(Artifact.engineDartBinary),
+        Source.artifact(Artifact.skyEnginePath),
+        // TODO(zanderso): cannot reference gen_snapshot with artifacts since
+        // it resolves to a file (ios/gen_snapshot) that never exists. This was
+        // split into gen_snapshot_arm64 and gen_snapshot_armv7.
+        // Source.artifact(Artifact.genSnapshot,
+        //   platform: TargetPlatform.ios,
+        //   mode: BuildMode.profile,
+        // ),
+      ];
 
   @override
   List<Source> get outputs => const <Source>[Source.pattern('{OUTPUT_DIR}/App.framework/App')];
@@ -211,8 +213,9 @@ class DebugUniversalFramework extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
-  ];
+        Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
+      ];
 
   @override
   List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/App.framework/App')];
@@ -242,16 +245,16 @@ abstract class UnpackIOS extends Target {
 
   @override
   List<Source> get inputs => <Source>[
-    const Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
-    ),
-    Source.artifact(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: buildMode),
-  ];
+        const Source.pattern(
+          '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+        ),
+        Source.artifact(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: buildMode),
+      ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
-  ];
+        Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
+      ];
 
   @override
   List<Target> get dependencies => <Target>[];
@@ -271,9 +274,8 @@ abstract class UnpackIOS extends Target {
     }
     await _copyFramework(environment, sdkRoot);
 
-    final File frameworkBinary = environment.outputDir
-        .childDirectory('Flutter.framework')
-        .childFile('Flutter');
+    final File frameworkBinary =
+        environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
     final String frameworkBinaryPath = frameworkBinary.path;
     if (!await frameworkBinary.exists()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
@@ -443,21 +445,25 @@ abstract class IosAssetBundle extends Target {
   const IosAssetBundle();
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+        DartBuildForNative(),
+        KernelSnapshot(),
+        InstallCodeAssets(),
+      ];
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App.framework/App'),
-    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    ...IconTreeShaker.inputs,
-    ...ShaderCompiler.inputs,
-  ];
+        Source.pattern('{BUILD_DIR}/App.framework/App'),
+        Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+        ...IconTreeShaker.inputs,
+        ...ShaderCompiler.inputs,
+      ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/App.framework/App'),
-    Source.pattern('{OUTPUT_DIR}/App.framework/Info.plist'),
-  ];
+        Source.pattern('{OUTPUT_DIR}/App.framework/App'),
+        Source.pattern('{OUTPUT_DIR}/App.framework/Info.plist'),
+      ];
 
   @override
   List<String> get depfiles => <String>['flutter_assets.d'];
@@ -529,9 +535,11 @@ abstract class IosAssetBundle extends Target {
     final String? flavor = await flutterProject.ios.parseFlavorFromConfiguration(environment);
 
     // Copy the assets.
+    final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
+      dartBuildResult: dartBuildResult,
       targetPlatform: TargetPlatform.ios,
       buildMode: buildMode,
       additionalInputs: <File>[
@@ -568,19 +576,19 @@ class DebugIosApplicationBundle extends IosAssetBundle {
 
   @override
   List<Source> get inputs => <Source>[
-    const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
-    const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
-    const Source.pattern('{BUILD_DIR}/app.dill'),
-    ...super.inputs,
-  ];
+        const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
+        const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+        const Source.pattern('{BUILD_DIR}/app.dill'),
+        ...super.inputs,
+      ];
 
   @override
   List<Source> get outputs => <Source>[
-    const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/vm_snapshot_data'),
-    const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/isolate_snapshot_data'),
-    const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/kernel_blob.bin'),
-    ...super.outputs,
-  ];
+        const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/vm_snapshot_data'),
+        const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/isolate_snapshot_data'),
+        const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/kernel_blob.bin'),
+        ...super.outputs,
+      ];
 
   @override
   List<Target> get dependencies => <Target>[const DebugUniversalFramework(), ...super.dependencies];
@@ -592,15 +600,15 @@ abstract class _IosAssetBundleWithDSYM extends IosAssetBundle {
 
   @override
   List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-  ];
+        ...super.inputs,
+        const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+      ];
 
   @override
   List<Source> get outputs => <Source>[
-    ...super.outputs,
-    const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-  ];
+        ...super.outputs,
+        const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+      ];
 }
 
 /// Build a profile iOS application bundle.

@@ -30,8 +30,8 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
   FakeDyldEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
   @override
   Map<String, String> get environment => <String, String>{
-    'DYLD_LIBRARY_PATH': '/path/to/libraries',
-  };
+        'DYLD_LIBRARY_PATH': '/path/to/libraries',
+      };
 
   @override
   Future<bool> isUpToDate(FileSystem fileSystem) => Future<bool>.value(true);
@@ -57,8 +57,8 @@ class FakeProcess implements Process {
     IOSink? stdin,
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
-  }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin ?? MemoryIOSink();
+  })  : exitCode = exitCode ?? Future<int>.value(0),
+        stdin = stdin ?? MemoryIOSink();
 
   @override
   final int pid;
@@ -313,7 +313,7 @@ class FakeStdin extends Fake implements Stdin {
 
 class FakePlistParser implements PlistParser {
   FakePlistParser([Map<String, Object>? underlyingValues])
-    : _underlyingValues = underlyingValues ?? <String, Object>{};
+      : _underlyingValues = underlyingValues ?? <String, Object>{};
 
   final Map<String, Object> _underlyingValues;
 
@@ -492,6 +492,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.areCustomDevicesEnabled = false,
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
+    this.isDartDataAssetsEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
     this.isExplicitPackageDependenciesEnabled = false,
   });
@@ -525,6 +526,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isNativeAssetsEnabled;
+
+  @override
+  final bool isDartDataAssetsEnabled;
 
   @override
   final bool isSwiftPackageManagerEnabled;
@@ -633,10 +637,10 @@ class FakeStopwatch implements Stopwatch {
 
 class FakeStopwatchFactory implements StopwatchFactory {
   FakeStopwatchFactory({Stopwatch? stopwatch, Map<String, Stopwatch>? stopwatches})
-    : stopwatches = <String, Stopwatch>{
-        if (stopwatches != null) ...stopwatches,
-        if (stopwatch != null) '': stopwatch,
-      };
+      : stopwatches = <String, Stopwatch>{
+          if (stopwatches != null) ...stopwatches,
+          if (stopwatch != null) '': stopwatch,
+        };
 
   Map<String, Stopwatch> stopwatches;
 
@@ -679,13 +683,13 @@ class FakeJava extends Fake implements Java {
     String binary = '/android-studio/jbr/bin/java',
     Version? version,
     bool canRun = true,
-  }) : binaryPath = binary,
-       version = version ?? const Version.withText(19, 0, 2, 'openjdk 19.0.2 2023-01-17'),
-       _environment = <String, String>{
-         if (javaHome != null) Java.javaHomeEnvironmentVariable: javaHome,
-         'PATH': '/android-studio/jbr/bin',
-       },
-       _canRun = canRun;
+  })  : binaryPath = binary,
+        version = version ?? const Version.withText(19, 0, 2, 'openjdk 19.0.2 2023-01-17'),
+        _environment = <String, String>{
+          if (javaHome != null) Java.javaHomeEnvironmentVariable: javaHome,
+          'PATH': '/android-studio/jbr/bin',
+        },
+        _canRun = canRun;
 
   @override
   String? javaHome;
