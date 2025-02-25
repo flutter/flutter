@@ -315,6 +315,11 @@ void FlutterWindowsView::OnKey(int key,
   SendKey(key, scancode, action, character, extended, was_down, callback);
 }
 
+void FlutterWindowsView::OnFocus(FlutterViewFocusState focus_state,
+                                 FlutterViewFocusDirection direction) {
+  SendFocus(focus_state, direction);
+}
+
 void FlutterWindowsView::OnComposeBegin() {
   SendComposeBegin();
 }

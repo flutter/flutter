@@ -191,6 +191,10 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
              KeyEventCallback callback) override;
 
   // |WindowBindingHandlerDelegate|
+  void onFocus(FlutterViewFocusState focus_state,
+               FlutterViewFocusDirection direction) override;
+
+  // |WindowBindingHandlerDelegate|
   void OnComposeBegin() override;
 
   // |WindowBindingHandlerDelegate|
