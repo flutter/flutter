@@ -2628,8 +2628,8 @@ typedef struct {
 
   /// The callback invoked by the engine when FlutterView focus state has
   /// changed. The embedder can use this callback to request focus change for
-  /// the native view. The callback is invoked from a task posted to the platform
-  /// thread.
+  /// the native view. The callback is invoked from a task posted to the
+  /// platform thread.
   FlutterViewFocusChangeRequestCallback view_focus_change_request_callback;
 } FlutterProjectArgs;
 
