@@ -5234,11 +5234,10 @@ void main() {
 
   testWidgets('secondaryTrackValue updates correctly', (WidgetTester tester) async {
     final List<Offset?> log = <Offset?>[];
-    final LoggingRoundedRectSliderTrackShape loggingTrackShape =
-        LoggingRoundedRectSliderTrackShape(secondaryOffsetLog: log);
-    final ThemeData theme = ThemeData(
-      sliderTheme: SliderThemeData(trackShape: loggingTrackShape),
+    final LoggingRoundedRectSliderTrackShape loggingTrackShape = LoggingRoundedRectSliderTrackShape(
+      secondaryOffsetLog: log,
     );
+    final ThemeData theme = ThemeData(sliderTheme: SliderThemeData(trackShape: loggingTrackShape));
     Widget buildSlider(double? secondaryTrackValue) {
       return MaterialApp(
         theme: theme,
@@ -5253,6 +5252,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildSlider(null));
     await tester.pumpAndSettle();
     expect(log.last, isNull);
