@@ -11,7 +11,6 @@
 #include <memory>
 #include <utility>
 
-#include "impeller/toolkit/android/shadow_realm.h"
 #include "unicode/uchar.h"
 
 #include "flutter/common/constants.h"
@@ -872,12 +871,6 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeUpdateDisplayMetrics",
           .signature = "(J)V",
           .fnPtr = reinterpret_cast<void*>(&UpdateDisplayMetrics),
-      },
-      {
-          .name = "nativeShouldDisableAHB",
-          .signature = "()Z",
-          .fnPtr = reinterpret_cast<void*>(
-              &impeller::android::ShadowRealm::ShouldDisableAHB),
       },
       {
           .name = "nativeIsSurfaceControlEnabled",
