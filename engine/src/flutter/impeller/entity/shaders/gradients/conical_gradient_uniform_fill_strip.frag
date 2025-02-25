@@ -29,8 +29,9 @@ highp in vec2 v_position;
 out vec4 frag_color;
 
 void main() {
-  vec2 res = IPComputeConicalTStrip(frag_info.focus, frag_info.focus_radius,
-                               frag_info.center, frag_info.radius, v_position);
+  vec2 res =
+      IPComputeConicalTStrip(frag_info.focus, frag_info.focus_radius,
+                             frag_info.center, frag_info.radius, v_position);
 
   float t = res.x;
   vec4 result_color = vec4(0);

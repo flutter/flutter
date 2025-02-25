@@ -9,4 +9,4 @@ precision highp float;
 
 #include <impeller/texture.glsl>
 
-#endif // CONICAL_GRADIENT_GLSL_
+#endif  // CONICAL_GRADIENT_GLSL_

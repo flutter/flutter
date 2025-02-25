@@ -29,7 +29,8 @@ highp in vec2 v_position;
 out vec4 frag_color;
 
 void main() {
-  vec2 res = IPComputeConicalTConical(frag_info.focus, frag_info.focus_radius,
+  vec2 res =
+      IPComputeConicalTConical(frag_info.focus, frag_info.focus_radius,
                                frag_info.center, frag_info.radius, v_position);
   if (res.y < 0.0) {
     frag_color = vec4(0);
