@@ -107,7 +107,7 @@ vec2 IPComputeConicalTConical(vec2 c0, float r0, vec2 c1, float r1, vec2 pos, fl
 
 }
 
-int IPComputeConicalKind(vec2 c0, float r0, vec2 c1, float r1) {
+float IPComputeConicalKind(vec2 c0, float r0, vec2 c1, float r1) {
   const float scalar_nearly_zero = 1.0 / float(1 << 12);
   float d_center = distance(c0, c1);
   float d_radius = r1 - r0;
@@ -120,13 +120,13 @@ int IPComputeConicalKind(vec2 c0, float r0, vec2 c1, float r1) {
 
   if(radial) {
     if(strip) {
-      return 0;
+      return 0.0;
     }
-    return 1;
+    return 1.0;
   } else if(strip) {
-    return 2;
+    return 2.0;
   } else {
-    return 3;
+    return 3.0;
   }
 }
 
@@ -137,7 +137,7 @@ int IPComputeConicalKind(vec2 c0, float r0, vec2 c1, float r1) {
 ///
 /// The code is migrated from Skia Graphite. See
 /// https://github.com/google/skia/blob/ddf987d2ab3314ee0e80ac1ae7dbffb44a87d394/src/sksl/sksl_graphite_frag.sksl#L541-L666.
-vec2 IPComputeConicalT(int kind, vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
+vec2 IPComputeConicalT(float kind, vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
   if(kind == 0) {
     return vec2(0.0, -1.0);
   } else if(kind == 1) {
