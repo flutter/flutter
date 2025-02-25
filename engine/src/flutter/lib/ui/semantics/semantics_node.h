@@ -57,6 +57,10 @@ const int kHorizontalScrollSemanticsActions =
 const int kScrollableSemanticsActions =
     kVerticalScrollSemanticsActions | kHorizontalScrollSemanticsActions;
 
+const int kSystemActions =
+    static_cast<int32_t>(SemanticsAction::kDidGainAccessibilityFocus) |
+    static_cast<int32_t>(SemanticsAction::kDidLoseAccessibilityFocus);
+
 /// C/C++ representation of `SemanticsRole` defined in
 /// `lib/ui/semantics.dart`.
 ///\warning This must match the `SemanticsRole` enum in
