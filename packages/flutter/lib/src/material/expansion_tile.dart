@@ -731,6 +731,7 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
       duration: _duration,
       reverseCurve: _reverseCurve,
       maintainState: widget.maintainState,
+      addHeaderTap: false,
       headerBuilder: _buildHeader,
       bodyBuilder: _buildBody,
       onExpansionChanged: _onExpansionChanged,

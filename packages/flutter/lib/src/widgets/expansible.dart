@@ -194,6 +194,7 @@ class Expansible extends StatefulWidget {
     this.reverseCurve,
     this.initiallyExpanded = false,
     this.maintainState = false,
+    this.addHeaderTap = true,
   });
 
   /// Called when this widget expands or collapses.
@@ -218,6 +219,12 @@ class Expansible extends StatefulWidget {
 
   /// True if the widget is initially expanded, and false otherwise.
   final bool initiallyExpanded;
+
+  /// False if the header already coordinates its behavior on tap using the
+  /// [controller].
+  ///
+  /// Defaults to true.
+  final bool addHeaderTap;
 
   /// Specifies whether the state of the children is maintained when the widget
   /// expands and collapses.
@@ -327,14 +334,17 @@ class ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
     return AnimatedBuilder(
       animation: _animationController.view,
       builder: (BuildContext context, Widget? child) {
-        final Widget header = Semantics(
-          button: true,
-          child: GestureDetector(
-            onTap: _toggleExpansion,
-            excludeFromSemantics: true,
-            child: widget.headerBuilder(context, _isExpanded),
-          ),
-        );
+        Widget header = widget.headerBuilder(context, _isExpanded);
+        if (widget.addHeaderTap) {
+          header = Semantics(
+            button: true,
+            child: GestureDetector(
+              onTap: _toggleExpansion,
+              excludeFromSemantics: true,
+              child: header,
+            ),
+          );
+        }
         final Widget body = ClipRect(child: Align(heightFactor: _heightFactor.value, child: child));
         if (widget.expansibleBuilder != null) {
           return widget.expansibleBuilder!(context, header, body, _isExpanded);
