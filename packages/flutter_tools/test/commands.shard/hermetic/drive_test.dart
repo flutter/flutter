@@ -588,7 +588,6 @@ void main() {
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');
       expect(options.verboseSystemLogs, true);
-      expect(options.nullAssertions, true);
       expect(options.nativeNullAssertions, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
       expect(options.traceSystrace, true);
