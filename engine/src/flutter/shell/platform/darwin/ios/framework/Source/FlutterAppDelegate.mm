@@ -164,7 +164,9 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                                  completionHandler:^(BOOL success) {
                                    if (!success && throwBack) {
                                      // throw it back to iOS
-                                     [UIApplication.sharedApplication openURL:url];
+                                     [UIApplication.sharedApplication openURL:url
+                                                                      options:@{}
+                                                            completionHandler:nil];
                                    }
                                  }];
   } else {
