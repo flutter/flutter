@@ -104,4 +104,33 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  group('comboBox', () {
+    testWidgets('failure case, empty', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.comboBox, child: const Text('a comboBox')),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(error.message, 'A combo box needs expanded states');
+    });
+
+    testWidgets('success case', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.comboBox,
+            expanded: true,
+            child: const Text('a comboBox'),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
 }

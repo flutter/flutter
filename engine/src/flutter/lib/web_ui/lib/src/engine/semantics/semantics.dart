@@ -2530,6 +2530,8 @@ class EngineSemanticsOwner {
   SemanticsUpdatePhase get phase => _phase;
   SemanticsUpdatePhase _phase = SemanticsUpdatePhase.idle;
 
+  /// The current semantics tree.
+  Map<int, SemanticsObject> get semanticsTree => _semanticsTree;
   final Map<int, SemanticsObject> _semanticsTree = <int, SemanticsObject>{};
 
   /// Map [SemanticsObject.id] to parent [SemanticsObject] it was attached to

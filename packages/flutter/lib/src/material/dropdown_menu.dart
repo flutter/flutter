@@ -1093,12 +1093,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                       (Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item),
                     ),
                     if (widget.label != null)
-                      ExcludeSemantics(
-                        child: Padding(
-                          // See RenderEditable.floatingCursorAddedMargin for the default horizontal padding.
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: DefaultTextStyle(style: effectiveTextStyle!, child: widget.label!),
-                        ),
+                      Padding(
+                        // See RenderEditable.floatingCursorAddedMargin for the default horizontal padding.
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: DefaultTextStyle(style: effectiveTextStyle!, child: widget.label!),
                       ),
                     trailingButton,
                     leadingButton,
@@ -1121,12 +1119,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           child: body,
         );
       },
-    );
-
-    menuAnchor = Semantics(
-      role: SemanticsRole.comboBox,
-      expanded: _controller.isOpen,
-      child: menuAnchor,
     );
 
     if (widget.expandedInsets case final EdgeInsetsGeometry padding) {
@@ -1154,29 +1146,34 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       child: menuAnchor,
     );
 
-    return Actions(
-      actions: <Type, Action<Intent>>{
-        _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKeyInvoke),
-        _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKeyInvoke),
-        _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: (_) => _handleEditingComplete()),
-      },
-      child: Stack(
-        children: <Widget>[
-          // Handling keyboard navigation when the Textfield has no focus.
-          Shortcuts(
-            shortcuts: const <ShortcutActivator, Intent>{
-              SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
-              SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
-              SingleActivator(LogicalKeyboardKey.enter): _EnterIntent(),
-            },
-            child: Focus(
-              focusNode: _internalFocudeNode,
-              skipTraversal: true,
-              child: const SizedBox.shrink(),
+    return Semantics(
+      role: SemanticsRole.comboBox,
+      expanded: _controller.isOpen,
+      label: currentHighlight != null ? filteredEntries[currentHighlight!].label : null,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKeyInvoke),
+          _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKeyInvoke),
+          _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: (_) => _handleEditingComplete()),
+        },
+        child: Stack(
+          children: <Widget>[
+            // Handling keyboard navigation when the Textfield has no focus.
+            Shortcuts(
+              shortcuts: const <ShortcutActivator, Intent>{
+                SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
+                SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+                SingleActivator(LogicalKeyboardKey.enter): _EnterIntent(),
+              },
+              child: Focus(
+                focusNode: _internalFocudeNode,
+                skipTraversal: true,
+                child: const SizedBox.shrink(),
+              ),
             ),
-          ),
-          menuAnchor,
-        ],
+            menuAnchor,
+          ],
+        ),
       ),
     );
   }
@@ -1430,10 +1427,6 @@ class _RenderDropdownMenuBody extends RenderBox
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
-      if (child == firstChild) {
-        visitor(renderObjectChild);
-      }
       return;
     });
   }
