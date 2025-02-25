@@ -85,6 +85,30 @@ void main() {
     expect(borderWithAllSidesSame.bottom, same(side5));
   });
 
+  test('Border.all constructor', () {
+    const BorderSide defaultSide = BorderSide();
+
+    const BorderSide customSide = BorderSide(
+      color: Color(0xFFFFFFFF),
+      width: 4.0,
+    );
+
+    final Border defaultBorder = Border.all();
+    expect(defaultBorder.left, defaultSide);
+    expect(defaultBorder.top, defaultSide);
+    expect(defaultBorder.right, defaultSide);
+    expect(defaultBorder.bottom, defaultSide);
+
+    final Border customBorder = Border.all(
+      color: const Color(0xFFFFFFFF),
+      width: 4.0
+    );
+    expect(customBorder.left, customSide);
+    expect(customBorder.top, customSide);
+    expect(customBorder.right, customSide);
+    expect(customBorder.bottom, customSide);
+  });
+
   test('Border.merge', () {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const BorderSide magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
