@@ -15,7 +15,8 @@ mat3 IPMapToUnitX(vec2 p0, vec2 p1) {
     IPMat3Inverse(mat3(p1.y - p0.y, p0.x - p1.x, 0.0, p1.x - p0.x, p1.y - p0.y, 0.0, p0.x, p0.y, 1.0));
 }
 
-vec2 IPComputeConicalTRadial(vec2 c0, float r0, vec2 c1, float r1, vec2 pos, float d_radius) {
+vec2 IPComputeConicalTRadial(vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
+  float d_radius = r1 - r0;
   float scale = 1.0 / d_radius;
   float scale_sign = sign(d_radius);
   float bias = r0 / d_radius;
@@ -25,7 +26,8 @@ vec2 IPComputeConicalTRadial(vec2 c0, float r0, vec2 c1, float r1, vec2 pos, flo
   return vec2(t, 1.0);
 }
 
-vec2 IPComputeConicalTStrip(vec2 c0, float r0, vec2 c1, float r1, vec2 pos, float d_center) {
+vec2 IPComputeConicalTStrip(vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
+  float d_center = distance(c0, c1);
   mat3 transform = IPMapToUnitX(c0, c1);
   float r = r0 / d_center;
   float r_2 = r * r;
@@ -39,8 +41,9 @@ vec2 IPComputeConicalTStrip(vec2 c0, float r0, vec2 c1, float r1, vec2 pos, floa
   return vec2(t, 1.0);
 }
 
-vec2 IPComputeConicalTConical(vec2 c0, float r0, vec2 c1, float r1, vec2 pos, float d_center) {
+vec2 IPComputeConicalTConical(vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
   const float scalar_nearly_zero = 1.0 / float(1 << 12);
+  float d_center = distance(c0, c1);
   // See https://skia.org/docs/dev/design/conical/ for details on how this
   // algorithm works. Calculate f and swap inputs if necessary (steps 1 and
   // 2).
@@ -138,17 +141,14 @@ float IPComputeConicalKind(vec2 c0, float r0, vec2 c1, float r1) {
 /// The code is migrated from Skia Graphite. See
 /// https://github.com/google/skia/blob/ddf987d2ab3314ee0e80ac1ae7dbffb44a87d394/src/sksl/sksl_graphite_frag.sksl#L541-L666.
 vec2 IPComputeConicalT(float kind, vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
-  if(kind == 0) {
+  if (kind == 0.0) {
     return vec2(0.0, -1.0);
-  } else if(kind == 1) {
-    float d_radius = r1 - r0;
-    return IPComputeConicalTRadial(c0, r0, c1, r1, pos, d_radius);
-  } else if(kind == 2) {
-    float d_center = distance(c0, c1);
-    return IPComputeConicalTStrip(c0, r0, c1, r1, pos, d_center);
+  } else if (kind == 1.0) {
+    return IPComputeConicalTRadial(c0, r0, c1, r1, pos);
+  } else if (kind == 2.0) {
+    return IPComputeConicalTStrip(c0, r0, c1, r1, pos);
   } else {
-    float d_center = distance(c0, c1);
-    return IPComputeConicalTConical(c0, r0, c1, r1, pos, d_center);
+    return IPComputeConicalTConical(c0, r0, c1, r1, pos);
   }
 }
 
