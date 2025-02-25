@@ -457,17 +457,17 @@ class Border extends BoxBorder {
        bottom = horizontal;
 
   /// Creates a border with only the specified sides set and the unspecified
-  /// sides set to [rest].
+  /// sides set to [others].
   const Border.some({
     BorderSide? top,
     BorderSide? right,
     BorderSide? bottom,
     BorderSide? left,
-    required BorderSide rest,
-  }) : top = top ?? rest,
-       right = right ?? rest,
-       bottom = bottom ?? rest,
-       left = left ?? rest;
+    required BorderSide others,
+  }) : top = top ?? others,
+       right = right ?? others,
+       bottom = bottom ?? others,
+       left = left ?? others;
 
   /// A uniform border with all sides the same color and width.
   ///
@@ -826,7 +826,7 @@ class BorderDirectional extends BoxBorder {
   });
 
   /// Creates a border with only the specified sides set and the unspecified
-  /// sides set to [rest].
+  /// sides set to [others].
   ///
   /// The [start] and [end] sides represent the horizontal sides; the start side
   /// is on the leading edge given the reading direction, and the end side is on
@@ -836,11 +836,11 @@ class BorderDirectional extends BoxBorder {
     BorderSide? start,
     BorderSide? end,
     BorderSide? bottom,
-    required BorderSide rest,
-  }) : top = top ?? rest,
-       start = start ?? rest,
-       end = end ?? rest,
-       bottom = bottom ?? rest;
+    required BorderSide others,
+  }) : top = top ?? others,
+       start = start ?? others,
+       end = end ?? others,
+       bottom = bottom ?? others;
 
   /// Creates a [BorderDirectional] that represents the addition of the two
   /// given [BorderDirectional]s.

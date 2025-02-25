@@ -312,18 +312,18 @@ class BorderRadius extends BorderRadiusGeometry {
   });
 
   /// Creates a border radius where only the specified corners are set while the
-  /// unspecified corners are set to [rest].
+  /// unspecified corners are set to [others].
   const BorderRadius.some({
     Radius? topLeft,
     Radius? topRight,
     Radius? bottomLeft,
     Radius? bottomRight,
-    required Radius rest,
+    required Radius others,
   }) : this.only(
-    topLeft: topLeft ?? rest,
-    topRight: topRight ?? rest,
-    bottomLeft: bottomLeft ?? rest,
-    bottomRight: bottomRight ?? rest,
+    topLeft: topLeft ?? others,
+    topRight: topRight ?? others,
+    bottomLeft: bottomLeft ?? others,
+    bottomRight: bottomRight ?? others,
   );
 
 
@@ -559,18 +559,18 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   });
 
   /// Creates a border radius where only the specified corners are set while the
-  /// unspecified corners are set to [rest].
+  /// unspecified corners are set to [others].
   const BorderRadiusDirectional.some({
     Radius? topStart,
     Radius? topEnd,
     Radius? bottomStart,
     Radius? bottomEnd,
-    required Radius rest,
+    required Radius others,
   }) : this.only(
-    topStart: topStart ?? rest,
-    topEnd: topEnd ?? rest,
-    bottomStart: bottomStart ?? rest,
-    bottomEnd: bottomEnd ?? rest,
+    topStart: topStart ?? others,
+    topEnd: topEnd ?? others,
+    bottomStart: bottomStart ?? others,
+    bottomEnd: bottomEnd ?? others,
   );
 
   /// A border radius with all zero radii.

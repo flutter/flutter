@@ -391,21 +391,21 @@ class EdgeInsets extends EdgeInsetsGeometry {
       bottom = vertical;
 
   /// Creates insets where only the specified offsets are set, while the unspecified ones
-  /// are set to [rest].
+  /// are set to [others].
   ///
   /// {@tool snippet}
   ///
   /// 40 pixel margin below, and typical eight pixel margins on all other sides:
   ///
   /// ```dart
-  /// const EdgeInsets.some(bottom: 40, rest: 8)
+  /// const EdgeInsets.some(bottom: 40, others: 8)
   /// ```
   /// {@end-tool}
-  const EdgeInsets.some({double? left, double? top, double? right, double? bottom, required double rest})
-    : left = left ?? rest,
-    top = top ?? rest,
-    right = right ?? rest,
-    bottom = bottom ?? rest;
+  const EdgeInsets.some({double? left, double? top, double? right, double? bottom, required double others})
+    : left = left ?? others,
+      top = top ?? others,
+      right = right ?? others,
+      bottom = bottom ?? others;
 
 
   /// Creates insets that match the given view padding.
@@ -713,14 +713,14 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
       bottom = value;
 
   /// Creates insets where only the specified offsets are set, while the unspecified ones
-  /// are set to [rest].
+  /// are set to [others].
   ///
   /// {@tool snippet}
   ///
   /// 40 pixel margin below, and typical eight pixel margins on all other sides:
   ///
   /// ```dart
-  /// const EdgeInsetsDirectional.some(bottom: 40, rest: 8)
+  /// const EdgeInsetsDirectional.some(bottom: 40, others: 8)
   /// ```
   /// {@end-tool}
   const EdgeInsetsDirectional.some({
@@ -728,11 +728,11 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     double? top,
     double? end,
     double? bottom,
-    required double rest}) :
-      start = start ?? rest,
-      top = top ?? rest,
-      end = end ?? rest,
-      bottom = bottom ?? rest;
+    required double others,
+  }) : start = start ?? others,
+       top = top ?? others,
+       end = end ?? others,
+       bottom = bottom ?? others;
 
   /// An [EdgeInsetsDirectional] with zero offsets in each direction.
   ///
