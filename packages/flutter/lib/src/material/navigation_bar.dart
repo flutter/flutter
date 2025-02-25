@@ -319,7 +319,7 @@ class NavigationBar extends StatelessWidget {
                               onTap: _handleTap(i),
                               labelTextStyle: labelTextStyle,
                               labelPadding: labelPadding,
-                              child: destinations[i],
+                              child: _NavigationBarDestinationSemantics(child: destinations[i]),
                             );
                           },
                         ),
@@ -593,8 +593,9 @@ class _NavigationDestinationBuilderState extends State<_NavigationDestinationBui
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
 
-    return _NavigationBarDestinationSemantics(
+    return Semantics(
       enabled: widget.enabled,
+      button: true,
       child: _NavigationBarDestinationTooltip(
         message: widget.tooltip ?? widget.label,
         child: _IndicatorInkWell(
@@ -997,10 +998,7 @@ class _DestinationLayoutAnimationBuilder extends StatelessWidget {
 class _NavigationBarDestinationSemantics extends StatelessWidget {
   /// Adds the appropriate semantics for navigation bar destinations to the
   /// [child].
-  const _NavigationBarDestinationSemantics({required this.enabled, required this.child});
-
-  /// Whether this destination is enabled.
-  final bool enabled;
+  const _NavigationBarDestinationSemantics({required this.child});
 
   /// The widget that should receive the destination semantics.
   final Widget child;
@@ -1016,8 +1014,6 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
       builder: (BuildContext context, Widget? child) {
         return Semantics(
           selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
-          button: true,
-          enabled: enabled,
           child: child,
         );
       },
