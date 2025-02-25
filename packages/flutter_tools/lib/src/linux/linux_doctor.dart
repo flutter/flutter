@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:process/process.dart';
 
 import '../base/io.dart';
 import '../base/user_messages.dart';
 import '../base/version.dart';
+import '../convert.dart';
 import '../doctor_validator.dart';
 
 /// A combination of version description and parsed version number.
