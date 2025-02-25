@@ -698,6 +698,10 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
 
   /// Creates insets where all the offsets are `value`.
   ///
+  /// This is equivalent to [EdgeInsets.all], since the inset is the same
+  /// with either [TextDirection]. This constructor is just a convenience for
+  /// type compatibility.
+  ///
   /// {@tool snippet}
   ///
   /// Typical eight-pixel margin on all sides:
