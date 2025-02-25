@@ -117,6 +117,7 @@ void main() {
       expect(detach, 1);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/162972
     testWidgets('FixedExtentScrollController keepScrollOffset', (WidgetTester tester) async {
       final PageStorageBucket bucket = PageStorageBucket();
 
@@ -175,6 +176,15 @@ void main() {
         tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 10')),
         offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/162972
+    test('FixedExtentScrollController debugLabel', () {
+      final FixedExtentScrollController controller = FixedExtentScrollController(
+        debugLabel: 'MyCustomWidget',
+      );
+      expect(controller.debugLabel, 'MyCustomWidget');
+      expect(controller.toString(), contains('MyCustomWidget'));
     });
 
     testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
