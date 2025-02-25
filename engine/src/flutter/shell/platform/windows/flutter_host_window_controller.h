@@ -22,7 +22,7 @@ class FlutterWindowsEngine;
 class FlutterHostWindowController {
  public:
   explicit FlutterHostWindowController(FlutterWindowsEngine* engine);
-  virtual ~FlutterHostWindowController();
+  virtual ~FlutterHostWindowController() = default;
 
   // Creates a |FlutterHostWindow|, i.e., a native Win32 window with a
   // |FlutterWindow| parented to it. The child |FlutterWindow| implements a
@@ -33,6 +33,10 @@ class FlutterHostWindowController {
   // std::nullopt if the window could not be created.
   virtual std::optional<WindowMetadata> CreateHostWindow(
       WindowCreationSettings const& settings);
+
+  // Creates a |FlutterHostWindow| from an existing top-level |hwnd| and |view|.
+  virtual void CreateHostWindowFromExisting(HWND hwnd,
+                                            FlutterWindowsView* view);
 
   // Modifies the attributes of the window hosting the view with ID |view_id|
   // according to the given |settings|. A "onWindowChanged" message is sent if
@@ -69,9 +73,6 @@ class FlutterHostWindowController {
   FlutterWindowsEngine* engine() const;
 
  private:
-  // Destroys all windows managed by this controller.
-  void DestroyAllWindows();
-
   // Retrieves the size of the view with ID |view_id|, in logical coordinates.
   Size GetViewSize(FlutterViewId view_id) const;
 

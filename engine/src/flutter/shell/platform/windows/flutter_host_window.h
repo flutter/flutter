@@ -17,6 +17,7 @@
 namespace flutter {
 
 class FlutterHostWindowController;
+class FlutterWindowsView;
 class FlutterWindowsViewController;
 
 // A Win32 window that hosts a |FlutterWindow| in its client area.
@@ -28,9 +29,14 @@ class FlutterHostWindow {
   // |FlutterHostWindow::GetWindowHandle|.
   FlutterHostWindow(FlutterHostWindowController* controller,
                     WindowCreationSettings const& settings);
+  // Creates a |FlutterHostWindow| from an existing |view| associated with a
+  // top-level |hwnd|. Used when the native window is created by the runner.
+  FlutterHostWindow(FlutterHostWindowController* controller,
+                    HWND hwnd,
+                    FlutterWindowsView* view);
   virtual ~FlutterHostWindow();
 
-  // Returns the instance pointer for |hwnd| or nulllptr if invalid.
+  // Returns the instance pointer for |hwnd| or nullptr if invalid.
   static FlutterHostWindow* GetThisFromHandle(HWND hwnd);
 
   // Returns the window archetype.
@@ -60,7 +66,7 @@ class FlutterHostWindow {
  private:
   friend FlutterHostWindowController;
 
-  // Set the focus to the child view window of |window|.
+  // Sets the focus to the child view window of |window|.
   static void FocusViewOf(FlutterHostWindow* window);
 
   // OS callback called by message pump. Handles the WM_NCCREATE message which
@@ -94,9 +100,11 @@ class FlutterHostWindow {
   void SetTitle(std::string_view title) const;
 
   // Controller for this window.
-  FlutterHostWindowController* const window_controller_;
+  FlutterHostWindowController* const window_controller_ = nullptr;
 
-  // Controller for the view hosted by this window.
+  // Controller for the view hosted in this window. Value-initialized if the
+  // window is created from an existing top-level native window created by the
+  // runner.
   std::unique_ptr<FlutterWindowsViewController> view_controller_;
 
   // The window archetype.

@@ -131,24 +131,24 @@ Future<PositionerSetting?> customPositionerDialog(
                               defaultVerticalAlignment:
                                   TableCellVerticalAlignment.middle,
                               children: [
-                                const TableRow(children: [
+                                TableRow(children: [
                                   TableCell(
-                                    child: Text(''),
+                                    child: const Text(''),
                                   ),
                                   TableCell(
                                     child: Center(
-                                      child: Text('X'),
+                                      child: const Text('X'),
                                     ),
                                   ),
                                   TableCell(
                                     child: Center(
-                                      child: Text('Y'),
+                                      child: const Text('Y'),
                                     ),
                                   ),
                                 ]),
                                 TableRow(children: [
-                                  const TableCell(
-                                    child: Text('Slide'),
+                                  TableCell(
+                                    child: const Text('Slide'),
                                   ),
                                   TableCell(
                                     child: Checkbox(
@@ -166,8 +166,8 @@ Future<PositionerSetting?> customPositionerDialog(
                                   ),
                                 ]),
                                 TableRow(children: [
-                                  const TableCell(
-                                    child: Text('Flip'),
+                                  TableCell(
+                                    child: const Text('Flip'),
                                   ),
                                   TableCell(
                                     child: Checkbox(
@@ -185,8 +185,8 @@ Future<PositionerSetting?> customPositionerDialog(
                                   ),
                                 ]),
                                 TableRow(children: [
-                                  const TableCell(
-                                    child: Text('Resize'),
+                                  TableCell(
+                                    child: const Text('Resize'),
                                   ),
                                   TableCell(
                                     child: Checkbox(

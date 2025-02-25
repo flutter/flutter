@@ -10,6 +10,16 @@
 
 namespace flutter {
 
+// Configures how the Flutter engine selects a GPU.
+enum class GpuPreference {
+  // No preference.
+  NoPreference,
+  // Prefer energy efficiency over performance, such as an integrated GPU.
+  // This falls back to a high performance GPU if no low power GPU is
+  // available.
+  LowPowerPreference,
+};
+
 // A set of Flutter and Dart assets used to initialize a Flutter engine.
 class DartProject {
  public:
@@ -71,6 +81,27 @@ class DartProject {
     return dart_entrypoint_arguments_;
   }
 
+  // Sets the GPU usage preference for flutter engine.
+  void set_gpu_preference(GpuPreference gpu_preference) {
+    gpu_preference_ = gpu_preference;
+  }
+
+  // Returns the project's GPU preference.
+  // Defaults to NoPreference.
+  GpuPreference gpu_preference() const { return gpu_preference_; }
+
+  // Sets whether the UI isolate should run on the platform thread.
+  // In a future release, this setting will become a no-op when
+  // Flutter Windows requires merged platform and UI threads.
+  void set_merged_platform_ui_thread(bool merged_platform_ui_thread) {
+    merged_platform_ui_thread_ = merged_platform_ui_thread;
+  }
+
+  // Returns whether the UI isolate should run on the platform thread.
+  // Defaults to false. In a future release, this setting will default
+  // to true.
+  bool merged_platform_ui_thread() const { return merged_platform_ui_thread_; }
+
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
@@ -95,6 +126,10 @@ class DartProject {
   std::string dart_entrypoint_;
   // The list of arguments to pass through to the Dart entrypoint.
   std::vector<std::string> dart_entrypoint_arguments_;
+  // The preference for GPU to be used by flutter engine.
+  GpuPreference gpu_preference_ = GpuPreference::NoPreference;
+  // Whether the UI isolate should run on the platform thread.
+  bool merged_platform_ui_thread_ = false;
 };
 
 }  // namespace flutter

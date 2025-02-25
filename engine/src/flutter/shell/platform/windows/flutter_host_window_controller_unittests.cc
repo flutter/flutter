@@ -65,6 +65,7 @@ class FlutterHostWindowControllerTest : public WindowsTest {
     SetDpiAwareness();
     FlutterWindowsEngineBuilder builder(GetContext());
     engine_ = builder.Build();
+    engine_->Run();
     controller_ = std::make_unique<FlutterHostWindowController>(engine_.get());
   }
 
@@ -315,10 +316,9 @@ TEST_F(FlutterHostWindowControllerTest, CreatePopup) {
   FlutterHostWindow* const window =
       host_window_controller()->GetHostWindow(popup_result->view_id);
   ASSERT_NE(window, nullptr);
-  RECT client_rect;
-  GetClientRect(window->GetWindowHandle(), &client_rect);
-  EXPECT_EQ(client_rect.right - client_rect.left, popup_settings.size.width());
-  EXPECT_EQ(client_rect.bottom - client_rect.top, popup_settings.size.height());
+  Size const size = GetLogicalClientSize(window->GetWindowHandle());
+  EXPECT_EQ(size.width(), popup_settings.size.width());
+  EXPECT_EQ(size.height(), popup_settings.size.height());
 }
 
 TEST_F(FlutterHostWindowControllerTest, DestroyWindow) {
