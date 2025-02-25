@@ -111,29 +111,6 @@ vec2 IPComputeConicalTConical(vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
   return vec2(t, 1.0);
 }
 
-float IPComputeConicalKind(vec2 c0, float r0, vec2 c1, float r1) {
-  const float scalar_nearly_zero = 1.0 / float(1 << 12);
-  float d_center = distance(c0, c1);
-  float d_radius = r1 - r0;
-
-  // Degenerate case: a radial gradient (p0 = p1).
-  bool radial = d_center < scalar_nearly_zero;
-
-  // Degenerate case: a strip with bandwidth 2r (r0 = r1).
-  bool strip = abs(d_radius) < scalar_nearly_zero;
-
-  if (radial) {
-    if (strip) {
-      return 0.0;
-    }
-    return 1.0;
-  } else if (strip) {
-    return 2.0;
-  } else {
-    return 3.0;
-  }
-}
-
 /// Compute the t value for a conical gradient at point `p` between the 2
 /// circles defined by (c0, r0) and (c1, r1). The returned vec2 encapsulates 't'
 /// as its x component and validity status as its y component, with positive y

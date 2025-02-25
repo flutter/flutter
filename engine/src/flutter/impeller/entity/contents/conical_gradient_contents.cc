@@ -151,9 +151,10 @@ bool ConicalGradientContents::RenderUniform(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.matrix = GetInverseEffectTransform();
 
+  ConicalKind kind = GetConicalKind(center_, radius_, focus_, focus_radius_);
   PipelineBuilderCallback pipeline_callback =
-      [&renderer](ContentContextOptions options) {
-        return renderer.GetConicalGradientUniformFillPipeline(options);
+      [&renderer, kind](ContentContextOptions options) {
+        return renderer.GetConicalGradientUniformFillPipeline(options, kind);
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,

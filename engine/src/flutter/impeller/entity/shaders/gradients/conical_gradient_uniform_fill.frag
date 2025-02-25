@@ -10,6 +10,8 @@ precision highp float;
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
+layout(constant_id = 0) const float kind = 3.0;
+
 uniform FragInfo {
   highp vec2 center;
   vec2 focus;
@@ -29,8 +31,6 @@ highp in vec2 v_position;
 out vec4 frag_color;
 
 void main() {
-  float kind = IPComputeConicalKind(frag_info.focus, frag_info.focus_radius,
-                                    frag_info.center, frag_info.radius);
   vec2 res = IPComputeConicalT(kind, frag_info.focus, frag_info.focus_radius,
                                frag_info.center, frag_info.radius, v_position);
 
