@@ -1,5 +1,8 @@
 # Flutter Engine
 
+> [!Important]
+> This repostiory is archived. The engine was migrated to [flutter/flutter/engine](https://github.com/flutter/flutter/tree/master/engine).
+
 [![Flutter CI Status](https://flutter-dashboard.appspot.com/api/public/build-status-badge?repo=engine)](https://flutter-dashboard.appspot.com/#/build?repo=engine)
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
