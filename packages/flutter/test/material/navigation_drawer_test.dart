@@ -166,7 +166,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       _buildWidget(
         scaffoldKey,
@@ -258,7 +258,6 @@ void main() {
         data: const MediaQueryData(padding: EdgeInsets.all(20.0)),
         child: MaterialApp(
           useInheritedMediaQuery: true,
-          theme: ThemeData.light(),
           home: Scaffold(
             key: scaffoldKey,
             drawer: NavigationDrawer(
@@ -371,7 +370,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     const Color color = Color(0xff0000ff);
     const ShapeBorder shape = RoundedRectangleBorder();
 
