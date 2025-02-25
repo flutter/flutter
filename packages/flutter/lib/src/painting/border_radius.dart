@@ -311,6 +311,22 @@ class BorderRadius extends BorderRadiusGeometry {
     this.bottomRight = Radius.zero,
   });
 
+  /// Creates a border radius where only the specified corners are set while the
+  /// unspecified corners are set to [others].
+  const BorderRadius.some({
+    Radius? topLeft,
+    Radius? topRight,
+    Radius? bottomLeft,
+    Radius? bottomRight,
+    required Radius others,
+  }) : this.only(
+    topLeft: topLeft ?? others,
+    topRight: topRight ?? others,
+    bottomLeft: bottomLeft ?? others,
+    bottomRight: bottomRight ?? others,
+  );
+
+
   /// Returns a copy of this BorderRadius with the given fields replaced with
   /// the new values.
   BorderRadius copyWith({
@@ -541,6 +557,21 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
     this.bottomStart = Radius.zero,
     this.bottomEnd = Radius.zero,
   });
+
+  /// Creates a border radius where only the specified corners are set while the
+  /// unspecified corners are set to [others].
+  const BorderRadiusDirectional.some({
+    Radius? topStart,
+    Radius? topEnd,
+    Radius? bottomStart,
+    Radius? bottomEnd,
+    required Radius others,
+  }) : this.only(
+    topStart: topStart ?? others,
+    topEnd: topEnd ?? others,
+    bottomStart: bottomStart ?? others,
+    bottomEnd: bottomEnd ?? others,
+  );
 
   /// A border radius with all zero radii.
   ///

@@ -390,6 +390,24 @@ class EdgeInsets extends EdgeInsetsGeometry {
       right = horizontal,
       bottom = vertical;
 
+  /// Creates insets where only the specified offsets are set, while the unspecified ones
+  /// are set to [others].
+  ///
+  /// {@tool snippet}
+  ///
+  /// 40 pixel margin below, and typical eight pixel margins on all other sides:
+  ///
+  /// ```dart
+  /// const EdgeInsets.some(bottom: 40, others: 8)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsets.some({double? left, double? top, double? right, double? bottom, required double others})
+    : left = left ?? others,
+      top = top ?? others,
+      right = right ?? others,
+      bottom = bottom ?? others;
+
+
   /// Creates insets that match the given view padding.
   ///
   /// If you need the current system padding or view insets in the context of a
@@ -680,6 +698,10 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
 
   /// Creates insets where all the offsets are `value`.
   ///
+  /// This is equivalent to [EdgeInsets.all], since the inset is the same
+  /// with either [TextDirection]. This constructor is just a convenience for
+  /// type compatibility.
+  ///
   /// {@tool snippet}
   ///
   /// Typical eight-pixel margin on all sides:
@@ -693,6 +715,28 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
       top = value,
       end = value,
       bottom = value;
+
+  /// Creates insets where only the specified offsets are set, while the unspecified ones
+  /// are set to [others].
+  ///
+  /// {@tool snippet}
+  ///
+  /// 40 pixel margin below, and typical eight pixel margins on all other sides:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.some(bottom: 40, others: 8)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.some({
+    double? start,
+    double? top,
+    double? end,
+    double? bottom,
+    required double others,
+  }) : start = start ?? others,
+       top = top ?? others,
+       end = end ?? others,
+       bottom = bottom ?? others;
 
   /// An [EdgeInsetsDirectional] with zero offsets in each direction.
   ///
