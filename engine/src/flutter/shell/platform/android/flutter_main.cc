@@ -49,7 +49,7 @@ namespace {
 
 fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 
-constexpr std::string_view kAndroidHuawei = "android-huawei";
+static const constexpr char* kAndroidHuawei = "android-huawei";
 
 /// These are SoCs that crash when using AHB imports.
 static constexpr const char* kBLC[] = {
