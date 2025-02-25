@@ -706,6 +706,12 @@ void FlutterWindowsEngine::SendKeyEvent(const FlutterKeyEvent& event,
   }
 }
 
+void FlutterWindowsEngine::SendViewFocusEvent(const FlutterFocusEvent& event) {
+  if (engine_) {
+    embedder_api_.SendViewFocusEvent(engine_, &event);
+  }
+}
+
 bool FlutterWindowsEngine::SendPlatformMessage(
     const char* channel,
     const uint8_t* message,

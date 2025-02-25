@@ -368,7 +368,7 @@ void FlutterWindowsView::OnResetImeComposing() {
   binding_handler_->OnResetImeComposing();
 }
 
-// Sends new size  information to FlutterEngine.
+// Sends new size  in`rmation to FlutterEngine.
 void FlutterWindowsView::SendWindowMetrics(size_t width,
                                            size_t height,
                                            double pixel_ratio) const {
@@ -555,6 +555,16 @@ void FlutterWindowsView::SendKey(int key,
           callback(handled);
         }
       });
+}
+
+void FlutterWindowsView::SendFocus(FlutterViewFocusState focus_state,
+                                   FlutterViewFocusDirection direction) {
+  FlutterViewFocusEvent event = {};
+  event.struct_size = sizeof(event);
+  event.view_id = view_id_;
+  event.focus_state = focus_state;
+  event.direction = direction;
+  engine_->SendViewFocusEvent(focus_state, direction);
 }
 
 void FlutterWindowsView::SendComposeBegin() {

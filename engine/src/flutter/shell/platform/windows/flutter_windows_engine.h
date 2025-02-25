@@ -179,6 +179,9 @@ class FlutterWindowsEngine {
                     FlutterKeyEventCallback callback,
                     void* user_data);
 
+  // Informs the engine of an incoming focus event.
+  void SendViewFocusEvent(const FlutterViewFocusEvent& event);
+
   KeyboardHandlerBase* keyboard_key_handler() {
     return keyboard_key_handler_.get();
   }
