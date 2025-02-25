@@ -9,7 +9,7 @@ import 'semantics.dart';
 
 /// Adds expandability behavior to a semantic node.
 ///
-/// A expanded node would have the `aria-expanded` set to "true" if the node
+/// An expandable node would have the `aria-expanded` attribute set to "true" if the node
 /// is currently expanded (i.e. [SemanticsObject.isExpanded] is true), and set
 /// to "false" if it's not expanded (i.e. [SemanticsObject.isExpanded] is
 /// false). If the node is not expandable (i.e. [SemanticsObject.isExpandable]
