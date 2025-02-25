@@ -37,7 +37,8 @@ void main() {
       const Duration pollDelay300Ms = Duration(milliseconds: 300);
 
       bool heightTextDidShrink = false;
-      // TODO(harri35): Reconsider this polling duration when the root cause is found.
+      // TODO(harri35): Reconsider this polling duration when the root cause is found
+      // in https://github.com/flutter/flutter/issues/163606.
       // Sometimes it can take up to 21.3 seconds for the keyboard to open,
       // so we allow ample time here (200 * pollDelay300Ms = 60 sec)
       for (int i = 0; i < 200; ++i) {
