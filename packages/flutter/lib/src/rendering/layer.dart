@@ -334,9 +334,7 @@ abstract class Layer with DiagnosticableTreeMixin {
       _debugDisposed = true;
       return true;
     }());
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _engineLayer?.dispose();
     _engineLayer = null;
   }

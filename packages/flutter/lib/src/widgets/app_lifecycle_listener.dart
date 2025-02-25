@@ -178,11 +178,7 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
   @mustCallSuper
   void dispose() {
     assert(_debugAssertNotDisposed());
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     binding.removeObserver(this);
     assert(() {
       _debugDisposed = true;

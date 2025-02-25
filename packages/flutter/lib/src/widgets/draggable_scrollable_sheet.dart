@@ -607,9 +607,7 @@ class _DraggableSheetExtent {
   }
 
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _currentSize.dispose();
   }
 

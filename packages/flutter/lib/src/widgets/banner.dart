@@ -128,11 +128,7 @@ class BannerPainter extends CustomPainter {
   ///
   /// After calling this method, this object is no longer usable.
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _textPainter?.dispose();
     _textPainter = null;
   }

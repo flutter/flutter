@@ -572,9 +572,7 @@ abstract class Route<T> extends _RoutePlaceholder {
     _navigator = null;
     _restorationScopeId.dispose();
     _disposeCompleter.complete();
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
   }
 
   /// Whether this route is the top-most route on the navigator.
@@ -3381,11 +3379,7 @@ class _RouteEntry extends RouteTransitionRecord {
   /// before disposing.
   void forcedDispose() {
     assert(currentState.index < _RouteLifecycle.disposed.index);
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     currentState = _RouteLifecycle.disposed;
     route.dispose();
   }

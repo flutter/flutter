@@ -157,9 +157,7 @@ class _AnimationTuple {
 
   @mustCallSuper
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     controller.dispose();
     startAnimation.dispose();
     endAnimation.dispose();

@@ -974,9 +974,7 @@ class _DialPainter extends CustomPainter {
   final int selectedValue;
 
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     for (final _TappableLabel label in primaryLabels) {
       label.painter.dispose();
     }

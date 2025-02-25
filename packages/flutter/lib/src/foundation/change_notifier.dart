@@ -233,9 +233,7 @@ mixin class ChangeNotifier implements Listenable {
   /// so that the method is tree-shaken away when the flag is false.
   @protected
   static void maybeDispatchObjectCreation(ChangeNotifier object) {
-    // Tree shaker does not include this method and the class MemoryAllocations
-    // if kFlutterMemoryAllocationsEnabled is false.
-    if (kFlutterMemoryAllocationsEnabled && !object._creationDispatched) {
+    if (!object._creationDispatched) {
       assert(debugMaybeDispatchCreated('foundation', 'ChangeNotifier', object));
       object._creationDispatched = true;
     }
@@ -386,8 +384,8 @@ mixin class ChangeNotifier implements Listenable {
       _debugDisposed = true;
       return true;
     }());
-    if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    if (_creationDispatched) {
+      assert(debugMaybeDispatchDisposed(this));
     }
     _listeners = _emptyListeners;
     _count = 0;

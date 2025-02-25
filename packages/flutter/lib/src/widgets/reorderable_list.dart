@@ -1441,9 +1441,7 @@ class _DragInfo extends Drag {
   late Offset _rawDragPosition;
 
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _proxyAnimation?.dispose();
   }
 

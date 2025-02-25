@@ -257,9 +257,7 @@ class OverlayEntry implements Listenable {
       _overlay == null,
       'An OverlayEntry must first be removed from the Overlay before dispose is called.',
     );
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _disposedByOwner = true;
     if (!mounted) {
       // If we're still mounted when disposed, then this will be disposed in

@@ -69,11 +69,7 @@ class DisposableBuildContext<T extends State> {
   /// Creators of this object must call [dispose] when their [Element] is
   /// unmounted, i.e. when [State.dispose] is called.
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _state = null;
   }
 }

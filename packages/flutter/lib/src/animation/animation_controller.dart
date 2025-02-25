@@ -929,9 +929,7 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _ticker!.dispose();
     _ticker = null;
     clearStatusListeners();
