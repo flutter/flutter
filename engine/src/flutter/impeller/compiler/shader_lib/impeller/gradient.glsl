@@ -107,14 +107,7 @@ vec2 IPComputeConicalTConical(vec2 c0, float r0, vec2 c1, float r1, vec2 pos, fl
 
 }
 
-/// Compute the t value for a conical gradient at point `p` between the 2
-/// circles defined by (c0, r0) and (c1, r1). The returned vec2 encapsulates 't'
-/// as its x component and validity status as its y component, with positive y
-/// indicating a valid result.
-///
-/// The code is migrated from Skia Graphite. See
-/// https://github.com/google/skia/blob/ddf987d2ab3314ee0e80ac1ae7dbffb44a87d394/src/sksl/sksl_graphite_frag.sksl#L541-L666.
-vec2 IPComputeConicalT(vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
+int IPComputeConicalKind(vec2 c0, float r0, vec2 c1, float r1) {
   const float scalar_nearly_zero = 1.0 / float(1 << 12);
   float d_center = distance(c0, c1);
   float d_radius = r1 - r0;
@@ -127,16 +120,34 @@ vec2 IPComputeConicalT(vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
 
   if(radial) {
     if(strip) {
-      // The start and end inputs are the same in both position and radius.
-      // We don't expect to see this input, but just in case we avoid dividing
-      // by zero.
-      return vec2(0.0, -1.0);
+      return 0;
     }
-
-    return IPComputeConicalTRadial(c0, r0, c1, r1, pos, d_radius);
+    return 1;
   } else if(strip) {
+    return 2;
+  } else {
+    return 3;
+  }
+}
+
+/// Compute the t value for a conical gradient at point `p` between the 2
+/// circles defined by (c0, r0) and (c1, r1). The returned vec2 encapsulates 't'
+/// as its x component and validity status as its y component, with positive y
+/// indicating a valid result.
+///
+/// The code is migrated from Skia Graphite. See
+/// https://github.com/google/skia/blob/ddf987d2ab3314ee0e80ac1ae7dbffb44a87d394/src/sksl/sksl_graphite_frag.sksl#L541-L666.
+vec2 IPComputeConicalT(int kind, vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
+  if(kind == 0) {
+    return vec2(0.0, -1.0);
+  } else if(kind == 1) {
+    float d_radius = r1 - r0;
+    return IPComputeConicalTRadial(c0, r0, c1, r1, pos, d_radius);
+  } else if(kind == 2) {
+    float d_center = distance(c0, c1);
     return IPComputeConicalTStrip(c0, r0, c1, r1, pos, d_center);
   } else {
+    float d_center = distance(c0, c1);
     return IPComputeConicalTConical(c0, r0, c1, r1, pos, d_center);
   }
 }
