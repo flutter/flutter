@@ -637,8 +637,8 @@ class _RawAutocompleteOptions extends StatefulWidget {
 
 class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
   VoidCallback? removeCompositionCallback;
-  late BuildContext rootOverlayContext;
-  double bottomInset = 0.0;
+  late BuildContext ancestorOverlayContext;
+  double bottomViewInsets = 0.0;
   Offset fieldOffset = Offset.zero;
 
   // Get the field offset if the field's position changes when its layer tree
@@ -662,7 +662,10 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
           fieldOffset = nextFieldOffset;
         });
       }
-      bottomInset = MediaQuery.viewInsetsOf(rootOverlayContext).bottom;
+      // The bottom view insets might have already been removed. To get the
+      // correct keyboard insets, use the build context of the nearest ancestor
+      // overlay, ideally the root overlay of the widget tree.
+      bottomViewInsets = MediaQuery.viewInsetsOf(ancestorOverlayContext).bottom;
     });
   }
 
@@ -672,7 +675,7 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
     removeCompositionCallback = widget.optionsLayerLink.leader?.addCompositionCallback(
       _onLeaderComposition,
     );
-    rootOverlayContext = Overlay.of(context).context;
+    ancestorOverlayContext = Overlay.of(context).context;
   }
 
   @override
@@ -709,14 +712,18 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
           optionsViewOpenDirection: widget.optionsViewOpenDirection,
           textDirection: Directionality.of(context),
           fieldConstraints: widget.fieldConstraints,
-          bottomInset: bottomInset,
+          bottomViewInsets: bottomViewInsets,
         ),
-        child: TextFieldTapRegion(
-          child: AutocompleteHighlightedOption(
-            highlightIndexNotifier: widget.highlightIndexNotifier,
-            // optionsViewBuilder must be able to look up
-            // AutocompleteHighlightedOption in its context.
-            child: Builder(builder: widget.builder),
+        child: MediaQuery.removeViewInsets(
+          context: ancestorOverlayContext,
+          removeBottom: bottomViewInsets > 0.0,
+          child: TextFieldTapRegion(
+            child: AutocompleteHighlightedOption(
+              highlightIndexNotifier: widget.highlightIndexNotifier,
+              // optionsViewBuilder must be able to look up
+              // AutocompleteHighlightedOption in its context.
+              child: Builder(builder: widget.builder),
+            ),
           ),
         ),
       ),
@@ -732,7 +739,7 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
     required this.optionsViewOpenDirection,
     required this.textDirection,
     required this.fieldConstraints,
-    required this.bottomInset,
+    required this.bottomViewInsets,
   }) : assert(layerLink.leaderSize != null);
 
   /// Links the options in [RawAutocomplete.optionsViewBuilder] to the field in
@@ -752,7 +759,7 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
   final BoxConstraints fieldConstraints;
 
   /// The height of the soft keyboard which constrains the options view.
-  final double bottomInset;
+  final double bottomViewInsets;
 
   // A big enough height for about one item in the default
   // Autocomplete.optionsViewBuilder. The assumption is that the user likely
@@ -774,7 +781,7 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
       maxWidth: fieldSize.width == 0.0 ? constraints.maxWidth : fieldSize.width,
       maxHeight: max(_kMinUsableHeight, switch (optionsViewOpenDirection) {
         OptionsViewOpenDirection.down =>
-          constraints.maxHeight - fieldOffset.dy - fieldSize.height - bottomInset,
+          constraints.maxHeight - fieldOffset.dy - fieldSize.height - bottomViewInsets,
         OptionsViewOpenDirection.up => fieldOffset.dy,
       }),
     );
@@ -809,7 +816,7 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
         optionsViewOpenDirection != oldDelegate.optionsViewOpenDirection ||
         textDirection != oldDelegate.textDirection ||
         fieldConstraints != oldDelegate.fieldConstraints ||
-        bottomInset != oldDelegate.bottomInset;
+        bottomViewInsets != oldDelegate.bottomViewInsets;
   }
 }
 
