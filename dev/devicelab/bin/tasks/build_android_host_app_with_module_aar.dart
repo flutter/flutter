@@ -260,7 +260,7 @@ class ModuleTest {
       section(topBuildContent);
       await topBuildDotGradle.writeAsString(topBuildContent, flush: true);
 
-      final bool greaterThanGradle83 = agpVersion.compareTo(Version(8, 3, 0)) >= 0;
+      final bool greaterThanOrEqualToGradle83 = agpVersion.compareTo(Version(8, 3, 0)) >= 0;
 
       section('Build debug host APK');
 
@@ -324,7 +324,7 @@ class ModuleTest {
         'intermediates',
         'assets',
         'debug',
-        ...greaterThanGradle83 ? <String>['mergeDebugAssets'] : <String>[],
+        ...greaterThanOrEqualToGradle83 ? <String>['mergeDebugAssets'] : <String>[],
         'flutter_assets',
         'assets',
         'read-only.txt',
@@ -419,7 +419,7 @@ class ModuleTest {
         'intermediates',
         'assets',
         'release',
-        ...greaterThanGradle83 ? <String>['mergeReleaseAssets'] : <String>[],
+        ...greaterThanOrEqualToGradle83 ? <String>['mergeReleaseAssets'] : <String>[],
         'flutter_assets',
         'assets',
         'read-only.txt',
