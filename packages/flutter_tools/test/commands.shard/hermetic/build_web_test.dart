@@ -20,8 +20,10 @@ import 'package:flutter_tools/src/web/compile.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
+import '../../src/throwing_pub.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -39,7 +41,7 @@ void main() {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('name: foo\n');
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+    writePackageConfigFile(mainLibName: 'foo', directory: fileSystem.currentDirectory);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     logger = BufferLogger.test();
@@ -450,6 +452,82 @@ void main() {
     },
   );
 
+<<<<<<< HEAD
+  // Tests whether using a deprecated webRenderer toggles a warningText.
+  Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
+    testUsingContext(
+      'Using the "${webRenderer.name}" renderer triggers a warningText.',
+      () async {
+        // Run the command so it parses the renderer, but ignore all errors.
+        // We only care about the logger.
+        try {
+          final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+          await createTestCommandRunner(
+            buildCommand,
+          ).run(<String>['build', 'web', '--no-pub', ...webRenderer.toCliDartDefines]);
+        } on ToolExit catch (error) {
+          expect(error, isA<ToolExit>());
+        }
+        expect(
+          logger.warningText,
+          contains('See: https://docs.flutter.dev/to/web-html-renderer-deprecation'),
+        );
+      },
+      overrides: <Type, Generator>{
+        Platform: () => fakePlatform,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Logger: () => logger,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: ThrowingPub.new,
+      },
+    );
+  }
+
+  /// Do test all the deprecated WebRendererModes
+  WebRendererMode.values
+      .where((WebRendererMode mode) => mode.isDeprecated)
+      .forEach(testWebRendererDeprecationMessage);
+
+||||||| 44203b67f5
+  // Tests whether using a deprecated webRenderer toggles a warningText.
+  Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
+    testUsingContext(
+      'Using the "${webRenderer.name}" renderer triggers a warningText.',
+      () async {
+        // Run the command so it parses the renderer, but ignore all errors.
+        // We only care about the logger.
+        try {
+          final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+          await createTestCommandRunner(
+            buildCommand,
+          ).run(<String>['build', 'web', '--no-pub', ...webRenderer.toCliDartDefines]);
+        } on ToolExit catch (error) {
+          expect(error, isA<ToolExit>());
+        }
+        expect(
+          logger.warningText,
+          contains('See: https://docs.flutter.dev/to/web-html-renderer-deprecation'),
+        );
+      },
+      overrides: <Type, Generator>{
+        Platform: () => fakePlatform,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Logger: () => logger,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
+      },
+    );
+  }
+
+  /// Do test all the deprecated WebRendererModes
+  WebRendererMode.values
+      .where((WebRendererMode mode) => mode.isDeprecated)
+      .forEach(testWebRendererDeprecationMessage);
+
+=======
+>>>>>>> origin/master
   testUsingContext(
     'flutter build web option visibility',
     () async {
@@ -505,27 +583,11 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   }
 
   // Project files.
-  fileSystem.directory('.dart_tool').childFile('package_config.json')
-    ..createSync(recursive: true)
-    ..writeAsStringSync('''
-{
-  "packages": [
-    {
-      "name": "foo",
-      "rootUri": "../",
-      "packageUri": "lib/",
-      "languageVersion": "3.2"
-    },
-    {
-      "name": "fizz",
-      "rootUri": "../bar",
-      "packageUri": "lib/",
-      "languageVersion": "3.2"
-    }
-  ],
-  "configVersion": 2
-}
-''');
+  writePackageConfigFile(
+    directory: fileSystem.currentDirectory,
+    mainLibName: 'foo',
+    packages: <String, String>{'fizz': 'bar'},
+  );
   fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: foo
 

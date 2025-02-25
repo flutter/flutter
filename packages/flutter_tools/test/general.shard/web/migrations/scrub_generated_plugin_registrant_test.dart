@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -12,10 +14,10 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 
 import '../../../src/context.dart'; // legacy
-import '../../../src/fake_pub_deps.dart';
 import '../../../src/fakes.dart';
 import '../../../src/test_build_system.dart';
-import '../../../src/test_flutter_command_runner.dart'; // legacy
+import '../../../src/test_flutter_command_runner.dart';
+import '../../../src/throwing_pub.dart'; // legacy
 
 void main() {
   // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
@@ -82,7 +84,7 @@ void main() {
         ProcessManager: () => processManager,
         BuildSystem: () => buildSystem,
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -111,7 +113,7 @@ void main() {
         ProcessManager: () => processManager,
         BuildSystem: () => buildSystem,
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -143,7 +145,7 @@ void main() {
         ProcessManager: () => processManager,
         BuildSystem: () => buildSystem,
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -171,7 +173,7 @@ void main() {
         ProcessManager: () => processManager,
         BuildSystem: () => buildSystem,
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -205,7 +207,7 @@ void main() {
         ProcessManager: () => processManager,
         BuildSystem: () => buildSystem,
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   });
@@ -284,4 +286,15 @@ flutter:
 class UrlLauncherPlugin {}
 ''');
   fileSystem.file(fileSystem.path.join('lib', 'main.dart')).writeAsStringSync('void main() { }');
+  fileSystem
+      .file(fileSystem.path.join('.dart_tool', 'package_config.json'))
+      .writeAsStringSync(
+        json.encode(<String, Object?>{
+          'packages': <Object>[
+            <String, Object?>{'name': 'foo', 'rootUri': '../', 'packageUri': 'lib/'},
+            <String, Object?>{'name': 'bar', 'rootUri': '../bar', 'packageUri': 'lib/'},
+          ],
+          'configVersion': 2,
+        }),
+      );
 }
