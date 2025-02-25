@@ -29,6 +29,7 @@ INTERNAL NOTE
 
 ### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
 
+- [flutter/164050](https://github.com/flutter/flutter/pull/164050) - Fixes test reorderable_list_test.dart failing for certain ordering seeds, such as 20250221.
 - [flutter/161625](https://github.com/flutter/flutter/pull/161625) - Adds text
   tests.
 - [flutter/162351](https://github.com/flutter/flutter/pull/162351) - Fixes
