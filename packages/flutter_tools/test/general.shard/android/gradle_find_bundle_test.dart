@@ -623,7 +623,7 @@ void main() {
   });
 
   testWithoutContext(
-    'Finds app bundle when archiveName / archiveBaseName is not standart "app"',
+    'Finds app bundle when archiveName / archiveBaseName is not standard "app"',
     () {
       final FlutterProject project = generateFakeAppBundle('debug', 'foo-debug.aab', fileSystem);
       final File bundle = findBundleFile(
