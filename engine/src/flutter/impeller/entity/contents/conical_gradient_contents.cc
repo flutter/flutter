@@ -189,8 +189,8 @@ bool ConicalGradientContents::RenderUniform(const ContentContext& renderer,
 bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
                                             const Entity& entity,
                                             RenderPass& pass) const {
-  using VS = ConicalGradientFillPipeline::VertexShader;
-  using FS = ConicalGradientFillPipeline::FragmentShader;
+  using VS = ConicalGradientFillConicalPipeline::VertexShader;
+  using FS = ConicalGradientFillConicalPipeline::FragmentShader;
 
   auto gradient_data = CreateGradientBuffer(colors_, stops_);
   auto gradient_texture =

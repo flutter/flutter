@@ -9,32 +9,4 @@ precision highp float;
 
 #include <impeller/texture.glsl>
 
-uniform FragInfo {
-  highp vec2 center;
-  float radius;
-  float tile_mode;
-  vec4 decal_border_color;
-  float texture_sampler_y_coord_scale;
-  float alpha;
-  vec2 half_texel;
-  vec2 focus;
-  float focus_radius;
-} frag_info;
-
-vec4 TextureConical(vec2 res, sampler2D tex) {
-  if (res.y < 0.0) {
-    return vec4(0);
-  }
-
-  float t = res.x;
-  vec4 result = IPSampleLinearWithTileMode(tex,            //
-                                           vec2(t, 0.5),   //
-                                           frag_info.texture_sampler_y_coord_scale,  //
-                                           frag_info.half_texel,     //
-                                           frag_info.tile_mode,      //
-                                           frag_info.decal_border_color);
-  result = IPPremultiply(result) * frag_info.alpha;
-  return result;
-}
-
 #endif // CONICAL_GRADIENT_GLSL_

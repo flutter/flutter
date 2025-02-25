@@ -350,13 +350,11 @@ ContentContext::ContentContext(
 
       linear_gradient_fill_pipelines_.CreateDefault(*context_, options);
       radial_gradient_fill_pipelines_.CreateDefault(*context_, options);
-      conical_gradient_fill_pipelines_.CreateDefault(*context_, options, {3.0});
-      conical_gradient_fill_radial_pipelines_.CreateDefault(*context_, options,
-                                                            {1.0});
-      conical_gradient_fill_strip_pipelines_.CreateDefault(*context_, options,
-                                                           {2.0});
-      conical_gradient_fill_strip_and_radial_pipelines_.CreateDefault(
-          *context_, options, {0.0});
+      conical_gradient_fill_pipelines_.CreateDefault(*context_, options);
+      conical_gradient_fill_radial_pipelines_.CreateDefault(*context_, options);
+      conical_gradient_fill_strip_pipelines_.CreateDefault(*context_, options);
+      conical_gradient_fill_strip_and_radial_pipelines_.CreateDefault(*context_,
+                                                                      options);
       sweep_gradient_fill_pipelines_.CreateDefault(*context_, options);
     }
 
