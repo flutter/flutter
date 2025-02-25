@@ -319,15 +319,7 @@ abstract interface class DecorationImagePainter {
 
 class _DecorationImagePainter implements DecorationImagePainter {
   _DecorationImagePainter._(this._details, this._onChanged) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/painting.dart',
-        className: '$_DecorationImagePainter',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('painting', '_DecorationImagePainter', this));
   }
 
   final DecorationImage _details;
@@ -862,15 +854,7 @@ class _BlendedDecorationImage implements DecorationImage {
 
 class _BlendedDecorationImagePainter implements DecorationImagePainter {
   _BlendedDecorationImagePainter._(this.a, this.b, this.t) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/painting.dart',
-        className: '$_BlendedDecorationImagePainter',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('painting', '_BlendedDecorationImagePainter', this));
   }
 
   final DecorationImagePainter? a;

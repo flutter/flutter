@@ -11,6 +11,7 @@ import 'dart:ui' show VoidCallback;
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
+import 'debug.dart';
 import 'diagnostics.dart';
 import 'memory_allocations.dart';
 
@@ -235,11 +236,7 @@ mixin class ChangeNotifier implements Listenable {
     // Tree shaker does not include this method and the class MemoryAllocations
     // if kFlutterMemoryAllocationsEnabled is false.
     if (kFlutterMemoryAllocationsEnabled && !object._creationDispatched) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterFoundationLibrary,
-        className: '$ChangeNotifier',
-        object: object,
-      );
+      assert(debugMaybeDispatchCreated('foundation', 'ChangeNotifier', object));
       object._creationDispatched = true;
     }
   }

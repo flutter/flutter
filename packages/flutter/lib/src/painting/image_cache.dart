@@ -595,15 +595,7 @@ class ImageCacheStatus {
 /// [ImageCache._cache].
 abstract class _CachedImageBase {
   _CachedImageBase(this.completer, {this.sizeBytes}) : handle = completer.keepAlive() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/painting.dart',
-        className: '$_CachedImageBase',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('painting', '_CachedImageBase', this));
   }
 
   final ImageStreamCompleter completer;

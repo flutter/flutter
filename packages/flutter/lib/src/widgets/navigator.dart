@@ -171,13 +171,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   Route({RouteSettings? settings, bool? requestFocus})
     : _settings = settings ?? const RouteSettings(),
       _requestFocus = requestFocus {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$Route<$T>',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'Route<T>', this));
   }
 
   /// When the route state is updated, request focus if the current route is at the top.
@@ -3149,15 +3143,7 @@ class _RouteEntry extends RouteTransitionRecord {
              initialState == _RouteLifecycle.replace,
        ),
        currentState = initialState {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$_RouteEntry',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', '_RouteEntry', this));
   }
 
   @override

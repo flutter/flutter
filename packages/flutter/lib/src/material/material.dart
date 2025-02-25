@@ -677,15 +677,7 @@ abstract class InkFeature {
     required this.referenceBox,
     this.onRemoved,
   }) : _controller = controller as _RenderInkFeatures {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/material.dart',
-        className: '$InkFeature',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('material', 'InkFeature', this));
   }
 
   /// The [MaterialInkController] associated with this [InkFeature].

@@ -1398,15 +1398,7 @@ class _DragInfo extends Drag {
     this.proxyDecorator,
     required this.tickerProvider,
   }) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$_DragInfo',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', '_DragInfo', this));
     final RenderBox itemRenderBox = item.context.findRenderObject()! as RenderBox;
     listState = item._listState;
     index = item.index;

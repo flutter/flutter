@@ -822,8 +822,6 @@ enum _StateLifecycle {
 /// The signature of [State.setState] functions.
 typedef StateSetter = void Function(VoidCallback fn);
 
-const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
-
 /// The logic and internal state for a [StatefulWidget].
 ///
 /// State is information that (1) can be read synchronously when the widget is
@@ -1009,13 +1007,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @mustCallSuper
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
-        className: '$State',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'State', this));
   }
 
   /// Called whenever the widget configuration changes.
@@ -3513,13 +3505,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// Typically called by an override of [Widget.createElement].
   Element(Widget widget) : _widget = widget {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
-        className: '$Element',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'Element', this));
   }
 
   Element? _parent;

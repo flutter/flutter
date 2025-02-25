@@ -86,15 +86,7 @@ class Ticker {
       _debugCreationStack = StackTrace.current;
       return true;
     }());
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/scheduler.dart',
-        className: '$Ticker',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('scheduler', 'Ticker', this));
   }
 
   TickerFuture? _future;

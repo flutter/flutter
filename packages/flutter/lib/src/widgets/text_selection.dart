@@ -348,15 +348,7 @@ class TextSelectionOverlay {
     required TextMagnifierConfiguration magnifierConfiguration,
   }) : _handlesVisible = handlesVisible,
        _value = value {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$TextSelectionOverlay',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'TextSelectionOverlay', this));
     renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     _updateTextSelectionOverlayVisibilities();
@@ -1050,15 +1042,7 @@ class SelectionOverlay {
        _selectionEndpoints = selectionEndpoints,
        _toolbarLocation = toolbarLocation,
        assert(debugCheckHasOverlay(context)) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$SelectionOverlay',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'SelectionOverlay', this));
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.context}

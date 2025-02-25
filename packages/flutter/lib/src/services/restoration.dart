@@ -965,13 +965,7 @@ class RestorationBucket {
   // https://github.com/flutter/flutter/issues/137435
   /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
   void _maybeDispatchObjectCreation() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/services.dart',
-        className: '$RestorationBucket',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('services', 'RestorationBucket', this));
   }
 
   /// Deletes the bucket and all the data stored in it from the bucket
