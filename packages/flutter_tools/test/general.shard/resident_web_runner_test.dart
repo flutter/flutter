@@ -14,9 +14,9 @@ import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/tools/scene_importer.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -89,7 +88,6 @@ void main() {
   late FakeVmServiceHost fakeVmServiceHost;
   late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
-  late TestUsage testUsage;
   late FakeAnalytics fakeAnalytics;
 
   // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
@@ -99,7 +97,6 @@ void main() {
   }
 
   setUp(() {
-    testUsage = TestUsage();
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.any();
     debugConnection = FakeDebugConnection();
@@ -146,7 +143,9 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        usage: globals.flutterUsage,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
       );
@@ -176,7 +175,9 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        usage: globals.flutterUsage,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
       );
@@ -198,7 +199,9 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        usage: globals.flutterUsage,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
       );
@@ -210,7 +213,9 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        usage: globals.flutterUsage,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
       );
@@ -350,7 +355,9 @@ void main() {
         stayResident: false,
         fileSystem: fileSystem,
         logger: logger,
-        usage: globals.flutterUsage,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
@@ -379,13 +386,99 @@ void main() {
         stayResident: false,
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        usage: globals.flutterUsage,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
       );
 
       expect(await residentWebRunner.run(), 0);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
+    },
+  );
+
+  testUsingContext(
+    'Detach keeps device running',
+    () async {
+      final BufferLogger logger = BufferLogger.test();
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      fileSystem.directory('web').deleteSync(recursive: true);
+      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
+        flutterDevice,
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        fileSystem: fileSystem,
+        logger: logger,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
+        analytics: globals.analytics,
+        systemClock: globals.systemClock,
+        devtoolsHandler: createNoOpHandler,
+      );
+
+      mockDevice.dds = DartDevelopmentService(logger: logger);
+
+      expect(mockDevice.isRunning, false);
+      final Completer<DebugConnectionInfo> connectionInfoCompleter =
+          Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+      expect(mockDevice.isRunning, true);
+      await residentWebRunner.detach();
+      expect(residentWebRunner.stopAppDuringCleanup, false);
+      await residentWebRunner.exit();
+      await residentWebRunner.cleanupAtFinish();
+      expect(mockDevice.isRunning, true);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
+    },
+  );
+
+  testUsingContext(
+    'Quit stops device',
+    () async {
+      final BufferLogger logger = BufferLogger.test();
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      fileSystem.directory('web').deleteSync(recursive: true);
+      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
+        flutterDevice,
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        fileSystem: fileSystem,
+        logger: logger,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
+        analytics: globals.analytics,
+        systemClock: globals.systemClock,
+        devtoolsHandler: createNoOpHandler,
+      );
+
+      mockDevice.dds = DartDevelopmentService(logger: logger);
+
+      expect(mockDevice.isRunning, false);
+      final Completer<DebugConnectionInfo> connectionInfoCompleter =
+          Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+      expect(mockDevice.isRunning, true);
+      expect(residentWebRunner.stopAppDuringCleanup, true);
+      await residentWebRunner.cleanupAtFinish();
+      expect(mockDevice.isRunning, false);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -595,7 +688,9 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        usage: globals.flutterUsage,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
@@ -674,21 +769,6 @@ void main() {
       expect(result.code, 0);
       expect(webDevFS.mainUri.toString(), contains('entrypoint.dart'));
 
-      // ensure that analytics are sent.
-      expect(testUsage.events, <TestUsageEvent>[
-        TestUsageEvent(
-          'hot',
-          'restart',
-          parameters: CustomDimensions.fromMap(<String, String>{
-            'cd27': 'web-javascript',
-            'cd28': '',
-            'cd29': 'false',
-            'cd30': 'true',
-            'cd13': '0',
-            'cd48': 'false',
-          }),
-        ),
-      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -702,9 +782,6 @@ void main() {
           ),
         ),
       );
-      expect(testUsage.timings, const <TestTimingEvent>[
-        TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
-      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -717,7 +794,6 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -781,21 +857,6 @@ void main() {
       expect(logger.statusText, contains('Restarted application in'));
       expect(result.code, 0);
 
-      // ensure that analytics are sent.
-      expect(testUsage.events, <TestUsageEvent>[
-        TestUsageEvent(
-          'hot',
-          'restart',
-          parameters: CustomDimensions.fromMap(<String, String>{
-            'cd27': 'web-javascript',
-            'cd28': '',
-            'cd29': 'false',
-            'cd30': 'true',
-            'cd13': '0',
-            'cd48': 'false',
-          }),
-        ),
-      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -809,9 +870,6 @@ void main() {
           ),
         ),
       );
-      expect(testUsage.timings, const <TestTimingEvent>[
-        TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
-      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -824,7 +882,6 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -857,12 +914,9 @@ void main() {
       expect(result.code, 0);
 
       // web-server device does not send restart analytics
-      expect(testUsage.events, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
-      expect(testUsage.timings, isEmpty);
     },
     overrides: <Type, Generator>{
-      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -898,12 +952,9 @@ void main() {
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
 
       expect(await residentWebRunner.run(), 1);
-      expect(testUsage.events, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
-      expect(testUsage.timings, isEmpty);
     },
     overrides: <Type, Generator>{
-      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -969,12 +1020,9 @@ void main() {
 
       expect(result.code, 1);
       expect(result.message, contains('Failed to recompile application.'));
-      expect(testUsage.events, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
-      expect(testUsage.timings, isEmpty);
     },
     overrides: <Type, Generator>{
-      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -1047,14 +1095,46 @@ void main() {
   );
 
   testUsingContext(
-    'printHelp without details shows hot restart help message',
+    'printHelp without details shows only hot restart help message',
     () async {
       final BufferLogger logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       residentWebRunner.printHelp(details: false);
 
-      expect(logger.statusText, contains('To hot restart changes'));
+      expect(logger.statusText, contains('Hot restart'));
+      expect(logger.statusText.contains('Hot reload'), false);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'printHelp without details shows hot restart and hot reload help message '
+    'if using DDC library bundle format',
+    () async {
+      final BufferLogger logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        debuggingOptions: DebuggingOptions.enabled(
+          const BuildInfo(
+            BuildMode.debug,
+            null,
+            trackWidgetCreation: true,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+            extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--dartdevc-canary'],
+          ),
+        ),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+      residentWebRunner.printHelp(details: false);
+
+      expect(logger.statusText, contains('Hot restart'));
+      expect(logger.statusText, contains('Hot reload'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1187,7 +1267,9 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         fileSystem: fileSystem,
         logger: logger,
-        usage: globals.flutterUsage,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
@@ -1233,7 +1315,9 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         fileSystem: fileSystem,
         logger: logger,
-        usage: globals.flutterUsage,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
@@ -1276,7 +1360,9 @@ void main() {
         stayResident: false,
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        usage: globals.flutterUsage,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
@@ -1568,11 +1654,13 @@ ResidentRunner setUpResidentRunner(
     flutterDevice,
     flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions: debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
-    usage: globals.flutterUsage,
     analytics: globals.analytics,
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
+    terminal: Terminal.test(),
+    platform: FakePlatform(),
+    outputPreferences: OutputPreferences.test(),
     devtoolsHandler: createNoOpHandler,
   );
 }
@@ -1588,11 +1676,16 @@ class FakeDevice extends Fake implements Device {
 
   int count = 0;
 
+  bool isRunning = false;
+
   @override
   Future<String> get sdkNameAndVersion async => 'SDK Name and Version';
 
   @override
   late DartDevelopmentService dds;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   Future<LaunchResult> startApp(
@@ -1605,6 +1698,7 @@ class FakeDevice extends Fake implements Device {
     bool ipv6 = false,
     String? userIdentifier,
   }) async {
+    isRunning = true;
     return LaunchResult.succeeded();
   }
 
@@ -1614,6 +1708,7 @@ class FakeDevice extends Fake implements Device {
       throw StateError('stopApp called more than once.');
     }
     count += 1;
+    isRunning = false;
     return true;
   }
 }
@@ -1665,6 +1760,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
+    bool recompileRestart = false,
   }) async {
     return const CompilerOutput('foo.dill', 0, <Uri>[]);
   }
@@ -1718,12 +1814,12 @@ class FakeWebDevFS extends Fake implements WebDevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
-    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
+    bool resetCompiler = false,
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
@@ -1873,7 +1969,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,

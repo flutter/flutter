@@ -625,3 +625,18 @@ void testPointerActions() {
     });
   };
 }
+
+@pragma('vm:entry-point')
+void testDispatchEvents() {
+  PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket pointer) {
+    notifyNative();
+  };
+}
+
+@pragma('vm:entry-point')
+void testSendViewFocusEvent() {
+  PlatformDispatcher.instance.onViewFocusChange = (ViewFocusEvent event) {
+    notifyMessage('${event.viewId} ${event.state} ${event.direction}');
+  };
+  notifyNative();
+}

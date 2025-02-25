@@ -169,9 +169,6 @@ class BuildWebCommand extends BuildSubCommand {
     final bool sourceMaps = boolArg('source-maps');
 
     final List<WebCompilerConfig> compilerConfigs;
-    if (webRenderer.isDeprecated) {
-      globals.logger.printWarning(webRenderer.deprecationWarning);
-    }
 
     if (useWasm) {
       if (webRenderer != WebRendererMode.getDefault(useWasm: true)) {
@@ -240,14 +237,12 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
-    displayNullSafetyMode(buildInfo);
     final WebBuilder webBuilder = WebBuilder(
       logger: globals.logger,
       processManager: globals.processManager,
       buildSystem: globals.buildSystem,
       fileSystem: globals.fs,
       flutterVersion: globals.flutterVersion,
-      usage: globals.flutterUsage,
       analytics: globals.analytics,
     );
     await webBuilder.buildWeb(
