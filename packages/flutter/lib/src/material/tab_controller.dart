@@ -121,7 +121,9 @@ class TabController extends ChangeNotifier {
          value: initialIndex.toDouble(),
          vsync: vsync,
        ) {
-    assert(debugMaybeDispatchDisposed(this));
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
   }
 
   // Private constructor used by `_copyWith`. This allows a new TabController to
@@ -136,7 +138,9 @@ class TabController extends ChangeNotifier {
        _previousIndex = previousIndex,
        _animationController = animationController,
        _animationDuration = animationDuration {
-    assert(debugMaybeDispatchDisposed(this));
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
   }
 
   /// Creates a new [TabController] with `index`, `previousIndex`, `length`, and

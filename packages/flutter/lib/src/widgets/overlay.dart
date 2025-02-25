@@ -27,8 +27,6 @@ import 'framework.dart';
 import 'lookup_boundary.dart';
 import 'ticker_provider.dart';
 
-const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
-
 // Examples can assume:
 // late BuildContext context;
 
