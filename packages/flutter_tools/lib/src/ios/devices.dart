@@ -39,6 +39,23 @@ import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
 
+const String kJITCrashFailureMessage =
+    'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';
+
+const String kJITCrashFailureMessageInstructions = '''
+════════════════════════════════════════════════════════════════════════════════
+An upcoming change to iOS has caused a temporary break in Flutter's
+debug mode on physical devices running iOS 18.4 (currently in beta).
+See https://github.com/flutter/flutter/issues/163984 for details.
+
+In the meantime, we recommend these temporary workarounds:
+
+* When developing with a physical device, use one running iOS 18.3 or lower.
+* Use a simulator for development rather than a physical device.
+* If you must use a device updated to iOS 18.4, use Flutter's release or
+  profile mode via --release or --profile flags.
+════════════════════════════════════════════════════════════════════════════════''';
+
 class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices({
     required Platform platform,
@@ -594,6 +611,7 @@ class IOSDevice extends Device {
           debuggingOptions: debuggingOptions,
           packageId: packageId,
           vmServiceDiscovery: vmServiceDiscovery,
+          package: package,
         );
       } else if (isWirelesslyConnected) {
         // Wait for the Dart VM url to be discovered via logs (from `ios-deploy`)
@@ -702,6 +720,7 @@ class IOSDevice extends Device {
     required String packageId,
     required DebuggingOptions debuggingOptions,
     ProtocolDiscovery? vmServiceDiscovery,
+    IOSApp? package,
   }) async {
     Timer? maxWaitForCI;
     final Completer<Uri?> cancelCompleter = Completer<Uri?>();
@@ -743,6 +762,11 @@ class IOSDevice extends Device {
       });
     }
 
+    final StreamSubscription<String> errorListener = _interceptErrorsFromLogs(
+      package,
+      debuggingOptions: debuggingOptions,
+    );
+
     final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
       packageId,
       this,
@@ -771,7 +795,32 @@ class IOSDevice extends Device {
       }
     }
     maxWaitForCI?.cancel();
+    await errorListener.cancel();
     return localUri;
+  }
+
+  /// Listen for specific errors and perform actions, such as printing guided
+  /// messages or exiting the tool.
+  StreamSubscription<String> _interceptErrorsFromLogs(
+    IOSApp? package, {
+    required DebuggingOptions debuggingOptions,
+  }) {
+    final DeviceLogReader deviceLogReader = getLogReader(
+      app: package,
+      usingCISystem: debuggingOptions.usingCISystem,
+    );
+
+    final Stream<String> logStream = deviceLogReader.logLines;
+
+    final StreamSubscription<String> errorListener = logStream.listen((String line) {
+      if (sdkVersion != null && sdkVersion! >= Version(18, 4, null)) {
+        if (line.contains(kJITCrashFailureMessage)) {
+          throwToolExit(kJITCrashFailureMessageInstructions);
+        }
+      }
+    });
+
+    return errorListener;
   }
 
   ProtocolDiscovery _setupDebuggerAndVmServiceDiscovery({
