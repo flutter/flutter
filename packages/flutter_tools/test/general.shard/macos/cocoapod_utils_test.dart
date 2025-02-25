@@ -62,6 +62,7 @@ void main() {
 
       writePackageConfigFile(
         directory: flutterProject.directory,
+        mainLibName: 'my_app',
         packages: <String, String>{
           for (final String plugin in pluginNames)
             plugin: fakePubCache.childDirectory(plugin).uri.toString(),

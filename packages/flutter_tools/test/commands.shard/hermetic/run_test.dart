@@ -204,7 +204,7 @@ void main() {
         fs = MemoryFileSystem.test();
 
         fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-        writePackageConfigFile(directory: fs.currentDirectory);
+        writePackageConfigFile(directory: fs.currentDirectory, mainLibName: 'my_app');
 
         final Directory libDir = fs.currentDirectory.childDirectory('lib');
         libDir.createSync();

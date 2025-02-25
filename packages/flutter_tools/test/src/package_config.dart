@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 /// Writes a `.dart_tool/package_config.json` file at [directory].
 ///
@@ -17,12 +16,11 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 ///
 /// Returns the `File` Object representing the package config.
 File writePackageConfigFile({
-  Directory? directory,
-  String mainLibName = 'my_app',
+  required Directory directory,
+  required String mainLibName,
   Map<String, String> packages = const <String, String>{},
   Map<String, String> languageVersions = const <String, String>{},
 }) {
-  directory ??= globals.fs.currentDirectory;
   return directory.childDirectory('.dart_tool').childFile('package_config.json')
     ..createSync(recursive: true)
     ..writeAsStringSync(

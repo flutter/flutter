@@ -1826,7 +1826,7 @@ Future<FlutterProject> someProject({
   bool includePubspec = false,
 }) async {
   final Directory directory = globals.fs.directory('some_project');
-  writePackageConfigFile(mainLibName: 'hello');
+  writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'hello');
   if (includePubspec) {
     directory.childFile('pubspec.yaml')
       ..createSync(recursive: true)
@@ -1983,6 +1983,7 @@ void _testInMemory(
         .directory(Cache.flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools'),
+    mainLibName: 'my_app',
     packages: <String, String>{
       'flutter_template_images': dummyTemplateImagesDirectory.uri.toString(),
     },

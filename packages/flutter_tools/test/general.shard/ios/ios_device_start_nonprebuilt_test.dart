@@ -1160,7 +1160,7 @@ void setUpIOSProject(FileSystem fileSystem, {bool createWorkspace = true}) {
   fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 ''');
-  writePackageConfigFile(directory: fileSystem.currentDirectory);
+  writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
   fileSystem.directory('ios').createSync();
   if (createWorkspace) {
     fileSystem.directory('ios/Runner.xcworkspace').createSync();

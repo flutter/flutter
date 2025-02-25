@@ -789,6 +789,7 @@ void createFakePlugins(
   final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
   writePackageConfigFile(
     directory: flutterProject.directory,
+    mainLibName: 'my_app',
     packages: <String, String>{
       for (final String name in pluginNames) name: fakePubCache.childDirectory(name).path,
     },

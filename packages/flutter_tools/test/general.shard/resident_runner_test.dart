@@ -1095,6 +1095,8 @@ flutter:
 
         // Create necessary files for [DartPluginRegistrantTarget]
         writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
           packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
         );
 
@@ -1145,6 +1147,8 @@ dependencies:
         // Create necessary files for [DartPluginRegistrantTarget], including a
         // plugin that will trigger generation.
         writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
           packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
         );
 

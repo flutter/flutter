@@ -299,7 +299,7 @@ void main() {
   testWithoutContext('CustomDevice.isSupportedForProject is true with editable host app', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
-    writePackageConfigFile(directory: fileSystem.currentDirectory);
+    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
 
     final FlutterProject flutterProject = _setUpFlutterProject(fileSystem.currentDirectory);
 

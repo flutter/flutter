@@ -359,7 +359,7 @@ class FakePub extends Fake implements Pub {
       expect(arguments, expectedArguments);
     }
     if (project != null) {
-      writePackageConfigFile(directory: project.directory);
+      writePackageConfigFile(directory: project.directory, mainLibName: 'my_app');
     }
   }
 }

@@ -198,7 +198,7 @@ void main() {
 
       // Add basic properties to the Flutter project and subprojects
       setUpProject(fs);
-      writePackageConfigFile(directory: flutterProject.directory);
+      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
     });
 
     void addToPackageConfig(String name, Directory packageDir) {
@@ -248,7 +248,7 @@ void main() {
 
       final List<Directory> directories = <Directory>[];
       final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
-      writePackageConfigFile(directory: flutterProject.directory);
+      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
       for (final String nameOrPath in pluginNamesOrPaths) {
         final String name = fileSystem.path.basename(nameOrPath);
         final Directory pluginDirectory =
@@ -2432,7 +2432,7 @@ flutter:
           ..flutterPluginsDependenciesFile = dependenciesFile
           ..windows = windowsProject;
 
-        writePackageConfigFile(directory: flutterProject.directory);
+        writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
 
         const String dependenciesFileContents = r'''
 {
@@ -2801,7 +2801,7 @@ flutter:
         )
         ..windows = windowsProject;
 
-      writePackageConfigFile(directory: flutterProject.directory);
+      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
 
       createPluginSymlinks(
         flutterProject,

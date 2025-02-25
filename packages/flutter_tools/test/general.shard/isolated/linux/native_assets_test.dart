@@ -106,6 +106,7 @@ void main() {
 
       final File packageConfigFile = writePackageConfigFile(
         directory: fileSystem.directory(projectUri),
+        mainLibName: 'my_app',
       );
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         packageConfigFile,

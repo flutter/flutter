@@ -140,7 +140,11 @@ $assetsSection
       'No assets are bundled when the package has no assets',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          packages: <String, String>{'test_package': 'p/p/'},
+          mainLibName: 'my_app',
+        );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
@@ -171,7 +175,11 @@ $assetsSection
       'No assets are bundled when the package has an asset that is not listed',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          packages: <String, String>{'test_package': 'p/p/'},
+          mainLibName: 'my_app',
+        );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
         final List<String> assets = <String>['a/foo'];
@@ -206,7 +214,11 @@ $assetsSection
       'asset its pubspec',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          packages: <String, String>{'test_package': 'p/p/'},
+          mainLibName: 'my_app',
+        );
 
         final List<String> assets = <String>['a/foo'];
         writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: assets);
@@ -233,7 +245,11 @@ $assetsSection
       () async {
         final List<String> assetEntries = <String>['packages/test_package/a/foo'];
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          packages: <String, String>{'test_package': 'p/p/'},
+          mainLibName: 'my_app',
+        );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
         final List<String> assets = <String>['a/foo'];
@@ -257,7 +273,11 @@ $assetsSection
       'has an asset and a variant, and lists the asset in its pubspec',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          packages: <String, String>{'test_package': 'p/p/'},
+          mainLibName: 'my_app',
+        );
         writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: <String>['a/foo', 'a/bar']);
 
         final List<String> assets = <String>['a/foo', 'a/2x/foo', 'a/bar'];
@@ -286,7 +306,11 @@ $assetsSection
       'has an asset and a variant, and the app lists the asset in its pubspec',
       () async {
         writePubspecFile('pubspec.yaml', 'test', assets: <String>['packages/test_package/a/foo']);
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'test_package': 'p/p/'},
+        );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
         final List<String> assets = <String>['a/foo', 'a/2x/foo'];
@@ -312,7 +336,11 @@ $assetsSection
       'two assets in its pubspec',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'test_package': 'p/p/'},
+        );
 
         final List<String> assets = <String>['a/foo', 'a/bar'];
         writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: assets);
@@ -343,7 +371,11 @@ $assetsSection
           'packages/test_package/a/bar',
         ];
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'test_package': 'p/p/'},
+        );
 
         final List<String> assets = <String>['a/foo', 'a/bar'];
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
@@ -371,6 +403,8 @@ $assetsSection
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
           packages: <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'},
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: <String>['a/foo']);
@@ -411,6 +445,8 @@ $assetsSection
         ];
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
         writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
           packages: <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'},
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
@@ -448,6 +484,8 @@ $assetsSection
       () async {
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
           packages: <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'},
         );
         writePubspecFile(
@@ -479,7 +517,11 @@ $assetsSection
       'Flavored assets are bundled when the app depends on a package',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'test_package': 'p/p/'},
+        );
         writePubspecFile(
           'p/p/pubspec.yaml',
           'test_package',
@@ -513,7 +555,11 @@ $assetsSection
     'Asset paths can contain URL reserved characters',
     () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+      writePackageConfigFile(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'my_app',
+        packages: <String, String>{'test_package': 'p/p/'},
+      );
 
       final List<String> assets = <String>['a/foo', 'a/foo [x]'];
       writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: assets);
@@ -540,7 +586,11 @@ $assetsSection
     'Asset paths can contain URL reserved characters',
     () async {
       writePubspecFile('pubspec.yaml', 'test');
-      writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+      writePackageConfigFile(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'my_app',
+        packages: <String, String>{'test_package': 'p/p/'},
+      );
 
       final List<String> assets = <String>['a/foo', 'a/foo [x]'];
       writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: assets);
@@ -568,7 +618,11 @@ $assetsSection
       'Two assets are bundled when scanning their directory',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'test_package': 'p/p/'},
+        );
 
         final List<String> assetsOnDisk = <String>['a/foo', 'a/bar'];
         final List<String> assetsOnManifest = <String>['a/'];
@@ -597,7 +651,11 @@ $assetsSection
       'Two assets are bundled when listing one and scanning second directory',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'test_package': 'p/p/'},
+        );
 
         final List<String> assetsOnDisk = <String>['a/foo', 'abc/bar'];
         final List<String> assetOnManifest = <String>['a/foo', 'abc/'];
@@ -626,7 +684,11 @@ $assetsSection
       'One asset is bundled with variant, scanning wrong directory',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'test_package': 'p/p/'},
+        );
 
         final List<String> assetsOnDisk = <String>['a/foo', 'a/b/foo', 'a/bar'];
         final List<String> assetOnManifest = <String>[
@@ -659,7 +721,11 @@ $assetsSection
       'One asset is bundled with variant, scanning directory',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'test_package': 'p/p/'},
+        );
 
         final List<String> assetsOnDisk = <String>['a/foo', 'a/2x/foo'];
         final List<String> assetOnManifest = <String>['a/'];
@@ -685,7 +751,11 @@ $assetsSection
       'No asset is bundled with variant, no assets or directories are listed',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'test_package': 'p/p/'},
+        );
 
         final List<String> assetsOnDisk = <String>['a/foo', 'a/2x/foo'];
         final List<String> assetOnManifest = <String>[];
@@ -709,7 +779,11 @@ $assetsSection
       'Expect error generating manifest, wrong non-existing directory is listed',
       () async {
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(packages: <String, String>{'test_package': 'p/p/'});
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'test_package': 'p/p/'},
+        );
 
         final List<String> assetOnManifest = <String>['c/'];
 

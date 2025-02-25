@@ -67,6 +67,8 @@ name: foo
 ''');
 
         writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
           packages: <String, String>{'foo': 'foo/'},
           languageVersions: <String, String>{'foo': '2.7'},
         );

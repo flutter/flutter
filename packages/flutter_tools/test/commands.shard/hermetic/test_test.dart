@@ -66,6 +66,7 @@ void main() {
         'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
         'integration_test': 'file:///path/to/flutter/packages/integration_test',
       },
+      mainLibName: 'my_app',
     );
     package.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
     package
@@ -81,6 +82,7 @@ void main() {
         'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_api-0.6.1',
         'test_core': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_core-0.5.9',
       },
+      mainLibName: 'my_app',
     );
 
     fs.currentDirectory = package.path;
@@ -123,6 +125,7 @@ dev_dependencies:
         packages: <String, String>{
           'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
         },
+        mainLibName: 'my_app',
       );
 
       final FakePackageTest fakePackageTest = FakePackageTest();
