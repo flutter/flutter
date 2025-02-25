@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,6 +32,7 @@ public class FlutterMutatorView extends FrameLayout {
   private int prevTop;
 
   private final AndroidTouchProcessor androidTouchProcessor;
+  private Paint paint;
 
   /**
    * Initialize the FlutterMutatorView. Use this to set the screenDensity, which will be used to
@@ -43,6 +45,7 @@ public class FlutterMutatorView extends FrameLayout {
     super(context, null);
     this.screenDensity = screenDensity;
     this.androidTouchProcessor = androidTouchProcessor;
+    this.paint = new Paint();
   }
 
   /** Initialize the FlutterMutatorView. */
@@ -117,6 +120,10 @@ public class FlutterMutatorView extends FrameLayout {
       Path pathCopy = new Path(path);
       pathCopy.offset(-left, -top);
       canvas.clipPath(pathCopy);
+    }
+    if (mutatorsStack.getFinalOpacity() != 1.f) {
+      paint.setAlpha((int) (255 * mutatorsStack.getFinalOpacity()));
+      this.setLayerType(View.LAYER_TYPE_HARDWARE, paint);
     }
     super.draw(canvas);
     canvas.restore();
