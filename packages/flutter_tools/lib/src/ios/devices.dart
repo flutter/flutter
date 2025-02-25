@@ -44,15 +44,15 @@ const String kJITCrashFailureMessage =
 
 const String kJITCrashFailureInstructions = '''
 ════════════════════════════════════════════════════════════════════════════════
-An upcoming change to iOS has caused a temporary break in Flutter's
-debug mode on physical devices running iOS 18.4 (currently in beta).
+A change to iOS has caused a temporary break in Flutter's debug mode on
+physical devices.
 See https://github.com/flutter/flutter/issues/163984 for details.
 
 In the meantime, we recommend these temporary workarounds:
 
 * When developing with a physical device, use one running iOS 18.3 or lower.
 * Use a simulator for development rather than a physical device.
-* If you must use a device updated to iOS 18.4, use Flutter's release or
+* If you must use a device updated to iOS 18.4+, use Flutter's release or
   profile mode via --release or --profile flags.
 ════════════════════════════════════════════════════════════════════════════════''';
 
