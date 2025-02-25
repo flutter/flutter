@@ -57,6 +57,7 @@ const int kHorizontalScrollSemanticsActions =
 const int kScrollableSemanticsActions =
     kVerticalScrollSemanticsActions | kHorizontalScrollSemanticsActions;
 
+/// The following actions are not user-initiated.
 const int kSystemActions =
     static_cast<int32_t>(SemanticsAction::kDidGainAccessibilityFocus) |
     static_cast<int32_t>(SemanticsAction::kDidLoseAccessibilityFocus);
