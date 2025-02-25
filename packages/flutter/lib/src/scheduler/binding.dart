@@ -212,15 +212,7 @@ typedef _PerformanceModeCleanupCallback = VoidCallback;
 /// The component that makes the request is responsible for disposing the handle.
 class PerformanceModeRequestHandle {
   PerformanceModeRequestHandle._(_PerformanceModeCleanupCallback this._cleanup) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/scheduler.dart',
-        className: '$PerformanceModeRequestHandle',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('scheduler', 'PerformanceModeRequestHandle', this));
   }
 
   _PerformanceModeCleanupCallback? _cleanup;
@@ -231,11 +223,7 @@ class PerformanceModeRequestHandle {
   /// This method must only be called once per object.
   void dispose() {
     assert(_cleanup != null);
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _cleanup!();
     _cleanup = null;
   }

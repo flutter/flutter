@@ -2062,15 +2062,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 // value, and ChangeNotifier requires using VoidCallback.
 class _HighlightModeManager {
   _HighlightModeManager() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$_HighlightModeManager',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', '_HighlightModeManager', this));
   }
 
   // If null, no interactions have occurred yet and the default highlight mode for the current
@@ -2136,9 +2128,7 @@ class _HighlightModeManager {
 
   @mustCallSuper
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     if (ServicesBinding.instance.keyEventManager.keyMessageHandler == handleKeyMessage) {
       GestureBinding.instance.pointerRouter.removeGlobalRoute(handlePointerEvent);
       ServicesBinding.instance.keyEventManager.keyMessageHandler = null;

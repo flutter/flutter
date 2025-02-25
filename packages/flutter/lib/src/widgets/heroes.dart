@@ -518,15 +518,7 @@ class _HeroFlightManifest {
 // Builds the in-flight hero widget.
 class _HeroFlight {
   _HeroFlight(this.onFlightEnded) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$_HeroFlight',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', '_HeroFlight', this));
     _proxyAnimation = ProxyAnimation()..addStatusListener(_handleAnimationUpdate);
   }
 
@@ -633,9 +625,7 @@ class _HeroFlight {
   /// Releases resources.
   @mustCallSuper
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     if (overlayEntry != null) {
       overlayEntry!.remove();
       overlayEntry!.dispose();
@@ -824,15 +814,7 @@ class HeroController extends NavigatorObserver {
   /// The [createRectTween] argument is optional. If null, the controller uses a
   /// linear [Tween<Rect>].
   HeroController({this.createRectTween}) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$HeroController',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'HeroController', this));
   }
 
   /// Used to create [RectTween]s that interpolate the position of heroes in flight.
@@ -1106,12 +1088,7 @@ class HeroController extends NavigatorObserver {
   /// Releases resources.
   @mustCallSuper
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-
+    assert(debugMaybeDispatchDisposed(this));
     for (final _HeroFlight flight in _flights.values) {
       flight.dispose();
     }
