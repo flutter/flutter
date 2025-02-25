@@ -540,6 +540,29 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   DrawPath(path, paint);
 }
 
+void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
+                                   const Paint& paint) {
+  if (paint.style == Paint::Style::kFill) {
+    // TODO(dkwingsmt): Investigate if RSE can use the `AttemptDrawBlurredRRect`
+    // optimization at some point, such as a large enough mask radius.
+    // https://github.com/flutter/flutter/issues/163893
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint.blend_mode);
+
+    RoundSuperellipseGeometry geom(rse.GetBounds(), rse.GetRadii());
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    return;
+  }
+
+  auto path = PathBuilder{}
+                  .SetConvexity(Convexity::kConvex)
+                  .AddRoundSuperellipse(rse)
+                  .SetBounds(rse.GetBounds())
+                  .TakePath();
+  DrawPath(path, paint);
+}
+
 void Canvas::DrawCircle(const Point& center,
                         Scalar radius,
                         const Paint& paint) {
@@ -817,10 +840,14 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   } else {
     auto cvg = vertices->GetCoverage(Matrix{});
     FML_CHECK(cvg.has_value());
-    src_coverage =
-        // Covered by FML_CHECK.
-        // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-        vertices->GetTextureCoordinateCoverage().value_or(cvg.value());
+    auto texture_coverage = vertices->GetTextureCoordinateCoverage();
+    if (texture_coverage.has_value()) {
+      src_coverage =
+          Rect::MakeOriginSize(texture_coverage->GetOrigin(),
+                               texture_coverage->GetSize().Max({1, 1}));
+    } else {
+      src_coverage = cvg.value();
+    }
   }
   src_contents = src_paint.CreateContents();
 
@@ -1677,6 +1704,14 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   return input_texture;
 }
 
+bool Canvas::SupportsBlitToOnscreen() const {
+  return renderer_.GetContext()
+             ->GetCapabilities()
+             ->SupportsTextureToTextureBlits() &&
+         renderer_.GetContext()->GetBackendType() !=
+             Context::BackendType::kOpenGLES;
+}
+
 bool Canvas::BlitToOnscreen(bool is_onscreen) {
   auto command_buffer = renderer_.GetContext()->CreateCommandBuffer();
   command_buffer->SetLabel("EntityPass Root Command Buffer");
@@ -1684,9 +1719,7 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
                               .inline_pass_context->GetPassTarget()
                               .GetRenderTarget();
 
-  if (renderer_.GetContext()
-          ->GetCapabilities()
-          ->SupportsTextureToTextureBlits()) {
+  if (SupportsBlitToOnscreen()) {
     auto blit_pass = command_buffer->CreateBlitPass();
     blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),
                        render_target_.GetRenderTargetTexture());

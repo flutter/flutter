@@ -10,7 +10,13 @@
 namespace flutter {
 namespace testing {
 
-TEST(AndroidPlatformView, SelectsVulkanBasedOnApiLevel) {
+// TODO(matanlurey): Re-enable.
+//
+// This test (and the entire suite) was skipped on CI (see
+// https://github.com/flutter/flutter/issues/163742) and has since bit rotted
+// (we fallback to OpenGLES on emulators for performance reasons); either fix
+// the test, or remove it.
+TEST(AndroidPlatformView, DISABLED_SelectsVulkanBasedOnApiLevel) {
   Settings settings;
   settings.enable_software_rendering = false;
   settings.enable_impeller = true;
@@ -40,6 +46,14 @@ TEST(AndroidPlatformView, FallsBackToGLESonEmulator) {
 
   EXPECT_TRUE(FlutterMain::IsDeviceEmulator(emulator_product));
   EXPECT_FALSE(FlutterMain::IsDeviceEmulator(device_product));
+}
+
+TEST(AndroidPlatformView, FallsBackToGLESonMostExynos) {
+  std::string exynos_board = "exynos7870";
+  std::string snap_board = "smg1234";
+
+  EXPECT_TRUE(FlutterMain::IsKnownBadSOC(exynos_board));
+  EXPECT_FALSE(FlutterMain::IsKnownBadSOC(snap_board));
 }
 
 }  // namespace testing
