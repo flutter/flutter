@@ -42,7 +42,6 @@ void main() {
   vec2 res = IPComputeConicalT(kind, frag_info.focus, frag_info.focus_radius,
                                frag_info.center, frag_info.radius, v_position);
 
-
   float t = res.x;
   vec4 result_color = vec4(0);
   if (res.y < 0.0 ||
