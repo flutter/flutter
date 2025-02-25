@@ -782,7 +782,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (BOOL)accessibilityRespondsToUserInteraction {
-  if ((self.node.actions & flutter::~kSystemActions) != 0) {
+  if ((self.node.actions & ~flutter::kSystemActions) != 0) {
     return true;
   }
 
