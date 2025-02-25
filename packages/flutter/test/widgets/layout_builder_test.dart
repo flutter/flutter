@@ -961,6 +961,10 @@ class _RenderSmartLayoutBuilder extends RenderProxyBox
       onChildWasPainted(extraOffset);
     }
   }
+
+  @protected
+  @override
+  BoxConstraints get layoutInfo => constraints;
 }
 
 class _LayoutSpy extends LeafRenderObjectWidget {
