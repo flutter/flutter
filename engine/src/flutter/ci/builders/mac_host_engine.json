@@ -10,6 +10,10 @@
         "Tests to run on mac hosts should go in one of the other mac_ build ",
         "definition files."
     ],
+    "luci_flags": {
+      "delay_collect_builds": true,
+      "parallel_download_builds": true
+    },
     "builds": [
         {
             "drone_dimensions": [
