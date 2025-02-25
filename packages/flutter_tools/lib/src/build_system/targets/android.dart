@@ -29,9 +29,9 @@ abstract class AndroidAssetBundle extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-        Source.pattern('{BUILD_DIR}/app.dill'),
-        ...IconTreeShaker.inputs,
-      ];
+    Source.pattern('{BUILD_DIR}/app.dill'),
+    ...IconTreeShaker.inputs,
+  ];
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -92,10 +92,10 @@ abstract class AndroidAssetBundle extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-        DartBuildForNative(),
-        KernelSnapshot(),
-        InstallCodeAssets(),
-      ];
+    DartBuildForNative(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 }
 
 /// An implementation of [AndroidAssetBundle] that includes dependencies on vm
@@ -108,18 +108,18 @@ class DebugAndroidApplication extends AndroidAssetBundle {
 
   @override
   List<Source> get inputs => <Source>[
-        ...super.inputs,
-        const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
-        const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
-      ];
+    ...super.inputs,
+    const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
+    const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+  ];
 
   @override
   List<Source> get outputs => <Source>[
-        ...super.outputs,
-        const Source.pattern('{OUTPUT_DIR}/flutter_assets/vm_snapshot_data'),
-        const Source.pattern('{OUTPUT_DIR}/flutter_assets/isolate_snapshot_data'),
-        const Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
-      ];
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/vm_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/isolate_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
+  ];
 }
 
 /// An implementation of [AndroidAssetBundle] that only includes assets.
@@ -139,9 +139,9 @@ class ProfileAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-        AotElfProfile(TargetPlatform.android_arm),
-        AotAndroidAssetBundle(),
-      ];
+    AotElfProfile(TargetPlatform.android_arm),
+    AotAndroidAssetBundle(),
+  ];
 }
 
 /// Build a release android application's Dart artifacts.
@@ -153,9 +153,9 @@ class ReleaseAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-        AotElfRelease(TargetPlatform.android_arm),
-        AotAndroidAssetBundle(),
-      ];
+    AotElfRelease(TargetPlatform.android_arm),
+    AotAndroidAssetBundle(),
+  ];
 }
 
 /// Generate an ELF binary from a dart kernel file in release mode.
@@ -179,7 +179,8 @@ class AndroidAot extends AotElfBase {
   }
 
   @override
-  String get name => 'android_aot_${buildMode.cliName}_'
+  String get name =>
+      'android_aot_${buildMode.cliName}_'
       '${getNameForTargetPlatform(targetPlatform)}';
 
   /// The specific Android ABI we are building for.
@@ -192,14 +193,14 @@ class AndroidAot extends AotElfBase {
 
   @override
   List<Source> get inputs => <Source>[
-        const Source.pattern(
-          '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/android.dart',
-        ),
-        const Source.pattern('{BUILD_DIR}/app.dill'),
-        const Source.artifact(Artifact.engineDartBinary),
-        const Source.artifact(Artifact.skyEnginePath),
-        Source.artifact(Artifact.genSnapshot, mode: buildMode, platform: targetPlatform),
-      ];
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/android.dart',
+    ),
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.artifact(Artifact.engineDartBinary),
+    const Source.artifact(Artifact.skyEnginePath),
+    Source.artifact(Artifact.genSnapshot, mode: buildMode, platform: targetPlatform),
+  ];
 
   @override
   List<Source> get outputs => <Source>[Source.pattern('{BUILD_DIR}/$_androidAbiName/app.so')];
@@ -305,7 +306,8 @@ class AndroidAotBundle extends Target {
   }
 
   @override
-  String get name => 'android_aot_bundle_${dependency.buildMode.cliName}_'
+  String get name =>
+      'android_aot_bundle_${dependency.buildMode.cliName}_'
       '${getNameForTargetPlatform(dependency.targetPlatform)}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;
@@ -369,7 +371,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
   ///
   /// If [components] is not provided, it will be read from the pubspec.yaml manifest.
   AndroidAotDeferredComponentsBundle(this.dependency, {List<DeferredComponent>? components})
-      : _components = components;
+    : _components = components;
 
   /// The [AndroidAotBundle] instance this bundle rule depends on.
   final AndroidAotBundle dependency;
@@ -382,20 +384,21 @@ class AndroidAotDeferredComponentsBundle extends Target {
   }
 
   @override
-  String get name => 'android_aot_deferred_components_bundle_${dependency.buildMode.cliName}_'
+  String get name =>
+      'android_aot_deferred_components_bundle_${dependency.buildMode.cliName}_'
       '${getNameForTargetPlatform(dependency.targetPlatform)}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;
 
   @override
   List<Source> get inputs => <Source>[
-        // Tracking app.so is enough to invalidate the dynamically named
-        // loading unit libs as changes to loading units guarantee
-        // changes to app.so as well. This task does not actually
-        // copy app.so.
-        Source.pattern('{OUTPUT_DIR}/$_androidAbiName/app.so'),
-        const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-      ];
+    // Tracking app.so is enough to invalidate the dynamically named
+    // loading unit libs as changes to loading units guarantee
+    // changes to app.so as well. This task does not actually
+    // copy app.so.
+    Source.pattern('{OUTPUT_DIR}/$_androidAbiName/app.so'),
+    const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -427,8 +430,9 @@ class AndroidAotDeferredComponentsBundle extends Target {
       dependency.buildMode,
     );
 
-    final File manifestFile =
-        environment.outputDir.childDirectory(_androidAbiName).childFile('manifest.json');
+    final File manifestFile = environment.outputDir
+        .childDirectory(_androidAbiName)
+        .childFile('manifest.json');
     if (manifestFile.existsSync()) {
       libDepfile.inputs.add(manifestFile);
     }

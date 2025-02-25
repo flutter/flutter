@@ -22,7 +22,7 @@ export '../../isolated/native_assets/native_assets.dart'
 /// Runs the dart build of the app.
 abstract class DartBuild extends Target {
   const DartBuild({@visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner})
-      : _buildRunner = buildRunner;
+    : _buildRunner = buildRunner;
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
 
@@ -33,7 +33,7 @@ abstract class DartBuild extends Target {
 
     final DartBuildResult result;
     if (nativeAssetsEnvironment == 'false') {
-      result = const DartBuildResult.empty();
+      result = DartBuildResult.empty();
     } else {
       final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
@@ -44,7 +44,8 @@ abstract class DartBuild extends Target {
       final Uri projectUri = environment.projectDir.uri;
       final String? runPackageName =
           packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
-      final FlutterNativeAssetsBuildRunner buildRunner = _buildRunner ??
+      final FlutterNativeAssetsBuildRunner buildRunner =
+          _buildRunner ??
           FlutterNativeAssetsBuildRunnerImpl(
             environment.packageConfigPath,
             packageConfig,
@@ -86,21 +87,21 @@ abstract class DartBuild extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-        Source.pattern(
-          '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
-        ),
-        // If different packages are resolved, different native assets might need to be built.
-        Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
-        // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
-      ];
+    Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
+    ),
+    // If different packages are resolved, different native assets might need to be built.
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
+  ];
 
   @override
   String get name => 'dart_build';
 
   @override
   List<Source> get outputs => const <Source>[
-        Source.pattern('{BUILD_DIR}/$dartBuildResultFilename'),
-      ];
+    Source.pattern('{BUILD_DIR}/$dartBuildResultFilename'),
+  ];
 
   /// Dependent build [Target]s can use this to consume the result of the
   /// [DartBuild] target.
@@ -109,7 +110,7 @@ abstract class DartBuild extends Target {
       DartBuild.dartBuildResultFilename,
     );
     if (!dartBuildResultJsonFile.existsSync()) {
-      return const DartBuildResult.empty();
+      return DartBuildResult.empty();
     }
     return DartBuildResult.fromJson(
       json.decode(dartBuildResultJsonFile.readAsStringSync()) as Map<String, Object?>,
@@ -133,9 +134,7 @@ class DartBuildForWeb extends DartBuild {
   final List<Dart2WebTarget> compileTargets;
 
   @override
-  List<Target> get dependencies => <Target>[
-        ...compileTargets,
-      ];
+  List<Target> get dependencies => <Target>[...compileTargets];
 }
 
 /// Installs the code assets from a [DartBuild] Flutter app.
@@ -187,12 +186,12 @@ class InstallCodeAssets extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-        Source.pattern(
-          '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
-        ),
-        // If different packages are resolved, different native assets might need to be built.
-        Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
-      ];
+    Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
+    ),
+    // If different packages are resolved, different native assets might need to be built.
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+  ];
 
   @override
   String get name => 'install_code_assets';

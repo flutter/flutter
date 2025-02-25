@@ -33,12 +33,10 @@ void main() {
   late final Directory tempDirectory;
   late final Directory root;
   setUpAll(() async {
-    processManager.runSync(<String>[
-      flutterBin,
-      'config',
-      '--enable-native-assets',
-    ]);
-    tempDirectory = fileSystem.directory(fileSystem.systemTempDirectory.createTempSync().resolveSymbolicLinksSync());
+    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
+    tempDirectory = fileSystem.directory(
+      fileSystem.systemTempDirectory.createTempSync().resolveSymbolicLinksSync(),
+    );
     root = await createDataAssetApp(packageName, tempDirectory);
   });
   tearDownAll(() {
@@ -50,7 +48,7 @@ void main() {
     // NOTE: flutter web doesn't allow cpaturing print()s in profile/release
     // nOTE: flutter web doens't allow adding assets on hot-restart
     final List<String> devices = <String>[hostOs, 'chrome', 'flutter-tester'];
-    final List<String> modes  = <String>['debug', 'release'];
+    final List<String> modes = <String>['debug', 'release'];
 
     for (final String mode in modes) {
       for (final String device in devices) {
@@ -76,10 +74,7 @@ void main() {
           final bool performRestart = isDebug;
           final bool performReload = isDebug && !isWeb;
 
-          final Map<String, String> assets = <String, String>{
-            'id1' : 'content1',
-            'id2' : 'content2'
-          };
+          final Map<String, String> assets = <String, String>{'id1': 'content1', 'id2': 'content2'};
           writeHookLibrary(root, assets, available: <String>['id1']);
           writeHelperLibrary(root, 'version1', assets.keys.toList());
 
@@ -88,12 +83,12 @@ void main() {
             root.path,
             <Transition>[
               Barrier.contains('Launching lib/main.dart on'),
-              Multiple.contains(<Pattern>[
+              Multiple.contains(
+                <Pattern>[
                   // The flutter tool will print it's ready to accept keys (e.g.
                   // q=quit, ...)
                   // (This can be racy with app already running and printing)
-                  if (isWeb) 'To hot restart changes while running'
-                  else 'Flutter run key command',
+                  if (isWeb) 'To hot restart changes while running' else 'Flutter run key command',
 
                   // Once the app runs it will print whether it found assets.
                   'VERSION: version1',
@@ -113,49 +108,56 @@ void main() {
                 },
               ),
               if (performRestart)
-                Multiple.contains(<Pattern>[
-                  // Once the app runs it will print whether it found assets.
-                  // We expect it to having found the new `id2` now.
-                  'VERSION: version2',
-                  'FOUND "packages/data_asset_example/id1": "content1".',
+                Multiple.contains(
+                  <Pattern>[
+                    // Once the app runs it will print whether it found assets.
+                    // We expect it to having found the new `id2` now.
+                    'VERSION: version2',
+                    'FOUND "packages/data_asset_example/id1": "content1".',
 
-                  // Flutter web doesn't support new assets on hot-restart atm
-                  // -> See https://github.com/flutter/flutter/issues/159666
-                  if (isWeb) 'NOT-FOUND "packages/data_asset_example/id2".'
-                  else 'FOUND "packages/data_asset_example/id2": "content2".',
-                ],
-                handler: (_) {
-                  if (!performReload) {
-                    return 'q';
-                  }
-                  // Now we trigger a hot-reload with new assets & new
-                  // application code, we make the build hook now emit also the
-                  // `id3` data asset (but not `id4`).
-                  assets['id3'] = 'content3';
-                  assets['id4'] = 'content4';
-                  writeHookLibrary(root, assets, available: <String>['id1', 'id2', 'id3']);
-                  writeHelperLibrary(root, 'version3', assets.keys.toList());
-                  return 'r';
-                }),
+                    // Flutter web doesn't support new assets on hot-restart atm
+                    // -> See https://github.com/flutter/flutter/issues/159666
+                    if (isWeb)
+                      'NOT-FOUND "packages/data_asset_example/id2".'
+                    else
+                      'FOUND "packages/data_asset_example/id2": "content2".',
+                  ],
+                  handler: (_) {
+                    if (!performReload) {
+                      return 'q';
+                    }
+                    // Now we trigger a hot-reload with new assets & new
+                    // application code, we make the build hook now emit also the
+                    // `id3` data asset (but not `id4`).
+                    assets['id3'] = 'content3';
+                    assets['id4'] = 'content4';
+                    writeHookLibrary(root, assets, available: <String>['id1', 'id2', 'id3']);
+                    writeHelperLibrary(root, 'version3', assets.keys.toList());
+                    return 'r';
+                  },
+                ),
               if (performReload)
-                Multiple.contains(<Pattern>[
-                  // Once the app runs it will print whether it found assets.
-                  'VERSION: version3',
-                  'FOUND "packages/data_asset_example/id1": "content1".',
-                  'FOUND "packages/data_asset_example/id2": "content2".',
-                  'FOUND "packages/data_asset_example/id3": "content3".',
-                  'NOT-FOUND "packages/data_asset_example/id4".',
-                ],
-                handler: (_) {
-                  return 'q'; // quit
-                }),
+                Multiple.contains(
+                  <Pattern>[
+                    // Once the app runs it will print whether it found assets.
+                    'VERSION: version3',
+                    'FOUND "packages/data_asset_example/id1": "content1".',
+                    'FOUND "packages/data_asset_example/id2": "content2".',
+                    'FOUND "packages/data_asset_example/id3": "content3".',
+                    'NOT-FOUND "packages/data_asset_example/id4".',
+                  ],
+                  handler: (_) {
+                    return 'q'; // quit
+                  },
+                ),
               Barrier.contains('Application finished.'),
             ],
             debug: true,
           );
           if (result.exitCode != 0) {
             throw Exception(
-                'flutter run failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+              'flutter run failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+            );
           }
         });
       }
@@ -163,39 +165,37 @@ void main() {
 
     for (final String target in <String>[hostOs, 'web']) {
       testWithoutContext('flutter build $target', () async {
-        final Map<String, String> assets = <String, String>{
-          'id1' : 'content1',
-          'id2' : 'content2'
-        };
+        final Map<String, String> assets = <String, String>{'id1': 'content1', 'id2': 'content2'};
         final List<String> available = <String>['id1'];
         writeHookLibrary(root, assets, available: available);
         writeHelperLibrary(root, 'version1', assets.keys.toList());
 
         final ProcessTestResult result = await runFlutter(
-          <String>['build', '-v', target ],
+          <String>['build', '-v', target],
           root.path,
-          <Transition>[
-            Barrier.contains('Built build/$target'),
-          ],
+          <Transition>[Barrier.contains('Built build/$target')],
           debug: true,
         );
         if (result.exitCode != 0) {
           throw Exception(
-              'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+            'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+          );
         }
         final Directory buildTargetDir = root.childDirectory('build').childDirectory(target);
 
-        final List<File> manifestFiles  = buildTargetDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where((File file) => file.path.endsWith('AssetManifest.json'))
-            .toList();
+        final List<File> manifestFiles =
+            buildTargetDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((File file) => file.path.endsWith('AssetManifest.json'))
+                .toList();
 
         if (manifestFiles.isEmpty) {
           throw Exception('Expected a `AssetManifest.json` to be avilable in the $buildTargetDir.');
         }
         for (final File manifestFile in manifestFiles) {
-          final Map<String, Object?> manifest = json.decode(manifestFile.readAsStringSync()) as Map<String, Object?>;
+          final Map<String, Object?> manifest =
+              json.decode(manifestFile.readAsStringSync()) as Map<String, Object?>;
           for (final String id in available) {
             final String key = 'packages/$packageName/$id';
             final List<Object?> entry = manifest[key]! as List<Object?>;
@@ -210,12 +210,13 @@ void main() {
   });
 }
 
-
 Future<Directory> createDataAssetApp(String packageName, Directory tempDirectory) async {
-  final ProcessResult result = processManager.runSync(
-    <String>[flutterBin, 'create', '--no-pub', packageName],
-    workingDirectory: tempDirectory.path,
-  );
+  final ProcessResult result = processManager.runSync(<String>[
+    flutterBin,
+    'create',
+    '--no-pub',
+    packageName,
+  ], workingDirectory: tempDirectory.path);
   expect(result, const ProcessResultMatcher());
 
   final Directory root = tempDirectory.childDirectory(packageName);
@@ -228,9 +229,7 @@ Future<Directory> createDataAssetApp(String packageName, Directory tempDirectory
   await pinDependencies(pubspecFile);
 
   final File mainFile = root.childDirectory('lib').childFile('main.dart');
-  writeFile(
-    mainFile,
-    '''
+  writeFile(mainFile, '''
         import 'dart:async';
 
         import 'package:flutter/material.dart';
@@ -267,20 +266,21 @@ Future<Directory> createDataAssetApp(String packageName, Directory tempDirectory
         }
     ''');
 
-  final ProcessResult result2 = await processManager.run(
-    <String>[flutterBin, 'pub', 'get'],
-    workingDirectory: root.path,
-  );
+  final ProcessResult result2 = await processManager.run(<String>[
+    flutterBin,
+    'pub',
+    'get',
+  ], workingDirectory: root.path);
   expect(result2, const ProcessResultMatcher());
 
   return root;
 }
 
 void writeHookLibrary(
-    Directory root,
-    Map<String, String> dataAssets,
-    {required List<String> available}) {
-
+  Directory root,
+  Map<String, String> dataAssets, {
+  required List<String> available,
+}) {
   final Directory assetDir = root.childDirectory('asset');
 
   dataAssets.forEach((String id, String content) {
@@ -288,9 +288,7 @@ void writeHookLibrary(
   });
 
   final File hookFile = root.childDirectory('hook').childFile('build.dart');
-  available = <String>[
-    for (final String id in available) '"$id"',
-  ];
+  available = <String>[for (final String id in available) '"$id"'];
   writeFile(hookFile, '''
       import 'package:native_assets_cli/data_assets.dart';
 
@@ -315,17 +313,10 @@ void writeHookLibrary(
   ''');
 }
 
-void writeHelperLibrary(
-    Directory root,
-    String version,
-    List<String> assetIds) {
-  assetIds = <String>[
-    for (final String id in assetIds) '"packages/$packageName/$id"',
-  ];
+void writeHelperLibrary(Directory root, String version, List<String> assetIds) {
+  assetIds = <String>[for (final String id in assetIds) '"packages/$packageName/$id"'];
   final File helperFile = root.childDirectory('lib').childFile('helper.dart');
-  writeFile(
-    helperFile,
-  '''
+  writeFile(helperFile, '''
       import 'package:flutter/services.dart' show rootBundle;
 
       // Only run the code once, but after hot-restart & hot-reload we want to
