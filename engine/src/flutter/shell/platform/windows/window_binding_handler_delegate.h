@@ -97,7 +97,7 @@ class WindowBindingHandlerDelegate {
   /// lost focus.
   ///
   /// Typically called by currently configured WindowBindingHandler.
-  virtual void onFocus(FlutterViewFocusState focus_state,
+  virtual void OnFocus(FlutterViewFocusState focus_state,
                        FlutterViewFocusDirection direction) = 0;
 
   // Notifies the delegate that IME composing mode has begun.

@@ -567,9 +567,9 @@ void FlutterWindowsView::SendFocus(FlutterViewFocusState focus_state,
   FlutterViewFocusEvent event = {};
   event.struct_size = sizeof(event);
   event.view_id = view_id_;
-  event.focus_state = focus_state;
+  event.state = focus_state;
   event.direction = direction;
-  engine_->SendViewFocusEvent(focus_state, direction);
+  engine_->SendViewFocusEvent(event);
 }
 
 void FlutterWindowsView::SendComposeBegin() {

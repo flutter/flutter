@@ -706,7 +706,7 @@ void FlutterWindowsEngine::SendKeyEvent(const FlutterKeyEvent& event,
   }
 }
 
-void FlutterWindowsEngine::SendViewFocusEvent(const FlutterFocusEvent& event) {
+void FlutterWindowsEngine::SendViewFocusEvent(const FlutterViewFocusEvent& event) {
   if (engine_) {
     embedder_api_.SendViewFocusEvent(engine_, &event);
   }

@@ -165,6 +165,10 @@ void FlutterWindow::SetView(WindowBindingHandlerDelegate* window) {
   }
   if (focused_ && window) {
     OnWindowStateEvent(WindowStateEvent::kFocus);
+    binding_handler_delegate_->OnFocus(
+      FlutterViewFocusState::kFocused,
+      FlutterViewFocusDirection::kUndefined
+    );
   }
 }
 
