@@ -42,7 +42,7 @@ import 'xcodeproj.dart';
 const String kJITCrashFailureMessage =
     'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';
 
-const String kJITCrashFailureMessageInstructions = '''
+const String kJITCrashFailureInstructions = '''
 ════════════════════════════════════════════════════════════════════════════════
 An upcoming change to iOS has caused a temporary break in Flutter's
 debug mode on physical devices running iOS 18.4 (currently in beta).
@@ -762,7 +762,7 @@ class IOSDevice extends Device {
       });
     }
 
-    final StreamSubscription<String> errorListener = _interceptErrorsFromLogs(
+    final StreamSubscription<String>? errorListener = _interceptErrorsFromLogs(
       package,
       debuggingOptions: debuggingOptions,
     );
@@ -795,16 +795,22 @@ class IOSDevice extends Device {
       }
     }
     maxWaitForCI?.cancel();
-    await errorListener.cancel();
+    await errorListener?.cancel();
     return localUri;
   }
 
-  /// Listen for specific errors and perform actions, such as printing guided
-  /// messages or exiting the tool.
-  StreamSubscription<String> _interceptErrorsFromLogs(
+  /// Listen to device logs for crash on iOS 18.4+ due to JIT restriction. If
+  /// found, give guided error and throw tool exit. Returns null and does not
+  /// listen if device is less than iOS 18.4.
+  StreamSubscription<String>? _interceptErrorsFromLogs(
     IOSApp? package, {
     required DebuggingOptions debuggingOptions,
   }) {
+    // Currently only checking for kJITCrashFailureMessage, which only should
+    // be checked on iOS 18.4+.
+    if (sdkVersion == null || sdkVersion! < Version(18, 4, null)) {
+      return null;
+    }
     final DeviceLogReader deviceLogReader = getLogReader(
       app: package,
       usingCISystem: debuggingOptions.usingCISystem,
@@ -813,10 +819,8 @@ class IOSDevice extends Device {
     final Stream<String> logStream = deviceLogReader.logLines;
 
     final StreamSubscription<String> errorListener = logStream.listen((String line) {
-      if (sdkVersion != null && sdkVersion! >= Version(18, 4, null)) {
-        if (line.contains(kJITCrashFailureMessage)) {
-          throwToolExit(kJITCrashFailureMessageInstructions);
-        }
+      if (line.contains(kJITCrashFailureMessage)) {
+        throwToolExit(kJITCrashFailureInstructions);
       }
     });
 

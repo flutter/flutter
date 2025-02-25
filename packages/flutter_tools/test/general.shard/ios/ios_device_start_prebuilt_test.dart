@@ -1162,7 +1162,7 @@ void main() {
                 return null;
               },
               onError: (Object error, StackTrace stack) {
-                expect(error.toString(), contains(kJITCrashFailureMessageInstructions));
+                expect(error.toString(), contains(kJITCrashFailureInstructions));
                 completer.complete();
               },
             ),
