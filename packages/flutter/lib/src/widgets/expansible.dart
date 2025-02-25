@@ -12,10 +12,20 @@ import 'page_storage.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
+/// The type of the callback that returns the header or body of an [Expansible].
 ///
+/// See also:
+///
+///   * [Expansible.headerBuilder], which is of this type.
+///   * [Expansible.bodyBuilder], which is also of this type.
 typedef ExpansibleComponentBuilder = Widget Function(BuildContext context, bool isExpanded);
 
+/// The type of the callback that uses the header and body of an [Expansible]
+/// widget to layout that widget.
 ///
+/// See also:
+///
+///   * [Expansible.expansibleBuilder], which is of this type.
 typedef ExpansibleBuilder =
     Widget Function(BuildContext context, Widget header, Widget body, bool isExpanded);
 
@@ -28,11 +38,14 @@ typedef ExpansibleBuilder =
 /// The controller's [expand] and [collapse] methods cause the
 /// the [Expansible] to rebuild, so they may not be called from
 /// a build method.
+///
+/// The controller's [drive] method can be used to drive other animations that
+/// sync with the expanding/collapsing animation, making it possible to rotate
+/// an icon in the header or animate the widget's color as it expands/collapses.
 class ExpansibleController {
   /// Creates a controller to be used with [Expansible.controller].
   ExpansibleController();
 
-  ///
   ExpansibleState? _state;
 
   /// Whether the expansible widget built with this controller is in expanded
@@ -94,7 +107,14 @@ class ExpansibleController {
     }
   }
 
+  /// Chains a [Tween] (or [CurveTween]) to the expanding/collapsing animation.
   ///
+  /// This allows other animations to sync with the expanding/collapsing
+  /// animation, making it possible to rotate an icon or animate the widget's
+  /// color as the widget expands/collapses.
+  ///
+  /// Delegates to the internal [AnimationController.drive] method to apply the
+  /// provided [Animatable].
   Animation<U> drive<U>(Animatable<U> child) {
     assert(_state != null);
     return _state!._animationController.drive(child);
@@ -109,27 +129,8 @@ class ExpansibleController {
   ///
   /// To return null if there is no [Expansible] use [maybeOf] instead.
   ///
-  /// {@tool dartpad}
-  /// Typical usage of the [ExpansibleController.of] function is to call it from within the
-  /// `build` method of a descendant of an [Expansible].
-  ///
-  /// When the [Expansible] is actually created in the same `build`
-  /// function as the callback that refers to the controller, then the
-  /// `context` argument to the `build` function can't be used to find
-  /// the [ExpansibleController] (since it's "above" the widget
-  /// being returned in the widget tree). In cases like that you can
-  /// add a [Builder] widget, which provides a new scope with a
-  /// [BuildContext] that is "under" the [Expansible]:
-  ///
-  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
-  /// {@end-tool}
-  ///
-  /// A more efficient solution is to split your build function into
-  /// several widgets. This introduces a new context from which you
-  /// can obtain the [ExpansibleController]. With this approach you
-  /// would have an outer widget that creates the [Expansible]
-  /// populated by instances of your new inner widgets, and then in
-  /// these inner widgets you would use [ExpansibleController.of].
+  /// Typical usage of the [ExpansibleController.of] function is to call it from
+  /// within the `build` method of a descendant of an [Expansible].
   static ExpansibleController of(BuildContext context) {
     final ExpansibleState? result = context.findAncestorStateOfType<ExpansibleState>();
     if (result != null) {
@@ -146,9 +147,7 @@ class ExpansibleController {
       ),
       ErrorHint(
         'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
-        'context that is "under" the Expansible. For an example of this, please see the '
-        'documentation for ExpansibleController.of():\n'
-        '  https://api.flutter.dev/flutter/widgets/Expansible/of.html',
+        'context that is "under" the Expansible. ',
       ),
       ErrorHint(
         'A more efficient solution is to split your build function into several widgets. This '
@@ -172,16 +171,37 @@ class ExpansibleController {
   /// See also:
   ///
   ///  * [of], a similar function to this one that throws if no [Expansible]
-  ///    encloses the given context. Also includes some sample code in its
-  ///    documentation.
+  ///    encloses the given context.
   static ExpansibleController? maybeOf(BuildContext context) {
     return context.findAncestorStateOfType<ExpansibleState>()?.widget.controller;
   }
 }
 
+/// A [StatefulWidget] that expands and collapses.
 ///
+/// An [Expansible] consists of a header, which is always shown, and a
+/// body, which is hidden in its collapsed state and shown in its expanded
+/// state.
+///
+/// The [Expansible] is expanded or collapsed with an animation driven by an
+/// [AnimationController]. When the widget is expanded, the height of its body
+/// animates from 0 to its fully expanded height.
+///
+/// This widget is typically used with [ListView] to create an "expand /
+/// collapse" list entry. When used with scrolling widgets like [ListView], a
+/// unique [PageStorageKey] must be specified as the [key], to enable the
+/// [Expansible] to save and restore its expanded state when it is scrolled
+/// in and out of view.
+///
+/// Provide [headerBuilder] and [bodyBuilder] callbacks to
+/// build the header and body widgets. An additional [expansibleBuilder]
+/// callback can be provided to further customize the layout of the widget.
+///
+/// See also:
+///
+///  * [ExpansionTile], a Material-styled widget that expands and collapses.
 class Expansible extends StatefulWidget {
-  ///
+  /// Creates an instance of [Expansible].
   const Expansible({
     super.key,
     required this.headerBuilder,
@@ -194,8 +214,28 @@ class Expansible extends StatefulWidget {
     this.reverseCurve,
     this.initiallyExpanded = false,
     this.maintainState = false,
-    this.addHeaderTap = true,
+    this.excludeHeaderGestures = false,
   });
+
+  /// Used to programmatically expand and collapse the widget.
+  final ExpansibleController controller;
+
+  /// Builds the always-displayed header.
+  ///
+  /// If this header already has an `onTap` or `onPressed` method that toggles
+  /// its expansion, set [excludeHeaderGestures] to true.
+  final ExpansibleComponentBuilder headerBuilder;
+
+  /// Builds the collapsible body.
+  ///
+  /// When this widget is expanded, the height of its body animates from 0 to
+  /// its fully extended height.
+  final ExpansibleComponentBuilder bodyBuilder;
+
+  /// Lays out the widget with the results of [headerBuilder] and [bodyBuilder].
+  ///
+  /// Defaults to placing the header and body in a [Column].
+  final ExpansibleBuilder? expansibleBuilder;
 
   /// Called when this widget expands or collapses.
   ///
@@ -203,6 +243,11 @@ class Expansible extends StatefulWidget {
   /// true. When the widget starts collapsing, this function is called with
   /// value false.
   final ValueChanged<bool>? onExpansionChanged;
+
+  /// True if the widget is initially expanded, and false otherwise.
+  ///
+  /// Defaults to false.
+  final bool initiallyExpanded;
 
   /// The duration of the expansion animation.
   ///
@@ -217,40 +262,33 @@ class Expansible extends StatefulWidget {
   /// The reverse curve of the expansion animation.
   final Curve? reverseCurve;
 
-  /// True if the widget is initially expanded, and false otherwise.
-  final bool initiallyExpanded;
-
-  /// False if the header already coordinates its behavior on tap using the
+  /// If the header already coordinates its behavior on tap using the
   /// [controller].
   ///
-  /// Defaults to true.
-  final bool addHeaderTap;
-
-  /// Specifies whether the state of the children is maintained when the widget
-  /// expands and collapses.
+  /// By default, the header returned from [headerBuilder] is wrapped in a
+  /// [GestureDetector] to toggle the expansion when tapped. Set this to true to
+  /// avoid conflicting gestures if the header returned in [headerBuilder]
+  /// already toggles its expansion on tap using [ExpansibleController.expand]
+  /// or [ExpansibleController.collapse].
   ///
-  /// If true, the children are kept in the tree while the widget is
-  /// collapsed. Otherwise, the children are removed from the tree when the
+  /// Defaults to false.
+  final bool excludeHeaderGestures;
+
+  /// If the state of the body is maintained when the widget expands or
+  /// collapses.
+  ///
+  /// If true, the body is kept in the tree while the widget is
+  /// collapsed. Otherwise, the body is removed from the tree when the
   /// widget is collapsed and recreated upon expansion.
+  ///
+  /// Defaults to false.
   final bool maintainState;
-
-  /// Used to programmatically expand and collapse the widget.
-  final ExpansibleController controller;
-
-  ///
-  final ExpansibleComponentBuilder headerBuilder;
-
-  ///
-  final ExpansibleComponentBuilder bodyBuilder;
-
-  ///
-  final ExpansibleBuilder? expansibleBuilder;
 
   @override
   State<StatefulWidget> createState() => ExpansibleState();
 }
 
-///
+/// State object for an [Expansible] widget.
 class ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
   bool _isExpanded = false;
   late AnimationController _animationController;
@@ -324,7 +362,7 @@ class ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final bool closed = !_isExpanded && _animationController.isDismissed;
-    final bool shouldRemoveChildren = closed && !widget.maintainState;
+    final bool shouldRemoveBody = closed && !widget.maintainState;
 
     final Widget result = Offstage(
       offstage: closed,
@@ -335,7 +373,7 @@ class ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
       animation: _animationController.view,
       builder: (BuildContext context, Widget? child) {
         Widget header = widget.headerBuilder(context, _isExpanded);
-        if (widget.addHeaderTap) {
+        if (!widget.excludeHeaderGestures) {
           header = Semantics(
             button: true,
             child: GestureDetector(
@@ -351,7 +389,7 @@ class ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
         }
         return _buildExpansible(context, header, body);
       },
-      child: shouldRemoveChildren ? null : result,
+      child: shouldRemoveBody ? null : result,
     );
   }
 }

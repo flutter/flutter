@@ -30,9 +30,31 @@ import 'theme_data.dart';
 /// tile based on a system event. To do so, create an [ExpansionTile]
 /// with an [ExpansionTileController] that's owned by a stateful widget
 /// or look up the tile's automatically created [ExpansionTileController]
-/// with [ExpansionTileController.of]
+/// with `ExpansionTileController.of`.
 ///
-/// The controller's [expand] and [collapse] methods cause the
+/// {@tool dartpad}
+/// Typical usage of the `ExpansionTileController.of` function is to call it from within the
+/// `build` method of a descendant of an [ExpansionTile].
+///
+/// When the [ExpansionTile] is actually created in the same `build`
+/// function as the callback that refers to the controller, then the
+/// `context` argument to the `build` function can't be used to find
+/// the [ExpansionTileController] (since it's "above" the widget
+/// being returned in the widget tree). In cases like that you can
+/// add a [Builder] widget, which provides a new scope with a
+/// [BuildContext] that is "under" the [ExpansionTile]:
+///
+/// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
+/// {@end-tool}
+///
+/// A more efficient solution is to split your build function into
+/// several widgets. This introduces a new context from which you
+/// can obtain the [ExpansionTileController]. With this approach you
+/// would have an outer widget that creates the [ExpansionTile]
+/// populated by instances of your new inner widgets, and then in
+/// these inner widgets you would use `ExpansionTileController.of`.
+///
+/// The controller's `expand` and `collapse` methods cause the
 /// the [ExpansionTile] to rebuild, so they may not be called from
 /// a build method.
 typedef ExpansionTileController = ExpansibleController;
@@ -445,8 +467,6 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
   late Curve? _reverseCurve;
   late Duration _duration;
 
-  final GlobalKey _key = GlobalKey();
-
   @override
   void initState() {
     super.initState();
@@ -724,14 +744,13 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Expansible(
-      key: _key,
       controller: _tileController,
       initiallyExpanded: widget.initiallyExpanded,
       curve: _curve,
       duration: _duration,
       reverseCurve: _reverseCurve,
       maintainState: widget.maintainState,
-      addHeaderTap: false,
+      excludeHeaderGestures: true,
       headerBuilder: _buildHeader,
       bodyBuilder: _buildBody,
       onExpansionChanged: _onExpansionChanged,
