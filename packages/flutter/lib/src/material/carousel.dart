@@ -1543,10 +1543,10 @@ class CarouselController extends ScrollController {
   /// If the [index] is less than 0, the carousel will scroll to the first item.
   /// If the [index] is greater than the number of items, the carousel will scroll
   /// to the last item.
-  /// For [CarouselView.weighted], this will scroll the carousel so the first item with
-  /// maximum weight becomes the leading item, with [index] determining the final layout
-  /// position. With `consumeMaxWeight` set to true, the item with the maximum weight
-  /// will be the leading item.
+  ///
+  /// For [CarouselView.weighted], this will scroll the carousel so the item at [index]
+  /// is positioned according to the weight distribution. The item with the highest weight
+  /// will occupy the most prominent position in the layout.
   ///
   /// The animation uses the provided [Duration] and [Curve]. The returned [Future]
   /// completes when the animation finishes.
@@ -1586,9 +1586,11 @@ class CarouselController extends ScrollController {
     final int totalWeight = weights.reduce((int a, int b) => a + b);
     final double dimension = position.viewportDimension;
 
-    final int newIndex = carouselState._consumeMaxWeight ? index - 1 : index;
+    final int maxWeightIndex = weights.indexOf(weights.max);
+    int leadingIndex = carouselState._consumeMaxWeight ? index : index - maxWeightIndex;
+    leadingIndex = leadingIndex.clamp(0, _carouselState!.widget.children.length - 1);
 
-    return dimension * (weights.first / totalWeight) * newIndex;
+    return dimension * (weights.first / totalWeight) * leadingIndex;
   }
 
   @override

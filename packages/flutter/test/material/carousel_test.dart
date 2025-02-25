@@ -1689,13 +1689,8 @@ Future<void> runCarouselTest({
   await tester.pumpAndSettle();
 
   // Verify that the middle item is visible.
-  if (flexWeights.isNotEmpty && consumeMaxWeight) {
-    expect(find.text('Item ${middleIndex - 1}'), findsOneWidget);
-    expect(realOffset(), controller.offset);
-  } else {
-    expect(find.text('Item $middleIndex'), findsOneWidget);
-    expect(realOffset(), controller.offset);
-  }
+  expect(find.text('Item $middleIndex'), findsOneWidget);
+  expect(realOffset(), controller.offset);
 
   // Scroll to the first item.
   controller.animateToItem(0, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
