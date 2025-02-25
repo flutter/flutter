@@ -454,8 +454,19 @@ class ContentContext {
     return GetPipeline(radial_gradient_fill_pipelines_, opts);
   }
 
-  PipelineRef GetConicalGradientFillPipeline(ContentContextOptions opts) const {
-    return GetPipeline(conical_gradient_fill_pipelines_, opts);
+  PipelineRef GetConicalGradientFillPipeline(ContentContextOptions opts,
+                                             ConicalKind kind) const {
+    switch (kind) {
+      case ConicalKind::kConical:
+        return GetPipeline(conical_gradient_fill_pipelines_, opts);
+      case ConicalKind::kRadial:
+        return GetPipeline(conical_gradient_fill_radial_pipelines_, opts);
+      case ConicalKind::kStrip:
+        return GetPipeline(conical_gradient_fill_strip_pipelines_, opts);
+      case ConicalKind::kStripAndRadial:
+        return GetPipeline(conical_gradient_fill_strip_and_radial_pipelines_,
+                           opts);
+    }
   }
 
   PipelineRef GetRRectBlurPipeline(ContentContextOptions opts) const {
@@ -1007,6 +1018,12 @@ class ContentContext {
   mutable Variants<RadialGradientFillPipeline> radial_gradient_fill_pipelines_;
   mutable Variants<ConicalGradientFillPipeline>
       conical_gradient_fill_pipelines_;
+  mutable Variants<ConicalGradientFillPipeline>
+      conical_gradient_fill_radial_pipelines_;
+  mutable Variants<ConicalGradientFillPipeline>
+      conical_gradient_fill_strip_pipelines_;
+  mutable Variants<ConicalGradientFillPipeline>
+      conical_gradient_fill_strip_and_radial_pipelines_;
   mutable Variants<SweepGradientFillPipeline> sweep_gradient_fill_pipelines_;
   mutable Variants<LinearGradientUniformFillPipeline>
       linear_gradient_uniform_fill_pipelines_;
