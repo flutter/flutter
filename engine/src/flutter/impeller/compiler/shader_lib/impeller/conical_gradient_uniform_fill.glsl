@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CONICAL_GRADIENT_GLSL_
-#define CONICAL_GRADIENT_GLSL_
+#ifndef CONICAL_GRADIENT_UNIFORM_FILL_GLSL_
+#define CONICAL_GRADIENT_UNIFORM_FILL_GLSL_
 
 precision highp float;
 
@@ -60,4 +60,4 @@ vec4 DoConicalGradientUniformFill(vec2 res) {
   return result_color;
 }
 
-#endif  // CONICAL_GRADIENT_GLSL_
+#endif  // CONICAL_GRADIENT_UNIFORM_FILL_GLSL_
