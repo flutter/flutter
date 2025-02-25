@@ -42,7 +42,8 @@ import 'xcodeproj.dart';
 const String kJITCrashFailureMessage =
     'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';
 
-const String kJITCrashFailureInstructions = '''
+@visibleForTesting
+String jITCrashFailureInstructions(String deviceVersion) => '''
 ════════════════════════════════════════════════════════════════════════════════
 A change to iOS has caused a temporary break in Flutter's debug mode on
 physical devices.
@@ -52,7 +53,7 @@ In the meantime, we recommend these temporary workarounds:
 
 * When developing with a physical device, use one running iOS 18.3 or lower.
 * Use a simulator for development rather than a physical device.
-* If you must use a device updated to iOS 18.4+, use Flutter's release or
+* If you must use a device updated to $deviceVersion, use Flutter's release or
   profile mode via --release or --profile flags.
 ════════════════════════════════════════════════════════════════════════════════''';
 
@@ -762,7 +763,7 @@ class IOSDevice extends Device {
       });
     }
 
-    final StreamSubscription<String>? errorListener = _interceptErrorsFromLogs(
+    final StreamSubscription<String>? errorListener = await _interceptErrorsFromLogs(
       package,
       debuggingOptions: debuggingOptions,
     );
@@ -802,10 +803,10 @@ class IOSDevice extends Device {
   /// Listen to device logs for crash on iOS 18.4+ due to JIT restriction. If
   /// found, give guided error and throw tool exit. Returns null and does not
   /// listen if device is less than iOS 18.4.
-  StreamSubscription<String>? _interceptErrorsFromLogs(
+  Future<StreamSubscription<String>?> _interceptErrorsFromLogs(
     IOSApp? package, {
     required DebuggingOptions debuggingOptions,
-  }) {
+  }) async {
     // Currently only checking for kJITCrashFailureMessage, which only should
     // be checked on iOS 18.4+.
     if (sdkVersion == null || sdkVersion! < Version(18, 4, null)) {
@@ -818,9 +819,11 @@ class IOSDevice extends Device {
 
     final Stream<String> logStream = deviceLogReader.logLines;
 
+    final String deviceSdkVersion = await sdkNameAndVersion;
+
     final StreamSubscription<String> errorListener = logStream.listen((String line) {
       if (line.contains(kJITCrashFailureMessage)) {
-        throwToolExit(kJITCrashFailureInstructions);
+        throwToolExit(jITCrashFailureInstructions(deviceSdkVersion));
       }
     });
 

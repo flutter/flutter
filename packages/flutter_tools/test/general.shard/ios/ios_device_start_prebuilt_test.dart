@@ -1162,7 +1162,7 @@ void main() {
                 return null;
               },
               onError: (Object error, StackTrace stack) {
-                expect(error.toString(), contains(kJITCrashFailureInstructions));
+                expect(error.toString(), contains(jITCrashFailureInstructions('iOS 18.4')));
                 completer.complete();
               },
             ),
