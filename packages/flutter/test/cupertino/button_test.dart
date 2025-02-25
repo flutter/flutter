@@ -886,14 +886,14 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('CupertinoButton.mouseCursor behavior', (WidgetTester tester) async{
+  testWidgets('CupertinoButton.mouseCursor behavior', (WidgetTester tester) async {
     const SystemMouseCursor customCursor = SystemMouseCursors.grab;
 
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoButton(
-            onPressed: (){},
+            onPressed: () {},
             mouseCursor: customCursor,
             child: const Text('Tap Me'),
           ),
@@ -911,20 +911,17 @@ void main() {
     await tester.pumpAndSettle();
 
     // Expect the custom cursor to be active when the mouse is over the button
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      customCursor,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
   });
 
-  testWidgets('CupertinoButton.Filled.mouseCursor behavior', (WidgetTester tester) async{
+  testWidgets('CupertinoButton.Filled.mouseCursor behavior', (WidgetTester tester) async {
     const SystemMouseCursor customCursor = SystemMouseCursors.grab;
 
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoButton.filled(
-            onPressed: (){},
+            onPressed: () {},
             mouseCursor: customCursor,
             child: const Text('Tap Me'),
           ),
@@ -942,20 +939,17 @@ void main() {
     await tester.pumpAndSettle();
 
     // Expect the custom cursor to be active when the mouse is over the button
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      customCursor,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
   });
 
-  testWidgets('CupertinoButton.Tinted.mouseCursor behavior', (WidgetTester tester) async{
+  testWidgets('CupertinoButton.Tinted.mouseCursor behavior', (WidgetTester tester) async {
     const SystemMouseCursor customCursor = SystemMouseCursors.grab;
 
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoButton.tinted(
-            onPressed: (){},
+            onPressed: () {},
             mouseCursor: customCursor,
             child: const Text('Tap Me'),
           ),
@@ -973,10 +967,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Expect the custom cursor to be active when the mouse is over the button
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      customCursor,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
   });
 }
 

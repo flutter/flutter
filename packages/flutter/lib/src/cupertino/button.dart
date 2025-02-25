@@ -440,7 +440,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     );
 
     return MouseRegion(
-      cursor: enabled ? widget.mouseCursor ?? (kIsWeb ? SystemMouseCursors.click : MouseCursor.defer) : MouseCursor.defer,
+      cursor:
+          enabled
+              ? widget.mouseCursor ?? (kIsWeb ? SystemMouseCursors.click : MouseCursor.defer)
+              : MouseCursor.defer,
       child: FocusableActionDetector(
         actions: _actionMap,
         focusNode: widget.focusNode,
