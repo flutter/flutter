@@ -34,7 +34,7 @@ File? findPackageConfigFile(Directory dir) {
       return candidatePackageConfigFile;
     }
     final Directory parentDir = candidateDir.parent;
-    if (fileSystem.identicalSync(parentDir.path, candidateDir.path)) {
+    if (fileSystem.path.equals(parentDir.path, candidateDir.path)) {
       return null;
     }
     candidateDir = parentDir;
