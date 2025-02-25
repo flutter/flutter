@@ -20,6 +20,7 @@ import '../widgets/semantics_tester.dart';
 class LoggingRoundedRectSliderTrackShape extends RoundedRectSliderTrackShape {
   LoggingRoundedRectSliderTrackShape({this.secondaryOffsetLog});
   final List<Offset?>? secondaryOffsetLog;
+
   @override
   Rect getPreferredRect({
     required RenderBox parentBox,
