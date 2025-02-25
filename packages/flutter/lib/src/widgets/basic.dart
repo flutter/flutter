@@ -1115,7 +1115,14 @@ class ClipRSuperellipse extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DoubleProperty('borderRadius', borderRadius, defaultValue: 0));
+    properties.add(
+      DiagnosticsProperty<BorderRadiusGeometry>(
+        'borderRadius',
+        borderRadius,
+        showName: false,
+        defaultValue: null,
+      ),
+    );
     properties.add(
       DiagnosticsProperty<CustomClipper<RSuperellipse>>('clipper', clipper, defaultValue: null),
     );

@@ -1833,9 +1833,10 @@ class ClipRSuperellipseLayer extends ContainerLayer {
     Offset localPosition, {
     required bool onlyFirst,
   }) {
-    if (!clipRSuperellipse!.contains(localPosition)) {
-      return false;
-    }
+    // TODO(dkwingsmt): implement
+    // if (!clipRSuperellipse!.contains(localPosition)) {
+    //   return false;
+    // }
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 

@@ -1770,9 +1770,11 @@ class RenderClipRSuperellipse extends _RenderCustomClip<RSuperellipse> {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
-      if (!_clip!.contains(position)) {
-        return false;
-      }
+      // TODO(dkwingsmt)
+      return true;
+      // if (!_clip!.contains(position)) {
+      //   return false;
+      // }
     }
     return super.hitTest(result, position: position);
   }
@@ -1809,7 +1811,7 @@ class RenderClipRSuperellipse extends _RenderCustomClip<RSuperellipse> {
           context.canvas.drawRSuperellipse(_clip!.shift(offset), _debugPaint!);
           _debugText!.paint(
             context.canvas,
-            offset + Offset(_clip!.radius, -_debugText!.text!.style!.fontSize! * 1.1),
+            offset + Offset(_clip!.tlRadiusX, -_debugText!.text!.style!.fontSize! * 1.1),
           );
         }
       }
