@@ -561,6 +561,9 @@ targets:
     recipe: infra/ci_yaml
     presubmit: false
     timeout: 30
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
@@ -4571,6 +4574,7 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
     runIf:
       - dev/**
       - packages/flutter_tools/**
