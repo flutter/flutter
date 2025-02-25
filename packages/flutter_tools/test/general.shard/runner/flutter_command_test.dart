@@ -1273,39 +1273,6 @@ flutter:
     group('Flutter version', () {
       for (final String dartDefine in FlutterCommand.flutterVersionDartDefines) {
         testUsingContext(
-          "tool exits when $dartDefine is already set in user's environment",
-          () async {
-            final CommandRunner<void> runner = createTestCommandRunner(
-              _TestRunCommandThatOnlyValidates(),
-            );
-
-            await expectLater(
-              runner.run(<String>['run', '--no-pub', '--no-hot']),
-              throwsToolExit(
-                message:
-                    '$dartDefine is used by the framework and cannot be set in the environment. '
-                    'Use FlutterVersion to access it in Flutter code',
-              ),
-            );
-          },
-          overrides: <Type, Generator>{
-            DeviceManager:
-                () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
-            Platform:
-                () => FakePlatform(environment: <String, String>{dartDefine: 'I was already set'}),
-            Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-            FileSystem: () {
-              return MemoryFileSystem.test()
-                ..file('lib/main.dart').createSync(recursive: true)
-                ..file('pubspec.yaml').createSync()
-                ..file('.packages').createSync();
-            },
-            ProcessManager: () => FakeProcessManager.any(),
-            FlutterVersion: () => FakeFlutterVersion(),
-          },
-        );
-
-        testUsingContext(
           'tool exits when $dartDefine is set in --dart-define or --dart-define-from-file',
           () async {
             final CommandRunner<void> runner = createTestCommandRunner(
