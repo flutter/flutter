@@ -254,7 +254,6 @@ class ModuleTest {
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
       // Modify AGP version to the passed in version.
-      // /Users/reidbaker/flutter-work/dev/integration_tests/pure_android_host_apps/android_host_app_v2_embedding/build.gradle
       final File topBuildDotGradle = File(path.join(hostApp.path, 'build.gradle'));
       String topBuildContent = await topBuildDotGradle.readAsString();
       topBuildContent = topBuildContent.replaceFirst('REPLACEME', agpVersion.toString());
