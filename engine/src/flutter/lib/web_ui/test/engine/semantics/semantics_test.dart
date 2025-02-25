@@ -2332,7 +2332,7 @@ void _testSelectables() {
 }
 
 void _testExpandables() {
-  test('renders and updates non-selectable, selected, and unselected nodes', () async {
+  test('renders and updates non-expandable, expanded, and unexpanded nodes', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
