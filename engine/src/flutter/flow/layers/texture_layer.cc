@@ -63,7 +63,7 @@ void TextureLayer::Paint(PaintContext& context) const {
       .aiks_context = context.aiks_context,
       .paint = context.state_stack.fill(paint),
   };
-  texture->Paint(ctx, ToSkRect(paint_bounds()), freeze_, sampling_);
+  texture->Paint(ctx, paint_bounds(), freeze_, sampling_);
 }
 
 }  // namespace flutter

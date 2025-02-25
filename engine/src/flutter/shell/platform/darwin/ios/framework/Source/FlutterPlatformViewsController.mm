@@ -742,7 +742,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
     flutter::DlCanvas* overlayCanvas = frame->Canvas();
     int restoreCount = overlayCanvas->GetSaveCount();
     overlayCanvas->Save();
-    overlayCanvas->ClipRect(overlay->second);
+    overlayCanvas->ClipRect(flutter::ToDlRect(overlay->second));
     overlayCanvas->Clear(flutter::DlColor::kTransparent());
     self.slices[viewId]->render_into(overlayCanvas);
     overlayCanvas->RestoreToCount(restoreCount);

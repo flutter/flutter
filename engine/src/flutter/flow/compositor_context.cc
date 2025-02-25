@@ -169,10 +169,10 @@ void CompositorContext::ScopedFrame::PaintLayerTreeSkia(
 
     if (needs_save_layer) {
       TRACE_EVENT0("flutter", "Canvas::saveLayer");
-      SkRect bounds = SkRect::Make(ToSkISize(layer_tree.frame_size()));
+      DlRect bounds = DlRect::MakeSize(layer_tree.frame_size());
       DlPaint paint;
       paint.setBlendMode(DlBlendMode::kSrc);
-      canvas()->SaveLayer(&bounds, &paint);
+      canvas()->SaveLayer(bounds, &paint);
     }
     canvas()->Clear(DlColor::kTransparent());
   }

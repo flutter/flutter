@@ -44,7 +44,7 @@ TEST_P(AiksTest, CollapsedDrawPaintInSubpass) {
 
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kMultiply);
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kCornflowerBlue().modulateOpacity(0.75f));
@@ -63,7 +63,7 @@ TEST_P(AiksTest, CollapsedDrawPaintInSubpassBackdropFilter) {
   builder.DrawPaint(paint);
 
   auto filter = DlImageFilter::MakeBlur(20.0, 20.0, DlTileMode::kDecal);
-  builder.SaveLayer(nullptr, nullptr, filter.get());
+  builder.SaveLayer(std::nullopt, nullptr, filter.get());
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kCornflowerBlue());
@@ -85,7 +85,7 @@ TEST_P(AiksTest, ColorMatrixFilterSubpassCollapseOptimization) {
 
   DlPaint paint;
   paint.setColorFilter(filter);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   builder.Translate(500, 300);
   builder.Rotate(120);  // 120 deg
@@ -102,7 +102,7 @@ TEST_P(AiksTest, LinearToSrgbFilterSubpassCollapseOptimization) {
 
   DlPaint paint;
   paint.setColorFilter(DlColorFilter::MakeLinearToSrgbGamma());
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   builder.Translate(500, 300);
   builder.Rotate(120);  // 120 deg.
@@ -119,7 +119,7 @@ TEST_P(AiksTest, SrgbToLinearFilterSubpassCollapseOptimization) {
 
   DlPaint paint;
   paint.setColorFilter(DlColorFilter::MakeLinearToSrgbGamma());
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   builder.Translate(500, 300);
   builder.Rotate(120);  // 120 deg
@@ -140,7 +140,7 @@ TEST_P(AiksTest, TranslucentSaveLayerDrawsCorrectly) {
 
   DlPaint save_paint;
   save_paint.setColor(DlColor::kBlack().withAlpha(128));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
   builder.DrawRect(DlRect::MakeXYWH(100, 500, 300, 300), paint);
   builder.Restore();
 
@@ -160,7 +160,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendColorFilterDrawsCorrectly) {
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kDstOver));
   builder.Save();
   builder.ClipRect(DlRect::MakeXYWH(100, 500, 300, 300));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kBlue());
@@ -183,7 +183,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendImageFilterDrawsCorrectly) {
   save_paint.setImageFilter(DlImageFilter::MakeColorFilter(
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kDstOver)));
 
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kBlue());
@@ -206,7 +206,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorAndImageFilterDrawsCorrectly) {
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kDstOver));
   builder.Save();
   builder.ClipRect(DlRect::MakeXYWH(100, 500, 300, 300));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kBlue());
@@ -224,7 +224,7 @@ TEST_P(AiksTest, ImageFilteredUnboundedSaveLayerWithUnboundedContents) {
   DlPaint save_paint;
   save_paint.setImageFilter(
       DlImageFilter::MakeBlur(10.0, 10.0, DlTileMode::kDecal));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   {
     // DrawPaint to verify correct behavior when the contents are unbounded.
@@ -250,7 +250,7 @@ TEST_P(AiksTest, TranslucentSaveLayerImageDrawsCorrectly) {
 
   DlPaint paint;
   paint.setColor(DlColor::kBlack().withAlpha(128));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.DrawImage(image, DlPoint(100, 500), DlImageSampling::kMipmapLinear);
   builder.Restore();
 
@@ -272,7 +272,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorMatrixColorFilterDrawsCorrectly) {
   DlPaint paint;
   paint.setColor(DlColor::kBlack().withAlpha(128));
   paint.setColorFilter(DlColorFilter::MakeMatrix(matrix));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.DrawImage(image, DlPoint(100, 500), {});
   builder.Restore();
 
@@ -294,7 +294,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorMatrixImageFilterDrawsCorrectly) {
   DlPaint paint;
   paint.setColor(DlColor::kBlack().withAlpha(128));
   paint.setColorFilter(DlColorFilter::MakeMatrix(matrix));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.DrawImage(image, DlPoint(100, 500), {});
   builder.Restore();
 
@@ -320,7 +320,7 @@ TEST_P(AiksTest,
       DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix)));
   paint.setColorFilter(
       DlColorFilter::MakeBlend(DlColor::kGreen(), DlBlendMode::kModulate));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.DrawImage(image, DlPoint(100, 500), {});
   builder.Restore();
 
@@ -337,7 +337,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithAdvancedBlendModeDrawsCorrectly) {
   DlPaint save_paint;
   save_paint.setAlpha(128);
   save_paint.setBlendMode(DlBlendMode::kLighten);
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kGreen());
@@ -358,13 +358,13 @@ TEST_P(AiksTest, CanRenderTinyOverlappingSubpasses) {
   builder.DrawPaint(paint);
 
   // Draw two overlapping subpixel circles.
-  builder.SaveLayer({});
+  builder.SaveLayer(std::nullopt);
 
   DlPaint yellow_paint;
   yellow_paint.setColor(DlColor::kYellow());
   builder.DrawCircle(DlPoint(100, 100), 0.1, yellow_paint);
   builder.Restore();
-  builder.SaveLayer({});
+  builder.SaveLayer(std::nullopt);
   builder.DrawCircle(DlPoint(100, 100), 0.1, yellow_paint);
   builder.Restore();
 
@@ -387,7 +387,7 @@ TEST_P(AiksTest, CanRenderDestructiveSaveLayer) {
 
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kSrc);
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kGreen());
@@ -639,7 +639,7 @@ TEST_P(AiksTest, MatrixImageFilterMagnify) {
     DlPaint paint;
     paint.setImageFilter(
         DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear));
-    builder.SaveLayer(nullptr, &paint);
+    builder.SaveLayer(std::nullopt, &paint);
 
     DlPaint rect_paint;
     rect_paint.setAlpha(0.5 * 255);
@@ -748,7 +748,7 @@ TEST_P(AiksTest, MatrixBackdropFilter) {
   DlPaint paint;
   paint.setColor(DlColor::kBlack());
   builder.DrawPaint(paint);
-  builder.SaveLayer(nullptr, nullptr);
+  builder.SaveLayer(std::nullopt, nullptr);
   {
     DlPaint paint;
     paint.setColor(DlColor::kGreen().withAlpha(0.5 * 255));
@@ -768,7 +768,7 @@ TEST_P(AiksTest, MatrixBackdropFilter) {
                       DlMatrix::MakeTranslation({-100, -100});
     auto backdrop_filter =
         DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear);
-    builder.SaveLayer(nullptr, nullptr, backdrop_filter.get());
+    builder.SaveLayer(std::nullopt, nullptr, backdrop_filter.get());
     builder.Restore();
   }
   builder.Restore();
@@ -782,7 +782,7 @@ TEST_P(AiksTest, MatrixSaveLayerFilter) {
   DlPaint paint;
   paint.setColor(DlColor::kBlack());
   builder.DrawPaint(paint);
-  builder.SaveLayer(nullptr, nullptr);
+  builder.SaveLayer(std::nullopt, nullptr);
   {
     paint.setColor(DlColor::kGreen().withAlpha(255 * 0.5));
     paint.setBlendMode(DlBlendMode::kPlus);
@@ -798,7 +798,7 @@ TEST_P(AiksTest, MatrixSaveLayerFilter) {
     save_paint.setImageFilter(
         DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear));
 
-    builder.SaveLayer(nullptr, &save_paint);
+    builder.SaveLayer(std::nullopt, &save_paint);
 
     DlPaint circle_paint;
     circle_paint.setColor(DlColor::kGreen().withAlpha(255 * 0.5));
@@ -914,7 +914,7 @@ TEST_P(AiksTest, BackdropRestoreUsesCorrectCoverageForFirstRestoredClip) {
       // Create a save layer with a backdrop blur filter.
       auto backdrop_filter =
           DlImageFilter::MakeBlur(10.0, 10.0, DlTileMode::kDecal);
-      builder.SaveLayer(nullptr, nullptr, backdrop_filter.get());
+      builder.SaveLayer(std::nullopt, nullptr, backdrop_filter.get());
     }
   }
   builder.RestoreToCount(count);

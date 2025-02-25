@@ -87,13 +87,13 @@ TEST_P(AiksTest, BlendModeShouldCoverWholeScreen) {
   builder.DrawPaint(paint);
 
   paint.setBlendMode(DlBlendMode::kSrcOver);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   paint.setColor(DlColor::kWhite());
   builder.DrawRect(DlRect::MakeXYWH(100, 100, 400, 400), paint);
 
   paint.setBlendMode(DlBlendMode::kSrc);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   paint.setColor(DlColor::kBlue());
   builder.DrawRect(DlRect::MakeXYWH(200, 200, 200, 200), paint);
@@ -408,7 +408,7 @@ TEST_P(AiksTest, BlendModePlusAlphaWideGamut) {
 
   paint.setColor(DlColor::RGBA(0.9, 1, 0.9, 1.0));
   builder.DrawPaint(paint);
-  builder.SaveLayer(nullptr);
+  builder.SaveLayer(std::nullopt);
 
   paint.setBlendMode(DlBlendMode::kPlus);
   paint.setColor(DlColor::kRed());
@@ -444,7 +444,7 @@ TEST_P(AiksTest, BlendModePlusAlphaColorFilterWideGamut) {
   DlPaint save_paint;
   save_paint.setColorFilter(
       DlColorFilter::MakeBlend(DlColor::RGBA(1, 0, 0, 1), DlBlendMode::kPlus));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   paint.setColor(DlColor::kRed());
   builder.DrawRect(DlRect::MakeXYWH(100, 100, 400, 400), paint);
@@ -469,7 +469,7 @@ TEST_P(AiksTest, ForegroundBlendSubpassCollapseOptimization) {
   DlPaint save_paint;
   save_paint.setColorFilter(
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kColorDodge));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   builder.Translate(500, 300);
   builder.Rotate(120);
@@ -534,7 +534,7 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
       // Perform the blend in a SaveLayer so that the initial backdrop color is
       // fully transparent black. SourceOver blend the result onto the parent
       // pass.
-      builder.SaveLayer({});
+      builder.SaveLayer(std::nullopt);
       {
         DlPaint draw_paint;
         draw_paint.setColor(
@@ -546,7 +546,7 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
         // pass.
         DlPaint save_paint;
         save_paint.setBlendMode(static_cast<DlBlendMode>(blend_mode));
-        builder.SaveLayer(nullptr, &save_paint);
+        builder.SaveLayer(std::nullopt, &save_paint);
         {  //
           DlPaint paint;
           paint.setColor(
@@ -570,7 +570,7 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
   builder.Translate(0, 100);
   // Perform the blend in a SaveLayer so that the initial backdrop color is
   // fully transparent black. SourceOver blend the result onto the parent pass.
-  builder.SaveLayer({});
+  builder.SaveLayer(std::nullopt);
   for (const auto& color : source_colors) {
     // Simply write the CPU blended color to the pass.
     DlPaint paint;
@@ -612,7 +612,7 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
   DlPaint paint;
   paint.setBlendMode(DlBlendMode::kSrcOver);
   builder.Save();
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   {
     builder.DrawImage(dst_image, DlPoint(0, 0), DlImageSampling::kMipmapLinear,
                       &paint);
@@ -629,7 +629,7 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
   builder.Save();
 
   DlPaint save_paint;
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
   {
     builder.DrawImage(dst_image, DlPoint(400, 0),
                       DlImageSampling::kMipmapLinear, nullptr);
@@ -637,7 +637,7 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
     DlPaint save_paint;
     save_paint.setColor(DlColor::kWhite().withAlpha(src_alpha * 255));
     save_paint.setBlendMode(static_cast<DlBlendMode>(blend_mode));
-    builder.SaveLayer(nullptr, &save_paint);
+    builder.SaveLayer(std::nullopt, &save_paint);
     {
       builder.DrawImage(src_image, DlPoint(400, 0),
                         DlImageSampling::kMipmapLinear, nullptr);
@@ -841,13 +841,13 @@ TEST_P(AiksTest, ColorWheel) {
     DlPaint paint;
     paint.setColor(DlColor::kWhite().withAlpha(dst_alpha * 255));
     paint.setBlendMode(DlBlendMode::kSrc);
-    builder.SaveLayer(nullptr, &paint);
+    builder.SaveLayer(std::nullopt, &paint);
     {
       DlPaint paint;
       paint.setColor(DlColor::kWhite());
       builder.DrawPaint(paint);
 
-      builder.SaveLayer(nullptr, nullptr);
+      builder.SaveLayer(std::nullopt, nullptr);
       builder.Scale(GetContentScale().x, GetContentScale().y);
       builder.Translate(500, 400);
       builder.Scale(3, 3);
@@ -865,7 +865,7 @@ TEST_P(AiksTest, ColorWheel) {
     save_paint.setColor(DlColor::kWhite().withAlpha(src_alpha * 255));
     save_paint.setBlendMode(static_cast<DlBlendMode>(
         blend_modes.blend_mode_values[current_blend_index]));
-    builder.SaveLayer(nullptr, &save_paint);
+    builder.SaveLayer(std::nullopt, &save_paint);
     {
       DlPaint paint;
       paint.setBlendMode(DlBlendMode::kPlus);
@@ -896,7 +896,7 @@ TEST_P(AiksTest, DestructiveBlendColorFilterFloodsClip) {
   DlPaint save_paint;
   save_paint.setColorFilter(
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kSrc));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
   builder.Restore();
 
   // Should be solid red as the destructive color filter floods the clip.
@@ -912,7 +912,7 @@ TEST_P(AiksTest, AdvancedBlendColorFilterWithDestinationOpacity) {
   save_paint.setOpacity(0.3);
   save_paint.setColorFilter(DlColorFilter::MakeBlend(DlColor::kTransparent(),
                                                      DlBlendMode::kSaturation));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
   builder.DrawRect(DlRect::MakeXYWH(100, 100, 300, 300),
                    DlPaint(DlColor::kMaroon()));
   builder.DrawRect(DlRect::MakeXYWH(200, 200, 300, 300),
