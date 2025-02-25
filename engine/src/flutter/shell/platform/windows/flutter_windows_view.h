@@ -357,7 +357,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                KeyEventCallback callback);
 
   // Reports a focus event to Flutter engine.
-  void SendFocus(FlutterViewFocusState focus_state, FlutterViewFocusDirection direction);
+  void SendFocus(FlutterViewFocusState focus_state,
+                 FlutterViewFocusDirection direction);
 
   // Reports an IME compose begin event.
   //

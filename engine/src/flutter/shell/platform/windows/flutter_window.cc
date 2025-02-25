@@ -165,10 +165,8 @@ void FlutterWindow::SetView(WindowBindingHandlerDelegate* window) {
   }
   if (focused_ && window) {
     OnWindowStateEvent(WindowStateEvent::kFocus);
-    binding_handler_delegate_->OnFocus(
-      FlutterViewFocusState::kFocused,
-      FlutterViewFocusDirection::kUndefined
-    );
+    binding_handler_delegate_->OnFocus(FlutterViewFocusState::kFocused,
+                                       FlutterViewFocusDirection::kUndefined);
   }
 }
 
@@ -637,18 +635,14 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_SETFOCUS:
       OnWindowStateEvent(WindowStateEvent::kFocus);
       ::CreateCaret(window_handle_, nullptr, 1, 1);
-      binding_handler_delegate_->OnFocus(
-        FlutterViewFocusState::kFocused,
-        FlutterViewFocusDirection::kUndefined
-      );
+      binding_handler_delegate_->OnFocus(FlutterViewFocusState::kFocused,
+                                         FlutterViewFocusDirection::kUndefined);
       break;
     case WM_KILLFOCUS:
       OnWindowStateEvent(WindowStateEvent::kUnfocus);
       ::DestroyCaret();
-      binding_handler_delegate_->OnFocus(
-        FlutterViewFocusState::kUnfocused,
-        FlutterViewFocusDirection::kUndefined
-      );
+      binding_handler_delegate_->OnFocus(FlutterViewFocusState::kUnfocused,
+                                         FlutterViewFocusDirection::kUndefined);
       break;
     case WM_LBUTTONDOWN:
     case WM_RBUTTONDOWN:
