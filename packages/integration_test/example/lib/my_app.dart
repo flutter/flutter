@@ -23,10 +23,12 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Plugin example app')),
-        body: Column(children: <Widget>[
-          Text('Platform: ${Platform.operatingSystem}\n'),
-          Expanded(child: SimplePlatformView()),
-        ]),
+        body: Column(
+          children: <Widget>[
+            Text('Platform: ${Platform.operatingSystem}\n'),
+            const Expanded(child: SimplePlatformView()),
+          ],
+        ),
       ),
     );
   }

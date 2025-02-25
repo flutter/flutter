@@ -7,26 +7,22 @@ import 'package:flutter/widgets.dart';
 
 /// A platform view that displays a blue fill.
 class SimplePlatformView extends StatelessWidget {
+  /// Creates a platform view that displays a blue fill.
   const SimplePlatformView({super.key});
 
   @override
   Widget build(BuildContext context) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        // TODO: Implement. https://github.com/flutter/flutter/issues/164130
+        // TODO(cbracken): Implement. https://github.com/flutter/flutter/issues/164130
         return Container();
       case TargetPlatform.iOS:
-        return UiKitView(
-          viewType: 'simple-platform-view',
-          onPlatformViewCreated: (int id) {
-            print('iOS platform view created with id: $id');
-          },
-        );
+        return const UiKitView(viewType: 'simple-platform-view');
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-       throw UnimplementedError();
+        throw UnimplementedError();
     }
   }
 }

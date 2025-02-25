@@ -41,7 +41,7 @@ void main() {
 
     // Take a full-screen screenshot.
     final List<int> screenshot = await IntegrationTestWidgetsFlutterBinding.instance.takeScreenshot(
-        "integration_test_screen_matches_golden_file",
+      'integration_test_screen_matches_golden_file',
     );
     await expectLater(
       screenshot,
