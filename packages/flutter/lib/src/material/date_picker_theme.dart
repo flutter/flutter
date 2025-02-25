@@ -84,6 +84,8 @@ class DatePickerThemeData with Diagnosticable {
     this.cancelButtonStyle,
     this.confirmButtonStyle,
     this.locale,
+    this.toggleModeStyle,
+    this.toggleModeForegroundColor,
   });
 
   /// Overrides the default value of [Dialog.backgroundColor].
@@ -360,6 +362,17 @@ class DatePickerThemeData with Diagnosticable {
   /// picker. It defaults to the ambient locale provided by [Localizations].
   final Locale? locale;
 
+  /// Overrides the default text style used for the text of toggle mode button
+  ///
+  /// The [TextStyle.color] of [toggleModeStyle] is not used, [toggleModeForegroundColor]
+  /// is used instead.
+  final TextStyle? toggleModeStyle;
+
+  /// Overrides the default color used for text labels and icons of toggle mode button.
+  ///
+  /// This is used instead of the [TextStyle.color] property of [toggleModeStyle].
+  final Color? toggleModeForegroundColor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DatePickerThemeData copyWith({
@@ -401,6 +414,8 @@ class DatePickerThemeData with Diagnosticable {
     ButtonStyle? cancelButtonStyle,
     ButtonStyle? confirmButtonStyle,
     Locale? locale,
+    TextStyle? toggleModeStyle,
+    Color? toggleModeForegroundColor,
   }) {
     return DatePickerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -445,6 +460,8 @@ class DatePickerThemeData with Diagnosticable {
       cancelButtonStyle: cancelButtonStyle ?? this.cancelButtonStyle,
       confirmButtonStyle: confirmButtonStyle ?? this.confirmButtonStyle,
       locale: locale ?? this.locale,
+      toggleModeStyle: toggleModeStyle ?? this.toggleModeStyle,
+      toggleModeForegroundColor: toggleModeForegroundColor ?? this.toggleModeForegroundColor,
     );
   }
 
@@ -570,6 +587,12 @@ class DatePickerThemeData with Diagnosticable {
       cancelButtonStyle: ButtonStyle.lerp(a?.cancelButtonStyle, b?.cancelButtonStyle, t),
       confirmButtonStyle: ButtonStyle.lerp(a?.confirmButtonStyle, b?.confirmButtonStyle, t),
       locale: t < 0.5 ? a?.locale : b?.locale,
+      toggleModeStyle: TextStyle.lerp(a?.toggleModeStyle, b?.toggleModeStyle, t),
+      toggleModeForegroundColor: Color.lerp(
+        a?.toggleModeForegroundColor,
+        b?.toggleModeForegroundColor,
+        t,
+      ),
     );
   }
 
@@ -623,6 +646,8 @@ class DatePickerThemeData with Diagnosticable {
     cancelButtonStyle,
     confirmButtonStyle,
     locale,
+    toggleModeStyle,
+    toggleModeForegroundColor,
   ]);
 
   @override
@@ -668,7 +693,9 @@ class DatePickerThemeData with Diagnosticable {
         other.inputDecorationTheme == inputDecorationTheme &&
         other.cancelButtonStyle == cancelButtonStyle &&
         other.confirmButtonStyle == confirmButtonStyle &&
-        other.locale == locale;
+        other.locale == locale &&
+        other.toggleModeStyle == toggleModeStyle &&
+        other.toggleModeForegroundColor == toggleModeForegroundColor;
   }
 
   @override
@@ -842,6 +869,12 @@ class DatePickerThemeData with Diagnosticable {
       ),
     );
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextStyle>('toggleModeStyle', toggleModeStyle, defaultValue: null),
+    );
+    properties.add(
+      ColorProperty('toggleModeForegroundColor', toggleModeForegroundColor, defaultValue: null),
+    );
   }
 }
 
@@ -956,6 +989,12 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   Color? get headerBackgroundColor => _isDark ? _colors.surface : _colors.primary;
+
+  @override
+  Color? get toggleModeForegroundColor => _colors.onSurface.withOpacity(0.60);
+
+  @override
+  TextStyle? get toggleModeStyle => _textTheme.titleSmall?.apply(color: toggleModeForegroundColor);
 
   @override
   ButtonStyle get cancelButtonStyle {
@@ -1129,6 +1168,14 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   Color? get backgroundColor => _colors.surfaceContainerHigh;
+
+  @override
+  Color? get toggleModeForegroundColor => _colors.onSurface.withOpacity(0.60);
+
+  @override
+  TextStyle? get toggleModeStyle => _textTheme.titleSmall?.apply(
+    color: toggleModeForegroundColor,
+  );
 
   @override
   ButtonStyle get cancelButtonStyle {
