@@ -157,6 +157,9 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   void UpdateAssetResolverByType(
       std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
       flutter::AssetResolver::AssetResolverType type) {}
+  // |flutter::PlatformView::Delegate|
+  void OnPlatformViewSendViewFocusEvent(const flutter::ViewFocusEvent& event) {
+  };
 
   flutter::Surface* surface() const { return surface_.get(); }
   flutter::PlatformMessage* message() const { return message_.get(); }
