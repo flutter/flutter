@@ -365,6 +365,13 @@ struct ContentContextOptions {
   void ApplyToPipelineDescriptor(PipelineDescriptor& desc) const;
 };
 
+enum ConicalKind {
+  kConical,
+  kRadial,
+  kStrip,
+  kStripAndRadial,
+};
+
 class Tessellator;
 class RenderTargetCache;
 
@@ -421,29 +428,20 @@ class ContentContext {
     return GetPipeline(radial_gradient_ssbo_fill_pipelines_, opts);
   }
 
-  PipelineRef GetConicalGradientSSBOFillPipeline(
-      ContentContextOptions opts) const {
+  PipelineRef GetConicalGradientSSBOFillPipeline(ContentContextOptions opts,
+                                                 ConicalKind kind) const {
     FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-    return GetPipeline(conical_gradient_ssbo_fill_pipelines_, opts);
-  }
-
-  PipelineRef GetConicalGradientSSBOFillRadialPipeline(
-      ContentContextOptions opts) const {
-    FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-    return GetPipeline(conical_gradient_ssbo_fill_radial_pipelines_, opts);
-  }
-
-  PipelineRef GetConicalGradientSSBOFillStripPipeline(
-      ContentContextOptions opts) const {
-    FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-    return GetPipeline(conical_gradient_ssbo_fill_strip_pipelines_, opts);
-  }
-
-  PipelineRef GetConicalGradientSSBOFillStripAndRadialPipeline(
-      ContentContextOptions opts) const {
-    FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-    return GetPipeline(conical_gradient_ssbo_fill_strip_and_radial_pipelines_,
-                       opts);
+    switch (kind) {
+      case ConicalKind::kConical:
+        return GetPipeline(conical_gradient_ssbo_fill_pipelines_, opts);
+      case ConicalKind::kRadial:
+        return GetPipeline(conical_gradient_ssbo_fill_radial_pipelines_, opts);
+      case ConicalKind::kStrip:
+        return GetPipeline(conical_gradient_ssbo_fill_strip_pipelines_, opts);
+      case ConicalKind::kStripAndRadial:
+        return GetPipeline(
+            conical_gradient_ssbo_fill_strip_and_radial_pipelines_, opts);
+    }
   }
 
   PipelineRef GetSweepGradientSSBOFillPipeline(
