@@ -36,19 +36,19 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-        Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
-        Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
-        Source.pattern('{BUILD_DIR}/app.dill'),
-        ...IconTreeShaker.inputs,
-        ...ShaderCompiler.inputs,
-      ];
+    Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
+    Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+    Source.pattern('{BUILD_DIR}/app.dill'),
+    ...IconTreeShaker.inputs,
+    ...ShaderCompiler.inputs,
+  ];
 
   @override
   List<Source> get outputs => const <Source>[
-        Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
-        Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
-        Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
-      ];
+    Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
+    Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
+    Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
+  ];
 
   @override
   List<String> get depfiles => <String>['flutter_assets.d'];
@@ -106,10 +106,10 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-        DartBuildForNative(),
-        KernelSnapshot(),
-        InstallCodeAssets(),
-      ];
+    DartBuildForNative(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 }
 
 /// Copies the pre-built flutter bundle for release mode.
@@ -146,21 +146,21 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-        Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
-        Source.pattern(
-          '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart',
-        ),
-        Source.artifact(Artifact.platformKernelDill),
-        Source.artifact(Artifact.engineDartBinary),
-        Source.artifact(Artifact.engineDartAotRuntime),
-        Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
-      ];
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart',
+    ),
+    Source.artifact(Artifact.platformKernelDill),
+    Source.artifact(Artifact.engineDartBinary),
+    Source.artifact(Artifact.engineDartAotRuntime),
+    Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[
-        Source.pattern('{BUILD_DIR}/${KernelSnapshot.dillName}'),
-        // TODO(mosuem): Should output resources.json. https://github.com/flutter/flutter/issues/146263
-      ];
+    Source.pattern('{BUILD_DIR}/${KernelSnapshot.dillName}'),
+    // TODO(mosuem): Should output resources.json. https://github.com/flutter/flutter/issues/146263
+  ];
 
   static const String depfile = 'kernel_snapshot_program.d';
 
@@ -169,9 +169,9 @@ class KernelSnapshot extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-        GenerateLocalizationsTarget(),
-        DartPluginRegistrantTarget(),
-      ];
+    GenerateLocalizationsTarget(),
+    DartPluginRegistrantTarget(),
+  ];
 
   static const String dillName = 'app.dill';
 
@@ -245,8 +245,7 @@ class KernelSnapshot extends Target {
       TargetPlatform.android_arm ||
       TargetPlatform.android_arm64 ||
       TargetPlatform.android_x64 ||
-      TargetPlatform.android_x86 =>
-        'android',
+      TargetPlatform.android_x86 => 'android',
       TargetPlatform.darwin => 'macos',
       TargetPlatform.ios => 'ios',
       TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
@@ -400,14 +399,14 @@ class AotElfProfile extends AotElfBase {
 
   @override
   List<Source> get inputs => <Source>[
-        const Source.pattern(
-          '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart',
-        ),
-        const Source.pattern('{BUILD_DIR}/app.dill'),
-        const Source.artifact(Artifact.engineDartBinary),
-        const Source.artifact(Artifact.skyEnginePath),
-        Source.artifact(Artifact.genSnapshot, platform: targetPlatform, mode: BuildMode.profile),
-      ];
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart',
+    ),
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.artifact(Artifact.engineDartBinary),
+    const Source.artifact(Artifact.skyEnginePath),
+    Source.artifact(Artifact.genSnapshot, platform: targetPlatform, mode: BuildMode.profile),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/app.so')];
@@ -427,14 +426,14 @@ class AotElfRelease extends AotElfBase {
 
   @override
   List<Source> get inputs => <Source>[
-        const Source.pattern(
-          '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart',
-        ),
-        const Source.pattern('{BUILD_DIR}/app.dill'),
-        const Source.artifact(Artifact.engineDartBinary),
-        const Source.artifact(Artifact.skyEnginePath),
-        Source.artifact(Artifact.genSnapshot, platform: targetPlatform, mode: BuildMode.release),
-      ];
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart',
+    ),
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.artifact(Artifact.engineDartBinary),
+    const Source.artifact(Artifact.skyEnginePath),
+    Source.artifact(Artifact.genSnapshot, platform: targetPlatform, mode: BuildMode.release),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/app.so')];

@@ -164,9 +164,7 @@ const Feature dartDataAssets = Feature(
   name: 'dart data assets building and bundling',
   configSetting: 'enable-dart-data-assets',
   environmentOverride: 'FLUTTER_DART_DATA_ASSETS',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true),
 );
 
 /// Enable Swift Package Manager as a darwin dependency manager.
@@ -183,7 +181,8 @@ const Feature swiftPackageManager = Feature(
 const Feature explicitPackageDependencies = Feature.fullyEnabled(
   name: 'support for dev_dependency plugins',
   configSetting: 'explicit-package-dependencies',
-  extraHelpText: 'Plugins that are resolved as result of being in "dev_dependencies" of a '
+  extraHelpText:
+      'Plugins that are resolved as result of being in "dev_dependencies" of a '
       'package are not included in release builds of an app. By enabling this '
       'feature, the synthetic "package:flutter_gen" can no longer be generated '
       'and the legacy ".flutter-plugins" tool artifact is no longer generated.\n'
@@ -219,9 +218,9 @@ class Feature {
     this.environmentOverride,
     this.configSetting,
     this.extraHelpText,
-  })  : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
-        beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
-        stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
+  }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
+       beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
+       stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
 
   /// The user visible name for this feature.
   final String name;

@@ -36,14 +36,13 @@ abstract class UnpackMacOS extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-        Source.pattern(
-            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-      ];
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[
-        Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
-      ];
+    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
+  ];
 
   @override
   List<Target> get dependencies => <Target>[];
@@ -225,9 +224,9 @@ class ProfileUnpackMacOS extends UnpackMacOS {
 
   @override
   List<Source> get inputs => <Source>[
-        ...super.inputs,
-        const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.profile),
-      ];
+    ...super.inputs,
+    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.profile),
+  ];
 }
 
 /// Unpack the debug prebuilt engine framework.
@@ -239,9 +238,9 @@ class DebugUnpackMacOS extends UnpackMacOS {
 
   @override
   List<Source> get inputs => <Source>[
-        ...super.inputs,
-        const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.debug),
-      ];
+    ...super.inputs,
+    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.debug),
+  ];
 }
 
 /// Create an App.framework for debug macOS targets.
@@ -263,7 +262,7 @@ class DebugMacOSFramework extends Target {
 
     final Iterable<DarwinArch> darwinArchs =
         environment.defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName) ??
-            <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
 
     final Iterable<String> darwinArchArguments = darwinArchs.expand(
       (DarwinArch arch) => <String>['-arch', arch.name],
@@ -303,9 +302,8 @@ static const int Moo = 88;
 
   @override
   List<Source> get inputs => const <Source>[
-        Source.pattern(
-            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-      ];
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/App.framework/App')];
@@ -342,7 +340,7 @@ class CompileMacOSFramework extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
     final List<DarwinArch> darwinArchs =
         environment.defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
-            <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.darwin) {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
@@ -411,18 +409,16 @@ class CompileMacOSFramework extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-        Source.pattern('{BUILD_DIR}/app.dill'),
-        Source.pattern(
-            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-        Source.artifact(Artifact.genSnapshot,
-            mode: BuildMode.release, platform: TargetPlatform.darwin),
-      ];
+    Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+    Source.artifact(Artifact.genSnapshot, mode: BuildMode.release, platform: TargetPlatform.darwin),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[
-        Source.pattern('{BUILD_DIR}/App.framework/App'),
-        Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-      ];
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
 }
 
 /// Bundle the flutter assets into the App.framework.
@@ -435,21 +431,19 @@ abstract class MacOSBundleFlutterAssets extends Target {
   const MacOSBundleFlutterAssets();
 
   @override
-  List<Target> get dependencies => const <Target>[
-        DartBuildForNative(),
-      ];
+  List<Target> get dependencies => const <Target>[DartBuildForNative()];
 
   @override
   List<Source> get inputs => const <Source>[
-        Source.pattern('{BUILD_DIR}/App.framework/App'),
-        ...IconTreeShaker.inputs,
-      ];
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
+    ...IconTreeShaker.inputs,
+  ];
 
   @override
   List<Source> get outputs => const <Source>[
-        Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/App'),
-        Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/Info.plist'),
-      ];
+    Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/App'),
+    Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/Info.plist'),
+  ];
 
   @override
   List<String> get depfiles => const <String>['flutter_assets.d'];
@@ -464,9 +458,8 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkRootDirectory = environment.outputDir.childDirectory('App.framework');
     final Directory outputDirectory = frameworkRootDirectory
-        .childDirectory('Versions')
-        .childDirectory('A')
-      ..createSync(recursive: true);
+      .childDirectory('Versions')
+      .childDirectory('A')..createSync(recursive: true);
 
     // Copy App into framework directory.
     environment.buildDir
@@ -493,8 +486,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
     }
 
     // Copy assets into asset directory.
-    final Directory assetDirectory =
-        outputDirectory.childDirectory('Resources').childDirectory('flutter_assets');
+    final Directory assetDirectory = outputDirectory
+        .childDirectory('Resources')
+        .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
 
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
@@ -625,42 +619,42 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   List<Target> get dependencies => <Target>[
-        ...super.dependencies,
-        const KernelSnapshot(),
-        const DebugMacOSFramework(),
-        const DebugUnpackMacOS(),
-        const InstallCodeAssets(),
-      ];
+    ...super.dependencies,
+    const KernelSnapshot(),
+    const DebugMacOSFramework(),
+    const DebugUnpackMacOS(),
+    const InstallCodeAssets(),
+  ];
 
   @override
   List<Source> get inputs => <Source>[
-        ...super.inputs,
-        const Source.pattern('{BUILD_DIR}/app.dill'),
-        const Source.artifact(
-          Artifact.isolateSnapshotData,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.debug,
-        ),
-        const Source.artifact(
-          Artifact.vmSnapshotData,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.debug,
-        ),
-      ];
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.artifact(
+      Artifact.isolateSnapshotData,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.debug,
+    ),
+    const Source.artifact(
+      Artifact.vmSnapshotData,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.debug,
+    ),
+  ];
 
   @override
   List<Source> get outputs => <Source>[
-        ...super.outputs,
-        const Source.pattern(
-          '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin',
-        ),
-        const Source.pattern(
-          '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data',
-        ),
-        const Source.pattern(
-          '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data',
-        ),
-      ];
+    ...super.outputs,
+    const Source.pattern(
+      '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin',
+    ),
+    const Source.pattern(
+      '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data',
+    ),
+    const Source.pattern(
+      '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data',
+    ),
+  ];
 }
 
 /// Bundle the profile flutter assets into the App.framework.
@@ -672,23 +666,23 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   List<Target> get dependencies => <Target>[
-        ...super.dependencies,
-        const CompileMacOSFramework(),
-        const ProfileUnpackMacOS(),
-        const InstallCodeAssets(),
-      ];
+    ...super.dependencies,
+    const CompileMacOSFramework(),
+    const ProfileUnpackMacOS(),
+    const InstallCodeAssets(),
+  ];
 
   @override
   List<Source> get inputs => <Source>[
-        ...super.inputs,
-        const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-      ];
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
 
   @override
   List<Source> get outputs => <Source>[
-        ...super.outputs,
-        const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-      ];
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
 }
 
 /// Bundle the release flutter assets into the App.framework.
@@ -700,22 +694,22 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   List<Target> get dependencies => const <Target>[
-        CompileMacOSFramework(),
-        InstallCodeAssets(),
-        ReleaseUnpackMacOS(),
-      ];
+    CompileMacOSFramework(),
+    InstallCodeAssets(),
+    ReleaseUnpackMacOS(),
+  ];
 
   @override
   List<Source> get inputs => <Source>[
-        ...super.inputs,
-        const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-      ];
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
 
   @override
   List<Source> get outputs => <Source>[
-        ...super.outputs,
-        const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-      ];
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
 
   @override
   Future<void> build(Environment environment) async {
