@@ -60,7 +60,10 @@
 #include "impeller/entity/tiled_texture_fill.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
 
-#include "impeller/entity/conical_gradient_uniform_fill.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_conical.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_radial.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_strip.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_strip_radial.frag.h"
 #include "impeller/entity/linear_gradient_uniform_fill.frag.h"
 #include "impeller/entity/radial_gradient_uniform_fill.frag.h"
 #include "impeller/entity/sweep_gradient_uniform_fill.frag.h"
@@ -113,9 +116,18 @@ using SweepGradientFillPipeline =
 using LinearGradientUniformFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          LinearGradientUniformFillFragmentShader>;
-using ConicalGradientUniformFillPipeline =
+using ConicalGradientUniformFillConicalPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientUniformFillFragmentShader>;
+                         ConicalGradientUniformFillConicalFragmentShader>;
+using ConicalGradientUniformFillStripPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientUniformFillStripFragmentShader>;
+using ConicalGradientUniformFillRadialPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientUniformFillRadialFragmentShader>;
+using ConicalGradientUniformFillStripRadialPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientUniformFillStripRadialFragmentShader>;
 using RadialGradientUniformFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          RadialGradientUniformFillFragmentShader>;
@@ -1053,13 +1065,13 @@ class ContentContext {
       linear_gradient_uniform_fill_pipelines_;
   mutable Variants<RadialGradientUniformFillPipeline>
       radial_gradient_uniform_fill_pipelines_;
-  mutable Variants<ConicalGradientUniformFillPipeline>
+  mutable Variants<ConicalGradientUniformFillConicalPipeline>
       conical_gradient_uniform_fill_pipelines_;
-  mutable Variants<ConicalGradientUniformFillPipeline>
+  mutable Variants<ConicalGradientUniformFillRadialPipeline>
       conical_gradient_uniform_fill_radial_pipelines_;
-  mutable Variants<ConicalGradientUniformFillPipeline>
+  mutable Variants<ConicalGradientUniformFillStripPipeline>
       conical_gradient_uniform_fill_strip_pipelines_;
-  mutable Variants<ConicalGradientUniformFillPipeline>
+  mutable Variants<ConicalGradientUniformFillStripRadialPipeline>
       conical_gradient_uniform_fill_strip_and_radial_pipelines_;
   mutable Variants<SweepGradientUniformFillPipeline>
       sweep_gradient_uniform_fill_pipelines_;

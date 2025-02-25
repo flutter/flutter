@@ -73,7 +73,7 @@ void ConicalGradientContents::SetFocus(std::optional<Point> focus,
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
 #define UNIFORM_FRAG_INFO(t) \
-  t##GradientUniformFillPipeline::FragmentShader::FragInfo
+  t##GradientUniformFillConicalPipeline::FragmentShader::FragInfo
 #define UNIFORM_COLOR_SIZE ARRAY_LEN(UNIFORM_FRAG_INFO(Conical)::colors)
 #define UNIFORM_STOP_SIZE ARRAY_LEN(UNIFORM_FRAG_INFO(Conical)::stop_pairs)
 static_assert(UNIFORM_COLOR_SIZE == kMaxUniformGradientStops);
@@ -145,8 +145,8 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
 bool ConicalGradientContents::RenderUniform(const ContentContext& renderer,
                                             const Entity& entity,
                                             RenderPass& pass) const {
-  using VS = ConicalGradientUniformFillPipeline::VertexShader;
-  using FS = ConicalGradientUniformFillPipeline::FragmentShader;
+  using VS = ConicalGradientUniformFillConicalPipeline::VertexShader;
+  using FS = ConicalGradientUniformFillConicalPipeline::FragmentShader;
 
   VS::FrameInfo frame_info;
   frame_info.matrix = GetInverseEffectTransform();
