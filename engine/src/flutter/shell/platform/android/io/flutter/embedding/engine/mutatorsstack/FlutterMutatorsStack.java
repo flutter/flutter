@@ -14,8 +14,6 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.flutter.Log;
-
 /**
  * The mutator stack containing a list of mutators
  *
@@ -145,7 +143,7 @@ public class FlutterMutatorsStack {
     /**
      * Get the opacity of the mutator if the {@link #getType()} returns FlutterMutatorType.OPACITY.
      *
-     *  @return the opacity if the type is FlutterMutatorType.OPACITY; otherwise null.
+     * @return the opacity if the type is FlutterMutatorType.OPACITY; otherwise null.
      */
     public float getOpacity() {
       return opacity;

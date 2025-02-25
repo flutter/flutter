@@ -1043,13 +1043,13 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
-  g_mutators_stack_push_opacity_method = env->GetMethodID(
-          g_mutators_stack_class->obj(), "pushOpacity", "(F)V");
-    if (g_mutators_stack_push_opacity_method == nullptr) {
-        FML_LOG(ERROR)
-                << "Could not locate FlutterMutatorsStack.pushOpacity method";
-        return false;
-    }
+  g_mutators_stack_push_opacity_method =
+      env->GetMethodID(g_mutators_stack_class->obj(), "pushOpacity", "(F)V");
+  if (g_mutators_stack_push_opacity_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate FlutterMutatorsStack.pushOpacity method";
+    return false;
+  }
 
   g_java_weak_reference_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
       env, env->FindClass("java/lang/ref/WeakReference"));
@@ -1992,9 +1992,10 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         break;
       }
       case kOpacity: {
-          float opacity = (*iter)->GetAlphaFloat();
-          env->CallVoidMethod(mutatorsStack, g_mutators_stack_push_opacity_method, opacity);
-          break;
+        float opacity = (*iter)->GetAlphaFloat();
+        env->CallVoidMethod(mutatorsStack, g_mutators_stack_push_opacity_method,
+                            opacity);
+        break;
       }
       // TODO(cyanglaz): Implement other mutators.
       // https://github.com/flutter/flutter/issues/58426
