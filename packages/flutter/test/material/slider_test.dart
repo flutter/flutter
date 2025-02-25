@@ -5256,9 +5256,11 @@ void main() {
     await tester.pumpWidget(buildSlider(null));
     await tester.pumpAndSettle();
     expect(log.last, isNull);
+
     await tester.pumpWidget(buildSlider(0.2));
     await tester.pumpAndSettle();
     expect(log.last, const Offset(174.4, 300.0));
+
     await tester.pumpWidget(buildSlider(0.5));
     await tester.pumpAndSettle();
     expect(log.last, const Offset(400.0, 300.0));
