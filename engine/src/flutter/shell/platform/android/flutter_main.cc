@@ -259,7 +259,6 @@ bool FlutterMain::IsDeviceEmulator(std::string_view product_model) {
 bool FlutterMain::IsKnownBadSOC(std::string_view hardware) {
   // TODO(jonahwilliams): if the list gets too long (> 16), convert
   // to a hash map first.
-  FML_LOG(ERROR) << hardware;
   for (const auto& board : kBLC) {
     if (strcmp(board, hardware.data()) == 0) {
       return true;
@@ -308,11 +307,6 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     __system_property_get("ro.product.model", product_model);
     if (IsDeviceEmulator(product_model)) {
       // Avoid using Vulkan on known emulators.
-      return kVulkanUnsupportedFallback;
-    }
-
-    if (__system_property_find("ro.vendor.mediatek.platform") != nullptr) {
-      // Probably MediaTek. Avoid Vulkan.
       return kVulkanUnsupportedFallback;
     }
 
