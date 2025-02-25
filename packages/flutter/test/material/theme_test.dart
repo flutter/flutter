@@ -13,7 +13,7 @@ void main() {
   const TextTheme defaultGeometryThemeM3 = Typography.englishLike2021;
 
   test('ThemeDataTween control test', () {
-    final ThemeData light = ThemeData.light();
+    final ThemeData light = ThemeData();
     final ThemeData dark = ThemeData.dark();
     final ThemeDataTween tween = ThemeDataTween(begin: light, end: dark);
     expect(tween.lerp(0.25), equals(ThemeData.lerp(light, dark, 0.25)));
@@ -136,7 +136,7 @@ void main() {
   });
 
   testWidgets('ThemeData.localize memoizes the result', (WidgetTester tester) async {
-    final ThemeData light = ThemeData.light();
+    final ThemeData light = ThemeData();
     final ThemeData dark = ThemeData.dark();
 
     // Same input, same output.
@@ -649,7 +649,7 @@ void main() {
       await testTheme(tester, ThemeData.dark());
       expect(CupertinoTheme.brightnessOf(context!), Brightness.dark);
 
-      await testTheme(tester, ThemeData.light());
+      await testTheme(tester, ThemeData());
       expect(CupertinoTheme.brightnessOf(context!), Brightness.light);
 
       // Overridable by cupertinoOverrideTheme.

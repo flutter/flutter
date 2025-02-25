@@ -313,7 +313,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             elevation: lightElevation,
             backgroundColor: lightBackgroundColor,

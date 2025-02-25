@@ -509,7 +509,7 @@ List<Widget> buildVideoPreviewItems(BuildContext context) {
 }
 
 ThemeData buildTheme(BuildContext context) {
-  final TextTheme lightTextTheme = ThemeData.light().textTheme;
+  final TextTheme lightTextTheme = ThemeData().textTheme;
   return ThemeData(
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: AppBarTheme(

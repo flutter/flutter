@@ -6189,7 +6189,7 @@ void main() {
     // TabBarTheme splashFactory and overlayColor
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData(
           tabBarTheme: TabBarThemeData(splashFactory: splashFactory, overlayColor: overlayColor),
         ),
         home: DefaultTabController(

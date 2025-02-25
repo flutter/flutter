@@ -14,7 +14,7 @@ void main() {
     expect(dark, equals(dark.copyWith()));
     expect(dark.hashCode, equals(dark.copyWith().hashCode));
 
-    final ThemeData light = ThemeData.light();
+    final ThemeData light = ThemeData();
     final ThemeData dawn = ThemeData.lerp(dark, light, 0.25);
 
     expect(dawn.brightness, Brightness.dark);
@@ -108,7 +108,7 @@ void main() {
   });
 
   test('light, dark and fallback constructors support useMaterial3', () {
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData();
     expect(lightTheme.useMaterial3, true);
     expect(lightTheme.typography, Typography.material2021(colorScheme: lightTheme.colorScheme));
 
@@ -116,7 +116,7 @@ void main() {
     expect(darkTheme.useMaterial3, true);
     expect(darkTheme.typography, Typography.material2021(colorScheme: darkTheme.colorScheme));
 
-    final ThemeData fallbackTheme = ThemeData.light();
+    final ThemeData fallbackTheme = ThemeData();
     expect(fallbackTheme.useMaterial3, true);
     expect(
       fallbackTheme.typography,
@@ -1005,13 +1005,11 @@ void main() {
       // GENERAL CONFIGURATION
       adaptationMap: const <Type, Adaptation<Object>>{SwitchThemeData: SwitchThemeAdaptation()},
       applyElevationOverlayColor: true,
-      cupertinoOverrideTheme: ThemeData.light().cupertinoOverrideTheme,
+      cupertinoOverrideTheme: ThemeData().cupertinoOverrideTheme,
       extensions: const <Object, ThemeExtension<dynamic>>{
         MyThemeExtensionB: MyThemeExtensionB(textStyle: TextStyle()),
       },
-      inputDecorationTheme: ThemeData.light().inputDecorationTheme.copyWith(
-        border: InputBorder.none,
-      ),
+      inputDecorationTheme: ThemeData().inputDecorationTheme.copyWith(border: InputBorder.none),
       materialTapTargetSize: MaterialTapTargetSize.padded,
       pageTransitionsTheme: const PageTransitionsTheme(),
       platform: TargetPlatform.android,
@@ -1038,10 +1036,10 @@ void main() {
       splashColor: Colors.white,
       unselectedWidgetColor: Colors.white,
       // TYPOGRAPHY & ICONOGRAPHY
-      iconTheme: ThemeData.light().iconTheme,
-      primaryIconTheme: ThemeData.light().iconTheme,
-      primaryTextTheme: ThemeData.light().textTheme,
-      textTheme: ThemeData.light().textTheme,
+      iconTheme: ThemeData().iconTheme,
+      primaryIconTheme: ThemeData().iconTheme,
+      primaryTextTheme: ThemeData().textTheme,
+      textTheme: ThemeData().textTheme,
       typography: Typography.material2018(platform: TargetPlatform.iOS),
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
@@ -1438,7 +1436,7 @@ void main() {
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
-    ThemeData.light().debugFillProperties(properties);
+    ThemeData().debugFillProperties(properties);
     final List<String> propertyNameList =
         properties.properties
             .map((final DiagnosticsNode node) => node.name)

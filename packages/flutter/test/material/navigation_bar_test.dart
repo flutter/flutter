@@ -901,7 +901,6 @@ void main() {
 
     Widget buildNavigationBar() {
       return MaterialApp(
-        theme: ThemeData.light(),
         home: Scaffold(
           bottomNavigationBar: Center(
             child: NavigationBar(

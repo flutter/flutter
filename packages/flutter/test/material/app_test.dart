@@ -798,7 +798,7 @@ void main() {
   });
 
   testWidgets('MaterialApp animates theme changes', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData();
     final ThemeData darkTheme = ThemeData.dark();
     await tester.pumpWidget(
       MaterialApp(
@@ -820,7 +820,6 @@ void main() {
     // Change to dark theme
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
         themeMode: ThemeMode.dark,
         home: Builder(
@@ -842,7 +841,7 @@ void main() {
   });
 
   testWidgets('MaterialApp theme animation can be turned off', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData();
     final ThemeData darkTheme = ThemeData.dark();
     int scaffoldRebuilds = 0;
 
@@ -872,7 +871,6 @@ void main() {
     // Change to dark theme
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
         themeMode: ThemeMode.dark,
         themeAnimationDuration: Duration.zero,
@@ -1578,7 +1576,7 @@ void main() {
   );
 
   testWidgets('Override theme animation using AnimationStyle', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData();
     final ThemeData darkTheme = ThemeData.dark();
 
     Widget buildWidget({ThemeMode themeMode = ThemeMode.light, AnimationStyle? animationStyle}) {

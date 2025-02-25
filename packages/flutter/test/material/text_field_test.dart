@@ -6778,7 +6778,7 @@ void main() {
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
 
-    final ThemeData theme = ThemeData.light();
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -6937,7 +6937,7 @@ void main() {
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
 
-    final ThemeData theme = ThemeData.light();
+    final ThemeData theme = ThemeData();
 
     Widget buildFrame(bool enabled) {
       return MaterialApp(

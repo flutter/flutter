@@ -258,7 +258,6 @@ void main() {
         data: const MediaQueryData(padding: EdgeInsets.all(20.0)),
         child: MaterialApp(
           useInheritedMediaQuery: true,
-          theme: ThemeData.light(),
           home: Scaffold(
             key: scaffoldKey,
             drawer: NavigationDrawer(

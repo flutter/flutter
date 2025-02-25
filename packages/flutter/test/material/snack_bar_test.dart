@@ -470,7 +470,7 @@ void main() {
   });
 
   testWidgets('Material3 - Light theme SnackBar has dark background', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: lightTheme,

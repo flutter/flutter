@@ -1187,9 +1187,7 @@ void main() {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.light().copyWith(
-            inputDecorationTheme: const InputDecorationTheme(border: border),
-          ),
+          theme: ThemeData(inputDecorationTheme: const InputDecorationTheme(border: border)),
           home: Material(
             child: Builder(
               builder: (BuildContext context) {
@@ -1487,9 +1485,7 @@ void main() {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.light().copyWith(
-            inputDecorationTheme: const InputDecorationTheme(border: border),
-          ),
+          theme: ThemeData(inputDecorationTheme: const InputDecorationTheme(border: border)),
           home: Material(
             child: Builder(
               builder: (BuildContext context) {

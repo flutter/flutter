@@ -1261,7 +1261,7 @@ void main() {
 
     Widget buildScaffold(GlobalKey scaffoldKey) {
       return MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData(
           bottomSheetTheme: BottomSheetThemeData(
             dragHandleColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.hovered)) {
@@ -1308,9 +1308,7 @@ void main() {
   ) async {
     Widget buildScaffold(GlobalKey scaffoldKey, {Size? dragHandleSize}) {
       return MaterialApp(
-        theme: ThemeData.light().copyWith(
-          bottomSheetTheme: BottomSheetThemeData(dragHandleSize: dragHandleSize),
-        ),
+        theme: ThemeData(bottomSheetTheme: BottomSheetThemeData(dragHandleSize: dragHandleSize)),
         home: Scaffold(key: scaffoldKey),
       );
     }
@@ -1343,9 +1341,7 @@ void main() {
   ) async {
     Widget buildScaffold(GlobalKey scaffoldKey, {Size? dragHandleSize}) {
       return MaterialApp(
-        theme: ThemeData.light().copyWith(
-          bottomSheetTheme: BottomSheetThemeData(dragHandleSize: dragHandleSize),
-        ),
+        theme: ThemeData(bottomSheetTheme: BottomSheetThemeData(dragHandleSize: dragHandleSize)),
         home: Scaffold(key: scaffoldKey),
       );
     }

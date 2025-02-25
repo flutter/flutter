@@ -351,7 +351,7 @@ void main() {
 
     Widget buildFrame({Color? activeColor, Color? fillColor}) {
       return MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
             fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
               return states.contains(MaterialState.selected) ? fillColor : null;

@@ -1417,7 +1417,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Theme(
-            data: ThemeData.light(),
+            data: ThemeData(),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Material(child: Slider(value: 100.0, max: 200.0, onChanged: (double v) {})),

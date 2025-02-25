@@ -20,9 +20,8 @@ void main() {
     const Color shadowColor = Colors.black;
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.light(),
-        home: const Scaffold(
+      const MaterialApp(
+        home: Scaffold(
           bottomNavigationBar: BottomAppBar(elevation: elevation, shadowColor: shadowColor),
         ),
       ),
@@ -40,9 +39,8 @@ void main() {
     const Color bottomAppBarColor = Colors.black45;
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.light(),
-        home: const Scaffold(
+      const MaterialApp(
+        home: Scaffold(
           bottomNavigationBar: BottomAppBar(
             color: bottomAppBarColor,
             // Avoid getting a surface tint color, to keep the color check below simple
@@ -253,9 +251,7 @@ void main() {
   testWidgets('Material3 - Color overrides theme color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(
-          bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00)),
-        ),
+        theme: ThemeData(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
         home: Builder(
           builder: (BuildContext context) {
             return const Scaffold(

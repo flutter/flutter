@@ -983,7 +983,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/pull/77732
     Widget buildFrame({bool isActive = true, Brightness? brightness}) {
       return MaterialApp(
-        theme: brightness == Brightness.dark ? ThemeData.dark() : ThemeData.light(),
+        theme: brightness == Brightness.dark ? ThemeData.dark() : ThemeData(),
         home: Scaffold(
           body: Center(
             child: Stepper(
@@ -1003,7 +1003,7 @@ void main() {
     }
 
     // Light theme
-    final ColorScheme light = ThemeData.light().colorScheme;
+    final ColorScheme light = ThemeData().colorScheme;
     await tester.pumpWidget(buildFrame(brightness: Brightness.light));
     expect(circleFillColor(), light.primary);
     await tester.pumpWidget(buildFrame(isActive: false, brightness: Brightness.light));

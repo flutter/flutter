@@ -18,7 +18,7 @@ void main() {
   testWidgets(
     'Material3 - Default values are used when no NavigationRail or NavigationRailThemeData properties are specified',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData.light();
+      final ThemeData theme = ThemeData();
       // Material 3 defaults
       await tester.pumpWidget(
         MaterialApp(
@@ -58,7 +58,7 @@ void main() {
       // This test can be removed when `useMaterial3` is deprecated.
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.light().copyWith(useMaterial3: false),
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(body: NavigationRail(selectedIndex: 0, destinations: _destinations())),
         ),
       );

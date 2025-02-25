@@ -507,7 +507,7 @@ void main() {
 
     Widget buildFrame({Color? activeColor, Color? thumbColor}) {
       return MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData(
           switchTheme: SwitchThemeData(
             thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
               return states.contains(MaterialState.selected) ? thumbColor : null;
