@@ -291,7 +291,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   Size? _viewSize;
   ui.Offset? _menuPosition;
 
-  @nonVirtual
   AnimationStatus get animationStatus {
     return isOpen ? _animationStatus ?? AnimationStatus.completed : AnimationStatus.dismissed;
   }
@@ -301,9 +300,18 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     assert(mounted);
     if (_animationStatus != status) {
       _animationStatus = status;
-      setState(() {
-        // Mark dirty to notify _MenuControllerScope dependents.
-      });
+      // TODO(davidhicks980): Create a helper function to safely call setState
+      if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+        setState(() {
+          // Mark dirty now, but only if not in a build.
+        });
+      } else {
+        SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+          setState(() {
+            // Mark dirty
+          });
+        });
+      }
     }
   }
 
