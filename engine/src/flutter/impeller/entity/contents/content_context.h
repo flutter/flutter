@@ -427,6 +427,25 @@ class ContentContext {
     return GetPipeline(conical_gradient_ssbo_fill_pipelines_, opts);
   }
 
+  PipelineRef GetConicalGradientSSBOFillRadialPipeline(
+      ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
+    return GetPipeline(conical_gradient_ssbo_fill_radial_pipelines_, opts);
+  }
+
+  PipelineRef GetConicalGradientSSBOFillStripPipeline(
+      ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
+    return GetPipeline(conical_gradient_ssbo_fill_strip_pipelines_, opts);
+  }
+
+  PipelineRef GetConicalGradientSSBOFillStripAndRadialPipeline(
+      ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
+    return GetPipeline(conical_gradient_ssbo_fill_strip_and_radial_pipelines_,
+                       opts);
+  }
+
   PipelineRef GetSweepGradientSSBOFillPipeline(
       ContentContextOptions opts) const {
     FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
@@ -1005,6 +1024,12 @@ class ContentContext {
       radial_gradient_ssbo_fill_pipelines_;
   mutable Variants<ConicalGradientSSBOFillPipeline>
       conical_gradient_ssbo_fill_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline>
+      conical_gradient_ssbo_fill_radial_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline>
+      conical_gradient_ssbo_fill_strip_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline>
+      conical_gradient_ssbo_fill_strip_and_radial_pipelines_;
   mutable Variants<SweepGradientSSBOFillPipeline>
       sweep_gradient_ssbo_fill_pipelines_;
   mutable Variants<RRectBlurPipeline> rrect_blur_pipelines_;

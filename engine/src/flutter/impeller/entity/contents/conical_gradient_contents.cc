@@ -14,6 +14,35 @@
 
 namespace impeller {
 
+namespace {
+enum ConicalKind {
+  kConical,
+  kRadial,
+  kStrip,
+  kStripAndRadial,
+};
+
+ConicalKind GetConicalKind(Point center,
+                           Scalar radius,
+                           std::optional<Point> focus,
+                           Scalar focus_radius) {
+  ConicalKind kind = ConicalKind::kConical;
+  if (!focus.has_value() ||
+      center.GetDistance(focus.value()) < kEhCloseEnough) {
+    kind = ConicalKind::kRadial;
+  }
+  if (focus.has_value() && std::fabsf(radius - focus_radius) < kEhCloseEnough) {
+    if (kind == ConicalKind::kRadial) {
+      kind = ConicalKind::kStripAndRadial;
+    } else {
+      kind = ConicalKind::kStrip;
+    }
+  }
+  return kind;
+}
+
+}  // namespace
+
 ConicalGradientContents::ConicalGradientContents() = default;
 
 ConicalGradientContents::~ConicalGradientContents() = default;
@@ -79,9 +108,20 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.matrix = GetInverseEffectTransform();
 
+  ConicalKind kind = GetConicalKind(center_, radius_, focus_, focus_radius_);
   PipelineBuilderCallback pipeline_callback =
-      [&renderer](ContentContextOptions options) {
-        return renderer.GetConicalGradientSSBOFillPipeline(options);
+      [&renderer, kind](ContentContextOptions options) {
+        switch (kind) {
+          case ConicalKind::kRadial:
+            return renderer.GetConicalGradientSSBOFillRadialPipeline(options);
+          case ConicalKind::kStrip:
+            return renderer.GetConicalGradientSSBOFillStripPipeline(options);
+          case ConicalKind::kStripAndRadial:
+            return renderer.GetConicalGradientSSBOFillStripAndRadialPipeline(
+                options);
+          case ConicalKind::kConical:
+            return renderer.GetConicalGradientSSBOFillPipeline(options);
+        }
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
