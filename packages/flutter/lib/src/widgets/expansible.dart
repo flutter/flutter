@@ -327,9 +327,13 @@ class ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
     return AnimatedBuilder(
       animation: _animationController.view,
       builder: (BuildContext context, Widget? child) {
-        final Widget header = GestureDetector(
-          onTap: _toggleExpansion,
-          child: widget.headerBuilder(context, _isExpanded),
+        final Widget header = Semantics(
+          button: true,
+          child: GestureDetector(
+            onTap: _toggleExpansion,
+            excludeFromSemantics: true,
+            child: widget.headerBuilder(context, _isExpanded),
+          ),
         );
         final Widget body = ClipRect(child: Align(heightFactor: _heightFactor.value, child: child));
         if (widget.expansibleBuilder != null) {
