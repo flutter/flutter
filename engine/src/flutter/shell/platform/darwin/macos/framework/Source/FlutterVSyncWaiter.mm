@@ -61,51 +61,47 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
 
 // Called from display link thread.
 - (void)onDisplayLink:(CFTimeInterval)timestamp targetTimestamp:(CFTimeInterval)targetTimestamp {
-  @synchronized(self) {
-    if (_lastTargetTimestamp == 0) {
-      // Initial vsync - timestamp will be used to determine vsync phase.
-      _lastTargetTimestamp = targetTimestamp;
-      _displayLink.paused = YES;
-    } else {
-      _lastTargetTimestamp = targetTimestamp;
-      [FlutterRunLoop.mainRunLoop performBlock:^{
-        // CVDisplayLink callback is called one and a half frame before the target
-        // timestamp. That can cause frame-pacing issues if the frame is rendered too early,
-        // it may also trigger frame start before events are processed.
-        CFTimeInterval minStart = targetTimestamp - _displayLink.nominalOutputRefreshPeriod;
-        CFTimeInterval current = CACurrentMediaTime();
-        CFTimeInterval remaining = std::max(minStart - current - kTimerLatencyCompensation, 0.0);
+  if (_lastTargetTimestamp == 0) {
+    // Initial vsync - timestamp will be used to determine vsync phase.
+    _lastTargetTimestamp = targetTimestamp;
+    _displayLink.paused = YES;
+  } else {
+    _lastTargetTimestamp = targetTimestamp;
 
-        TRACE_VSYNC("DisplayLinkCallback-Original", _pendingBaton.value_or(0));
+    // CVDisplayLink callback is called one and a half frame before the target
+    // timestamp. That can cause frame-pacing issues if the frame is rendered too early,
+    // it may also trigger frame start before events are processed.
+    CFTimeInterval minStart = targetTimestamp - _displayLink.nominalOutputRefreshPeriod;
+    CFTimeInterval current = CACurrentMediaTime();
+    CFTimeInterval remaining = std::max(minStart - current - kTimerLatencyCompensation, 0.0);
 
-        [FlutterRunLoop.mainRunLoop
-            performBlock:^{
-              if (!_pendingBaton.has_value()) {
-                TRACE_VSYNC("DisplayLinkPaused", size_t(0));
-                _displayLink.paused = YES;
-                return;
-              }
-              TRACE_VSYNC("DisplayLinkCallback-Delayed", _pendingBaton.value_or(0));
-              _block(minStart, targetTimestamp, *_pendingBaton);
-              _pendingBaton = std::nullopt;
-            }
-              afterDelay:remaining];
-      }];
-    }
+    TRACE_VSYNC("DisplayLinkCallback-Original", _pendingBaton.value_or(0));
+
+    [FlutterRunLoop.mainRunLoop
+        performBlock:^{
+          if (!_pendingBaton.has_value()) {
+            TRACE_VSYNC("DisplayLinkPaused", size_t(0));
+            _displayLink.paused = YES;
+            return;
+          }
+          TRACE_VSYNC("DisplayLinkCallback-Delayed", _pendingBaton.value_or(0));
+          _block(minStart, targetTimestamp, *_pendingBaton);
+          _pendingBaton = std::nullopt;
+        }
+          afterDelay:remaining];
   }
 }
 
 // Called from UI thread.
 - (void)waitForVSync:(uintptr_t)baton {
+  FML_DCHECK([NSThread isMainThread]);
   // CVDisplayLink start -> callback latency is two frames, there is
   // no need to delay the warm-up frame.
   if (_warmUpFrame) {
     _warmUpFrame = NO;
     TRACE_VSYNC("WarmUpFrame", baton);
-    [[NSRunLoop currentRunLoop] performBlock:^{
-      CFTimeInterval now = CACurrentMediaTime();
-      _block(now, now, baton);
-    }];
+    CFTimeInterval now = CACurrentMediaTime();
+    _block(now, now, baton);
     return;
   }
 
