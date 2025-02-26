@@ -107,6 +107,7 @@ typedef CanvasPath Path;
   V(PlatformConfigurationNativeApi::GetRootIsolateToken)           \
   V(PlatformConfigurationNativeApi::RegisterBackgroundIsolate)     \
   V(PlatformConfigurationNativeApi::SendPortPlatformMessage)       \
+  V(PlatformConfigurationNativeApi::RequestViewFocusChange)        \
   V(PlatformConfigurationNativeApi::SendChannelUpdate)             \
   V(PlatformConfigurationNativeApi::GetScaledFontSize)             \
   V(PlatformIsolateNativeApi::IsRunningOnPlatformThread)           \
@@ -207,6 +208,7 @@ typedef CanvasPath Path;
   V(ImageFilter, initComposeFilter)              \
   V(ImageFilter, initShader)                     \
   V(ImageFilter, initMatrix)                     \
+  V(ImageFilter, equals)                         \
   V(ImageShader, dispose)                        \
   V(ImageShader, initWithImage)                  \
   V(ImmutableBuffer, dispose)                    \
