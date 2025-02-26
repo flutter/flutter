@@ -229,7 +229,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   /// The parameter `move` is the move event of the primary pointer that started
   /// the tap sequence.
   @protected
-  void handleTapMove({required PointerMoveEvent move});
+  void handleTapMove({required PointerMoveEvent move}) {}
 
   /// A pointer that previously triggered [handleTapDown] will not end up
   /// causing a tap.
