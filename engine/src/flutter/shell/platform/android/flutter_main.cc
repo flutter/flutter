@@ -45,8 +45,6 @@ namespace {
 
 fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 
-static const constexpr char* kAndroidHuawei = "android-huawei";
-
 /// These are SoCs that crash when using AHB imports.
 static constexpr const char* kBLC[] = {
     // Most Exynos Series SoC
@@ -312,10 +310,8 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
       return kVulkanUnsupportedFallback;
     }
 
-    __system_property_get("ro.com.google.clientidbase", product_model);
-    if (strcmp(product_model, kAndroidHuawei)) {
-      // Avoid using Vulkan on Huawei as AHB imports do not
-      // consistently work.
+    if (__system_property_find("ro.vendor.mediatek.platform") != nullptr) {
+      // Probably MediaTek. Avoid Vulkan.
       return kVulkanUnsupportedFallback;
     }
 
