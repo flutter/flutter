@@ -164,8 +164,6 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
       .se_n = n,
       .se_max_theta = asin(sin_thetaJ),
 
-      .ratio = ratio,
-
       .circle_start = pointJ,
       .circle_center = circle_center,
       .circle_max_angle = circle_max_angle,
@@ -316,25 +314,6 @@ bool RoundSuperellipseParam::Contains(const Point& point) const {
   return CornerContains(top_right, point) &&
          CornerContains(bottom_right, point) &&
          CornerContains(bottom_left, point) && CornerContains(top_left, point);
-}
-
-void RoundSuperellipseParam::SuperellipseBezierArc(
-    Point* output,
-    const RoundSuperellipseParam::Octant& param) {
-  Point start = {param.se_center.x, param.edge_mid.y};
-  const Point& end = param.circle_start;
-  constexpr Point start_tangent = {1, 0};
-  Point circle_start_vector = param.circle_start - param.circle_center;
-  Point end_tangent =
-      Point{-circle_start_vector.y, circle_start_vector.x}.Normalize();
-
-  Scalar start_factor = LerpPrecomputedVariable(0, param.ratio);
-  Scalar end_factor = LerpPrecomputedVariable(1, param.ratio);
-
-  output[0] = start;
-  output[1] = start + start_tangent * start_factor * param.se_a;
-  output[2] = end + end_tangent * end_factor * param.se_a;
-  output[3] = end;
 }
 
 }  // namespace impeller
