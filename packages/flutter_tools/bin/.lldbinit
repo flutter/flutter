@@ -1,0 +1,1 @@
+command script import --relative-to-command-file rx_helper.py
