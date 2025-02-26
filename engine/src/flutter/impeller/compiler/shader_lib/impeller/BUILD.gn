@@ -13,6 +13,7 @@ copy("impeller") {
     "external_texture_oes.glsl",
     "gaussian.glsl",
     "gradient.glsl",
+    "math.glsl",
     "path.glsl",
     "texture.glsl",
     "tile_mode.glsl",
