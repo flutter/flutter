@@ -19,18 +19,21 @@ void main() {
     final Finder nextMonthButton = find.byIcon(Icons.chevron_right);
 
     Text lastDayText = getLastDayText(tester);
+    expect(find.text('February 2025'), findsOneWidget);
     expect(lastDayText.data, equals('21'));
 
     await tester.tap(nextMonthButton);
     await tester.pumpAndSettle();
 
     lastDayText = getLastDayText(tester);
+    expect(find.text('March 2025'), findsOneWidget);
     expect(lastDayText.data, equals('28'));
 
     await tester.tap(nextMonthButton);
     await tester.pumpAndSettle();
 
     lastDayText = getLastDayText(tester);
+    expect(find.text('April 2025'), findsOneWidget);
     expect(lastDayText.data, equals('21'));
 
     await tester.tap(nextMonthButton);
