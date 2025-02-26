@@ -50,6 +50,11 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
   [registrar addMethodCallDelegate:[self instance] channel:channel];
 }
 
+/// Handle method calls from Dart code:
+/// - allTestsFinished: Populate NSString* testResults property with a string summary of test run.
+/// - captureScreenshot: Capture a screenshot. Populate capturedScreenshotsByName["name"] with image.
+/// - convertSurfaceToImage: Android-only. Not implemented on iOS.
+/// - revertFlutterImage: Android-only. Not implemented on iOS.
 - (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
   if ([call.method isEqualToString:kMethodTestFinished]) {
     self.testResults = call.arguments[@"results"];
@@ -73,18 +78,23 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 }
 
 - (UIImage *)capturePngScreenshot {
-  UIWindow *window = [UIApplication.sharedApplication.windows
-                      filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"keyWindow = YES"]].firstObject;
-  CGRect screenshotBounds = window.bounds;
-  UIImage *image;
+  // Get all windows in the app
+  NSArray<UIWindow *> *windows = [UIApplication sharedApplication].windows;
 
-  UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithBounds:screenshotBounds];
+  // Find the overall bounding rect for all windows
+  CGRect screenBounds = [UIScreen mainScreen].bounds;
 
-  image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
-    [window drawViewHierarchyInRect:screenshotBounds afterScreenUpdates:YES];
-  }];
+  UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithBounds:screenBounds];
+  UIImage *screenshot =
+      [renderer imageWithActions:^(UIGraphicsImageRendererContext *_Nonnull rendererContext) {
+        for (UIWindow *window in windows) {
+          if (!window.hidden) {  // Render only visible windows
+            [window drawViewHierarchyInRect:window.frame afterScreenUpdates:YES];
+          }
+        }
+      }];
 
-  return image;
+  return screenshot;
 }
 
 @end
