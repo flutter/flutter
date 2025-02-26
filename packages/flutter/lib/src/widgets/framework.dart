@@ -822,8 +822,6 @@ enum _StateLifecycle {
 /// The signature of [State.setState] functions.
 typedef StateSetter = void Function(VoidCallback fn);
 
-const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
-
 /// The logic and internal state for a [StatefulWidget].
 ///
 /// State is information that (1) can be read synchronously when the widget is
@@ -1009,13 +1007,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @mustCallSuper
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
-        className: '$State',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'State', this));
   }
 
   /// Called whenever the widget configuration changes.
@@ -1345,9 +1337,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
       _debugLifecycleState = _StateLifecycle.defunct;
       return true;
     }());
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
   }
 
   /// Describes the part of the user interface represented by this widget.
@@ -3513,13 +3503,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// Typically called by an override of [Widget.createElement].
   Element(Widget widget) : _widget = widget {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
-        className: '$Element',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'Element', this));
   }
 
   Element? _parent;
@@ -4764,9 +4748,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(owner != null);
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     // Use the private property to avoid a CastError during hot reload.
     final Key? key = _widget?.key;
     if (key is GlobalKey) {
