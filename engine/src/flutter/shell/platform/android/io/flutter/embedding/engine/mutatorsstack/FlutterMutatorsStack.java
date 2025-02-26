@@ -97,7 +97,7 @@ public class FlutterMutatorsStack {
     /**
      * Initialize an opacity mutator.
      *
-     * @param opacity the opacity value to apply.
+     * @param opacity the opacity value to apply. The value must be between 0 and 1, inclusive.
      */
     public FlutterMutator(float opacity) {
       this.type = FlutterMutatorType.OPACITY;
@@ -248,6 +248,10 @@ public class FlutterMutatorsStack {
     return finalMatrix;
   }
 
+  /**
+   * Returns the final opacity. The value must be between 0 and 1, inclusive, or behavior will be
+   * undefined.
+   */
   public float getFinalOpacity() {
     return finalOpacity;
   }
