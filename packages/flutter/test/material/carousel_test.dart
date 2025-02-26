@@ -1413,7 +1413,7 @@ void main() {
       expect(buttonPressed, isTrue);
     },
   );
-  
+
   testWidgets('CarouselView does not crash if itemExtent is zero', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1625,6 +1625,7 @@ void main() {
         expect(itemRect.right, lessThanOrEqualTo(carouselRight));
       }
     });
+  });
 }
 
 Finder getItem(int index) {
