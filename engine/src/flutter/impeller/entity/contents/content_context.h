@@ -101,6 +101,21 @@ using FramebufferBlendPipelineHandle =
                          FramebufferBlendFragmentShader>;
 
 // clang-format off
+using BlendColorBurnPipeline = AdvancedBlendPipelineHandle;
+using BlendColorDodgePipeline = AdvancedBlendPipelineHandle;
+using BlendColorPipeline = AdvancedBlendPipelineHandle;
+using BlendDarkenPipeline = AdvancedBlendPipelineHandle;
+using BlendDifferencePipeline = AdvancedBlendPipelineHandle;
+using BlendExclusionPipeline = AdvancedBlendPipelineHandle;
+using BlendHardLightPipeline = AdvancedBlendPipelineHandle;
+using BlendHuePipeline = AdvancedBlendPipelineHandle;
+using BlendLightenPipeline = AdvancedBlendPipelineHandle;
+using BlendLuminosityPipeline = AdvancedBlendPipelineHandle;
+using BlendMultiplyPipeline = AdvancedBlendPipelineHandle;
+using BlendOverlayPipeline = AdvancedBlendPipelineHandle;
+using BlendSaturationPipeline = AdvancedBlendPipelineHandle;
+using BlendScreenPipeline = AdvancedBlendPipelineHandle;
+using BlendSoftLightPipeline = AdvancedBlendPipelineHandle;
 using BorderMaskBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, BorderMaskBlurFragmentShader>;
 using ClipPipeline = RenderPipelineHandle<ClipVertexShader, ClipFragmentShader>;
 using ColorMatrixColorFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, ColorMatrixColorFilterFragmentShader>;
@@ -114,6 +129,21 @@ using ConicalGradientUniformFillRadialPipeline = GradientPipelineHandle<ConicalG
 using ConicalGradientUniformFillStripPipeline = GradientPipelineHandle<ConicalGradientUniformFillStripFragmentShader>;
 using ConicalGradientUniformFillStripRadialPipeline = GradientPipelineHandle<ConicalGradientUniformFillStripRadialFragmentShader>;
 using FastGradientPipeline = RenderPipelineHandle<FastGradientVertexShader, FastGradientFragmentShader>;
+using FramebufferBlendColorBurnPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendColorDodgePipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendColorPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendDarkenPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendDifferencePipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendExclusionPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendHardLightPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendHuePipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendLightenPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendLuminosityPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendMultiplyPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendOverlayPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendSaturationPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendScreenPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendSoftLightPipeline = FramebufferBlendPipelineHandle;
 using GaussianBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, GaussianFragmentShader>;
 using GlyphAtlasPipeline = RenderPipelineHandle<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
 using LinearGradientFillPipeline = GradientPipelineHandle<LinearGradientFillFragmentShader>;
@@ -138,40 +168,6 @@ using TiledTexturePipeline = RenderPipelineHandle<TextureUvFillVertexShader, Til
 using VerticesUberShader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUberFragmentShader>;
 using YUVToRGBFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, YuvToRgbFilterFragmentShader>;
 // clang-format on
-
-// Advanced blends
-using BlendColorBurnPipeline = AdvancedBlendPipelineHandle;
-using BlendColorDodgePipeline = AdvancedBlendPipelineHandle;
-using BlendColorPipeline = AdvancedBlendPipelineHandle;
-using BlendDarkenPipeline = AdvancedBlendPipelineHandle;
-using BlendDifferencePipeline = AdvancedBlendPipelineHandle;
-using BlendExclusionPipeline = AdvancedBlendPipelineHandle;
-using BlendHardLightPipeline = AdvancedBlendPipelineHandle;
-using BlendHuePipeline = AdvancedBlendPipelineHandle;
-using BlendLightenPipeline = AdvancedBlendPipelineHandle;
-using BlendLuminosityPipeline = AdvancedBlendPipelineHandle;
-using BlendMultiplyPipeline = AdvancedBlendPipelineHandle;
-using BlendOverlayPipeline = AdvancedBlendPipelineHandle;
-using BlendSaturationPipeline = AdvancedBlendPipelineHandle;
-using BlendScreenPipeline = AdvancedBlendPipelineHandle;
-using BlendSoftLightPipeline = AdvancedBlendPipelineHandle;
-
-// Framebuffer Advanced Blends
-using FramebufferBlendColorBurnPipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendColorDodgePipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendColorPipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendDarkenPipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendDifferencePipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendExclusionPipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendHardLightPipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendHuePipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendLightenPipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendLuminosityPipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendMultiplyPipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendOverlayPipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendSaturationPipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendScreenPipeline = FramebufferBlendPipelineHandle;
-using FramebufferBlendSoftLightPipeline = FramebufferBlendPipelineHandle;
 
 #ifdef IMPELLER_ENABLE_OPENGLES
 using TiledTextureExternalPipeline =
