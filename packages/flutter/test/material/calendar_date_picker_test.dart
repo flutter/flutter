@@ -1493,4 +1493,121 @@ void main() {
       expect(selectedYear, equals(DateTime(2018, DateTime.june)));
     });
   });
+
+  group('Calendar Delegate', () {
+    testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: CalendarDatePicker(
+              initialDate: DateTime(2025, DateTime.february, 26),
+              firstDate: DateTime(2025, DateTime.february),
+              lastDate: DateTime(2025, DateTime.may),
+              onDateChanged: (DateTime value) {},
+            ),
+          ),
+        ),
+      );
+
+      final CalendarDatePicker calendarPicker = tester.widget(find.byType(CalendarDatePicker));
+      expect(calendarPicker.calendarDelegate, isA<GregorianCalendarDelegate>());
+
+      final Finder datePickerModeToggleButton = find.descendant(
+        of: find.byType(InkWell),
+        matching: find.text('February 2025'),
+      );
+      await tester.tap(datePickerModeToggleButton);
+      await tester.pumpAndSettle();
+
+      final YearPicker yearPicker = tester.widget(find.byType(YearPicker));
+      expect(yearPicker.calendarDelegate, isA<GregorianCalendarDelegate>());
+    });
+
+    testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: CalendarDatePicker(
+              initialDate: DateTime(2025, DateTime.february, 26),
+              firstDate: DateTime(2025, DateTime.february),
+              lastDate: DateTime(2025, DateTime.may),
+              onDateChanged: (DateTime value) {},
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final CalendarDatePicker calendarPicker = tester.widget(find.byType(CalendarDatePicker));
+      expect(calendarPicker.calendarDelegate, isA<TestCalendarDelegate>());
+
+      final Finder datePickerModeToggleButton = find.descendant(
+        of: find.byType(InkWell),
+        matching: find.text('February 2025'),
+      );
+      await tester.tap(datePickerModeToggleButton);
+      await tester.pumpAndSettle();
+
+      final YearPicker yearPicker = tester.widget(find.byType(YearPicker));
+      expect(yearPicker.calendarDelegate, isA<TestCalendarDelegate>());
+    });
+
+    testWidgets('Displays calendar based on the calendar delegate', (WidgetTester tester) async {
+      Text getLastDayText(WidgetTester tester) {
+        final Finder dayFinder = find.descendant(of: find.byType(Ink), matching: find.byType(Text));
+        return tester.widget(dayFinder.last);
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: CalendarDatePicker(
+              initialDate: DateTime(2025, DateTime.february, 26),
+              firstDate: DateTime(2025, DateTime.february),
+              lastDate: DateTime(2025, DateTime.may),
+              onDateChanged: (DateTime value) {},
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final Finder nextMonthButton = find.byIcon(Icons.chevron_right);
+
+      Text lastDayText = getLastDayText(tester);
+      expect(find.text('February 2025'), findsOneWidget);
+      expect(lastDayText.data, equals('21'));
+
+      await tester.tap(nextMonthButton);
+      await tester.pumpAndSettle();
+
+      lastDayText = getLastDayText(tester);
+      expect(find.text('March 2025'), findsOneWidget);
+      expect(lastDayText.data, equals('28'));
+
+      await tester.tap(nextMonthButton);
+      await tester.pumpAndSettle();
+
+      lastDayText = getLastDayText(tester);
+      expect(find.text('April 2025'), findsOneWidget);
+      expect(lastDayText.data, equals('21'));
+    });
+  });
+}
+
+class TestCalendarDelegate extends GregorianCalendarDelegate {
+  const TestCalendarDelegate();
+
+  @override
+  int getDaysInMonth(int year, int month) {
+    return month.isEven ? 21 : 28;
+  }
+
+  @override
+  int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
+    return 1;
+  }
 }
