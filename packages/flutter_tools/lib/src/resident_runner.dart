@@ -1206,7 +1206,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<DartBuildResult> runDartBuild() async {
     globals.printTrace('runDartBuild()');
-    if (_dartBuildResult != null && _dartBuildResult!.isBuildUpToDate(globals.fs)) {
+    if (_dartBuildResult?.isBuildUpToDate(globals.fs) ?? false) {
       globals.printTrace('runDartBuild() - up-to-date already');
       return _dartBuildResult!;
     }
