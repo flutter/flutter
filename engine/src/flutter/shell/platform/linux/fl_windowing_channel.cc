@@ -100,11 +100,9 @@ static FlMethodResponse* create_regular(FlWindowingChannel* self,
     return FL_METHOD_RESPONSE(fl_method_error_response_new(
         kBadArgumentsError, "Missing/invalid size argument", nullptr));
   }
-  // NOLINTNEXTLINE(clang-analyzer-unix.Malloc)
   g_autofree FlWindowingSize* size = parse_size_value(size_value);
 
   FlValue* min_size_value = fl_value_lookup_string(args, kMinSizeKey);
-  // NOLINTNEXTLINE(clang-analyzer-unix.Malloc)
   g_autofree FlWindowingSize* min_size = nullptr;
   if (min_size_value != nullptr) {
     if (!is_valid_size_argument(min_size_value)) {
@@ -115,7 +113,6 @@ static FlMethodResponse* create_regular(FlWindowingChannel* self,
   }
 
   FlValue* max_size_value = fl_value_lookup_string(args, kMaxSizeKey);
-  // NOLINTNEXTLINE(clang-analyzer-unix.Malloc)
   g_autofree FlWindowingSize* max_size = nullptr;
   if (max_size_value != nullptr) {
     if (!is_valid_size_argument(max_size_value)) {
@@ -166,7 +163,6 @@ static FlMethodResponse* modify_regular(FlWindowingChannel* self,
   // NOTE(robert-ancell) - clang_tidy doesn't seem to recognise g_autofree here
   // and thinks this is leaking.
 
-  // NOLINTNEXTLINE(clang-analyzer-unix.Malloc)
   g_autofree FlWindowingSize* size = nullptr;
   FlValue* size_value = fl_value_lookup_string(args, kSizeKey);
   if (size_value != nullptr) {
