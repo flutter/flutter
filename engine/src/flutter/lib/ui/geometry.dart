@@ -1891,7 +1891,8 @@ class _RSuperellipseOctant {
     final Offset pointS = Offset(s, s);
     final Offset pointJ = Offset(xJ, yJ) + pointS;
     final Offset circleCenter = radius == 0 ? pointM : _findCircleCenter(pointJ, pointM, R);
-    final double circleMaxAngle = radius == 0 ? 0 : _angleTo(pointM - circleCenter, pointJ - circleCenter);
+    final double circleMaxAngle =
+        radius == 0 ? 0 : _angleTo(pointM - circleCenter, pointJ - circleCenter);
 
     return _RSuperellipseOctant._raw(
       offset: center,
@@ -1921,6 +1922,24 @@ class _RSuperellipseOctant {
     required this.circleMaxAngle,
   });
 
+  bool contains(Offset p) {
+    // Check whether the point is within the octant.
+    if (p.dx < 0 || p.dy < 0 || p.dy < p.dx) {
+      return true;
+    }
+    // Check if the point is within the stretch segment.
+    if (p.dx <= seCenter.dx) {
+      return p.dy <= edgeMid.dy;
+    }
+    // Check if the point is within the superellipsoid segment.
+    if (p.dx <= circleStart.dx) {
+      final Offset p_se = (p - seCenter) / seA;
+      return math.pow(p_se.dx, seN) + math.pow(p_se.dy, seN) <= 1;
+    }
+    final double circle_radius = (circleStart - circleCenter).distanceSquared;
+    return (p - circleCenter).distanceSquared < circle_radius;
+  }
+
   // A look up table with precomputed variables.
   //
   // The columns represent the following variabls respectively:
@@ -1930,24 +1949,24 @@ class _RSuperellipseOctant {
   //
   // For definition of the variables, see ComputeOctant.
   static const List<List<double>> _kPrecomputedVariables = [
-      /*ratio=2.00*/ <double>[2.00000000, 0.117205737],
-      /*ratio=2.02*/ <double>[2.03999083, 0.117205737],
-      /*ratio=2.04*/ <double>[2.07976152, 0.119418745],
-      /*ratio=2.06*/ <double>[2.11195967, 0.136274515],
-      /*ratio=2.08*/ <double>[2.14721808, 0.141289310],
-      /*ratio=2.10*/ <double>[2.18349805, 0.143410679],
-      /*ratio=2.12*/ <double>[2.21858213, 0.146668334],
-      /*ratio=2.14*/ <double>[2.24861661, 0.154985392],
-      /*ratio=2.16*/ <double>[2.28146030, 0.158932848],
-      /*ratio=2.18*/ <double>[2.30842385, 0.168182439],
-      /*ratio=2.20*/ <double>[2.33888662, 0.172911853],
-      /*ratio=2.22*/ <double>[2.36937163, 0.177039959],
-      /*ratio=2.24*/ <double>[2.40317673, 0.177839181],
-      /*ratio=2.26*/ <double>[2.42840031, 0.185615110],
-      /*ratio=2.28*/ <double>[2.45838300, 0.188905374],
-      /*ratio=2.30*/ <double>[2.48660575, 0.193273145],
+    /*ratio=2.00*/ <double>[2.00000000, 0.117205737],
+    /*ratio=2.02*/ <double>[2.03999083, 0.117205737],
+    /*ratio=2.04*/ <double>[2.07976152, 0.119418745],
+    /*ratio=2.06*/ <double>[2.11195967, 0.136274515],
+    /*ratio=2.08*/ <double>[2.14721808, 0.141289310],
+    /*ratio=2.10*/ <double>[2.18349805, 0.143410679],
+    /*ratio=2.12*/ <double>[2.21858213, 0.146668334],
+    /*ratio=2.14*/ <double>[2.24861661, 0.154985392],
+    /*ratio=2.16*/ <double>[2.28146030, 0.158932848],
+    /*ratio=2.18*/ <double>[2.30842385, 0.168182439],
+    /*ratio=2.20*/ <double>[2.33888662, 0.172911853],
+    /*ratio=2.22*/ <double>[2.36937163, 0.177039959],
+    /*ratio=2.24*/ <double>[2.40317673, 0.177839181],
+    /*ratio=2.26*/ <double>[2.42840031, 0.185615110],
+    /*ratio=2.28*/ <double>[2.45838300, 0.188905374],
+    /*ratio=2.30*/ <double>[2.48660575, 0.193273145],
   ];
-  static const double _kRatioStepInverse = 50;  // = 1 / 0.02
+  static const double _kRatioStepInverse = 50; // = 1 / 0.02
 
   static int get _kNumRecords => _kPrecomputedVariables.length;
   static const double _kMinRatio = 2.00;
@@ -1962,7 +1981,7 @@ class _RSuperellipseOctant {
     final double frac = steps - left;
 
     return (1 - frac) * _kPrecomputedVariables[left][column] +
-          frac * _kPrecomputedVariables[left + 1][column];
+        frac * _kPrecomputedVariables[left + 1][column];
   }
 
   // Find the center of the circle that passes the given two points and have the
@@ -2056,6 +2075,20 @@ class _RSuperellipseQuadrant {
     required this.top,
     required this.right,
   });
+
+  bool contains(Offset p) {
+    Offset flipped(Offset a) {
+      return Offset(a.dy, a.dx);
+    }
+
+    final Offset localP = p - offset;
+    final Offset norm_point = Offset(localP.dx / signedScale.width, localP.dy / signedScale.height);
+    if (norm_point.dx < 0 || norm_point.dy < 0) {
+      return true;
+    }
+    return top.contains(norm_point - top.offset) &&
+        right.contains(flipped(norm_point - right.offset));
+  }
 }
 
 // A utility struct that expands input parameters for a rounded superellipse to
@@ -2067,8 +2100,7 @@ class _RSuperellipseParam {
   final _RSuperellipseQuadrant bottomLeft;
   final _RSuperellipseQuadrant topLeft;
 
-  factory _RSuperellipseParam.MakeRSuperellipse(RSuperellipse rseUnscaled) {
-    final RSuperellipse rse = rseUnscaled.scaleRadii();
+  factory _RSuperellipseParam.MakeScaled(RSuperellipse rse /* a scaled rse */) {
     final double topSplit = _split(rse.left, rse.right, rse.tlRadiusX, rse.trRadiusX);
     final double rightSplit = _split(rse.top, rse.bottom, rse.trRadiusY, rse.brRadiusY);
     final double bottomSplit = _split(rse.left, rse.right, rse.blRadiusX, rse.brRadiusX);
@@ -2126,7 +2158,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   /// and the same radii along its horizontal axis and its vertical axis.
   ///
   /// Will assert in debug mode if `radiusX` or `radiusY` are negative.
-  const RSuperellipse.fromLTRBXY(
+  RSuperellipse.fromLTRBXY(
     double left,
     double top,
     double right,
@@ -2263,7 +2295,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          brRadiusY: bottomRight.y,
        );
 
-  const RSuperellipse._raw({
+  RSuperellipse._raw({
     super.left = 0.0,
     super.top = 0.0,
     super.right = 0.0,
@@ -2308,7 +2340,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   );
 
   /// A rounded rectangle with all the values set to zero.
-  static const RSuperellipse zero = RSuperellipse._raw();
+  static final RSuperellipse zero = RSuperellipse._raw();
 
   /// Whether the point specified by the given offset (which is assumed to be
   /// relative to the origin) lies inside the rounded superellipse.
@@ -2322,48 +2354,21 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
       return false;
     } // outside bounding box
     final RSuperellipse scaled = scaleRadii();
-    if (scaled.contains(point)) {
-      return true;
+    if (_param == null) {
+      if (scaled.safeInnerRect.contains(point)) {
+        return true;
+      }
+      _param = _RSuperellipseParam.MakeScaled(scaled);
     }
+    assert(_param != null);
 
-    double x;
-    double y;
-    double radiusX;
-    double radiusY;
-    // check whether point is in one of the rounded corner areas
-    // x, y -> translate to ellipse center
-    if (point.dx < left + scaled.tlRadiusX && point.dy < top + scaled.tlRadiusY) {
-      x = point.dx - left - scaled.tlRadiusX;
-      y = point.dy - top - scaled.tlRadiusY;
-      radiusX = scaled.tlRadiusX;
-      radiusY = scaled.tlRadiusY;
-    } else if (point.dx > right - scaled.trRadiusX && point.dy < top + scaled.trRadiusY) {
-      x = point.dx - right + scaled.trRadiusX;
-      y = point.dy - top - scaled.trRadiusY;
-      radiusX = scaled.trRadiusX;
-      radiusY = scaled.trRadiusY;
-    } else if (point.dx > right - scaled.brRadiusX && point.dy > bottom - scaled.brRadiusY) {
-      x = point.dx - right + scaled.brRadiusX;
-      y = point.dy - bottom + scaled.brRadiusY;
-      radiusX = scaled.brRadiusX;
-      radiusY = scaled.brRadiusY;
-    } else if (point.dx < left + scaled.blRadiusX && point.dy > bottom - scaled.blRadiusY) {
-      x = point.dx - left - scaled.blRadiusX;
-      y = point.dy - bottom + scaled.blRadiusY;
-      radiusX = scaled.blRadiusX;
-      radiusY = scaled.blRadiusY;
-    } else {
-      return true; // inside and not within the rounded corner area
-    }
-
-    x = x / radiusX;
-    y = y / radiusY;
-    // check if the point is outside the unit circle
-    if (x * x + y * y > 1.0) {
-      return false;
-    }
-    return true;
+    return _param!.topLeft.contains(point) &&
+        _param!.topRight.contains(point) &&
+        _param!.bottomLeft.contains(point) &&
+        _param!.bottomRight.contains(point);
   }
+
+  _RSuperellipseParam? _param;
 
   /// Linearly interpolate between two rounded superellipses.
   ///
