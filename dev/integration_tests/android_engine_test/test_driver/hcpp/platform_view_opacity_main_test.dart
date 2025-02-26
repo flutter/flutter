@@ -37,6 +37,7 @@ void main() async {
     flutterDriver = await FlutterDriver.connect();
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
     await nativeDriver.configureForScreenshotTesting();
+    await flutterDriver.waitUntilFirstFrameRasterized();
   });
 
   tearDownAll(() async {
@@ -55,6 +56,18 @@ void main() async {
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile('$goldenPrefix.opacity.png'),
+    );
+  }, timeout: Timeout.none);
+
+  test('should start with opacity, and toggle to no opacity', () async {
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.opacity.png'),
+    );
+    await flutterDriver.tap(find.byValueKey('ToggleOpacity'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.no_opacity.png'),
     );
   }, timeout: Timeout.none);
 }

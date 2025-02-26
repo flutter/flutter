@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
-import '../platform_view/_shared.dart';
 import '../src/allow_list_devices.dart';
 
 void main() async {
@@ -28,15 +27,61 @@ void main() async {
 
   // Run on full screen.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-  runApp(
-      const Opacity(
-        opacity: 0.3,
+  runApp(const _OpacityWrappedMainApp());
+}
+
+final class _OpacityWrappedMainApp extends StatefulWidget {
+  const _OpacityWrappedMainApp();
+
+  @override
+  State<_OpacityWrappedMainApp> createState() {
+    return _OpacityWrappedMainAppState();
+  }
+}
+
+class _OpacityWrappedMainAppState extends State<_OpacityWrappedMainApp> {
+  double opacity = 0.3;
+
+  void _toggleOpacity() {
+    setState(() {
+      if (opacity == 1) {
+        opacity = 0.3;
+      } else {
+        opacity = 1;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Opacity(
+        opacity: opacity,
         child: ColoredBox(
-            color: Colors.white,
-            child: MainApp(platformView: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),)
+          color: Colors.white,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              TextButton(
+                key: const ValueKey<String>('ToggleOpacity'),
+                onPressed: _toggleOpacity,
+                child: const SizedBox(
+                  width: 300,
+                  height: 300,
+                  child: ColoredBox(color: Colors.green),
+                ),
+              ),
+              const SizedBox(
+                width: 200,
+                height: 200,
+                child: _HybridCompositionAndroidPlatformView(viewType: 'changing_color_button_platform_view'),
+              ),
+            ],
+          ),
         ),
-      )
-  );
+      ),
+    );
+  }
 }
 
 final class _HybridCompositionAndroidPlatformView extends StatelessWidget {
@@ -52,16 +97,16 @@ final class _HybridCompositionAndroidPlatformView extends StatelessWidget {
         return AndroidViewSurface(
           controller: controller as AndroidViewController,
           gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          hitTestBehavior: PlatformViewHitTestBehavior.transparent,
         );
       },
       onCreatePlatformView: (PlatformViewCreationParams params) {
         return PlatformViewsService.initHybridAndroidView(
-          id: params.id,
-          viewType: viewType,
-          layoutDirection: TextDirection.ltr,
-          creationParamsCodec: const StandardMessageCodec(),
-        )
+            id: params.id,
+            viewType: viewType,
+            layoutDirection: TextDirection.ltr,
+            creationParamsCodec: const StandardMessageCodec(),
+          )
           ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
           ..create();
       },
