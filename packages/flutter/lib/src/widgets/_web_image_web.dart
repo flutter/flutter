@@ -21,7 +21,7 @@ import 'platform_view.dart';
 /// Displays an `<img>` element with `src` set to [src].
 class ImgElementPlatformView extends StatelessWidget {
   /// Creates a platform view backed with an `<img>` element.
-  ImgElementPlatformView(this.src, {super.key}) {
+  ImgElementPlatformView(this.src, {this.fit, super.key}) {
     if (!_registered) {
       _register();
     }
@@ -39,12 +39,21 @@ class ImgElementPlatformView extends StatelessWidget {
       // without fetching it over the network again.
       final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
       img.src = paramsMap['src']! as String;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      final String? fit = paramsMap['fit'] as String?;
+      if (fit != null) {
+        img.style.objectFit = fit;
+      }
       return img;
     });
   }
 
   /// The `src` URL for the `<img>` tag.
   final String? src;
+
+  /// The `object-fit` CSS property for the `<img>` tag.
+  final web.CSSObjectFit? fit;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +62,7 @@ class ImgElementPlatformView extends StatelessWidget {
     }
     return HtmlElementView(
       viewType: _viewType,
-      creationParams: <String, String?>{'src': src},
+      creationParams: <String, String?>{'src': src, 'fit': fit?.name},
       hitTestBehavior: PlatformViewHitTestBehavior.transparent,
     );
   }
@@ -72,7 +81,7 @@ class RawWebImage extends SingleChildRenderObjectWidget {
     this.fit,
     this.alignment = Alignment.center,
     this.matchTextDirection = false,
-  }) : super(child: ImgElementPlatformView(image.htmlImage.src));
+  }) : super(child: ImgElementPlatformView(image.htmlImage.src, fit: fit?.cssObjectFit));
 
   /// The underlying HTML element to be displayed.
   final WebImageInfo image;
@@ -369,5 +378,22 @@ class RenderWebImage extends RenderShiftedBox {
     properties.add(
       DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null),
     );
+  }
+}
+
+extension on BoxFit {
+  web.CSSObjectFit get cssObjectFit {
+    switch (this) {
+      case BoxFit.contain:
+      case BoxFit.cover:
+      case BoxFit.fitWidth:
+      case BoxFit.fitHeight:
+      case BoxFit.scaleDown:
+        return web.CSSObjectFit.cover;
+      case BoxFit.fill:
+        return web.CSSObjectFit.fill;
+      case BoxFit.none:
+        return web.CSSObjectFit.none;
+    }
   }
 }
