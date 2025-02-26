@@ -88,195 +88,90 @@
 
 namespace impeller {
 
-using FastGradientPipeline =
-    RenderPipelineHandle<FastGradientVertexShader, FastGradientFragmentShader>;
-using LinearGradientFillPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         LinearGradientFillFragmentShader>;
-using SolidFillPipeline =
-    RenderPipelineHandle<SolidFillVertexShader, SolidFillFragmentShader>;
-using RadialGradientFillPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         RadialGradientFillFragmentShader>;
-using ConicalGradientFillConicalPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientFillConicalFragmentShader>;
-using ConicalGradientFillStripPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientFillStripFragmentShader>;
-using ConicalGradientFillRadialPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientFillRadialFragmentShader>;
-using ConicalGradientFillStripRadialPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientFillStripRadialFragmentShader>;
-using SweepGradientFillPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         SweepGradientFillFragmentShader>;
-using LinearGradientUniformFillPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         LinearGradientUniformFillFragmentShader>;
-using ConicalGradientUniformFillConicalPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientUniformFillConicalFragmentShader>;
-using ConicalGradientUniformFillStripPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientUniformFillStripFragmentShader>;
-using ConicalGradientUniformFillRadialPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientUniformFillRadialFragmentShader>;
-using ConicalGradientUniformFillStripRadialPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientUniformFillStripRadialFragmentShader>;
-using RadialGradientUniformFillPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         RadialGradientUniformFillFragmentShader>;
-using SweepGradientUniformFillPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         SweepGradientUniformFillFragmentShader>;
-using LinearGradientSSBOFillPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         LinearGradientSsboFillFragmentShader>;
-using ConicalGradientSSBOFillPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientSsboFillFragmentShader>;
-using RadialGradientSSBOFillPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         RadialGradientSsboFillFragmentShader>;
-using SweepGradientSSBOFillPipeline =
-    RenderPipelineHandle<GradientFillVertexShader,
-                         SweepGradientSsboFillFragmentShader>;
-using RRectBlurPipeline =
-    RenderPipelineHandle<RrectBlurVertexShader, RrectBlurFragmentShader>;
-using TexturePipeline =
-    RenderPipelineHandle<TextureFillVertexShader, TextureFillFragmentShader>;
-using TextureDownsamplePipeline =
-    RenderPipelineHandle<TextureFillVertexShader,
-                         TextureDownsampleFragmentShader>;
-using TextureStrictSrcPipeline =
-    RenderPipelineHandle<TextureFillVertexShader,
-                         TextureFillStrictSrcFragmentShader>;
-using TiledTexturePipeline =
-    RenderPipelineHandle<TextureUvFillVertexShader,
-                         TiledTextureFillFragmentShader>;
-using GaussianBlurPipeline =
-    RenderPipelineHandle<FilterPositionUvVertexShader, GaussianFragmentShader>;
-using BorderMaskBlurPipeline =
-    RenderPipelineHandle<FilterPositionUvVertexShader,
-                         BorderMaskBlurFragmentShader>;
-using MorphologyFilterPipeline =
-    RenderPipelineHandle<FilterPositionUvVertexShader,
-                         MorphologyFilterFragmentShader>;
-using ColorMatrixColorFilterPipeline =
-    RenderPipelineHandle<FilterPositionVertexShader,
-                         ColorMatrixColorFilterFragmentShader>;
-using LinearToSrgbFilterPipeline =
-    RenderPipelineHandle<FilterPositionVertexShader,
-                         LinearToSrgbFilterFragmentShader>;
-using SrgbToLinearFilterPipeline =
-    RenderPipelineHandle<FilterPositionVertexShader,
-                         SrgbToLinearFilterFragmentShader>;
-using YUVToRGBFilterPipeline =
-    RenderPipelineHandle<FilterPositionVertexShader,
-                         YuvToRgbFilterFragmentShader>;
+template <typename T>
+using GradientPipelineHandle =
+    RenderPipelineHandle<GradientFillVertexShader, T>;
 
-using GlyphAtlasPipeline =
-    RenderPipelineHandle<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
+using AdvancedBlendPipelineHandle =
+    RenderPipelineHandle<AdvancedBlendVertexShader,
+                         AdvancedBlendFragmentShader>;
 
-using PorterDuffBlendPipeline =
-    RenderPipelineHandle<PorterDuffBlendVertexShader,
-                         PorterDuffBlendFragmentShader>;
+using FramebufferBlendPipelineHandle =
+    RenderPipelineHandle<FramebufferBlendVertexShader,
+                         FramebufferBlendFragmentShader>;
+
+// clang-format off
+using BorderMaskBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, BorderMaskBlurFragmentShader>;
 using ClipPipeline = RenderPipelineHandle<ClipVertexShader, ClipFragmentShader>;
+using ColorMatrixColorFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, ColorMatrixColorFilterFragmentShader>;
+using ConicalGradientFillConicalPipeline = GradientPipelineHandle<ConicalGradientFillConicalFragmentShader>;
+using ConicalGradientFillRadialPipeline = GradientPipelineHandle<ConicalGradientFillRadialFragmentShader>;
+using ConicalGradientFillStripPipeline = GradientPipelineHandle<ConicalGradientFillStripFragmentShader>;
+using ConicalGradientFillStripRadialPipeline = GradientPipelineHandle<ConicalGradientFillStripRadialFragmentShader>;
+using ConicalGradientSSBOFillPipeline = GradientPipelineHandle<ConicalGradientSsboFillFragmentShader>;
+using ConicalGradientUniformFillConicalPipeline = GradientPipelineHandle<ConicalGradientUniformFillConicalFragmentShader>;
+using ConicalGradientUniformFillRadialPipeline = GradientPipelineHandle<ConicalGradientUniformFillRadialFragmentShader>;
+using ConicalGradientUniformFillStripPipeline = GradientPipelineHandle<ConicalGradientUniformFillStripFragmentShader>;
+using ConicalGradientUniformFillStripRadialPipeline = GradientPipelineHandle<ConicalGradientUniformFillStripRadialFragmentShader>;
+using FastGradientPipeline = RenderPipelineHandle<FastGradientVertexShader, FastGradientFragmentShader>;
+using GaussianBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, GaussianFragmentShader>;
+using GlyphAtlasPipeline = RenderPipelineHandle<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
+using LinearGradientFillPipeline = GradientPipelineHandle<LinearGradientFillFragmentShader>;
+using LinearGradientSSBOFillPipeline = GradientPipelineHandle<LinearGradientSsboFillFragmentShader>;
+using LinearGradientUniformFillPipeline = GradientPipelineHandle<LinearGradientUniformFillFragmentShader>;
+using LinearToSrgbFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, LinearToSrgbFilterFragmentShader>;
+using MorphologyFilterPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, MorphologyFilterFragmentShader>;
+using PorterDuffBlendPipeline = RenderPipelineHandle<PorterDuffBlendVertexShader, PorterDuffBlendFragmentShader>;
+using RadialGradientFillPipeline = GradientPipelineHandle<RadialGradientFillFragmentShader>;
+using RadialGradientSSBOFillPipeline = GradientPipelineHandle<RadialGradientSsboFillFragmentShader>;
+using RadialGradientUniformFillPipeline = GradientPipelineHandle<RadialGradientUniformFillFragmentShader>;
+using RRectBlurPipeline = RenderPipelineHandle<RrectBlurVertexShader, RrectBlurFragmentShader>;
+using SolidFillPipeline = RenderPipelineHandle<SolidFillVertexShader, SolidFillFragmentShader>;
+using SrgbToLinearFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, SrgbToLinearFilterFragmentShader>;
+using SweepGradientFillPipeline = GradientPipelineHandle<SweepGradientFillFragmentShader>;
+using SweepGradientSSBOFillPipeline = GradientPipelineHandle<SweepGradientSsboFillFragmentShader>;
+using SweepGradientUniformFillPipeline = GradientPipelineHandle<SweepGradientUniformFillFragmentShader>;
+using TextureDownsamplePipeline = RenderPipelineHandle<TextureFillVertexShader, TextureDownsampleFragmentShader>;
+using TexturePipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillFragmentShader>;
+using TextureStrictSrcPipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillStrictSrcFragmentShader>;
+using TiledTexturePipeline = RenderPipelineHandle<TextureUvFillVertexShader, TiledTextureFillFragmentShader>;
+using VerticesUberShader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUberFragmentShader>;
+using YUVToRGBFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, YuvToRgbFilterFragmentShader>;
+// clang-format on
 
 // Advanced blends
-using BlendColorPipeline = RenderPipelineHandle<AdvancedBlendVertexShader,
-                                                AdvancedBlendFragmentShader>;
-using BlendColorBurnPipeline =
-    RenderPipelineHandle<AdvancedBlendVertexShader,
-                         AdvancedBlendFragmentShader>;
-using BlendColorDodgePipeline =
-    RenderPipelineHandle<AdvancedBlendVertexShader,
-                         AdvancedBlendFragmentShader>;
-using BlendDarkenPipeline = RenderPipelineHandle<AdvancedBlendVertexShader,
-                                                 AdvancedBlendFragmentShader>;
-using BlendDifferencePipeline =
-    RenderPipelineHandle<AdvancedBlendVertexShader,
-                         AdvancedBlendFragmentShader>;
-using BlendExclusionPipeline =
-    RenderPipelineHandle<AdvancedBlendVertexShader,
-                         AdvancedBlendFragmentShader>;
-using BlendHardLightPipeline =
-    RenderPipelineHandle<AdvancedBlendVertexShader,
-                         AdvancedBlendFragmentShader>;
-using BlendHuePipeline = RenderPipelineHandle<AdvancedBlendVertexShader,
-                                              AdvancedBlendFragmentShader>;
-using BlendLightenPipeline = RenderPipelineHandle<AdvancedBlendVertexShader,
-                                                  AdvancedBlendFragmentShader>;
-using BlendLuminosityPipeline =
-    RenderPipelineHandle<AdvancedBlendVertexShader,
-                         AdvancedBlendFragmentShader>;
-using BlendMultiplyPipeline = RenderPipelineHandle<AdvancedBlendVertexShader,
-                                                   AdvancedBlendFragmentShader>;
-using BlendOverlayPipeline = RenderPipelineHandle<AdvancedBlendVertexShader,
-                                                  AdvancedBlendFragmentShader>;
-using BlendSaturationPipeline =
-    RenderPipelineHandle<AdvancedBlendVertexShader,
-                         AdvancedBlendFragmentShader>;
-using BlendScreenPipeline = RenderPipelineHandle<AdvancedBlendVertexShader,
-                                                 AdvancedBlendFragmentShader>;
-using BlendSoftLightPipeline =
-    RenderPipelineHandle<AdvancedBlendVertexShader,
-                         AdvancedBlendFragmentShader>;
-// Framebuffer Advanced Blends
-using FramebufferBlendColorPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendColorBurnPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendColorDodgePipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendDarkenPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendDifferencePipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendExclusionPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendHardLightPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendHuePipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendLightenPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendLuminosityPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendMultiplyPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendOverlayPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendSaturationPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendScreenPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
-using FramebufferBlendSoftLightPipeline =
-    RenderPipelineHandle<FramebufferBlendVertexShader,
-                         FramebufferBlendFragmentShader>;
+using BlendColorBurnPipeline = AdvancedBlendPipelineHandle;
+using BlendColorDodgePipeline = AdvancedBlendPipelineHandle;
+using BlendColorPipeline = AdvancedBlendPipelineHandle;
+using BlendDarkenPipeline = AdvancedBlendPipelineHandle;
+using BlendDifferencePipeline = AdvancedBlendPipelineHandle;
+using BlendExclusionPipeline = AdvancedBlendPipelineHandle;
+using BlendHardLightPipeline = AdvancedBlendPipelineHandle;
+using BlendHuePipeline = AdvancedBlendPipelineHandle;
+using BlendLightenPipeline = AdvancedBlendPipelineHandle;
+using BlendLuminosityPipeline = AdvancedBlendPipelineHandle;
+using BlendMultiplyPipeline = AdvancedBlendPipelineHandle;
+using BlendOverlayPipeline = AdvancedBlendPipelineHandle;
+using BlendSaturationPipeline = AdvancedBlendPipelineHandle;
+using BlendScreenPipeline = AdvancedBlendPipelineHandle;
+using BlendSoftLightPipeline = AdvancedBlendPipelineHandle;
 
-/// Draw Vertices/Atlas Uber Shader
-using VerticesUberShader = RenderPipelineHandle<PorterDuffBlendVertexShader,
-                                                VerticesUberFragmentShader>;
+// Framebuffer Advanced Blends
+using FramebufferBlendColorBurnPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendColorDodgePipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendColorPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendDarkenPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendDifferencePipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendExclusionPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendHardLightPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendHuePipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendLightenPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendLuminosityPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendMultiplyPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendOverlayPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendSaturationPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendScreenPipeline = FramebufferBlendPipelineHandle;
+using FramebufferBlendSoftLightPipeline = FramebufferBlendPipelineHandle;
 
 #ifdef IMPELLER_ENABLE_OPENGLES
 using TiledTextureExternalPipeline =
