@@ -16,8 +16,6 @@ import 'dart:ui' as ui show Codec, FrameInfo, Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
-
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the
@@ -47,13 +45,7 @@ class ImageInfo {
   ///
   /// See details for disposing contract in the class description.
   ImageInfo({required this.image, this.scale = 1.0, this.debugLabel}) {
-    if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterPaintingLibrary,
-        className: '$ImageInfo',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('painting', 'ImageInfo', this));
   }
 
   /// Creates an [ImageInfo] with a cloned [image].
@@ -144,9 +136,7 @@ class ImageInfo {
   /// and no clones of it or the image it contains can be made.
   void dispose() {
     assert((image.debugGetOpenHandleStackTraces()?.length ?? 1) > 0);
-    if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     image.dispose();
   }
 
@@ -460,15 +450,7 @@ class ImageStream with Diagnosticable {
 class ImageStreamCompleterHandle {
   ImageStreamCompleterHandle._(ImageStreamCompleter this._completer) {
     _completer!._keepAliveHandles += 1;
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterPaintingLibrary,
-        className: '$ImageStreamCompleterHandle',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('painting', 'ImageStreamCompleterHandle', this));
   }
 
   ImageStreamCompleter? _completer;
@@ -485,11 +467,7 @@ class ImageStreamCompleterHandle {
     _completer!._keepAliveHandles -= 1;
     _completer!._maybeDispose();
     _completer = null;
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
   }
 }
 

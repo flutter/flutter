@@ -46,16 +46,21 @@ enum class SemanticsAction : int32_t {
   kScrollToOffset = 1 << 23,
 };
 
-const int kVerticalScrollSemanticsActions =
+constexpr int kVerticalScrollSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollUp) |
     static_cast<int32_t>(SemanticsAction::kScrollDown);
 
-const int kHorizontalScrollSemanticsActions =
+constexpr int kHorizontalScrollSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollLeft) |
     static_cast<int32_t>(SemanticsAction::kScrollRight);
 
-const int kScrollableSemanticsActions =
+constexpr int kScrollableSemanticsActions =
     kVerticalScrollSemanticsActions | kHorizontalScrollSemanticsActions;
+
+/// The following actions are not user-initiated.
+constexpr int kSystemActions =
+    static_cast<int32_t>(SemanticsAction::kDidGainAccessibilityFocus) |
+    static_cast<int32_t>(SemanticsAction::kDidLoseAccessibilityFocus);
 
 /// C/C++ representation of `SemanticsRole` defined in
 /// `lib/ui/semantics.dart`.

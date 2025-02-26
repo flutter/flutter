@@ -100,7 +100,7 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
 
         auto transformed = path.makeTransform(SkMatrix::Translate(
             x + blob->bounds().left(), y + blob->bounds().top()));
-        builder_->DrawPath(transformed, dl_paints_[paint_id]);
+        builder_->DrawPath(DlPath(transformed), dl_paints_[paint_id]);
         return;
       }
       builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(blob), x,
@@ -136,18 +136,18 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
   void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {
     size_t paint_id = std::get<PaintID>(paint);
     FML_DCHECK(paint_id < dl_paints_.size());
-    builder_->DrawRect(rect, dl_paints_[paint_id]);
+    builder_->DrawRect(ToDlRect(rect), dl_paints_[paint_id]);
   }
 
   void drawFilledRect(const SkRect& rect,
                       const DecorationStyle& decor_style) override {
     DlPaint paint = toDlPaint(decor_style, DlDrawStyle::kFill);
-    builder_->DrawRect(rect, paint);
+    builder_->DrawRect(ToDlRect(rect), paint);
   }
 
   void drawPath(const SkPath& path,
                 const DecorationStyle& decor_style) override {
-    builder_->DrawPath(path, toDlPaint(decor_style));
+    builder_->DrawPath(DlPath(path), toDlPaint(decor_style));
   }
 
   void drawLine(SkScalar x0,
@@ -163,12 +163,12 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
                                dash_path_effect->fOnLength,
                                dash_path_effect->fOffLength, paint);
     } else {
-      builder_->DrawLine(SkPoint::Make(x0, y0), SkPoint::Make(x1, y1), paint);
+      builder_->DrawLine(DlPoint(x0, y0), DlPoint(x1, y1), paint);
     }
   }
 
   void clipRect(const SkRect& rect) override {
-    builder_->ClipRect(rect, DlClipOp::kIntersect, false);
+    builder_->ClipRect(ToDlRect(rect), DlClipOp::kIntersect, false);
   }
 
   void translate(SkScalar dx, SkScalar dy) override {

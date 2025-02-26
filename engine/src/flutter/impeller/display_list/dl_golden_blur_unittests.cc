@@ -190,7 +190,7 @@ TEST_P(DlGoldenTest, LargeDownscaleRrect) {
       paint.setColor(DlColor::kYellow());
       paint.setMaskFilter(
           DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/1000));
-      canvas->DrawCircle(SkPoint::Make(0, 0), 1200, paint);
+      canvas->DrawCircle(DlPoint(0, 0), 1200, paint);
       canvas->Restore();
     }
 
@@ -198,7 +198,7 @@ TEST_P(DlGoldenTest, LargeDownscaleRrect) {
     paint.setColor(DlColor::kYellow());
     paint.setMaskFilter(
         DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/250));
-    canvas->DrawCircle(SkPoint::Make(1024, 768), 300, paint);
+    canvas->DrawCircle(DlPoint(1024, 768), 300, paint);
   };
 
   DisplayListBuilder builder;

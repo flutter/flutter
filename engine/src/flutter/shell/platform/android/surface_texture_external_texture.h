@@ -116,7 +116,7 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
 
   // |Texture|
   void Paint(PaintContext& context,
-             const SkRect& bounds,
+             const DlRect& bounds,
              bool freeze,
              const DlImageSampling sampling) override;
 
