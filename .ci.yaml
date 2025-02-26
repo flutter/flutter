@@ -585,6 +585,8 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # TODO(flutter/flutter#164140): Reduce timeout once customer
+      # tests are sharded.
       test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
   - name: Linux docs_publish
