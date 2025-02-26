@@ -674,10 +674,10 @@ void main() {
       -50,
       50,
       50,
-      topLeft: Radius.elliptical(1.0, 1.0),
-      topRight: Radius.elliptical(99.0, 99.0),
-      bottomLeft: Radius.elliptical(99.0, 99.0),
-      bottomRight: Radius.elliptical(1.0, 1.0),
+      topLeft: Radius.circular(1.0),
+      topRight: Radius.circular(99.0),
+      bottomLeft: Radius.circular(99.0),
+      bottomRight: Radius.circular(1.0),
     );
 
     expect(rr.contains(Offset(0, 0)), isTrue);

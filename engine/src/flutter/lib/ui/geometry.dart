@@ -2108,22 +2108,22 @@ class _RSuperellipseParam {
     return _RSuperellipseParam._raw(
       topRight: _RSuperellipseQuadrant.Make(
         Offset(topSplit, rightSplit),
-        Offset(rse.top, rse.right),
+        Offset(rse.right, rse.top),
         Size(rse.trRadiusX, rse.trRadiusY),
       ),
       bottomRight: _RSuperellipseQuadrant.Make(
         Offset(bottomSplit, rightSplit),
-        Offset(rse.bottom, rse.right),
+        Offset(rse.right, rse.bottom),
         Size(rse.brRadiusX, rse.brRadiusY),
       ),
       bottomLeft: _RSuperellipseQuadrant.Make(
         Offset(bottomSplit, leftSplit),
-        Offset(rse.bottom, rse.left),
+        Offset(rse.left, rse.bottom),
         Size(rse.blRadiusX, rse.blRadiusY),
       ),
       topLeft: _RSuperellipseQuadrant.Make(
         Offset(topSplit, leftSplit),
-        Offset(rse.top, rse.left),
+        Offset(rse.left, rse.top),
         Size(rse.tlRadiusX, rse.tlRadiusY),
       ),
     );
