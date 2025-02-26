@@ -39,4 +39,4 @@ vec4 DoConicalGradientTextureFill(vec2 res) {
   return result;
 }
 
-#endif // CONICAL_GRADIENT_UNIFORM_FILL_GLSL_
+#endif  // CONICAL_GRADIENT_UNIFORM_FILL_GLSL_
