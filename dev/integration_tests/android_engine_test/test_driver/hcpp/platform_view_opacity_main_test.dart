@@ -47,27 +47,18 @@ void main() async {
 
   test('verify that HCPP is supported and enabled', () async {
     final Map<String, Object?> response =
-    json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
 
     expect(response['supported'], true);
   }, timeout: Timeout.none);
 
   test('should screenshot a rectangle with specified opacity', () async {
-    await expectLater(
-      nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.opacity.png'),
-    );
+    await expectLater(nativeDriver.screenshot(), matchesGoldenFile('$goldenPrefix.opacity.png'));
   }, timeout: Timeout.none);
 
   test('should start with opacity, and toggle to no opacity', () async {
-    await expectLater(
-      nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.opacity.png'),
-    );
+    await expectLater(nativeDriver.screenshot(), matchesGoldenFile('$goldenPrefix.opacity.png'));
     await flutterDriver.tap(find.byValueKey('ToggleOpacity'));
-    await expectLater(
-      nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.no_opacity.png'),
-    );
+    await expectLater(nativeDriver.screenshot(), matchesGoldenFile('$goldenPrefix.no_opacity.png'));
   }, timeout: Timeout.none);
 }

@@ -74,7 +74,9 @@ class _OpacityWrappedMainAppState extends State<_OpacityWrappedMainApp> {
               const SizedBox(
                 width: 200,
                 height: 200,
-                child: _HybridCompositionAndroidPlatformView(viewType: 'changing_color_button_platform_view'),
+                child: _HybridCompositionAndroidPlatformView(
+                  viewType: 'changing_color_button_platform_view',
+                ),
               ),
             ],
           ),
