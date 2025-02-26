@@ -47,7 +47,7 @@ public class FlutterMutatorsStack {
     @Nullable private Rect rect;
     @Nullable private Path path;
     @Nullable private float[] radiis;
-    @Nullable private float opacity;
+    private float opacity = 1.f;
 
     private FlutterMutatorType type;
 
@@ -143,7 +143,7 @@ public class FlutterMutatorsStack {
     /**
      * Get the opacity of the mutator if the {@link #getType()} returns FlutterMutatorType.OPACITY.
      *
-     * @return the opacity if the type is FlutterMutatorType.OPACITY; otherwise null.
+     * @return the opacity of the mutator if the type is FlutterMutatorType.OPACITY; otherwise 1.
      */
     public float getOpacity() {
       return opacity;
