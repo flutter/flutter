@@ -1145,4 +1145,23 @@ PipelineRef ContentContext::GetDrawVerticesUberShader(
   return GetPipeline(vertices_uber_shader_, opts);
 }
 
+#ifdef IMPELLER_ENABLE_OPENGLES
+PipelineRef ContentContext::GetDownsampleTextureGlesPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(texture_downsample_gles_pipelines_, opts);
+}
+
+PipelineRef ContentContext::GetTiledTextureExternalPipeline(
+    ContentContextOptions opts) const {
+  FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
+  return GetPipeline(tiled_texture_external_pipelines_, opts);
+}
+
+PipelineRef ContentContext::GetTiledTextureUvExternalPipeline(
+    ContentContextOptions opts) const {
+  FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
+  return GetPipeline(tiled_texture_uv_external_pipelines_, opts);
+}
+#endif  // IMPELLER_ENABLE_OPENGLES
+
 }  // namespace impeller

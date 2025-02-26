@@ -383,28 +383,12 @@ class ContentContext {
   PipelineRef GetTiledTexturePipeline(ContentContextOptions opts) const;
   PipelineRef GetXorBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetYUVToRGBFilterPipeline(ContentContextOptions opts) const;
-  // clang-format on
-
 #ifdef IMPELLER_ENABLE_OPENGLES
-  PipelineRef GetDownsampleTextureGlesPipeline(
-      ContentContextOptions opts) const {
-    return GetPipeline(texture_downsample_gles_pipelines_, opts);
-  }
-
-  PipelineRef GetTiledTextureExternalPipeline(
-      ContentContextOptions opts) const {
-    FML_DCHECK(GetContext()->GetBackendType() ==
-               Context::BackendType::kOpenGLES);
-    return GetPipeline(tiled_texture_external_pipelines_, opts);
-  }
-
-  PipelineRef GetTiledTextureUvExternalPipeline(
-      ContentContextOptions opts) const {
-    FML_DCHECK(GetContext()->GetBackendType() ==
-               Context::BackendType::kOpenGLES);
-    return GetPipeline(tiled_texture_uv_external_pipelines_, opts);
-  }
+  PipelineRef GetDownsampleTextureGlesPipeline(ContentContextOptions opts) const;
+  PipelineRef GetTiledTextureExternalPipeline(ContentContextOptions opts) const;
+  PipelineRef GetTiledTextureUvExternalPipeline(ContentContextOptions opts) const;
 #endif  // IMPELLER_ENABLE_OPENGLES
+  // clang-format on
 
   // An empty 1x1 texture for binding drawVertices/drawAtlas or other cases
   // that don't always have a texture (due to blending).
