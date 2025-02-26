@@ -45,6 +45,17 @@ typedef enum {
   LowPowerPreference,
 } FlutterDesktopGpuPreference;
 
+// Configures the thread policy for running the UI isolate.
+typedef enum {
+  // Default value. Currently will run the UI isolate on separate thread,
+  // later will be changed to running the UI isolate on platform thread.
+  Default,
+  // Run the UI isolate on platform thread.
+  RunOnPlatformThread,
+  // Run the UI isolate on a separate thread.
+  RunOnSeparateThread,
+} FlutterDesktopUIThreadPolicy;
+
 // Properties for configuring a Flutter engine instance.
 typedef struct {
   // The path to the flutter_assets folder for the application to be run.
@@ -81,12 +92,17 @@ typedef struct {
   // GPU choice preference
   FlutterDesktopGpuPreference gpu_preference;
 
+<<<<<<< HEAD
   /// Whether to enable the Impeller rendering engine.
   ///
   /// When not provided, this value is treated as false. In a future release,
   /// this setting will become a no-op when the Skia backend is fully removed.
   bool enable_impeller;
 
+=======
+  // Policy for the thread that runs UI isolate.
+  FlutterDesktopUIThreadPolicy ui_thread_policy;
+>>>>>>> d8100ac5ed3f597757b031de45dcebc3cd0542ca
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========

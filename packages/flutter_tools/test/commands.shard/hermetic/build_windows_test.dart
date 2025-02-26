@@ -390,7 +390,6 @@ C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identif
         buildCommand('Release'),
       ]);
       fileSystem.file(fileSystem.path.join('lib', 'other.dart')).createSync(recursive: true);
-      fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json')).createSync(recursive: true);
 
       // Relevant portions of an incorrectly generated project, with some
       // irrelevant details removed for length.
@@ -533,7 +532,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
         buildCommand('Release'),
       ]);
       fileSystem.file(fileSystem.path.join('lib', 'other.dart')).createSync(recursive: true);
-      fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json')).createSync(recursive: true);
 
       await createTestCommandRunner(command).run(const <String>[
         'windows',
@@ -545,7 +543,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
         r'--split-debug-info=C:\foo\',
         '--dart-define=foo=a',
         '--dart-define=bar=b',
-        r'--bundle-sksl-path=foo\bar.sksl.json',
         r'--target=lib\other.dart',
       ]);
 
@@ -571,7 +568,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
           r'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
           r'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
           r'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-          r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI="',
+          r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI="',
           r'  "DART_OBFUSCATION=true"',
           r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
           r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
@@ -581,7 +578,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
           r'  "FLUTTER_ROOT=C:\\flutter"',
           r'  "PROJECT_DIR=C:\\"',
           r'  "FLUTTER_TARGET=lib\\other.dart"',
-          r'  "BUNDLE_SKSL_PATH=foo\\bar.sksl.json"',
         ]),
       );
     },

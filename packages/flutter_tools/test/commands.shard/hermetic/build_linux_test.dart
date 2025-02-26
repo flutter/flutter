@@ -5,12 +5,10 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -45,18 +43,14 @@ void main() {
 
   late MemoryFileSystem fileSystem;
   late FakeProcessManager processManager;
-  late ProcessUtils processUtils;
   late Logger logger;
-  late Artifacts artifacts;
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    artifacts = Artifacts.test(fileSystem: fileSystem);
     Cache.flutterRoot = _kTestFlutterRoot;
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
-    processUtils = ProcessUtils(logger: logger, processManager: processManager);
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -91,7 +85,7 @@ void main() {
         '-DFLUTTER_TARGET_PLATFORM=linux-$target',
         '/linux',
       ],
-      workingDirectory: 'build/linux/$target/$buildMode',
+      workingDirectory: '/build/linux/$target/$buildMode',
       onRun: onRun,
     );
   }
@@ -105,7 +99,7 @@ void main() {
     String stdout = '',
   }) {
     return FakeCommand(
-      command: <String>['ninja', '-C', 'build/linux/$target/$buildMode', 'install'],
+      command: <String>['ninja', '-C', '/build/linux/$target/$buildMode', 'install'],
       environment: environment,
       onRun: onRun,
       stdout: stdout,
@@ -116,12 +110,10 @@ void main() {
     'Linux build fails when there is no linux project',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockCoreProjectFiles();
@@ -148,12 +140,11 @@ void main() {
     'Linux build fails on non-linux platform',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockProjectFilesForBuild();
@@ -175,12 +166,11 @@ void main() {
     'Linux build fails when feature is disabled',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockProjectFilesForBuild();
@@ -205,12 +195,11 @@ void main() {
     'Linux build outputs path when successful',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       processManager = FakeProcessManager.list(<FakeCommand>[
@@ -236,12 +225,11 @@ void main() {
     'Linux build invokes CMake and ninja, and writes temporary files',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       processManager.addCommands(<FakeCommand>[cmakeCommand('release'), ninjaCommand('release')]);
@@ -282,12 +270,11 @@ void main() {
     'Handles missing cmake',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockProjectFilesForBuild();
@@ -311,12 +298,11 @@ void main() {
     'Handles argument error from missing ninja',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockProjectFilesForBuild();
@@ -348,12 +334,11 @@ void main() {
     'Linux build does not spew stdout to status logger',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockProjectFilesForBuild();
@@ -383,12 +368,11 @@ void main() {
     'Linux build extracts errors from stdout',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockProjectFilesForBuild();
@@ -396,7 +380,7 @@ void main() {
       // This contains a mix of routine build output and various types of errors
       // (Dart error, compile error, link error), edited down for compactness.
       const String stdout = r'''
-ninja: Entering directory `build/linux/x64/release'
+ninja: Entering directory `/build/linux/x64/release'
 [1/6] Generating /foo/linux/flutter/ephemeral/libflutter_linux_gtk.so, /foo/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony
 lib/main.dart:4:3: Error: Method not found: 'foo'.
 [2/6] Building CXX object CMakeFiles/foo.dir/main.cc.o
@@ -445,12 +429,11 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     'Linux verbose build sets VERBOSE_SCRIPT_LOGGING',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockProjectFilesForBuild();
@@ -485,12 +468,11 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     'Linux on x64 build --debug passes debug mode to cmake and ninja',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockProjectFilesForBuild();
@@ -514,12 +496,11 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     'Linux on ARM64 build --debug passes debug mode to cmake and ninja',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
       );
       setUpMockProjectFilesForBuild();
@@ -544,12 +525,11 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     'Linux on x64 build --profile passes profile mode to make',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockProjectFilesForBuild();
@@ -572,12 +552,11 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     'Linux on ARM64 build --profile passes profile mode to make',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
       );
       setUpMockProjectFilesForBuild();
@@ -602,12 +581,11 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     'Not support Linux cross-build for x64 on arm64',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
       );
 
@@ -628,18 +606,16 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     'Linux build configures CMake exports',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[cmakeCommand('release'), ninjaCommand('release')]);
       fileSystem.file('lib/other.dart').createSync(recursive: true);
-      fileSystem.file('foo/bar.sksl.json').createSync(recursive: true);
 
       await createTestCommandRunner(command).run(const <String>[
         'build',
@@ -653,7 +629,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         '--dart-define=foo.bar=2',
         '--dart-define=fizz.far=3',
         '--tree-shake-icons',
-        '--bundle-sksl-path=foo/bar.sksl.json',
       ]);
 
       final File cmakeConfig = fileSystem.currentDirectory
@@ -676,7 +651,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
           'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
           'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
           'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-          '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw=="',
+          '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI="',
           '  "DART_OBFUSCATION=true"',
           '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
           '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
@@ -686,7 +661,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
           '  "FLUTTER_ROOT=$_kTestFlutterRoot"',
           '  "PROJECT_DIR=${fileSystem.currentDirectory.path}"',
           '  "FLUTTER_TARGET=lib/other.dart"',
-          '  "BUNDLE_SKSL_PATH=foo/bar.sksl.json"',
         ]),
       );
     },
@@ -733,12 +707,11 @@ set(BINARY_NAME "fizz_bar")
     () {
       final CommandRunner<void> runner = createTestCommandRunner(
         BuildCommand(
-          artifacts: artifacts,
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
           logger: logger,
-          processUtils: processUtils,
+
           osUtils: FakeOperatingSystemUtils(),
         ),
       );
@@ -786,12 +759,11 @@ set(BINARY_NAME "fizz_bar")
     'Performs code size analysis and sends analytics',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: FakeOperatingSystemUtils(),
       );
       setUpMockProjectFilesForBuild();
@@ -847,12 +819,11 @@ set(BINARY_NAME "fizz_bar")
     'Linux on ARM64 build --release passes, and check if the LinuxBuildDirectory for arm64 can be referenced correctly by using analytics',
     () async {
       final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-        processUtils: processUtils,
+
         osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
       );
       setUpMockProjectFilesForBuild();

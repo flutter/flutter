@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "binary_messenger_impl.h"
+#include "flutter_windows.h"
 
 namespace flutter {
 
@@ -19,10 +20,17 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
   c_engine_properties.dart_entrypoint = project.dart_entrypoint().c_str();
   c_engine_properties.gpu_preference =
       static_cast<FlutterDesktopGpuPreference>(project.gpu_preference());
-  c_engine_properties.enable_impeller = project.get_enable_impeller();
+  c_engine_properties.ui_thread_policy =
+      static_cast<FlutterDesktopUIThreadPolicy>(project.ui_thread_policy());
 
-  const std::vector<std::string>& entrypoint_args =
+  std::vector<std::string> entrypoint_args =
       project.dart_entrypoint_arguments();
+  if (project.get_enable_impeller()) {
+    entrypoint_args.push_back("--enable-impeller=true");
+  } else if (!std::find(entrypoint_args.begin(), entrypoint_args.end(),
+                        "--enable-impeller=true")) {
+    entrypoint_args.push_back("--enable-impeller=false");
+  }
   std::vector<const char*> entrypoint_argv;
   std::transform(
       entrypoint_args.begin(), entrypoint_args.end(),

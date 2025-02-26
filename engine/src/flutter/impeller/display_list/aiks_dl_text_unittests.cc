@@ -155,6 +155,28 @@ TEST_P(AiksTest, CanRenderTextFrameWithHalfScaling) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// This is a test that looks for glyph artifacts we've see.
+TEST_P(AiksTest, ScaledK) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+  for (int i = 0; i < 6; ++i) {
+    builder.Save();
+    builder.Translate(300 * i, 0);
+    Scalar scale = 0.445 - (i / 1000.f);
+    builder.Scale(scale, scale);
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "k", "Roboto-Regular.ttf",
+        TextRenderOptions{.font_size = 600, .position = DlPoint(10, 500)});
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "k", "Roboto-Regular.ttf",
+        TextRenderOptions{.font_size = 300, .position = DlPoint(10, 800)});
+    builder.Restore();
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderTextFrameWithFractionScaling) {
   Scalar fine_scale = 0.f;
   bool is_subpixel = false;
@@ -301,7 +323,7 @@ TEST_P(AiksTest, CanRenderTextInSaveLayer) {
 
   // Blend the layer with the parent pass using kClear to expose the coverage.
   paint.setBlendMode(DlBlendMode::kClear);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   ASSERT_TRUE(RenderTextInCanvasSkia(
       GetContext(), builder, "the quick brown fox jumped over the lazy dog!.?",
       "Roboto-Regular.ttf"));
@@ -419,7 +441,7 @@ TEST_P(AiksTest, CanRenderTextWithLargePerspectiveTransform) {
   DisplayListBuilder builder;
 
   DlPaint save_paint;
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
   builder.Transform(Matrix(2000, 0, 0, 0,   //
                            0, 2000, 0, 0,   //
                            0, 0, -1, 9000,  //

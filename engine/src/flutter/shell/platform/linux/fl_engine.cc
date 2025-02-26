@@ -61,6 +61,9 @@ struct _FlEngine {
   // Process keyboard events.
   FlKeyboardManager* keyboard_manager;
 
+  // Implements the flutter/textinput channel.
+  FlTextInputHandler* text_input_handler;
+
   // Implements the flutter/keyboard channel.
   FlKeyboardHandler* keyboard_handler;
 
@@ -391,9 +394,20 @@ static void fl_engine_update_semantics_cb(const FlutterSemanticsUpdate2* update,
 static void setup_keyboard(FlEngine* self) {
   g_clear_object(&self->keyboard_manager);
   self->keyboard_manager = fl_keyboard_manager_new(self);
+
   g_clear_object(&self->keyboard_handler);
   self->keyboard_handler =
       fl_keyboard_handler_new(self->binary_messenger, self->keyboard_manager);
+
+  GtkWidget* widget =
+      self->text_input_handler != nullptr
+          ? fl_text_input_handler_get_widget(self->text_input_handler)
+          : nullptr;
+  g_clear_object(&self->text_input_handler);
+  self->text_input_handler = fl_text_input_handler_new(self->binary_messenger);
+  if (widget != nullptr) {
+    fl_text_input_handler_set_widget(self->text_input_handler, widget);
+  }
 }
 
 // Called right before the engine is restarted.
@@ -474,6 +488,7 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->settings_handler);
   g_clear_object(&self->platform_handler);
   g_clear_object(&self->keyboard_manager);
+  g_clear_object(&self->text_input_handler);
   g_clear_object(&self->keyboard_handler);
   g_clear_object(&self->mouse_cursor_handler);
   g_clear_object(&self->task_runner);
@@ -618,8 +633,17 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);
   g_ptr_array_insert(command_line_args, 0, g_strdup("flutter"));
+  bool had_impeller_flag = false;
   for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
+    if (env_switch == "--enable-impeller=true") {
+      had_impeller_flag = true;
+    }
     g_ptr_array_add(command_line_args, g_strdup(env_switch.c_str()));
+  }
+  if (fl_dart_project_get_enable_impeller(self->project)) {
+    g_ptr_array_add(command_line_args, g_strdup("--enable-impeller=true"));
+  } else if (!had_impeller_flag) {
+    g_ptr_array_add(command_line_args, g_strdup("--enable-impeller=false"));
   }
 
   gchar** dart_entrypoint_args =
@@ -641,7 +665,6 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       dart_entrypoint_args != nullptr ? g_strv_length(dart_entrypoint_args) : 0;
   args.dart_entrypoint_argv =
       reinterpret_cast<const char* const*>(dart_entrypoint_args);
-  args.enable_impeller = fl_dart_project_get_enable_impeller(self->project);
 
   FlutterCompositor compositor = {};
   compositor.struct_size = sizeof(FlutterCompositor);
@@ -1284,6 +1307,11 @@ void fl_engine_request_app_exit(FlEngine* self) {
 FlKeyboardManager* fl_engine_get_keyboard_manager(FlEngine* self) {
   g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
   return self->keyboard_manager;
+}
+
+FlTextInputHandler* fl_engine_get_text_input_handler(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
+  return self->text_input_handler;
 }
 
 FlMouseCursorHandler* fl_engine_get_mouse_cursor_handler(FlEngine* self) {

@@ -601,10 +601,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   std::vector<std::string> switches = self.switches;
 
   // Enable Impeller only if specifically asked for from the project or cmdline arguments.
-  bool enable_impeller = false;
   if (_project.enableImpeller ||
       std::find(switches.begin(), switches.end(), "--enable-impeller=true") != switches.end()) {
-    enable_impeller = true;
+    switches.push_back("--enable-impeller=true");
   }
 
   std::transform(switches.begin(), switches.end(), std::back_inserter(argv),
@@ -642,7 +641,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     }
     std::cout << message << std::endl;
   };
-  flutterArguments.enable_impeller = enable_impeller;
 
   static size_t sTaskRunnerIdentifiers = 0;
   const FlutterTaskRunnerDescription cocoa_task_runner_description = {
@@ -1126,6 +1124,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   while ((nextViewController = [viewControllerEnumerator nextObject])) {
     [nextViewController onPreEngineRestart];
   }
+  [_platformViewController reset];
 }
 
 - (void)onVSync:(uintptr_t)baton {

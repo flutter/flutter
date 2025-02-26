@@ -1840,9 +1840,16 @@ mixin BaseSliderTrackShape {
     final double thumbWidth = sliderTheme.thumbShape!.getPreferredSize(isEnabled, isDiscrete).width;
     final double overlayWidth =
         sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
-    final double trackHeight = sliderTheme.trackHeight!;
+    double trackHeight = sliderTheme.trackHeight!;
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
+
+    // If the track colors are transparent, then override only the track height
+    // to maintain overall Slider width.
+    if (sliderTheme.activeTrackColor == Colors.transparent &&
+        sliderTheme.inactiveTrackColor == Colors.transparent) {
+      trackHeight = 0;
+    }
 
     final double trackLeft =
         offset.dx + (sliderTheme.padding == null ? math.max(overlayWidth / 2, thumbWidth / 2) : 0);
@@ -2192,9 +2199,16 @@ mixin BaseRangeSliderTrackShape {
         sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete).width;
     final double overlayWidth =
         sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
-    final double trackHeight = sliderTheme.trackHeight!;
+    double trackHeight = sliderTheme.trackHeight!;
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
+
+    // If the track colors are transparent, then override only the track height
+    // to maintain overall Slider width.
+    if (sliderTheme.activeTrackColor == Colors.transparent &&
+        sliderTheme.inactiveTrackColor == Colors.transparent) {
+      trackHeight = 0;
+    }
 
     final double trackLeft = offset.dx + math.max(overlayWidth / 2, thumbWidth / 2);
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;

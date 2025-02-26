@@ -20,6 +20,17 @@ enum class GpuPreference {
   LowPowerPreference,
 };
 
+// Configures the thread policy for running the UI isolate.
+enum class UIThreadPolicy {
+  // Default value. Currently will run the UI isolate on separate thread,
+  // later will be changed to running the UI isolate on platform thread.
+  Default,
+  // Run the UI isolate on platform thread.
+  RunOnPlatformThread,
+  // Run the UI isolate on a separate thread.
+  RunOnSeparateThread,
+};
+
 // A set of Flutter and Dart assets used to initialize a Flutter engine.
 class DartProject {
  public:
@@ -98,6 +109,15 @@ class DartProject {
   /// Whether the Impeller rendering engine is enabled.
   bool get_enable_impeller() const { return enable_impeller_; }
 
+  // Sets the thread policy for UI isolate.
+  void set_ui_thread_policy(UIThreadPolicy policy) {
+    ui_thread_policy_ = policy;
+  }
+
+  // Returns the policy for UI isolate.
+  // Defaults to UIThreadPolicy::Default.
+  UIThreadPolicy ui_thread_policy() const { return ui_thread_policy_; }
+
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
@@ -126,6 +146,8 @@ class DartProject {
   GpuPreference gpu_preference_ = GpuPreference::NoPreference;
   // Whether the Impeller rendering backend is enabled.
   bool enable_impeller_ = false;
+  // Thread policy for UI isolate.
+  UIThreadPolicy ui_thread_policy_ = UIThreadPolicy::Default;
 };
 
 }  // namespace flutter

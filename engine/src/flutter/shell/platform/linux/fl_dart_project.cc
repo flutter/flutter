@@ -13,7 +13,7 @@ struct _FlDartProject {
   gchar* assets_path;
   gchar* icu_data_path;
   gchar** dart_entrypoint_args;
-  bool enable_impeller;
+  gboolean enable_impeller;
 };
 
 G_DEFINE_TYPE(FlDartProject, fl_dart_project, G_TYPE_OBJECT)
@@ -118,12 +118,13 @@ G_MODULE_EXPORT void fl_dart_project_set_dart_entrypoint_arguments(
 }
 
 G_MODULE_EXPORT void fl_dart_project_set_enable_impeller(FlDartProject* self,
-                                                         bool enabled) {
+                                                         gboolean enabled) {
   g_return_if_fail(FL_IS_DART_PROJECT(self));
   self->enable_impeller = enabled;
 }
 
-G_MODULE_EXPORT bool fl_dart_project_get_enable_impeller(FlDartProject* self) {
+G_MODULE_EXPORT gboolean fl_dart_project_get_enable_impeller(
+    FlDartProject* self) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(self), false);
   return self->enable_impeller;
 }
