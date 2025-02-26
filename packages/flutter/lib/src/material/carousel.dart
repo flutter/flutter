@@ -1544,9 +1544,8 @@ class CarouselController extends ScrollController {
   /// If the [index] is greater than the number of items, the carousel will scroll
   /// to the last item.
   ///
-  /// For [CarouselView.weighted], this will scroll the carousel so the item at [index]
-  /// is positioned according to the weight distribution. The item with the highest weight
-  /// will occupy the most prominent position in the layout.
+  /// For [CarouselView.weighted], animates to make the item at [index] occupy the primary,
+  /// most prominent position determined by the largest weight in [flexWeights].
   ///
   /// The animation uses the provided [Duration] and [Curve]. The returned [Future]
   /// completes when the animation finishes.
