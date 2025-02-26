@@ -13,7 +13,7 @@ android {
         }
     }
 
-    namespace = "dev.flutter.multipleflutters"
+    namespace "dev.flutter.multipleflutters"
     compileSdk = 35
 
     // Flutter's CI installs the NDK at a non-standard path.
