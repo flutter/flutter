@@ -160,7 +160,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   std::unique_ptr<flutter::ConnectionCollection> _connections;
 }
 
-- (int64_t)engineId {
+- (int64_t)engineIdentifier {
   // Conversion to intptr_t doesn't need bridged cast.
   return (int64_t)self;
 }
@@ -719,7 +719,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                                          libraryOrNil:libraryOrNil
                                        entrypointArgs:entrypointArgs];
 
-  configuration.SetEngineId(self.engineId);
+  configuration.SetEngineId(self.engineIdentifier);
   self.shell.RunEngine(std::move(configuration));
 }
 
@@ -1465,7 +1465,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                          libraryOrNil:libraryURI
                                        entrypointArgs:entrypointArgs];
 
-  configuration.SetEngineId(result.engineId);
+  configuration.SetEngineId(result.engineIdentifier);
 
   fml::WeakPtr<flutter::PlatformView> platform_view = _shell->GetPlatformView();
   FML_DCHECK(platform_view);

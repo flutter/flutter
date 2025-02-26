@@ -276,13 +276,13 @@ FLUTTER_ASSERT_ARC
 - (void)testEngineId {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   [engine run];
-  int64_t id1 = engine.engineId;
+  int64_t id1 = engine.engineIdentifier;
   XCTAssertTrue(id1 != 0);
   FlutterEngine* spawn = [engine spawnWithEntrypoint:nil
                                           libraryURI:nil
                                         initialRoute:nil
                                       entrypointArgs:nil];
-  int64_t id2 = spawn.engineId;
+  int64_t id2 = spawn.engineIdentifier;
   XCTAssertEqual([FlutterEngine engineForIdentifier:id1], engine);
   XCTAssertEqual([FlutterEngine engineForIdentifier:id2], spawn);
 }
