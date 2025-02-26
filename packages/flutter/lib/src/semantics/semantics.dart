@@ -186,7 +186,7 @@ sealed class _DebugSemanticsRoleChecks {
       final SemanticsData data = node.getSemanticsData();
       if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
         node.visitChildren(validateRadioGroupChildren);
-        return true;
+        return error == null;
       }
 
       if (!data.hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup)) {
