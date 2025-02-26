@@ -26,6 +26,10 @@ static const constexpr char* kMultisampledRenderToTextureExt =
 static const constexpr char* kMultisampledRenderToTexture2Ext =
     "GL_EXT_multisampled_render_to_texture2";
 
+// https://registry.khronos.org/OpenGL/extensions/OES/OES_EGL_image_external_essl3.txt
+static const constexpr char* kOESImageExternalGLES3 =
+    "GL_OES_EGL_image_external_essl3";
+
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
     GLint value = 0;
@@ -136,6 +140,9 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   }
   is_es_ = desc->IsES();
   is_angle_ = desc->IsANGLE();
+  is_android_es3_safe_ = desc->IsES() &&
+                         desc->GetGlVersion().IsAtLeast(Version{3, 0, 0}) &&
+                         desc->HasExtension(kOESImageExternalGLES3);
 }
 
 bool CapabilitiesGLES::IsES() const {
@@ -153,6 +160,10 @@ size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
       return 0u;
   }
   FML_UNREACHABLE();
+}
+
+bool CapabilitiesGLES::IsES3AndroidSafe() const {
+  return is_android_es3_safe_;
 }
 
 bool CapabilitiesGLES::SupportsOffscreenMSAA() const {

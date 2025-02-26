@@ -77,6 +77,11 @@ class CapabilitiesGLES final
 
   bool IsANGLE() const;
 
+  /// @brief Whether the GLES version is at least 3.0 and the
+  ///        GL_OES_EGL_image_external_essl3 used for external texture interop
+  ///        is supported.
+  bool IsES3AndroidSafe() const;
+
   /// @brief Whether this is an ES GL variant or (if false) desktop GL.
   bool IsES() const;
 
@@ -138,6 +143,7 @@ class CapabilitiesGLES final
   bool supports_implicit_msaa_ = false;
   bool is_angle_ = false;
   bool is_es_ = false;
+  bool is_android_es3_safe_ = false;
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
 };
 

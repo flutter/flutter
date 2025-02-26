@@ -57,8 +57,7 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
     FML_LOG(ERROR) << "Could not create OpenGL proc table.";
     return nullptr;
   }
-  bool is_gles3 = proc_table->GetDescription()->GetGlVersion().IsAtLeast(
-      impeller::Version{3, 0, 0});
+  bool is_gles3 = proc_table->GetCapabilities()->IsES3AndroidSafe();
 
   std::vector<std::shared_ptr<fml::Mapping>> gles2_shader_mappings = {
       std::make_shared<fml::NonOwnedMapping>(

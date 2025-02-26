@@ -72,5 +72,16 @@ TEST(CapabilitiesGLES, SupportsMSAA) {
   EXPECT_FALSE(capabilities->SupportsOffscreenMSAA());
 }
 
+TEST(CapabilitiesGLES, IsES3AndroidSafe) {
+  auto const extensions = std::vector<const char*>{
+      "GL_OES_EGL_image_external_essl3",
+  };
+  // defaults to ES 3.0
+  auto mock_gles = MockGLES::Init(extensions);
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+
+  EXPECT_TRUE(capabilities->IsES3AndroidSafe());
+}
+
 }  // namespace testing
 }  // namespace impeller
