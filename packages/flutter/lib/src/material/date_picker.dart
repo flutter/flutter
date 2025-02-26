@@ -1920,7 +1920,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           ),
         ),
         backgroundColor: dialogBackground,
-        body: CalendarDateRangePicker(
+        body: _CalendarDateRangePicker(
           initialStartDate: selectedStartDate,
           initialEndDate: selectedEndDate,
           firstDate: firstDate,
@@ -1948,10 +1948,9 @@ const double _maxCalendarWidthPortrait = 480.0;
 
 /// Displays a scrollable calendar grid that allows a user to select a range
 /// of dates.
-class CalendarDateRangePicker extends StatefulWidget {
+class _CalendarDateRangePicker extends StatefulWidget {
   /// Creates a scrollable calendar grid for picking date ranges.
-  CalendarDateRangePicker({
-    super.key,
+  _CalendarDateRangePicker({
     DateTime? initialStartDate,
     DateTime? initialEndDate,
     required DateTime firstDate,
@@ -2004,10 +2003,10 @@ class CalendarDateRangePicker extends StatefulWidget {
   final CalendarDelegate calendarDelegate;
 
   @override
-  State<CalendarDateRangePicker> createState() => _CalendarDateRangePickerState();
+  State<_CalendarDateRangePicker> createState() => _CalendarDateRangePickerState();
 }
 
-class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
+class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
   final GlobalKey _scrollViewKey = GlobalKey();
   DateTime? _startDate;
   DateTime? _endDate;
