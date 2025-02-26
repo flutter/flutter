@@ -1414,6 +1414,7 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/160679
   testWidgets('CarouselView does not crash if itemExtent is zero', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
