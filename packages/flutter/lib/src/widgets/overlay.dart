@@ -30,13 +30,24 @@ import 'ticker_provider.dart';
 
 const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
 
-/// The signature of the widget builder callback taken by [OverlayPortal.nameTBD].
+/// The signature of the widget builder callback taken by
+/// [OverlayPortal.overlayChildLayoutBuilder].
+///
+/// {@template flutter.widgets.OverlayChildLayoutBuilder}
+/// The `childSize` parameter is the size of [OverlayPortal.child], in its own
+/// coordinates.
+///
+/// The `childPaintTransform` is the paint transform of [OverlayPortal.child]
+/// in the target [Overlay]'s coordinates.
+///
+/// The `overlaySize` is the size of the target [Overlay], in its own coordinates.
+/// {@endtemplate}
 typedef OverlayChildLayoutBuilder =
     Widget Function(
       BuildContext context,
       Size childSize,
       Matrix4 childPaintTransform,
-      Size theaterSize,
+      Size overlaySize,
     );
 
 // Examples can assume:
@@ -1811,7 +1822,30 @@ class OverlayPortal extends StatefulWidget {
     this.child,
   }) : _targetRootOverlay = true;
 
-  OverlayPortal.nameTBD({
+  /// Creates an [OverlayPortal] that renders the widget `overlayChildBuilder`
+  /// builds on the closest [Overlay] when [OverlayPortalController.show] is
+  /// called.
+  ///
+  /// Developers can use `overlayChildBuilder` to configure the overlay child
+  /// base on the the size and the location of [OverlayPortal.child] within the
+  /// target [Overlay], as well as the size of the [Overlay] itself. This allows
+  /// the overlay child to, for example, always follow [OverlayPortal.child] and
+  /// at the same time resize itself base on how close it is to the edges of
+  /// the [Overlay].
+  ///
+  /// {@macro flutter.widgets.OverlayChildLayoutBuilder}
+  ///
+  /// The `overlayChildBuilder` callback is called during layout. To ensure the
+  /// paint transform of [OverlayPortal.child] in relation to the target
+  /// [Overlay] is up-to-date by then, all [RenderObject]s between the
+  /// [OverlayPortal] to the target [Overlay] must establish their paint
+  /// transform during the layout phase, which most [RenderObject]s do. One known
+  /// exception is the [CompositedTransformFollower] widget, whose [RenderObject]
+  /// only establishes the paint transform when composited. Putting a
+  /// [CompositedTransformFollower] between the [OverlayPortal] and the [Overlay]
+  /// may resulting in an incorrect child paint transform being provided to the
+  /// `overlayChildBuilder` and will throw an assertion in debug mode.
+  OverlayPortal.overlayChildLayoutBuilder({
     Key? key,
     required OverlayPortalController controller,
     required OverlayChildLayoutBuilder overlayChildBuilder,
@@ -2615,8 +2649,7 @@ class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<(Size, Matrix4, S
 }
 
 // A RenderBox that:
-//  - has exactly one child during layout
-//  - matches the size and the paint transform of its parent and its theater
+//  - matches the size and the paint transform of its parent and its theater.
 //  - is a relayout boundary, and gets marked dirty for relayout every frame
 //    (but only when a frame is already scheduled)
 //  - runs a layout callback in performLayout.
@@ -2688,7 +2721,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
               'RenderFollowerLayer establishes its paint transform only after the layout phase.',
             ),
             ErrorHint(
-              'Consider replacing the corresponding CompositeTransformFollower with OverlayPortal.nameTBD if possible.',
+              'Consider replacing the corresponding CompositedTransformFollower with OverlayPortal.overlayChildLayoutBuilder if possible.',
             ),
           ]);
         }
