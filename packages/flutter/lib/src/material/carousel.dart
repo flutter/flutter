@@ -1545,7 +1545,7 @@ class CarouselController extends ScrollController {
   /// to the last item.
   ///
   /// For [CarouselView.weighted], animates to make the item at [index] occupy the primary,
-  /// most prominent position determined by the largest weight in [flexWeights].
+  /// most prominent position determined by the largest weight in `flexWeights`.
   ///
   /// The animation uses the provided [Duration] and [Curve]. The returned [Future]
   /// completes when the animation finishes.
