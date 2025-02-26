@@ -235,7 +235,7 @@ bool FlutterMain::Register(JNIEnv* env) {
       {
           .name = "nativeInit",
           .signature = "(Landroid/content/Context;[Ljava/lang/String;Ljava/"
-                       "lang/String;Ljava/lang/String;Ljava/lang/String;J)V",
+                       "lang/String;Ljava/lang/String;Ljava/lang/String;JI)V",
           .fnPtr = reinterpret_cast<void*>(&Init),
       },
       {
