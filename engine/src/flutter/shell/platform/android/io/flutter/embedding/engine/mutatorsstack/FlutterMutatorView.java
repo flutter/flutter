@@ -121,10 +121,14 @@ public class FlutterMutatorView extends FrameLayout {
       pathCopy.offset(-left, -top);
       canvas.clipPath(pathCopy);
     }
-    if (mutatorsStack.getFinalOpacity() != 1.f) {
+
+    int newAlpha = (int) (255 * mutatorsStack.getFinalOpacity());
+    boolean shouldApplyOpacity = paint.getAlpha() != newAlpha;
+    if (shouldApplyOpacity) {
       paint.setAlpha((int) (255 * mutatorsStack.getFinalOpacity()));
       this.setLayerType(View.LAYER_TYPE_HARDWARE, paint);
     }
+
     super.draw(canvas);
     canvas.restore();
   }
