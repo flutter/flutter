@@ -260,17 +260,18 @@ felt build
 
 Run a Flutter app in debug mode using your locally built Web Engine artifacts:
 
-* **Option 1**: Launch a Chrome window that closes when `flutter run` exits.
+* **Option 1**: Launch a Chrome window from the command line.
    ```
    flutter run --local-web-sdk=wasm_release --debug -d chrome
    ```
+   Exiting `flutter run` will close the app's Chrome window.
 * **Option 2**: Launch a web server on port `8080`:
   ```
   flutter run --local-web-sdk=wasm_release --debug -d web-server --web-port 8080
   ```
-  You will need to navigate your browser to http://localhost:8080.
-  This option is useful if you don't want to keep your browser window when you
-  you rebuild your Flutter Web Engine and restart `flutter run`.
+  To see your Flutter app, navigate your browser to http://localhost:8080.
+  This option is useful if you want to keep your browser window when you
+  you restart `flutter run`.
 
 You can use [Chrome DevTools][7] to debug the Flutter Web engine.
 To open Chrome DevTools, right click and press **Inspect** on the Chrome window.
