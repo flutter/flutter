@@ -83,10 +83,7 @@ void main() {
     );
 
     // some with topLeft
-    borderRadius = const BorderRadius.some(
-      topLeft: radius1,
-      others: radius2,
-    );
+    borderRadius = const BorderRadius.some(topLeft: radius1, others: radius2);
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topLeft, radius1);
     expect(borderRadius.topRight, radius2);
@@ -104,10 +101,7 @@ void main() {
     );
 
     // some with topRight
-    borderRadius = const BorderRadius.some(
-      topRight: radius1,
-      others: radius2,
-    );
+    borderRadius = const BorderRadius.some(topRight: radius1, others: radius2);
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topLeft, radius2);
     expect(borderRadius.topRight, radius1);
@@ -125,10 +119,7 @@ void main() {
     );
 
     // some with bottomLeft
-    borderRadius = const BorderRadius.some(
-      bottomLeft: radius1,
-      others: radius2,
-    );
+    borderRadius = const BorderRadius.some(bottomLeft: radius1, others: radius2);
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topLeft, radius2);
     expect(borderRadius.topRight, radius2);
@@ -146,10 +137,7 @@ void main() {
     );
 
     // some with bottomRight
-    borderRadius = const BorderRadius.some(
-      bottomRight: radius1,
-      others: radius2,
-    );
+    borderRadius = const BorderRadius.some(bottomRight: radius1, others: radius2);
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topLeft, radius2);
     expect(borderRadius.topRight, radius2);
@@ -211,7 +199,6 @@ void main() {
         bottomRight: radius5,
       ),
     );
-
 
     expect(
       const BorderRadius.only(
@@ -409,10 +396,7 @@ void main() {
     );
 
     // some with topStart
-    borderRadius = const BorderRadiusDirectional.some(
-      topStart: radius1,
-      others: radius2,
-    );
+    borderRadius = const BorderRadiusDirectional.some(topStart: radius1, others: radius2);
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topStart, radius1);
     expect(borderRadius.topEnd, radius2);
@@ -440,10 +424,7 @@ void main() {
     );
 
     // some with topEnd
-    borderRadius = const BorderRadiusDirectional.some(
-      topEnd: radius1,
-      others: radius2,
-    );
+    borderRadius = const BorderRadiusDirectional.some(topEnd: radius1, others: radius2);
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topStart, radius2);
     expect(borderRadius.topEnd, radius1);
@@ -471,10 +452,7 @@ void main() {
     );
 
     // some with bottomStart
-    borderRadius = const BorderRadiusDirectional.some(
-      bottomStart: radius1,
-      others: radius2,
-    );
+    borderRadius = const BorderRadiusDirectional.some(bottomStart: radius1, others: radius2);
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topStart, radius2);
     expect(borderRadius.topEnd, radius2);
@@ -502,10 +480,7 @@ void main() {
     );
 
     // some with bottomEnd
-    borderRadius = const BorderRadiusDirectional.some(
-      bottomEnd: radius1,
-      others: radius2,
-    );
+    borderRadius = const BorderRadiusDirectional.some(bottomEnd: radius1, others: radius2);
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topStart, radius2);
     expect(borderRadius.topEnd, radius2);

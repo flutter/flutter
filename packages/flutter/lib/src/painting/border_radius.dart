@@ -320,12 +320,11 @@ class BorderRadius extends BorderRadiusGeometry {
     Radius? bottomRight,
     required Radius others,
   }) : this.only(
-    topLeft: topLeft ?? others,
-    topRight: topRight ?? others,
-    bottomLeft: bottomLeft ?? others,
-    bottomRight: bottomRight ?? others,
-  );
-
+         topLeft: topLeft ?? others,
+         topRight: topRight ?? others,
+         bottomLeft: bottomLeft ?? others,
+         bottomRight: bottomRight ?? others,
+       );
 
   /// Returns a copy of this BorderRadius with the given fields replaced with
   /// the new values.
@@ -567,11 +566,11 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
     Radius? bottomEnd,
     required Radius others,
   }) : this.only(
-    topStart: topStart ?? others,
-    topEnd: topEnd ?? others,
-    bottomStart: bottomStart ?? others,
-    bottomEnd: bottomEnd ?? others,
-  );
+         topStart: topStart ?? others,
+         topEnd: topEnd ?? others,
+         bottomStart: bottomStart ?? others,
+         bottomEnd: bottomEnd ?? others,
+       );
 
   /// A border radius with all zero radii.
   ///

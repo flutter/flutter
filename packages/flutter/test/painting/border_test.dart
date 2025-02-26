@@ -88,10 +88,7 @@ void main() {
   test('Border.all constructor', () {
     const BorderSide defaultSide = BorderSide();
 
-    const BorderSide customSide = BorderSide(
-      color: Color(0xFFFFFFFF),
-      width: 4.0,
-    );
+    const BorderSide customSide = BorderSide(color: Color(0xFFFFFFFF), width: 4.0);
 
     final Border defaultBorder = Border.all();
     expect(defaultBorder.left, defaultSide);
@@ -99,10 +96,7 @@ void main() {
     expect(defaultBorder.right, defaultSide);
     expect(defaultBorder.bottom, defaultSide);
 
-    final Border customBorder = Border.all(
-      color: const Color(0xFFFFFFFF),
-      width: 4.0
-    );
+    final Border customBorder = Border.all(color: const Color(0xFFFFFFFF), width: 4.0);
     expect(customBorder.left, customSide);
     expect(customBorder.top, customSide);
     expect(customBorder.right, customSide);

@@ -401,12 +401,16 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// const EdgeInsets.some(bottom: 40, others: 8)
   /// ```
   /// {@end-tool}
-  const EdgeInsets.some({double? left, double? top, double? right, double? bottom, required double others})
-    : left = left ?? others,
-      top = top ?? others,
-      right = right ?? others,
-      bottom = bottom ?? others;
-
+  const EdgeInsets.some({
+    double? left,
+    double? top,
+    double? right,
+    double? bottom,
+    required double others,
+  }) : left = left ?? others,
+       top = top ?? others,
+       right = right ?? others,
+       bottom = bottom ?? others;
 
   /// Creates insets that match the given view padding.
   ///

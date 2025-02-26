@@ -48,10 +48,22 @@ void main() {
     expect(someRight.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(20, 20, 10, 20)));
 
     const EdgeInsets someBottom = EdgeInsets.some(bottom: 10, others: 20);
-    expect(someBottom.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(20, 20, 20, 10)));
-    expect(someBottom.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(20, 20, 20, 10)));
+    expect(
+      someBottom.resolve(TextDirection.ltr),
+      equals(const EdgeInsets.fromLTRB(20, 20, 20, 10)),
+    );
+    expect(
+      someBottom.resolve(TextDirection.rtl),
+      equals(const EdgeInsets.fromLTRB(20, 20, 20, 10)),
+    );
 
-    const EdgeInsets someAll = EdgeInsets.some(left: 10, top: 20, right: 30, bottom: 40, others: 50);
+    const EdgeInsets someAll = EdgeInsets.some(
+      left: 10,
+      top: 20,
+      right: 30,
+      bottom: 40,
+      others: 50,
+    );
     expect(someAll.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 20, 30, 40)));
     expect(someAll.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 20, 30, 40)));
 
@@ -120,8 +132,14 @@ void main() {
     expect(someEnd.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 20, 20, 20)));
 
     const EdgeInsetsDirectional someBottom = EdgeInsetsDirectional.some(bottom: 10, others: 20);
-    expect(someBottom.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(20, 20, 20, 10)));
-    expect(someBottom.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(20, 20, 20, 10)));
+    expect(
+      someBottom.resolve(TextDirection.ltr),
+      equals(const EdgeInsets.fromLTRB(20, 20, 20, 10)),
+    );
+    expect(
+      someBottom.resolve(TextDirection.rtl),
+      equals(const EdgeInsets.fromLTRB(20, 20, 20, 10)),
+    );
 
     const EdgeInsetsDirectional someAll = EdgeInsetsDirectional.some(
       start: 10,
