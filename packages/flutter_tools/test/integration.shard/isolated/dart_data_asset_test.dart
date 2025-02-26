@@ -35,6 +35,7 @@ void main() {
   late final Directory root;
   setUpAll(() async {
     processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
+    processManager.runSync(<String>[flutterBin, 'config', '--enable-dart-data-assets']);
     tempDirectory = fileSystem.directory(
       fileSystem.systemTempDirectory.createTempSync().resolveSymbolicLinksSync(),
     );
@@ -89,7 +90,7 @@ void main() {
                   // The flutter tool will print it's ready to accept keys (e.g.
                   // q=quit, ...)
                   // (This can be racy with app already running and printing)
-                  if (isWeb) 'To hot restart changes while running' else 'Flutter run key command',
+                  'Flutter run key command',
 
                   // Once the app runs it will print whether it found assets.
                   'VERSION: version1',
@@ -293,13 +294,13 @@ void writeHookLibrary(
       import 'package:native_assets_cli/data_assets.dart';
 
       void main(List<String> args) async {
-        await build(args, (BuildConfig config, BuildOutputBuilder output) async {
+        await build(args, (BuildInput input, BuildOutputBuilder output) async {
           for (final id in $available) {
-            output.dataAssets.add(
+            output.assets.data.add(
               DataAsset(
-                package: '$packageName',
-                name: '\$id',
-                file: config.packageRoot.resolve('asset/\$id.txt'),
+                package: input.packageName,
+                name: id,
+                file: input.packageRoot.resolve('asset/\$id.txt'),
               ),
             );
           }
@@ -307,7 +308,7 @@ void writeHookLibrary(
           // This is a workaround for an issue in the
           // `package:native_assets_builder` package:
           // -> See https://github.com/dart-lang/native/issues/1770
-          output.addDependency(config.packageRoot.resolve('hook/build.dart'));
+          output.addDependency(input.packageRoot.resolve('hook/build.dart'));
         });
       }
   ''');
