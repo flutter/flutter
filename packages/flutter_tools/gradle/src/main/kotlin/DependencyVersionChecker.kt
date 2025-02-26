@@ -2,6 +2,7 @@ package com.flutter.gradle
 
 import androidx.annotation.VisibleForTesting
 import com.android.build.api.AndroidPluginVersion
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -16,6 +17,9 @@ object DependencyVersionChecker {
     @VisibleForTesting internal const val AGP_NAME: String = "Android Gradle Plugin"
 
     @VisibleForTesting internal const val KGP_NAME: String = "Kotlin"
+
+    @VisibleForTesting
+    internal const val SDK_NAME: String = "Android SDK"
 
     // String constant that defines the name of the Gradle extra property that we set when
     // detecting that the project is using versions outside of Flutter's support range.
@@ -61,6 +65,11 @@ object DependencyVersionChecker {
             "($projectDirectory/build.gradle) by the ext.kotlin_version property.\n"
     }
 
+    @VisibleForTesting internal fun getPotentialSDKFix(projectDirectory: String): String =
+        "Your project's Android SDK version is typically " +
+            "defined in the android block of the `build.gradle` file " +
+            "($projectDirectory/app/build.gradle)."
+
     // The following versions define our support policy for Gradle, Java, AGP, and KGP.
     // Before updating any "error" version, ensure that you have updated the corresponding
     // "warn" version for a full release to provide advanced warning. See
@@ -81,6 +90,8 @@ object DependencyVersionChecker {
 
     @VisibleForTesting internal val errorKGPVersion: Version = Version(1, 7, 0)
 
+    @VisibleForTesting internal val warnSDKVersion: Version = Version(20, 0, 0)
+
     /**
      * Checks if the project's Android build time dependencies are each within the respective
      * version range that we support. When we can't find a version for a given dependency
@@ -91,6 +102,14 @@ object DependencyVersionChecker {
 
         checkGradleVersion(getGradleVersion(project), project)
         checkJavaVersion(getJavaVersion(), project)
+
+        project.afterEvaluate {
+            val sdkVersion = getSDKVersion(project)
+            if (sdkVersion != null) {
+                checkSDKVersion(sdkVersion, project)
+            }
+        }
+
         val agpVersion: AndroidPluginVersion? = getAGPVersion(project)
         if (agpVersion != null) {
             checkAGPVersion(agpVersion, project)
@@ -155,6 +174,25 @@ object DependencyVersionChecker {
         } else {
             Version.fromString(versionString as String)
         }
+    }
+
+    @VisibleForTesting internal fun getSDKVersion(project: Project): Version? {
+        val androidExtensionName = "android"
+        val androidExtension =
+            project.extensions.findByName(androidExtensionName) as? ApplicationExtension
+
+        if (androidExtension == null) {
+            project.logger.error("Android extension not found.")
+            return null
+        }
+
+        val minSdk = androidExtension.defaultConfig.minSdk
+        if (minSdk == null) {
+            project.logger.error("Android SDK version not found.")
+            return null
+        }
+
+        return Version(minSdk, 0, 0)
     }
 
     @VisibleForTesting internal fun getErrorMessage(
@@ -282,6 +320,23 @@ object DependencyVersionChecker {
                     version.toString(),
                     warnKGPVersion.toString(),
                     getPotentialKGPFix(project.rootDir.path)
+                )
+            project.logger.error(warnMessage)
+        }
+    }
+
+    @VisibleForTesting
+    internal fun checkSDKVersion(
+        version: Version,
+        project: Project,
+    ) {
+        if (version < warnSDKVersion) {
+            val warnMessage: String =
+                getWarnMessage(
+                    SDK_NAME,
+                    version.toString(),
+                    warnSDKVersion.toString(),
+                    getPotentialSDKFix(project.getRootDir().getPath()),
                 )
             project.logger.error(warnMessage)
         }
