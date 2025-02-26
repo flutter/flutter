@@ -2,6 +2,7 @@ package com.flutter.gradle
 
 import org.gradle.internal.impldep.org.junit.Assert.assertThrows
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -37,5 +38,31 @@ class DeeplinkTest {
         val deeplink2 = null
 
         assertThrows(NullPointerException::class.java, { deeplink1.equals(deeplink2) })
+    }
+
+    @Test
+    fun canCreateDeeplinkJson() {
+        val deeplink = Deeplink("scheme1", "host1", "path1", null)
+        val linkJson = deeplink.toJson()
+
+        assertTrue(linkJson.containsKey("scheme"))
+        assertTrue(linkJson.containsKey("host"))
+        assertTrue(linkJson.containsKey("path"))
+        assertFalse(linkJson.containsKey("intentFilterCheck"))
+    }
+
+    @Test
+    fun canCreateDeeplinkJsonWithIntentFilter() {
+        val intentFilterCheck = IntentFilterCheck()
+        intentFilterCheck.hasActionView = true
+        intentFilterCheck.hasDefaultCategory = true
+        val deeplink = Deeplink("scheme1", "host1", "path1", intentFilterCheck)
+        val linkJson = deeplink.toJson()
+
+        assertTrue(linkJson.containsKey("scheme"))
+        assertTrue(linkJson.containsKey("host"))
+        assertTrue(linkJson.containsKey("path"))
+        assertTrue(linkJson.containsKey("intentFilterCheck"))
+        assertContains(linkJson.toString(), intentFilterCheck.toJson().toString())
     }
 }
