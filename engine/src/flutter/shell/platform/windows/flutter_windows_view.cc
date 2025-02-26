@@ -841,7 +841,7 @@ void FlutterWindowsView::OnWindowStateEvent(HWND hwnd, WindowStateEvent event) {
   engine_->OnWindowStateEvent(hwnd, event);
 }
 
-bool FlutterWinddowsView::Focus() {
+bool FlutterWindowsView::Focus() {
   return binding_handler_->Focus();
 }
 

@@ -388,11 +388,11 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
                             SAFE_ACCESS(update, listening, false));
     }
   };
-  args.view_focus_change_request_callback = [](const FlutterViewFocusRequest* request,
-                                              void* user_data) {
-    auto host = static_cast<FlutterWindowsEngine*>(user_data);
-    host->OnViewFocusChangeRequest(request);
-  };
+  args.view_focus_change_request_callback =
+      [](const FlutterViewFocusChangeRequest* request, void* user_data) {
+        auto host = static_cast<FlutterWindowsEngine*>(user_data);
+        host->OnViewFocusChangeRequest(request);
+      };
 
   args.custom_task_runners = &custom_task_runners;
 
@@ -1005,7 +1005,8 @@ void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {
   }
 }
 
-void FlutterWindowsEngine::OnViewFocusChangeRequest(const FlutterViewFocusRequest* request) {
+void FlutterWindowsEngine::OnViewFocusChangeRequest(
+    const FlutterViewFocusChangeRequest* request) {
   std::shared_lock read_lock(views_mutex_);
 
   auto iterator = views_.find(request->view_id);
