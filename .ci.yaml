@@ -3091,7 +3091,6 @@ targets:
   # Samsung Galaxy S24, Impeller (Vulkan)
   - name: Linux_galaxy_s24 new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
