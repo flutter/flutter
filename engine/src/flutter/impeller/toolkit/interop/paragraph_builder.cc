@@ -4,7 +4,7 @@
 
 #include "impeller/toolkit/interop/paragraph_builder.h"
 
-#include "flutter/third_party/txt/src/skia/paragraph_builder_skia.h"
+#include "flutter/txt/src/skia/paragraph_builder_skia.h"
 #include "impeller/base/validation.h"
 #include "impeller/toolkit/interop/paragraph.h"
 
