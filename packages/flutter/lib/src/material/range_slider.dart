@@ -459,10 +459,9 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   }
 
   // Always keep the ValueIndicator visible on the Overlay; otherwise, it cannot be updated during the build phase.
-  late final OverlayPortalController _valueIndicatorOverlayPortalController =
-      OverlayPortalController()..show();
-  // Control whether the value indicator is visible only when it needs to be shown during dragging.
-  late final ValueNotifier<bool> _showValueIndicatorForDragged = ValueNotifier<bool>(false);
+  final OverlayPortalController _valueIndicatorOverlayPortalController = OverlayPortalController(
+    debugLabel: 'RangeSlider ValueIndicator',
+  )..show();
 
   @override
   void initState() {
@@ -514,7 +513,6 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     enableController.dispose();
     startPositionController.dispose();
     endPositionController.dispose();
-    _showValueIndicatorForDragged.dispose();
     super.dispose();
   }
 
@@ -730,7 +728,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         child: OverlayPortal(
           controller: _valueIndicatorOverlayPortalController,
           overlayChildBuilder: (BuildContext context) {
-            return _buildValueIndicator(sliderTheme.showValueIndicator);
+            return _buildValueIndicator(sliderTheme.showValueIndicator!);
           },
           child: _RangeSliderRenderObjectWidget(
             values: _unlerpRangeValues(widget.values),
@@ -752,36 +750,21 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   }
 
   final LayerLink _layerLink = LayerLink();
-  Widget _buildValueIndicator(ShowValueIndicator? showValueIndicator) {
+  Widget _buildValueIndicator(ShowValueIndicator showValueIndicator) {
     late final Widget valueIndicator = CompositedTransformFollower(
       link: _layerLink,
       child: _ValueIndicatorRenderObjectWidget(state: this),
     );
-    late final Widget valueIndicatorWhenDragged = ValueListenableBuilder<bool>(
-      valueListenable: _showValueIndicatorForDragged,
-      builder: (BuildContext context, bool showValueIndicator, Widget? child) {
-        return showValueIndicator ? valueIndicator : const SizedBox.shrink();
-      },
-    );
     return switch (showValueIndicator) {
-      ShowValueIndicator.alwaysVisible => valueIndicator,
+      ShowValueIndicator.never => const SizedBox.shrink(),
       ShowValueIndicator.onlyForDiscrete =>
-        widget.divisions != null ? valueIndicatorWhenDragged : const SizedBox.shrink(),
+        widget.divisions != null ? valueIndicator : const SizedBox.shrink(),
       ShowValueIndicator.onlyForContinuous =>
-        widget.divisions == null ? valueIndicatorWhenDragged : const SizedBox.shrink(),
-      ShowValueIndicator.onDrag || ShowValueIndicator.always => valueIndicatorWhenDragged,
-      _ => const SizedBox.shrink(),
+        widget.divisions == null ? valueIndicator : const SizedBox.shrink(),
+      ShowValueIndicator.alwaysVisible ||
+      ShowValueIndicator.always ||
+      ShowValueIndicator.onDrag => valueIndicator,
     };
-  }
-
-  void showValueIndicator() {
-    assert(mounted);
-    _showValueIndicatorForDragged.value = true;
-  }
-
-  void hideValueIndicator() {
-    assert(mounted);
-    _showValueIndicatorForDragged.value = false;
   }
 }
 
@@ -915,11 +898,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _valueIndicatorAnimation = CurvedAnimation(
       parent: _state.valueIndicatorController,
       curve: Curves.fastOutSlowIn,
-    )..addStatusListener((AnimationStatus status) {
-      if (status.isDismissed) {
-        _state.hideValueIndicator();
-      }
-    });
+    );
     _enableAnimation = CurvedAnimation(parent: _state.enableController, curve: Curves.easeInOut);
   }
 
@@ -1295,7 +1274,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       return;
     }
 
-    _state.showValueIndicator();
     final double tapValue = clampDouble(_getValueFromGlobalPosition(globalPosition), 0.0, 1.0);
     _lastThumbSelection = sliderTheme.thumbSelector!(
       textDirection,
