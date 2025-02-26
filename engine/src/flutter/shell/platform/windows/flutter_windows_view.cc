@@ -841,6 +841,10 @@ void FlutterWindowsView::OnWindowStateEvent(HWND hwnd, WindowStateEvent event) {
   engine_->OnWindowStateEvent(hwnd, event);
 }
 
+bool FlutterWinddowsView::Focus() {
+  return binding_handler_->Focus();
+}
+
 bool FlutterWindowsView::NeedsVsync() const {
   // If the Desktop Window Manager composition is enabled,
   // the system itself synchronizes with vsync.

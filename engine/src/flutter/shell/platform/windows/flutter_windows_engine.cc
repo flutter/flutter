@@ -1008,12 +1008,13 @@ void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {
 void FlutterWindowsEngine::OnViewFocusChangeRequest(const FlutterViewFocusRequest* request) {
   std::shared_lock read_lock(views_mutex_);
 
-  auto iterator = views_.findd(request->view_id);
+  auto iterator = views_.find(request->view_id);
   if (iterator == views_.end()) {
     return;
   }
 
   FlutterWindowsView* view = iterator->second;
+  view->Focus();
 }
 
 bool FlutterWindowsEngine::Present(const FlutterPresentViewInfo* info) {
