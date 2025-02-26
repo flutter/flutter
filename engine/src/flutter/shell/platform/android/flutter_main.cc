@@ -15,22 +15,18 @@
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/native_library.h"
-#include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
-#include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
+#include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "impeller/base/validation.h"
 #include "impeller/toolkit/android/proc_table.h"
-#include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "txt/platform.h"
 
 namespace flutter {
@@ -48,6 +44,8 @@ extern const intptr_t kPlatformStrongDillSize;
 namespace {
 
 fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
+
+static const constexpr char* kAndroidHuawei = "android-huawei";
 
 /// These are SoCs that crash when using AHB imports.
 static constexpr const char* kBLC[] = {
@@ -68,8 +66,9 @@ static constexpr const char* kBLC[] = {
 
 }  // anonymous namespace
 
-FlutterMain::FlutterMain(const flutter::Settings& settings)
-    : settings_(settings) {}
+FlutterMain::FlutterMain(const flutter::Settings& settings,
+                         flutter::AndroidRenderingAPI android_rendering_api)
+    : settings_(settings), android_rendering_api_(android_rendering_api) {}
 
 FlutterMain::~FlutterMain() = default;
 
@@ -83,6 +82,10 @@ FlutterMain& FlutterMain::Get() {
 
 const flutter::Settings& FlutterMain::GetSettings() const {
   return settings_;
+}
+
+flutter::AndroidRenderingAPI FlutterMain::GetAndroidRenderingAPI() {
+  return android_rendering_api_;
 }
 
 void FlutterMain::Init(JNIEnv* env,
@@ -116,8 +119,8 @@ void FlutterMain::Init(JNIEnv* env,
     }
   }
 
-  settings.android_rendering_api = SelectedRenderingAPI(settings);
-  switch (settings.android_rendering_api) {
+  AndroidRenderingAPI android_rendering_api = SelectedRenderingAPI(settings);
+  switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
     case AndroidRenderingAPI::kSkiaOpenGLES:
       settings.enable_impeller = false;
@@ -187,8 +190,7 @@ void FlutterMain::Init(JNIEnv* env,
 
   // Not thread safe. Will be removed when FlutterMain is refactored to no
   // longer be a singleton.
-  g_flutter_main.reset(new FlutterMain(settings));
-
+  g_flutter_main.reset(new FlutterMain(settings, android_rendering_api));
   g_flutter_main->SetupDartVMServiceUriCallback(env);
 }
 
@@ -307,6 +309,17 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     __system_property_get("ro.product.model", product_model);
     if (IsDeviceEmulator(product_model)) {
       // Avoid using Vulkan on known emulators.
+      return kVulkanUnsupportedFallback;
+    }
+
+    __system_property_get("ro.com.google.clientidbase", product_model);
+    if (strcmp(product_model, kAndroidHuawei) == 0) {
+      // Avoid using Vulkan on Huawei as AHB imports do not
+      // consistently work.
+    }
+
+    if (__system_property_find("ro.vendor.mediatek.platform") != nullptr) {
+      // Probably MediaTek. Avoid Vulkan.
       return kVulkanUnsupportedFallback;
     }
 
