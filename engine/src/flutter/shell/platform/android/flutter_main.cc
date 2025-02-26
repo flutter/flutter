@@ -313,7 +313,7 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     }
 
     __system_property_get("ro.com.google.clientidbase", product_model);
-    if (strcmp(product_model, kAndroidHuawei)) {
+    if (strcmp(product_model, kAndroidHuawei) == 0) {
       // Avoid using Vulkan on Huawei as AHB imports do not
       // consistently work.
       return kVulkanUnsupportedFallback;
