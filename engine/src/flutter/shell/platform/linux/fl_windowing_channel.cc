@@ -45,6 +45,8 @@ static gboolean is_valid_size_argument(FlValue* value) {
              FL_VALUE_TYPE_FLOAT;
 }
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(FlWindowingSize, g_free)
+
 static FlWindowingSize* parse_size_value(FlValue* value) {
   FlWindowingSize* size = g_new0(FlWindowingSize, 1);
   size->width = fl_value_get_float(fl_value_get_list_value(value, 0));
@@ -100,10 +102,10 @@ static FlMethodResponse* create_regular(FlWindowingChannel* self,
     return FL_METHOD_RESPONSE(fl_method_error_response_new(
         kBadArgumentsError, "Missing/invalid size argument", nullptr));
   }
-  g_autofree FlWindowingSize* size = parse_size_value(size_value);
+  g_autoptr(FlWindowingSize) size = parse_size_value(size_value);
 
   FlValue* min_size_value = fl_value_lookup_string(args, kMinSizeKey);
-  g_autofree FlWindowingSize* min_size = nullptr;
+  g_autoptr(FlWindowingSize) min_size = nullptr;
   if (min_size_value != nullptr) {
     if (!is_valid_size_argument(min_size_value)) {
       return FL_METHOD_RESPONSE(fl_method_error_response_new(
@@ -113,7 +115,7 @@ static FlMethodResponse* create_regular(FlWindowingChannel* self,
   }
 
   FlValue* max_size_value = fl_value_lookup_string(args, kMaxSizeKey);
-  g_autofree FlWindowingSize* max_size = nullptr;
+  g_autoptr(FlWindowingSize) max_size = nullptr;
   if (max_size_value != nullptr) {
     if (!is_valid_size_argument(max_size_value)) {
       return FL_METHOD_RESPONSE(fl_method_error_response_new(
@@ -160,10 +162,7 @@ static FlMethodResponse* modify_regular(FlWindowingChannel* self,
   }
   int64_t view_id = fl_value_get_int(view_id_value);
 
-  // NOTE(robert-ancell) - clang_tidy doesn't seem to recognise g_autofree here
-  // and thinks this is leaking.
-
-  g_autofree FlWindowingSize* size = nullptr;
+  g_autoptr(FlWindowingSize) size = nullptr;
   FlValue* size_value = fl_value_lookup_string(args, kSizeKey);
   if (size_value != nullptr) {
     if (!is_valid_size_argument(size_value)) {
