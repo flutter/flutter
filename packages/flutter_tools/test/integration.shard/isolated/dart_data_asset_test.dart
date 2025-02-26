@@ -14,6 +14,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart';
+import 'package:yaml_edit/yaml_edit.dart' show YamlEditor;
 
 import '../../src/common.dart';
 import '../test_utils.dart' show ProcessResultMatcher, fileSystem, flutterBin, platform;
@@ -220,12 +221,13 @@ Future<Directory> createDataAssetApp(String packageName, Directory tempDirectory
   expect(result, const ProcessResultMatcher());
 
   final Directory root = tempDirectory.childDirectory(packageName);
+
   final File pubspecFile = root.childFile('pubspec.yaml');
-  await replaceFileSection(
-    pubspecFile,
-    'dependencies:\n',
-    'dependencies:\n  native_assets_cli: ^0.11.0\n',
-  );
+  final String content = await pubspecFile.readAsString();
+  final YamlEditor yamlEditor = YamlEditor(content);
+  yamlEditor.update(<String>['dependencies'], <String, String>{'native_assets_cli': '^0.11.0'});
+  pubspecFile.writeAsStringSync(yamlEditor.toString());
+
   await pinDependencies(pubspecFile);
 
   final File mainFile = root.childDirectory('lib').childFile('main.dart');
@@ -266,12 +268,10 @@ Future<Directory> createDataAssetApp(String packageName, Directory tempDirectory
         }
     ''');
 
-  final ProcessResult result2 = await processManager.run(<String>[
-    flutterBin,
-    'pub',
-    'get',
-  ], workingDirectory: root.path);
-  expect(result2, const ProcessResultMatcher());
+  expect(
+    await processManager.run(<String>[flutterBin, 'pub', 'get'], workingDirectory: root.path),
+    const ProcessResultMatcher(),
+  );
 
   return root;
 }
@@ -347,12 +347,7 @@ void writeHelperLibrary(Directory root, String version, List<String> assetIds) {
       ''');
 }
 
-void writeFile(File file, String content) {
-  file.parent.createSync(recursive: true);
-  file.writeAsStringSync(content);
-}
-
-Future<void> replaceFileSection(File file, Pattern pattern, String replacement) async {
-  final String content = await file.readAsString();
-  await file.writeAsString(content.replaceFirst(pattern, replacement));
-}
+void writeFile(File file, String content) =>
+    file
+      ..createSync(recursive: true)
+      ..writeAsStringSync(content);
