@@ -24,8 +24,6 @@ class BaseFlutterTaskHelper(
     // cache.
     @VisibleForTesting
     internal fun generateRuleNames(baseFlutterTask: BaseFlutterTask): List<String> {
-//        val bob = baseFlutterTask.buildMode
-
         val ruleNames: List<String> =
             when {
                 baseFlutterTask.buildMode == "debug" -> listOf("debug_android_application")
@@ -37,14 +35,6 @@ class BaseFlutterTaskHelper(
             }
         return ruleNames
     }
-
-    @VisibleForTesting
-    internal fun experimentCreateExecSpec(): Action<ExecSpec> =
-        Action<ExecSpec> {
-            args("--local-engine", baseFlutterTask.localEngine)
-            args("assemble")
-        }
-
 
     @VisibleForTesting
     internal fun createExecSpecActionFromTask(): Action<ExecSpec> =
@@ -111,7 +101,7 @@ class BaseFlutterTaskHelper(
                 args("--ExtraFrontEndOptions=${baseFlutterTask.extraFrontEndOptions}")
             }
 
-//            args("-dAndroidArchs=${baseFlutterTask.targetPlatformValues.joinToString("")}")
+            args("-dAndroidArchs=${baseFlutterTask.targetPlatformValues.joinToString(" ")}")
             args("-dMinSdkVersion=${baseFlutterTask.minSdkVersion}")
             args(generateRuleNames(baseFlutterTask))
         }
