@@ -892,14 +892,6 @@ void main() {
     );
     final TestGesture gesture = await tester.startGesture(
       tester.getTopLeft(find.byType(CupertinoButton)),
-      kind: switch (defaultTargetPlatform) {
-        TargetPlatform.iOS ||
-        TargetPlatform.android ||
-        TargetPlatform.fuchsia => PointerDeviceKind.touch,
-        TargetPlatform.macOS ||
-        TargetPlatform.windows ||
-        TargetPlatform.linux => PointerDeviceKind.mouse,
-      },
     );
     addTearDown(gesture.removePointer);
     // Check opacity.
