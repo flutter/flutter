@@ -328,6 +328,8 @@ class FlutterWindowsEngine {
   // channel.
   virtual void OnChannelUpdate(std::string name, bool listening);
 
+  virtual void OnViewFocusChangeRequest(const FlutterViewFocusRequest* request);
+
  private:
   // Allows swapping out embedder_api_ calls in tests.
   friend class EngineModifier;

@@ -388,6 +388,11 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
                             SAFE_ACCESS(update, listening, false));
     }
   };
+  args.view_focus_change_request_callback = [](const FlutterViewFocusRequest* request,
+                                              void* user_data) {
+    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+    host->OnViewFocusChangeRequest(request);
+  };
 
   args.custom_task_runners = &custom_task_runners;
 
@@ -998,6 +1003,17 @@ void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {
   } else if (name == "flutter/lifecycle" && listening) {
     lifecycle_manager_->BeginProcessingLifecycle();
   }
+}
+
+void FlutterWindowsEngine::OnViewFocusChangeRequest(const FlutterViewFocusRequest* request) {
+  std::shared_lock read_lock(views_mutex_);
+
+  auto iterator = views_.findd(request->view_id);
+  if (iterator == views_.end()) {
+    return;
+  }
+
+  FlutterWindowsView* view = iterator->second;
 }
 
 bool FlutterWindowsEngine::Present(const FlutterPresentViewInfo* info) {
