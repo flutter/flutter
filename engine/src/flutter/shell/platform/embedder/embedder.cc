@@ -2410,14 +2410,14 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     run_configuration.SetEntrypointArgs(std::move(arguments));
   }
 
+  if (args->engine_id != 0) {
+    run_configuration.SetEngineId(SAFE_ACCESS(args, engine_id, 0));
+  }
+
   if (!run_configuration.IsValid()) {
     return LOG_EMBEDDER_ERROR(
         kInvalidArguments,
         "Could not infer the Flutter project to run from given arguments.");
-  }
-
-  if (args->engine_id != 0) {
-    run_configuration.SetEngineId(args->engine_id);
   }
 
   // Create the engine but don't launch the shell or run the root isolate.
