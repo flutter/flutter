@@ -180,8 +180,7 @@ void SkStopwatchVisualizer::Visualize(DlCanvas* canvas,
 
   // Draw the cached surface onto the output canvas.
   auto image = DlImage::Make(visualize_cache_surface_->makeImageSnapshot());
-  canvas->DrawImage(image, SkPoint{rect.GetX(), rect.GetY()},
-                    DlImageSampling::kNearestNeighbor);
+  canvas->DrawImage(image, rect.GetOrigin(), DlImageSampling::kNearestNeighbor);
 }
 
 }  // namespace flutter
