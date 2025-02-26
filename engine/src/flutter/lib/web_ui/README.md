@@ -258,7 +258,7 @@ Build the Flutter Web engine locally:
 felt build
 ```
 
-Run a Flutter app in debug mode using your lcoally built Web Engine artifacts:
+Run a Flutter app in debug mode using your locally built Web Engine artifacts:
 
 ```
 flutter run --local-web-sdk=wasm_release --debug -d chrome
