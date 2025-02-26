@@ -61,7 +61,7 @@ class _OpacityWrappedMainAppState extends State<_OpacityWrappedMainApp> {
           color: Colors.white,
           child: Stack(
             alignment: Alignment.center,
-            children: [
+            children: <Widget>[
               TextButton(
                 key: const ValueKey<String>('ToggleOpacity'),
                 onPressed: _toggleOpacity,
