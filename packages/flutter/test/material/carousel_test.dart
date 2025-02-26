@@ -1413,6 +1413,24 @@ void main() {
       expect(buttonPressed, isTrue);
     },
   );
+  
+  testWidgets('CarouselView does not crash if itemExtent is zero', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 100,
+            child: CarouselView(
+              itemExtent: 0,
+              children: <Widget>[Container(color: Colors.red, width: 100, height: 100)],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 
   group('CarouselController.animateToItem', () {
     testWidgets('CarouselView.weighted horizontal, not reversed, flexWeights [7,1]', (
@@ -1607,7 +1625,6 @@ void main() {
         expect(itemRect.right, lessThanOrEqualTo(carouselRight));
       }
     });
-  });
 }
 
 Finder getItem(int index) {

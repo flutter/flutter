@@ -14,7 +14,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': '5336e20498d9d95f28ea2d70dee8f2be5d949f22',
+  'skia_revision': '47b84f354604206d35d1bfe2eb39a3d4eca081bf',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -637,7 +637,7 @@ deps = {
     ],
     'dep_type': 'cipd',
   },
-  'third_party/ninja': {
+  'engine/src/flutter/third_party/ninja': {
     'packages': [
       {
         'package': 'infra/3pp/tools/ninja/${{platform}}',
