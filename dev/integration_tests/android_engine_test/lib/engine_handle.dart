@@ -15,9 +15,7 @@ void main() {
   ensureAndroidDevice();
   enableFlutterDriverExtension(
     handler: (String? command) async {
-      return json.encode(<String, Object?>{
-        'engineId': PlatformDispatcher.instance.engineId,
-      });
+      return json.encode(<String, Object?>{'engineId': PlatformDispatcher.instance.engineId});
     },
     commands: <CommandExtension>[nativeDriverCommands],
   );
