@@ -246,20 +246,20 @@ class FlutterDeviceScreenshot {
       File mypath=new File(directory,"camille_image_1.jpg");
 
       FileOutputStream fos = null;
-      try {
-          fos = new FileOutputStream(mypath);
-      // Use the compress method on the BitMap object to write image to the OutputStream
-          bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-      } catch (Exception e) {
-            e.printStackTrace();
-      } finally {
-          try {
-            fos.close();
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-      }
-      Log.e("CAMILLE: image directory:", directory.getAbsolutePath());
+      // try {
+      //     fos = new FileOutputStream(mypath);
+      // // Use the compress method on the BitMap object to write image to the OutputStream
+      //     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+      // } catch (Exception e) {
+      //       e.printStackTrace();
+      // } finally {
+      //     try {
+      //       fos.close();
+      //     } catch (IOException e) {
+      //       e.printStackTrace();
+      //     }
+      // }
+      // Log.e("CAMILLE: image directory:", directory.getAbsolutePath());
 
       final ByteArrayOutputStream output = new ByteArrayOutputStream();
       bitmap.compress(Bitmap.CompressFormat.PNG, /*quality=*/ 100, output);
@@ -281,20 +281,20 @@ class FlutterDeviceScreenshot {
       File mypath=new File(directory,"camille_image_2.png");
 
       FileOutputStream fos = null;
-      try {
-          fos = new FileOutputStream(mypath);
-      // Use the compress method on the BitMap object to write image to the OutputStream
-          bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-      } catch (Exception e) {
-            e.printStackTrace();
-      } finally {
-          try {
-            fos.close();
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-      }
-      Log.e("CAMILLE: image directory:", directory.getAbsolutePath());
+      // try {
+      //     fos = new FileOutputStream(mypath);
+      // // Use the compress method on the BitMap object to write image to the OutputStream
+      //     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+      // } catch (Exception e) {
+      //       e.printStackTrace();
+      // } finally {
+      //     try {
+      //       fos.close();
+      //     } catch (IOException e) {
+      //       e.printStackTrace();
+      //     }
+      // }
+      // Log.e("CAMILLE: image directory:", directory.getAbsolutePath());
 
     final int[] flutterViewLocation = new int[2];
     flutterView.getLocationInWindow(flutterViewLocation);

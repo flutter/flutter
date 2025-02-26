@@ -24,24 +24,21 @@ void main() {
       IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   String _adbPath() {
-  final String? androidHome =
-      Platform.environment['ANDROID_HOME'] ?? Platform.environment['ANDROID_SDK_ROOT'];
-  if (androidHome == null) {
-    return 'adb';
-  } else {
-    return p.join(androidHome, 'platform-tools', 'adb');
+    final String? androidHome =
+        Platform.environment['ANDROID_HOME'] ?? Platform.environment['ANDROID_SDK_ROOT'];
+    if (androidHome == null) {
+      return 'adb';
+    } else {
+      return p.join(androidHome, 'platform-tools', 'adb');
+    }
   }
-}
 
   // CAMILLE: would we need a driver?
   testWidgets('verify screenshot', (WidgetTester tester) async {
     /////// SANITY CHECK:
     /////////////// CAMILLE: this will not work because test runs on device
     // print('>>>> CAMILLE adb path: ${_adbPath()}'); // equals 'adb' because androidHome is null
-    // final Process run = await Process.start(_adbPath(), const <String>[
-    //     'shell',
-    //     'screencap',
-    //   ]);
+    // final Process run = await Process.start('shell', const <String>['--help']);
     // await run.exitCode;
     ////////////////////////////////////////////////////////////////////////
     // CAMILLE: we may be able to call screncap without adb shell, adb shell means run this command on the device

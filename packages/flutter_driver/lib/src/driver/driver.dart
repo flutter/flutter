@@ -613,7 +613,7 @@ abstract class FlutterDriver {
   ///
   /// The image will be returned as a PNG.
   ///
-  /// **Warning:** This is not reliable.
+  /// **Warning:** This is not reliable. LOL
   ///
   /// There is a two-second artificial delay before screenshotting. The delay
   /// here is to deal with a race between the driver script and the raster

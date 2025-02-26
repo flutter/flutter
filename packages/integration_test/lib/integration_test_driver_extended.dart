@@ -38,7 +38,7 @@ Future<void> writeResponseData(
 
 /// Adaptor to run an integration test using `flutter drive`.
 ///
-/// To an integration test `<test_name>.dart` using `flutter drive`, put a file named
+/// To integration test `<test_name>.dart` using `flutter drive`, put a file named
 /// `<test_name>_test.dart` in the app's `test_driver` directory:
 ///
 /// ```dart
@@ -76,16 +76,18 @@ Future<void> writeResponseData(
 /// function will be called to process the [Response.data] when a test fails.
 /// The default value is `false`.
 Future<void> integrationDriver({
-  FlutterDriver? driver, // CAMILLE: why a driver? because it runs on the host?
+  FlutterDriver? driver, // CAMILLE: why a driver? because it runs on the host? yes
   ScreenshotCallback? onScreenshot,
   ResponseDataCallback? responseDataCallback = writeResponseData,
   bool writeResponseOnFailure = false,
 }) async {
-  driver ??= await FlutterDriver.connect();
+  driver ??= await FlutterDriver.connect(); // CAMILLE: connecting to the device
   // Test states that it's waiting on web driver commands.
   // [DriverTestMessage] is converted to string since json format causes an
   // error if it's used as a message for requestData.
-  String jsonResponse = await driver.requestData(DriverTestMessage.pending().toString());
+  String jsonResponse = await driver.requestData(
+    DriverTestMessage.pending().toString(),
+  ); // CAMILLE: sends pending message
 
   final Map<String, bool> onScreenshotResults = <String, bool>{};
 
@@ -100,7 +102,7 @@ Future<void> integrationDriver({
     if (webDriverCommand == '${WebDriverCommandType.screenshot}') {
       assert(onScreenshot != null, 'screenshot command requires an onScreenshot callback');
       // Use `driver.screenshot()` method to get a screenshot of the web page.
-      final List<int> screenshotImage = await driver.screenshot();
+      final List<int> screenshotImage = await driver.screenshot(); // CAMILLE: take screenshot, 2
       final String screenshotName = response.data!['screenshot_name']! as String;
       final Map<String, Object?>? args =
           (response.data!['args'] as Map<String, Object?>?)?.cast<String, Object?>();
