@@ -1255,7 +1255,6 @@ void main() {
           '--trace-systrace',
           '--trace-to-file=path/to/trace.binpb',
           '--verbose-system-logs',
-          '--null-assertions',
           '--native-null-assertions',
           '--enable-impeller',
           '--enable-vulkan-validation',
