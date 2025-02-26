@@ -3761,15 +3761,7 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 class SemanticsOwner extends ChangeNotifier {
   /// Creates a [SemanticsOwner] that manages zero or more [SemanticsNode] objects.
   SemanticsOwner({required this.onSemanticsUpdate}) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/semantics.dart',
-        className: '$SemanticsOwner',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('semantics', 'SemanticsOwner', this));
   }
 
   /// The [onSemanticsUpdate] callback is expected to dispatch [SemanticsUpdate]s
@@ -3791,9 +3783,7 @@ class SemanticsOwner extends ChangeNotifier {
 
   @override
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _dirtyNodes.clear();
     _nodes.clear();
     _detachedNodes.clear();
