@@ -146,6 +146,7 @@ void main() {
       addTearDown(controller.dispose);
       await tester.pumpWidget(buildFrame(controller));
       expect(controller.selectedItem, 2);
+      expect(controller.offset, 200.0);
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 2')),
         offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
@@ -154,6 +155,7 @@ void main() {
       controller.jumpToItem(20);
       await tester.pump();
       expect(controller.selectedItem, 20);
+      expect(controller.offset, 2000.0);
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 20')),
         offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
@@ -163,6 +165,7 @@ void main() {
       addTearDown(controller.dispose);
       await tester.pumpWidget(buildFrame(controller));
       expect(controller.selectedItem, 20);
+      expect(controller.offset, 2000.0);
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 20')),
         offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
@@ -172,6 +175,7 @@ void main() {
       addTearDown(controller.dispose);
       await tester.pumpWidget(buildFrame(controller));
       expect(controller.selectedItem, 10);
+      expect(controller.offset, 1000.0);
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 10')),
         offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
