@@ -677,18 +677,21 @@ Future<DartBuildResult> _runDartBuild({
         if (codeAssetSupport) CodeAsset.type,
         if (dataAssetSupport) DataAsset.type,
       ],
-      inputCreator:
-          () =>
-              BuildInputBuilder()
-                ..config.setupCode(
-                  targetArchitecture: architecture,
-                  linkModePreference: LinkModePreference.dynamic,
-                  cCompiler: cCompilerConfig,
-                  targetOS: targetOS!,
-                  android: androidConfig,
-                  iOS: iosConfig,
-                  macOS: macOSConfig,
-                ),
+      inputCreator: () {
+        final BuildInputBuilder buildInputBuilder = BuildInputBuilder();
+        if (targetOS != null) {
+          buildInputBuilder.config.setupCode(
+            targetArchitecture: architecture,
+            linkModePreference: LinkModePreference.dynamic,
+            cCompiler: cCompilerConfig,
+            targetOS: targetOS,
+            android: androidConfig,
+            iOS: iosConfig,
+            macOS: macOSConfig,
+          );
+        }
+        return buildInputBuilder;
+      },
       inputValidator:
           (BuildInput config) async => <String>[
             if (codeAssetSupport) ...await validateCodeAssetBuildInput(config),
@@ -719,18 +722,21 @@ Future<DartBuildResult> _runDartBuild({
         if (codeAssetSupport) CodeAsset.type,
         if (dataAssetSupport) DataAsset.type,
       ],
-      inputCreator:
-          () =>
-              LinkInputBuilder()
-                ..config.setupCode(
-                  targetArchitecture: architecture,
-                  linkModePreference: LinkModePreference.dynamic,
-                  cCompiler: cCompilerConfig,
-                  targetOS: targetOS!,
-                  android: androidConfig,
-                  iOS: iosConfig,
-                  macOS: macOSConfig,
-                ),
+      inputCreator: () {
+        final LinkInputBuilder linkInputBuilder = LinkInputBuilder();
+        if (targetOS != null) {
+          linkInputBuilder.config.setupCode(
+            targetArchitecture: architecture,
+            linkModePreference: LinkModePreference.dynamic,
+            cCompiler: cCompilerConfig,
+            targetOS: targetOS,
+            android: androidConfig,
+            iOS: iosConfig,
+            macOS: macOSConfig,
+          );
+        }
+        return linkInputBuilder;
+      },
       inputValidator:
           (LinkInput config) async => <String>[
             if (codeAssetSupport) ...await validateCodeAssetLinkInput(config),
