@@ -135,20 +135,11 @@ abstract class BaseFlutterTask : DefaultTask() {
         return depfiles
     }
 
-    // base flutter task will have a reference to a the util class (w/ business logic)
-    // in build bundle, there will be something to check preconditions
-    // maybe there's a function called generate args that returns a string
-    //
-    //
     fun buildBundle() {
-        // might be passing in the Task instead of the parameter
-        // below sourceDir is the parameter
         val helper = BaseFlutterTaskHelper(baseFlutterTask = this)
         helper.checkPreConditions()
-
         intermediateDir.mkdirs()
 
-        // maybe i can pass in logging...?
         logging.captureStandardError(LogLevel.ERROR)
         project.exec(helper.createExecSpecActionFromTask())
     }
