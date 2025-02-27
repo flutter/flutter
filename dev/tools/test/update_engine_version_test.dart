@@ -73,12 +73,16 @@ void main() {
     // This gives a "dirty" check that we did not change the output characteristics
     // of the tool without adding new tests for the new files.
     final Set<String> expectedFiles = <String>{
-      'bin/cache/engine.realm',
-      'bin/cache/engine.stamp',
-      'bin/internal/${localFs.path.basename(testRoot.binInternalUpdateEngineVersion.path)}',
-      'bin/internal/engine.realm',
-      'bin/internal/engine.version',
-      'engine/src/.gn',
+      localFs.path.join('bin', 'cache', 'engine.realm'),
+      localFs.path.join('bin', 'cache', 'engine.stamp'),
+      localFs.path.join(
+        'bin',
+        'internal',
+        localFs.path.basename(testRoot.binInternalUpdateEngineVersion.path),
+      ),
+      localFs.path.join('bin', 'internal', 'engine.realm'),
+      localFs.path.join('bin', 'internal', 'engine.version'),
+      localFs.path.join('engine/src/.gn'),
       'DEPS',
     };
     final Set<String> currentFiles =
