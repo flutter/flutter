@@ -271,7 +271,8 @@ Run a Flutter app in debug mode using your locally built Web Engine artifacts:
   ```
   To see your Flutter app, navigate your browser to http://localhost:8080.
   This option is useful if you want to keep your browser window when you
-  you restart `flutter run`.
+  you restart `flutter run`, or, if you need to debug browsers that aren't
+  supported by `flutter run`, such as Firefox and Safari.
 
 You can use [Chrome DevTools][7] to debug the Flutter Web engine.
 To open Chrome DevTools, right click and press **Inspect** on the Chrome window.
