@@ -62,6 +62,15 @@ TEST(MutatorsStack, PushClipRRect) {
   ASSERT_TRUE(iter->get()->GetRRect() == rrect);
 }
 
+TEST(MutatorsStack, PushClipRSE) {
+  MutatorsStack stack;
+  auto rse = DlRoundSuperellipse();
+  stack.PushClipRSE(rse);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kClipRSE);
+  ASSERT_TRUE(iter->get()->GetRSE() == rse);
+}
+
 TEST(MutatorsStack, PushClipPath) {
   MutatorsStack stack;
   DlPath path;
@@ -197,6 +206,11 @@ TEST(Mutator, Initialization) {
   ASSERT_TRUE(mutator2.GetType() == MutatorType::kClipRRect);
   ASSERT_TRUE(mutator2.GetRRect() == rrect);
 
+  DlRoundSuperellipse rse = DlRoundSuperellipse();
+  Mutator mutator2se = Mutator(rse);
+  ASSERT_TRUE(mutator2se.GetType() == MutatorType::kClipRSE);
+  ASSERT_TRUE(mutator2se.GetRSE() == rse);
+
   DlPath path;
   Mutator mutator3 = Mutator(path);
   ASSERT_TRUE(mutator3.GetType() == MutatorType::kClipPath);
@@ -227,6 +241,11 @@ TEST(Mutator, CopyConstructor) {
   Mutator mutator2 = Mutator(rrect);
   Mutator copy2 = Mutator(mutator2);
   ASSERT_TRUE(mutator2 == copy2);
+
+  DlRoundSuperellipse rse = DlRoundSuperellipse();
+  Mutator mutator2se = Mutator(rse);
+  Mutator copy2se = Mutator(mutator2se);
+  ASSERT_TRUE(mutator2se == copy2se);
 
   DlPath path;
   Mutator mutator3 = Mutator(path);
@@ -264,6 +283,11 @@ TEST(Mutator, Equality) {
   Mutator mutator3 = Mutator(rrect);
   Mutator other_mutator3 = Mutator(rrect);
   ASSERT_TRUE(mutator3 == other_mutator3);
+
+  DlRoundSuperellipse rse = DlRoundSuperellipse();
+  Mutator mutator3se = Mutator(rse);
+  Mutator other_mutator3se = Mutator(rse);
+  ASSERT_TRUE(mutator3se == other_mutator3se);
 
   DlPath path;
   flutter::Mutator mutator4 = flutter::Mutator(path);

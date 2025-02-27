@@ -644,7 +644,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const DlRoundRect& clip_rr
   // 500 points in UIKit for devices that has screenScale of 2. We need to scale the transformMatrix
   // down to the logical resoltion before applying it to the layer of PlatformView.
   flutter::DlScalar pointScale = 1.0 / screenScale;
-  transformMatrix = transformMatrix * DlMatrix::MakeScale({pointScale, pointScale, 1});
+  transformMatrix = DlMatrix::MakeScale({pointScale, pointScale, 1}) * transformMatrix;
 
   // Reverse the offset of the clipView.
   // The clipView's frame includes the final translate of the final transform matrix.
@@ -654,7 +654,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const DlRoundRect& clip_rr
   // Note that the transforms are not applied to the clipping paths because clipping paths happen on
   // the mask view, whose origin is always (0,0) to the _flutterView.
   impeller::Vector3 origin = impeller::Vector3(clipView.frame.origin.x, clipView.frame.origin.y);
-  transformMatrix = transformMatrix * DlMatrix::MakeTranslation(-origin);
+  transformMatrix = DlMatrix::MakeTranslation(-origin) * transformMatrix;
 
   embeddedView.layer.transform = GetCATransform3DFromDlMatrix(transformMatrix);
 }
