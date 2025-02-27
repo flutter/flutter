@@ -24,14 +24,14 @@ If the versions chosen are not known by [gradle_utils.dart](https://github.com/f
 ```
 // OK
 android {
-  compileSdk flutter.compileSdkVersion
+  compileSdk = flutter.compileSdkVersion
 }
 ```
 
 ```
 // OK if flutter.compileSdkVersion is not available like in an add to app example.
 android {
-  compileSdk 35
+  compileSdk = 35
 }
 ```
 
@@ -53,14 +53,14 @@ android {
 ```
 // OK
 defaultConfig {
-  targetSdk flutter.targetSdkVersion
+  targetSdk = flutter.targetSdkVersion
 }
 ```
 
 ```
 // OK if flutter.compileSdkVersion is not available like in an add to app example.
 defaultConfig {
-  targetSdk 35
+  targetSdk = 35
 }
 ```
 
