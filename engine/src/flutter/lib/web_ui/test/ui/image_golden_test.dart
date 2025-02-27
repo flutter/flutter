@@ -414,10 +414,11 @@ Future<void> testMain() async {
       final DomHTMLImageElement image = createDomHTMLImageElement();
       final Completer<void> completer = Completer<void>();
       late final DomEventListener loadListener;
-      loadListener = createDomEventListener((DomEvent event) {
-        completer.complete();
-        image.removeEventListener('load', loadListener);
-      });
+      loadListener =
+          (DomEvent event) {
+            completer.complete();
+            image.removeEventListener('load', loadListener);
+          }.toJS;
       image.addEventListener('load', loadListener);
       image.src = url;
       await completer.future;
@@ -457,10 +458,11 @@ Future<void> testMain() async {
       final DomHTMLImageElement image = createDomHTMLImageElement();
       final Completer<void> completer = Completer<void>();
       late final DomEventListener loadListener;
-      loadListener = createDomEventListener((DomEvent event) {
-        completer.complete();
-        image.removeEventListener('load', loadListener);
-      });
+      loadListener =
+          (DomEvent event) {
+            completer.complete();
+            image.removeEventListener('load', loadListener);
+          }.toJS;
       image.addEventListener('load', loadListener);
       image.src = url;
       await completer.future;

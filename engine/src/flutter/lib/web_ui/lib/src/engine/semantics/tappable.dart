@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -44,9 +46,10 @@ class SemanticButton extends SemanticRole {
 /// See also [ClickDebouncer].
 class Tappable extends SemanticBehavior {
   Tappable(super.semanticsObject, super.owner) {
-    _clickListener = createDomEventListener((DomEvent click) {
-      PointerBinding.clickDebouncer.onClick(click, viewId, semanticsObject.id, _isListening);
-    });
+    _clickListener =
+        (DomEvent click) {
+          PointerBinding.clickDebouncer.onClick(click, viewId, semanticsObject.id, _isListening);
+        }.toJS;
     owner.element.addEventListener('click', _clickListener);
   }
 

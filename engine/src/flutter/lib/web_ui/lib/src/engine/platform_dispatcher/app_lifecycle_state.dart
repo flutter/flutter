@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
@@ -88,21 +89,24 @@ class _BrowserAppLifecycleState extends AppLifecycleState {
     _subscriptions.clear();
   }
 
-  late final DomEventListener _focusListener = createDomEventListener((DomEvent event) {
-    onAppLifecycleStateChange(ui.AppLifecycleState.resumed);
-  });
+  late final DomEventListener _focusListener =
+      (DomEvent event) {
+        onAppLifecycleStateChange(ui.AppLifecycleState.resumed);
+      }.toJS;
 
-  late final DomEventListener _blurListener = createDomEventListener((DomEvent event) {
-    onAppLifecycleStateChange(ui.AppLifecycleState.inactive);
-  });
+  late final DomEventListener _blurListener =
+      (DomEvent event) {
+        onAppLifecycleStateChange(ui.AppLifecycleState.inactive);
+      }.toJS;
 
-  late final DomEventListener _visibilityChangeListener = createDomEventListener((DomEvent event) {
-    if (domDocument.visibilityState == 'visible') {
-      onAppLifecycleStateChange(ui.AppLifecycleState.resumed);
-    } else if (domDocument.visibilityState == 'hidden') {
-      onAppLifecycleStateChange(ui.AppLifecycleState.hidden);
-    }
-  });
+  late final DomEventListener _visibilityChangeListener =
+      (DomEvent event) {
+        if (domDocument.visibilityState == 'visible') {
+          onAppLifecycleStateChange(ui.AppLifecycleState.resumed);
+        } else if (domDocument.visibilityState == 'hidden') {
+          onAppLifecycleStateChange(ui.AppLifecycleState.hidden);
+        }
+      }.toJS;
 
   void _onViewCountChanged(int _) {
     if (_viewManager.views.isEmpty) {

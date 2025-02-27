@@ -323,9 +323,13 @@ class Surface extends DisplayCanvas {
       _offscreenCanvas!.removeEventListener(
         'webglcontextrestored',
         _cachedContextRestoredListener,
-        false,
+        false.toJS,
       );
-      _offscreenCanvas!.removeEventListener('webglcontextlost', _cachedContextLostListener, false);
+      _offscreenCanvas!.removeEventListener(
+        'webglcontextlost',
+        _cachedContextLostListener,
+        false.toJS,
+      );
       _offscreenCanvas = null;
       _cachedContextRestoredListener = null;
       _cachedContextLostListener = null;
@@ -333,9 +337,13 @@ class Surface extends DisplayCanvas {
       _canvasElement!.removeEventListener(
         'webglcontextrestored',
         _cachedContextRestoredListener,
-        false,
+        false.toJS,
       );
-      _canvasElement!.removeEventListener('webglcontextlost', _cachedContextLostListener, false);
+      _canvasElement!.removeEventListener(
+        'webglcontextlost',
+        _cachedContextLostListener,
+        false.toJS,
+      );
       _canvasElement!.remove();
       _canvasElement = null;
       _cachedContextRestoredListener = null;
@@ -377,10 +385,10 @@ class Surface extends DisplayCanvas {
     // notification. When we receive this notification we force a new context.
     //
     // See also: https://www.khronos.org/webgl/wiki/HandlingContextLost
-    _cachedContextRestoredListener = createDomEventListener(_contextRestoredListener);
-    _cachedContextLostListener = createDomEventListener(_contextLostListener);
-    htmlCanvas.addEventListener('webglcontextlost', _cachedContextLostListener, false);
-    htmlCanvas.addEventListener('webglcontextrestored', _cachedContextRestoredListener, false);
+    _cachedContextRestoredListener = _contextRestoredListener.toJS;
+    _cachedContextLostListener = _contextLostListener.toJS;
+    htmlCanvas.addEventListener('webglcontextlost', _cachedContextLostListener, false.toJS);
+    htmlCanvas.addEventListener('webglcontextrestored', _cachedContextRestoredListener, false.toJS);
     _forceNewContext = false;
     _contextLost = false;
 
@@ -490,11 +498,15 @@ class Surface extends DisplayCanvas {
 
   @override
   void dispose() {
-    _offscreenCanvas?.removeEventListener('webglcontextlost', _cachedContextLostListener, false);
+    _offscreenCanvas?.removeEventListener(
+      'webglcontextlost',
+      _cachedContextLostListener,
+      false.toJS,
+    );
     _offscreenCanvas?.removeEventListener(
       'webglcontextrestored',
       _cachedContextRestoredListener,
-      false,
+      false.toJS,
     );
     _cachedContextLostListener = null;
     _cachedContextRestoredListener = null;

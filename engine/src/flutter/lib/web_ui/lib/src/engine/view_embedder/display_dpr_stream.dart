@@ -47,9 +47,9 @@ class DisplayDprStream {
     } else {
       _dprMediaQuery = domWindow.matchMedia('(resolution: ${_currentDpr}dppx)');
     }
-    _dprMediaQuery.addEventListenerWithOptions(
+    _dprMediaQuery.addEventListener(
       'change',
-      createDomEventListener(_onDprMediaQueryChange),
+      _onDprMediaQueryChange.toJS,
       <String, Object>{
         // We only listen `once` because this event only triggers once when the
         // DPR changes from `_currentDpr`. Once that happens, we need a new
@@ -59,7 +59,7 @@ class DisplayDprStream {
         // listener from the old mediaQuery after we're done with it.
         'once': true,
         'passive': true,
-      },
+      }.toJSAnyDeep,
     );
   }
 

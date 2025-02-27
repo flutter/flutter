@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
+
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -60,39 +62,43 @@ final class ViewFocusBinding {
     }
   }
 
-  late final DomEventListener _handleFocusin = createDomEventListener((DomEvent event) {
-    event as DomFocusEvent;
-    _handleFocusChange(event.target as DomElement?);
-  });
+  late final DomEventListener _handleFocusin =
+      (DomEvent event) {
+        event as DomFocusEvent;
+        _handleFocusChange(event.target as DomElement?);
+      }.toJS;
 
-  late final DomEventListener _handleFocusout = createDomEventListener((DomEvent event) {
-    // During focusout processing, activeElement typically points to <body />.
-    // However, if an element is focused during a blur event, activeElement points to that focused element.
-    // We leverage this behavior to ignore focusout events where the document has focus but activeElement is not <body />.
-    //
-    // Refer to https://github.com/flutter/engine/pull/54965 for more info.
-    final bool wasFocusInvoked =
-        domDocument.hasFocus() && domDocument.activeElement != domDocument.body;
-    if (wasFocusInvoked) {
-      return;
-    }
+  late final DomEventListener _handleFocusout =
+      (DomEvent event) {
+        // During focusout processing, activeElement typically points to <body />.
+        // However, if an element is focused during a blur event, activeElement points to that focused element.
+        // We leverage this behavior to ignore focusout events where the document has focus but activeElement is not <body />.
+        //
+        // Refer to https://github.com/flutter/engine/pull/54965 for more info.
+        final bool wasFocusInvoked =
+            domDocument.hasFocus() && domDocument.activeElement != domDocument.body;
+        if (wasFocusInvoked) {
+          return;
+        }
 
-    event as DomFocusEvent;
-    _handleFocusChange(event.relatedTarget as DomElement?);
-  });
+        event as DomFocusEvent;
+        _handleFocusChange(event.relatedTarget as DomElement?);
+      }.toJS;
 
-  late final DomEventListener _handleKeyDown = createDomEventListener((DomEvent event) {
-    // The right event type needs to be checked because Chrome seems to be firing
-    // `Event` events instead of `KeyboardEvent` events when autofilling is used.
-    // See https://github.com/flutter/flutter/issues/149968 for more info.
-    if (event is DomKeyboardEvent && (event.shiftKey ?? false)) {
-      _viewFocusDirection = ui.ViewFocusDirection.backward;
-    }
-  });
+  late final DomEventListener _handleKeyDown =
+      (DomEvent event) {
+        // The right event type needs to be checked because Chrome seems to be firing
+        // `Event` events instead of `KeyboardEvent` events when autofilling is used.
+        // See https://github.com/flutter/flutter/issues/149968 for more info.
+        if (event is DomKeyboardEvent && (event.shiftKey ?? false)) {
+          _viewFocusDirection = ui.ViewFocusDirection.backward;
+        }
+      }.toJS;
 
-  late final DomEventListener _handleKeyUp = createDomEventListener((DomEvent event) {
-    _viewFocusDirection = ui.ViewFocusDirection.forward;
-  });
+  late final DomEventListener _handleKeyUp =
+      (DomEvent event) {
+        _viewFocusDirection = ui.ViewFocusDirection.forward;
+      }.toJS;
 
   void _handleFocusChange(DomElement? focusedElement) {
     if (!isEnabled) {

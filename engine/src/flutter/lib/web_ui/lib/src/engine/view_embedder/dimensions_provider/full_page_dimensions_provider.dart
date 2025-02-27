@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:ui/src/engine/display.dart';
 import 'package:ui/src/engine/dom.dart';
@@ -29,7 +30,11 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     final DomEventTarget resizeEventTarget = domWindow.visualViewport ?? domWindow;
 
     // Subscribe to the 'resize' event, and convert it to a ui.Size stream.
-    _domResizeSubscription = DomSubscription(resizeEventTarget, 'resize', _onVisualViewportResize);
+    _domResizeSubscription = DomSubscription(
+      resizeEventTarget,
+      'resize',
+      _onVisualViewportResize.toJS,
+    );
   }
 
   late DomSubscription _domResizeSubscription;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -83,16 +84,18 @@ class EnginePicture implements ui.Picture {
     // Ignoring the returned futures from onError and onLoad because we're
     // communicating through the `onImageLoaded` completer.
     late final DomEventListener errorListener;
-    errorListener = createDomEventListener((DomEvent event) {
-      onImageLoaded.completeError(event);
-      imageElement.removeEventListener('error', errorListener);
-    });
+    errorListener =
+        (DomEvent event) {
+          onImageLoaded.completeError(event);
+          imageElement.removeEventListener('error', errorListener);
+        }.toJS;
     imageElement.addEventListener('error', errorListener);
     late final DomEventListener loadListener;
-    loadListener = createDomEventListener((DomEvent event) {
-      onImageLoaded.complete(HtmlImage(imageElement, width, height));
-      imageElement.removeEventListener('load', loadListener);
-    });
+    loadListener =
+        (DomEvent event) {
+          onImageLoaded.complete(HtmlImage(imageElement, width, height));
+          imageElement.removeEventListener('load', loadListener);
+        }.toJS;
     imageElement.addEventListener('load', loadListener);
     return onImageLoaded.future;
   }

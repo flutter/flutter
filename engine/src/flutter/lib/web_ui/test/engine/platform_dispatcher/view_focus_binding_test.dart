@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -252,9 +254,10 @@ void testMain() {
       final DomElement input1 = createDomElement('input');
       final DomElement input2 = createDomElement('input');
       final EngineFlutterView view = createAndRegisterView(dispatcher);
-      final DomEventListener focusInput1Listener = createDomEventListener((DomEvent event) {
-        input1.focusWithoutScroll();
-      });
+      final DomEventListener focusInput1Listener =
+          (DomEvent event) {
+            input1.focusWithoutScroll();
+          }.toJS;
 
       view.dom.rootElement.append(input1);
       view.dom.rootElement.append(input2);

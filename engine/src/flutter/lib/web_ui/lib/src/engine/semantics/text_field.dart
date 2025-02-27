@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
@@ -126,9 +128,9 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     }
 
     // Subscribe to text and selection changes.
-    subscriptions.add(DomSubscription(activeDomElement, 'input', handleChange));
-    subscriptions.add(DomSubscription(activeDomElement, 'keydown', maybeSendAction));
-    subscriptions.add(DomSubscription(domDocument, 'selectionchange', handleChange));
+    subscriptions.add(DomSubscription(activeDomElement, 'input', handleChange.toJS));
+    subscriptions.add(DomSubscription(activeDomElement, 'keydown', maybeSendAction.toJS));
+    subscriptions.add(DomSubscription(domDocument, 'selectionchange', handleChange.toJS));
     preventDefaultForMouseEvents();
   }
 
@@ -271,7 +273,7 @@ class SemanticTextField extends SemanticRole {
 
     editableElement.addEventListener(
       'focus',
-      createDomEventListener((DomEvent event) {
+      (DomEvent event) {
         // IMPORTANT: because this event listener can be triggered by either or
         // both a "focus" and a "click" DOM events, this code must be idempotent.
         EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -280,19 +282,19 @@ class SemanticTextField extends SemanticRole {
           ui.SemanticsAction.focus,
           null,
         );
-      }),
+      }.toJS,
     );
     editableElement.addEventListener(
       'click',
-      createDomEventListener((DomEvent event) {
+      (DomEvent event) {
         editableElement.focusWithoutScroll();
-      }),
+      }.toJS,
     );
     editableElement.addEventListener(
       'blur',
-      createDomEventListener((DomEvent event) {
+      (DomEvent event) {
         SemanticsTextEditingStrategy._instance?.deactivate(this);
-      }),
+      }.toJS,
     );
   }
 

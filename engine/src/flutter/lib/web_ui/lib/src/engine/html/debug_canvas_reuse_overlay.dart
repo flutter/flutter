@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import '../dom.dart';
 
 DomHTMLElement _createContainer() {
@@ -63,7 +65,7 @@ class DebugCanvasReuseOverlay {
           createDomHTMLDivElement()..append(
             createDomHTMLButtonElement()
               ..text = 'Reset'
-              ..addEventListener('click', createDomEventListener((_) => _reset())),
+              ..addEventListener('click', ((DomEvent _) => _reset()).toJS),
           ),
         ),
     );

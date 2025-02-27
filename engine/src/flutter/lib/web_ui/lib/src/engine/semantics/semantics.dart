@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -572,11 +573,21 @@ abstract class SemanticRole {
 
   void removeAttribute(String name) => element.removeAttribute(name);
 
-  void addEventListener(String type, DomEventListener? listener, [bool? useCapture]) =>
-      element.addEventListener(type, listener, useCapture);
+  void addEventListener(String type, DomEventListener? listener, [bool? useCapture]) {
+    if (useCapture != null) {
+      element.addEventListener(type, listener, useCapture.toJS);
+    } else {
+      element.addEventListener(type, listener);
+    }
+  }
 
-  void removeEventListener(String type, DomEventListener? listener, [bool? useCapture]) =>
-      element.removeEventListener(type, listener, useCapture);
+  void removeEventListener(String type, DomEventListener? listener, [bool? useCapture]) {
+    if (useCapture != null) {
+      element.removeEventListener(type, listener, useCapture.toJS);
+    } else {
+      element.removeEventListener(type, listener);
+    }
+  }
 
   /// Convenience getter for the [Focusable] behavior, if any.
   Focusable? get focusable => _focusable;

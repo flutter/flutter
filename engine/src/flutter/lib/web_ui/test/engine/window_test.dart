@@ -530,10 +530,7 @@ Future<void> testMain() async {
 
   test('dispatches browser event on flutter/service_worker channel', () async {
     final Completer<void> completer = Completer<void>();
-    domWindow.addEventListener(
-      'flutter-first-frame',
-      createDomEventListener((DomEvent e) => completer.complete()),
-    );
+    domWindow.addEventListener('flutter-first-frame', ((DomEvent e) => completer.complete()).toJS);
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {

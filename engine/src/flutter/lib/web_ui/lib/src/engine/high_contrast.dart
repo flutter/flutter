@@ -21,9 +21,7 @@ class HighContrastSupport {
   final DomMediaQueryList _highContrastMediaQuery = domWindow.matchMedia(
     _highContrastMediaQueryString,
   );
-  late final DomEventListener _onHighContrastChangeListener = createDomEventListener(
-    _onHighContrastChange,
-  );
+  late final DomEventListener _onHighContrastChangeListener = _onHighContrastChange.toJS;
 
   bool get isHighContrastEnabled => _highContrastMediaQuery.matches;
 

@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import '../dom.dart';
 
 /// Listener for DOM events that prevents the default browser behavior.
-final DomEventListener preventDefaultListener = createDomEventListener((DomEvent event) {
-  event.preventDefault();
-});
+final DomEventListener preventDefaultListener =
+    (DomEvent event) {
+      event.preventDefault();
+    }.toJS;

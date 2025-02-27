@@ -51,7 +51,9 @@ class SkwasmLineMetrics extends SkwasmObjectWrapper<RawLineMetrics> implements u
   SkwasmLineMetrics._(LineMetricsHandle handle) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawLineMetrics> _registry =
-      SkwasmFinalizationRegistry<RawLineMetrics>(lineMetricsDispose);
+      SkwasmFinalizationRegistry<RawLineMetrics>(
+        (LineMetricsHandle handle) => lineMetricsDispose(handle),
+      );
 
   @override
   bool get hardBreak => lineMetricsGetHardBreak(handle);
@@ -88,7 +90,9 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
   SkwasmParagraph(ParagraphHandle handle) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawParagraph> _registry =
-      SkwasmFinalizationRegistry<RawParagraph>(paragraphDispose);
+      SkwasmFinalizationRegistry<RawParagraph>(
+        (ParagraphHandle handle) => paragraphDispose(handle),
+      );
 
   bool _hasCheckedForMissingCodePoints = false;
 
@@ -301,7 +305,9 @@ class SkwasmNativeTextStyle extends SkwasmObjectWrapper<RawTextStyle> {
   factory SkwasmNativeTextStyle.defaultTextStyle() => SkwasmNativeTextStyle(textStyleCreate());
 
   static final SkwasmFinalizationRegistry<RawTextStyle> _registry =
-      SkwasmFinalizationRegistry<RawTextStyle>(textStyleDispose);
+      SkwasmFinalizationRegistry<RawTextStyle>(
+        (TextStyleHandle handle) => textStyleDispose(handle),
+      );
 
   SkwasmNativeTextStyle copy() {
     return SkwasmNativeTextStyle(textStyleCopy(handle));
@@ -644,7 +650,9 @@ final class SkwasmStrutStyle extends SkwasmObjectWrapper<RawStrutStyle> implemen
   ) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawStrutStyle> _registry =
-      SkwasmFinalizationRegistry<RawStrutStyle>(strutStyleDispose);
+      SkwasmFinalizationRegistry<RawStrutStyle>(
+        (StrutStyleHandle handle) => strutStyleDispose(handle),
+      );
 
   final String? _fontFamily;
   final List<String>? _fontFamilyFallback;
@@ -835,7 +843,9 @@ class SkwasmParagraphStyle extends SkwasmObjectWrapper<RawParagraphStyle>
   ) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawParagraphStyle> _registry =
-      SkwasmFinalizationRegistry<RawParagraphStyle>(paragraphStyleDispose);
+      SkwasmFinalizationRegistry<RawParagraphStyle>(
+        (ParagraphStyleHandle handle) => paragraphStyleDispose(handle),
+      );
 
   final SkwasmNativeTextStyle textStyle;
   final String? defaultFontFamily;
@@ -929,7 +939,9 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
   SkwasmParagraphBuilder._(ParagraphBuilderHandle handle, this.style) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawParagraphBuilder> _registry =
-      SkwasmFinalizationRegistry<RawParagraphBuilder>(paragraphBuilderDispose);
+      SkwasmFinalizationRegistry<RawParagraphBuilder>(
+        (ParagraphBuilderHandle handle) => paragraphBuilderDispose(handle),
+      );
 
   final SkwasmParagraphStyle style;
   final List<SkwasmNativeTextStyle> textStyleStack = <SkwasmNativeTextStyle>[];

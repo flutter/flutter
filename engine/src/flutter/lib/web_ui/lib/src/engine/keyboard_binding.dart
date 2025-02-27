@@ -102,16 +102,26 @@ ValueGetter<T> _cached<T>(ValueGetter<T> body) {
 
 class KeyboardBinding {
   KeyboardBinding._() {
-    _addEventListener('keydown', (DomEvent domEvent) {
-      final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
-      _converter.handleEvent(event);
-      RawKeyboard.instance?.handleHtmlEvent(domEvent);
-    });
-    _addEventListener('keyup', (DomEvent domEvent) {
-      final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
-      _converter.handleEvent(event);
-      RawKeyboard.instance?.handleHtmlEvent(domEvent);
-    });
+    _addEventListener(
+      'keydown',
+      (DomEvent domEvent) {
+        final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(
+          domEvent as DomKeyboardEvent,
+        );
+        _converter.handleEvent(event);
+        RawKeyboard.instance?.handleHtmlEvent(domEvent);
+      }.toJS,
+    );
+    _addEventListener(
+      'keyup',
+      (DomEvent domEvent) {
+        final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(
+          domEvent as DomKeyboardEvent,
+        );
+        _converter.handleEvent(event);
+        RawKeyboard.instance?.handleHtmlEvent(domEvent);
+      }.toJS,
+    );
   }
 
   /// The singleton instance of this object.
@@ -140,26 +150,26 @@ class KeyboardBinding {
   late final KeyboardConverter _converter = KeyboardConverter(_onKeyData, localPlatform);
   final Map<String, DomEventListener> _listeners = <String, DomEventListener>{};
 
-  void _addEventListener(String eventName, DartDomEventListener handler) {
-    JSVoid loggedHandler(DomEvent event) {
+  void _addEventListener(String eventName, DomEventListener handler) {
+    void loggedHandler(DomEvent event) {
       if (_debugLogKeyEvents) {
         print(event.type);
       }
       if (EngineSemantics.instance.receiveGlobalEvent(event)) {
-        handler(event);
+        handler.callAsFunction(null, event);
       }
     }
 
-    final DomEventListener wrappedHandler = createDomEventListener(loggedHandler);
+    final DomEventListener wrappedHandler = loggedHandler.toJS;
     assert(!_listeners.containsKey(eventName));
     _listeners[eventName] = wrappedHandler;
-    domWindow.addEventListener(eventName, wrappedHandler, true);
+    domWindow.addEventListener(eventName, wrappedHandler, true.toJS);
   }
 
   /// Remove all active event listeners.
   void _clearListeners() {
     _listeners.forEach((String eventName, DomEventListener listener) {
-      domWindow.removeEventListener(eventName, listener, true);
+      domWindow.removeEventListener(eventName, listener, true.toJS);
     });
     _listeners.clear();
   }
