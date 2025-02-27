@@ -205,6 +205,6 @@ TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String
   // precisely because web can compile to JavaScript and to Wasm (so
   // `TargetPlatform.web_javascript` isn't actually always the case).
   //
-  // For now we just use this as the JS target platform.
+  // For now we just assume that no target platform means web.
   return TargetPlatform.web_javascript;
 }
