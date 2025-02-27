@@ -43,6 +43,8 @@ class _DriverInformation {
       result = await _processManager.run(<String>['eglinfo'], stdoutEncoding: utf8);
     } on ArgumentError {
       // ignore error.
+    } on ProcessException {
+      return false;
     }
     // result.exitCode is ignored, as this is non-zero if some platforms are not avaiable.
     // The output information is still parsable in all cases.
