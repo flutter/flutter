@@ -191,7 +191,7 @@ bool FlutterWindow::Focus() {
     return false;
   }
 
-  HWND prevFocus = SetFocus(hwnd);
+  HWND prevFocus = ::SetFocus(hwnd);
   if (prevFocus == NULL) {
     return false;
   }
