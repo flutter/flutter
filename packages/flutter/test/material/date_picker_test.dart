@@ -2676,7 +2676,7 @@ void main() {
     });
 
     testWidgets('Displays calendar based on the calendar delegate', (WidgetTester tester) async {
-      Text getLastDayText(WidgetTester tester) {
+      Text getLastDayText() {
         final Finder dayFinder = find.descendant(of: find.byType(Ink), matching: find.byType(Text));
         return tester.widget(dayFinder.last);
       }
@@ -2697,21 +2697,21 @@ void main() {
 
       final Finder nextMonthButton = find.byIcon(Icons.chevron_right);
 
-      Text lastDayText = getLastDayText(tester);
+      Text lastDayText = getLastDayText();
       expect(find.text('January 2016'), findsOneWidget);
       expect(lastDayText.data, equals('28'));
 
       await tester.tap(nextMonthButton);
       await tester.pumpAndSettle();
 
-      lastDayText = getLastDayText(tester);
+      lastDayText = getLastDayText();
       expect(find.text('February 2016'), findsOneWidget);
       expect(lastDayText.data, equals('21'));
 
       await tester.tap(nextMonthButton);
       await tester.pumpAndSettle();
 
-      lastDayText = getLastDayText(tester);
+      lastDayText = getLastDayText();
       expect(find.text('March 2016'), findsOneWidget);
       expect(lastDayText.data, equals('28'));
     });

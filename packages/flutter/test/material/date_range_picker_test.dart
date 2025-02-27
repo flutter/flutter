@@ -1847,9 +1847,34 @@ void main() {
     });
 
     testWidgets('Displays calendar based on the calendar delegate', (WidgetTester tester) async {
-      Text getLastDayText(WidgetTester tester) {
-        final Finder dayFinder = find.descendant(of: find.byType(Ink), matching: find.byType(Text));
-        return tester.widget(dayFinder.last);
+      Finder getMonthItem() {
+        final Finder dayItem = find.descendant(
+          of: find.byType(ConstrainedBox),
+          matching: find.text('1'),
+        );
+        return find.ancestor(of: dayItem, matching: find.byType(Column));
+      }
+
+      int getDayCount(Finder parent) {
+        final Finder dayItem = find.descendant(
+          of: parent,
+          matching: find.descendant(of: find.byType(InkResponse), matching: find.byType(Text)),
+        );
+        return tester.widgetList(dayItem).length;
+      }
+
+      Text getMonthYear(Finder parent) {
+        return tester.widget(
+          find
+              .descendant(
+                of: parent,
+                matching: find.descendant(
+                  of: find.byType(ConstrainedBox),
+                  matching: find.byType(Text),
+                ),
+              )
+              .first,
+        );
       }
 
       await tester.pumpWidget(
@@ -1866,25 +1891,15 @@ void main() {
         ),
       );
 
-      final Finder nextMonthButton = find.byIcon(Icons.chevron_right);
+      final Finder monthItem = getMonthItem();
 
-      Text lastDayText = getLastDayText(tester);
-      expect(find.text('January 2016'), findsOneWidget);
-      expect(lastDayText.data, equals('28'));
+      final Finder firstMonthItem = monthItem.at(0);
+      expect(getMonthYear(firstMonthItem).data, 'January 2016');
+      expect(getDayCount(firstMonthItem), 28);
 
-      await tester.tap(nextMonthButton);
-      await tester.pumpAndSettle();
-
-      lastDayText = getLastDayText(tester);
-      expect(find.text('February 2016'), findsOneWidget);
-      expect(lastDayText.data, equals('21'));
-
-      await tester.tap(nextMonthButton);
-      await tester.pumpAndSettle();
-
-      lastDayText = getLastDayText(tester);
-      expect(find.text('March 2016'), findsOneWidget);
-      expect(lastDayText.data, equals('28'));
+      final Finder secondMonthItem = monthItem.at(2);
+      expect(getMonthYear(secondMonthItem).data, 'February 2016');
+      expect(getDayCount(secondMonthItem), 21);
     });
   });
 }
