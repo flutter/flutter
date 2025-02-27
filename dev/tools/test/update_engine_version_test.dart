@@ -49,6 +49,7 @@ void main() {
   setUp(() async {
     tmpDir = localFs.systemTempDirectory.createTempSync('update_engine_version_test.');
     testRoot = _FlutterRootUnderTest.fromPath(tmpDir.childDirectory('flutter').path);
+    testRoot.root.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
 
     environment = <String, String>{};
     environment.addAll(io.Platform.environment);
@@ -111,6 +112,7 @@ void main() {
         testRoot.binInternalEngineVersion.readAsStringSync(),
         equalsIgnoringWhitespace('123abc'),
       );
+      expect(testRoot.binCacheEngineStamp.readAsStringSync(), equalsIgnoringWhitespace('123abc'));
     });
   });
 
@@ -124,6 +126,10 @@ void main() {
     expect(testRoot.binInternalEngineVersion, exists);
     expect(
       testRoot.binInternalEngineVersion.readAsStringSync(),
+      equalsIgnoringWhitespace(engineVersionTrackedContents),
+    );
+    expect(
+      testRoot.binCacheEngineStamp.readAsStringSync(),
       equalsIgnoringWhitespace(engineVersionTrackedContents),
     );
   });
@@ -140,6 +146,10 @@ void main() {
       testRoot.binInternalEngineVersion.readAsStringSync(),
       equalsIgnoringWhitespace(engineVersionTrackedContents),
     );
+    expect(
+      testRoot.binCacheEngineStamp.readAsStringSync(),
+      equalsIgnoringWhitespace(engineVersionTrackedContents),
+    );
   });
 
   test('writes nothing, even if files are set, if we are on "beta"', () async {
@@ -152,6 +162,10 @@ void main() {
     expect(testRoot.binInternalEngineVersion, exists);
     expect(
       testRoot.binInternalEngineVersion.readAsStringSync(),
+      equalsIgnoringWhitespace(engineVersionTrackedContents),
+    );
+    expect(
+      testRoot.binCacheEngineStamp.readAsStringSync(),
       equalsIgnoringWhitespace(engineVersionTrackedContents),
     );
   });
@@ -176,6 +190,10 @@ void main() {
         testRoot.binInternalEngineVersion.readAsStringSync(),
         equalsIgnoringWhitespace(mergeBaseHeadUpstream.stdout as String),
       );
+      expect(
+        testRoot.binCacheEngineStamp.readAsStringSync(),
+        equalsIgnoringWhitespace(mergeBaseHeadUpstream.stdout as String),
+      );
     });
 
     test('merge-base HEAD origin/master on non-LUCI when upstream is not set', () async {
@@ -193,6 +211,10 @@ void main() {
         testRoot.binInternalEngineVersion.readAsStringSync(),
         equalsIgnoringWhitespace(mergeBaseHeadOrigin.stdout as String),
       );
+      expect(
+        testRoot.binCacheEngineStamp.readAsStringSync(),
+        equalsIgnoringWhitespace(mergeBaseHeadOrigin.stdout as String),
+      );
     });
 
     test('rev-parse HEAD when running on LUCI', () async {
@@ -203,6 +225,10 @@ void main() {
       expect(testRoot.binInternalEngineVersion, exists);
       expect(
         testRoot.binInternalEngineVersion.readAsStringSync(),
+        equalsIgnoringWhitespace(revParseHead.stdout as String),
+      );
+      expect(
+        testRoot.binCacheEngineStamp.readAsStringSync(),
         equalsIgnoringWhitespace(revParseHead.stdout as String),
       );
     });
@@ -224,6 +250,7 @@ void main() {
 
       expect(testRoot.binInternalEngineVersion, exists);
       expect(testRoot.binInternalEngineVersion.readAsStringSync(), equalsIgnoringWhitespace(''));
+      expect(testRoot.binCacheEngineStamp.readAsStringSync(), equalsIgnoringWhitespace(''));
     });
 
     test('[engine/src/.gn] engine.version is blank', () async {
@@ -233,6 +260,7 @@ void main() {
 
       expect(testRoot.binInternalEngineVersion, exists);
       expect(testRoot.binInternalEngineVersion.readAsStringSync(), equalsIgnoringWhitespace(''));
+      expect(testRoot.binCacheEngineStamp.readAsStringSync(), equalsIgnoringWhitespace(''));
     });
   });
 }
@@ -273,6 +301,7 @@ final class _FlutterRootUnderTest {
       binInternalEngineRealm: root.childFile(
         fileSystem.path.join('bin', 'internal', 'engine.realm'),
       ),
+      binCacheEngineStamp: root.childFile(fileSystem.path.join('bin', 'cache', 'engine.stamp')),
       binInternalUpdateEngineVersion: root.childFile(
         fileSystem.path.join(
           'bin',
@@ -302,6 +331,7 @@ final class _FlutterRootUnderTest {
     this.root, {
     required this.deps,
     required this.engineSrcGn,
+    required this.binCacheEngineStamp,
     required this.binInternalEngineVersion,
     required this.binInternalEngineRealm,
     required this.binInternalUpdateEngineVersion,
@@ -322,7 +352,18 @@ final class _FlutterRootUnderTest {
   /// `bin/internal/engine.version`.
   ///
   /// This file contains a SHA of which engine binaries to download.
-  final File binInternalEngineVersion;
+  ///
+  /// Currently, the SHA is either _computed_ or _pre-determined_, based on if
+  /// the file is checked-in and tracked. That behavior is changing, and in the
+  /// future this will be a checked-in file and not computed.
+  ///
+  /// See also: https://github.com/flutter/flutter/issues/164315.
+  final File binInternalEngineVersion; // TODO(matanlurey): Update these docs.
+
+  /// `bin/cache/engine.stamp`.
+  ///
+  /// This file contains a _computed_ SHA of which engine binaries to download.
+  final File binCacheEngineStamp;
 
   /// `bin/internal/engine.realm`.
   ///
