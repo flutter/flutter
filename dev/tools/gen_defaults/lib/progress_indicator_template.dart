@@ -28,6 +28,9 @@ class _Circular${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
   Color? get circularTrackColor => indeterminate ? null : ${componentColor('md.comp.progress-indicator.track')};
 
   @override
+  StrokeCap? get strokeCap => StrokeCap.round;
+
+  @override
   double get strokeWidth => ${getToken('md.comp.progress-indicator.track.thickness')};
 
   @override
@@ -44,6 +47,19 @@ class _Circular${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
 
   @override
   EdgeInsetsGeometry? get circularTrackPadding => const EdgeInsets.all(4.0);
+}
+
+class _Refresh${blockName}DefaultsM3 extends _Circular${blockName}DefaultsM3 {
+  _Refresh${blockName}DefaultsM3(super.context, {required super.indeterminate});
+
+  @override
+  StrokeCap? get strokeCap => indeterminate ? StrokeCap.round : StrokeCap.butt;
+
+  @override
+  double? get strokeAlign => CircularProgressIndicator.strokeAlignCenter;
+
+  @override
+  Color? get refreshBackgroundColor => _colors.surfaceContainerHigh;
 }
 
 class _Linear${blockName}DefaultsM3 extends ProgressIndicatorThemeData {

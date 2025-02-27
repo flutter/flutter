@@ -1758,6 +1758,62 @@ void main() {
       ),
     );
   });
+
+  testWidgets('RefreshProgressIndicator defaults when year2023 is false', (
+    WidgetTester tester,
+  ) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Center(child: RefreshProgressIndicator(year2023: false)),
+      ),
+    );
+    expect(
+      find.byType(RefreshProgressIndicator),
+      paints..arc(strokeCap: StrokeCap.round, color: theme.colorScheme.primary),
+    );
+    // Indeterminate RefreshProgressIndicator does not paint arrow head.
+    expect(
+      find.byType(RefreshProgressIndicator),
+      isNot(paints..path(color: theme.colorScheme.primary)),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Center(child: RefreshProgressIndicator(year2023: false, value: 0.5)),
+      ),
+    );
+    expect(
+      find.byType(RefreshProgressIndicator),
+      paints
+        ..arc(strokeCap: StrokeCap.butt, color: theme.colorScheme.primary)
+        // Arrow head.
+        ..path(color: theme.colorScheme.primary),
+    );
+
+    final Material backgroundMaterial = tester.widget(
+      find.descendant(of: find.byType(RefreshProgressIndicator), matching: find.byType(Material)),
+    );
+    expect(backgroundMaterial.color, theme.colorScheme.surfaceContainerHigh);
+  });
+
+  testWidgets('RefreshProgressIndicator default arrow head when year2023 is false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Center(child: RefreshProgressIndicator(year2023: false, value: 0.5)),
+      ),
+    );
+
+    await expectLater(
+      find.byType(RefreshProgressIndicator),
+      matchesGoldenFile('refresh_progress_indicator.default_arrow_head.year2023_false.png'),
+    );
+  });
 }
 
 class _RefreshProgressIndicatorGolden extends StatefulWidget {
