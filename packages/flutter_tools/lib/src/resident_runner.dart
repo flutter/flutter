@@ -32,7 +32,6 @@ import 'compile.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'features.dart';
 import 'globals.dart' as globals;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
@@ -1174,10 +1173,6 @@ abstract class ResidentRunner extends ResidentHandlers {
       defines: <String, String>{
         // Needed for Dart plugin registry generation.
         kTargetFile: mainPath,
-        kNativeAssets:
-            (featureFlags.isNativeAssetsEnabled || featureFlags.isDartDataAssetsEnabled)
-                ? 'true'
-                : 'false',
         kBuildMode: debuggingOptions.buildInfo.mode.cliName,
       },
     );
@@ -1205,10 +1200,10 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<DartBuildResult> runDartBuild() async {
     globals.printTrace('runDartBuild()');
-    if (_dartBuildResult?.isBuildUpToDate(globals.fs) ?? false) {
-      globals.printTrace('runDartBuild() - up-to-date already');
-      return _dartBuildResult!;
-    }
+    // if (_dartBuildResult?.isBuildUpToDate(globals.fs) ?? false) {
+    //   globals.printTrace('runDartBuild() - up-to-date already');
+    //   return _dartBuildResult!;
+    // }
     globals.printTrace('runDartBuild() - will perform dart build');
 
     final BuildResult lastBuild = await globals.buildSystem.build(
