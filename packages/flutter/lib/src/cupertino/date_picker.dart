@@ -53,6 +53,10 @@ const double _kTimerPickerLabelFontSize = 17.0;
 // The width of each column of the countdown time picker.
 const double _kTimerPickerColumnIntrinsicWidth = 106;
 
+// Value derived by analyzing the animation duration of a video captured from the Clock app
+// running on an iPhone 16 with iOS 18.
+const Duration _kTimePickerLabelAnimationDuration = Duration(milliseconds: 200);
+
 TextStyle _themeTextStyle(BuildContext context, {bool isValid = true}) {
   final TextStyle style = CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
   return isValid
@@ -2526,11 +2530,73 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           },
           child: _buildHourPicker(additionalPadding, selectionOverlay),
         ),
-        _buildLabel(
-          localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour!) ?? '',
-          additionalPadding,
+        _buildAnimatedLabel(
+          labelBuilder: (int value) => localizations.timerPickerHourLabel(value) ?? '',
+          currentValue: lastSelectedHour ?? selectedHour!,
+          additionalPadding: additionalPadding,
         ),
       ],
+    );
+  }
+
+  /// Builds a label with animated suffix that changes when the value changes.
+  ///
+  /// [labelBuilder] is a function that takes a value and returns the full label text.
+  /// [currentValue] is the current value to display.
+  /// [additionalPadding] is the padding to apply to the label.
+  Widget _buildAnimatedLabel({
+    required String Function(int) labelBuilder,
+    required int currentValue,
+    required EdgeInsetsDirectional additionalPadding,
+  }) {
+    // Since the base value will always be one, we define the baseLabel getting the
+    // label equivalent to it.
+    final String baseLabel = labelBuilder(1);
+    final String currentLabel = labelBuilder(currentValue);
+    final List<String> parts = currentLabel.split(baseLabel);
+    final String prefix = parts.first;
+    final String suffix = parts.length > 1 ? parts.last : '';
+
+    final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
+      start: numberLabelWidth + _kTimerPickerLabelPadSize + additionalPadding.start,
+    );
+
+    const TextStyle labelStyle = TextStyle(
+      fontSize: _kTimerPickerLabelFontSize,
+      fontWeight: FontWeight.w600,
+    );
+
+    return IgnorePointer(
+      child: Padding(
+        padding: padding.resolve(textDirection),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart.resolve(textDirection),
+          child: SizedBox(
+            height: numberLabelHeight,
+            child: Baseline(
+              baseline: numberLabelBaseline,
+              baselineType: TextBaseline.alphabetic,
+              child: RichText(
+                text: TextSpan(
+                  style: labelStyle,
+                  children: <InlineSpan>[
+                    TextSpan(text: prefix + baseLabel),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: AnimatedSwitcher(
+                        duration: _kTimePickerLabelAnimationDuration,
+                        child: Text(key: ValueKey<String>(suffix), suffix, style: labelStyle),
+                      ),
+                    ),
+                  ],
+                ),
+                maxLines: 1,
+                softWrap: false,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
