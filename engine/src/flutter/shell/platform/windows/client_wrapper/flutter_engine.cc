@@ -23,7 +23,7 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
   c_engine_properties.ui_thread_policy =
       static_cast<FlutterDesktopUIThreadPolicy>(project.ui_thread_policy());
 
-  std::vector<std::string> entrypoint_args =
+  const std::vector<std::string>& entrypoint_args =
       project.dart_entrypoint_arguments();
   std::vector<const char*> entrypoint_argv;
   std::transform(
