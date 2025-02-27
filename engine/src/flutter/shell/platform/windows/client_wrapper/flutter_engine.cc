@@ -27,8 +27,8 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
       project.dart_entrypoint_arguments();
   if (project.get_enable_impeller()) {
     entrypoint_args.push_back("--enable-impeller=true");
-  } else if (!std::find(entrypoint_args.begin(), entrypoint_args.end(),
-                        "--enable-impeller=true")) {
+  } else if (std::find(entrypoint_args.begin(), entrypoint_args.end(),
+                       "--enable-impeller=true") != entrypoint_args.end()) {
     entrypoint_args.push_back("--enable-impeller=false");
   }
   std::vector<const char*> entrypoint_argv;
