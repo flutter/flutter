@@ -30,11 +30,22 @@ void main() {
 
     // TODO(matanlurey): Is this necessary?
     await tester.pumpAndSettle();
+    // TODO(cbracken): not only is it necessary, but so is this.
+    await tester.pumpAndSettle();
 
-    // Take a screenshot.
+    // Take a widget screenshot.
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('integration_test_matches_golden_file.png'),
+      matchesGoldenFile('integration_test_widget_matches_golden_file.png'),
+    );
+
+    // Take a full-screen screenshot.
+    final List<int> screenshot = await IntegrationTestWidgetsFlutterBinding.instance.takeScreenshot(
+      'integration_test_screen_matches_golden_file',
+    );
+    await expectLater(
+      screenshot,
+      matchesGoldenFile('integration_test_screen_matches_golden_file.png'),
     );
   });
 }
