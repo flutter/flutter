@@ -18,6 +18,7 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/context.dart';
+import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -361,5 +362,10 @@ class FakePub extends Fake implements Pub {
     if (project != null) {
       writePackageConfigFile(directory: project.directory, mainLibName: 'my_app');
     }
+  }
+
+  @override
+  Future<Map<String, Object?>> deps(FlutterProject project) {
+    return FakePubWithPrimedDeps().deps(project);
   }
 }
