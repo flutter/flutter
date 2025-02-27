@@ -16,6 +16,16 @@ import 'build_info.dart';
 import 'cache.dart';
 import 'globals.dart' as globals;
 
+//////////////////////////////////////////////////////////////////////
+//                                                                  //
+//  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
+//                                                                  //
+//  There is a link to this file in //docs/tool/Engine-artfiacts.md //
+//  and it would be very kind of you to update the link, if needed. //
+//                                                                  //
+//////////////////////////////////////////////////////////////////////
+
+/// Defines what engine artifacts are available (not necessarily on each platform).
 enum Artifact {
   /// The tool which compiles a dart kernel file into native code.
   genSnapshot,

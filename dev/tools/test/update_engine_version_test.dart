@@ -13,6 +13,15 @@ import 'package:file_testing/file_testing.dart';
 import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
+//////////////////////////////////////////////////////////////////////
+//                                                                  //
+//  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
+//                                                                  //
+//  There is a link to this file in //docs/tool/Engine-artfiacts.md //
+//  and it would be very kind of you to update the link, if needed. //
+//                                                                  //
+//////////////////////////////////////////////////////////////////////
+
 void main() {
   const FileSystem localFs = LocalFileSystem();
   final _FlutterRootUnderTest flutterRoot = _FlutterRootUnderTest.findWithin();
