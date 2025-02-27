@@ -21,10 +21,8 @@ class BaseFlutterTaskTest {
         val baseFlutterTask = mockk<BaseFlutterTask>()
         val file = File("")
         val intermediateDirFile = File("User/flutter")
-//        val depFileTest: File = File("User/flutter/flutter_build.d")
         val project = mockk<Project>()
         val configFileCollection = mockk<ConfigurableFileCollection>()
-//        val actualConfigurableFileCollection: ConfigurableFileCollection = project.files("User/flutter/flutter_build.d")
         every { baseFlutterTask.sourceDir } returns file
 
         val helper = BaseFlutterTaskHelper(baseFlutterTask)
