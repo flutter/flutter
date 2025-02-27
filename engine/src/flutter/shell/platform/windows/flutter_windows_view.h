@@ -252,7 +252,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // Focus the view.
   // Returns true if the view was focused.
-  bool Focus();
+  virtual bool Focus();
 
  protected:
   virtual void NotifyWinEventWrapper(ui::AXPlatformNodeWin* node,
