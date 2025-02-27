@@ -18,7 +18,7 @@ abstract class BaseFlutterTask : DefaultTask() {
     lateinit var flutterRoot: File
 
     @Internal
-    var flutterExecutable: File? = null
+    lateinit var flutterExecutable: File
 
     @Input
     var buildMode: String? = null
@@ -40,7 +40,7 @@ abstract class BaseFlutterTask : DefaultTask() {
 
     @Optional
     @Input
-    var fastStart: Boolean? = null
+    var fastStart: Boolean = false
 
     @Input
     lateinit var targetPath: String
@@ -128,11 +128,9 @@ abstract class BaseFlutterTask : DefaultTask() {
 
     @OutputFiles
     fun getDependenciesFiles(): FileCollection {
-        var depfiles: FileCollection = project.files()
-
-        // Includes all sources used in the flutter compilation.
-        depfiles += project.files("$intermediateDir/flutter_build.d")
-        return depfiles
+        val helper = BaseFlutterTaskHelper(baseFlutterTask = this)
+        val depFiles = helper.getDependenciesFiles()
+        return depFiles
     }
 
     fun buildBundle() {

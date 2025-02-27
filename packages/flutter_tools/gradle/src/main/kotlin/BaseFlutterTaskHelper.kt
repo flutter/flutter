@@ -3,15 +3,28 @@ package com.flutter.gradle
 import androidx.annotation.VisibleForTesting
 import org.gradle.api.Action
 import org.gradle.api.GradleException
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.OutputFiles
 import org.gradle.process.ExecSpec
 import java.nio.file.Paths
 
 class BaseFlutterTaskHelper(
-    val baseFlutterTask: BaseFlutterTask
+    private val baseFlutterTask: BaseFlutterTask
 ) {
     @VisibleForTesting
     internal val gradleErrorMessage = "Invalid Flutter source directory: ${baseFlutterTask.sourceDir}"
 
+    @OutputFiles
+    @VisibleForTesting
+    internal fun getDependenciesFiles(): FileCollection {
+        var depfiles: FileCollection = baseFlutterTask.project.files()
+
+        // Includes all sources used in the flutter compilation.
+        depfiles += baseFlutterTask.project.files("${baseFlutterTask.intermediateDir}/flutter_build.d")
+        return depfiles
+    }
+
+    @VisibleForTesting
     internal fun checkPreConditions() {
         if (baseFlutterTask.sourceDir == null || !baseFlutterTask.sourceDir!!.isDirectory) {
             throw GradleException(gradleErrorMessage)
@@ -39,7 +52,7 @@ class BaseFlutterTaskHelper(
     @VisibleForTesting
     internal fun createExecSpecActionFromTask(): Action<ExecSpec> =
         Action<ExecSpec> {
-            executable(baseFlutterTask.flutterExecutable?.absolutePath)
+            executable(baseFlutterTask.flutterExecutable.absolutePath)
             workingDir(baseFlutterTask.sourceDir)
             baseFlutterTask.localEngine?.let {
                 args("--local-engine", baseFlutterTask.localEngine)
@@ -60,10 +73,10 @@ class BaseFlutterTaskHelper(
             baseFlutterTask.performanceMeasurementFile?.let {
                 args("--performance-measurement-file=${baseFlutterTask.performanceMeasurementFile}")
             }
-            if (!baseFlutterTask.fastStart!! || baseFlutterTask.buildMode != "debug") {
+            if (!baseFlutterTask.fastStart || baseFlutterTask.buildMode != "debug") {
                 args("-dTargetFile=${baseFlutterTask.targetPath}")
             } else {
-                args("-dTargetFile=${Paths.get(baseFlutterTask.flutterRoot.absolutePath ?: "bob", "examples", "splash", "lib", "main.dart")}")
+                args("-dTargetFile=${Paths.get(baseFlutterTask.flutterRoot.absolutePath, "examples", "splash", "lib", "main.dart")}")
             }
             args("-dTargetPlatform=android")
             args("-dBuildMode=${baseFlutterTask.buildMode}")
