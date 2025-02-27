@@ -66,6 +66,7 @@ def main():
     classpath.append(args.build_config_path)
 
   packages = [
+      'io.flutter.app',
       'io.flutter.embedding.android',
       'io.flutter.embedding.engine',
       'io.flutter.embedding.engine.dart',
