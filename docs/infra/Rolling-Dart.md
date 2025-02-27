@@ -1,18 +1,15 @@
+# Rolling the Dart SDK
+
 Flutter is a series of connected repositories. Within each repository there are files (normally named `DEPS`) which determine which version of the other repositories the repository currently works with.
 
 The three relevant repositories for this document are:
 
-- Flutter. This is the top half of the Flutter project: [flutter/flutter on GitHub](https://github.com/flutter/flutter)
-- Engine. This is the Flutter Engine, the lower half of the Flutter project: [flutter/engine on GitHub](https://github.com/flutter/engine)
+- Flutter. The Flutter project: [flutter/flutter on GitHub](https://github.com/flutter/flutter)
 - Dart SDK. This is the language used for big parts of Flutter: [dart-lang/sdk on GitHub](https://github.com/dart-lang/sdk)
-
-This document describes how to update the version of the Dart SDK that the Engine uses, and then update the version of the Engine that Flutter uses, so that Flutter gets the latest Dart.
-
-The Flutter repo does not use a `DEPS` file and `gclient` for its dependencies. Instead, the Flutter Engine version is in `flutter/bin/internal/engine.version`.
 
 ## Dart Autoroller
 
-Dart is now automatically rolled into the Flutter engine repository on a regular basis. See [Autorollers](Autorollers.md) for more information.
+Dart is now automatically rolled into the Flutter repository on a regular basis. See [Autorollers](Autorollers.md) for more information.
 
 ## Using dart_roll_helper.py to roll the version of Dart used by the engine
 
@@ -54,8 +51,8 @@ If the script completes without errors, move on to step 10 in the next section t
    linked to from [our contributing guide](../../CONTRIBUTING.md).
 2. Build the engine according to the instructions on the [Compiling the engine](../engine/contributing/Compiling-the-engine.md) page.
 3. Select a target Dart revision, typically use the [latest revision](https://github.com/dart-lang/sdk/commits/main). Check that the tests for that revision have all passed (all green) on the [Dart buildbot](https://ci.chromium.org/p/flutter/g/engine/console) and the [Internal Dart Flutter buildbot](https://ci.chromium.org/p/dart/g/flutter/console).
-4. Create a PR (see [Tree hygiene](../contributing/Tree-hygiene.md)) that updates `dart_revision` in [DEPS](https://github.com/flutter/engine/blob/main/DEPS) to your selected revision. Invoke `gclient sync` in the src directory to ensure versions corresponding to the DEPS file are synced up.
-5. Update all Dart-dependent DEPS entries using `engine/src/tools/dart/create_updated_flutter_deps.py` script. In case script complains that dart dependency was removed, remove entry from flutter DEPS file manually. If the list of library source files or patch files is modified, update the file [libraries.yaml](https://github.com/flutter/engine/blob/main/lib/snapshot/libraries.yaml) and regenerate the corresponding json file.
+4. Create a PR (see [Tree hygiene](../contributing/Tree-hygiene.md)) that updates `dart_revision` in [DEPS](../../DEPS) to your selected revision. Invoke `gclient sync` in the src directory to ensure versions corresponding to the DEPS file are synced up.
+5. Update all Dart-dependent DEPS entries using [`create_updated_flutter_deps.py`](../../engine/src/tools/dart/create_updated_flutter_deps.py) script. In case script complains that dart dependency was removed, remove entry from flutter DEPS file manually. If the list of library source files or patch files is modified, update the file [`libraries.yaml`](../../engine/src/flutter/lib/snapshot/libraries.yaml) and regenerate the corresponding json file.
 6. Invoke `gclient sync` in the src directory to ensure versions corresponding to the DEPS file are synced up.
 7. Build the debug, profile, and release versions of the engine, following the normal [Compiling the engine](../engine/contributing/Compiling-the-engine.md) instructions. You will need to build the host versions of the engine too. Here is a script with the build commands:
 
