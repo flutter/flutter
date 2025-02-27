@@ -74,7 +74,7 @@ void main() {
 
         testWithoutContext('flutter run on $device --$mode', () async {
           final bool performRestart = isDebug;
-          final bool performReload = isDebug && !isWeb;
+          final bool performReload = isDebug;
 
           final Map<String, String> assets = <String, String>{'id1': 'content1', 'id2': 'content2'};
           writeHookLibrary(root, assets, available: <String>['id1']);
