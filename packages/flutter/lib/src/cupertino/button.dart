@@ -388,13 +388,6 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
   };
 
-  final WidgetStateProperty<MouseCursor> _defaultCursor =
-      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
-        return !states.contains(WidgetState.disabled) && kIsWeb
-            ? SystemMouseCursors.click
-            : MouseCursor.defer;
-      });
-
   @override
   Widget build(BuildContext context) {
     final bool enabled = widget.enabled;
@@ -521,4 +514,11 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       ),
     );
   }
+
+  static final WidgetStateProperty<MouseCursor> _defaultCursor =
+      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+        return !states.contains(WidgetState.disabled) && kIsWeb
+            ? SystemMouseCursors.click
+            : MouseCursor.defer;
+      });
 }
