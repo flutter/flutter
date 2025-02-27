@@ -52,6 +52,10 @@ const Radius _kSeparatorRadius = Radius.circular(_kSeparatorWidth / 2);
 // amount of time.
 const double _kMinThumbScale = 0.95;
 
+// The maximum scale factor of the thumb, when being pressed on for a sufficient
+// amount of time.
+const double _kMaxThumbScale = 1.05;
+
 // The minimum horizontal distance between the edges of the separator and the
 // closest child.
 const double _kSegmentMinPadding = 10;
@@ -104,6 +108,7 @@ class _Segment<T> extends StatefulWidget {
     required this.isDragging,
     required this.enabled,
     required this.segmentLocation,
+    required this.isMomentary,
   }) : super(key: key);
 
   final Widget child;
@@ -112,13 +117,15 @@ class _Segment<T> extends StatefulWidget {
   final bool highlighted;
   final bool enabled;
   final _SegmentLocation segmentLocation;
+  final bool isMomentary;
 
   // Whether the thumb of the parent widget (CupertinoSlidingSegmentedControl)
   // is currently being dragged.
   final bool isDragging;
 
-  bool get shouldFadeoutContent => pressed && !highlighted && enabled;
+  bool get shouldFadeoutContent => pressed && !highlighted && enabled && !isMomentary;
   bool get shouldScaleContent => pressed && highlighted && isDragging && enabled;
+  bool get shouldHighlightContent => highlighted && !isMomentary;
 
   @override
   _SegmentState<T> createState() => _SegmentState<T>();
@@ -148,12 +155,26 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
     assert(oldWidget.key == widget.key);
 
     if (oldWidget.shouldScaleContent != widget.shouldScaleContent) {
-      highlightPressScaleAnimation = highlightPressScaleController.drive(
-        Tween<double>(
-          begin: highlightPressScaleAnimation.value,
-          end: widget.shouldScaleContent ? _kMinThumbScale : 1.0,
-        ),
-      );
+      final Animatable<double> scaleAnimation =
+          widget.isMomentary && widget.shouldScaleContent
+              ? TweenSequence<double>(<TweenSequenceItem<double>>[
+                TweenSequenceItem<double>(
+                  tween: Tween<double>(
+                    begin: highlightPressScaleAnimation.value,
+                    end: _kMaxThumbScale,
+                  ),
+                  weight: 50,
+                ),
+                TweenSequenceItem<double>(
+                  tween: Tween<double>(begin: _kMaxThumbScale, end: 1.0),
+                  weight: 50,
+                ),
+              ])
+              : Tween<double>(
+                begin: highlightPressScaleAnimation.value,
+                end: widget.shouldScaleContent ? _kMinThumbScale : 1.0,
+              );
+      highlightPressScaleAnimation = highlightPressScaleController.drive(scaleAnimation);
       highlightPressScaleController.animateWith(_kThumbSpringAnimationSimulation);
     }
   }
@@ -185,7 +206,8 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
             child: AnimatedDefaultTextStyle(
               style: DefaultTextStyle.of(context).style.merge(
                 TextStyle(
-                  fontWeight: widget.highlighted ? _kHighlightedFontWeight : _kFontWeight,
+                  fontWeight:
+                      widget.shouldHighlightContent ? _kHighlightedFontWeight : _kFontWeight,
                   fontSize: _kFontSize,
                   color: widget.enabled ? null : _kDisabledContentColor,
                 ),
@@ -356,6 +378,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
     this.padding = _kHorizontalItemPadding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
     this.proportionalWidth = false,
+    this.isMomentary = false,
   }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.contains(groupValue),
@@ -468,6 +491,14 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   ///
   /// Defaults to `EdgeInsets.symmetric(vertical: 2, horizontal: 3)`.
   final EdgeInsetsGeometry padding;
+
+  /// Determines whether segments in the segmented control show selected state.
+  ///
+  /// If true, segments in the control don’t show selected state and
+  /// don’t update the value of selectedSegmentIndex after tracking ends.
+  ///
+  /// Defaults to false.
+  final bool isMomentary;
 
   @override
   State<CupertinoSlidingSegmentedControl<T>> createState() => _SegmentedControlState<T>();
@@ -639,6 +670,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     if (isThumbDragging) {
       return;
     }
+
     final T segment = segmentForXPosition(details.localPosition.dx);
     onPressedChangedByGesture(null);
     if (segment != widget.groupValue && !widget.disabledChildren.contains(segment)) {
@@ -774,6 +806,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
               isDragging: isThumbDragging,
               enabled: !widget.disabledChildren.contains(entry.key),
               segmentLocation: segmentLocation,
+              isMomentary: widget.isMomentary,
               child: entry.value,
             ),
           ),
@@ -812,7 +845,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
           builder: (BuildContext context, Widget? child) {
             return _SegmentedControlRenderWidget<T>(
               key: segmentedControlRenderWidgetKey,
-              highlightedIndex: highlightedIndex,
+              highlightedIndex: widget.isMomentary ? null : highlightedIndex,
               thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
               thumbScale: thumbScaleAnimation.value,
               proportionalWidth: widget.proportionalWidth,
