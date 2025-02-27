@@ -21,9 +21,9 @@ class IntentFilterCheckTest {
     assertTrue(intentJson.containsKey("hasDefaultCategory"))
     assertTrue(intentJson.containsKey("hasBrowsableCategory"))
 
-    assertEquals("false", intentJson.getOrDefault(key = "hasAutoVerify", defaultValue = true).toString())
-    assertEquals("true", intentJson.getOrDefault(key = "hasActionView", defaultValue = false).toString())
-    assertEquals("true", intentJson.getOrDefault(key = "hasDefaultCategory", defaultValue = false).toString())
-    assertEquals("false", intentJson.getOrDefault(key = "hasBrowsableCategory", defaultValue = true).toString())
+    assertEquals("false", intentJson.get(key = "hasAutoVerify").toString())
+    assertEquals("true", intentJson.get(key = "hasActionView").toString())
+    assertEquals("true", intentJson.get(key = "hasDefaultCategory").toString())
+    assertEquals("false", intentJson.get(key = "hasBrowsableCategory").toString())
   }
 }
