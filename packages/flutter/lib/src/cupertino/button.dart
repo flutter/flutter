@@ -260,10 +260,24 @@ class CupertinoButton extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// The cursor that will be shown when hovering over the button.
+  /// The cursor for a mouse pointer when it enters or is hovering over the widget
   ///
-  /// If null, defaults to [SystemMouseCursors.click] on web and
-  /// [MouseCursor.defer] on other platforms.
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]:
+  /// * [WidgetState.pressed].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then [MouseCursor.defer] is used when the button is disabled.
+  /// When the button is enabled, [SystemMouseCursors.click] is used on Web
+  /// and [MouseCursor.defer] is used on other platformss
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
+  ///    [WidgetStateProperty] which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [WidgetStateProperty].
   final MouseCursor? mouseCursor;
 
   final _CupertinoButtonStyle _style;
