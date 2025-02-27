@@ -120,7 +120,7 @@
 @class FlutterKeyboardLayout;
 
 @interface FlutterKeyboardManager (Testing)
-- (nonnull instancetype)initWithDelegate:(nonnull id<FlutterKeyboardManagerDelegate>)viewDelegate
+- (nonnull instancetype)initWithDelegate:(nonnull id<FlutterKeyboardManagerDelegate>)delegate
                           keyboardLayout:(nonnull FlutterKeyboardLayout*)keyboardLayout;
 @end
 
