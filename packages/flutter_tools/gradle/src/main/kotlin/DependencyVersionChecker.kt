@@ -90,7 +90,7 @@ object DependencyVersionChecker {
 
     @VisibleForTesting internal val errorKGPVersion: Version = Version(1, 7, 0)
 
-    @VisibleForTesting internal val warnSDKVersion: Version = Version(20, 0, 0)
+    @VisibleForTesting internal val warnSDKVersion: Int = 20
 
     /**
      * Checks if the project's Android build time dependencies are each within the respective
@@ -176,7 +176,7 @@ object DependencyVersionChecker {
         }
     }
 
-    @VisibleForTesting internal fun getSDKVersion(project: Project): Version? {
+    @VisibleForTesting internal fun getSDKVersion(project: Project): Int? {
         val androidExtensionName = "android"
         val androidExtension =
             project.extensions.findByName(androidExtensionName) as? ApplicationExtension
@@ -192,7 +192,7 @@ object DependencyVersionChecker {
             return null
         }
 
-        return Version(minSdk, 0, 0)
+        return minSdk
     }
 
     @VisibleForTesting internal fun getErrorMessage(
@@ -327,16 +327,17 @@ object DependencyVersionChecker {
 
     @VisibleForTesting
     internal fun checkSDKVersion(
-        version: Version,
-        project: Project,
+        version: Int,
+        project: Project
     ) {
+        // For Android SDK, only the major version is relevant, no need to do a full version check.
         if (version < warnSDKVersion) {
             val warnMessage: String =
                 getWarnMessage(
                     SDK_NAME,
                     version.toString(),
                     warnSDKVersion.toString(),
-                    getPotentialSDKFix(project.getRootDir().getPath()),
+                    getPotentialSDKFix(project.rootDir.path)
                 )
             project.logger.error(warnMessage)
         }

@@ -1,6 +1,7 @@
 package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.flutter.gradle.DependencyVersionChecker.AGP_NAME
 import com.flutter.gradle.DependencyVersionChecker.GRADLE_NAME
@@ -8,6 +9,7 @@ import com.flutter.gradle.DependencyVersionChecker.JAVA_NAME
 import com.flutter.gradle.DependencyVersionChecker.KGP_NAME
 import com.flutter.gradle.DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY
 import com.flutter.gradle.DependencyVersionChecker.POTENTIAL_JAVA_FIX
+import com.flutter.gradle.DependencyVersionChecker.SDK_NAME
 import com.flutter.gradle.DependencyVersionChecker.errorAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.errorGradleVersion
 import com.flutter.gradle.DependencyVersionChecker.errorKGPVersion
@@ -15,15 +17,19 @@ import com.flutter.gradle.DependencyVersionChecker.getErrorMessage
 import com.flutter.gradle.DependencyVersionChecker.getPotentialAGPFix
 import com.flutter.gradle.DependencyVersionChecker.getPotentialGradleFix
 import com.flutter.gradle.DependencyVersionChecker.getPotentialKGPFix
+import com.flutter.gradle.DependencyVersionChecker.getPotentialSDKFix
 import com.flutter.gradle.DependencyVersionChecker.getWarnMessage
 import com.flutter.gradle.DependencyVersionChecker.warnAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnGradleVersion
 import com.flutter.gradle.DependencyVersionChecker.warnJavaVersion
 import com.flutter.gradle.DependencyVersionChecker.warnKGPVersion
+import com.flutter.gradle.DependencyVersionChecker.warnSDKVersion
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.slot
 import io.mockk.verify
+import org.gradle.api.Action
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
@@ -40,6 +46,7 @@ const val SUPPORTED_GRADLE_VERSION: String = "7.4.2"
 val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_11
 val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(7, 3, 1)
 const val SUPPORTED_KGP_VERSION: String = "1.8.10"
+const val SUPPORTED_SDK_VERSION: Int = 30
 
 class DependencyVersionCheckerTest {
     @Test
@@ -209,6 +216,41 @@ class DependencyVersionCheckerTest {
         }
         verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
+
+    @Test
+    fun `SDK version in warn range results in warning logs`() {
+        val exampleWarnSDKVersion = 19
+        val mockProject =
+            MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(sdkVersion = exampleWarnSDKVersion)
+
+        val mockExtraPropertiesExtension = mockProject.extra
+        every {
+            mockExtraPropertiesExtension.set(
+                OUT_OF_SUPPORT_RANGE_PROPERTY,
+                false,
+            )
+        } returns Unit
+        val mockLogger = mockProject.logger
+        every { mockLogger.error(any()) } returns Unit
+
+        DependencyVersionChecker.checkDependencyVersions(mockProject)
+        verify {
+            mockLogger.error(
+                getWarnMessage(
+                    SDK_NAME,
+                    exampleWarnSDKVersion.toString(),
+                    warnSDKVersion.toString(),
+                    getPotentialSDKFix(FAKE_PROJECT_ROOT_DIR),
+                ),
+            )
+        }
+        verify(exactly = 0) {
+            mockExtraPropertiesExtension.set(
+                OUT_OF_SUPPORT_RANGE_PROPERTY,
+                true,
+            )
+        }
+    }
 }
 
 // There isn't a way to create a real org.gradle.api.Project object for testing unfortunately, so
@@ -224,7 +266,8 @@ object MockProjectFactory {
         javaVersion: JavaVersion = SUPPORTED_JAVA_VERSION,
         gradleVersion: String = SUPPORTED_GRADLE_VERSION,
         agpVersion: AndroidPluginVersion = SUPPORTED_AGP_VERSION,
-        kgpVersion: String = SUPPORTED_KGP_VERSION
+        kgpVersion: String = SUPPORTED_KGP_VERSION,
+        sdkVersion: Int = SUPPORTED_SDK_VERSION
     ): Project {
         // Java
         mockkStatic(JavaVersion::class)
@@ -253,6 +296,16 @@ object MockProjectFactory {
 
         // Project path
         every { mockProject.rootDir.path } returns FAKE_PROJECT_ROOT_DIR
+
+        // SDK
+        val actionSlot = slot<Action<Project>>()
+        val mockApplicationExtension = mockk<ApplicationExtension>()
+        every { mockProject.afterEvaluate(capture(actionSlot)) } answers {
+            actionSlot.captured.execute(mockProject)
+            return@answers Unit
+        }
+        every { mockProject.extensions.findByName("android") } returns mockApplicationExtension
+        every { mockApplicationExtension.defaultConfig.minSdk } returns sdkVersion
 
         return mockProject
     }
