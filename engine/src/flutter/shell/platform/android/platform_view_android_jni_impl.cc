@@ -11,7 +11,6 @@
 #include <memory>
 #include <utility>
 
-#include "impeller/toolkit/android/shadow_realm.h"
 #include "unicode/uchar.h"
 
 #include "flutter/common/constants.h"
@@ -159,6 +158,7 @@ static jmethodID g_mutators_stack_init_method = nullptr;
 static jmethodID g_mutators_stack_push_transform_method = nullptr;
 static jmethodID g_mutators_stack_push_cliprect_method = nullptr;
 static jmethodID g_mutators_stack_push_cliprrect_method = nullptr;
+static jmethodID g_mutators_stack_push_opacity_method = nullptr;
 
 // Called By Java
 static jlong AttachJNI(JNIEnv* env, jclass clazz, jobject flutterJNI) {
@@ -872,12 +872,6 @@ bool RegisterApi(JNIEnv* env) {
           .fnPtr = reinterpret_cast<void*>(&UpdateDisplayMetrics),
       },
       {
-          .name = "nativeShouldDisableAHB",
-          .signature = "()Z",
-          .fnPtr = reinterpret_cast<void*>(
-              &impeller::android::ShadowRealm::ShouldDisableAHB),
-      },
-      {
           .name = "nativeIsSurfaceControlEnabled",
           .signature = "(J)Z",
           .fnPtr = reinterpret_cast<void*>(&IsSurfaceControlEnabled),
@@ -1039,6 +1033,14 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   if (g_mutators_stack_push_cliprrect_method == nullptr) {
     FML_LOG(ERROR)
         << "Could not locate FlutterMutatorsStack.pushClipRRect method";
+    return false;
+  }
+
+  g_mutators_stack_push_opacity_method =
+      env->GetMethodID(g_mutators_stack_class->obj(), "pushOpacity", "(F)V");
+  if (g_mutators_stack_push_opacity_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate FlutterMutatorsStack.pushOpacity method";
     return false;
   }
 
@@ -1982,10 +1984,15 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
             radiisArray.obj());
         break;
       }
+      case kOpacity: {
+        float opacity = (*iter)->GetAlphaFloat();
+        env->CallVoidMethod(mutatorsStack, g_mutators_stack_push_opacity_method,
+                            opacity);
+        break;
+      }
       // TODO(cyanglaz): Implement other mutators.
       // https://github.com/flutter/flutter/issues/58426
       case kClipPath:
-      case kOpacity:
       case kBackdropFilter:
         break;
     }

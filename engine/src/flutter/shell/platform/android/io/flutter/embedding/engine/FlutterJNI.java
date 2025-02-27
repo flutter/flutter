@@ -1637,16 +1637,6 @@ public class FlutterJNI {
     void asyncWaitForVsync(final long cookie);
   }
 
-  /**
-   * Whether Android Hardware Buffer import is known to not work on this particular vendor + API
-   * level and should be disabled.
-   */
-  public boolean ShouldDisableAHB() {
-    return nativeShouldDisableAHB();
-  }
-
-  private native boolean nativeShouldDisableAHB();
-
   /** Whether the SurfaceControl swapchain required for hcpp is enabled and active. */
   public boolean IsSurfaceControlEnabled() {
     return nativeIsSurfaceControlEnabled(nativeShellHolderId);

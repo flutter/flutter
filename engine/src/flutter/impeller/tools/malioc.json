@@ -4365,7 +4365,7 @@
           },
           "thread_occupancy": 100,
           "uniform_registers_used": 4,
-          "work_registers_used": 3
+          "work_registers_used": 2
         }
       }
     }
