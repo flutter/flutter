@@ -161,8 +161,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (int64_t)engineIdentifier {
-  // Conversion to intptr_t doesn't need bridged cast.
-  return (int64_t)self;
+  return reinterpret_cast<int64_t>((__bridge void*)self);
 }
 
 - (instancetype)init {

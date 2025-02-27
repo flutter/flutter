@@ -641,7 +641,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     }
     std::cout << message << std::endl;
   };
-  flutterArguments.engine_id = (int64_t)self;  // Conversion to intptr_t doesn't need bridged
+
+  flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
 
   static size_t sTaskRunnerIdentifiers = 0;
   const FlutterTaskRunnerDescription cocoa_task_runner_description = {
