@@ -118,7 +118,7 @@ void main() {
                     'FOUND "packages/data_asset_example/id1": "content1".',
 
                     // Flutter web doesn't support new assets on hot-restart atm
-                    // -> See https://github.com/flutter/flutter/issues/159666
+                    // -> See https://github.com/flutter/flutter/issues/137265
                     if (isWeb)
                       'NOT-FOUND "packages/data_asset_example/id2".'
                     else
@@ -144,8 +144,15 @@ void main() {
                     // Once the app runs it will print whether it found assets.
                     'VERSION: version3',
                     'FOUND "packages/data_asset_example/id1": "content1".',
-                    'FOUND "packages/data_asset_example/id2": "content2".',
-                    'FOUND "packages/data_asset_example/id3": "content3".',
+                    // Flutter web doesn't support new assets on hot-reload atm
+                    // -> See https://github.com/flutter/flutter/issues/137265
+                    if (isWeb) ...[
+                      'NOT-FOUND "packages/data_asset_example/id2".',
+                      'NOT-FOUND "packages/data_asset_example/id3".',
+                    ] else ...[
+                      'FOUND "packages/data_asset_example/id2": "content2".',
+                      'FOUND "packages/data_asset_example/id3": "content3".',
+                    ],
                     'NOT-FOUND "packages/data_asset_example/id4".',
                   ],
                   handler: (_) {
