@@ -65,8 +65,8 @@ class DependencyVersionCheckerTest {
                     AGP_NAME,
                     exampleErrorAgpVersion.toString(),
                     errorAGPVersion.toString(),
-                    getPotentialAGPFix(FAKE_PROJECT_ROOT_DIR)
-                )
+                    getPotentialAGPFix(FAKE_PROJECT_ROOT_DIR),
+                ),
         )
         verify { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
@@ -88,8 +88,8 @@ class DependencyVersionCheckerTest {
                     AGP_NAME,
                     exampleWarnAgpVersion.toString(),
                     warnAGPVersion.toString(),
-                    getPotentialAGPFix(FAKE_PROJECT_ROOT_DIR)
-                )
+                    getPotentialAGPFix(FAKE_PROJECT_ROOT_DIR),
+                ),
             )
         }
         verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
@@ -113,8 +113,8 @@ class DependencyVersionCheckerTest {
                     KGP_NAME,
                     exampleErrorKgpVersion,
                     errorKGPVersion.toString(),
-                    getPotentialKGPFix(FAKE_PROJECT_ROOT_DIR)
-                )
+                    getPotentialKGPFix(FAKE_PROJECT_ROOT_DIR),
+                ),
         )
         verify { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
@@ -136,8 +136,8 @@ class DependencyVersionCheckerTest {
                     KGP_NAME,
                     exampleWarnKgpVersion,
                     warnKGPVersion.toString(),
-                    getPotentialKGPFix(FAKE_PROJECT_ROOT_DIR)
-                )
+                    getPotentialKGPFix(FAKE_PROJECT_ROOT_DIR),
+                ),
             )
         }
         verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
@@ -163,8 +163,8 @@ class DependencyVersionCheckerTest {
                     JAVA_NAME,
                     exampleWarnJavaVersion.toString(),
                     warnJavaVersion.toString(),
-                    POTENTIAL_JAVA_FIX
-                )
+                    POTENTIAL_JAVA_FIX,
+                ),
             )
         }
         verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
@@ -187,8 +187,8 @@ class DependencyVersionCheckerTest {
                     GRADLE_NAME,
                     exampleErrorGradleVersion,
                     errorGradleVersion.toString(),
-                    getPotentialGradleFix(FAKE_PROJECT_ROOT_DIR)
-                )
+                    getPotentialGradleFix(FAKE_PROJECT_ROOT_DIR),
+                ),
         )
         verify { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
@@ -210,8 +210,8 @@ class DependencyVersionCheckerTest {
                     GRADLE_NAME,
                     exampleWarnGradleVersion,
                     warnGradleVersion.toString(),
-                    getPotentialGradleFix(FAKE_PROJECT_ROOT_DIR)
-                )
+                    getPotentialGradleFix(FAKE_PROJECT_ROOT_DIR),
+                ),
             )
         }
         verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
@@ -267,7 +267,7 @@ object MockProjectFactory {
         gradleVersion: String = SUPPORTED_GRADLE_VERSION,
         agpVersion: AndroidPluginVersion = SUPPORTED_AGP_VERSION,
         kgpVersion: String = SUPPORTED_KGP_VERSION,
-        sdkVersion: Int = SUPPORTED_SDK_VERSION
+        sdkVersion: Int = SUPPORTED_SDK_VERSION,
     ): Project {
         // Java
         mockkStatic(JavaVersion::class)
