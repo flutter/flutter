@@ -579,4 +579,7 @@ class TestWebBuildCommand extends FlutterCommand {
 
   @override
   bool get shouldRunPub => false;
+
+  @override
+  bool get shouldEnsurePlatformTooling => false;
 }
