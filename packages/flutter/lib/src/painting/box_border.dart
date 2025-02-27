@@ -323,7 +323,10 @@ abstract class BoxBorder extends ShapeBorder {
       case BoxShape.rectangle:
         borderRect = (borderRadius ?? BorderRadius.zero).resolve(textDirection).toRRect(rect);
       case BoxShape.circle:
-        assert(borderRadius == null, 'borderRadius is not allowed when shape is BoxShape.circle. Remove either the shape or borderRadius argument.');
+        assert(
+          borderRadius == null,
+          'borderRadius is not allowed when shape is BoxShape.circle. Remove either the shape or borderRadius argument.',
+        );
         borderRect = RRect.fromRectAndRadius(
           Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2.0),
           Radius.circular(rect.width),
