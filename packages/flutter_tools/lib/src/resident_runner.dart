@@ -1212,7 +1212,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     globals.printTrace('runDartBuild() - will perform dart build');
 
     final BuildResult lastBuild = await globals.buildSystem.build(
-      const DartBuildForWeb(),
+      const DartBuildForDataAssets(),
       _environment!,
     );
     if (!lastBuild.success) {

@@ -127,8 +127,8 @@ class DartBuildForNative extends DartBuild {
   List<Target> get dependencies => const <Target>[KernelSnapshot()];
 }
 
-class DartBuildForWeb extends DartBuild {
-  const DartBuildForWeb({@visibleForTesting super.buildRunner});
+class DartBuildForDataAssets extends DartBuild {
+  const DartBuildForDataAssets({@visibleForTesting super.buildRunner});
 
   @override
   List<Target> get dependencies => <Target>[];
