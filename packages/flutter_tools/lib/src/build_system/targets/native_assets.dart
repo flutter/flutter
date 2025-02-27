@@ -14,7 +14,6 @@ import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
-import 'web.dart';
 
 export '../../isolated/native_assets/native_assets.dart'
     show CodeAsset, DartBuildResult, DataAsset, DynamicLoadingBundled;
@@ -129,12 +128,10 @@ class DartBuildForNative extends DartBuild {
 }
 
 class DartBuildForWeb extends DartBuild {
-  const DartBuildForWeb(this.compileTargets, {@visibleForTesting super.buildRunner});
-
-  final List<Dart2WebTarget> compileTargets;
+  const DartBuildForWeb({@visibleForTesting super.buildRunner});
 
   @override
-  List<Target> get dependencies => <Target>[...compileTargets];
+  List<Target> get dependencies => <Target>[];
 }
 
 /// Installs the code assets from a [DartBuild] Flutter app.

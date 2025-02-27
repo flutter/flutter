@@ -25,7 +25,6 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/targets/native_assets.dart';
-import 'build_system/targets/web.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
@@ -1213,7 +1212,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     globals.printTrace('runDartBuild() - will perform dart build');
 
     final BuildResult lastBuild = await globals.buildSystem.build(
-      const DartBuildForWeb(<Dart2WebTarget>[]),
+      const DartBuildForWeb(),
       _environment!,
     );
     if (!lastBuild.success) {
