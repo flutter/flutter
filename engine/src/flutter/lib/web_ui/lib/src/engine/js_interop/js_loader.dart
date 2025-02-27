@@ -6,8 +6,8 @@
 library js_loader;
 
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
-import 'package:js/js_util.dart' as js_util;
 import 'package:ui/src/engine.dart';
 
 @JS()
@@ -29,7 +29,7 @@ class FlutterLoader {}
 
 extension FlutterLoaderExtension on FlutterLoader {
   external void didCreateEngineInitializer(FlutterEngineInitializer initializer);
-  bool get isAutoStart => !js_util.hasProperty(this, 'didCreateEngineInitializer');
+  bool get isAutoStart => !(this as JSObject).has('didCreateEngineInitializer');
 }
 
 /// Typedef for the function that initializes the flutter engine.
