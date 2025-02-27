@@ -1632,6 +1632,7 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
     'glfw/glfw',
     'GoogleCloudPlatform/artifact-registry-maven-tools',
     'material-components/material-components-android', // TODO(guidezpl): remove when https://github.com/material-components/material-components-android/issues/4144 is closed
+    'ninja-build/ninja',
     'torvalds/linux',
     'tpn/winsdk-10',
   };
