@@ -32,6 +32,9 @@ FlutterProjectBundle::FlutterProjectBundle(
   gpu_preference_ =
       static_cast<FlutterGpuPreference>(properties.gpu_preference);
 
+  ui_thread_policy_ =
+      static_cast<FlutterUIThreadPolicy>(properties.ui_thread_policy);
+
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||
       (!aot_library_path_.empty() && aot_library_path_.is_relative())) {

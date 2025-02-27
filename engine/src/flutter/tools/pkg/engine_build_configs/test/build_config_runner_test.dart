@@ -116,7 +116,8 @@ void main() {
     // Check that the events for the Ninja command are correct.
     expect(events[2] is RunnerStart, isTrue);
     expect(events[2].name, equals('$buildName: ninja'));
-    expect(events[2].command[0], contains('ninja'));
+    final String rootPath = path.dirname(path.dirname(engine.srcDir.path));
+    expect(events[2].command[0], equals('$rootPath/third_party/ninja/ninja'));
     final String configPath = '${engine.srcDir.path}/out/${targetBuild.ninja.config}';
     expect(events[2].command.contains(configPath), isTrue);
     for (final String target in targetBuild.ninja.targets) {
