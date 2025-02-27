@@ -121,7 +121,8 @@ void FlutterMain::Init(JNIEnv* env,
   // android_get_device_api_level() is only available on API 24 and greater, and
   // Flutter still supports 21, 22, and 23.
 
-  AndroidRenderingAPI android_rendering_api = SelectedRenderingAPI(settings, api_level);
+  AndroidRenderingAPI android_rendering_api =
+      SelectedRenderingAPI(settings, api_level);
   switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
     case AndroidRenderingAPI::kSkiaOpenGLES:
