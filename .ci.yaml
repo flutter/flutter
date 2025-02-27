@@ -5267,7 +5267,7 @@ targets:
       device_os: iOS-18-4
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "16e5104o"
         }
       tags: >
         ["devicelab", "ios", "mac"]
