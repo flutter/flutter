@@ -23,6 +23,29 @@ import 'package:flutter_test/flutter_test.dart';
 const Offset _kRowOffset = Offset(0.0, -50.0);
 
 void main() {
+  Finder findAnimatedLabelWithText(String expectedText) {
+    return find.byWidgetPredicate((Widget widget) {
+      if (widget is RichText) {
+        final TextSpan rootSpan = widget.text as TextSpan;
+        final StringBuffer buffer = StringBuffer();
+        rootSpan.visitChildren((InlineSpan inlineSpan) {
+          if (inlineSpan is TextSpan) {
+            buffer.write(inlineSpan.text);
+          } else if (inlineSpan is WidgetSpan) {
+            final AnimatedSwitcher switcher = inlineSpan.child as AnimatedSwitcher;
+            final Text? textChild = switcher.child as Text?;
+            if (textChild != null) {
+              buffer.write(textChild.data);
+            }
+          }
+          return true;
+        });
+        return buffer.toString() == expectedText;
+      }
+      return false;
+    });
+  }
+
   group('Countdown timer picker', () {
     testWidgets('initialTimerDuration falls within limit', (WidgetTester tester) async {
       expect(() {
@@ -121,8 +144,8 @@ void main() {
 
       Offset lastOffset = tester.getTopLeft(find.text('12'));
 
-      expect(tester.getTopLeft(find.text('hours')).dx > lastOffset.dx, true);
-      lastOffset = tester.getTopLeft(find.text('hours'));
+      expect(tester.getTopLeft(findAnimatedLabelWithText('hours')).dx > lastOffset.dx, true);
+      lastOffset = tester.getTopLeft(findAnimatedLabelWithText('hours'));
 
       expect(tester.getTopLeft(find.text('30')).dx > lastOffset.dx, true);
       lastOffset = tester.getTopLeft(find.text('30'));
@@ -153,8 +176,8 @@ void main() {
 
       Offset lastOffset = tester.getTopLeft(find.text('12'));
 
-      expect(tester.getTopLeft(find.text('hours')).dx > lastOffset.dx, false);
-      lastOffset = tester.getTopLeft(find.text('hours'));
+      expect(tester.getTopLeft(findAnimatedLabelWithText('hours')).dx > lastOffset.dx, false);
+      lastOffset = tester.getTopLeft(findAnimatedLabelWithText('hours'));
 
       expect(tester.getTopLeft(find.text('30')).dx > lastOffset.dx, false);
       lastOffset = tester.getTopLeft(find.text('30'));
@@ -1804,8 +1827,8 @@ void main() {
     );
 
     expect(duration, isNull);
-    expect(find.text('hour'), findsNothing);
-    expect(find.text('hours'), findsOneWidget);
+
+    expect(findAnimatedLabelWithText('hours'), findsOneWidget);
 
     await tester.drag(
       find.text('2'),
@@ -1814,14 +1837,67 @@ void main() {
     ); // see top of file
     // Duration should change but not the label.
     expect(duration!.inHours, 1);
-    expect(find.text('hour'), findsNothing);
-    expect(find.text('hours'), findsOneWidget);
+    expect(findAnimatedLabelWithText('hours'), findsOneWidget);
     await tester.pumpAndSettle();
 
     // Now the label should change.
     expect(duration!.inHours, 1);
-    expect(find.text('hours'), findsNothing);
-    expect(find.text('hour'), findsOneWidget);
+    expect(findAnimatedLabelWithText('hour'), findsOneWidget);
+  });
+
+  testWidgets('TimerPicker hour label suffix fades in and out', (WidgetTester tester) async {
+    Duration? duration;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: 320,
+            height: 216,
+            child: CupertinoTimerPicker(
+              mode: CupertinoTimerPickerMode.hm,
+              initialTimerDuration: const Duration(hours: 1, minutes: 30),
+              onTimerDurationChanged: (Duration d) {
+                duration = d;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(findAnimatedLabelWithText('hour'), findsOneWidget);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('1').first));
+    await gesture.moveBy(const Offset(0, -30));
+    await tester.pump();
+    expect(duration!.inHours, 2);
+    expect(findAnimatedLabelWithText('hour'), findsOneWidget);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(findAnimatedLabelWithText('hours'), findsOneWidget);
+
+    await tester.drag(find.text('2'), Offset(0, -_kRowOffset.dy), warnIfMissed: false);
+
+    // Pump frame-by-frame until the scroll settles and the suffix animation begins.
+    while (findAnimatedLabelWithText('hour').evaluate().isEmpty) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    // Pump half the animation duration (100ms of 200ms) to land at mid-fade.
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The departing 's' suffix should be mid-fade.
+    final Finder suffixFade = find.ancestor(
+      of: find.text('s'),
+      matching: find.byType(FadeTransition),
+    );
+    expect(suffixFade, findsOneWidget);
+    final double suffixOpacity = tester.widget<FadeTransition>(suffixFade).opacity.value;
+    expect(suffixOpacity, greaterThan(0.0));
+    expect(suffixOpacity, lessThan(1.0));
+
+    await tester.pumpAndSettle();
+    expect(findAnimatedLabelWithText('hour'), findsOneWidget);
   });
 
   testWidgets('TimerPicker has intrinsic width and height', (WidgetTester tester) async {
@@ -2150,25 +2226,37 @@ void main() {
       );
     }
 
+    // Helper: extract the resolved text color from the hour label. The hour
+    // label is built by _AnimatedLabelSwitcher as a RichText whose root
+    // TextSpan has no style; the color lives on the child TextSpan (prefix)
+    // and the Text widget inside the AnimatedSwitcher (suffix). We read it
+    // from the suffix Text's RenderParagraph, which carries the style.
+    Color hourLabelColor() {
+      final Finder suffixText = find.descendant(
+        of: find.byType(AnimatedSwitcher),
+        matching: find.byType(Text),
+      );
+      final RenderParagraph p = tester.renderObject(suffixText.first);
+      return p.text.style!.color!;
+    }
+
     // CupertinoTimerPicker with light theme.
     await tester.pumpWidget(buildTimerPicker(Brightness.light));
-    RenderParagraph paragraph = tester.renderObject(find.text('hours'));
     final Color expectedLight = CupertinoColors.label.resolveFrom(
       tester.element(find.byType(CupertinoTimerPicker)),
     );
-    expect(paragraph.text.style!.color, expectedLight);
+    expect(hourLabelColor(), expectedLight);
     // Text style should not return unresolved color.
-    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+    expect(hourLabelColor().toString().contains('UNRESOLVED'), isFalse);
 
-    // CupertinoTimerPicker with light theme.
+    // CupertinoTimerPicker with dark theme.
     await tester.pumpWidget(buildTimerPicker(Brightness.dark));
-    paragraph = tester.renderObject(find.text('hours'));
     final Color expectedDark = CupertinoColors.label.resolveFrom(
       tester.element(find.byType(CupertinoTimerPicker)),
     );
-    expect(paragraph.text.style!.color, expectedDark);
+    expect(hourLabelColor(), expectedDark);
     // Text style should not return unresolved color.
-    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+    expect(hourLabelColor().toString().contains('UNRESOLVED'), isFalse);
   });
 
   testWidgets('TimerPicker minDate - maxDate with minuteInterval', (WidgetTester tester) async {
