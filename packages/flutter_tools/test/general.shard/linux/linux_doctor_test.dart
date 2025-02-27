@@ -160,7 +160,7 @@ Configurations:
 
 // A command that will failure when running 'eglinfo'.
 FakeCommand _eglinfoMissingCommand() {
-  return FakeCommand(
+  return const FakeCommand(
     command: <String>['eglinfo'],
     exitCode: 1,
     exception: ProcessException('eglinfo', <String>[]),
