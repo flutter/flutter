@@ -117,11 +117,7 @@ void main() {
             packagesWithNativeAssetsResult: <String>['bar'],
           ),
         ),
-        throwsToolExit(
-          message:
-              'Package(s) bar require the native assets feature to be enabled. '
-              'Enable using `flutter config --enable-native-assets`.',
-        ),
+        throwsToolExit(message: 'Enable code assets using `flutter config --enable-native-assets`'),
       );
     },
   );
