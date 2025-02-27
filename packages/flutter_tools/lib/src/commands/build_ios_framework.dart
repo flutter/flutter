@@ -45,7 +45,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
 
     argParser

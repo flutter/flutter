@@ -910,7 +910,6 @@ void main() {
         useSseForDebugProxy: true,
         useSseForDebugBackend: true,
         useSseForInjectedClient: true,
-        nullAssertions: true,
         nativeNullAssertions: true,
         buildInfo: const BuildInfo(
           BuildMode.debug,
@@ -1019,7 +1018,6 @@ void main() {
         useSseForDebugProxy: true,
         useSseForDebugBackend: true,
         useSseForInjectedClient: true,
-        nullAssertions: true,
         nativeNullAssertions: true,
         buildInfo: const BuildInfo(
           BuildMode.debug,
@@ -1134,7 +1132,6 @@ void main() {
           useSseForDebugProxy: true,
           useSseForDebugBackend: true,
           useSseForInjectedClient: true,
-          nullAssertions: true,
           nativeNullAssertions: true,
           buildInfo: const BuildInfo(
             BuildMode.debug,
@@ -1225,7 +1222,6 @@ void main() {
         expressionCompiler: null,
         extraHeaders: const <String, String>{},
         chromiumLauncher: null,
-        nullAssertions: true,
         nativeNullAssertions: true,
         ddcModuleSystem: usesDdcModuleSystem,
         canaryFeatures: canaryFeatures,
@@ -1264,7 +1260,6 @@ void main() {
         useSseForDebugProxy: true,
         useSseForDebugBackend: true,
         useSseForInjectedClient: true,
-        nullAssertions: true,
         nativeNullAssertions: true,
         buildInfo: const BuildInfo(
           BuildMode.debug,
@@ -1324,7 +1319,6 @@ void main() {
         useSseForDebugProxy: true,
         useSseForDebugBackend: true,
         useSseForInjectedClient: true,
-        nullAssertions: true,
         nativeNullAssertions: true,
         buildInfo: BuildInfo.debug,
         enableDwds: false,
@@ -1495,7 +1489,6 @@ void main() {
         useSseForDebugProxy: true,
         useSseForDebugBackend: true,
         useSseForInjectedClient: true,
-        nullAssertions: true,
         nativeNullAssertions: true,
         buildInfo: BuildInfo.debug,
         enableDwds: false,
