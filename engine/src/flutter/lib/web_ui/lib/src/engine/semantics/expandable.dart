@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/ui.dart' as ui;
-
-import 'label_and_value.dart';
 import 'semantics.dart';
 
 /// Adds expandability behavior to a semantic node.
