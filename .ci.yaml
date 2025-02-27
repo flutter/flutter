@@ -5257,6 +5257,22 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
 
+  - name: Mac_arm64_ios hot_mode_dev_cycle_ios_beta__benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      os: Mac-14
+      device_os: iOS-18-4
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "15a240d"
+        }
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: hot_mode_dev_cycle_ios__benchmark
+
   - name: Mac_arm64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false

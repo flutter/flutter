@@ -5,7 +5,6 @@
 import 'package:xml/xml.dart';
 import 'package:xml/xpath.dart';
 
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
@@ -14,30 +13,20 @@ import '../ios/xcodeproj.dart';
 import '../project.dart';
 
 class LLDBInitMigration extends ProjectMigrator {
-  LLDBInitMigration(
-    XcodeBasedProject project,
-    SupportedPlatform platform,
-    BuildInfo buildInfo, {
-    required Logger logger,
-  }) : _xcodeProject = project,
-       _platform = platform,
-       _buildInfo = buildInfo,
-       _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-       super(logger);
+  LLDBInitMigration(IosProject project, BuildInfo buildInfo, {required Logger logger})
+    : _xcodeProject = project,
+      _buildInfo = buildInfo,
+      _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
+      super(logger);
 
-  final XcodeBasedProject _xcodeProject;
-  final SupportedPlatform _platform;
+  final IosProject _xcodeProject;
   final BuildInfo _buildInfo;
   final File _xcodeProjectInfoFile;
-
-  final String initPath = 'packages/flutter_tools/bin/.lldbinit';
+  String get initPath =>
+      _xcodeProject.lldbInitFile.path.replaceFirst(_xcodeProject.hostAppRoot.path, r'$(SRCROOT)');
 
   @override
   Future<void> migrate() async {
-    // Only needed for iOS
-    if (_platform != SupportedPlatform.ios) {
-      return;
-    }
     SchemeInfo? schemeInfo;
     try {
       if (!_xcodeProjectInfoFile.existsSync()) {
@@ -50,13 +39,11 @@ class LLDBInitMigration extends ProjectMigrator {
       if (isSchemeMigrated) {
         return;
       }
-
       _migrateScheme(schemeInfo);
-
     } on Exception catch (e) {
-      throwToolExit(
+      logger.printError(
         'An error occurred when adding LLDB Init File:\n'
-        '  $e'
+        '  $e',
       );
     }
   }
@@ -95,14 +82,18 @@ class LLDBInitMigration extends ProjectMigrator {
     final String schemeContent = schemeInfo.schemeContent;
 
     if (schemeContent.contains('customLLDBInitFile')) {
-      throw Exception('Running Flutter in debug mode on new iOS versions requires an LLDB File, but the scheme already has one set. Please remove the LLDB Init File for the scheme ${schemeInfo.schemeName}');
+      throw Exception(
+        'Running Flutter in debug mode on new iOS versions requires a LLDB '
+        'Init File, but the scheme already has one set. Please remove the LLDB '
+        'Init File for the scheme ${schemeInfo.schemeName}.',
+      );
     }
 
     final String newScheme = schemeContent.replaceAll(
       'selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"',
       '''
 selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      customLLDBInitFile = "\$(FLUTTER_ROOT)/$initPath"''',
+      customLLDBInitFile = "$initPath"''',
     );
     try {
       final XmlDocument document = XmlDocument.parse(newScheme);

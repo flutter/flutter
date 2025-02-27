@@ -171,7 +171,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
     LLDBInitMigration(
       app.project,
-      SupportedPlatform.ios,
       buildInfo,
       logger: globals.logger,
     ),
