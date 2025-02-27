@@ -5011,15 +5011,16 @@ TEST_F(ShellTest, ProvidesEngineId) {
   TaskRunners task_runners = GetTaskRunnersForFixture();
   fml::AutoResetWaitableEvent latch;
 
-  int reported_handle = 0;
+  std::optional<int> reported_handle = std::nullopt;
 
   AddNativeCallback(
       "ReportEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        Dart_Handle exception = nullptr;
-        reported_handle =
-            tonic::DartConverter<int64_t>::FromArguments(args, 0, exception);
-        ASSERT_EQ(exception, nullptr);
-
+        Dart_Handle arg = Dart_GetNativeArgument(args, 0);
+        if (Dart_IsNull(arg)) {
+          reported_handle = std::nullopt;
+        } else {
+          reported_handle = tonic::DartConverter<int64_t>::FromDart(arg);
+        }
         latch.Signal();
       }));
   fml::AutoResetWaitableEvent check_latch;
@@ -5034,6 +5035,37 @@ TEST_F(ShellTest, ProvidesEngineId) {
 
   latch.Wait();
   ASSERT_EQ(reported_handle, 99);
+  DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, ProvidesNullEngineId) {
+  Settings settings = CreateSettingsForFixture();
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+  fml::AutoResetWaitableEvent latch;
+
+  std::optional<int> reported_handle = std::nullopt;
+
+  AddNativeCallback(
+      "ReportEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        Dart_Handle arg = Dart_GetNativeArgument(args, 0);
+        if (Dart_IsNull(arg)) {
+          reported_handle = std::nullopt;
+        } else {
+          reported_handle = tonic::DartConverter<int64_t>::FromDart(arg);
+        }
+        latch.Signal();
+      }));
+  fml::AutoResetWaitableEvent check_latch;
+
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell->IsSetup());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("providesEngineId");
+  RunEngine(shell.get(), std::move(configuration));
+
+  latch.Wait();
+  ASSERT_EQ(reported_handle, std::nullopt);
   DestroyShell(std::move(shell), task_runners);
 }
 
