@@ -146,10 +146,10 @@ void main() {
                     'FOUND "packages/data_asset_example/id1": "content1".',
                     // Flutter web doesn't support new assets on hot-reload atm
                     // -> See https://github.com/flutter/flutter/issues/137265
-                    if (isWeb) ...[
+                    if (isWeb) ...<Pattern>[
                       'NOT-FOUND "packages/data_asset_example/id2".',
                       'NOT-FOUND "packages/data_asset_example/id3".',
-                    ] else ...[
+                    ] else ...<Pattern>[
                       'FOUND "packages/data_asset_example/id2": "content2".',
                       'FOUND "packages/data_asset_example/id3": "content3".',
                     ],
