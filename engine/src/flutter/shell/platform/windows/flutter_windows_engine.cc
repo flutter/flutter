@@ -266,6 +266,12 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   std::transform(
       switches.begin(), switches.end(), std::back_inserter(argv),
       [](const std::string& arg) -> const char* { return arg.c_str(); });
+  if (project_->ImpellerEnabled()) {
+    switches.push_back("--enable-impeller=true");
+  } else if (std::find(switches.begin(), switches.end(),
+                       "--enable-impeller=true") != switches.end()) {
+    switches.push_back("--enable-impeller=false");
+  }
 
   const std::vector<std::string>& entrypoint_args =
       project_->dart_entrypoint_arguments();
@@ -309,7 +315,6 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = argv.empty() ? nullptr : argv.data();
-  args.enable_impeller = project_->ImpellerEnabled();
 
   // Fail if conflicting non-default entrypoints are specified in the method
   // argument and the project.
