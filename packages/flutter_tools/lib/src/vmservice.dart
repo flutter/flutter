@@ -486,6 +486,7 @@ class FlutterVmService {
       return await service.getVM();
     } on vm_service.RPCError catch (err) {
       if (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          err.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
           err.message.contains('Service connection disposed')) {
         globals.printTrace('VmService.getVm call failed: $err');
         return null;
@@ -507,6 +508,7 @@ class FlutterVmService {
       // Swallow the exception here and let the shutdown logic elsewhere deal
       // with cleaning up.
       if (e.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          e.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
           e.message.contains('Service connection disposed')) {
         return null;
       }
@@ -792,6 +794,7 @@ class FlutterVmService {
       // disappears while handling a request, return null.
       if ((err.code == vm_service.RPCErrorKind.kMethodNotFound.code) ||
           (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code) ||
+          (err.code == vm_service.RPCErrorKind.kConnectionDisposed.code) ||
           (err.message.contains('Service connection disposed'))) {
         return null;
       }
