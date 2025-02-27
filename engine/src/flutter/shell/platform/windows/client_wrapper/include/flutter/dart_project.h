@@ -103,10 +103,11 @@ class DartProject {
 
   // Whether to enable the Impeller rendering engine.
   //
-  // If not provided, defaults to false.
+  // If not provided, defaults to false. In a future release, this setting will
+  // become a no-op when the Skia backend is fully removed.
   void set_enable_impeller(bool value) { enable_impeller_ = value; }
 
-  /// Whether the Impeller rendering engine is enabled.
+  // Whether the Impeller rendering engine is enabled.
   bool get_enable_impeller() const { return enable_impeller_; }
 
   // Sets the thread policy for UI isolate.

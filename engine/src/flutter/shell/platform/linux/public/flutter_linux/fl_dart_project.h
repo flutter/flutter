@@ -134,6 +134,8 @@ gchar** fl_dart_project_get_dart_entrypoint_arguments(FlDartProject* project);
  * @enabled: whether the Impeller rendering backend is enabled.
  *
  * If true, Selects the Impeller rendering backend. Otherwise selects Skia.
+ * In a future release, this setting will become a no-op when the Skia backend
+ * is fully removed.
  */
 void fl_dart_project_set_enable_impeller(FlDartProject* project,
                                          gboolean enabled);
