@@ -476,9 +476,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   // pair cursor change with a view.
   __weak FlutterView* _lastViewWithPointerEvent;
 
-  // Pointer to a keyboard manager, a hub that manages how key events are
-  // dispatched to various Flutter key responders, and whether the event is
-  // propagated to the next NSResponder.
+  // Pointer to a keyboard manager.
   FlutterKeyboardManager* _keyboardManager;
 }
 

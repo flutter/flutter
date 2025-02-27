@@ -59,7 +59,9 @@
 @end
 
 /**
- * Processes keyboard events and cooperate with |TextInputPlugin|.
+ * A hub that manages how key events are dispatched to various Flutter key
+ * responders, and whether the event is propagated to the next NSResponder.
+ * Cooperates with |TextInputPlugin| to handle text
  *
  * A keyboard event goes through a few sections, each can choose to handled the
  * event, and only unhandled events can move to the next section:
