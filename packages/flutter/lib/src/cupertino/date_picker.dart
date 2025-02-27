@@ -2492,11 +2492,87 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           },
           child: _buildHourPicker(additionalPadding, selectionOverlay),
         ),
-        _buildLabel(
-          localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour!) ?? '',
-          additionalPadding,
-        ),
+        _buildHourLabel(additionalPadding),
       ],
+    );
+  }
+
+  Widget _buildHourLabel(EdgeInsetsDirectional pickerPadding) {
+    final String oneHourLabel = localizations.timerPickerHourLabel(1) ?? '';
+    final String currentLabel =
+        localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour!) ?? '';
+    final List<String> parts = currentLabel.split(oneHourLabel);
+    final bool containsOneHourLabel = parts.length > 1;
+    final String prefix = parts.first;
+    final String suffix = parts.last;
+
+    final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
+      start: numberLabelWidth + _kTimerPickerLabelPadSize + pickerPadding.start,
+    );
+
+    return IgnorePointer(
+      child: Padding(
+        padding: padding.resolve(textDirection),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart.resolve(textDirection),
+          child: SizedBox(
+            height: numberLabelHeight,
+            child: Baseline(
+              baseline: numberLabelBaseline,
+              baselineType: TextBaseline.alphabetic,
+              child:
+                  containsOneHourLabel
+                      ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text.rich(
+                            maxLines: 1,
+                            softWrap: false,
+                            TextSpan(
+                              text: prefix,
+                              style: const TextStyle(
+                                fontSize: _kTimerPickerLabelFontSize,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text: oneHourLabel,
+                                  style: const TextStyle(
+                                    fontSize: _kTimerPickerLabelFontSize,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: Text(
+                              suffix,
+                              key: ValueKey<String?>(suffix),
+                              style: const TextStyle(
+                                fontSize: _kTimerPickerLabelFontSize,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              softWrap: false,
+                            ),
+                          ),
+                        ],
+                      )
+                      : Text(
+                        currentLabel,
+                        style: const TextStyle(
+                          fontSize: _kTimerPickerLabelFontSize,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        softWrap: false,
+                      ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
