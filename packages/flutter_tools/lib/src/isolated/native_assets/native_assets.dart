@@ -126,7 +126,7 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
   required FileSystem fileSystem,
 }) async {
   final OS? targetOS = getNativeOSFromTargetPlatform(targetPlatform);
-  final bool isWeb = targetOS == null;
+  final bool isWeb = targetPlatform == TargetPlatform.web_javascript;
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
 
   // Sanity check.
