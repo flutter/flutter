@@ -2455,7 +2455,7 @@ extension type SkFontStyle._(JSObject _) implements JSObject {
 }
 
 extension type SkTextShadow._(JSObject _) implements JSObject {
-  external SkTextShadow();
+  external SkTextShadow({int dummyArgumentToCreateObjectLiteral});
 
   @JS('color')
   external set _color(JSFloat32Array? value);
@@ -2471,7 +2471,7 @@ extension type SkTextShadow._(JSObject _) implements JSObject {
 }
 
 extension type SkFontFeature._(JSObject _) implements JSObject {
-  external SkFontFeature();
+  external SkFontFeature({int dummyArgumentToCreateObjectLiteral});
 
   @JS('name')
   external set _name(JSString? value);
@@ -2483,7 +2483,7 @@ extension type SkFontFeature._(JSObject _) implements JSObject {
 }
 
 extension type SkFontVariation._(JSObject _) implements JSObject {
-  external SkFontVariation();
+  external SkFontVariation({int dummyArgumentToCreateObjectLiteral});
 
   @JS('axis')
   external set _axis(JSString? value);

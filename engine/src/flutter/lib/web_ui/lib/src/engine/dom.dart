@@ -75,7 +75,7 @@ extension type DomObjectConstructor._(JSObject _) implements JSObject {
   external JSObject assign(JSAny? target, JSAny? source1, JSAny? source2);
 }
 
-extension type DomWindow._(JSObject _) implements JSObject, DomEventTarget {
+extension type DomWindow._(JSObject _) implements DomEventTarget, JSObject {
   external DomConsole get console;
 
   @JS('devicePixelRatio')
@@ -135,10 +135,16 @@ extension type DomWindow._(JSObject _) implements JSObject, DomEventTarget {
 
   external DomScreen? get screen;
 
+  JSFunction _makeAnimationFrameCallbackZoned(DomRequestAnimationFrameCallback callback) {
+    final ZoneUnaryCallback<void, JSNumber> zonedCallback = Zone.current
+        .bindUnaryCallback<void, JSNumber>(callback);
+    return zonedCallback.toJS;
+  }
+
   @JS('requestAnimationFrame')
   external JSNumber _requestAnimationFrame(JSFunction callback);
   double requestAnimationFrame(DomRequestAnimationFrameCallback callback) =>
-      _requestAnimationFrame(callback.toJS).toDartDouble;
+      _requestAnimationFrame(_makeAnimationFrameCallbackZoned(callback)).toDartDouble;
 
   @JS('postMessage')
   external void _postMessage(JSAny message, JSString targetOrigin, [JSArray<JSAny?> messagePorts]);
@@ -331,6 +337,13 @@ extension type DomHTMLDocument._(JSObject _) implements JSObject, DomDocument {
 @JS('document')
 external DomHTMLDocument get domDocument;
 
+/// Creates a [DomEventListener] that runs in the current [Zone].
+DomEventListener createDomEventListener(DartDomEventListener listener) {
+  final ZoneUnaryCallback<void, DomEvent> zonedListener = Zone.current
+      .bindUnaryCallback<void, DomEvent>(listener);
+  return zonedListener.toJS;
+}
+
 extension type DomEventTarget._(JSObject _) implements JSObject {
   external void addEventListener(String type, DomEventListener? listener, [JSAny options]);
 
@@ -352,6 +365,7 @@ extension type DomEventListenerOptions._(JSObject _) implements JSObject {
   external set once(bool value);
 }
 
+typedef DartDomEventListener = void Function(DomEvent event);
 typedef DomEventListener = JSFunction;
 
 extension type DomEvent._(JSObject _) implements JSObject {

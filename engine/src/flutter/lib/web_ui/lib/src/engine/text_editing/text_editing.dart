@@ -1718,6 +1718,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
         'focus',
         (DomEvent _) {
           // Cancel previous timer if exists.
+          print('GOT FOCUS EVENT IN text_editing.dart');
           _schedulePlacement();
         }.toJS,
       ),

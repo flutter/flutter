@@ -1079,7 +1079,7 @@ Future<void> testMain() async {
       final Completer<bool> submittedForm = Completer<bool>();
       formElement.addEventListener(
         'submit',
-        ((DomEvent event) => submittedForm.complete(true)).toJS,
+        createDomEventListener((DomEvent event) => submittedForm.complete(true)),
       );
 
       const MethodCall clearClient = MethodCall('TextInput.clearClient');
@@ -1131,7 +1131,7 @@ Future<void> testMain() async {
       final Completer<bool> submittedForm = Completer<bool>();
       formElement.addEventListener(
         'submit',
-        ((DomEvent event) => submittedForm.complete(true)).toJS,
+        createDomEventListener((DomEvent event) => submittedForm.complete(true)),
       );
 
       // Clear client is not called. The used requested context to be finalized.
@@ -1152,10 +1152,9 @@ Future<void> testMain() async {
 
     test('Moves the focus across input elements', () async {
       final List<DomEvent> focusinEvents = <DomEvent>[];
-      final DomEventListener handleFocusIn =
-          (DomEvent event) {
-            focusinEvents.add(event);
-          }.toJS;
+      final DomEventListener handleFocusIn = createDomEventListener((DomEvent event) {
+        focusinEvents.add(event);
+      });
 
       final MethodCall setClient1 = MethodCall('TextInput.setClient', <dynamic>[
         123,
@@ -3763,7 +3762,11 @@ void clearForms() {
 
 /// Waits until the text strategy closes and moves the focus accordingly.
 Future<void> waitForTextStrategyStopPropagation() async {
-  await Future<void>.delayed(Duration.zero);
+  final Completer<void> animationFrameFired = Completer<void>();
+  domWindow.requestAnimationFrame((JSNumber _) {
+    animationFrameFired.complete();
+  });
+  return animationFrameFired.future;
 }
 
 class GlobalTextEditingStrategySpy extends GloballyPositionedTextEditingStrategy {

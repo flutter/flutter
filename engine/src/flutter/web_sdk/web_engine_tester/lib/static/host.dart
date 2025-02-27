@@ -182,10 +182,10 @@ MultiChannel<dynamic> _connectToServer() {
   final StreamChannelController<dynamic> controller = StreamChannelController<dynamic>(sync: true);
   webSocket.addEventListener(
     'message',
-    (DomEvent message) {
+    createDomEventListener((DomEvent message) {
       final String data = (message as DomMessageEvent).data as String;
       controller.local.sink.add(jsonDecode(data));
-    }.toJS,
+    }),
   );
 
   controller.local.stream.listen((dynamic message) => webSocket.send(jsonEncode(message)));

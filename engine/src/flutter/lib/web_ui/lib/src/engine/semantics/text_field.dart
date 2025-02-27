@@ -271,9 +271,11 @@ class SemanticTextField extends SemanticRole {
       ..height = '${semanticsObject.rect!.height}px';
     append(editableElement);
 
+    print('ADDING EVENT LISTENERS TO $editableElement');
     editableElement.addEventListener(
       'focus',
       (DomEvent event) {
+        print('GOT FOCUS EVENT!!!');
         // IMPORTANT: because this event listener can be triggered by either or
         // both a "focus" and a "click" DOM events, this code must be idempotent.
         EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -287,12 +289,14 @@ class SemanticTextField extends SemanticRole {
     editableElement.addEventListener(
       'click',
       (DomEvent event) {
+        print('GOT CLICK EVENT!!!');
         editableElement.focusWithoutScroll();
       }.toJS,
     );
     editableElement.addEventListener(
       'blur',
       (DomEvent event) {
+        print('GOT BLUR EVENT!!!');
         SemanticsTextEditingStrategy._instance?.deactivate(this);
       }.toJS,
     );

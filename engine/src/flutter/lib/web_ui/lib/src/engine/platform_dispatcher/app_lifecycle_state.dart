@@ -70,6 +70,7 @@ class _BrowserAppLifecycleState extends AppLifecycleState {
 
   @override
   void activate() {
+    print('ABOUT TO SET EVENT LISTENERS');
     domWindow.addEventListener('focus', _focusListener);
     domWindow.addEventListener('blur', _blurListener);
     domDocument.addEventListener('visibilitychange', _visibilityChangeListener);
@@ -80,6 +81,7 @@ class _BrowserAppLifecycleState extends AppLifecycleState {
 
   @override
   void deactivate() {
+    print('REMOVING EVENT LISTENERS');
     domWindow.removeEventListener('focus', _focusListener);
     domWindow.removeEventListener('blur', _blurListener);
     domDocument.removeEventListener('visibilitychange', _visibilityChangeListener);
@@ -91,16 +93,19 @@ class _BrowserAppLifecycleState extends AppLifecycleState {
 
   late final DomEventListener _focusListener =
       (DomEvent event) {
+        print('GOT FOCUS EVENT!!!');
         onAppLifecycleStateChange(ui.AppLifecycleState.resumed);
       }.toJS;
 
   late final DomEventListener _blurListener =
       (DomEvent event) {
+        print('GOT BLUR EVENT!!!');
         onAppLifecycleStateChange(ui.AppLifecycleState.inactive);
       }.toJS;
 
   late final DomEventListener _visibilityChangeListener =
       (DomEvent event) {
+        print('GOT VISIBILITY CHANGE EVENT!!!');
         if (domDocument.visibilityState == 'visible') {
           onAppLifecycleStateChange(ui.AppLifecycleState.resumed);
         } else if (domDocument.visibilityState == 'hidden') {
