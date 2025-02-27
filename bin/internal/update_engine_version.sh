@@ -67,5 +67,11 @@ echo $ENGINE_VERSION > "$FLUTTER_ROOT/bin/internal/engine.version"
 
 # The realm on CI is passed in.
 if [ -n "${FLUTTER_REALM}" ]; then
+  echo $FLUTTER_REALM > "$FLUTTER_ROOT/bin/cache/engine.realm"
+  # TODO(matanlurey): Stop writing to internal/engine.realm. https://github.com/flutter/flutter/issues/164315.
   echo $FLUTTER_REALM > "$FLUTTER_ROOT/bin/internal/engine.realm"
+else
+  echo "" > "$FLUTTER_ROOT/bin/cache/engine.realm"
+  # TODO(matanlurey): Stop writing to internal/engine.realm. https://github.com/flutter/flutter/issues/164315.
+  echo "" > "$FLUTTER_ROOT/bin/internal/engine.realm"
 fi

@@ -66,5 +66,11 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 # The realm on CI is passed in.
 if ($Env:FLUTTER_REALM) {
+    [System.IO.File]::WriteAllText("$flutterRoot\bin\cache\engine.realm", $Env:FLUTTER_REALM, $utf8NoBom)
+    # TODO(matanlurey): Stop writing to internal/engine.realm. https://github.com/flutter/flutter/issues/164315.
     [System.IO.File]::WriteAllText("$flutterRoot\bin\internal\engine.realm", $Env:FLUTTER_REALM, $utf8NoBom)
+} else {
+    [System.IO.File]::WriteAllText("$flutterRoot\bin\cache\engine.realm", "", $utf8NoBom)
+    # TODO(matanlurey): Stop writing to internal/engine.realm. https://github.com/flutter/flutter/issues/164315.
+    [System.IO.File]::WriteAllText("$flutterRoot\bin\internal\engine.realm", "", $utf8NoBom)
 }
