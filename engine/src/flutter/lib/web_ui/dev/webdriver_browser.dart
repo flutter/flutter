@@ -64,6 +64,8 @@ class WebDriverBrowser extends Browser {
 
   @override
   Future<Image> captureScreenshot(Rectangle<num> region) async {
+    // The underlying return type is Uint8Lint – goto definitions to see
+    // Fixing in https://github.com/google/webdriver.dart/pull/323
     final Image image = decodePng(await _driver.captureScreenshotAsList() as Uint8List)!;
     return copyCrop(
       image,
