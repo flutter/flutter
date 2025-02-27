@@ -125,8 +125,9 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
-  final OS? targetOS = getNativeOSFromTargetPlatform(targetPlatform);
   final bool isWeb = targetPlatform == TargetPlatform.web_javascript;
+  final OS? targetOS = getNativeOSFromTargetPlatform(targetPlatform);
+  assert(isWeb || targetOS != null);
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
 
   // Sanity check.
@@ -153,7 +154,7 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
           ? null
           : (flutterTester
               ? <Architecture>[Architecture.current]
-              : _architecturesForOS(targetPlatform, targetOS, environmentDefines));
+              : _architecturesForOS(targetPlatform, targetOS!, environmentDefines));
   final DartBuildResult result =
       architectures?.isEmpty ?? false
           ? DartBuildResult.empty()
