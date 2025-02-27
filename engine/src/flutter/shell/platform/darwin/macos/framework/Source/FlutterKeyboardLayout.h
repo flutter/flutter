@@ -27,6 +27,9 @@ typedef struct {
 
 }  // namespace flutter
 
+/**
+ * A delegate protocol for FlutterKeyboardLayout. Implemented by FlutterKeyboardManager.
+ */
 @protocol FlutterKeyboardLayoutDelegate
 
 /**
@@ -39,6 +42,11 @@ typedef struct {
 
 @end
 
+/**
+ * A class that allows querying the printable result of a key with a modifier state according to the
+ * current keyboard layout. It also provides a delegate protocol for clients interested in
+ * listening to keyboard layout changes.
+ */
 @interface FlutterKeyboardLayout : NSObject
 
 @property(readwrite, nonatomic, weak) id<FlutterKeyboardLayoutDelegate> delegate;

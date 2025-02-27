@@ -34,6 +34,9 @@
 
 @end
 
+/**
+ * Provides context for a keyboard event. Implemented by FlutterViewController.
+ */
 @protocol FlutterKeyboardManagerEventContext
 
 @required
