@@ -99,7 +99,14 @@ public class FlutterLoaderTest {
     final String oldGenHeapArg = "--old-gen-heap-size=" + oldGenHeapSizeMegaBytes;
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(oldGenHeapArg));
   }
@@ -122,7 +129,14 @@ public class FlutterLoaderTest {
         "--resource-cache-max-bytes-threshold=" + resourceCacheMaxBytesThreshold;
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(resourceCacheMaxBytesThresholdArg));
   }
@@ -140,7 +154,14 @@ public class FlutterLoaderTest {
     final String leakVMArg = "--leak-vm=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(leakVMArg));
   }
@@ -162,7 +183,14 @@ public class FlutterLoaderTest {
     final String leakVMArg = "--leak-vm=false";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(leakVMArg));
   }
@@ -191,7 +219,14 @@ public class FlutterLoaderTest {
     final String enableImpellerArg = "--enable-impeller";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertFalse(arguments.contains(enableImpellerArg));
   }
@@ -209,7 +244,14 @@ public class FlutterLoaderTest {
     final String enableVulkanValidationArg = "--enable-vulkan-validation";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertFalse(arguments.contains(enableVulkanValidationArg));
   }
@@ -231,7 +273,14 @@ public class FlutterLoaderTest {
     final String enableImpellerArg = "--enable-impeller=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(enableImpellerArg));
   }
@@ -253,7 +302,14 @@ public class FlutterLoaderTest {
     final String disabledControlArg = "--enable-surface-control";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(disabledControlArg));
   }
