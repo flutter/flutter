@@ -412,7 +412,7 @@ class WebReleaseBundle extends Target {
   List<Target> get dependencies => <Target>[
     ...compileTargets,
     templatedFilesTarget,
-    DartBuildForWeb(compileTargets),
+    const DartBuildForWeb(),
   ];
 
   Iterable<String> get buildPatternStems =>
