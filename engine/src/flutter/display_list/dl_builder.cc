@@ -1077,9 +1077,9 @@ void DisplayListBuilder::ClipPath(const DlPath& path,
       ClipOval(rect, clip_op, is_aa);
       return;
     }
-    SkRRect rrect;
-    if (path.IsSkRRect(&rrect)) {
-      ClipRRect(rrect, clip_op, is_aa);
+    DlRoundRect rrect;
+    if (path.IsRoundRect(&rrect)) {
+      ClipRoundRect(rrect, clip_op, is_aa);
       return;
     }
   }
