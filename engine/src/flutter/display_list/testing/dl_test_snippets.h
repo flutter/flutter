@@ -203,7 +203,7 @@ static const std::shared_ptr<DlVertices> kTestVertices2 =
 
 static sk_sp<DisplayList> MakeTestDisplayList(int w, int h, SkColor color) {
   DisplayListBuilder builder;
-  builder.DrawRect(SkRect::MakeWH(w, h), DlPaint(DlColor(color)));
+  builder.DrawRect(DlRect::MakeWH(w, h), DlPaint(DlColor(color)));
   return builder.Build();
 }
 static sk_sp<DisplayList> TestDisplayList1 =

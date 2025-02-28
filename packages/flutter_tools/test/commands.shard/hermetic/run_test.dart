@@ -77,34 +77,6 @@ void main() {
     );
 
     testUsingContext(
-      'does not support --no-sound-null-safety by default',
-      () async {
-        fileSystem.file('lib/main.dart').createSync(recursive: true);
-        fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-
-        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
-        await expectLater(
-          () => createTestCommandRunner(
-            command,
-          ).run(<String>['run', '--use-application-binary=app/bar/faz', '--no-sound-null-safety']),
-          throwsA(
-            isException.having(
-              (Exception exception) => exception.toString(),
-              'toString',
-              contains('Could not find an option named "no-sound-null-safety"'),
-            ),
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-      },
-    );
-
-    testUsingContext(
       'does not support "--use-application-binary" and "--fast-start"',
       () async {
         fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -204,7 +176,7 @@ void main() {
         fs = MemoryFileSystem.test();
 
         fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-        writePackageConfigFile(directory: fs.currentDirectory);
+        writePackageConfigFile(directory: fs.currentDirectory, mainLibName: 'my_app');
 
         final Directory libDir = fs.currentDirectory.childDirectory('lib');
         libDir.createSync();
@@ -1278,7 +1250,6 @@ void main() {
           '--trace-systrace',
           '--trace-to-file=path/to/trace.binpb',
           '--verbose-system-logs',
-          '--null-assertions',
           '--native-null-assertions',
           '--enable-impeller',
           '--enable-vulkan-validation',
@@ -1301,7 +1272,6 @@ void main() {
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');
       expect(options.verboseSystemLogs, true);
-      expect(options.nullAssertions, true);
       expect(options.nativeNullAssertions, true);
       expect(options.traceSystrace, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);

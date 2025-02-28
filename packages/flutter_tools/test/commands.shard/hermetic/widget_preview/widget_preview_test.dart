@@ -175,19 +175,6 @@ flutter:
                 - deferredComponentArg
         - path: package/deferredComponentUri''';
 
-  static const String basicPackageConfig = '''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "test",
-      "rootUri": "fileSystem.currentDirectory.path",
-      "packageUri": "lib/"
-    }
-  ]
-}
-''';
-
   final String projectRoot;
   final FileSystem fileSystem;
   final Logger logger;
@@ -213,6 +200,9 @@ flutter:
 
   @override
   late final File packageConfig = () {
-    return writePackageConfigFile(directory: fileSystem.directory(projectRoot));
+    return writePackageConfigFile(
+      directory: fileSystem.directory(projectRoot),
+      mainLibName: 'my_app',
+    );
   }();
 }

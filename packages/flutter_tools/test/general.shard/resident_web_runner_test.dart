@@ -117,7 +117,7 @@ void main() {
     fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 ''');
-    writePackageConfigFile(directory: fileSystem.currentDirectory);
+    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
@@ -447,7 +447,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -488,7 +488,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1390,6 +1390,8 @@ flutter:
   generate: true
 ''');
       writePackageConfigFile(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
       );
       expect(await residentWebRunner.run(), 0);
@@ -1416,6 +1418,8 @@ flutter:
     () async {
       // Create necessary files for [DartPluginRegistrantTarget]
       writePackageConfigFile(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
       );
 

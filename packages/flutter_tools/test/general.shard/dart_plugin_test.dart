@@ -46,7 +46,7 @@ void main() {
             ..flutterPluginsFile = directory.childFile('.flutter-plugins')
             ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies')
             ..dartPluginRegistrant = directory.childFile('dart_plugin_registrant.dart');
-      writePackageConfigFile(directory: flutterProject.directory);
+      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
     });
 
     group('resolvePlatformImplementation', () {
@@ -1482,13 +1482,7 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
   Set<String> dependencies = <String>{};
 
   @override
-  Set<String> devDependencies = <String>{};
-
-  @override
-  String get appName => 'my_app';
-
-  @override
-  YamlMap toYaml() => YamlMap.wrap(<String, Object?>{'name': appName});
+  String get appName => 'myapp';
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {

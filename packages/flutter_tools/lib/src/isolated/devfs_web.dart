@@ -831,7 +831,6 @@ class WebDevFS implements DevFS {
     required this.expressionCompiler,
     required this.extraHeaders,
     required this.chromiumLauncher,
-    required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.ddcModuleSystem,
     required this.canaryFeatures,
@@ -865,7 +864,6 @@ class WebDevFS implements DevFS {
   final bool canaryFeatures;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
-  final bool nullAssertions;
   final bool nativeNullAssertions;
   final int _port;
   final String? tlsCertPath;
@@ -1086,13 +1084,11 @@ class WebDevFS implements DevFS {
         ddcModuleSystem
             ? generateDDCLibraryBundleMainModule(
               entrypoint: entrypoint,
-              nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
               onLoadEndBootstrap: onLoadEndBootstrap,
             )
             : generateMainModule(
               entrypoint: entrypoint,
-              nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
               loaderRootDirectory: _baseUri.toString(),
             ),

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -792,6 +790,7 @@ void createFakePlugins(
   final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
   writePackageConfigFile(
     directory: flutterProject.directory,
+    mainLibName: 'my_app',
     packages: <String, String>{
       for (final String name in pluginNames) name: fakePubCache.childDirectory(name).path,
     },

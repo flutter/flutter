@@ -199,7 +199,7 @@ void main() {
 
       // Add basic properties to the Flutter project and subprojects
       setUpProject(fs);
-      writePackageConfigFile(directory: flutterProject.directory);
+      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
     });
 
     void addToPackageConfig(String name, Directory packageDir, {bool isDevDependency = false}) {
@@ -250,7 +250,7 @@ void main() {
 
       final List<Directory> directories = <Directory>[];
       final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
-      writePackageConfigFile(directory: flutterProject.directory);
+      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
       for (final String nameOrPath in pluginNamesOrPaths) {
         final String name = fileSystem.path.basename(nameOrPath);
         final Directory pluginDirectory =
@@ -685,7 +685,7 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           SystemClock: () => systemClock,
           FlutterVersion: () => flutterVersion,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
           // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/160257.
           // Not necessary, you can observe this bug by calling `generateLegacyPlugins: false`,
           // but since this flag is about to be enabled, and enabling it implicitly sets that
@@ -2434,7 +2434,7 @@ flutter:
           ..flutterPluginsDependenciesFile = dependenciesFile
           ..windows = windowsProject;
 
-        writePackageConfigFile(directory: flutterProject.directory);
+        writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
 
         const String dependenciesFileContents = r'''
 {
@@ -2807,7 +2807,7 @@ flutter:
         )
         ..windows = windowsProject;
 
-      writePackageConfigFile(directory: flutterProject.directory);
+      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
 
       createPluginSymlinks(
         flutterProject,

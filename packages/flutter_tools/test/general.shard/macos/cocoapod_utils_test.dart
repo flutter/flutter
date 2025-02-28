@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -19,6 +17,7 @@ import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
 
 void main() {
@@ -62,31 +61,22 @@ void main() {
 
       final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
 
-      final Map<String, Object?> packageConfig = <String, Object?>{
-        'packages': <Object?>[
-          <String, Object>{
-            'name': flutterProject.manifest.appName,
-            'rootUri': '../',
-            'packageUri': 'lib/',
-          },
-        ],
-        'configVersion': 2,
-      };
+      writePackageConfigFile(
+        directory: flutterProject.directory,
+        mainLibName: 'my_app',
+        packages: <String, String>{
+          for (final String plugin in pluginNames)
+            plugin: fakePubCache.childDirectory(plugin).uri.toString(),
+        },
+      );
+
       for (final String name in pluginNames) {
         flutterProject.manifest.dependencies.add(name);
         final Directory pluginDirectory = fakePubCache.childDirectory(name);
-        (packageConfig['packages']! as List<Object?>).add(<String, Object?>{
-          'name': name,
-          'rootUri': pluginDirectory.uri.toString(),
-          'packageUri': 'lib/',
-        });
         pluginDirectory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', name));
       }
-      final File packageConfigFile = flutterProject.packageConfig;
-      packageConfigFile.createSync(recursive: true);
-      packageConfigFile.writeAsStringSync(jsonEncode(packageConfig));
     }
 
     setUp(() async {

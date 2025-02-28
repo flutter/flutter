@@ -188,6 +188,7 @@ name: path_provider_example
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
+          languageVersions: <String, String>{'path_provider_example': '2.12'},
         );
 
         projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);

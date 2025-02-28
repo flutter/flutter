@@ -6,9 +6,7 @@
 # Please keep the list alphabetical order.
 
 - test_command: test run fuchsia-pkg://fuchsia.com/assets_unittests#meta/assets_unittests.cm
-  disabled: flutter/engine/src/flutter/assets/native_assets_unittests.cc does not support fuchsia yet.
   package: assets_unittests-0.far
-  variant: disabled
 - test_command: test run fuchsia-pkg://fuchsia.com/client_wrapper_unittests#meta/client_wrapper_unittests.cm
   package: client_wrapper_unittests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/common_cpp_core_unittests#meta/common_cpp_core_unittests.cm

@@ -210,7 +210,7 @@ void main() {
           .createSync();
       // Project info
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
-      writePackageConfigFile(directory: fileSystem.currentDirectory);
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -389,7 +389,7 @@ void main() {
       fileSystem
           .file('pubspec.yaml')
           .writeAsStringSync('name: my_app\nflutter:\n  shaders:\n    - shader.glsl');
-      writePackageConfigFile(directory: fileSystem.currentDirectory);
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -470,7 +470,7 @@ void main() {
 
       // Project info
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
-      writePackageConfigFile(directory: fileSystem.currentDirectory);
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
 
       // Plist file
       fileSystem

@@ -92,6 +92,9 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
     globals.logger,
   );
   for (final String packageName in transitiveDependencies.keys) {
+    print('TR $transitiveDependencies');
+    print('TR ${packageConfig.packages.map((p) => p.name)}');
+
     final Package? package = packageConfig[packageName];
     if (package == null) {
       if (throwOnError) {
@@ -109,7 +112,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
       dependency.rootUri,
       project.manifest.dependencies,
       isDevDependency:
-          !featureFlags.isExplicitPackageDependenciesEnabled && dependency.isExclusiveDevDependency,
+          featureFlags.isExplicitPackageDependenciesEnabled && dependency.isExclusiveDevDependency,
       fileSystem: fs,
     );
     if (plugin != null) {

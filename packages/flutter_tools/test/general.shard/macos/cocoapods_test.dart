@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -24,6 +22,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
 
 enum _StdioStream { stdout, stderr }
@@ -72,20 +71,7 @@ environement:
     final FlutterProject projectUnderTest = FlutterProject.fromDirectory(
       fileSystem.directory('project'),
     );
-    final File packageConfigFile = projectUnderTest.packageConfig;
-    packageConfigFile.createSync(recursive: true);
-    packageConfigFile.writeAsStringSync(
-      json.encode(<String, Object?>{
-        'packages': <Object>[
-          <String, Object?>{
-            'name': projectUnderTest.manifest.appName,
-            'rootUri': '../',
-            'packageUri': 'lib/',
-          },
-        ],
-        'configVersion': 2,
-      }),
-    );
+    writePackageConfigFile(directory: projectUnderTest.directory, mainLibName: 'my_app');
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     projectUnderTest.macos.xcodeProject.createSync(recursive: true);
     return projectUnderTest;

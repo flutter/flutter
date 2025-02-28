@@ -77,7 +77,7 @@ void main() {
           ProcessManager: () => FakeProcessManager.empty(),
         },
         () async {
-          writePackageConfigFile(directory: environment.projectDir);
+          writePackageConfigFile(directory: environment.projectDir, mainLibName: 'my_app');
           final Uri nonFlutterTesterAssetUri =
               environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
           final File dylibAfterCompiling = fileSystem.file('bar.dll');
@@ -254,6 +254,7 @@ void main() {
 
       final File packageConfigFile = writePackageConfigFile(
         directory: fileSystem.directory(projectUri),
+        mainLibName: 'my_app',
       );
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         packageConfigFile,

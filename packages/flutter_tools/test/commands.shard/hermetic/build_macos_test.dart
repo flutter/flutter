@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -27,6 +26,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 import '../../src/throwing_pub.dart';
@@ -77,16 +77,8 @@ void main() {
   // Sets up the minimal mock project files necessary to look like a Flutter project.
   void createCoreMockProjectFiles() {
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
-    fileSystem.file('.dart_tool/package_config.json')
-      ..createSync(recursive: true)
-      ..writeAsStringSync(
-        json.encode(<String, Object?>{
-          'packages': <Object>[
-            <String, Object?>{'name': 'my_app', 'rootUri': '../', 'packageUri': 'lib/'},
-          ],
-          'configVersion': 2,
-        }),
-      );
+    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -495,7 +487,7 @@ STDERR STUFF
           'FLUTTER_BUILD_DIR=build',
           'FLUTTER_BUILD_NAME=1.0.0',
           'FLUTTER_BUILD_NUMBER=1',
-          'DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw==',
+          'DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DART_OBFUSCATION=true',
           'EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable',
           'EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable',

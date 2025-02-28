@@ -302,7 +302,7 @@ void main() {
           FeatureFlags: disableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
+          Pub: () => const ThrowingPub(),
           FlutterProjectFactory:
               () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
@@ -328,7 +328,7 @@ void main() {
           FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
+          Pub: ThrowingPub.new,
           FlutterProjectFactory:
               () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
@@ -352,7 +352,7 @@ void main() {
           FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
+          Pub: ThrowingPub.new,
           FlutterProjectFactory:
               () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
@@ -376,7 +376,7 @@ void main() {
           FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
+          Pub: ThrowingPub.new,
           FlutterProjectFactory:
               () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
@@ -1823,7 +1823,7 @@ Future<FlutterProject> someProject({
   bool includePubspec = true,
 }) async {
   final Directory directory = globals.fs.directory('some_project');
-  writePackageConfigFile(mainLibName: 'hello');
+  writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'hello');
   if (includePubspec) {
     directory.childFile('pubspec.yaml')
       ..createSync(recursive: true)
@@ -1840,21 +1840,11 @@ Future<FlutterProject> someProject({
 
 Future<FlutterProject> projectWithPluginDependency() async {
   final Directory directory = globals.fs.directory('some_project');
-  directory.childDirectory('.dart_tool').childFile('package_config.json')
-    ..createSync(recursive: true)
-    ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "my_plugin",
-      "rootUri": "/plugin_project",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
+  writePackageConfigFile(
+    directory: directory,
+    mainLibName: 'app_name',
+    packages: <String, String>{'my_plugin': '/plugin_project'},
+  );
   directory.childFile('pubspec.yaml')
     ..createSync(recursive: true)
     ..writeAsStringSync('''
@@ -1980,6 +1970,7 @@ void _testInMemory(
         .directory(Cache.flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools'),
+    mainLibName: 'app_name',
     packages: <String, String>{
       'flutter_template_images': dummyTemplateImagesDirectory.uri.toString(),
     },

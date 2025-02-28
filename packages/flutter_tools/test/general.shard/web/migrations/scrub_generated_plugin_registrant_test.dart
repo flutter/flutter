@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -15,6 +13,7 @@ import 'package:flutter_tools/src/features.dart';
 
 import '../../../src/context.dart'; // legacy
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 import '../../../src/test_build_system.dart';
 import '../../../src/test_flutter_command_runner.dart';
 import '../../../src/throwing_pub.dart'; // legacy
@@ -286,15 +285,9 @@ flutter:
 class UrlLauncherPlugin {}
 ''');
   fileSystem.file(fileSystem.path.join('lib', 'main.dart')).writeAsStringSync('void main() { }');
-  fileSystem
-      .file(fileSystem.path.join('.dart_tool', 'package_config.json'))
-      .writeAsStringSync(
-        json.encode(<String, Object?>{
-          'packages': <Object>[
-            <String, Object?>{'name': 'foo', 'rootUri': '../', 'packageUri': 'lib/'},
-            <String, Object?>{'name': 'bar', 'rootUri': '../bar', 'packageUri': 'lib/'},
-          ],
-          'configVersion': 2,
-        }),
-      );
+  writePackageConfigFile(
+    directory: fileSystem.currentDirectory,
+    mainLibName: 'foo',
+    packages: <String, String>{'bar': 'bar'},
+  );
 }

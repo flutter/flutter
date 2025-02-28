@@ -23,7 +23,6 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
-import '../../src/throwing_pub.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -145,7 +144,8 @@ void main() {
               'HasWebPlugins': 'true',
               'ServiceWorkerStrategy': 'offline-first',
               'BuildMode': 'release',
-              'DartDefines': 'Zm9vPWE=',
+              'DartDefines':
+                  'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               'DartObfuscation': 'false',
               'TrackWidgetCreation': 'false',
               'TreeShakeIcons': 'true',
@@ -206,7 +206,8 @@ void main() {
               'Dart2jsNoFrequencyBasedMinification': 'false',
               'Dart2jsOptimization': 'O3',
               'BuildMode': 'release',
-              'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
+              'DartDefines':
+                  'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               'DartObfuscation': 'false',
               'TrackWidgetCreation': 'false',
               'TreeShakeIcons': 'true',
@@ -260,6 +261,8 @@ void main() {
               'HasWebPlugins': 'true',
               'ServiceWorkerStrategy': 'offline-first',
               'BuildMode': 'release',
+              'DartDefines':
+                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               'DartObfuscation': 'false',
               'TrackWidgetCreation': 'false',
               'TreeShakeIcons': 'true',
@@ -448,82 +451,6 @@ void main() {
     },
   );
 
-<<<<<<< HEAD
-  // Tests whether using a deprecated webRenderer toggles a warningText.
-  Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
-    testUsingContext(
-      'Using the "${webRenderer.name}" renderer triggers a warningText.',
-      () async {
-        // Run the command so it parses the renderer, but ignore all errors.
-        // We only care about the logger.
-        try {
-          final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
-          await createTestCommandRunner(
-            buildCommand,
-          ).run(<String>['build', 'web', '--no-pub', ...webRenderer.toCliDartDefines]);
-        } on ToolExit catch (error) {
-          expect(error, isA<ToolExit>());
-        }
-        expect(
-          logger.warningText,
-          contains('See: https://docs.flutter.dev/to/web-html-renderer-deprecation'),
-        );
-      },
-      overrides: <Type, Generator>{
-        Platform: () => fakePlatform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        Logger: () => logger,
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: ThrowingPub.new,
-      },
-    );
-  }
-
-  /// Do test all the deprecated WebRendererModes
-  WebRendererMode.values
-      .where((WebRendererMode mode) => mode.isDeprecated)
-      .forEach(testWebRendererDeprecationMessage);
-
-||||||| 44203b67f5
-  // Tests whether using a deprecated webRenderer toggles a warningText.
-  Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
-    testUsingContext(
-      'Using the "${webRenderer.name}" renderer triggers a warningText.',
-      () async {
-        // Run the command so it parses the renderer, but ignore all errors.
-        // We only care about the logger.
-        try {
-          final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
-          await createTestCommandRunner(
-            buildCommand,
-          ).run(<String>['build', 'web', '--no-pub', ...webRenderer.toCliDartDefines]);
-        } on ToolExit catch (error) {
-          expect(error, isA<ToolExit>());
-        }
-        expect(
-          logger.warningText,
-          contains('See: https://docs.flutter.dev/to/web-html-renderer-deprecation'),
-        );
-      },
-      overrides: <Type, Generator>{
-        Platform: () => fakePlatform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        Logger: () => logger,
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
-      },
-    );
-  }
-
-  /// Do test all the deprecated WebRendererModes
-  WebRendererMode.values
-      .where((WebRendererMode mode) => mode.isDeprecated)
-      .forEach(testWebRendererDeprecationMessage);
-
-=======
->>>>>>> origin/master
   testUsingContext(
     'flutter build web option visibility',
     () async {

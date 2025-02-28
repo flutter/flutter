@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -54,7 +53,7 @@ void main() {
 name: my_app
 ''');
 
-    writePackageConfigFile(directory: fileSystem.currentDirectory);
+    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
   });

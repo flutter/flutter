@@ -40,7 +40,7 @@ class FakePub extends Fake implements Pub {
     bool shouldSkipThirdPartyGenerator = true,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    writePackageConfigFile(directory: project.directory);
+    writePackageConfigFile(directory: project.directory, mainLibName: 'my_app');
     if (offline) {
       calledGetOffline += 1;
     } else {
