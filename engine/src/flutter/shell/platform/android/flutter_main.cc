@@ -95,7 +95,8 @@ void FlutterMain::Init(JNIEnv* env,
                        jstring kernelPath,
                        jstring appStoragePath,
                        jstring engineCachesPath,
-                       jlong initTimeMillis) {
+                       jlong initTimeMillis,
+                       jint api_level) {
   std::vector<std::string> args;
   args.push_back("flutter");
   for (auto& arg : fml::jni::StringArrayToVector(env, jargs)) {
@@ -118,8 +119,12 @@ void FlutterMain::Init(JNIEnv* env,
           "Dart DevTools.");
     }
   }
+  // The API level must be provided from java, as the NDK function
+  // android_get_device_api_level() is only available on API 24 and greater, and
+  // Flutter still supports 21, 22, and 23.
 
-  AndroidRenderingAPI android_rendering_api = SelectedRenderingAPI(settings);
+  AndroidRenderingAPI android_rendering_api =
+      SelectedRenderingAPI(settings, api_level);
   switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
     case AndroidRenderingAPI::kSkiaOpenGLES:
@@ -233,7 +238,7 @@ bool FlutterMain::Register(JNIEnv* env) {
       {
           .name = "nativeInit",
           .signature = "(Landroid/content/Context;[Ljava/lang/String;Ljava/"
-                       "lang/String;Ljava/lang/String;Ljava/lang/String;J)V",
+                       "lang/String;Ljava/lang/String;Ljava/lang/String;JI)V",
           .fnPtr = reinterpret_cast<void*>(&Init),
       },
       {
@@ -271,7 +276,8 @@ bool FlutterMain::IsKnownBadSOC(std::string_view hardware) {
 
 // static
 AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
-    const flutter::Settings& settings) {
+    const flutter::Settings& settings,
+    int api_level) {
   if (settings.enable_software_rendering) {
     FML_CHECK(!settings.enable_impeller)
         << "Impeller does not support software rendering. Either disable "
@@ -301,7 +307,6 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     // Even if this check returns true, Impeller may determine it cannot use
     // Vulkan for some other reason, such as a missing required extension or
     // feature.
-    int api_level = android_get_device_api_level();
     if (api_level < kMinimumAndroidApiLevelForVulkan) {
       return kVulkanUnsupportedFallback;
     }
