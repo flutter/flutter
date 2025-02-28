@@ -27,6 +27,35 @@ struct _FlPointerManager {
 
 G_DEFINE_TYPE(FlPointerManager, fl_pointer_manager, G_TYPE_OBJECT);
 
+// 8 corresponds to mouse back button on both x11 and wayland
+static constexpr guint kMouseButtonBack = 8;
+
+// 9 corresponds to mouse forward button on both x11 and wayland
+static constexpr guint kMouseButtonForward = 9;
+
+// Convert a GDK button ID into a Flutter button ID
+static gboolean get_mouse_button(guint gdk_button, int64_t* button) {
+  switch (gdk_button) {
+    case GDK_BUTTON_PRIMARY:
+      *button = kFlutterPointerButtonMousePrimary;
+      return TRUE;
+    case GDK_BUTTON_MIDDLE:
+      *button = kFlutterPointerButtonMouseMiddle;
+      return TRUE;
+    case GDK_BUTTON_SECONDARY:
+      *button = kFlutterPointerButtonMouseSecondary;
+      return TRUE;
+    case kMouseButtonBack:
+      *button = kFlutterPointerButtonMouseBack;
+      return TRUE;
+    case kMouseButtonForward:
+      *button = kFlutterPointerButtonMouseForward;
+      return TRUE;
+    default:
+      return FALSE;
+  }
+}
+
 // Generates a mouse pointer event if the pointer appears inside the window.
 static void ensure_pointer_added(FlPointerManager* self,
                                  guint event_time,
@@ -79,8 +108,13 @@ gboolean fl_pointer_manager_handle_button_press(
     FlutterPointerDeviceKind device_kind,
     gdouble x,
     gdouble y,
-    int64_t button) {
+    guint gdk_button) {
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
+
+  int64_t button;
+  if (!get_mouse_button(gdk_button, &button)) {
+    return FALSE;
+  }
 
   ensure_pointer_added(self, event_time, device_kind, x, y);
 
@@ -112,8 +146,13 @@ gboolean fl_pointer_manager_handle_button_release(
     FlutterPointerDeviceKind device_kind,
     gdouble x,
     gdouble y,
-    int64_t button) {
+    guint gdk_button) {
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
+
+  int64_t button;
+  if (!get_mouse_button(gdk_button, &button)) {
+    return FALSE;
+  }
 
   // Drop the event if Flutter already thinks the button is up.
   if ((self->button_state & button) == 0) {
