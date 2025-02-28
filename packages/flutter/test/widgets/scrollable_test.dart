@@ -1782,9 +1782,7 @@ void main() {
     expect(getScrollOffset(tester), 200);
   });
 
-  testWidgets('HoldActivity can interrupt ScrollPosition.animateTo', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('HoldActivity can interrupt ScrollPosition.animateTo', (WidgetTester tester) async {
     const double animationExtent = 100.0;
     const double dragExtent = 30.0;
     final ScrollController controller = ScrollController();
@@ -1811,7 +1809,7 @@ void main() {
     expect(getScrollOffset(tester), (animationExtent / 2) - dragExtent);
   });
 
-    testWidgets('HoldActivity interrupted by animateTo does not crash', (WidgetTester tester) async {
+  testWidgets('HoldActivity interrupted by animateTo does not crash', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
 
     await pumpTest(tester, debugDefaultTargetPlatformOverride, controller: controller);
