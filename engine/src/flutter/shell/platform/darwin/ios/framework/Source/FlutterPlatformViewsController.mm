@@ -5,6 +5,7 @@
 #import "shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
+#include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
 #include "flutter/fml/make_copyable.h"
@@ -80,45 +81,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                     clipDlRect.GetTop(),    //
                     clipDlRect.GetWidth(),  //
                     clipDlRect.GetHeight());
-}
-
-// Determines if the `clip_rect` from a clipRect mutator contains the
-// `platformview_boundingrect`.
-//
-// `clip_rect` is in its own coordinate space. The rect needs to be transformed by
-// `transform_matrix` to be in the coordinate space where the PlatformView is displayed.
-//
-// `platformview_boundingrect` is the final bounding rect of the PlatformView in the coordinate
-// space where the PlatformView is displayed.
-static bool ClipRectContainsPlatformViewBoundingRect(const DlRect& clip_rect,
-                                                     const DlRect& platformview_boundingrect,
-                                                     const DlMatrix& transform_matrix) {
-  if (!transform_matrix.IsInvertible()) {
-    return false;
-  }
-  DlRect local_bounds = platformview_boundingrect.TransformAndClipBounds(transform_matrix.Invert());
-  return clip_rect.Contains(local_bounds);
-}
-
-// Determines if the `clipRRect` from a clipRRect mutator contains the
-// `platformview_boundingrect`.
-//
-// `clip_rrect` is in its own coordinate space. The rrect needs to be transformed by
-// `transform_matrix` to be in the coordinate space where the PlatformView is displayed.
-//
-// `platformview_boundingrect` is the final bounding rect of the PlatformView in the coordinate
-// space where the PlatformView is displayed.
-static bool ClipRRectContainsPlatformViewBoundingRect(const DlRoundRect& clip_rrect,
-                                                      const DlRect& platformview_boundingrect,
-                                                      const DlMatrix& transform_matrix) {
-  if (!transform_matrix.IsInvertible()) {
-    return false;
-  }
-  DlRect local_bounds = platformview_boundingrect.TransformAndClipBounds(transform_matrix.Invert());
-  return clip_rrect.Contains(local_bounds.GetLeftTop()) &&
-         clip_rrect.Contains(local_bounds.GetRightTop()) &&
-         clip_rrect.Contains(local_bounds.GetRightBottom()) &&
-         clip_rrect.Contains(local_bounds.GetLeftBottom());
 }
 
 @interface FlutterPlatformViewsController ()
@@ -555,8 +517,8 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const DlRoundRect& clip_rr
         break;
       }
       case flutter::MutatorType::kClipRect: {
-        if (ClipRectContainsPlatformViewBoundingRect((*iter)->GetRect(), dlBoundingRect,
-                                                     transformMatrix)) {
+        if (flutter::DisplayListMatrixClipState::TransformedRectCoversBounds(
+                (*iter)->GetRect(), transformMatrix, dlBoundingRect)) {
           break;
         }
         [self clipViewSetMaskView:clipView];
@@ -565,8 +527,8 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const DlRoundRect& clip_rr
         break;
       }
       case flutter::MutatorType::kClipRRect: {
-        if (ClipRRectContainsPlatformViewBoundingRect((*iter)->GetRRect(), dlBoundingRect,
-                                                      transformMatrix)) {
+        if (flutter::DisplayListMatrixClipState::TransformedRRectCoversBounds(
+                (*iter)->GetRRect(), transformMatrix, dlBoundingRect)) {
           break;
         }
         [self clipViewSetMaskView:clipView];
@@ -575,8 +537,8 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const DlRoundRect& clip_rr
         break;
       }
       case flutter::MutatorType::kClipRSE: {
-        if (ClipRRectContainsPlatformViewBoundingRect((*iter)->GetRSEApproximation(),
-                                                      dlBoundingRect, transformMatrix)) {
+        if (flutter::DisplayListMatrixClipState::TransformedRoundSuperellipseCoversBounds(
+                (*iter)->GetRSE(), transformMatrix, dlBoundingRect)) {
           break;
         }
         [self clipViewSetMaskView:clipView];
