@@ -165,8 +165,6 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
 
   void Flush() override;
 
-  ENABLE_DL_CANVAS_BACKWARDS_COMPATIBILITY
-
  private:
   SkCanvas* delegate_;
 };

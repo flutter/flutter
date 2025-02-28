@@ -448,14 +448,12 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
 }
 
 - (flutter::PostPrerollResult)postPrerollActionWithThreadMerger:
-                                  (const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger
-                                                impellerEnabled:(BOOL)impellerEnabled {
+    (const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger {
   return flutter::PostPrerollResult::kSuccess;
 }
 
 - (void)endFrameWithResubmit:(BOOL)shouldResubmitFrame
-                threadMerger:(const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger
-             impellerEnabled:(BOOL)impellerEnabled {
+                threadMerger:(const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger {
 }
 
 - (void)pushFilterToVisitedPlatformViews:(const std::shared_ptr<flutter::DlImageFilter>&)filter
@@ -744,7 +742,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
     flutter::DlCanvas* overlayCanvas = frame->Canvas();
     int restoreCount = overlayCanvas->GetSaveCount();
     overlayCanvas->Save();
-    overlayCanvas->ClipRect(overlay->second);
+    overlayCanvas->ClipRect(flutter::ToDlRect(overlay->second));
     overlayCanvas->Clear(flutter::DlColor::kTransparent());
     self.slices[viewId]->render_into(overlayCanvas);
     overlayCanvas->RestoreToCount(restoreCount);
