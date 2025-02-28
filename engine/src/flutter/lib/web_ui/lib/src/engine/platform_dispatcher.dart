@@ -140,6 +140,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   EngineFlutterWindow? get implicitView => viewManager[kImplicitViewId] as EngineFlutterWindow?;
 
+  @override
+  int? get engineId => null;
+
   /// A callback that is invoked whenever the platform's [devicePixelRatio],
   /// [physicalSize], [padding], [viewInsets], or [systemGestureInsets]
   /// values change, for example when the device is rotated or when the
