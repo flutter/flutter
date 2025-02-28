@@ -24,7 +24,6 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
-import '../build_system/tools/scene_importer.dart';
 import '../build_system/tools/shader_compiler.dart';
 import '../bundle_builder.dart';
 import '../cache.dart';
@@ -41,6 +40,7 @@ import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
+import '../web/web_constants.dart';
 import '../web_template.dart';
 
 typedef DwdsLauncher =
@@ -831,7 +831,6 @@ class WebDevFS implements DevFS {
     required this.expressionCompiler,
     required this.extraHeaders,
     required this.chromiumLauncher,
-    required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.ddcModuleSystem,
     required this.canaryFeatures,
@@ -865,7 +864,6 @@ class WebDevFS implements DevFS {
   final bool canaryFeatures;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
-  final bool nullAssertions;
   final bool nativeNullAssertions;
   final int _port;
   final String? tlsCertPath;
@@ -1030,7 +1028,6 @@ class WebDevFS implements DevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
-    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
@@ -1087,13 +1084,11 @@ class WebDevFS implements DevFS {
         ddcModuleSystem
             ? generateDDCLibraryBundleMainModule(
               entrypoint: entrypoint,
-              nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
               onLoadEndBootstrap: onLoadEndBootstrap,
             )
             : generateMainModule(
               entrypoint: entrypoint,
-              nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
               loaderRootDirectory: _baseUri.toString(),
             ),
@@ -1233,9 +1228,6 @@ class WebDevFS implements DevFS {
 
   @override
   Set<String> get shaderPathsToEvict => <String>{};
-
-  @override
-  Set<String> get scenePathsToEvict => <String>{};
 }
 
 class ReleaseAssetServer {
@@ -1315,11 +1307,8 @@ class ReleaseAssetServer {
           'Content-Type': mimeType,
           'Cross-Origin-Resource-Policy': 'cross-origin',
           'Access-Control-Allow-Origin': '*',
-          if (_needsCoopCoep &&
-              _fileSystem.path.extension(file.path) == '.html') ...<String, String>{
-            'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'credentialless',
-          },
+          if (_needsCoopCoep && _fileSystem.path.extension(file.path) == '.html')
+            ...kMultiThreadedHeaders,
         },
       );
     }
@@ -1329,10 +1318,7 @@ class ReleaseAssetServer {
       file.readAsBytesSync(),
       headers: <String, String>{
         'Content-Type': 'text/html',
-        if (_needsCoopCoep) ...<String, String>{
-          'Cross-Origin-Opener-Policy': 'same-origin',
-          'Cross-Origin-Embedder-Policy': 'credentialless',
-        },
+        if (_needsCoopCoep) ...kMultiThreadedHeaders,
       },
     );
   }

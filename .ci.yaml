@@ -252,6 +252,10 @@ platform_properties:
       os: Mac-13|Mac-14
       cpu: x86
       device_type: "mokey"
+      $flutter/osx_sdk : >-
+        {
+          "skip_xcode_install": true
+        }
   mac_arm64_mokey:
     properties:
       dependencies: >-
@@ -262,6 +266,10 @@ platform_properties:
       os: Mac-13|Mac-14
       cpu: arm64
       device_type: "mokey"
+      $flutter/osx_sdk : >-
+        {
+          "skip_xcode_install": true
+        }
 
   mac_pixel_7pro:
     properties:
@@ -553,6 +561,9 @@ targets:
     recipe: infra/ci_yaml
     presubmit: false
     timeout: 30
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
@@ -574,7 +585,9 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
+      # TODO(flutter/flutter#164140): Reduce timeout once customer
+      # tests are sharded.
+      test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
   - name: Linux docs_publish
     recipe: flutter/docs
@@ -1157,6 +1170,7 @@ targets:
       task_name: android_release_builds_exclude_dev_dependencies_test
     runIf:
       - dev/**
+      - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
       - engine/**
@@ -3079,7 +3093,6 @@ targets:
   # Samsung Galaxy S24, Impeller (Vulkan)
   - name: Linux_galaxy_s24 new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -3215,7 +3228,6 @@ targets:
   - name: Linux_pixel_7pro platform_views_hcpp_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3242,7 +3254,6 @@ targets:
       task_name: routing_test
 
   - name: Linux_pixel_7pro service_extensions_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/157852
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3559,7 +3570,6 @@ targets:
       task_name: animated_complex_opacity_perf_macos__e2e_summary
 
   - name: Mac_benchmark basic_material_app_macos__compile
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/162364
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3864,7 +3874,6 @@ targets:
       - dev/bots/**
 
   - name: Mac_benchmark flutter_view_macos__start_up
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/159540
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4565,6 +4574,7 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6686,7 +6696,6 @@ targets:
 
   # windows mokey test
   - name: Windows_mokey native_assets_android
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/156063
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
