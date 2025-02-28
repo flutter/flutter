@@ -28,8 +28,6 @@ import 'layout_builder.dart';
 import 'lookup_boundary.dart';
 import 'ticker_provider.dart';
 
-const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
-
 /// The signature of the widget builder callback used in
 /// [OverlayPortal.overlayChildLayoutBuilder].
 ///
@@ -117,9 +115,7 @@ class OverlayEntry implements Listenable {
     this.canSizeOverlay = false,
   }) : _opaque = opaque,
        _maintainState = maintainState {
-    if (kFlutterMemoryAllocationsEnabled) {
-      _maybeDispatchObjectCreation();
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'OverlayEntry', this));
   }
 
   /// This entry will include the widget built by this builder in the overlay at
@@ -198,19 +194,6 @@ class OverlayEntry implements Listenable {
   /// The currently mounted `_OverlayEntryWidgetState` built using this [OverlayEntry].
   ValueNotifier<_OverlayEntryWidgetState?>? _overlayEntryStateNotifier =
       ValueNotifier<_OverlayEntryWidgetState?>(null);
-
-  // TODO(polina-c): stop duplicating code across disposables
-  // https://github.com/flutter/flutter/issues/137435
-  /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
-  void _maybeDispatchObjectCreation() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
-        className: '$OverlayEntry',
-        object: this,
-      );
-    }
-  }
 
   @override
   void addListener(VoidCallback listener) {
@@ -291,9 +274,7 @@ class OverlayEntry implements Listenable {
       _overlay == null,
       'An OverlayEntry must first be removed from the Overlay before dispose is called.',
     );
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _disposedByOwner = true;
     if (!mounted) {
       // If we're still mounted when disposed, then this will be disposed in

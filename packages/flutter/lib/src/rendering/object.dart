@@ -884,16 +884,7 @@ typedef LayoutCallback<T extends Constraints> = void Function(T constraints);
 
 class _LocalSemanticsHandle implements SemanticsHandle {
   _LocalSemanticsHandle._(PipelineOwner owner, this.listener) : _owner = owner {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/rendering.dart',
-        className: '$_LocalSemanticsHandle',
-        object: this,
-      );
-    }
-
+    assert(debugMaybeDispatchCreated('rendering', '_LocalSemanticsHandle', this));
     if (listener != null) {
       _owner.semanticsOwner!.addListener(listener!);
     }
@@ -906,12 +897,7 @@ class _LocalSemanticsHandle implements SemanticsHandle {
 
   @override
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-
+    assert(debugMaybeDispatchDisposed(this));
     if (listener != null) {
       _owner.semanticsOwner!.removeListener(listener!);
     }
@@ -974,15 +960,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     this.onSemanticsUpdate,
     this.onSemanticsOwnerDisposed,
   }) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/rendering.dart',
-        className: '$PipelineOwner',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('rendering', 'PipelineOwner', this));
   }
 
   /// Called when a render object associated with this pipeline owner wishes to
@@ -1598,9 +1576,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     assert(rootNode == null);
     assert(_manifold == null);
     assert(_debugParent == null);
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _semanticsOwner?.dispose();
     _semanticsOwner = null;
     _nodesNeedingLayout.clear();
@@ -1663,8 +1639,6 @@ abstract class PipelineManifold implements Listenable {
   ///    implementations typically call to implement this method.
   void requestVisualUpdate();
 }
-
-const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 
 /// An object in the render tree.
 ///
@@ -1794,13 +1768,7 @@ const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarget {
   /// Initializes internal fields for subclasses.
   RenderObject() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterRenderingLibrary,
-        className: '$RenderObject',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('rendering', 'RenderObject', this));
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
     _wasRepaintBoundary = isRepaintBoundary;
   }
@@ -1861,9 +1829,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @mustCallSuper
   void dispose() {
     assert(!_debugDisposed);
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _layerHandle.layer = null;
     assert(() {
       // TODO(dnfield): Enable this assert once clients have had a chance to
