@@ -61,8 +61,6 @@ static GtkWindow* fl_windowing_handler_create_window(
     FlWindowingHandler* handler,
     FlView* view) {
   GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-  gtk_widget_show(GTK_WIDGET(view));
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 
   return GTK_WINDOW(window);
@@ -86,6 +84,7 @@ static FlMethodResponse* create_regular(FlWindowingSize* size,
   }
 
   FlView* view = fl_view_new_for_engine(engine);
+  gtk_widget_show(GTK_WIDGET(view));
 
   GtkWindow* window;
   g_signal_emit(self, signals[SIGNAL_CREATE_WINDOW], 0, view, &window);
