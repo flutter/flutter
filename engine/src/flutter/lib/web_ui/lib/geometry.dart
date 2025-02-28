@@ -405,6 +405,8 @@ class Radius {
   }
 }
 
+const double _kRRectInsetFactor = 0.29289321881; // 1-cos(pi/4)
+
 abstract class _RRectLike<T extends _RRectLike<T>> {
   const _RRectLike({
     required this.left,
@@ -503,18 +505,16 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   double get height => bottom - top;
   Rect get outerRect => Rect.fromLTRB(left, top, right, bottom);
   Rect get safeInnerRect {
-    const double kInsetFactor = 0.29289321881; // 1-cos(pi/4)
-
     final double leftRadius = math.max(blRadiusX, tlRadiusX);
     final double topRadius = math.max(tlRadiusY, trRadiusY);
     final double rightRadius = math.max(trRadiusX, brRadiusX);
     final double bottomRadius = math.max(brRadiusY, blRadiusY);
 
     return Rect.fromLTRB(
-      left + leftRadius * kInsetFactor,
-      top + topRadius * kInsetFactor,
-      right - rightRadius * kInsetFactor,
-      bottom - bottomRadius * kInsetFactor,
+      left + leftRadius * _kRRectInsetFactor,
+      top + topRadius * _kRRectInsetFactor,
+      right - rightRadius * _kRRectInsetFactor,
+      bottom - bottomRadius * _kRRectInsetFactor,
     );
   }
 
