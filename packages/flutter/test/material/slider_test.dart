@@ -16,6 +16,59 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
+/// A [RoundedRectSliderTrackShape] that logs its paint.
+class LoggingRoundedRectSliderTrackShape extends RoundedRectSliderTrackShape {
+  LoggingRoundedRectSliderTrackShape({this.secondaryOffsetLog});
+  final List<Offset?>? secondaryOffsetLog;
+
+  @override
+  Rect getPreferredRect({
+    required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    required SliderThemeData sliderTheme,
+    bool isEnabled = true,
+    bool isDiscrete = false,
+  }) {
+    return super.getPreferredRect(
+      parentBox: parentBox,
+      offset: offset,
+      sliderTheme: sliderTheme,
+      isEnabled: isEnabled,
+      isDiscrete: isDiscrete,
+    );
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    Offset? secondaryOffset,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    double additionalActiveTrackHeight = 2,
+  }) {
+    secondaryOffsetLog?.add(secondaryOffset);
+    super.paint(
+      context,
+      offset,
+      parentBox: parentBox,
+      sliderTheme: sliderTheme,
+      enableAnimation: enableAnimation,
+      textDirection: textDirection,
+      thumbCenter: thumbCenter,
+      secondaryOffset: secondaryOffset,
+      isDiscrete: isDiscrete,
+      isEnabled: isEnabled,
+      additionalActiveTrackHeight: additionalActiveTrackHeight,
+    );
+  }
+}
+
 // A thumb shape that also logs its repaint center.
 class LoggingThumbShape extends SliderComponentShape {
   LoggingThumbShape(this.log);
@@ -5178,5 +5231,41 @@ void main() {
 
     await gesture.up();
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('Can update renderObject when secondaryTrackValue is updated', (
+    WidgetTester tester,
+  ) async {
+    final List<Offset?> log = <Offset?>[];
+    final LoggingRoundedRectSliderTrackShape loggingTrackShape = LoggingRoundedRectSliderTrackShape(
+      secondaryOffsetLog: log,
+    );
+    final ThemeData theme = ThemeData(sliderTheme: SliderThemeData(trackShape: loggingTrackShape));
+    Widget buildSlider(double? secondaryTrackValue) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: 0,
+              secondaryTrackValue: secondaryTrackValue,
+              onChanged: (double value) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(null));
+    await tester.pumpAndSettle();
+    expect(log.last, isNull);
+
+    await tester.pumpWidget(buildSlider(0.2));
+    await tester.pumpAndSettle();
+    expect(log.last, const Offset(174.4, 300.0));
+
+    await tester.pumpWidget(buildSlider(0.5));
+    await tester.pumpAndSettle();
+    expect(log.last, const Offset(400.0, 300.0));
   });
 }
