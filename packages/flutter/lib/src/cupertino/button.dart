@@ -260,7 +260,7 @@ class CupertinoButton extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// The cursor for a mouse pointer when it enters or is hovering over the widget
+  /// The cursor for a mouse pointer when it enters or is hovering over the widget.
   ///
   /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]:
