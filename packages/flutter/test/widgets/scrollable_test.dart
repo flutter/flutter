@@ -1807,6 +1807,8 @@ void main() {
 
     // The drag stops the animation, and the drag extent is respected.
     expect(getScrollOffset(tester), (animationExtent / 2) - dragExtent);
+
+    controller.dispose();
   });
 
   testWidgets('HoldActivity interrupted by animateTo does not crash', (WidgetTester tester) async {
@@ -1822,6 +1824,8 @@ void main() {
 
     controller.animateTo(1000, duration: const Duration(seconds: 1), curve: Curves.linear);
     expect(tester.takeException(), null);
+
+    controller.dispose();
   });
 }
 
