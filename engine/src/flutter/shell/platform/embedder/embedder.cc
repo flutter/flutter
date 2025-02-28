@@ -2410,8 +2410,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     run_configuration.SetEntrypointArgs(std::move(arguments));
   }
 
-  if (args->engine_id != 0) {
-    run_configuration.SetEngineId(SAFE_ACCESS(args, engine_id, 0));
+  if (SAFE_ACCESS(args, engine_id, 0) != 0) {
+    run_configuration.SetEngineId(args->engine_id);
   }
 
   if (!run_configuration.IsValid()) {
