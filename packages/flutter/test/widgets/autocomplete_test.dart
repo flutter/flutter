@@ -3209,10 +3209,11 @@ void main() {
     expect(find.byKey(optionsKey), findsOneWidget);
   });
 
-  testWidgets('Options view is constrained by MediaQuery bottom padding', (
+  testWidgets('Options view is constrained by MediaQuery bottom padding and view insets', (
     WidgetTester tester,
   ) async {
-    const double padding = 100.0;
+    const double padding = 50.0;
+    const double bottomInset = 70.0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -3265,6 +3266,18 @@ void main() {
 
     // The options view has shrunk to the available height.
     expect(tester.getSize(find.byType(Placeholder)).height, initialSize - (padding / 3));
+
+    tester.view.viewInsets = const FakeViewPadding(bottom: bottomInset);
+    await tester.pump();
+
+    expect(tester.view.padding.bottom, padding);
+
+    await tester.tap(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'abc');
+    await tester.pump();
+
+    // The options view has shrunk to the available height.
+    expect(tester.getSize(find.byType(Placeholder)).height, initialSize - (bottomInset / 3));
   });
 
   testWidgets('Options view is constrained by MediaQuery top padding', (WidgetTester tester) async {

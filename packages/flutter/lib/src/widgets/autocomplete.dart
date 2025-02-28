@@ -637,7 +637,7 @@ class _RawAutocompleteOptions extends StatefulWidget {
 
 class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
   VoidCallback? removeCompositionCallback;
-  late BuildContext ancestorOverlayContext;
+  late BuildContext rootOverlayContext;
   double bottomPadding = 0.0;
   double topPadding = 0.0;
   Offset fieldOffset = Offset.zero;
@@ -663,12 +663,22 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
           fieldOffset = nextFieldOffset;
         });
       }
-      // The bottom view insets might have already been removed. To get the
-      // correct keyboard insets, use the build context of the nearest ancestor
-      // overlay, ideally the root overlay of the widget tree.
-      final EdgeInsets padding = MediaQuery.paddingOf(ancestorOverlayContext);
-      bottomPadding = padding.bottom;
-      topPadding = padding.top;
+      // The padding and view insets might have already been removed. To get the
+      // correct padding and view insets, use the build context of the root
+      // overlay.
+      final EdgeInsets padding = MediaQuery.paddingOf(rootOverlayContext);
+      final EdgeInsets viewInsets = MediaQuery.viewInsetsOf(rootOverlayContext);
+      final double effectiveBottomPadding = max(padding.bottom, viewInsets.bottom);
+      if (effectiveBottomPadding != bottomPadding) {
+        setState(() {
+          bottomPadding = effectiveBottomPadding;
+        });
+      }
+      if (padding.top != topPadding) {
+        setState(() {
+          topPadding = padding.top;
+        });
+      }
     });
   }
 
@@ -678,7 +688,7 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
     removeCompositionCallback = widget.optionsLayerLink.leader?.addCompositionCallback(
       _onLeaderComposition,
     );
-    ancestorOverlayContext = Overlay.of(context).context;
+    rootOverlayContext = Overlay.of(context, rootOverlay: true).context;
   }
 
   @override
@@ -719,7 +729,7 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
           topPadding: topPadding,
         ),
         child: MediaQuery.removePadding(
-          context: ancestorOverlayContext,
+          context: rootOverlayContext,
           removeBottom: bottomPadding > 0.0,
           removeTop: topPadding > 0.0,
           child: TextFieldTapRegion(
