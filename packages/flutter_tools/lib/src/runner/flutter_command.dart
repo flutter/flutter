@@ -1480,12 +1480,6 @@ abstract class FlutterCommand extends Command<void> {
   // This adds the Dart defines used to access various Flutter version information at runtime.
   void _addFlutterVersionToDartDefines(FlutterVersion version, List<String> dartDefines) {
     for (final String dartDefine in flutterVersionDartDefines) {
-      if (globals.platform.environment[dartDefine] != null) {
-        throwToolExit(
-          '$dartDefine is used by the framework and cannot be set in the environment. '
-          'Use FlutterVersion to access it in Flutter code',
-        );
-      }
       if (dartDefines.any((String define) => define.startsWith(dartDefine))) {
         throwToolExit(
           '$dartDefine is used by the framework and cannot be '
