@@ -1221,7 +1221,7 @@ class _RSuperellipseParam {
 }
 
 class RSuperellipse extends _RRectLike<RSuperellipse> {
-  const RSuperellipse.fromLTRBXY(
+  RSuperellipse.fromLTRBXY(
     double left,
     double top,
     double right,
@@ -1356,7 +1356,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
              topLeft.x == bottomRight.y,
        );
 
-  const RSuperellipse._raw({
+  RSuperellipse._raw({
     super.left = 0.0,
     super.top = 0.0,
     super.right = 0.0,
