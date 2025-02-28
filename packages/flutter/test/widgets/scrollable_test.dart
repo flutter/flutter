@@ -1781,6 +1781,35 @@ void main() {
     await tester.pumpAndSettle();
     expect(getScrollOffset(tester), 200);
   });
+
+  testWidgets('Avoid race condition when interacting with an animating scrollable', (
+    WidgetTester tester,
+  ) async {
+    const double animationExtent = 100.0;
+    const double dragExtent = 30.0;
+    final ScrollController controller = ScrollController();
+
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, controller: controller);
+
+    controller.animateTo(
+      animationExtent,
+      duration: const Duration(seconds: 1),
+      curve: Curves.linear,
+    );
+    await tester.pump();
+
+    // Pump to halfway through the animation.
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(getScrollOffset(tester), animationExtent / 2);
+
+    // Interrupt the animation by dragging in the opposite direction.
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, dragExtent));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // The drag stops the animation, and the drag extent is respected.
+    expect(getScrollOffset(tester), (animationExtent / 2) - dragExtent);
+  });
 }
 
 // ignore: must_be_immutable
