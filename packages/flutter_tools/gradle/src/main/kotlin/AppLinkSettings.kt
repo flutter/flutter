@@ -9,12 +9,23 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 
+/*
+ * See https://developer.android.com/training/app-links/ for more information about app link.
+ */
 data class AppLinkSettings(
-    val applicationId: String
+    val applicationId: String?
 ) {
     var deeplinkingFlagEnabled = false
     val deeplinks = mutableSetOf<Deeplink>()
 
+    // An example json:
+    // {
+    //   applicationId: "com.example.app",
+    //   deeplinks: [
+    //     {"scheme":"http", "host":"example.com", "path":".*"},
+    //     {"scheme":"https","host":"example.com","path":".*"}
+    //   ]
+    // }
     fun toJson(): JsonObject =
         buildJsonObject {
             put("applicationId", applicationId)
