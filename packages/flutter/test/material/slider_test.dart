@@ -5233,7 +5233,9 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Can update renderObject when secondaryTrackValue is updated', (WidgetTester tester) async {
+  testWidgets('Can update renderObject when secondaryTrackValue is updated', (
+    WidgetTester tester,
+  ) async {
     final List<Offset?> log = <Offset?>[];
     final LoggingRoundedRectSliderTrackShape loggingTrackShape = LoggingRoundedRectSliderTrackShape(
       secondaryOffsetLog: log,
