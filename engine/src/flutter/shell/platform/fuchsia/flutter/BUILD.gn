@@ -987,12 +987,12 @@ if (enable_unittests) {
       },
     ]
     if (is_aot_test) {
-    resources += [
-          {
-            path = "$root_gen_dir/flutter/shell/platform/embedder/assets/app_elf_snapshot.so"
-            dest = "assets/app_elf_snapshot.so"
-          },
-        ]
+      resources += [
+        {
+          path = "$root_gen_dir/flutter/shell/platform/embedder/assets/app_elf_snapshot.so"
+          dest = "assets/app_elf_snapshot.so"
+        },
+      ]
     }
   }
 
@@ -1026,12 +1026,12 @@ if (enable_unittests) {
       },
     ]
     if (is_aot_test) {
-resources += [
-      {
-        path = "$root_gen_dir/flutter/third_party/tonic/tests/assets/app_elf_snapshot.so"
-        dest = "assets/app_elf_snapshot.so"
-      },
-    ]
+      resources += [
+        {
+          path = "$root_gen_dir/flutter/third_party/tonic/tests/assets/app_elf_snapshot.so"
+          dest = "assets/app_elf_snapshot.so"
+        },
+      ]
     }
   }
 
