@@ -82,7 +82,7 @@ void main() {
       ),
       localFs.path.join('bin', 'internal', 'engine.realm'),
       localFs.path.join('bin', 'internal', 'engine.version'),
-      localFs.path.join('engine/src/.gn'),
+      localFs.path.join('engine', 'src', '.gn'),
       'DEPS',
     };
     final Set<String> currentFiles =
