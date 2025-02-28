@@ -268,7 +268,7 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// If null, then [MouseCursor.defer] is used when the button is disabled.
   /// When the button is enabled, [SystemMouseCursors.click] is used on Web
-  /// and [MouseCursor.defer] is used on other platformss
+  /// and [MouseCursor.defer] is used on other platforms.
   ///
   /// See also:
   ///
