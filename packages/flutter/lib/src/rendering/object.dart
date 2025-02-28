@@ -1176,6 +1176,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     }
   }
 
+  /// Returns true if there are any nodes that need to be painted.
+  bool get needsPaint => _nodesNeedingPaint.isNotEmpty;
+
   List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
 
   /// Whether this pipeline is currently in the paint phase.
