@@ -195,6 +195,9 @@ void main() {
 
     expect(flutterView1.renderedScenes, hasLength(3));
     expect(flutterView2.renderedScenes, hasLength(3));
+
+    binding.removeRenderView(renderView1);
+    binding.removeRenderView(renderView2);
   });
 
   test('hit-testing reaches the right view', () {
