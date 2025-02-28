@@ -37,6 +37,7 @@ import '../../src/fake_devices.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 
 List<String> _xattrArgs(FlutterProject flutterProject) {
   return <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', flutterProject.directory.path];
@@ -1161,8 +1162,10 @@ void setUpIOSProject(
   bool createWorkspace = true,
   String scheme = 'Runner',
 }) {
-  fileSystem.file('pubspec.yaml').createSync();
-  fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+  fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+''');
+  writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
   fileSystem.directory('ios').createSync();
   if (createWorkspace) {
     fileSystem.directory('ios/Runner.xcworkspace').createSync();
