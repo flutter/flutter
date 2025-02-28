@@ -135,6 +135,8 @@ void main() {
     }
 
     run('git', <String>['init', '--initial-branch', 'master']);
+    run('git', <String>['config', '--local', 'user.email', 'test@example.com']);
+    run('git', <String>['config', '--local', 'user.name', 'Test User']);
     run('git', <String>['add', '.']);
     run('git', <String>['commit', '-m', 'Initial commit']);
     if (branch != 'master') {
