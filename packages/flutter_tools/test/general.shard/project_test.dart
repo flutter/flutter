@@ -1851,7 +1851,7 @@ Future<FlutterProject> projectWithPluginDependency() async {
 name: app_name
 flutter:
 
-dependencies:
+dev_dependencies:
   my_plugin:
     sdk: flutter
 ''');
