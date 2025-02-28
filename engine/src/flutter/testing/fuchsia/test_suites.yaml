@@ -92,7 +92,7 @@
 - test_command: test run fuchsia-pkg://fuchsia.com/tonic_unittests#meta/tonic_unittests.cm
   disabled: Dart_LoadELF isn't implemented on Fuchsia
   package: tonic_unittests-0.far
-  variant: disabled
+  variant: debug
 - test_command: test run fuchsia-pkg://fuchsia.com/touch-input-test#meta/touch-input-test.cm
   packages:
     - touch-input-test-0.far

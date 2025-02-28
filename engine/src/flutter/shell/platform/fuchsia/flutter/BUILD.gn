@@ -931,11 +931,15 @@ if (enable_unittests) {
         path = "$root_gen_dir/flutter/runtime/assets/plugin_registrant_kernel_blob.bin"
         dest = "assets/plugin_registrant_kernel_blob.bin"
       },
-      {
-        path = "$root_gen_dir/flutter/runtime/assets/plugin_registrant_app_elf_snapshot.so"
-        dest = "assets/plugin_registrant_app_elf_snapshot.so"
-      },
     ]
+    if (is_aot_test) {
+      resources += [
+        {
+          path = "$root_gen_dir/flutter/runtime/assets/plugin_registrant_app_elf_snapshot.so"
+          dest = "assets/plugin_registrant_app_elf_snapshot.so"
+        },
+      ]
+    }
   }
 
   fuchsia_test_archive("no_dart_plugin_registrant_unittests") {
@@ -954,11 +958,15 @@ if (enable_unittests) {
         path = "$root_gen_dir/flutter/runtime/assets/no_plugin_registrant_kernel_blob.bin"
         dest = "assets/no_plugin_registrant_kernel_blob.bin"
       },
-      {
-        path = "$root_gen_dir/flutter/runtime/assets/no_plugin_registrant_app_elf_snapshot.so"
-        dest = "assets/no_plugin_registrant_app_elf_snapshot.so"
-      },
     ]
+    if (is_aot_test) {
+      resources += [
+        {
+          path = "$root_gen_dir/flutter/runtime/assets/no_plugin_registrant_app_elf_snapshot.so"
+          dest = "assets/no_plugin_registrant_app_elf_snapshot.so"
+        },
+      ]
+    }
   }
 
   fuchsia_test_archive("embedder_a11y_unittests") {
@@ -977,11 +985,15 @@ if (enable_unittests) {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/kernel_blob.bin"
         dest = "assets/kernel_blob.bin"
       },
-      {
-        path = "$root_gen_dir/flutter/shell/platform/embedder/assets/app_elf_snapshot.so"
-        dest = "assets/app_elf_snapshot.so"
-      },
     ]
+    if (is_aot_test) {
+    resources += [
+          {
+            path = "$root_gen_dir/flutter/shell/platform/embedder/assets/app_elf_snapshot.so"
+            dest = "assets/app_elf_snapshot.so"
+          },
+        ]
+    }
   }
 
   fuchsia_test_archive("embedder_proctable_unittests") {
@@ -1012,11 +1024,15 @@ if (enable_unittests) {
         path = "$root_gen_dir/flutter/third_party/tonic/tests/assets/kernel_blob.bin"
         dest = "assets/kernel_blob.bin"
       },
+    ]
+    if (is_aot_test) {
+resources += [
       {
         path = "$root_gen_dir/flutter/third_party/tonic/tests/assets/app_elf_snapshot.so"
         dest = "assets/app_elf_snapshot.so"
       },
     ]
+    }
   }
 
   # When adding a new dep here, please also ensure the dep is added to
