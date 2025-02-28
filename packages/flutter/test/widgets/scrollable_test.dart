@@ -1782,7 +1782,7 @@ void main() {
     expect(getScrollOffset(tester), 200);
   });
 
-  testWidgets('Avoid race condition when interacting with an animating scrollable', (
+  testWidgets('HoldActivity can interrupt ScrollPosition.animateTo', (
     WidgetTester tester,
   ) async {
     const double animationExtent = 100.0;
@@ -1809,6 +1809,21 @@ void main() {
 
     // The drag stops the animation, and the drag extent is respected.
     expect(getScrollOffset(tester), (animationExtent / 2) - dragExtent);
+  });
+
+    testWidgets('HoldActivity interrupted by animateTo does not crash', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, controller: controller);
+
+    final Offset listCenter = tester.getCenter(find.byType(Scrollable));
+
+    // Hold.
+    await tester.startGesture(listCenter);
+    await tester.pump(const Duration(milliseconds: 500));
+
+    controller.animateTo(1000, duration: const Duration(seconds: 1), curve: Curves.linear);
+    expect(tester.takeException(), null);
   });
 }
 
