@@ -92,13 +92,15 @@ class SensitiveContentSetting {
       return;
     }
 
-    final int currentContentSensitivityId = await _sensitiveContentService.getContentSensitivity();
-
     // If needed, set default content sensitivity level as set in native Android. This will be
     // auto sensitive if it is otherwise unset by the developer.
-    _defaultContentSensitivitySetting ??= ContentSensitivity.getContentSensitivityById(
-      currentContentSensitivityId,
-    );
+    if (_defaultContentSensitivitySetting == null) {
+      final int currentContentSensitivityId =
+          await _sensitiveContentService.getContentSensitivity();
+      _defaultContentSensitivitySetting = ContentSensitivity.getContentSensitivityById(
+        currentContentSensitivityId,
+      );
+    }
 
     // If needed, then set the initial content sensitivity state.
     _contentSensitivityState ??= ContentSensitivityState(_defaultContentSensitivitySetting!);
