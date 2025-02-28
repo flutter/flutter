@@ -101,7 +101,7 @@ class BaseFlutterTaskTest {
 
         // Mock return values of properties.
         every { baseFlutterTask.flutterExecutable } returns file
-        every { baseFlutterTask.flutterExecutable.absolutePath } returns flutterExecutablePath
+        every { baseFlutterTask.flutterExecutable!!.absolutePath } returns flutterExecutablePath
 
         every { baseFlutterTask.localEngine } returns testString
         every { baseFlutterTask.localEngineSrcPath } returns testString
@@ -114,7 +114,7 @@ class BaseFlutterTaskTest {
         every { baseFlutterTask.fastStart } returns true
         every { baseFlutterTask.buildMode } returns buildModeDebugString
         every { baseFlutterTask.flutterRoot } returns file
-        every { baseFlutterTask.flutterRoot.absolutePath } returns flutterRootAbsolutePath
+        every { baseFlutterTask.flutterRoot!!.absolutePath } returns flutterRootAbsolutePath
 
         every { baseFlutterTask.trackWidgetCreation } returns testBool
         every { baseFlutterTask.splitDebugInfo } returns testString
@@ -137,7 +137,7 @@ class BaseFlutterTaskTest {
 
         // Mock the actual method calls. We don't make real calls because we cannot create a real
         // ExecSpec object.
-        val taskAbsolutePath = baseFlutterTask.flutterExecutable.absolutePath
+        val taskAbsolutePath = baseFlutterTask.flutterExecutable!!.absolutePath
         every { mockExecSpec.executable(taskAbsolutePath) } returns mockProcessForkOptions
 
         val sourceDirFile = baseFlutterTask.sourceDir
@@ -162,7 +162,7 @@ class BaseFlutterTaskTest {
 
         val performanceMeasurementFile = baseFlutterTask.performanceMeasurementFile
         every { mockExecSpec.args("--performance-measurement-file=${performanceMeasurementFile}") } returns mockExecSpec
-        val taskRootAbsolutePath = baseFlutterTask.flutterRoot.absolutePath
+        val taskRootAbsolutePath = baseFlutterTask.flutterRoot!!.absolutePath
         val targetFilePath = Paths.get(taskRootAbsolutePath, "examples", "splash", "lib", "main.dart")
         every { mockExecSpec.args("-dTargetFile=${targetFilePath}") } returns mockExecSpec
 
@@ -269,7 +269,7 @@ class BaseFlutterTaskTest {
 
         // Mock return values of properties.
         every { baseFlutterTask.flutterExecutable } returns file
-        every { baseFlutterTask.flutterExecutable.absolutePath } returns flutterExecutablePath
+        every { baseFlutterTask.flutterExecutable!!.absolutePath } returns flutterExecutablePath
 
         every { baseFlutterTask.localEngine } returns null
         every { baseFlutterTask.localEngineSrcPath } returns null
@@ -282,7 +282,7 @@ class BaseFlutterTaskTest {
         every { baseFlutterTask.fastStart } returns true
         every { baseFlutterTask.buildMode } returns buildModeDebugString
         every { baseFlutterTask.flutterRoot } returns file
-        every { baseFlutterTask.flutterRoot.absolutePath } returns flutterRootAbsolutePath
+        every { baseFlutterTask.flutterRoot!!.absolutePath } returns flutterRootAbsolutePath
 
         every { baseFlutterTask.trackWidgetCreation } returns null
         every { baseFlutterTask.splitDebugInfo } returns null
@@ -305,7 +305,7 @@ class BaseFlutterTaskTest {
 
         // Mock the actual method calls. We don't make real calls because we cannot create a real
         // ExecSpec object.
-        val taskAbsolutePath = baseFlutterTask.flutterExecutable.absolutePath
+        val taskAbsolutePath = baseFlutterTask.flutterExecutable!!.absolutePath
         every { mockExecSpec.executable(taskAbsolutePath) } returns mockProcessForkOptions
 
         val sourceDirFile = baseFlutterTask.sourceDir
@@ -320,7 +320,7 @@ class BaseFlutterTaskTest {
         every { mockExecSpec.args("--depfile", depfilePath) } returns mockExecSpec
         every { mockExecSpec.args("--output", intermediateDir ) } returns mockExecSpec
 
-        val taskRootAbsolutePath = baseFlutterTask.flutterRoot.absolutePath
+        val taskRootAbsolutePath = baseFlutterTask.flutterRoot!!.absolutePath
         val targetFilePath = Paths.get(taskRootAbsolutePath, "examples", "splash", "lib", "main.dart")
         every { mockExecSpec.args("-dTargetFile=${targetFilePath}") } returns mockExecSpec
         every { mockExecSpec.args("-dTargetPlatform=android") } returns mockExecSpec
@@ -386,7 +386,7 @@ class BaseFlutterTaskTest {
 
         // Mock return values of properties.
         every { baseFlutterTask.flutterExecutable } returns file
-        every { baseFlutterTask.flutterExecutable.absolutePath } returns flutterExecutableAbsolutePath
+        every { baseFlutterTask.flutterExecutable!!.absolutePath } returns flutterExecutableAbsolutePath
 
         every { baseFlutterTask.localEngine } returns null
         every { baseFlutterTask.localEngineSrcPath } returns null
@@ -424,7 +424,7 @@ class BaseFlutterTaskTest {
 
         // Mock the actual method calls. We don't make real calls because we cannot create a real
         // ExecSpec object.
-        val taskExecutableAbsolutePath = baseFlutterTask.flutterExecutable.absolutePath
+        val taskExecutableAbsolutePath = baseFlutterTask.flutterExecutable!!.absolutePath
         every { mockExecSpec.executable(taskExecutableAbsolutePath) } returns mockProcessForkOptions
 
         val sourceDirFile = baseFlutterTask.sourceDir
@@ -504,7 +504,7 @@ class BaseFlutterTaskTest {
 
         // Mock return values of properties.
         every { baseFlutterTask.flutterExecutable } returns file
-        every { baseFlutterTask.flutterExecutable.absolutePath } returns flutterExecutableAbsolutePath
+        every { baseFlutterTask.flutterExecutable!!.absolutePath } returns flutterExecutableAbsolutePath
 
         every { baseFlutterTask.localEngine } returns null
         every { baseFlutterTask.localEngineSrcPath } returns null
@@ -542,7 +542,7 @@ class BaseFlutterTaskTest {
 
         // Mock the actual method calls. We don't make real calls because we cannot create a real
         // ExecSpec object.
-        val taskExecutableAbsolutePath = baseFlutterTask.flutterExecutable.absolutePath
+        val taskExecutableAbsolutePath = baseFlutterTask.flutterExecutable!!.absolutePath
         every { mockExecSpec.executable(taskExecutableAbsolutePath) } returns mockProcessForkOptions
 
         val sourceDirFile = baseFlutterTask.sourceDir

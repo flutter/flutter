@@ -40,7 +40,7 @@ abstract class BaseFlutterTask : DefaultTask() {
 
     @Optional
     @Input
-    var fastStart: Boolean = false
+    var fastStart: Boolean? = null
 
     @Input
     var targetPath: String? = null
@@ -51,7 +51,7 @@ abstract class BaseFlutterTask : DefaultTask() {
 
     @Optional
     @Input
-    var fileSystemRoots: List<String?>? = null
+    var fileSystemRoots: Array<String>? = null
 
     @Optional
     @Input
@@ -112,7 +112,7 @@ abstract class BaseFlutterTask : DefaultTask() {
 
     @Optional
     @Input
-    var deferredComponents: Boolean = false
+    var deferredComponents: Boolean? = null
 
     @Optional
     @Input
