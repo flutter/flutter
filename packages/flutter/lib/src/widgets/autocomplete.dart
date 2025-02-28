@@ -638,7 +638,8 @@ class _RawAutocompleteOptions extends StatefulWidget {
 class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
   VoidCallback? removeCompositionCallback;
   late BuildContext ancestorOverlayContext;
-  double bottomViewInsets = 0.0;
+  double bottomPadding = 0.0;
+  double topPadding = 0.0;
   Offset fieldOffset = Offset.zero;
 
   // Get the field offset if the field's position changes when its layer tree
@@ -665,7 +666,9 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
       // The bottom view insets might have already been removed. To get the
       // correct keyboard insets, use the build context of the nearest ancestor
       // overlay, ideally the root overlay of the widget tree.
-      bottomViewInsets = MediaQuery.viewInsetsOf(ancestorOverlayContext).bottom;
+      final EdgeInsets padding = MediaQuery.paddingOf(ancestorOverlayContext);
+      bottomPadding = padding.bottom;
+      topPadding = padding.top;
     });
   }
 
@@ -712,11 +715,13 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
           optionsViewOpenDirection: widget.optionsViewOpenDirection,
           textDirection: Directionality.of(context),
           fieldConstraints: widget.fieldConstraints,
-          bottomViewInsets: bottomViewInsets,
+          bottomPadding: bottomPadding,
+          topPadding: topPadding,
         ),
-        child: MediaQuery.removeViewInsets(
+        child: MediaQuery.removePadding(
           context: ancestorOverlayContext,
-          removeBottom: bottomViewInsets > 0.0,
+          removeBottom: bottomPadding > 0.0,
+          removeTop: topPadding > 0.0,
           child: TextFieldTapRegion(
             child: AutocompleteHighlightedOption(
               highlightIndexNotifier: widget.highlightIndexNotifier,
@@ -739,7 +744,8 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
     required this.optionsViewOpenDirection,
     required this.textDirection,
     required this.fieldConstraints,
-    required this.bottomViewInsets,
+    required this.bottomPadding,
+    required this.topPadding,
   }) : assert(layerLink.leaderSize != null);
 
   /// Links the options in [RawAutocomplete.optionsViewBuilder] to the field in
@@ -758,8 +764,11 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
   /// The [BoxConstraints] for the field in [RawAutocomplete.fieldViewBuilder].
   final BoxConstraints fieldConstraints;
 
-  /// The height of the soft keyboard which constrains the options view.
-  final double bottomViewInsets;
+  /// The [MediaQuery] bottom padding which constrains the options view.
+  final double bottomPadding;
+
+  /// The [MediaQuery] top padding which constrains the options view.
+  final double topPadding;
 
   // A big enough height for about one item in the default
   // Autocomplete.optionsViewBuilder. The assumption is that the user likely
@@ -781,8 +790,8 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
       maxWidth: fieldSize.width == 0.0 ? constraints.maxWidth : fieldSize.width,
       maxHeight: max(_kMinUsableHeight, switch (optionsViewOpenDirection) {
         OptionsViewOpenDirection.down =>
-          constraints.maxHeight - fieldOffset.dy - fieldSize.height - bottomViewInsets,
-        OptionsViewOpenDirection.up => fieldOffset.dy,
+          constraints.maxHeight - fieldOffset.dy - fieldSize.height - bottomPadding,
+        OptionsViewOpenDirection.up => fieldOffset.dy - topPadding,
       }),
     );
   }
@@ -816,7 +825,8 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
         optionsViewOpenDirection != oldDelegate.optionsViewOpenDirection ||
         textDirection != oldDelegate.textDirection ||
         fieldConstraints != oldDelegate.fieldConstraints ||
-        bottomViewInsets != oldDelegate.bottomViewInsets;
+        bottomPadding != oldDelegate.bottomPadding ||
+        topPadding != oldDelegate.topPadding;
   }
 }
 
