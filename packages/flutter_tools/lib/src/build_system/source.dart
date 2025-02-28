@@ -207,7 +207,7 @@ class SourceVisitor implements ResolvedFiles {
       sources.add(
         environment.flutterRootDir
             .childDirectory('bin')
-            .childDirectory('internal')
+            .childDirectory('cache')
             .childFile('engine.stamp'),
       );
       return;

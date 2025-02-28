@@ -932,6 +932,9 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   @override
   final String stampName;
 
+  @override
+  String? get version => cache.engineRevision;
+
   /// Return a list of (directory path, download URL path) tuples.
   List<List<String>> getBinaryDirs();
 
