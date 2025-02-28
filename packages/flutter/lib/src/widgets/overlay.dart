@@ -30,17 +30,15 @@ import 'ticker_provider.dart';
 
 const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
 
-/// The signature of the widget builder callback taken by
+/// The signature of the widget builder callback used in
 /// [OverlayPortal.overlayChildLayoutBuilder].
 ///
 /// {@template flutter.widgets.OverlayChildLayoutBuilder}
-/// The `childSize` parameter is the size of [OverlayPortal.child], in its own
-/// coordinates.
+/// The `childSize` parameter and the `overlaySize` parameter are the size of
+/// [OverlayPortal.child] and [Overlay] respectively, in their own coordinates.
 ///
-/// The `childPaintTransform` is the paint transform of [OverlayPortal.child]
-/// in the target [Overlay]'s coordinates.
-///
-/// The `overlaySize` is the size of the target [Overlay], in its own coordinates.
+/// The `childPaintTransform` parameter is the paint transform of
+/// [OverlayPortal.child], in the target [Overlay]'s coordinates.
 /// {@endtemplate}
 typedef OverlayChildLayoutBuilder =
     Widget Function(
@@ -1827,7 +1825,7 @@ class OverlayPortal extends StatefulWidget {
   /// called.
   ///
   /// Developers can use `overlayChildBuilder` to configure the overlay child
-  /// base on the the size and the location of [OverlayPortal.child] within the
+  /// based on the the size and the location of [OverlayPortal.child] within the
   /// target [Overlay], as well as the size of the [Overlay] itself. This allows
   /// the overlay child to, for example, always follow [OverlayPortal.child] and
   /// at the same time resize itself base on how close it is to the edges of
@@ -1839,12 +1837,12 @@ class OverlayPortal extends StatefulWidget {
   /// paint transform of [OverlayPortal.child] in relation to the target
   /// [Overlay] is up-to-date by then, all [RenderObject]s between the
   /// [OverlayPortal] to the target [Overlay] must establish their paint
-  /// transform during the layout phase, which most [RenderObject]s do. One known
+  /// transform during the layout phase, which most [RenderObject]s do. One
   /// exception is the [CompositedTransformFollower] widget, whose [RenderObject]
   /// only establishes the paint transform when composited. Putting a
   /// [CompositedTransformFollower] between the [OverlayPortal] and the [Overlay]
   /// may resulting in an incorrect child paint transform being provided to the
-  /// `overlayChildBuilder` and will throw an assertion in debug mode.
+  /// `overlayChildBuilder` and will cause an assertion in debug mode.
   OverlayPortal.overlayChildLayoutBuilder({
     Key? key,
     required OverlayPortalController controller,

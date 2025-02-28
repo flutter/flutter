@@ -27,8 +27,8 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// available during layout, and doesn't depend on the child's intrinsic size.
 ///
 /// The equality of the [LayoutInfo] type is used by the implementation to avoid
-/// unnecessary rebuilds: if the new [LayoutInfo] computed in [performLayout] is
-/// the same as (defined by [LayoutInfo]'s [==] operator) the previous [LayoutInfo],
+/// unnecessary rebuilds: if the new [LayoutInfo] computed during layout is the
+/// same as (defined by [LayoutInfo]'s [==] operator) the previous [LayoutInfo],
 /// the implementation will try to avoid calling the [builder] again unless
 /// [updateShouldRebuild] returns true.
 ///
@@ -307,10 +307,10 @@ mixin RenderConstrainedLayoutBuilder<LayoutInfo, ChildType extends RenderObject>
     invokeLayoutCallback(_callback!);
   }
 
-  /// The (subset of) information to invoke the [builder] callback with.
+  /// The (subset of) information to invoke the `builder` callback with.
   ///
   /// This is typically the information that are only made available in
-  /// [performNeedsLayout], which is inaccessible for regular [Builder] widget,
+  /// [performLayout], which is inaccessible for regular [Builder] widget,
   /// such as the incoming [Constraints].
   @protected
   LayoutInfo get layoutInfo;
