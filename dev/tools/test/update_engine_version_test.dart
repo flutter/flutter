@@ -67,6 +67,13 @@ void main() {
     flutterRoot.binInternalUpdateEngineVersion.copySyncRecursive(
       testRoot.binInternalUpdateEngineVersion.path,
     );
+
+    // Regression test for https://github.com/flutter/flutter/pull/164396;
+    // on a fresh checkout bin/cache does not exist, so avoid trying to create
+    // this folder.
+    if (testRoot.root.childDirectory('cache').existsSync()) {
+      fail('Do not initially create a bin/cache directory, it should be created by the script.');
+    }
   });
 
   tearDown(() {
