@@ -58,7 +58,6 @@ void main() {
   setUp(() async {
     tmpDir = localFs.systemTempDirectory.createTempSync('update_engine_version_test.');
     testRoot = _FlutterRootUnderTest.fromPath(tmpDir.childDirectory('flutter').path);
-    testRoot.root.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
 
     environment = <String, String>{};
     environment.addAll(io.Platform.environment);

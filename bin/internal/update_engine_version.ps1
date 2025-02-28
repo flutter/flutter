@@ -19,6 +19,9 @@ $ErrorActionPreference = "Stop"
 $progName = Split-Path -parent $MyInvocation.MyCommand.Definition
 $flutterRoot = (Get-Item $progName).parent.parent.FullName
 
+# Generate a bin/cache directory, which won't initially exist for a fresh checkout.
+New-Item -Path "$flutterRoot\bin\cache" -ItemType Directory -Force
+
 # On stable, beta, and release tags, the engine.version is tracked by git - do not override it.
 $trackedEngine = (git -C "$flutterRoot" ls-files bin/internal/engine.version) | Out-String
 if ($trackedEngine.length -ne 0) {
