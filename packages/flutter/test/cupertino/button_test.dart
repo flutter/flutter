@@ -885,6 +885,167 @@ void main() {
     await tester.pump();
     expect(value, isTrue);
   });
+
+  testWidgets('CupertinoButton.mouseCursor behavior', (WidgetTester tester) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.grab;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoButton(
+            onPressed: () {},
+            mouseCursor: customCursor,
+            child: const Text('Tap Me'),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    // Get the center of the CupertinoButton to ensure the pointer is over it
+    final Offset buttonCenter = tester.getCenter(find.text('Tap Me'));
+    await gesture.addPointer(location: buttonCenter);
+    await tester.pumpAndSettle();
+
+    // Expect the custom cursor to be active when the mouse is over the button
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
+  });
+
+  testWidgets('CupertinoButton.filled.mouseCursor behavior', (WidgetTester tester) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.grab;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoButton.filled(
+            onPressed: () {},
+            mouseCursor: customCursor,
+            child: const Text('Tap Me'),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    // Get the center of the CupertinoButton to ensure the pointer is over it
+    final Offset buttonCenter = tester.getCenter(find.text('Tap Me'));
+    await gesture.addPointer(location: buttonCenter);
+    await tester.pumpAndSettle();
+
+    // Expect the custom cursor to be active when the mouse is over the button
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
+  });
+
+  testWidgets('CupertinoButton.tinted.mouseCursor behavior', (WidgetTester tester) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.grab;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoButton.tinted(
+            onPressed: () {},
+            mouseCursor: customCursor,
+            child: const Text('Tap Me'),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    // Get the center of the CupertinoButton to ensure the pointer is over it
+    final Offset buttonCenter = tester.getCenter(find.text('Tap Me'));
+    await gesture.addPointer(location: buttonCenter);
+    await tester.pumpAndSettle();
+
+    // Expect the custom cursor to be active when the mouse is over the button
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
+  });
+
+  testWidgets('CupertinoButton.mouseCursor in disabled state', (WidgetTester tester) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.forbidden;
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoButton(onPressed: null, mouseCursor: customCursor, child: Text('Tap Me')),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+
+    final Offset buttonCenter = tester.getCenter(find.text('Tap Me'));
+    await gesture.addPointer(location: buttonCenter);
+    await tester.pumpAndSettle();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
+  });
+
+  testWidgets('CupertinoButton.tinted.mouseCursor in disabled state', (WidgetTester tester) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.forbidden;
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoButton.tinted(
+            onPressed: null,
+            mouseCursor: customCursor,
+            child: Text('Tap Me'),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+
+    final Offset buttonCenter = tester.getCenter(find.text('Tap Me'));
+    await gesture.addPointer(location: buttonCenter);
+    await tester.pumpAndSettle();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
+  });
+
+  testWidgets('CupertinoButton.filled.mouseCursor in disabled state', (WidgetTester tester) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.forbidden;
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoButton.filled(
+            onPressed: null,
+            mouseCursor: customCursor,
+            child: Text('Tap Me'),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+
+    final Offset buttonCenter = tester.getCenter(find.text('Tap Me'));
+    await gesture.addPointer(location: buttonCenter);
+    await tester.pumpAndSettle();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
+  });
 }
 
 Widget boilerplate({required Widget child}) {

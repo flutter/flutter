@@ -89,6 +89,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
@@ -124,6 +125,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
   }) : assert(minimumSize == null || minSize == null),
@@ -153,6 +155,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
@@ -257,6 +260,23 @@ class CupertinoButton extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the widget.
+  ///
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]:
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then [MouseCursor.defer] is used when the button is disabled.
+  /// When the button is enabled, [SystemMouseCursors.click] is used on Web
+  /// and [MouseCursor.defer] is used on other platforms.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
+  ///    [WidgetStateProperty] which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [WidgetStateProperty].
+  final MouseCursor? mouseCursor;
+
   final _CupertinoButtonStyle _style;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
@@ -283,6 +303,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   late Animation<double> _opacityAnimation;
 
   late bool isFocused;
+
+  static final WidgetStateProperty<MouseCursor> _defaultCursor =
+      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+        return !states.contains(WidgetState.disabled) && kIsWeb
+            ? SystemMouseCursors.click
+            : MouseCursor.defer;
+      });
 
   @override
   void initState() {
@@ -430,8 +457,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
           textStyle.fontSize != null ? textStyle.fontSize! * 1.2 : kCupertinoButtonDefaultIconSize,
     );
 
+    final Set<WidgetState> states = <WidgetState>{if (!enabled) WidgetState.disabled};
+    final MouseCursor effectiveMouseCursor =
+        WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+        _defaultCursor.resolve(states);
+
     return MouseRegion(
-      cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor: effectiveMouseCursor,
       child: FocusableActionDetector(
         actions: _actionMap,
         focusNode: widget.focusNode,
