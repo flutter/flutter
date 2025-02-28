@@ -46,6 +46,12 @@ abstract class DartBuild extends Target {
       logger: environment.logger,
     );
     final Uri projectUri = environment.projectDir.uri;
+    final File recordedUsagesFileCandidate = environment.buildDir.childFile(
+      KernelSnapshot.recordedUsagesFileName,
+    );
+    final Uri? recordedUsagesFile =
+        recordedUsagesFileCandidate.existsSync() ? recordedUsagesFileCandidate.uri : null;
+
     final String? runPackageName =
         packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
     final FlutterNativeAssetsBuildRunner buildRunner =
@@ -63,6 +69,7 @@ abstract class DartBuild extends Target {
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      recordedUsagesFile: recordedUsagesFile,
     );
 
     final File dartBuildResultJsonFile = environment.buildDir.childFile(dartBuildResultFilename);
@@ -95,7 +102,7 @@ abstract class DartBuild extends Target {
     ),
     // If different packages are resolved, different native assets might need to be built.
     Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
-    // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
+    Source.pattern('{BUILD_DIR}/${KernelSnapshot.recordedUsagesFileName}'),
   ];
 
   @override

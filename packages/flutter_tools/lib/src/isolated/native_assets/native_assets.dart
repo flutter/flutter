@@ -124,6 +124,7 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
+  required Uri? recordedUsagesFile,
 }) async {
   final bool isWeb = targetPlatform == TargetPlatform.web_javascript;
   final OS? targetOS = getNativeOSFromTargetPlatform(targetPlatform);
@@ -168,6 +169,7 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
             linkingEnabled: _nativeAssetsLinkingEnabled(buildMode),
             fileSystem: fileSystem,
             targetOS: targetOS,
+            recordedUsagesFile: recordedUsagesFile,
           );
   return result;
 }
@@ -238,6 +240,7 @@ abstract interface class FlutterNativeAssetsBuildRunner {
     required ApplicationAssetValidator applicationAssetValidator,
     required Uri workingDirectory,
     required BuildResult buildResult,
+    required Uri? recordedUsagesFile,
   });
 
   /// The C compiler config to use for compilation.
@@ -339,6 +342,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     required ApplicationAssetValidator applicationAssetValidator,
     required Uri workingDirectory,
     required BuildResult buildResult,
+    required Uri? recordedUsagesFile,
   }) {
     return _buildRunner.link(
       buildAssetTypes: buildAssetTypes,
@@ -347,6 +351,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
       linkValidator: linkValidator,
       applicationAssetValidator: applicationAssetValidator,
       buildResult: buildResult,
+      resourceIdentifiers: recordedUsagesFile,
     );
   }
 
@@ -629,6 +634,7 @@ Future<DartBuildResult> _runDartBuild({
   required bool linkingEnabled,
   required bool codeAssetSupport,
   required bool dataAssetSupport,
+  required Uri? recordedUsagesFile,
 }) async {
   final DateTime buildStart = DateTime.now();
 
@@ -680,7 +686,7 @@ Future<DartBuildResult> _runDartBuild({
       ],
       inputCreator: () {
         final BuildInputBuilder buildInputBuilder = BuildInputBuilder();
-        if (targetOS != null) {
+        if (targetOS != null && codeAssetSupport) {
           buildInputBuilder.config.setupCode(
             targetArchitecture: architecture,
             linkModePreference: LinkModePreference.dynamic,
@@ -725,7 +731,7 @@ Future<DartBuildResult> _runDartBuild({
       ],
       inputCreator: () {
         final LinkInputBuilder linkInputBuilder = LinkInputBuilder();
-        if (targetOS != null) {
+        if (targetOS != null && codeAssetSupport) {
           linkInputBuilder.config.setupCode(
             targetArchitecture: architecture,
             linkModePreference: LinkModePreference.dynamic,
@@ -754,12 +760,16 @@ Future<DartBuildResult> _runDartBuild({
           ],
       workingDirectory: projectUri,
       buildResult: buildResult,
+      recordedUsagesFile: recordedUsagesFile,
     );
     if (linkResult == null) {
       _throwNativeAssetsLinkFailed();
     }
     assets.addAll(linkResult.encodedAssets);
-    dependencies.addAll(linkResult.dependencies);
+    dependencies.addAll(<Uri>[
+      ...linkResult.dependencies,
+      if (recordedUsagesFile != null) recordedUsagesFile,
+    ]);
   }
 
   final List<CodeAsset> codeAssets =

@@ -95,6 +95,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
+          recordedUsagesFile: null,
         );
         await installCodeAssets(
           dartBuildResult: result,
@@ -139,6 +140,7 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutNdk(),
+        recordedUsagesFile: null,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
@@ -164,6 +166,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),
+          recordedUsagesFile: null,
         ),
         throwsToolExit(message: 'Android NDK Clang could not be found.'),
       );

@@ -305,6 +305,7 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
+            recordedUsagesFile: null,
           );
           final Uri nativeAssetsFileUri =
               flutterTester

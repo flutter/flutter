@@ -82,6 +82,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        recordedUsagesFile: null,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
@@ -113,6 +114,7 @@ void main() {
           targetPlatform: TargetPlatform.windows_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          recordedUsagesFile: null,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
           ),
@@ -143,6 +145,7 @@ void main() {
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        recordedUsagesFile: null,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
         ),
@@ -185,6 +188,7 @@ void main() {
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          recordedUsagesFile: null,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
             buildResult: null,
@@ -230,6 +234,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        recordedUsagesFile: null,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(

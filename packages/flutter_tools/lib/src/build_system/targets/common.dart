@@ -159,7 +159,7 @@ class KernelSnapshot extends Target {
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{BUILD_DIR}/${KernelSnapshot.dillName}'),
-    // TODO(mosuem): Should output resources.json. https://github.com/flutter/flutter/issues/146263
+    Source.pattern('{BUILD_DIR}/$recordedUsagesFileName'),
   ];
 
   static const String depfile = 'kernel_snapshot_program.d';
@@ -174,6 +174,7 @@ class KernelSnapshot extends Target {
   ];
 
   static const String dillName = 'app.dill';
+  static const String recordedUsagesFileName = 'recorded_usages.json';
 
   @override
   Future<void> build(Environment environment) async {
@@ -260,6 +261,8 @@ class KernelSnapshot extends Target {
 
     final String dillPath = environment.buildDir.childFile(dillName).path;
 
+    final String recordedUsagesFile = environment.buildDir.childFile(recordedUsagesFileName).path;
+
     final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
     await _addFlavorToDartDefines(dartDefines, environment, targetPlatform);
 
@@ -288,6 +291,7 @@ class KernelSnapshot extends Target {
       buildDir: environment.buildDir,
       targetOS: targetOS,
       checkDartPluginRegistry: environment.generateDartPluginRegistry,
+      recordedUsagesFile: recordedUsagesFile,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception();

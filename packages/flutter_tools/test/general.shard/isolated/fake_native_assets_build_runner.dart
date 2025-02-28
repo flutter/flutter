@@ -76,6 +76,7 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     required ApplicationAssetValidator applicationAssetValidator,
     required Uri workingDirectory,
     required BuildResult buildResult,
+    required Uri? recordedUsagesFile,
   }) async {
     LinkResult? result = linkResult;
     for (final String package in packagesWithNativeAssetsResult) {

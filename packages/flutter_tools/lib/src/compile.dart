@@ -254,6 +254,7 @@ class KernelCompiler {
     required List<String> dartDefines,
     required PackageConfig packageConfig,
     String? nativeAssets,
+    String? recordedUsagesFile,
   }) async {
     final TargetPlatform? platform =
         targetModel == TargetModel.dartdevc ? TargetPlatform.web_javascript : null;
@@ -365,6 +366,7 @@ class KernelCompiler {
             '-Dflutter.dart_plugin_registrant=$dartPluginRegistrantUri',
           ],
           if (nativeAssets != null) ...<String>['--native-assets', nativeAssets],
+          if (recordedUsagesFile != null) ...<String>['--recorded-usages-file', recordedUsagesFile],
           // See: https://github.com/flutter/flutter/issues/103994
           '--verbosity=error',
           ...?extraFrontEndOptions,

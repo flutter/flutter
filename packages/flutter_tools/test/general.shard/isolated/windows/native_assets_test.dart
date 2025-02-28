@@ -115,6 +115,7 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            recordedUsagesFile: null,
             buildRunner: buildRunner,
           );
           final String expectedDirectory =

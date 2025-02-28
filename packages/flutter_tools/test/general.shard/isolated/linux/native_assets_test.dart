@@ -66,6 +66,7 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutClang(),
+        recordedUsagesFile: null,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
