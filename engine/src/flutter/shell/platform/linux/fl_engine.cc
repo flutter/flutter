@@ -568,6 +568,8 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
   self->keyboard_manager = fl_keyboard_manager_new(self);
   self->mouse_cursor_handler =
       fl_mouse_cursor_handler_new(self->binary_messenger);
+  self->windowing_handler = fl_windowing_handler_new(self);
+
   fl_renderer_set_engine(self->renderer, self);
 
   return self;
@@ -707,7 +709,6 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   fl_settings_handler_start(self->settings_handler, settings);
 
   self->platform_handler = fl_platform_handler_new(self->binary_messenger);
-  self->windowing_handler = fl_windowing_handler_new(self);
 
   setup_keyboard(self);
 
