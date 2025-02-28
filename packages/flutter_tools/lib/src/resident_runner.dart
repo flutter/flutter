@@ -1197,7 +1197,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     globals.printTrace('complete');
   }
 
-  Future<DartBuildResult> runDartBuild() async {
+  Future<DartBuildResult> runDartBuild({required bool isWeb}) async {
     globals.printTrace('runDartBuild()');
     if (_dartBuildResult?.isBuildUpToDate(globals.fs) ?? false) {
       globals.printTrace('runDartBuild() - up-to-date already');
@@ -1206,7 +1206,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     globals.printTrace('runDartBuild() - will perform dart build');
 
     final BuildResult lastBuild = await globals.buildSystem.build(
-      const DartBuildForDataAssets(),
+      const DartBuildForDataAssets(isWeb: true),
       _environment,
     );
     if (!lastBuild.success) {
