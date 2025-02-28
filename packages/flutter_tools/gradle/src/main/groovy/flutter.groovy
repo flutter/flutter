@@ -1245,6 +1245,7 @@ class FlutterPlugin implements Plugin<Project> {
             String variantBuildMode = buildModeFor(variant.buildType)
             String flavorValue = variant.getFlavorName()
             String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
+            print("fileSystemRootsValue: " + fileSystemRootsValue)
             // Be careful when configuring task below, Groovy has bizarre
             // scoping rules: writing `verbose isVerbose()` means calling
             // `isVerbose` on the task itself - which would return `verbose`

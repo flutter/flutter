@@ -15,10 +15,10 @@ import java.io.File
 
 abstract class BaseFlutterTask : DefaultTask() {
     @Internal
-    lateinit var flutterRoot: File
+    var flutterRoot: File? = null
 
     @Internal
-    lateinit var flutterExecutable: File
+    var flutterExecutable: File? = null
 
     @Input
     var buildMode: String? = null
@@ -32,7 +32,7 @@ abstract class BaseFlutterTask : DefaultTask() {
 
     @Optional
     @Input
-    val localEngineHost: String? = null
+    var localEngineHost: String? = null
 
     @Optional
     @Input
@@ -43,7 +43,7 @@ abstract class BaseFlutterTask : DefaultTask() {
     var fastStart: Boolean = false
 
     @Input
-    lateinit var targetPath: String
+    var targetPath: String? = null
 
     @Optional
     @Input
@@ -51,24 +51,24 @@ abstract class BaseFlutterTask : DefaultTask() {
 
     @Optional
     @Input
-    lateinit var fileSystemRoots: List<String>
+    var fileSystemRoots: List<String?>? = null
 
     @Optional
     @Input
-    lateinit var fileSystemScheme: String
+    var fileSystemScheme: String? = null
 
     @Input
     var trackWidgetCreation: Boolean? = null
 
     @Optional
     @Input
-    lateinit var targetPlatformValues: List<String>
+    var targetPlatformValues: List<String>? = null
 
     @Internal
     var sourceDir: File? = null
 
     @Internal
-    lateinit var intermediateDir: File
+    var intermediateDir: File? = null
 
     @Optional
     @Input
@@ -136,7 +136,7 @@ abstract class BaseFlutterTask : DefaultTask() {
     fun buildBundle() {
         val helper = BaseFlutterTaskHelper(baseFlutterTask = this)
         helper.checkPreConditions()
-        intermediateDir.mkdirs()
+        intermediateDir!!.mkdirs()
 
         logging.captureStandardError(LogLevel.ERROR)
         project.exec(helper.createExecSpecActionFromTask())

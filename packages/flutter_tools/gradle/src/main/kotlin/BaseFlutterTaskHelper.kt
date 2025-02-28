@@ -9,10 +9,10 @@ import org.gradle.process.ExecSpec
 import java.nio.file.Paths
 
 class BaseFlutterTaskHelper(
-    private val baseFlutterTask: BaseFlutterTask
+    private var baseFlutterTask: BaseFlutterTask
 ) {
     @VisibleForTesting
-    internal val gradleErrorMessage = "Invalid Flutter source directory: ${baseFlutterTask.sourceDir}"
+    internal var gradleErrorMessage = "Invalid Flutter source directory: ${baseFlutterTask.sourceDir}"
 
     @OutputFiles
     @VisibleForTesting
@@ -41,10 +41,10 @@ class BaseFlutterTaskHelper(
             when {
                 baseFlutterTask.buildMode == "debug" -> listOf("debug_android_application")
                 baseFlutterTask.deferredComponents ->
-                    baseFlutterTask.targetPlatformValues.map {
+                    baseFlutterTask.targetPlatformValues!!.map {
                         "android_aot_deferred_components_bundle_${baseFlutterTask.buildMode}_$it"
                     }
-                else -> baseFlutterTask.targetPlatformValues.map { "android_aot_bundle_${baseFlutterTask.buildMode}_$it" }
+                else -> baseFlutterTask.targetPlatformValues!!.map { "android_aot_bundle_${baseFlutterTask.buildMode}_$it" }
             }
         return ruleNames
     }
@@ -52,7 +52,7 @@ class BaseFlutterTaskHelper(
     @VisibleForTesting
     internal fun createExecSpecActionFromTask(): Action<ExecSpec> =
         Action<ExecSpec> {
-            executable(baseFlutterTask.flutterExecutable.absolutePath)
+            executable(baseFlutterTask.flutterExecutable!!.absolutePath)
             workingDir(baseFlutterTask.sourceDir)
             baseFlutterTask.localEngine?.let {
                 args("--local-engine", baseFlutterTask.localEngine)
@@ -76,7 +76,7 @@ class BaseFlutterTaskHelper(
             if (!baseFlutterTask.fastStart || baseFlutterTask.buildMode != "debug") {
                 args("-dTargetFile=${baseFlutterTask.targetPath}")
             } else {
-                args("-dTargetFile=${Paths.get(baseFlutterTask.flutterRoot.absolutePath, "examples", "splash", "lib", "main.dart")}")
+                args("-dTargetFile=${Paths.get(baseFlutterTask.flutterRoot!!.absolutePath, "examples", "splash", "lib", "main.dart")}")
             }
             args("-dTargetPlatform=android")
             args("-dBuildMode=${baseFlutterTask.buildMode}")
@@ -114,7 +114,7 @@ class BaseFlutterTaskHelper(
                 args("--ExtraFrontEndOptions=${baseFlutterTask.extraFrontEndOptions}")
             }
 
-            args("-dAndroidArchs=${baseFlutterTask.targetPlatformValues.joinToString(" ")}")
+            args("-dAndroidArchs=${baseFlutterTask.targetPlatformValues!!.joinToString(" ")}")
             args("-dMinSdkVersion=${baseFlutterTask.minSdkVersion}")
             args(generateRuleNames(baseFlutterTask))
         }
