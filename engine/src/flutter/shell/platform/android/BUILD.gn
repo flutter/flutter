@@ -691,7 +691,15 @@ if (target_cpu != "x86") {
     # The output gen_snapshot binary name in the archive.
     gen_snapshot_dest = "gen_snapshot"
 
-    if (host_os == "win") {
+    if (host_os == "mac") {
+      # macOS gen_snapshot is a universal binary with architecture suffix.
+      arch_suffix = target_cpu
+      if (target_cpu == "arm") {
+        arch_suffix = "armv7"
+      }
+      gen_snapshot_src =
+          rebase_path("$root_out_dir/gen_snapshot_${arch_suffix}")
+    } else if (host_os == "win") {
       gen_snapshot_src = rebase_path("$root_out_dir/gen_snapshot.exe")
       gen_snapshot_dest = "gen_snapshot.exe"
     }
