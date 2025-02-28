@@ -914,7 +914,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
   });
 
-  testWidgets('CupertinoButton.Filled.mouseCursor behavior', (WidgetTester tester) async {
+  testWidgets('CupertinoButton.filled.mouseCursor behavior', (WidgetTester tester) async {
     const SystemMouseCursor customCursor = SystemMouseCursors.grab;
 
     await tester.pumpWidget(
