@@ -439,7 +439,10 @@ class Context {
       '-dTargetPlatform=ios',
       '-dTargetFile=$targetPath',
       '-dBuildMode=$buildMode',
+      // FLAVOR is set by the Flutter CLI in the Flutter/Generated.xcconfig file
+      // when the --flavor flag is used, so it may not always be present.
       if (environment['FLAVOR'] != null) '-dFlavor=${environment['FLAVOR']}',
+      '-dConfiguration=${environment['CONFIGURATION']}',
       '-dIosArchs=$archs',
       '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
       '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO'] ?? ''}',
@@ -473,10 +476,6 @@ class Context {
         expandedCodeSignIdentity.isNotEmpty &&
         environment['CODE_SIGNING_REQUIRED'] != 'NO') {
       flutterArgs.add('-dCodesignIdentity=$expandedCodeSignIdentity');
-    }
-
-    if (environment['BUNDLE_SKSL_PATH'] != null && environment['BUNDLE_SKSL_PATH']!.isNotEmpty) {
-      flutterArgs.add('-dBundleSkSLPath=${environment['BUNDLE_SKSL_PATH']}');
     }
 
     if (environment['CODE_SIZE_DIRECTORY'] != null &&

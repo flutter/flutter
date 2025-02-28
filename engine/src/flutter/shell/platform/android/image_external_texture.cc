@@ -25,7 +25,7 @@ ImageExternalTexture::~ImageExternalTexture() = default;
 
 // Implementing flutter::Texture.
 void ImageExternalTexture::Paint(PaintContext& context,
-                                 const SkRect& bounds,
+                                 const DlRect& bounds,
                                  bool freeze,
                                  const DlImageSampling sampling) {
   if (state_ == AttachmentState::kDetached) {
@@ -34,16 +34,16 @@ void ImageExternalTexture::Paint(PaintContext& context,
   Attach(context);
   const bool should_process_frame = !freeze;
   if (should_process_frame) {
-    ProcessFrame(context, bounds);
+    ProcessFrame(context, ToSkRect(bounds));
   }
   if (dl_image_) {
     context.canvas->DrawImageRect(
-        dl_image_,                                     // image
-        SkRect::Make(dl_image_->bounds()),             // source rect
-        bounds,                                        // destination rect
-        sampling,                                      // sampling
-        context.paint,                                 // paint
-        flutter::DlCanvas::SrcRectConstraint::kStrict  // enforce edges
+        dl_image_,                             // image
+        DlRect::Make(dl_image_->GetBounds()),  // source rect
+        bounds,                                // destination rect
+        sampling,                              // sampling
+        context.paint,                         // paint
+        flutter::DlSrcRectConstraint::kStrict  // enforce edges
     );
   } else {
     FML_LOG(INFO) << "No DlImage available for ImageExternalTexture to paint.";

@@ -37,6 +37,7 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
     SetLogMessageCallbackHook();
     SetLocalizationCallbackHooks();
     SetChannelUpdateCallbackHook();
+    SetViewFocusChangeRequestHook();
     AddCommandLineArgument("--disable-vm-service");
 
     if (preference == InitializationPreference::kSnapshotsInitialize ||
@@ -112,6 +113,11 @@ void EmbedderConfigBuilder::SetChannelUpdateCallbackHook() {
       context_.GetChannelUpdateCallbackHook();
 }
 
+void EmbedderConfigBuilder::SetViewFocusChangeRequestHook() {
+  project_args_.view_focus_change_request_callback =
+      context_.GetViewFocusChangeRequestCallbackHook();
+}
+
 void EmbedderConfigBuilder::SetLogTag(std::string tag) {
   log_tag_ = std::move(tag);
   project_args_.log_tag = log_tag_.c_str();
@@ -163,6 +169,15 @@ void EmbedderConfigBuilder::SetPlatformTaskRunner(
   project_args_.custom_task_runners = &custom_task_runners_;
 }
 
+void EmbedderConfigBuilder::SetUITaskRunner(
+    const FlutterTaskRunnerDescription* runner) {
+  if (runner == nullptr) {
+    return;
+  }
+  custom_task_runners_.ui_task_runner = runner;
+  project_args_.custom_task_runners = &custom_task_runners_;
+}
+
 void EmbedderConfigBuilder::SetupVsyncCallback() {
   project_args_.vsync_callback = [](void* user_data, intptr_t baton) {
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
@@ -183,6 +198,11 @@ void EmbedderConfigBuilder::SetRenderTaskRunner(
 void EmbedderConfigBuilder::SetPlatformMessageCallback(
     const std::function<void(const FlutterPlatformMessage*)>& callback) {
   context_.SetPlatformMessageCallback(callback);
+}
+
+void EmbedderConfigBuilder::SetViewFocusChangeRequestCallback(
+    const std::function<void(const FlutterViewFocusChangeRequest*)>& callback) {
+  context_.SetViewFocusChangeRequestCallback(callback);
 }
 
 void EmbedderConfigBuilder::SetCompositor(bool avoid_backing_store_cache,

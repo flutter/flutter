@@ -46,16 +46,54 @@ enum class SemanticsAction : int32_t {
   kScrollToOffset = 1 << 23,
 };
 
-const int kVerticalScrollSemanticsActions =
+constexpr int kVerticalScrollSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollUp) |
     static_cast<int32_t>(SemanticsAction::kScrollDown);
 
-const int kHorizontalScrollSemanticsActions =
+constexpr int kHorizontalScrollSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollLeft) |
     static_cast<int32_t>(SemanticsAction::kScrollRight);
 
-const int kScrollableSemanticsActions =
+constexpr int kScrollableSemanticsActions =
     kVerticalScrollSemanticsActions | kHorizontalScrollSemanticsActions;
+
+/// The following actions are not user-initiated.
+constexpr int kSystemActions =
+    static_cast<int32_t>(SemanticsAction::kDidGainAccessibilityFocus) |
+    static_cast<int32_t>(SemanticsAction::kDidLoseAccessibilityFocus);
+
+/// C/C++ representation of `SemanticsRole` defined in
+/// `lib/ui/semantics.dart`.
+///\warning This must match the `SemanticsRole` enum in
+///         `lib/ui/semantics.dart`.
+/// See also:
+///   - file://./../../../lib/ui/semantics.dart
+enum class SemanticsRole : int32_t {
+  kNone = 0,
+  kTab = 1,
+  kTabBar = 2,
+  kTabPanel = 3,
+  kTable = 4,
+  kCell = 5,
+  kRow = 6,
+  kColumnHeader = 7,
+  kDialog = 8,
+  kAlertDialog = 9,
+  kSearchBox = 10,
+  kDragHandle = 11,
+  kSpinButton = 12,
+  kComboBox = 13,
+  kMenuBar = 14,
+  kMenu = 15,
+  kMenuItem = 16,
+  kList = 17,
+  kListItem = 18,
+  kForm = 19,
+  kTooltip = 20,
+  kLoadingSpinner = 21,
+  kProgressBar = 22,
+  kHotKey = 23,
+};
 
 /// C/C++ representation of `SemanticsFlags` defined in
 /// `lib/ui/semantics.dart`.
@@ -148,6 +186,7 @@ struct SemanticsNode {
   int32_t headingLevel = 0;
 
   std::string linkUrl;
+  SemanticsRole role;
 };
 
 // Contains semantic nodes that need to be updated.

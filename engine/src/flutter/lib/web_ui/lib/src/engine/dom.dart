@@ -158,7 +158,6 @@ extension DomWindowExtension on DomWindow {
         message.toJSAnyShallow,
         targetOrigin.toJS,
         // Cast is necessary so we can call `.toJS` on the right extension.
-        // ignore: unnecessary_cast
         (messagePorts as List<JSAny>).toJS,
       );
     }
@@ -735,6 +734,13 @@ extension DomElementExtension on DomElement {
 
   external void setPointerCapture(num? pointerId);
 }
+
+extension type DomCSS(JSObject _) implements JSObject {
+  external bool supports(String proeprty, String value);
+}
+
+@JS('CSS')
+external DomCSS get domCSS;
 
 @JS()
 @staticInterop
@@ -2133,6 +2139,10 @@ extension DomVisualViewportExtension on DomVisualViewport {
   @JS('width')
   external JSNumber? get _width;
   double? get width => _width?.toDartDouble;
+
+  @JS('scale')
+  external JSNumber? get _scale;
+  double? get scale => _scale?.toDartDouble;
 }
 
 @JS()

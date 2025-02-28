@@ -7,6 +7,7 @@
 package com.example.android_engine_test.extensions
 
 import android.app.Activity
+import android.os.Build
 import android.os.SystemClock
 import android.view.MotionEvent
 import io.flutter.Log
@@ -44,6 +45,18 @@ class NativeDriverSupportPlugin :
             return
         }
         when (call.method) {
+            "sdk_version" -> {
+                val versionMap = mapOf("version" to Build.VERSION.SDK_INT)
+                result.success(versionMap)
+            }
+            "is_emulator" -> {
+                val isEmulator =
+                    when {
+                        Build.MODEL.contains("gphone") -> true
+                        else -> false
+                    }
+                result.success(mapOf("emulator" to isEmulator))
+            }
             "ping" -> {
                 result.success(null)
             }
@@ -56,7 +69,8 @@ class NativeDriverSupportPlugin :
                         selector = NativeSelector.ByContentDescription(call.argument("label")!!)
                     }
                     "byNativeIntegerId" -> {
-                        selector = NativeSelector.ByViewId(call.argument("id")!!)
+                        val stringId = call.argument<String>("id")!!
+                        selector = NativeSelector.ByViewId(stringId.toInt())
                     }
                     else -> {
                         result.error("INVALID_SELECTOR", "Not supported", kind)

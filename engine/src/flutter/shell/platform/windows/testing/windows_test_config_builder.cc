@@ -30,12 +30,22 @@ void WindowsConfigBuilder::SetDartEntrypoint(std::string_view entrypoint) {
   dart_entrypoint_ = entrypoint;
 }
 
+void WindowsConfigBuilder::SetUIThreadPolicy(
+    FlutterDesktopUIThreadPolicy policy) {
+  ui_thread_policy_ = policy;
+}
+
 void WindowsConfigBuilder::AddDartEntrypointArgument(std::string_view arg) {
   if (arg.empty()) {
     return;
   }
 
   dart_entrypoint_arguments_.emplace_back(std::move(arg));
+}
+
+void WindowsConfigBuilder::SetGpuPreference(
+    FlutterDesktopGpuPreference gpu_preference) {
+  gpu_preference_ = gpu_preference;
 }
 
 FlutterDesktopEngineProperties WindowsConfigBuilder::GetEngineProperties()
@@ -62,6 +72,9 @@ FlutterDesktopEngineProperties WindowsConfigBuilder::GetEngineProperties()
     engine_properties.dart_entrypoint_argv = nullptr;
     engine_properties.dart_entrypoint_argc = 0;
   }
+
+  engine_properties.gpu_preference = gpu_preference_;
+  engine_properties.ui_thread_policy = ui_thread_policy_;
 
   return engine_properties;
 }

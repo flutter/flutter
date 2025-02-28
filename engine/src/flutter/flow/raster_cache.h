@@ -133,7 +133,7 @@ class RasterCache {
       const RasterCache::Context& context,
       sk_sp<const DlRTree> rtree,
       const std::function<void(DlCanvas*)>& draw_function,
-      const std::function<void(DlCanvas*, const SkRect& rect)>&
+      const std::function<void(DlCanvas*, const DlRect& rect)>&
           draw_checkerboard) const;
 
   explicit RasterCache(

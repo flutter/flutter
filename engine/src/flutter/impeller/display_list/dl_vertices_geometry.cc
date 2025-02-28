@@ -8,7 +8,6 @@
 #include "impeller/core/formats.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/point.h"
-#include "third_party/skia/include/core/SkPoint.h"
 
 namespace impeller {
 
@@ -88,7 +87,7 @@ bool DlVerticesGeometry::HasTextureCoordinates() const {
   return vertices_->texture_coordinate_data() != nullptr;
 }
 
-std::optional<Rect> DlVerticesGeometry::GetTextureCoordinateCoverge() const {
+std::optional<Rect> DlVerticesGeometry::GetTextureCoordinateCoverage() const {
   if (!HasTextureCoordinates()) {
     return std::nullopt;
   }

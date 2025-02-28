@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
-import 'package:js/js_util.dart' as js_util;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
@@ -20,14 +20,15 @@ external set didCreateEngineInitializer(JSFunction? callback);
 
 void main() {
   // Prepare _flutter.loader.didCreateEngineInitializer, so it's ready in the page ASAP.
-  loader = js_util.jsify(<String, Object>{
-    'loader': <String, Object>{
-      'didCreateEngineInitializer':
-          () {
-            print('not mocked');
-          }.toJS,
-    },
-  });
+  loader =
+      <String, Object>{
+        'loader': <String, Object>{
+          'didCreateEngineInitializer':
+              () {
+                print('not mocked');
+              }.toJS,
+        },
+      }.jsify();
   internalBootstrapBrowserTest(() => testMain);
 }
 
@@ -38,7 +39,6 @@ void testMain() {
       JSAny? engineInitializer;
 
       void didCreateEngineInitializerMock(JSAny? obj) {
-        print('obj: $obj');
         engineInitializer = obj;
       }
 
@@ -53,12 +53,12 @@ void testMain() {
       // Check that the object we captured is actually a loader
       expect(engineInitializer, isNotNull);
       expect(
-        js_util.hasProperty(engineInitializer!, 'initializeEngine'),
+        (engineInitializer! as JSObject).has('initializeEngine'),
         isTrue,
         reason: 'Missing FlutterEngineInitializer method: initializeEngine.',
       );
       expect(
-        js_util.hasProperty(engineInitializer!, 'autoStart'),
+        (engineInitializer! as JSObject).has('autoStart'),
         isTrue,
         reason: 'Missing FlutterEngineInitializer method: autoStart.',
       );

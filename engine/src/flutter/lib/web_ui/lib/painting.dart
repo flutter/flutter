@@ -689,30 +689,18 @@ class TargetImageSize {
   final int? height;
 }
 
-// TODO(mdebbar): Deprecate this and remove it.
-// https://github.com/flutter/flutter/issues/127395
-Future<Codec> webOnlyInstantiateImageCodecFromUrl(
-  Uri uri, {
-  ui_web.ImageCodecChunkCallback? chunkCallback,
-}) {
-  assert(() {
-    engine.printWarning(
-      'The webOnlyInstantiateImageCodecFromUrl API is deprecated and will be '
-      'removed in a future release. Please use `createImageCodecFromUrl` from '
-      '`dart:ui_web` instead.',
-    );
-    return true;
-  }());
-  return ui_web.createImageCodecFromUrl(uri, chunkCallback: chunkCallback);
-}
-
 void decodeImageFromList(Uint8List list, ImageDecoderCallback callback) {
   _decodeImageFromListAsync(list, callback);
 }
 
 Future<void> _decodeImageFromListAsync(Uint8List list, ImageDecoderCallback callback) async {
   final Codec codec = await instantiateImageCodec(list);
-  final FrameInfo frameInfo = await codec.getNextFrame();
+  final FrameInfo frameInfo;
+  try {
+    frameInfo = await codec.getNextFrame();
+  } finally {
+    codec.dispose();
+  }
   callback(frameInfo.image);
 }
 
@@ -722,15 +710,12 @@ Future<void> _decodeImageFromListAsync(Uint8List list, ImageDecoderCallback call
 // to right, then from top to down. The order of the 4 bytes of pixels is
 // decided by `format`.
 Future<Codec> createBmp(Uint8List pixels, int width, int height, int rowBytes, PixelFormat format) {
-  late bool swapRedBlue;
-  switch (format) {
-    case PixelFormat.bgra8888:
-      swapRedBlue = true;
-    case PixelFormat.rgba8888:
-      swapRedBlue = false;
-    case PixelFormat.rgbaFloat32:
-      throw UnimplementedError('RGB conversion from rgbaFloat32 data is not implemented');
-  }
+  final bool swapRedBlue = switch (format) {
+    PixelFormat.bgra8888 => true,
+    PixelFormat.rgba8888 => false,
+    PixelFormat.rgbaFloat32 =>
+      throw UnimplementedError('RGB conversion from rgbaFloat32 data is not implemented'),
+  };
 
   // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.
   // The header is in the 108-byte BITMAPV4HEADER format, or as called by

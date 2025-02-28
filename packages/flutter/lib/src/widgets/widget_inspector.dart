@@ -357,15 +357,7 @@ class _ScreenshotContainerLayer extends OffsetLayer {
 /// a screenshot.
 class _ScreenshotData {
   _ScreenshotData({required this.target}) : containerLayer = _ScreenshotContainerLayer() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$_ScreenshotData',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', '_ScreenshotData', this));
   }
 
   /// Target to take a screenshot of.
@@ -407,9 +399,7 @@ class _ScreenshotData {
   /// Releases allocated resources.
   @mustCallSuper
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     containerLayer.dispose();
   }
 }
@@ -3748,10 +3738,7 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
-    // TODO(srawlins): `unused_element_parameter` is being separated from
-    // `unused_element`. Ignore both names until the separation is complete.
-    // ignore: unused_element, unused_element_parameter
-    this.name,
+    this.name, // ignore: unused_element_parameter
   });
 
   /// File path of the location.

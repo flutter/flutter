@@ -8,10 +8,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-// TODO(mdebbar): Deprecate this and remove it.
-// https://github.com/flutter/flutter/issues/127395
-typedef WebOnlyImageCodecChunkCallback = ui_web.ImageCodecChunkCallback;
-
 abstract class HtmlImageElementCodec implements ui.Codec {
   HtmlImageElementCodec(this.src, {this.chunkCallback, this.debugSource});
 
@@ -43,9 +39,7 @@ abstract class HtmlImageElementCodec implements ui.Codec {
     // builders to create UI.
     chunkCallback?.call(0, 100);
     imgElement = createDomHTMLImageElement();
-    if (renderer is! HtmlRenderer) {
-      imgElement!.crossOrigin = 'anonymous';
-    }
+    imgElement!.crossOrigin = 'anonymous';
     imgElement!
       ..decoding = 'async'
       ..src = src;

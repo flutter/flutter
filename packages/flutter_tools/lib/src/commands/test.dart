@@ -71,7 +71,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }) {
     requiresPubspecYaml();
     usesPubOption();
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
@@ -457,7 +456,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
-      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
       usingCISystem: usingCISystem,
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
@@ -590,10 +588,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     if (webRenderer == WebRendererMode.skwasm && !useWasm) {
       throwToolExit('Skwasm renderer requires --wasm');
-    }
-
-    if (webRenderer.isDeprecated) {
-      globals.logger.printWarning(webRenderer.deprecationWarning);
     }
 
     Device? integrationTestDevice;

@@ -11,14 +11,9 @@
 #include "flutter/fml/synchronization/count_down_latch.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
-
-// The number of frames the rasterizer task runner will continue
-// to run on the platform thread after no platform view is rendered.
-//
-// Note: this is an arbitrary number.
-static constexpr int kDefaultMergedLeaseDuration = 10;
 
 static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
 
@@ -201,8 +196,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
 ///
 /// This requires posting a task to the platform thread and blocking on its completion.
 - (void)createMissingOverlays:(size_t)requiredOverlayLayers
-               withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-                    grContext:(GrDirectContext*)grContext;
+               withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext;
 
 /// Update the buffers and mutate the platform views in CATransaction on the platform thread.
 - (void)performSubmit:(const LayersMap&)platformViewLayers
@@ -247,8 +241,8 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
 
 /// Runs on the platform thread.
 - (void)createLayerWithIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-                        grContext:(GrDirectContext*)grContext
-                      pixelFormat:(MTLPixelFormat)pixelFormat;
+                      pixelFormat:(MTLPixelFormat)pixelFormat
+                      screenScale:(CGFloat)screenScale;
 
 /// Removes overlay views and platform views that aren't needed in the current frame.
 /// Must run on the platform thread.
@@ -454,51 +448,12 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
 }
 
 - (flutter::PostPrerollResult)postPrerollActionWithThreadMerger:
-                                  (const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger
-                                                impellerEnabled:(BOOL)impellerEnabled {
-  // TODO(jonahwilliams): remove this once Software backend is removed for iOS Sim.
-#ifdef FML_OS_IOS_SIMULATOR
-  const bool mergeThreads = true;
-#else
-  const bool mergeThreads = !impellerEnabled;
-#endif  // FML_OS_IOS_SIMULATOR
-
-  if (mergeThreads) {
-    if (self.compositionOrder.empty()) {
-      return flutter::PostPrerollResult::kSuccess;
-    }
-    if (!rasterThreadMerger->IsMerged()) {
-      // The raster thread merger may be disabled if the rasterizer is being
-      // created or teared down.
-      //
-      // In such cases, the current frame is dropped, and a new frame is attempted
-      // with the same layer tree.
-      //
-      // Eventually, the frame is submitted once this method returns `kSuccess`.
-      // At that point, the raster tasks are handled on the platform thread.
-      [self cancelFrame];
-      return flutter::PostPrerollResult::kSkipAndRetryFrame;
-    }
-    // If the post preroll action is successful, we will display platform views in the current
-    // frame. In order to sync the rendering of the platform views (quartz) with skia's rendering,
-    // We need to begin an explicit CATransaction. This transaction needs to be submitted
-    // after the current frame is submitted.
-    rasterThreadMerger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
-  }
+    (const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger {
   return flutter::PostPrerollResult::kSuccess;
 }
 
 - (void)endFrameWithResubmit:(BOOL)shouldResubmitFrame
-                threadMerger:(const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger
-             impellerEnabled:(BOOL)impellerEnabled {
-#if FML_OS_IOS_SIMULATOR
-  BOOL runCheck = YES;
-#else
-  BOOL runCheck = !impellerEnabled;
-#endif  // FML_OS_IOS_SIMULATOR
-  if (runCheck && shouldResubmitFrame) {
-    rasterThreadMerger->MergeWithLease(kDefaultMergedLeaseDuration);
-  }
+                threadMerger:(const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger {
 }
 
 - (void)pushFilterToVisitedPlatformViews:(const std::shared_ptr<flutter::DlImageFilter>&)filter
@@ -561,7 +516,9 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
   CGRect frame =
       CGRectMake(-clipView.frame.origin.x, -clipView.frame.origin.y,
                  CGRectGetWidth(self.flutterView.bounds), CGRectGetHeight(self.flutterView.bounds));
-  clipView.maskView = [self.maskViewPool getMaskViewWithFrame:frame];
+  clipView.maskView = [self.maskViewPool
+      getMaskViewWithFrame:frame
+               screenScale:[self.flutterViewController flutterScreenIfViewLoaded].scale];
 }
 
 - (void)applyMutators:(const flutter::MutatorsStack&)mutatorsStack
@@ -582,7 +539,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
     [self.maskViewPool insertViewToPoolIfNeeded:(FlutterClippingMaskView*)(clipView.maskView)];
     clipView.maskView = nil;
   }
-  CGFloat screenScale = [UIScreen mainScreen].scale;
+  CGFloat screenScale = [self.flutterViewController flutterScreenIfViewLoaded].scale;
   auto iter = mutatorsStack.Begin();
   while (iter != mutatorsStack.End()) {
     switch ((*iter)->GetType()) {
@@ -698,7 +655,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
   // when we apply the transforms matrix in |applyMutators:embeddedView:boundingRect|, we need
   // to remember to do a reverse translate.
   const SkRect& rect = params.finalBoundingRect();
-  CGFloat screenScale = [UIScreen mainScreen].scale;
+  CGFloat screenScale = [self.flutterViewController flutterScreenIfViewLoaded].scale;
   clippingView.frame = CGRectMake(rect.x() / screenScale, rect.y() / screenScale,
                                   rect.width() / screenScale, rect.height() / screenScale);
   [self applyMutators:mutatorStack embeddedView:touchInterceptor boundingRect:rect];
@@ -729,8 +686,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
 }
 
 - (BOOL)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)background_frame
-     withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-          grContext:(GrDirectContext*)grContext {
+     withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext {
   TRACE_EVENT0("flutter", "PlatformViewsController::SubmitFrame");
 
   // No platform views to render; we're done.
@@ -765,7 +721,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
   // If there are not sufficient overlay layers, we must construct them on the platform
   // thread, at least until we've refactored iOS surface creation to use IOSurfaces
   // instead of CALayers.
-  [self createMissingOverlays:requiredOverlayLayers withIosContext:iosContext grContext:grContext];
+  [self createMissingOverlays:requiredOverlayLayers withIosContext:iosContext];
 
   int64_t overlayId = 0;
   for (int64_t viewId : self.compositionOrder) {
@@ -786,7 +742,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
     flutter::DlCanvas* overlayCanvas = frame->Canvas();
     int restoreCount = overlayCanvas->GetSaveCount();
     overlayCanvas->Save();
-    overlayCanvas->ClipRect(overlay->second);
+    overlayCanvas->ClipRect(flutter::ToDlRect(overlay->second));
     overlayCanvas->Clear(flutter::DlColor::kTransparent());
     self.slices[viewId]->render_into(overlayCanvas);
     overlayCanvas->RestoreToCount(restoreCount);
@@ -843,8 +799,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
 }
 
 - (void)createMissingOverlays:(size_t)requiredOverlayLayers
-               withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-                    grContext:(GrDirectContext*)grContext {
+               withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext {
   TRACE_EVENT0("flutter", "PlatformViewsController::CreateMissingLayers");
 
   if (requiredOverlayLayers <= self.layerPool->size()) {
@@ -856,11 +811,11 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
   // complete.
   auto latch = std::make_shared<fml::CountDownLatch>(1u);
   fml::TaskRunner::RunNowOrPostTask(
-      self.platformTaskRunner, [self, missingLayerCount, iosContext, grContext, latch]() {
+      self.platformTaskRunner, [self, missingLayerCount, iosContext, latch]() {
         for (auto i = 0u; i < missingLayerCount; i++) {
           [self createLayerWithIosContext:iosContext
-                                grContext:grContext
-                              pixelFormat:((FlutterView*)self.flutterView).pixelFormat];
+                              pixelFormat:((FlutterView*)self.flutterView).pixelFormat
+                              screenScale:((FlutterView*)self.flutterView).screen.scale];
         }
         latch->CountDown();
       });
@@ -964,9 +919,9 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
 }
 
 - (void)createLayerWithIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-                        grContext:(GrDirectContext*)grContext
-                      pixelFormat:(MTLPixelFormat)pixelFormat {
-  self.layerPool->CreateLayer(grContext, iosContext, pixelFormat);
+                      pixelFormat:(MTLPixelFormat)pixelFormat
+                      screenScale:(CGFloat)screenScale {
+  self.layerPool->CreateLayer(iosContext, pixelFormat, screenScale);
 }
 
 - (void)removeUnusedLayers:(const std::vector<std::shared_ptr<flutter::OverlayLayer>>&)unusedLayers

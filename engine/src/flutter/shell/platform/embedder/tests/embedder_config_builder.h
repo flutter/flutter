@@ -59,6 +59,8 @@ class EmbedderConfigBuilder {
 
   void SetChannelUpdateCallbackHook();
 
+  void SetViewFocusChangeRequestHook();
+
   // Used to set a custom log tag.
   void SetLogTag(std::string tag);
 
@@ -74,10 +76,16 @@ class EmbedderConfigBuilder {
 
   void SetPlatformTaskRunner(const FlutterTaskRunnerDescription* runner);
 
+  void SetUITaskRunner(const FlutterTaskRunnerDescription* runner);
+
   void SetRenderTaskRunner(const FlutterTaskRunnerDescription* runner);
 
   void SetPlatformMessageCallback(
       const std::function<void(const FlutterPlatformMessage*)>& callback);
+
+  void SetViewFocusChangeRequestCallback(
+      const std::function<void(const FlutterViewFocusChangeRequest*)>&
+          callback);
 
   void SetCompositor(bool avoid_backing_store_cache = false,
                      bool use_present_layers_callback = false);
@@ -98,6 +106,9 @@ class EmbedderConfigBuilder {
   // Sets up the callback for vsync, the callbacks needs to be specified on the
   // text context vis `SetVsyncCallback`.
   void SetupVsyncCallback();
+
+  void SetViewFocusChangeRequestCallback(
+      const FlutterViewFocusChangeRequestCallback& callback);
 
  private:
   EmbedderTestContext& context_;

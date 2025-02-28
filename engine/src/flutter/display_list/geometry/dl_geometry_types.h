@@ -6,8 +6,11 @@
 #define FLUTTER_DISPLAY_LIST_GEOMETRY_DL_GEOMETRY_TYPES_H_
 
 #include "flutter/impeller/geometry/matrix.h"
+#include "flutter/impeller/geometry/path.h"
 #include "flutter/impeller/geometry/rect.h"
 #include "flutter/impeller/geometry/round_rect.h"
+#include "flutter/impeller/geometry/round_superellipse.h"
+#include "flutter/impeller/geometry/rstransform.h"
 #include "flutter/impeller/geometry/scalar.h"
 
 #include "flutter/third_party/skia/include/core/SkM44.h"
@@ -30,8 +33,11 @@ using DlISize = impeller::ISize32;
 using DlRect = impeller::Rect;
 using DlIRect = impeller::IRect32;
 using DlRoundRect = impeller::RoundRect;
+using DlRoundSuperellipse = impeller::RoundSuperellipse;
+using DlRoundingRadii = impeller::RoundingRadii;
 using DlMatrix = impeller::Matrix;
 using DlQuad = impeller::Quad;
+using DlRSTransform = impeller::RSTransform;
 
 static_assert(sizeof(SkPoint) == sizeof(DlPoint));
 static_assert(sizeof(SkIPoint) == sizeof(DlIPoint));
@@ -135,6 +141,10 @@ inline const SkPoint* ToSkPoints(const DlPoint* points) {
   return points == nullptr ? nullptr : reinterpret_cast<const SkPoint*>(points);
 }
 
+inline SkPoint* ToSkPoints(DlPoint* points) {
+  return points == nullptr ? nullptr : reinterpret_cast<SkPoint*>(points);
+}
+
 inline const SkRect& ToSkRect(const DlRect& rect) {
   return *reinterpret_cast<const SkRect*>(&rect);
 }
@@ -193,6 +203,16 @@ inline const SkRRect ToSkRRect(const DlRoundRect& round_rect) {
   SkRRect rrect;
   rrect.setRectRadii(ToSkRect(round_rect.GetBounds()), radii);
   return rrect;
+};
+
+// Approximates a rounded superellipse with a round rectangle to the
+// best practical accuracy.
+//
+// Skia does not support rounded superellipses directly, so rendering
+// `DlRoundSuperellipses` on Skia requires falling back to RRect.
+inline constexpr const SkRRect ToApproximateSkRRect(
+    const DlRoundSuperellipse& rse) {
+  return ToSkRRect(rse.ToApproximateRoundRect());
 };
 
 inline constexpr SkMatrix ToSkMatrix(const DlMatrix& matrix) {

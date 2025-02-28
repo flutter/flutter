@@ -140,12 +140,12 @@ void main() {
     expect(find.text('Group 0 Tile 19'), findsOneWidget);
     expect(
       tester.getRect(find.text('Group 0 Tile 19')),
-      const Rect.fromLTRB(0.0, 0.0, 300.0, 300.0),
+      const Rect.fromLTRB(0.0, 300.0, 300.0, 600.0),
     );
     expect(find.text('Group 1 Tile 0'), findsOneWidget);
     expect(
       tester.getRect(find.text('Group 1 Tile 0')),
-      const Rect.fromLTRB(0.0, 400.0, 300.0, 600.0),
+      const Rect.fromLTRB(0.0, 100.0, 300.0, 300.0),
     );
 
     final List<RenderSliverList> renderSlivers =
@@ -158,9 +158,9 @@ void main() {
     expect(first.geometry!.scrollExtent, equals(20 * 300.0));
     expect(second.geometry!.scrollExtent, equals(20 * 200.0));
 
-    expect((first.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+    expect((first.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(300.0));
     expect(first.constraints.scrollOffset, equals(19 * 300.0));
-    expect((second.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(1 * 300.0));
+    expect((second.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
 
     final RenderSliverMainAxisGroup renderGroup = tester.renderObject<RenderSliverMainAxisGroup>(
       find.byType(SliverMainAxisGroup),
@@ -935,6 +935,109 @@ void main() {
     );
     expect(find.text('1'), findsNothing);
     expect(find.text('1', skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgets("The localToGlobal of SliverMainAxisGroup's children works in reverse.", (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        viewportHeight: 400,
+        reverse: true,
+        slivers: <Widget>[
+          const SliverToBoxAdapter(child: SizedBox(height: 70)),
+          const SliverToBoxAdapter(child: SizedBox(height: 20, child: Text('1'))),
+          const SliverToBoxAdapter(child: SizedBox(height: 700)),
+        ],
+      ),
+    );
+    final RenderBox renderBox = tester.renderObject(find.text('1')) as RenderBox;
+    expect(renderBox.localToGlobal(Offset.zero), const Offset(0.0, 310.0));
+    expect(tester.getTopLeft(find.text('1')), const Offset(0.0, 310.0));
+  });
+
+  testWidgets('SliverMainAxisGroup multiple PinnedHeaderSliver children', (
+    WidgetTester tester,
+  ) async {
+    final Size screenSize = tester.view.physicalSize / tester.view.devicePixelRatio;
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    Future<void> pumpWidget({Axis scrollDirection = Axis.vertical, bool reverse = false}) async {
+      Widget buildExtentBox(double size, {Widget? child}) {
+        return switch (scrollDirection) {
+          Axis.vertical => SizedBox(height: size, child: child),
+          Axis.horizontal => SizedBox(width: size, child: child),
+        };
+      }
+
+      await tester.pumpWidget(
+        _buildSliverMainAxisGroup(
+          controller: controller,
+          viewportHeight: screenSize.height,
+          viewportWidth: screenSize.width,
+          scrollDirection: scrollDirection,
+          reverse: reverse,
+          slivers: <Widget>[
+            PinnedHeaderSliver(child: buildExtentBox(30)),
+            SliverToBoxAdapter(child: buildExtentBox(30)),
+            PinnedHeaderSliver(child: buildExtentBox(20, child: const Text('1'))),
+            SliverToBoxAdapter(child: buildExtentBox(1000)),
+          ],
+        ),
+      );
+    }
+
+    await pumpWidget();
+    controller.jumpTo(500);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('1')), const Offset(0, 30));
+
+    await pumpWidget(scrollDirection: Axis.horizontal);
+    controller.jumpTo(500);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('1')), const Offset(30, 0));
+
+    await pumpWidget(reverse: true);
+    controller.jumpTo(500);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('1')), Offset(0, screenSize.height - 50));
+
+    await pumpWidget(scrollDirection: Axis.horizontal, reverse: true);
+    controller.jumpTo(500);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('1')), Offset(screenSize.width - 50, 0));
+  });
+
+  testWidgets('SliverMainAxisGroup precision error', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox(
+            height: 201,
+            child: CustomScrollView(
+              controller: controller,
+              slivers: const <Widget>[
+                SliverMainAxisGroup(
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(child: SizedBox(height: 70)),
+                    PinnedHeaderSliver(child: SizedBox(height: 70)),
+                    SliverToBoxAdapter(child: SizedBox(height: 70)),
+                    PinnedHeaderSliver(child: SizedBox(height: 70)),
+                    SliverToBoxAdapter(child: SizedBox(height: 70)),
+                    PinnedHeaderSliver(child: SizedBox(height: 70)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    controller.jumpTo(60.22678428085297);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }
 

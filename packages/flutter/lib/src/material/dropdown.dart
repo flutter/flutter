@@ -1452,7 +1452,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   double get _denseButtonHeight {
     final double fontSize =
         _textStyle!.fontSize ?? Theme.of(context).textTheme.titleMedium!.fontSize!;
-    final double scaledFontSize = MediaQuery.textScalerOf(context).scale(fontSize);
+    final double lineHeight =
+        _textStyle!.height ?? Theme.of(context).textTheme.titleMedium!.height ?? 1.0;
+    final double scaledFontSize = MediaQuery.textScalerOf(context).scale(fontSize * lineHeight);
     return math.max(scaledFontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
@@ -1524,7 +1526,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
 
     final EdgeInsetsGeometry padding =
-        ButtonTheme.of(context).alignedDropdown ? _kAlignedButtonPadding : _kUnalignedButtonPadding;
+        ButtonTheme.of(context).alignedDropdown && widget._inputDecoration == null
+            ? _kAlignedButtonPadding
+            : _kUnalignedButtonPadding;
 
     // If value is null (then _selectedIndex is null) then we
     // display the hint or nothing at all.
@@ -1720,6 +1724,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     InputDecoration? decoration,
     super.onSaved,
     super.validator,
+    super.errorBuilder,
     AutovalidateMode? autovalidateMode,
     double? menuMaxHeight,
     bool? enableFeedback,
@@ -1745,10 +1750,8 @@ class DropdownButtonFormField<T> extends FormField<T> {
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
-           final InputDecoration decorationArg = decoration ?? const InputDecoration();
-           final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
-             Theme.of(field.context).inputDecorationTheme,
-           );
+           InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+               .applyDefaults(Theme.of(field.context).inputDecorationTheme);
 
            final bool showSelectedItem =
                items != null &&
@@ -1764,6 +1767,22 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    ? effectiveHint != null
                    : effectiveHint != null || effectiveDisabledHint != null;
            final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable;
+
+           if (field.errorText != null || effectiveDecoration.hintText != null) {
+             final Widget? error =
+                 field.errorText != null && errorBuilder != null
+                     ? errorBuilder(state.context, field.errorText!)
+                     : null;
+             final String? errorText = error == null ? field.errorText : null;
+             // Clear the decoration hintText because DropdownButton has its own hint logic.
+             final String? hintText = effectiveDecoration.hintText != null ? '' : null;
+
+             effectiveDecoration = effectiveDecoration.copyWith(
+               error: error,
+               errorText: errorText,
+               hintText: hintText,
+             );
+           }
 
            // An unfocusable Focus widget so that this widget can detect if its
            // descendants have focus or not.
@@ -1798,11 +1817,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                      enableFeedback: enableFeedback,
                      alignment: alignment,
                      borderRadius: borderRadius,
-                     // Clear the decoration hintText because DropdownButton has its own hint logic.
-                     inputDecoration: effectiveDecoration.copyWith(
-                       errorText: field.errorText,
-                       hintText: effectiveDecoration.hintText != null ? '' : null,
-                     ),
+                     inputDecoration: effectiveDecoration,
                      isEmpty: isEmpty,
                      padding: padding,
                    ),

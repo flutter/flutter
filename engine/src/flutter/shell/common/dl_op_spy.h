@@ -57,12 +57,13 @@ class DlOpSpy final : public virtual DlOpReceiver,
   void drawRoundRect(const DlRoundRect& rrect) override;
   void drawDiffRoundRect(const DlRoundRect& outer,
                          const DlRoundRect& inner) override;
+  void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override;
   void drawPath(const DlPath& path) override;
   void drawArc(const DlRect& oval_bounds,
                DlScalar start_degrees,
                DlScalar sweep_degrees,
                bool use_center) override;
-  void drawPoints(PointMode mode,
+  void drawPoints(DlPointMode mode,
                   uint32_t count,
                   const DlPoint points[]) override;
   void drawVertices(const std::shared_ptr<DlVertices>& vertices,
@@ -77,14 +78,14 @@ class DlOpSpy final : public virtual DlOpReceiver,
       const DlRect& dst,
       DlImageSampling sampling,
       bool render_with_attributes,
-      SrcRectConstraint constraint = SrcRectConstraint::kFast) override;
+      DlSrcRectConstraint constraint = DlSrcRectConstraint::kFast) override;
   void drawImageNine(const sk_sp<DlImage> image,
                      const DlIRect& center,
                      const DlRect& dst,
                      DlFilterMode filter,
                      bool render_with_attributes) override;
   void drawAtlas(const sk_sp<DlImage> atlas,
-                 const SkRSXform xform[],
+                 const DlRSTransform xform[],
                  const DlRect tex[],
                  const DlColor colors[],
                  int count,

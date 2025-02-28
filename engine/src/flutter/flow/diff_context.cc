@@ -143,8 +143,8 @@ DlRect DiffContext::MapRect(const DlRect& rect) {
 }
 
 bool DiffContext::PushCullRect(const DlRect& clip) {
-  state_.matrix_clip.clipRect(clip, DlCanvas::ClipOp::kIntersect, false);
-  return !state_.matrix_clip.device_cull_rect().isEmpty();
+  state_.matrix_clip.clipRect(clip, DlClipOp::kIntersect, false);
+  return !state_.matrix_clip.is_cull_rect_empty();
 }
 
 const DlMatrix& DiffContext::GetMatrix() const {

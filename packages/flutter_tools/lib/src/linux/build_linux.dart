@@ -80,9 +80,9 @@ Future<void> buildLinux(
 
   final Status status = logger.startProgress('Building Linux application...');
   final String buildModeName = buildInfo.mode.cliName;
-  final Directory platformBuildDirectory = globals.fs.directory(
-    getLinuxBuildDirectory(targetPlatform),
-  );
+  final Directory platformBuildDirectory = globals.fs
+      .directory(linuxProject.parent.directory.path)
+      .childDirectory(getLinuxBuildDirectory(targetPlatform));
   final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
   try {
     await _runCmake(
@@ -185,7 +185,6 @@ Future<void> _runCmake(
     throwToolExit('Unable to generate build files');
   }
   final Duration elapsedDuration = sw.elapsed;
-  globals.flutterUsage.sendTiming('build', 'cmake-linux', elapsedDuration);
   globals.analytics.send(
     Event.timing(
       workflow: 'build',
@@ -216,7 +215,6 @@ Future<void> _runBuild(Directory buildDir) async {
     throwToolExit('Build process failed');
   }
   final Duration elapsedDuration = sw.elapsed;
-  globals.flutterUsage.sendTiming('build', 'linux-ninja', elapsedDuration);
   globals.analytics.send(
     Event.timing(
       workflow: 'build',

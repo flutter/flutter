@@ -56,9 +56,12 @@ class DummyDelegate : public LayerStateStack::Delegate {
   void transform(const DlMatrix& matrix) override {}
   void integralTransform() override {}
 
-  void clipRect(const DlRect& rect, ClipOp op, bool is_aa) override {}
-  void clipRRect(const DlRoundRect& rrect, ClipOp op, bool is_aa) override {}
-  void clipPath(const DlPath& path, ClipOp op, bool is_aa) override {}
+  void clipRect(const DlRect& rect, DlClipOp op, bool is_aa) override {}
+  void clipRRect(const DlRoundRect& rrect, DlClipOp op, bool is_aa) override {}
+  void clipRSuperellipse(const DlRoundSuperellipse& rse,
+                         DlClipOp op,
+                         bool is_aa) override {}
+  void clipPath(const DlPath& path, DlClipOp op, bool is_aa) override {}
 
  private:
   static void error() {
@@ -115,13 +118,18 @@ class DlCanvasDelegate : public LayerStateStack::Delegate {
     }
   }
 
-  void clipRect(const DlRect& rect, ClipOp op, bool is_aa) override {
+  void clipRect(const DlRect& rect, DlClipOp op, bool is_aa) override {
     canvas_->ClipRect(rect, op, is_aa);
   }
-  void clipRRect(const DlRoundRect& rrect, ClipOp op, bool is_aa) override {
+  void clipRRect(const DlRoundRect& rrect, DlClipOp op, bool is_aa) override {
     canvas_->ClipRoundRect(rrect, op, is_aa);
   }
-  void clipPath(const DlPath& path, ClipOp op, bool is_aa) override {
+  void clipRSuperellipse(const DlRoundSuperellipse& rse,
+                         DlClipOp op,
+                         bool is_aa) override {
+    canvas_->ClipRoundSuperellipse(rse, op, is_aa);
+  }
+  void clipPath(const DlPath& path, DlClipOp op, bool is_aa) override {
     canvas_->ClipPath(path, op, is_aa);
   }
 
@@ -170,13 +178,18 @@ class PrerollDelegate : public LayerStateStack::Delegate {
     }
   }
 
-  void clipRect(const DlRect& rect, ClipOp op, bool is_aa) override {
+  void clipRect(const DlRect& rect, DlClipOp op, bool is_aa) override {
     state().clipRect(rect, op, is_aa);
   }
-  void clipRRect(const DlRoundRect& rrect, ClipOp op, bool is_aa) override {
+  void clipRRect(const DlRoundRect& rrect, DlClipOp op, bool is_aa) override {
     state().clipRRect(rrect, op, is_aa);
   }
-  void clipPath(const DlPath& path, ClipOp op, bool is_aa) override {
+  void clipRSuperellipse(const DlRoundSuperellipse& rse,
+                         DlClipOp op,
+                         bool is_aa) override {
+    state().clipRSuperellipse(rse, op, is_aa);
+  }
+  void clipPath(const DlPath& path, DlClipOp op, bool is_aa) override {
     state().clipPath(path, op, is_aa);
   }
 
@@ -414,8 +427,7 @@ class ClipRectEntry : public LayerStateStack::StateEntry {
       : clip_rect_(clip_rect), is_aa_(is_aa) {}
 
   void apply(LayerStateStack* stack) const override {
-    stack->delegate_->clipRect(clip_rect_, DlCanvas::ClipOp::kIntersect,
-                               is_aa_);
+    stack->delegate_->clipRect(clip_rect_, DlClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
     mutators_stack->PushClipRect(ToSkRect(clip_rect_));
@@ -434,8 +446,7 @@ class ClipRRectEntry : public LayerStateStack::StateEntry {
       : clip_rrect_(clip_rrect), is_aa_(is_aa) {}
 
   void apply(LayerStateStack* stack) const override {
-    stack->delegate_->clipRRect(clip_rrect_, DlCanvas::ClipOp::kIntersect,
-                                is_aa_);
+    stack->delegate_->clipRRect(clip_rrect_, DlClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
     mutators_stack->PushClipRRect(ToSkRRect(clip_rrect_));
@@ -448,6 +459,33 @@ class ClipRRectEntry : public LayerStateStack::StateEntry {
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(ClipRRectEntry);
 };
 
+class ClipRSuperellipseEntry : public LayerStateStack::StateEntry {
+ public:
+  ClipRSuperellipseEntry(const DlRoundSuperellipse& clip_rsuperellipse,
+                         bool is_aa)
+      : clip_rsuperellipse_(clip_rsuperellipse), is_aa_(is_aa) {}
+
+  void apply(LayerStateStack* stack) const override {
+    stack->delegate_->clipRSuperellipse(clip_rsuperellipse_,
+                                        DlClipOp::kIntersect, is_aa_);
+  }
+  void update_mutators(MutatorsStack* mutators_stack) const override {
+    // MutatorsStack doesn't support non-Skia classes, and therefore this method
+    // has to use approximate RRect, which might cause trouble for certain
+    // embedded apps.
+    // TODO(dkwingsmt): Make this method push a correct ClipRoundedSuperellipse
+    // mutator.
+    // https://github.com/flutter/flutter/issues/163716
+    mutators_stack->PushClipRRect(ToApproximateSkRRect(clip_rsuperellipse_));
+  }
+
+ private:
+  const DlRoundSuperellipse clip_rsuperellipse_;
+  const bool is_aa_;
+
+  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(ClipRSuperellipseEntry);
+};
+
 class ClipPathEntry : public LayerStateStack::StateEntry {
  public:
   ClipPathEntry(const DlPath& clip_path, bool is_aa)
@@ -455,8 +493,7 @@ class ClipPathEntry : public LayerStateStack::StateEntry {
   ~ClipPathEntry() override = default;
 
   void apply(LayerStateStack* stack) const override {
-    stack->delegate_->clipPath(clip_path_, DlCanvas::ClipOp::kIntersect,
-                               is_aa_);
+    stack->delegate_->clipPath(clip_path_, DlClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
     mutators_stack->PushClipPath(clip_path_.GetSkPath());
@@ -571,6 +608,13 @@ void MutatorContext::clipRRect(const DlRoundRect& rrect, bool is_aa) {
   layer_state_stack_->maybe_save_layer_for_clip(save_needed_);
   save_needed_ = false;
   layer_state_stack_->push_clip_rrect(rrect, is_aa);
+}
+
+void MutatorContext::clipRSuperellipse(const DlRoundSuperellipse& rse,
+                                       bool is_aa) {
+  layer_state_stack_->maybe_save_layer_for_clip(save_needed_);
+  save_needed_ = false;
+  layer_state_stack_->push_clip_rsuperellipse(rse, is_aa);
 }
 
 void MutatorContext::clipPath(const DlPath& path, bool is_aa) {
@@ -700,6 +744,13 @@ void LayerStateStack::push_clip_rect(const DlRect& rect, bool is_aa) {
 
 void LayerStateStack::push_clip_rrect(const DlRoundRect& rrect, bool is_aa) {
   state_stack_.emplace_back(std::make_unique<ClipRRectEntry>(rrect, is_aa));
+  apply_last_entry();
+}
+
+void LayerStateStack::push_clip_rsuperellipse(const DlRoundSuperellipse& rse,
+                                              bool is_aa) {
+  state_stack_.emplace_back(
+      std::make_unique<ClipRSuperellipseEntry>(rse, is_aa));
   apply_last_entry();
 }
 

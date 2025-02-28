@@ -33,6 +33,7 @@ import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel.TextEditState;
 import io.flutter.plugin.platform.PlatformViewsController;
+import io.flutter.plugin.platform.PlatformViewsController2;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -52,6 +53,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   private boolean mRestartInputPending;
   @Nullable private InputConnection lastInputConnection;
   @NonNull private PlatformViewsController platformViewsController;
+  @NonNull private PlatformViewsController2 platformViewsController2;
   @Nullable private Rect lastClientRect;
   private ImeSyncDeferringInsetsCallback imeSyncCallback;
 
@@ -69,7 +71,8 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       @NonNull View view,
       @NonNull TextInputChannel textInputChannel,
       @NonNull ScribeChannel scribeChannel,
-      @NonNull PlatformViewsController platformViewsController) {
+      @NonNull PlatformViewsController platformViewsController,
+      @NonNull PlatformViewsController2 platformViewsController2) {
     mView = view;
     // Create a default object.
     mEditable = new ListenableEditingState(null, mView);
@@ -160,6 +163,8 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
     this.platformViewsController = platformViewsController;
     this.platformViewsController.attachTextInputPlugin(this);
+    this.platformViewsController2 = platformViewsController2;
+    this.platformViewsController2.attachTextInputPlugin(this);
   }
 
   @NonNull
@@ -215,6 +220,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   @SuppressLint("NewApi")
   public void destroy() {
     platformViewsController.detachTextInputPlugin();
+    platformViewsController2.detachTextInputPlugin();
     textInputChannel.setTextInputMethodHandler(null);
     notifyViewExited();
     mEditable.removeEditingStateListener(this);
@@ -250,7 +256,8 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     int textType = InputType.TYPE_CLASS_TEXT;
     if (type.type == TextInputChannel.TextInputType.MULTILINE) {
       textType |= InputType.TYPE_TEXT_FLAG_MULTI_LINE;
-    } else if (type.type == TextInputChannel.TextInputType.EMAIL_ADDRESS) {
+    } else if (type.type == TextInputChannel.TextInputType.EMAIL_ADDRESS
+        || type.type == TextInputChannel.TextInputType.TWITTER) {
       textType |= InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
     } else if (type.type == TextInputChannel.TextInputType.URL
         || type.type == TextInputChannel.TextInputType.WEB_SEARCH) {

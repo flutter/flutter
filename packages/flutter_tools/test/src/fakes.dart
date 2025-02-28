@@ -127,7 +127,6 @@ class MemoryIOSink implements IOSink {
           add(data);
           // Catches all exceptions to propagate them to the completer.
         } catch (err, stack) {
-          // ignore: avoid_catches_without_on_clauses
           sub.cancel();
           completer.completeError(err, stack);
         }
@@ -201,10 +200,8 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   bool _hasTerminal = true;
 
   @override
-  // ignore: override_on_non_overriding_member
   String get lineTerminator => '\n';
   @override
-  // ignore: override_on_non_overriding_member
   set lineTerminator(String value) {
     throw UnimplementedError('Setting the line terminator is not supported');
   }
@@ -369,6 +366,8 @@ class FakeFlutterVersion implements FlutterVersion {
     this.devToolsVersion = '2.8.0',
     this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
     this.engineRevisionShort = 'abcde',
+    this.engineAge = '0 hours ago',
+    this.engineCommitDate = '12/01/01',
     this.repositoryUrl = 'https://github.com/flutter/flutter.git',
     this.frameworkVersion = '0.0.0',
     this.frameworkRevision = '11111111111111111111',
@@ -419,6 +418,12 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   final String engineRevisionShort;
+
+  @override
+  final String? engineCommitDate;
+
+  @override
+  final String engineAge;
 
   @override
   final String? repositoryUrl;
@@ -487,7 +492,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.areCustomDevicesEnabled = false,
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
-    this.isPreviewDeviceEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
     this.isExplicitPackageDependenciesEnabled = false,
   });
@@ -521,9 +525,6 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isNativeAssetsEnabled;
-
-  @override
-  final bool isPreviewDeviceEnabled;
 
   @override
   final bool isSwiftPackageManagerEnabled;

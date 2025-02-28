@@ -36,7 +36,7 @@ void SurfaceTextureExternalTexture::MarkNewFrameAvailable() {
 }
 
 void SurfaceTextureExternalTexture::Paint(PaintContext& context,
-                                          const SkRect& bounds,
+                                          const DlRect& bounds,
                                           bool freeze,
                                           const DlImageSampling sampling) {
   if (state_ == AttachmentState::kDetached) {
@@ -45,7 +45,7 @@ void SurfaceTextureExternalTexture::Paint(PaintContext& context,
   const bool should_process_frame =
       !freeze || ShouldUpdate() || dl_image_ == nullptr;
   if (should_process_frame) {
-    ProcessFrame(context, bounds);
+    ProcessFrame(context, ToSkRect(bounds));
   }
   // If process frame failed, this may not be in attached state.
   if (state_ != AttachmentState::kAttached) {
@@ -58,7 +58,7 @@ void SurfaceTextureExternalTexture::Paint(PaintContext& context,
     return;
   }
 
-  DrawFrame(context, bounds, sampling);
+  DrawFrame(context, ToSkRect(bounds), sampling);
 }
 
 void SurfaceTextureExternalTexture::DrawFrame(
@@ -75,7 +75,7 @@ void SurfaceTextureExternalTexture::DrawFrame(
   // outside of the virtual "clip rect"), so we invert the incoming matrix.
 
   if (transform.IsIdentity()) {
-    context.canvas->DrawImage(dl_image_, SkPoint{0, 0}, sampling,
+    context.canvas->DrawImage(dl_image_, DlPoint{0, 0}, sampling,
                               context.paint);
     return;
   }
@@ -102,7 +102,7 @@ void SurfaceTextureExternalTexture::DrawFrame(
     paintWithShader = *context.paint;
   }
   paintWithShader.setColorSource(source);
-  context.canvas->DrawRect(SkRect::MakeWH(1, 1), paintWithShader);
+  context.canvas->DrawRect(DlRect::MakeWH(1, 1), paintWithShader);
 }
 
 void SurfaceTextureExternalTexture::OnGrContextDestroyed() {

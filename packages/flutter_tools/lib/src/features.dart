@@ -48,9 +48,6 @@ abstract class FeatureFlags {
   /// Whether native assets compilation and bundling is enabled.
   bool get isNativeAssetsEnabled => false;
 
-  /// Whether native assets compilation and bundling is enabled.
-  bool get isPreviewDeviceEnabled => true;
-
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
@@ -75,7 +72,6 @@ const List<Feature> allFeatures = <Feature>[
   flutterCustomDevicesFeature,
   cliAnimation,
   nativeAssets,
-  previewDevice,
   swiftPackageManager,
   explicitPackageDependencies,
 ];
@@ -159,15 +155,6 @@ const Feature nativeAssets = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
-/// Enable Flutter preview prebuilt device.
-const Feature previewDevice = Feature(
-  name: 'Flutter preview prebuilt device',
-  configSetting: 'enable-flutter-preview',
-  environmentOverride: 'FLUTTER_PREVIEW_DEVICE',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-);
-
 /// Enable Swift Package Manager as a darwin dependency manager.
 const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
@@ -179,7 +166,7 @@ const Feature swiftPackageManager = Feature(
 );
 
 /// Enable explicit resolution and generation of package dependencies.
-const Feature explicitPackageDependencies = Feature(
+const Feature explicitPackageDependencies = Feature.fullyEnabled(
   name: 'support for dev_dependency plugins',
   configSetting: 'explicit-package-dependencies',
   extraHelpText:
@@ -191,9 +178,6 @@ const Feature explicitPackageDependencies = Feature(
       'See also:\n'
       '* https://flutter.dev/to/flutter-plugins-configuration.\n'
       '* https://flutter.dev/to/flutter-gen-deprecation.',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-  stable: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

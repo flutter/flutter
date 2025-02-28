@@ -71,6 +71,18 @@ final class AndroidNativeDriver implements NativeDriver {
     await _driver.sendCommand(NativeCommand.tap(finder));
   }
 
+  @override
+  Future<int> get sdkVersion async {
+    final Map<String, Object?> result = await _driver.sendCommand(NativeCommand.getSdkVersion);
+    return result['version']! as int;
+  }
+
+  @override
+  Future<bool> get isEmulator async {
+    final Map<String, Object?> result = await _driver.sendCommand(NativeCommand.getIsEmulator);
+    return result['emulator']! as bool;
+  }
+
   /// Waits for 2 seconds before completing.
   ///
   /// There is no perfect way, outside of polling, to know when the device is

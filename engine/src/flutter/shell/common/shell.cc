@@ -634,6 +634,12 @@ void Shell::NotifyLowMemoryWarning() const {
   // to purge them.
 }
 
+void Shell::FlushMicrotaskQueue() const {
+  if (engine_) {
+    engine_->FlushMicrotaskQueue();
+  }
+}
+
 void Shell::RunEngine(RunConfiguration run_configuration) {
   RunEngine(std::move(run_configuration), nullptr);
 }
@@ -1089,8 +1095,8 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
-  fml::TaskRunner::RunNowAndFlushMessages(
-      task_runners_.GetUITaskRunner(),
+
+  task_runners_.GetUITaskRunner()->PostTask(
       fml::MakeCopyable([engine = weak_engine_, packet = std::move(packet),
                          flow_id = next_pointer_flow_id_]() mutable {
         if (engine) {
@@ -1542,6 +1548,18 @@ double Shell::GetScaledFontSize(double unscaled_font_size,
                                 int configuration_id) const {
   return platform_view_->GetScaledFontSize(unscaled_font_size,
                                            configuration_id);
+}
+
+void Shell::RequestViewFocusChange(const ViewFocusChangeRequest& request) {
+  FML_DCHECK(is_set_up_);
+
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(),
+      [view = platform_view_->GetWeakPtr(), request] {
+        if (view) {
+          view->RequestViewFocusChange(request);
+        }
+      });
 }
 
 void Shell::ReportTimings() {
@@ -2093,6 +2111,20 @@ void Shell::OnPlatformViewRemoveView(int64_t view_id,
             rasterizer->CollectView(view_id);
           }
         });
+      });
+}
+
+void Shell::OnPlatformViewSendViewFocusEvent(const ViewFocusEvent& event) {
+  TRACE_EVENT0("flutter", "Shell:: OnPlatformViewSendViewFocusEvent");
+  FML_DCHECK(is_set_up_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  task_runners_.GetUITaskRunner()->RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
+      [engine = engine_->GetWeakPtr(), event = event] {
+        if (engine) {
+          engine->SendViewFocusEvent(event);
+        }
       });
 }
 
