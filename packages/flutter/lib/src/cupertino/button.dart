@@ -264,9 +264,6 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]:
-  ///  * [WidgetState.pressed].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   ///
   /// If null, then [MouseCursor.defer] is used when the button is disabled.
