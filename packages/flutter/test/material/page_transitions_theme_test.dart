@@ -727,7 +727,7 @@ void main() {
   }) {
     return MaterialApp(
       theme: ThemeData(
-        useMaterial3: true,
+
         pageTransitionsTheme: PageTransitionsTheme(
           builders: <TargetPlatform, PageTransitionsBuilder>{
             TargetPlatform.android: ZoomPageTransitionsBuilder(
