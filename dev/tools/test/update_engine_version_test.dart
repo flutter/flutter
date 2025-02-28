@@ -62,6 +62,17 @@ void main() {
 
     environment = <String, String>{};
 
+    if (const LocalPlatform().isWindows) {
+      // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
+      const List<String> powerShellVariables = <String>['SystemRoot', 'Path', 'PATHEXT'];
+      for (final String key in powerShellVariables) {
+        final String? value = io.Platform.environment[key];
+        if (value != null) {
+          environment[key] = value;
+        }
+      }
+    }
+
     // Copy the update_engine_version script and create a rough directory structure.
     flutterRoot.binInternalUpdateEngineVersion.copySyncRecursive(
       testRoot.binInternalUpdateEngineVersion.path,
