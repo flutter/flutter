@@ -132,25 +132,6 @@ static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
   }
 }
 
-static gboolean get_mouse_button(GdkEvent* event, int64_t* button) {
-  guint event_button = 0;
-  gdk_event_get_button(event, &event_button);
-
-  switch (event_button) {
-    case GDK_BUTTON_PRIMARY:
-      *button = kFlutterPointerButtonMousePrimary;
-      return TRUE;
-    case GDK_BUTTON_MIDDLE:
-      *button = kFlutterPointerButtonMouseMiddle;
-      return TRUE;
-    case GDK_BUTTON_SECONDARY:
-      *button = kFlutterPointerButtonMouseSecondary;
-      return TRUE;
-    default:
-      return FALSE;
-  }
-}
-
 // Called when the mouse cursor changes.
 static void cursor_changed_cb(FlView* self) {
   FlMouseCursorHandler* handler =
@@ -323,10 +304,8 @@ static gboolean button_press_event_cb(FlView* self,
     return FALSE;
   }
 
-  int64_t button;
-  if (!get_mouse_button(event, &button)) {
-    return FALSE;
-  }
+  guint button = 0;
+  gdk_event_get_button(event, &button);
 
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
@@ -345,10 +324,8 @@ static gboolean button_release_event_cb(FlView* self,
                                         GdkEventButton* button_event) {
   GdkEvent* event = reinterpret_cast<GdkEvent*>(button_event);
 
-  int64_t button;
-  if (!get_mouse_button(event, &button)) {
-    return FALSE;
-  }
+  guint button = 0;
+  gdk_event_get_button(event, &button);
 
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
