@@ -304,6 +304,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
   late bool isFocused;
 
+  static final WidgetStateProperty<MouseCursor> _defaultCursor =
+      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+        return !states.contains(WidgetState.disabled) && kIsWeb
+            ? SystemMouseCursors.click
+            : MouseCursor.defer;
+      });
+
   @override
   void initState() {
     super.initState();
@@ -525,11 +532,4 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       ),
     );
   }
-
-  static final WidgetStateProperty<MouseCursor> _defaultCursor =
-      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
-        return !states.contains(WidgetState.disabled) && kIsWeb
-            ? SystemMouseCursors.click
-            : MouseCursor.defer;
-      });
 }
