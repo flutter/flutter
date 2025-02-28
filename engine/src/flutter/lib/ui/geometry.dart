@@ -1868,6 +1868,28 @@ class _RSuperellipseOctant {
   final double circleMaxAngle;
 
   factory _RSuperellipseOctant.Make(Offset center, double halfSize, double radius) {
+    /* The following figure shows the first quadrant of a square-like rounded
+    * superellipse. The target arc consists of the "stretch" (AB), a
+    * superellipsoid arc (BJ), and a circular arc (JM).
+    *
+    *     straight   superelipse
+    *          ↓     ↓
+    *        A    B       J    circular arc
+    *        ---------...._   ↙
+    *        |    |      /  `⟍ M
+    *        |    |     /    ⟋ ⟍
+    *        |    |    /  ⟋     \
+    *        |    |   / ⟋        |
+    *        |    |  ᜱD          |
+    *        |    | /             |
+    *    ↑   +----+ S             |
+    *    s   |    |               |
+    *    ↓   +----+---------------| A'
+    *       O
+    *        ← s →
+    *        ←---- half_size -----→
+    */
+
     final double ratio = radius == 0 ? _kMaxRatio : math.min(halfSize * 2 / radius, _kMaxRatio);
     final double a = ratio * radius / 2;
     final double s = halfSize - a;
@@ -2093,6 +2115,9 @@ class _RSuperellipseQuadrant {
 
 // A utility struct that expands input parameters for a rounded superellipse to
 // drawing variables.
+//
+// This class and its related code should be kept in synchronize with
+// `round_superellipse_param.cc`.
 class _RSuperellipseParam {
   // The parameters for the four quadrants that make up the full contour.
   final _RSuperellipseQuadrant topRight;

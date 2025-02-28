@@ -980,6 +980,246 @@ class RRect extends _RRectLike<RRect> {
   }
 }
 
+// Return the value that splits the range from `left` to `right` into two
+// portions whose ratio equals to `ratioLeft` : `ratioRight`.
+double _split(double left, double right, double ratioLeft, double ratioRight) {
+  if (ratioLeft == 0 && ratioRight == 0) {
+    return (left + right) / 2;
+  }
+  return (left * ratioRight + right * ratioLeft) / (ratioLeft + ratioRight);
+}
+
+double _replanceInfinityWithOne(double a) {
+  return a.isFinite ? a : 1;
+}
+
+double _angleTo(Offset m, Offset n) {
+  double cross(Offset a, Offset b) {
+    return a.dx * b.dy - a.dy * b.dx;
+  }
+
+  double dot(Offset a, Offset b) {
+    return a.dx * b.dx + a.dy * b.dy;
+  }
+
+  return math.atan2(cross(m, n), dot(m, n));
+}
+
+class _RSuperellipseOctant {
+  final Offset offset;
+  final Offset edgeMid;
+  final Offset seCenter;
+  final double seA;
+  final double seN;
+  final double seMaxTheta;
+  final Offset circleStart;
+  final Offset circleCenter;
+  final double circleMaxAngle;
+
+  factory _RSuperellipseOctant.Make(Offset center, double halfSize, double radius) {
+    final double ratio = radius == 0 ? _kMaxRatio : math.min(halfSize * 2 / radius, _kMaxRatio);
+    final double a = ratio * radius / 2;
+    final double s = halfSize - a;
+    final double g = _kRRectInsetFactor * radius;
+    final double n = _lerpPrecomputedVariable(0, ratio);
+
+    final double sin_thetaJ = radius == 0 ? 0 : _lerpPrecomputedVariable(1, ratio);
+
+    final double sin_thetaJ_sq = sin_thetaJ * sin_thetaJ;
+    final double cos_thetaJ_sq = 1 - sin_thetaJ_sq;
+    final double tan_thetaJ_sq = sin_thetaJ_sq / cos_thetaJ_sq;
+
+    final double xJ = a * math.pow(sin_thetaJ_sq, 1 / n);
+    final double yJ = a * math.pow(cos_thetaJ_sq, 1 / n);
+    final double tan_phiJ = math.pow(tan_thetaJ_sq, (n - 1) / n) as double;
+    final double d = (xJ - tan_phiJ * yJ) / (1 - tan_phiJ);
+    final double R = (a - d - g) * math.sqrt(2);
+
+    final Offset pointA = Offset(0, halfSize);
+    final Offset pointM = Offset(halfSize - g, halfSize - g);
+    final Offset pointS = Offset(s, s);
+    final Offset pointJ = Offset(xJ, yJ) + pointS;
+    final Offset circleCenter = radius == 0 ? pointM : _findCircleCenter(pointJ, pointM, R);
+    final double circleMaxAngle =
+        radius == 0 ? 0 : _angleTo(pointM - circleCenter, pointJ - circleCenter);
+
+    return _RSuperellipseOctant._raw(
+      offset: center,
+
+      edgeMid: pointA,
+
+      seCenter: pointS,
+      seA: a,
+      seN: n,
+      seMaxTheta: math.asin(sin_thetaJ),
+
+      circleStart: pointJ,
+      circleCenter: circleCenter,
+      circleMaxAngle: circleMaxAngle,
+    );
+  }
+
+  _RSuperellipseOctant._raw({
+    required this.offset,
+    required this.edgeMid,
+    required this.seCenter,
+    required this.seA,
+    required this.seN,
+    required this.seMaxTheta,
+    required this.circleStart,
+    required this.circleCenter,
+    required this.circleMaxAngle,
+  });
+
+  bool contains(Offset p) {
+    if (p.dx < 0 || p.dy < 0 || p.dy < p.dx) {
+      return true;
+    }
+    if (p.dx <= seCenter.dx) {
+      return p.dy <= edgeMid.dy;
+    }
+    if (p.dx <= circleStart.dx) {
+      final Offset p_se = (p - seCenter) / seA;
+      return math.pow(p_se.dx, seN) + math.pow(p_se.dy, seN) <= 1;
+    }
+    final double circle_radius = (circleStart - circleCenter).distanceSquared;
+    return (p - circleCenter).distanceSquared < circle_radius;
+  }
+
+  static const List<List<double>> _kPrecomputedVariables = [
+    /*ratio=2.00*/ <double>[2.00000000, 0.117205737],
+    /*ratio=2.02*/ <double>[2.03999083, 0.117205737],
+    /*ratio=2.04*/ <double>[2.07976152, 0.119418745],
+    /*ratio=2.06*/ <double>[2.11195967, 0.136274515],
+    /*ratio=2.08*/ <double>[2.14721808, 0.141289310],
+    /*ratio=2.10*/ <double>[2.18349805, 0.143410679],
+    /*ratio=2.12*/ <double>[2.21858213, 0.146668334],
+    /*ratio=2.14*/ <double>[2.24861661, 0.154985392],
+    /*ratio=2.16*/ <double>[2.28146030, 0.158932848],
+    /*ratio=2.18*/ <double>[2.30842385, 0.168182439],
+    /*ratio=2.20*/ <double>[2.33888662, 0.172911853],
+    /*ratio=2.22*/ <double>[2.36937163, 0.177039959],
+    /*ratio=2.24*/ <double>[2.40317673, 0.177839181],
+    /*ratio=2.26*/ <double>[2.42840031, 0.185615110],
+    /*ratio=2.28*/ <double>[2.45838300, 0.188905374],
+    /*ratio=2.30*/ <double>[2.48660575, 0.193273145],
+  ];
+  static const double _kRatioStepInverse = 50; // = 1 / 0.02
+
+  static int get _kNumRecords => _kPrecomputedVariables.length;
+  static const double _kMinRatio = 2.00;
+  static double get _kMaxRatio => _kMinRatio + (_kNumRecords - 1) / _kRatioStepInverse;
+
+  static double _lerpPrecomputedVariable(int column, double ratio) {
+    final double steps = ((ratio - _kMinRatio) * _kRatioStepInverse).clamp(0, _kNumRecords - 1);
+    final int left = steps.floor().clamp(0, _kNumRecords - 2);
+    final double frac = steps - left;
+
+    return (1 - frac) * _kPrecomputedVariables[left][column] +
+        frac * _kPrecomputedVariables[left + 1][column];
+  }
+
+  static Offset _findCircleCenter(Offset a, Offset b, double r) {
+    final Offset a_to_b = b - a;
+    final Offset m = (a + b) / 2;
+    final Offset c_to_m = Offset(-a_to_b.dy, a_to_b.dx);
+    final double distance_am = a_to_b.distance / 2;
+    final double distance_cm = math.sqrt(r * r - distance_am * distance_am);
+    return m - c_to_m / c_to_m.distance * distance_cm;
+  }
+}
+
+class _RSuperellipseQuadrant {
+  final Offset offset;
+  final Size signedScale;
+  final _RSuperellipseOctant top;
+  final _RSuperellipseOctant right;
+
+  factory _RSuperellipseQuadrant.Make(Offset center, Offset corner, Size radius) {
+    final Offset cornerVector = corner - center;
+    assert(radius.isFinite);
+    final double normRadius = radius.shortestSide;
+    final Size forwardScale = normRadius == 0 ? Size(1, 1) : (radius / normRadius);
+    final double normHalfWidth = cornerVector.dx.abs() / forwardScale.width;
+    final double normHalfHeight = cornerVector.dy.abs() / forwardScale.height;
+    final Size signedScale = Size(
+      _replanceInfinityWithOne(cornerVector.dx / normHalfWidth),
+      _replanceInfinityWithOne(cornerVector.dy / normHalfHeight),
+    );
+    final double c = normHalfWidth - normHalfHeight;
+    return _RSuperellipseQuadrant._raw(
+      offset: center,
+      signedScale: signedScale,
+      top: _RSuperellipseOctant.Make(Offset(0, -c), normHalfWidth, normRadius),
+      right: _RSuperellipseOctant.Make(Offset(c, 0), normHalfHeight, normRadius),
+    );
+  }
+
+  _RSuperellipseQuadrant._raw({
+    required this.offset,
+    required this.signedScale,
+    required this.top,
+    required this.right,
+  });
+
+  bool contains(Offset p) {
+    Offset flipped(Offset a) {
+      return Offset(a.dy, a.dx);
+    }
+
+    final Offset localP = p - offset;
+    final Offset norm_point = Offset(localP.dx / signedScale.width, localP.dy / signedScale.height);
+    if (norm_point.dx < 0 || norm_point.dy < 0) {
+      return true;
+    }
+    return top.contains(norm_point - top.offset) &&
+        right.contains(flipped(norm_point - right.offset));
+  }
+}
+
+class _RSuperellipseParam {
+  final _RSuperellipseQuadrant topRight;
+  final _RSuperellipseQuadrant bottomRight;
+  final _RSuperellipseQuadrant bottomLeft;
+  final _RSuperellipseQuadrant topLeft;
+
+  factory _RSuperellipseParam.MakeScaled(RSuperellipse rse /* a scaled rse */) {
+    final double topSplit = _split(rse.left, rse.right, rse.tlRadiusX, rse.trRadiusX);
+    final double rightSplit = _split(rse.top, rse.bottom, rse.trRadiusY, rse.brRadiusY);
+    final double bottomSplit = _split(rse.left, rse.right, rse.blRadiusX, rse.brRadiusX);
+    final double leftSplit = _split(rse.top, rse.bottom, rse.tlRadiusY, rse.blRadiusY);
+    return _RSuperellipseParam._raw(
+      topRight: _RSuperellipseQuadrant.Make(
+        Offset(topSplit, rightSplit),
+        Offset(rse.right, rse.top),
+        Size(rse.trRadiusX, rse.trRadiusY),
+      ),
+      bottomRight: _RSuperellipseQuadrant.Make(
+        Offset(bottomSplit, rightSplit),
+        Offset(rse.right, rse.bottom),
+        Size(rse.brRadiusX, rse.brRadiusY),
+      ),
+      bottomLeft: _RSuperellipseQuadrant.Make(
+        Offset(bottomSplit, leftSplit),
+        Offset(rse.left, rse.bottom),
+        Size(rse.blRadiusX, rse.blRadiusY),
+      ),
+      topLeft: _RSuperellipseQuadrant.Make(
+        Offset(topSplit, leftSplit),
+        Offset(rse.left, rse.top),
+        Size(rse.tlRadiusX, rse.tlRadiusY),
+      ),
+    );
+  }
+
+  _RSuperellipseParam._raw({
+    required this.topRight,
+    required this.bottomRight,
+    required this.bottomLeft,
+    required this.topLeft,
+  });
+}
+
 class RSuperellipse extends _RRectLike<RSuperellipse> {
   const RSuperellipse.fromLTRBXY(
     double left,
@@ -1187,6 +1427,25 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   }
 
   static const RSuperellipse zero = RSuperellipse._raw();
+
+  bool contains(Offset point) {
+    if (point.dx < left || point.dx >= right || point.dy < top || point.dy >= bottom) {
+      return false;
+    }
+    final RSuperellipse scaled = scaleRadii();
+    if (_param == null) {
+      if (scaled.safeInnerRect.contains(point)) {
+        return true;
+      }
+      _param = _RSuperellipseParam.MakeScaled(scaled);
+    }
+    assert(_param != null);
+
+    return _param!.topLeft.contains(point) &&
+        _param!.topRight.contains(point) &&
+        _param!.bottomLeft.contains(point) &&
+        _param!.bottomRight.contains(point);
+  }
 
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
     if (a == null) {

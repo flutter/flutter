@@ -642,29 +642,29 @@ void main() {
     checkPointAndMirrors(Offset(49.995, 0)); // Right
   });
 
-  // test('RSuperellipse.contains UniformRectangularContains', () {
-  //   // The bounds is not centered at the origin and has unequal height and width.
-  //   final RSuperellipse rr = RSuperellipse.fromLTRBXY(0, 0, 50, 100, 23.0, 30.0);
+  test('RSuperellipse.contains UniformRectangularContains', () {
+    // The bounds is not centered at the origin and has unequal height and width.
+    final RSuperellipse rr = RSuperellipse.fromLTRBXY(0, 0, 50, 100, 23.0, 30.0);
 
-  //   final Offset center = rr.outerRect.center;
-  //   void checkPointAndMirrors(Offset globalPoint) {
-  //     final Offset p = globalPoint - center;
-  //     checkPointWithOffset(rr, Offset(p.dx, p.dy) + center, Offset(0.02, 0.02));
-  //     checkPointWithOffset(rr, Offset(p.dx, -p.dy) + center, Offset(0.02, -0.02));
-  //     checkPointWithOffset(rr, Offset(-p.dx, p.dy) + center, Offset(-0.02, 0.02));
-  //     checkPointWithOffset(rr, Offset(-p.dx, -p.dy) + center, Offset(-0.02, -0.02));
-  //   }
+    final Offset center = rr.outerRect.center;
+    void checkPointAndMirrors(Offset globalPoint) {
+      final Offset p = globalPoint - center;
+      checkPointWithOffset(rr, Offset(p.dx, p.dy) + center, Offset(0.02, 0.02));
+      checkPointWithOffset(rr, Offset(p.dx, -p.dy) + center, Offset(0.02, -0.02));
+      checkPointWithOffset(rr, Offset(-p.dx, p.dy) + center, Offset(-0.02, 0.02));
+      checkPointWithOffset(rr, Offset(-p.dx, -p.dy) + center, Offset(-0.02, -0.02));
+    }
 
-  //   checkPointAndMirrors(Offset(24.99, 99.99)); // Bottom mid-edge
-  //   checkPointAndMirrors(Offset(29.99, 99.64));
-  //   checkPointAndMirrors(Offset(34.99, 98.06));
-  //   checkPointAndMirrors(Offset(39.99, 94.73));
-  //   checkPointAndMirrors(Offset(44.13, 89.99));
-  //   checkPointAndMirrors(Offset(48.60, 79.99));
-  //   checkPointAndMirrors(Offset(49.93, 69.99));
-  //   checkPointAndMirrors(Offset(49.99, 59.99));
-  //   checkPointAndMirrors(Offset(49.99, 49.99)); // Right mid-edge
-  // });
+    checkPointAndMirrors(Offset(24.99, 99.99)); // Bottom mid-edge
+    checkPointAndMirrors(Offset(29.99, 99.64));
+    checkPointAndMirrors(Offset(34.99, 98.06));
+    checkPointAndMirrors(Offset(39.99, 94.73));
+    checkPointAndMirrors(Offset(44.13, 89.99));
+    checkPointAndMirrors(Offset(48.60, 79.99));
+    checkPointAndMirrors(Offset(49.93, 69.99));
+    checkPointAndMirrors(Offset(49.99, 59.99));
+    checkPointAndMirrors(Offset(49.99, 49.99)); // Right mid-edge
+  });
 
   test('RSuperellipse.contains SlimDiagnalContains', () {
     // This shape has large radii on one diagnal and tiny radii on the other,

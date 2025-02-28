@@ -14,6 +14,9 @@ namespace impeller {
 
 // A utility struct that expands input parameters for a rounded superellipse to
 // drawing variables.
+//
+// This class and its related code should be kept in synchronize with
+// `geometry.dart`.
 struct RoundSuperellipseParam {
   // Parameters for drawing a square-like rounded superellipse.
   //
