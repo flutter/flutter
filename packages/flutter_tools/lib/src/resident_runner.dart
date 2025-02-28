@@ -1210,7 +1210,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       _environment,
     );
     if (!lastBuild.success) {
-      for (final ExceptionMeasurement exceptionMeasurement in _lastBuild!.exceptions.values) {
+      for (final ExceptionMeasurement exceptionMeasurement in lastBuild.exceptions.values) {
         globals.printError(
           exceptionMeasurement.exception.toString(),
           stackTrace: globals.logger.isVerbose ? exceptionMeasurement.stackTrace : null,
