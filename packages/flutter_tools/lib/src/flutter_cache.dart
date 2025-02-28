@@ -171,7 +171,7 @@ class FlutterWebSdk extends CachedArtifact {
   Directory get location => cache.getWebSdkDirectory();
 
   @override
-  String? get version => cache.getVersionFor('engine');
+  String? get version => cache.engineRevision;
 
   @override
   Future<void> updateInner(

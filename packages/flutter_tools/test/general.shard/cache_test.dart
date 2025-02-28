@@ -1005,6 +1005,13 @@ void main() {
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
     final FlutterWebSdk webSdk = FlutterWebSdk(cache);
 
+    final Directory cacheDir = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('cache');
+    final File engineVersionFile = cacheDir.childFile('engine.stamp');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
+
     artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
       location.createSync(recursive: true);
       location.childFile('foo').createSync();
