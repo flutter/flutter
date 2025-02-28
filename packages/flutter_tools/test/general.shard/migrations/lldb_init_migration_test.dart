@@ -462,23 +462,6 @@ class FakeXcodeProject extends Fake implements IosProject {
   File get lldbInitFile =>
       hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral').childFile('.lldbinit');
 
-  // @override
-  // Directory get flutterPluginSwiftPackageDirectory => hostAppRoot
-  //     .childDirectory('Flutter')
-  //     .childDirectory('ephemeral')
-  //     .childDirectory('Packages')
-  //     .childDirectory('FlutterGeneratedPluginSwiftPackage');
-
-  // @override
-  // File get flutterPluginSwiftPackageManifest =>
-  //     flutterPluginSwiftPackageDirectory.childFile('Package.swift');
-
-  // @override
-  // bool get flutterPluginSwiftPackageInProjectSettings {
-  //   return xcodeProjectInfoFile.existsSync() &&
-  //       xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
-  // }
-
   @override
   Future<XcodeProjectInfo?> projectInfo() async {
     return _projectInfo;

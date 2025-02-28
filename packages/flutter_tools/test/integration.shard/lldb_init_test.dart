@@ -10,149 +10,161 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  test('Ensure lldb is added to Xcode project', () async {
-    final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync('lldb_test.');
-    try {
-      final String workingDirectoryPath = workingDirectory.path;
-      const String appName = 'lldb_test';
-
-      final ProcessResult createResult = await processManager.run(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'create',
-        '--org',
-        'io.flutter.devicelab',
-        '-i',
-        'swift',
-        appName,
-        '--platforms=ios',
-      ], workingDirectory: workingDirectory.path);
-      expect(
-        createResult.exitCode,
-        0,
-        reason:
-            'Failed to create app: \n'
-            'stdout: \n${createResult.stdout}\n'
-            'stderr: \n${createResult.stderr}\n',
+  test(
+    'Ensure lldb is added to Xcode project',
+    () async {
+      final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
+        'lldb_test.',
       );
+      try {
+        final String workingDirectoryPath = workingDirectory.path;
+        const String appName = 'lldb_test';
 
-      final String appDirectoryPath = fileSystem.path.join(workingDirectoryPath, appName);
+        final ProcessResult createResult = await processManager.run(<String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'create',
+          '--org',
+          'io.flutter.devicelab',
+          '-i',
+          'swift',
+          appName,
+          '--platforms=ios',
+        ], workingDirectory: workingDirectory.path);
+        expect(
+          createResult.exitCode,
+          0,
+          reason:
+              'Failed to create app: \n'
+              'stdout: \n${createResult.stdout}\n'
+              'stderr: \n${createResult.stderr}\n',
+        );
 
-      final ProcessResult buildResult = await processManager.run(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'build',
-        'ios',
-        '--config-only',
-      ], workingDirectory: appDirectoryPath);
-      expect(
-        buildResult.exitCode,
-        0,
-        reason:
-            'Failed to build config for the app: \n'
-            'stdout: \n${buildResult.stdout}\n'
-            'stderr: \n${buildResult.stderr}\n',
+        final String appDirectoryPath = fileSystem.path.join(workingDirectoryPath, appName);
+
+        final ProcessResult buildResult = await processManager.run(<String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'build',
+          'ios',
+          '--config-only',
+        ], workingDirectory: appDirectoryPath);
+        expect(
+          buildResult.exitCode,
+          0,
+          reason:
+              'Failed to build config for the app: \n'
+              'stdout: \n${buildResult.stdout}\n'
+              'stderr: \n${buildResult.stderr}\n',
+        );
+
+        final File schemeFile = fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('ios')
+            .childDirectory('Runner.xcodeproj')
+            .childDirectory('xcshareddata')
+            .childDirectory('xcschemes')
+            .childFile('Runner.xcscheme');
+        expect(schemeFile.existsSync(), isTrue);
+        expect(
+          schemeFile.readAsStringSync(),
+          contains(r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/.lldbinit"'),
+        );
+
+        final File lldbInitFile = fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childFile('.lldbinit');
+        expect(lldbInitFile.existsSync(), isTrue);
+
+        final File lldbPythonFile = fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childFile('lldb_helper.py');
+        expect(lldbPythonFile.existsSync(), isTrue);
+      } finally {
+        ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
+      }
+    },
+    skip: !platform.isMacOS, // [intended] Only applicable to macOS.
+  );
+
+  test(
+    'Ensure lldb is added to Xcode project when using flavor',
+    () async {
+      final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
+        'lldb_test.',
       );
+      try {
+        final String workingDirectoryPath = workingDirectory.path;
+        const String appName = 'lldb_test';
+        const String flavor = 'vanilla';
 
-      final File schemeFile = fileSystem
-          .directory(appDirectoryPath)
-          .childDirectory('ios')
-          .childDirectory('Runner.xcodeproj')
-          .childDirectory('xcshareddata')
-          .childDirectory('xcschemes')
-          .childFile('Runner.xcscheme');
-      expect(schemeFile.existsSync(), isTrue);
-      expect(
-        schemeFile.readAsStringSync(),
-        contains(r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/.lldbinit"'),
-      );
+        final ProcessResult createResult = await processManager.run(<String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'create',
+          '--org',
+          'io.flutter.devicelab',
+          '-i',
+          'swift',
+          appName,
+          '--platforms=ios',
+        ], workingDirectory: workingDirectory.path);
+        expect(
+          createResult.exitCode,
+          0,
+          reason:
+              'Failed to create app: \n'
+              'stdout: \n${createResult.stdout}\n'
+              'stderr: \n${createResult.stderr}\n',
+        );
 
-      final File lldbInitFile = fileSystem
-          .directory(appDirectoryPath)
-          .childDirectory('ios')
-          .childDirectory('Flutter')
-          .childDirectory('ephemeral')
-          .childFile('.lldbinit');
-      expect(lldbInitFile.existsSync(), isTrue);
+        final String appDirectoryPath = fileSystem.path.join(workingDirectoryPath, appName);
+        final File schemeFile = fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('ios')
+            .childDirectory('Runner.xcodeproj')
+            .childDirectory('xcshareddata')
+            .childDirectory('xcschemes')
+            .childFile('Runner.xcscheme');
+        expect(schemeFile.existsSync(), isTrue);
 
-      final File lldbPythonFile = fileSystem
-          .directory(appDirectoryPath)
-          .childDirectory('ios')
-          .childDirectory('Flutter')
-          .childDirectory('ephemeral')
-          .childFile('lldb_helper.py');
-      expect(lldbPythonFile.existsSync(), isTrue);
-    } finally {
-      ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
-    }
-  });
+        final File pbxprojFile = fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('ios')
+            .childDirectory('Runner.xcodeproj')
+            .childFile('project.pbxproj');
+        expect(pbxprojFile.existsSync(), isTrue);
 
-  test('Ensure lldb is added to Xcode project when using flavor', () async {
-    final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync('lldb_test.');
-    try {
-      final String workingDirectoryPath = workingDirectory.path;
-      const String appName = 'lldb_test';
-      const String flavor = 'vanilla';
+        // Create flavor
+        final File flavorSchemeFile = fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('ios')
+            .childDirectory('Runner.xcodeproj')
+            .childDirectory('xcshareddata')
+            .childDirectory('xcschemes')
+            .childFile('$flavor.xcscheme');
+        flavorSchemeFile.createSync(recursive: true);
+        flavorSchemeFile.writeAsStringSync(schemeFile.readAsStringSync());
 
-      final ProcessResult createResult = await processManager.run(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'create',
-        '--org',
-        'io.flutter.devicelab',
-        '-i',
-        'swift',
-        appName,
-        '--platforms=ios',
-      ], workingDirectory: workingDirectory.path);
-      expect(
-        createResult.exitCode,
-        0,
-        reason:
-            'Failed to create app: \n'
-            'stdout: \n${createResult.stdout}\n'
-            'stderr: \n${createResult.stderr}\n',
-      );
-
-      final String appDirectoryPath = fileSystem.path.join(workingDirectoryPath, appName);
-      final File schemeFile = fileSystem
-          .directory(appDirectoryPath)
-          .childDirectory('ios')
-          .childDirectory('Runner.xcodeproj')
-          .childDirectory('xcshareddata')
-          .childDirectory('xcschemes')
-          .childFile('Runner.xcscheme');
-      expect(schemeFile.existsSync(), isTrue);
-
-      final File pbxprojFile = fileSystem
-          .directory(appDirectoryPath)
-          .childDirectory('ios')
-          .childDirectory('Runner.xcodeproj')
-          .childFile('project.pbxproj');
-      expect(pbxprojFile.existsSync(), isTrue);
-
-      // Create flavor
-      final File flavorSchemeFile = fileSystem
-          .directory(appDirectoryPath)
-          .childDirectory('ios')
-          .childDirectory('Runner.xcodeproj')
-          .childDirectory('xcshareddata')
-          .childDirectory('xcschemes')
-          .childFile('$flavor.xcscheme');
-      flavorSchemeFile.createSync(recursive: true);
-      flavorSchemeFile.writeAsStringSync(schemeFile.readAsStringSync());
-
-      String pbxprojContents = pbxprojFile.readAsStringSync();
-      pbxprojContents = pbxprojContents.replaceAll('97C147071CF9000F007C117D /* Release */,', '''
+        String pbxprojContents = pbxprojFile.readAsStringSync();
+        pbxprojContents = pbxprojContents.replaceAll('97C147071CF9000F007C117D /* Release */,', '''
 97C147071CF9000F007C117D /* Release */,
 78624EC12D71262400FF7985 /* Release-vanilla */,
 ''');
-      pbxprojContents = pbxprojContents.replaceAll('97C147041CF9000F007C117D /* Release */,', '''
+        pbxprojContents = pbxprojContents.replaceAll('97C147041CF9000F007C117D /* Release */,', '''
 97C147041CF9000F007C117D /* Release */,
 78624EC02D71262400FF7985 /* Release-vanilla */,
 ''');
 
-      pbxprojContents = pbxprojContents.replaceAll('/* Begin XCBuildConfiguration section */', r'''
+        pbxprojContents = pbxprojContents.replaceAll(
+          '/* Begin XCBuildConfiguration section */',
+          r'''
 /* Begin XCBuildConfiguration section */
 78624EC12D71262400FF7985 /* Release-vanilla */ = {
 			isa = XCBuildConfiguration;
@@ -228,49 +240,52 @@ void main() {
 			};
 			name = "Release-vanilla";
 		};
-''');
-      pbxprojFile.writeAsStringSync(pbxprojContents);
+''',
+        );
+        pbxprojFile.writeAsStringSync(pbxprojContents);
 
-      final ProcessResult buildResult = await processManager.run(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'build',
-        'ios',
-        '--config-only',
-        '--flavor',
-        flavor,
-      ], workingDirectory: appDirectoryPath);
-      expect(
-        buildResult.exitCode,
-        0,
-        reason:
-            'Failed to build config for the app: \n'
-            'stdout: \n${buildResult.stdout}\n'
-            'stderr: \n${buildResult.stderr}\n',
-      );
+        final ProcessResult buildResult = await processManager.run(<String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'build',
+          'ios',
+          '--config-only',
+          '--flavor',
+          flavor,
+        ], workingDirectory: appDirectoryPath);
+        expect(
+          buildResult.exitCode,
+          0,
+          reason:
+              'Failed to build config for the app: \n'
+              'stdout: \n${buildResult.stdout}\n'
+              'stderr: \n${buildResult.stderr}\n',
+        );
 
-      expect(
-        flavorSchemeFile.readAsStringSync(),
-        contains(r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/.lldbinit"'),
-      );
+        expect(
+          flavorSchemeFile.readAsStringSync(),
+          contains(r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/.lldbinit"'),
+        );
 
-      final File lldbInitFile = fileSystem
-          .directory(appDirectoryPath)
-          .childDirectory('ios')
-          .childDirectory('Flutter')
-          .childDirectory('ephemeral')
-          .childFile('.lldbinit');
-      expect(lldbInitFile.existsSync(), isTrue);
+        final File lldbInitFile = fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childFile('.lldbinit');
+        expect(lldbInitFile.existsSync(), isTrue);
 
-      final File lldbPythonFile = fileSystem
-          .directory(appDirectoryPath)
-          .childDirectory('ios')
-          .childDirectory('Flutter')
-          .childDirectory('ephemeral')
-          .childFile('lldb_helper.py');
-      expect(lldbPythonFile.existsSync(), isTrue);
-    } finally {
-      ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
-    }
-  });
+        final File lldbPythonFile = fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childFile('lldb_helper.py');
+        expect(lldbPythonFile.existsSync(), isTrue);
+      } finally {
+        ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
+      }
+    },
+    skip: !platform.isMacOS, // [intended] Only applicable to macOS.
+  );
 }
