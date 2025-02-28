@@ -838,7 +838,7 @@ TEST_F(ExternalViewEmbedderTest, SceneWithOneClippedView) {
   DlMatrix matrix = DlMatrix::MakeTranslation({kTranslateX, kTranslateY}) *
                     DlMatrix::MakeScale({kScale.x, kScale.y, 1});
 
-  DLRect kClipRect =
+  DlRect kClipRect =
       DlRect::MakeXYWH(30, 40, child_view_size_signed.width() - 50,
                        child_view_size_signed.height() - 60);
   fuchsia::math::Rect kClipInMathRect = {
@@ -941,7 +941,8 @@ TEST_F(ExternalViewEmbedderTest, SceneWithOneClippedView) {
   new_mutators_stack.PushOpacity(kOpacity);
   new_mutators_stack.PushTransform(new_matrix);
   flutter::EmbeddedViewParams new_child_view_params(
-      ToSkMatrix(new_matrix), child_view_size_signed, new_mutators_stack);
+      flutter::ToSkMatrix(new_matrix), child_view_size_signed,
+      new_mutators_stack);
   DrawFrameWithView(
       external_view_embedder, frame_size_signed, kDPR, child_view_id,
       new_child_view_params,
@@ -1591,7 +1592,7 @@ TEST_F(ExternalViewEmbedderTest, ViewportCoveredWithInputInterceptor) {
   mutators_stack.PushTransform(matrix);
 
   flutter::EmbeddedViewParams child_view_params(
-      flutter::ToSkMatrix(matrix(), child_view_size_signed, mutators_stack);
+      flutter::ToSkMatrix(matrix), child_view_size_signed, mutators_stack);
   external_view_embedder.CreateView(
       child_view_id, []() {},
       [](fuchsia::ui::composition::ContentId,
@@ -1629,9 +1630,9 @@ TEST_F(ExternalViewEmbedderTest, ViewportCoveredWithInputInterceptor) {
     canvas->Translate(canvas_size.width * 3.f / 4.f, canvas_size.height / 2.f);
     canvas->DrawRect(DlRect::MakeSize(canvas_size / 32.f), rect_paint);
   };
-  DrawFrameWithView(
-      external_view_embedder, frame_size_signed, kDPR, child_view_id,
-      child_view_params, background_draw_callback, overlay_draw_callback);
+  DrawFrameWithView(external_view_embedder, frame_size_signed, kDPR,
+                    child_view_id, child_view_params, background_draw_callback,
+                    overlay_draw_callback);
   EXPECT_THAT(fake_flatland().graph(),
               IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
                              view_ref_clone, {IsInputShield()}));
