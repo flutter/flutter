@@ -90,7 +90,7 @@ void main() {
         ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
       }
     },
-    skip: !platform.isMacOS, // [intended] Only applicable to macOS.
+    skip: !platform.isMacOS, // [intended] Can only build on macOS.
   );
 
   test(
@@ -286,6 +286,6 @@ void main() {
         ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
       }
     },
-    skip: !platform.isMacOS, // [intended] Only applicable to macOS.
+    skip: !platform.isMacOS, // [intended] Can only build on macOS.
   );
 }

@@ -385,12 +385,7 @@ void main() {
               contains('Generated file, do not edit.'),
             );
           },
-          overrides: <Type, Generator>{
-            // XcodeProjectInterpreter: () => null,
-            // FileSystem: () => fs,
-            // ProcessManager: () => FakeProcessManager.any(),
-            Cache: () => FakeCache(olderThanToolsStamp: true),
-          },
+          overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)},
         );
       });
     });
