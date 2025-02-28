@@ -1328,6 +1328,38 @@ flutter:
         );
       }
 
+      // Regression test for https://github.com/flutter/flutter/issues/164093
+      testUsingContext(
+        'tool does not throw when FLUTTER_GIT_URL exists in environment variables',
+        () async {
+          final CommandRunner<void> runner = createTestCommandRunner(
+            _TestRunCommandThatOnlyValidates(),
+          );
+
+          await expectReturnsNormallyLater(runner.run(<String>['run', '--no-pub', '--no-hot']));
+        },
+        overrides: <Type, Generator>{
+          DeviceManager:
+              () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          Platform:
+              () =>
+                  FakePlatform()
+                    ..environment = <String, String>{
+                      'FLUTTER_GIT_URL': 'git@example.org:fork_of/flutter.git',
+                    },
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () {
+            final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+            fileSystem.file('lib/main.dart').createSync(recursive: true);
+            fileSystem.file('pubspec.yaml').createSync();
+            fileSystem.file('.packages').createSync();
+            return fileSystem;
+          },
+          ProcessManager: () => FakeProcessManager.any(),
+          FlutterVersion: () => FakeFlutterVersion(),
+        },
+      );
+
       testUsingContext(
         'FLUTTER_VERSION is set in dartDefines',
         () async {
