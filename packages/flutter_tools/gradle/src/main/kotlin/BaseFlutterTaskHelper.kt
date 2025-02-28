@@ -40,7 +40,7 @@ class BaseFlutterTaskHelper(
         val ruleNames: List<String> =
             when {
                 baseFlutterTask.buildMode == "debug" -> listOf("debug_android_application")
-                baseFlutterTask.deferredComponents ->
+                baseFlutterTask.deferredComponents!! ->
                     baseFlutterTask.targetPlatformValues!!.map {
                         "android_aot_deferred_components_bundle_${baseFlutterTask.buildMode}_$it"
                     }
@@ -73,7 +73,7 @@ class BaseFlutterTaskHelper(
             baseFlutterTask.performanceMeasurementFile?.let {
                 args("--performance-measurement-file=${baseFlutterTask.performanceMeasurementFile}")
             }
-            if (!baseFlutterTask.fastStart || baseFlutterTask.buildMode != "debug") {
+            if (!baseFlutterTask.fastStart!! || baseFlutterTask.buildMode != "debug") {
                 args("-dTargetFile=${baseFlutterTask.targetPath}")
             } else {
                 args("-dTargetFile=${Paths.get(baseFlutterTask.flutterRoot!!.absolutePath, "examples", "splash", "lib", "main.dart")}")
