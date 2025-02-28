@@ -1051,7 +1051,27 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
   BuildResult? _lastBuild;
-  Environment? _environment;
+
+  late final Environment _environment = Environment(
+    artifacts: globals.artifacts!,
+    logger: globals.logger,
+    cacheDir: globals.cache.getRoot(),
+    engineVersion: globals.flutterVersion.engineRevision,
+    fileSystem: globals.fs,
+    flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+    outputDir: globals.fs.directory(getBuildDirectory()),
+    processManager: globals.processManager,
+    platform: globals.platform,
+    analytics: globals.analytics,
+    projectDir: globals.fs.currentDirectory,
+    packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
+    generateDartPluginRegistry: generateDartPluginRegistry,
+    defines: <String, String>{
+      // Needed for Dart plugin registry generation.
+      kTargetFile: mainPath,
+      kBuildMode: debuggingOptions.buildInfo.mode.cliName,
+    },
+  );
 
   /// The result of the last dart build. Will be populated in
   /// [runDartBuild].
@@ -1156,27 +1176,6 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> runSourceGenerators() async {
-    _environment ??= Environment(
-      artifacts: globals.artifacts!,
-      logger: globals.logger,
-      cacheDir: globals.cache.getRoot(),
-      engineVersion: globals.flutterVersion.engineRevision,
-      fileSystem: globals.fs,
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      outputDir: globals.fs.directory(getBuildDirectory()),
-      processManager: globals.processManager,
-      platform: globals.platform,
-      analytics: globals.analytics,
-      projectDir: globals.fs.currentDirectory,
-      packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-      generateDartPluginRegistry: generateDartPluginRegistry,
-      defines: <String, String>{
-        // Needed for Dart plugin registry generation.
-        kTargetFile: mainPath,
-        kBuildMode: debuggingOptions.buildInfo.mode.cliName,
-      },
-    );
-
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
       globals.buildTargets.generateLocalizationsTarget,
       globals.buildTargets.dartPluginRegistrantTarget,
@@ -1184,7 +1183,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
     _lastBuild = await globals.buildSystem.buildIncremental(
       compositeTarget,
-      _environment!,
+      _environment,
       _lastBuild,
     );
     if (!_lastBuild!.success) {
@@ -1208,7 +1207,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
     final BuildResult lastBuild = await globals.buildSystem.build(
       const DartBuildForDataAssets(),
-      _environment!,
+      _environment,
     );
     if (!lastBuild.success) {
       for (final ExceptionMeasurement exceptionMeasurement in _lastBuild!.exceptions.values) {
@@ -1219,7 +1218,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
     }
 
-    _dartBuildResult = await DartBuild.loadBuildResult(_environment!);
+    _dartBuildResult = await DartBuild.loadBuildResult(_environment);
     globals.printTrace('runDartBuild() - done');
     return _dartBuildResult!;
   }
