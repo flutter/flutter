@@ -28,7 +28,10 @@
 #include "impeller/entity/clip.frag.h"
 #include "impeller/entity/clip.vert.h"
 #include "impeller/entity/color_matrix_color_filter.frag.h"
-#include "impeller/entity/conical_gradient_fill.frag.h"
+#include "impeller/entity/conical_gradient_fill_conical.frag.h"
+#include "impeller/entity/conical_gradient_fill_radial.frag.h"
+#include "impeller/entity/conical_gradient_fill_strip.frag.h"
+#include "impeller/entity/conical_gradient_fill_strip_radial.frag.h"
 #include "impeller/entity/fast_gradient.frag.h"
 #include "impeller/entity/fast_gradient.vert.h"
 #include "impeller/entity/filter_position.vert.h"
@@ -57,7 +60,10 @@
 #include "impeller/entity/tiled_texture_fill.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
 
-#include "impeller/entity/conical_gradient_uniform_fill.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_conical.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_radial.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_strip.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_strip_radial.frag.h"
 #include "impeller/entity/linear_gradient_uniform_fill.frag.h"
 #include "impeller/entity/radial_gradient_uniform_fill.frag.h"
 #include "impeller/entity/sweep_gradient_uniform_fill.frag.h"
@@ -92,18 +98,36 @@ using SolidFillPipeline =
 using RadialGradientFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          RadialGradientFillFragmentShader>;
-using ConicalGradientFillPipeline =
+using ConicalGradientFillConicalPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientFillFragmentShader>;
+                         ConicalGradientFillConicalFragmentShader>;
+using ConicalGradientFillStripPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientFillStripFragmentShader>;
+using ConicalGradientFillRadialPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientFillRadialFragmentShader>;
+using ConicalGradientFillStripRadialPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientFillStripRadialFragmentShader>;
 using SweepGradientFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          SweepGradientFillFragmentShader>;
 using LinearGradientUniformFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          LinearGradientUniformFillFragmentShader>;
-using ConicalGradientUniformFillPipeline =
+using ConicalGradientUniformFillConicalPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientUniformFillFragmentShader>;
+                         ConicalGradientUniformFillConicalFragmentShader>;
+using ConicalGradientUniformFillStripPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientUniformFillStripFragmentShader>;
+using ConicalGradientUniformFillRadialPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientUniformFillRadialFragmentShader>;
+using ConicalGradientUniformFillStripRadialPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientUniformFillStripRadialFragmentShader>;
 using RadialGradientUniformFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          RadialGradientUniformFillFragmentShader>;
@@ -365,6 +389,13 @@ struct ContentContextOptions {
   void ApplyToPipelineDescriptor(PipelineDescriptor& desc) const;
 };
 
+enum ConicalKind {
+  kConical,
+  kRadial,
+  kStrip,
+  kStripAndRadial,
+};
+
 class Tessellator;
 class RenderTargetCache;
 
@@ -399,9 +430,21 @@ class ContentContext {
     return GetPipeline(radial_gradient_uniform_fill_pipelines_, opts);
   }
 
-  PipelineRef GetConicalGradientUniformFillPipeline(
-      ContentContextOptions opts) const {
-    return GetPipeline(conical_gradient_uniform_fill_pipelines_, opts);
+  PipelineRef GetConicalGradientUniformFillPipeline(ContentContextOptions opts,
+                                                    ConicalKind kind) const {
+    switch (kind) {
+      case ConicalKind::kConical:
+        return GetPipeline(conical_gradient_uniform_fill_pipelines_, opts);
+      case ConicalKind::kRadial:
+        return GetPipeline(conical_gradient_uniform_fill_radial_pipelines_,
+                           opts);
+      case ConicalKind::kStrip:
+        return GetPipeline(conical_gradient_uniform_fill_strip_pipelines_,
+                           opts);
+      case ConicalKind::kStripAndRadial:
+        return GetPipeline(
+            conical_gradient_uniform_fill_strip_and_radial_pipelines_, opts);
+    }
   }
 
   PipelineRef GetSweepGradientUniformFillPipeline(
@@ -421,10 +464,20 @@ class ContentContext {
     return GetPipeline(radial_gradient_ssbo_fill_pipelines_, opts);
   }
 
-  PipelineRef GetConicalGradientSSBOFillPipeline(
-      ContentContextOptions opts) const {
+  PipelineRef GetConicalGradientSSBOFillPipeline(ContentContextOptions opts,
+                                                 ConicalKind kind) const {
     FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-    return GetPipeline(conical_gradient_ssbo_fill_pipelines_, opts);
+    switch (kind) {
+      case ConicalKind::kConical:
+        return GetPipeline(conical_gradient_ssbo_fill_pipelines_, opts);
+      case ConicalKind::kRadial:
+        return GetPipeline(conical_gradient_ssbo_fill_radial_pipelines_, opts);
+      case ConicalKind::kStrip:
+        return GetPipeline(conical_gradient_ssbo_fill_strip_pipelines_, opts);
+      case ConicalKind::kStripAndRadial:
+        return GetPipeline(
+            conical_gradient_ssbo_fill_strip_and_radial_pipelines_, opts);
+    }
   }
 
   PipelineRef GetSweepGradientSSBOFillPipeline(
@@ -437,8 +490,19 @@ class ContentContext {
     return GetPipeline(radial_gradient_fill_pipelines_, opts);
   }
 
-  PipelineRef GetConicalGradientFillPipeline(ContentContextOptions opts) const {
-    return GetPipeline(conical_gradient_fill_pipelines_, opts);
+  PipelineRef GetConicalGradientFillPipeline(ContentContextOptions opts,
+                                             ConicalKind kind) const {
+    switch (kind) {
+      case ConicalKind::kConical:
+        return GetPipeline(conical_gradient_fill_pipelines_, opts);
+      case ConicalKind::kRadial:
+        return GetPipeline(conical_gradient_fill_radial_pipelines_, opts);
+      case ConicalKind::kStrip:
+        return GetPipeline(conical_gradient_fill_strip_pipelines_, opts);
+      case ConicalKind::kStripAndRadial:
+        return GetPipeline(conical_gradient_fill_strip_and_radial_pipelines_,
+                           opts);
+    }
   }
 
   PipelineRef GetRRectBlurPipeline(ContentContextOptions opts) const {
@@ -988,15 +1052,27 @@ class ContentContext {
   mutable Variants<FastGradientPipeline> fast_gradient_pipelines_;
   mutable Variants<LinearGradientFillPipeline> linear_gradient_fill_pipelines_;
   mutable Variants<RadialGradientFillPipeline> radial_gradient_fill_pipelines_;
-  mutable Variants<ConicalGradientFillPipeline>
+  mutable Variants<ConicalGradientFillConicalPipeline>
       conical_gradient_fill_pipelines_;
+  mutable Variants<ConicalGradientFillRadialPipeline>
+      conical_gradient_fill_radial_pipelines_;
+  mutable Variants<ConicalGradientFillStripPipeline>
+      conical_gradient_fill_strip_pipelines_;
+  mutable Variants<ConicalGradientFillStripRadialPipeline>
+      conical_gradient_fill_strip_and_radial_pipelines_;
   mutable Variants<SweepGradientFillPipeline> sweep_gradient_fill_pipelines_;
   mutable Variants<LinearGradientUniformFillPipeline>
       linear_gradient_uniform_fill_pipelines_;
   mutable Variants<RadialGradientUniformFillPipeline>
       radial_gradient_uniform_fill_pipelines_;
-  mutable Variants<ConicalGradientUniformFillPipeline>
+  mutable Variants<ConicalGradientUniformFillConicalPipeline>
       conical_gradient_uniform_fill_pipelines_;
+  mutable Variants<ConicalGradientUniformFillRadialPipeline>
+      conical_gradient_uniform_fill_radial_pipelines_;
+  mutable Variants<ConicalGradientUniformFillStripPipeline>
+      conical_gradient_uniform_fill_strip_pipelines_;
+  mutable Variants<ConicalGradientUniformFillStripRadialPipeline>
+      conical_gradient_uniform_fill_strip_and_radial_pipelines_;
   mutable Variants<SweepGradientUniformFillPipeline>
       sweep_gradient_uniform_fill_pipelines_;
   mutable Variants<LinearGradientSSBOFillPipeline>
@@ -1005,6 +1081,12 @@ class ContentContext {
       radial_gradient_ssbo_fill_pipelines_;
   mutable Variants<ConicalGradientSSBOFillPipeline>
       conical_gradient_ssbo_fill_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline>
+      conical_gradient_ssbo_fill_radial_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline>
+      conical_gradient_ssbo_fill_strip_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline>
+      conical_gradient_ssbo_fill_strip_and_radial_pipelines_;
   mutable Variants<SweepGradientSSBOFillPipeline>
       sweep_gradient_ssbo_fill_pipelines_;
   mutable Variants<RRectBlurPipeline> rrect_blur_pipelines_;
