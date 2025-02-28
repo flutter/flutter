@@ -60,8 +60,8 @@ class _MyAppState extends State<MyApp> {
                   const Text(
                     'This text has a custom label and an identifier. In Android, the label is used as the content-desc, and the identifier is used as the resource-id.',
                     semanticsLabel: 'This is a custom label',
-                    // semanticsIdentifier:
-                    //     'This is a custom identifier that only the automation tools are able to see',
+                    semanticsIdentifier:
+                        'This is a custom identifier that only the automation tools are able to see',
                   ),
                   const Divider(),
                   Text('Text.rich Example:', style: bodyStyle),
@@ -98,19 +98,19 @@ class _MyAppState extends State<MyApp> {
                         child: Text.rich(
                           TextSpan(
                             text: 'Please open the ',
-                            // semanticsIdentifier: 'please_open',
+                            semanticsIdentifier: 'please_open',
                             children: <InlineSpan>[
                               const TextSpan(
                                 text: 'product 1',
-                                // semanticsIdentifier: 'product_name',
+                                semanticsIdentifier: 'product_name',
                               ),
                               const TextSpan(
                                 text: '\nto use this app.',
-                                // semanticsIdentifier: 'to_use_app',
+                                semanticsIdentifier: 'to_use_app',
                               ),
                               TextSpan(
                                 text: ' Learn more',
-                                // semanticsIdentifier: 'learn_more_link',
+                                semanticsIdentifier: 'learn_more_link',
                                 style: const TextStyle(color: Colors.blue),
                                 recognizer:
                                     TapGestureRecognizer()
@@ -127,19 +127,19 @@ class _MyAppState extends State<MyApp> {
                         child: Text.rich(
                           TextSpan(
                             text: 'Please open the ',
-                            // semanticsIdentifier: 'please_open',
+                            semanticsIdentifier: 'please_open',
                             children: <InlineSpan>[
                               const TextSpan(
                                 text: 'product 2',
-                                // semanticsIdentifier: 'product_name',
+                                semanticsIdentifier: 'product_name',
                               ),
                               const TextSpan(
                                 text: '\nto access this app.',
-                                // semanticsIdentifier: 'to_use_app',
+                                semanticsIdentifier: 'to_use_app',
                               ),
                               TextSpan(
                                 text: ' Find out more',
-                                // semanticsIdentifier: 'learn_more_link',
+                                semanticsIdentifier: 'learn_more_link',
                                 style: const TextStyle(color: Colors.blue),
                                 recognizer:
                                     TapGestureRecognizer()

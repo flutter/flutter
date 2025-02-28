@@ -132,7 +132,6 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(
   final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
   String workingText = '';
   String workingLabel = '';
-  String? workingIdentifier;
   List<ui.StringAttribute> workingAttributes = <ui.StringAttribute>[];
   for (final InlineSpanSemanticsInformation info in infoList) {
     if (info.requiresOwnNode) {
@@ -140,13 +139,11 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(
         InlineSpanSemanticsInformation(
           workingText,
           semanticsLabel: workingLabel,
-          semanticsIdentifier: workingIdentifier,
           stringAttributes: workingAttributes,
         ),
       );
       workingText = '';
       workingLabel = '';
-      workingIdentifier = null;
       workingAttributes = <ui.StringAttribute>[];
       combined.add(info);
     } else {
@@ -163,14 +160,12 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(
         );
       }
       workingLabel += effectiveLabel;
-      workingIdentifier = info.semanticsIdentifier;
     }
   }
   combined.add(
     InlineSpanSemanticsInformation(
       workingText,
       semanticsLabel: workingLabel,
-      semanticsIdentifier: workingIdentifier,
       stringAttributes: workingAttributes,
     ),
   );
