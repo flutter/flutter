@@ -618,15 +618,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     this._onHasScrolledBodyChanged,
     this._floatHeaderSlivers,
   ) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$_NestedScrollCoordinator',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', '_NestedScrollCoordinator', this));
     final double initialScrollOffset = _parent?.initialScrollOffset ?? 0.0;
     _outerController = _NestedScrollController(
       this,
@@ -1136,9 +1128,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   @mustCallSuper
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _currentDrag?.dispose();
     _currentDrag = null;
     _outerController.dispose();

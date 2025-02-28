@@ -1447,6 +1447,8 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         _param!.bottomRight.contains(point);
   }
 
+  _RSuperellipseParam? _param;
+
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
     if (a == null) {
       if (b == null) {

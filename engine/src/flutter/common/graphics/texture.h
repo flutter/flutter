@@ -10,8 +10,6 @@
 #include "flutter/display_list/dl_canvas.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkSamplingOptions.h"
 
 class GrDirectContext;
 
@@ -50,7 +48,7 @@ class Texture : public ContextListener {
 
   // Called from raster thread.
   virtual void Paint(PaintContext& context,
-                     const SkRect& bounds,
+                     const DlRect& bounds,
                      bool freeze,
                      const DlImageSampling sampling) = 0;
 

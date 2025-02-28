@@ -22,6 +22,7 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 # On stable, beta, and release tags, the engine.version is tracked by git - do not override it.
 $trackedEngine = (git -C "$flutterRoot" ls-files bin/internal/engine.version) | Out-String
 if ($trackedEngine.length -ne 0) {
+  Copy-Item -Path "$flutterRoot\bin\internal\engine.version" -Destination "$flutterRoot\bin\cache\engine.stamp" -Force
   return
 }
 
@@ -59,9 +60,17 @@ if ([string]::IsNullOrEmpty($engineVersion) -and (Test-Path "$flutterRoot\DEPS" 
 
 # Write the engine version out so downstream tools know what to look for.
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText("$flutterRoot\bin\cache\engine.stamp", $engineVersion, $utf8NoBom)
+# TODO(matanlurey): Stop writing to internal/engine.version. https://github.com/flutter/flutter/issues/164315.
 [System.IO.File]::WriteAllText("$flutterRoot\bin\internal\engine.version", $engineVersion, $utf8NoBom)
 
 # The realm on CI is passed in.
 if ($Env:FLUTTER_REALM) {
+    [System.IO.File]::WriteAllText("$flutterRoot\bin\cache\engine.realm", $Env:FLUTTER_REALM, $utf8NoBom)
+    # TODO(matanlurey): Stop writing to internal/engine.realm. https://github.com/flutter/flutter/issues/164315.
     [System.IO.File]::WriteAllText("$flutterRoot\bin\internal\engine.realm", $Env:FLUTTER_REALM, $utf8NoBom)
+} else {
+    [System.IO.File]::WriteAllText("$flutterRoot\bin\cache\engine.realm", "", $utf8NoBom)
+    # TODO(matanlurey): Stop writing to internal/engine.realm. https://github.com/flutter/flutter/issues/164315.
+    [System.IO.File]::WriteAllText("$flutterRoot\bin\internal\engine.realm", "", $utf8NoBom)
 }

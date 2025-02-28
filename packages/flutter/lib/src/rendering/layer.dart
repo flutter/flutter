@@ -80,8 +80,6 @@ class AnnotationResult<T> {
   }
 }
 
-const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
-
 /// A composited layer.
 ///
 /// During painting, the render tree generates a tree of composited layers that
@@ -146,13 +144,7 @@ const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 abstract class Layer with DiagnosticableTreeMixin {
   /// Creates an instance of Layer.
   Layer() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterRenderingLibrary,
-        className: '$Layer',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('rendering', 'Layer', this));
   }
 
   final Map<int, VoidCallback> _callbacks = <int, VoidCallback>{};
@@ -342,9 +334,7 @@ abstract class Layer with DiagnosticableTreeMixin {
       _debugDisposed = true;
       return true;
     }());
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _engineLayer?.dispose();
     _engineLayer = null;
   }

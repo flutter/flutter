@@ -117,7 +117,6 @@ interface class FlutterTestRunner {
           flutterTesterBinPath: flutterTesterBinPath,
           flutterProject: flutterProject,
           pauseAfterLoad: debuggingOptions.startPaused,
-          nullAssertions: debuggingOptions.nullAssertions,
           buildInfo: debuggingOptions.buildInfo,
           webMemoryFS: result,
           logger: globals.logger,
@@ -697,7 +696,6 @@ class SpawnPlugin extends PlatformPlugin {
       '--disable-asset-fonts',
       '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       if (testAssetDirectory != null) '--flutter-assets-dir=$testAssetDirectory',
-      if (debuggingOptions.nullAssertions) '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
       rootTestIsolateSpawnerDillFile.absolute.path,
     ];
