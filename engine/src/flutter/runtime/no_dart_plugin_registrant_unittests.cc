@@ -26,7 +26,7 @@ class DartIsolateTest : public FixtureTest {
 };
 
 TEST_F(DartIsolateTest, DartPluginRegistrantIsNotPresent) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+#if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());

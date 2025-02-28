@@ -52,7 +52,7 @@ class DartIsolateTest : public FixtureTest {
 };
 
 TEST_F(DartIsolateTest, DartPluginRegistrantIsPresent) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+#if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
@@ -103,7 +103,7 @@ TEST_F(DartIsolateTest, DartPluginRegistrantIsPresent) {
 }
 
 TEST_F(DartIsolateTest, DartPluginRegistrantFromBackgroundIsolate) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+#if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
@@ -155,7 +155,7 @@ TEST_F(DartIsolateTest, DartPluginRegistrantFromBackgroundIsolate) {
 }
 
 TEST_F(DartIsolateTest, DartPluginRegistrantNotFromBackgroundIsolate) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+#if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
@@ -208,7 +208,7 @@ TEST_F(DartIsolateTest, DartPluginRegistrantNotFromBackgroundIsolate) {
 }
 
 TEST_F(DartIsolateTest, DartPluginRegistrantWhenRegisteringBackgroundIsolate) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+#if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());

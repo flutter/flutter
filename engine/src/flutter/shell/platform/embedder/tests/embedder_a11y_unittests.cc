@@ -34,7 +34,7 @@ constexpr static char kTooltip[] = "tooltip";
 #endif
 
 TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+#if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
   {
@@ -100,7 +100,7 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+#if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
@@ -278,7 +278,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
 }
 
 TEST_F(EmbedderA11yTest, A11yStringAttributes) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+#if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
@@ -397,7 +397,7 @@ TEST_F(EmbedderA11yTest, A11yStringAttributes) {
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+#if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
@@ -573,7 +573,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV1Callbacks) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+#if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
