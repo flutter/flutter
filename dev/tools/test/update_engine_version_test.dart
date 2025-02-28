@@ -61,8 +61,6 @@ void main() {
     testRoot.root.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
 
     environment = <String, String>{};
-    environment.addAll(io.Platform.environment);
-    environment.remove('FLUTTER_PREBUILT_ENGINE_VERSION');
 
     // Copy the update_engine_version script and create a rough directory structure.
     flutterRoot.binInternalUpdateEngineVersion.copySyncRecursive(
