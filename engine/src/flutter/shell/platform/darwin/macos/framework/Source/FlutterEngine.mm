@@ -642,6 +642,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     std::cout << message << std::endl;
   };
 
+  flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
+
   static size_t sTaskRunnerIdentifiers = 0;
   const FlutterTaskRunnerDescription cocoa_task_runner_description = {
       .struct_size = sizeof(FlutterTaskRunnerDescription),
@@ -1157,6 +1159,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     NSLog(@"Failed to shut down Flutter engine: error %d", result);
   }
   _engine = nullptr;
+}
+
++ (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
+  NSAssert([[NSThread currentThread] isMainThread], @"Must be called on the main thread.");
+  return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
 }
 
 - (void)setUpPlatformViewChannel {
