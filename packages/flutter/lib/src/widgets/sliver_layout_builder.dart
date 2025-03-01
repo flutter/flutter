@@ -42,6 +42,10 @@ class _RenderSliverLayoutBuilder extends RenderSliver
     return 0;
   }
 
+  @protected
+  @override
+  SliverConstraints get layoutInfo => constraints;
+
   @override
   void performLayout() {
     rebuildIfNecessary();
