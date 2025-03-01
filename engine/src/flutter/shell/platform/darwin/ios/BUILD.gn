@@ -256,7 +256,7 @@ shared_library("ios_test_flutter") {
     "//flutter/third_party/rapidjson",
     "//flutter/third_party/spring_animation",
     "//flutter/third_party/tonic",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
   ]
   public_configs = [
     ":ios_gpu_configuration_config",
