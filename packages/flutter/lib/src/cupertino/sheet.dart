@@ -221,10 +221,14 @@ class CupertinoSheetTransition extends StatefulWidget {
       reverseCurve: reverseCurve,
       parent: secondaryAnimation,
     );
-    final double deviceCornerRadius = MediaQuery.maybeViewPaddingOf(context)?.top ?? 0;
+
+    final double deviceCornerRadius = (MediaQuery.maybeViewPaddingOf(context)?.top ?? 0) * .9;
+    final bool roundedDeviceCorners = deviceCornerRadius > 20;
 
     final Animatable<BorderRadiusGeometry> decorationTween = Tween<BorderRadiusGeometry>(
-      begin: BorderRadius.circular(deviceCornerRadius),
+      begin: BorderRadius.vertical(
+        top: Radius.circular(roundedDeviceCorners ? deviceCornerRadius : 0),
+      ),
       end: BorderRadius.circular(12),
     );
 
@@ -262,7 +266,13 @@ class CupertinoSheetTransition extends StatefulWidget {
           animation: radiusAnimation,
           child: child,
           builder: (BuildContext context, Widget? child) {
-            return ClipRRect(borderRadius: radiusAnimation.value, child: contrastedChild);
+            return ClipRRect(
+              borderRadius:
+                  !secondaryAnimation.isDismissed
+                      ? radiusAnimation.value
+                      : BorderRadius.circular(0),
+              child: contrastedChild,
+            );
           },
         ),
       ),
