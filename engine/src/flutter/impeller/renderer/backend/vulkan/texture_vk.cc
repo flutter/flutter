@@ -12,10 +12,12 @@
 namespace impeller {
 
 TextureVK::TextureVK(std::weak_ptr<Context> context,
-                     std::shared_ptr<TextureSourceVK> source)
+                     std::shared_ptr<TextureSourceVK> source,
+                     bool is_external_texture)
     : Texture(source->GetTextureDescriptor()),
       context_(std::move(context)),
-      source_(std::move(source)) {
+      source_(std::move(source)),
+      is_external_texture_(is_external_texture) {
 #ifdef IMPELLER_DEBUG
   has_validation_layers_ = HasValidationLayers();
 #endif  // IMPELLER_DEBUG

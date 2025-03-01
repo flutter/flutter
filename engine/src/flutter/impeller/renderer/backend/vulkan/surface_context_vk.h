@@ -77,6 +77,9 @@ class SurfaceContextVK : public Context,
   bool SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer) override;
 
   // |Context|
+  void UpdateExternalTexture(const std::shared_ptr<Texture>& texture) override;
+
+  // |Context|
   void Shutdown() override;
 
   [[nodiscard]] bool SetWindowSurface(vk::UniqueSurfaceKHR surface,

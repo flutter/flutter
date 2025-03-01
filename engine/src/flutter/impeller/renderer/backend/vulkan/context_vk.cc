@@ -13,6 +13,7 @@
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 #include "impeller/renderer/backend/vulkan/workarounds_vk.h"
+#include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_target.h"
 
 #ifdef FML_OS_ANDROID
@@ -41,6 +42,7 @@
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
+#include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_library_vk.h"
 #include "impeller/renderer/capabilities.h"
 
@@ -747,6 +749,31 @@ bool ContextVK::SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer) {
 
 const WorkaroundsVK& ContextVK::GetWorkarounds() const {
   return workarounds_;
+}
+
+void ContextVK::UpdateExternalTexture(const std::shared_ptr<Texture>& texture) {
+  TextureVK& texture_vk = TextureVK::Cast(*texture);
+  if (!texture_vk.is_external_texture()) {
+    return;
+  }
+
+  std::shared_ptr<CommandBuffer> buffer = CreateCommandBuffer();
+  CommandBufferVK& buffer_vk = CommandBufferVK::Cast(*buffer);
+
+  BarrierVK barrier;
+  barrier.cmd_buffer = buffer_vk.GetCommandBuffer();
+  barrier.src_access = {};
+  barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  barrier.dst_access = vk::AccessFlagBits::eShaderRead;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+  barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+  texture_vk.SetLayoutWithoutEncoding(vk::ImageLayout::eUndefined);
+  if (!texture_vk.SetLayout(barrier)) {
+    return;
+  }
+
+  EnqueueCommandBuffer(buffer);
 }
 
 }  // namespace impeller

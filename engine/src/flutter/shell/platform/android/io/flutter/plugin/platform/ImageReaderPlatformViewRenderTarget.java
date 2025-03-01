@@ -39,9 +39,9 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
         public void onImageAvailable(ImageReader reader) {
           Image image = null;
           try {
-            image = reader.acquireLatestImage();
+            image = reader.acquireNextImage();
           } catch (IllegalStateException e) {
-            Log.e(TAG, "onImageAvailable acquireLatestImage failed: " + e.toString());
+            Log.e(TAG, "onImageAvailable acquireNextImage failed: " + e.toString());
           }
           if (image == null) {
             return;

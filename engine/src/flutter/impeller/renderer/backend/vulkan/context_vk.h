@@ -237,11 +237,16 @@ class ContextVK final : public Context,
   // | Context |
   bool FlushCommandBuffers() override;
 
+  // | Context |
   RuntimeStageBackend GetRuntimeStageBackend() const override;
 
+  // | Context |
   std::shared_ptr<const IdleWaiter> GetIdleWaiter() const override {
     return idle_waiter_vk_;
   }
+
+  // | Context |
+  void UpdateExternalTexture(const std::shared_ptr<Texture>& texture) override;
 
  private:
   struct DeviceHolderImpl : public DeviceHolderVK {

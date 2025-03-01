@@ -245,6 +245,11 @@ class Context {
   /// @brief Submit the command buffer that renders to the onscreen surface.
   virtual bool SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer);
 
+  virtual void UpdateExternalTexture(const std::shared_ptr<Texture>& texture) {
+    FML_LOG(ERROR) << "UploadExternalTexture";
+    return;
+  }
+
  protected:
   Context();
 

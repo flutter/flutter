@@ -19,7 +19,8 @@ namespace impeller {
 class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
  public:
   TextureVK(std::weak_ptr<Context> context,
-            std::shared_ptr<TextureSourceVK> source);
+            std::shared_ptr<TextureSourceVK> source,
+            bool is_external_texture = false);
 
   // |Texture|
   ~TextureVK() override;
@@ -74,9 +75,12 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
   /// May be nullptr if no previous render pass existed.
   SharedHandleVK<vk::RenderPass> GetCachedRenderPass() const;
 
+  bool is_external_texture() const { return is_external_texture_; }
+
  private:
   std::weak_ptr<Context> context_;
   std::shared_ptr<TextureSourceVK> source_;
+  bool is_external_texture_ = false;
   bool has_validation_layers_ = false;
 
   // |Texture|
