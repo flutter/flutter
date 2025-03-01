@@ -33,6 +33,9 @@ fi
 
 FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 
+# Generate a bin/cache directory, which won't initially exist for a fresh checkout.
+mkdir -p "$FLUTTER_ROOT/bin/cache"
+
 # On stable, beta, and release tags, the engine.version is tracked by git - do not override it.
 TRACKED_ENGINE="$(git -C "$FLUTTER_ROOT" ls-files bin/internal/engine.version)"
 if [[ -n "$TRACKED_ENGINE" ]]; then
