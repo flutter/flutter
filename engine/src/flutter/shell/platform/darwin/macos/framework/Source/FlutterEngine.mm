@@ -89,7 +89,9 @@ constexpr char kTextPlainFormat[] = "text/plain";
 /**
  * Private interface declaration for FlutterEngine.
  */
-@interface FlutterEngine () <FlutterBinaryMessenger, FlutterMouseCursorPluginDelegate>
+@interface FlutterEngine () <FlutterBinaryMessenger,
+                             FlutterMouseCursorPluginDelegate,
+                             FlutterKeyboardManagerDelegate>
 
 /**
  * A mutable array that holds one bool value that determines if responses to platform messages are
@@ -473,6 +475,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   // Weak reference to last view that received a pointer event. This is used to
   // pair cursor change with a view.
   __weak FlutterView* _lastViewWithPointerEvent;
+
+  // Pointer to a keyboard manager.
+  FlutterKeyboardManager* _keyboardManager;
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
@@ -513,6 +518,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _isResponseValid = [[NSMutableArray alloc] initWithCapacity:1];
   [_isResponseValid addObject:@YES];
+  _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
 
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
@@ -641,6 +647,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     }
     std::cout << message << std::endl;
   };
+
+  flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
 
   static size_t sTaskRunnerIdentifiers = 0;
   const FlutterTaskRunnerDescription cocoa_task_runner_description = {
@@ -1022,12 +1030,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   _lastViewWithPointerEvent = [self viewControllerForIdentifier:kFlutterImplicitViewId].flutterView;
 }
 
-- (void)sendKeyEvent:(const FlutterKeyEvent&)event
-            callback:(FlutterKeyEventCallback)callback
-            userData:(void*)userData {
-  _embedderAPI.SendKeyEvent(_engine, &event, callback, userData);
-}
-
 - (void)setSemanticsEnabled:(BOOL)enabled {
   if (_semanticsEnabled == enabled) {
     return;
@@ -1125,6 +1127,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     [nextViewController onPreEngineRestart];
   }
   [_platformViewController reset];
+  _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
 }
 
 - (void)onVSync:(uintptr_t)baton {
@@ -1157,6 +1160,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     NSLog(@"Failed to shut down Flutter engine: error %d", result);
   }
   _engine = nullptr;
+}
+
++ (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
+  NSAssert([[NSThread currentThread] isMainThread], @"Must be called on the main thread.");
+  return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
 }
 
 - (void)setUpPlatformViewChannel {
@@ -1555,6 +1563,17 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 // Getter used by test harness, only exposed through the FlutterEngine(Test) category
 - (flutter::FlutterCompositor*)macOSCompositor {
   return _macOSCompositor.get();
+}
+
+#pragma mark - FlutterKeyboardManagerDelegate
+
+/**
+ * Dispatches the given pointer event data to engine.
+ */
+- (void)sendKeyEvent:(const FlutterKeyEvent&)event
+            callback:(FlutterKeyEventCallback)callback
+            userData:(void*)userData {
+  _embedderAPI.SendKeyEvent(_engine, &event, callback, userData);
 }
 
 @end
