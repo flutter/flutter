@@ -4,12 +4,14 @@ import androidx.annotation.VisibleForTesting
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.Variant
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.extra
 import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 
 object DependencyVersionChecker {
+    // Logging constants.
     @VisibleForTesting internal const val GRADLE_NAME: String = "Gradle"
 
     @VisibleForTesting internal const val JAVA_NAME: String = "Java"
@@ -24,6 +26,13 @@ object DependencyVersionChecker {
     // detecting that the project is using versions outside of Flutter's support range.
     // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-project/index.html#-2107180640%2FProperties%2F-1867656071.
     @VisibleForTesting internal const val OUT_OF_SUPPORT_RANGE_PROPERTY = "usesUnsupportedDependencyVersions"
+
+    // The specific task prefix to depend on when checking the minimum SDK version. For example,
+    // a task might be "assemble[FLAVOR]Release"
+    @VisibleForTesting internal const val MIN_SDK_CHECK_TASK_DEPENDENCY_PREFIX = "assemble"
+
+    // The task postfix to use when checking the minimum SDK version for each flavor.
+    internal const val MIN_SDK_CHECK_TASK_POSTFIX = "MinSdkCheck"
 
     // The following messages represent best effort guesses at where a Flutter developer should
     // look to upgrade a dependency that is below the corresponding threshold. Developers can
@@ -105,8 +114,33 @@ object DependencyVersionChecker {
         checkJavaVersion(getJavaVersion(), project)
 
         project.afterEvaluate {
-            val minSdkVersions = getMinSdkVersions(project)
-            checkMinSdkVersion(minSdkVersions, project)
+            val defaultMinSdkVersion = getDefaultMinSdkVersion(project)
+            if (defaultMinSdkVersion != null) {
+                checkMinSdkVersion(defaultMinSdkVersion, project)
+            }
+        }
+
+        val androidComponents =
+            project.extensions.findByType(AndroidComponentsExtension::class.java)
+
+        androidComponents?.onVariants {
+            val taskName = "${it.name.capitalize()}$MIN_SDK_CHECK_TASK_POSTFIX"
+            val minSdkCheckTask =
+                project.tasks.register(taskName) {
+                    doLast {
+                        val minSdkVersion = getMinSdkVersion(it)
+                        checkMinSdkVersion(minSdkVersion, project)
+                    }
+                }
+
+            project.afterEvaluate {
+                // Make assemble task depend on minSdkCheckTask for this variant.
+                project.tasks
+                    .named("$MIN_SDK_CHECK_TASK_DEPENDENCY_PREFIX${it.name.capitalize()}")
+                    .configure {
+                        dependsOn(minSdkCheckTask)
+                    }
+            }
         }
 
         val agpVersion: AndroidPluginVersion? = getAGPVersion(project)
@@ -125,6 +159,8 @@ object DependencyVersionChecker {
         }
         // KGP is not required, so don't log any warning if we can't find the version.
     }
+
+    private fun getMinSdkVersion(it: Variant) = MinSdkVersion(it.name, it.minSdk.apiLevel)
 
     // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.invocation/-gradle/index.html#-837060600%2FFunctions%2F-1793262594
     @VisibleForTesting internal fun getGradleVersion(project: Project): Version {
@@ -175,30 +211,21 @@ object DependencyVersionChecker {
     }
 
     @VisibleForTesting
-    internal fun getMinSdkVersions(project: Project): List<MinSdkVersion> {
+    internal fun getDefaultMinSdkVersion(project: Project): MinSdkVersion? {
         val androidExtension = project.extensions.findByType(ApplicationExtension::class.java)
-        val minSdkList = mutableListOf<MinSdkVersion>()
 
         if (androidExtension == null) {
             project.logger.error("Android extension not found.")
-            return emptyList()
+            return null
         }
 
         val defaultMinSdk = androidExtension.defaultConfig.minSdk
         if (defaultMinSdk != null) {
-            minSdkList += MinSdkVersion(null, defaultMinSdk)
+            return MinSdkVersion(null, defaultMinSdk)
         } else {
             project.logger.error("Android default min SDK version not found.")
+            return null
         }
-
-        androidExtension.productFlavors.forEach { flavor ->
-            val flavorMinSdk = flavor.minSdk
-            if (flavorMinSdk != null) {
-                minSdkList += MinSdkVersion(flavor.name, flavorMinSdk)
-            }
-        }
-
-        return minSdkList
     }
 
     @VisibleForTesting internal fun getErrorMessage(
@@ -336,31 +363,29 @@ object DependencyVersionChecker {
     }
 
     @VisibleForTesting internal fun checkMinSdkVersion(
-        minSdkVersions: List<MinSdkVersion>,
+        minSdkVersion: MinSdkVersion,
         project: Project
     ) {
-        minSdkVersions.forEach {
-            // For Android SDK, only the major version is relevant, no need to do a full version check.
-            if (it.version < errorMinSdkVersion) {
-                val errorMessage: String =
-                    getErrorMessage(
-                        getFlavorSpecificMessage(it.flavor, SDK_NAME),
-                        it.version.toString(),
-                        errorMinSdkVersion.toString(),
-                        getPotentialSDKFix(project.rootDir.path)
-                    )
-                project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
-                throw DependencyValidationException(errorMessage)
-            } else if (it.version < warnMinSdkVersion) {
-                val warnMessage: String =
-                    getWarnMessage(
-                        getFlavorSpecificMessage(it.flavor, SDK_NAME),
-                        it.version.toString(),
-                        warnMinSdkVersion.toString(),
-                        getPotentialSDKFix(project.rootDir.path)
-                    )
-                project.logger.error(warnMessage)
-            }
+        // For Android SDK, only the major version is relevant, no need to do a full version check.
+        if (minSdkVersion.version < errorMinSdkVersion) {
+            val errorMessage: String =
+                getErrorMessage(
+                    getFlavorSpecificMessage(minSdkVersion.flavor, SDK_NAME),
+                    minSdkVersion.version.toString(),
+                    errorMinSdkVersion.toString(),
+                    getPotentialSDKFix(project.rootDir.path)
+                )
+            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
+            throw DependencyValidationException(errorMessage)
+        } else if (minSdkVersion.version < warnMinSdkVersion) {
+            val warnMessage: String =
+                getWarnMessage(
+                    getFlavorSpecificMessage(minSdkVersion.flavor, SDK_NAME),
+                    minSdkVersion.version.toString(),
+                    warnMinSdkVersion.toString(),
+                    getPotentialSDKFix(project.rootDir.path)
+                )
+            project.logger.error(warnMessage)
         }
     }
 }
@@ -419,3 +444,5 @@ internal class Version(
     val flavor: String?,
     val version: Int
 )
+
+private fun String.capitalize(): String = replaceFirstChar { if (it.isLowerCase()) it.uppercase() else it.toString() }

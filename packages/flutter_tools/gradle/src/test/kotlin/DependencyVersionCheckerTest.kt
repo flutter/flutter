@@ -2,8 +2,8 @@ package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.dsl.ApplicationExtension
-import com.android.build.api.dsl.ApplicationProductFlavor
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.Variant
 import com.flutter.gradle.DependencyVersionChecker.AGP_NAME
 import com.flutter.gradle.DependencyVersionChecker.GRADLE_NAME
 import com.flutter.gradle.DependencyVersionChecker.JAVA_NAME
@@ -35,8 +35,10 @@ import io.mockk.verify
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.internal.extensions.core.extra
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -221,7 +223,7 @@ class DependencyVersionCheckerTest {
     }
 
     @Test
-    fun `SDK version in warn range results in warning logs`() {
+    fun `min SDK version in warn range results in warning logs`() {
         val exampleWarnSDKVersion = 19
         val flavorName = "flavor1"
         val mockProject =
@@ -271,7 +273,7 @@ class DependencyVersionCheckerTest {
     }
 
     @Test
-    fun `default SDK version in error range results in DependencyValidationException`() {
+    fun `default min SDK version in error range results in DependencyValidationException`() {
         val exampleErrorSDKVersion = 0
         val mockProject =
             MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(
@@ -311,7 +313,7 @@ class DependencyVersionCheckerTest {
     }
 
     @Test
-    fun `flavor SDK version in error range results in DependencyValidationException`() {
+    fun `flavor min SDK version in error range results in DependencyValidationException`() {
         val exampleErrorSDKVersion = 0
         val flavorName = "flavor1"
         val mockProject =
@@ -398,27 +400,56 @@ private object MockProjectFactory {
 
         // SDK
         val actionSlot = slot<Action<Project>>()
+        val onVariantsFnSlot = slot<(Variant) -> Unit>()
         val mockApplicationExtension = mockk<ApplicationExtension>()
         val defaultSdkVersion = minSdkVersions.find { it.flavor == null }?.version
-        val productFlavors = arrayListOf<ApplicationProductFlavor>()
         every { mockProject.afterEvaluate(capture(actionSlot)) } answers {
             actionSlot.captured.execute(mockProject)
             return@answers Unit
         }
         every { mockProject.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
         every { mockApplicationExtension.defaultConfig.minSdk } returns defaultSdkVersion
-        minSdkVersions.forEach {
-            val flavor = mockk<ApplicationProductFlavor>()
-            if (it.flavor != null) {
-                every { flavor.name } returns it.flavor
-                every { flavor.minSdk } returns it.version
-                productFlavors += flavor
-            }
-        }
-        every { mockApplicationExtension.productFlavors } returns
+        every { mockAndroidComponentsExtension.selector() } returns
             mockk {
-                every { iterator() }.returns(productFlavors.iterator())
+                every { all() } returns mockk()
             }
+        every { mockProject.tasks } returns
+            mockk<TaskContainer> {
+                val registerTaskSlot = slot<Action<Task>>()
+                every { register(any(), capture(registerTaskSlot)) } answers registerAnswer@{
+                    registerTaskSlot.captured.execute(
+                        mockk {
+                            val doLastActionSlot = slot<Action<Task>>()
+                            every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
+                                doLastActionSlot.captured.execute(mockk())
+                                return@doLastAnswer mockk()
+                            }
+                        }
+                    )
+                    return@registerAnswer mockk()
+                }
+
+                every { named(any<String>()) } returns
+                    mockk {
+                        every { configure(any<Action<Task>>()) } returns mockk()
+                    }
+            }
+        every {
+            mockAndroidComponentsExtension.onVariants(
+                any(),
+                capture(onVariantsFnSlot)
+            )
+        } answers {
+            minSdkVersions.forEach {
+                val variant = mockk<Variant>()
+                if (it.flavor != null) {
+                    every { variant.name } returns it.flavor
+                    every { variant.minSdk } returns mockk { every { apiLevel } returns it.version }
+                    onVariantsFnSlot.captured.invoke(variant)
+                }
+            }
+            return@answers Unit
+        }
 
         return mockProject
     }
