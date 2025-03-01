@@ -75,6 +75,9 @@ Future<void> main(List<String> rawArgs) async {
   /// Use an emulator for this test if it is an android test.
   final bool useEmulator = (args['use-emulator'] as bool?) ?? false;
 
+  /// Do not attempt to reboot device.
+  final bool noReboot = (args['no-reboot'] as bool?) ?? false;
+
   if (args.wasParsed('list')) {
     for (int i = 0; i < taskNames.length; i++) {
       print('${(i + 1).toString().padLeft(3)} - ${taskNames[i]}');
@@ -135,6 +138,7 @@ Future<void> main(List<String> rawArgs) async {
       luciBuilder: luciBuilder,
       resultsPath: resultsPath,
       useEmulator: useEmulator,
+      noReboot: noReboot,
     );
   }
 }
@@ -377,6 +381,12 @@ ArgParser createArgParser(List<String> taskNames) {
       help:
           'If this is an android test, use an emulator to run the test instead of '
           'a physical device.',
+    )
+    ..addFlag(
+      'no-reboot',
+      negatable: false,
+      help:
+          'Do not attempt to reboot the device after every 30 test runs',
     )
     ..addMultiOption(
       'test',

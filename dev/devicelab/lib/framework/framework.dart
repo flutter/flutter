@@ -79,12 +79,14 @@ class _TaskRunner {
       final bool runProcessCleanup = parameters['runProcessCleanup'] != 'false';
       final String? localEngine = parameters['localEngine'];
       final String? localEngineHost = parameters['localEngineHost'];
+      final bool noReboot = parameters['noReboot'] == 'true';
       final TaskResult result = await run(
         taskTimeout,
         runProcessCleanup: runProcessCleanup,
         runFlutterConfig: runFlutterConfig,
         localEngine: localEngine,
         localEngineHost: localEngineHost,
+        noReboot: noReboot,
       );
       const Duration taskResultReceivedTimeout = Duration(seconds: 30);
       _taskResultReceivedTimeout = Timer(taskResultReceivedTimeout, () {
@@ -141,6 +143,7 @@ class _TaskRunner {
     bool runProcessCleanup = true,
     required String? localEngine,
     required String? localEngineHost,
+    bool noReboot = false,
   }) async {
     try {
       _taskStarted = true;
@@ -238,7 +241,9 @@ class _TaskRunner {
       print(stackTrace);
       return TaskResult.failure('Task timed out after $taskTimeout');
     } finally {
-      await checkForRebootRequired();
+      if (!noReboot){
+        await checkForRebootRequired();
+      }
       await forceQuitRunningProcesses();
     }
   }
