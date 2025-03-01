@@ -35,7 +35,7 @@ FlPointerManager* fl_pointer_manager_new(FlutterViewId view_id,
  * @device_kind: kind of device generating the event.
  * @x: x co-ordinate of event.
  * @y: y co-ordinate of event.
- * @button: button being pressed.
+ * @gdk_button: button being pressed.
  *
  * Returns %TRUE if this event was handled.
  */
@@ -45,7 +45,7 @@ gboolean fl_pointer_manager_handle_button_press(
     FlutterPointerDeviceKind device_kind,
     gdouble x,
     gdouble y,
-    int64_t button);
+    guint gdk_button);
 
 /**
  * fl_pointer_manager_handle_button_release:
@@ -54,7 +54,7 @@ gboolean fl_pointer_manager_handle_button_press(
  * @device_kind: kind of device generating the event.
  * @x: x co-ordinate of event.
  * @y: y co-ordinate of event.
- * @button: button being released.
+ * @gdk_button: button being released.
  *
  * Returns %TRUE if this event was handled.
  */
@@ -64,7 +64,7 @@ gboolean fl_pointer_manager_handle_button_release(
     FlutterPointerDeviceKind device_kind,
     gdouble x,
     gdouble y,
-    int64_t button);
+    guint gdk_button);
 
 /**
  * fl_pointer_manager_handle_motion:
