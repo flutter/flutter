@@ -98,6 +98,7 @@ void SurfaceContextVK::MarkFrameEnd() {
   }
   parent_->DisposeThreadLocalCachedResources();
   parent_->GetResourceAllocator()->DebugTraceMemoryStatistics();
+  parent_->GetFreeQueue()->PopEntries();
 }
 
 void SurfaceContextVK::UpdateSurfaceSize(const ISize& size) const {

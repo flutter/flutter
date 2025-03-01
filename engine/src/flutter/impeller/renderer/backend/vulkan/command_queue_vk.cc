@@ -9,7 +9,6 @@
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
-#include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/tracked_objects_vk.h"
 #include "impeller/renderer/command_buffer.h"
 
@@ -69,7 +68,7 @@ fml::Status CommandQueueVK::Submit(
 
   // Submit will proceed, call callback with true when it is done and do not
   // call when `reset` is collected.
-  auto added_fence = context->GetFenceWaiter()->AddFence(
+  context->GetFreeQueue()->PushEntry(
       std::move(fence), [completion_callback, tracked_objects = std::move(
                                                   tracked_objects)]() mutable {
         // Ensure tracked objects are destructed before calling any final
@@ -79,9 +78,6 @@ fml::Status CommandQueueVK::Submit(
           completion_callback(CommandBuffer::Status::kCompleted);
         }
       });
-  if (!added_fence) {
-    return fml::Status(fml::StatusCode::kCancelled, "Failed to add fence.");
-  }
   reset.Release();
   return fml::Status();
 }

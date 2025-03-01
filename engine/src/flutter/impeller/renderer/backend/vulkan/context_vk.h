@@ -17,6 +17,7 @@
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/driver_info_vk.h"
+#include "impeller/renderer/backend/vulkan/free_queue_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 #include "impeller/renderer/backend/vulkan/queue_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_library_vk.h"
@@ -35,7 +36,6 @@ class CommandEncoderFactoryVK;
 class CommandEncoderVK;
 class CommandPoolRecyclerVK;
 class DebugReportVK;
-class FenceWaiterVK;
 class ResourceManagerVK;
 class SurfaceContextVK;
 class GPUTracerVK;
@@ -206,8 +206,6 @@ class ContextVK final : public Context,
 
   vk::PhysicalDevice GetPhysicalDevice() const;
 
-  std::shared_ptr<FenceWaiterVK> GetFenceWaiter() const;
-
   std::shared_ptr<ResourceManagerVK> GetResourceManager() const;
 
   std::shared_ptr<CommandPoolRecyclerVK> GetCommandPoolRecycler() const;
@@ -243,6 +241,8 @@ class ContextVK final : public Context,
     return idle_waiter_vk_;
   }
 
+  std::shared_ptr<FreeQueueVK> GetFreeQueue() const { return free_queue_vk_; }
+
  private:
   struct DeviceHolderImpl : public DeviceHolderVK {
     // |DeviceHolder|
@@ -275,7 +275,6 @@ class ContextVK final : public Context,
   std::shared_ptr<YUVConversionLibraryVK> yuv_conversion_library_;
   QueuesVK queues_;
   std::shared_ptr<const Capabilities> device_capabilities_;
-  std::shared_ptr<FenceWaiterVK> fence_waiter_;
   std::shared_ptr<ResourceManagerVK> resource_manager_;
   std::shared_ptr<DescriptorPoolRecyclerVK> descriptor_pool_recycler_;
   std::shared_ptr<CommandPoolRecyclerVK> command_pool_recycler_;
@@ -284,6 +283,7 @@ class ContextVK final : public Context,
   std::shared_ptr<GPUTracerVK> gpu_tracer_;
   std::shared_ptr<CommandQueue> command_queue_vk_;
   std::shared_ptr<const IdleWaiter> idle_waiter_vk_;
+  std::shared_ptr<FreeQueueVK> free_queue_vk_;
   WorkaroundsVK workarounds_;
 
   using DescriptorPoolMap =

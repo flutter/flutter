@@ -11,6 +11,7 @@
 #include "impeller/core/runtime_types.h"
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
+#include "impeller/renderer/backend/vulkan/free_queue_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 #include "impeller/renderer/backend/vulkan/workarounds_vk.h"
 #include "impeller/renderer/render_target.h"
@@ -37,7 +38,6 @@
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 #include "impeller/renderer/backend/vulkan/debug_report_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
-#include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
@@ -404,12 +404,6 @@ void ContextVK::Setup(Settings settings) {
   }
 
   //----------------------------------------------------------------------------
-  /// Create the fence waiter.
-  ///
-  auto fence_waiter =
-      std::shared_ptr<FenceWaiterVK>(new FenceWaiterVK(device_holder));
-
-  //----------------------------------------------------------------------------
   /// Create the resource manager and command pool recycler.
   ///
   auto resource_manager = ResourceManagerVK::Create();
@@ -468,6 +462,7 @@ void ContextVK::Setup(Settings settings) {
   sampler_library->ApplyWorkarounds(workarounds_);
 
   device_holder_ = std::move(device_holder);
+  free_queue_vk_ = std::make_shared<FreeQueueVK>(device_holder_);
   idle_waiter_vk_ = std::make_shared<IdleWaiterVK>(device_holder_);
   driver_info_ = std::move(driver_info);
   debug_report_ = std::move(debug_report);
@@ -479,7 +474,6 @@ void ContextVK::Setup(Settings settings) {
       new YUVConversionLibraryVK(device_holder_));
   queues_ = std::move(queues);
   device_capabilities_ = std::move(caps);
-  fence_waiter_ = std::move(fence_waiter);
   resource_manager_ = std::move(resource_manager);
   command_pool_recycler_ = std::move(command_pool_recycler);
   descriptor_pool_recycler_ = std::move(descriptor_pool_recycler);
@@ -600,7 +594,6 @@ void ContextVK::Shutdown() {
   // pointers ensures that cleanup happens in a correct order.
   //
   // tl;dr: Without it, we get thread::join failures on shutdown.
-  fence_waiter_.reset();
   resource_manager_.reset();
 
   raster_message_loop_->Terminate();
@@ -620,10 +613,6 @@ const std::shared_ptr<QueueVK>& ContextVK::GetGraphicsQueue() const {
 
 vk::PhysicalDevice ContextVK::GetPhysicalDevice() const {
   return device_holder_->physical_device;
-}
-
-std::shared_ptr<FenceWaiterVK> ContextVK::GetFenceWaiter() const {
-  return fence_waiter_;
 }
 
 std::shared_ptr<ResourceManagerVK> ContextVK::GetResourceManager() const {
