@@ -90,15 +90,6 @@ class CustomCalendarDelegate extends CalendarDelegate {
   DateTime dateOnly(DateTime date) => DateUtils.dateOnly(date);
 
   @override
-  DateTimeRange datesOnly(DateTimeRange range) => DateUtils.datesOnly(range);
-
-  @override
-  bool isSameDay(DateTime? dateA, DateTime? dateB) => DateUtils.isSameDay(dateA, dateB);
-
-  @override
-  bool isSameMonth(DateTime? dateA, DateTime? dateB) => DateUtils.isSameMonth(dateA, dateB);
-
-  @override
   int monthDelta(DateTime startDate, DateTime endDate) => DateUtils.monthDelta(startDate, endDate);
 
   @override
@@ -118,11 +109,6 @@ class CustomCalendarDelegate extends CalendarDelegate {
   @override
   String formatMonthYear(DateTime date, MaterialLocalizations localizations) {
     return localizations.formatMonthYear(date);
-  }
-
-  @override
-  String formatYear(int year, MaterialLocalizations localizations) {
-    return localizations.formatYear(DateTime(year));
   }
 
   @override

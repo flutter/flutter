@@ -29,33 +29,40 @@ import 'material_localizations.dart';
 ///
 ///  * [GregorianCalendarDelegate], the default implementation for the Gregorian calendar.
 ///  * [CalendarDatePicker], which uses this delegate to manage calendar-specific behavior.
-abstract class CalendarDelegate {
+@optionalTypeArgs
+abstract class CalendarDelegate<T extends DateTime> {
   /// Creates a calendar delegate.
   const CalendarDelegate();
 
   /// Returns a [DateTime] representing the current date and time.
-  DateTime now();
+  T now();
 
   /// {@macro flutter.material.date.dateOnly}
-  DateTime dateOnly(covariant DateTime date);
+  T dateOnly(T date);
 
   /// {@macro flutter.material.date.datesOnly}
-  DateTimeRange datesOnly(covariant DateTimeRange range);
+  DateTimeRange<T> datesOnly(DateTimeRange<T> range) {
+    return DateTimeRange<T>(start: dateOnly(range.start), end: dateOnly(range.end));
+  }
 
   /// {@macro flutter.material.date.isSameDay}
-  bool isSameDay(covariant DateTime? dateA, covariant DateTime? dateB);
+  bool isSameDay(T? dateA, T? dateB) {
+    return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
+  }
 
   /// {@macro flutter.material.date.isSameMonth}
-  bool isSameMonth(covariant DateTime? dateA, covariant DateTime? dateB);
+  bool isSameMonth(T? dateA, T? dateB) {
+    return dateA?.year == dateB?.year && dateA?.month == dateB?.month;
+  }
 
   /// {@macro flutter.material.date.monthDelta}
-  int monthDelta(covariant DateTime startDate, covariant DateTime endDate);
+  int monthDelta(T startDate, T endDate);
 
   /// {@macro flutter.material.date.addMonthsToMonthDate}
-  DateTime addMonthsToMonthDate(covariant DateTime monthDate, int monthsToAdd);
+  T addMonthsToMonthDate(T monthDate, int monthsToAdd);
 
   /// {@macro flutter.material.date.addDaysToDate}
-  DateTime addDaysToDate(covariant DateTime date, int days);
+  T addDaysToDate(T date, int days);
 
   /// {@macro flutter.material.date.firstDayOffset}
   int firstDayOffset(int year, int month, MaterialLocalizations localizations);
@@ -64,19 +71,21 @@ abstract class CalendarDelegate {
   int getDaysInMonth(int year, int month);
 
   /// Returns a [DateTime] with the given [year] and [month].
-  DateTime getMonth(int year, int month);
+  T getMonth(int year, int month);
 
   /// Returns a [DateTime] with the given [year], [month], and [day].
-  DateTime getDay(int year, int month, int day);
+  T getDay(int year, int month, int day);
 
   /// Formats the month and the year of the given [date].
   ///
   /// The returned string does not contain the day of the month. This appears
   /// in the date picker invoked using [showDatePicker].
-  String formatMonthYear(covariant DateTime date, MaterialLocalizations localizations);
+  String formatMonthYear(T date, MaterialLocalizations localizations);
 
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
-  String formatYear(int year, MaterialLocalizations localizations);
+  String formatYear(int year, MaterialLocalizations localizations) {
+    return localizations.formatYear(DateTime(year));
+  }
 
   /// Formats the date using a medium-width format.
   ///
@@ -87,7 +96,7 @@ abstract class CalendarDelegate {
   ///
   /// - US English: Wed, Sep 27
   /// - Russian: ср, сент. 27
-  String formatMediumDate(covariant DateTime date, MaterialLocalizations localizations);
+  String formatMediumDate(T date, MaterialLocalizations localizations);
 
   /// Formats the month and day of the given [date].
   ///
@@ -95,7 +104,7 @@ abstract class CalendarDelegate {
   ///
   /// - US English: Feb 21
   /// - Russian: 21 февр.
-  String formatShortMonthDay(covariant DateTime date, MaterialLocalizations localizations);
+  String formatShortMonthDay(T date, MaterialLocalizations localizations);
 
   /// Formats the date using a short-width format.
   ///
@@ -105,7 +114,7 @@ abstract class CalendarDelegate {
   ///
   /// - US English: Feb 21, 2019
   /// - Russian: 21 февр. 2019 г.
-  String formatShortDate(covariant DateTime date, MaterialLocalizations localizations);
+  String formatShortDate(T date, MaterialLocalizations localizations);
 
   /// Formats day of week, month, day of month and year in a long-width format.
   ///
@@ -116,7 +125,7 @@ abstract class CalendarDelegate {
   ///
   /// - US English: Wednesday, September 27, 2017
   /// - Russian: Среда, Сентябрь 27, 2017
-  String formatFullDate(covariant DateTime date, MaterialLocalizations localizations);
+  String formatFullDate(T date, MaterialLocalizations localizations);
 
   /// Formats the date in a compact format.
   ///
@@ -129,7 +138,7 @@ abstract class CalendarDelegate {
   ///
   /// See also:
   ///   * [parseCompactDate], which will convert a compact date string to a [DateTime].
-  String formatCompactDate(covariant DateTime date, MaterialLocalizations localizations);
+  String formatCompactDate(T date, MaterialLocalizations localizations);
 
   /// Converts the given compact date formatted string into a [DateTime].
   ///
@@ -139,7 +148,7 @@ abstract class CalendarDelegate {
   ///
   /// See also:
   ///   * [formatCompactDate], which will convert a [DateTime] into a string in the compact format.
-  DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations);
+  T? parseCompactDate(String? inputString, MaterialLocalizations localizations);
 
   /// The help text used on an empty [InputDatePickerFormField] to indicate
   /// to the user the date format being asked for.
@@ -157,7 +166,7 @@ abstract class CalendarDelegate {
 /// See also:
 /// * [CalendarDelegate], the base class for defining custom calendars.
 /// * [CalendarDatePicker], which uses this delegate for date selection.
-class GregorianCalendarDelegate extends CalendarDelegate {
+class GregorianCalendarDelegate extends CalendarDelegate<DateTime> {
   /// Creates a calendar delegate that uses the Gregorian calendar and the
   /// conventions of the current [MaterialLocalizations].
   const GregorianCalendarDelegate();
@@ -167,15 +176,6 @@ class GregorianCalendarDelegate extends CalendarDelegate {
 
   @override
   DateTime dateOnly(DateTime date) => DateUtils.dateOnly(date);
-
-  @override
-  DateTimeRange datesOnly(DateTimeRange range) => DateUtils.datesOnly(range);
-
-  @override
-  bool isSameDay(DateTime? dateA, DateTime? dateB) => DateUtils.isSameDay(dateA, dateB);
-
-  @override
-  bool isSameMonth(DateTime? dateA, DateTime? dateB) => DateUtils.isSameMonth(dateA, dateB);
 
   @override
   int monthDelta(DateTime startDate, DateTime endDate) => DateUtils.monthDelta(startDate, endDate);
@@ -206,11 +206,6 @@ class GregorianCalendarDelegate extends CalendarDelegate {
   @override
   String formatMonthYear(DateTime date, MaterialLocalizations localizations) {
     return localizations.formatMonthYear(date);
-  }
-
-  @override
-  String formatYear(int year, MaterialLocalizations localizations) {
-    return localizations.formatYear(DateTime(year));
   }
 
   @override
