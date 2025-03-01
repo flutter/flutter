@@ -13,51 +13,57 @@ import '../../dart/package_map.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
-import '../exceptions.dart';
+import '../exceptions.dart' show MissingDefineException;
 import 'common.dart';
+
+export '../../isolated/native_assets/native_assets.dart'
+    show CodeAsset, DartBuildResult, DataAsset, DynamicLoadingBundled;
 
 /// Runs the dart build of the app.
 abstract class DartBuild extends Target {
-  const DartBuild({@visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner})
-    : _buildRunner = buildRunner;
+  const DartBuild({
+    @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
+    required this.isWeb,
+  }) : _buildRunner = buildRunner;
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
+
+  // The target platform is not set on the web, so we store it explicitly.
+  final bool isWeb;
 
   @override
   Future<void> build(Environment environment) async {
     final FileSystem fileSystem = environment.fileSystem;
-    final String? nativeAssetsEnvironment = environment.defines[kNativeAssets];
-
     final DartBuildResult result;
-    if (nativeAssetsEnvironment == 'false') {
-      result = const DartBuildResult.empty();
-    } else {
-      final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
-      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        fileSystem.file(environment.packageConfigPath),
-        logger: environment.logger,
-      );
-      final Uri projectUri = environment.projectDir.uri;
-      final String? runPackageName =
-          packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
-      final FlutterNativeAssetsBuildRunner buildRunner =
-          _buildRunner ??
-          FlutterNativeAssetsBuildRunnerImpl(
-            environment.packageConfigPath,
-            packageConfig,
-            fileSystem,
-            environment.logger,
-            runPackageName!,
-          );
-      result = await runFlutterSpecificDartBuild(
-        environmentDefines: environment.defines,
-        buildRunner: buildRunner,
-        targetPlatform: targetPlatform,
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-      );
-    }
+    final TargetPlatform targetPlatform =
+        isWeb
+            ? TargetPlatform.web_javascript
+            : _getTargetPlatformFromEnvironment(environment, name);
+
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      fileSystem.file(environment.packageConfigPath),
+      logger: environment.logger,
+    );
+    final Uri projectUri = environment.projectDir.uri;
+    final String? runPackageName =
+        packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
+    final FlutterNativeAssetsBuildRunner buildRunner =
+        _buildRunner ??
+        FlutterNativeAssetsBuildRunnerImpl(
+          environment.packageConfigPath,
+          packageConfig,
+          fileSystem,
+          environment.logger,
+          runPackageName!,
+        );
+    result = await runFlutterSpecificDartBuild(
+      environmentDefines: environment.defines,
+      buildRunner: buildRunner,
+      targetPlatform: targetPlatform,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+    );
 
     final File dartBuildResultJsonFile = environment.buildDir.childFile(dartBuildResultFilename);
     if (!dartBuildResultJsonFile.parent.existsSync()) {
@@ -106,6 +112,9 @@ abstract class DartBuild extends Target {
     final File dartBuildResultJsonFile = environment.buildDir.childFile(
       DartBuild.dartBuildResultFilename,
     );
+    if (!dartBuildResultJsonFile.existsSync()) {
+      return DartBuildResult.empty();
+    }
     return DartBuildResult.fromJson(
       json.decode(dartBuildResultJsonFile.readAsStringSync()) as Map<String, Object?>,
     );
@@ -116,10 +125,17 @@ abstract class DartBuild extends Target {
 }
 
 class DartBuildForNative extends DartBuild {
-  const DartBuildForNative({@visibleForTesting super.buildRunner});
+  const DartBuildForNative({@visibleForTesting super.buildRunner}) : super(isWeb: false);
 
   @override
   List<Target> get dependencies => const <Target>[KernelSnapshot()];
+}
+
+class DartBuildForDataAssets extends DartBuild {
+  const DartBuildForDataAssets({@visibleForTesting super.buildRunner, required super.isWeb});
+
+  @override
+  List<Target> get dependencies => <Target>[];
 }
 
 /// Installs the code assets from a [DartBuild] Flutter app.

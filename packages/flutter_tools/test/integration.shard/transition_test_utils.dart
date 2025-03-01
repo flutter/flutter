@@ -26,7 +26,7 @@ void debugPrint(String message) {
 typedef LineHandler = String? Function(String line);
 
 abstract class Transition {
-  const Transition({this.handler, this.logging});
+  const Transition({this.handler, this.logging, required this.contains});
 
   /// Callback that is invoked when the transition matches.
   ///
@@ -40,20 +40,24 @@ abstract class Transition {
   /// The default value, null, leaves the logging state unaffected.
   final bool? logging;
 
+  /// Whether to check the line for containing a substring or an exact match.
+  final bool contains;
+
   bool matches(String line);
 
   @protected
-  bool lineMatchesPattern(String line, Pattern pattern, bool contains) {
-    if (pattern is RegExp) {
-      // Ideally this would also distinguish between "contains" and "equals"
-      // operation.
-      return line.contains(pattern);
+  bool lineMatchesPattern(String line, Pattern pattern) {
+    if (pattern is String) {
+      return contains ? line.contains(pattern) : line == pattern;
     }
     return contains ? line.contains(pattern) : line == pattern;
   }
 
   @protected
-  String describe(Pattern pattern, bool contains) {
+  String describe(Pattern pattern) {
+    if (pattern is String) {
+      return contains ? '"...$pattern..."' : '"$pattern"';
+    }
     if (pattern is RegExp) {
       return '/${pattern.pattern}/';
     }
@@ -62,37 +66,35 @@ abstract class Transition {
 }
 
 class Barrier extends Transition {
-  Barrier(this.pattern, {super.handler, super.logging}) : contains = false;
-  Barrier.contains(this.pattern, {super.handler, super.logging}) : contains = true;
+  Barrier(this.pattern, {super.handler, super.logging}) : super(contains: false);
+  Barrier.contains(this.pattern, {super.handler, super.logging}) : super(contains: true);
 
   final Pattern pattern;
-  final bool contains;
 
   @override
-  bool matches(String line) => lineMatchesPattern(line, pattern, contains);
+  bool matches(String line) => lineMatchesPattern(line, pattern);
 
   @override
-  String toString() => describe(pattern, contains);
+  String toString() => describe(pattern);
 }
 
 class Multiple extends Transition {
   Multiple(List<Pattern> patterns, {super.handler, super.logging})
     : _originalPatterns = patterns,
       patterns = patterns.toList(),
-      contains = false;
+      super(contains: false);
   Multiple.contains(List<Pattern> patterns, {super.handler, super.logging})
     : _originalPatterns = patterns,
       patterns = patterns.toList(),
-      contains = true;
+      super(contains: true);
 
   final List<Pattern> _originalPatterns;
   final List<Pattern> patterns;
-  final bool contains;
 
   @override
   bool matches(String line) {
     for (int index = 0; index < patterns.length; index += 1) {
-      if (lineMatchesPattern(line, patterns[index], contains)) {
+      if (lineMatchesPattern(line, patterns[index])) {
         patterns.removeAt(index);
         break;
       }
@@ -102,7 +104,7 @@ class Multiple extends Transition {
 
   @override
   String toString() {
-    String describe(Pattern pattern) => super.describe(pattern, contains);
+    String describe(Pattern pattern) => super.describe(pattern);
     if (patterns.isEmpty) {
       return '${_originalPatterns.map(describe).join(', ')} (all matched)';
     }
