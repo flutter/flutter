@@ -861,7 +861,10 @@ class ScrollableState extends State<Scrollable>
 
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
-    assert(_hold == null);
+    // _hold might be non-null if the scroll position is currently animating.
+    if (_hold != null) {
+      _disposeHold();
+    }
     _hold = position.hold(_disposeHold);
   }
 
@@ -872,18 +875,27 @@ class ScrollableState extends State<Scrollable>
     assert(_drag == null);
     _drag = position.drag(details, _disposeDrag);
     assert(_drag != null);
-    assert(_hold == null);
+    // _hold might be non-null if the scroll position is currently animating.
+    if (_hold != null) {
+      _disposeHold();
+    }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
+    // _hold might be non-null if the scroll position is currently animating.
+    if (_hold != null) {
+      _disposeHold();
+    }
     // _drag might be null if the drag activity ended and called _disposeDrag.
-    assert(_hold == null || _drag == null);
     _drag?.update(details);
   }
 
   void _handleDragEnd(DragEndDetails details) {
+    // _hold might be non-null if the scroll position is currently animating.
+    if (_hold != null) {
+      _disposeHold();
+    }
     // _drag might be null if the drag activity ended and called _disposeDrag.
-    assert(_hold == null || _drag == null);
     _drag?.end(details);
     assert(_drag == null);
   }
