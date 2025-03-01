@@ -630,10 +630,11 @@ mixin RendererBinding
     rootPipelineOwner.flushCompositingBits();
     final List<RenderView> viewsNeedingPaint = <RenderView>[];
     for (final RenderView renderView in renderViews) {
-      if (renderView.owner?.needsPaint ?? false) {
+      if (_forceCompositing || (renderView.owner?.needsPaint ?? false)) {
         viewsNeedingPaint.add(renderView);
       }
     }
+    _forceCompositing = false;
     rootPipelineOwner.flushPaint();
     if (sendFramesToEngine) {
       for (final RenderView renderView in viewsNeedingPaint) {
@@ -641,6 +642,18 @@ mixin RendererBinding
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;
+    }
+  }
+
+  // Force compositing when returning to the foreground.
+  bool _forceCompositing = false;
+
+  @override
+  void handleAppLifecycleStateChanged(AppLifecycleState state) {
+    final bool framesEnabledBefore = framesEnabled;
+    super.handleAppLifecycleStateChanged(state);
+    if (!framesEnabledBefore && framesEnabled) {
+      _forceCompositing = true;
     }
   }
 

@@ -200,6 +200,48 @@ void main() {
     binding.removeRenderView(renderView2);
   });
 
+  test('forced composition when returning to foreground', () {
+    final FakeFlutterView flutterView1 = FakeFlutterView(viewId: 1);
+    final FakeFlutterView flutterView2 = FakeFlutterView(viewId: 2);
+    final RenderView renderView1 = RenderView(view: flutterView1);
+    final RenderView renderView2 = RenderView(view: flutterView2);
+    final PipelineOwner owner1 = PipelineOwner()..rootNode = renderView1;
+    final PipelineOwner owner2 = PipelineOwner()..rootNode = renderView2;
+    binding.rootPipelineOwner.adoptChild(owner1);
+    binding.rootPipelineOwner.adoptChild(owner2);
+    binding.addRenderView(renderView1);
+    binding.addRenderView(renderView2);
+    renderView1.prepareInitialFrame();
+    renderView2.prepareInitialFrame();
+
+    expect(flutterView1.renderedScenes, isEmpty);
+    expect(flutterView2.renderedScenes, isEmpty);
+
+    binding.handleBeginFrame(Duration.zero);
+    binding.handleDrawFrame();
+
+    expect(flutterView1.renderedScenes, hasLength(1));
+    expect(flutterView2.renderedScenes, hasLength(1));
+
+    binding.handleBeginFrame(Duration.zero);
+    binding.handleDrawFrame();
+
+    expect(flutterView1.renderedScenes, hasLength(1));
+    expect(flutterView2.renderedScenes, hasLength(1));
+
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+
+    binding.handleBeginFrame(Duration.zero);
+    binding.handleDrawFrame();
+
+    expect(flutterView1.renderedScenes, hasLength(2));
+    expect(flutterView2.renderedScenes, hasLength(2));
+
+    binding.removeRenderView(renderView1);
+    binding.removeRenderView(renderView2);
+  });
+
   test('hit-testing reaches the right view', () {
     final FakeFlutterView flutterView1 = FakeFlutterView(viewId: 1);
     final FakeFlutterView flutterView2 = FakeFlutterView(viewId: 2);
