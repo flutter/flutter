@@ -1112,7 +1112,7 @@ void main() {
       addTearDown(source.dispose);
 
       return MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData(
           dataTableTheme: const DataTableThemeData(decoration: BoxDecoration(color: Colors.white)),
         ),
         home: PaginatedDataTable(
