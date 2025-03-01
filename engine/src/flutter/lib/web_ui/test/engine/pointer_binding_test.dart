@@ -286,10 +286,9 @@ void testMain() {
     final DomElement child = createDomHTMLDivElement();
     rootElement.append(child);
 
-    final DomEventListener stopPropagationListener =
-        createDomEventListener((DomEvent event) {
-          event.stopPropagation();
-        });
+    final DomEventListener stopPropagationListener = createDomEventListener((DomEvent event) {
+      event.stopPropagation();
+    });
 
     // The event reaches `PointerBinding` as expected.
     child.dispatchEvent(context.primaryDown());
@@ -2528,11 +2527,10 @@ void testMain() {
       Listener.register(
         event: 'custom-event',
         target: eventTarget,
-        handler:
-            (DomEvent event) {
-              expect(event, expected);
-              handled = true;
-            },
+        handler: (DomEvent event) {
+          expect(event, expected);
+          handled = true;
+        },
       );
 
       // Trigger the event...
@@ -2544,10 +2542,9 @@ void testMain() {
       final Listener listener = Listener.register(
         event: 'custom-event',
         target: eventTarget,
-        handler:
-            (DomEvent event) {
-              handled = true;
-            },
+        handler: (DomEvent event) {
+          handled = true;
+        },
       );
       listener.unregister();
 
