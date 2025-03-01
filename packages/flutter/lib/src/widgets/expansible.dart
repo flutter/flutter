@@ -14,6 +14,9 @@ import 'transitions.dart';
 
 /// The type of the callback that returns the header or body of an [Expansible].
 ///
+/// The `isExpanded` property allows for a different header or body depending on
+/// whether the [Expansible] is currently expanded or collapsed.
+///
 /// See also:
 ///
 ///   * [Expansible.headerBuilder], which is of this type.
@@ -21,7 +24,16 @@ import 'transitions.dart';
 typedef ExpansibleComponentBuilder = Widget Function(BuildContext context, bool isExpanded);
 
 /// The type of the callback that uses the header and body of an [Expansible]
-/// widget to layout that widget.
+/// widget to build the widget.
+///
+/// The `header` property is the header returned by [Expansible.headerBuilder]
+/// wrapped in a [GestureDetector] to toggle the expansion when tapped.
+///
+/// The `body` property is the body returned by [Expansible.bodyBuilder] wrapped
+/// in an [Offstage] to hide the body when the [Expansible] is collapsed.
+///
+/// The `isExpanded` property allows for a different return value depending on
+/// whether the [Expansible] is currently expanded or collapsed.
 ///
 /// See also:
 ///
@@ -98,8 +110,8 @@ class ExpansibleController {
   ///
   /// See also:
   ///
-  ///  * [expand], which expands the tile.
-  ///  * [isExpanded] to check whether the tile is expanded.
+  ///  * [expand], which expands the [Expansible].
+  ///  * [isExpanded] to check whether the [Expansible] is expanded.
   void collapse() {
     assert(_state != null);
     if (isExpanded) {
@@ -133,33 +145,36 @@ class ExpansibleController {
   /// within the `build` method of a descendant of an [Expansible].
   static ExpansibleController of(BuildContext context) {
     final ExpansibleState? result = context.findAncestorStateOfType<ExpansibleState>();
-    if (result != null) {
-      return result.widget.controller;
-    }
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary(
-        'ExpansibleController.of() called with a context that does not contain a Expansible.',
-      ),
-      ErrorDescription(
-        'No Expansible ancestor could be found starting from the context that was passed to ExpansibleController.of(). '
-        'This usually happens when the context provided is from the same StatefulWidget as that '
-        'whose build function actually creates the Expansible widget being sought.',
-      ),
-      ErrorHint(
-        'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
-        'context that is "under" the Expansible. ',
-      ),
-      ErrorHint(
-        'A more efficient solution is to split your build function into several widgets. This '
-        'introduces a new context from which you can obtain the Expansible. In this solution, '
-        'you would have an outer widget that creates the Expansible populated by instances of '
-        'your new inner widgets, and then in these inner widgets you would use ExpansibleController.of().\n'
-        'An other solution is assign a GlobalKey to the Expansible, '
-        'then use the key.currentState property to obtain the Expansible rather than '
-        'using the ExpansibleController.of() function.',
-      ),
-      context.describeElement('The context used was'),
-    ]);
+    assert(() {
+      if (result == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'ExpansibleController.of() called with a context that does not contain a Expansible.',
+          ),
+          ErrorDescription(
+            'No Expansible ancestor could be found starting from the context that was passed to ExpansibleController.of(). '
+            'This usually happens when the context provided is from the same StatefulWidget as that '
+            'whose build function actually creates the Expansible widget being sought.',
+          ),
+          ErrorHint(
+            'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+            'context that is "under" the Expansible. ',
+          ),
+          ErrorHint(
+            'A more efficient solution is to split your build function into several widgets. This '
+            'introduces a new context from which you can obtain the Expansible. In this solution, '
+            'you would have an outer widget that creates the Expansible populated by instances of '
+            'your new inner widgets, and then in these inner widgets you would use ExpansibleController.of().\n'
+            'An other solution is assign a GlobalKey to the Expansible, '
+            'then use the key.currentState property to obtain the Expansible rather than '
+            'using the ExpansibleController.of() function.',
+          ),
+          context.describeElement('The context used was'),
+        ]);
+      }
+      return true;
+    }());
+    return result!.widget.controller;
   }
 
   /// Finds the [Expansible] from the closest instance of this class that
