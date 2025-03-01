@@ -171,7 +171,7 @@ class FlutterWebSdk extends CachedArtifact {
   Directory get location => cache.getWebSdkDirectory();
 
   @override
-  String? get version => cache.getVersionFor('engine');
+  String? get version => cache.engineRevision;
 
   @override
   Future<void> updateInner(
@@ -568,7 +568,7 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
   Directory get location => cache.getArtifactDirectory('flutter_runner');
 
   @override
-  String? get version => cache.getVersionFor('engine');
+  String? get version => cache.engineRevision;
 
   @override
   Future<void> updateInner(
@@ -627,7 +627,7 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
   Directory get location => cache.getArtifactDirectory(name);
 
   @override
-  String? get version => cache.getVersionFor('engine');
+  String? get version => cache.engineRevision;
 
   Future<void> _downloadDebugSymbols(String targetArch, ArtifactUpdater artifactUpdater) async {
     final String packageName = 'fuchsia-debug-symbols-$targetArch';
