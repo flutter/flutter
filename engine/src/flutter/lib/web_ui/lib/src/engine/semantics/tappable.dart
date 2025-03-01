@@ -46,10 +46,9 @@ class SemanticButton extends SemanticRole {
 /// See also [ClickDebouncer].
 class Tappable extends SemanticBehavior {
   Tappable(super.semanticsObject, super.owner) {
-    _clickListener =
-        (DomEvent click) {
-          PointerBinding.clickDebouncer.onClick(click, viewId, semanticsObject.id, _isListening);
-        }.toJS;
+    _clickListener = createDomEventListener((DomEvent click) {
+      PointerBinding.clickDebouncer.onClick(click, viewId, semanticsObject.id, _isListening);
+    });
     owner.element.addEventListener('click', _clickListener);
   }
 

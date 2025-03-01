@@ -830,11 +830,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _onLocaleChangedSubscription = DomSubscription(
       domWindow,
       'languagechange',
-      (DomEvent _) {
+      createDomEventListener((DomEvent _) {
         // Update internal config, then propagate the changes.
         updateLocales();
         invokeOnLocaleChanged();
-      }.toJS,
+      }),
     );
   }
 

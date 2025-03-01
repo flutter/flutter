@@ -170,16 +170,12 @@ class AccessibilityFocusManager {
     final _FocusTarget newTarget = (
       semanticsNodeId: semanticsNodeId,
       element: element,
-      domFocusListener:
-          (DomEvent _) {
-            print('CALLING DOM FOCUS LISTENER!!');
-            _didReceiveDomFocus();
-          }.toJS,
-      domBlurListener:
-          (DomEvent _) {
-            print('CALLING DOM BLUR LISTENER!!');
-            _didReceiveDomBlur();
-          }.toJS,
+      domFocusListener: createDomEventListener((DomEvent _) {
+        _didReceiveDomFocus();
+      }),
+      domBlurListener: createDomEventListener((DomEvent _) {
+        _didReceiveDomBlur();
+      }),
     );
     _target = newTarget;
     _lastEvent = AccessibilityFocusManagerEvent.nothing;

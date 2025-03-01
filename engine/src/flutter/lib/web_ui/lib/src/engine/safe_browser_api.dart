@@ -1027,11 +1027,11 @@ class OffScreenCanvas {
         final DomFileReader fileReader = createDomFileReader();
         fileReader.addEventListener(
           'load',
-          (DomEvent event) {
+          createDomEventListener((DomEvent event) {
             completer.complete(
               js_util.getProperty<String>(js_util.getProperty<Object>(event, 'target'), 'result'),
             );
-          }.toJS,
+          }),
         );
         fileReader.readAsDataURL(value);
       });

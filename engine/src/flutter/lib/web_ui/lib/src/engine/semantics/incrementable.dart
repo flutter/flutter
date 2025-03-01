@@ -38,7 +38,7 @@ class SemanticIncrementable extends SemanticRole {
 
     _element.addEventListener(
       'change',
-      (DomEvent _) {
+      createDomEventListener((DomEvent _) {
         if (_element.disabled!) {
           return;
         }
@@ -61,7 +61,7 @@ class SemanticIncrementable extends SemanticRole {
             null,
           );
         }
-      }.toJS,
+      }),
     );
 
     // Store the callback as a closure because Dart does not guarantee that

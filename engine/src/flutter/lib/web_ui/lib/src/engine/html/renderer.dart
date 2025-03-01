@@ -359,18 +359,16 @@ class HtmlRenderer implements Renderer {
     late final DomEventListener loadListener;
     late final DomEventListener errorListener;
     final Completer<HtmlImage> completer = Completer<HtmlImage>();
-    loadListener =
-        (DomEvent event) {
-          completer.complete(HtmlImage(imageElement, width, height));
-          imageElement.removeEventListener('load', loadListener);
-          imageElement.removeEventListener('error', errorListener);
-        }.toJS;
-    errorListener =
-        (DomEvent event) {
-          completer.completeError(Exception('Failed to create image from image bitmap.'));
-          imageElement.removeEventListener('load', loadListener);
-          imageElement.removeEventListener('error', errorListener);
-        }.toJS;
+    loadListener = createDomEventListener((DomEvent event) {
+      completer.complete(HtmlImage(imageElement, width, height));
+      imageElement.removeEventListener('load', loadListener);
+      imageElement.removeEventListener('error', errorListener);
+    });
+    errorListener = createDomEventListener((DomEvent event) {
+      completer.completeError(Exception('Failed to create image from image bitmap.'));
+      imageElement.removeEventListener('load', loadListener);
+      imageElement.removeEventListener('error', errorListener);
+    });
     imageElement.addEventListener('load', loadListener);
     imageElement.addEventListener('error', errorListener);
     imageElement.src = await canvas.toDataUrl();

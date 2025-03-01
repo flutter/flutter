@@ -128,9 +128,15 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     }
 
     // Subscribe to text and selection changes.
-    subscriptions.add(DomSubscription(activeDomElement, 'input', handleChange.toJS));
-    subscriptions.add(DomSubscription(activeDomElement, 'keydown', maybeSendAction.toJS));
-    subscriptions.add(DomSubscription(domDocument, 'selectionchange', handleChange.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),
+    );
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'keydown', createDomEventListener(maybeSendAction)),
+    );
+    subscriptions.add(
+      DomSubscription(domDocument, 'selectionchange', createDomEventListener(handleChange)),
+    );
     preventDefaultForMouseEvents();
   }
 
@@ -271,11 +277,9 @@ class SemanticTextField extends SemanticRole {
       ..height = '${semanticsObject.rect!.height}px';
     append(editableElement);
 
-    print('ADDING EVENT LISTENERS TO $editableElement');
     editableElement.addEventListener(
       'focus',
-      (DomEvent event) {
-        print('GOT FOCUS EVENT!!!');
+      createDomEventListener((DomEvent event) {
         // IMPORTANT: because this event listener can be triggered by either or
         // both a "focus" and a "click" DOM events, this code must be idempotent.
         EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -284,21 +288,19 @@ class SemanticTextField extends SemanticRole {
           ui.SemanticsAction.focus,
           null,
         );
-      }.toJS,
+      }),
     );
     editableElement.addEventListener(
       'click',
-      (DomEvent event) {
-        print('GOT CLICK EVENT!!!');
+      createDomEventListener((DomEvent event) {
         editableElement.focusWithoutScroll();
-      }.toJS,
+      }),
     );
     editableElement.addEventListener(
       'blur',
-      (DomEvent event) {
-        print('GOT BLUR EVENT!!!');
+      createDomEventListener((DomEvent event) {
         SemanticsTextEditingStrategy._instance?.deactivate(this);
-      }.toJS,
+      }),
     );
   }
 

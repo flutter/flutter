@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_interop';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -156,10 +154,9 @@ class SemanticScrollable extends SemanticRole {
       };
       EngineSemantics.instance.addGestureModeListener(_gestureModeListener!);
 
-      _scrollListener =
-          (DomEvent _) {
-            _recomputeScrollPosition();
-          }.toJS;
+      _scrollListener = createDomEventListener((DomEvent _) {
+        _recomputeScrollPosition();
+      });
       addEventListener('scroll', _scrollListener);
     }
   }

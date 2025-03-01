@@ -216,7 +216,7 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
     DomSubscription(
       domWindow,
       'message',
-      (DomEvent event) {
+      createDomEventListener((DomEvent event) {
         final DomMessageEvent message = event as DomMessageEvent;
         // A message on the Window can theoretically come from any website. It's
         // very unlikely that a malicious site would care about hacking someone's
@@ -241,9 +241,9 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
             DomSubscription(
               port,
               'message',
-              (DomEvent event) {
+              createDomEventListener((DomEvent event) {
                 controller.local.sink.add((event as DomMessageEvent).data);
-              }.toJS,
+              }),
             ),
           );
           port.start();
@@ -261,9 +261,9 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
             DomSubscription(
               channel.port1,
               'message',
-              (DomEvent message) {
+              createDomEventListener((DomEvent message) {
                 controller.local.sink.add((message as DomMessageEvent).data['data']);
-              }.toJS,
+              }),
             ),
           );
 
@@ -273,7 +273,7 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
           // loading the test.
           controller.local.sink.add(message.data['data']);
         }
-      }.toJS,
+      }),
     ),
   );
 

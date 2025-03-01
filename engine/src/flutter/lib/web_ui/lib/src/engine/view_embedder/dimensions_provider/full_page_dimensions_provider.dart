@@ -33,7 +33,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     _domResizeSubscription = DomSubscription(
       resizeEventTarget,
       'resize',
-      _onVisualViewportResize.toJS,
+      createDomEventListener(_onVisualViewportResize),
     );
   }
 

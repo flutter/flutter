@@ -182,9 +182,9 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     // PointerBinding.
     placeholder.addEventListener(
       'click',
-      (DomEvent event) {
+      createDomEventListener((DomEvent event) {
         tryEnableSemantics(event);
-      }.toJS,
+      }),
       true.toJS,
     );
 
@@ -380,9 +380,9 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
     // PointerBinding.
     placeholder.addEventListener(
       'click',
-      (DomEvent event) {
+      createDomEventListener((DomEvent event) {
         tryEnableSemantics(event);
-      }.toJS,
+      }),
       true.toJS,
     );
 

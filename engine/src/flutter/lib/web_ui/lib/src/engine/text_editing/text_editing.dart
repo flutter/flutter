@@ -394,14 +394,14 @@ class EngineAutofillForm {
         DomSubscription(
           element,
           'input',
-          (DomEvent e) {
+          createDomEventListener((DomEvent e) {
             if (items![key] == null) {
               throw StateError('AutofillInfo must have a valid uniqueIdentifier.');
             } else {
               final AutofillInfo autofillInfo = items![key]!;
               handleChange(element, autofillInfo);
             }
-          }.toJS,
+          }),
         ),
       );
     }
@@ -1371,18 +1371,28 @@ abstract class DefaultTextEditingStrategy
     }
 
     // Subscribe to text and selection changes.
-    subscriptions.add(DomSubscription(activeDomElement, 'input', handleChange.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),
+    );
 
-    subscriptions.add(DomSubscription(activeDomElement, 'keydown', maybeSendAction.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'keydown', createDomEventListener(maybeSendAction)),
+    );
 
-    subscriptions.add(DomSubscription(domDocument, 'selectionchange', handleChange.toJS));
+    subscriptions.add(
+      DomSubscription(domDocument, 'selectionchange', createDomEventListener(handleChange)),
+    );
 
-    subscriptions.add(DomSubscription(activeDomElement, 'beforeinput', handleBeforeInput.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'beforeinput', createDomEventListener(handleBeforeInput)),
+    );
 
     if (this is! SafariDesktopTextEditingStrategy) {
       // handleBlur causes Safari to reopen autofill dialogs after autofill,
       // so we don't attach the listener there.
-      subscriptions.add(DomSubscription(activeDomElement, 'blur', handleBlur.toJS));
+      subscriptions.add(
+        DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
+      );
     }
 
     addCompositionEventHandlers(activeDomElement);
@@ -1591,9 +1601,9 @@ abstract class DefaultTextEditingStrategy
       DomSubscription(
         activeDomElement,
         'mousedown',
-        (DomEvent event) {
+        createDomEventListener((DomEvent event) {
           event.preventDefault();
-        }.toJS,
+        }),
       ),
     );
 
@@ -1601,9 +1611,9 @@ abstract class DefaultTextEditingStrategy
       DomSubscription(
         activeDomElement,
         'mouseup',
-        (DomEvent event) {
+        createDomEventListener((DomEvent event) {
           event.preventDefault();
-        }.toJS,
+        }),
       ),
     );
 
@@ -1611,9 +1621,9 @@ abstract class DefaultTextEditingStrategy
       DomSubscription(
         activeDomElement,
         'mousemove',
-        (DomEvent event) {
+        createDomEventListener((DomEvent event) {
           event.preventDefault();
-        }.toJS,
+        }),
       ),
     );
   }
@@ -1699,15 +1709,25 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     }
 
     // Subscribe to text and selection changes.
-    subscriptions.add(DomSubscription(activeDomElement, 'input', handleChange.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),
+    );
 
-    subscriptions.add(DomSubscription(activeDomElement, 'keydown', maybeSendAction.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'keydown', createDomEventListener(maybeSendAction)),
+    );
 
-    subscriptions.add(DomSubscription(domDocument, 'selectionchange', handleChange.toJS));
+    subscriptions.add(
+      DomSubscription(domDocument, 'selectionchange', createDomEventListener(handleChange)),
+    );
 
-    subscriptions.add(DomSubscription(activeDomElement, 'beforeinput', handleBeforeInput.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'beforeinput', createDomEventListener(handleBeforeInput)),
+    );
 
-    subscriptions.add(DomSubscription(activeDomElement, 'blur', handleBlur.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
+    );
 
     addCompositionEventHandlers(activeDomElement);
 
@@ -1716,11 +1736,10 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       DomSubscription(
         activeDomElement,
         'focus',
-        (DomEvent _) {
+        createDomEventListener((DomEvent _) {
           // Cancel previous timer if exists.
-          print('GOT FOCUS EVENT IN text_editing.dart');
           _schedulePlacement();
-        }.toJS,
+        }),
       ),
     );
 
@@ -1764,7 +1783,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       DomSubscription(
         activeDomElement,
         'click',
-        (DomEvent _) {
+        createDomEventListener((DomEvent _) {
           // Check if the element is already positioned. If not this does not fall
           // under `The user was using the long press, now they want to enter text
           // via keyboard` journey.
@@ -1775,7 +1794,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
             // Re-configure the timer to place the element.
             _schedulePlacement();
           }
-        }.toJS,
+        }),
       ),
     );
   }
@@ -1828,15 +1847,25 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     }
 
     // Subscribe to text and selection changes.
-    subscriptions.add(DomSubscription(activeDomElement, 'input', handleChange.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),
+    );
 
-    subscriptions.add(DomSubscription(activeDomElement, 'keydown', maybeSendAction.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'keydown', createDomEventListener(maybeSendAction)),
+    );
 
-    subscriptions.add(DomSubscription(domDocument, 'selectionchange', handleChange.toJS));
+    subscriptions.add(
+      DomSubscription(domDocument, 'selectionchange', createDomEventListener(handleChange)),
+    );
 
-    subscriptions.add(DomSubscription(activeDomElement, 'beforeinput', handleBeforeInput.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'beforeinput', createDomEventListener(handleBeforeInput)),
+    );
 
-    subscriptions.add(DomSubscription(activeDomElement, 'blur', handleBlur.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
+    );
 
     addCompositionEventHandlers(activeDomElement);
 
@@ -1876,11 +1905,17 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     }
 
     // Subscribe to text and selection changes.
-    subscriptions.add(DomSubscription(activeDomElement, 'input', handleChange.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),
+    );
 
-    subscriptions.add(DomSubscription(activeDomElement, 'keydown', maybeSendAction.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'keydown', createDomEventListener(maybeSendAction)),
+    );
 
-    subscriptions.add(DomSubscription(activeDomElement, 'beforeinput', handleBeforeInput.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'beforeinput', createDomEventListener(handleBeforeInput)),
+    );
 
     addCompositionEventHandlers(activeDomElement);
 
@@ -1901,18 +1936,22 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       DomSubscription(
         activeDomElement,
         'keyup',
-        (DomEvent event) {
+        createDomEventListener((DomEvent event) {
           handleChange(event);
-        }.toJS,
+        }),
       ),
     );
 
     // In Firefox the context menu item "Select All" does not work without
     // listening to onSelect. On the other browsers onSelectionChange is
     // enough for covering "Select All" functionality.
-    subscriptions.add(DomSubscription(activeDomElement, 'select', handleChange.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'select', createDomEventListener(handleChange)),
+    );
 
-    subscriptions.add(DomSubscription(activeDomElement, 'blur', handleBlur.toJS));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
+    );
 
     preventDefaultForMouseEvents();
   }

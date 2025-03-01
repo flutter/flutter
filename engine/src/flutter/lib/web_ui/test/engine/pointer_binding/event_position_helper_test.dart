@@ -56,9 +56,9 @@ void doTests() {
 
       rootElement.addEventListener(
         'click',
-        (DomEvent e) {
+        createDomEventListener((DomEvent e) {
           events.add(e);
-        }.toJS,
+        }),
       );
     });
 

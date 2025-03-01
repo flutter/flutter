@@ -91,7 +91,7 @@ class SafariPointerEventWorkaround {
   void workAroundMissingPointerEvents() {
     // We only need to attach the listener once.
     if (_listener == null) {
-      _listener = (DomEvent _) {}.toJS;
+      _listener = createDomEventListener((DomEvent _) {});
       domDocument.addEventListener('touchstart', _listener);
     }
   }
@@ -462,10 +462,10 @@ class Listener {
   factory Listener.register({
     required String event,
     required DomEventTarget target,
-    required DomEventListener handler,
+    required DartDomEventListener handler,
     bool? passive,
   }) {
-    final DomEventListener jsHandler = handler;
+    final DomEventListener jsHandler = createDomEventListener(handler);
 
     if (passive == null) {
       target.addEventListener(event, jsHandler);
@@ -527,7 +527,7 @@ abstract class _BaseAdapter {
   /// as the [target], while move and up events should use [domWindow]
   /// instead, because the browser doesn't fire the latter two for DOM elements
   /// when the pointer is outside the window.
-  void addEventListener(DomEventTarget target, String eventName, DomEventListener handler) {
+  void addEventListener(DomEventTarget target, String eventName, DartDomEventListener handler) {
     void loggedHandler(DomEvent event) {
       if (_debugLogPointerEvents) {
         if (domInstanceOfString(event as JSObject, 'PointerEvent')) {
@@ -546,13 +546,11 @@ abstract class _BaseAdapter {
       // browser gestures. Semantics tells us whether it is safe to forward
       // the event to the framework.
       if (EngineSemantics.instance.receiveGlobalEvent(event)) {
-        handler.callAsFunction(null, event);
+        handler(event);
       }
     }
 
-    _listeners.add(
-      Listener.register(event: eventName, target: target, handler: loggedHandler.toJS),
-    );
+    _listeners.add(Listener.register(event: eventName, target: target, handler: loggedHandler));
   }
 
   /// Converts a floating number timestamp (in milliseconds) to a [Duration] by
@@ -718,7 +716,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     return data;
   }
 
-  void _addWheelEventListener(DomEventListener handler) {
+  void _addWheelEventListener(DartDomEventListener handler) {
     _listeners.add(
       Listener.register(event: 'wheel', target: _viewTarget, handler: handler, passive: false),
     );
@@ -920,17 +918,13 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     _PointerEventListener handler, {
     bool checkModifiers = true,
   }) {
-    addEventListener(
-      target,
-      eventName,
-      (DomEvent event) {
-        final DomPointerEvent pointerEvent = event as DomPointerEvent;
-        if (checkModifiers) {
-          _checkModifiersState(event);
-        }
-        handler(pointerEvent);
-      }.toJS,
-    );
+    addEventListener(target, eventName, (DomEvent event) {
+      final DomPointerEvent pointerEvent = event as DomPointerEvent;
+      if (checkModifiers) {
+        _checkModifiersState(event);
+      }
+      handler(pointerEvent);
+    });
   }
 
   void _checkModifiersState(DomPointerEvent event) {
@@ -1066,11 +1060,9 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       }
     }, checkModifiers: false);
 
-    _addWheelEventListener(
-      (DomEvent event) {
-        _handleWheelEvent(event);
-      }.toJS,
-    );
+    _addWheelEventListener((DomEvent event) {
+      _handleWheelEvent(event);
+    });
   }
 
   // For each event that is de-coalesced from `event` and described in

@@ -49,7 +49,7 @@ class DisplayDprStream {
     }
     _dprMediaQuery.addEventListener(
       'change',
-      _onDprMediaQueryChange.toJS,
+      createDomEventListener(_onDprMediaQueryChange),
       <String, Object>{
         // We only listen `once` because this event only triggers once when the
         // DPR changes from `_currentDpr`. Once that happens, we need a new
@@ -66,7 +66,7 @@ class DisplayDprStream {
   // Handler of the _dprMediaQuery 'change' event.
   //
   // This calls subscribe again because events are listened to with `once: true`.
-  JSVoid _onDprMediaQueryChange(DomEvent _) {
+  void _onDprMediaQueryChange(DomEvent _) {
     _currentDpr = _display.devicePixelRatio;
     _dprStreamController.add(_currentDpr);
     // Re-subscribe...

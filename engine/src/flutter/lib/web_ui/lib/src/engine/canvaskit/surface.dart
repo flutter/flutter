@@ -385,8 +385,8 @@ class Surface extends DisplayCanvas {
     // notification. When we receive this notification we force a new context.
     //
     // See also: https://www.khronos.org/webgl/wiki/HandlingContextLost
-    _cachedContextRestoredListener = _contextRestoredListener.toJS;
-    _cachedContextLostListener = _contextLostListener.toJS;
+    _cachedContextRestoredListener = createDomEventListener(_contextRestoredListener);
+    _cachedContextLostListener = createDomEventListener(_contextLostListener);
     htmlCanvas.addEventListener('webglcontextlost', _cachedContextLostListener, false.toJS);
     htmlCanvas.addEventListener('webglcontextrestored', _cachedContextRestoredListener, false.toJS);
     _forceNewContext = false;

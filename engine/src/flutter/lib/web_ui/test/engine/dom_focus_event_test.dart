@@ -21,10 +21,9 @@ Future<void> testMain() async {
     domDocument.activeElement?.blur();
   });
 
-  test('Moves the focus across input elements', () async {
+  test('can listen for focus events', () async {
     final List<DomEvent> focusinEvents = <DomEvent>[];
     final DomEventListener handleFocusIn = createDomEventListener((DomEvent event) {
-      print('GOT FOCUS IN EVENT!!');
       focusinEvents.add(event);
     });
     final DomHTMLDivElement divElement = createDomHTMLDivElement();
@@ -38,12 +37,8 @@ Future<void> testMain() async {
 }
 
 Future<void> waitForAnimationFrame() {
-  print('WAITING FOR ANIMATION FRAME!');
-  print('CURRENT ZONE: ${Zone.current} (${Zone.current.hashCode})');
   final Completer<void> animationFrameFired = Completer<void>();
   domWindow.requestAnimationFrame((JSNumber _) {
-    print('GOT ANIMATION FRAME!!');
-    print('CURRENT ZONE: ${Zone.current} (${Zone.current.hashCode})');
     animationFrameFired.complete();
   });
   return animationFrameFired.future;
