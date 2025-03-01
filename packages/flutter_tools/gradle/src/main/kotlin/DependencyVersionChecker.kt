@@ -25,12 +25,11 @@ object DependencyVersionChecker {
     // The following messages represent best effort guesses at where a Flutter developer should
     // look to upgrade a dependency that is below the corresponding threshold. Developers can
     // change some of these locations, so they are not guaranteed to be accurate.
-    @VisibleForTesting internal fun getPotentialGradleFix(projectDirectory: String): String {
-        return "Your project's gradle version is typically " +
+    @VisibleForTesting internal fun getPotentialGradleFix(projectDirectory: String): String =
+        "Your project's gradle version is typically " +
             "defined in the gradle wrapper file. By default, this can be found at " +
             "$projectDirectory/gradle/wrapper/gradle-wrapper.properties. \n" +
             "For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html.\n"
-    }
 
     // The potential java fix does not make use of the project directory,
     // so it left as a constant.
@@ -40,8 +39,8 @@ object DependencyVersionChecker {
             "chooses which version of Java to use, see the --jdk-dir section of the " +
             "output of `flutter config -h`.\n"
 
-    @VisibleForTesting internal fun getPotentialAGPFix(projectDirectory: String): String {
-        return "Your project's AGP version is typically " +
+    @VisibleForTesting internal fun getPotentialAGPFix(projectDirectory: String): String =
+        "Your project's AGP version is typically " +
             "defined in the plugins block of the `settings.gradle` file " +
             "($projectDirectory/settings.gradle), by a plugin with the id of " +
             "com.android.application. \nIf you don't see a plugins block, your project " +
@@ -49,17 +48,15 @@ object DependencyVersionChecker {
             "likely defined in the top-level build.gradle file " +
             "($projectDirectory/build.gradle) by the following line in the dependencies" +
             " block of the buildscript: \"classpath 'com.android.tools.build:gradle:<version>'\".\n"
-    }
 
-    @VisibleForTesting internal fun getPotentialKGPFix(projectDirectory: String): String {
-        return "Your project's KGP version is typically " +
+    @VisibleForTesting internal fun getPotentialKGPFix(projectDirectory: String): String =
+        "Your project's KGP version is typically " +
             "defined in the plugins block of the `settings.gradle` file " +
             "($projectDirectory/settings.gradle), by a plugin with the id of " +
             "org.jetbrains.kotlin.android. \nIf you don't see a plugins block, your project " +
             "was likely created with an older template version, in which case it is most " +
             "likely defined in the top-level build.gradle file " +
             "($projectDirectory/build.gradle) by the ext.kotlin_version property.\n"
-    }
 
     // The following versions define our support policy for Gradle, Java, AGP, and KGP.
     // Before updating any "error" version, ensure that you have updated the corresponding
@@ -118,15 +115,14 @@ object DependencyVersionChecker {
     }
 
     // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-java-version/index.html#-1790786897%2FFunctions%2F-1793262594
-    @VisibleForTesting internal fun getJavaVersion(): JavaVersion {
-        return JavaVersion.current()
-    }
+    @VisibleForTesting internal fun getJavaVersion(): JavaVersion = JavaVersion.current()
 
     @VisibleForTesting internal fun getAGPVersion(project: Project): AndroidPluginVersion? {
         val androidPluginVersion: AndroidPluginVersion? =
-            project.extensions.findByType(
-                AndroidComponentsExtension::class.java
-            )?.pluginVersion
+            project.extensions
+                .findByType(
+                    AndroidComponentsExtension::class.java
+                )?.pluginVersion
         return androidPluginVersion
     }
 
@@ -162,26 +158,24 @@ object DependencyVersionChecker {
         versionString: String,
         errorVersion: String,
         potentialFix: String
-    ): String {
-        return "Error: Your project's $dependencyName version ($versionString) is lower " +
+    ): String =
+        "Error: Your project's $dependencyName version ($versionString) is lower " +
             "than Flutter's minimum supported version of $errorVersion. Please upgrade " +
             "your $dependencyName version. \nAlternatively, use the flag " +
             "\"--android-skip-build-dependency-validation\" to bypass this check.\n\n" +
             "Potential fix: $potentialFix"
-    }
 
     @VisibleForTesting internal fun getWarnMessage(
         dependencyName: String,
         versionString: String,
         warnVersion: String,
         potentialFix: String
-    ): String {
-        return "Warning: Flutter support for your project's $dependencyName version " +
+    ): String =
+        "Warning: Flutter support for your project's $dependencyName version " +
             "($versionString) will soon be dropped. Please upgrade your $dependencyName " +
             "version to a version of at least $warnVersion soon." +
             "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
             " to bypass this check.\n\nPotential fix: $potentialFix"
-    }
 
     @VisibleForTesting internal fun checkGradleVersion(
         version: Version,
@@ -292,7 +286,11 @@ object DependencyVersionChecker {
 // perform easy comparisons. All versions will have a major, minor, and patch value. These values
 // default to 0 when they are not provided or are otherwise unparseable.
 // For example the version strings "8.2", "8.2.2hfd", and "8.2.0" would parse to the same version.
-internal class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Version> {
+internal class Version(
+    val major: Int,
+    val minor: Int,
+    val patch: Int
+) : Comparable<Version> {
     companion object {
         fun fromString(version: String): Version {
             val asList: List<String> = version.split(".")
@@ -318,9 +316,7 @@ internal class Version(val major: Int, val minor: Int, val patch: Int) : Compara
         return 0
     }
 
-    override fun toString(): String {
-        return "$major.$minor.$patch"
-    }
+    override fun toString(): String = "$major.$minor.$patch"
 }
 
 // Custom error for when the dependency_version_checker.kts script finds a dependency out of
