@@ -77,8 +77,17 @@ void main() {
     );
 
     environment = <String, String>{};
-    environment.addAll(io.Platform.environment);
-    environment.remove('FLUTTER_PREBUILT_ENGINE_VERSION');
+
+    if (const LocalPlatform().isWindows) {
+      // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
+      const List<String> powerShellVariables = <String>['SystemRoot', 'Path', 'PATHEXT'];
+      for (final String key in powerShellVariables) {
+        final String? value = io.Platform.environment[key];
+        if (value != null) {
+          environment[key] = value;
+        }
+      }
+    }
 
     // Copy the update_engine_version script and create a rough directory structure.
     flutterRoot.binInternalUpdateEngineVersion.copySyncRecursive(
@@ -171,6 +180,8 @@ void main() {
     }
 
     run('git', <String>['init', '--initial-branch', 'master']);
+    run('git', <String>['config', '--local', 'user.email', 'test@example.com']);
+    run('git', <String>['config', '--local', 'user.name', 'Test User']);
     run('git', <String>['add', '.']);
     run('git', <String>['commit', '-m', 'Initial commit']);
     if (branch != 'master') {
