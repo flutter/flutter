@@ -465,7 +465,7 @@ void main() {
     expect(packageUrl, isNotNull);
     expect(
       packageUrl.toString(),
-      'https://storage.googleapis.com/flutter_infra_release/flutter/null/package_dir.zip',
+      'https://storage.googleapis.com/flutter_infra_release/flutter/abc123/package_dir.zip',
     );
 
     final Directory dir =
@@ -1359,6 +1359,9 @@ class FakeSecondaryCache extends Fake implements Cache {
 
   @override
   String get storageBaseUrl => 'https://storage.googleapis.com';
+
+  @override
+  String get engineRevision => version ?? 'abc123';
 
   @override
   Directory getDownloadDir() => artifactDirectory;
