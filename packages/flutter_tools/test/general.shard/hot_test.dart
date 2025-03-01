@@ -22,9 +22,9 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart';
 import '../src/package_config.dart';
+import '../src/throwing_pub.dart';
 import 'hot_shared.dart';
 
 void main() {
@@ -204,7 +204,7 @@ void main() {
           Platform: () => FakePlatform(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
 
@@ -245,7 +245,7 @@ void main() {
           Platform: () => FakePlatform(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
     });

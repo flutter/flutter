@@ -26,7 +26,12 @@ void main() {
     return path.replaceAll('/', globals.fs.path.separator);
   }
 
-  void writePubspecFile(String path, String name, {String? fontsSection}) {
+  void writePubspecFile(
+    String path,
+    String name, {
+    String? fontsSection,
+    Map<String, String> deps = const <String, String>{},
+  }) {
     if (fontsSection == null) {
       fontsSection = '';
     } else {
@@ -44,6 +49,7 @@ name: $name
 dependencies:
   flutter:
     sdk: flutter
+${deps.entries.map((MapEntry<String, String> entry) => '  ${entry.key}: {path: ${entry.value}}').join('\n')}
 $fontsSection
 ''');
   }
