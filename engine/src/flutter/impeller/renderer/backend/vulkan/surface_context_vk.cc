@@ -67,6 +67,11 @@ void SurfaceContextVK::Shutdown() {
   parent_->Shutdown();
 }
 
+void SurfaceContextVK::UpdateExternalTexture(
+    const std::shared_ptr<Texture>& texture) {
+  return parent_->UpdateExternalTexture(texture);
+}
+
 bool SurfaceContextVK::SetWindowSurface(vk::UniqueSurfaceKHR surface,
                                         const ISize& size) {
   return SetSwapchain(SwapchainVK::Create(parent_, std::move(surface), size));

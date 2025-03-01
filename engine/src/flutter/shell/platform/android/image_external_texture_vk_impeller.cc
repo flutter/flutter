@@ -52,7 +52,6 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
   auto existing_image = image_lru_.FindImage(key);
   if (existing_image != nullptr || !hb_desc.has_value()) {
     dl_image_ = existing_image;
-
     CloseHardwareBuffer(hardware_buffer);
     return;
   }
@@ -64,33 +63,8 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
     return;
   }
 
-  auto texture =
-      std::make_shared<impeller::TextureVK>(impeller_context_, texture_source);
-  // Transition the layout to shader read.
-  {
-    auto buffer = impeller_context_->CreateCommandBuffer();
-    impeller::CommandBufferVK& buffer_vk =
-        impeller::CommandBufferVK::Cast(*buffer);
-
-    impeller::BarrierVK barrier;
-    barrier.cmd_buffer = buffer_vk.GetCommandBuffer();
-    barrier.src_access = impeller::vk::AccessFlagBits::eColorAttachmentWrite |
-                         impeller::vk::AccessFlagBits::eTransferWrite;
-    barrier.src_stage =
-        impeller::vk::PipelineStageFlagBits::eColorAttachmentOutput |
-        impeller::vk::PipelineStageFlagBits::eTransfer;
-    barrier.dst_access = impeller::vk::AccessFlagBits::eShaderRead;
-    barrier.dst_stage = impeller::vk::PipelineStageFlagBits::eFragmentShader;
-
-    barrier.new_layout = impeller::vk::ImageLayout::eShaderReadOnlyOptimal;
-
-    if (!texture->SetLayout(barrier)) {
-      return;
-    }
-    if (!impeller_context_->GetCommandQueue()->Submit({buffer}).ok()) {
-      return;
-    }
-  }
+  auto texture = std::make_shared<impeller::TextureVK>(
+      impeller_context_, texture_source, /*is_external_texture=*/true);
 
   dl_image_ = impeller::DlImageImpeller::Make(texture);
   if (key.has_value()) {

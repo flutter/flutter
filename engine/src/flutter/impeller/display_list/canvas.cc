@@ -475,6 +475,12 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
     return;
   }
 
+  if (paint.color_source &&
+      paint.color_source->type() == flutter::DlColorSourceType::kImage) {
+    UploadExternalTexture(
+        paint.color_source->asImage()->image()->impeller_texture());
+  }
+
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
@@ -714,6 +720,7 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
   if (size.IsEmpty()) {
     return;
   }
+  UploadExternalTexture(image);
 
   std::optional<Rect> clipped_source =
       source.Intersection(Rect::MakeSize(size));
@@ -1702,6 +1709,10 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   }
 
   return input_texture;
+}
+
+void Canvas::UploadExternalTexture(const std::shared_ptr<Texture>& texture) {
+  renderer_.GetContext()->UpdateExternalTexture(texture);
 }
 
 bool Canvas::SupportsBlitToOnscreen() const {

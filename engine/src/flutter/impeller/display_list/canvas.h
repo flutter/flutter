@@ -263,6 +263,8 @@ class Canvas {
   // Visible for testing.
   bool SupportsBlitToOnscreen() const;
 
+  void UploadExternalTexture(const std::shared_ptr<Texture>& texture);
+
  private:
   ContentContext& renderer_;
   RenderTarget render_target_;
