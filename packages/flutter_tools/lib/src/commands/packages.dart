@@ -243,7 +243,6 @@ class PackagesGetCommand extends FlutterCommand {
     argParser.addFlag('enforce-lockfile');
     argParser.addFlag('precompile');
     argParser.addFlag('major-versions');
-    argParser.addFlag('null-safety');
     argParser.addFlag('example', defaultsTo: true);
     argParser.addOption('sdk');
     argParser.addOption('path');

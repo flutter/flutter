@@ -8,6 +8,15 @@ import '../build_info.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
 
+//////////////////////////////////////////////////////////////////////
+//                                                                  //
+//  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
+//                                                                  //
+//  There is a link to this file in //docs/tool/Engine-artfiacts.md //
+//  and it would be very kind of you to update the link, if needed. //
+//                                                                  //
+//////////////////////////////////////////////////////////////////////
+
 /// A set of source files.
 abstract class ResolvedFiles {
   /// Whether any of the sources we evaluated contained a missing depfile.

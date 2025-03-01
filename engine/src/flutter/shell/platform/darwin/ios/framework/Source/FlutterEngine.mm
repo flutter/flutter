@@ -160,6 +160,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   std::unique_ptr<flutter::ConnectionCollection> _connections;
 }
 
+- (int64_t)engineIdentifier {
+  return reinterpret_cast<int64_t>((__bridge void*)self);
+}
+
 - (instancetype)init {
   return [self initWithName:@"FlutterEngine" project:nil allowHeadlessExecution:YES];
 }
@@ -239,6 +243,11 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                object:nil];
 
   return self;
+}
+
++ (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
+  NSAssert([[NSThread currentThread] isMainThread], @"Must be called on the main thread.");
+  return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
 }
 
 - (void)setUpSceneLifecycleNotifications:(NSNotificationCenter*)center API_AVAILABLE(ios(13.0)) {
@@ -704,9 +713,13 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
           libraryURI:(NSString*)libraryOrNil
       entrypointArgs:(NSArray<NSString*>*)entrypointArgs {
   // Launch the Dart application with the inferred run configuration.
-  self.shell.RunEngine([self.dartProject runConfigurationForEntrypoint:entrypoint
-                                                          libraryOrNil:libraryOrNil
-                                                        entrypointArgs:entrypointArgs]);
+  flutter::RunConfiguration configuration =
+      [self.dartProject runConfigurationForEntrypoint:entrypoint
+                                         libraryOrNil:libraryOrNil
+                                       entrypointArgs:entrypointArgs];
+
+  configuration.SetEngineId(self.engineIdentifier);
+  self.shell.RunEngine(std::move(configuration));
 }
 
 - (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
@@ -1450,6 +1463,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       [self.dartProject runConfigurationForEntrypoint:entrypoint
                                          libraryOrNil:libraryURI
                                        entrypointArgs:entrypointArgs];
+
+  configuration.SetEngineId(result.engineIdentifier);
 
   fml::WeakPtr<flutter::PlatformView> platform_view = _shell->GetPlatformView();
   FML_DCHECK(platform_view);

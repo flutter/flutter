@@ -86,6 +86,9 @@ void runSemanticsTests() {
   group('selectables', () {
     _testSelectables();
   });
+  group('expandables', () {
+    _testExpandables();
+  });
   group('tappable', () {
     _testTappable();
   });
@@ -2323,6 +2326,77 @@ void _testSelectables() {
     expect(node.semanticRole!.kind, EngineSemanticsRole.checkable);
     expect(node.semanticRole!.debugSemanticBehaviorTypes, isNot(contains(Selectable)));
     expect(node.element.getAttribute('aria-selected'), isNull);
+
+    semantics().semanticsEnabled = false;
+  });
+}
+
+void _testExpandables() {
+  test('renders and updates non-expandable, expanded, and unexpanded nodes', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, isSelectable: false, rect: const ui.Rect.fromLTRB(0, 0, 100, 20)),
+        tester.updateNode(
+          id: 2,
+          isExpandable: true,
+          isExpanded: false,
+          rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+        ),
+        tester.updateNode(
+          id: 3,
+          isExpandable: true,
+          isExpanded: true,
+          rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+  <sem-c>
+    <sem></sem>
+    <sem aria-expanded="false"></sem>
+    <sem aria-expanded="true"></sem>
+  </sem-c>
+</sem>
+''');
+
+    // Missing attributes cannot be expressed using HTML patterns, so check directly.
+    final nonExpandable = owner().debugSemanticsTree![1]!.element;
+    expect(nonExpandable.getAttribute('aria-expanded'), isNull);
+
+    // Flip the values and check that that ARIA attribute is updated.
+    tester.updateNode(
+      id: 2,
+      isExpandable: true,
+      isExpanded: true,
+      rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+    );
+    tester.updateNode(
+      id: 3,
+      isExpandable: true,
+      isExpanded: false,
+      rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+  <sem-c>
+    <sem></sem>
+    <sem aria-expanded="true"></sem>
+    <sem aria-expanded="false"></sem>
+  </sem-c>
+</sem>
+''');
 
     semantics().semanticsEnabled = false;
   });
