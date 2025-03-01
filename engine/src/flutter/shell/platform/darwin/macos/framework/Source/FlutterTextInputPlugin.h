@@ -12,8 +12,14 @@
 
 @class FlutterTextField;
 
+/**
+ * Delegate for FlutterTextInputPlugin. Implemented by FlutterEngine.
+ */
 @protocol FlutterTextInputPluginDelegate
 
+/**
+ * Returns the FlutterViewController for the given view identifier.
+ */
 - (FlutterViewController*)viewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier;
 
 @property(nonatomic, readonly) id<FlutterBinaryMessenger> binaryMessenger;
