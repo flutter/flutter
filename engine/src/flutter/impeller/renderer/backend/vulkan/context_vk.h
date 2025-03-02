@@ -241,7 +241,7 @@ class ContextVK final : public Context,
     return idle_waiter_vk_;
   }
 
-  std::shared_ptr<FreeQueueVK> GetFreeQueue() const { return free_queue_vk_; }
+  FreeQueueVK& GetFreeQueue() const { return *free_queue_vk_; }
 
  private:
   struct DeviceHolderImpl : public DeviceHolderVK {
@@ -283,7 +283,7 @@ class ContextVK final : public Context,
   std::shared_ptr<GPUTracerVK> gpu_tracer_;
   std::shared_ptr<CommandQueue> command_queue_vk_;
   std::shared_ptr<const IdleWaiter> idle_waiter_vk_;
-  std::shared_ptr<FreeQueueVK> free_queue_vk_;
+  std::unique_ptr<FreeQueueVK> free_queue_vk_;
   WorkaroundsVK workarounds_;
 
   using DescriptorPoolMap =

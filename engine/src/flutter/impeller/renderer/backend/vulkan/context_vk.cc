@@ -462,7 +462,7 @@ void ContextVK::Setup(Settings settings) {
   sampler_library->ApplyWorkarounds(workarounds_);
 
   device_holder_ = std::move(device_holder);
-  free_queue_vk_ = std::make_shared<FreeQueueVK>(device_holder_);
+  free_queue_vk_ = std::make_unique<FreeQueueVK>(device_holder_);
   idle_waiter_vk_ = std::make_shared<IdleWaiterVK>(device_holder_);
   driver_info_ = std::move(driver_info);
   debug_report_ = std::move(debug_report);

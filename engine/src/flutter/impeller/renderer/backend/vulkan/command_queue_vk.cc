@@ -68,7 +68,7 @@ fml::Status CommandQueueVK::Submit(
 
   // Submit will proceed, call callback with true when it is done and do not
   // call when `reset` is collected.
-  context->GetFreeQueue()->PushEntry(
+  context->GetFreeQueue().PushEntry(
       std::move(fence), [completion_callback, tracked_objects = std::move(
                                                   tracked_objects)]() mutable {
         // Ensure tracked objects are destructed before calling any final

@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_FREE_QUEUE_VK_H_
 
 #include <memory>
+#include <mutex>
 
 #include "fml/closure.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
