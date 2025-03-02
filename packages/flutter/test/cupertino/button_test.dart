@@ -941,8 +941,75 @@ void main() {
     await gesture.up();
     expect(value, isTrue);
   });
+
+  testWidgets('Mouse cursor resolves in pressed/disabled states', (WidgetTester tester) async {
+    Widget buildButton({required bool enabled, MouseCursor? cursor}) {
+      return CupertinoApp(
+        home: Center(
+          child: CupertinoButton(
+            onPressed: enabled ? () {} : null,
+            mouseCursor: cursor,
+            child: const Text('Tap Me'),
+          ),
+        ),
+      );
+    }
+
+    // Test default mouse cursor
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await tester.pumpWidget(buildButton(enabled: true, cursor: const _ButtonMouseCursor()));
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoButton)));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+    await gesture.removePointer();
+
+    // Test disabled state mouse cursor
+    await tester.pumpWidget(buildButton(enabled: false, cursor: SystemMouseCursors.forbidden));
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoButton)));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden,
+    );
+    await gesture.removePointer();
+
+    // Test clicked state mouse cursor
+    await tester.pumpWidget(buildButton(enabled: true, cursor: SystemMouseCursors.click));
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.click,
+    );
+  });
 }
 
 Widget boilerplate({required Widget child}) {
   return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+}
+
+class _ButtonMouseCursor extends WidgetStateMouseCursor {
+  const _ButtonMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.hovered) || states.contains(WidgetState.pressed)) {
+      return SystemMouseCursors.click;
+    }
+    if (states.contains(WidgetState.disabled)) {
+      return SystemMouseCursors.forbidden;
+    }
+    return SystemMouseCursors.basic;
+  }
+
+  @override
+  String get debugDescription => '_ButtonMouseCursor()';
 }

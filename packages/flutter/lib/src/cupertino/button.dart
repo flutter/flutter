@@ -493,6 +493,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final MouseCursor effectiveMouseCursor =
         WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
         _defaultCursor.resolve(states);
+
     return MouseRegion(
       cursor: effectiveMouseCursor,
       child: FocusableActionDetector(
