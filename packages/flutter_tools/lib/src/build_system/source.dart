@@ -165,7 +165,7 @@ class SourceVisitor implements ResolvedFiles {
   ///
   /// If the [Artifact] points to a directory then all child files are included.
   /// To increase the performance of builds that use a known revision of Flutter,
-  /// these are updated to point towards the engine.version file instead of
+  /// these are updated to point towards the `engine.stamp` file instead of
   /// the artifact itself.
   void visitArtifact(Artifact artifact, TargetPlatform? platform, BuildMode? mode) {
     // This is not a local engine.
@@ -173,8 +173,8 @@ class SourceVisitor implements ResolvedFiles {
       sources.add(
         environment.flutterRootDir
             .childDirectory('bin')
-            .childDirectory('internal')
-            .childFile('engine.version'),
+            .childDirectory('cache')
+            .childFile('engine.stamp'),
       );
       return;
     }
@@ -199,7 +199,7 @@ class SourceVisitor implements ResolvedFiles {
   ///
   /// If the [Artifact] points to a directory then all child files are included.
   /// To increase the performance of builds that use a known revision of Flutter,
-  /// these are updated to point towards the engine.version file instead of
+  /// these are updated to point towards the `engine.stamp` file instead of
   /// the artifact itself.
   void visitHostArtifact(HostArtifact artifact) {
     // This is not a local engine.
@@ -207,8 +207,8 @@ class SourceVisitor implements ResolvedFiles {
       sources.add(
         environment.flutterRootDir
             .childDirectory('bin')
-            .childDirectory('internal')
-            .childFile('engine.version'),
+            .childDirectory('cache')
+            .childFile('engine.stamp'),
       );
       return;
     }
