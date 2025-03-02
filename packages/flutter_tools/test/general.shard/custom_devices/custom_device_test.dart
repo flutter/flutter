@@ -128,9 +128,9 @@ void main() {
       expect(device.category, Category.mobile);
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
-      expect(device.supportsRuntimeMode(BuildMode.profile), false);
-      expect(device.supportsRuntimeMode(BuildMode.release), false);
-      expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
+      expect(device.supportsRuntimeMode(BuildMode.profile), true);
+      expect(device.supportsRuntimeMode(BuildMode.release), true);
+      expect(device.supportsRuntimeMode(BuildMode.jitRelease), true);
     },
     overrides: <Type, dynamic Function()>{
       FileSystem: () => MemoryFileSystem.test(),
