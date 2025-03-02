@@ -8,6 +8,7 @@ import("//flutter/build/bin_to_obj.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/lib/snapshot/gen_snapshot.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/version/version.gni")
@@ -692,13 +693,8 @@ if (target_cpu != "x86") {
     gen_snapshot_dest = "gen_snapshot"
 
     if (host_os == "mac") {
-      # macOS gen_snapshot is a universal binary with architecture suffix.
-      arch_suffix = target_cpu
-      if (target_cpu == "arm") {
-        arch_suffix = "armv7"
-      }
       gen_snapshot_src =
-          rebase_path("$root_out_dir/gen_snapshot_${arch_suffix}")
+          rebase_path("$root_out_dir/gen_snapshot${gen_snapshot_suffix}")
     } else if (host_os == "win") {
       gen_snapshot_src = rebase_path("$root_out_dir/gen_snapshot.exe")
       gen_snapshot_dest = "gen_snapshot.exe"
