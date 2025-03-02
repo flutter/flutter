@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 
@@ -283,6 +284,18 @@ class CupertinoButton extends StatefulWidget {
   /// enable a button, set [onPressed] or [onLongPress] to a non-null value.
   bool get enabled => onPressed != null || onLongPress != null;
 
+  /// The distance a button needs to be moved after being pressed for its opacity to change.
+  ///
+  /// The opacity changes when the position moved is this distance away from the button.
+  static double tapMoveSlop() {
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS ||
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia => kCupertinoButtonTapMoveSlop,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 0.0,
+    };
+  }
+
   @override
   State<CupertinoButton> createState() => _CupertinoButtonState();
 
@@ -356,11 +369,28 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       _buttonHeldDown = false;
       _animate();
     }
+    final RenderBox renderObject = context.findRenderObject()! as RenderBox;
+    final Offset localPosition = renderObject.globalToLocal(event.globalPosition);
+    if (renderObject.paintBounds.inflate(CupertinoButton.tapMoveSlop()).contains(localPosition)) {
+      _handleTap();
+    }
   }
 
   void _handleTapCancel() {
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
+      _animate();
+    }
+  }
+
+  void _handTapMove(TapMoveDetails event) {
+    final RenderBox renderObject = context.findRenderObject()! as RenderBox;
+    final Offset localPosition = renderObject.globalToLocal(event.globalPosition);
+    final bool buttonShouldHeldDown = renderObject.paintBounds
+        .inflate(CupertinoButton.tapMoveSlop())
+        .contains(localPosition);
+    if (buttonShouldHeldDown != _buttonHeldDown) {
+      _buttonHeldDown = buttonShouldHeldDown;
       _animate();
     }
   }
@@ -457,11 +487,12 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
           textStyle.fontSize != null ? textStyle.fontSize! * 1.2 : kCupertinoButtonDefaultIconSize,
     );
 
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+
     final Set<WidgetState> states = <WidgetState>{if (!enabled) WidgetState.disabled};
     final MouseCursor effectiveMouseCursor =
         WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
         _defaultCursor.resolve(states);
-
     return MouseRegion(
       cursor: effectiveMouseCursor,
       child: FocusableActionDetector(
@@ -471,13 +502,29 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         onFocusChange: widget.onFocusChange,
         onShowFocusHighlight: _onShowFocusHighlight,
         enabled: enabled,
-        child: GestureDetector(
+        child: RawGestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTapDown: enabled ? _handleTapDown : null,
-          onTapUp: enabled ? _handleTapUp : null,
-          onTapCancel: enabled ? _handleTapCancel : null,
-          onTap: widget.onPressed,
-          onLongPress: widget.onLongPress,
+          gestures: <Type, GestureRecognizerFactory>{
+            TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+              () => TapGestureRecognizer(postAcceptSlopTolerance: null),
+              (TapGestureRecognizer instance) {
+                instance.onTapDown = enabled ? _handleTapDown : null;
+                instance.onTapUp = enabled ? _handleTapUp : null;
+                instance.onTapCancel = enabled ? _handleTapCancel : null;
+                instance.onTapMove = enabled ? _handTapMove : null;
+                instance.gestureSettings = gestureSettings;
+              },
+            ),
+            if (widget.onLongPress != null)
+              LongPressGestureRecognizer:
+                  GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+                    () => LongPressGestureRecognizer(),
+                    (LongPressGestureRecognizer instance) {
+                      instance.onLongPress = widget.onLongPress;
+                      instance.gestureSettings = gestureSettings;
+                    },
+                  ),
+          },
           child: Semantics(
             button: true,
             child: ConstrainedBox(

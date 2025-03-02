@@ -396,3 +396,11 @@ void onMetricsChangedSignalViewIds() {
 void mergedUIThread() {
   signal();
 }
+
+@pragma('vm:external-name', 'NotifyEngineId')
+external void notifyEngineId(int? handle);
+
+@pragma('vm:entry-point')
+void testEngineId() {
+  notifyEngineId(ui.PlatformDispatcher.instance.engineId);
+}
