@@ -1886,13 +1886,20 @@ class _OverlayPortalState extends State<OverlayPortal> {
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller._attachTarget = null;
       _setupController(widget.controller);
+    } else if (widget.controller._attachTarget == null) {
+      _setupController(widget.controller);
     }
   }
 
   @override
-  void dispose() {
-    assert(widget.controller._attachTarget == this);
+  void deactivate() {
+    super.deactivate();
+    assert(widget.controller._attachTarget == null || widget.controller._attachTarget == this);
     widget.controller._attachTarget = null;
+  }
+
+  @override
+  void dispose() {
     _locationCache?._debugMarkLocationInvalid();
     _locationCache = null;
     super.dispose();

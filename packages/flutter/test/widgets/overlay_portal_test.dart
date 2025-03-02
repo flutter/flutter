@@ -1365,6 +1365,52 @@ void main() {
     verifyTreeIsClean();
   });
 
+  testWidgets('PortalController can be assigned to another after deactivate', (
+    WidgetTester tester,
+  ) async {
+    final OverlayPortalController controller1 = OverlayPortalController();
+    final OverlayPortalController controller2 = OverlayPortalController();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            OverlayPortal(
+              controller: controller1,
+              overlayChildBuilder: (BuildContext context) => const Placeholder(),
+            ),
+            OverlayPortal(
+              controller: controller2,
+              overlayChildBuilder: (BuildContext context) => const Placeholder(),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            OverlayPortal(
+              controller: controller1,
+              overlayChildBuilder: (BuildContext context) => const Placeholder(),
+            ),
+            OverlayPortal(
+              controller: controller2,
+              overlayChildBuilder: (BuildContext context) => const Placeholder(),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    verifyTreeIsClean();
+    expect(tester.takeException(), isNull);
+  });
+
   group('GlobalKey Reparenting', () {
     testWidgets('child is laid out before overlay child after OverlayEntry shuffle', (
       WidgetTester tester,
