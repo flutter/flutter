@@ -621,8 +621,8 @@ class RenderTable extends RenderBox {
     assert(_children.length == _rows * _columns);
     final List<SemanticsNode> rows = <SemanticsNode>[];
 
-    for (int i = 0; i < _rows; i++) {
-      final Rect rowBox = getRowBox(i);
+    for (int y = 0; y < _rows; y++) {
+      final Rect rowBox = getRowBox(y);
       // Skip row if it's empty
       if (rowBox.height == 0) {
         continue;
@@ -635,33 +635,35 @@ class RenderTable extends RenderBox {
 
       final SemanticsConfiguration configuration =
           SemanticsConfiguration()
-            ..indexInParent = i
+            ..indexInParent = y
             ..role = SemanticsRole.row;
 
-      final Iterable<MapEntry<int, SemanticsNode>> rawCells =
-          children.skip(i * _columns).take(_columns).toList().asMap().entries;
+      final List<SemanticsNode> rawCells = children.skip(y * _columns).take(_columns).toList();
 
-      final List<SemanticsNode> cells =
-          rawCells.map((MapEntry<int, SemanticsNode> entry) {
-            final SemanticsNode cell = entry.value;
-            // Get the index of the cell.
-            cell.indexInParent = entry.key;
+      final List<SemanticsNode> cells = List<SemanticsNode>.generate(columns, (int x) {
+        final SemanticsNode cell = rawCells[x];
+        cell.indexInParent = x;
 
-            // Shift the cell's transform to be relative to the row.
-            final Offset offset = (cell.transform != null
-                    ? MatrixUtils.getAsTranslation(cell.transform!) ?? Offset.zero
-                    : Offset.zero)
-                .translate(-rowBox.left, -rowBox.top);
+        // Shift the cell's transform to be relative to the row.
+        final Matrix4 cellTransform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0);
 
-            cell.transform = Matrix4.translationValues(offset.dx, offset.dy, 0);
+        final double cellWidth =
+            x == _columns - 1
+                ? rowBox.width - _columnLefts!.elementAt(x)
+                : _columnLefts!.elementAt(x + 1) - _columnLefts!.elementAt(x);
 
-            // If the cell has no role, set it to cell. This happens when users add a basic widget like
-            // Text directly to the table row without wrapping it in a TableCell.
-            if (cell.role == SemanticsRole.none) {
-              cell.role = SemanticsRole.cell;
-            }
-            return cell;
-          }).toList();
+        cell
+          ..transform = cellTransform
+          ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
+
+        // If the cell has no role, set it to cell. This happens when users add a basic widget like
+        // Text directly to the table row without wrapping it in a TableCell.
+        if (cell.role == SemanticsRole.none) {
+          cell.role = SemanticsRole.cell;
+        }
+        return cell;
+      });
+
       newRow
         ..updateWith(config: configuration, childrenInInversePaintOrder: cells)
         ..transform = Matrix4.translationValues(rowBox.left, rowBox.top, 0)
