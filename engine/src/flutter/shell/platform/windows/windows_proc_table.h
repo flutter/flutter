@@ -123,6 +123,35 @@ class WindowsProcTable {
                                         DWORD dwExStyle,
                                         UINT dpi) const;
 
+  // Get the system metrics.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-getsystemmetrics
+  virtual int GetSystemMetrics(int nIndex) const;
+
+  // Enumerate display devices.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-enumdisplaydevicesw
+  virtual BOOL EnumDisplayDevices(LPCWSTR lpDevice,
+                                  DWORD iDevNum,
+                                  PDISPLAY_DEVICE lpDisplayDevice,
+                                  DWORD dwFlags) const;
+
+  // Enumerate display settings.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-enumdisplaysettingsw
+  virtual BOOL EnumDisplaySettings(LPCWSTR lpszDeviceName,
+                                   DWORD iModeNum,
+                                   DEVMODE* lpDevMode) const;
+
+  // Get the monitor from a point.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-monitorfrompoint
+  virtual HMONITOR MonitorFromPoint(POINT pt, DWORD dwFlags) const;
+
  private:
   using GetPointerType_ = BOOL __stdcall(UINT32 pointerId,
                                          POINTER_INPUT_TYPE* pointerType);

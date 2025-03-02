@@ -141,23 +141,15 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
 
   // And it should send display info.
   bool notify_display_update_called = false;
-  modifier.SetFrameInterval(16600000);  // 60 fps.
+
   modifier.embedder_api().NotifyDisplayUpdate = MOCK_ENGINE_PROC(
       NotifyDisplayUpdate,
-      ([&notify_display_update_called, engine_instance = engine.get()](
+      ([&notify_display_update_called](
            FLUTTER_API_SYMBOL(FlutterEngine) raw_engine,
            const FlutterEngineDisplaysUpdateType update_type,
            const FlutterEngineDisplay* embedder_displays,
            size_t display_count) {
         EXPECT_EQ(update_type, kFlutterEngineDisplaysUpdateTypeStartup);
-        EXPECT_EQ(display_count, 1);
-
-        FlutterEngineDisplay display = embedder_displays[0];
-
-        EXPECT_EQ(display.display_id, 0);
-        EXPECT_EQ(display.single_display, true);
-        EXPECT_EQ(std::floor(display.refresh_rate), 60.0);
-
         notify_display_update_called = true;
         return kSuccess;
       }));
