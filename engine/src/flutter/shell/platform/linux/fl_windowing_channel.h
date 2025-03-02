@@ -67,6 +67,16 @@ FlWindowingChannel* fl_windowing_channel_new(FlBinaryMessenger* messenger,
                                              FlWindowingChannelVTable* vtable,
                                              gpointer user_data);
 
+void fl_windowing_channel_on_window_destroyed(FlWindowingChannel* channel,
+                                              int64_t view_id,
+                                              GCancellable* cancellable,
+                                              GAsyncReadyCallback callback,
+                                              gpointer user_data);
+
+gboolean fl_windowing_channel_on_window_destroyed_finish(GObject* object,
+                                                         GAsyncResult* result,
+                                                         GError** error);
+
 FlMethodResponse* fl_windowing_channel_make_create_regular_response(
     int64_t view_id,
     FlWindowingSize* size,

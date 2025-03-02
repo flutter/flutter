@@ -235,7 +235,6 @@ static void fl_mock_binary_messenger_send_on_channel(
     GAsyncReadyCallback callback,
     gpointer user_data) {
   FlMockBinaryMessenger* self = FL_MOCK_BINARY_MESSENGER(messenger);
-  g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
 
   MockChannel* mock_channel = static_cast<MockChannel*>(
       g_hash_table_lookup(self->mock_channels, channel));
@@ -247,9 +246,15 @@ static void fl_mock_binary_messenger_send_on_channel(
       g_hash_table_lookup(self->mock_event_channels, channel));
   MockErrorChannel* mock_error_channel = static_cast<MockErrorChannel*>(
       g_hash_table_lookup(self->mock_error_channels, channel));
-  g_autoptr(GBytes) response = nullptr;
+
   if (mock_channel != nullptr) {
-    response = mock_channel->callback(self, message, mock_channel->user_data);
+    g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
+    g_autoptr(GBytes) response =
+        mock_channel->callback(self, message, mock_channel->user_data);
+    if (response != nullptr) {
+      g_task_return_pointer(task, g_bytes_ref(response),
+                            reinterpret_cast<GDestroyNotify>(g_bytes_unref));
+    }
   } else if (mock_message_channel != nullptr) {
     g_autoptr(GError) error = nullptr;
     g_autoptr(FlValue) message_value = fl_message_codec_decode_message(
@@ -257,15 +262,20 @@ static void fl_mock_binary_messenger_send_on_channel(
     if (message_value == nullptr) {
       g_warning("Failed to decode message: %s", error->message);
     } else {
+      g_autoptr(GTask) task =
+          g_task_new(self, cancellable, callback, user_data);
       g_autoptr(FlValue) response_value = mock_message_channel->callback(
           self, task, message_value, mock_message_channel->user_data);
       if (response_value == nullptr) {
         return;
       }
 
-      response = fl_message_codec_encode_message(mock_message_channel->codec,
-                                                 response_value, &error);
-      if (response == nullptr) {
+      g_autoptr(GBytes) response = fl_message_codec_encode_message(
+          mock_message_channel->codec, response_value, &error);
+      if (response != nullptr) {
+        g_task_return_pointer(task, g_bytes_ref(response),
+                              reinterpret_cast<GDestroyNotify>(g_bytes_unref));
+      } else {
         g_warning("Failed to encode message: %s", error->message);
       }
     }
@@ -277,6 +287,8 @@ static void fl_mock_binary_messenger_send_on_channel(
                                             &name, &args, &error)) {
       g_warning("Failed to decode method call: %s", error->message);
     } else {
+      g_autoptr(GTask) task =
+          g_task_new(self, cancellable, callback, user_data);
       g_autoptr(FlMethodResponse) response_value =
           mock_method_channel->callback(self, task, name, args,
                                         mock_method_channel->user_data);
@@ -284,9 +296,12 @@ static void fl_mock_binary_messenger_send_on_channel(
         return;
       }
 
-      response = fl_method_codec_encode_response(mock_method_channel->codec,
-                                                 response_value, &error);
-      if (response == nullptr) {
+      g_autoptr(GBytes) response = fl_method_codec_encode_response(
+          mock_method_channel->codec, response_value, &error);
+      if (response != nullptr) {
+        g_task_return_pointer(task, g_bytes_ref(response),
+                              reinterpret_cast<GDestroyNotify>(g_bytes_unref));
+      } else {
         g_warning("Failed to encode method response: %s", error->message);
       }
     }
@@ -314,15 +329,11 @@ static void fl_mock_binary_messenger_send_on_channel(
       g_warning("Unknown event response");
     }
   } else if (mock_error_channel != nullptr) {
+    g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
     g_task_return_new_error(task, fl_binary_messenger_codec_error_quark(),
                             mock_error_channel->code, "%s",
                             mock_error_channel->message);
     return;
-  }
-
-  if (response != nullptr) {
-    g_task_return_pointer(task, g_bytes_ref(response),
-                          reinterpret_cast<GDestroyNotify>(g_bytes_unref));
   }
 }
 

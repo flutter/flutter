@@ -13,6 +13,8 @@ typedef struct {
   FlWindowingChannel* channel;
 
   GHashTable* windows_by_view_id;
+
+  GCancellable* cancellable;
 } FlWindowingHandlerPrivate;
 
 enum { SIGNAL_CREATE_WINDOW, LAST_SIGNAL };
@@ -24,13 +26,18 @@ G_DEFINE_TYPE_WITH_PRIVATE(FlWindowingHandler,
                            G_TYPE_OBJECT)
 
 typedef struct {
+  FlWindowingHandler* self;
   GtkWindow* window;
   FlView* view;
   guint first_frame_cb_id;
+  guint destroy_cb_id;
 } WindowData;
 
-static WindowData* window_data_new(GtkWindow* window, FlView* view) {
+static WindowData* window_data_new(FlWindowingHandler* self,
+                                   GtkWindow* window,
+                                   FlView* view) {
   WindowData* data = g_new0(WindowData, 1);
+  data->self = self;
   data->window = GTK_WINDOW(g_object_ref(window));
   data->view = FL_VIEW(g_object_ref(view));
   return data;
@@ -38,6 +45,7 @@ static WindowData* window_data_new(GtkWindow* window, FlView* view) {
 
 static void window_data_free(WindowData* data) {
   g_signal_handler_disconnect(data->view, data->first_frame_cb_id);
+  g_signal_handler_disconnect(data->window, data->destroy_cb_id);
   g_object_unref(data->window);
   g_object_unref(data->view);
   g_free(data);
@@ -46,6 +54,33 @@ static void window_data_free(WindowData* data) {
 // Called when the first frame is received.
 static void first_frame_cb(FlView* view, WindowData* data) {
   gtk_window_present(data->window);
+}
+
+static void on_window_destroyed_cb(GObject* object,
+                                   GAsyncResult* result,
+                                   gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  if (!fl_windowing_channel_on_window_destroyed_finish(object, result,
+                                                       &error)) {
+    if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+      g_warning("Failed to report window destroyed: %s", error->message);
+    }
+  }
+}
+
+// Called when the window is destroyed.
+static void destroy_cb(GtkWidget* widget, WindowData* data) {
+  FlWindowingHandlerPrivate* priv =
+      reinterpret_cast<FlWindowingHandlerPrivate*>(
+          fl_windowing_handler_get_instance_private(data->self));
+
+  int64_t view_id = fl_view_get_id(data->view);
+
+  fl_windowing_channel_on_window_destroyed(priv->channel, view_id,
+                                           priv->cancellable,
+                                           on_window_destroyed_cb, nullptr);
+
+  g_hash_table_remove(priv->windows_by_view_id, GINT_TO_POINTER(view_id));
 }
 
 static WindowData* get_window_data(FlWindowingHandler* self, int64_t view_id) {
@@ -128,9 +163,11 @@ static FlMethodResponse* create_regular(FlWindowingSize* size,
                                   geometry_mask);
   }
 
-  WindowData* data = window_data_new(GTK_WINDOW(window), view);
+  WindowData* data = window_data_new(self, GTK_WINDOW(window), view);
   data->first_frame_cb_id =
       g_signal_connect(view, "first-frame", G_CALLBACK(first_frame_cb), data);
+  data->destroy_cb_id =
+      g_signal_connect(window, "destroy", G_CALLBACK(destroy_cb), data);
 
   // Make the resources for the view so rendering can start.
   // We'll show the view when we have the first frame.
@@ -222,9 +259,12 @@ static void fl_windowing_handler_dispose(GObject* object) {
       reinterpret_cast<FlWindowingHandlerPrivate*>(
           fl_windowing_handler_get_instance_private(self));
 
+  g_cancellable_cancel(priv->cancellable);
+
   g_weak_ref_clear(&priv->engine);
   g_clear_object(&priv->channel);
   g_clear_pointer(&priv->windows_by_view_id, g_hash_table_unref);
+  g_clear_object(&priv->cancellable);
 
   G_OBJECT_CLASS(fl_windowing_handler_parent_class)->dispose(object);
 }
@@ -249,6 +289,7 @@ static void fl_windowing_handler_init(FlWindowingHandler* self) {
   priv->windows_by_view_id =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
                             reinterpret_cast<GDestroyNotify>(window_data_free));
+  priv->cancellable = g_cancellable_new();
 }
 
 static FlWindowingChannelVTable windowing_channel_vtable = {
@@ -271,4 +312,16 @@ FlWindowingHandler* fl_windowing_handler_new(FlEngine* engine) {
       fl_engine_get_binary_messenger(engine), &windowing_channel_vtable, self);
 
   return self;
+}
+
+GtkWindow* fl_windowing_handler_get_window(FlWindowingHandler* self,
+                                           FlutterViewId view_id) {
+  g_return_val_if_fail(FL_IS_WINDOWING_HANDLER(self), nullptr);
+
+  WindowData* data = get_window_data(self, view_id);
+  if (data == nullptr) {
+    return nullptr;
+  }
+
+  return data->window;
 }
