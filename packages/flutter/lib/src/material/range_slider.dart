@@ -26,7 +26,10 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'material_state.dart';
+import 'range_slider_parts.dart';
+import 'slider_parts.dart';
 import 'slider_theme.dart';
+import 'sliders_value_indicator_shape.dart';
 import 'theme.dart';
 
 // Examples can assume:
