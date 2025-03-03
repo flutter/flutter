@@ -9,7 +9,6 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:file_testing/file_testing.dart';
 import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
@@ -58,15 +57,21 @@ void main() {
       args,
       environment: environment,
       workingDirectory: testRoot.root.absolute.path,
-      includeParentEnvironment: false,
     );
     if (result.exitCode != 0) {
-      print('exitCode: ${result.exitCode}');
+      fail('Failed running "$executable $args" (exit code = ${result.exitCode})');
     }
     printIfNotEmpty('stdout', (result.stdout as String).trim());
     printIfNotEmpty('stderr', (result.stderr as String).trim());
     return result;
   }
+
+  setUpAll(() async {
+    if (usePowershellOnPosix) {
+      final io.ProcessResult result = io.Process.runSync('pwsh', <String>['--version']);
+      print('Using Powershell (${result.stdout}) on POSIX for local debugging and testing');
+    }
+  });
 
   setUp(() async {
     tmpDir = localFs.systemTempDirectory.createTempSync('update_engine_version_test.');
@@ -78,7 +83,7 @@ void main() {
 
     environment = <String, String>{};
 
-    if (const LocalPlatform().isWindows) {
+    if (const LocalPlatform().isWindows || usePowershellOnPosix) {
       // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
       const List<String> powerShellVariables = <String>['SystemRoot', 'Path', 'PATHEXT'];
       for (final String key in powerShellVariables) {
@@ -138,8 +143,7 @@ void main() {
     );
 
     // Now do cleanup so even if the next step fails, we still deleted tmp.
-    print(tmpDir);
-    // tmpDir.deleteSync(recursive: true);
+    tmpDir.deleteSync(recursive: true);
 
     final Set<String> unexpectedFiles = currentFiles.difference(expectedFiles);
     if (unexpectedFiles.isNotEmpty) {
@@ -155,6 +159,13 @@ void main() {
     }
   });
 
+  /// Runs `bin/internal/update_engine_version.{sh|ps1}` and returns the process result.
+  ///
+  /// If the exit code is 0, it is considered a success, and files should exist as a side-effect.
+  ///
+  /// - On Windows, `powershell` is used (to run `update_engine_version.ps1`);
+  /// - On POSIX, if [usePowershellOnPosix] is set, `pwsh` is used (to run `update_engine_version.ps1`);
+  /// - Otherwise, `update_engine_version.sh` is used.
   io.ProcessResult runUpdateEngineVersion() {
     final String executable;
     final List<String> args;
@@ -173,223 +184,121 @@ void main() {
     return run(executable, args);
   }
 
-  void setupRepo({required String branch}) {
-    for (final File f in <File>[testRoot.deps, testRoot.engineSrcGn]) {
-      f.createSync(recursive: true);
-    }
-
+  /// Initializes a blank git repo in [testRoot.root].
+  void initGitRepoWithBlankInitialCommit() {
     run('git', <String>['init', '--initial-branch', 'master']);
     run('git', <String>['config', '--local', 'user.email', 'test@example.com']);
     run('git', <String>['config', '--local', 'user.name', 'Test User']);
     run('git', <String>['add', '.']);
     run('git', <String>['commit', '-m', 'Initial commit']);
-    if (branch != 'master') {
-      run('git', <String>['checkout', '-b', branch]);
+  }
+
+  /// Creates a `bin/internal/engine.version` file in [testRoot].
+  ///
+  /// If [gitTrack] is `false`, the files are left untracked by git.
+  void pinEngineVersionForReleaseBranch({required String engineHash, bool gitTrack = true}) {
+    testRoot.binInternalEngineVersion.writeAsStringSync(engineHash);
+    if (gitTrack) {
+      run('git', <String>['add', '-f', 'bin/internal/engine.version']);
+      run('git', <String>['commit', '-m', 'tracking engine.version']);
     }
   }
 
-  const String engineVersionTrackedContents = 'already existing contents';
-  void setupTrackedEngineVersion() {
-    testRoot.binInternalEngineVersion.writeAsStringSync(engineVersionTrackedContents);
-    run('git', <String>['add', '-f', 'bin/internal/engine.version']);
-    run('git', <String>['commit', '-m', 'tracking engine.version']);
+  /// Sets up and fetches a [remote] (such as `upstream` or `origin`) for [testRoot.root] pointing to [path].
+  void setupRemote({required String remote, required String path}) {
+    run('git', <String>['remote', 'add', remote, path]);
+    run('git', <String>['fetch', remote]);
   }
 
-  void setupRemote({required String remote}) {
-    run('git', <String>['remote', 'add', remote, testRoot.root.path]);
-    run('git', <String>['fetch', remote]);
+  /// Returns the SHA computed by `merge-base HEAD {{ref}}/master`.
+  String gitMergeBase({required String ref}) {
+    final io.ProcessResult mergeBaseHeadOrigin = run('git', <String>[
+      'merge-base',
+      'HEAD',
+      '$ref/master',
+    ]);
+    return mergeBaseHeadOrigin.stdout as String;
   }
 
   group('if FLUTTER_PREBUILT_ENGINE_VERSION is set', () {
     setUp(() {
       environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '123abc';
-      setupRepo(branch: 'master');
+      initGitRepoWithBlankInitialCommit();
     });
 
     test('writes it to cache/engine.stamp with no git interaction', () async {
       runUpdateEngineVersion();
 
-      expect(testRoot.binCacheEngineStamp, exists);
-      expect(testRoot.binCacheEngineStamp.readAsStringSync(), equalsIgnoringWhitespace('123abc'));
-    });
-  });
-
-  test('writes nothing, even if files are set, if we are on "stable"', () async {
-    setupRepo(branch: 'stable');
-    setupTrackedEngineVersion();
-    setupRemote(remote: 'upstream');
-
-    runUpdateEngineVersion();
-
-    expect(testRoot.binInternalEngineVersion, exists);
-    expect(
-      testRoot.binInternalEngineVersion.readAsStringSync(),
-      equalsIgnoringWhitespace(engineVersionTrackedContents),
-    );
-    expect(
-      testRoot.binCacheEngineStamp.readAsStringSync(),
-      equalsIgnoringWhitespace(engineVersionTrackedContents),
-    );
-  });
-
-  test('writes nothing, even if files are set, if we are on "3.29.0"', () async {
-    setupRepo(branch: '3.29.0');
-    setupTrackedEngineVersion();
-    setupRemote(remote: 'upstream');
-
-    runUpdateEngineVersion();
-
-    expect(testRoot.binInternalEngineVersion, exists);
-    expect(
-      testRoot.binInternalEngineVersion.readAsStringSync(),
-      equalsIgnoringWhitespace(engineVersionTrackedContents),
-    );
-    expect(
-      testRoot.binCacheEngineStamp.readAsStringSync(),
-      equalsIgnoringWhitespace(engineVersionTrackedContents),
-    );
-  });
-
-  test('writes nothing, even if files are set, if we are on "beta"', () async {
-    setupRepo(branch: 'beta');
-    setupTrackedEngineVersion();
-    setupRemote(remote: 'upstream');
-
-    runUpdateEngineVersion();
-
-    expect(testRoot.binInternalEngineVersion, exists);
-    expect(
-      testRoot.binInternalEngineVersion.readAsStringSync(),
-      equalsIgnoringWhitespace(engineVersionTrackedContents),
-    );
-    expect(
-      testRoot.binCacheEngineStamp.readAsStringSync(),
-      equalsIgnoringWhitespace(engineVersionTrackedContents),
-    );
-  });
-
-  group('if DEPS and engine/src/.gn are present, engine.version is derived from', () {
-    setUp(() async {
-      setupRepo(branch: 'master');
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('123abc'));
     });
 
-    test('merge-base HEAD upstream/master on non-LUCI when upstream is set', () async {
-      setupRemote(remote: 'upstream');
-
-      final io.ProcessResult mergeBaseHeadUpstream = run('git', <String>[
-        'merge-base',
-        'HEAD',
-        'upstream/master',
-      ]);
+    test('takes precedence over bin/internal/engine.version, even if set', () async {
+      pinEngineVersionForReleaseBranch(engineHash: '456def');
       runUpdateEngineVersion();
 
-      expect(testRoot.binInternalEngineVersion, exists);
-      expect(
-        testRoot.binInternalEngineVersion.readAsStringSync(),
-        equalsIgnoringWhitespace(mergeBaseHeadUpstream.stdout as String),
-      );
-      expect(
-        testRoot.binCacheEngineStamp.readAsStringSync(),
-        equalsIgnoringWhitespace(mergeBaseHeadUpstream.stdout as String),
-      );
-    });
-
-    test('merge-base HEAD origin/master on non-LUCI when upstream is not set', () async {
-      setupRemote(remote: 'origin');
-
-      final io.ProcessResult mergeBaseHeadOrigin = run('git', <String>[
-        'merge-base',
-        'HEAD',
-        'origin/master',
-      ]);
-      runUpdateEngineVersion();
-
-      expect(testRoot.binInternalEngineVersion, exists);
-      expect(
-        testRoot.binInternalEngineVersion.readAsStringSync(),
-        equalsIgnoringWhitespace(mergeBaseHeadOrigin.stdout as String),
-      );
-      expect(
-        testRoot.binCacheEngineStamp.readAsStringSync(),
-        equalsIgnoringWhitespace(mergeBaseHeadOrigin.stdout as String),
-      );
-    });
-
-    test('rev-parse HEAD when running on LUCI', () async {
-      environment['LUCI_CONTEXT'] = '_NON_NULL_AND_NON_EMPTY_STRING';
-      runUpdateEngineVersion();
-
-      final io.ProcessResult revParseHead = run('git', <String>['rev-parse', 'HEAD']);
-      expect(testRoot.binInternalEngineVersion, exists);
-      expect(
-        testRoot.binInternalEngineVersion.readAsStringSync(),
-        equalsIgnoringWhitespace(revParseHead.stdout as String),
-      );
-      expect(
-        testRoot.binCacheEngineStamp.readAsStringSync(),
-        equalsIgnoringWhitespace(revParseHead.stdout as String),
-      );
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('123abc'));
     });
   });
 
-  group('if DEPS or engine/src/.gn are omitted', () {
+  group('if bin/internal/engine.version is set', () {
     setUp(() {
-      for (final File f in <File>[testRoot.deps, testRoot.engineSrcGn]) {
-        f.createSync(recursive: true);
-      }
-      setupRepo(branch: 'master');
-      setupRemote(remote: 'origin');
+      initGitRepoWithBlankInitialCommit();
     });
 
-    test('[DEPS] engine.version is blank', () async {
-      testRoot.deps.deleteSync();
-
+    test('and tracked it is used', () async {
+      setupRemote(remote: 'upstream', path: testRoot.root.path);
+      pinEngineVersionForReleaseBranch(engineHash: 'abc123');
       runUpdateEngineVersion();
 
-      expect(testRoot.binInternalEngineVersion, exists);
-      expect(testRoot.binInternalEngineVersion.readAsStringSync(), equalsIgnoringWhitespace(''));
-      expect(testRoot.binCacheEngineStamp.readAsStringSync(), equalsIgnoringWhitespace(''));
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('abc123'));
     });
 
-    test('[engine/src/.gn] engine.version is blank', () async {
-      testRoot.engineSrcGn.deleteSync();
-
+    test('but not tracked, it is ignored', () async {
+      setupRemote(remote: 'upstream', path: testRoot.root.path);
+      pinEngineVersionForReleaseBranch(engineHash: 'abc123', gitTrack: false);
       runUpdateEngineVersion();
 
-      expect(testRoot.binInternalEngineVersion, exists);
-      expect(testRoot.binInternalEngineVersion.readAsStringSync(), equalsIgnoringWhitespace(''));
-      expect(testRoot.binCacheEngineStamp.readAsStringSync(), equalsIgnoringWhitespace(''));
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(gitMergeBase(ref: 'upstream')));
+    });
+  });
+
+  group('resolves engine artifacts with git merge-base', () {
+    setUp(() {
+      initGitRepoWithBlankInitialCommit();
+    });
+
+    test('default to upstream/master if available', () async {
+      setupRemote(remote: 'upstream', path: testRoot.root.path);
+      runUpdateEngineVersion();
+
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(gitMergeBase(ref: 'upstream')));
+    });
+
+    test('fallsback to origin/master', () async {
+      setupRemote(remote: 'origin', path: testRoot.root.path);
+      runUpdateEngineVersion();
+
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(gitMergeBase(ref: 'origin')));
     });
   });
 
   group('engine.realm', () {
     setUp(() {
-      for (final File f in <File>[testRoot.deps, testRoot.engineSrcGn]) {
-        f.createSync(recursive: true);
-      }
-      setupRepo(branch: 'master');
-      setupRemote(remote: 'origin');
+      initGitRepoWithBlankInitialCommit();
+      environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '123abc';
     });
 
-    test('is empty if the FLUTTER_REALM environment variable is not set', () {
-      expect(environment, isNot(contains('FLUTTER_REALM')));
-
+    test('is empty by default', () async {
       runUpdateEngineVersion();
 
-      expect(testRoot.binCacheEngineRealm, exists);
-      expect(testRoot.binCacheEngineRealm.readAsStringSync(), equalsIgnoringWhitespace(''));
+      expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching(''));
     });
 
-    test('contains the FLUTTER_REALM environment variable', () async {
+    test('is the value in FLUTTER_REALM if set', () async {
       environment['FLUTTER_REALM'] = 'flutter_archives_v2';
-
       runUpdateEngineVersion();
 
-      expect(testRoot.binCacheEngineRealm, exists);
-      expect(
-        testRoot.binCacheEngineRealm.readAsStringSync(),
-        equalsIgnoringWhitespace('flutter_archives_v2'),
-      );
+      expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v2'));
     });
   });
 }
@@ -403,10 +312,6 @@ void main() {
 /// ├── bin
 /// │   ├── internal
 /// │   │   └── update_engine_version.{sh|ps1}
-/// │   └── engine
-/// │       └── src
-/// │           └── .gn
-/// └── DEPS
 /// ```
 final class _FlutterRootUnderTest {
   /// Creates a root-under test using [path] as the root directory.
@@ -421,8 +326,6 @@ final class _FlutterRootUnderTest {
     final Directory root = fileSystem.directory(path);
     return _FlutterRootUnderTest._(
       root,
-      deps: root.childFile('DEPS'),
-      engineSrcGn: root.childFile(fileSystem.path.join('engine', 'src', '.gn')),
       binInternalEngineVersion: root.childFile(
         fileSystem.path.join('bin', 'internal', 'engine.version'),
       ),
@@ -456,8 +359,6 @@ final class _FlutterRootUnderTest {
 
   const _FlutterRootUnderTest._(
     this.root, {
-    required this.deps,
-    required this.engineSrcGn,
     required this.binCacheEngineStamp,
     required this.binInternalEngineVersion,
     required this.binCacheEngineRealm,
@@ -465,16 +366,6 @@ final class _FlutterRootUnderTest {
   });
 
   final Directory root;
-
-  /// `DEPS`.
-  ///
-  /// The presenence of this file is an indicator we are in a fused (mono) repo.
-  final File deps;
-
-  /// `engine/src/.gn`.
-  ///
-  /// The presenence of this file is an indicator we are in a fused (mono) repo.
-  final File engineSrcGn;
 
   /// `bin/internal/engine.version`.
   ///
@@ -508,5 +399,53 @@ extension on File {
   void copySyncRecursive(String newPath) {
     fileSystem.directory(fileSystem.path.dirname(newPath)).createSync(recursive: true);
     copySync(newPath);
+  }
+}
+
+/// Returns a matcher, that, given [contents]:
+///
+/// 1. Asserts the 'actual' entity is a [File];
+/// 2. Asserts that the file exists;
+/// 3. Asserts that the file's contents, after applying [collapseWhitespace], is the same as
+///    [contents], after applying [collapseWhitespace].
+///
+/// This replaces multiple other matchers, and still provides a high-quality error message
+/// when it fails.
+Matcher _hasFileContentsMatching(String contents) {
+  return _ExistsWithStringContentsIgnoringWhitespace(contents);
+}
+
+final class _ExistsWithStringContentsIgnoringWhitespace extends Matcher {
+  _ExistsWithStringContentsIgnoringWhitespace(String contents)
+    : _expected = collapseWhitespace(contents);
+
+  final String _expected;
+
+  @override
+  bool matches(Object? item, _) {
+    if (item is! File || !item.existsSync()) {
+      return false;
+    }
+    final String actual = item.readAsStringSync();
+    return collapseWhitespace(actual) == collapseWhitespace(_expected);
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('a file exists that matches (ignoring whitespace): $_expected');
+  }
+
+  @override
+  Description describeMismatch(Object? item, Description mismatch, _, _) {
+    if (item is! File) {
+      return mismatch.add('is not a file (${item.runtimeType})');
+    }
+    if (!item.existsSync()) {
+      return mismatch.add('does not exist');
+    }
+    return mismatch
+        .add('is ')
+        .addDescriptionOf(collapseWhitespace(item.readAsStringSync()))
+        .add(' with whitespace compressed');
   }
 }

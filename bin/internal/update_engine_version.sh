@@ -39,13 +39,13 @@ mkdir -p "$FLUTTER_ROOT/bin/cache"
 if [ -n "${FLUTTER_PREBUILT_ENGINE_VERSION}" ]; then
   ENGINE_VERSION="${FLUTTER_PREBUILT_ENGINE_VERSION}"
 
-# Check if bin/internal/engine.version exists.
+# Check if bin/internal/engine.version exists and is a tracked file in git.
 #
 # This is intended for a user-shipped stable or beta release, where the release
 # has a specific (pinned) engine artifacts version.
 #
 # If set, it takes precedence over the git hash.
-elif [ -f "$FLUTTER_ROOT/bin/internal/engine.version" ]; then
+elif [ -n "$(git -C "$FLUTTER_ROOT" ls-files bin/internal/engine.version)" ]; then
   ENGINE_VERSION="$(cat "$FLUTTER_ROOT/bin/internal/engine.version")"
 
 # Fallback to using git to triangulate which upstream/master (or origin/master)
