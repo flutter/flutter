@@ -59,6 +59,7 @@ void main() {
       args,
       environment: environment,
       workingDirectory: testRoot.root.absolute.path,
+      includeParentEnvironment: false,
     );
     if (result.exitCode != 0) {
       fail('Failed running "$executable $args" (exit code = ${result.exitCode})');
@@ -203,9 +204,11 @@ void main() {
     }
   }
 
-  /// Sets up and fetches a [remote] (such as `upstream` or `origin`) for [testRoot.root] pointing to [path].
-  void setupRemote({required String remote, required String path}) {
-    run('git', <String>['remote', 'add', remote, path]);
+  /// Sets up and fetches a [remote] (such as `upstream` or `origin`) for [testRoot.root].
+  ///
+  /// The remote points at itself (`testRoot.root.path`) for ease of testing.
+  void setupRemote({required String remote}) {
+    run('git', <String>['remote', 'add', remote, testRoot.root.path]);
     run('git', <String>['fetch', remote]);
   }
 
@@ -245,7 +248,7 @@ void main() {
     });
 
     test('and tracked it is used', () async {
-      setupRemote(remote: 'upstream', path: testRoot.root.path);
+      setupRemote(remote: 'upstream');
       pinEngineVersionForReleaseBranch(engineHash: 'abc123');
       runUpdateEngineVersion();
 
@@ -253,7 +256,7 @@ void main() {
     });
 
     test('but not tracked, it is ignored', () async {
-      setupRemote(remote: 'upstream', path: testRoot.root.path);
+      setupRemote(remote: 'upstream');
       pinEngineVersionForReleaseBranch(engineHash: 'abc123', gitTrack: false);
       runUpdateEngineVersion();
 
@@ -267,14 +270,14 @@ void main() {
     });
 
     test('default to upstream/master if available', () async {
-      setupRemote(remote: 'upstream', path: testRoot.root.path);
+      setupRemote(remote: 'upstream');
       runUpdateEngineVersion();
 
       expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(gitMergeBase(ref: 'upstream')));
     });
 
     test('fallsback to origin/master', () async {
-      setupRemote(remote: 'origin', path: testRoot.root.path);
+      setupRemote(remote: 'origin');
       runUpdateEngineVersion();
 
       expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(gitMergeBase(ref: 'origin')));

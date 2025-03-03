@@ -33,7 +33,7 @@
 # "pin" the engine artifact version so the flutter tool does not need to use git
 # to determine the engine artifacts.
 #
-# See https://github.com/flutter/flutter/blob/master/docs/tool/Engine-artifacts.md.
+# See https://github.com/flutter/flutter/blob/main/docs/tool/Engine-artifacts.md.
 /bin/internal/engine.version
 
 # Flutter repo-specific

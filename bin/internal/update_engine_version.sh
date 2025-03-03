@@ -6,7 +6,7 @@
 # Based on the current repository state, writes the following two files to disk:
 #
 # bin/cache/engine.stamp <-- SHA of the commit that engine artifacts were built
-# bin/cache/engine.realm <-- optional; whether the SHA is from presubmit builds
+# bin/cache/engine.realm <-- optional; whether the SHA is from presubmit builds or staging (bringup: true).
 
 # ---------------------------------- NOTE ---------------------------------- #
 #
@@ -14,7 +14,7 @@
 # `update_engine_version.ps1` script in the same directory to ensure that Flutter
 # continues to work across all platforms!
 #
-# https://github.com/flutter/flutter/blob/master/docs/tool/Engine-artifacts.md.
+# https://github.com/flutter/flutter/blob/main/docs/tool/Engine-artifacts.md.
 #
 # Want to test this script?
 # $ cd dev/tools
