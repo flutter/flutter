@@ -10,7 +10,7 @@
 # ---------------------------------- NOTE ---------------------------------- #
 #
 # Please keep the logic in this file consistent with the logic in the
-# `update_engine_version.ps1` script in the same directory to ensure that Flutter
+# `update_engine_version.sh` script in the same directory to ensure that Flutter
 # continues to work across all platforms!
 #
 # https://github.com/flutter/flutter/blob/master/docs/tool/Engine-artifacts.md.
