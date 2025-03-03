@@ -22,24 +22,24 @@ requireNotNull(flutterRoot) { "Flutter root directory not found!" }
 require(flutterRoot.isDirectory) { "Flutter root is not a valid directory!" }
 
 val engineVersion =
-    Paths.get(
-        flutterRoot.absolutePath,
-        "bin",
-        "cache",
-        "engine.stamp"
-    )
-        .toFile()
+    Paths
+        .get(
+            flutterRoot.absolutePath,
+            "bin",
+            "cache",
+            "engine.stamp"
+        ).toFile()
         .readText()
         .trim()
 
 var engineRealm =
-    Paths.get(
-        flutterRoot.absolutePath,
-        "bin",
-        "cache",
-        "engine.realm"
-    )
-        .toFile()
+    Paths
+        .get(
+            flutterRoot.absolutePath,
+            "bin",
+            "cache",
+            "engine.realm"
+        ).toFile()
         .readText()
         .trim()
 
