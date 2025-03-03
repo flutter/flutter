@@ -115,6 +115,9 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.row => _semanticsRow,
     SemanticsRole.columnHeader => _semanticsColumnHeader,
     SemanticsRole.radioGroup => _semanticsRadioGroup,
+    SemanticsRole.menu => _semanticsMenu,
+    SemanticsRole.menuBar => _semanticsMenuBar,
+    SemanticsRole.menuItem => _noCheckRequired,
     SemanticsRole.alert => _noLiveRegion,
     SemanticsRole.status => _noLiveRegion,
     SemanticsRole.list => _noCheckRequired,
@@ -125,9 +128,6 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.dragHandle => _unimplemented,
     SemanticsRole.spinButton => _unimplemented,
     SemanticsRole.comboBox => _unimplemented,
-    SemanticsRole.menuBar => _unimplemented,
-    SemanticsRole.menu => _unimplemented,
-    SemanticsRole.menuItem => _unimplemented,
     SemanticsRole.form => _unimplemented,
     SemanticsRole.tooltip => _unimplemented,
     SemanticsRole.loadingSpinner => _unimplemented,
@@ -238,6 +238,22 @@ sealed class _DebugSemanticsRoleChecks {
 
     node.visitChildren(validateRadioGroupChildren);
     return error;
+  }
+
+  static FlutterError? _semanticsMenu(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a menu cannot be empty');
+    }
+
+    return null;
+  }
+
+  static FlutterError? _semanticsMenuBar(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a menu bar cannot be empty');
+    }
+
+    return null;
   }
 
   static FlutterError? _noLiveRegion(SemanticsNode node) {
