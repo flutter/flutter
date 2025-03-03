@@ -121,7 +121,6 @@ void main() {
         'internal',
         localFs.path.basename(testRoot.binInternalUpdateEngineVersion.path),
       ),
-      localFs.path.join('bin', 'internal', 'engine.realm'),
       localFs.path.join('bin', 'internal', 'engine.version'),
       localFs.path.join('engine', 'src', '.gn'),
       'DEPS',
@@ -207,14 +206,10 @@ void main() {
       setupRepo(branch: 'master');
     });
 
-    test('writes it to engine.version with no git interaction', () async {
+    test('writes it to cache/engine.stamp with no git interaction', () async {
       runUpdateEngineVersion();
 
-      expect(testRoot.binInternalEngineVersion, exists);
-      expect(
-        testRoot.binInternalEngineVersion.readAsStringSync(),
-        equalsIgnoringWhitespace('123abc'),
-      );
+      expect(testRoot.binCacheEngineStamp, exists);
       expect(testRoot.binCacheEngineStamp.readAsStringSync(), equalsIgnoringWhitespace('123abc'));
     });
   });
@@ -383,8 +378,6 @@ void main() {
 
       expect(testRoot.binCacheEngineRealm, exists);
       expect(testRoot.binCacheEngineRealm.readAsStringSync(), equalsIgnoringWhitespace(''));
-      expect(testRoot.binInternalEngineRealm, exists);
-      expect(testRoot.binInternalEngineRealm.readAsStringSync(), equalsIgnoringWhitespace(''));
     });
 
     test('contains the FLUTTER_REALM environment variable', () async {
@@ -395,11 +388,6 @@ void main() {
       expect(testRoot.binCacheEngineRealm, exists);
       expect(
         testRoot.binCacheEngineRealm.readAsStringSync(),
-        equalsIgnoringWhitespace('flutter_archives_v2'),
-      );
-      expect(testRoot.binInternalEngineRealm, exists);
-      expect(
-        testRoot.binInternalEngineRealm.readAsStringSync(),
         equalsIgnoringWhitespace('flutter_archives_v2'),
       );
     });
@@ -414,8 +402,6 @@ void main() {
 /// ```txt
 /// ├── bin
 /// │   ├── internal
-/// │   │   ├── engine.version
-/// │   │   ├── engine.realm
 /// │   │   └── update_engine_version.{sh|ps1}
 /// │   └── engine
 /// │       └── src
@@ -441,9 +427,6 @@ final class _FlutterRootUnderTest {
         fileSystem.path.join('bin', 'internal', 'engine.version'),
       ),
       binCacheEngineRealm: root.childFile(fileSystem.path.join('bin', 'cache', 'engine.realm')),
-      binInternalEngineRealm: root.childFile(
-        fileSystem.path.join('bin', 'internal', 'engine.realm'),
-      ),
       binCacheEngineStamp: root.childFile(fileSystem.path.join('bin', 'cache', 'engine.stamp')),
       binInternalUpdateEngineVersion: root.childFile(
         fileSystem.path.join(
@@ -478,7 +461,6 @@ final class _FlutterRootUnderTest {
     required this.binCacheEngineStamp,
     required this.binInternalEngineVersion,
     required this.binCacheEngineRealm,
-    required this.binInternalEngineRealm,
     required this.binInternalUpdateEngineVersion,
   });
 
@@ -496,32 +478,20 @@ final class _FlutterRootUnderTest {
 
   /// `bin/internal/engine.version`.
   ///
-  /// This file contains a SHA of which engine binaries to download.
+  /// This file contains a pinned SHA of which engine binaries to download.
   ///
-  /// Currently, the SHA is either _computed_ or _pre-determined_, based on if
-  /// the file is checked-in and tracked. That behavior is changing, and in the
-  /// future this will be a checked-in file and not computed.
-  ///
-  /// See also: https://github.com/flutter/flutter/issues/164315.
-  final File binInternalEngineVersion; // TODO(matanlurey): Update these docs.
+  /// If omitted, the file is ignored.
+  final File binInternalEngineVersion;
 
   /// `bin/cache/engine.stamp`.
   ///
   /// This file contains a _computed_ SHA of which engine binaries to download.
   final File binCacheEngineStamp;
 
-  /// `bin/internal/engine.realm`.
-  ///
-  /// If non-empty, the value comes from the environment variable `FLUTTER_REALM`,
-  /// which instructs the tool where the SHA stored in [binInternalEngineVersion]
-  /// should be fetched from (it differs for presubmits run for flutter/flutter
-  /// and builds downloaded by end-users or by postsubmits).
-  final File binInternalEngineRealm;
-
   /// `bin/cache/engine.realm`.
   ///
   /// If non-empty, the value comes from the environment variable `FLUTTER_REALM`,
-  /// which instructs the tool where the SHA stored in [binInternalEngineVersion]
+  /// which instructs the tool where the SHA stored in [binCacheEngineStamp]
   /// should be fetched from (it differs for presubmits run for flutter/flutter
   /// and builds downloaded by end-users or by postsubmits).
   final File binCacheEngineRealm;
