@@ -618,8 +618,8 @@ class RenderTable extends RenderBox {
     SemanticsConfiguration config,
     Iterable<SemanticsNode> children,
   ) {
-    assert(_children.length == _rows * _columns);
     final List<SemanticsNode> rows = <SemanticsNode>[];
+    int cellIndex = 0;
 
     for (int y = 0; y < _rows; y++) {
       final Rect rowBox = getRowBox(y);
@@ -638,10 +638,19 @@ class RenderTable extends RenderBox {
             ..indexInParent = y
             ..role = SemanticsRole.row;
 
-      final List<SemanticsNode> rawCells = children.skip(y * _columns).take(_columns).toList();
+      // The list of cells of this Row.
+      final List<SemanticsNode> cells = <SemanticsNode>[];
 
-      final List<SemanticsNode> cells = List<SemanticsNode>.generate(columns, (int x) {
-        final SemanticsNode cell = rawCells[x];
+      for (int x = 0; x < columns && cellIndex < children.length; x++, cellIndex++) {
+        // Get the cell at the current index.
+        final SemanticsNode cell = children.elementAt(cellIndex);
+        final Offset offset =
+            (cell.transform != null ? MatrixUtils.getAsTranslation(cell.transform!) : null) ??
+            Offset.zero;
+        // This cell belong to next row. break.
+        if (cell.rect.shift(offset).top > rowBox.bottom) {
+          break;
+        }
         cell.indexInParent = x;
 
         // Shift the cell's transform to be relative to the row.
@@ -652,17 +661,21 @@ class RenderTable extends RenderBox {
                 ? rowBox.width - _columnLefts!.elementAt(x)
                 : _columnLefts!.elementAt(x + 1) - _columnLefts!.elementAt(x);
 
+        // Skip cell if it's invisible
+        if (cellWidth <= 0.0) {
+          continue;
+        }
+
         cell
           ..transform = cellTransform
           ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
 
-        // If the cell has no role, set it to cell. This happens when users add a basic widget like
-        // Text directly to the table row without wrapping it in a TableCell.
+        //  If the cell has no role, set it to cell.
         if (cell.role == SemanticsRole.none) {
           cell.role = SemanticsRole.cell;
         }
-        return cell;
-      });
+        cells.add(cell);
+      }
 
       newRow
         ..updateWith(config: configuration, childrenInInversePaintOrder: cells)
