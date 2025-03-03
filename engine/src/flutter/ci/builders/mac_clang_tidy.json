@@ -26,6 +26,11 @@
             "description": "A debug mode macOS host build used only as the basis for a clang-tidy run.",
             "ninja": {
                 "config": "ci/host_debug_clang_tidy"
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
             }
         },
         {
@@ -55,6 +60,11 @@
             "description": "A debug mode iOS simulator build used only as the basis for a clang-tidy run.",
             "ninja": {
                 "config": "ci/ios_debug_sim_clang_tidy"
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
             }
         }
     ],
@@ -107,7 +117,12 @@
                     "max_attempts": 1,
                     "script": "flutter/ci/clang_tidy.sh"
                 }
-            ]
+            ],
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            }
         },
         {
             "name": "test: lint host_debug 1",
@@ -157,7 +172,12 @@
                     "max_attempts": 1,
                     "script": "flutter/ci/clang_tidy.sh"
                 }
-            ]
+            ],
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            }
         },
         {
             "name": "test: lint host_debug 2",
@@ -207,7 +227,12 @@
                     "max_attempts": 1,
                     "script": "flutter/ci/clang_tidy.sh"
                 }
-            ]
+            ],
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            }
         },
         {
             "name": "test: lint host_debug 3",
@@ -257,7 +282,12 @@
                     "max_attempts": 1,
                     "script": "flutter/ci/clang_tidy.sh"
                 }
-            ]
+            ],
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            }
         },
         {
             "name": "test: lint ios_debug_sim",
@@ -325,7 +355,12 @@
                     "max_attempts": 1,
                     "script": "flutter/ci/clang_tidy.sh"
                 }
-            ]
+            ],
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            }
         }
     ]
 }

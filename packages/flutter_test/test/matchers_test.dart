@@ -6,6 +6,7 @@
 
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -728,6 +729,7 @@ void main() {
         maxValueLength: 15,
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
+        role: ui.SemanticsRole.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1026,6 +1028,7 @@ void main() {
         maxValueLength: 15,
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
+        role: ui.SemanticsRole.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1121,6 +1124,7 @@ void main() {
         maxValueLength: 15,
         headingLevel: 0,
         linkUrl: null,
+        role: ui.SemanticsRole.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1223,6 +1227,7 @@ void main() {
         maxValueLength: 15,
         headingLevel: 0,
         linkUrl: null,
+        role: ui.SemanticsRole.none,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1253,6 +1258,7 @@ void main() {
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
+        role: ui.SemanticsRole.none,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1339,6 +1345,7 @@ void main() {
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
         headingLevel: 0,
         linkUrl: null,
+        role: ui.SemanticsRole.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 

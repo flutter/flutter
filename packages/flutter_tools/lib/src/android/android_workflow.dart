@@ -134,7 +134,7 @@ class AndroidValidator extends DoctorValidator {
   }
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     final AndroidSdk? androidSdk = _androidSdk;
     if (androidSdk == null) {
@@ -158,7 +158,15 @@ class AndroidValidator extends DoctorValidator {
 
     _task = 'Validating Android SDK command line tools are available';
     if (!androidSdk.cmdlineToolsAvailable) {
-      messages.add(ValidationMessage.error(_userMessages.androidMissingCmdTools));
+      messages.add(
+        const ValidationMessage.error(
+          'cmdline-tools component is missing.\n'
+          'Try installing or updating Android Studio.\n'
+          'Alternatively, download the tools from https://developer.android.com/studio#command-line-tools-only '
+          'and make sure to set the ANDROID_HOME environment variable.\n'
+          'See https://developer.android.com/studio/command-line for more details.',
+        ),
+      );
       return ValidationResult(ValidationType.missing, messages);
     }
 
@@ -267,7 +275,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior

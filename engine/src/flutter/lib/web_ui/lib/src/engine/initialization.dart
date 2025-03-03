@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:js_interop';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -141,7 +140,7 @@ Future<void> initializeEngineServices({
   //
   // This extension does not need to clean-up Dart statics. Those are cleaned
   // up by the compiler.
-  developer.registerExtension('ext.flutter.disassemble', (_, __) {
+  developer.registerExtension('ext.flutter.disassemble', (_, _) {
     for (final ui.VoidCallback listener in _hotRestartListeners) {
       listener();
     }
@@ -153,51 +152,6 @@ Future<void> initializeEngineServices({
   if (Profiler.isBenchmarkMode) {
     Profiler.ensureInitialized();
   }
-
-  bool waitingForAnimation = false;
-  scheduleFrameCallback = () {
-    // We're asked to schedule a frame and call `frameHandler` when the frame
-    // fires.
-    if (!waitingForAnimation) {
-      waitingForAnimation = true;
-      domWindow.requestAnimationFrame((JSNumber highResTime) {
-        FrameTimingRecorder.recordCurrentFrameVsync();
-
-        // In Flutter terminology "building a frame" consists of "beginning
-        // frame" and "drawing frame".
-        //
-        // We do not call `recordBuildFinish` from here because
-        // part of the rasterization process, particularly in the HTML
-        // renderer, takes place in the `SceneBuilder.build()`.
-        FrameTimingRecorder.recordCurrentFrameBuildStart();
-
-        // Reset immediately, because `frameHandler` can schedule more frames.
-        waitingForAnimation = false;
-
-        // We have to convert high-resolution time to `int` so we can construct
-        // a `Duration` out of it. However, high-res time is supplied in
-        // milliseconds as a double value, with sub-millisecond information
-        // hidden in the fraction. So we first multiply it by 1000 to uncover
-        // microsecond precision, and only then convert to `int`.
-        final int highResTimeMicroseconds = (1000 * highResTime.toDartDouble).toInt();
-
-        if (EnginePlatformDispatcher.instance.onBeginFrame != null) {
-          EnginePlatformDispatcher.instance.invokeOnBeginFrame(
-            Duration(microseconds: highResTimeMicroseconds),
-          );
-        }
-
-        if (EnginePlatformDispatcher.instance.onDrawFrame != null) {
-          // TODO(yjbanov): technically Flutter flushes microtasks between
-          //                onBeginFrame and onDrawFrame. We don't, which hasn't
-          //                been an issue yet, but eventually we'll have to
-          //                implement it properly. (Also see the to-do in
-          //                `EnginePlatformDispatcher.scheduleWarmUpFrame`).
-          EnginePlatformDispatcher.instance.invokeOnDrawFrame();
-        }
-      });
-    }
-  };
 
   assetManager ??= ui_web.AssetManager(assetBase: configuration.assetBase);
   _setAssetManager(assetManager);
@@ -236,12 +190,7 @@ Future<void> initializeEngineUi() async {
   ensureMetaTag('generator', 'Flutter');
 
   if (!configuration.multiViewEnabled) {
-    final EngineFlutterWindow implicitView = ensureImplicitViewInitialized(
-      hostElement: configuration.hostElement,
-    );
-    if (renderer is HtmlRenderer) {
-      ensureResourceManagerInitialized(implicitView);
-    }
+    ensureImplicitViewInitialized(hostElement: configuration.hostElement);
   }
   _initializationState = DebugEngineInitializationState.initialized;
 }

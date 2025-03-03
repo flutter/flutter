@@ -33,7 +33,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.fileSystem,
     required this.processManager,
     required this.logger,
-    required this.shellPath,
+    required this.flutterTesterBinPath,
     required this.debuggingOptions,
     required this.enableVmService,
     required this.machine,
@@ -54,7 +54,7 @@ class FlutterTesterTestDevice extends TestDevice {
   final FileSystem fileSystem;
   final ProcessManager processManager;
   final Logger logger;
-  final String shellPath;
+  final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
   final bool enableVmService;
   final bool? machine;
@@ -89,7 +89,7 @@ class FlutterTesterTestDevice extends TestDevice {
     _server = await bind(host, /*port*/ 0);
     logger.printTrace('test $id: test harness socket server is running at port:${_server!.port}');
     final List<String> command = <String>[
-      shellPath,
+      flutterTesterBinPath,
       if (enableVmService) ...<String>[
         // Some systems drive the _FlutterPlatform class in an unusual way, where
         // only one test file is processed at a time, and the operating
@@ -118,7 +118,6 @@ class FlutterTesterTestDevice extends TestDevice {
       '--disable-asset-fonts',
       '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       if (testAssetDirectory != null) '--flutter-assets-dir=$testAssetDirectory',
-      if (debuggingOptions.nullAssertions) '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
       entrypointPath,
     ];

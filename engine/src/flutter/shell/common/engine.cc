@@ -245,8 +245,9 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
           configuration.GetEntrypointLibrary(),      //
           configuration.GetEntrypointArgs(),         //
           configuration.TakeIsolateConfiguration(),  //
-          native_assets_manager_)                    //
-  ) {
+          native_assets_manager_,                    //
+          configuration.GetEngineId()))              //
+  {
     return RunStatus::Failure;
   }
 
@@ -310,6 +311,10 @@ void Engine::AddView(int64_t view_id,
 
 bool Engine::RemoveView(int64_t view_id) {
   return runtime_controller_->RemoveView(view_id);
+}
+
+bool Engine::SendViewFocusEvent(const ViewFocusEvent& event) {
+  return runtime_controller_->SendViewFocusEvent(event);
 }
 
 void Engine::SetViewportMetrics(int64_t view_id,
@@ -522,6 +527,10 @@ double Engine::GetScaledFontSize(double unscaled_font_size,
   return delegate_.GetScaledFontSize(unscaled_font_size, configuration_id);
 }
 
+void Engine::RequestViewFocusChange(const ViewFocusChangeRequest& request) {
+  delegate_.RequestViewFocusChange(request);
+}
+
 void Engine::SetNeedsReportTimings(bool needs_reporting) {
   delegate_.SetNeedsReportTimings(needs_reporting);
 }
@@ -625,6 +634,10 @@ void Engine::SetDisplays(const std::vector<DisplayData>& displays) {
 
 void Engine::ShutdownPlatformIsolates() {
   runtime_controller_->ShutdownPlatformIsolates();
+}
+
+void Engine::FlushMicrotaskQueue() {
+  runtime_controller_->FlushMicrotaskQueue();
 }
 
 }  // namespace flutter

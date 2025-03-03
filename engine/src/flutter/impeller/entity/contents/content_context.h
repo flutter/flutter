@@ -15,6 +15,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
+#include "impeller/geometry/color.h"
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/pipeline.h"
@@ -27,7 +28,10 @@
 #include "impeller/entity/clip.frag.h"
 #include "impeller/entity/clip.vert.h"
 #include "impeller/entity/color_matrix_color_filter.frag.h"
-#include "impeller/entity/conical_gradient_fill.frag.h"
+#include "impeller/entity/conical_gradient_fill_conical.frag.h"
+#include "impeller/entity/conical_gradient_fill_radial.frag.h"
+#include "impeller/entity/conical_gradient_fill_strip.frag.h"
+#include "impeller/entity/conical_gradient_fill_strip_radial.frag.h"
 #include "impeller/entity/fast_gradient.frag.h"
 #include "impeller/entity/fast_gradient.vert.h"
 #include "impeller/entity/filter_position.vert.h"
@@ -56,7 +60,10 @@
 #include "impeller/entity/tiled_texture_fill.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
 
-#include "impeller/entity/conical_gradient_uniform_fill.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_conical.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_radial.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_strip.frag.h"
+#include "impeller/entity/conical_gradient_uniform_fill_strip_radial.frag.h"
 #include "impeller/entity/linear_gradient_uniform_fill.frag.h"
 #include "impeller/entity/radial_gradient_uniform_fill.frag.h"
 #include "impeller/entity/sweep_gradient_uniform_fill.frag.h"
@@ -91,18 +98,36 @@ using SolidFillPipeline =
 using RadialGradientFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          RadialGradientFillFragmentShader>;
-using ConicalGradientFillPipeline =
+using ConicalGradientFillConicalPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientFillFragmentShader>;
+                         ConicalGradientFillConicalFragmentShader>;
+using ConicalGradientFillStripPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientFillStripFragmentShader>;
+using ConicalGradientFillRadialPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientFillRadialFragmentShader>;
+using ConicalGradientFillStripRadialPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientFillStripRadialFragmentShader>;
 using SweepGradientFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          SweepGradientFillFragmentShader>;
 using LinearGradientUniformFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          LinearGradientUniformFillFragmentShader>;
-using ConicalGradientUniformFillPipeline =
+using ConicalGradientUniformFillConicalPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
-                         ConicalGradientUniformFillFragmentShader>;
+                         ConicalGradientUniformFillConicalFragmentShader>;
+using ConicalGradientUniformFillStripPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientUniformFillStripFragmentShader>;
+using ConicalGradientUniformFillRadialPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientUniformFillRadialFragmentShader>;
+using ConicalGradientUniformFillStripRadialPipeline =
+    RenderPipelineHandle<GradientFillVertexShader,
+                         ConicalGradientUniformFillStripRadialFragmentShader>;
 using RadialGradientUniformFillPipeline =
     RenderPipelineHandle<GradientFillVertexShader,
                          RadialGradientUniformFillFragmentShader>;
@@ -364,6 +389,13 @@ struct ContentContextOptions {
   void ApplyToPipelineDescriptor(PipelineDescriptor& desc) const;
 };
 
+enum ConicalKind {
+  kConical,
+  kRadial,
+  kStrip,
+  kStripAndRadial,
+};
+
 class Tessellator;
 class RenderTargetCache;
 
@@ -398,9 +430,21 @@ class ContentContext {
     return GetPipeline(radial_gradient_uniform_fill_pipelines_, opts);
   }
 
-  PipelineRef GetConicalGradientUniformFillPipeline(
-      ContentContextOptions opts) const {
-    return GetPipeline(conical_gradient_uniform_fill_pipelines_, opts);
+  PipelineRef GetConicalGradientUniformFillPipeline(ContentContextOptions opts,
+                                                    ConicalKind kind) const {
+    switch (kind) {
+      case ConicalKind::kConical:
+        return GetPipeline(conical_gradient_uniform_fill_pipelines_, opts);
+      case ConicalKind::kRadial:
+        return GetPipeline(conical_gradient_uniform_fill_radial_pipelines_,
+                           opts);
+      case ConicalKind::kStrip:
+        return GetPipeline(conical_gradient_uniform_fill_strip_pipelines_,
+                           opts);
+      case ConicalKind::kStripAndRadial:
+        return GetPipeline(
+            conical_gradient_uniform_fill_strip_and_radial_pipelines_, opts);
+    }
   }
 
   PipelineRef GetSweepGradientUniformFillPipeline(
@@ -420,10 +464,20 @@ class ContentContext {
     return GetPipeline(radial_gradient_ssbo_fill_pipelines_, opts);
   }
 
-  PipelineRef GetConicalGradientSSBOFillPipeline(
-      ContentContextOptions opts) const {
+  PipelineRef GetConicalGradientSSBOFillPipeline(ContentContextOptions opts,
+                                                 ConicalKind kind) const {
     FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-    return GetPipeline(conical_gradient_ssbo_fill_pipelines_, opts);
+    switch (kind) {
+      case ConicalKind::kConical:
+        return GetPipeline(conical_gradient_ssbo_fill_pipelines_, opts);
+      case ConicalKind::kRadial:
+        return GetPipeline(conical_gradient_ssbo_fill_radial_pipelines_, opts);
+      case ConicalKind::kStrip:
+        return GetPipeline(conical_gradient_ssbo_fill_strip_pipelines_, opts);
+      case ConicalKind::kStripAndRadial:
+        return GetPipeline(
+            conical_gradient_ssbo_fill_strip_and_radial_pipelines_, opts);
+    }
   }
 
   PipelineRef GetSweepGradientSSBOFillPipeline(
@@ -436,8 +490,19 @@ class ContentContext {
     return GetPipeline(radial_gradient_fill_pipelines_, opts);
   }
 
-  PipelineRef GetConicalGradientFillPipeline(ContentContextOptions opts) const {
-    return GetPipeline(conical_gradient_fill_pipelines_, opts);
+  PipelineRef GetConicalGradientFillPipeline(ContentContextOptions opts,
+                                             ConicalKind kind) const {
+    switch (kind) {
+      case ConicalKind::kConical:
+        return GetPipeline(conical_gradient_fill_pipelines_, opts);
+      case ConicalKind::kRadial:
+        return GetPipeline(conical_gradient_fill_radial_pipelines_, opts);
+      case ConicalKind::kStrip:
+        return GetPipeline(conical_gradient_fill_strip_pipelines_, opts);
+      case ConicalKind::kStripAndRadial:
+        return GetPipeline(conical_gradient_fill_strip_and_radial_pipelines_,
+                           opts);
+    }
   }
 
   PipelineRef GetRRectBlurPipeline(ContentContextOptions opts) const {
@@ -522,8 +587,121 @@ class ContentContext {
     return GetPipeline(yuv_to_rgb_filter_pipelines_, opts);
   }
 
-  PipelineRef GetPorterDuffBlendPipeline(ContentContextOptions opts) const {
-    return GetPipeline(porter_duff_blend_pipelines_, opts);
+  // Porter-Duff combined blends.
+  PipelineRef GetPorterDuffPipeline(BlendMode mode,
+                                    ContentContextOptions opts) const {
+    switch (mode) {
+      case BlendMode::kClear:
+        return GetClearBlendPipeline(opts);
+      case BlendMode::kSource:
+        return GetSourceBlendPipeline(opts);
+      case BlendMode::kDestination:
+        return GetDestinationBlendPipeline(opts);
+      case BlendMode::kSourceOver:
+        return GetSourceOverBlendPipeline(opts);
+      case BlendMode::kDestinationOver:
+        return GetDestinationOverBlendPipeline(opts);
+      case BlendMode::kSourceIn:
+        return GetSourceInBlendPipeline(opts);
+      case BlendMode::kDestinationIn:
+        return GetDestinationInBlendPipeline(opts);
+      case BlendMode::kSourceOut:
+        return GetSourceOutBlendPipeline(opts);
+      case BlendMode::kDestinationOut:
+        return GetDestinationOutBlendPipeline(opts);
+      case BlendMode::kSourceATop:
+        return GetSourceATopBlendPipeline(opts);
+      case BlendMode::kDestinationATop:
+        return GetDestinationATopBlendPipeline(opts);
+      case BlendMode::kXor:
+        return GetXorBlendPipeline(opts);
+      case BlendMode::kPlus:
+        return GetPlusBlendPipeline(opts);
+      case BlendMode::kModulate:
+        return GetModulateBlendPipeline(opts);
+      case BlendMode::kScreen:
+        return GetScreenBlendPipeline(opts);
+      case BlendMode::kOverlay:
+      case BlendMode::kDarken:
+      case BlendMode::kLighten:
+      case BlendMode::kColorDodge:
+      case BlendMode::kColorBurn:
+      case BlendMode::kHardLight:
+      case BlendMode::kSoftLight:
+      case BlendMode::kDifference:
+      case BlendMode::kExclusion:
+      case BlendMode::kMultiply:
+      case BlendMode::kHue:
+      case BlendMode::kSaturation:
+      case BlendMode::kColor:
+      case BlendMode::kLuminosity:
+        VALIDATION_LOG << "Invalid porter duff blend mode "
+                       << BlendModeToString(mode);
+        return GetClearBlendPipeline(opts);
+        break;
+    }
+  }
+
+  PipelineRef GetClearBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(clear_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetSourceBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(source_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetDestinationBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(destination_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetSourceOverBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(source_over_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetDestinationOverBlendPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(destination_over_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetSourceInBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(source_in_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetDestinationInBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(destination_in_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetSourceOutBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(source_out_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetDestinationOutBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(destination_out_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetSourceATopBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(source_a_top_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetDestinationATopBlendPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(destination_a_top_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetXorBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(xor_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetPlusBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(plus_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetModulateBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(modulate_blend_pipelines_, opts);
+  }
+
+  PipelineRef GetScreenBlendPipeline(ContentContextOptions opts) const {
+    return GetPipeline(screen_blend_pipelines_, opts);
   }
 
   // Advanced blends.
@@ -826,7 +1004,7 @@ class ContentContext {
 
     void CreateDefault(const Context& context,
                        const ContentContextOptions& options,
-                       const std::initializer_list<Scalar>& constants = {}) {
+                       const std::vector<Scalar>& constants = {}) {
       auto desc = PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(
           context, constants);
       if (!desc.has_value()) {
@@ -874,15 +1052,27 @@ class ContentContext {
   mutable Variants<FastGradientPipeline> fast_gradient_pipelines_;
   mutable Variants<LinearGradientFillPipeline> linear_gradient_fill_pipelines_;
   mutable Variants<RadialGradientFillPipeline> radial_gradient_fill_pipelines_;
-  mutable Variants<ConicalGradientFillPipeline>
+  mutable Variants<ConicalGradientFillConicalPipeline>
       conical_gradient_fill_pipelines_;
+  mutable Variants<ConicalGradientFillRadialPipeline>
+      conical_gradient_fill_radial_pipelines_;
+  mutable Variants<ConicalGradientFillStripPipeline>
+      conical_gradient_fill_strip_pipelines_;
+  mutable Variants<ConicalGradientFillStripRadialPipeline>
+      conical_gradient_fill_strip_and_radial_pipelines_;
   mutable Variants<SweepGradientFillPipeline> sweep_gradient_fill_pipelines_;
   mutable Variants<LinearGradientUniformFillPipeline>
       linear_gradient_uniform_fill_pipelines_;
   mutable Variants<RadialGradientUniformFillPipeline>
       radial_gradient_uniform_fill_pipelines_;
-  mutable Variants<ConicalGradientUniformFillPipeline>
+  mutable Variants<ConicalGradientUniformFillConicalPipeline>
       conical_gradient_uniform_fill_pipelines_;
+  mutable Variants<ConicalGradientUniformFillRadialPipeline>
+      conical_gradient_uniform_fill_radial_pipelines_;
+  mutable Variants<ConicalGradientUniformFillStripPipeline>
+      conical_gradient_uniform_fill_strip_pipelines_;
+  mutable Variants<ConicalGradientUniformFillStripRadialPipeline>
+      conical_gradient_uniform_fill_strip_and_radial_pipelines_;
   mutable Variants<SweepGradientUniformFillPipeline>
       sweep_gradient_uniform_fill_pipelines_;
   mutable Variants<LinearGradientSSBOFillPipeline>
@@ -891,6 +1081,12 @@ class ContentContext {
       radial_gradient_ssbo_fill_pipelines_;
   mutable Variants<ConicalGradientSSBOFillPipeline>
       conical_gradient_ssbo_fill_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline>
+      conical_gradient_ssbo_fill_radial_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline>
+      conical_gradient_ssbo_fill_strip_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline>
+      conical_gradient_ssbo_fill_strip_and_radial_pipelines_;
   mutable Variants<SweepGradientSSBOFillPipeline>
       sweep_gradient_ssbo_fill_pipelines_;
   mutable Variants<RRectBlurPipeline> rrect_blur_pipelines_;
@@ -916,7 +1112,24 @@ class ContentContext {
   mutable Variants<ClipPipeline> clip_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
   mutable Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter_pipelines_;
-  mutable Variants<PorterDuffBlendPipeline> porter_duff_blend_pipelines_;
+
+  // Porter Duff Blends.
+  mutable Variants<PorterDuffBlendPipeline> clear_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> source_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> destination_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> source_over_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> destination_over_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> source_in_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> destination_in_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> source_out_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> destination_out_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> source_a_top_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> destination_a_top_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> xor_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> plus_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> modulate_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> screen_blend_pipelines_;
+
   // Advanced blends.
   mutable Variants<BlendColorPipeline> blend_color_pipelines_;
   mutable Variants<BlendColorBurnPipeline> blend_colorburn_pipelines_;

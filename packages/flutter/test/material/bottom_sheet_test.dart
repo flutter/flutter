@@ -1181,6 +1181,7 @@ void main() {
                           textDirection: TextDirection.ltr,
                           children: <TestSemantics>[
                             TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
                               actions: <SemanticsAction>[SemanticsAction.tap],
                               label: 'Dismiss',
                               textDirection: TextDirection.ltr,
@@ -2463,9 +2464,9 @@ void main() {
     // Test custom animation style.
     await tester.pumpWidget(
       buildWidget(
-        sheetAnimationStyle: AnimationStyle(
-          duration: const Duration(milliseconds: 800),
-          reverseDuration: const Duration(milliseconds: 400),
+        sheetAnimationStyle: const AnimationStyle(
+          duration: Duration(milliseconds: 800),
+          reverseDuration: Duration(milliseconds: 400),
         ),
       ),
     );
@@ -2623,9 +2624,9 @@ void main() {
     // Test custom animation style.
     await tester.pumpWidget(
       buildWidget(
-        sheetAnimationStyle: AnimationStyle(
-          duration: const Duration(milliseconds: 800),
-          reverseDuration: const Duration(milliseconds: 400),
+        sheetAnimationStyle: const AnimationStyle(
+          duration: Duration(milliseconds: 800),
+          reverseDuration: Duration(milliseconds: 400),
         ),
       ),
     );
@@ -2749,6 +2750,43 @@ void main() {
       expect(getTextFieldFocusNode()?.hasFocus, true);
     },
   );
+
+  testWidgets('requestFocus works correctly in showModalBottomSheet.', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(body: TextField(focusNode: focusNode)),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+
+    showModalBottomSheet<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: true,
+      builder: (BuildContext context) => const Text('BottomSheet'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('BottomSheet'))).hasFocus, true);
+    expect(focusNode.hasFocus, false);
+
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    showModalBottomSheet<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: false,
+      builder: (BuildContext context) => const Text('BottomSheet'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('BottomSheet'))).hasFocus, false);
+    expect(focusNode.hasFocus, true);
+  });
 }
 
 class _TestPage extends StatelessWidget {

@@ -1230,10 +1230,10 @@ class FakeResidentRunner extends ResidentHandlers {
   bool supportsRestart = true;
 
   @override
-  bool supportsServiceProtocol = true;
+  bool supportsDetach = true;
 
   @override
-  bool supportsWriteSkSL = true;
+  bool supportsServiceProtocol = true;
 
   @override
   Future<void> cleanupAfterSignal() async {}
@@ -1249,7 +1249,7 @@ class FakeResidentRunner extends ResidentHandlers {
   }
 
   @override
-  void printHelp({required bool details}) {
+  void printHelp({required bool details, bool reloadIsRestart = false}) {
     if (details) {
       calledPrintWithDetails = true;
     } else {
@@ -1305,6 +1305,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   String get name => 'Fake Device';
+
+  @override
+  String get displayName => name;
 
   @override
   DartDevelopmentService dds = DartDevelopmentService(logger: FakeLogger());
@@ -1398,7 +1401,7 @@ class TestRunner extends Fake implements ResidentRunner {
   Future<void> cleanupAtFinish() async {}
 
   @override
-  void printHelp({bool? details}) {
+  void printHelp({bool? details, bool reloadIsRestart = false}) {
     hasHelpBeenPrinted = true;
   }
 

@@ -20,6 +20,7 @@ import '../vector_math.dart';
 import '../window.dart';
 import 'accessibility.dart';
 import 'checkable.dart';
+import 'expandable.dart';
 import 'focusable.dart';
 import 'header.dart';
 import 'heading.dart';
@@ -32,6 +33,8 @@ import 'platform_view.dart';
 import 'route.dart';
 import 'scrollable.dart';
 import 'semantics_helper.dart';
+import 'table.dart';
+import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
 
@@ -235,6 +238,7 @@ class SemanticsNodeUpdate {
     required this.additionalActions,
     required this.headingLevel,
     this.linkUrl,
+    required this.role,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -341,13 +345,16 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String? linkUrl;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.SemanticsRole role;
 }
 
 /// Identifies [SemanticRole] implementations.
 ///
 /// Each value corresponds to the most specific role a semantics node plays in
 /// the semantics tree.
-enum SemanticRoleKind {
+enum EngineSemanticsRole {
   /// Supports incrementing and/or decrementing its value.
   incrementable,
 
@@ -402,6 +409,33 @@ enum SemanticRoleKind {
   /// Denotes a header.
   header,
 
+  /// An individual tab button.
+  tab,
+
+  /// Contains tab buttons.
+  tabList,
+
+  /// A main content for a tab.
+  tabPanel,
+
+  /// A popup dialog.
+  dialog,
+
+  /// An alert dialog.
+  alertDialog,
+
+  /// A table structure containing data arranged in rows and columns.
+  table,
+
+  /// A cell in a [table] that does not contain column or row header information.
+  cell,
+
+  /// A row of [cell]s or or [columnHeader]s in a [table].
+  row,
+
+  /// A cell in a [table] contains header information for a column.
+  columnHeader,
+
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
   ///
@@ -428,6 +462,7 @@ abstract class SemanticRole {
     addRouteName();
     addLabelAndValue(preferredRepresentation: preferredLabelRepresentation);
     addSelectableBehavior();
+    addExpandableBehavior();
   }
 
   /// Initializes a blank role for a [semanticsObject].
@@ -442,7 +477,7 @@ abstract class SemanticRole {
   late final DomElement element;
 
   /// The kind of the role that this .
-  final SemanticRoleKind kind;
+  final EngineSemanticsRole kind;
 
   /// The semantics object managed by this role.
   final SemanticsObject semanticsObject;
@@ -594,6 +629,10 @@ abstract class SemanticRole {
     }
   }
 
+  void addExpandableBehavior() {
+    addSemanticBehavior(Expandable(semanticsObject, this));
+  }
+
   /// Adds a semantic behavior to this role.
   ///
   /// This method should be called by concrete implementations of
@@ -678,7 +717,7 @@ abstract class SemanticRole {
 final class GenericRole extends SemanticRole {
   GenericRole(SemanticsObject semanticsObject)
     : super.withBasics(
-        SemanticRoleKind.generic,
+        EngineSemanticsRole.generic,
         semanticsObject,
         // Prefer sized span because if this is a leaf it is frequently a Text widget.
         // But if it turns out to be a container, then LabelAndValue will automatically
@@ -1232,6 +1271,9 @@ class SemanticsObject {
   /// Controls the semantics tree that this node participates in.
   final EngineSemanticsOwner owner;
 
+  /// The role of this node.
+  late ui.SemanticsRole role;
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1518,6 +1560,8 @@ class SemanticsObject {
       _markLinkUrlDirty();
     }
 
+    role = update.role;
+
     // Apply updates to the DOM.
     _updateRole();
 
@@ -1714,51 +1758,102 @@ class SemanticsObject {
   /// semantics flags and actions.
   SemanticRole? semanticRole;
 
-  SemanticRoleKind _getSemanticRoleKind() {
+  EngineSemanticsRole _getEngineSemanticsRole() {
     // The most specific role should take precedence.
     if (isPlatformView) {
-      return SemanticRoleKind.platformView;
-    } else if (isHeading) {
+      return EngineSemanticsRole.platformView;
+    }
+    switch (role) {
+      case ui.SemanticsRole.tab:
+        return EngineSemanticsRole.tab;
+      case ui.SemanticsRole.tabPanel:
+        return EngineSemanticsRole.tabPanel;
+      case ui.SemanticsRole.tabBar:
+        return EngineSemanticsRole.tabList;
+      case ui.SemanticsRole.dialog:
+        return EngineSemanticsRole.dialog;
+      case ui.SemanticsRole.alertDialog:
+        return EngineSemanticsRole.alertDialog;
+      case ui.SemanticsRole.table:
+        return EngineSemanticsRole.table;
+      case ui.SemanticsRole.cell:
+        return EngineSemanticsRole.cell;
+      case ui.SemanticsRole.row:
+        return EngineSemanticsRole.row;
+      case ui.SemanticsRole.columnHeader:
+        return EngineSemanticsRole.columnHeader;
+      // TODO(chunhtai): implement these roles.
+      // https://github.com/flutter/flutter/issues/159741.
+      case ui.SemanticsRole.searchBox:
+      case ui.SemanticsRole.dragHandle:
+      case ui.SemanticsRole.spinButton:
+      case ui.SemanticsRole.comboBox:
+      case ui.SemanticsRole.menuBar:
+      case ui.SemanticsRole.menu:
+      case ui.SemanticsRole.menuItem:
+      case ui.SemanticsRole.list:
+      case ui.SemanticsRole.listItem:
+      case ui.SemanticsRole.form:
+      case ui.SemanticsRole.tooltip:
+      case ui.SemanticsRole.loadingSpinner:
+      case ui.SemanticsRole.progressBar:
+      case ui.SemanticsRole.hotKey:
+      case ui.SemanticsRole.none:
+      // fallback to checking semantics properties.
+    }
+
+    if (isHeading) {
       // IMPORTANT: because headings also cover certain kinds of headers, the
       //            `heading` role has precedence over the `header` role.
-      return SemanticRoleKind.heading;
+      return EngineSemanticsRole.heading;
     } else if (isTextField) {
-      return SemanticRoleKind.textField;
+      return EngineSemanticsRole.textField;
     } else if (isIncrementable) {
-      return SemanticRoleKind.incrementable;
+      return EngineSemanticsRole.incrementable;
     } else if (isVisualOnly) {
-      return SemanticRoleKind.image;
+      return EngineSemanticsRole.image;
     } else if (isCheckable) {
-      return SemanticRoleKind.checkable;
+      return EngineSemanticsRole.checkable;
     } else if (isButton) {
-      return SemanticRoleKind.button;
+      return EngineSemanticsRole.button;
     } else if (isScrollContainer) {
-      return SemanticRoleKind.scrollable;
+      return EngineSemanticsRole.scrollable;
     } else if (scopesRoute) {
-      return SemanticRoleKind.route;
+      return EngineSemanticsRole.route;
     } else if (isLink) {
-      return SemanticRoleKind.link;
+      return EngineSemanticsRole.link;
     } else if (isHeader) {
-      return SemanticRoleKind.header;
+      return EngineSemanticsRole.header;
+    } else if (isButtonLike) {
+      return EngineSemanticsRole.button;
     } else {
-      return SemanticRoleKind.generic;
+      return EngineSemanticsRole.generic;
     }
   }
 
-  SemanticRole _createSemanticRole(SemanticRoleKind role) {
+  SemanticRole _createSemanticRole(EngineSemanticsRole role) {
     return switch (role) {
-      SemanticRoleKind.textField => SemanticTextField(this),
-      SemanticRoleKind.scrollable => SemanticScrollable(this),
-      SemanticRoleKind.incrementable => SemanticIncrementable(this),
-      SemanticRoleKind.button => SemanticButton(this),
-      SemanticRoleKind.checkable => SemanticCheckable(this),
-      SemanticRoleKind.route => SemanticRoute(this),
-      SemanticRoleKind.image => SemanticImage(this),
-      SemanticRoleKind.platformView => SemanticPlatformView(this),
-      SemanticRoleKind.link => SemanticLink(this),
-      SemanticRoleKind.heading => SemanticHeading(this),
-      SemanticRoleKind.header => SemanticHeader(this),
-      SemanticRoleKind.generic => GenericRole(this),
+      EngineSemanticsRole.textField => SemanticTextField(this),
+      EngineSemanticsRole.scrollable => SemanticScrollable(this),
+      EngineSemanticsRole.incrementable => SemanticIncrementable(this),
+      EngineSemanticsRole.button => SemanticButton(this),
+      EngineSemanticsRole.checkable => SemanticCheckable(this),
+      EngineSemanticsRole.route => SemanticRoute(this),
+      EngineSemanticsRole.image => SemanticImage(this),
+      EngineSemanticsRole.platformView => SemanticPlatformView(this),
+      EngineSemanticsRole.link => SemanticLink(this),
+      EngineSemanticsRole.heading => SemanticHeading(this),
+      EngineSemanticsRole.header => SemanticHeader(this),
+      EngineSemanticsRole.tab => SemanticTab(this),
+      EngineSemanticsRole.tabList => SemanticTabList(this),
+      EngineSemanticsRole.tabPanel => SemanticTabPanel(this),
+      EngineSemanticsRole.dialog => SemanticDialog(this),
+      EngineSemanticsRole.alertDialog => SemanticAlertDialog(this),
+      EngineSemanticsRole.table => SemanticTable(this),
+      EngineSemanticsRole.cell => SemanticCell(this),
+      EngineSemanticsRole.row => SemanticRow(this),
+      EngineSemanticsRole.columnHeader => SemanticColumnHeader(this),
+      EngineSemanticsRole.generic => GenericRole(this),
     };
   }
 
@@ -1766,7 +1861,7 @@ class SemanticsObject {
   /// update the DOM.
   void _updateRole() {
     SemanticRole? currentSemanticRole = semanticRole;
-    final SemanticRoleKind kind = _getSemanticRoleKind();
+    final EngineSemanticsRole kind = _getEngineSemanticsRole();
     final DomElement? previousElement = semanticRole?.element;
 
     if (currentSemanticRole != null) {
@@ -1818,7 +1913,13 @@ class SemanticsObject {
       hasAction(ui.SemanticsAction.increase) || hasAction(ui.SemanticsAction.decrease);
 
   /// Whether the object represents a button.
+  ///
+  /// See also [isButtonLike].
   bool get isButton => hasFlag(ui.SemanticsFlag.isButton);
+
+  /// Whether the object behaves like a button even if it does not formally have
+  /// the [ui.SemanticsFlag.isButton] flag.
+  bool get isButtonLike => isTappable && !hasChildren;
 
   /// Represents a tappable or clickable widget, such as button, icon button,
   /// "hamburger" menu, etc.
@@ -1851,6 +1952,19 @@ class SemanticsObject {
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
   bool get isSelected => hasFlag(ui.SemanticsFlag.isSelected);
+
+  /// If true, this node represents something that can be annotated as
+  /// "expanded", such as a expansion tile or drop down menu
+  ///
+  /// Expandability is managed by `aria-expanded`.
+  ///
+  /// See also:
+  ///
+  ///   * [isExpanded], which indicates whether the node is currently selected.
+  bool get isExpandable => hasFlag(ui.SemanticsFlag.hasExpandedState);
+
+  /// Indicates whether the node is currently expanded.
+  bool get isExpanded => hasFlag(ui.SemanticsFlag.isExpanded);
 
   /// Role-specific adjustment of the vertical position of the child container.
   ///
@@ -2232,6 +2346,15 @@ class EngineSemantics {
   GestureMode get gestureMode => _gestureMode;
   GestureMode _gestureMode = GestureMode.browserGestures;
 
+  /// Resets [gestureMode] back to its original value [GestureMode.browserGestures].
+  ///
+  /// This is intended to be used in tests only.
+  @visibleForTesting
+  void debugResetGestureMode() {
+    _gestureModeClock?.datetime = null;
+    _gestureMode = GestureMode.browserGestures;
+  }
+
   AlarmClock? _gestureModeClock;
 
   AlarmClock? _getGestureModeClock() {
@@ -2311,6 +2434,12 @@ class EngineSemantics {
       'mousemove',
       'mouseleave',
       'mouseup',
+
+      // The wheel event disables browser gestures to allow the framework handle
+      // the scrolling. Doing otherwise would cause [SemanticScrollable] to send
+      // [SemanticsAction.scrollUp/Down] to the framework leading to scroll
+      // position jerks. See https://github.com/flutter/flutter/issues/159358.
+      'wheel',
     ];
 
     if (pointerEventTypes.contains(event.type)) {

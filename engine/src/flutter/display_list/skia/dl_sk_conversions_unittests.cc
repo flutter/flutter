@@ -11,6 +11,7 @@
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
+#include "flutter/impeller/geometry/path_component.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
@@ -92,9 +93,9 @@ TEST(DisplayListSkConversions, ToSkFilterMode) {
 }
 
 TEST(DisplayListSkConversions, ToSkSrcRectConstraint) {
-  ASSERT_EQ(ToSk(DlCanvas::SrcRectConstraint::kFast),
+  ASSERT_EQ(ToSk(DlSrcRectConstraint::kFast),
             SkCanvas::SrcRectConstraint::kFast_SrcRectConstraint);
-  ASSERT_EQ(ToSk(DlCanvas::SrcRectConstraint::kStrict),
+  ASSERT_EQ(ToSk(DlSrcRectConstraint::kStrict),
             SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint);
 }
 
@@ -318,6 +319,144 @@ TEST(DisplayListSkConversions, ToSkDitheringEnabledForGradients) {
   {
     SkPaint sk_paint = ToNonShaderSk(dl_paint);
     EXPECT_FALSE(sk_paint.isDither());
+  }
+}
+
+TEST(DisplayListSkConversions, ToSkRSTransform) {
+  constexpr size_t kTransformCount = 4;
+  DlRSTransform transforms[kTransformCount] = {
+      DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+      DlRSTransform::Make({12.25f, 14.75f}, 10.0f, DlDegrees(30)),
+      DlRSTransform::Make({-10.4f, 8.25f}, 11.0f, DlDegrees(400)),
+      DlRSTransform::Make({1.0f, 3.0f}, 0.5f, DlDegrees(45)),
+  };
+  SkRSXform expected_transforms[kTransformCount] = {
+      SkRSXform::MakeFromRadians(1.0f, SkDegreesToRadians(0),  //
+                                 0.0f, 0.0f, 0.0f, 0.0f),
+      SkRSXform::MakeFromRadians(10.0f, SkDegreesToRadians(30),  //
+                                 12.25f, 14.75f, 0.0f, 0.0f),
+      SkRSXform::MakeFromRadians(11.0f, SkDegreesToRadians(400),  //
+                                 -10.4f, 8.25f, 0.0f, 0.0f),
+      SkRSXform::MakeFromRadians(0.5f, SkDegreesToRadians(45),  //
+                                 1.0f, 3.0f, 0.0f, 0.0f),
+  };
+  auto sk_transforms = ToSk(transforms);
+  for (size_t i = 0; i < kTransformCount; i++) {
+    // Comparing dl values to transformed copy values
+    // should match exactly because arrays were simply aliased
+    EXPECT_EQ(sk_transforms[i].fSCos, transforms[i].scaled_cos) << i;
+    EXPECT_EQ(sk_transforms[i].fSSin, transforms[i].scaled_sin) << i;
+    EXPECT_EQ(sk_transforms[i].fTx, transforms[i].translate_x) << i;
+    EXPECT_EQ(sk_transforms[i].fTy, transforms[i].translate_y) << i;
+
+    // Comparing dl values to computed Skia values
+    // should match closely, but not exactly due to differences in trig
+    EXPECT_FLOAT_EQ(sk_transforms[i].fSCos, expected_transforms[i].fSCos) << i;
+    EXPECT_FLOAT_EQ(sk_transforms[i].fSSin, expected_transforms[i].fSSin) << i;
+    EXPECT_EQ(sk_transforms[i].fTx, expected_transforms[i].fTx) << i;
+    EXPECT_EQ(sk_transforms[i].fTy, expected_transforms[i].fTy) << i;
+
+    // Comparing the results of transforming a sprite with Skia vs Impeller
+    SkPoint sk_quad[4];
+    expected_transforms[i].toQuad(20, 30, sk_quad);
+    DlQuad dl_quad;
+    transforms[i].GetQuad(20, 30, dl_quad);
+    // Skia order is UL,UR,LR,LL, Impeller order is UL,UR,LL,LR
+    EXPECT_FLOAT_EQ(sk_quad[0].fX, dl_quad[0].x) << i;
+    EXPECT_FLOAT_EQ(sk_quad[0].fY, dl_quad[0].y) << i;
+    EXPECT_FLOAT_EQ(sk_quad[1].fX, dl_quad[1].x) << i;
+    EXPECT_FLOAT_EQ(sk_quad[1].fY, dl_quad[1].y) << i;
+    EXPECT_FLOAT_EQ(sk_quad[2].fX, dl_quad[3].x) << i;
+    EXPECT_FLOAT_EQ(sk_quad[2].fY, dl_quad[3].y) << i;
+    EXPECT_FLOAT_EQ(sk_quad[3].fX, dl_quad[2].x) << i;
+    EXPECT_FLOAT_EQ(sk_quad[3].fY, dl_quad[2].y) << i;
+  }
+}
+
+// This tests the new conic subdivision code in the Impeller conic path
+// component object vs the code we used to rely on inside Skia
+TEST(DisplayListSkConversions, ConicToQuads) {
+  SkScalar weights[4] = {
+      0.02f,
+      0.5f,
+      SK_ScalarSqrt2 * 0.5f,
+      1.0f,
+  };
+
+  for (SkScalar weight : weights) {
+    SkPoint sk_points[5];
+    int ncurves = SkPath::ConvertConicToQuads(
+        SkPoint::Make(10, 10), SkPoint::Make(20, 10), SkPoint::Make(20, 20),
+        weight, sk_points, 1);
+    ASSERT_EQ(ncurves, 2) << "weight: " << weight;
+
+    std::array<DlPoint, 5> i_points;
+    impeller::ConicPathComponent i_conic(DlPoint(10, 10), DlPoint(20, 10),
+                                         DlPoint(20, 20), weight);
+    i_conic.SubdivideToQuadraticPoints(i_points);
+
+    for (int i = 0; i < 5; i++) {
+      EXPECT_FLOAT_EQ(sk_points[i].fX, i_points[i].x)
+          << "weight: " << weight << "point[" << i << "].x";
+      EXPECT_FLOAT_EQ(sk_points[i].fY, i_points[i].y)
+          << "weight: " << weight << "point[" << i << "].y";
+    }
+  }
+}
+
+// This tests the new conic subdivision code in the Impeller conic path
+// component object vs the code we used to rely on inside Skia
+TEST(DisplayListSkConversions, ConicPathToQuads) {
+  // If we execute conicTo with a weight of exactly 1.0, SkPath will turn
+  // it into a quadTo, so we avoid that by using 0.999
+  SkScalar weights[4] = {
+      0.02f,
+      0.5f,
+      SK_ScalarSqrt2 * 0.5f,
+      1.0f - kEhCloseEnough,
+  };
+
+  for (SkScalar weight : weights) {
+    SkPath sk_path;
+    sk_path.moveTo(10, 10);
+    sk_path.conicTo(20, 10, 20, 20, weight);
+
+    DlPath dl_path(sk_path);
+    impeller::Path i_path = dl_path.GetPath();
+
+    auto it = i_path.begin();
+    ASSERT_EQ(it.type(), impeller::Path::ComponentType::kContour);
+    ++it;
+
+    ASSERT_EQ(it.type(), impeller::Path::ComponentType::kQuadratic);
+    auto quad1 = it.quadratic();
+    ASSERT_NE(quad1, nullptr);
+    ++it;
+
+    ASSERT_EQ(it.type(), impeller::Path::ComponentType::kQuadratic);
+    auto quad2 = it.quadratic();
+    ASSERT_NE(quad2, nullptr);
+    ++it;
+
+    SkPoint sk_points[5];
+    int ncurves = SkPath::ConvertConicToQuads(
+        SkPoint::Make(10, 10), SkPoint::Make(20, 10), SkPoint::Make(20, 20),
+        weight, sk_points, 1);
+    ASSERT_EQ(ncurves, 2);
+
+    EXPECT_FLOAT_EQ(sk_points[0].fX, quad1->p1.x) << "weight: " << weight;
+    EXPECT_FLOAT_EQ(sk_points[0].fY, quad1->p1.y) << "weight: " << weight;
+    EXPECT_FLOAT_EQ(sk_points[1].fX, quad1->cp.x) << "weight: " << weight;
+    EXPECT_FLOAT_EQ(sk_points[1].fY, quad1->cp.y) << "weight: " << weight;
+    EXPECT_FLOAT_EQ(sk_points[2].fX, quad1->p2.x) << "weight: " << weight;
+    EXPECT_FLOAT_EQ(sk_points[2].fY, quad1->p2.y) << "weight: " << weight;
+
+    EXPECT_FLOAT_EQ(sk_points[2].fX, quad2->p1.x) << "weight: " << weight;
+    EXPECT_FLOAT_EQ(sk_points[2].fY, quad2->p1.y) << "weight: " << weight;
+    EXPECT_FLOAT_EQ(sk_points[3].fX, quad2->cp.x) << "weight: " << weight;
+    EXPECT_FLOAT_EQ(sk_points[3].fY, quad2->cp.y) << "weight: " << weight;
+    EXPECT_FLOAT_EQ(sk_points[4].fX, quad2->p2.x) << "weight: " << weight;
+    EXPECT_FLOAT_EQ(sk_points[4].fY, quad2->p2.y) << "weight: " << weight;
   }
 }
 

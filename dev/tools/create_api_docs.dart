@@ -401,7 +401,7 @@ class Configurator {
     // show the end of it if there was a problem.
     print('${DateTime.now().toUtc()}: Building Flutter docset.');
 
-    // If dashing gets stuck, Cirrus will time out the build after an hour, and we
+    // If dashing gets stuck, LUCI will time out the build after an hour, and we
     // never get to see the logs. Thus, we run it in the background and tail the
     // logs only if it fails.
     final ProcessWrapper result = ProcessWrapper(
@@ -1265,7 +1265,7 @@ class FlutterInformation {
     info['engineRevision'] = flutterVersion['engineRevision'] as String;
     final File engineRealm = flutterRoot
         .childDirectory('bin')
-        .childDirectory('internal')
+        .childDirectory('cache')
         .childFile('engine.realm');
     info['engineRealm'] = engineRealm.existsSync() ? engineRealm.readAsStringSync().trim() : '';
 

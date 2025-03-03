@@ -11,7 +11,6 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-// TODO(mattcarroll): re-evalute docs in this class and add nullability annotations.
 /**
  * Registry of backend textures used with a single {@link io.flutter.embedding.android.FlutterView}
  * instance. Entries may be embedded into the Flutter view using the <a
@@ -116,6 +115,8 @@ public interface TextureRegistry {
       /**
        * Invoked when an Android application is resumed after {@link Callback#onSurfaceDestroyed()}.
        *
+       * <p>When this method is overridden, {@link Callback#onSurfaceCreated()} is not called.
+       *
        * <p>Applications should now call {@link SurfaceProducer#getSurface()} to get a new
        * {@link Surface}, as the previous one was destroyed and released as a result of a low memory
        * event from the Android OS.
@@ -141,17 +142,9 @@ public interface TextureRegistry {
       }
 
       /**
-       * Invoked when a {@link Surface} returned by {@link SurfaceProducer#getSurface()} is invalid.
+       * An alias for {@link Callback#onSurfaceCleanup()} with a less accurate name.
        *
-       * <p>In a low memory environment, the Android OS will signal to Flutter to release resources,
-       * such as surfaces, that are not currently in use, such as when the application is in the
-       * background, and this method is subsequently called to notify a plugin author to stop using
-       * or rendering to the last surface.
-       *
-       * @deprecated Override and use {@link Callback#onSurfaceCleanup()} instead. This method is
-       *     called after the surface has already been destroyed, which is often too late to tell a
-       *     dependency (which might have already scheduled a render) to stop.
-       * @see <a href="https://github.com/flutter/flutter/issues/160933">#160933</a>.
+       * @deprecated Override and use {@link Callback#onSurfaceCleanup()} instead.
        */
       @Deprecated(since = "Flutter 3.28", forRemoval = true)
       default void onSurfaceDestroyed() {}
@@ -159,6 +152,8 @@ public interface TextureRegistry {
       /**
        * Invoked when a {@link Surface} returned by {@link SurfaceProducer#getSurface()} is about
        * to become invalid.
+       *
+       * <p>When this method is overridden, {@link Callback#onSurfaceDestroyed()} is not called.
        *
        * <p>In a low memory environment, the Android OS will signal to Flutter to release resources,
        * such as surfaces, that are not currently in use, such as when the application is in the
@@ -183,7 +178,9 @@ public interface TextureRegistry {
        * }
        * </pre>
        */
-      default void onSurfaceCleanup() {}
+      default void onSurfaceCleanup() {
+        onSurfaceDestroyed();
+      }
     }
 
     /** This method is not officially part of the public API surface and will be deprecated. */

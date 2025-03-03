@@ -7,7 +7,6 @@
 
 #include <fcntl.h>
 
-#include <chrono>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -21,14 +20,6 @@
 #include "flutter/fml/unique_fd.h"
 
 namespace flutter {
-
-// The combination of targeted graphics API and Impeller support.
-enum class AndroidRenderingAPI {
-  kSoftware,
-  kImpellerOpenGLES,
-  kImpellerVulkan,
-  kSkiaOpenGLES
-};
 
 class FrameTiming {
  public:
@@ -234,15 +225,11 @@ struct Settings {
   bool enable_impeller = false;
 #endif
 
-  // Force disable the android surface control even where supported.
-  bool disable_surface_control = false;
+  // Enable android surface control swapchains where supported.
+  bool enable_surface_control = false;
 
   // Log a warning during shell initialization if Impeller is not enabled.
   bool warn_on_impeller_opt_out = false;
-
-  // The selected Android rendering API.
-  AndroidRenderingAPI android_rendering_api =
-      AndroidRenderingAPI::kSkiaOpenGLES;
 
   // Requests a specific rendering backend.
   std::optional<std::string> requested_rendering_backend;

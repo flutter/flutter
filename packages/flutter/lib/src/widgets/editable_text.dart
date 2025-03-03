@@ -258,17 +258,19 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// The current string the user is editing.
   String get text => value.text;
 
-  /// Setting this will notify all the listeners of this [TextEditingController]
+  /// Updates the current [text] to the given `newText`, and removes existing
+  /// selection and composing range held by the controller.
+  ///
+  /// This setter is typically only used in tests, as it resets the cursor
+  /// position and the composing state. For production code, **consider using the
+  /// [value] setter to update the [text] value instead**, and specify a
+  /// reasonable selection range within the new [text].
+  ///
+  /// Setting this notifies all the listeners of this [TextEditingController]
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
-  /// actions, not during the build, layout, or paint phases.
-  ///
-  /// This property can be set from a listener added to this
-  /// [TextEditingController]; **however, one should not also set [selection]
-  /// in a separate statement. To change both the [text] and the [selection]
-  /// change the controller's [value].** Setting this here will clear
-  /// the current selection and composing range, so avoid using it directly
-  /// unless that is the desired behavior.
+  /// actions, not during the build, layout, or paint phases. This property can
+  /// be set from a listener added to this [TextEditingController].
   set text(String newText) {
     value = value.copyWith(
       text: newText,
@@ -1561,6 +1563,10 @@ class EditableText extends StatefulWidget {
   /// Called for each tap up that occurs outside of the [TextFieldTapRegion]
   /// group when the text field is focused.
   ///
+  /// If this is null, [EditableTextTapUpOutsideIntent] will be invoked. In the
+  /// default implementation, this is a no-op. To change this behavior, set a
+  /// callback here or override [EditableTextTapUpOutsideIntent].
+  ///
   /// The [PointerUpEvent] passed to the function is the event that caused the
   /// notification. It is possible that the event may occur outside of the
   /// immediate bounding box defined by the text field, although it will be
@@ -1571,6 +1577,8 @@ class EditableText extends StatefulWidget {
   ///
   ///  * [TapRegion] for how the region group is determined.
   ///  * [onTapOutside], which is called for each tap down.
+  ///  * [EditableTextTapOutsideIntent], the intent that is invoked if
+  ///  this is null.
   final TapRegionUpCallback? onTapUpOutside;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
@@ -3023,6 +3031,8 @@ class EditableTextState extends State<EditableText>
   ///
   /// * [EditableText.getEditableButtonItems], which performs a similar role,
   ///   but for any editable field, not just specifically EditableText.
+  /// * [SystemContextMenu.getDefaultItems], which performs a similar role, but
+  ///   for the system-rendered context menu.
   /// * [SelectableRegionState.contextMenuButtonItems], which performs a similar
   ///   role but for content that is selectable but not editable.
   /// * [contextMenuAnchors], which provides the anchor points for the default
@@ -3381,7 +3391,7 @@ class EditableTextState extends State<EditableText>
       // `selection` is the only change.
       SelectionChangedCause cause;
       if (_textInputConnection?.scribbleInProgress ?? false) {
-        cause = SelectionChangedCause.scribble;
+        cause = SelectionChangedCause.stylusHandwriting;
       } else if (_pointOffsetOrigin != null) {
         // For floating cursor selection when force pressing the space bar.
         cause = SelectionChangedCause.forcePress;
@@ -4176,7 +4186,7 @@ class EditableTextState extends State<EditableText>
       case SelectionChangedCause.drag:
       case SelectionChangedCause.forcePress:
       case SelectionChangedCause.longPress:
-      case SelectionChangedCause.scribble:
+      case SelectionChangedCause.stylusHandwriting:
       case SelectionChangedCause.tap:
       case SelectionChangedCause.toolbar:
         requestKeyboard();
@@ -5368,6 +5378,16 @@ class EditableTextState extends State<EditableText>
     );
   }
 
+  /// The default behavior used if [EditableText.onTapUpOutside] is null.
+  ///
+  /// The `event` argument is the [PointerUpEvent] that caused the notification.
+  void _defaultOnTapUpOutside(BuildContext context, PointerUpEvent event) {
+    Actions.invoke(
+      context,
+      EditableTextTapUpOutsideIntent(focusNode: widget.focusNode, pointerUpEvent: event),
+    );
+  }
+
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
@@ -5489,6 +5509,7 @@ class EditableTextState extends State<EditableText>
 
     TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
     EditableTextTapOutsideIntent: _makeOverridable(_EditableTextTapOutsideAction()),
+    EditableTextTapUpOutsideIntent: _makeOverridable(_EditableTextTapUpOutsideAction()),
   };
 
   @protected
@@ -5518,7 +5539,9 @@ class EditableTextState extends State<EditableText>
                       ? widget.onTapOutside ??
                           (PointerDownEvent event) => _defaultOnTapOutside(context, event)
                       : null,
-              onTapUpOutside: widget.onTapUpOutside,
+              onTapUpOutside:
+                  widget.onTapUpOutside ??
+                  (PointerUpEvent event) => _defaultOnTapUpOutside(context, event),
               debugLabel: kReleaseMode ? null : 'EditableText',
               child: MouseRegion(
                 cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -6023,7 +6046,7 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
   @override
   void onScribbleFocus(Offset offset) {
     widget.focusNode.requestFocus();
-    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.scribble);
+    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.stylusHandwriting);
     widget.updateSelectionRects();
   }
 
@@ -6499,5 +6522,14 @@ class _EditableTextTapOutsideAction extends ContextAction<EditableTextTapOutside
       case TargetPlatform.windows:
         intent.focusNode.unfocus();
     }
+  }
+}
+
+class _EditableTextTapUpOutsideAction extends ContextAction<EditableTextTapUpOutsideIntent> {
+  _EditableTextTapUpOutsideAction();
+
+  @override
+  void invoke(EditableTextTapUpOutsideIntent intent, [BuildContext? context]) {
+    // The default action is a no-op.
   }
 }
