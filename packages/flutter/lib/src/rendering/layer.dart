@@ -1783,7 +1783,7 @@ class ClipRRectLayer extends ContainerLayer {
 class ClipRSuperellipseLayer extends ContainerLayer {
   /// Creates a layer with a rounded-rectangular clip.
   ///
-  /// The [clipRRect] and [clipBehavior] properties must be non-null before the
+  /// The [clipRSuperellipse] and [clipBehavior] properties must be non-null before the
   /// compositing phase of the pipeline.
   ClipRSuperellipseLayer({RSuperellipse? clipRSuperellipse, Clip clipBehavior = Clip.antiAlias})
     : _clipRSuperellipse = clipRSuperellipse,
