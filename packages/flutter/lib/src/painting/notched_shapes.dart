@@ -152,7 +152,7 @@ class AutomaticNotchedShape extends NotchedShape {
   ///
   /// The [guest] may be null, in which case no notch is created even
   /// if a guest rectangle is provided to [getOuterPath].
-  const AutomaticNotchedShape(this.host, [ this.guest ]);
+  const AutomaticNotchedShape(this.host, [this.guest]);
 
   /// The shape of the widget that uses the [NotchedShape] (typically a
   /// [BottomAppBar]).
@@ -170,10 +170,7 @@ class AutomaticNotchedShape extends NotchedShape {
   final ShapeBorder? guest;
 
   @override
-  Path getOuterPath(Rect hostRect, Rect? guestRect) { // ignore: avoid_renaming_method_parameters
-    // The parameters of this method are renamed over the baseclass because they
-    // would clash with properties of this object, and the use of all four of
-    // them in the code below is really confusing if they have the same names.
+  Path getOuterPath(Rect hostRect, Rect? guestRect) {
     final Path hostPath = host.getOuterPath(hostRect);
     if (guest != null && guestRect != null) {
       final Path guestPath = guest!.getOuterPath(guestRect);

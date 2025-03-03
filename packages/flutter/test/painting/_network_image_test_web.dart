@@ -15,53 +15,46 @@ import 'package:web/web.dart' as web;
 
 import '../image_data.dart';
 import '_test_http_request.dart';
+
 void runTests() {
   tearDown(() {
     debugRestoreHttpRequestFactory();
     debugRestoreImgElementFactory();
   });
 
-  testWidgets('loads an image from the network with headers',
-      (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest = TestHttpRequest()
-      ..status = 200
-      ..mockEvent = MockEvent('load', web.Event('test error'))
-      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+  testWidgets('loads an image from the network with headers', (WidgetTester tester) async {
+    final TestHttpRequest testHttpRequest =
+        TestHttpRequest()
+          ..status = 200
+          ..mockEvent = MockEvent('load', web.Event('test error'))
+          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
-    const Map<String, String> headers = <String, String>{
-      'flutter': 'flutter',
-      'second': 'second',
-    };
+    const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
-    final Image image = Image.network(
-      'https://www.example.com/images/frame.png',
-      headers: headers,
-    );
+    final Image image = Image.network('https://www.example.com/images/frame.png', headers: headers);
 
     await tester.pumpWidget(image);
 
     assert(mapEquals(testHttpRequest.responseHeaders, headers), true);
   });
 
-  testWidgets('loads an image from the network with unsuccessful HTTP code',
-      (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest = TestHttpRequest()
-      ..status = 404
-      ..mockEvent = MockEvent('error', web.Event('test error'));
-
+  testWidgets('loads an image from the network with unsuccessful HTTP code', (
+    WidgetTester tester,
+  ) async {
+    final TestHttpRequest testHttpRequest =
+        TestHttpRequest()
+          ..status = 404
+          ..mockEvent = MockEvent('error', web.Event('test error'));
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
-    const Map<String, String> headers = <String, String>{
-      'flutter': 'flutter',
-      'second': 'second',
-    };
+    const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
     final Image image = Image.network(
       'https://www.example.com/images/frame2.png',
@@ -79,21 +72,18 @@ void runTests() {
     );
   });
 
-  testWidgets('loads an image from the network with empty response',
-      (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest = TestHttpRequest()
-      ..status = 200
-      ..mockEvent = MockEvent('load', web.Event('successful load'))
-      ..response = (Uint8List.fromList(<int>[])).buffer;
+  testWidgets('loads an image from the network with empty response', (WidgetTester tester) async {
+    final TestHttpRequest testHttpRequest =
+        TestHttpRequest()
+          ..status = 200
+          ..mockEvent = MockEvent('load', web.Event('successful load'))
+          ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
-    const Map<String, String> headers = <String, String>{
-      'flutter': 'flutter',
-      'second': 'second',
-    };
+    const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
     final Image image = Image.network(
       'https://www.example.com/images/frame3.png',
@@ -101,24 +91,27 @@ void runTests() {
     );
 
     await tester.pumpWidget(image);
-    expect(tester.takeException().toString(),
-        'HTTP request failed, statusCode: 200, https://www.example.com/images/frame3.png');
+    expect(
+      tester.takeException().toString(),
+      'HTTP request failed, statusCode: 200, https://www.example.com/images/frame3.png',
+    );
   });
 
-  testWidgets('emits a WebImageInfo if the image is cross-origin',
-      (WidgetTester tester) async {
-    final TestHttpRequest failingRequest = TestHttpRequest()
-      ..status = 500
-      ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
-      ..response = (Uint8List.fromList(<int>[])).buffer;
-    final TestImgElement testImg = TestImgElement();
+  testWidgets('When strategy is default, emits an error if the image is cross-origin', (
+    WidgetTester tester,
+  ) async {
+    final TestHttpRequest failingRequest =
+        TestHttpRequest()
+          ..status = 500
+          ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+          ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {
       return failingRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
     imgElementFactory = () {
-      return testImg.getMock() as web_shim.HTMLImageElement;
+      throw UnimplementedError();
     };
 
     const NetworkImage networkImage = NetworkImage('https://www.example.com/images/frame4.png');
@@ -128,31 +121,34 @@ void runTests() {
     await tester.runAsync(() async {
       imageCompleter = Completer<void>();
       final ImageStream stream = networkImage.resolve(ImageConfiguration.empty);
-      stream.addListener(ImageStreamListener((ImageInfo info, bool isSync) {
-        imageInfo = info;
-        imageCompleter!.complete();
-      }, onError: (Object error, StackTrace? stackTrace) {
-        recordedError = error;
-        imageCompleter!.complete();
-      }));
+      stream.addListener(
+        ImageStreamListener(
+          (ImageInfo info, bool isSync) {
+            imageInfo = info;
+            imageCompleter!.complete();
+          },
+          onError: (Object error, StackTrace? stackTrace) {
+            recordedError = error;
+            imageCompleter!.complete();
+          },
+        ),
+      );
     });
     await tester.runAsync(() async {
-      testImg.decodeSuccess();
       await imageCompleter!.future;
     });
-    expect(recordedError, isNull);
-    expect(imageInfo, isA<WebImageInfo>());
+    expect(recordedError, isNotNull);
+    expect(imageInfo, isNull);
+  });
 
-    final WebImageInfo webImageInfo = imageInfo! as WebImageInfo;
-    expect(webImageInfo.htmlImage.src, equals('https://www.example.com/images/frame4.png'));
-  }, skip: !isSkiaWeb);
-
-  testWidgets('emits an error if the image is cross-origin but fails to decode',
-      (WidgetTester tester) async {
-    final TestHttpRequest failingRequest = TestHttpRequest()
-      ..status = 500
-      ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
-      ..response = (Uint8List.fromList(<int>[])).buffer;
+  testWidgets('When strategy is .fallback, emits a WebImageInfo if the image is cross-origin', (
+    WidgetTester tester,
+  ) async {
+    final TestHttpRequest failingRequest =
+        TestHttpRequest()
+          ..status = 500
+          ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+          ..response = (Uint8List.fromList(<int>[])).buffer;
     final TestImgElement testImg = TestImgElement();
 
     httpRequestFactory = () {
@@ -163,53 +159,216 @@ void runTests() {
       return testImg.getMock() as web_shim.HTMLImageElement;
     };
 
-    const NetworkImage networkImage = NetworkImage('https://www.example.com/images/frame5.png');
+    const NetworkImage networkImage = NetworkImage(
+      'https://www.example.com/images/frame5.png',
+      webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+    );
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;
     await tester.runAsync(() async {
       imageCompleter = Completer<void>();
       final ImageStream stream = networkImage.resolve(ImageConfiguration.empty);
-      stream.addListener(ImageStreamListener((ImageInfo info, bool isSync) {
-        imageInfo = info;
-        imageCompleter!.complete();
-      }, onError: (Object error, StackTrace? stackTrace) {
-        recordedError = error;
-        imageCompleter!.complete();
-      }));
+      stream.addListener(
+        ImageStreamListener(
+          (ImageInfo info, bool isSync) {
+            imageInfo = info;
+            imageCompleter!.complete();
+          },
+          onError: (Object error, StackTrace? stackTrace) {
+            recordedError = error;
+            imageCompleter!.complete();
+          },
+        ),
+      );
     });
     await tester.runAsync(() async {
-      testImg.decodeFailure();
+      testImg.decodeSuccess();
       await imageCompleter!.future;
     });
-    expect(recordedError, isNotNull);
-    expect(imageInfo, isNull);
-  }, skip: !isSkiaWeb);
+    expect(recordedError, isNull);
+    expect(imageInfo, isA<WebImageInfo>());
 
-  testWidgets('Image renders an image using a Platform View if the image info is WebImageInfo',
-      (WidgetTester tester) async {
+    final WebImageInfo webImageInfo = imageInfo! as WebImageInfo;
+    expect(webImageInfo.htmlImage.src, equals('https://www.example.com/images/frame5.png'));
+  });
+
+  testWidgets(
+    'When strategy is .fallback, emits an error if the image is cross-origin but fails to decode',
+    (WidgetTester tester) async {
+      final TestHttpRequest failingRequest =
+          TestHttpRequest()
+            ..status = 500
+            ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+            ..response = (Uint8List.fromList(<int>[])).buffer;
+      final TestImgElement testImg = TestImgElement();
+
+      httpRequestFactory = () {
+        return failingRequest.getMock() as web_shim.XMLHttpRequest;
+      };
+
+      imgElementFactory = () {
+        return testImg.getMock() as web_shim.HTMLImageElement;
+      };
+
+      const NetworkImage networkImage = NetworkImage(
+        'https://www.example.com/images/frame6.png',
+        webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+      );
+      ImageInfo? imageInfo;
+      Object? recordedError;
+      Completer<void>? imageCompleter;
+      await tester.runAsync(() async {
+        imageCompleter = Completer<void>();
+        final ImageStream stream = networkImage.resolve(ImageConfiguration.empty);
+        stream.addListener(
+          ImageStreamListener(
+            (ImageInfo info, bool isSync) {
+              imageInfo = info;
+              imageCompleter!.complete();
+            },
+            onError: (Object error, StackTrace? stackTrace) {
+              recordedError = error;
+              imageCompleter!.complete();
+            },
+          ),
+        );
+      });
+      await tester.runAsync(() async {
+        testImg.decodeFailure();
+        await imageCompleter!.future;
+      });
+      expect(recordedError, isNotNull);
+      expect(imageInfo, isNull);
+    },
+  );
+
+  testWidgets('When strategy is .prefer, emits an WebImageInfo if the image is same-origin', (
+    WidgetTester tester,
+  ) async {
+    final TestHttpRequest testHttpRequest =
+        TestHttpRequest()
+          ..status = 200
+          ..mockEvent = MockEvent('load', web.Event('test error'))
+          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final TestImgElement testImg = TestImgElement();
+
+    httpRequestFactory = () {
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
+    };
+
+    imgElementFactory = () {
+      return testImg.getMock() as web_shim.HTMLImageElement;
+    };
+
+    const NetworkImage networkImage = NetworkImage(
+      'https://www.example.com/images/frame7.png',
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+    );
+    ImageInfo? imageInfo;
+    Object? recordedError;
+    Completer<void>? imageCompleter;
+    await tester.runAsync(() async {
+      imageCompleter = Completer<void>();
+      final ImageStream stream = networkImage.resolve(ImageConfiguration.empty);
+      stream.addListener(
+        ImageStreamListener(
+          (ImageInfo info, bool isSync) {
+            imageInfo = info;
+            imageCompleter!.complete();
+          },
+          onError: (Object error, StackTrace? stackTrace) {
+            recordedError = error;
+            imageCompleter!.complete();
+          },
+        ),
+      );
+    });
+    await tester.runAsync(() async {
+      testImg.decodeSuccess();
+      await imageCompleter!.future;
+    });
+    expect(recordedError, isNull);
+    expect(imageInfo, isA<WebImageInfo>());
+
+    final WebImageInfo webImageInfo = imageInfo! as WebImageInfo;
+    expect(webImageInfo.htmlImage.src, equals('https://www.example.com/images/frame7.png'));
+  });
+
+  testWidgets('When strategy is .prefer, emits a normal image if headers is not null', (
+    WidgetTester tester,
+  ) async {
+    final TestHttpRequest testHttpRequest =
+        TestHttpRequest()
+          ..status = 200
+          ..mockEvent = MockEvent('load', web.Event('test error'))
+          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final TestImgElement testImg = TestImgElement();
+
+    httpRequestFactory = () {
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
+    };
+
+    imgElementFactory = () {
+      return testImg.getMock() as web_shim.HTMLImageElement;
+    };
+
+    const NetworkImage networkImage = NetworkImage(
+      'https://www.example.com/images/frame8.png',
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+      headers: <String, String>{'flutter': 'flutter', 'second': 'second'},
+    );
+    ImageInfo? imageInfo;
+    Object? recordedError;
+    Completer<void>? imageCompleter;
+    await tester.runAsync(() async {
+      imageCompleter = Completer<void>();
+      final ImageStream stream = networkImage.resolve(ImageConfiguration.empty);
+      stream.addListener(
+        ImageStreamListener(
+          (ImageInfo info, bool isSync) {
+            imageInfo = info;
+            imageCompleter!.complete();
+          },
+          onError: (Object error, StackTrace? stackTrace) {
+            recordedError = error;
+            imageCompleter!.complete();
+          },
+        ),
+      );
+    });
+    await tester.runAsync(() async {
+      testImg.decodeSuccess();
+      await imageCompleter!.future;
+    });
+    expect(recordedError, isNull);
+    expect(imageInfo, isNotNull);
+    expect(imageInfo, isNot(isA<WebImageInfo>()));
+  });
+
+  testWidgets('Image renders an image using a Platform View if the image info is WebImageInfo', (
+    WidgetTester tester,
+  ) async {
     final TestImgElement testImg = TestImgElement();
 
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
     final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
 
-    await tester.pumpWidget(
-      Image(
-        image: imageProvider,
-      ),
-    );
+    await tester.pumpWidget(Image(image: imageProvider));
 
     // Before getting a WebImageInfo, the Image resolves to a RawImage.
     expect(find.byType(RawImage), findsOneWidget);
     expect(find.byType(RawWebImage), findsNothing);
     expect(find.byType(PlatformViewLink), findsNothing);
-    streamCompleter.setData(imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement));
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement),
+    );
     await tester.pump();
     expect(find.byType(RawImage), findsNothing);
     // After getting a WebImageInfo, the Image uses a Platform View to render.
     expect(find.byType(RawWebImage), findsOneWidget);
     expect(find.byType(PlatformViewLink), findsOneWidget);
-  }, skip: !isSkiaWeb);
+  });
 }
 
 class _TestImageProvider extends ImageProvider<Object> {
@@ -268,10 +427,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
     listeners.remove(listener);
   }
 
-  void setData({
-    ImageInfo? imageInfo,
-    ImageChunkEvent? chunkEvent,
-  }) {
+  void setData({ImageInfo? imageInfo, ImageChunkEvent? chunkEvent}) {
     if (imageInfo != null) {
       _currentImage?.dispose();
       _currentImage = imageInfo;
@@ -287,10 +443,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
     }
   }
 
-  void setError({
-    required Object exception,
-    StackTrace? stackTrace,
-  }) {
+  void setError({required Object exception, StackTrace? stackTrace}) {
     final List<ImageStreamListener> localListeners = listeners.toList();
     for (final ImageStreamListener listener in localListeners) {
       listener.onError?.call(exception, stackTrace);

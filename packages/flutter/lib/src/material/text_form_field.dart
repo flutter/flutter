@@ -150,6 +150,7 @@ class TextFormField extends FormField<String> {
     ValueChanged<String>? onFieldSubmitted,
     super.onSaved,
     super.validator,
+    super.errorBuilder,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
     bool? ignorePointers,
@@ -209,12 +210,22 @@ class TextFormField extends FormField<String> {
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<String> field) {
            final _TextFormFieldState state = field as _TextFormFieldState;
-           final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+           InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
                .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+
+           final String? errorText = field.errorText;
+           if (errorText != null) {
+             effectiveDecoration =
+                 errorBuilder != null
+                     ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
+                     : effectiveDecoration.copyWith(errorText: errorText);
+           }
+
            void onChangedHandler(String value) {
              field.didChange(value);
              onChanged?.call(value);
            }
+
            return UnmanagedRestorationScope(
              bucket: field.bucket,
              child: TextField(
@@ -222,7 +233,7 @@ class TextFormField extends FormField<String> {
                restorationId: restorationId,
                controller: state._effectiveController,
                focusNode: focusNode,
-               decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+               decoration: effectiveDecoration,
                keyboardType: keyboardType,
                textInputAction: textInputAction,
                style: style,
@@ -239,8 +250,12 @@ class TextFormField extends FormField<String> {
                obscuringCharacter: obscuringCharacter,
                obscureText: obscureText,
                autocorrect: autocorrect,
-               smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-               smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+               smartDashesType:
+                   smartDashesType ??
+                   (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+               smartQuotesType:
+                   smartQuotesType ??
+                   (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
                enableSuggestions: enableSuggestions,
                maxLengthEnforcement: maxLengthEnforcement,
                maxLines: maxLines,
@@ -265,7 +280,8 @@ class TextFormField extends FormField<String> {
                scrollPadding: scrollPadding,
                scrollPhysics: scrollPhysics,
                keyboardAppearance: keyboardAppearance,
-               enableInteractiveSelection: enableInteractiveSelection ?? (!obscureText || !readOnly),
+               enableInteractiveSelection:
+                   enableInteractiveSelection ?? (!obscureText || !readOnly),
                selectionControls: selectionControls,
                buildCounter: buildCounter,
                autofillHints: autofillHints,
@@ -306,10 +322,11 @@ class TextFormField extends FormField<String> {
   /// {@endtemplate}
   final ValueChanged<String>? onChanged;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
-    return AdaptiveTextSelectionToolbar.editableText(
-      editableTextState: editableTextState,
-    );
+  static Widget _defaultContextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 
   @override
@@ -341,9 +358,10 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller = value == null
-        ? RestorableTextEditingController()
-        : RestorableTextEditingController.fromValue(value);
+    _controller =
+        value == null
+            ? RestorableTextEditingController()
+            : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -353,7 +371,9 @@ class _TextFormFieldState extends FormFieldState<String> {
   void initState() {
     super.initState();
     if (_textFormField.controller == null) {
-      _createLocalController(widget.initialValue != null ? TextEditingValue(text: widget.initialValue!) : null);
+      _createLocalController(
+        widget.initialValue != null ? TextEditingValue(text: widget.initialValue!) : null,
+      );
     } else {
       _textFormField.controller!.addListener(_handleControllerChanged);
     }
@@ -393,7 +413,7 @@ class _TextFormFieldState extends FormFieldState<String> {
     super.didChange(value);
 
     if (_effectiveController.text != value) {
-      _effectiveController.text = value ?? '';
+      _effectiveController.value = TextEditingValue(text: value ?? '');
     }
   }
 
@@ -401,7 +421,7 @@ class _TextFormFieldState extends FormFieldState<String> {
   void reset() {
     // Set the controller value before calling super.reset() to let
     // _handleControllerChanged suppress the change.
-    _effectiveController.text = widget.initialValue ?? '';
+    _effectiveController.value = TextEditingValue(text: widget.initialValue ?? '');
     super.reset();
     _textFormField.onChanged?.call(_effectiveController.text);
   }

@@ -2,24 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('list body and paragraph intrinsics', () {
     final RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(
-        style: TextStyle(height: 1.0),
-        text: 'Hello World',
-      ),
+      const TextSpan(style: TextStyle(height: 1.0), text: 'Hello World'),
       textDirection: TextDirection.ltr,
     );
-    final RenderListBody testBlock = RenderListBody(
-      children: <RenderBox>[
-        paragraph,
-      ],
-    );
+    final RenderListBody testBlock = RenderListBody(children: <RenderBox>[paragraph]);
 
     final double textWidth = paragraph.getMaxIntrinsicWidth(double.infinity);
     final double oneLineTextHeight = paragraph.getMinIntrinsicHeight(double.infinity);
@@ -70,10 +62,7 @@ void main() {
 
   test('textScaler affects intrinsics', () {
     final RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(
-        style: TextStyle(fontSize: 10),
-        text: 'Hello World',
-      ),
+      const TextSpan(style: TextStyle(fontSize: 10), text: 'Hello World'),
       textDirection: TextDirection.ltr,
     );
 
@@ -85,10 +74,7 @@ void main() {
 
   test('maxLines affects intrinsics', () {
     final RenderParagraph paragraph = RenderParagraph(
-      TextSpan(
-        style: const TextStyle(fontSize: 10),
-        text: List<String>.filled(5, 'A').join('\n'),
-      ),
+      TextSpan(style: const TextStyle(fontSize: 10), text: List<String>.filled(5, 'A').join('\n')),
       textDirection: TextDirection.ltr,
     );
 
@@ -100,10 +86,7 @@ void main() {
 
   test('strutStyle affects intrinsics', () {
     final RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(
-        style: TextStyle(fontSize: 10),
-        text: 'Hello World',
-      ),
+      const TextSpan(style: TextStyle(fontSize: 10), text: 'Hello World'),
       textDirection: TextDirection.ltr,
     );
 
@@ -111,5 +94,5 @@ void main() {
 
     paragraph.strutStyle = const StrutStyle(fontSize: 100, forceStrutHeight: true);
     expect(paragraph.getMaxIntrinsicHeight(double.infinity), 100);
-  }, skip: kIsWeb && !isSkiaWeb); // [intended] strut support for HTML renderer https://github.com/flutter/flutter/issues/32243.
+  });
 }

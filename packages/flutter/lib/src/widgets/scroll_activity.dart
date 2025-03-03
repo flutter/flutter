@@ -67,15 +67,7 @@ abstract class ScrollActivityDelegate {
 abstract class ScrollActivity {
   /// Initializes [delegate] for subclasses.
   ScrollActivity(this._delegate) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$ScrollActivity',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'ScrollActivity', this));
   }
 
   /// The delegate that this activity will use to actuate the scroll view.
@@ -101,7 +93,7 @@ abstract class ScrollActivity {
   ///
   /// For example, [BallisticScrollActivity]'s implementation calls
   /// [ScrollActivityDelegate.goBallistic].
-  void resetActivity() { }
+  void resetActivity() {}
 
   /// Dispatch a [ScrollStartNotification] with the given metrics.
   void dispatchScrollStartNotification(ScrollMetrics metrics, BuildContext? context) {
@@ -109,13 +101,29 @@ abstract class ScrollActivity {
   }
 
   /// Dispatch a [ScrollUpdateNotification] with the given metrics and scroll delta.
-  void dispatchScrollUpdateNotification(ScrollMetrics metrics, BuildContext context, double scrollDelta) {
-    ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta).dispatch(context);
+  void dispatchScrollUpdateNotification(
+    ScrollMetrics metrics,
+    BuildContext context,
+    double scrollDelta,
+  ) {
+    ScrollUpdateNotification(
+      metrics: metrics,
+      context: context,
+      scrollDelta: scrollDelta,
+    ).dispatch(context);
   }
 
   /// Dispatch an [OverscrollNotification] with the given metrics and overscroll.
-  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
-    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll).dispatch(context);
+  void dispatchOverscrollNotification(
+    ScrollMetrics metrics,
+    BuildContext context,
+    double overscroll,
+  ) {
+    OverscrollNotification(
+      metrics: metrics,
+      context: context,
+      overscroll: overscroll,
+    ).dispatch(context);
   }
 
   /// Dispatch a [ScrollEndNotification] with the given metrics and overscroll.
@@ -124,7 +132,7 @@ abstract class ScrollActivity {
   }
 
   /// Called when the scroll view that is performing this activity changes its metrics.
-  void applyNewDimensions() { }
+  void applyNewDimensions() {}
 
   /// Whether the scroll view should ignore pointer events while performing this
   /// activity.
@@ -156,12 +164,7 @@ abstract class ScrollActivity {
   /// Called when the scroll view stops performing this activity.
   @mustCallSuper
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-
+    assert(debugMaybeDispatchDisposed(this));
     _isDisposed = true;
   }
 
@@ -217,10 +220,8 @@ abstract class ScrollHoldController {
 /// animation underway).
 class HoldScrollActivity extends ScrollActivity implements ScrollHoldController {
   /// Creates a scroll activity that does nothing.
-  HoldScrollActivity({
-    required ScrollActivityDelegate delegate,
-    this.onHoldCanceled,
-  }) : super(delegate);
+  HoldScrollActivity({required ScrollActivityDelegate delegate, this.onHoldCanceled})
+    : super(delegate);
 
   /// Called when [dispose] is called.
   final VoidCallback? onHoldCanceled;
@@ -271,15 +272,7 @@ class ScrollDragController implements Drag {
        _lastNonStationaryTimestamp = details.sourceTimeStamp,
        _kind = details.kind,
        _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0 {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$ScrollDragController',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'ScrollDragController', this));
   }
 
   /// The object that will actuate the scroll view as the user drags.
@@ -299,14 +292,14 @@ class ScrollDragController implements Drag {
 
   Duration? _lastNonStationaryTimestamp;
   bool _retainMomentum;
+
   /// Null if already in motion or has no [motionStartDistanceThreshold].
   double? _offsetSinceLastStop;
 
   /// Maximum amount of time interval the drag can have consecutive stationary
   /// pointer update events before losing the momentum carried from a previous
   /// scroll activity.
-  static const Duration momentumRetainStationaryDurationThreshold =
-      Duration(milliseconds: 20);
+  static const Duration momentumRetainStationaryDurationThreshold = Duration(milliseconds: 20);
 
   /// The minimum amount of velocity needed to apply the [carriedVelocity] at
   /// the end of a drag. Expressed as a factor. For example with a
@@ -319,8 +312,7 @@ class ScrollDragController implements Drag {
   /// Maximum amount of time interval the drag can have consecutive stationary
   /// pointer update events before needing to break the
   /// [motionStartDistanceThreshold] to start motion again.
-  static const Duration motionStoppedDurationThreshold =
-      Duration(milliseconds: 50);
+  static const Duration motionStoppedDurationThreshold = Duration(milliseconds: 50);
 
   /// The drag distance past which, a [motionStartDistanceThreshold] breaking
   /// drag is considered a deliberate fling.
@@ -343,7 +335,7 @@ class ScrollDragController implements Drag {
     if (_retainMomentum &&
         offset == 0.0 &&
         (timestamp == null || // If drag event has no timestamp, we lose momentum.
-         timestamp - _lastNonStationaryTimestamp! > momentumRetainStationaryDurationThreshold)) {
+            timestamp - _lastNonStationaryTimestamp! > momentumRetainStationaryDurationThreshold)) {
       // If pointer is stationary for too long, we lose momentum.
       _retainMomentum = false;
     }
@@ -387,11 +379,12 @@ class ScrollDragController implements Drag {
           } else {
             // This is a normal speed threshold break.
             return math.min(
-              // Ease into the motion when the threshold is initially broken
-              // to avoid a visible jump.
-              motionStartDistanceThreshold! / 3.0,
-              offset.abs(),
-            ) * offset.sign;
+                  // Ease into the motion when the threshold is initially broken
+                  // to avoid a visible jump.
+                  motionStartDistanceThreshold! / 3.0,
+                  offset.abs(),
+                ) *
+                offset.sign;
           }
         } else {
           return 0.0;
@@ -440,7 +433,7 @@ class ScrollDragController implements Drag {
       // Build momentum only if the velocity of the last drag was not
       // substantially lower than the carried momentum.
       final bool isVelocityNotSubstantiallyLessThanCarriedMomentum =
-        velocity.abs() > carriedVelocity!.abs() * momentumRetainVelocityThresholdFactor;
+          velocity.abs() > carriedVelocity!.abs() * momentumRetainVelocityThresholdFactor;
       if (isFlingingInSameDirection && isVelocityNotSubstantiallyLessThanCarriedMomentum) {
         velocity += carriedVelocity!;
       }
@@ -456,17 +449,14 @@ class ScrollDragController implements Drag {
   /// Called by the delegate when it is no longer sending events to this object.
   @mustCallSuper
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _lastDetails = null;
     onDragCanceled?.call();
   }
 
   /// The type of input device driving the drag.
   final PointerDeviceKind? _kind;
+
   /// The most recently observed [DragStartDetails], [DragUpdateDetails], or
   /// [DragEndDetails] object.
   dynamic get lastDetails => _lastDetails;
@@ -486,10 +476,7 @@ class ScrollDragController implements Drag {
 class DragScrollActivity extends ScrollActivity {
   /// Creates an activity for when the user drags their finger across the
   /// screen.
-  DragScrollActivity(
-    super.delegate,
-    ScrollDragController controller,
-  ) : _controller = controller;
+  DragScrollActivity(super.delegate, ScrollDragController controller) : _controller = controller;
 
   ScrollDragController? _controller;
 
@@ -497,21 +484,43 @@ class DragScrollActivity extends ScrollActivity {
   void dispatchScrollStartNotification(ScrollMetrics metrics, BuildContext? context) {
     final dynamic lastDetails = _controller!.lastDetails;
     assert(lastDetails is DragStartDetails);
-    ScrollStartNotification(metrics: metrics, context: context, dragDetails: lastDetails as DragStartDetails).dispatch(context);
+    ScrollStartNotification(
+      metrics: metrics,
+      context: context,
+      dragDetails: lastDetails as DragStartDetails,
+    ).dispatch(context);
   }
 
   @override
-  void dispatchScrollUpdateNotification(ScrollMetrics metrics, BuildContext context, double scrollDelta) {
+  void dispatchScrollUpdateNotification(
+    ScrollMetrics metrics,
+    BuildContext context,
+    double scrollDelta,
+  ) {
     final dynamic lastDetails = _controller!.lastDetails;
     assert(lastDetails is DragUpdateDetails);
-    ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta, dragDetails: lastDetails as DragUpdateDetails).dispatch(context);
+    ScrollUpdateNotification(
+      metrics: metrics,
+      context: context,
+      scrollDelta: scrollDelta,
+      dragDetails: lastDetails as DragUpdateDetails,
+    ).dispatch(context);
   }
 
   @override
-  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
+  void dispatchOverscrollNotification(
+    ScrollMetrics metrics,
+    BuildContext context,
+    double overscroll,
+  ) {
     final dynamic lastDetails = _controller!.lastDetails;
     assert(lastDetails is DragUpdateDetails);
-    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, dragDetails: lastDetails as DragUpdateDetails).dispatch(context);
+    OverscrollNotification(
+      metrics: metrics,
+      context: context,
+      overscroll: overscroll,
+      dragDetails: lastDetails as DragUpdateDetails,
+    ).dispatch(context);
   }
 
   @override
@@ -569,13 +578,15 @@ class BallisticScrollActivity extends ScrollActivity {
     TickerProvider vsync,
     this.shouldIgnorePointer,
   ) {
-    _controller = AnimationController.unbounded(
-      debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
-      vsync: vsync,
-    )
-      ..addListener(_tick)
-      ..animateWith(simulation)
-       .whenComplete(_end); // won't trigger if we dispose _controller before it completes.
+    _controller =
+        AnimationController.unbounded(
+            debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
+            vsync: vsync,
+          )
+          ..addListener(_tick)
+          ..animateWith(
+            simulation,
+          ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late AnimationController _controller;
@@ -617,8 +628,17 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   @override
-  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
-    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, velocity: velocity).dispatch(context);
+  void dispatchOverscrollNotification(
+    ScrollMetrics metrics,
+    BuildContext context,
+    double overscroll,
+  ) {
+    OverscrollNotification(
+      metrics: metrics,
+      context: context,
+      overscroll: overscroll,
+      velocity: velocity,
+    ).dispatch(context);
   }
 
   @override
@@ -663,14 +683,18 @@ class DrivenScrollActivity extends ScrollActivity {
     required TickerProvider vsync,
   }) : assert(duration > Duration.zero) {
     _completer = Completer<void>();
-    _controller = AnimationController.unbounded(
-      value: from,
-      debugLabel: objectRuntimeType(this, 'DrivenScrollActivity'),
-      vsync: vsync,
-    )
-      ..addListener(_tick)
-      ..animateTo(to, duration: duration, curve: curve)
-       .whenComplete(_end); // won't trigger if we dispose _controller before it completes.
+    _controller =
+        AnimationController.unbounded(
+            value: from,
+            debugLabel: objectRuntimeType(this, 'DrivenScrollActivity'),
+            vsync: vsync,
+          )
+          ..addListener(_tick)
+          ..animateTo(
+            to,
+            duration: duration,
+            curve: curve,
+          ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late final Completer<void> _completer;
@@ -698,8 +722,17 @@ class DrivenScrollActivity extends ScrollActivity {
   }
 
   @override
-  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
-    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, velocity: velocity).dispatch(context);
+  void dispatchOverscrollNotification(
+    ScrollMetrics metrics,
+    BuildContext context,
+    double overscroll,
+  ) {
+    OverscrollNotification(
+      metrics: metrics,
+      context: context,
+      overscroll: overscroll,
+      velocity: velocity,
+    ).dispatch(context);
   }
 
   @override

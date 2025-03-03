@@ -82,6 +82,7 @@ GOTO :after_subroutine
   REM The following IF conditions are all linked with a logical OR. However,
   REM there is no OR operator in batch and a GOTO construct is used as replacement.
 
+  CALL :do_ensure_engine_version
   IF NOT EXIST "%engine_stamp%" GOTO do_sdk_update_and_snapshot
   SET /P dart_required_version=<"%engine_version_path%"
   SET /P dart_installed_version=<"%engine_stamp%"
@@ -101,6 +102,36 @@ GOTO :after_subroutine
   REM Everything is up-to-date - exit subroutine
   EXIT /B
 
+  :do_ensure_engine_version
+    REM Detect which PowerShell executable is available on the Host
+    REM PowerShell version <= 5: PowerShell.exe
+    REM PowerShell version >= 6: pwsh.exe
+    WHERE /Q pwsh.exe && (
+        SET powershell_executable=pwsh.exe
+    ) || WHERE /Q PowerShell.exe && (
+        SET powershell_executable=PowerShell.exe
+    ) || (
+        ECHO Error: PowerShell executable not found.                        1>&2
+        ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
+        EXIT 1
+    )
+    SET update_engine_bin=%FLUTTER_ROOT%\bin\internal\update_engine_version.ps1
+    REM Escape apostrophes from the executable path
+    SET "update_engine_bin=%update_engine_bin:'=''%"
+    REM PowerShell command must have exit code set in order to prevent all non-zero exit codes from being translated
+    REM into 1. The exit code 2 is used to detect the case where the major version is incorrect and there should be
+    REM no subsequent retries.
+    %powershell_executable% -ExecutionPolicy Bypass -NoProfile -Command "Unblock-File -Path '%update_engine_bin%'; & '%update_engine_bin%'; exit $LASTEXITCODE;"
+    IF "%ERRORLEVEL%" EQU "2" (
+      EXIT 1
+    )
+    IF "%ERRORLEVEL%" NEQ "0" (
+      ECHO Error: Unable to determine engine version... 1>&2
+      EXIT 1
+    )
+    REM Do not fall through - return from subroutine
+    EXIT /B
+
   :do_sdk_update_and_snapshot
     REM Detect which PowerShell executable is available on the Host
     REM PowerShell version <= 5: PowerShell.exe
@@ -114,6 +145,7 @@ GOTO :after_subroutine
         ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
         EXIT 1
     )
+    SET /A dart_sdk_retries+=1
     ECHO Checking Dart SDK version... 1>&2
     SET update_dart_bin=%FLUTTER_ROOT%\bin\internal\update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
@@ -126,7 +158,13 @@ GOTO :after_subroutine
     IF "%ERRORLEVEL%" EQU "2" (
       EXIT 1
     )
+    SET max_dart_sdk_retries=3
     IF "%ERRORLEVEL%" NEQ "0" (
+      IF "%dart_sdk_retries%" EQU "%max_dart_sdk_retries%" (
+        ECHO Error: Unable to update Dart SDK after %max_dart_sdk_retries% retries. 1>&2
+        DEL "%engine_stamp%"
+        EXIT 1
+      )
       ECHO Error: Unable to update Dart SDK. Retrying... 1>&2
       timeout /t 5 /nobreak
       GOTO :do_sdk_update_and_snapshot

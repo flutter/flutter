@@ -9,22 +9,22 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-
 Future<void> main() async {
   await task(() async {
     try {
       await runProjectTest((FlutterProject flutterProject) async {
         section('APK contains plugin classes');
-        await flutterProject.setMinSdkVersion(20);
+        await flutterProject.setMinSdkVersion(21);
         await flutterProject.addPlugin('google_maps_flutter:^2.2.1');
 
         await inDirectory(flutterProject.rootPath, () async {
-          await flutter('build', options: <String>[
-            'apk',
-            '--debug',
-            '--target-platform=android-arm',
-          ]);
-          final File apk = File('${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-debug.apk');
+          await flutter(
+            'build',
+            options: <String>['apk', '--debug', '--target-platform=android-arm'],
+          );
+          final File apk = File(
+            '${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-debug.apk',
+          );
           if (!apk.existsSync()) {
             throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
           }

@@ -161,6 +161,9 @@ class ElevatedButton extends ButtonStyleButton {
   /// [ButtonStyle.iconColor] and [iconSize] is used to construct
   /// [ButtonStyle.iconSize].
   ///
+  /// If [iconColor] is null, the button icon will use [foregroundColor]. If [foregroundColor] is also
+  /// null, the button icon will use the default icon color.
+  ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
   /// value, [elevation] + 2 is used when the button is hovered
@@ -231,29 +234,29 @@ class ElevatedButton extends ButtonStyleButton {
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
   }) {
-    final MaterialStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {
+    final MaterialStateProperty<Color?>? overlayColorProp = switch ((
+      foregroundColor,
+      overlayColor,
+    )) {
       (null, null) => null,
       (_, Color(a: 0.0)) => WidgetStatePropertyAll<Color?>(overlayColor),
-      (_, final Color color) || (final Color color, _) => WidgetStateProperty<Color?>.fromMap(
-        <WidgetState, Color?>{
-          WidgetState.pressed: color.withOpacity(0.1),
-          WidgetState.hovered: color.withOpacity(0.08),
-          WidgetState.focused: color.withOpacity(0.1),
-        },
-      ),
+      (_, final Color color) ||
+      (final Color color, _) => WidgetStateProperty<Color?>.fromMap(<WidgetState, Color?>{
+        WidgetState.pressed: color.withOpacity(0.1),
+        WidgetState.hovered: color.withOpacity(0.08),
+        WidgetState.focused: color.withOpacity(0.1),
+      }),
     };
 
     WidgetStateProperty<double>? elevationValue;
     if (elevation != null) {
-      elevationValue = WidgetStateProperty<double>.fromMap(
-        <WidgetStatesConstraint, double>{
-          WidgetState.disabled: 0,
-          WidgetState.pressed: elevation + 6,
-          WidgetState.hovered: elevation + 2,
-          WidgetState.focused: elevation + 2,
-          WidgetState.any:     elevation,
-        },
-      );
+      elevationValue = WidgetStateProperty<double>.fromMap(<WidgetStatesConstraint, double>{
+        WidgetState.disabled: 0,
+        WidgetState.pressed: elevation + 6,
+        WidgetState.hovered: elevation + 2,
+        WidgetState.focused: elevation + 2,
+        WidgetState.any: elevation,
+      });
     }
 
     return ButtonStyle(
@@ -273,12 +276,10 @@ class ElevatedButton extends ButtonStyleButton {
       maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-      mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(
-        <WidgetStatesConstraint, MouseCursor?>{
-          WidgetState.disabled: disabledMouseCursor,
-          WidgetState.any: enabledMouseCursor,
-        },
-      ),
+      mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
+        WidgetState.disabled: disabledMouseCursor,
+        WidgetState.any: enabledMouseCursor,
+      }),
       visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
@@ -419,8 +420,8 @@ class ElevatedButton extends ButtonStyleButton {
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Theme.of(context).useMaterial3
-      ? _ElevatedButtonDefaultsM3(context)
-      : styleFrom(
+        ? _ElevatedButtonDefaultsM3(context)
+        : styleFrom(
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
           disabledBackgroundColor: colorScheme.onSurface.withOpacity(0.12),
@@ -458,10 +459,10 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
   final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
 
   return ButtonStyleButton.scaledPadding(
-     EdgeInsets.symmetric(horizontal: padding1x),
-     EdgeInsets.symmetric(horizontal: padding1x / 2),
-     EdgeInsets.symmetric(horizontal: padding1x / 2 / 2),
-     effectiveTextScale,
+    EdgeInsets.symmetric(horizontal: padding1x),
+    EdgeInsets.symmetric(horizontal: padding1x / 2),
+    EdgeInsets.symmetric(horizontal: padding1x / 2 / 2),
+    effectiveTextScale,
   );
 }
 
@@ -488,27 +489,31 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
            buttonStyle: style,
            iconAlignment: iconAlignment,
          ),
-      );
+       );
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final ButtonStyle buttonStyle = super.defaultStyleOf(context);
-    final double defaultFontSize = buttonStyle.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
-    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+    final double defaultFontSize =
+        buttonStyle.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final double effectiveTextScale =
+        MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
 
-    final EdgeInsetsGeometry scaledPadding = useMaterial3
-    ?  ButtonStyleButton.scaledPadding(
-      const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
-      const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
-      const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
-      effectiveTextScale,
-    ) : ButtonStyleButton.scaledPadding(
-      const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-      effectiveTextScale,
-    );
+    final EdgeInsetsGeometry scaledPadding =
+        useMaterial3
+            ? ButtonStyleButton.scaledPadding(
+              const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+              const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+              const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+              effectiveTextScale,
+            )
+            : ButtonStyleButton.scaledPadding(
+              const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
+              const EdgeInsets.symmetric(horizontal: 8),
+              const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
+              effectiveTextScale,
+            );
     return buttonStyle.copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );
@@ -530,19 +535,23 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double defaultFontSize = buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
-    final double scale = clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
+    final double defaultFontSize =
+        buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final double scale =
+        clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
     final double gap = lerpDouble(8, 4, scale)!;
     final ElevatedButtonThemeData elevatedButtonTheme = ElevatedButtonTheme.of(context);
-    final IconAlignment effectiveIconAlignment = iconAlignment
-      ?? elevatedButtonTheme.style?.iconAlignment
-      ?? buttonStyle?.iconAlignment
-      ?? IconAlignment.start;
+    final IconAlignment effectiveIconAlignment =
+        iconAlignment ??
+        elevatedButtonTheme.style?.iconAlignment ??
+        buttonStyle?.iconAlignment ??
+        IconAlignment.start;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: effectiveIconAlignment == IconAlignment.start
-        ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
-        : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
+      children:
+          effectiveIconAlignment == IconAlignment.start
+              ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
+              : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
     );
   }
 }
@@ -554,6 +563,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   _ElevatedButtonDefaultsM3(this.context)
    : super(
@@ -689,5 +699,6 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - ElevatedButton

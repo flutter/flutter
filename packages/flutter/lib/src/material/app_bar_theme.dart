@@ -42,6 +42,7 @@ class AppBarTheme with Diagnosticable {
     this.actionsIconTheme,
     this.centerTitle,
     this.titleSpacing,
+    this.leadingWidth,
     this.toolbarHeight,
     this.toolbarTextStyle,
     this.titleTextStyle,
@@ -123,6 +124,10 @@ class AppBarTheme with Diagnosticable {
   /// If null, [AppBar] uses default value of [NavigationToolbar.kMiddleSpacing].
   final double? titleSpacing;
 
+  /// Overrides the default value of the [AppBar.leadingWidth]
+  /// property in all descendant [AppBar] widgets.
+  final double? leadingWidth;
+
   /// Overrides the default value of the [AppBar.toolbarHeight]
   /// property in all descendant [AppBar] widgets.
   ///
@@ -173,6 +178,7 @@ class AppBarTheme with Diagnosticable {
     IconThemeData? iconTheme,
     bool? centerTitle,
     double? titleSpacing,
+    double? leadingWidth,
     double? toolbarHeight,
     TextStyle? toolbarTextStyle,
     TextStyle? titleTextStyle,
@@ -195,6 +201,7 @@ class AppBarTheme with Diagnosticable {
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       centerTitle: centerTitle ?? this.centerTitle,
       titleSpacing: titleSpacing ?? this.titleSpacing,
+      leadingWidth: leadingWidth ?? this.leadingWidth,
       toolbarHeight: toolbarHeight ?? this.toolbarHeight,
       toolbarTextStyle: toolbarTextStyle ?? this.toolbarTextStyle,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
@@ -227,6 +234,7 @@ class AppBarTheme with Diagnosticable {
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
       titleSpacing: lerpDouble(a?.titleSpacing, b?.titleSpacing, t),
+      leadingWidth: lerpDouble(a?.leadingWidth, b?.leadingWidth, t),
       toolbarHeight: lerpDouble(a?.toolbarHeight, b?.toolbarHeight, t),
       toolbarTextStyle: TextStyle.lerp(a?.toolbarTextStyle, b?.toolbarTextStyle, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
@@ -248,6 +256,7 @@ class AppBarTheme with Diagnosticable {
     actionsIconTheme,
     centerTitle,
     titleSpacing,
+    leadingWidth,
     toolbarHeight,
     toolbarTextStyle,
     titleTextStyle,
@@ -263,23 +272,24 @@ class AppBarTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is AppBarTheme
-        && other.backgroundColor == backgroundColor
-        && other.foregroundColor == foregroundColor
-        && other.elevation == elevation
-        && other.scrolledUnderElevation == scrolledUnderElevation
-        && other.shadowColor == shadowColor
-        && other.surfaceTintColor == surfaceTintColor
-        && other.shape == shape
-        && other.iconTheme == iconTheme
-        && other.actionsIconTheme == actionsIconTheme
-        && other.centerTitle == centerTitle
-        && other.titleSpacing == titleSpacing
-        && other.toolbarHeight == toolbarHeight
-        && other.toolbarTextStyle == toolbarTextStyle
-        && other.titleTextStyle == titleTextStyle
-        && other.systemOverlayStyle == systemOverlayStyle
-        && other.actionsPadding == actionsPadding;
+    return other is AppBarTheme &&
+        other.backgroundColor == backgroundColor &&
+        other.foregroundColor == foregroundColor &&
+        other.elevation == elevation &&
+        other.scrolledUnderElevation == scrolledUnderElevation &&
+        other.shadowColor == shadowColor &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.shape == shape &&
+        other.iconTheme == iconTheme &&
+        other.actionsIconTheme == actionsIconTheme &&
+        other.centerTitle == centerTitle &&
+        other.titleSpacing == titleSpacing &&
+        other.leadingWidth == leadingWidth &&
+        other.toolbarHeight == toolbarHeight &&
+        other.toolbarTextStyle == toolbarTextStyle &&
+        other.titleTextStyle == titleTextStyle &&
+        other.systemOverlayStyle == systemOverlayStyle &&
+        other.actionsPadding == actionsPadding;
   }
 
   @override
@@ -288,17 +298,32 @@ class AppBarTheme with Diagnosticable {
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('scrolledUnderElevation', scrolledUnderElevation, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<double>(
+        'scrolledUnderElevation',
+        scrolledUnderElevation,
+        defaultValue: null,
+      ),
+    );
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
-    properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null),
+    );
     properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('leadingWidth', leadingWidth, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('toolbarHeight', toolbarHeight, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('toolbarTextStyle', toolbarTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextStyle>('toolbarTextStyle', toolbarTextStyle, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null),
+    );
   }
 }
