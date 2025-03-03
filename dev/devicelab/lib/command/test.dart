@@ -84,7 +84,11 @@ class TestCommand extends Command<void> {
       help: 'Suppresses standard output and only print standard error output.',
     );
     argParser.addFlag('use-emulator', help: 'Use an emulator instead of a device to run tests.');
-    argParser.addFlag('no-reboot', negatable: false, help: 'Do not attempt to reboot the device after every 30 test runs');
+    argParser.addFlag(
+      'disable-reboot',
+      negatable: false,
+      help: 'Do not automatically reboot the device after a certain number of tests',
+    );
   }
 
   @override
@@ -112,7 +116,7 @@ class TestCommand extends Command<void> {
       useEmulator: (argResults!['use-emulator'] as bool?) ?? false,
       taskArgs: taskArgs,
       exitOnFirstTestFailure: argResults!['exit'] as bool,
-      noReboot: (argResults!['no-reboot'] as bool?) ?? false,
+      disableReboot: (argResults!['disable-reboot'] as bool?) ?? false,
     );
   }
 }
