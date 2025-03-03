@@ -19,9 +19,9 @@ import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart';
 import '../src/package_config.dart';
+import '../src/throwing_pub.dart';
 
 void main() {
   // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
@@ -1108,7 +1108,6 @@ void main() {
         'Generates new entrypoint',
         () async {
           flutterProject.isModule = true;
-
           createFakeDartPlugins(flutterProject, flutterManifest, fs, <String, String>{
             'url_launcher_android': '''
   flutter:
@@ -1162,7 +1161,6 @@ void main() {
 
           final Directory libDir = flutterProject.directory.childDirectory('lib');
           libDir.createSync(recursive: true);
-
           final File mainFile = libDir.childFile('main.dart');
           mainFile.writeAsStringSync('''
 // @dart = 2.8
@@ -1270,7 +1268,7 @@ void main() {
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
 
@@ -1317,7 +1315,7 @@ void main() {
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
 
@@ -1363,7 +1361,7 @@ void main() {
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
 
@@ -1394,7 +1392,7 @@ void main() {
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
 
@@ -1446,7 +1444,7 @@ void main() {
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
     });

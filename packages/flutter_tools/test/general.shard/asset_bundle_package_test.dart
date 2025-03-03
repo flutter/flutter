@@ -32,6 +32,7 @@ void main() {
     String path,
     String name, {
     List<String>? assets,
+    Map<String, String>? dependencies,
     List<(String path, String flavor)>? flavoredAssets,
   }) {
     String assetsSection;
@@ -61,6 +62,8 @@ flutter:
       assetsSection = buffer.toString();
     }
 
+    dependencies = dependencies ?? <String, String>{};
+
     globals.fs.file(fixPath(path))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -68,6 +71,7 @@ name: $name
 dependencies:
   flutter:
     sdk: flutter
+${dependencies.entries.map((MapEntry<String, String> d) => '  ${d.key}: {path: ${d.value}}').join('\n')}
 $assetsSection
 ''');
   }
