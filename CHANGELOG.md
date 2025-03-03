@@ -29,6 +29,7 @@ INTERNAL NOTE
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
+- [flutter/164036](https://github.com/flutter/flutter/pull/164036) - Increase the maximum number of concurrent background image decode tasks to 64.
 - [flutter/163830](https://github.com/flutter/flutter/pull/163830) - Fix Tab linear and elastic animation blink.
 - [flutter/164119](https://github.com/flutter/flutter/pull/164119) - Configuration changes to run test on macOS 14 for Flutter's CI.
 - [flutter/164155](https://github.com/flutter/flutter/pull/164155) - Roll .ci.yaml changes into the LUCI configuration only when the master branch is updated.
