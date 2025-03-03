@@ -22,6 +22,7 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
       static_cast<FlutterDesktopGpuPreference>(project.gpu_preference());
   c_engine_properties.ui_thread_policy =
       static_cast<FlutterDesktopUIThreadPolicy>(project.ui_thread_policy());
+  c_engine_properties.enable_impeller = project.get_enable_impeller();
 
   const std::vector<std::string>& entrypoint_args =
       project.dart_entrypoint_arguments();
