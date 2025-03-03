@@ -3149,7 +3149,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
 /// ```dart
 /// Future<TimeOfDay?> selectedTime24Hour = showTimePicker(
 ///   context: context,
-///   show24HourFormat: true,
+///   use24HourFormat: true,
 ///   initialTime: const TimeOfDay(hour: 10, minute: 47),
 /// );
 /// ```
