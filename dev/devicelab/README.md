@@ -93,6 +93,33 @@ By default, DeviceLab tests have an automatic retry logic built in. Any failing 
 ../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test --exit -t {NAME_OF_TEST}
 ```
 
+### Running tests without automatic reboots
+By default, DeviceLab tests have an automatic device reboot logic built in. After a certain number of test runs the device is rebooted. This can be disabled by specifying the `--disable-reboot` option:
+
+```sh
+../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test --disable-reboot -t {NAME_OF_TEST}
+```
+
+### Running tests with repetition (reproduce flakyness)
+
+Sometimes it may be useful to run single test many times repeatedly, e.g. to reproduce possible test flakyness. In the following example we have used [hyperfine](https://github.com/sharkdp/hyperfine) to execute the test repeatedly and collect stats (other similar tools can be used also instead):
+
+```sh
+# Runs test 1000 times without automatic retries and automatic reboot
+hyperfine -r 1000 '../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t integration_ui_keyboard_resize --exit --disable-reboot > log.txt'
+```
+
+Running tests like this takes significant amount of time, therefore:
+- Device should be prepared
+  - Connected using a fast connection (skip USB hubs if not sure about their speed)
+  - The device should have developer options enabled
+  - The device should have kept awake (Keep Awake from developer settings)
+  - Play Store APK scanning should be disabled (blocks automatic install at a random time)
+  - Device theft protection should be disabled (can auto-lock the device in case of connection loss or if you use Aeroplane mode)
+  - Google Assistant or Gemini voice detection or similar should be disabled
+- Computer should be prepared
+  - The computer used to run tests should be kept awake (Mac caffeinated, Windows PowerToys Awake, etc)
+
 ### Running tests against a local engine build
 
 To run device lab tests against a local engine build, pass the appropriate
