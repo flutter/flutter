@@ -310,6 +310,11 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
       return kVulkanUnsupportedFallback;
     }
 
+    if (__system_property_find("ro.vendor.mediatek.platform") != nullptr) {
+      // Probably MediaTek. Avoid Vulkan.
+      return kVulkanUnsupportedFallback;
+    }
+
     __system_property_get("ro.product.board", product_model);
     if (IsKnownBadSOC(product_model)) {
       // Avoid using Vulkan on known bad SoCs.
