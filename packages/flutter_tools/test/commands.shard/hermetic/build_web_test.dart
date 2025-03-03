@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/web/compile.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -39,7 +40,7 @@ void main() {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('name: foo\n');
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+    writePackageConfigFile(mainLibName: 'foo', directory: fileSystem.currentDirectory);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     logger = BufferLogger.test();
@@ -143,7 +144,8 @@ void main() {
               'HasWebPlugins': 'true',
               'ServiceWorkerStrategy': 'offline-first',
               'BuildMode': 'release',
-              'DartDefines': 'Zm9vPWE=',
+              'DartDefines':
+                  'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               'DartObfuscation': 'false',
               'TrackWidgetCreation': 'false',
               'TreeShakeIcons': 'true',
@@ -204,7 +206,8 @@ void main() {
               'Dart2jsNoFrequencyBasedMinification': 'false',
               'Dart2jsOptimization': 'O3',
               'BuildMode': 'release',
-              'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
+              'DartDefines':
+                  'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               'DartObfuscation': 'false',
               'TrackWidgetCreation': 'false',
               'TreeShakeIcons': 'true',
@@ -258,6 +261,8 @@ void main() {
               'HasWebPlugins': 'true',
               'ServiceWorkerStrategy': 'offline-first',
               'BuildMode': 'release',
+              'DartDefines':
+                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               'DartObfuscation': 'false',
               'TrackWidgetCreation': 'false',
               'TreeShakeIcons': 'true',
@@ -501,27 +506,11 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   }
 
   // Project files.
-  fileSystem.directory('.dart_tool').childFile('package_config.json')
-    ..createSync(recursive: true)
-    ..writeAsStringSync('''
-{
-  "packages": [
-    {
-      "name": "foo",
-      "rootUri": "../",
-      "packageUri": "lib/",
-      "languageVersion": "3.2"
-    },
-    {
-      "name": "fizz",
-      "rootUri": "../bar",
-      "packageUri": "lib/",
-      "languageVersion": "3.2"
-    }
-  ],
-  "configVersion": 2
-}
-''');
+  writePackageConfigFile(
+    directory: fileSystem.currentDirectory,
+    mainLibName: 'foo',
+    packages: <String, String>{'fizz': 'bar'},
+  );
   fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: foo
 

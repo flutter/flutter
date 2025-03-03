@@ -6,13 +6,10 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:analyzer/source/file_source.dart';
-import 'package:analyzer/source/source.dart';
 import 'package:file/file.dart' as file;
 import 'package:file/local.dart' as file;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
-import 'package:watcher/watcher.dart';
 
 /// The name of the directory containing plugin specific subfolders used to
 /// store data across sessions.
@@ -107,9 +104,6 @@ class _PhysicalFile extends _PhysicalResource implements File {
   const _PhysicalFile(io.File super.file);
 
   @override
-  Stream<WatchEvent> get changes => FileWatcher(_entry.path).events;
-
-  @override
   int get lengthSync {
     try {
       return _file.lengthSync();
@@ -136,11 +130,6 @@ class _PhysicalFile extends _PhysicalResource implements File {
     final File destination = parentFolder.getChildAssumingFile(shortName);
     destination.writeAsBytesSync(readAsBytesSync());
     return destination;
-  }
-
-  @override
-  Source createSource([Uri? uri]) {
-    return FileSource(this, uri ?? pathContext.toUri(path));
   }
 
   @override
@@ -216,17 +205,6 @@ class _PhysicalFile extends _PhysicalResource implements File {
 /// A `dart:io` based implementation of [Folder].
 class _PhysicalFolder extends _PhysicalResource implements Folder {
   const _PhysicalFolder(io.Directory super.directory);
-
-  @override
-  Stream<WatchEvent> get changes => DirectoryWatcher(_entry.path).events.handleError(
-    (Object error) {},
-    test:
-        (dynamic error) =>
-            error is io.FileSystemException &&
-            // Don't suppress "Directory watcher closed," so the outer
-            // listener can see the interruption & act on it.
-            !error.message.startsWith('Directory watcher closed unexpectedly'),
-  );
 
   @override
   bool get isRoot {
@@ -351,12 +329,6 @@ abstract class _PhysicalResource implements Resource {
 
   @override
   Folder get parent {
-    final String parentPath = pathContext.dirname(path);
-    return _PhysicalFolder(io.Directory(parentPath));
-  }
-
-  @override
-  Folder get parent2 {
     final String parentPath = pathContext.dirname(path);
     return _PhysicalFolder(io.Directory(parentPath));
   }
