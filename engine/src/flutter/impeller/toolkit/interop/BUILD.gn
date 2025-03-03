@@ -76,7 +76,7 @@ impeller_component("interop_base") {
     "../../renderer/backend",
     "//flutter/display_list",
     "//flutter/fml",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
   ]
 }
 
