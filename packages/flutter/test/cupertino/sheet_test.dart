@@ -810,8 +810,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Finder clipRRectFinder = find.byType(ClipRRect);
-    final Rect clipRect = tester.getRect(clipRRectFinder);
-    expect(clipRect.center, equals(const Offset(400, 300)));
+    expect(clipRRectFinder, findsNothing);
   });
 
   group('drag dismiss gesture', () {
