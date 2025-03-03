@@ -35,7 +35,7 @@ const double _kTopGapRatio = 0.08;
 // the top of the screen. Values found from eyeballing a simulator running iOS 18.0.
 final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
-  end: const Offset(0.0, _kTopGapRatio),
+  end: Offset.zero,
 );
 
 // Offset change for when a new sheet covers another sheet. '0.0' represents the
@@ -494,16 +494,19 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   Widget buildContent(BuildContext context) {
-    final double bottomPadding = MediaQuery.sizeOf(context).height * _kTopGapRatio;
+    final double topPadding = MediaQuery.sizeOf(context).height * _kTopGapRatio;
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
       removeBottom: true,
       child: Padding(
-        padding: EdgeInsets.only(bottom: bottomPadding),
-        child: CupertinoUserInterfaceLevel(
-          data: CupertinoUserInterfaceLevelData.elevated,
-          child: _CupertinoSheetScope(child: builder(context)),
+        padding: EdgeInsets.only(top: topPadding),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          child: CupertinoUserInterfaceLevel(
+            data: CupertinoUserInterfaceLevelData.elevated,
+            child: _CupertinoSheetScope(child: builder(context)),
+          ),
         ),
       ),
     );
