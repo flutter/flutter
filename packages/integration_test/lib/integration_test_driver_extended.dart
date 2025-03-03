@@ -38,7 +38,7 @@ Future<void> writeResponseData(
 
 /// Adaptor to run an integration test using `flutter drive`.
 ///
-/// To an integration test `<test_name>.dart` using `flutter drive`, put a file named
+/// To integration test `<test_name>.dart` using `flutter drive`, put a file named
 /// `<test_name>_test.dart` in the app's `test_driver` directory:
 ///
 /// ```dart
@@ -62,6 +62,7 @@ Future<void> writeResponseData(
 ///
 /// `driver` A custom driver. Defaults to `FlutterDriver.connect()`.
 ///
+// CAMILLE: why does onScreenshot run on device vs host?
 /// `onScreenshot` can be used to process the screenshots taken during the test.
 /// An example could be that this callback compares the byte array against a baseline image,
 /// and it returns `true` if both images are equal.
@@ -75,16 +76,18 @@ Future<void> writeResponseData(
 /// function will be called to process the [Response.data] when a test fails.
 /// The default value is `false`.
 Future<void> integrationDriver({
-  FlutterDriver? driver,
+  FlutterDriver? driver, // CAMILLE: why a driver? because it runs on the host? yes
   ScreenshotCallback? onScreenshot,
   ResponseDataCallback? responseDataCallback = writeResponseData,
   bool writeResponseOnFailure = false,
 }) async {
-  driver ??= await FlutterDriver.connect();
+  driver ??= await FlutterDriver.connect(); // CAMILLE: connecting to the device
   // Test states that it's waiting on web driver commands.
   // [DriverTestMessage] is converted to string since json format causes an
   // error if it's used as a message for requestData.
-  String jsonResponse = await driver.requestData(DriverTestMessage.pending().toString());
+  String jsonResponse = await driver.requestData(
+    DriverTestMessage.pending().toString(),
+  ); // CAMILLE: sends pending message
 
   final Map<String, bool> onScreenshotResults = <String, bool>{};
 
@@ -99,11 +102,15 @@ Future<void> integrationDriver({
     if (webDriverCommand == '${WebDriverCommandType.screenshot}') {
       assert(onScreenshot != null, 'screenshot command requires an onScreenshot callback');
       // Use `driver.screenshot()` method to get a screenshot of the web page.
-      final List<int> screenshotImage = await driver.screenshot();
+      final List<int> screenshotImage = await driver.screenshot(); // CAMILLE: take screenshot, 2
       final String screenshotName = response.data!['screenshot_name']! as String;
       final Map<String, Object?>? args =
           (response.data!['args'] as Map<String, Object?>?)?.cast<String, Object?>();
 
+      // CAMILLE: why does we need on screenshot?
+      // first web renderer (html) uses div and anchor and img tags and the like in combination with canvas tags to render app
+      // browser cannot take pic of itself. communicates with cfrome driver || flutter driver to take screenshots
+      // new rendered (canvaskit/wasm) it is not a surface like a vanvas and now can convert this directly to an image
       final bool screenshotSuccess = await onScreenshot!(screenshotName, screenshotImage, args);
       onScreenshotResults[screenshotName] = screenshotSuccess;
       if (screenshotSuccess) {
