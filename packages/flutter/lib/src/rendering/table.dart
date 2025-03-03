@@ -640,7 +640,9 @@ class RenderTable extends RenderBox {
 
       final List<SemanticsNode> rawCells = children.skip(y * _columns).take(_columns).toList();
 
-      final List<SemanticsNode> cells = List<SemanticsNode>.generate(columns, (int x) {
+      final List<SemanticsNode> cells = [];
+
+      for (int x = 0; x < columns; x++) {
         final SemanticsNode cell = rawCells[x];
         cell.indexInParent = x;
 
@@ -652,6 +654,11 @@ class RenderTable extends RenderBox {
                 ? rowBox.width - _columnLefts!.elementAt(x)
                 : _columnLefts!.elementAt(x + 1) - _columnLefts!.elementAt(x);
 
+        // Skip cell if it's invisible
+        if (cellWidth <= 0.0) {
+          continue;
+        }
+
         cell
           ..transform = cellTransform
           ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
@@ -661,8 +668,8 @@ class RenderTable extends RenderBox {
         if (cell.role == SemanticsRole.none) {
           cell.role = SemanticsRole.cell;
         }
-        return cell;
-      });
+        cells.add(cell);
+      }
 
       newRow
         ..updateWith(config: configuration, childrenInInversePaintOrder: cells)
