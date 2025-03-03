@@ -1093,6 +1093,8 @@ class Radius {
   }
 }
 
+const double _kRRectInsetFactor = 0.29289321881; // 1-cos(pi/4)
+
 // The common base class for `RRect` and `RSuperellipse`.
 abstract class _RRectLike<T extends _RRectLike<T>> {
   const _RRectLike({
@@ -1255,18 +1257,16 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   /// corners. The middle of a corner is the intersection of the curve with its
   /// respective quadrant bisector.
   Rect get safeInnerRect {
-    const double kInsetFactor = 0.29289321881; // 1-cos(pi/4)
-
     final double leftRadius = math.max(blRadiusX, tlRadiusX);
     final double topRadius = math.max(tlRadiusY, trRadiusY);
     final double rightRadius = math.max(trRadiusX, brRadiusX);
     final double bottomRadius = math.max(brRadiusY, blRadiusY);
 
     return Rect.fromLTRB(
-      left + leftRadius * kInsetFactor,
-      top + topRadius * kInsetFactor,
-      right - rightRadius * kInsetFactor,
-      bottom - bottomRadius * kInsetFactor,
+      left + leftRadius * _kRRectInsetFactor,
+      top + topRadius * _kRRectInsetFactor,
+      right - rightRadius * _kRRectInsetFactor,
+      bottom - bottomRadius * _kRRectInsetFactor,
     );
   }
 
@@ -1804,6 +1804,364 @@ class RRect extends _RRectLike<RRect> {
   }
 }
 
+// Return the value that splits the range from `left` to `right` into two
+// portions whose ratio equals to `ratioLeft` : `ratioRight`.
+double _split(double left, double right, double ratioLeft, double ratioRight) {
+  if (ratioLeft == 0 && ratioRight == 0) {
+    return (left + right) / 2;
+  }
+  return (left * ratioRight + right * ratioLeft) / (ratioLeft + ratioRight);
+}
+
+double _replanceInfinityWithOne(double a) {
+  return a.isFinite ? a : 1;
+}
+
+double _angleTo(Offset m, Offset n) {
+  double cross(Offset a, Offset b) {
+    return a.dx * b.dy - a.dy * b.dx;
+  }
+
+  double dot(Offset a, Offset b) {
+    return a.dx * b.dx + a.dy * b.dy;
+  }
+
+  return math.atan2(cross(m, n), dot(m, n));
+}
+
+// Parameters for drawing a square-like rounded superellipse.
+//
+// This structure is used to define an octant of an arbitrary rounded
+// superellipse.
+class _RSuperellipseOctant {
+  // The offset of the square-like rounded superellipse's center from the
+  // origin.
+  //
+  // All other coordinates in this structure are relative to this point.
+  final Offset offset;
+
+  // The coordinate of the midpoint of the top edge, relative to the `offset`
+  // point.
+  //
+  // This is the starting point of the octant curve.
+  final Offset edgeMid;
+
+  // The coordinate of the superellipse's center, relative to the `offset`
+  // point.
+  final Offset seCenter;
+  // The semi-axis length of the superellipse.
+  final double seA;
+  // The degree of the superellipse.
+  final double seN;
+  // The range of the parameter "theta" used to define the superellipse curve.
+  //
+  // The "theta" is not the angle of the curve but the implicit parameter
+  // used in the curve's parametric equation.
+  final double seMaxTheta;
+
+  // The coordinate of the top left end of the circular arc, relative to the
+  // `offset` point.
+  final Offset circleStart;
+  // The center of the circular arc, relative to the `offset` point.
+  final Offset circleCenter;
+  // The angular span of the circular arc, measured in radians.
+  final double circleMaxAngle;
+
+  factory _RSuperellipseOctant.Make(Offset center, double halfSize, double radius) {
+    /* The following figure shows the first quadrant of a square-like rounded
+    * superellipse. The target arc consists of the "stretch" (AB), a
+    * superellipsoid arc (BJ), and a circular arc (JM).
+    *
+    *     straight   superelipse
+    *          ↓     ↓
+    *        A    B       J    circular arc
+    *        ---------...._   ↙
+    *        |    |      /  `⟍ M
+    *        |    |     /    ⟋ ⟍
+    *        |    |    /  ⟋     \
+    *        |    |   / ⟋        |
+    *        |    |  ᜱD          |
+    *        |    | /             |
+    *    ↑   +----+ S             |
+    *    s   |    |               |
+    *    ↓   +----+---------------| A'
+    *       O
+    *        ← s →
+    *        ←---- half_size -----→
+    */
+
+    final double ratio = radius == 0 ? _kMaxRatio : math.min(halfSize * 2 / radius, _kMaxRatio);
+    final double a = ratio * radius / 2;
+    final double s = halfSize - a;
+    final double g = _kRRectInsetFactor * radius;
+    final double n = _lerpPrecomputedVariable(0, ratio);
+
+    final double sin_thetaJ = radius == 0 ? 0 : _lerpPrecomputedVariable(1, ratio);
+
+    final double sin_thetaJ_sq = sin_thetaJ * sin_thetaJ;
+    final double cos_thetaJ_sq = 1 - sin_thetaJ_sq;
+    final double tan_thetaJ_sq = sin_thetaJ_sq / cos_thetaJ_sq;
+
+    final double xJ = a * math.pow(sin_thetaJ_sq, 1 / n);
+    final double yJ = a * math.pow(cos_thetaJ_sq, 1 / n);
+    final double tan_phiJ = math.pow(tan_thetaJ_sq, (n - 1) / n) as double;
+    final double d = (xJ - tan_phiJ * yJ) / (1 - tan_phiJ);
+    final double R = (a - d - g) * math.sqrt(2);
+
+    final Offset pointA = Offset(0, halfSize);
+    final Offset pointM = Offset(halfSize - g, halfSize - g);
+    final Offset pointS = Offset(s, s);
+    final Offset pointJ = Offset(xJ, yJ) + pointS;
+    final Offset circleCenter = radius == 0 ? pointM : _findCircleCenter(pointJ, pointM, R);
+    final double circleMaxAngle =
+        radius == 0 ? 0 : _angleTo(pointM - circleCenter, pointJ - circleCenter);
+
+    return _RSuperellipseOctant._raw(
+      offset: center,
+
+      edgeMid: pointA,
+
+      seCenter: pointS,
+      seA: a,
+      seN: n,
+      seMaxTheta: math.asin(sin_thetaJ),
+
+      circleStart: pointJ,
+      circleCenter: circleCenter,
+      circleMaxAngle: circleMaxAngle,
+    );
+  }
+
+  _RSuperellipseOctant._raw({
+    required this.offset,
+    required this.edgeMid,
+    required this.seCenter,
+    required this.seA,
+    required this.seN,
+    required this.seMaxTheta,
+    required this.circleStart,
+    required this.circleCenter,
+    required this.circleMaxAngle,
+  });
+
+  bool contains(Offset p) {
+    // Check whether the point is within the octant.
+    if (p.dx < 0 || p.dy < 0 || p.dy < p.dx) {
+      return true;
+    }
+    // Check if the point is within the stretch segment.
+    if (p.dx <= seCenter.dx) {
+      return p.dy <= edgeMid.dy;
+    }
+    // Check if the point is within the superellipsoid segment.
+    if (p.dx <= circleStart.dx) {
+      final Offset p_se = (p - seCenter) / seA;
+      return math.pow(p_se.dx, seN) + math.pow(p_se.dy, seN) <= 1;
+    }
+    final double circle_radius = (circleStart - circleCenter).distanceSquared;
+    return (p - circleCenter).distanceSquared < circle_radius;
+  }
+
+  // A look up table with precomputed variables.
+  //
+  // The columns represent the following variabls respectively:
+  //
+  //  * n
+  //  * sin(thetaJ)
+  //
+  // For definition of the variables, see ComputeOctant.
+  static const List<List<double>> _kPrecomputedVariables = [
+    /*ratio=2.00*/ <double>[2.00000000, 0.117205737],
+    /*ratio=2.02*/ <double>[2.03999083, 0.117205737],
+    /*ratio=2.04*/ <double>[2.07976152, 0.119418745],
+    /*ratio=2.06*/ <double>[2.11195967, 0.136274515],
+    /*ratio=2.08*/ <double>[2.14721808, 0.141289310],
+    /*ratio=2.10*/ <double>[2.18349805, 0.143410679],
+    /*ratio=2.12*/ <double>[2.21858213, 0.146668334],
+    /*ratio=2.14*/ <double>[2.24861661, 0.154985392],
+    /*ratio=2.16*/ <double>[2.28146030, 0.158932848],
+    /*ratio=2.18*/ <double>[2.30842385, 0.168182439],
+    /*ratio=2.20*/ <double>[2.33888662, 0.172911853],
+    /*ratio=2.22*/ <double>[2.36937163, 0.177039959],
+    /*ratio=2.24*/ <double>[2.40317673, 0.177839181],
+    /*ratio=2.26*/ <double>[2.42840031, 0.185615110],
+    /*ratio=2.28*/ <double>[2.45838300, 0.188905374],
+    /*ratio=2.30*/ <double>[2.48660575, 0.193273145],
+  ];
+  static const double _kRatioStepInverse = 50; // = 1 / 0.02
+
+  static int get _kNumRecords => _kPrecomputedVariables.length;
+  static const double _kMinRatio = 2.00;
+  static double get _kMaxRatio => _kMinRatio + (_kNumRecords - 1) / _kRatioStepInverse;
+
+  // Linear interpolation for `kPrecomputedVariables`.
+  //
+  // The `column` is a 0-based index that decides the target variable.
+  static double _lerpPrecomputedVariable(int column, double ratio) {
+    final double steps = ((ratio - _kMinRatio) * _kRatioStepInverse).clamp(0, _kNumRecords - 1);
+    final int left = steps.floor().clamp(0, _kNumRecords - 2);
+    final double frac = steps - left;
+
+    return (1 - frac) * _kPrecomputedVariables[left][column] +
+        frac * _kPrecomputedVariables[left + 1][column];
+  }
+
+  // Find the center of the circle that passes the given two points and have the
+  // given radius.
+  static Offset _findCircleCenter(Offset a, Offset b, double r) {
+    /* Denote the middle Offset of A and B as M. The key is to find the center of
+    * the circle.
+    *         A --__
+    *          /  ⟍ `、
+    *         /   M  ⟍\
+    *        /       ⟋  B
+    *       /     ⟋   ↗
+    *      /   ⟋
+    *     / ⟋    r
+    *  C ᜱ  ↙
+    */
+
+    final Offset a_to_b = b - a;
+    final Offset m = (a + b) / 2;
+    final Offset c_to_m = Offset(-a_to_b.dy, a_to_b.dx);
+    final double distance_am = a_to_b.distance / 2;
+    final double distance_cm = math.sqrt(r * r - distance_am * distance_am);
+    return m - c_to_m / c_to_m.distance * distance_cm;
+  }
+}
+
+// Parameters for drawing a rounded superellipse with equal radius size for
+// all corners.
+//
+// This structure is used to define a quadrant of an arbitrary rounded
+// superellipse.
+class _RSuperellipseQuadrant {
+  // The offset of the rounded superellipse's center from the origin.
+  //
+  // All other coordinates in this structure are relative to this point.
+  final Offset offset;
+  // The scaling factor used to transform a normalized rounded superellipse
+  // back to its original, unnormalized shape.
+  //
+  // Normalization refers to adjusting the original curve, which may have
+  // asymmetrical corner sizes, into a symmetrical one by reducing the longer
+  // radius to match the shorter one. For instance, to draw a rounded
+  // superellipse with size (200, 300) and radii (20, 10), the function first
+  // draws a normalized RSE with size (100, 300) and radii (10, 10), then
+  // scales it by (2x, 1x) to restore the original proportions.
+  //
+  // Normalization also flips the curve to the first quadrant (positive x and
+  // y) if it originally resides in another quadrant. This affects the signs
+  // of `signed_scale`.
+  final Size signedScale;
+
+  // The parameters for the two octants that make up this quadrant after
+  // normalization.
+  final _RSuperellipseOctant top;
+  final _RSuperellipseOctant right;
+
+  factory _RSuperellipseQuadrant.Make(Offset center, Offset corner, Size radius) {
+    final Offset cornerVector = corner - center;
+    assert(radius.isFinite);
+
+    // The prefix "norm" is short for "normalized".
+    //
+    // Be extra careful to avoid NaNs in cases that some radius or some
+    // coordinate of cornerVector is zero.
+    final double normRadius = radius.shortestSide;
+    final Size forwardScale = normRadius == 0 ? Size(1, 1) : (radius / normRadius);
+    final double normHalfWidth = cornerVector.dx.abs() / forwardScale.width;
+    final double normHalfHeight = cornerVector.dy.abs() / forwardScale.height;
+    final Size signedScale = Size(
+      _replanceInfinityWithOne(cornerVector.dx / normHalfWidth),
+      _replanceInfinityWithOne(cornerVector.dy / normHalfHeight),
+    );
+
+    // Each quadrant curve is composed of two octant curves, each of which
+    // belongs to a square-like rounded rectangle. For the two octants to
+    // connect at the circular arc, the centers these two square-like rounded
+    // rectangle must be offset from the quadrant center by a same distance in
+    // different directions.  The distance is denoted as `c`.
+    final double c = normHalfWidth - normHalfHeight;
+    return _RSuperellipseQuadrant._raw(
+      offset: center,
+      signedScale: signedScale,
+      top: _RSuperellipseOctant.Make(Offset(0, -c), normHalfWidth, normRadius),
+      right: _RSuperellipseOctant.Make(Offset(c, 0), normHalfHeight, normRadius),
+    );
+  }
+
+  _RSuperellipseQuadrant._raw({
+    required this.offset,
+    required this.signedScale,
+    required this.top,
+    required this.right,
+  });
+
+  bool contains(Offset p) {
+    Offset flipped(Offset a) {
+      return Offset(a.dy, a.dx);
+    }
+
+    final Offset localP = p - offset;
+    final Offset norm_point = Offset(localP.dx / signedScale.width, localP.dy / signedScale.height);
+    if (norm_point.dx < 0 || norm_point.dy < 0) {
+      return true;
+    }
+    return top.contains(norm_point - top.offset) &&
+        right.contains(flipped(norm_point - right.offset));
+  }
+}
+
+// A utility struct that expands input parameters for a rounded superellipse to
+// drawing variables.
+//
+// This class and its related code should be kept in synchronize with
+// `round_superellipse_param.cc`.
+class _RSuperellipseParam {
+  // The parameters for the four quadrants that make up the full contour.
+  final _RSuperellipseQuadrant topRight;
+  final _RSuperellipseQuadrant bottomRight;
+  final _RSuperellipseQuadrant bottomLeft;
+  final _RSuperellipseQuadrant topLeft;
+
+  factory _RSuperellipseParam.MakeScaled(RSuperellipse rse /* a scaled rse */) {
+    final double topSplit = _split(rse.left, rse.right, rse.tlRadiusX, rse.trRadiusX);
+    final double rightSplit = _split(rse.top, rse.bottom, rse.trRadiusY, rse.brRadiusY);
+    final double bottomSplit = _split(rse.left, rse.right, rse.blRadiusX, rse.brRadiusX);
+    final double leftSplit = _split(rse.top, rse.bottom, rse.tlRadiusY, rse.blRadiusY);
+    return _RSuperellipseParam._raw(
+      topRight: _RSuperellipseQuadrant.Make(
+        Offset(topSplit, rightSplit),
+        Offset(rse.right, rse.top),
+        Size(rse.trRadiusX, rse.trRadiusY),
+      ),
+      bottomRight: _RSuperellipseQuadrant.Make(
+        Offset(bottomSplit, rightSplit),
+        Offset(rse.right, rse.bottom),
+        Size(rse.brRadiusX, rse.brRadiusY),
+      ),
+      bottomLeft: _RSuperellipseQuadrant.Make(
+        Offset(bottomSplit, leftSplit),
+        Offset(rse.left, rse.bottom),
+        Size(rse.blRadiusX, rse.blRadiusY),
+      ),
+      topLeft: _RSuperellipseQuadrant.Make(
+        Offset(topSplit, leftSplit),
+        Offset(rse.left, rse.top),
+        Size(rse.tlRadiusX, rse.tlRadiusY),
+      ),
+    );
+  }
+
+  _RSuperellipseParam._raw({
+    required this.topRight,
+    required this.bottomRight,
+    required this.bottomLeft,
+    required this.topLeft,
+  });
+}
+
 /// An immutable rounded superellipse.
 ///
 /// A rounded superellipse is a shape similar to a typical rounded rectangle
@@ -1825,7 +2183,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   /// and the same radii along its horizontal axis and its vertical axis.
   ///
   /// Will assert in debug mode if `radiusX` or `radiusY` are negative.
-  const RSuperellipse.fromLTRBXY(
+  RSuperellipse.fromLTRBXY(
     double left,
     double top,
     double right,
@@ -1962,7 +2320,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          brRadiusY: bottomRight.y,
        );
 
-  const RSuperellipse._raw({
+  RSuperellipse._raw({
     super.left = 0.0,
     super.top = 0.0,
     super.right = 0.0,
@@ -2007,7 +2365,35 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   );
 
   /// A rounded rectangle with all the values set to zero.
-  static const RSuperellipse zero = RSuperellipse._raw();
+  static final RSuperellipse zero = RSuperellipse._raw();
+
+  /// Whether the point specified by the given offset (which is assumed to be
+  /// relative to the origin) lies inside the rounded superellipse.
+  ///
+  /// This method may allocate (and cache) intermediate data the first time it
+  /// is called on a particular [RSuperellipse] instance. When using this
+  /// method, prefer to reuse existing [RSuperellipse]s rather than recreating
+  /// the object each time.
+  bool contains(Offset point) {
+    if (point.dx < left || point.dx >= right || point.dy < top || point.dy >= bottom) {
+      return false;
+    } // outside bounding box
+    final RSuperellipse scaled = scaleRadii();
+    if (_param == null) {
+      if (scaled.safeInnerRect.contains(point)) {
+        return true;
+      }
+      _param = _RSuperellipseParam.MakeScaled(scaled);
+    }
+    assert(_param != null);
+
+    return _param!.topLeft.contains(point) &&
+        _param!.topRight.contains(point) &&
+        _param!.bottomLeft.contains(point) &&
+        _param!.bottomRight.contains(point);
+  }
+
+  _RSuperellipseParam? _param;
 
   /// Linearly interpolate between two rounded superellipses.
   ///
