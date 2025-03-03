@@ -1273,39 +1273,6 @@ flutter:
     group('Flutter version', () {
       for (final String dartDefine in FlutterCommand.flutterVersionDartDefines) {
         testUsingContext(
-          "tool exits when $dartDefine is already set in user's environment",
-          () async {
-            final CommandRunner<void> runner = createTestCommandRunner(
-              _TestRunCommandThatOnlyValidates(),
-            );
-
-            await expectLater(
-              runner.run(<String>['run', '--no-pub', '--no-hot']),
-              throwsToolExit(
-                message:
-                    '$dartDefine is used by the framework and cannot be set in the environment. '
-                    'Use FlutterVersion to access it in Flutter code',
-              ),
-            );
-          },
-          overrides: <Type, Generator>{
-            DeviceManager:
-                () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
-            Platform:
-                () => FakePlatform(environment: <String, String>{dartDefine: 'I was already set'}),
-            Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-            FileSystem: () {
-              return MemoryFileSystem.test()
-                ..file('lib/main.dart').createSync(recursive: true)
-                ..file('pubspec.yaml').createSync()
-                ..file('.packages').createSync();
-            },
-            ProcessManager: () => FakeProcessManager.any(),
-            FlutterVersion: () => FakeFlutterVersion(),
-          },
-        );
-
-        testUsingContext(
           'tool exits when $dartDefine is set in --dart-define or --dart-define-from-file',
           () async {
             final CommandRunner<void> runner = createTestCommandRunner(
@@ -1360,6 +1327,38 @@ flutter:
           },
         );
       }
+
+      // Regression test for https://github.com/flutter/flutter/issues/164093
+      testUsingContext(
+        'tool does not throw when FLUTTER_GIT_URL exists in environment variables',
+        () async {
+          final CommandRunner<void> runner = createTestCommandRunner(
+            _TestRunCommandThatOnlyValidates(),
+          );
+
+          await expectReturnsNormallyLater(runner.run(<String>['run', '--no-pub', '--no-hot']));
+        },
+        overrides: <Type, Generator>{
+          DeviceManager:
+              () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          Platform:
+              () =>
+                  FakePlatform()
+                    ..environment = <String, String>{
+                      'FLUTTER_GIT_URL': 'git@example.org:fork_of/flutter.git',
+                    },
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () {
+            final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+            fileSystem.file('lib/main.dart').createSync(recursive: true);
+            fileSystem.file('pubspec.yaml').createSync();
+            fileSystem.file('.packages').createSync();
+            return fileSystem;
+          },
+          ProcessManager: () => FakeProcessManager.any(),
+          FlutterVersion: () => FakeFlutterVersion(),
+        },
+      );
 
       testUsingContext(
         'FLUTTER_VERSION is set in dartDefines',

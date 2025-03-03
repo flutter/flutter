@@ -1563,6 +1563,10 @@ class EditableText extends StatefulWidget {
   /// Called for each tap up that occurs outside of the [TextFieldTapRegion]
   /// group when the text field is focused.
   ///
+  /// If this is null, [EditableTextTapUpOutsideIntent] will be invoked. In the
+  /// default implementation, this is a no-op. To change this behavior, set a
+  /// callback here or override [EditableTextTapUpOutsideIntent].
+  ///
   /// The [PointerUpEvent] passed to the function is the event that caused the
   /// notification. It is possible that the event may occur outside of the
   /// immediate bounding box defined by the text field, although it will be
@@ -1573,6 +1577,8 @@ class EditableText extends StatefulWidget {
   ///
   ///  * [TapRegion] for how the region group is determined.
   ///  * [onTapOutside], which is called for each tap down.
+  ///  * [EditableTextTapOutsideIntent], the intent that is invoked if
+  ///  this is null.
   final TapRegionUpCallback? onTapUpOutside;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
@@ -5404,6 +5410,16 @@ class EditableTextState extends State<EditableText>
     );
   }
 
+  /// The default behavior used if [EditableText.onTapUpOutside] is null.
+  ///
+  /// The `event` argument is the [PointerUpEvent] that caused the notification.
+  void _defaultOnTapUpOutside(BuildContext context, PointerUpEvent event) {
+    Actions.invoke(
+      context,
+      EditableTextTapUpOutsideIntent(focusNode: widget.focusNode, pointerUpEvent: event),
+    );
+  }
+
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
@@ -5525,6 +5541,7 @@ class EditableTextState extends State<EditableText>
 
     TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
     EditableTextTapOutsideIntent: _makeOverridable(_EditableTextTapOutsideAction()),
+    EditableTextTapUpOutsideIntent: _makeOverridable(_EditableTextTapUpOutsideAction()),
   };
 
   @protected
@@ -5554,7 +5571,9 @@ class EditableTextState extends State<EditableText>
                       ? widget.onTapOutside ??
                           (PointerDownEvent event) => _defaultOnTapOutside(context, event)
                       : null,
-              onTapUpOutside: widget.onTapUpOutside,
+              onTapUpOutside:
+                  widget.onTapUpOutside ??
+                  (PointerUpEvent event) => _defaultOnTapUpOutside(context, event),
               debugLabel: kReleaseMode ? null : 'EditableText',
               child: MouseRegion(
                 cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -6535,5 +6554,14 @@ class _EditableTextTapOutsideAction extends ContextAction<EditableTextTapOutside
       case TargetPlatform.windows:
         intent.focusNode.unfocus();
     }
+  }
+}
+
+class _EditableTextTapUpOutsideAction extends ContextAction<EditableTextTapUpOutsideIntent> {
+  _EditableTextTapUpOutsideAction();
+
+  @override
+  void invoke(EditableTextTapUpOutsideIntent intent, [BuildContext? context]) {
+    // The default action is a no-op.
   }
 }

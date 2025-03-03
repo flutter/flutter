@@ -44,7 +44,7 @@ void configureProject(Project project, String outputDir) {
 
     String storageUrl = System.getenv('FLUTTER_STORAGE_BASE_URL') ?: "https://storage.googleapis.com"
 
-    String engineRealm = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.realm")
+    String engineRealm = Paths.get(getFlutterRoot(project), "bin", "cache", "engine.realm")
         .toFile().text.trim()
     if (engineRealm) {
         engineRealm += "/"
@@ -57,7 +57,7 @@ void configureProject(Project project, String outputDir) {
             url "$storageUrl/${engineRealm}download.flutter.io"
         }
     }
-    String engineVersion = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.version")
+    String engineVersion = Paths.get(getFlutterRoot(project), "bin", "cache", "engine.stamp")
         .toFile().text.trim()
     project.dependencies {
         // Add the embedding dependency.
@@ -179,7 +179,7 @@ projectsEvaluated {
             // Configure the `assembleAar<variantName>` task for each plugin's projects and make
             // the module's equivalent task depend on the plugin's task.
             String variantName = variant.name.capitalize()
-            
+
                 Task moduleProjectTask = moduleProject.tasks.named("assembleAar$variantName").get()
                 assert(moduleProjectTask != null)
                 Task pluginProjectTask = pluginProject.tasks.named("assembleAar$variantName").get()
