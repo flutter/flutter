@@ -81,6 +81,7 @@ class ContextMTL final : public Context,
       id<MTLCommandQueue> command_queue,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
+      bool has_multiple_devices,
       const std::string& label);
 
   // |Context|
@@ -172,6 +173,7 @@ class ContextMTL final : public Context,
       tasks_awaiting_gpu_mutex_);
   std::unique_ptr<SyncSwitchObserver> sync_switch_observer_;
   std::shared_ptr<CommandQueue> command_queue_ip_;
+  bool has_multiple_devices_ = false;
 #ifdef IMPELLER_DEBUG
   std::shared_ptr<GPUTracerMTL> gpu_tracer_;
   std::shared_ptr<ImpellerMetalCaptureManager> capture_manager_;
@@ -181,6 +183,7 @@ class ContextMTL final : public Context,
   ContextMTL(id<MTLDevice> device,
              id<MTLCommandQueue> command_queue,
              NSArray<id<MTLLibrary>>* shader_libraries,
+             bool has_multiple_devices,
              std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
              std::optional<PixelFormat> pixel_format_override = std::nullopt);
 

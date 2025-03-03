@@ -21,6 +21,24 @@
 
 namespace impeller {
 
+// Intel Macs can have multiple GPUs connected, and the applicaiton may
+// switch between them or start up with some other non-default device. To
+// correctly handle this, we would need to track the metal device per
+// window and potentially re-create the context if it changed. These
+// external GPUs are not supported on ARM macs though and are now a
+// legacy/uncommon feature. To avoid crashes, we detect when there
+// are multiple devices and fall back to the most conservative set of
+// GPU features feasible.
+static bool HasMultipleDevices() {
+#if FML_OS_IOS
+  return false;
+#else
+  NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
+  FML_LOG(ERROR) << "Devices Count: " << [devices count];
+  return [devices count] > 1;
+#endif  // FML_OS_IOS
+}
+
 static bool DeviceSupportsFramebufferFetch(id<MTLDevice> device) {
   // The iOS simulator lies about supporting framebuffer fetch.
 #if FML_OS_IOS_SIMULATOR
@@ -54,13 +72,15 @@ static bool DeviceSupportsComputeSubgroups(id<MTLDevice> device) {
 
 static std::unique_ptr<Capabilities> InferMetalCapabilities(
     id<MTLDevice> device,
-    PixelFormat color_format) {
+    PixelFormat color_format,
+    bool has_multiple_devices) {
   return CapabilitiesBuilder()
       .SetSupportsOffscreenMSAA(true)
       .SetSupportsSSBO(true)
       .SetSupportsTextureToTextureBlits(true)
       .SetSupportsDecalSamplerAddressMode(true)
-      .SetSupportsFramebufferFetch(DeviceSupportsFramebufferFetch(device))
+      .SetSupportsFramebufferFetch(DeviceSupportsFramebufferFetch(device) &&
+                                   !has_multiple_devices)
       .SetDefaultColorFormat(color_format)
       .SetDefaultStencilFormat(PixelFormat::kS8UInt)
       .SetDefaultDepthStencilFormat(PixelFormat::kD32FloatS8UInt)
@@ -78,11 +98,13 @@ ContextMTL::ContextMTL(
     id<MTLDevice> device,
     id<MTLCommandQueue> command_queue,
     NSArray<id<MTLLibrary>>* shader_libraries,
+    bool has_multiple_devices,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     std::optional<PixelFormat> pixel_format_override)
     : device_(device),
       command_queue_(command_queue),
-      is_gpu_disabled_sync_switch_(std::move(is_gpu_disabled_sync_switch)) {
+      is_gpu_disabled_sync_switch_(std::move(is_gpu_disabled_sync_switch)),
+      has_multiple_devices_(has_multiple_devices) {
   // Validate device.
   if (!device_) {
     VALIDATION_LOG << "Could not set up valid Metal device.";
@@ -123,18 +145,19 @@ ContextMTL::ContextMTL(
 
   // Setup the resource allocator.
   {
-    resource_allocator_ = std::shared_ptr<AllocatorMTL>(
-        new AllocatorMTL(device_, "Impeller Permanents Allocator"));
+    resource_allocator_ = std::shared_ptr<AllocatorMTL>(new AllocatorMTL(
+        device_, has_multiple_devices_, "Impeller Permanents Allocator"));
     if (!resource_allocator_) {
       VALIDATION_LOG << "Could not set up the resource allocator.";
       return;
     }
   }
 
-  device_capabilities_ =
-      InferMetalCapabilities(device_, pixel_format_override.has_value()
-                                          ? pixel_format_override.value()
-                                          : PixelFormat::kB8G8R8A8UNormInt);
+  device_capabilities_ = InferMetalCapabilities(
+      device_,
+      pixel_format_override.has_value() ? pixel_format_override.value()
+                                        : PixelFormat::kB8G8R8A8UNormInt,
+      /*has_multiple_devices=*/has_multiple_devices_);
   command_queue_ip_ = std::make_shared<CommandQueue>();
 #ifdef IMPELLER_DEBUG
   gpu_tracer_ = std::make_shared<GPUTracerMTL>();
@@ -234,7 +257,7 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
       device, command_queue,
       MTLShaderLibraryFromFilePaths(device, shader_library_paths),
-      std::move(is_gpu_disabled_sync_switch)));
+      HasMultipleDevices(), std::move(is_gpu_disabled_sync_switch)));
   if (!context->IsValid()) {
     FML_LOG(ERROR) << "Could not create Metal context.";
     return nullptr;
@@ -256,7 +279,8 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
       device, command_queue,
       MTLShaderLibraryFromFileData(device, shader_libraries_data,
                                    library_label),
-      std::move(is_gpu_disabled_sync_switch), pixel_format_override));
+      HasMultipleDevices(), std::move(is_gpu_disabled_sync_switch),
+      pixel_format_override));
   if (!context->IsValid()) {
     FML_LOG(ERROR) << "Could not create Metal context.";
     return nullptr;
@@ -269,12 +293,13 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
     id<MTLCommandQueue> command_queue,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
+    bool has_multiple_devices,
     const std::string& library_label) {
-  auto context = std::shared_ptr<ContextMTL>(
-      new ContextMTL(device, command_queue,
-                     MTLShaderLibraryFromFileData(device, shader_libraries_data,
-                                                  library_label),
-                     std::move(is_gpu_disabled_sync_switch)));
+  auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
+      device, command_queue,
+      MTLShaderLibraryFromFileData(device, shader_libraries_data,
+                                   library_label),
+      has_multiple_devices, std::move(is_gpu_disabled_sync_switch)));
   if (!context->IsValid()) {
     FML_LOG(ERROR) << "Could not create Metal context.";
     return nullptr;
@@ -367,7 +392,8 @@ void ContextMTL::SetCapabilities(
 
 // |Context|
 bool ContextMTL::UpdateOffscreenLayerPixelFormat(PixelFormat format) {
-  device_capabilities_ = InferMetalCapabilities(device_, format);
+  device_capabilities_ = InferMetalCapabilities(
+      device_, format, /*has_multiple_devices=*/has_multiple_devices_);
   return true;
 }
 

@@ -127,6 +127,25 @@ TEST(GPUSurfaceMetalImpeller, ResetHostBufferBasedOnFrameBoundary) {
   EXPECT_EQ(host_buffer.GetStateForTest().current_frame, 1u);
 }
 
+TEST(GPUSurfaceMetalImpeller, CreatesMultipleDevices) {
+  std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
+      std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_data,
+                                             impeller_entity_shaders_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_data,
+                                             impeller_modern_shaders_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_framebuffer_blend_shaders_data,
+                                             impeller_framebuffer_blend_shaders_length),
+  };
+  auto sync_switch = std::make_shared<fml::SyncSwitch>(false);
+  auto device = ::MTLCreateSystemDefaultDevice();
+  auto command_queue = device.newCommandQueue;
+  auto context = impeller::ContextMTL::Create(device, command_queue, shader_mappings, sync_switch,
+                                              /*has_multiple_devices=*/true, "Impeller Library");
+
+  // This test runs on arm macs which should return true here.
+  EXPECT_FALSE(context->GetCapabilities()->SupportsFramebufferFetch());
+}
+
 #ifdef IMPELLER_DEBUG
 TEST(GPUSurfaceMetalImpeller, CreatesImpellerCaptureScope) {
   auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
