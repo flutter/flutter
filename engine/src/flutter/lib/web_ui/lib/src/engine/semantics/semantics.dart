@@ -367,6 +367,9 @@ enum EngineSemanticsRole {
   /// Contains editable text.
   textField,
 
+  /// A group of radio buttons.
+  radioGroup,
+
   /// A control that has a checked state, such as a check box or a radio button.
   checkable,
 
@@ -1782,6 +1785,8 @@ class SemanticsObject {
         return EngineSemanticsRole.row;
       case ui.SemanticsRole.columnHeader:
         return EngineSemanticsRole.columnHeader;
+      case ui.SemanticsRole.radioGroup:
+        return EngineSemanticsRole.radioGroup;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.searchBox:
@@ -1837,6 +1842,7 @@ class SemanticsObject {
       EngineSemanticsRole.scrollable => SemanticScrollable(this),
       EngineSemanticsRole.incrementable => SemanticIncrementable(this),
       EngineSemanticsRole.button => SemanticButton(this),
+      EngineSemanticsRole.radioGroup => SemanticRadioGroup(this),
       EngineSemanticsRole.checkable => SemanticCheckable(this),
       EngineSemanticsRole.route => SemanticRoute(this),
       EngineSemanticsRole.image => SemanticImage(this),

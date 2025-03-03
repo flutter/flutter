@@ -113,6 +113,7 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.table => _noCheckRequired,
     SemanticsRole.cell => _semanticsCell,
     SemanticsRole.columnHeader => _semanticsColumnHeader,
+    SemanticsRole.radioGroup => _semanticsRadioGroup,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.row => _unimplemented,
@@ -176,6 +177,39 @@ sealed class _DebugSemanticsRoleChecks {
       return FlutterError('A columnHeader must be a child of a table');
     }
     return null;
+  }
+
+  static FlutterError? _semanticsRadioGroup(SemanticsNode node) {
+    FlutterError? error;
+    bool hasCheckedChild = false;
+    bool validateRadioGroupChildren(SemanticsNode node) {
+      final SemanticsData data = node.getSemanticsData();
+      if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
+        node.visitChildren(validateRadioGroupChildren);
+        return error == null;
+      }
+
+      if (!data.hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup)) {
+        error = FlutterError(
+          'Radio buttons in a radio group must be in a mutually exclusive group',
+        );
+        return false;
+      }
+
+      if (data.hasFlag(SemanticsFlag.isChecked)) {
+        if (hasCheckedChild) {
+          error = FlutterError('Radio groups must not have multiple checked children');
+          return false;
+        }
+        hasCheckedChild = true;
+      }
+
+      assert(error == null);
+      return true;
+    }
+
+    node.visitChildren(validateRadioGroupChildren);
+    return error;
   }
 }
 

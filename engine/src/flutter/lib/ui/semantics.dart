@@ -459,6 +459,9 @@ enum SemanticsRole {
   ///
   /// For example, [Shortcuts].
   hotKey,
+
+  /// A group of radio buttons.
+  radioGroup,
 }
 
 /// A Boolean value that can be associated with a semantics node.
