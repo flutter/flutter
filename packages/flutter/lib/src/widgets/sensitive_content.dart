@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart' show Container;
 import 'package:flutter/services.dart' show ContentSensitivity, SensitiveContentService;
 
 import 'async.dart' show AsyncSnapshot, FutureBuilder;
@@ -46,10 +47,9 @@ class ContentSensitivitySetting {
     }
   }
 
-  /// Returns the number of [SensitiveContent] widgets represented by this state.
-  int getTotalNumberOfWidgets() {
-    return sensitiveWidgetCount + autoSensitiveWidgetCount + notSensitiveWigetCount;
-  }
+  /// Returns true if this class is currently tracking at least one [SensitiveContent] widget.
+  bool get hasWidgets =>
+      sensitiveWidgetCount + autoSensitiveWidgetCount + notSensitiveWigetCount > 0;
 }
 
 /// Host of the current content sensitivity level for the widget tree that contains
@@ -67,23 +67,23 @@ class SensitiveContentHost {
   @visibleForTesting
   ContentSensitivity? currentContentSensitivityLevel;
 
-  @visibleForTesting
   /// [SensitiveContentHost] instance for the widget tree.
+  @visibleForTesting
   static final SensitiveContentHost instance = SensitiveContentHost._();
 
-  @visibleForTesting
   /// The state of content sensitivity in the widget tree.
   ///
   /// Contains the number of widgets with each [ContentSensitivity] level and
   /// the current [ContentSensitivity] setting.
+  @visibleForTesting
   ContentSensitivitySetting? getContentSenstivityState() {
     return _contentSensitivitySetting;
   }
 
   /// Registers a [SensitiveContent] widget that will help determine the
   /// [ContentSensitivity] level for the widget tree.
-  static Future<void> register(ContentSensitivity desiredSensitivityLevel) async {
-    await instance._register(desiredSensitivityLevel);
+  static Future<void> register(ContentSensitivity desiredSensitivityLevel) {
+    return instance._register(desiredSensitivityLevel);
   }
 
   Future<void> _register(ContentSensitivity desiredSensitivityLevel) async {
@@ -123,6 +123,10 @@ class SensitiveContentHost {
   }
 
   void _unregister(ContentSensitivity widgetSensitivityLevel) {
+    assert(
+      _contentSenstivityIsSupported != null,
+      'SensitiveContentHost.register must be called before SensitiveContentHost.unregister',
+    );
     if (!_contentSenstivityIsSupported!) {
       // Setting content sensitivity is not supported on this device.
       return;
@@ -132,7 +136,7 @@ class SensitiveContentHost {
     // desiredSensitivityLevel.
     _contentSensitivitySetting!.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
 
-    if (_contentSensitivitySetting!.getTotalNumberOfWidgets() == 0) {
+    if (_contentSensitivitySetting!.hasWidgets) {
       // Restore default content sensitivity setting if there are no more SensitiveContent
       // widgets in the tree.
       _sensitiveContentService.setContentSensitivity(_defaultContentSensitivitySetting!);
@@ -141,7 +145,7 @@ class SensitiveContentHost {
     }
 
     // Determine if another sensitivity level needs to be restored.
-    ContentSensitivity? contentSensitivityToRestore;
+    late final ContentSensitivity? contentSensitivityToRestore;
     switch (widgetSensitivityLevel) {
       case ContentSensitivity.sensitive:
         if (shouldSetContentSensitivity(ContentSensitivity.notSensitive)) {
@@ -154,9 +158,10 @@ class SensitiveContentHost {
           contentSensitivityToRestore = ContentSensitivity.notSensitive;
         }
       case ContentSensitivity.notSensitive:
-      // Removing a not sensitive SensitiveContent widgets when there are other SensitiveContent widgets
-      // in the tree will have no impact on the content sensitivity setting for the widget tree since
-      // they have the least severe content sensitivity level.
+        // Removing a not sensitive SensitiveContent widgets when there are other SensitiveContent widgets
+        // in the tree will have no impact on the content sensitivity setting for the widget tree since
+        // they have the least severe content sensitivity level.
+        contentSensitivityToRestore = null;
     }
 
     if (contentSensitivityToRestore != null) {
@@ -238,7 +243,12 @@ class _SensitiveContentState extends State<SensitiveContent> {
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
       future: _sensitiveContentRegistrationFuture,
-      builder: (BuildContext context, AsyncSnapshot<void> snapshot) => widget.child,
+      builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+        if (snapshot.hasData) {
+          return widget.child;
+        }
+        return Container();
+      },
     );
   }
 }
