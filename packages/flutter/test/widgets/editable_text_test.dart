@@ -16877,6 +16877,71 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
     skip: kIsWeb, // [intended]
   );
+
+  testWidgets('scrolls to correct position when focusing read-only fields', (
+    WidgetTester tester,
+  ) async {
+    final List<TextEditingController> controllers = <TextEditingController>[
+      TextEditingController(text: 'Field1'),
+      TextEditingController(text: 'Field2'),
+    ];
+    final List<FocusNode> focusNodes = <FocusNode>[
+      FocusNode(debugLabel: 'FirstField'),
+      FocusNode(debugLabel: 'SecondField'),
+    ];
+    final ScrollController scrollController = ScrollController();
+
+    addTearDown(() {
+      scrollController.dispose();
+      for (final FocusNode e in focusNodes) {
+        e.dispose();
+      }
+      for (final TextEditingController e in controllers) {
+        e.dispose();
+      }
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          controller: scrollController,
+          child: Column(
+            children: <Widget>[
+              EditableText(
+                controller: controllers[0],
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNodes[0],
+                readOnly: true,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+              const SizedBox(height: 1500),
+              EditableText(
+                controller: controllers[1],
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNodes[1],
+                readOnly: true,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    //
+    focusNodes[1].requestFocus();
+    await tester.pumpAndSettle();
+    expect(
+      scrollController.position.pixels,
+      moreOrLessEquals(scrollController.position.maxScrollExtent),
+    );
+
+    focusNodes[0].requestFocus();
+    await tester.pumpAndSettle();
+    expect(scrollController.position.pixels, equals(0.0));
+  });
 }
 
 class UnsettableController extends TextEditingController {

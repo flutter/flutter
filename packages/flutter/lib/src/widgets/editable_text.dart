@@ -4601,9 +4601,7 @@ class EditableTextState extends State<EditableText>
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
       _lastBottomViewInset = View.of(context).viewInsets.bottom;
-      if (!widget.readOnly) {
-        _scheduleShowCaretOnScreen(withAnimation: true);
-      }
+      _scheduleShowCaretOnScreen(withAnimation: true);
       final TextSelection? updatedSelection = _adjustedSelectionWhenFocused();
       if (updatedSelection != null) {
         _handleSelectionChanged(updatedSelection, null);
