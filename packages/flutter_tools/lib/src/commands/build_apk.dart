@@ -29,10 +29,8 @@ class BuildApkCommand extends BuildSubCommand {
     addDartObfuscationOption();
     usesDartDefineOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    addBundleSkSLPathOption(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addIgnoreDeprecationOption();
@@ -138,7 +136,6 @@ class BuildApkCommand extends BuildSubCommand {
       targetArchs: _targetArchs.map<AndroidArch>(getAndroidArchForName),
     );
     validateBuild(androidBuildInfo);
-    displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
     final FlutterProject project = FlutterProject.current();
     await androidBuilder?.buildApk(

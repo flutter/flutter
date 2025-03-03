@@ -692,27 +692,6 @@ void main() {
     });
   });
 
-  testWithoutContext(
-    'computeDartVmFlags handles various combinations of Dart VM flags and null_assertions',
-    () {
-      expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug)), '');
-      expect(
-        computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo')),
-        '--foo',
-      );
-      expect(
-        computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, nullAssertions: true)),
-        '--null_assertions',
-      );
-      expect(
-        computeDartVmFlags(
-          DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo', nullAssertions: true),
-        ),
-        '--foo,--null_assertions',
-      );
-    },
-  );
-
   group('JSON encode DebuggingOptions', () {
     testWithoutContext('can preserve the original options', () {
       final DebuggingOptions original = DebuggingOptions.enabled(
@@ -761,12 +740,9 @@ void main() {
           traceSystrace: true,
           traceToFile: 'path/to/trace.binpb',
           endlessTraceBuffer: true,
-          dumpSkpOnShaderCompilation: true,
-          cacheSkSL: true,
           purgePersistentCache: true,
           verboseSystemLogs: true,
           enableImpeller: ImpellerStatus.disabled,
-          nullAssertions: true,
           deviceVmServicePort: 0,
           hostVmServicePort: 1,
         );
@@ -784,7 +760,7 @@ void main() {
             '--disable-service-auth-codes',
             '--disable-vm-service-publication',
             '--start-paused',
-            '--dart-flags="--foo,--null_assertions"',
+            '--dart-flags="--foo"',
             '--use-test-fonts',
             '--enable-checked-mode',
             '--verify-entry-points',
@@ -796,9 +772,7 @@ void main() {
             '--trace-allowlist="foo"',
             '--trace-skia-allowlist="skia.a,skia.b"',
             '--endless-trace-buffer',
-            '--dump-skp-on-shader-compilation',
             '--verbose-logging',
-            '--cache-sksl',
             '--purge-persistent-cache',
             '--route=/test',
             '--trace-startup',
@@ -895,7 +869,6 @@ void main() {
         final DebuggingOptions original = DebuggingOptions.disabled(
           BuildInfo.debug,
           traceAllowlist: 'foo',
-          cacheSkSL: true,
           enableImpeller: ImpellerStatus.disabled,
         );
 
@@ -910,7 +883,6 @@ void main() {
           <String>[
             '--enable-dart-profiling',
             '--trace-allowlist="foo"',
-            '--cache-sksl',
             '--route=/test',
             '--trace-startup',
             '--enable-impeller=false',
@@ -937,12 +909,9 @@ void main() {
           traceSystrace: true,
           traceToFile: 'path/to/trace.binpb',
           endlessTraceBuffer: true,
-          dumpSkpOnShaderCompilation: true,
-          cacheSkSL: true,
           purgePersistentCache: true,
           verboseSystemLogs: true,
           enableImpeller: ImpellerStatus.disabled,
-          nullAssertions: true,
           deviceVmServicePort: 0,
           hostVmServicePort: 1,
         );
@@ -960,7 +929,7 @@ void main() {
             '--disable-service-auth-codes',
             '--disable-vm-service-publication',
             '--start-paused',
-            '--dart-flags=--foo,--null_assertions',
+            '--dart-flags=--foo',
             '--use-test-fonts',
             '--enable-checked-mode',
             '--verify-entry-points',
@@ -972,9 +941,7 @@ void main() {
             '--trace-allowlist="foo"',
             '--trace-skia-allowlist="skia.a,skia.b"',
             '--endless-trace-buffer',
-            '--dump-skp-on-shader-compilation',
             '--verbose-logging',
-            '--cache-sksl',
             '--purge-persistent-cache',
             '--route=/test',
             '--trace-startup',

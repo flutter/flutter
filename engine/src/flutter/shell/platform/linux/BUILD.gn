@@ -150,7 +150,6 @@ source_set("flutter_linux_sources") {
     "fl_task_runner.h",
     "fl_text_input_channel.cc",
     "fl_text_input_handler.cc",
-    "fl_text_input_view_delegate.cc",
     "fl_texture.cc",
     "fl_texture_gl.cc",
     "fl_texture_registrar.cc",
@@ -159,6 +158,8 @@ source_set("flutter_linux_sources") {
     "fl_view.cc",
     "fl_view_accessible.cc",
     "fl_window_state_monitor.cc",
+    "fl_windowing_channel.cc",
+    "fl_windowing_handler.cc",
     "key_mapping.g.cc",
   ]
 
@@ -249,6 +250,7 @@ executable("flutter_linux_unittests") {
     "fl_view_accessible_test.cc",
     "fl_view_test.cc",
     "fl_window_state_monitor_test.cc",
+    "fl_windowing_handler_test.cc",
     "key_mapping_test.cc",
     "testing/fl_mock_binary_messenger.cc",
     "testing/fl_test.cc",
@@ -262,7 +264,6 @@ executable("flutter_linux_unittests") {
     "testing/mock_renderer.cc",
     "testing/mock_settings.cc",
     "testing/mock_signal_handler.cc",
-    "testing/mock_text_input_view_delegate.cc",
     "testing/mock_texture_registrar.cc",
     "testing/mock_window.cc",
   ]

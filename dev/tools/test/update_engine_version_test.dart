@@ -13,9 +13,31 @@ import 'package:file_testing/file_testing.dart';
 import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
+//////////////////////////////////////////////////////////////////////
+//                                                                  //
+//  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
+//                                                                  //
+//  There is a link to this file in //docs/tool/Engine-artfiacts.md //
+//  and it would be very kind of you to update the link, if needed. //
+//                                                                  //
+//////////////////////////////////////////////////////////////////////
+
 void main() {
+  // Want to test the powershell (update_engine_version.ps1) file, but running
+  // a macOS or Linux machine? You can install powershell and then opt-in to
+  // running `pwsh bin/internal/update_engine_version.ps1`.
+  //
+  // macOS: https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-macos
+  // linux: https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-linux
+  //
+  // Then, set this variable to true:
+  const bool usePowershellOnPosix = false;
+
   const FileSystem localFs = LocalFileSystem();
-  final _FlutterRootUnderTest flutterRoot = _FlutterRootUnderTest.findWithin();
+  final _FlutterRootUnderTest flutterRoot = _FlutterRootUnderTest.findWithin(
+    // ignore: avoid_redundant_argument_values
+    forcePowershell: usePowershellOnPosix,
+  );
 
   late Directory tmpDir;
   late _FlutterRootUnderTest testRoot;
@@ -48,33 +70,141 @@ void main() {
 
   setUp(() async {
     tmpDir = localFs.systemTempDirectory.createTempSync('update_engine_version_test.');
-    testRoot = _FlutterRootUnderTest.fromPath(tmpDir.childDirectory('flutter').path);
+    testRoot = _FlutterRootUnderTest.fromPath(
+      tmpDir.childDirectory('flutter').path,
+      // ignore: avoid_redundant_argument_values
+      forcePowershell: usePowershellOnPosix,
+    );
 
     environment = <String, String>{};
-    environment.addAll(io.Platform.environment);
-    environment.remove('FLUTTER_PREBUILT_ENGINE_VERSION');
+
+    if (const LocalPlatform().isWindows) {
+      // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
+      const List<String> powerShellVariables = <String>['SystemRoot', 'Path', 'PATHEXT'];
+      for (final String key in powerShellVariables) {
+        final String? value = io.Platform.environment[key];
+        if (value != null) {
+          environment[key] = value;
+        }
+      }
+    }
 
     // Copy the update_engine_version script and create a rough directory structure.
     flutterRoot.binInternalUpdateEngineVersion.copySyncRecursive(
       testRoot.binInternalUpdateEngineVersion.path,
     );
+
+    // Regression test for https://github.com/flutter/flutter/pull/164396;
+    // on a fresh checkout bin/cache does not exist, so avoid trying to create
+    // this folder.
+    if (testRoot.root.childDirectory('cache').existsSync()) {
+      fail('Do not initially create a bin/cache directory, it should be created by the script.');
+    }
   });
 
   tearDown(() {
-    tmpDir.deleteSync(recursive: true);
+    // Git adds a lot of files, we don't want to test for them.
+    final Directory gitDir = testRoot.root.childDirectory('.git');
+    if (gitDir.existsSync()) {
+      gitDir.deleteSync(recursive: true);
+    }
+
+    // Take a snapshot of files we expect to be created or otherwise exist.
+    //
+    // This gives a "dirty" check that we did not change the output characteristics
+    // of the tool without adding new tests for the new files.
+    final Set<String> expectedFiles = <String>{
+      localFs.path.join('bin', 'cache', 'engine.realm'),
+      localFs.path.join('bin', 'cache', 'engine.stamp'),
+      localFs.path.join(
+        'bin',
+        'internal',
+        localFs.path.basename(testRoot.binInternalUpdateEngineVersion.path),
+      ),
+      localFs.path.join('bin', 'internal', 'engine.realm'),
+      localFs.path.join('bin', 'internal', 'engine.version'),
+      localFs.path.join('engine', 'src', '.gn'),
+      'DEPS',
+    };
+    final Set<String> currentFiles =
+        tmpDir
+            .listSync(recursive: true)
+            .whereType<File>()
+            .map((File e) => localFs.path.relative(e.path, from: testRoot.root.path))
+            .toSet();
+
+    // If this test failed, print out the current directory structure.
+    printOnFailure(
+      'Files in virtual "flutter" directory when test failed:\n\n${(currentFiles.toList()..sort()).join('\n')}',
+    );
+
+    // Now do cleanup so even if the next step fails, we still deleted tmp.
+    print(tmpDir);
+    // tmpDir.deleteSync(recursive: true);
+
+    final Set<String> unexpectedFiles = currentFiles.difference(expectedFiles);
+    if (unexpectedFiles.isNotEmpty) {
+      final StringBuffer message = StringBuffer(
+        '\nOne or more files were generated by ${localFs.path.basename(testRoot.binInternalUpdateEngineVersion.path)} that were not expected:\n\n',
+      );
+      message.writeAll(unexpectedFiles, '\n');
+      message.writeln('\n');
+      message.writeln(
+        'If this was intentional update "expectedFiles" in dev/tools/test/update_engine_version_test.dart and add *new* tests for the new outputs.',
+      );
+      fail('$message');
+    }
   });
 
   io.ProcessResult runUpdateEngineVersion() {
-    final (String executable, List<String> args) =
-        const LocalPlatform().isWindows
-            ? ('powershell', <String>[testRoot.binInternalUpdateEngineVersion.path])
-            : (testRoot.binInternalUpdateEngineVersion.path, <String>[]);
+    final String executable;
+    final List<String> args;
+    if (const LocalPlatform().isWindows) {
+      executable = 'powershell';
+      args = <String>[testRoot.binInternalUpdateEngineVersion.path];
+      // ignore: dead_code
+    } else if (usePowershellOnPosix) {
+      executable = 'pwsh';
+      args = <String>[testRoot.binInternalUpdateEngineVersion.path];
+      // ignore: dead_code
+    } else {
+      executable = testRoot.binInternalUpdateEngineVersion.path;
+      args = <String>[];
+    }
     return run(executable, args);
+  }
+
+  void setupRepo({required String branch}) {
+    for (final File f in <File>[testRoot.deps, testRoot.engineSrcGn]) {
+      f.createSync(recursive: true);
+    }
+
+    run('git', <String>['init', '--initial-branch', 'master']);
+    run('git', <String>['config', '--local', 'user.email', 'test@example.com']);
+    run('git', <String>['config', '--local', 'user.name', 'Test User']);
+    run('git', <String>['add', '.']);
+    run('git', <String>['commit', '-m', 'Initial commit']);
+    if (branch != 'master') {
+      run('git', <String>['checkout', '-b', branch]);
+    }
+  }
+
+  const String engineVersionTrackedContents = 'already existing contents';
+  void setupTrackedEngineVersion() {
+    testRoot.binInternalEngineVersion.writeAsStringSync(engineVersionTrackedContents);
+    run('git', <String>['add', '-f', 'bin/internal/engine.version']);
+    run('git', <String>['commit', '-m', 'tracking engine.version']);
+  }
+
+  void setupRemote({required String remote}) {
+    run('git', <String>['remote', 'add', remote, testRoot.root.path]);
+    run('git', <String>['fetch', remote]);
   }
 
   group('if FLUTTER_PREBUILT_ENGINE_VERSION is set', () {
     setUp(() {
       environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '123abc';
+      setupRepo(branch: 'master');
     });
 
     test('writes it to engine.version with no git interaction', () async {
@@ -85,43 +215,62 @@ void main() {
         testRoot.binInternalEngineVersion.readAsStringSync(),
         equalsIgnoringWhitespace('123abc'),
       );
+      expect(testRoot.binCacheEngineStamp.readAsStringSync(), equalsIgnoringWhitespace('123abc'));
     });
   });
 
-  void setupRepo({required String branch}) {
-    for (final File f in <File>[testRoot.deps, testRoot.engineSrcGn]) {
-      f.createSync(recursive: true);
-    }
-
-    run('git', <String>['init', '--initial-branch', 'master']);
-    run('git', <String>['add', '.']);
-    run('git', <String>['commit', '-m', 'Initial commit']);
-    if (branch != 'master') {
-      run('git', <String>['checkout', '-b', branch]);
-    }
-  }
-
-  void setupRemote({required String remote}) {
-    run('git', <String>['remote', 'add', remote, testRoot.root.path]);
-    run('git', <String>['fetch', remote]);
-  }
-
   test('writes nothing, even if files are set, if we are on "stable"', () async {
     setupRepo(branch: 'stable');
+    setupTrackedEngineVersion();
     setupRemote(remote: 'upstream');
 
     runUpdateEngineVersion();
 
-    expect(testRoot.binInternalEngineVersion, isNot(exists));
+    expect(testRoot.binInternalEngineVersion, exists);
+    expect(
+      testRoot.binInternalEngineVersion.readAsStringSync(),
+      equalsIgnoringWhitespace(engineVersionTrackedContents),
+    );
+    expect(
+      testRoot.binCacheEngineStamp.readAsStringSync(),
+      equalsIgnoringWhitespace(engineVersionTrackedContents),
+    );
+  });
+
+  test('writes nothing, even if files are set, if we are on "3.29.0"', () async {
+    setupRepo(branch: '3.29.0');
+    setupTrackedEngineVersion();
+    setupRemote(remote: 'upstream');
+
+    runUpdateEngineVersion();
+
+    expect(testRoot.binInternalEngineVersion, exists);
+    expect(
+      testRoot.binInternalEngineVersion.readAsStringSync(),
+      equalsIgnoringWhitespace(engineVersionTrackedContents),
+    );
+    expect(
+      testRoot.binCacheEngineStamp.readAsStringSync(),
+      equalsIgnoringWhitespace(engineVersionTrackedContents),
+    );
   });
 
   test('writes nothing, even if files are set, if we are on "beta"', () async {
     setupRepo(branch: 'beta');
+    setupTrackedEngineVersion();
     setupRemote(remote: 'upstream');
 
     runUpdateEngineVersion();
 
-    expect(testRoot.binInternalEngineVersion, isNot(exists));
+    expect(testRoot.binInternalEngineVersion, exists);
+    expect(
+      testRoot.binInternalEngineVersion.readAsStringSync(),
+      equalsIgnoringWhitespace(engineVersionTrackedContents),
+    );
+    expect(
+      testRoot.binCacheEngineStamp.readAsStringSync(),
+      equalsIgnoringWhitespace(engineVersionTrackedContents),
+    );
   });
 
   group('if DEPS and engine/src/.gn are present, engine.version is derived from', () {
@@ -144,6 +293,10 @@ void main() {
         testRoot.binInternalEngineVersion.readAsStringSync(),
         equalsIgnoringWhitespace(mergeBaseHeadUpstream.stdout as String),
       );
+      expect(
+        testRoot.binCacheEngineStamp.readAsStringSync(),
+        equalsIgnoringWhitespace(mergeBaseHeadUpstream.stdout as String),
+      );
     });
 
     test('merge-base HEAD origin/master on non-LUCI when upstream is not set', () async {
@@ -161,6 +314,10 @@ void main() {
         testRoot.binInternalEngineVersion.readAsStringSync(),
         equalsIgnoringWhitespace(mergeBaseHeadOrigin.stdout as String),
       );
+      expect(
+        testRoot.binCacheEngineStamp.readAsStringSync(),
+        equalsIgnoringWhitespace(mergeBaseHeadOrigin.stdout as String),
+      );
     });
 
     test('rev-parse HEAD when running on LUCI', () async {
@@ -173,6 +330,10 @@ void main() {
         testRoot.binInternalEngineVersion.readAsStringSync(),
         equalsIgnoringWhitespace(revParseHead.stdout as String),
       );
+      expect(
+        testRoot.binCacheEngineStamp.readAsStringSync(),
+        equalsIgnoringWhitespace(revParseHead.stdout as String),
+      );
     });
   });
 
@@ -181,6 +342,8 @@ void main() {
       for (final File f in <File>[testRoot.deps, testRoot.engineSrcGn]) {
         f.createSync(recursive: true);
       }
+      setupRepo(branch: 'master');
+      setupRemote(remote: 'origin');
     });
 
     test('[DEPS] engine.version is blank', () async {
@@ -190,6 +353,7 @@ void main() {
 
       expect(testRoot.binInternalEngineVersion, exists);
       expect(testRoot.binInternalEngineVersion.readAsStringSync(), equalsIgnoringWhitespace(''));
+      expect(testRoot.binCacheEngineStamp.readAsStringSync(), equalsIgnoringWhitespace(''));
     });
 
     test('[engine/src/.gn] engine.version is blank', () async {
@@ -199,6 +363,45 @@ void main() {
 
       expect(testRoot.binInternalEngineVersion, exists);
       expect(testRoot.binInternalEngineVersion.readAsStringSync(), equalsIgnoringWhitespace(''));
+      expect(testRoot.binCacheEngineStamp.readAsStringSync(), equalsIgnoringWhitespace(''));
+    });
+  });
+
+  group('engine.realm', () {
+    setUp(() {
+      for (final File f in <File>[testRoot.deps, testRoot.engineSrcGn]) {
+        f.createSync(recursive: true);
+      }
+      setupRepo(branch: 'master');
+      setupRemote(remote: 'origin');
+    });
+
+    test('is empty if the FLUTTER_REALM environment variable is not set', () {
+      expect(environment, isNot(contains('FLUTTER_REALM')));
+
+      runUpdateEngineVersion();
+
+      expect(testRoot.binCacheEngineRealm, exists);
+      expect(testRoot.binCacheEngineRealm.readAsStringSync(), equalsIgnoringWhitespace(''));
+      expect(testRoot.binInternalEngineRealm, exists);
+      expect(testRoot.binInternalEngineRealm.readAsStringSync(), equalsIgnoringWhitespace(''));
+    });
+
+    test('contains the FLUTTER_REALM environment variable', () async {
+      environment['FLUTTER_REALM'] = 'flutter_archives_v2';
+
+      runUpdateEngineVersion();
+
+      expect(testRoot.binCacheEngineRealm, exists);
+      expect(
+        testRoot.binCacheEngineRealm.readAsStringSync(),
+        equalsIgnoringWhitespace('flutter_archives_v2'),
+      );
+      expect(testRoot.binInternalEngineRealm, exists);
+      expect(
+        testRoot.binInternalEngineRealm.readAsStringSync(),
+        equalsIgnoringWhitespace('flutter_archives_v2'),
+      );
     });
   });
 }
@@ -227,6 +430,7 @@ final class _FlutterRootUnderTest {
     String path, {
     FileSystem fileSystem = const LocalFileSystem(),
     Platform platform = const LocalPlatform(),
+    bool forcePowershell = false,
   }) {
     final Directory root = fileSystem.directory(path);
     return _FlutterRootUnderTest._(
@@ -236,23 +440,26 @@ final class _FlutterRootUnderTest {
       binInternalEngineVersion: root.childFile(
         fileSystem.path.join('bin', 'internal', 'engine.version'),
       ),
+      binCacheEngineRealm: root.childFile(fileSystem.path.join('bin', 'cache', 'engine.realm')),
       binInternalEngineRealm: root.childFile(
         fileSystem.path.join('bin', 'internal', 'engine.realm'),
       ),
+      binCacheEngineStamp: root.childFile(fileSystem.path.join('bin', 'cache', 'engine.stamp')),
       binInternalUpdateEngineVersion: root.childFile(
         fileSystem.path.join(
           'bin',
           'internal',
-          'update_engine_version.${platform.isWindows ? 'ps1' : 'sh'}',
+          'update_engine_version.${platform.isWindows || forcePowershell ? 'ps1' : 'sh'}',
         ),
       ),
     );
   }
 
-  factory _FlutterRootUnderTest.findWithin([
+  factory _FlutterRootUnderTest.findWithin({
     String? path,
     FileSystem fileSystem = const LocalFileSystem(),
-  ]) {
+    bool forcePowershell = false,
+  }) {
     path ??= fileSystem.currentDirectory.path;
     Directory current = fileSystem.directory(path);
     while (!current.childFile('DEPS').existsSync()) {
@@ -261,14 +468,16 @@ final class _FlutterRootUnderTest {
       }
       current = current.parent;
     }
-    return _FlutterRootUnderTest.fromPath(current.path);
+    return _FlutterRootUnderTest.fromPath(current.path, forcePowershell: forcePowershell);
   }
 
   const _FlutterRootUnderTest._(
     this.root, {
     required this.deps,
     required this.engineSrcGn,
+    required this.binCacheEngineStamp,
     required this.binInternalEngineVersion,
+    required this.binCacheEngineRealm,
     required this.binInternalEngineRealm,
     required this.binInternalUpdateEngineVersion,
   });
@@ -288,12 +497,34 @@ final class _FlutterRootUnderTest {
   /// `bin/internal/engine.version`.
   ///
   /// This file contains a SHA of which engine binaries to download.
-  final File binInternalEngineVersion;
+  ///
+  /// Currently, the SHA is either _computed_ or _pre-determined_, based on if
+  /// the file is checked-in and tracked. That behavior is changing, and in the
+  /// future this will be a checked-in file and not computed.
+  ///
+  /// See also: https://github.com/flutter/flutter/issues/164315.
+  final File binInternalEngineVersion; // TODO(matanlurey): Update these docs.
+
+  /// `bin/cache/engine.stamp`.
+  ///
+  /// This file contains a _computed_ SHA of which engine binaries to download.
+  final File binCacheEngineStamp;
 
   /// `bin/internal/engine.realm`.
   ///
-  /// It is a mystery what this file contains, but it's set by `FLUTTER_REALM`.
+  /// If non-empty, the value comes from the environment variable `FLUTTER_REALM`,
+  /// which instructs the tool where the SHA stored in [binInternalEngineVersion]
+  /// should be fetched from (it differs for presubmits run for flutter/flutter
+  /// and builds downloaded by end-users or by postsubmits).
   final File binInternalEngineRealm;
+
+  /// `bin/cache/engine.realm`.
+  ///
+  /// If non-empty, the value comes from the environment variable `FLUTTER_REALM`,
+  /// which instructs the tool where the SHA stored in [binInternalEngineVersion]
+  /// should be fetched from (it differs for presubmits run for flutter/flutter
+  /// and builds downloaded by end-users or by postsubmits).
+  final File binCacheEngineRealm;
 
   /// `bin/internal/update_engine_version.{sh|ps1}`.
   ///

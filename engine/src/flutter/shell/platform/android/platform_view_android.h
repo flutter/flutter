@@ -7,11 +7,9 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include <android/hardware_buffer_jni.h>
-#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_view.h"
@@ -46,7 +44,7 @@ class PlatformViewAndroid final : public PlatformView {
   PlatformViewAndroid(PlatformView::Delegate& delegate,
                       const flutter::TaskRunners& task_runners,
                       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-                      bool use_software_rendering);
+                      AndroidRenderingAPI rendering_api);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a new PlatformViewAndroid but using an existing
@@ -118,6 +116,9 @@ class PlatformViewAndroid final : public PlatformView {
       const override {
     return platform_message_handler_;
   }
+
+  /// @brief Whether the SurfaceControl based swapchain is enabled and active.
+  bool IsSurfaceControlEnabled() const;
 
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
