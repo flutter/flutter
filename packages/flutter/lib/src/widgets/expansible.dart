@@ -50,10 +50,6 @@ typedef ExpansibleBuilder =
 /// The controller's [expand] and [collapse] methods cause the
 /// the [Expansible] to rebuild, so they may not be called from
 /// a build method.
-///
-/// The controller's [drive] method can be used to drive other animations that
-/// sync with the expanding/collapsing animation, making it possible to rotate
-/// an icon in the header or animate the widget's color as it expands/collapses.
 class ExpansibleController {
   /// Creates a controller to be used with [Expansible.controller].
   ExpansibleController();
@@ -117,19 +113,6 @@ class ExpansibleController {
     if (isExpanded) {
       _state!._toggleExpansion();
     }
-  }
-
-  /// Chains a [Tween] (or [CurveTween]) to the expanding/collapsing animation.
-  ///
-  /// This allows other animations to sync with the expanding/collapsing
-  /// animation, making it possible to rotate an icon or animate the widget's
-  /// color as the widget expands/collapses.
-  ///
-  /// Delegates to the internal [AnimationController.drive] method to apply the
-  /// provided [Animatable].
-  Animation<U> drive<U>(Animatable<U> child) {
-    assert(_state != null);
-    return _state!._animationController.drive(child);
   }
 
   /// Finds the [ExpansibleController] for the closest [Expansible] instance

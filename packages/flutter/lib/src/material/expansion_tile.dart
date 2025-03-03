@@ -23,6 +23,8 @@ import 'material_localizations.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+const Duration _kExpand = Duration(milliseconds: 200);
+
 /// Enables control over a single [ExpansionTile]'s expanded/collapsed state.
 ///
 /// It can be useful to expand or collapse an [ExpansionTile]
@@ -453,6 +455,7 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
   final ColorTween _iconColorTween = ColorTween();
   final ColorTween _backgroundColorTween = ColorTween();
 
+  late AnimationController _animationController;
   late Animation<double> _iconTurns;
   late Animation<ShapeBorder?> _border;
   late Animation<Color?> _headerColor;
@@ -462,7 +465,6 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
   late ExpansionTileThemeData _expansionTileTheme;
   late ExpansionTileController _tileController;
   Timer? _timer;
-
   late Curve _curve;
   late Curve? _reverseCurve;
   late Duration _duration;
@@ -471,12 +473,26 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
   void initState() {
     super.initState();
     _curve = Curves.easeIn;
-    _duration = const Duration(milliseconds: 200);
+    _duration = _kExpand;
+    _animationController = AnimationController(duration: _duration, vsync: this);
+    _iconTurns = _animationController.drive(_halfTween.chain(_easeInTween));
+    _border = _animationController.drive(_borderTween.chain(_easeOutTween));
+    _headerColor = _animationController.drive(_headerColorTween.chain(_easeInTween));
+    _iconColor = _animationController.drive(_iconColorTween.chain(_easeInTween));
+    _backgroundColor = _animationController.drive(_backgroundColorTween.chain(_easeOutTween));
+
+    final bool isExpanded =
+        PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.initiallyExpanded;
+    if (isExpanded) {
+      _animationController.value = 1.0;
+    }
+
     _tileController = widget.controller ?? ExpansionTileController();
   }
 
   @override
   void dispose() {
+    _animationController.dispose();
     _timer?.cancel();
     _timer = null;
     super.dispose();
@@ -486,6 +502,7 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
     final TextDirection textDirection = WidgetsLocalizations.of(context).textDirection;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String stateHint = isExpanded ? localizations.collapsedHint : localizations.expandedHint;
+    _animationController.toggle();
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       // TODO(tahatesser): This is a workaround for VoiceOver interrupting
@@ -517,7 +534,6 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
   }
 
   Widget? _buildIcon(BuildContext context) {
-    _iconTurns = _tileController.drive(_halfTween.chain(_easeInTween));
     return RotationTransition(turns: _iconTurns, child: const Icon(Icons.expand_more));
   }
 
@@ -536,8 +552,6 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
   }
 
   Widget _buildHeader(BuildContext context, bool isExpanded) {
-    _iconColor = _tileController.drive(_iconColorTween.chain(_easeInTween));
-    _headerColor = _tileController.drive(_headerColorTween.chain(_easeInTween));
     final ThemeData theme = Theme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String onTapHint =
@@ -598,8 +612,6 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
   }
 
   Widget _buildExpansible(BuildContext context, Widget header, Widget body, bool isExpanded) {
-    _backgroundColor = _tileController.drive(_backgroundColorTween.chain(_easeOutTween));
-    _border = _tileController.drive(_borderTween.chain(_easeOutTween));
     final Color backgroundColor =
         _backgroundColor.value ?? _expansionTileTheme.backgroundColor ?? Colors.transparent;
     final ShapeBorder expansionTileBorder =
