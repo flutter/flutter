@@ -607,7 +607,79 @@ class RenderTable extends RenderBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.role = SemanticsRole.table;
+    config.isSemanticBoundary = true;
     config.explicitChildNodes = true;
+  }
+
+  /// Overrides this method to create semantics nodes for rows between table and table cells.
+  @override
+  void assembleSemanticsNode(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    assert(_children.length == _rows * _columns);
+    final List<SemanticsNode> rows = <SemanticsNode>[];
+
+    for (int y = 0; y < _rows; y++) {
+      final Rect rowBox = getRowBox(y);
+      // Skip row if it's empty
+      if (rowBox.height == 0) {
+        continue;
+      }
+      final SemanticsNode newRow = SemanticsNode(
+        showOnScreen: () {
+          showOnScreen(descendant: this, rect: rowBox);
+        },
+      );
+
+      final SemanticsConfiguration configuration =
+          SemanticsConfiguration()
+            ..indexInParent = y
+            ..role = SemanticsRole.row;
+
+      final List<SemanticsNode> rawCells = children.skip(y * _columns).take(_columns).toList();
+
+      final List<SemanticsNode> cells = [];
+
+      for (int x = 0; x < columns; x++) {
+        final SemanticsNode cell = rawCells[x];
+        cell.indexInParent = x;
+
+        // Shift the cell's transform to be relative to the row.
+        final Matrix4 cellTransform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0);
+
+        final double cellWidth =
+            x == _columns - 1
+                ? rowBox.width - _columnLefts!.elementAt(x)
+                : _columnLefts!.elementAt(x + 1) - _columnLefts!.elementAt(x);
+
+        // Skip cell if it's invisible
+        if (cellWidth <= 0.0) {
+          continue;
+        }
+
+        cell
+          ..transform = cellTransform
+          ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
+
+        // If the cell has no role, set it to cell. This happens when users add a basic widget like
+        // Text directly to the table row without wrapping it in a TableCell.
+        if (cell.role == SemanticsRole.none) {
+          cell.role = SemanticsRole.cell;
+        }
+        cells.add(cell);
+      }
+
+      newRow
+        ..updateWith(config: configuration, childrenInInversePaintOrder: cells)
+        ..transform = Matrix4.translationValues(rowBox.left, rowBox.top, 0)
+        ..rect = Rect.fromLTWH(0, 0, rowBox.width, rowBox.height);
+
+      rows.add(newRow);
+    }
+
+    node.updateWith(config: config, childrenInInversePaintOrder: rows);
   }
 
   /// Replaces the children of this table with the given cells.
