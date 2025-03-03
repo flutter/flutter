@@ -51,15 +51,16 @@ tasks.withType<JavaCompile> {
 tasks.test {
     useJUnitPlatform()
 }
-
-kotlin {
+// https://stackoverflow.com/questions/55456176/unresolved-reference-compilekotlin-in-build-gradle-kts
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 
 dependencies {
-    compileOnly("androidx.annotation:annotation-jvm:1.9.1")
+    // Versions available https://mvnrepository.com/artifact/androidx.annotation/annotation-jvm.
+    compileOnly("androidx.annotation:annotation-jvm:1.6.0")
     // Must match the version applied in "plugins"
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
     // Update to 1.8.0 when min kotlin is 2.1
