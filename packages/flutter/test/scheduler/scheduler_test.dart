@@ -333,6 +333,27 @@ void main() {
 
     expect(isCompleted, true);
   });
+
+  test('Can schedule a frame callback without scheduling a new frame', () {
+    scheduler.handleBeginFrame(Duration.zero);
+    scheduler.handleDrawFrame();
+    bool callbackInvoked = false;
+
+    assert(!scheduler.hasScheduledFrame);
+    scheduler.scheduleFrameCallback(scheduleNewFrame: false, (_) => callbackInvoked = true);
+    expect(scheduler.hasScheduledFrame, isFalse);
+    scheduler.scheduleFrame();
+    scheduler.handleBeginFrame(Duration.zero);
+    expect(callbackInvoked, isTrue);
+    scheduler.handleDrawFrame();
+
+    assert(!scheduler.hasScheduledFrame);
+    scheduler.scheduleFrameCallback((_) => callbackInvoked = true);
+    expect(scheduler.hasScheduledFrame, isTrue);
+    scheduler.handleBeginFrame(Duration.zero);
+    expect(callbackInvoked, isTrue);
+    scheduler.handleDrawFrame();
+  });
 }
 
 class DummyTimer implements Timer {
