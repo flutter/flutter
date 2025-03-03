@@ -29,9 +29,14 @@ namespace testing {
 using EmbedderA11yTest = testing::EmbedderTest;
 using ::testing::ElementsAre;
 
+#if !defined(OS_FUCHSIA) || (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
 constexpr static char kTooltip[] = "tooltip";
+#endif
 
 TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
+#else
   {
     auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
     EmbedderConfigBuilder builder(context);
@@ -91,13 +96,13 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
     ASSERT_FALSE(engine.is_valid());
     engine.reset();
   }
+#endif
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
-
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
@@ -269,14 +274,13 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
   result = FlutterEngineUpdateSemanticsEnabled(engine.get(), false);
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_enabled_latch_3.Wait();
-#endif  // OS_FUCHSIA
+#endif
 }
 
 TEST_F(EmbedderA11yTest, A11yStringAttributes) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
-
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
@@ -389,14 +393,13 @@ TEST_F(EmbedderA11yTest, A11yStringAttributes) {
   signal_native_latch.Wait();
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
   semantics_update_latch.Wait();
-#endif  // OS_FUCHSIA
+#endif
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
-
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
@@ -566,10 +569,13 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
   result = FlutterEngineUpdateSemanticsEnabled(engine.get(), false);
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_enabled_latch_3.Wait();
-#endif  // OS_FUCHSIA
+#endif
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV1Callbacks) {
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
+#else
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
@@ -765,6 +771,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV1Callbacks) {
   result = FlutterEngineUpdateSemanticsEnabled(engine.get(), false);
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_enabled_latch_3.Wait();
+#endif
 }
 
 }  // namespace testing
