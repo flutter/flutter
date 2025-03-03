@@ -2003,9 +2003,8 @@ final class SystemTextScaler extends TextScaler {
     if (identical(this, other)) {
       return true;
     }
-    // The system's (potentially deprecated) text scale factor is used for
-    // the equality check because the `scale` function's output monotonically
-    // increases with the text scale factor.
+    // The system's text scale factor is used for the equality check because the
+    // `scale` function's output monotonically increases with the text scale factor.
     return other is SystemTextScaler && textScaleFactor == other.textScaleFactor;
   }
 
