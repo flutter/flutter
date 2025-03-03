@@ -213,9 +213,9 @@ class FlutterPlugin implements Plugin<Project> {
 
         engineVersion = useLocalEngine()
             ? "+" // Match any version since there's only one.
-            : "1.0.0-" + Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.version").toFile().text.trim()
+            : "1.0.0-" + Paths.get(flutterRoot.absolutePath, "bin", "cache", "engine.stamp").toFile().text.trim()
 
-        engineRealm = Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.realm").toFile().text.trim()
+        engineRealm = Paths.get(flutterRoot.absolutePath, "bin", "cache", "engine.realm").toFile().text.trim()
         if (engineRealm) {
             engineRealm += "/"
         }

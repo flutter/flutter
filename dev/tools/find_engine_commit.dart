@@ -6,7 +6,7 @@ import 'dart:io';
 
 void _validate(List<String> args) {
   bool errors = false;
-  if (!File('bin/internal/engine.version').existsSync()) {
+  if (!File('bin/cache/engine.stamp').existsSync()) {
     errors = true;
     print('This program must be run from the root of your flutter repository.');
   }
