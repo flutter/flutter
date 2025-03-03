@@ -34,7 +34,6 @@ static bool HasMultipleDevices() {
   return false;
 #else
   NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
-  FML_LOG(ERROR) << "Devices Count: " << [devices count];
   return [devices count] > 1;
 #endif  // FML_OS_IOS
 }
