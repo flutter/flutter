@@ -334,7 +334,7 @@ void main() {
     expect(isCompleted, true);
   });
 
-  test('Can schedule a frame callback without scheduling a new frame', () {
+  test('Can schedule a frame callback with / without scheduling a new frame', () {
     scheduler.handleBeginFrame(Duration.zero);
     scheduler.handleDrawFrame();
     bool callbackInvoked = false;
@@ -342,17 +342,17 @@ void main() {
     assert(!scheduler.hasScheduledFrame);
     scheduler.scheduleFrameCallback(scheduleNewFrame: false, (_) => callbackInvoked = true);
     expect(scheduler.hasScheduledFrame, isFalse);
-    scheduler.scheduleFrame();
-    scheduler.handleBeginFrame(Duration.zero);
+    tick(const Duration(seconds: 2));
     expect(callbackInvoked, isTrue);
-    scheduler.handleDrawFrame();
 
     assert(!scheduler.hasScheduledFrame);
+    callbackInvoked = false;
     scheduler.scheduleFrameCallback((_) => callbackInvoked = true);
     expect(scheduler.hasScheduledFrame, isTrue);
-    scheduler.handleBeginFrame(Duration.zero);
+    tick(const Duration(seconds: 4));
     expect(callbackInvoked, isTrue);
-    scheduler.handleDrawFrame();
+
+    assert(!scheduler.hasScheduledFrame);
   });
 }
 
