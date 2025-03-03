@@ -15,26 +15,28 @@ import 'system_channels.dart';
 /// There are only three [ContentSensitivity] levels, and these can be set via a
 /// [SensitiveContent] widget.
 ///
-/// [ContentSensitivity.sensitive] is the most severe setting, and  if it is set,
-/// it will cause the tree to remain marked  sensitive even if there are other
-/// `SensitiveContent` widgets in the tree. [ContentSensitivity.autoSensitive] is
-/// the second most severe setting, and it will cause the tree to remain marked
-/// auto-sensitive if there are either (1) no other `SensitiveContent` widgets in
-/// the tree or (2) there are only other auto-sensitive or not sensitive
-/// `SensitiveContent` widgets in the tree. [ContentSensitivity.notSensitive] is
-/// the least severe setting, and it will cause the tree to remain marked not sensitive
-/// as long as there are (1) no other `SensitiveContent` widgets in the tree or (2) there
-/// are only other not sensitive `SensitiveContent` widgets in the tree. If there are no
-/// `SensitiveContent` widgets in the tree, the default setting as queried from the embedding
-/// will be used. This could be set by a Flutter developer in native Android; otherwise,
-/// Android uses [ContentSensitivity.autoSensitive] by default.
+/// [ContentSensitivity.sensitive] is the most severe setting, and if it is set,
+/// it will cause the tree to remain marked sensitive even if there are other
+/// `SensitiveContent` widgets in the tree.
+///
+/// [ContentSensitivity.autoSensitive] is the second most severe setting, and it will
+/// cause the tree to remain marked auto-sensitive if there are either (1) no other
+/// `SensitiveContent` widgets in the tree or (2) there are only other auto-sensitive
+/// or not sensitive `SensitiveContent` widgets in the tree.
+///
+/// [ContentSensitivity.notSensitive] is the least severe setting, and it will cause the
+/// tree to remain marked not sensitive as long as there are (1) no other `SensitiveContent`
+/// widgets in the tree or (2) there  are only other not sensitive `SensitiveContent` widgets
+/// in the tree. If there are no `SensitiveContent` widgets in the tree, the default setting as
+/// queried from the embedding will be used. This could be set by a Flutter developer in native
+/// Android; otherwise, Android uses [ContentSensitivity.autoSensitive] by default.
 /// {@endtemplate}
 ///
 /// * See [SensitiveContent] for how to set a [ContentSensitivity] level
 ///   in order for sensitive content to be obscured when the Flutter screen
 ///   is shared.
 enum ContentSensitivity {
-  /// Content sensitivity is auto-detected by the native framework.
+  /// Content sensitivity is auto-detected by the native platform.
   ///
   /// When this level is set via a [SensitiveContent] widget, the window
   /// hosting the screen will only be marked as sensitive if other [SensitiveContent]
@@ -43,7 +45,8 @@ enum ContentSensitivity {
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO for how
   /// this mode behaves on native Android.
   ///
-  /// This is currently a no-op and thus, will behave the same as [ContentSensitivity.notSensitive].
+  /// This mode currently does not work for Flutter, and thus, will never obscure the screen during
+  /// an active media projection. However, it will still logically be prioritized over [notSensitive].
   // TODO(camsim99): Implement `autoSensitive` mode that matches the behavior
   // of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented based on autofill hints; see
   // https://github.com/flutter/flutter/issues/160879.
@@ -71,20 +74,15 @@ enum ContentSensitivity {
 
   /// Identifier for each [ContentSensitivity] level, which matches the native Android value
   /// of the constant that each level corresponds to.
+  ///
+  /// See https://developer.android.com/reference/android/view/View for the enum values for
+  /// the corresponding Android constants (CONTENT_SENSITIVITY_AUTO, CONTENT_SENSITIVITY_SENSITIVE,
+  /// CONTENT_SENSITIVITY_NOT_SENSITIVE).
   final int id;
 
   /// Retrieve [ContentSensitivity] level by [id].
   static ContentSensitivity getContentSensitivityById(int id) {
-    switch (id) {
-      case 0:
-        return ContentSensitivity.autoSensitive;
-      case 1:
-        return ContentSensitivity.sensitive;
-      case 2:
-        return ContentSensitivity.notSensitive;
-      default:
-        throw ArgumentError('$id is an invalid ContentSensitvity ID.');
-    }
+    return ContentSensitivity.values.firstWhere((ContentSensitivity value) => value.id == id);
   }
 }
 
@@ -111,18 +109,18 @@ class SensitiveContentService {
       );
     } catch (e) {
       // Content sensitivity failed to be set.
-      throw FlutterError('Content sensitivity failed to be set: $e');
+      throw FlutterError('Content sensitivity $contentSensitivity failed to be set: $e');
     }
   }
 
   /// Gets content sensitivity level of the Android `View` that contains
   /// the app's widget tree.
-  Future<int> getContentSensitivity() async {
+  Future<ContentSensitivity> getContentSensitivity() async {
     try {
       final int? result = await sensitiveContentChannel.invokeMethod<int>(
         'SensitiveContent.getContentSensitivity',
       );
-      return result!;
+      return ContentSensitivity.getContentSensitivityById(result!);
     } catch (e) {
       // Content sensitivity failed to be set.
       throw FlutterError('Failed to retrieve content sensitivity: $e');
@@ -130,7 +128,7 @@ class SensitiveContentService {
   }
 
   /// Returns whether or not setting content sensitivity levels is supported
-  /// on the device.
+  /// by the device.
   Future<bool> isSupported() async {
     try {
       final bool? result = await sensitiveContentChannel.invokeMethod<bool>(

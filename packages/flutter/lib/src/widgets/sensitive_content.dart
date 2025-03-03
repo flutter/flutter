@@ -9,12 +9,9 @@ import 'framework.dart';
 
 /// Data structure used to track the [SensitiveContent] widgets in the
 /// widget tree.
-class ContentSensitivityState {
-  /// Creates a [ContentSensitivityState].
-  ContentSensitivityState(this.currentContentSensitivitySetting);
-
-  /// The current [ContentSensitivity] level set for the entire widget tree.
-  ContentSensitivity currentContentSensitivitySetting;
+class ContentSensitivitySetting {
+  /// Creates a [ContentSensitivitySetting].
+  ContentSensitivitySetting();
 
   /// The number of [SensitiveContent] widgets that have sensitivity level [ContentSensitivity.sensitive].
   int sensitiveWidgetCount = 0;
@@ -57,26 +54,30 @@ class ContentSensitivityState {
 
 /// Host of the current content sensitivity level for the widget tree that contains
 /// some number [SensitiveContent] widgets.
-class SensitiveContentSetting {
-  SensitiveContentSetting._();
+class SensitiveContentHost {
+  SensitiveContentHost._();
 
   bool? _contentSenstivityIsSupported;
-  ContentSensitivityState? _contentSensitivityState;
+  ContentSensitivitySetting? _contentSensitivitySetting;
   ContentSensitivity? _defaultContentSensitivitySetting;
 
   final SensitiveContentService _sensitiveContentService = SensitiveContentService();
 
+  /// The current [ContentSensitivity] level set for the entire widget tree.
   @visibleForTesting
-  /// [SensitiveContentSetting] instance for the widget tree.
-  static final SensitiveContentSetting instance = SensitiveContentSetting._();
+  ContentSensitivity? currentContentSensitivityLevel;
+
+  @visibleForTesting
+  /// [SensitiveContentHost] instance for the widget tree.
+  static final SensitiveContentHost instance = SensitiveContentHost._();
 
   @visibleForTesting
   /// The state of content sensitivity in the widget tree.
   ///
   /// Contains the number of widgets with each [ContentSensitivity] level and
   /// the current [ContentSensitivity] setting.
-  ContentSensitivityState? getContentSenstivityState() {
-    return _contentSensitivityState;
+  ContentSensitivitySetting? getContentSenstivityState() {
+    return _contentSensitivitySetting;
   }
 
   /// Registers a [SensitiveContent] widget that will help determine the
@@ -93,20 +94,16 @@ class SensitiveContentSetting {
     }
 
     // If needed, set default content sensitivity level as set in native Android. This will be
-    // auto sensitive if it is otherwise unset by the developer.
-    if (_defaultContentSensitivitySetting == null) {
-      final int currentContentSensitivityId =
-          await _sensitiveContentService.getContentSensitivity();
-      _defaultContentSensitivitySetting = ContentSensitivity.getContentSensitivityById(
-        currentContentSensitivityId,
-      );
-    }
+    // auto sensitive if it is otherwise unset by the developer. Also, initialize the current
+    // content sensitivity level if needed.
+    _defaultContentSensitivitySetting ??= await _sensitiveContentService.getContentSensitivity();
+    currentContentSensitivityLevel ??= _defaultContentSensitivitySetting;
 
     // If needed, then set the initial content sensitivity state.
-    _contentSensitivityState ??= ContentSensitivityState(_defaultContentSensitivitySetting!);
+    _contentSensitivitySetting ??= ContentSensitivitySetting();
 
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
-    _contentSensitivityState!.addWidgetWithContentSensitivity(desiredSensitivityLevel);
+    _contentSensitivitySetting!.addWidgetWithContentSensitivity(desiredSensitivityLevel);
 
     // Verify that desiredSensitivityLevel should be set in order for sensitive
     // content to remain obscured.
@@ -116,10 +113,10 @@ class SensitiveContentSetting {
 
     // Set content sensitivity level as desiredSensitivityLevel and update stored data.
     _sensitiveContentService.setContentSensitivity(desiredSensitivityLevel);
-    _contentSensitivityState!.currentContentSensitivitySetting = desiredSensitivityLevel;
+    currentContentSensitivityLevel = desiredSensitivityLevel;
   }
 
-  /// Unregisters a [SensitiveContent] widget from the [ContentSensitivityState] tracking
+  /// Unregisters a [SensitiveContent] widget from the [ContentSensitivitySetting] tracking
   /// the content sensitivity level of the widget tree.
   static void unregister(ContentSensitivity widgetSensitivityLevel) {
     instance._unregister(widgetSensitivityLevel);
@@ -133,14 +130,13 @@ class SensitiveContentSetting {
 
     // Update SensitiveContent widget count for those with
     // desiredSensitivityLevel.
-    _contentSensitivityState!.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
+    _contentSensitivitySetting!.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
 
-    if (_contentSensitivityState!.getTotalNumberOfWidgets() == 0) {
+    if (_contentSensitivitySetting!.getTotalNumberOfWidgets() == 0) {
       // Restore default content sensitivity setting if there are no more SensitiveContent
       // widgets in the tree.
       _sensitiveContentService.setContentSensitivity(_defaultContentSensitivitySetting!);
-      _contentSensitivityState!.currentContentSensitivitySetting =
-          _defaultContentSensitivitySetting!;
+      currentContentSensitivityLevel = _defaultContentSensitivitySetting!;
       return;
     }
 
@@ -165,7 +161,7 @@ class SensitiveContentSetting {
 
     if (contentSensitivityToRestore != null) {
       // Set content sensitivity level as contentSensitivityToRestore and update stored data.
-      _contentSensitivityState!.currentContentSensitivitySetting = contentSensitivityToRestore;
+      currentContentSensitivityLevel = contentSensitivityToRestore;
       _sensitiveContentService.setContentSensitivity(contentSensitivityToRestore);
     }
   }
@@ -176,7 +172,7 @@ class SensitiveContentSetting {
   /// [desiredSensitivityLevel] should only be set if it is strictly more
   /// severe than any of the other [SensitiveContent] widgets in the widget tree.
   bool shouldSetContentSensitivity(ContentSensitivity desiredSensitivityLevel) {
-    if (_contentSensitivityState!.currentContentSensitivitySetting == desiredSensitivityLevel) {
+    if (currentContentSensitivityLevel == desiredSensitivityLevel) {
       return false;
     }
 
@@ -184,10 +180,10 @@ class SensitiveContentSetting {
       case ContentSensitivity.sensitive:
         return true;
       case ContentSensitivity.autoSensitive:
-        return _contentSensitivityState!.sensitiveWidgetCount == 0;
+        return _contentSensitivitySetting!.sensitiveWidgetCount == 0;
       case ContentSensitivity.notSensitive:
-        return _contentSensitivityState!.sensitiveWidgetCount +
-                _contentSensitivityState!.autoSensitiveWidgetCount ==
+        return _contentSensitivitySetting!.sensitiveWidgetCount +
+                _contentSensitivitySetting!.autoSensitiveWidgetCount ==
             0;
     }
   }
@@ -229,12 +225,12 @@ class _SensitiveContentState extends State<SensitiveContent> {
   @override
   void initState() {
     super.initState();
-    _sensitiveContentRegistrationFuture = SensitiveContentSetting.register(widget.sensitivityLevel);
+    _sensitiveContentRegistrationFuture = SensitiveContentHost.register(widget.sensitivityLevel);
   }
 
   @override
   void dispose() {
-    SensitiveContentSetting.unregister(widget.sensitivityLevel);
+    SensitiveContentHost.unregister(widget.sensitivityLevel);
     super.dispose();
   }
 

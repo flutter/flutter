@@ -8,12 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Default content sensitivity setting for testing.
-  final int defaultContentSensitivitySettingId = ContentSensitivity.autoSensitive.id;
-  final ContentSensitivity defaultContentSensitivitySetting =
-      ContentSensitivity.getContentSensitivityById(defaultContentSensitivitySettingId);
+  const ContentSensitivity defaultContentSensitivitySetting = ContentSensitivity.autoSensitive;
 
   // The state of content sensitivity in the app.
-  final SensitiveContentSetting sensitiveContentSetting = SensitiveContentSetting.instance;
+  final SensitiveContentHost sensitiveContentHost = SensitiveContentHost.instance;
 
   // The number of method channel calls to `SensitiveContent.setContentSensitivity`.
   int setContentSensitivityCallCount = 0;
@@ -30,7 +28,7 @@ void main() {
           setContentSensitivityCallCount++;
           expect(methodCall.arguments, isA<int>());
         } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-          return defaultContentSensitivitySettingId;
+          return defaultContentSensitivitySetting.id;
         } else if (methodCall.method == 'SensitiveContent.isSupported') {
           return true;
         }
@@ -54,10 +52,10 @@ void main() {
     );
 
     expect(
-      sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+      sensitiveContentHost.currentContentSensitivityLevel,
       equals(ContentSensitivity.sensitive),
     );
-    expect(sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
+    expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
     expect(setContentSensitivityCallCount, 1);
   });
 
@@ -70,10 +68,10 @@ void main() {
       await tester.pumpWidget(Container());
 
       expect(
-        sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+        sensitiveContentHost.currentContentSensitivityLevel,
         equals(defaultContentSensitivitySetting),
       );
-      expect(sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount, equals(0));
+      expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(0));
     },
   );
 
@@ -92,13 +90,10 @@ void main() {
         );
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(2),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(2));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -127,13 +122,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(1),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -154,13 +146,10 @@ void main() {
         await tester.pumpWidget(Column(children: <Widget>[sc1, sc2, sc3]));
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(3),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(3));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -193,13 +182,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(2),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(2));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -217,15 +203,12 @@ void main() {
         await tester.pumpWidget(Column(children: <Widget>[sc1, asc1]));
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(1),
-        );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
         expect(setContentSensitivityCallCount, 1);
@@ -258,15 +241,12 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(0));
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(0),
-        );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
         expect(setContentSensitivityCallCount, 2);
@@ -295,15 +275,12 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(1),
-        );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(0),
         );
         expect(setContentSensitivityCallCount, 1);
@@ -338,15 +315,12 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(1),
-        );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
         expect(setContentSensitivityCallCount, 1);
@@ -366,17 +340,11 @@ void main() {
         await tester.pumpWidget(Column(children: <Widget>[sc1, nsc1]));
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(1),
-        );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(1),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -407,17 +375,11 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(0),
-        );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(1),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(0));
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 2);
       });
 
@@ -444,17 +406,11 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(1),
-        );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(0),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(0));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -487,17 +443,11 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-          equals(1),
-        );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(1),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -521,21 +471,15 @@ void main() {
         await tester.pumpWidget(Column(children: <Widget>[sc1, asc1, nsc1]));
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
+        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(1),
-        );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(1),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -570,19 +514,16 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+            sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.autoSensitive),
           );
+          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(0));
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-            equals(0),
-          );
-          expect(
-            sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
             equals(1),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
+            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
           expect(setContentSensitivityCallCount, 2);
@@ -618,19 +559,16 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+            sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
+          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
             equals(0),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
+            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
           expect(setContentSensitivityCallCount, 1);
@@ -666,19 +604,16 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+            sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
+          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
+            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
             equals(1),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
+            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(0),
           );
           expect(setContentSensitivityCallCount, 1);
@@ -709,19 +644,16 @@ void main() {
           await tester.pumpWidget(Column(children: <Widget>[sc1, sc2, asc1, nsc1]));
 
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+            sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
+          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(2));
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-            equals(2),
-          );
-          expect(
-            sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
             equals(1),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
+            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
           expect(setContentSensitivityCallCount, 1);
@@ -761,19 +693,16 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+            sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
+          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
+            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
             equals(1),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
+            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
           expect(setContentSensitivityCallCount, 1);
@@ -813,19 +742,16 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+            sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
+          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(2));
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-            equals(2),
-          );
-          expect(
-            sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
             equals(0),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
+            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
           expect(setContentSensitivityCallCount, 1);
@@ -865,19 +791,16 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+            sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
+          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(2));
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
-            equals(2),
-          );
-          expect(
-            sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
             equals(1),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
+            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(0),
           );
           expect(setContentSensitivityCallCount, 1);
@@ -919,19 +842,16 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+            sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
+          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
+            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
             equals(1),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
+            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
           expect(setContentSensitivityCallCount, 1);
@@ -971,19 +891,16 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+            sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
+          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.sensitiveWidgetCount,
+            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
             equals(1),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
+            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
           expect(setContentSensitivityCallCount, 1);
@@ -1009,11 +926,11 @@ void main() {
         await tester.pumpWidget(Column(children: <Widget>[asc1, asc2]));
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(2),
         );
         expect(setContentSensitivityCallCount, 0);
@@ -1044,11 +961,11 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
         expect(setContentSensitivityCallCount, 0);
@@ -1068,17 +985,14 @@ void main() {
         await tester.pumpWidget(Column(children: <Widget>[asc1, nsc1]));
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(1),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 0);
       });
 
@@ -1107,17 +1021,14 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(0),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(1),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -1144,17 +1055,14 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(0),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(0));
         expect(setContentSensitivityCallCount, 0);
       });
 
@@ -1187,17 +1095,14 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(1),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(1),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 0);
       });
 
@@ -1221,17 +1126,14 @@ void main() {
         await tester.pumpWidget(Column(children: <Widget>[asc1, asc2, nsc1]));
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
           equals(2),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(1),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 0);
       });
 
@@ -1264,15 +1166,15 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+            sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.autoSensitive),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
             equals(1),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
+            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(1),
           );
           expect(setContentSensitivityCallCount, 0);
@@ -1308,15 +1210,15 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+            sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.autoSensitive),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.autoSensitiveWidgetCount,
+            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
             equals(2),
           );
           expect(
-            sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
+            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
             equals(0),
           );
           expect(setContentSensitivityCallCount, 0);
@@ -1341,13 +1243,10 @@ void main() {
         await tester.pumpWidget(Column(children: <Widget>[nsc1, nsc2]));
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(2),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(2));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -1376,13 +1275,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          sensitiveContentSetting.getContentSenstivityState()!.currentContentSensitivitySetting,
+          sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
-        expect(
-          sensitiveContentSetting.getContentSenstivityState()!.notSensitiveWigetCount,
-          equals(1),
-        );
+        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
     },
