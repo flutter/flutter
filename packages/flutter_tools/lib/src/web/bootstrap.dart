@@ -471,6 +471,40 @@ document.addEventListener('dart-app-ready', function (e) {
 ''';
 }
 
+// TODO(srujzs): Delete this once it's no longer used internally.
+String generateDDCMainModule({
+  required String entrypoint,
+  required bool nullAssertions,
+  required bool nativeNullAssertions,
+  String? exportedMain,
+}) {
+  final String entrypointMainName = exportedMain ?? entrypoint.split('.')[0];
+  // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
+  return '''
+/* ENTRYPOINT_EXTENTION_MARKER */
+
+(function() {
+  // Flutter Web uses a generated main entrypoint, which shares app and module names.
+  let appName = "$entrypoint";
+  let moduleName = "$entrypoint";
+
+  // Use a dummy UUID since multi-apps are not supported on Flutter Web.
+  let uuid = "00000000-0000-0000-0000-000000000000";
+
+  let child = {};
+  child.main = function() {
+    let dart = self.dart_library.import('dart_sdk', appName).dart;
+    dart.nonNullAsserts($nullAssertions);
+    dart.nativeNonNullAsserts($nativeNullAssertions);
+    self.dart_library.start(appName, uuid, moduleName, "$entrypointMainName");
+  }
+
+  /* MAIN_EXTENSION_MARKER */
+  child.main();
+})();
+''';
+}
+
 const String _onLoadEndCallback = r'$onLoadEndCallback';
 
 String generateDDCLibraryBundleMainModule({
