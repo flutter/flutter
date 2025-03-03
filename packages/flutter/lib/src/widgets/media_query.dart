@@ -304,10 +304,7 @@ class MediaQueryData {
           view.platformDispatcher.supportsShowingSystemContextMenu;
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
-    return platformData?.textScaler ??
-        (view.platformDispatcher.textScaleFactor == 1
-            ? TextScaler.noScaling
-            : _SystemTextScaler(view.platformDispatcher));
+    return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
   }
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -1969,23 +1966,35 @@ class _UnspecifiedTextScaler implements TextScaler {
   const _UnspecifiedTextScaler();
 
   @override
-  TextScaler clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) =>
+  Never clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) =>
       throw UnimplementedError();
-
   @override
-  double scale(double fontSize) => throw UnimplementedError();
-
+  Never scale(double fontSize) => throw UnimplementedError();
   @override
-  double get textScaleFactor => throw UnimplementedError();
+  Never get textScaleFactor => throw UnimplementedError();
 }
 
-class _SystemTextScaler extends TextScaler {
-  _SystemTextScaler(this.platformDispatcher) : textScaleFactor = platformDispatcher.textScaleFactor;
+/// A [TextScaler] that reflects the user's font scale preferences from the
+/// platform's accessibility settings.
+final class SystemTextScaler extends TextScaler {
+  SystemTextScaler._(this._platformDispatcher)
+    : textScaleFactor = _platformDispatcher.textScaleFactor;
 
-  final ui.PlatformDispatcher platformDispatcher;
+  final ui.PlatformDispatcher _platformDispatcher;
   @override
-  double scale(double fontSize) => platformDispatcher.scaleFontSize(fontSize);
+  double scale(double fontSize) => _platformDispatcher.scaleFontSize(fontSize);
 
+  /// A value that represents the current user preference for the scaling factor
+  /// for fonts.
+  ///
+  /// This numeric value is typically used to compare [SystemTextScaler]s. Two
+  /// [SystemTextScaler] instances with the same [textScaleFactor] are considered
+  /// equal as their [scale] methods produce the same output when given the same
+  /// input font size. However, [textScaleFactor] should not be used in arithmetic
+  /// operations.
+  // TODO(LongCatIsLooong): consider changing the type to Comparable<OpaqueWrapper>
+  // once  `MediaQueryData.textScaleFactor` is removed:
+  // https://github.com/flutter/flutter/issues/128825.
   @override
   final double textScaleFactor;
 
@@ -1997,7 +2006,7 @@ class _SystemTextScaler extends TextScaler {
     // The system's (potentially deprecated) text scale factor is used for
     // the equality check because the `scale` function's output monotonically
     // increases with the text scale factor.
-    return other is _SystemTextScaler && textScaleFactor == other.textScaleFactor;
+    return other is SystemTextScaler && textScaleFactor == other.textScaleFactor;
   }
 
   @override
