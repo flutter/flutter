@@ -247,14 +247,18 @@ Matcher isSameColorAs(Color color, {double threshold = colorEpsilon}) {
 }
 
 /// Asserts that the object is a [TextScaler] that reflects the user's font
-/// scale preferences, typically from the platform's accessibility settings.
+/// scale preferences from the platform's accessibility settings.
+///
+/// This matcher is useful for verifying the text scaling within a widget subtree
+/// respects the user accessibility preferences, and not accidentally being
+/// shadowed by a [MediaQuery] with a different type of [TextScaler].
 ///
 /// In widget tests, the value of the system font scale preference can be
 /// changed via [TestPlatformDispatcher.textScaleFactorTestValue].
 ///
 /// If `withScaleFactor` is specified and non-null, this matcher also asserts
 /// that the [TextScaler]'s' `textScaleFactor` equals `withScaleFactor`.
-Matcher isSystemTextScaler({ double? withScaleFactor }) {
+Matcher isSystemTextScaler({double? withScaleFactor}) {
   return _IsSystemTextScaler(withScaleFactor);
 }
 
@@ -1233,16 +1237,23 @@ class _IsSystemTextScaler extends Matcher {
       return failWithDescription(matchState, '${item.runtimeType} is not a system TextScaler');
     }
     final double actualTextScaleFactor = item.textScaleFactor;
-    if (expectedUserTextScaleFactor != null && expectedUserTextScaleFactor != actualTextScaleFactor) {
-      return failWithDescription(matchState, 'expecting a scale factor of $expectedUserTextScaleFactor, but got $actualTextScaleFactor');
+    if (expectedUserTextScaleFactor != null &&
+        expectedUserTextScaleFactor != actualTextScaleFactor) {
+      return failWithDescription(
+        matchState,
+        'expecting a scale factor of $expectedUserTextScaleFactor, but got $actualTextScaleFactor',
+      );
     }
     return true;
   }
 
   @override
   Description describe(Description description) {
-    final String scaleFactorExpectation = expectedUserTextScaleFactor == null ? '' : '(${expectedUserTextScaleFactor}x)';
-    return description.add('A TextScaler that reflects the font scale settings in the system user preference ($_expectedRuntimeType$scaleFactorExpectation)');
+    final String scaleFactorExpectation =
+        expectedUserTextScaleFactor == null ? '' : '(${expectedUserTextScaleFactor}x)';
+    return description.add(
+      'A TextScaler that reflects the font scale settings in the system user preference ($_expectedRuntimeType$scaleFactorExpectation)',
+    );
   }
 
   bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
@@ -1251,7 +1262,12 @@ class _IsSystemTextScaler extends Matcher {
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
     return mismatchDescription.add(matchState['failure'] as String);
   }
 }
