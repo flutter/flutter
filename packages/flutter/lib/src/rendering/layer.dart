@@ -1779,7 +1779,8 @@ class ClipRRectLayer extends ContainerLayer {
 /// layer to be skipped (directly replaced by its children). This can be helpful
 /// to track down the cause of performance problems.
 ///
-/// Hit tests are performed based on the bounding box of the RSuperellipse.
+/// Hit tests are performed based on the bounding box of the rounded
+/// superellipse.
 class ClipRSuperellipseLayer extends ContainerLayer {
   /// Creates a layer with a rounded-rectangular clip.
   ///
