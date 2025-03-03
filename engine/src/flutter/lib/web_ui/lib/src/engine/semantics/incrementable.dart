@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
@@ -36,7 +38,7 @@ class SemanticIncrementable extends SemanticRole {
 
     _element.addEventListener(
       'change',
-      createDomEventListener((_) {
+      createDomEventListener((DomEvent _) {
         if (_element.disabled!) {
           return;
         }

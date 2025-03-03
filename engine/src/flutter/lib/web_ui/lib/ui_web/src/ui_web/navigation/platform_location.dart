@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 
@@ -89,7 +91,10 @@ class BrowserPlatformLocation implements PlatformLocation {
 
   @visibleForTesting
   DomEventListener getOrCreateDomEventListener(EventListener fn) {
-    return _popStateListenersCache.putIfAbsent(fn, () => createDomEventListener(fn));
+    final DomEventListener jsListener = createDomEventListener((DomEvent event) {
+      fn(event);
+    });
+    return _popStateListenersCache.putIfAbsent(fn, () => jsListener);
   }
 
   @override

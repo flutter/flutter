@@ -39,7 +39,7 @@ class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
   }
 
   static final SkwasmFinalizationRegistry<RawImage> _registry =
-      SkwasmFinalizationRegistry<RawImage>(imageDispose);
+      SkwasmFinalizationRegistry<RawImage>((ImageHandle handle) => imageDispose(handle));
 
   @override
   void dispose() {

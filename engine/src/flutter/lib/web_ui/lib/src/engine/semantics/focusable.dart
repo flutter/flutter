@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
@@ -168,8 +170,12 @@ class AccessibilityFocusManager {
     final _FocusTarget newTarget = (
       semanticsNodeId: semanticsNodeId,
       element: element,
-      domFocusListener: createDomEventListener((_) => _didReceiveDomFocus()),
-      domBlurListener: createDomEventListener((_) => _didReceiveDomBlur()),
+      domFocusListener: createDomEventListener((DomEvent _) {
+        _didReceiveDomFocus();
+      }),
+      domBlurListener: createDomEventListener((DomEvent _) {
+        _didReceiveDomBlur();
+      }),
     );
     _target = newTarget;
     _lastEvent = AccessibilityFocusManagerEvent.nothing;
