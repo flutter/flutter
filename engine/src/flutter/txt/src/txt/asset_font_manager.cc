@@ -44,8 +44,9 @@ sk_sp<SkTypeface> AssetFontManager::onMatchFamilyStyle(
     const SkFontStyle& style) const {
   sk_sp<SkFontStyleSet> font_style_set =
       font_provider_->MatchFamily(std::string(familyName));
-  if (font_style_set == nullptr)
+  if (font_style_set == nullptr) {
     return nullptr;
+  }
   return font_style_set->matchStyle(style);
 }
 

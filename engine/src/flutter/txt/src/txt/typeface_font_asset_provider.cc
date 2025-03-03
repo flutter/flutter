@@ -43,12 +43,12 @@ void TypefaceFontAssetProvider::RegisterTypeface(sk_sp<SkTypeface> typeface) {
   typeface->getFamilyName(&sk_family_name);
 
   std::string family_name(sk_family_name.c_str(), sk_family_name.size());
-  RegisterTypeface(std::move(typeface), std::move(family_name));
+  RegisterTypeface(std::move(typeface), family_name);
 }
 
 void TypefaceFontAssetProvider::RegisterTypeface(
     sk_sp<SkTypeface> typeface,
-    std::string family_name_alias) {
+    const std::string& family_name_alias) {
   if (family_name_alias.empty()) {
     return;
   }

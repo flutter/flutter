@@ -8,13 +8,14 @@
 
 namespace txt {
 
-void FontFeatures::SetFeature(std::string tag, int value) {
+void FontFeatures::SetFeature(const std::string& tag, int value) {
   feature_map_[tag] = value;
 }
 
 std::string FontFeatures::GetFeatureSettings() const {
-  if (feature_map_.empty())
+  if (feature_map_.empty()) {
     return "";
+  }
 
   std::ostringstream stream;
 
@@ -32,7 +33,7 @@ const std::map<std::string, int>& FontFeatures::GetFontFeatures() const {
   return feature_map_;
 }
 
-void FontVariations::SetAxisValue(std::string tag, float value) {
+void FontVariations::SetAxisValue(const std::string& tag, float value) {
   axis_map_[tag] = value;
 }
 

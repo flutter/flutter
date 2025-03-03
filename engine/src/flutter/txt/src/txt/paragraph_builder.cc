@@ -18,7 +18,7 @@ namespace txt {
 /// @param[in]  impeller_enabled  Whether Impeller is enabled in the runtime.
 std::unique_ptr<ParagraphBuilder> ParagraphBuilder::CreateSkiaBuilder(
     const ParagraphStyle& style,
-    std::shared_ptr<FontCollection> font_collection,
+    const std::shared_ptr<FontCollection>& font_collection,
     const bool impeller_enabled) {
   return std::make_unique<ParagraphBuilderSkia>(style, font_collection,
                                                 impeller_enabled);

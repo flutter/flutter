@@ -35,7 +35,7 @@ SkFontStyle MakeSkFontStyle(txt::FontWeight font_weight,
 
 ParagraphBuilderSkia::ParagraphBuilderSkia(
     const ParagraphStyle& style,
-    std::shared_ptr<FontCollection> font_collection,
+    const std::shared_ptr<FontCollection>& font_collection,
     const bool impeller_enabled)
     : base_style_(style.GetTextStyle()), impeller_enabled_(impeller_enabled) {
   builder_ = skt::ParagraphBuilder::make(

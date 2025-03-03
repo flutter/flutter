@@ -15,7 +15,7 @@ namespace txt {
 // selects glyphs.
 class FontFeatures {
  public:
-  void SetFeature(std::string tag, int value);
+  void SetFeature(const std::string& tag, int value);
 
   std::string GetFeatureSettings() const;
 
@@ -29,7 +29,7 @@ class FontFeatures {
 // attributes of variable fonts.
 class FontVariations {
  public:
-  void SetAxisValue(std::string tag, float value);
+  void SetAxisValue(const std::string& tag, float value);
 
   const std::map<std::string, float>& GetAxisValues() const;
 

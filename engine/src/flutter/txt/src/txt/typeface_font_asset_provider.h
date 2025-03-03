@@ -49,7 +49,7 @@ class TypefaceFontAssetProvider : public FontAssetProvider {
   void RegisterTypeface(sk_sp<SkTypeface> typeface);
 
   void RegisterTypeface(sk_sp<SkTypeface> typeface,
-                        std::string family_name_alias);
+                        const std::string& family_name_alias);
 
   // |FontAssetProvider|
   size_t GetFamilyCount() const override;

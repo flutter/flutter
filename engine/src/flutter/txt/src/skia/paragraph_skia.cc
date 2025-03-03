@@ -306,6 +306,7 @@ std::vector<Paragraph::TextBox> ParagraphSkia::GetRectsForRange(
       static_cast<skt::RectWidthStyle>(rect_width_style));
 
   std::vector<Paragraph::TextBox> boxes;
+  boxes.reserve(skia_boxes.size());
   for (const skt::TextBox& skia_box : skia_boxes) {
     boxes.emplace_back(skia_box.rect,
                        static_cast<TextDirection>(skia_box.direction));
@@ -318,6 +319,7 @@ std::vector<Paragraph::TextBox> ParagraphSkia::GetRectsForPlaceholders() {
   std::vector<skt::TextBox> skia_boxes = paragraph_->getRectsForPlaceholders();
 
   std::vector<Paragraph::TextBox> boxes;
+  boxes.reserve(skia_boxes.size());
   for (const skt::TextBox& skia_box : skia_boxes) {
     boxes.emplace_back(skia_box.rect,
                        static_cast<TextDirection>(skia_box.direction));

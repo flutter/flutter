@@ -11,7 +11,7 @@ TestFontManager::TestFontManager(
     std::unique_ptr<FontAssetProvider> font_provider,
     std::vector<std::string> test_font_family_names)
     : AssetFontManager(std::move(font_provider)),
-      test_font_family_names_(test_font_family_names) {}
+      test_font_family_names_(std::move(test_font_family_names)) {}
 
 TestFontManager::~TestFontManager() = default;
 

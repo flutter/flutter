@@ -20,7 +20,7 @@ namespace txt {
 class ParagraphBuilderSkia : public ParagraphBuilder {
  public:
   ParagraphBuilderSkia(const ParagraphStyle& style,
-                       std::shared_ptr<FontCollection> font_collection,
+                       const std::shared_ptr<FontCollection>& font_collection,
                        const bool impeller_enabled);
 
   virtual ~ParagraphBuilderSkia();

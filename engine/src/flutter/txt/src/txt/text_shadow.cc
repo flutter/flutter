@@ -12,12 +12,15 @@ TextShadow::TextShadow(SkColor color, SkPoint offset, double blur_sigma)
     : color(color), offset(offset), blur_sigma(blur_sigma) {}
 
 bool TextShadow::operator==(const TextShadow& other) const {
-  if (color != other.color)
+  if (color != other.color) {
     return false;
-  if (offset != other.offset)
+  }
+  if (offset != other.offset) {
     return false;
-  if (blur_sigma != other.blur_sigma)
+  }
+  if (blur_sigma != other.blur_sigma) {
     return false;
+  }
 
   return true;
 }
@@ -27,10 +30,12 @@ bool TextShadow::operator!=(const TextShadow& other) const {
 }
 
 bool TextShadow::hasShadow() const {
-  if (!offset.isZero())
+  if (!offset.isZero()) {
     return true;
-  if (blur_sigma > 0.5)
+  }
+  if (blur_sigma > 0.5) {
     return true;
+  }
 
   return false;
 }
