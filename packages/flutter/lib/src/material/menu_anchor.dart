@@ -11,6 +11,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -375,7 +376,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
         childFocusNode: widget.childFocusNode,
         overlayBuilder: _buildOverlay,
         builder: widget.builder,
-        child: widget.child,
+        child: Semantics(expanded: _menuController.isOpen, child: widget.child),
       ),
     );
 
@@ -940,7 +941,9 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       child = MouseRegion(onHover: _handlePointerHover, onExit: _handlePointerExit, child: child);
     }
 
-    return MergeSemantics(child: child);
+    return MergeSemantics(
+      child: Semantics(role: SemanticsRole.menuItem, enabled: widget.enabled, child: child),
+    );
   }
 
   void _handleFocusChange() {
@@ -1827,7 +1830,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 
           child = MergeSemantics(
             child: Semantics(
+              role: SemanticsRole.menuItem,
               expanded: _enabled && controller.isOpen,
+              enabled: _enabled,
               child: TextButton(
                 style: mergedStyle,
                 focusNode: _buttonFocusNode,
@@ -3261,7 +3266,10 @@ class _MenuPanelState extends State<_MenuPanel> {
       );
     }
 
-    return ConstrainedBox(constraints: effectiveConstraints, child: menuPanel);
+    return Semantics(
+      role: widget.orientation == Axis.vertical ? SemanticsRole.menu : SemanticsRole.menuBar,
+      child: ConstrainedBox(constraints: effectiveConstraints, child: menuPanel),
+    );
   }
 
   Widget _intrinsicCrossSize({required Widget child}) {

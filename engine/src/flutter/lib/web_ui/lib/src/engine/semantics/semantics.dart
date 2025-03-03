@@ -29,6 +29,7 @@ import 'incrementable.dart';
 import 'label_and_value.dart';
 import 'link.dart';
 import 'live_region.dart';
+import 'menus.dart';
 import 'platform_view.dart';
 import 'route.dart';
 import 'scrollable.dart';
@@ -444,6 +445,16 @@ enum EngineSemanticsRole {
   ///
   /// Provides a label or a value.
   generic,
+
+  /// A visible list of items or a widget that can be made to open and close.
+  menu,
+
+  /// A presentation of [menu] that usually remains visible and is usually
+  /// presented horizontally.
+  menuBar,
+
+  /// an option in a set of choices contained by a [menu] or [menubar].
+  menuItem,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -1356,6 +1367,9 @@ class SemanticsObject {
   /// This field is only meaningful if [hasEnabledState] is true.
   bool get isEnabled => hasFlag(ui.SemanticsFlag.isEnabled);
 
+  /// Whether this object can be in one of "expanded" or "collapsed" state.
+  bool get hasExpandedState => hasFlag(ui.SemanticsFlag.hasExpandedState);
+
   /// Whether this object represents a vertically scrollable area.
   bool get isVerticalScrollContainer =>
       hasAction(ui.SemanticsAction.scrollDown) || hasAction(ui.SemanticsAction.scrollUp);
@@ -1787,15 +1801,18 @@ class SemanticsObject {
         return EngineSemanticsRole.columnHeader;
       case ui.SemanticsRole.radioGroup:
         return EngineSemanticsRole.radioGroup;
+      case ui.SemanticsRole.menu:
+        return EngineSemanticsRole.menu;
+      case ui.SemanticsRole.menuBar:
+        return EngineSemanticsRole.menuBar;
+      case ui.SemanticsRole.menuItem:
+        return EngineSemanticsRole.menuItem;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.searchBox:
       case ui.SemanticsRole.dragHandle:
       case ui.SemanticsRole.spinButton:
       case ui.SemanticsRole.comboBox:
-      case ui.SemanticsRole.menuBar:
-      case ui.SemanticsRole.menu:
-      case ui.SemanticsRole.menuItem:
       case ui.SemanticsRole.list:
       case ui.SemanticsRole.listItem:
       case ui.SemanticsRole.form:
@@ -1859,6 +1876,9 @@ class SemanticsObject {
       EngineSemanticsRole.cell => SemanticCell(this),
       EngineSemanticsRole.row => SemanticRow(this),
       EngineSemanticsRole.columnHeader => SemanticColumnHeader(this),
+      EngineSemanticsRole.menu => SemanticMenu(this),
+      EngineSemanticsRole.menuBar => SemanticMenuBar(this),
+      EngineSemanticsRole.menuItem => SemanticMenuItem(this),
       EngineSemanticsRole.generic => GenericRole(this),
     };
   }

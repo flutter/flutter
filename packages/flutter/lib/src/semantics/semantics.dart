@@ -114,6 +114,9 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.cell => _semanticsCell,
     SemanticsRole.columnHeader => _semanticsColumnHeader,
     SemanticsRole.radioGroup => _semanticsRadioGroup,
+    SemanticsRole.menu => _semanticsMenu,
+    SemanticsRole.menuBar => _semanticsMenuBar,
+    SemanticsRole.menuItem => _noCheckRequired,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.row => _unimplemented,
@@ -121,9 +124,6 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.dragHandle => _unimplemented,
     SemanticsRole.spinButton => _unimplemented,
     SemanticsRole.comboBox => _unimplemented,
-    SemanticsRole.menuBar => _unimplemented,
-    SemanticsRole.menu => _unimplemented,
-    SemanticsRole.menuItem => _unimplemented,
     SemanticsRole.list => _unimplemented,
     SemanticsRole.listItem => _unimplemented,
     SemanticsRole.form => _unimplemented,
@@ -210,6 +210,22 @@ sealed class _DebugSemanticsRoleChecks {
 
     node.visitChildren(validateRadioGroupChildren);
     return error;
+  }
+
+  static FlutterError? _semanticsMenu(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a menu cannot be empty');
+    }
+
+    return null;
+  }
+
+  static FlutterError? _semanticsMenuBar(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a menu bar cannot be empty');
+    }
+
+    return null;
   }
 }
 
