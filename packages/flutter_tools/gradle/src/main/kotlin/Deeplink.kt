@@ -5,7 +5,12 @@
 package com.flutter.gradle
 
 // TODO(gmackall): Identify which of these can be val instead of var.
-class Deeplink(var scheme: String?, var host: String?, var path: String?, var intentFilterCheck: IntentFilterCheck?) {
+class Deeplink(
+    var scheme: String?,
+    var host: String?,
+    var path: String?,
+    var intentFilterCheck: IntentFilterCheck?
+) {
     // TODO(gmackall): This behavior was kept identical to the original Groovy behavior as part of
     // the Groovy->Kotlin conversion, but should be changed once the conversion is complete.
     override fun equals(other: Any?): Boolean {
@@ -21,7 +26,5 @@ class Deeplink(var scheme: String?, var host: String?, var path: String?, var in
             path == otherAsDeeplink.path
     }
 
-    override fun hashCode(): Int {
-        return scheme.hashCode() + host.hashCode() + path.hashCode()
-    }
+    override fun hashCode(): Int = scheme.hashCode() + host.hashCode() + path.hashCode()
 }
