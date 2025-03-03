@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/navigator_utils.dart';
@@ -11,6 +13,8 @@ import '../widgets/navigator_utils.dart';
 const double _kTopGapRatio = 0.08;
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   testWidgets('Sheet route does not cover the whole screen', (WidgetTester tester) async {
     final GlobalKey scaffoldKey = GlobalKey();
 
@@ -1008,4 +1012,60 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
+
+  testWidgets(
+    'SystemChrome.setSystemUIOverlayStyle is set correctly based on platform',
+    (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      Future<void> testPlatform(TargetPlatform platform, SystemUiOverlayStyle expectedStyle) async {
+        debugDefaultTargetPlatformOverride = platform;
+
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: CupertinoPageScaffold(
+              key: scaffoldKey,
+              child: Center(
+                child: CupertinoButton(
+                  child: const Text('Show Cupertino Dialog'),
+                  onPressed: () {
+                    showCupertinoSheet<void>(
+                      context: scaffoldKey.currentContext!,
+                      pageBuilder:
+                          (BuildContext context) => CupertinoPageScaffold(
+                            child: Center(
+                              child: CupertinoButton(
+                                child: const Text('Close Dialog'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ),
+                          ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Show Cupertino Dialog'));
+        await tester.pumpAndSettle();
+
+        expect(SystemChrome.latestStyle, equals(expectedStyle));
+
+        await tester.tap(find.text('Close Dialog'));
+        await tester.pumpAndSettle();
+      }
+
+      await testPlatform(TargetPlatform.iOS, SystemUiOverlayStyle.light);
+      await testPlatform(TargetPlatform.android, SystemUiOverlayStyle.dark);
+
+      debugDefaultTargetPlatformOverride = null;
+    },
+    variant: TargetPlatformVariant.mobile(),
+  );
 }

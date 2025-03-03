@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -234,7 +235,9 @@ class CupertinoSheetTransition extends StatefulWidget {
     final Animation<double> scaleAnimation = curvedAnimation.drive(_kScaleTween);
     curvedAnimation.dispose();
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+    }
 
     final bool isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
     final Color overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
