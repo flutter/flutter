@@ -138,6 +138,9 @@ void runSemanticsTests() {
   group('controlsNodes', () {
     _testControlsNodes();
   });
+  group('menu', () {
+    _testMenus();
+  });
   group('requirable', () {
     _testRequirable();
   });
@@ -4089,6 +4092,73 @@ void _testTables() {
     final SemanticsObject object = pumpSemantics();
     expect(object.semanticRole?.kind, EngineSemanticsRole.columnHeader);
     expect(object.element.getAttribute('role'), 'columnheader');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testMenus() {
+  test('nodes with menu role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menu,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menu);
+    expect(object.element.getAttribute('role'), 'menu');
+  });
+
+  test('nodes with menuitem role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuItem,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuItem);
+    expect(object.element.getAttribute('role'), 'menuitem');
+  });
+
+  test('nodes with menubar role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuBar,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuBar);
+    expect(object.element.getAttribute('role'), 'menubar');
   });
 
   semantics().semanticsEnabled = false;
