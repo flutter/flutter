@@ -7,7 +7,6 @@
 library;
 
 import 'dart:collection';
-import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -439,8 +438,7 @@ class _TableElement extends RenderObjectElement {
 /// as the [child].
 class TableCell extends ParentDataWidget<TableCellParentData> {
   /// Creates a widget that controls how a child of a [Table] is aligned.
-  TableCell({super.key, this.verticalAlignment, required Widget child})
-    : super(child: Semantics(role: SemanticsRole.cell, child: child));
+  const TableCell({super.key, this.verticalAlignment, required super.child});
 
   /// How this cell is aligned vertically.
   final TableCellVerticalAlignment? verticalAlignment;
