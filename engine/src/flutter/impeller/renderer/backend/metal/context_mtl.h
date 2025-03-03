@@ -81,8 +81,8 @@ class ContextMTL final : public Context,
       id<MTLCommandQueue> command_queue,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
-      bool has_multiple_devices,
-      const std::string& label);
+      const std::string& label,
+      std::optional<bool> has_multiple_devices = std::nullopt);
 
   // |Context|
   ~ContextMTL() override;

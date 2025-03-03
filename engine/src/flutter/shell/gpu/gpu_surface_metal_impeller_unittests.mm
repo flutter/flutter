@@ -140,7 +140,7 @@ TEST(GPUSurfaceMetalImpeller, CreatesMultipleDevices) {
   auto device = ::MTLCreateSystemDefaultDevice();
   auto command_queue = device.newCommandQueue;
   auto context = impeller::ContextMTL::Create(device, command_queue, shader_mappings, sync_switch,
-                                              /*has_multiple_devices=*/true, "Impeller Library");
+                                              "Impeller Library", /*has_multiple_devices=*/true);
 
   // This test runs on arm macs which should return true here.
   EXPECT_FALSE(context->GetCapabilities()->SupportsFramebufferFetch());

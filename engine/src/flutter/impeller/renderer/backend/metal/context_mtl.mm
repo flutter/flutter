@@ -292,13 +292,14 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
     id<MTLCommandQueue> command_queue,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
-    bool has_multiple_devices,
-    const std::string& library_label) {
-  auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      device, command_queue,
-      MTLShaderLibraryFromFileData(device, shader_libraries_data,
-                                   library_label),
-      has_multiple_devices, std::move(is_gpu_disabled_sync_switch)));
+    const std::string& library_label,
+    std::optional<bool> has_multiple_devices) {
+  auto context = std::shared_ptr<ContextMTL>(
+      new ContextMTL(device, command_queue,
+                     MTLShaderLibraryFromFileData(device, shader_libraries_data,
+                                                  library_label),
+                     has_multiple_devices.value_or(HasMultipleDevices()),
+                     std::move(is_gpu_disabled_sync_switch)));
   if (!context->IsValid()) {
     FML_LOG(ERROR) << "Could not create Metal context.";
     return nullptr;
