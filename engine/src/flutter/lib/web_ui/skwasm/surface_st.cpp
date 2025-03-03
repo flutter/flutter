@@ -4,10 +4,12 @@
 
 #include "surface.h"
 
+#include "skwasm_support.h"
+
 using namespace Skwasm;
 
 Surface::Surface() : _thread(0) {
-  init();
+  skwasm_connectThread(0);
 }
 
 SKWASM_EXPORT bool skwasm_isMultiThreaded() {

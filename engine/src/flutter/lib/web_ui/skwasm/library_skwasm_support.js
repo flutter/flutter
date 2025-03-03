@@ -8,6 +8,8 @@
 mergeInto(LibraryManager.library, {
   $skwasm_support_setup__postset: 'skwasm_support_setup();',
   $skwasm_support_setup: function() {
+    console.log("skwasmSingleThreaded: " + Module["skwasmSingleThreaded"]);
+
     const handleToCanvasMap = new Map();
     const associatedObjectsMap = new Map();
 
@@ -75,18 +77,12 @@ mergeInto(LibraryManager.library, {
               data.callbackId,
             );
             return;
-          case 'initSurface':
-            _surface_init(data.surface);
-            return;
           default:
             console.warn(`unrecognized skwasm message: ${skwasmMessage}`);
         }
       };
       skwasm_registerMessageListener(threadId, eventListener);
     };
-    if (typeof window === 'undefined') {
-      _skwasm_connectThread(0);
-    }
     _skwasm_dispatchRenderPictures = function(threadId, surfaceHandle, pictures, pictureCount, callbackId) {
       skwasm_postMessage({
         skwasmMessage: 'renderPictures',

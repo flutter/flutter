@@ -10,10 +10,14 @@
 using namespace Skwasm;
 
 Surface::Surface() {
+  printf("Creating surface: %p\n", this);
   assert(emscripten_is_main_browser_thread());
 
-  _thread = emscripten_malloc_wasm_worker(1024);
-  skwasm_initThread(_thread, this);
+  _thread = emscripten_malloc_wasm_worker(65536);
+  emscripten_wasm_worker_post_function_v(_thread, []() {
+    // Listen to the main thread from the worker
+    skwasm_connectThread(0);
+  });
 
   // Listen to messages from the worker
   skwasm_connectThread(_thread);

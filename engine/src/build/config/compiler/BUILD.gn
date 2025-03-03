@@ -278,8 +278,8 @@ config("compiler") {
 
   if (is_wasm) {
     if (wasm_use_pthreads) {
-      cflags += [ "-sWASM_WORKERS=2" ]
-      ldflags += [ "-sWASM_WORKERS=2" ]
+      cflags += [ "-sWASM_WORKERS=1" ]
+      ldflags += [ "-sWASM_WORKERS=1" ]
     } if (wasm_shared_memory) {
       cflags += [ "-sSHARED_MEMORY=1" ]
       ldflags += [ "-sSHARED_MEMORY=1" ]

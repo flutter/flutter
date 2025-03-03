@@ -16,11 +16,13 @@ using namespace Skwasm;
 
 // Worker thread only
 void Surface::dispose() {
+  printf("destroying surface: %p\n", this);
   delete this;
 }
 
 // Main thread only
 uint32_t Surface::renderPictures(SkPicture** pictures, int count) {
+  printf("kicking off render pictures on surface: %p\n", this);
   assert(emscripten_is_main_browser_thread());
   uint32_t callbackId = ++_currentCallbackId;
   std::unique_ptr<sk_sp<SkPicture>[]> picturePointers =
@@ -59,15 +61,7 @@ void Surface::setCallbackHandler(CallbackHandler* callbackHandler) {
 }
 
 // Worker thread only
-void Surface::_runWorker() {
-  init();
-  emscripten_exit_with_live_runtime();
-}
-
-// Worker thread only
-void Surface::init() {
-  // Listen to messages from the main thread
-  skwasm_connectThread(0);
+void Surface::_init() {
   _glContext = skwasm_createOffscreenCanvas(256, 256);
   if (!_glContext) {
     printf("Failed to create context!\n");
@@ -78,6 +72,7 @@ void Surface::init() {
   emscripten_webgl_enable_extension(_glContext, "WEBGL_debug_renderer_info");
 
   _grContext = GrDirectContexts::MakeGL(GrGLInterfaces::MakeWebGL());
+  printf("grContext: %p\n", _grContext.get());
 
   // WebGL should already be clearing the color and stencil buffers, but do it
   // again here to ensure Skia receives them in the expected state.
@@ -95,6 +90,8 @@ void Surface::init() {
 
   emscripten_glGetIntegerv(GL_SAMPLES, &_sampleCount);
   emscripten_glGetIntegerv(GL_STENCIL_BITS, &_stencil);
+
+  _isInitialized = true;
 }
 
 // Worker thread only
@@ -122,6 +119,11 @@ void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
                                      int pictureCount,
                                      uint32_t callbackId,
                                      double rasterStart) {
+  printf("rendering picures on worker on surface: %p\n", this);
+  if (!_isInitialized) {
+    _init();
+  }
+
   // This is populated by the `captureImageBitmap` call the first time it is
   // passed in.
   SkwasmObject imageBitmapArray = __builtin_wasm_ref_null_extern();
@@ -136,7 +138,9 @@ void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
     makeCurrent(_glContext);
     auto canvas = _surface->getCanvas();
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
+    printf("grcontext before draw: %p\n", _grContext.get());
     canvas->drawPicture(picture, &matrix, nullptr);
+    printf("flushing grcontext: %p\n", _grContext.get());
     _grContext->flush(_surface.get());
     imageBitmapArray = skwasm_captureImageBitmap(_glContext, imageBitmapArray);
   }
@@ -147,6 +151,10 @@ void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
 void Surface::rasterizeImageOnWorker(SkImage* image,
                                      ImageByteFormat format,
                                      uint32_t callbackId) {
+  if (!_isInitialized) {
+    _init();
+  }
+
   // We handle PNG encoding with browser APIs so that we can omit libpng from
   // skia to save binary size.
   assert(format != ImageByteFormat::png);
@@ -215,10 +223,6 @@ SkwasmObject TextureSourceWrapper::getTextureSource() {
 
 SKWASM_EXPORT Surface* surface_create() {
   return new Surface();
-}
-
-SKWASM_EXPORT void surface_init(Surface *surface) {
-  surface->init();
 }
 
 SKWASM_EXPORT unsigned long surface_getThreadId(Surface* surface) {

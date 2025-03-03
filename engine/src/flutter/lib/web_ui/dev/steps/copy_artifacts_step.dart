@@ -253,13 +253,14 @@ class CopyArtifactsStep implements PipelineStep {
 
     for (final String filename in <String>[
       '$libraryName.js',
+      '$libraryName.ww.js',
       '$libraryName.wasm',
       '$libraryName.wasm.map',
     ]) {
       final io.File sourceFile = io.File(pathlib.join(sourcePath, filename));
       final io.File targetFile = io.File(pathlib.join(targetDirectoryPath, filename));
       if (!sourceFile.existsSync()) {
-        if (filename.endsWith('.map')) {
+        if (filename.endsWith('.map') || filename.endsWith('ww.js')) {
           // Sourcemaps are only generated under certain build conditions, so
           // they are optional.
           continue;
