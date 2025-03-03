@@ -3208,4 +3208,132 @@ void main() {
     expect(lastOptions, altEleOptions);
     expect(find.byKey(optionsKey), findsOneWidget);
   });
+
+  testWidgets('Options view is constrained by MediaQuery bottom padding and view insets', (
+    WidgetTester tester,
+  ) async {
+    const double padding = 50.0;
+    const double bottomInset = 70.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              const SizedBox(height: 200),
+              RawAutocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['abcd'],
+                fieldViewBuilder: (
+                  BuildContext context,
+                  TextEditingController textEditingController,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return TextField(
+                    controller: textEditingController,
+                    focusNode: focusNode,
+                    onSubmitted: (String value) {
+                      onFieldSubmitted();
+                    },
+                  );
+                },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) => const Placeholder(),
+              ),
+              const SizedBox(height: 200),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'a');
+    await tester.pump();
+
+    final double initialSize = tester.getSize(find.byType(Placeholder)).height;
+
+    tester.view.padding = const FakeViewPadding(bottom: padding);
+    addTearDown(tester.view.reset);
+    await tester.pump();
+
+    await tester.tap(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'ab');
+    await tester.pump();
+
+    // The options view has shrunk to the available height.
+    expect(tester.getSize(find.byType(Placeholder)).height, initialSize - (padding / 3));
+
+    tester.view.viewInsets = const FakeViewPadding(bottom: bottomInset);
+    await tester.pump();
+
+    expect(tester.view.padding.bottom, padding);
+
+    await tester.tap(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'abc');
+    await tester.pump();
+
+    // The options view has shrunk to the available height.
+    expect(tester.getSize(find.byType(Placeholder)).height, initialSize - (bottomInset / 3));
+  });
+
+  testWidgets('Options view is constrained by MediaQuery top padding', (WidgetTester tester) async {
+    const double padding = 100.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              const SizedBox(height: 200),
+              RawAutocomplete<String>(
+                optionsViewOpenDirection: OptionsViewOpenDirection.up,
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['abcd'],
+                fieldViewBuilder: (
+                  BuildContext context,
+                  TextEditingController textEditingController,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return TextField(
+                    controller: textEditingController,
+                    focusNode: focusNode,
+                    onSubmitted: (String value) {
+                      onFieldSubmitted();
+                    },
+                  );
+                },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) => const Placeholder(),
+              ),
+              const SizedBox(height: 200),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'a');
+    await tester.pump();
+
+    final double initialSize = tester.getSize(find.byType(Placeholder)).height;
+
+    tester.view.padding = const FakeViewPadding(top: padding);
+    addTearDown(tester.view.reset);
+    await tester.pump();
+
+    await tester.tap(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'ab');
+    await tester.pump();
+
+    // The options view has shrunk to the available height.
+    expect(tester.getSize(find.byType(Placeholder)).height, initialSize - (padding / 3));
+  });
 }
