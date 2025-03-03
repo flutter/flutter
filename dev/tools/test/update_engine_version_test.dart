@@ -30,11 +30,13 @@ void main() {
   // linux: https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-linux
   //
   // Then, set this variable to true:
-  const bool usePowershellOnPosix = false;
+  final bool usePowershellOnPosix = () {
+    // Intentionally not a const so that linting doesn't go wild across the test.
+    return false;
+  }();
 
   const FileSystem localFs = LocalFileSystem();
   final _FlutterRootUnderTest flutterRoot = _FlutterRootUnderTest.findWithin(
-    // ignore: avoid_redundant_argument_values
     forcePowershell: usePowershellOnPosix,
   );
 
@@ -77,7 +79,6 @@ void main() {
     tmpDir = localFs.systemTempDirectory.createTempSync('update_engine_version_test.');
     testRoot = _FlutterRootUnderTest.fromPath(
       tmpDir.childDirectory('flutter').path,
-      // ignore: avoid_redundant_argument_values
       forcePowershell: usePowershellOnPosix,
     );
 
@@ -172,11 +173,9 @@ void main() {
     if (const LocalPlatform().isWindows) {
       executable = 'powershell';
       args = <String>[testRoot.binInternalUpdateEngineVersion.path];
-      // ignore: dead_code
     } else if (usePowershellOnPosix) {
       executable = 'pwsh';
       args = <String>[testRoot.binInternalUpdateEngineVersion.path];
-      // ignore: dead_code
     } else {
       executable = testRoot.binInternalUpdateEngineVersion.path;
       args = <String>[];
