@@ -48,6 +48,9 @@ abstract class FeatureFlags {
   /// Whether native assets compilation and bundling is enabled.
   bool get isNativeAssetsEnabled => false;
 
+  /// Whether dart data assets building and bundling is enabled.
+  bool get isDartDataAssetsEnabled => false;
+
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
@@ -72,6 +75,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterCustomDevicesFeature,
   cliAnimation,
   nativeAssets,
+  dartDataAssets,
   swiftPackageManager,
   explicitPackageDependencies,
 ];
@@ -152,6 +156,14 @@ const Feature nativeAssets = Feature(
   name: 'native assets compilation and bundling',
   configSetting: 'enable-native-assets',
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
+  master: FeatureChannelSetting(available: true),
+);
+
+/// Enable dart data assets building and bundling.
+const Feature dartDataAssets = Feature(
+  name: 'dart data assets building and bundling',
+  configSetting: 'enable-dart-data-assets',
+  environmentOverride: 'FLUTTER_DART_DATA_ASSETS',
   master: FeatureChannelSetting(available: true),
 );
 
