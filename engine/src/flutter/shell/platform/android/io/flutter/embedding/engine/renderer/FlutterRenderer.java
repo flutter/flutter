@@ -971,6 +971,11 @@ public class FlutterRenderer implements TextureRegistry {
       }
       return r;
     }
+
+    @VisibleForTesting
+    public int pendingDequeuedImages() {
+      return lastDequeuedImage.size();
+    }
   }
 
   @Keep
