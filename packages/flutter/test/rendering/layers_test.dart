@@ -745,7 +745,7 @@ void main() {
 
     const Rect bounds = Rect.fromLTRB(10, 10, 20, 20);
     final RRect rrBounds = RRect.fromRectXY(bounds, 2, 2);
-    final RRect rseBounds = RSuperellipse.fromRectXY(bounds, 2, 2);
+    final RSuperellipse rseBounds = RSuperellipse.fromRectXY(bounds, 2, 2);
     layer = ClipRectLayer(clipRect: bounds);
     expect(layer.describeClipBounds(), bounds);
 

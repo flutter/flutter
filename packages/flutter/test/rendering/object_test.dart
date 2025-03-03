@@ -273,7 +273,7 @@ void main() {
       Offset offset,
       Layer? oldLayer,
     ) {
-      return context.pushClipRRect(
+      return context.pushClipRSuperellipse(
         true,
         offset,
         Rect.zero,
