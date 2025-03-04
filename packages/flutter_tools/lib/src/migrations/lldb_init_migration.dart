@@ -74,20 +74,28 @@ class LLDBInitMigration extends ProjectMigrator {
     if (schemeInfo.schemeContent.contains(initPath)) {
       return true;
     }
+
+    // If the scheme is using a LLDB Init File that is not flutter_lldbinit,
+    // print a warning to either remove their LLDB Init file or append
+    // flutter_lldbinit to their existing one. This warning will continue to
+    // show even if they add flutter_lldbinit to their lldb init file.
+    if (schemeInfo.schemeContent.contains('customLLDBInitFile') && _buildInfo.isDebug) {
+      logger.printWarning(
+        'Running Flutter in debug mode on new iOS versions requires a LLDB '
+        'Init File, but the scheme already has one set. To ensure debug '
+        'mode works, please complete one of the following:\n'
+        '  * Remove the LLDB Init File from the scheme ${schemeInfo.schemeName}\n'
+        '  * Append the following to your custom LLDB Init File:\n'
+        '      `command source ${_xcodeProject.lldbInitFile.absolute.path}`',
+      );
+      return true;
+    }
     return false;
   }
 
   void _migrateScheme(SchemeInfo schemeInfo) {
     final File schemeFile = schemeInfo.schemeFile;
     final String schemeContent = schemeInfo.schemeContent;
-
-    if (schemeContent.contains('customLLDBInitFile')) {
-      throw Exception(
-        'Running Flutter in debug mode on new iOS versions requires a LLDB '
-        'Init File, but the scheme already has one set. Please remove the LLDB '
-        'Init File for the scheme ${schemeInfo.schemeName}.',
-      );
-    }
 
     final String newScheme = schemeContent.replaceAll(
       'selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"',

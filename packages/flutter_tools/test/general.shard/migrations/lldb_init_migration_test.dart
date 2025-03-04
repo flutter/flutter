@@ -141,7 +141,7 @@ void main() {
       expect(testLogger.errorText, isEmpty);
     });
 
-    testWithoutContext('throws error if customLLDBInitFile already exists', () async {
+    testWithoutContext('print warning if customLLDBInitFile already exists', () async {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
       final BufferLogger testLogger = BufferLogger.test();
       final FakeXcodeProject project = FakeXcodeProject(
@@ -161,12 +161,12 @@ void main() {
       );
       await migration.migrate();
       expect(
-        testLogger.errorText,
+        testLogger.warningText,
         contains('Running Flutter in debug mode on new iOS versions requires a LLDB Init File'),
       );
     });
 
-    testWithoutContext('throws error if LaunchAction is missing', () async {
+    testWithoutContext('prints error if LaunchAction is missing', () async {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
       final BufferLogger testLogger = BufferLogger.test();
       final FakeXcodeProject project = FakeXcodeProject(
@@ -186,7 +186,7 @@ void main() {
       expect(testLogger.errorText, contains('Failed to find LaunchAction for the Scheme'));
     });
 
-    testWithoutContext('throws error if TestAction is missing', () async {
+    testWithoutContext('prints error if TestAction is missing', () async {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
       final BufferLogger testLogger = BufferLogger.test();
       final FakeXcodeProject project = FakeXcodeProject(
@@ -206,7 +206,7 @@ void main() {
       expect(testLogger.errorText, contains('Failed to find TestAction for the Scheme'));
     });
 
-    testWithoutContext('throws error if scheme file is invalid XML', () async {
+    testWithoutContext('prints error if scheme file is invalid XML', () async {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
       final BufferLogger testLogger = BufferLogger.test();
       final FakeXcodeProject project = FakeXcodeProject(

@@ -68,7 +68,7 @@ void main() {
         expect(schemeFile.existsSync(), isTrue);
         expect(
           schemeFile.readAsStringSync(),
-          contains(r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/.lldbinit"'),
+          contains(r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"'),
         );
 
         final File lldbInitFile = fileSystem
@@ -76,7 +76,7 @@ void main() {
             .childDirectory('ios')
             .childDirectory('Flutter')
             .childDirectory('ephemeral')
-            .childFile('.lldbinit');
+            .childFile('flutter_lldbinit');
         expect(lldbInitFile.existsSync(), isTrue);
 
         final File lldbPythonFile = fileSystem
@@ -84,7 +84,7 @@ void main() {
             .childDirectory('ios')
             .childDirectory('Flutter')
             .childDirectory('ephemeral')
-            .childFile('lldb_helper.py');
+            .childFile('flutter_lldb_helper.py');
         expect(lldbPythonFile.existsSync(), isTrue);
       } finally {
         ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
@@ -264,7 +264,7 @@ void main() {
 
         expect(
           flavorSchemeFile.readAsStringSync(),
-          contains(r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/.lldbinit"'),
+          contains(r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"'),
         );
 
         final File lldbInitFile = fileSystem
@@ -272,7 +272,7 @@ void main() {
             .childDirectory('ios')
             .childDirectory('Flutter')
             .childDirectory('ephemeral')
-            .childFile('.lldbinit');
+            .childFile('flutter_lldbinit');
         expect(lldbInitFile.existsSync(), isTrue);
 
         final File lldbPythonFile = fileSystem
@@ -280,7 +280,7 @@ void main() {
             .childDirectory('ios')
             .childDirectory('Flutter')
             .childDirectory('ephemeral')
-            .childFile('lldb_helper.py');
+            .childFile('flutter_lldb_helper.py');
         expect(lldbPythonFile.existsSync(), isTrue);
       } finally {
         ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
