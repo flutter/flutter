@@ -611,6 +611,8 @@ gboolean fl_renderer_present_layers(FlRenderer* self,
                                     FlutterViewId view_id,
                                     const FlutterLayer** layers,
                                     size_t layers_count) {
+  // Detach the context from raster thread. Needed because blitting
+  // will be done on the main thread, which will make the context current.
   fl_renderer_clear_current(self);
 
   FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
@@ -635,6 +637,8 @@ gboolean fl_renderer_present_layers(FlRenderer* self,
     g_cond_wait(&priv->present_condition, &priv->present_mutex);
   }
 
+  // Restore the context to the raster thread in case the engine needs it
+  // to do some cleanup.
   fl_renderer_make_current(self);
 
   return data.result;
