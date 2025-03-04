@@ -20,6 +20,22 @@
 #include "gtest/gtest.h"
 
 namespace flutter {
+
+class TextInputPluginModifier {
+ public:
+  explicit TextInputPluginModifier(TextInputPlugin* text_input_plugin)
+      : text_input_plugin(text_input_plugin) {}
+
+  void SetViewId(FlutterViewId view_id) {
+    text_input_plugin->view_id_ = view_id;
+  }
+
+ private:
+  TextInputPlugin* text_input_plugin;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TextInputPluginModifier);
+};
+
 namespace testing {
 
 namespace {
@@ -33,6 +49,7 @@ static constexpr int kDefaultClientId = 42;
 // Should be identical to constants in text_input_plugin.cc.
 static constexpr char kChannelName[] = "flutter/textinput";
 static constexpr char kEnableDeltaModel[] = "enableDeltaModel";
+static constexpr char kViewId[] = "viewId";
 static constexpr char kSetClientMethod[] = "TextInput.setClient";
 static constexpr char kAffinityDownstream[] = "TextAffinity.downstream";
 static constexpr char kTextKey[] = "text";
@@ -63,6 +80,7 @@ static std::unique_ptr<rapidjson::Document> EncodedClientConfig(
   rapidjson::Value config(rapidjson::kObjectType);
   config.AddMember("inputAction", input_action, allocator);
   config.AddMember(kEnableDeltaModel, false, allocator);
+  config.AddMember(kViewId, 456, allocator);
   rapidjson::Value type_info(rapidjson::kObjectType);
   type_info.AddMember("name", type_name, allocator);
   config.AddMember("inputType", type_info, allocator);
@@ -149,7 +167,20 @@ class TextInputPluginTest : public WindowsTest {
                                                      std::move(window));
 
     EngineModifier modifier{engine_.get()};
-    modifier.SetImplicitView(view_.get());
+    modifier.SetViewById(view_.get(), 456);
+  }
+
+  std::unique_ptr<MockFlutterWindowsView> AddViewWithId(int view_id) {
+    EXPECT_NE(engine_, nullptr);
+    auto window = std::make_unique<MockWindowBindingHandler>();
+    EXPECT_CALL(*window, SetView).Times(1);
+    EXPECT_CALL(*window, GetWindowHandle).WillRepeatedly(Return(nullptr));
+    auto view = std::make_unique<MockFlutterWindowsView>(engine_.get(),
+                                                         std::move(window));
+
+    EngineModifier modifier{engine_.get()};
+    modifier.SetViewById(view_.get(), view_id);
+    return view;
   }
 
  private:
@@ -194,6 +225,8 @@ TEST_F(TextInputPluginTest, ClearClientResetsComposing) {
   BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
 
   TextInputPlugin handler(&messenger, engine());
+  TextInputPluginModifier modifier(&handler);
+  modifier.SetViewId(456);
 
   EXPECT_CALL(*view(), OnResetImeComposing());
 
@@ -224,9 +257,10 @@ TEST_F(TextInputPluginTest, ClearClientRequiresView) {
   messenger.SimulateEngineMessage(kChannelName, message->data(),
                                   message->size(), reply_handler);
 
-  EXPECT_EQ(reply,
-            "[\"Internal Consistency Error\",\"Text input is not available in "
-            "Windows headless mode\",null]");
+  EXPECT_EQ(
+      reply,
+      "[\"Internal Consistency Error\",\"Text input is not available because "
+      "view with view_id=0 cannot be found\",null]");
 }
 
 // Verify that the embedder sends state update messages to the framework during
@@ -253,6 +287,7 @@ TEST_F(TextInputPluginTest, VerifyComposingSendStateUpdate) {
   config.AddMember("inputAction", "done", allocator);
   config.AddMember("inputType", "text", allocator);
   config.AddMember(kEnableDeltaModel, false, allocator);
+  config.AddMember(kViewId, 456, allocator);
   arguments->PushBack(config, allocator);
   auto message =
       codec.EncodeMethodCall({"TextInput.setClient", std::move(arguments)});
@@ -392,6 +427,71 @@ TEST_F(TextInputPluginTest, VerifyInputActionSendDoesNotInsertNewLine) {
                          messages.front().begin()));
 }
 
+TEST_F(TextInputPluginTest, SetClientRequiresViewId) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger([](const std::string& channel,
+                                   const uint8_t* message, size_t message_size,
+                                   BinaryReply reply) {});
+
+  TextInputPlugin handler(&messenger, engine());
+
+  auto args = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
+  auto& allocator = args->GetAllocator();
+  args->PushBack(123, allocator);  // client_id
+
+  rapidjson::Value client_config(rapidjson::kObjectType);
+
+  args->PushBack(client_config, allocator);
+  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
+      MethodCall<rapidjson::Document>(kSetClientMethod, std::move(args)));
+
+  std::string reply;
+  BinaryReply reply_handler = [&reply](const uint8_t* reply_bytes,
+                                       size_t reply_size) {
+    reply = std::string(reinterpret_cast<const char*>(reply_bytes), reply_size);
+  };
+
+  EXPECT_TRUE(messenger.SimulateEngineMessage(kChannelName, encoded->data(),
+                                              encoded->size(), reply_handler));
+  EXPECT_EQ(
+      reply,
+      "[\"Bad Arguments\",\"Could not set client, view ID is null.\",null]");
+}
+
+TEST_F(TextInputPluginTest, SetClientRequiresViewIdToBeInteger) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger([](const std::string& channel,
+                                   const uint8_t* message, size_t message_size,
+                                   BinaryReply reply) {});
+
+  TextInputPlugin handler(&messenger, engine());
+
+  auto args = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
+  auto& allocator = args->GetAllocator();
+  args->PushBack(123, allocator);  // client_id
+
+  rapidjson::Value client_config(rapidjson::kObjectType);
+  client_config.AddMember(kViewId, "Not an integer", allocator);  // view_id
+
+  args->PushBack(client_config, allocator);
+  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
+      MethodCall<rapidjson::Document>(kSetClientMethod, std::move(args)));
+
+  std::string reply;
+  BinaryReply reply_handler = [&reply](const uint8_t* reply_bytes,
+                                       size_t reply_size) {
+    reply = std::string(reinterpret_cast<const char*>(reply_bytes), reply_size);
+  };
+
+  EXPECT_TRUE(messenger.SimulateEngineMessage(kChannelName, encoded->data(),
+                                              encoded->size(), reply_handler));
+  EXPECT_EQ(
+      reply,
+      "[\"Bad Arguments\",\"Could not set client, view ID is null.\",null]");
+}
+
 TEST_F(TextInputPluginTest, TextEditingWorksWithDeltaModel) {
   UseEngineWithView();
 
@@ -413,6 +513,7 @@ TEST_F(TextInputPluginTest, TextEditingWorksWithDeltaModel) {
 
   rapidjson::Value client_config(rapidjson::kObjectType);
   client_config.AddMember(kEnableDeltaModel, true, allocator);
+  client_config.AddMember(kViewId, 456, allocator);
 
   args->PushBack(client_config, allocator);
   auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
@@ -479,6 +580,7 @@ TEST_F(TextInputPluginTest, CompositionCursorPos) {
   auto& allocator = args->GetAllocator();
   args->PushBack(123, allocator);  // client_id
   rapidjson::Value client_config(rapidjson::kObjectType);
+  client_config.AddMember(kViewId, 456, allocator);
   args->PushBack(client_config, allocator);
   auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
       MethodCall<rapidjson::Document>(kSetClientMethod, std::move(args)));
@@ -535,6 +637,8 @@ TEST_F(TextInputPluginTest, TransformCursorRect) {
   BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
 
   TextInputPlugin handler(&messenger, engine());
+  TextInputPluginModifier modifier(&handler);
+  modifier.SetViewId(456);
 
   auto& codec = JsonMethodCodec::GetInstance();
 
@@ -611,9 +715,62 @@ TEST_F(TextInputPluginTest, SetMarkedTextRectRequiresView) {
   messenger.SimulateEngineMessage(kChannelName, message->data(),
                                   message->size(), reply_handler);
 
-  EXPECT_EQ(reply,
-            "[\"Internal Consistency Error\",\"Text input is not available in "
-            "Windows headless mode\",null]");
+  EXPECT_EQ(
+      reply,
+      "[\"Internal Consistency Error\",\"Text input is not available because "
+      "view with view_id=0 cannot be found\",null]");
+}
+
+TEST_F(TextInputPluginTest, SetAndUseMultipleClients) {
+  UseEngineWithView();  // Creates the default view
+  AddViewWithId(789);   // Creates the next view
+
+  bool sent_message = false;
+  TestBinaryMessenger messenger(
+      [&sent_message](const std::string& channel, const uint8_t* message,
+                      size_t message_size,
+                      BinaryReply reply) { sent_message = true; });
+
+  TextInputPlugin handler(&messenger, engine());
+
+  auto const set_client_and_send_message = [&](int client_id, int view_id) {
+    auto args = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
+    auto& allocator = args->GetAllocator();
+    args->PushBack(client_id, allocator);  // client_id
+
+    rapidjson::Value client_config(rapidjson::kObjectType);
+    client_config.AddMember(kViewId, view_id, allocator);  // view_id
+
+    args->PushBack(client_config, allocator);
+    auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
+        MethodCall<rapidjson::Document>(kSetClientMethod, std::move(args)));
+
+    std::string reply;
+    BinaryReply reply_handler = [&reply](const uint8_t* reply_bytes,
+                                         size_t reply_size) {
+      reply =
+          std::string(reinterpret_cast<const char*>(reply_bytes), reply_size);
+    };
+
+    EXPECT_TRUE(messenger.SimulateEngineMessage(
+        kChannelName, encoded->data(), encoded->size(), reply_handler));
+
+    sent_message = false;
+    handler.ComposeBeginHook();
+    EXPECT_TRUE(sent_message);
+    sent_message = false;
+    handler.ComposeChangeHook(u"4", 1);
+    EXPECT_TRUE(sent_message);
+    sent_message = false;
+    handler.ComposeCommitHook();
+    EXPECT_FALSE(sent_message);
+    sent_message = false;
+    handler.ComposeEndHook();
+    EXPECT_TRUE(sent_message);
+  };
+
+  set_client_and_send_message(123, 456);  // Set and send for the first view
+  set_client_and_send_message(123, 789);  // Set and send for the next view
 }
 
 }  // namespace testing
