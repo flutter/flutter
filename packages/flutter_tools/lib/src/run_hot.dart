@@ -309,6 +309,8 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
 
+    await _calculateTargetPlatform();
+
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(
       fullRestart: needsFullRestart,
