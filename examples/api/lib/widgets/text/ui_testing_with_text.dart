@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 void main() => runApp(const MyApp());
 
