@@ -635,8 +635,17 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);
   g_ptr_array_insert(command_line_args, 0, g_strdup("flutter"));
+  bool had_impeller_flag = false;
   for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
+    if (env_switch == "--enable-impeller=true") {
+      had_impeller_flag = true;
+    }
     g_ptr_array_add(command_line_args, g_strdup(env_switch.c_str()));
+  }
+  if (fl_dart_project_get_enable_impeller(self->project)) {
+    g_ptr_array_add(command_line_args, g_strdup("--enable-impeller=true"));
+  } else if (!had_impeller_flag) {
+    g_ptr_array_add(command_line_args, g_strdup("--enable-impeller=false"));
   }
 
   gchar** dart_entrypoint_args =
