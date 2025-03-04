@@ -96,7 +96,7 @@ object DependencyVersionChecker {
 
     // If this value is changed, then make sure to change the documentation on https://docs.flutter.dev/reference/supported-platforms
     @VisibleForTesting
-    internal val warnMinSdkVersion: Int = 22
+    internal val warnMinSdkVersion: Int = 21
 
     @VisibleForTesting
     internal val errorMinSdkVersion: Int = 1
