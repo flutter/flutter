@@ -387,7 +387,7 @@ void main() {
           home: Scaffold(
             body: Semantics(
               key: key,
-              controlsVisibilityOfNodes: const <String>{'abc'},
+              controlsNodes: const <String>{'abc'},
               child: const Placeholder(),
             ),
           ),
@@ -395,8 +395,8 @@ void main() {
       );
       final SemanticsNode node = tester.getSemantics(find.byKey(key));
       final SemanticsData data = node.getSemanticsData();
-      expect(data.controlsVisibilityOfNodes!.length, 1);
-      expect(data.controlsVisibilityOfNodes!.first, 'abc');
+      expect(data.controlsNodes!.length, 1);
+      expect(data.controlsNodes!.first, 'abc');
     });
 
     testWidgets('Semantics can merge attributed strings', (WidgetTester tester) async {
