@@ -16,6 +16,7 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'build_system/targets/native_assets.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
@@ -112,6 +113,7 @@ abstract class AssetBundle {
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
+    DartHookResult? dartHookResult,
     String manifestPath = defaultManifestPath,
     required String packageConfigPath,
     bool deferredComponentsEnabled = false,
@@ -187,6 +189,8 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime? _lastBuildTimestamp;
 
+  DartHookResult? _lastHookResult;
+
   // We assume the main asset is designed for a device pixel ratio of 1.0.
   static const String _kAssetManifestJsonFilename = 'AssetManifest.json';
   static const String _kAssetManifestBinFilename = 'AssetManifest.bin';
@@ -206,13 +210,21 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   bool needsBuild({String manifestPath = defaultManifestPath}) {
-    final DateTime? lastBuildTimestamp = _lastBuildTimestamp;
-    if (lastBuildTimestamp == null) {
+    if (!wasBuiltOnce() ||
+        _lastHookResult == null ||
+        // We need to re-run the dart build.
+        !_lastHookResult!.isUpToDate(_fileSystem) ||
+        // We don't have to re-run the dart build, but some files the dart build
+        // wants us to bundle have changed contents.
+        _lastHookResult!.isOutputDirty(_fileSystem)) {
       return true;
     }
 
+    final DateTime lastBuildTimestamp = _lastBuildTimestamp!;
+
     final FileStat manifestStat = _fileSystem.file(manifestPath).statSync();
-    if (manifestStat.type == FileSystemEntityType.notFound) {
+    if (manifestStat.type == FileSystemEntityType.notFound ||
+        manifestStat.modified.isAfter(lastBuildTimestamp)) {
       return true;
     }
 
@@ -221,18 +233,19 @@ class ManifestAssetBundle implements AssetBundle {
         return true; // directory was deleted.
       }
       for (final File file in directory.listSync().whereType<File>()) {
-        final DateTime dateTime = file.statSync().modified;
-        if (dateTime.isAfter(lastBuildTimestamp)) {
+        final DateTime lastModified = file.statSync().modified;
+        if (lastModified.isAfter(lastBuildTimestamp)) {
           return true;
         }
       }
     }
 
-    return manifestStat.modified.isAfter(lastBuildTimestamp);
+    return false;
   }
 
   @override
   Future<int> build({
+    DartHookResult? dartHookResult,
     String manifestPath = defaultManifestPath,
     FlutterProject? flutterProject,
     required String packageConfigPath,
@@ -255,6 +268,7 @@ class ManifestAssetBundle implements AssetBundle {
     // hang on hot reload, as the incremental dill files will never be copied to the
     // device.
     _lastBuildTimestamp = DateTime.now();
+    _lastHookResult = dartHookResult ?? DartHookResult.empty();
     if (flutterManifest.isEmpty) {
       entries[_kAssetManifestJsonFilename] = AssetBundleEntry(
         DevFSStringContent('{}'),
@@ -400,8 +414,33 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
 
+    for (final DataAsset dataAsset in dartHookResult?.dataAssets ?? <DataAsset>[]) {
+      final Package package = packageConfig[dataAsset.package]!;
+      final Uri fileUri = dataAsset.file;
+
+      final String baseDir;
+      final Uri relativeUri;
+      if (fileUri.isAbsolute) {
+        final List<String> pathSegments = fileUri.pathSegments;
+        baseDir =
+            fileUri.replace(pathSegments: pathSegments.take(pathSegments.length - 1)).toFilePath();
+        relativeUri = Uri(pathSegments: <String>[pathSegments.last]);
+      } else {
+        baseDir = package.root.toFilePath();
+        relativeUri = fileUri;
+      }
+
+      final _Asset asset = _Asset(
+        baseDir: baseDir,
+        relativeUri: relativeUri,
+        entryUri: Uri.parse('packages/${dataAsset.package}/${dataAsset.name}'),
+        package: package,
+      );
+      assetVariants[asset] = <_Asset>[asset];
+    }
+
     // Save the contents of each image, image variant, and font
-    // asset in entries.
+    // asset in [entries].
     for (final _Asset asset in assetVariants.keys) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       final List<_Asset> variants = assetVariants[asset]!;
