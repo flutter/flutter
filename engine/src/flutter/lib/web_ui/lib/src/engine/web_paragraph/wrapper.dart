@@ -6,9 +6,9 @@ import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'paragraph.dart';
-import 'layout.dart';
 import 'code_unit_flags.dart';
+import 'layout.dart';
+import 'paragraph.dart';
 
 /// Wraps the text by a given width.
 class TextWrapper {
@@ -16,23 +16,38 @@ class TextWrapper {
     this.startNewLine(0, 0.0);
   }
 
-  final String     _text;
+  final String _text;
   final TextLayout _layout;
 
   int _startLine = 0;
+
   // Whitespaces always separates text from clusters even if it's empty
   ClusterRange _whitespaces = ClusterRange(0, 0);
 
-  double _widthText = 0.0;        // English: contains all whole words on the line
+  double _widthText = 0.0; // English: contains all whole words on the line
   double _widthWhitespaces = 0.0;
-  double _widthLetters = 0.0;     // English: contains all the letters that didn't make the whole word yet
+  double _widthLetters =
+      0.0; // English: contains all the letters that didn't make the whole word yet
 
   bool isWhitespace(WebTextCluster cluster) {
-    return this._layout.hasFlag(ClusterRange(cluster.begin, cluster.end), CodeUnitFlags.kPartOfWhiteSpaceBreak);
+    return this._layout.hasFlag(
+      ClusterRange(cluster.begin, cluster.end),
+      CodeUnitFlags.kPartOfWhiteSpaceBreak,
+    );
   }
 
-  bool isLineBreak(WebTextCluster cluster) {
-    return this._layout.hasFlag(ClusterRange(cluster.begin, cluster.end), CodeUnitFlags.kSoftLineBreakBefore);
+  bool isSoftLineBreak(WebTextCluster cluster) {
+    return this._layout.hasFlag(
+      ClusterRange(cluster.begin, cluster.end),
+      CodeUnitFlags.kSoftLineBreakBefore,
+    );
+  }
+
+  bool isHardLineBreak(WebTextCluster cluster) {
+    return this._layout.hasFlag(
+      ClusterRange(cluster.begin, cluster.end),
+      CodeUnitFlags.kHardLineBreakBefore,
+    );
   }
 
   void startNewLine(int start, double clusterWidth) {
@@ -43,17 +58,91 @@ class TextWrapper {
     _widthLetters = clusterWidth;
   }
 
+  void breakLine(int index, double widthCluster, hardLineBreak) {
+    if (_whitespaces.start != _startLine) {
+      // There was at least one possible line break so we can use it to break the text
+    } else if (index > _startLine) {
+      // There was some text without line break, we will have to break the text by cluster
+      assert(_widthText == 0.0);
+
+      if (_widthLetters > 0) {
+        // We possibly have some leading spaces and some text after
+        _widthText = _widthWhitespaces + _widthLetters;
+        _widthWhitespaces = 0.0;
+        _widthLetters = 0.0;
+        _whitespaces.start = index;
+        _whitespaces.end = index;
+      } else {
+        // We only have whitespaces on the line
+        _widthText = 0.0;
+      }
+    } else {
+      // We have only one cluster and it's too big to fit the line but we place it anyway
+      assert(
+        _startLine == index &&
+            _widthText == 0.0 &&
+            _widthWhitespaces == 0.0 &&
+            _widthLetters == 0.0,
+      );
+      _widthText = widthCluster;
+      _whitespaces.start = index + 1;
+      _whitespaces.end = index + 1;
+    }
+
+    // Add the line
+    this._layout.lines.add(
+      TextLine(
+        _layout,
+        ClusterRange(_startLine, _whitespaces.start),
+        _widthText,
+        ClusterRange(_whitespaces.start, _whitespaces.end),
+        _widthWhitespaces,
+        hardLineBreak,
+      ),
+    );
+  }
+
   void breakLines(double width) {
     // "words":[startLine:whitespaces.start) whitespaces:[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
 
     this.startNewLine(0, 0.0);
 
+    bool hardLineBreak = false;
     for (int index = 0; index < _layout.textClusters.length; index++) {
-
       final WebTextCluster cluster = this._layout.textClusters[index];
-      final DomRectReadOnly box = this._layout.textMetrics!.getActualBoundingBox(cluster.begin, cluster.end);
-      final List<DomRectReadOnly> rects = this._layout.textMetrics!.getSelectionRects(cluster.begin, cluster.end);
-      final double widthCluster = rects[0].width;
+      final DomRectReadOnly box = this._layout.textMetrics!.getActualBoundingBox(
+        cluster.begin,
+        cluster.end,
+      );
+      final List<DomRectReadOnly> rects = this._layout.textMetrics!.getSelectionRects(
+        cluster.begin,
+        cluster.end,
+      );
+      // TODO: This is a temporary simplification, needs to be addressed later
+      double widthCluster = rects[0].width;
+      hardLineBreak = isHardLineBreak(cluster);
+
+      if (hardLineBreak) {
+        // Break the line and then continue with the current cluster as usual
+        if (_whitespaces.end < index) {
+          // Take letters into account
+          _widthText += _widthWhitespaces + _widthLetters;
+          _whitespaces.start = index;
+          _whitespaces.end = index;
+        }
+        this._layout.lines.add(
+          TextLine(
+            _layout,
+            ClusterRange(_startLine, _whitespaces.start),
+            _widthText,
+            ClusterRange(_whitespaces.start, _whitespaces.end),
+            _widthWhitespaces,
+            hardLineBreak,
+          ),
+        );
+        // Start a new line
+        this.startNewLine(index, 0.0);
+      }
 
       if (isWhitespace(cluster)) {
         // This is (possibly) a hanging whitespace that does not increase the actual line width
@@ -69,57 +158,71 @@ class TextWrapper {
         // Continue the current whitespaces sequence
         _whitespaces.end = index + 1;
         _widthWhitespaces += widthCluster;
+
         continue;
       }
 
       if (_widthText + _widthWhitespaces + _widthLetters + widthCluster > width) {
-        // The current text cluster does not fit the line
+        // The current text cluster does not fit the line or we have to force the line break
         if (_whitespaces.start != _startLine) {
           // There was at least one possible line break so we can use it to break the text
-          this._layout.lines.add(TextLine(_layout,
-                                  ClusterRange(_startLine, _whitespaces.start),
-                                  _widthText,
-                                  ClusterRange(_whitespaces.start, _whitespaces.end),
-                                 _widthWhitespaces));
-
-          // Start a new line but keep the clusters sequence
-          this.startNewLine(_whitespaces.end, _widthLetters);
-         } else if (_whitespaces.start == _startLine) {
-          // There was not a single line break detected
-          // There should be only "letters" and possibly whitespaces before which we are going to treat as regular text
+        } else if (index > _startLine) {
+          // There was some text without line break, we will have to break the text by cluster
           assert(_widthText == 0.0);
-          // There was not a single line break, we will have to break the text by cluster
-          this._layout.lines.add(TextLine(_layout,
-                        ClusterRange(_startLine, index),
-                        _widthWhitespaces + _widthLetters,
-                        ClusterRange(index, index),
-                        0.0));
-          // Start a new line with the current cluster as a cluster sequence
-          this.startNewLine(index, 0);
-         } else {
-          // We have only one cluster and it's too big to fit the line.
-          // We choose to ignore this case, not clip the cluster and just draw it
-          // There should not be any whitespaces
-          assert(_startLine == index && _widthText == 0.0 && _widthWhitespaces == 0.0 && _widthLetters == 0.0);
-          this._layout.lines.add(TextLine(_layout,
-              ClusterRange(_startLine, index + 1),
-              widthCluster,
-              ClusterRange(index + 1, index + 1),
-              0.0));
-          this.startNewLine(index + 1, 0.0);
-          // We already processed the current cluster (the only one on the line)
+
+          if (_widthLetters > 0) {
+            // We possibly have some leading spaces and some text after
+            _widthText = _widthWhitespaces + _widthLetters;
+            _widthWhitespaces = 0.0;
+            _widthLetters = 0.0;
+            _whitespaces.start = index;
+            _whitespaces.end = index;
+          } else {
+            // We only have whitespaces on the line
+            _widthText = 0.0;
+          }
+        } else {
+          // We have only one cluster and it's too big to fit the line but we place it anyway
+          assert(
+            _startLine == index &&
+                _widthText == 0.0 &&
+                _widthWhitespaces == 0.0 &&
+                _widthLetters == 0.0,
+          );
+          _widthText = widthCluster;
+          _whitespaces.start = index + 1;
+          _whitespaces.end = index + 1;
+        }
+
+        // Add the line
+        this._layout.lines.add(
+          TextLine(
+            _layout,
+            ClusterRange(_startLine, _whitespaces.start),
+            _widthText,
+            ClusterRange(_whitespaces.start, _whitespaces.end),
+            _widthWhitespaces,
+            hardLineBreak,
+          ),
+        );
+
+        // Start a new line but keep the clusters sequence
+        this.startNewLine(_whitespaces.end, _widthLetters);
+
+        if (_whitespaces.start > index) {
+          // We already processed the oversized cluster
           continue;
         }
         // At this point we have a new line and can process the current cluster as usual
       }
 
       // This is just a regular cluster, keep track of it
-      if (isLineBreak(cluster) && index != _startLine) {
+      if (isSoftLineBreak(cluster) && index != _startLine) {
         // We ignore a line break at the very beginning of the line
         if (_whitespaces.start == _startLine) {
-        // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
-        // these are the leading spaces and Flutter wants them to be preserved
-        // We need to pretend that these are not whitespaces
+          // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
+          // these are the leading spaces and Flutter wants them to be preserved
+          // We need to pretend that these are not whitespaces
         } else {
           if (_whitespaces.end != index) {
             // Line break without whitespaces before, add all collected letters to the text as a word
@@ -146,17 +249,41 @@ class TextWrapper {
       _widthText += _widthLetters;
     }
 
-    this._layout.lines.add(TextLine(_layout,
-      ClusterRange(_startLine, _whitespaces.start),
-      _widthText,
-      ClusterRange(_whitespaces.start, _whitespaces.end),
-      _widthWhitespaces));
+    this._layout.lines.add(
+      TextLine(
+        _layout,
+        ClusterRange(_startLine, _whitespaces.start),
+        _widthText,
+        ClusterRange(_whitespaces.start, _whitespaces.end),
+        _widthWhitespaces,
+        hardLineBreak,
+      ),
+    );
+
+    if (hardLineBreak) {
+      // TODO: Discuss with Mouad
+      // Flutter wants to have another (empty) line if \n is the last codepoint in the text
+      this._layout.lines.add(
+        TextLine(
+          _layout,
+          ClusterRange(_layout.textClusters.length, _layout.textClusters.length),
+          0.0,
+          ClusterRange(_layout.textClusters.length, _layout.textClusters.length),
+          0.0,
+          false,
+        ),
+      );
+    }
     /*
     for (int i = 0; i < this._layout.lines.length; ++i) {
       final TextLine line = this._layout.lines[i];
       final String text = _text.substring(line.clusterRange.start, line.clusterRange.end);
-      final String whitespaces = line.whitespacesRange.width() > 0 ? '${line.whitespacesRange.width()}' : 'no';
-      print('${i}: "${text}" [${line.clusterRange.start}:${line.clusterRange.end}) ${width} (${whitespaces} trailing whitespaces)');
+      final String whitespaces =
+          line.whitespacesRange.width() > 0 ? '${line.whitespacesRange.width()}' : 'no';
+      final String hardLineBreak = line.hardLineBreak ? 'hardlineBreak' : '';
+      print(
+        '${i}: "${text}" [${line.clusterRange.start}:${line.clusterRange.end}) ${width} ${hardLineBreak} (${whitespaces} trailing whitespaces)',
+      );
     }
     */
   }

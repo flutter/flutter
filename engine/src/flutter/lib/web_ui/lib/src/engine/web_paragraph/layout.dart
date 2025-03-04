@@ -6,10 +6,10 @@ import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'paragraph.dart';
-import 'wrapper.dart';
 import 'code_unit_flags.dart';
+import 'paragraph.dart';
 import 'unicode_properties.dart';
+import 'wrapper.dart';
 
 /// A single canvas2d context to use for all text information.
 @visibleForTesting
@@ -55,7 +55,7 @@ class TextLayout {
   void extractUnicodeInfo() {
     // Fill out the entire flag list
     for (int i = 0; i <= paragraph.text.length; ++i) {
-       codeUnitFlags.add(CodeUnitFlags(CodeUnitFlags.kNoCodeUnitFlag));
+      codeUnitFlags.add(CodeUnitFlags(CodeUnitFlags.kNoCodeUnitFlag));
     }
     // Get the information from the browser
     final SegmentationResult result = segmentText(paragraph.text);
@@ -79,7 +79,7 @@ class TextLayout {
     }
     // Add whitespaces
     for (int i = 0; i < paragraph.text.length; ++i) {
-       codeUnitFlags[i].whitespace = UnicodeProperties.isWhitespace(paragraph.text.codeUnitAt(i));
+      codeUnitFlags[i].whitespace = UnicodeProperties.isWhitespace(paragraph.text.codeUnitAt(i));
     }
   }
 
@@ -90,8 +90,13 @@ class TextLayout {
 
 class ClusterRange {
   ClusterRange(this.start, this.end);
-  bool isEmpty() { return start == end; }
-  int width() { return end - start; }
+  bool isEmpty() {
+    return start == end;
+  }
+
+  int width() {
+    return end - start;
+  }
 
   int start;
   int end;
@@ -105,11 +110,19 @@ class TextRun {
 }
 
 class TextLine {
-  TextLine(this.textLayout, this.clusterRange, this.width, this.whitespacesRange, this.whitespacesWidth);
+  TextLine(
+    this.textLayout,
+    this.clusterRange,
+    this.width,
+    this.whitespacesRange,
+    this.whitespacesWidth,
+    this.hardLineBreak,
+  );
 
   final TextLayout textLayout;
   final ClusterRange clusterRange;
   final ClusterRange whitespacesRange;
   final double width;
   final double whitespacesWidth;
+  final bool hardLineBreak;
 }
