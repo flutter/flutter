@@ -608,8 +608,8 @@ TEST_F(ExternalViewEmbedderTest, SceneWithOneView) {
   auto [child_view_token, child_viewport_token] = ViewTokenPair::New();
   const uint32_t child_view_id = child_viewport_token.value.get();
 
-  const int kOpacity = 200;
-  const float kOpacityFloat = 200 / 255.0f;
+  const uint8_t kOpacity = 200u;
+  const float kOpacityFloat = DlColor::toOpacity(200);
   const fuchsia::math::VecF kScale{3.0f, 4.0f};
 
   DlMatrix matrix = DlMatrix::MakeScale({kScale.x, kScale.y, 1});
@@ -829,8 +829,8 @@ TEST_F(ExternalViewEmbedderTest, SceneWithOneClippedView) {
   auto [child_view_token, child_viewport_token] = ViewTokenPair::New();
   const uint32_t child_view_id = child_viewport_token.value.get();
 
-  const int kOpacity = 200;
-  const float kOpacityFloat = 200 / 255.0f;
+  const uint8_t kOpacity = 200u;
+  const float kOpacityFloat = DlColor::toOpacity(200);
   const fuchsia::math::VecF kScale{3.0f, 4.0f};
   const int kTranslateX = 10;
   const int kTranslateY = 20;
@@ -1067,8 +1067,8 @@ TEST_F(ExternalViewEmbedderTest, SceneWithOneView_NoOverlay) {
   auto [child_view_token, child_viewport_token] = ViewTokenPair::New();
   const uint32_t child_view_id = child_viewport_token.value.get();
 
-  const int kOpacity = 125;
-  const float kOpacityFloat = 125 / 255.0f;
+  const uint8_t kOpacity = 125u;
+  const float kOpacityFloat = DlColor::toOpacity(125);
   const fuchsia::math::VecF kScale{2.f, 3.0f};
 
   DlMatrix matrix = DlMatrix::MakeScale({kScale.x, kScale.y, 1});
@@ -1581,8 +1581,8 @@ TEST_F(ExternalViewEmbedderTest, ViewportCoveredWithInputInterceptor) {
   auto [child_view_token, child_viewport_token] = ViewTokenPair::New();
   const uint32_t child_view_id = child_viewport_token.value.get();
 
-  const int kOpacity = 200;
-  const float kOpacityFloat = 200 / 255.0f;
+  const uint8_t kOpacity = 200u;
+  const float kOpacityFloat = DlColor::toOpacity(200);
   const fuchsia::math::VecF kScale{3.0f, 4.0f};
 
   DlMatrix matrix = DlMatrix::MakeScale({kScale.x, kScale.y, 1});
