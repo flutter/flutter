@@ -4042,7 +4042,7 @@ void _testTables() {
 }
 
 void _testControlsNodes() {
-  test('nodes with table role', () {
+  test('can have multiple controlled nodes', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -4088,6 +4088,65 @@ void _testControlsNodes() {
     tester.apply();
 
     object = tester.getSemanticsObject(0);
+    expect(object.element.getAttribute('aria-controls'), 'flt-semantic-node-1 flt-semantic-node-2');
+
+    tester.updateNode(
+      id: 0,
+      controlsNodes: <String>['a', 'b', 'c'],
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, identifier: 'a'),
+        tester.updateNode(id: 2, identifier: 'b'),
+        tester.updateNode(id: 3, identifier: 'c'),
+        tester.updateNode(id: 4, identifier: 'd'),
+      ],
+    );
+    tester.apply();
+
+    object = tester.getSemanticsObject(0);
+    expect(
+      object.element.getAttribute('aria-controls'),
+      'flt-semantic-node-1 flt-semantic-node-2 flt-semantic-node-3',
+    );
+
+    tester.updateNode(
+      id: 0,
+      controlsNodes: <String>['a', 'b', 'd'],
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, identifier: 'a'),
+        tester.updateNode(id: 2, identifier: 'b'),
+        tester.updateNode(id: 3, identifier: 'c'),
+        tester.updateNode(id: 4, identifier: 'd'),
+      ],
+    );
+    tester.apply();
+
+    object = tester.getSemanticsObject(0);
+    expect(
+      object.element.getAttribute('aria-controls'),
+      'flt-semantic-node-1 flt-semantic-node-2 flt-semantic-node-4',
+    );
+  });
+
+  test('can control multiple nodes with same identifier', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      controlsNodes: <String>['a'],
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, identifier: 'a'),
+        tester.updateNode(id: 2, identifier: 'a'),
+      ],
+    );
+    tester.apply();
+
+    SemanticsObject object = tester.getSemanticsObject(0);
     expect(object.element.getAttribute('aria-controls'), 'flt-semantic-node-1 flt-semantic-node-2');
   });
 
