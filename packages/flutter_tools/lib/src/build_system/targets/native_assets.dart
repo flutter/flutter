@@ -17,7 +17,7 @@ import '../exceptions.dart' show MissingDefineException;
 import 'common.dart';
 
 export '../../isolated/native_assets/native_assets.dart'
-    show CodeAsset, DartBuildResult, DataAsset, DynamicLoadingBundled;
+    show CodeAsset, DartHookResult, DataAsset, DynamicLoadingBundled;
 
 /// Runs the dart build of the app.
 class DartBuild extends Target {
@@ -33,7 +33,7 @@ class DartBuild extends Target {
   @override
   Future<void> build(Environment environment) async {
     final FileSystem fileSystem = environment.fileSystem;
-    final DartBuildResult result;
+    final DartHookResult result;
 
     final TargetPlatform targetPlatform =
         specifiedTargetPlatform ?? _getTargetPlatformFromEnvironment(environment, name);
@@ -54,7 +54,7 @@ class DartBuild extends Target {
           environment.logger,
           runPackageName!,
         );
-    result = await runFlutterSpecificDartBuild(
+    result = await runFlutterSpecificHooks(
       environmentDefines: environment.defines,
       buildRunner: buildRunner,
       targetPlatform: targetPlatform,
@@ -62,15 +62,15 @@ class DartBuild extends Target {
       fileSystem: fileSystem,
     );
 
-    final File dartBuildResultJsonFile = environment.buildDir.childFile(dartBuildResultFilename);
-    if (!dartBuildResultJsonFile.parent.existsSync()) {
-      dartBuildResultJsonFile.parent.createSync(recursive: true);
+    final File dartHookResultJsonFile = environment.buildDir.childFile(dartHookResultFilename);
+    if (!dartHookResultJsonFile.parent.existsSync()) {
+      dartHookResultJsonFile.parent.createSync(recursive: true);
     }
-    dartBuildResultJsonFile.writeAsStringSync(json.encode(result.toJson()));
+    dartHookResultJsonFile.writeAsStringSync(json.encode(result.toJson()));
 
     final Depfile depfile = Depfile(
       <File>[for (final Uri dependency in result.dependencies) fileSystem.file(dependency)],
-      <File>[fileSystem.file(dartBuildResultJsonFile)],
+      <File>[fileSystem.file(dartHookResultJsonFile)],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     if (!outputDepfile.parent.existsSync()) {
@@ -99,28 +99,26 @@ class DartBuild extends Target {
   String get name => 'dart_build';
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/$dartBuildResultFilename'),
-  ];
+  List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/$dartHookResultFilename')];
 
   /// Dependent build [Target]s can use this to consume the result of the
   /// [DartBuild] target.
-  static Future<DartBuildResult> loadBuildResult(Environment environment) async {
-    final File dartBuildResultJsonFile = environment.buildDir.childFile(
-      DartBuild.dartBuildResultFilename,
+  static Future<DartHookResult> loadBuildResult(Environment environment) async {
+    final File dartHookResultJsonFile = environment.buildDir.childFile(
+      DartBuild.dartHookResultFilename,
     );
-    if (!dartBuildResultJsonFile.existsSync()) {
-      return DartBuildResult.empty();
+    if (!dartHookResultJsonFile.existsSync()) {
+      return DartHookResult.empty();
     }
-    return DartBuildResult.fromJson(
-      json.decode(dartBuildResultJsonFile.readAsStringSync()) as Map<String, Object?>,
+    return DartHookResult.fromJson(
+      json.decode(dartHookResultJsonFile.readAsStringSync()) as Map<String, Object?>,
     );
   }
 
   @override
   List<Target> get dependencies => <Target>[];
 
-  static const String dartBuildResultFilename = 'dart_build_result.json';
+  static const String dartHookResultFilename = 'dart_build_result.json';
   static const String depFilename = 'dart_build.d';
 }
 
@@ -146,13 +144,13 @@ class InstallCodeAssets extends Target {
     final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
     // We fetch the result from the [DartBuild].
-    final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
+    final DartHookResult dartHookResult = await DartBuild.loadBuildResult(environment);
 
     // And install/copy the code assets to the right place and create a
     // native_asset.yaml that can be used by the final AOT compilation.
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
     await installCodeAssets(
-      dartBuildResult: dartBuildResult,
+      dartHookResult: dartHookResult,
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
       projectUri: projectUri,
@@ -162,7 +160,7 @@ class InstallCodeAssets extends Target {
     assert(await fileSystem.file(nativeAssetsFileUri).exists());
 
     final Depfile depfile = Depfile(
-      <File>[for (final Uri file in dartBuildResult.filesToBeBundled) fileSystem.file(file)],
+      <File>[for (final Uri file in dartHookResult.filesToBeBundled) fileSystem.file(file)],
       <File>[fileSystem.file(nativeAssetsFileUri)],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
