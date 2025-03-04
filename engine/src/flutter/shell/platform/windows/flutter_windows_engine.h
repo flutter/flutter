@@ -141,6 +141,8 @@ class FlutterWindowsEngine {
   // Returns null if the view does not exist.
   FlutterWindowsView* view(FlutterViewId view_id) const;
 
+  bool GetID3D11Device(ID3D11Device** device) const;
+
   // Returns the currently configured Plugin Registrar.
   FlutterDesktopPluginRegistrarRef GetRegistrar();
 
