@@ -1765,7 +1765,8 @@ class RenderClipRSuperellipse extends _RenderCustomClip<RSuperellipse> {
   }
 
   @override
-  RSuperellipse get _defaultClip => _borderRadius.resolve(textDirection).toRSuperellipse(Offset.zero & size);
+  RSuperellipse get _defaultClip =>
+      _borderRadius.resolve(textDirection).toRSuperellipse(Offset.zero & size);
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {

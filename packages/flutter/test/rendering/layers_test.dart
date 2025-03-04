@@ -473,7 +473,9 @@ void main() {
   });
 
   test('mutating ClipRSuperellipseLayer fields triggers needsAddToScene', () {
-    final ClipRSuperellipseLayer layer = ClipRSuperellipseLayer(clipRSuperellipse: RSuperellipse.zero);
+    final ClipRSuperellipseLayer layer = ClipRSuperellipseLayer(
+      clipRSuperellipse: RSuperellipse.zero,
+    );
     checkNeedsAddToScene(layer, () {
       layer.clipRSuperellipse = RSuperellipse.fromRectAndRadius(unitRect, Radius.zero);
     });
