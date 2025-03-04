@@ -8,8 +8,10 @@
 namespace txt {
 
 enum class FontStyle {
+  // NOLINTBEGIN(readability-identifier-naming)
   normal,
   italic,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 }  // namespace txt

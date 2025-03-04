@@ -21,6 +21,7 @@ namespace txt {
 // Skia's SkShaper/SkParagraph text layout module.
 class Paragraph {
  public:
+  // NOLINTNEXTLINE(readability-identifier-naming)
   enum Affinity { UPSTREAM, DOWNSTREAM };
 
   // Options for various types of bounding boxes provided by

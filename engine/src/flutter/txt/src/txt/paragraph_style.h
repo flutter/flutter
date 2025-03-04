@@ -15,17 +15,21 @@
 namespace txt {
 
 enum class TextAlign {
+  // NOLINTBEGIN(readability-identifier-naming)
   left,
   right,
   center,
   justify,
   start,
   end,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 enum class TextDirection {
+  // NOLINTBEGIN(readability-identifier-naming)
   rtl,
   ltr,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 // Adjusts the leading over and under text.

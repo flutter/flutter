@@ -8,6 +8,7 @@
 namespace txt {
 
 enum class FontWeight {
+  // NOLINTBEGIN(readability-identifier-naming)
   w100,  // Thin
   w200,  // Extra-Light
   w300,  // Light
@@ -17,6 +18,7 @@ enum class FontWeight {
   w700,  // Bold
   w800,  // Extra-Bold
   w900,  // Black
+  // NOLINTEND(readability-identifier-naming)
 };
 
 }  // namespace txt
