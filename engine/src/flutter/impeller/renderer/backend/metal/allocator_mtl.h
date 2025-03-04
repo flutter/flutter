@@ -49,6 +49,7 @@ class AllocatorMTL final : public Allocator {
 
   id<MTLDevice> device_;
   std::string allocator_label_;
+  bool has_multiple_devices_ = false;
   bool supports_memoryless_targets_ = false;
   bool supports_uma_ = false;
   bool is_valid_ = false;
@@ -60,7 +61,9 @@ class AllocatorMTL final : public Allocator {
 
   ISize max_texture_supported_;
 
-  AllocatorMTL(id<MTLDevice> device, std::string label);
+  AllocatorMTL(id<MTLDevice> device,
+               bool has_multiple_devices,
+               std::string label);
 
   // |Allocator|
   bool IsValid() const;

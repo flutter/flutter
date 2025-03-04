@@ -103,14 +103,20 @@ Bytes DebugAllocatorStats::GetAllocationSize() {
   return Bytes{size_.load()};
 }
 
-AllocatorMTL::AllocatorMTL(id<MTLDevice> device, std::string label)
-    : device_(device), allocator_label_(std::move(label)) {
+AllocatorMTL::AllocatorMTL(id<MTLDevice> device,
+                           bool has_multiple_devices,
+                           std::string label)
+    : device_(device),
+      allocator_label_(std::move(label)),
+      has_multiple_devices_(has_multiple_devices) {
   if (!device_) {
     return;
   }
 
-  supports_memoryless_targets_ = DeviceSupportsDeviceTransientTargets(device_);
-  supports_uma_ = DeviceHasUnifiedMemoryArchitecture(device_);
+  supports_memoryless_targets_ =
+      DeviceSupportsDeviceTransientTargets(device_) && !has_multiple_devices_;
+  supports_uma_ =
+      DeviceHasUnifiedMemoryArchitecture(device_) && !has_multiple_devices_;
   max_texture_supported_ = DeviceMaxTextureSizeSupported(device_);
 
   is_valid_ = true;
