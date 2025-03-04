@@ -93,6 +93,7 @@ enum class SemanticsRole : int32_t {
   kLoadingSpinner = 21,
   kProgressBar = 22,
   kHotKey = 23,
+  kRadioGroup = 24,
 };
 
 /// C/C++ representation of `SemanticsFlags` defined in
