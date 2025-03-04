@@ -39,7 +39,10 @@ static bool OnAcquireExternalTexture(void* user_data,
 }
 
 namespace {
-/// Attempts to find the integrated GPU backed metal device.
+
+// Attempts to find the integrated GPU backed metal device.
+//
+// See also: https://developer.apple.com/documentation/metal/multi-gpu-systems?language=objc
 id<MTLDevice> SelectMetalDevice() {
   NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
   for (id<MTLDevice> device in devices) {
