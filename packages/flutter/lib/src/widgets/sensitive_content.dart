@@ -262,6 +262,19 @@ class _SensitiveContentState extends State<SensitiveContent> {
   }
 
   @override
+  void didUpdateWidget(SensitiveContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.sensitivityLevel == oldWidget.sensitivityLevel) {
+      return;
+    }
+
+    // Re-register SensitiveContent widget if the sensitivity level changes.
+    SensitiveContentHost.unregister(oldWidget.sensitivityLevel);
+    _sensitiveContentRegistrationFuture = SensitiveContentHost.register(widget.sensitivityLevel);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
       future: _sensitiveContentRegistrationFuture,
