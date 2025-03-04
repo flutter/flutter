@@ -42,8 +42,8 @@ TEST(FlowTest, SurfaceFrameDoesNotHaveEmptyCanvas) {
       /*context_result=*/nullptr,
       /*display_list_fallback=*/true);
 
-  EXPECT_FALSE(frame.Canvas()->GetLocalClipBounds().isEmpty());
-  EXPECT_FALSE(frame.Canvas()->QuickReject(SkRect::MakeLTRB(10, 10, 50, 50)));
+  EXPECT_FALSE(frame.Canvas()->GetLocalClipCoverage().IsEmpty());
+  EXPECT_FALSE(frame.Canvas()->QuickReject(DlRect::MakeLTRB(10, 10, 50, 50)));
 }
 
 TEST(FlowTest, SurfaceFrameDoesNotPrepareRtree) {
@@ -58,7 +58,7 @@ TEST(FlowTest, SurfaceFrameDoesNotPrepareRtree) {
       /*frame_size=*/SkISize::Make(800, 600),
       /*context_result=*/nullptr,
       /*display_list_fallback=*/true);
-  surface_frame->Canvas()->DrawRect(SkRect::MakeWH(100, 100), DlPaint());
+  surface_frame->Canvas()->DrawRect(DlRect::MakeWH(100, 100), DlPaint());
   EXPECT_FALSE(surface_frame->BuildDisplayList()->has_rtree());
 }
 

@@ -1,4 +1,4 @@
-Signature: c14fc194a919c2ed0320535f01ffe8b7
+Signature: 456de9d5e79cb4e72177e8fc2f6372e5
 
 ====================================================================================================
 LIBRARY: etc1
@@ -399,9 +399,11 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/codec_is_animated_api.md
+FILE: ../../../flutter/third_party/skia/relnotes/getpipelinelabelapi.md
 FILE: ../../../flutter/third_party/skia/relnotes/graphiteincludes.md
 FILE: ../../../flutter/third_party/skia/relnotes/pdf_jpeg.md
 FILE: ../../../flutter/third_party/skia/relnotes/serializedkeyprecompilation.md
+FILE: ../../../flutter/third_party/skia/relnotes/userdefinedknownruntimeeffects.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -653,7 +655,6 @@ ORIGIN: ../../../flutter/third_party/skia/include/effects/SkDashPathEffect.h + .
 ORIGIN: ../../../flutter/third_party/skia/include/effects/SkDiscretePathEffect.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/effects/SkGradientShader.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/effects/SkTableMaskFilter.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/include/private/SkColorData.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkDeque.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkFixed.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkFloatingPoint.h + ../../../flutter/third_party/skia/LICENSE
@@ -692,6 +693,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/core/SkBlurMask.cpp + ../../../flu
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBlurMask.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBlurMaskFilterImpl.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkColor.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkColorData.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkColorFilter.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCoreBlitters.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkDescriptor.h + ../../../flutter/third_party/skia/LICENSE
@@ -801,7 +803,6 @@ FILE: ../../../flutter/third_party/skia/include/effects/SkDashPathEffect.h
 FILE: ../../../flutter/third_party/skia/include/effects/SkDiscretePathEffect.h
 FILE: ../../../flutter/third_party/skia/include/effects/SkGradientShader.h
 FILE: ../../../flutter/third_party/skia/include/effects/SkTableMaskFilter.h
-FILE: ../../../flutter/third_party/skia/include/private/SkColorData.h
 FILE: ../../../flutter/third_party/skia/include/private/base/SkDeque.h
 FILE: ../../../flutter/third_party/skia/include/private/base/SkFixed.h
 FILE: ../../../flutter/third_party/skia/include/private/base/SkFloatingPoint.h
@@ -840,6 +841,7 @@ FILE: ../../../flutter/third_party/skia/src/core/SkBlurMask.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkBlurMask.h
 FILE: ../../../flutter/third_party/skia/src/core/SkBlurMaskFilterImpl.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkColor.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkColorData.h
 FILE: ../../../flutter/third_party/skia/src/core/SkColorFilter.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkCoreBlitters.h
 FILE: ../../../flutter/third_party/skia/src/core/SkDescriptor.h
