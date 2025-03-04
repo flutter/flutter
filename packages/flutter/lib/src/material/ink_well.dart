@@ -366,7 +366,7 @@ class InkResponse extends StatelessWidget {
 
   /// Called when the user taps this part of the material with a secondary button.
   ///
-  /// The secondary button is typically accessed using the right mouse 
+  /// The secondary button is typically accessed using the right mouse
   /// button on desktop platforms such as Windows, macOS, and Linux.
   final GestureTapCallback? onSecondaryTap;
 
