@@ -38,6 +38,46 @@ import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
 
+bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
+  if (a == b) {
+    return true;
+  }
+  if ((a == null) != (b == null)) {
+    return false;
+  }
+  // They most both be non-null now.
+  if (a!.length != b!.length) {
+    return false;
+  }
+
+  if (a.length == 1) {
+    return a.first == b.first;
+  }
+
+  if (a.length == 2) {
+    return a.first == b.first && a.last == b.last || a.last == b.first && b.first == a.last;
+  }
+
+  // Complex cases.
+  final Map<T, int> wordCounts = <T, int>{};
+  for (final T word in a) {
+    int count = wordCounts[word] ?? 0;
+    wordCounts[word] = count + 1;
+  }
+
+  for (final T otherWord in b) {
+    int? count = wordCounts[otherWord];
+    if (count == null || count == 0) {
+      return false;
+    }
+    if (count == 1) {
+      wordCounts.remove(otherWord);
+    }
+    wordCounts[otherWord] = count - 1;
+  }
+  return wordCounts.isEmpty;
+}
+
 class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   const EngineAccessibilityFeatures(this._index);
 
@@ -239,6 +279,7 @@ class SemanticsNodeUpdate {
     required this.headingLevel,
     this.linkUrl,
     required this.role,
+    required this.controlsNodes,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -348,6 +389,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsRole role;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final List<String>? controlsNodes;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -672,6 +716,10 @@ abstract class SemanticRole {
     if (semanticsObject.isIdentifierDirty) {
       _updateIdentifier();
     }
+
+    if (semanticsObject.isControlsNodesDirty) {
+      _updateControls();
+    }
   }
 
   void _updateIdentifier() {
@@ -680,6 +728,24 @@ abstract class SemanticRole {
     } else {
       removeAttribute('flt-semantics-identifier');
     }
+  }
+
+  void _updateControls() {
+    if (semanticsObject.hasControlsNodes) {
+      final List<String> elementIds = <String>[];
+      for (final String identifier in semanticsObject.controlsNodes!) {
+        final Set<int>? semanticNodeIds = SemanticsObject.identifiersToIds[identifier];
+        if (semanticNodeIds == null) {
+          continue;
+        }
+        elementIds.addAll(semanticNodeIds.map<String>((int id) => 'flt-semantic-node-${id}'));
+      }
+      if (elementIds.isNotEmpty) {
+        setAttribute('aria-controls', elementIds.join(' '));
+        return;
+      }
+    }
+    removeAttribute('aria-controls');
   }
 
   /// Whether this role was disposed of.
@@ -862,6 +928,8 @@ abstract class SemanticBehavior {
 class SemanticsObject {
   /// Creates a semantics tree node with the given [id] and [owner].
   SemanticsObject(this.id, this.owner);
+
+  static final Map<String, Set<int>> identifiersToIds = <String, Set<int>>{};
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   int get flags => _flags;
@@ -1277,6 +1345,23 @@ class SemanticsObject {
   /// The role of this node.
   late ui.SemanticsRole role;
 
+  /// List of nodes whose contents are controlled by this node.
+  ///
+  /// The list contains [identifier]s of those nodes.
+  List<String>? controlsNodes;
+
+  /// Whether this object controls at least one node.
+  bool get hasControlsNodes => controlsNodes != null && controlsNodes!.isNotEmpty;
+
+  static const int _controlsNodesIndex = 1 << 27;
+
+  /// Whether the [controlsNodes] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isControlsNodesDirty => _isDirty(_controlsNodesIndex);
+  void _markControlsNodesDirty() {
+    _dirtyFields |= _controlsNodesIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1419,7 +1504,19 @@ class SemanticsObject {
     }
 
     if (_identifier != update.identifier) {
+      if (_identifier != null) {
+        final Set<int>? ids = identifiersToIds[_identifier];
+        if (ids != null) {
+          ids.remove(id);
+          if (ids.isEmpty) {
+            identifiersToIds.remove(_identifier);
+          }
+        }
+      }
       _identifier = update.identifier;
+      if (_identifier != null) {
+        identifiersToIds.putIfAbsent(_identifier!, () => <int>{}).add(id);
+      }
       _markIdentifierDirty();
     }
 
@@ -1564,6 +1661,11 @@ class SemanticsObject {
     }
 
     role = update.role;
+
+    if (!unorderedListEqual<String>(controlsNodes, update.controlsNodes)) {
+      controlsNodes = update.controlsNodes;
+      _markControlsNodesDirty();
+    }
 
     // Apply updates to the DOM.
     _updateRole();
