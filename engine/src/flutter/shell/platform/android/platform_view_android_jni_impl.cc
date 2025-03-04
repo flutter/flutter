@@ -1215,55 +1215,47 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   path_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
       env, env->FindClass("android/graphics/Path"));
   if (path_class->is_null()) {
-    env->ThrowNew(env->FindClass("java/lang/RuntimeException"),
-                  "Could not find android.graphics.Path class");
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path class";
     return false;
   }
 
   path_constructor = env->GetMethodID(path_class->obj(), "<init>", "()V");
   if (path_constructor == nullptr) {
-    env->ThrowNew(env->FindClass("java/lang/RuntimeException"),
-                  "Could not find Path constructor");
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path constructor";
     return false;
   }
 
   path_move_to_method = env->GetMethodID(path_class->obj(), "moveTo", "(FF)V");
   if (path_move_to_method == nullptr) {
-    env->ThrowNew(env->FindClass("java/lang/RuntimeException"),
-                  "Could not find moveTo method");
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path.moveTo method";
     return false;
   }
   path_line_to_method = env->GetMethodID(path_class->obj(), "lineTo", "(FF)V");
   if (path_line_to_method == nullptr) {
-    env->ThrowNew(env->FindClass("java/lang/RuntimeException"),
-                  "Could not find lineTo method");
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path.lineTo method";
     return false;
   }
   path_quad_to_method =
       env->GetMethodID(path_class->obj(), "quadTo", "(FFFF)V");
   if (path_quad_to_method == nullptr) {
-    env->ThrowNew(env->FindClass("java/lang/RuntimeException"),
-                  "Could not find quadTo method");
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path.quadTo method";
     return false;
   }
   path_cubic_to_method =
       env->GetMethodID(path_class->obj(), "cubicTo", "(FFFFFF)V");
   if (path_cubic_to_method == nullptr) {
-    env->ThrowNew(env->FindClass("java/lang/RuntimeException"),
-                  "Could not find cubicTo method");
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path.cubicTo method";
     return false;
   }
   path_conic_to_method =
       env->GetMethodID(path_class->obj(), "conicTo", "(FFFFF)V");
   if (path_conic_to_method == nullptr) {
-    env->ThrowNew(env->FindClass("java/lang/RuntimeException"),
-                  "Could not find conicTo method");
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path.conicTo method";
     return false;
   }
   path_close_method = env->GetMethodID(path_class->obj(), "close", "()V");
   if (path_close_method == nullptr) {
-    env->ThrowNew(env->FindClass("java/lang/RuntimeException"),
-                  "Could not find close method");
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path.close method";
     return false;
   }
 
