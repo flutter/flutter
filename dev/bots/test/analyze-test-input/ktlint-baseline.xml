@@ -18,6 +18,9 @@
     <file name="dev/integration_tests/spell_check/android/app/src/main/kotlin/com/example/sc_int_test/MainActivity.kt">
         <error line="1" column="9" source="standard:package-name" />
     </file>
+    <file name="dev/integration_tests/spell_check/android/app/src/main/kotlin/com/example/sc_int_test/MainApplication.kt">
+        <error line="5" column="9" source="standard:package-name" />
+    </file>
     <file name="dev/manual_tests/android/app/src/main/kotlin/dev/flutter/manual_tests/MainActivity.kt">
         <error line="1" column="9" source="standard:package-name" />
     </file>
