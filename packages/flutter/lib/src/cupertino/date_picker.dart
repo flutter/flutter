@@ -208,7 +208,7 @@ enum _PickerColumnType {
   // AM/PM column in time and dateAndTime mode.
   dayPeriod,
   // Two points column in time and dateAndTime mode.
-  twoPoints,
+  timeSeperator,
 }
 
 /// A date picker widget in iOS style.
@@ -359,7 +359,7 @@ class CupertinoDatePicker extends StatefulWidget {
        ),
        assert(
          (mode == CupertinoDatePickerMode.dateAndTime || mode == CupertinoDatePickerMode.time) ||
-             !showTimeSeperator,
+             showTimeSeperator,
          'showTimeSeperator is only supported in time or dateAndTime modes',
        );
 
@@ -445,7 +445,7 @@ class CupertinoDatePicker extends StatefulWidget {
 
   /// Whether to show the time separator between hour and minute in
   /// [CupertinoDatePickerMode.time] and [CupertinoDatePickerMode.dateAndTime] mode.
-  ///
+  /// throws an error if set to true in [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.monthYear] mode.
   /// Defaults to false.
   final bool showTimeSeperator;
 
@@ -563,7 +563,7 @@ class CupertinoDatePicker extends StatefulWidget {
         }
       case _PickerColumnType.year:
         longTexts.add(localizations.datePickerYear(2018));
-      case _PickerColumnType.twoPoints:
+      case _PickerColumnType.timeSeperator:
         longTexts.add(':');
     }
 
@@ -1067,18 +1067,20 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     TransitionBuilder itemPositioningBuilder,
     Widget? selectionOverlay,
   ) {
-    return CupertinoPicker(
-      offAxisFraction: offAxisFraction,
-      itemExtent: widget.itemExtent,
-      useMagnifier: _kUseMagnifier,
-      magnification: _kMagnification,
-      backgroundColor: widget.backgroundColor,
-      squeeze: _kSqueeze,
-      onSelectedItemChanged: (int index) {},
-      selectionOverlay: selectionOverlay,
-      children: List<Widget>.generate(1, (int index) {
-        return itemPositioningBuilder(context, Text(':', style: _themeTextStyle(context)));
-      }),
+    return ExcludeSemantics(
+      child: CupertinoPicker(
+        offAxisFraction: offAxisFraction,
+        itemExtent: widget.itemExtent,
+        useMagnifier: _kUseMagnifier,
+        magnification: _kMagnification,
+        backgroundColor: widget.backgroundColor,
+        squeeze: _kSqueeze,
+        onSelectedItemChanged: (int index) {},
+        selectionOverlay: selectionOverlay,
+        children: List<Widget>.generate(1, (int index) {
+          return itemPositioningBuilder(context, Text(':', style: _themeTextStyle(context)));
+        }),
+      ),
     );
   }
 
@@ -1157,7 +1159,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     // Adds time seperator column if the picker is showing time seperator.
     if (widget.showTimeSeperator) {
-      columnWidths.insert(1, _getEstimatedColumnWidth(_PickerColumnType.twoPoints));
+      columnWidths.insert(1, _getEstimatedColumnWidth(_PickerColumnType.timeSeperator));
       pickerBuilders.insert(1, _buildTimeSeperatorWidget);
     }
     // Adds am/pm column if the picker is not using 24h format.
@@ -1500,6 +1502,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         useMagnifier: _kUseMagnifier,
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
+        squeeze: _kSqueeze,
         onSelectedItemChanged: (int index) {
           selectedYear = index;
           if (_isCurrentDateValid) {

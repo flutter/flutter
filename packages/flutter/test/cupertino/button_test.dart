@@ -48,6 +48,17 @@ void main() {
     );
   });
 
+  testWidgets('Minimum size minimumSize parameter', (WidgetTester tester) async {
+    const Size size = Size(60.0, 100.0);
+    await tester.pumpWidget(
+      boilerplate(
+        child: const CupertinoButton(onPressed: null, minimumSize: size, child: SizedBox.shrink()),
+      ),
+    );
+    final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
+    expect(buttonBox.size, size);
+  });
+
   testWidgets('Size grows with text', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
@@ -584,6 +595,33 @@ void main() {
                 .decoration
             as BoxDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoButton.filled(
+          color: CupertinoColors.systemRed,
+          onPressed: () {},
+          child: Builder(
+            builder: (BuildContext context) {
+              textStyle = DefaultTextStyle.of(context).style;
+              return const Placeholder();
+            },
+          ),
+        ),
+      ),
+    );
+
+    decoration =
+        tester
+                .widget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(CupertinoButton),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
+    expect(decoration.color, isSameColorAs(CupertinoColors.systemRed));
   });
 
   testWidgets("All CupertinoButton const maps keys' match the available style sizes", (
@@ -845,6 +883,62 @@ void main() {
     expect(value, isFalse);
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump();
+    expect(value, isTrue);
+  });
+
+  testWidgets('Press and move on button and animation works', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(child: CupertinoButton(onPressed: () {}, child: const Text('Tap me'))),
+    );
+    final TestGesture gesture = await tester.startGesture(
+      tester.getTopLeft(find.byType(CupertinoButton)),
+    );
+    addTearDown(gesture.removePointer);
+    // Check opacity.
+    final FadeTransition opacity = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(FadeTransition)),
+    );
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 0.4);
+    final double moveDistance = CupertinoButton.tapMoveSlop();
+    await gesture.moveBy(Offset(0, -moveDistance + 1));
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 0.4);
+    await gesture.moveBy(const Offset(0, -2));
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 1.0);
+    await gesture.moveBy(const Offset(0, 1));
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 0.4);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('onPressed trigger takes into account MoveSlop.', (WidgetTester tester) async {
+    bool value = false;
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoButton(
+          onPressed: () {
+            value = true;
+          },
+          child: const Text('Tap me'),
+        ),
+      ),
+    );
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CupertinoButton)));
+    await gesture.moveTo(
+      tester.getBottomRight(find.byType(CupertinoButton)) +
+          Offset(0, CupertinoButton.tapMoveSlop()),
+    );
+    await gesture.up();
+    expect(value, isFalse);
+
+    gesture = await tester.startGesture(tester.getTopLeft(find.byType(CupertinoButton)));
+    await gesture.moveTo(
+      tester.getBottomRight(find.byType(CupertinoButton)) +
+          Offset(0, CupertinoButton.tapMoveSlop()),
+    );
+    await gesture.moveBy(const Offset(0, -1));
+    await gesture.up();
     expect(value, isTrue);
   });
 }

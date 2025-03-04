@@ -33,9 +33,18 @@ fi
 
 FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 
+# Generate a bin/cache directory, which won't initially exist for a fresh checkout.
+mkdir -p "$FLUTTER_ROOT/bin/cache"
+
+# On stable, beta, and release tags, the engine.version is tracked by git - do not override it.
+TRACKED_ENGINE="$(git -C "$FLUTTER_ROOT" ls-files bin/internal/engine.version)"
+if [[ -n "$TRACKED_ENGINE" ]]; then
+  cp $FLUTTER_ROOT/bin/internal/engine.version $FLUTTER_ROOT/bin/cache/engine.stamp
+  exit
+fi
+
 # Test for fusion repository and no environment variable override.
 if [ -z "$ENGINE_VERSION" ] && [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROOT/engine/src/.gn" ]; then
-  BRANCH=$(git -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)
   # In a fusion repository; the engine.version comes from the git hashes.
   if [ -z "${LUCI_CONTEXT}" ]; then
     set +e
@@ -54,12 +63,18 @@ if [ -z "$ENGINE_VERSION" ] && [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROO
   fi
 fi
 
-if [[ "$BRANCH" != "stable" && "$BRANCH" != "beta" ]]; then
-  # Write the engine version out so downstream tools know what to look for.
-  echo $ENGINE_VERSION > "$FLUTTER_ROOT/bin/internal/engine.version"
+# Write the engine version out so downstream tools know what to look for.
+echo $ENGINE_VERSION > "$FLUTTER_ROOT/bin/cache/engine.stamp"
+# TODO(matanlurey): Stop writing to internal/engine.version. https://github.com/flutter/flutter/issues/164315.
+echo $ENGINE_VERSION > "$FLUTTER_ROOT/bin/internal/engine.version"
 
-  # The realm on CI is passed in.
-  if [ -n "${FLUTTER_REALM}" ]; then
-    echo $FLUTTER_REALM > "$FLUTTER_ROOT/bin/internal/engine.realm"
-  fi
+# The realm on CI is passed in.
+if [ -n "${FLUTTER_REALM}" ]; then
+  echo $FLUTTER_REALM > "$FLUTTER_ROOT/bin/cache/engine.realm"
+  # TODO(matanlurey): Stop writing to internal/engine.realm. https://github.com/flutter/flutter/issues/164315.
+  echo $FLUTTER_REALM > "$FLUTTER_ROOT/bin/internal/engine.realm"
+else
+  echo "" > "$FLUTTER_ROOT/bin/cache/engine.realm"
+  # TODO(matanlurey): Stop writing to internal/engine.realm. https://github.com/flutter/flutter/issues/164315.
+  echo "" > "$FLUTTER_ROOT/bin/internal/engine.realm"
 fi

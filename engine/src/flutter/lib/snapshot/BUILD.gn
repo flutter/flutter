@@ -28,21 +28,25 @@ group("generate_snapshot_bins") {
     ":generate_snapshot_bin",
     ":kernel_platform_files",
   ]
+  public_deps = []
 
   # Build gen_snapshot for the currently specified target_cpu.
-  #
-  # For macOS target builds: needed for both target CPUs (arm64, x64).
-  # For iOS, Android target builds: all AOT target CPUs are arm/arm64.
   if (host_os == "mac" && (target_os == "mac" || target_os == "ios")) {
-    deps += [ ":create_macos_gen_snapshots" ]
+    # For macOS target builds: needed for both target CPUs (arm64, x64).
+    public_deps += [ ":create_macos_gen_snapshots" ]
   } else if (host_os == "mac" &&
              (target_cpu == "arm" || target_cpu == "arm64")) {
-    deps += [ ":create_arm_gen_snapshot" ]
+    # For iOS, Android target builds: all AOT target CPUs are arm/arm64.
+    public_deps += [ ":create_arm_gen_snapshot" ]
+  } else if (target_cpu == "arm" || target_cpu == "arm64" ||
+             target_cpu == "x64") {
+    # For other host OSes, build gen_snapshot directly.
+    public_deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
   }
 
   # Build analyze_snapshot for 64-bit target CPUs.
   if (host_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64")) {
-    deps += [ "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)" ]
+    public_deps += [ "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)" ]
   }
 }
 
@@ -173,7 +177,7 @@ if (host_os == "mac" && target_os != "mac" &&
 
     sources = [ "${host_output_dir}/gen_snapshot" ]
     outputs = [ "${host_output_dir}/gen_snapshot_${target_cpu_suffix}" ]
-    deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
+    public_deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
     visibility = [ ":*" ]
   }
 }

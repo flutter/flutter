@@ -31,7 +31,7 @@ namespace {
 // An EGL manager that initializes EGL but fails to create surfaces.
 class HalfBrokenEGLManager : public egl::Manager {
  public:
-  HalfBrokenEGLManager() : egl::Manager() {}
+  HalfBrokenEGLManager() : egl::Manager(egl::GpuPreference::NoPreference) {}
 
   std::unique_ptr<egl::WindowSurface>
   CreateWindowSurface(HWND hwnd, size_t width, size_t height) override {
@@ -422,6 +422,28 @@ TEST_F(WindowsTest, GetGraphicsAdapter) {
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
 }
 
+TEST_F(WindowsTest, GetGraphicsAdapterWithLowPowerPreference) {
+  std::optional<LUID> luid = egl::Manager::GetLowPowerGpuLuid();
+  if (!luid) {
+    GTEST_SKIP() << "Not able to find low power GPU, nothing to check.";
+  }
+
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetGpuPreference(FlutterDesktopGpuPreference::LowPowerPreference);
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+  auto view = FlutterDesktopViewControllerGetView(controller.get());
+
+  Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
+  dxgi_adapter = FlutterDesktopViewGetGraphicsAdapter(view);
+  ASSERT_NE(dxgi_adapter, nullptr);
+  DXGI_ADAPTER_DESC desc{};
+  ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
+  ASSERT_EQ(desc.AdapterLuid.HighPart, luid->HighPart);
+  ASSERT_EQ(desc.AdapterLuid.LowPart, luid->LowPart);
+}
+
 // Implicit view has the implicit view ID.
 TEST_F(WindowsTest, PluginRegistrarGetImplicitView) {
   auto& context = GetContext();
@@ -628,6 +650,35 @@ TEST_F(WindowsTest, AddRemoveView) {
       break;
     }
   }
+}
+
+TEST_F(WindowsTest, EngineId) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("testEngineId");
+
+  fml::AutoResetWaitableEvent latch;
+  std::optional<int64_t> engineId;
+  context.AddNativeFunction(
+      "NotifyEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        const auto argument = Dart_GetNativeArgument(args, 0);
+        if (!Dart_IsNull(argument)) {
+          const auto handle = tonic::DartConverter<int64_t>::FromDart(argument);
+          engineId = handle;
+        }
+        latch.Signal();
+      }));
+  // Create the implicit view.
+  ViewControllerPtr first_controller{builder.Run()};
+  ASSERT_NE(first_controller, nullptr);
+
+  latch.Wait();
+  EXPECT_TRUE(engineId.has_value());
+  if (!engineId.has_value()) {
+    return;
+  }
+  auto engine = FlutterDesktopViewControllerGetEngine(first_controller.get());
+  EXPECT_EQ(engine, FlutterDesktopEngineForId(*engineId));
 }
 
 }  // namespace testing

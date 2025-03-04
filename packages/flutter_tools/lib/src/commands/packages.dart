@@ -19,7 +19,6 @@ import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
 class PackagesCommand extends FlutterCommand {
@@ -244,7 +243,6 @@ class PackagesGetCommand extends FlutterCommand {
     argParser.addFlag('enforce-lockfile');
     argParser.addFlag('precompile');
     argParser.addFlag('major-versions');
-    argParser.addFlag('null-safety');
     argParser.addFlag('example', defaultsTo: true);
     argParser.addOption('sdk');
     argParser.addOption('path');
@@ -358,7 +356,6 @@ class PackagesGetCommand extends FlutterCommand {
       );
       // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) {
-      // ignore: avoid_catches_without_on_clauses
       final Duration elapsedDuration = timer.elapsed;
       analytics.send(
         Event.timing(
@@ -372,12 +369,25 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     if (rootProject != null) {
+      // TODO(matanlurey): https://github.com/flutter/flutter/issues/163774.
+      //
+      // `flutter packages get` inherently is neither a debug or release build,
+      // and since a future build (`flutter build apk`) will regenerate tooling
+      // anyway, we assume this is fine.
+      //
+      // It won't be if they do `flutter build --no-pub`, though.
+      const bool ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
+
       // We need to regenerate the platform specific tooling for both the project
       // itself and example(if present).
-      await rootProject.regeneratePlatformSpecificTooling();
+      await rootProject.regeneratePlatformSpecificTooling(
+        releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+      );
       if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
         final FlutterProject exampleProject = rootProject.example;
-        await exampleProject.regeneratePlatformSpecificTooling();
+        await exampleProject.regeneratePlatformSpecificTooling(
+          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+        );
       }
     }
 
@@ -396,36 +406,6 @@ class PackagesGetCommand extends FlutterCommand {
 
   late final String? _androidEmbeddingVersion =
       _rootProject?.android.getEmbeddingVersion().toString().split('.').last;
-
-  /// The pub packages usage values are incorrect since these are calculated/sent
-  /// before pub get completes. This needs to be performed after dependency resolution.
-  @override
-  Future<CustomDimensions> get usageValues async {
-    final FlutterProject? rootProject = _rootProject;
-    if (rootProject == null) {
-      return const CustomDimensions();
-    }
-
-    int numberPlugins;
-    // Do not send plugin analytics if pub has not run before.
-    final bool hasPlugins =
-        rootProject.flutterPluginsDependenciesFile.existsSync() &&
-        findPackageConfigFile(rootProject.directory) != null;
-    if (hasPlugins) {
-      // Do not fail pub get if package config files are invalid before pub has
-      // had a chance to run.
-      final List<Plugin> plugins = await _pluginsFound;
-      numberPlugins = plugins.length;
-    } else {
-      numberPlugins = 0;
-    }
-
-    return CustomDimensions(
-      commandPackagesNumberPlugins: numberPlugins,
-      commandPackagesProjectModule: rootProject.isModule,
-      commandPackagesAndroidEmbeddingVersion: _androidEmbeddingVersion,
-    );
-  }
 
   /// The pub packages usage values are incorrect since these are calculated/sent
   /// before pub get completes. This needs to be performed after dependency resolution.
