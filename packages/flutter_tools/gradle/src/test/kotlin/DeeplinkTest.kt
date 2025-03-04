@@ -44,7 +44,8 @@ class DeeplinkTest {
     fun canCreateDeeplinkJson() {
         val deeplink = Deeplink("scheme1", "host1", "path1", null)
         val linkJson = deeplink.toJson()
-
+        // Keys are not a reference because the key values are accessed
+        // across the gradle/dart boundery.
         assertTrue(linkJson.containsKey("scheme"))
         assertTrue(linkJson.containsKey("host"))
         assertTrue(linkJson.containsKey("path"))
@@ -58,7 +59,8 @@ class DeeplinkTest {
         intentFilterCheck.hasDefaultCategory = true
         val deeplink = Deeplink("scheme1", "host1", "path1", intentFilterCheck)
         val linkJson = deeplink.toJson()
-
+        // Keys are not a reference because the key values are accessed
+        // across the gradle/dart boundery.
         assertTrue(linkJson.containsKey("scheme"))
         assertTrue(linkJson.containsKey("host"))
         assertTrue(linkJson.containsKey("path"))

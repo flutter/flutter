@@ -38,6 +38,8 @@ class AppLinkSettingsTest {
 
         val settingsJson = appLinkSettings.toJson()
 
+        // Keys are not a reference because the key values are accessed
+        // across the gradle/dart boundery.
         assertTrue(settingsJson.containsKey("applicationId"))
         assertTrue(settingsJson.containsKey("deeplinkingFlagEnabled"))
         assertTrue(settingsJson.containsKey("deeplinks"))
