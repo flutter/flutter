@@ -612,10 +612,10 @@ class RenderTable extends RenderBox {
   }
 
   /// This method is overridden to build the semantics tree for the table
-  /// by generating nodes for rows and/or cells. Because table rows are not
-  /// RenderObjects, we must create their semantics nodes separately. If
-  /// a cell has a different semantic role, it is also wrapped in its own
-  /// new semantics node.
+  /// by generating nodes for rows and maybe cells. Because table rows are not
+  /// RenderObjects, we must create their semantics nodes separately. And if
+  /// a cell has a different semantic role, we create a new semantics node
+  /// to wrapp it.
   @override
   void assembleSemanticsNode(
     SemanticsNode node,
