@@ -26,8 +26,8 @@ val engineVersion =
         .get(
             flutterRoot.absolutePath,
             "bin",
-            "internal",
-            "engine.version"
+            "cache",
+            "engine.stamp"
         ).toFile()
         .readText()
         .trim()
@@ -37,7 +37,7 @@ var engineRealm =
         .get(
             flutterRoot.absolutePath,
             "bin",
-            "internal",
+            "cache",
             "engine.realm"
         ).toFile()
         .readText()
