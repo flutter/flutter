@@ -507,7 +507,7 @@ class HotRunner extends ResidentRunner {
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
       final int result = await assetBundle.build(
-        dartBuildResult: await runDartBuild(targetPlatform: targetPlatform),
+        dartHookResult: await runDartBuild(targetPlatform: targetPlatform),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         flavor: debuggingOptions.buildInfo.flavor,
       );

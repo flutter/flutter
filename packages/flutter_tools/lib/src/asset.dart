@@ -113,7 +113,7 @@ abstract class AssetBundle {
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
-    DartBuildResult? dartBuildResult,
+    DartHookResult? dartHookResult,
     String manifestPath = defaultManifestPath,
     required String packageConfigPath,
     bool deferredComponentsEnabled = false,
@@ -189,7 +189,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime? _lastBuildTimestamp;
 
-  DartBuildResult? _lastDartBuildResult;
+  DartHookResult? _lastBuildHookResult;
 
   // We assume the main asset is designed for a device pixel ratio of 1.0.
   static const String _kAssetManifestJsonFilename = 'AssetManifest.json';
@@ -211,12 +211,12 @@ class ManifestAssetBundle implements AssetBundle {
   @override
   bool needsBuild({String manifestPath = defaultManifestPath}) {
     if (!wasBuiltOnce() ||
-        _lastDartBuildResult == null ||
+        _lastBuildHookResult == null ||
         // We need to re-run the dart build.
-        !_lastDartBuildResult!.isBuildUpToDate(_fileSystem) ||
+        !_lastBuildHookResult!.isUpToDate(_fileSystem) ||
         // We don't have to re-run the dart build, but some files the dart build
         // wants us to bundle have changed contents.
-        _lastDartBuildResult!.isBuildOutputDirty(_fileSystem)) {
+        _lastBuildHookResult!.isOutputDirty(_fileSystem)) {
       return true;
     }
 
@@ -245,7 +245,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   Future<int> build({
-    DartBuildResult? dartBuildResult,
+    DartHookResult? dartHookResult,
     String manifestPath = defaultManifestPath,
     FlutterProject? flutterProject,
     required String packageConfigPath,
@@ -268,7 +268,7 @@ class ManifestAssetBundle implements AssetBundle {
     // hang on hot reload, as the incremental dill files will never be copied to the
     // device.
     _lastBuildTimestamp = DateTime.now();
-    _lastDartBuildResult = dartBuildResult;
+    _lastBuildHookResult = dartHookResult ?? DartHookResult.empty();
     if (flutterManifest.isEmpty) {
       entries[_kAssetManifestJsonFilename] = AssetBundleEntry(
         DevFSStringContent('{}'),
@@ -414,7 +414,7 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
 
-    for (final DataAsset dataAsset in dartBuildResult?.dataAssets ?? <DataAsset>[]) {
+    for (final DataAsset dataAsset in dartHookResult?.dataAssets ?? <DataAsset>[]) {
       final Package package = packageConfig[dataAsset.package]!;
       final Uri fileUri = dataAsset.file;
 

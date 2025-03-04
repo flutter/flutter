@@ -61,7 +61,7 @@ void main() {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.create(recursive: true);
 
-      await runFlutterSpecificDartBuild(
+      await runFlutterSpecificHooks(
         environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
