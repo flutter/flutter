@@ -658,18 +658,18 @@ class RenderTable extends RenderBox {
         // Assign the role cell to the child if it doesn't have a role.
         if (child.role == SemanticsRole.none) {
           child.role = SemanticsRole.cell;
-          continue;
         }
         // If the child is not a cell or columnHeader, create a new semantic node with role cell to wrap it.
         final bool addCellWrapper =
             child.role != SemanticsRole.cell && child.role != SemanticsRole.columnHeader;
 
         final SemanticsNode cell =
-            addCellWrapper ? child : SemanticsNode()
-              ..updateWith(
-                config: SemanticsConfiguration()..role = SemanticsRole.cell,
-                childrenInInversePaintOrder: <SemanticsNode>[child],
-              );
+            addCellWrapper
+                ? (SemanticsNode()..updateWith(
+                  config: SemanticsConfiguration()..role = SemanticsRole.cell,
+                  childrenInInversePaintOrder: <SemanticsNode>[child],
+                ))
+                : child;
 
         cell.indexInParent = x;
 
