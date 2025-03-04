@@ -2636,6 +2636,86 @@ void main() {
       await gesture.up();
     });
   });
+
+  group('Calendar Delegate', () {
+    testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DatePickerDialog(
+              initialDate: initialDate,
+              firstDate: firstDate,
+              lastDate: lastDate,
+            ),
+          ),
+        ),
+      );
+
+      final DatePickerDialog dialog = tester.widget(find.byType(DatePickerDialog));
+      expect(dialog.calendarDelegate, isA<GregorianCalendarDelegate>());
+    });
+
+    testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DatePickerDialog(
+              initialDate: initialDate,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final DatePickerDialog dialog = tester.widget(find.byType(DatePickerDialog));
+      expect(dialog.calendarDelegate, isA<TestCalendarDelegate>());
+    });
+
+    testWidgets('Displays calendar based on the calendar delegate', (WidgetTester tester) async {
+      Text getLastDayText() {
+        final Finder dayFinder = find.descendant(of: find.byType(Ink), matching: find.byType(Text));
+        return tester.widget(dayFinder.last);
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DatePickerDialog(
+              initialDate: initialDate,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final Finder nextMonthButton = find.byIcon(Icons.chevron_right);
+
+      Text lastDayText = getLastDayText();
+      expect(find.text('January 2016'), findsOneWidget);
+      expect(lastDayText.data, equals('28'));
+
+      await tester.tap(nextMonthButton);
+      await tester.pumpAndSettle();
+
+      lastDayText = getLastDayText();
+      expect(find.text('February 2016'), findsOneWidget);
+      expect(lastDayText.data, equals('21'));
+
+      await tester.tap(nextMonthButton);
+      await tester.pumpAndSettle();
+
+      lastDayText = getLastDayText();
+      expect(find.text('March 2016'), findsOneWidget);
+      expect(lastDayText.data, equals('28'));
+    });
+  });
 }
 
 class _RestorableDatePickerDialogTestWidget extends StatefulWidget {
@@ -2751,5 +2831,19 @@ class _DatePickerObserver extends NavigatorObserver {
       datePickerCount--;
     }
     super.didPop(route, previousRoute);
+  }
+}
+
+class TestCalendarDelegate extends GregorianCalendarDelegate {
+  const TestCalendarDelegate();
+
+  @override
+  int getDaysInMonth(int year, int month) {
+    return month.isEven ? 21 : 28;
+  }
+
+  @override
+  int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
+    return 1;
   }
 }
