@@ -4318,6 +4318,7 @@ class EditableTextState extends State<EditableText>
     _scrollToRevealScheduled = true;
 
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      _scrollToRevealScheduled = false;
       // Since we are in a post frame callback, check currentContext in case
       // RenderEditable has been disposed (in which case it will be null).
       final RenderEditable? renderEditable =
@@ -4328,6 +4329,9 @@ class EditableTextState extends State<EditableText>
       }
 
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(renderEditable.paintBounds);
+      final EdgeInsets caretPadding = widget.scrollPadding.copyWith(
+        bottom: widget.scrollPadding.bottom,
+      );
 
       _scrollController.animateTo(
         targetOffset.offset,
@@ -4335,7 +4339,11 @@ class EditableTextState extends State<EditableText>
         curve: _caretAnimationCurve,
       );
 
-      renderEditable.showOnScreen(rect: targetOffset.rect);
+      renderEditable.showOnScreen(
+        rect: caretPadding.inflateRect(targetOffset.rect),
+        duration: _caretAnimationDuration,
+        curve: _caretAnimationCurve,
+      );
     }, debugLabel: 'EditableText.scrollToReveal');
   }
 
