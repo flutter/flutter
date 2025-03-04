@@ -2824,10 +2824,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// child undergoes layout. Otherwise, the child can change its layout
   /// information without informing this render object.
   ///
-  /// It is recommended to establish / update the paint transform of this render
-  /// object in this method instead of [paint], such that certain render object
-  /// subclasses can change its layout based on the paint transform of an already
-  /// laid out subtree.
+  /// Some special [RenderObject] subclasses (such as the one used by
+  /// [OverlayPortal.overlayChildLayoutBuilder]) call [applyPaintTransform] in
+  /// their [performLayout] implementation. To ensure such [RenderObject]s get
+  /// the up-to-date paint transform, [RenderObject] subclasses should typically
+  /// update the paint transform (as reported by [applyPaintTransform]) in this
+  /// method instead of [paint].
   @protected
   void performLayout();
 

@@ -335,6 +335,11 @@ void main() {
   });
 
   test('Can schedule a frame callback with / without scheduling a new frame', () {
+    addTearDown(() {
+      PlatformDispatcher.instance
+        ..onBeginFrame = null
+        ..onDrawFrame = null;
+    });
     scheduler.handleBeginFrame(Duration.zero);
     scheduler.handleDrawFrame();
     bool callbackInvoked = false;

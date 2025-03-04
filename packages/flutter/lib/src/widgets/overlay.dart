@@ -30,21 +30,24 @@ import 'ticker_provider.dart';
 
 /// The signature of the widget builder callback used in
 /// [OverlayPortal.overlayChildLayoutBuilder].
-///
-/// {@template flutter.widgets.OverlayChildLayoutBuilder}
-/// The `childSize` parameter and the `overlaySize` parameter are the size of
-/// [OverlayPortal.child] and [Overlay] respectively, in their own coordinates.
-///
-/// The `childPaintTransform` parameter is the paint transform of
-/// [OverlayPortal.child], in the target [Overlay]'s coordinates.
-/// {@endtemplate}
 typedef OverlayChildLayoutBuilder =
-    Widget Function(
-      BuildContext context,
-      Size childSize,
-      Matrix4 childPaintTransform,
-      Size overlaySize,
-    );
+    Widget Function(BuildContext context, OverlayChildLayoutInfo info);
+
+/// The additional layout information available to the
+/// [OverlayPortal.overlayChildLayoutBuilder] callback.
+extension type OverlayChildLayoutInfo._(
+  (Size childSize, Matrix4 childPaintTransform, Size overlaySize) _info
+) {
+  /// The size of [OverlayPortal.child] in its own coordinates.
+  Size get childSize => _info.$1;
+
+  /// The paint transform of [OverlayPortal.child], in the target [Overlay]'s
+  /// coordinates.
+  Matrix4 get childPaintTransform => _info.$2;
+
+  /// The size of the target [Overlay] in its own coordinates.
+  Size get overlaySize => _info.$3;
+}
 
 // Examples can assume:
 // late BuildContext context;
@@ -1812,8 +1815,6 @@ class OverlayPortal extends StatefulWidget {
   /// at the same time resize itself base on how close it is to the edges of
   /// the [Overlay].
   ///
-  /// {@macro flutter.widgets.OverlayChildLayoutBuilder}
-  ///
   /// The `overlayChildBuilder` callback is called during layout. To ensure the
   /// paint transform of [OverlayPortal.child] in relation to the target
   /// [Overlay] is up-to-date by then, all [RenderObject]s between the
@@ -1832,8 +1833,7 @@ class OverlayPortal extends StatefulWidget {
   }) : this(
          key: key,
          controller: controller,
-         overlayChildBuilder:
-             (_) => _OverlayChildLayoutBuilder(userSuppliedBuilder: overlayChildBuilder),
+         overlayChildBuilder: (_) => _OverlayChildLayoutBuilder(builder: overlayChildBuilder),
          child: child,
        );
 
@@ -2478,7 +2478,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
       //
       //  1. this node will be laid out by the PipelineOwner *after* the two
       //     nodes it depends on (the theater and the layout surrogate) are
-      //     laid out.
+      //     laid out, as it has a greater depth value than its dependencies.
       //
       //  2. when the deferred child's child starts to do layout, the nodes
       //     from the layout surrogate to the theater (exclusive) have finishd
@@ -2498,6 +2498,8 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 
   @override
   void layout(Constraints constraints, {bool parentUsesSize = false}) {
+    // The `parentUsesSize` flag can be safely ignored since this render box is
+    // sized by the parent.
     _doLayoutFrom(parent!, constraints: constraints);
   }
 
@@ -2607,24 +2609,16 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   }
 }
 
-class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<(Size, Matrix4, Size)> {
-  const _OverlayChildLayoutBuilder({required this.userSuppliedBuilder});
-
-  final OverlayChildLayoutBuilder userSuppliedBuilder;
-
-  Widget _builder(BuildContext context, (Size, Matrix4, Size) layoutInfo) {
-    return userSuppliedBuilder(context, layoutInfo.$1, layoutInfo.$2, layoutInfo.$3);
-  }
+class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<OverlayChildLayoutInfo> {
+  const _OverlayChildLayoutBuilder({required this.builder});
 
   @override
-  Widget Function(BuildContext context, (Size, Matrix4, Size) layoutInfo) get builder => _builder;
-
+  final OverlayChildLayoutBuilder builder;
   @override
   RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
 
   @override
-  bool updateShouldRebuild(_OverlayChildLayoutBuilder oldWidget) =>
-      oldWidget.userSuppliedBuilder != userSuppliedBuilder;
+  bool updateShouldRebuild(_OverlayChildLayoutBuilder oldWidget) => oldWidget.builder != builder;
 }
 
 // A RenderBox that:
@@ -2636,7 +2630,7 @@ class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<(Size, Matrix4, S
 // Additionally, like RenderDeferredLayoutBox, this RenderBox also uses the Stack
 // layout algorithm so developers can use Positioned.
 class _RenderLayoutBuilder extends RenderProxyBox
-    with _RenderTheaterMixin, RenderConstrainedLayoutBuilder<(Size, Matrix4, Size), RenderBox> {
+    with _RenderTheaterMixin, RenderConstrainedLayoutBuilder<OverlayChildLayoutInfo, RenderBox> {
   @override
   Iterable<RenderBox> _childrenInPaintOrder() {
     final RenderBox? child = this.child;
@@ -2669,10 +2663,10 @@ class _RenderLayoutBuilder extends RenderProxyBox
 
   @protected
   @override
-  (Size, Matrix4, Size) get layoutInfo => _layoutInfo!;
+  OverlayChildLayoutInfo get layoutInfo => _layoutInfo!;
   // The size here is the child size of the regular child in its own parent's coordinates.
-  (Size, Matrix4, Size)? _layoutInfo;
-  (Size, Matrix4, Size) _computeNewLayoutInfo() {
+  OverlayChildLayoutInfo? _layoutInfo;
+  OverlayChildLayoutInfo _computeNewLayoutInfo() {
     final _RenderTheater theater = this.theater;
     final _RenderDeferredLayoutBox parent = this.parent! as _RenderDeferredLayoutBox;
     final _RenderLayoutSurrogateProxyBox layoutSurrogate = parent._layoutSurrogate;
@@ -2712,17 +2706,17 @@ class _RenderLayoutBuilder extends RenderProxyBox
     // uses the same coordinates as the theater.
     assert(getTransformTo(theater).isIdentity());
     assert(size == theater.debugSize);
-    return (
+    return OverlayChildLayoutInfo._((
       parent._layoutSurrogate.overlayPortalSize!,
       layoutSurrogate.getTransformTo(theater),
       size,
-    );
+    ));
   }
 
   int? _callbackId;
   @override
   void performLayout() {
-    final (Size, Matrix4, Size) newLayoutInfo = _computeNewLayoutInfo();
+    final OverlayChildLayoutInfo newLayoutInfo = _computeNewLayoutInfo();
     if (newLayoutInfo != _layoutInfo) {
       _layoutInfo = newLayoutInfo;
       rebuildIfNecessary();
@@ -2736,7 +2730,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
   }
 
   // This RenderObject is a child of _RenderDeferredLayouts which in turn is a
-  // child of _RenderTheater. None of them does speculative layout and
+  // child of _RenderTheater. None of them do speculative layout and
   // _RenderDeferredLayouts don't participate in _RenderTheater's intrinsics
   // calculations. Since the layout callback may mutate the live render tree
   // during layout, intrinsic calculations are neither available nor needed.

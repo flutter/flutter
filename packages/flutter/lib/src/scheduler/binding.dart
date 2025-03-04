@@ -580,10 +580,12 @@ mixin SchedulerBinding on BindingBase {
   /// Adds the given callback to the list of frame callbacks, and ensures that a
   /// frame is scheduled if the `scheduleNewFrame` argument is true.
   ///
+  /// The `scheduleNewFrame` argument dictates whether [scheduleFrame] should be
+  /// called to ensure a new frame. Defaults to true.
+  ///
   /// If this is called during the frame's animation phase (when transient frame
-  /// callbacks are still being invoked), a new frame will be scheduled, and
-  /// `callback` will be called in the newly scheduled frame, not in the current
-  /// frame.
+  /// callbacks are still being invoked), `callback` will be called in the next
+  /// frame, not in the current frame.
   ///
   /// If this is a one-off registration, ignore the `rescheduling` argument.
   ///

@@ -13,12 +13,11 @@ void main() {
     late StateSetter setState;
     Matrix4 transform = Matrix4.identity();
     late final OverlayEntry overlayEntry;
-    addTearDown(
-      () =>
-          overlayEntry
-            ..remove()
-            ..dispose(),
-    );
+    addTearDown(() {
+      overlayEntry
+        ..remove()
+        ..dispose();
+    });
 
     late Matrix4 paintTransform;
     late Size regularChildSize;
@@ -44,17 +43,15 @@ void main() {
                           controller: controller1,
                           overlayChildBuilder: (
                             BuildContext context,
-                            Size childSize,
-                            Matrix4 transform,
-                            Size theater,
+                            OverlayChildLayoutInfo layoutInfo,
                           ) {
-                            paintTransform = transform;
-                            regularChildSize = childSize;
+                            paintTransform = layoutInfo.childPaintTransform;
+                            regularChildSize = layoutInfo.childSize;
                             regularChildRectInTheater = MatrixUtils.transformRect(
                               paintTransform,
-                              Offset.zero & childSize,
+                              Offset.zero & layoutInfo.childSize,
                             );
-                            theaterSize = theater;
+                            theaterSize = layoutInfo.overlaySize;
                             return const SizedBox();
                           },
                           child: const SizedBox(width: 40, height: 50),
@@ -116,11 +113,9 @@ void main() {
                         controller: controller1,
                         overlayChildBuilder: (
                           BuildContext context,
-                          Size childSize,
-                          Matrix4 transform,
-                          Size theater,
+                          OverlayChildLayoutInfo layoutInfo,
                         ) {
-                          regularChildSize = childSize;
+                          regularChildSize = layoutInfo.childSize;
                           return const SizedBox();
                         },
                         child: SizedBox.fromSize(size: childSize),
@@ -162,7 +157,7 @@ void main() {
               builder: (BuildContext context) {
                 return OverlayPortal.overlayChildLayoutBuilder(
                   controller: controller1,
-                  overlayChildBuilder: (_, _, _, _) {
+                  overlayChildBuilder: (_, _) {
                     return Positioned(
                       left: 123.0,
                       top: 37.0,
@@ -197,13 +192,8 @@ void main() {
 
     late Matrix4 paintTransform;
 
-    Widget buildOverlayChild(
-      BuildContext context,
-      Size childSize,
-      Matrix4 transform,
-      Size theater,
-    ) {
-      paintTransform = transform;
+    Widget buildOverlayChild(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+      paintTransform = layoutInfo.childPaintTransform;
       return const SizedBox();
     }
 
@@ -267,13 +257,8 @@ void main() {
                   top: 20,
                   child: OverlayPortal.overlayChildLayoutBuilder(
                     controller: controller1,
-                    overlayChildBuilder: (
-                      BuildContext context,
-                      Size childSize,
-                      Matrix4 transform,
-                      Size theaterSize,
-                    ) {
-                      regularChildSize = childSize;
+                    overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+                      regularChildSize = layoutInfo.childSize;
                       return const SizedBox();
                     },
                     child: null,
@@ -308,14 +293,7 @@ void main() {
                   link: LayerLink(),
                   child: OverlayPortal.overlayChildLayoutBuilder(
                     controller: controller1,
-                    overlayChildBuilder: (
-                      BuildContext context,
-                      Size childSize,
-                      Matrix4 transform,
-                      Size theaterSize,
-                    ) {
-                      return const SizedBox();
-                    },
+                    overlayChildBuilder: (_, _) => const SizedBox(),
                     child: null,
                   ),
                 );
