@@ -5596,7 +5596,7 @@ class SemanticsConfiguration {
     if (_controlsNodes == null) {
       _controlsNodes = child._controlsNodes;
     } else if (child._controlsNodes != null) {
-      _controlsNodes!.addAll(child._controlsNodes!);
+      _controlsNodes = <String>{..._controlsNodes!, ...child._controlsNodes!};
     }
 
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
