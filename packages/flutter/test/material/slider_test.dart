@@ -1470,7 +1470,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Theme(
-            data: ThemeData.light(),
+            data: ThemeData(),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Material(child: Slider(value: 100.0, max: 200.0, onChanged: (double v) {})),
@@ -2006,7 +2006,7 @@ void main() {
 
   testWidgets('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     double value = 0.5;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -3395,8 +3395,8 @@ void main() {
     Widget buildFrame(ThemeMode themeMode) {
       return MaterialApp(
         themeMode: themeMode,
-        theme: ThemeData(brightness: Brightness.light, useMaterial3: true),
-        darkTheme: ThemeData(brightness: Brightness.dark, useMaterial3: true),
+        theme: ThemeData(brightness: Brightness.light),
+        darkTheme: ThemeData(brightness: Brightness.dark),
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
@@ -3956,7 +3956,7 @@ void main() {
   testWidgets(
     'Value indicator disappears after adjusting the slider on desktop',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
       const double currentValue = 0.5;
       await tester.pumpWidget(
         MaterialApp(
