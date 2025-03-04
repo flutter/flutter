@@ -453,7 +453,7 @@ class WebReleaseBundle extends Target {
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
 
-    final DartHookResult dartHookResult = await DartBuild.loadBuildResult(environment);
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       environment.outputDir.childDirectory('assets'),

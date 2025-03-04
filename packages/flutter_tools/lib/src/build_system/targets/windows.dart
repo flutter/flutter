@@ -142,7 +142,7 @@ abstract class BundleWindowsAssets extends Target {
           .childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-    final DartHookResult dartHookResult = await DartBuild.loadBuildResult(environment);
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       outputDirectory,

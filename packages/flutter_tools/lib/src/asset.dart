@@ -189,7 +189,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime? _lastBuildTimestamp;
 
-  DartHookResult? _lastBuildHookResult;
+  DartHookResult? _lastHookResult;
 
   // We assume the main asset is designed for a device pixel ratio of 1.0.
   static const String _kAssetManifestJsonFilename = 'AssetManifest.json';
@@ -211,12 +211,12 @@ class ManifestAssetBundle implements AssetBundle {
   @override
   bool needsBuild({String manifestPath = defaultManifestPath}) {
     if (!wasBuiltOnce() ||
-        _lastBuildHookResult == null ||
+        _lastHookResult == null ||
         // We need to re-run the dart build.
-        !_lastBuildHookResult!.isUpToDate(_fileSystem) ||
+        !_lastHookResult!.isUpToDate(_fileSystem) ||
         // We don't have to re-run the dart build, but some files the dart build
         // wants us to bundle have changed contents.
-        _lastBuildHookResult!.isOutputDirty(_fileSystem)) {
+        _lastHookResult!.isOutputDirty(_fileSystem)) {
       return true;
     }
 
@@ -268,7 +268,7 @@ class ManifestAssetBundle implements AssetBundle {
     // hang on hot reload, as the incremental dill files will never be copied to the
     // device.
     _lastBuildTimestamp = DateTime.now();
-    _lastBuildHookResult = dartHookResult ?? DartHookResult.empty();
+    _lastHookResult = dartHookResult ?? DartHookResult.empty();
     if (flutterManifest.isEmpty) {
       entries[_kAssetManifestJsonFilename] = AssetBundleEntry(
         DevFSStringContent('{}'),

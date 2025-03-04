@@ -494,7 +494,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(environment);
 
-    final DartHookResult dartHookResult = await DartBuild.loadBuildResult(environment);
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,

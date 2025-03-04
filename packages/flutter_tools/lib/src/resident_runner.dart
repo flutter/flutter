@@ -1218,7 +1218,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
     }
 
-    _dartHookResult = await DartBuild.loadBuildResult(_environment);
+    _dartHookResult = await DartBuild.loadHookResult(_environment);
     globals.printTrace('runDartBuild() - done');
     return _dartHookResult!;
   }
