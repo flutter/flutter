@@ -4,7 +4,6 @@
 
 #include "flutter/lib/ui/ui_dart_state.h"
 
-#include <iostream>
 #include <utility>
 
 #include "flutter/fml/message_loop.h"
@@ -12,15 +11,6 @@
 #include "flutter/lib/ui/window/platform_message.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_message_handler.h"
-
-#if defined(FML_OS_ANDROID)
-#include <android/log.h>
-#elif defined(FML_OS_IOS)
-extern "C" {
-// Cannot import the syslog.h header directly because of macro collision.
-extern void syslog(int, const char*, ...);
-}
-#endif
 
 using tonic::ToDart;
 
@@ -219,26 +209,6 @@ void UIDartState::LogMessage(const std::string& tag,
                              const std::string& message) const {
   if (log_message_callback_) {
     log_message_callback_(tag, message);
-  } else {
-    // Fall back to previous behavior if unspecified.
-#if defined(FML_OS_ANDROID)
-    __android_log_print(ANDROID_LOG_INFO, tag.c_str(), "%.*s",
-                        static_cast<int>(message.size()), message.c_str());
-#elif defined(FML_OS_IOS)
-    std::stringstream stream;
-    if (!tag.empty()) {
-      stream << tag << ": ";
-    }
-    stream << message;
-    std::string log = stream.str();
-    syslog(1 /* LOG_ALERT */, "%.*s", static_cast<int>(log.size()),
-           log.c_str());
-#else
-    if (!tag.empty()) {
-      std::cout << tag << ": ";
-    }
-    std::cout << message << std::endl;
-#endif
   }
 }
 
