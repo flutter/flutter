@@ -187,7 +187,7 @@ with. A typical example would be:
 ```yaml
 dependency_overrides:
   sky_engine:
-    path: /path/to/flutter/engine/out/host_debug/gen/dart-pkg/sky_engine
+    path: /path/to/flutter/engine/src/out/host_debug/gen/dart-pkg/sky_engine
 ```
 
 Replace `host_debug` with the actual build that you want to use (similar to `--local-engine`, but typically
