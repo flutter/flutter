@@ -30,6 +30,7 @@ import 'label_and_value.dart';
 import 'link.dart';
 import 'live_region.dart';
 import 'platform_view.dart';
+import 'requirable.dart';
 import 'route.dart';
 import 'scrollable.dart';
 import 'semantics_helper.dart';
@@ -466,6 +467,7 @@ abstract class SemanticRole {
     addLabelAndValue(preferredRepresentation: preferredLabelRepresentation);
     addSelectableBehavior();
     addExpandableBehavior();
+    addRequirableBehavior();
   }
 
   /// Initializes a blank role for a [semanticsObject].
@@ -634,6 +636,10 @@ abstract class SemanticRole {
 
   void addExpandableBehavior() {
     addSemanticBehavior(Expandable(semanticsObject, this));
+  }
+
+  void addRequirableBehavior() {
+    addSemanticBehavior(Requirable(semanticsObject, this));
   }
 
   /// Adds a semantic behavior to this role.
@@ -1958,6 +1964,22 @@ class SemanticsObject {
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
   bool get isSelected => hasFlag(ui.SemanticsFlag.isSelected);
+
+  /// If true, this node represents something that currently requires user input
+  /// before a form can be submitted.
+  ///
+  /// Requirability is managed by `aria-required` and is compatible with
+  /// multiple ARIA roles (checkbox, combobox, gridcell, listbox, radiogroup,
+  /// spinbutton, textbox, tree, etc). It is therefore mapped onto the
+  /// [Requirable] behavior.
+  ///
+  /// See also:
+  ///
+  ///   * [isRequired], which indicates whether the is currently required.
+  bool get isRequirable => hasFlag(ui.SemanticsFlag.hasRequiredState);
+
+  /// If [isRequirable] is true, indicates whether the node is required.
+  bool get isRequired => hasFlag(ui.SemanticsFlag.isRequired);
 
   /// If true, this node represents something that can be annotated as
   /// "expanded", such as a expansion tile or drop down menu

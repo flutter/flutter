@@ -249,6 +249,13 @@ typedef enum {
   /// The semantics node has the quality of either being "selected" or
   /// "not selected".
   kFlutterSemanticsFlagHasSelectedState = 1 << 28,
+  /// Whether a semantics node has the quality of being required.
+  kFlutterSemanticsFlagHasRequiredState = 1 << 29,
+  /// Whether user input is required on the semantics node before a form can be
+  /// submitted.
+  ///
+  /// Only applicable when kFlutterSemanticsFlagHasRequiredState flag is on.
+  kFlutterSemanticsFlagIsRequired = 1 << 30,
 } FlutterSemanticsFlag;
 
 typedef enum {
