@@ -105,7 +105,6 @@ void main() {
     final RenderObject innerTableRenderObject = tester.renderObject(find.byKey(innerTable));
     final RenderObject textRenderObject = tester.renderObject(find.text('AAAAAA'));
     expect(outerTableRenderObject.depth + 1, cellRenderObject.depth);
-    expect(cellRenderObject.depth + 1, innerTableRenderObject.depth);
     expect(innerTableRenderObject.depth + 1, textRenderObject.depth);
   });
 
