@@ -7,6 +7,7 @@ package io.flutter.plugin.view;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -70,7 +71,8 @@ public class SensitiveContentPluginTest {
 
   @Test
   @Config(maxSdk = 34)
-  public void setContentSensitivty_doesNotSetContentSensitivityAndThrowsErrorWhenRunningBelowApi35() {
+  public void
+      setContentSensitivty_doesNotSetContentSensitivityAndThrowsErrorWhenRunningBelowApi35() {
     final int fakeFlutterViewId = 56;
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
@@ -82,7 +84,7 @@ public class SensitiveContentPluginTest {
     sensitiveContentPlugin.setContentSensitivity(1, mockResult);
 
     verifyNoMoreInteractions(mockFlutterActivity);
-    verify(mockResult).error(anyString());
+    verify(mockResult).error(eq("error"), anyString(), isNull());
   }
 
   @Test
