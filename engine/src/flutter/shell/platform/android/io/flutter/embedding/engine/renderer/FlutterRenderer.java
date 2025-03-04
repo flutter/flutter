@@ -212,9 +212,7 @@ public class FlutterRenderer implements TextureRegistry {
     // version that is
     // running Vulkan, so we don't have to worry about it not being supported.
     final SurfaceProducer entry;
-    if (!debugForceSurfaceProducerGlTextures
-        && Build.VERSION.SDK_INT >= API_LEVELS.API_29
-        && !flutterJNI.ShouldDisableAHB()) {
+    if (!debugForceSurfaceProducerGlTextures && Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       final long id = nextTextureId.getAndIncrement();
       final ImageReaderSurfaceProducer producer = new ImageReaderSurfaceProducer(id);
       registerImageTexture(id, producer);
@@ -437,7 +435,15 @@ public class FlutterRenderer implements TextureRegistry {
           TextureRegistry.ImageConsumer,
           TextureRegistry.OnTrimMemoryListener {
     private static final String TAG = "ImageReaderSurfaceProducer";
-    private static final int MAX_IMAGES = 5;
+    private static final int MAX_IMAGES = 6;
+    // The ImageReaderSurfaceProducer must not close images until the renderer,
+    // either Skia OpenGL, Impeller OpenGL, or Impeller Vulkan is done reading
+    // from them. The Vulkan renderer allows up to two frames in flight before
+    // backpressure is applied. This implies that we may need to keep up to
+    // two images beyond the current image alive. Closing the images before
+    // the frame that references them has finished rendering can result in
+    // tearing or other incorrect rendering.
+    private static final int MAX_DEQUEUED_IMAGES = 2;
 
     // Flip when debugging to see verbose logs.
     private static final boolean VERBOSE_LOGS = false;
@@ -480,7 +486,7 @@ public class FlutterRenderer implements TextureRegistry {
     // REQUIRED: The following fields must only be accessed when lock is held.
     private final ArrayDeque<PerImageReader> imageReaderQueue = new ArrayDeque<>();
     private final HashMap<ImageReader, PerImageReader> perImageReaders = new HashMap<>();
-    private PerImage lastDequeuedImage = null;
+    private ArrayList<PerImage> lastDequeuedImage = new ArrayList<PerImage>();
     private PerImageReader lastReaderDequeuedFrom = null;
     private Callback callback = null;
 
@@ -664,22 +670,25 @@ public class FlutterRenderer implements TextureRegistry {
               lastDequeueTime = System.nanoTime();
             }
           }
-          if (lastDequeuedImage != null) {
+          while (lastDequeuedImage.size() > MAX_DEQUEUED_IMAGES) {
+            // We must keep the last image dequeued open until we are done presenting
+            // it. We have just dequeued a new image (r). Close the previously dequeued
+            // image. This is a very conservative check, we know based on the max frames
+            // in flight being 2 that dequing a 4th images implies that the driver is done
+            // reading from the 1st image.
+            PerImage last = lastDequeuedImage.remove(0);
             if (VERBOSE_LOGS) {
               Log.i(
                   TAG,
                   lastReaderDequeuedFrom.reader.hashCode()
                       + " closing image="
-                      + lastDequeuedImage.image.hashCode());
+                      + last.image.hashCode());
             }
-            // We must keep the last image dequeued open until we are done presenting
-            // it. We have just dequeued a new image (r). Close the previously dequeued
-            // image.
-            lastDequeuedImage.image.close();
+            last.image.close();
           }
           // Remember the last image and reader dequeued from. We do this because we must
           // keep both of these alive until we are done presenting the image.
-          lastDequeuedImage = r;
+          lastDequeuedImage.add(r);
           lastReaderDequeuedFrom = reader;
           break;
         }
@@ -739,9 +748,11 @@ public class FlutterRenderer implements TextureRegistry {
           pir.close();
         }
         perImageReaders.clear();
-        if (lastDequeuedImage != null) {
-          lastDequeuedImage.image.close();
-          lastDequeuedImage = null;
+        if (lastDequeuedImage.size() > 0) {
+          for (PerImage image : lastDequeuedImage) {
+            image.image.close();
+          }
+          lastDequeuedImage.clear();
         }
         if (lastReaderDequeuedFrom != null) {
           lastReaderDequeuedFrom.close();
@@ -959,6 +970,11 @@ public class FlutterRenderer implements TextureRegistry {
         }
       }
       return r;
+    }
+
+    @VisibleForTesting
+    public int pendingDequeuedImages() {
+      return lastDequeuedImage.size();
     }
   }
 
