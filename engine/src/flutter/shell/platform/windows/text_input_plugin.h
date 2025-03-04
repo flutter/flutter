@@ -103,7 +103,7 @@ class TextInputPlugin {
   int client_id_;
 
   // The active view id.
-  FlutterViewId view_id_;
+  FlutterViewId view_id_ = 0;
 
   // The active model. nullptr if not set.
   std::unique_ptr<TextInputModel> active_model_;
