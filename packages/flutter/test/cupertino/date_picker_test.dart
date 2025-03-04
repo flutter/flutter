@@ -2488,7 +2488,56 @@ void main() {
     expect(widths.indexOf(largestWidth), equals(1));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
-  // Regression test for https://github.com/flutter/flutter/issues/161773
+  testWidgets('showTimeSeperator is only supported in time or dateAndTime mode', (
+    WidgetTester tester,
+  ) async {
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.time,
+        onDateTimeChanged: (DateTime _) {},
+        showTimeSeperator: true,
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}, showTimeSeperator: true),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.date,
+        onDateTimeChanged: (DateTime _) {},
+        showTimeSeperator: true,
+      ),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError e) => e.message ?? 'Unknown error',
+          'message',
+          contains('showTimeSeperator is only supported in time or dateAndTime modes'),
+        ),
+      ),
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.monthYear,
+        onDateTimeChanged: (DateTime _) {},
+        showTimeSeperator: true,
+      ),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError e) => e.message ?? 'Unknown error',
+          'message',
+          contains('showTimeSeperator is only supported in time or dateAndTime modes'),
+        ),
+      ),
+    );
+
+    expect(() => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}), returnsNormally);
+  });
+
   testWidgets('CupertinoDatePicker date value baseline alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
