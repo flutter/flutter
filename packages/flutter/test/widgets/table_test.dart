@@ -76,7 +76,6 @@ void main() {
   testWidgets('Table widget calculate depth', (WidgetTester tester) async {
     final UniqueKey outerTable = UniqueKey();
     final UniqueKey innerTable = UniqueKey();
-    final UniqueKey cell = UniqueKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
