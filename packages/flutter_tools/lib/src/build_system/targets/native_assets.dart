@@ -13,51 +13,53 @@ import '../../dart/package_map.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
-import '../exceptions.dart';
 import 'common.dart';
 
+export '../../isolated/native_assets/native_assets.dart'
+    show CodeAsset, DartBuildResult, DataAsset, DynamicLoadingBundled;
+
 /// Runs the dart build of the app.
-abstract class DartBuild extends Target {
-  const DartBuild({@visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner})
-    : _buildRunner = buildRunner;
+class DartBuild extends Target {
+  const DartBuild({
+    @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
+    this.specifiedTargetPlatform,
+  }) : _buildRunner = buildRunner;
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
+
+  final TargetPlatform? specifiedTargetPlatform;
 
   @override
   Future<void> build(Environment environment) async {
     final FileSystem fileSystem = environment.fileSystem;
-    final String? nativeAssetsEnvironment = environment.defines[kNativeAssets];
-
     final DartBuildResult result;
-    if (nativeAssetsEnvironment == 'false') {
-      result = const DartBuildResult.empty();
-    } else {
-      final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
-      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        fileSystem.file(environment.packageConfigPath),
-        logger: environment.logger,
-      );
-      final Uri projectUri = environment.projectDir.uri;
-      final String? runPackageName =
-          packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
-      final FlutterNativeAssetsBuildRunner buildRunner =
-          _buildRunner ??
-          FlutterNativeAssetsBuildRunnerImpl(
-            environment.packageConfigPath,
-            packageConfig,
-            fileSystem,
-            environment.logger,
-            runPackageName!,
-          );
-      result = await runFlutterSpecificDartBuild(
-        environmentDefines: environment.defines,
-        buildRunner: buildRunner,
-        targetPlatform: targetPlatform,
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-      );
-    }
+    final TargetPlatform? targetPlatform =
+        specifiedTargetPlatform ?? _getTargetPlatformFromEnvironment(environment, name);
+
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      fileSystem.file(environment.packageConfigPath),
+      logger: environment.logger,
+    );
+    final Uri projectUri = environment.projectDir.uri;
+    final String? runPackageName =
+        packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
+    final FlutterNativeAssetsBuildRunner buildRunner =
+        _buildRunner ??
+        FlutterNativeAssetsBuildRunnerImpl(
+          environment.packageConfigPath,
+          packageConfig,
+          fileSystem,
+          environment.logger,
+          runPackageName!,
+        );
+    result = await runFlutterSpecificDartBuild(
+      environmentDefines: environment.defines,
+      buildRunner: buildRunner,
+      targetPlatform: targetPlatform,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+    );
 
     final File dartBuildResultJsonFile = environment.buildDir.childFile(dartBuildResultFilename);
     if (!dartBuildResultJsonFile.parent.existsSync()) {
@@ -106,10 +108,16 @@ abstract class DartBuild extends Target {
     final File dartBuildResultJsonFile = environment.buildDir.childFile(
       DartBuild.dartBuildResultFilename,
     );
+    if (!dartBuildResultJsonFile.existsSync()) {
+      return DartBuildResult.empty();
+    }
     return DartBuildResult.fromJson(
       json.decode(dartBuildResultJsonFile.readAsStringSync()) as Map<String, Object?>,
     );
   }
+
+  @override
+  List<Target> get dependencies => <Target>[];
 
   static const String dartBuildResultFilename = 'dart_build_result.json';
   static const String depFilename = 'dart_build.d';
@@ -134,7 +142,7 @@ class InstallCodeAssets extends Target {
   Future<void> build(Environment environment) async {
     final Uri projectUri = environment.projectDir.uri;
     final FileSystem fileSystem = environment.fileSystem;
-    final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
+    final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name)!;
 
     // We fetch the result from the [DartBuild].
     final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
@@ -188,10 +196,9 @@ class InstallCodeAssets extends Target {
   static const String depFilename = 'install_code_assets.d';
 }
 
-TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String name) {
+TargetPlatform? _getTargetPlatformFromEnvironment(Environment environment, String name) {
   final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
-  if (targetPlatformEnvironment == null) {
-    throw MissingDefineException(kTargetPlatform, name);
-  }
-  return getTargetPlatformForName(targetPlatformEnvironment);
+  return targetPlatformEnvironment != null
+      ? getTargetPlatformForName(targetPlatformEnvironment)
+      : null;
 }
