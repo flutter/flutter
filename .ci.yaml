@@ -374,7 +374,7 @@ targets:
       shard: analyze
       dependencies: >-
         [
-          {"dependency": "ktlint", "version": "version_1_1_1"}
+          {"dependency": "ktlint", "version": "version_1_5_0"}
         ]
       tags: >
         ["framework","hostonly","shard","linux"]
@@ -585,7 +585,9 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
+      # TODO(flutter/flutter#164140): Reduce timeout once customer
+      # tests are sharded.
+      test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
   - name: Linux docs_publish
     recipe: flutter/docs
