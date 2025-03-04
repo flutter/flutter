@@ -47,18 +47,31 @@ void main() async {
 
   test('verify that HCPP is supported and enabled', () async {
     final Map<String, Object?> response =
-    json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
 
     expect(response['supported'], true);
   }, timeout: Timeout.none);
 
   test('should screenshot a platform view with specified clippath', () async {
-    await expectLater(nativeDriver.screenshot(), matchesGoldenFile('$goldenPrefix.complex_clippath.png'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.complex_clippath.png'),
+    );
   }, timeout: Timeout.none);
 
-  test('should start with triangle cutoff on left, and toggle to no triangle cutoff on left', () async {
-    await expectLater(nativeDriver.screenshot(), matchesGoldenFile('$goldenPrefix.complex_clippath.png'));
-    await flutterDriver.tap(find.byValueKey('ToggleTriangleClipping'));
-    await expectLater(nativeDriver.screenshot(), matchesGoldenFile('$goldenPrefix.complex_clippath_no_triangle.png'));
-  }, timeout: Timeout.none);
+  test(
+    'should start with triangle cutoff on left, and toggle to no triangle cutoff on left',
+    () async {
+      await expectLater(
+        nativeDriver.screenshot(),
+        matchesGoldenFile('$goldenPrefix.complex_clippath.png'),
+      );
+      await flutterDriver.tap(find.byValueKey('ToggleTriangleClipping'));
+      await expectLater(
+        nativeDriver.screenshot(),
+        matchesGoldenFile('$goldenPrefix.complex_clippath_no_triangle.png'),
+      );
+    },
+    timeout: Timeout.none,
+  );
 }

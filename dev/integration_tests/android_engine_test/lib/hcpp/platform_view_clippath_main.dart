@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:convert';
 
 import 'package:android_driver_extensions/extension.dart';
@@ -38,12 +37,9 @@ final class _ComplicatedClipPathWrappedMainApp extends StatefulWidget {
   State<_ComplicatedClipPathWrappedMainApp> createState() {
     return _ComplicatedClipPathWrappedMainAppState();
   }
-
 }
 
-class _ComplicatedClipPathWrappedMainAppState
-    extends State<_ComplicatedClipPathWrappedMainApp> {
-
+class _ComplicatedClipPathWrappedMainAppState extends State<_ComplicatedClipPathWrappedMainApp> {
   final CustomClipper<Path> _triangleClipper = TriangleClipper();
   CustomClipper<Path>? _triangleOrEmpty = TriangleClipper();
 
@@ -91,7 +87,6 @@ class _ComplicatedClipPathWrappedMainAppState
       ),
     );
   }
-
 }
 
 // Clips to show the top half of the screen, with a cubic wave as the dividing
@@ -166,11 +161,11 @@ final class _HybridCompositionAndroidPlatformView extends StatelessWidget {
       },
       onCreatePlatformView: (PlatformViewCreationParams params) {
         return PlatformViewsService.initHybridAndroidView(
-          id: params.id,
-          viewType: viewType,
-          layoutDirection: TextDirection.ltr,
-          creationParamsCodec: const StandardMessageCodec(),
-        )
+            id: params.id,
+            viewType: viewType,
+            layoutDirection: TextDirection.ltr,
+            creationParamsCodec: const StandardMessageCodec(),
+          )
           ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
           ..create();
       },
