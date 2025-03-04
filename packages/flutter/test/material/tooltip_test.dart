@@ -3390,6 +3390,65 @@ void main() {
 
     await gesture.removePointer();
   });
+
+  testWidgets('Tooltip should pass its default text style down to widget spans', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Tooltip(
+          key: tooltipKey,
+          richMessage: const WidgetSpan(child: Text(tooltipText)),
+          child: Container(width: 100.0, height: 100.0, color: Colors.green[500]),
+        ),
+      ),
+    );
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2));
+
+    final Finder defaultTextStyle = find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(DefaultTextStyle),
+    );
+    final DefaultTextStyle textStyle = tester.widget<DefaultTextStyle>(defaultTextStyle.first);
+    expect(textStyle.style.color, Colors.white);
+    expect(textStyle.style.fontFamily, 'Roboto');
+    expect(textStyle.style.decoration, TextDecoration.none);
+    expect(
+      textStyle.style.debugLabel,
+      '((englishLike bodyMedium 2021).merge((blackMountainView bodyMedium).apply)).copyWith',
+    );
+  });
+
+  testWidgets('Tooltip should apply provided text style to rich messages', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    const TextStyle expectedTextStyle = TextStyle(color: Colors.orange);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Tooltip(
+          key: tooltipKey,
+          richMessage: const TextSpan(text: tooltipText),
+          textStyle: expectedTextStyle,
+          child: Container(width: 100.0, height: 100.0, color: Colors.green[500]),
+        ),
+      ),
+    );
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2));
+
+    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
+    final Finder defaultTextStyleFinder = find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(DefaultTextStyle),
+    );
+    final TextStyle defaultTextStyle =
+        tester.widget<DefaultTextStyle>(defaultTextStyleFinder.first).style;
+    expect(textStyle, same(expectedTextStyle));
+    expect(defaultTextStyle, same(expectedTextStyle));
+  });
 }
 
 Future<void> setWidgetForTooltipMode(

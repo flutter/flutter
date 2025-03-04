@@ -191,12 +191,6 @@ class Tooltip extends StatefulWidget {
   }) : assert(
          (message == null) != (richMessage == null),
          'Either `message` or `richMessage` must be specified',
-       ),
-       assert(
-         richMessage == null || textStyle == null,
-         'If `richMessage` is specified, `textStyle` will have no effect. '
-         'If you wish to provide a `textStyle` for a rich tooltip, add the '
-         '`textStyle` directly to the `richMessage` InlineSpan.',
        );
 
   /// The text to display in the tooltip.
@@ -978,8 +972,8 @@ class _TooltipOverlay extends StatelessWidget {
     this.padding,
     this.margin,
     this.decoration,
-    this.textStyle,
-    this.textAlign,
+    required this.textStyle,
+    required this.textAlign,
     required this.animation,
     required this.target,
     required this.verticalOffset,
@@ -994,8 +988,8 @@ class _TooltipOverlay extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final Decoration? decoration;
-  final TextStyle? textStyle;
-  final TextAlign? textAlign;
+  final TextStyle textStyle;
+  final TextAlign textAlign;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
@@ -1011,7 +1005,8 @@ class _TooltipOverlay extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: height),
         child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.bodyMedium!,
+          style: textStyle,
+          textAlign: textAlign,
           child: Semantics(
             container: true,
             child: Container(
