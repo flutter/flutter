@@ -641,6 +641,9 @@ class RenderTable extends RenderBox {
       // The list of cells of this Row.
       final List<SemanticsNode> cells = <SemanticsNode>[];
 
+      // Use two index to loop. x is the index of the cell in the row, cellIndex is the index of the
+      // cell in the table's children. Use two index because each row may have different number of visible
+      // cells and thus different number of children in the semantics tree.
       for (int x = 0; x < columns && cellIndex < children.length; x++, cellIndex++) {
         // Get the cell at the current index.
         final SemanticsNode cell = children.elementAt(cellIndex);
