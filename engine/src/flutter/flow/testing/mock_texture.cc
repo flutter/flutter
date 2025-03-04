@@ -33,16 +33,16 @@ MockTexture::MockTexture(int64_t textureId, const sk_sp<DlImage>& texture)
     : Texture(textureId), texture_(texture) {}
 
 void MockTexture::Paint(PaintContext& context,
-                        const SkRect& bounds,
+                        const DlRect& bounds,
                         bool freeze,
                         const DlImageSampling sampling) {
   // MockTexture objects that are not painted are allowed to have a null
   // texture, but when we get to this method we must have a non-null texture.
   FML_DCHECK(texture_ != nullptr);
-  SkRect src = SkRect::Make(texture_->bounds());
+  DlRect src = DlRect::Make(texture_->GetBounds());
   if (freeze) {
-    FML_DCHECK(src.width() > 2.0f && src.height() > 2.0f);
-    src = src.makeInset(1.0f, 1.0f);
+    FML_DCHECK(src.GetWidth() > 2.0f && src.GetHeight() > 2.0f);
+    src = src.Expand(-1.0f, -1.0f);
   }
   context.canvas->DrawImageRect(texture_, src, bounds, sampling, context.paint);
 }

@@ -281,6 +281,7 @@ enum SemanticsRole {
   loadingSpinner,
   progressBar,
   hotKey,
+  radioGroup,
 }
 
 // When adding a new StringAttributeType, the classes in these file must be
