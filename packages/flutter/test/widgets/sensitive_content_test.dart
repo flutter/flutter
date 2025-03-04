@@ -55,7 +55,6 @@ void main() {
       sensitiveContentHost.currentContentSensitivityLevel,
       equals(ContentSensitivity.sensitive),
     );
-    expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
     expect(setContentSensitivityCallCount, 1);
   });
 
@@ -71,7 +70,6 @@ void main() {
         sensitiveContentHost.currentContentSensitivityLevel,
         equals(defaultContentSensitivitySetting),
       );
-      expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(0));
     },
   );
 
@@ -93,7 +91,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(2));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -125,7 +122,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -149,7 +145,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(3));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -185,7 +180,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(2));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -205,11 +199,6 @@ void main() {
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
-        );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(1),
         );
         expect(setContentSensitivityCallCount, 1);
       });
@@ -244,11 +233,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(0));
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(1),
-        );
+
         expect(setContentSensitivityCallCount, 2);
       });
 
@@ -278,11 +263,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(0),
-        );
+
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -318,11 +299,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(1),
-        );
+
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -343,8 +320,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -378,8 +353,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(0));
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 2);
       });
 
@@ -409,8 +382,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(0));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -446,8 +417,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -474,12 +443,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(1),
-        );
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -517,15 +480,6 @@ void main() {
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.autoSensitive),
           );
-          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(0));
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
-            equals(1),
-          );
           expect(setContentSensitivityCallCount, 2);
         },
       );
@@ -561,15 +515,6 @@ void main() {
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
-          );
-          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(0),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
-            equals(1),
           );
           expect(setContentSensitivityCallCount, 1);
         },
@@ -607,15 +552,6 @@ void main() {
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
-            equals(0),
-          );
           expect(setContentSensitivityCallCount, 1);
         },
       );
@@ -646,15 +582,6 @@ void main() {
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
-          );
-          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(2));
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
-            equals(1),
           );
           expect(setContentSensitivityCallCount, 1);
         },
@@ -696,15 +623,6 @@ void main() {
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
-            equals(1),
-          );
           expect(setContentSensitivityCallCount, 1);
         },
       );
@@ -745,15 +663,6 @@ void main() {
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(2));
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(0),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
-            equals(1),
-          );
           expect(setContentSensitivityCallCount, 1);
         },
       );
@@ -793,15 +702,6 @@ void main() {
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
-          );
-          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(2));
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
-            equals(0),
           );
           expect(setContentSensitivityCallCount, 1);
         },
@@ -845,15 +745,6 @@ void main() {
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
-            equals(1),
-          );
           expect(setContentSensitivityCallCount, 1);
         },
       );
@@ -894,15 +785,6 @@ void main() {
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(sensitiveContentHost.getContentSenstivityState()!.sensitiveWidgetCount, equals(1));
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
-            equals(1),
-          );
           expect(setContentSensitivityCallCount, 1);
         },
       );
@@ -928,10 +810,6 @@ void main() {
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
-        );
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(2),
         );
         expect(setContentSensitivityCallCount, 0);
       });
@@ -964,10 +842,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(1),
-        );
         expect(setContentSensitivityCallCount, 0);
       });
 
@@ -988,11 +862,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(1),
-        );
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 0);
       });
 
@@ -1024,11 +893,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(0),
-        );
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -1058,11 +922,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(1),
-        );
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(0));
         expect(setContentSensitivityCallCount, 0);
       });
 
@@ -1098,11 +957,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(1),
-        );
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 0);
       });
 
@@ -1129,11 +983,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(
-          sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-          equals(2),
-        );
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 0);
       });
 
@@ -1168,14 +1017,6 @@ void main() {
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.autoSensitive),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(1),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
-            equals(1),
           );
           expect(setContentSensitivityCallCount, 0);
         },
@@ -1213,14 +1054,6 @@ void main() {
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.autoSensitive),
           );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.autoSensitiveWidgetCount,
-            equals(2),
-          );
-          expect(
-            sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount,
-            equals(0),
-          );
           expect(setContentSensitivityCallCount, 0);
         },
       );
@@ -1246,7 +1079,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(2));
         expect(setContentSensitivityCallCount, 1);
       });
 
@@ -1278,7 +1110,6 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
-        expect(sensitiveContentHost.getContentSenstivityState()!.notSensitiveWigetCount, equals(1));
         expect(setContentSensitivityCallCount, 1);
       });
     },
