@@ -304,6 +304,18 @@ FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetViewById(
   return HandleForView(registrar->engine->view(view_id));
 }
 
+bool FlutterDesktopPluginRegistrarGetID3D11Device(
+    FlutterDesktopPluginRegistrarRef registrar,
+    FlutterID3D11DeviceRef* device) {
+  ID3D11Device* d3d_device;
+  if (reinterpret_cast<flutter::FlutterWindowsEngine*>(registrar->engine)
+          ->GetID3D11Device(d3d_device)) {
+    device = reinterpret_cast<FlutterID3D11DeviceRef*>(&d3d_device);
+    return true;
+  }
+  return false;
+}
+
 void FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate(
     FlutterDesktopPluginRegistrarRef registrar,
     FlutterDesktopWindowProcCallback delegate,

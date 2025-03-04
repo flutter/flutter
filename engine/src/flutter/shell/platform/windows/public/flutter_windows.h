@@ -28,6 +28,10 @@ typedef struct FlutterDesktopViewController* FlutterDesktopViewControllerRef;
 struct FlutterDesktopView;
 typedef struct FlutterDesktopView* FlutterDesktopViewRef;
 
+// Opaque reference to a Flutter's ID3D11Device.
+struct FlutterID3D11Device;
+typedef struct FlutterID3D11Device* FlutterID3D11DeviceRef;
+
 // Opaque reference to a Flutter engine instance.
 struct FlutterDesktopEngine;
 typedef struct FlutterDesktopEngine* FlutterDesktopEngineRef;
@@ -129,6 +133,11 @@ FLUTTER_EXPORT void FlutterDesktopViewControllerDestroy(
 // Returns the view controller's view ID.
 FLUTTER_EXPORT FlutterDesktopViewId FlutterDesktopViewControllerGetViewId(
     FlutterDesktopViewControllerRef view_controller);
+
+// assign the D3D11 device associated with the engine to the given pointer
+FLUTTER_EXPORT bool FlutterDesktopPluginRegistrarGetID3D11Device(
+    FlutterDesktopPluginRegistrarRef registrar,
+    FlutterID3D11DeviceRef* device);
 
 // Returns the handle for the engine running in FlutterDesktopViewControllerRef.
 //
