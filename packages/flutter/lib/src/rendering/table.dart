@@ -611,7 +611,11 @@ class RenderTable extends RenderBox {
     config.explicitChildNodes = true;
   }
 
-  /// Overrides this method to create semantics nodes for rows between table and table cells.
+  /// This method is overridden to build the semantics tree for the table
+  /// by generating nodes for rows and/or cells. Because table rows are not
+  /// RenderObjects, we must create their semantics nodes separately. If
+  /// a cell has a different semantic role, it is also wrapped in its own
+  /// new semantics node.
   @override
   void assembleSemanticsNode(
     SemanticsNode node,
