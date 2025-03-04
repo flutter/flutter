@@ -8,6 +8,7 @@ import("//flutter/build/bin_to_obj.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/lib/snapshot/gen_snapshot.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/version/version.gni")
@@ -166,7 +167,7 @@ source_set("flutter_shell_native_src") {
     "//flutter/shell/platform/android/surface",
     "//flutter/shell/platform/android/surface:native_window",
     "//flutter/skia",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
     "//flutter/vulkan",
   ]
 
@@ -691,7 +692,10 @@ if (target_cpu != "x86") {
     # The output gen_snapshot binary name in the archive.
     gen_snapshot_dest = "gen_snapshot"
 
-    if (host_os == "win") {
+    if (host_os == "mac") {
+      gen_snapshot_src =
+          rebase_path("$root_out_dir/gen_snapshot${gen_snapshot_suffix}")
+    } else if (host_os == "win") {
       gen_snapshot_src = rebase_path("$root_out_dir/gen_snapshot.exe")
       gen_snapshot_dest = "gen_snapshot.exe"
     }
