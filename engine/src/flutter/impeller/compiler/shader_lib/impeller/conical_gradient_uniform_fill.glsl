@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef CONICAL_GRADIENT_UNIFORM_FILL_GLSL_
+#define CONICAL_GRADIENT_UNIFORM_FILL_GLSL_
+
 precision highp float;
 
-#include <impeller/color.glsl>
-#include <impeller/dithering.glsl>
-#include <impeller/gradient.glsl>
 #include <impeller/texture.glsl>
-#include <impeller/types.glsl>
 
 uniform FragInfo {
   highp vec2 center;
@@ -24,14 +23,7 @@ uniform FragInfo {
 }
 frag_info;
 
-highp in vec2 v_position;
-
-out vec4 frag_color;
-
-void main() {
-  vec2 res = IPComputeConicalT(frag_info.focus, frag_info.focus_radius,
-                               frag_info.center, frag_info.radius, v_position);
-
+vec4 DoConicalGradientUniformFill(vec2 res) {
   float t = res.x;
   vec4 result_color = vec4(0);
   if (res.y < 0.0 ||
@@ -64,5 +56,8 @@ void main() {
     }
   }
 
-  frag_color = IPPremultiply(result_color) * frag_info.alpha;
+  result_color = IPPremultiply(result_color) * frag_info.alpha;
+  return result_color;
 }
+
+#endif  // CONICAL_GRADIENT_UNIFORM_FILL_GLSL_
