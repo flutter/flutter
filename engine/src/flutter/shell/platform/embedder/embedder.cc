@@ -2093,6 +2093,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     settings.root_isolate_create_callback =
         [callback, user_data](const auto& isolate) { callback(user_data); };
   }
+
+  // Wire up callback for engine and print logging.
   if (SAFE_ACCESS(args, log_message_callback, nullptr) != nullptr) {
     FlutterLogMessageCallback callback =
         SAFE_ACCESS(args, log_message_callback, nullptr);
@@ -2101,7 +2103,17 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                                         const std::string& message) {
       callback(tag.c_str(), message.c_str(), user_data);
     };
+  } else {
+    settings.log_message_callback = [](const std::string& tag,
+                                       const std::string& message) {
+      // Fall back to logging to stdout if unspecified.
+      if (tag.empty()) {
+        std::cout << tag << ": ";
+      }
+      std::cout << message << std::endl;
+    };
   }
+
   if (SAFE_ACCESS(args, log_tag, nullptr) != nullptr) {
     settings.log_tag = SAFE_ACCESS(args, log_tag, nullptr);
   }
@@ -2408,6 +2420,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       arguments[i] = std::string{args->dart_entrypoint_argv[i]};
     }
     run_configuration.SetEntrypointArgs(std::move(arguments));
+  }
+
+  if (SAFE_ACCESS(args, engine_id, 0) != 0) {
+    run_configuration.SetEngineId(args->engine_id);
   }
 
   if (!run_configuration.IsValid()) {
