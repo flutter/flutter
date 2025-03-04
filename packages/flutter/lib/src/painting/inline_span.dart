@@ -95,8 +95,8 @@ class InlineSpanSemanticsInformation {
 
   /// True if this configuration should get its own semantics node.
   ///
-  /// This will be the case of the [recognizer] is not null, of if
-  /// [isPlaceholder] is true or if [semanticsIdentifier] has a value.
+  /// This will be the case if the [recognizer] is not null, or if
+  /// [isPlaceholder] is true, or if [semanticsIdentifier] has a value.
   final bool requiresOwnNode;
 
   /// The string attributes attached to this semantics information

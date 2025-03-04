@@ -159,7 +159,9 @@ void main() {
       ),
     );
     expect(find.text('Hello, 1 new semantics node has been created.'), findsOneWidget);
-    final SemanticsNode node = tester.getSemantics(find.text('Hello, 1 new semantics node has been created.'));
+    final SemanticsNode node = tester.getSemantics(
+      find.text('Hello, 1 new semantics node has been created.'),
+    );
     final Map<String, String> labelToNodeId = <String, String>{};
     node.visitChildren((SemanticsNode node) {
       labelToNodeId[node.label] = node.identifier;

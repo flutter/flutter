@@ -17,14 +17,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugDumpSemanticsTree();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final TextStyle? bodyStyle = Theme.of(context).textTheme.bodyLarge;
     final TextStyle customStyle1 = Theme.of(
