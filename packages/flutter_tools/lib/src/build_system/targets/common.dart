@@ -84,7 +84,7 @@ class CopyFlutterBundle extends Target {
           .file(isolateSnapshotData)
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
-    final DartHookResult dartHookResult = await DartBuild.loadBuildResult(environment);
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       environment.outputDir,

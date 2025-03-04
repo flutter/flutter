@@ -273,7 +273,7 @@ class CopyAssets extends Target {
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory output = environment.buildDir.childDirectory('flutter_assets');
     output.createSync(recursive: true);
-    final DartHookResult dartHookResult = await DartBuild.loadBuildResult(environment);
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       output,

@@ -31,7 +31,7 @@ import 'windows/native_assets.dart';
 export 'package:native_assets_cli/code_assets_builder.dart' show CodeAsset, DynamicLoadingBundled;
 export 'package:native_assets_cli/data_assets_builder.dart' show DataAsset;
 
-/// The assets produced by a Dart hooks and the dependencies of those assets.
+/// The assets produced by a Dart hook run and the dependencies of those assets.
 ///
 /// If any of the dependencies change, then the Dart build should be performed
 /// again.

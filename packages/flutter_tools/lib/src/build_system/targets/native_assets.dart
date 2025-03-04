@@ -103,7 +103,7 @@ class DartBuild extends Target {
 
   /// Dependent build [Target]s can use this to consume the result of the
   /// [DartBuild] target.
-  static Future<DartHookResult> loadBuildResult(Environment environment) async {
+  static Future<DartHookResult> loadHookResult(Environment environment) async {
     final File dartHookResultJsonFile = environment.buildDir.childFile(
       DartBuild.dartHookResultFilename,
     );
@@ -144,7 +144,7 @@ class InstallCodeAssets extends Target {
     final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
     // We fetch the result from the [DartBuild].
-    final DartHookResult dartHookResult = await DartBuild.loadBuildResult(environment);
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
 
     // And install/copy the code assets to the right place and create a
     // native_asset.yaml that can be used by the final AOT compilation.
