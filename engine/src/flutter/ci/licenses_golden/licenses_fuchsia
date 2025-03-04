@@ -1,4 +1,4 @@
-Signature: 84a1d347677a5adab5d42ccec8cce8b7
+Signature: 4d2db19e29e44496cc0476ae998ce226
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -16041,6 +16041,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/overview.fidl +
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.bus/platform-bus.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/platform-device.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spi.businfo/businfo.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/image_format.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -16394,6 +16395,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.bus/platform-bus.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/platform-device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spi.businfo/businfo.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/image_format.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/overview.fidl
@@ -17028,8 +17030,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/zircon/availab
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/zircon/availability_levels.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/zircon/availability_levels.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/availability_levels.inc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service_watcher.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/service_watcher.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/directory_watcher.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/directory_watcher.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_fake_bti_cpp/fake-bti.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_fake_bti_cpp/include/lib/driver/fake-bti/cpp/fake-bti.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_fake_mmio_reg_cpp/fake-mmio-reg.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -17141,8 +17143,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/zircon/availabil
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/zircon/availability_levels.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/zircon/availability_levels.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/availability_levels.inc
-FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service_watcher.h
-FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/service_watcher.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/directory_watcher.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/directory_watcher.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_fake_bti_cpp/fake-bti.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_fake_bti_cpp/include/lib/driver/fake-bti/cpp/fake-bti.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_fake_mmio_reg_cpp/fake-mmio-reg.cc
