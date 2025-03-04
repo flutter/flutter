@@ -4,6 +4,10 @@
 
 package com.flutter.gradle
 
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+
 // TODO(gmackall): Identify which of these can be val instead of var.
 class Deeplink(
     var scheme: String?,
@@ -27,4 +31,12 @@ class Deeplink(
     }
 
     override fun hashCode(): Int = scheme.hashCode() + host.hashCode() + path.hashCode()
+
+    fun toJson(): JsonObject =
+        buildJsonObject {
+            put("scheme", scheme)
+            put("host", host)
+            put("path", path)
+            intentFilterCheck?.let { put("intentFilterCheck", it.toJson()) }
+        }
 }
