@@ -431,6 +431,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
   const MacOSBundleFlutterAssets();
 
   @override
+  List<Target> get dependencies => const <Target>[DartBuildForNative()];
+
+  @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
     ...IconTreeShaker.inputs,
@@ -491,9 +494,11 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(environment);
 
+    final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
+      dartBuildResult: dartBuildResult,
       targetPlatform: TargetPlatform.darwin,
       buildMode: buildMode,
       flavor: flavor,
@@ -613,11 +618,12 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   String get name => 'debug_macos_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-    DebugMacOSFramework(),
-    DebugUnpackMacOS(),
-    InstallCodeAssets(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const KernelSnapshot(),
+    const DebugMacOSFramework(),
+    const DebugUnpackMacOS(),
+    const InstallCodeAssets(),
   ];
 
   @override
@@ -659,10 +665,11 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   String get name => 'profile_macos_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    CompileMacOSFramework(),
-    InstallCodeAssets(),
-    ProfileUnpackMacOS(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const CompileMacOSFramework(),
+    const ProfileUnpackMacOS(),
+    const InstallCodeAssets(),
   ];
 
   @override

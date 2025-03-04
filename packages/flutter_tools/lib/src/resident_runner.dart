@@ -24,6 +24,7 @@ import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
+import 'build_system/targets/native_assets.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
@@ -1050,7 +1051,34 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
   BuildResult? _lastBuild;
-  Environment? _environment;
+
+  late final Environment _environment = Environment(
+    artifacts: globals.artifacts!,
+    logger: globals.logger,
+    cacheDir: globals.cache.getRoot(),
+    engineVersion: globals.flutterVersion.engineRevision,
+    fileSystem: globals.fs,
+    flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+    outputDir: globals.fs.directory(getBuildDirectory()),
+    processManager: globals.processManager,
+    platform: globals.platform,
+    analytics: globals.analytics,
+    projectDir: globals.fs.currentDirectory,
+    packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
+    generateDartPluginRegistry: generateDartPluginRegistry,
+    defines: <String, String>{
+      // Needed for Dart plugin registry generation.
+      kTargetFile: mainPath,
+      kBuildMode: debuggingOptions.buildInfo.mode.cliName,
+    },
+  );
+
+  /// The result of the last dart build. Will be populated in
+  /// [runDartBuild].
+  DartBuildResult? _dartBuildResult;
+
+  /// The last dart build's result.
+  DartBuildResult? get dartBuildResult => _dartBuildResult;
 
   @override
   bool hotMode;
@@ -1148,26 +1176,6 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> runSourceGenerators() async {
-    _environment ??= Environment(
-      artifacts: globals.artifacts!,
-      logger: globals.logger,
-      cacheDir: globals.cache.getRoot(),
-      engineVersion: globals.flutterVersion.engineRevision,
-      fileSystem: globals.fs,
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      outputDir: globals.fs.directory(getBuildDirectory()),
-      processManager: globals.processManager,
-      platform: globals.platform,
-      analytics: globals.analytics,
-      projectDir: globals.fs.currentDirectory,
-      packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-      generateDartPluginRegistry: generateDartPluginRegistry,
-      defines: <String, String>{
-        // Needed for Dart plugin registry generation.
-        kTargetFile: mainPath,
-      },
-    );
-
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
       globals.buildTargets.generateLocalizationsTarget,
       globals.buildTargets.dartPluginRegistrantTarget,
@@ -1175,7 +1183,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
     _lastBuild = await globals.buildSystem.buildIncremental(
       compositeTarget,
-      _environment!,
+      _environment,
       _lastBuild,
     );
     if (!_lastBuild!.success) {
@@ -1187,6 +1195,32 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
     }
     globals.printTrace('complete');
+  }
+
+  Future<DartBuildResult> runDartBuild({required TargetPlatform targetPlatform}) async {
+    globals.printTrace('runDartBuild() with ${_environment.defines} and $targetPlatform');
+    if (_dartBuildResult?.isBuildUpToDate(globals.fs) ?? false) {
+      globals.printTrace('runDartBuild() - up-to-date already');
+      return _dartBuildResult!;
+    }
+    globals.printTrace('runDartBuild() - will perform dart build');
+
+    final BuildResult lastBuild = await globals.buildSystem.build(
+      DartBuild(specifiedTargetPlatform: targetPlatform),
+      _environment,
+    );
+    if (!lastBuild.success) {
+      for (final ExceptionMeasurement exceptionMeasurement in lastBuild.exceptions.values) {
+        globals.printError(
+          exceptionMeasurement.exception.toString(),
+          stackTrace: globals.logger.isVerbose ? exceptionMeasurement.stackTrace : null,
+        );
+      }
+    }
+
+    _dartBuildResult = await DartBuild.loadBuildResult(_environment);
+    globals.printTrace('runDartBuild() - done');
+    return _dartBuildResult!;
   }
 
   @protected
