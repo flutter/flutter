@@ -20,6 +20,7 @@ import '../vector_math.dart';
 import '../window.dart';
 import 'accessibility.dart';
 import 'checkable.dart';
+import 'expandable.dart';
 import 'focusable.dart';
 import 'header.dart';
 import 'heading.dart';
@@ -366,6 +367,9 @@ enum EngineSemanticsRole {
   /// Contains editable text.
   textField,
 
+  /// A group of radio buttons.
+  radioGroup,
+
   /// A control that has a checked state, such as a check box or a radio button.
   checkable,
 
@@ -461,6 +465,7 @@ abstract class SemanticRole {
     addRouteName();
     addLabelAndValue(preferredRepresentation: preferredLabelRepresentation);
     addSelectableBehavior();
+    addExpandableBehavior();
   }
 
   /// Initializes a blank role for a [semanticsObject].
@@ -625,6 +630,10 @@ abstract class SemanticRole {
     if (semanticsObject.isSelectable && !semanticsObject.isCheckable) {
       addSemanticBehavior(Selectable(semanticsObject, this));
     }
+  }
+
+  void addExpandableBehavior() {
+    addSemanticBehavior(Expandable(semanticsObject, this));
   }
 
   /// Adds a semantic behavior to this role.
@@ -1776,6 +1785,8 @@ class SemanticsObject {
         return EngineSemanticsRole.row;
       case ui.SemanticsRole.columnHeader:
         return EngineSemanticsRole.columnHeader;
+      case ui.SemanticsRole.radioGroup:
+        return EngineSemanticsRole.radioGroup;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.searchBox:
@@ -1831,6 +1842,7 @@ class SemanticsObject {
       EngineSemanticsRole.scrollable => SemanticScrollable(this),
       EngineSemanticsRole.incrementable => SemanticIncrementable(this),
       EngineSemanticsRole.button => SemanticButton(this),
+      EngineSemanticsRole.radioGroup => SemanticRadioGroup(this),
       EngineSemanticsRole.checkable => SemanticCheckable(this),
       EngineSemanticsRole.route => SemanticRoute(this),
       EngineSemanticsRole.image => SemanticImage(this),
@@ -1946,6 +1958,19 @@ class SemanticsObject {
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
   bool get isSelected => hasFlag(ui.SemanticsFlag.isSelected);
+
+  /// If true, this node represents something that can be annotated as
+  /// "expanded", such as a expansion tile or drop down menu
+  ///
+  /// Expandability is managed by `aria-expanded`.
+  ///
+  /// See also:
+  ///
+  ///   * [isExpanded], which indicates whether the node is currently selected.
+  bool get isExpandable => hasFlag(ui.SemanticsFlag.hasExpandedState);
+
+  /// Indicates whether the node is currently expanded.
+  bool get isExpanded => hasFlag(ui.SemanticsFlag.isExpanded);
 
   /// Role-specific adjustment of the vertical position of the child container.
   ///

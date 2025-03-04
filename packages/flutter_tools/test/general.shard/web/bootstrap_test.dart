@@ -62,7 +62,6 @@ void main() {
   test('generateMainModule removes timeout from requireJS', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
     );
 
@@ -83,7 +82,6 @@ void main() {
   test('generateMainModule hides requireJS injected by DDC', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
     );
     expect(
@@ -101,7 +99,6 @@ void main() {
   test('generateMainModule embeds urls correctly', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
     );
     // bootstrap main module has correct defined module.
@@ -117,7 +114,6 @@ void main() {
   test('generateMainModule can set bootstrap name', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
       bootstrapModule: 'foo_module.bootstrap',
     );
@@ -134,22 +130,18 @@ void main() {
   test('generateMainModule includes null safety switches', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: true,
       nativeNullAssertions: true,
     );
 
-    expect(result, contains('''dart_sdk.dart.nonNullAsserts(true);'''));
     expect(result, contains('''dart_sdk.dart.nativeNonNullAsserts(true);'''));
   });
 
   test('generateMainModule can disable null safety switches', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
     );
 
-    expect(result, contains('''dart_sdk.dart.nonNullAsserts(false);'''));
     expect(result, contains('''dart_sdk.dart.nativeNonNullAsserts(false);'''));
   });
 
@@ -157,7 +149,6 @@ void main() {
     const String root = 'http://localhost:12345';
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
       loaderRootDirectory: root,
     );
@@ -271,7 +262,6 @@ void main() {
     test('generateDDCLibraryBundleMainModule embeds the entrypoint correctly', () {
       final String result = generateDDCLibraryBundleMainModule(
         entrypoint: 'main.js',
-        nullAssertions: false,
         nativeNullAssertions: false,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
       );
@@ -283,24 +273,20 @@ void main() {
     test('generateDDCLibraryBundleMainModule includes null safety switches', () {
       final String result = generateDDCLibraryBundleMainModule(
         entrypoint: 'main.js',
-        nullAssertions: true,
         nativeNullAssertions: true,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
       );
 
-      expect(result, contains('nonNullAsserts: true'));
       expect(result, contains('nativeNonNullAsserts: true'));
     });
 
     test('generateDDCLibraryBundleMainModule can disable null safety switches', () {
       final String result = generateDDCLibraryBundleMainModule(
         entrypoint: 'main.js',
-        nullAssertions: false,
         nativeNullAssertions: false,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
       );
 
-      expect(result, contains('nonNullAsserts: false'));
       expect(result, contains('nativeNonNullAsserts: false'));
     });
 
