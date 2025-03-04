@@ -880,7 +880,6 @@ perfetto
 shaderc
 spirv-cross
 swiftshader
-txt
 vulkan
 vulkan-headers
 vulkan-utility-libraries
@@ -24167,7 +24166,6 @@ accessibility
 engine
 spring_animation
 tonic
-txt
 web_test_fonts
 web_unicode
 
