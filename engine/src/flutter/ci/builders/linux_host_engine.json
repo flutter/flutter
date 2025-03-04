@@ -98,7 +98,7 @@
                 "--no-goma"
             ],
             "name": "ci/host_release",
-            "description": "Produces release mode Linux host-side tooling.",
+            "description": "Produces flutter_patched_sdk_product.zip shared by all Flutter release builds.",
             "ninja": {
                 "config": "ci/host_release",
                 "targets": [
