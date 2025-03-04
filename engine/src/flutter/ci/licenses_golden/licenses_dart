@@ -1,4 +1,4 @@
-Signature: bb042bae00f88159712b2037c6869d01
+Signature: 84f86b2f50789f61cb66540906661036
 
 ====================================================================================================
 LIBRARY: dart
@@ -3716,7 +3716,6 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/regexp_patc
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/simd_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/stack_trace_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/stopwatch_patch.dart + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/symbol_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/timer_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/type.dart + ../../../flutter/third_party/dart/LICENSE
@@ -3787,7 +3786,6 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/regexp_patch.
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/simd_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/stack_trace_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/stopwatch_patch.dart
-FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/symbol_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/timer_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/type.dart
@@ -3882,6 +3880,7 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/simd.dart +
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_buffer_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_helper.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/sync_star_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/typed_data.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/wasm_types_patch.dart + ../../../flutter/third_party/dart/LICENSE
@@ -3944,6 +3943,7 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/simd.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_buffer_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_helper.dart
+FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/sync_star_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/typed_data.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/wasm_types_patch.dart
@@ -4860,7 +4860,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/7ceb3be8ed0a744b3ac2c363aab977f39051cc86
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/d70b123c77d4115f332652c9bb21ac46a2456889
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
