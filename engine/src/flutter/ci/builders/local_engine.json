@@ -355,6 +355,39 @@
         "debug",
         "--unoptimized",
         "--android",
+        "--android-cpu=arm",
+        "--no-stripped",
+        "--no-lto",
+        "--xcode-symlinks",
+        "--rbe",
+        "--no-goma"
+      ],
+      "name": "macos/android_debug_unopt",
+      "description": "Builds a debug mode unopt engine that targets 32-bit arm Android from a macOS host.",
+      "ninja": {
+        "config": "android_debug_unopt",
+        "targets": []
+      },
+      "properties": {
+        "$flutter/osx_sdk": {
+          "sdk_version": "15a240d"
+        }
+      }
+    },
+    {
+      "cas_archive": false,
+      "drone_dimensions": [
+        "os=Mac-13|Mac-14",
+        "device_type=none"
+      ],
+      "gclient_variables": {
+        "use_rbe": true
+      },
+      "gn": [
+        "--runtime-mode",
+        "debug",
+        "--unoptimized",
+        "--android",
         "--android-cpu=arm64",
         "--no-stripped",
         "--no-lto",

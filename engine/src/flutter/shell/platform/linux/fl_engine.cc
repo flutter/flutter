@@ -97,11 +97,6 @@ struct _FlEngine {
   FlEnginePlatformMessageHandler platform_message_handler;
   gpointer platform_message_handler_data;
   GDestroyNotify platform_message_handler_destroy_notify;
-
-  // Function to call when a semantic node is received.
-  FlEngineUpdateSemanticsHandler update_semantics_handler;
-  gpointer update_semantics_handler_data;
-  GDestroyNotify update_semantics_handler_destroy_notify;
 };
 
 G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
@@ -109,7 +104,7 @@ G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
 static void fl_engine_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
 
-enum { SIGNAL_ON_PRE_ENGINE_RESTART, LAST_SIGNAL };
+enum { SIGNAL_ON_PRE_ENGINE_RESTART, SIGNAL_UPDATE_SEMANTICS, LAST_SIGNAL };
 
 static guint fl_engine_signals[LAST_SIGNAL];
 
@@ -389,10 +384,7 @@ static void fl_engine_update_semantics_cb(const FlutterSemanticsUpdate2* update,
                                           void* user_data) {
   FlEngine* self = FL_ENGINE(user_data);
 
-  if (self->update_semantics_handler != nullptr) {
-    self->update_semantics_handler(self, update,
-                                   self->update_semantics_handler_data);
-  }
+  g_signal_emit(self, fl_engine_signals[SIGNAL_UPDATE_SEMANTICS], 0, update);
 }
 
 static void setup_keyboard(FlEngine* self) {
@@ -505,13 +497,6 @@ static void fl_engine_dispose(GObject* object) {
   self->platform_message_handler_data = nullptr;
   self->platform_message_handler_destroy_notify = nullptr;
 
-  if (self->update_semantics_handler_destroy_notify) {
-    self->update_semantics_handler_destroy_notify(
-        self->update_semantics_handler_data);
-  }
-  self->update_semantics_handler_data = nullptr;
-  self->update_semantics_handler_destroy_notify = nullptr;
-
   G_OBJECT_CLASS(fl_engine_parent_class)->dispose(object);
 }
 
@@ -530,6 +515,9 @@ static void fl_engine_class_init(FlEngineClass* klass) {
   fl_engine_signals[SIGNAL_ON_PRE_ENGINE_RESTART] = g_signal_new(
       "on-pre-engine-restart", fl_engine_get_type(), G_SIGNAL_RUN_LAST, 0,
       nullptr, nullptr, nullptr, G_TYPE_NONE, 0);
+  fl_engine_signals[SIGNAL_UPDATE_SEMANTICS] = g_signal_new(
+      "update-semantics", fl_engine_get_type(), G_SIGNAL_RUN_LAST, 0, nullptr,
+      nullptr, nullptr, G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 
 static void fl_engine_init(FlEngine* self) {
@@ -557,6 +545,7 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
   g_return_val_if_fail(FL_IS_RENDERER(renderer), nullptr);
 
   FlEngine* self = FL_ENGINE(g_object_new(fl_engine_get_type(), nullptr));
+
   self->project = FL_DART_PROJECT(g_object_ref(project));
   self->renderer = FL_RENDERER(g_object_ref(renderer));
   if (binary_messenger != nullptr) {
@@ -568,9 +557,17 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
   self->keyboard_manager = fl_keyboard_manager_new(self);
   self->mouse_cursor_handler =
       fl_mouse_cursor_handler_new(self->binary_messenger);
+  self->windowing_handler = fl_windowing_handler_new(self);
+
   fl_renderer_set_engine(self->renderer, self);
 
   return self;
+}
+
+FlEngine* fl_engine_for_id(int64_t id) {
+  void* engine = reinterpret_cast<void*>(id);
+  g_return_val_if_fail(FL_IS_ENGINE(engine), nullptr);
+  return FL_ENGINE(engine);
 }
 
 FlEngine* fl_engine_new_with_renderer(FlDartProject* project,
@@ -661,6 +658,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       dart_entrypoint_args != nullptr ? g_strv_length(dart_entrypoint_args) : 0;
   args.dart_entrypoint_argv =
       reinterpret_cast<const char* const*>(dart_entrypoint_args);
+  args.engine_id = reinterpret_cast<int64_t>(self);
 
   FlutterCompositor compositor = {};
   compositor.struct_size = sizeof(FlutterCompositor);
@@ -707,7 +705,6 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   fl_settings_handler_start(self->settings_handler, settings);
 
   self->platform_handler = fl_platform_handler_new(self->binary_messenger);
-  self->windowing_handler = fl_windowing_handler_new(self);
 
   setup_keyboard(self);
 
@@ -836,23 +833,6 @@ void fl_engine_set_platform_message_handler(
   self->platform_message_handler = handler;
   self->platform_message_handler_data = user_data;
   self->platform_message_handler_destroy_notify = destroy_notify;
-}
-
-void fl_engine_set_update_semantics_handler(
-    FlEngine* self,
-    FlEngineUpdateSemanticsHandler handler,
-    gpointer user_data,
-    GDestroyNotify destroy_notify) {
-  g_return_if_fail(FL_IS_ENGINE(self));
-
-  if (self->update_semantics_handler_destroy_notify) {
-    self->update_semantics_handler_destroy_notify(
-        self->update_semantics_handler_data);
-  }
-
-  self->update_semantics_handler = handler;
-  self->update_semantics_handler_data = user_data;
-  self->update_semantics_handler_destroy_notify = destroy_notify;
 }
 
 // Note: This function can be called from any thread.

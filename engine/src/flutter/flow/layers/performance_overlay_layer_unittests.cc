@@ -219,12 +219,6 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
   ImageSizeTextBlobInspector inspector;
   display_list()->Dispatch(inspector);
 
-  // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the
-  // performance overlay can use Fuchsia's font manager instead of the empty
-  // default.
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "Expectation requires a valid default font manager";
-#endif  // OS_FUCHSIA
   ASSERT_EQ(inspector.sizes().size(), 0u);
   ASSERT_EQ(inspector.text_blobs().size(), 1u);
   ASSERT_EQ(inspector.text_positions().size(), 1u);
