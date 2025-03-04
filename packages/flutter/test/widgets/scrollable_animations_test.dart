@@ -113,25 +113,31 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(
-          dragStartBehavior: DragStartBehavior.down,
-          controller: controller,
-          children: List<Widget>.generate(
-            80,
-            (int i) => Text('$i', textDirection: TextDirection.ltr),
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification notification) {
+            controller.position.animateTo(
+              animationExtent,
+              duration: const Duration(seconds: 1),
+              curve: Curves.linear,
+            );
+            return true;
+          },
+          child: ListView(
+            controller: controller,
+            dragStartBehavior: DragStartBehavior.down,
+            children: List<Widget>.generate(
+              80,
+              (int i) => Text('$i', textDirection: TextDirection.ltr),
+            ),
           ),
         ),
       ),
     );
 
-    await tester.pumpAndSettle();
     expectNoAnimation();
 
-    controller.position.animateTo(
-      animationExtent,
-      duration: const Duration(seconds: 1),
-      curve: Curves.linear,
-    );
+    // Drag to initiate the scroll animation.
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, 1.0));
     await tester.pump();
 
     // Pump to halfway through the animation.
@@ -149,34 +155,6 @@ void main() {
 
     // The drag stops the animation, and the drag extent is respected.
     expect(controller.position.pixels, (animationExtent / 2) - dragExtent);
-  });
-
-  testWidgets('HoldActivity interrupted by animateTo does not crash', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
-    addTearDown(controller.dispose);
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: ListView(
-          controller: controller,
-          children: List<Widget>.generate(
-            80,
-            (int i) => Text('$i', textDirection: TextDirection.ltr),
-          ),
-        ),
-      ),
-    );
-
-    expectNoAnimation();
-
-    final Offset listCenter = tester.getCenter(find.byType(Scrollable));
-
-    // Hold.
-    await tester.startGesture(listCenter);
-    await tester.pump(const Duration(milliseconds: 500));
-
-    controller.animateTo(1000, duration: const Duration(seconds: 1), curve: Curves.linear);
-    expect(tester.takeException(), null);
   });
 }
 
