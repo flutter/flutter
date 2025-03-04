@@ -635,7 +635,10 @@ Future<DartHookResult> _runDartHooks({
   // For web builds we use `null` as the single architecture.
   final bool isWeb = architectures == null;
 
-  final String targetString = isWeb ? 'web' : '$targetOS $architectures';
+  final String targetString =
+      isWeb
+          ? 'web'
+          : '$targetOS ${architectures.length == 1 ? architectures.single : architectures}';
 
   globals.logger.printTrace('Building native assets for $targetString.');
   final List<EncodedAsset> assets = <EncodedAsset>[];
