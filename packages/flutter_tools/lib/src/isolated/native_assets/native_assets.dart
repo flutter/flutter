@@ -128,7 +128,7 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
   final bool isWeb = targetPlatform == TargetPlatform.web_javascript;
   final OS? targetOS = isWeb ? null : getNativeOSFromTargetPlatform(targetPlatform!);
   assert(featureFlags.isNativeAssetsEnabled || targetOS != null);
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, isWeb ? 'web' : targetOS!.name);
 
   // Sanity check.
   final String? codesignIdentity = environmentDefines[kCodesignIdentity];
@@ -180,16 +180,15 @@ Future<void> installCodeAssets({
   required FileSystem fileSystem,
   required Uri nativeAssetsFileUri,
 }) async {
-  final OS? targetOS = getNativeOSFromTargetPlatform(targetPlatform);
-  assert(targetOS != null);
+  final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
 
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name);
   final bool flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
   final String? codesignIdentity = environmentDefines[kCodesignIdentity];
   final Map<CodeAsset, KernelAsset> assetTargetLocations = assetTargetLocationsForOS(
-    targetOS!,
+    targetOS,
     dartBuildResult.codeAssets,
     flutterTester,
     buildUri,
@@ -475,9 +474,9 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
 
 /// This should be the same for different archs, debug/release, etc.
 /// It should work for all macOS.
-Uri nativeAssetsBuildUri(Uri projectUri, OS? os) {
+Uri nativeAssetsBuildUri(Uri projectUri, String osName) {
   final String buildDir = getBuildDirectory();
-  return projectUri.resolve('$buildDir/native_assets/${os == null ? 'web' : os.name}/');
+  return projectUri.resolve('$buildDir/native_assets/$osName/');
 }
 
 Map<CodeAsset, KernelAsset> _assetTargetLocationsWindowsLinux(
