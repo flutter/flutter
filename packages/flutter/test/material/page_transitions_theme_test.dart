@@ -229,6 +229,98 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
 
+  group('FadeForwardsPageTransitionsBuilder transitions', () {
+    testWidgets(
+      'opacity fades out during forward secondary animation',
+      (WidgetTester tester) async {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        );
+        addTearDown(controller.dispose);
+        final Animation<double> animation = Tween<double>(begin: 1, end: 0).animate(controller);
+        final Animation<double> secondaryAnimation = Tween<double>(
+          begin: 0,
+          end: 1,
+        ).animate(controller);
+
+        await tester.pumpWidget(
+          Builder(
+            builder: (BuildContext context) {
+              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+                context,
+                animation,
+                secondaryAnimation,
+                false,
+                const SizedBox(),
+              )!;
+            },
+          ),
+        );
+
+        final RenderAnimatedOpacity? renderOpacity =
+            tester
+                .element(find.byType(SizedBox))
+                .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+
+        // Since secondary animation is forward, transition will be reverse between duration 0 to 0.25.
+        controller.value = 0.0;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 1.0);
+
+        controller.value = 0.25;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 0.0);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
+    testWidgets(
+      'opacity fades in during reverse secondary animaation',
+      (WidgetTester tester) async {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        );
+        addTearDown(controller.dispose);
+        final Animation<double> animation = Tween<double>(begin: 0, end: 1).animate(controller);
+        final Animation<double> secondaryAnimation = Tween<double>(
+          begin: 1,
+          end: 0,
+        ).animate(controller);
+
+        await tester.pumpWidget(
+          Builder(
+            builder: (BuildContext context) {
+              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+                context,
+                animation,
+                secondaryAnimation,
+                false,
+                const SizedBox(),
+              )!;
+            },
+          ),
+        );
+
+        final RenderAnimatedOpacity? renderOpacity =
+            tester
+                .element(find.byType(SizedBox))
+                .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+
+        // Since secondary animation is reverse, transition will be forward between duration 0.75 to 1.0.
+        controller.value = 0.75;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 0.0);
+
+        controller.value = 1.0;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 1.0);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+  });
+
   testWidgets(
     'FadeForwardsPageTransitionBuilder default duration is 800ms',
     (WidgetTester tester) async {
