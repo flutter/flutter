@@ -28,6 +28,9 @@ typedef struct FlutterDesktopViewController* FlutterDesktopViewControllerRef;
 struct FlutterDesktopView;
 typedef struct FlutterDesktopView* FlutterDesktopViewRef;
 
+struct FlutterID3D11Device;
+typedef struct FlutterID3D11Device* FlutterID3D11DeviceRef;
+
 // Opaque reference to a Flutter engine instance.
 struct FlutterDesktopEngine;
 typedef struct FlutterDesktopEngine* FlutterDesktopEngineRef;
@@ -130,11 +133,17 @@ FLUTTER_EXPORT void FlutterDesktopViewControllerDestroy(
 FLUTTER_EXPORT FlutterDesktopViewId FlutterDesktopViewControllerGetViewId(
     FlutterDesktopViewControllerRef view_controller);
 
-// Returns the handle for the engine running in FlutterDesktopViewControllerRef.
-//
-// Its lifetime is the same as the |controller|'s.
+// assign the D3D11 device associated with the engine to the given pointer
+FLUTTER_EXPORT bool FlutterDesktopPluginRegistrarGetID3D11Device(
+    FlutterDesktopPluginRegistrarRef registrar,
+    FlutterID3D11DeviceRef* device);
+
+    // Returns the handle for the engine running in
+    // FlutterDesktopViewControllerRef.
+    //
+    // Its lifetime is the same as the |controller|'s.
 FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopViewControllerGetEngine(
-    FlutterDesktopViewControllerRef controller);
+        FlutterDesktopViewControllerRef controller);
 
 // Returns the view managed by the given controller.
 FLUTTER_EXPORT FlutterDesktopViewRef FlutterDesktopViewControllerGetView(
@@ -200,8 +209,8 @@ FLUTTER_EXPORT bool FlutterDesktopEngineRun(FlutterDesktopEngineRef engine,
 // This should be called on every run of the application-level runloop, and
 // a wait for native events in the runloop should never be longer than the
 // last return value from this function.
-FLUTTER_EXPORT uint64_t FlutterDesktopEngineProcessMessages(
-    FlutterDesktopEngineRef engine);
+FLUTTER_EXPORT uint64_t
+FlutterDesktopEngineProcessMessages(FlutterDesktopEngineRef engine);
 
 FLUTTER_EXPORT void FlutterDesktopEngineReloadSystemFonts(
     FlutterDesktopEngineRef engine);
@@ -220,8 +229,8 @@ FlutterDesktopEngineGetPluginRegistrar(FlutterDesktopEngineRef engine,
 //
 // Callers should use |FlutterDesktopMessengerAddRef| if the returned pointer
 // will potentially outlive 'engine', such as when passing it to another thread.
-FLUTTER_EXPORT FlutterDesktopMessengerRef FlutterDesktopEngineGetMessenger(
-    FlutterDesktopEngineRef engine);
+FLUTTER_EXPORT FlutterDesktopMessengerRef
+FlutterDesktopEngineGetMessenger(FlutterDesktopEngineRef engine);
 
 // Returns the texture registrar associated with the engine.
 FLUTTER_EXPORT FlutterDesktopTextureRegistrarRef
