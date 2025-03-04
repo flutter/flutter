@@ -34,7 +34,7 @@ found in the LICENSE file. -->
         <meta-data android:name="flutterEmbedding" android:value="2" />
         <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="true" />
         <meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="vulkan" />
-        <meta-data android:name="io.flutter.embedding.android.EnableSurfaceControl" android:value="false" />
+        <meta-data android:name="io.flutter.embedding.android.EnableSurfaceControl" android:value="true" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
