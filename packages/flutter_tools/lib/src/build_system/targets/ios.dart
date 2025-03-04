@@ -533,7 +533,7 @@ abstract class IosAssetBundle extends Target {
     final String? flavor = await flutterProject.ios.parseFlavorFromConfiguration(environment);
 
     // Copy the assets.
-    final DartHookResult dartHookResult = await DartBuild.loadBuildResult(environment);
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
