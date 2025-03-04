@@ -2501,11 +2501,7 @@ void main() {
     );
 
     expect(
-      () => CupertinoDatePicker(
-        mode: CupertinoDatePickerMode.dateAndTime,
-        onDateTimeChanged: (DateTime _) {},
-        showTimeSeperator: true,
-      ),
+      () => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}, showTimeSeperator: true),
       returnsNormally,
     );
 
@@ -2525,33 +2521,45 @@ void main() {
     );
 
     expect(
-      () => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}),
-      returnsNormally,
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.monthYear,
+        onDateTimeChanged: (DateTime _) {},
+        showTimeSeperator: true,
+      ),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError e) => e.message ?? 'Unknown error',
+          'message',
+          contains('showTimeSeperator is only supported in time or dateAndTime modes'),
+        ),
+      ),
     );
 
-    // Regression test for https://github.com/flutter/flutter/issues/161773
-    testWidgets('CupertinoDatePicker date value baseline alignment', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Center(
-            child: SizedBox(
-              width: 400,
-              height: 400,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                onDateTimeChanged: (_) {},
-                initialDateTime: DateTime(2025, 2, 14),
-              ),
+    expect(() => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}), returnsNormally);
+  });
+
+  testWidgets('CupertinoDatePicker date value baseline alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: 400,
+            height: 400,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              onDateTimeChanged: (_) {},
+              initialDateTime: DateTime(2025, 2, 14),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      Offset lastOffset = tester.getTopLeft(find.text('November'));
-      expect(tester.getTopLeft(find.text('11')).dy, lastOffset.dy);
+    Offset lastOffset = tester.getTopLeft(find.text('November'));
+    expect(tester.getTopLeft(find.text('11')).dy, lastOffset.dy);
 
-      lastOffset = tester.getTopLeft(find.text('11'));
-      expect(tester.getTopLeft(find.text('2022')).dy, lastOffset.dy);
+    lastOffset = tester.getTopLeft(find.text('11'));
+    expect(tester.getTopLeft(find.text('2022')).dy, lastOffset.dy);
   });
 }
 

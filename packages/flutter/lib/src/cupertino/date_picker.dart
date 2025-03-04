@@ -207,7 +207,7 @@ enum _PickerColumnType {
   minute,
   // AM/PM column in time and dateAndTime mode.
   dayPeriod,
-  // Two points column in time and dateAndTime mode.
+  // Time separator column in time and dateAndTime mode.
   timeSeperator,
 }
 
@@ -358,8 +358,9 @@ class CupertinoDatePicker extends StatefulWidget {
          'initial minute is not divisible by minute interval',
        ),
        assert(
-         (mode == CupertinoDatePickerMode.dateAndTime || mode == CupertinoDatePickerMode.time) ||
-             showTimeSeperator,
+          !showTimeSeperator ||
+          mode == CupertinoDatePickerMode.dateAndTime ||
+          mode == CupertinoDatePickerMode.time,
          'showTimeSeperator is only supported in time or dateAndTime modes',
        );
 
@@ -445,7 +446,7 @@ class CupertinoDatePicker extends StatefulWidget {
 
   /// Whether to show the time separator between hour and minute in
   /// [CupertinoDatePickerMode.time] and [CupertinoDatePickerMode.dateAndTime] mode.
-  /// throws an error if set to true in [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.monthYear] mode.
+  /// Throws an error if set to true in [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.monthYear] mode.
   /// Defaults to false.
   final bool showTimeSeperator;
 
