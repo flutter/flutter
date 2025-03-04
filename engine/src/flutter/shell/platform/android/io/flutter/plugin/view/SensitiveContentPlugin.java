@@ -47,7 +47,12 @@ public class SensitiveContentPlugin
       @NonNull int requestedContentSensitivity, @NonNull MethodChannel.Result result) {
     if (!isSupported()) {
       // This feature is only available on >= API 35.
-      result.success(null);
+      result.error(
+          "error",
+          "Setting content sensitivity with value "
+              + requestedContentSensitivity
+              + " failed because this feature is only available on Android API >= 35.",
+          null);
       return;
     }
 
