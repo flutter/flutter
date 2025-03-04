@@ -555,7 +555,7 @@ class FlutterPlugin implements Plugin<Project> {
                             }
                         }
                     }
-                    new File(project.getProperty("outputPath")).write(appLinkSettings.toJson())
+                    new File(project.getProperty("outputPath")).write(appLinkSettings.toJson().toString())
                 }
             }
         }
