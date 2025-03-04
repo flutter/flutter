@@ -352,6 +352,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
     this.padding = _kHorizontalItemPadding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
     this.proportionalWidth = false,
+    this.isMomentary = false,
   }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.contains(groupValue),
@@ -464,6 +465,14 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   ///
   /// Defaults to `EdgeInsets.symmetric(vertical: 2, horizontal: 3)`.
   final EdgeInsetsGeometry padding;
+
+  /// Determines whether segments in the segmented control show selected state.
+  ///
+  /// If true, segments in the control don’t show selected state and
+  /// don’t update the value of selectedSegmentIndex after tracking ends.
+  ///
+  /// Defaults to false.
+  final bool isMomentary;
 
   @override
   State<CupertinoSlidingSegmentedControl<T>> createState() => _SegmentedControlState<T>();
@@ -635,6 +644,12 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     if (isThumbDragging) {
       return;
     }
+
+    // No gesture should interfere when widget is momentary.
+    if (widget.isMomentary) {
+      return;
+    }
+
     final T segment = segmentForXPosition(details.localPosition.dx);
     onPressedChangedByGesture(null);
     if (segment != widget.groupValue && !widget.disabledChildren.contains(segment)) {
@@ -662,6 +677,11 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
       return;
     }
 
+    // No gesture should interfere when widget is momentary.
+    if (widget.isMomentary) {
+      return;
+    }
+
     // If drag gesture starts on enabled segment and dragging on disabled segment,
     // no update needed.
     final T touchDownSegment = segmentForXPosition(details.localPosition.dx);
@@ -679,6 +699,11 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   }
 
   void onEnd(DragEndDetails details) {
+    // No gesture should interfere when widget is momentary.
+    if (widget.isMomentary) {
+      return;
+    }
+
     final T? pressed = this.pressed;
     if (isThumbDragging) {
       _playThumbScaleAnimation(isExpanding: true);
@@ -753,7 +778,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         Semantics(
           button: true,
           onTap: () {
-            if (widget.disabledChildren.contains(entry.key)) {
+            if (widget.disabledChildren.contains(entry.key) || widget.isMomentary) {
               return;
             }
             widget.onValueChanged(entry.key);
@@ -807,7 +832,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
           builder: (BuildContext context, Widget? child) {
             return _SegmentedControlRenderWidget<T>(
               key: segmentedControlRenderWidgetKey,
-              highlightedIndex: highlightedIndex,
+              highlightedIndex: widget.isMomentary ? null : highlightedIndex,
               thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
               thumbScale: thumbScaleAnimation.value,
               proportionalWidth: widget.proportionalWidth,

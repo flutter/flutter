@@ -2126,4 +2126,30 @@ void main() {
 
     expect(onValueChangedCalled, 0);
   });
+
+  testWidgets('CupertinoSlidingSegmentedControl can be momentary', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+
+    groupValue = 1;
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            isMomentary: true,
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    expect(getHighlightedIndex(tester), null);
+
+    // Tap first segment.
+    await tester.tap(find.text('A'));
+    await tester.pumpAndSettle();
+
+    expect(getHighlightedIndex(tester), null); // The highlighted index doesn't change
+  });
 }
