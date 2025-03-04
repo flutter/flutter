@@ -1,16 +1,15 @@
 package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
-import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.flutter.gradle.DependencyVersionChecker.AGP_NAME
 import com.flutter.gradle.DependencyVersionChecker.GRADLE_NAME
 import com.flutter.gradle.DependencyVersionChecker.JAVA_NAME
 import com.flutter.gradle.DependencyVersionChecker.KGP_NAME
+import com.flutter.gradle.DependencyVersionChecker.MIN_SDK_NAME
 import com.flutter.gradle.DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY
 import com.flutter.gradle.DependencyVersionChecker.POTENTIAL_JAVA_FIX
-import com.flutter.gradle.DependencyVersionChecker.SDK_NAME
 import com.flutter.gradle.DependencyVersionChecker.errorAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.errorGradleVersion
 import com.flutter.gradle.DependencyVersionChecker.errorKGPVersion
@@ -51,7 +50,7 @@ private const val SUPPORTED_GRADLE_VERSION: String = "7.4.2"
 private val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_11
 private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(7, 3, 1)
 private const val SUPPORTED_KGP_VERSION: String = "1.8.10"
-private val SUPPORTED_SDK_VERSION: MinSdkVersion = MinSdkVersion(null, 30)
+private val SUPPORTED_SDK_VERSION: MinSdkVersion = MinSdkVersion("release", 30)
 
 class DependencyVersionCheckerTest {
     @Test
@@ -225,13 +224,14 @@ class DependencyVersionCheckerTest {
     @Test
     fun `min SDK version in warn range results in warning logs`() {
         val exampleWarnSDKVersion = 19
-        val flavorName = "flavor1"
+        val flavorName1 = "flavor1"
+        val flavorName2 = "flavor2"
         val mockProject =
             MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(
                 minSdkVersions =
                     listOf(
-                        MinSdkVersion(null, exampleWarnSDKVersion),
-                        MinSdkVersion(flavorName, exampleWarnSDKVersion)
+                        MinSdkVersion(flavorName1, exampleWarnSDKVersion),
+                        MinSdkVersion(flavorName2, exampleWarnSDKVersion)
                     )
             )
 
@@ -249,7 +249,7 @@ class DependencyVersionCheckerTest {
         verify {
             mockLogger.error(
                 getWarnMessage(
-                    SDK_NAME,
+                    getFlavorSpecificMessage(flavorName1, MIN_SDK_NAME),
                     exampleWarnSDKVersion.toString(),
                     warnMinSdkVersion.toString(),
                     getPotentialSDKFix(FAKE_PROJECT_ROOT_DIR)
@@ -257,7 +257,7 @@ class DependencyVersionCheckerTest {
             )
             mockLogger.error(
                 getWarnMessage(
-                    getFlavorSpecificMessage(flavorName, SDK_NAME),
+                    getFlavorSpecificMessage(flavorName2, MIN_SDK_NAME),
                     exampleWarnSDKVersion.toString(),
                     warnMinSdkVersion.toString(),
                     getPotentialSDKFix(FAKE_PROJECT_ROOT_DIR)
@@ -273,47 +273,7 @@ class DependencyVersionCheckerTest {
     }
 
     @Test
-    fun `default min SDK version in error range results in DependencyValidationException`() {
-        val exampleErrorSDKVersion = 0
-        val mockProject =
-            MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(
-                minSdkVersions =
-                    listOf(
-                        MinSdkVersion(null, exampleErrorSDKVersion)
-                    )
-            )
-
-        val mockExtraPropertiesExtension = mockProject.extra
-        val mockLogger = mockProject.logger
-        every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
-        every { mockLogger.error(any()) } returns Unit
-
-        val dependencyValidationException =
-            assertFailsWith<DependencyValidationException> {
-                DependencyVersionChecker.checkDependencyVersions(
-                    mockProject
-                )
-            }
-
-        assert(
-            dependencyValidationException.message ==
-                getErrorMessage(
-                    getFlavorSpecificMessage(null, SDK_NAME),
-                    exampleErrorSDKVersion.toString(),
-                    errorMinSdkVersion.toString(),
-                    getPotentialSDKFix(FAKE_PROJECT_ROOT_DIR)
-                )
-        )
-        verify(exactly = 1) {
-            mockExtraPropertiesExtension.set(
-                OUT_OF_SUPPORT_RANGE_PROPERTY,
-                true
-            )
-        }
-    }
-
-    @Test
-    fun `flavor min SDK version in error range results in DependencyValidationException`() {
+    fun `min SDK version in error range results in DependencyValidationException`() {
         val exampleErrorSDKVersion = 0
         val flavorName = "flavor1"
         val mockProject =
@@ -339,7 +299,7 @@ class DependencyVersionCheckerTest {
         assert(
             dependencyValidationException.message ==
                 getErrorMessage(
-                    getFlavorSpecificMessage(flavorName, SDK_NAME),
+                    getFlavorSpecificMessage(flavorName, MIN_SDK_NAME),
                     exampleErrorSDKVersion.toString(),
                     errorMinSdkVersion.toString(),
                     getPotentialSDKFix(FAKE_PROJECT_ROOT_DIR)
@@ -400,15 +360,11 @@ private object MockProjectFactory {
 
         // SDK
         val actionSlot = slot<Action<Project>>()
-        val onVariantsFnSlot = slot<(Variant) -> Unit>()
-        val mockApplicationExtension = mockk<ApplicationExtension>()
-        val defaultSdkVersion = minSdkVersions.find { it.flavor == null }?.version
         every { mockProject.afterEvaluate(capture(actionSlot)) } answers {
             actionSlot.captured.execute(mockProject)
             return@answers Unit
         }
-        every { mockProject.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
-        every { mockApplicationExtension.defaultConfig.minSdk } returns defaultSdkVersion
+        val onVariantsFnSlot = slot<(Variant) -> Unit>()
         every { mockAndroidComponentsExtension.selector() } returns
             mockk {
                 every { all() } returns mockk()
