@@ -17,6 +17,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
 import 'common.dart';
@@ -39,6 +40,18 @@ const bool _shouldReportResultsToNative = bool.fromEnvironment(
   'INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE',
   defaultValue: true,
 );
+
+/// A convenience wrapper around features available in [IntegrationTestWidgetsFlutterBinding].
+@experimental
+class IntegrationTest {
+  /// Takes a screenshot.
+  ///
+  /// On Android, you need to call `convertFlutterSurfaceToImage()`, and
+  /// pump a frame before taking a screenshot.
+  static Future<List<int>> takeScreenshot() {
+    return IntegrationTestWidgetsFlutterBinding.instance.takeScreenshot();
+  }
+}
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
@@ -180,11 +193,14 @@ https://docs.flutter.dev/testing/integration-tests
   /// side.
   final CallbackManager callbackManager = driver_actions.callbackManager;
 
+  int _screenshotIndex = 0;
+
   /// Takes a screenshot.
   ///
   /// On Android, you need to call `convertFlutterSurfaceToImage()`, and
   /// pump a frame before taking a screenshot.
-  Future<List<int>> takeScreenshot(String screenshotName, [Map<String, Object?>? args]) async {
+  Future<List<int>> takeScreenshot([String? screenshotName, Map<String, Object?>? args]) async {
+    screenshotName ??= 'Untitled screenshot ${++_screenshotIndex}';
     reportData ??= <String, dynamic>{};
     reportData!['screenshots'] ??= <dynamic>[];
     final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName, args);
