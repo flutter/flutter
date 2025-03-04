@@ -4129,27 +4129,6 @@ void _testControlsNodes() {
     );
   });
 
-  test('can control multiple nodes with same identifier', () {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final SemanticsTester tester = SemanticsTester(owner());
-    tester.updateNode(
-      id: 0,
-      controlsNodes: <String>['a'],
-      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-      children: <SemanticsNodeUpdate>[
-        tester.updateNode(id: 1, identifier: 'a'),
-        tester.updateNode(id: 2, identifier: 'a'),
-      ],
-    );
-    tester.apply();
-
-    SemanticsObject object = tester.getSemanticsObject(0);
-    expect(object.element.getAttribute('aria-controls'), 'flt-semantic-node-1 flt-semantic-node-2');
-  });
-
   semantics().semanticsEnabled = false;
 }
 

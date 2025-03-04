@@ -732,18 +732,20 @@ abstract class SemanticRole {
 
   void _updateControls() {
     if (semanticsObject.hasControlsNodes) {
-      final List<String> elementIds = <String>[];
-      for (final String identifier in semanticsObject.controlsNodes!) {
-        final Set<int>? semanticNodeIds = SemanticsObject.identifiersToIds[identifier];
-        if (semanticNodeIds == null) {
-          continue;
+      semanticsObject.owner.addOneTimePostUpdateCallback(() {
+        final List<String> elementIds = <String>[];
+        for (final String identifier in semanticsObject.controlsNodes!) {
+          final int? semanticNodeId = semanticsObject.owner.identifiersToIds[identifier];
+          if (semanticNodeId == null) {
+            continue;
+          }
+          elementIds.add('flt-semantic-node-${semanticNodeId}');
         }
-        elementIds.addAll(semanticNodeIds.map<String>((int id) => 'flt-semantic-node-${id}'));
-      }
-      if (elementIds.isNotEmpty) {
-        setAttribute('aria-controls', elementIds.join(' '));
-        return;
-      }
+        if (elementIds.isNotEmpty) {
+          setAttribute('aria-controls', elementIds.join(' '));
+          return;
+        }
+      });
     }
     removeAttribute('aria-controls');
   }
@@ -928,8 +930,6 @@ abstract class SemanticBehavior {
 class SemanticsObject {
   /// Creates a semantics tree node with the given [id] and [owner].
   SemanticsObject(this.id, this.owner);
-
-  static final Map<String, Set<int>> identifiersToIds = <String, Set<int>>{};
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   int get flags => _flags;
@@ -1508,18 +1508,12 @@ class SemanticsObject {
     }
 
     if (_identifier != update.identifier) {
-      if (_identifier != null) {
-        final Set<int>? ids = identifiersToIds[_identifier];
-        if (ids != null) {
-          ids.remove(id);
-          if (ids.isEmpty) {
-            identifiersToIds.remove(_identifier);
-          }
-        }
+      if (_identifier?.isNotEmpty ?? false) {
+        owner.identifiersToIds.remove(_identifier);
       }
       _identifier = update.identifier;
-      if (_identifier != null) {
-        identifiersToIds.putIfAbsent(_identifier!, () => <int>{}).add(id);
+      if (_identifier?.isNotEmpty ?? false) {
+        owner.identifiersToIds[_identifier!] = id;
       }
       _markIdentifierDirty();
     }
@@ -2653,6 +2647,7 @@ class EngineSemanticsOwner {
   SemanticsUpdatePhase _phase = SemanticsUpdatePhase.idle;
 
   final Map<int, SemanticsObject> _semanticsTree = <int, SemanticsObject>{};
+  final Map<String, int> identifiersToIds = <String, int>{};
 
   /// Map [SemanticsObject.id] to parent [SemanticsObject] it was attached to
   /// this frame.
