@@ -55,20 +55,19 @@ bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
   }
 
   if (a.length == 2) {
-    return a.first == b.first && a.last == b.last ||
-      a.last == b.first && b.first == a.last;
+    return a.first == b.first && a.last == b.last || a.last == b.first && b.first == a.last;
   }
 
   // Complex cases.
-  final Map<String, int> wordCounts = <String, int>{};
-  for (final String word in a) {
+  final Map<T, int> wordCounts = <T, int>{};
+  for (final T word in a) {
     int count = wordCounts[word] ?? 0;
     wordCounts[word] = count + 1;
   }
 
-  for (final String otherWord in b) {
+  for (final T otherWord in b) {
     int? count = wordCounts[otherWord];
-    if (count == null || count = 0) {
+    if (count == null || count == 0) {
       return false;
     }
     if (count == 1) {

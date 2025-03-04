@@ -129,6 +129,9 @@ void runSemanticsTests() {
   group('table', () {
     _testTables();
   });
+  group('controlsNodes', () {
+    _testControlsNodes();
+  });
 }
 
 void _testSemanticRole() {
@@ -4038,6 +4041,59 @@ void _testTables() {
   semantics().semanticsEnabled = false;
 }
 
+void _testControlsNodes() {
+  test('nodes with table role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      controlsNodes: <String>['a'],
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, identifier: 'a'),
+        tester.updateNode(id: 2, identifier: 'b'),
+      ],
+    );
+    tester.apply();
+
+    SemanticsObject object = tester.getSemanticsObject(0);
+    expect(object.element.getAttribute('aria-controls'), 'flt-semantic-node-1');
+
+    tester.updateNode(
+      id: 0,
+      controlsNodes: <String>['b'],
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, identifier: 'a'),
+        tester.updateNode(id: 2, identifier: 'b'),
+      ],
+    );
+    tester.apply();
+
+    object = tester.getSemanticsObject(0);
+    expect(object.element.getAttribute('aria-controls'), 'flt-semantic-node-2');
+
+    tester.updateNode(
+      id: 0,
+      controlsNodes: <String>['a', 'b'],
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, identifier: 'a'),
+        tester.updateNode(id: 2, identifier: 'b'),
+      ],
+    );
+    tester.apply();
+
+    object = tester.getSemanticsObject(0);
+    expect(object.element.getAttribute('aria-controls'), 'flt-semantic-node-1 flt-semantic-node-2');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
@@ -4077,6 +4133,7 @@ void updateNode(
   Int32List? additionalActions,
   int headingLevel = 0,
   String? linkUrl,
+  List<String>? controlsNodes,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
@@ -4118,6 +4175,7 @@ void updateNode(
     additionalActions: additionalActions,
     headingLevel: headingLevel,
     linkUrl: linkUrl,
+    controlsNodes: controlsNodes,
   );
 }
 
