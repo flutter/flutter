@@ -683,7 +683,6 @@ bool FlutterWindowsEngine::GetID3D11Device(ID3D11Device** device) const {
   return this->egl_manager_->GetDevice(device);
 }
 
-
 // Returns the currently configured Plugin Registrar.
 FlutterDesktopPluginRegistrarRef FlutterWindowsEngine::GetRegistrar() {
   return plugin_registrar_.get();
