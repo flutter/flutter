@@ -13,20 +13,22 @@ void main() {
   // The state of content sensitivity in the app.
   final SensitiveContentHost sensitiveContentHost = SensitiveContentHost.instance;
 
-  // The number of method channel calls to `SensitiveContent.setContentSensitivity`.
-  int setContentSensitivityCallCount = 0;
+  // The ContentSenstivity levels that get set by the native platform via calls to
+  // `SensitiveContent.setContentSensitivity`.
+  List<ContentSensitivity> setContentSensitivityArgs = <ContentSensitivity>[];
 
   setUp(() {
     // Reset number of method channel calls to `SensitiveContent.setContentSensitivity`.
-    setContentSensitivityCallCount = 0;
+    setContentSensitivityArgs = <ContentSensitivity>[];
 
     // Mock calls to the sensitive content method channel.
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.sensitiveContent,
       (MethodCall methodCall) async {
         if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
-          setContentSensitivityCallCount++;
-          expect(methodCall.arguments, isA<int>());
+          setContentSensitivityArgs.add(
+            ContentSensitivity.getContentSensitivityById(methodCall.arguments as int),
+          );
         } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
           return defaultContentSensitivitySetting.id;
         } else if (methodCall.method == 'SensitiveContent.isSupported') {
@@ -55,7 +57,7 @@ void main() {
       sensitiveContentHost.currentContentSensitivityLevel,
       equals(ContentSensitivity.sensitive),
     );
-    expect(setContentSensitivityCallCount, 1);
+    expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
   });
 
   testWidgets(
@@ -70,6 +72,10 @@ void main() {
         sensitiveContentHost.currentContentSensitivityLevel,
         equals(defaultContentSensitivitySetting),
       );
+      expect(setContentSensitivityArgs, <ContentSensitivity>[
+        ContentSensitivity.sensitive,
+        defaultContentSensitivitySetting,
+      ]);
     },
   );
 
@@ -91,7 +97,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
       testWidgets('when it gets disposed with another sensitive widget', (
@@ -116,13 +122,13 @@ void main() {
           find.byKey(sc1Key),
         );
         sc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
       testWidgets('with two other sensitive widgets', (WidgetTester tester) async {
@@ -145,7 +151,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
       testWidgets('with two other sensitive widgets and one gets disposed', (
@@ -174,13 +180,13 @@ void main() {
           find.byKey(sc1Key),
         );
         sc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
       // Tests with auto sensitive widget(s):
@@ -200,7 +206,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
       testWidgets('when it gets disposed with one auto sensitive widget', (
@@ -221,20 +227,23 @@ void main() {
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, asc1]));
 
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
         final DisposeTesterState sc1DiposeTesterState = tester.firstState<DisposeTesterState>(
           find.byKey(sc1Key),
         );
         sc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
 
-        expect(setContentSensitivityCallCount, 2);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.sensitive,
+          ContentSensitivity.autoSensitive,
+        ]);
       });
 
       testWidgets('with one auto sensitive widget that gets disposed', (WidgetTester tester) async {
@@ -257,14 +266,14 @@ void main() {
           find.byKey(asc1Key),
         );
         asc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
 
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
       testWidgets('with two auto sensitive widgets and one gets disposed', (
@@ -293,14 +302,14 @@ void main() {
           find.byKey(asc1Key),
         );
         asc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
 
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
       // Tests with not sensitive widget(s):
@@ -320,7 +329,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
       testWidgets('when it gets disposed with one not sensitive widget', (
@@ -341,19 +350,22 @@ void main() {
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, nsc1]));
 
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
         final DisposeTesterState sc1DiposeTesterState = tester.firstState<DisposeTesterState>(
           find.byKey(sc1Key),
         );
         sc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
-        expect(setContentSensitivityCallCount, 2);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.sensitive,
+          ContentSensitivity.notSensitive,
+        ]);
       });
 
       testWidgets('with one not sensitive widget that gets disposed', (WidgetTester tester) async {
@@ -376,13 +388,13 @@ void main() {
           find.byKey(nsc1Key),
         );
         nsc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
       testWidgets('with two not sensitive widgets and one gets disposed', (
@@ -411,13 +423,13 @@ void main() {
           find.byKey(nsc1Key),
         );
         nsc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
       // Tests with an auto sensitive and a not sensitive widget(s):
@@ -443,7 +455,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.sensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
       testWidgets(
@@ -468,19 +480,22 @@ void main() {
 
           await tester.pumpWidget(Column(children: <Widget>[sc1, asc1, nsc1]));
 
-          expect(setContentSensitivityCallCount, 1);
+          expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
           final DisposeTesterState sc1DiposeTesterState = tester.firstState<DisposeTesterState>(
             find.byKey(sc1Key),
           );
           sc1DiposeTesterState.disposeWidget();
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.autoSensitive),
           );
-          expect(setContentSensitivityCallCount, 2);
+          expect(setContentSensitivityArgs, <ContentSensitivity>[
+            ContentSensitivity.sensitive,
+            ContentSensitivity.autoSensitive,
+          ]);
         },
       );
 
@@ -510,13 +525,13 @@ void main() {
             find.byKey(asc1Key),
           );
           asc1DiposeTesterState.disposeWidget();
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(setContentSensitivityCallCount, 1);
+          expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
         },
       );
 
@@ -546,13 +561,13 @@ void main() {
             find.byKey(nsc1Key),
           );
           nsc1DiposeTesterState.disposeWidget();
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(setContentSensitivityCallCount, 1);
+          expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
         },
       );
 
@@ -583,7 +598,7 @@ void main() {
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(setContentSensitivityCallCount, 1);
+          expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
         },
       );
 
@@ -617,13 +632,13 @@ void main() {
             find.byKey(sc1Key),
           );
           sc1DiposeTesterState.disposeWidget();
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(setContentSensitivityCallCount, 1);
+          expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
         },
       );
 
@@ -657,13 +672,13 @@ void main() {
             find.byKey(asc1Key),
           );
           asc1DiposeTesterState.disposeWidget();
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(setContentSensitivityCallCount, 1);
+          expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
         },
       );
 
@@ -697,13 +712,13 @@ void main() {
             find.byKey(nsc1Key),
           );
           nsc1DiposeTesterState.disposeWidget();
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(setContentSensitivityCallCount, 1);
+          expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
         },
       );
 
@@ -739,13 +754,13 @@ void main() {
             find.byKey(asc1Key),
           );
           asc1DiposeTesterState.disposeWidget();
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(setContentSensitivityCallCount, 1);
+          expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
         },
       );
 
@@ -779,13 +794,13 @@ void main() {
             find.byKey(nsc1Key),
           );
           nsc1DiposeTesterState.disposeWidget();
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.sensitive),
           );
-          expect(setContentSensitivityCallCount, 1);
+          expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
         },
       );
     },
@@ -811,7 +826,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(setContentSensitivityCallCount, 0);
+        expect(setContentSensitivityArgs.length, 0);
       });
 
       testWidgets('when it gets disposed with another auto sensitive widget', (
@@ -836,13 +851,13 @@ void main() {
           find.byKey(asc1Key),
         );
         asc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(setContentSensitivityCallCount, 0);
+        expect(setContentSensitivityArgs.length, 0);
       });
 
       // Tests with not sensitive widget(s):
@@ -862,7 +877,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(setContentSensitivityCallCount, 0);
+        expect(setContentSensitivityArgs.length, 0);
       });
 
       testWidgets('when it gets disposed with one not sensitive widget', (
@@ -887,13 +902,13 @@ void main() {
           find.byKey(asc1Key),
         );
         asc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
       });
 
       testWidgets('with one not sensitive widget that gets disposed', (WidgetTester tester) async {
@@ -916,13 +931,13 @@ void main() {
           find.byKey(nsc1Key),
         );
         nsc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(setContentSensitivityCallCount, 0);
+        expect(setContentSensitivityArgs.length, 0);
       });
 
       testWidgets('with two not sensitive widgets and one gets disposed', (
@@ -951,13 +966,13 @@ void main() {
           find.byKey(nsc1Key),
         );
         nsc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(setContentSensitivityCallCount, 0);
+        expect(setContentSensitivityArgs.length, 0);
       });
 
       // Tests with another auto sensitive widget and a not sensitive widget(s):
@@ -983,7 +998,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.autoSensitive),
         );
-        expect(setContentSensitivityCallCount, 0);
+        expect(setContentSensitivityArgs.length, 0);
       });
 
       testWidgets(
@@ -1012,13 +1027,13 @@ void main() {
             find.byKey(asc1Key),
           );
           asc1DiposeTesterState.disposeWidget();
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.autoSensitive),
           );
-          expect(setContentSensitivityCallCount, 0);
+          expect(setContentSensitivityArgs.length, 0);
         },
       );
 
@@ -1048,13 +1063,13 @@ void main() {
             find.byKey(nsc1Key),
           );
           nsc1DiposeTesterState.disposeWidget();
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           expect(
             sensitiveContentHost.currentContentSensitivityLevel,
             equals(ContentSensitivity.autoSensitive),
           );
-          expect(setContentSensitivityCallCount, 0);
+          expect(setContentSensitivityArgs.length, 0);
         },
       );
     },
@@ -1079,7 +1094,7 @@ void main() {
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs.length, 1);
       });
 
       testWidgets('when it gets disposed with one not sensitive widget', (
@@ -1104,13 +1119,13 @@ void main() {
           find.byKey(nsc1Key),
         );
         nsc1DiposeTesterState.disposeWidget();
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
           equals(ContentSensitivity.notSensitive),
         );
-        expect(setContentSensitivityCallCount, 1);
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
       });
     },
   );
