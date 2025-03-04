@@ -1107,7 +1107,8 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
 }
 
 // |PlatformView::Delegate|
-void Shell::OnPlatformViewDispatchSemanticsAction(int32_t node_id,
+void Shell::OnPlatformViewDispatchSemanticsAction(int64_t view_id,
+                                                  int32_t node_id,
                                                   SemanticsAction action,
                                                   fml::MallocMapping args) {
   FML_DCHECK(is_set_up_);
@@ -1118,7 +1119,7 @@ void Shell::OnPlatformViewDispatchSemanticsAction(int32_t node_id,
       fml::MakeCopyable([engine = engine_->GetWeakPtr(), node_id, action,
                          args = std::move(args)]() mutable {
         if (engine) {
-          engine->DispatchSemanticsAction(node_id, action, std::move(args));
+          engine->DispatchSemanticsAction(view_id, node_id, action, std::move(args));
         }
       }));
 }
