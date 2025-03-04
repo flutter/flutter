@@ -85,14 +85,11 @@ void main() {
           children: <TableRow>[
             TableRow(
               children: <Widget>[
-                TableCell(
-                  key: cell,
-                  child: Table(
-                    key: innerTable,
-                    children: const <TableRow>[
-                      TableRow(children: <Widget>[Text('AAAAAA'), Text('B'), Text('C')]),
-                    ],
-                  ),
+                Table(
+                  key: innerTable,
+                  children: const <TableRow>[
+                    TableRow(children: <Widget>[Text('AAAAAA'), Text('B'), Text('C')]),
+                  ],
                 ),
               ],
             ),
@@ -101,10 +98,9 @@ void main() {
       ),
     );
     final RenderObject outerTableRenderObject = tester.renderObject(find.byKey(outerTable));
-    final RenderObject cellRenderObject = tester.renderObject(find.byKey(cell));
     final RenderObject innerTableRenderObject = tester.renderObject(find.byKey(innerTable));
     final RenderObject textRenderObject = tester.renderObject(find.text('AAAAAA'));
-    expect(outerTableRenderObject.depth + 1, cellRenderObject.depth);
+    expect(outerTableRenderObject.depth + 1, innerTableRenderObject.depth);
     expect(innerTableRenderObject.depth + 1, textRenderObject.depth);
   });
 
