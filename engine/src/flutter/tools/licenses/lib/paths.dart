@@ -185,7 +185,6 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/stb',
   r'flutter/third_party/swiftshader/third_party', // See: https://github.com/flutter/flutter/issues/145726
   r'flutter/third_party/test_shaders', // for tests only
-  r'flutter/third_party/txt/third_party/fonts',
   r'flutter/third_party/vulkan-deps/glslang/LICENSE', // excluded to make sure we don't accidentally apply it as a default license
   r'flutter/third_party/vulkan-deps/glslang/src/LICENSE.txt', // redundant with licenses inside files
   r'flutter/third_party/vulkan-deps/glslang/src/glslang/OSDependent/Web', // we only use glslang in impellerc, not in web apps
@@ -221,6 +220,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/zlib/contrib/minizip/miniunz.c', // sample file
   r'flutter/third_party/zlib/contrib/minizip/minizip.c', // sample file
   r'flutter/tools',
+  r'flutter/txt/third_party/fonts', // only used on hosts for tests
   r'flutter/web_sdk', // this code is not linked into Flutter apps; it's only used by engine tests and tools
   r'fuchsia/sdk/linux/docs',
   r'fuchsia/sdk/linux/meta',

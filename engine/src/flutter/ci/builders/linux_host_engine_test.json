@@ -140,7 +140,7 @@
                     "flutter/shell/common:shell_benchmarks",
                     "flutter/shell/testing",
                     "flutter/tools/path_ops",
-                    "flutter/third_party/txt:txt_benchmarks"
+                    "flutter/txt:txt_benchmarks"
                 ]
             },
             "tests": [

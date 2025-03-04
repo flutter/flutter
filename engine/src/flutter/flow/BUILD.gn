@@ -99,7 +99,7 @@ source_set("flow") {
     "//flutter/common/graphics",
     "//flutter/display_list",
     "//flutter/fml",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
   ]
 
   deps = [ "//flutter/skia" ]
@@ -114,8 +114,7 @@ source_set("flow") {
 
 if (enable_unittests) {
   test_fixtures("flow_fixtures") {
-    fixtures =
-        [ "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf" ]
+    fixtures = [ "//flutter/txt/third_party/fonts/Roboto-Regular.ttf" ]
   }
 
   source_set("flow_testing") {

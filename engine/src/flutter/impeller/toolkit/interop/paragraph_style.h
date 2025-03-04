@@ -5,10 +5,10 @@
 #ifndef FLUTTER_IMPELLER_TOOLKIT_INTEROP_PARAGRAPH_STYLE_H_
 #define FLUTTER_IMPELLER_TOOLKIT_INTEROP_PARAGRAPH_STYLE_H_
 
+#include "flutter/txt/src/txt/paragraph_style.h"
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/object.h"
 #include "impeller/toolkit/interop/paint.h"
-#include "third_party/txt/src/txt/paragraph_style.h"
 
 namespace impeller::interop {
 

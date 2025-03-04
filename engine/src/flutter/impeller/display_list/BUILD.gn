@@ -106,7 +106,7 @@ template("display_list_unittests_component") {
       ":display_list",
       "../playground:playground_test",
       "//flutter/impeller/golden_tests:screenshot",
-      "//flutter/third_party/txt",
+      "//flutter/txt",
     ]
     if (defined(invoker.public_configs)) {
       public_configs = invoker.public_configs
@@ -182,7 +182,7 @@ template("aiks_unittests_component") {
       "//flutter/impeller/golden_tests:golden_playground_test",
       "//flutter/impeller/playground:playground_test",
       "//flutter/testing:testing_lib",
-      "//flutter/third_party/txt",
+      "//flutter/txt",
     ]
     if (defined(invoker.public_configs)) {
       public_configs = invoker.public_configs
