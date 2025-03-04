@@ -1075,10 +1075,10 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   /// The result of the last dart build. Will be populated in
   /// [runDartBuild].
-  DartBuildResult? _dartBuildResult;
+  DartHookResult? _dartHookResult;
 
   /// The last dart build's result.
-  DartBuildResult? get dartBuildResult => _dartBuildResult;
+  DartHookResult? get dartHookResult => _dartHookResult;
 
   @override
   bool hotMode;
@@ -1197,11 +1197,11 @@ abstract class ResidentRunner extends ResidentHandlers {
     globals.printTrace('complete');
   }
 
-  Future<DartBuildResult> runDartBuild({required TargetPlatform targetPlatform}) async {
+  Future<DartHookResult> runDartBuild({required TargetPlatform targetPlatform}) async {
     globals.printTrace('runDartBuild() with ${_environment.defines} and $targetPlatform');
-    if (_dartBuildResult?.isBuildUpToDate(globals.fs) ?? false) {
+    if (_dartHookResult?.isUpToDate(globals.fs) ?? false) {
       globals.printTrace('runDartBuild() - up-to-date already');
-      return _dartBuildResult!;
+      return _dartHookResult!;
     }
     globals.printTrace('runDartBuild() - will perform dart build');
 
@@ -1218,9 +1218,9 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
     }
 
-    _dartBuildResult = await DartBuild.loadBuildResult(_environment);
+    _dartHookResult = await DartBuild.loadBuildResult(_environment);
     globals.printTrace('runDartBuild() - done');
-    return _dartBuildResult!;
+    return _dartHookResult!;
   }
 
   @protected

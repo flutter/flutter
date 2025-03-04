@@ -991,7 +991,7 @@ class FakeBundle extends AssetBundle {
 
   @override
   Future<int> build({
-    DartBuildResult? dartBuildResult,
+    DartHookResult? dartHookResult,
     String manifestPath = defaultManifestPath,
     String? assetDirPath,
     String? packageConfigPath,

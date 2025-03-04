@@ -199,7 +199,7 @@ void main() {
           kSdkRoot: '.../iPhone Simulator',
           kIosArchs: 'arm64 x86_64',
         };
-        final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+        final DartHookResult dartHookResult = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
@@ -207,7 +207,7 @@ void main() {
           buildRunner: buildRunner,
         );
         await installCodeAssets(
-          dartBuildResult: dartBuildResult,
+          dartHookResult: dartHookResult,
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,

@@ -31,12 +31,12 @@ import 'windows/native_assets.dart';
 export 'package:native_assets_cli/code_assets_builder.dart' show CodeAsset, DynamicLoadingBundled;
 export 'package:native_assets_cli/data_assets_builder.dart' show DataAsset;
 
-/// The assets produced by a Dart build and the dependencies of those assets.
+/// The assets produced by a Dart hooks and the dependencies of those assets.
 ///
 /// If any of the dependencies change, then the Dart build should be performed
 /// again.
-final class DartBuildResult {
-  const DartBuildResult(
+final class DartHookResult {
+  const DartHookResult(
     this.buildStart,
     this.buildEnd,
     this.codeAssets,
@@ -44,14 +44,14 @@ final class DartBuildResult {
     this.dependencies,
   );
 
-  DartBuildResult.empty()
+  DartHookResult.empty()
     : buildStart = DateTime.now(),
       buildEnd = DateTime.now(),
       codeAssets = const <CodeAsset>[],
       dataAssets = const <DataAsset>[],
       dependencies = const <Uri>[];
 
-  factory DartBuildResult.fromJson(Map<String, Object?> json) {
+  factory DartHookResult.fromJson(Map<String, Object?> json) {
     final DateTime buildStart = DateTime.parse((json['build_start'] as String?)!);
     final DateTime buildEnd = DateTime.parse((json['build_end'] as String?)!);
     final List<Uri> dependencies = <Uri>[
@@ -66,7 +66,7 @@ final class DartBuildResult {
       for (final Object? json in json['data_assets'] as List<Object?>? ?? const <Object?>[])
         DataAsset.fromEncoded(EncodedAsset.fromJson(json! as Map<String, Object?>)),
     ];
-    return DartBuildResult(buildStart, buildEnd, codeAssets, dataAssets, dependencies);
+    return DartHookResult(buildStart, buildEnd, codeAssets, dataAssets, dependencies);
   }
 
   final DateTime buildStart;
@@ -91,7 +91,7 @@ final class DartBuildResult {
   ];
 
   /// Whether caller may need to re-run the dart build.
-  bool isBuildUpToDate(FileSystem fileSystem) {
+  bool isUpToDate(FileSystem fileSystem) {
     return !_wasAnyFileModifiedSince(fileSystem, buildStart, dependencies);
   }
 
@@ -101,7 +101,7 @@ final class DartBuildResult {
   /// the output may be existing on disc and not be produced by the build
   /// itself - in which case we may not need to re-build if the file changes,
   /// but we may need to make a new asset bundle with the modified file).
-  bool isBuildOutputDirty(FileSystem fileSystem) {
+  bool isOutputDirty(FileSystem fileSystem) {
     return _wasAnyFileModifiedSince(fileSystem, buildEnd, filesToBeBundled);
   }
 
@@ -116,9 +116,9 @@ final class DartBuildResult {
   }
 }
 
-/// Invokes the build of all transitive Dart packages and prepares code assets
+/// Invokes the build of all transitive Dart package hooks and prepares assets
 /// to be included in the native build.
-Future<DartBuildResult> runFlutterSpecificDartBuild({
+Future<DartHookResult> runFlutterSpecificHooks({
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
   required TargetPlatform? targetPlatform,
@@ -144,8 +144,8 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
     await buildDir.create(recursive: true);
   }
 
-  if (!await _nativeBuildRequired(buildRunner)) {
-    return DartBuildResult.empty();
+  if (!await _hookRunRequired(buildRunner)) {
+    return DartHookResult.empty();
   }
 
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
@@ -155,10 +155,10 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
           : (flutterTester
               ? <Architecture>[Architecture.current]
               : _architecturesForOS(targetPlatform, targetOS!, environmentDefines));
-  final DartBuildResult result =
+  final DartHookResult result =
       architectures?.isEmpty ?? false
-          ? DartBuildResult.empty()
-          : await _runDartBuild(
+          ? DartHookResult.empty()
+          : await _runDartHooks(
             environmentDefines: environmentDefines,
             buildRunner: buildRunner,
             codeAssetSupport: !isWeb && featureFlags.isNativeAssetsEnabled,
@@ -173,7 +173,7 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
 }
 
 Future<void> installCodeAssets({
-  required DartBuildResult dartBuildResult,
+  required DartHookResult dartHookResult,
   required Map<String, String> environmentDefines,
   required TargetPlatform targetPlatform,
   required Uri projectUri,
@@ -189,7 +189,7 @@ Future<void> installCodeAssets({
   final String? codesignIdentity = environmentDefines[kCodesignIdentity];
   final Map<CodeAsset, KernelAsset> assetTargetLocations = assetTargetLocationsForOS(
     targetOS,
-    dartBuildResult.codeAssets,
+    dartHookResult.codeAssets,
     flutterTester,
     buildUri,
   );
@@ -427,7 +427,7 @@ bool _nativeAssetsLinkingEnabled(BuildMode buildMode) {
   }
 }
 
-Future<bool> _nativeBuildRequired(FlutterNativeAssetsBuildRunner buildRunner) async {
+Future<bool> _hookRunRequired(FlutterNativeAssetsBuildRunner buildRunner) async {
   final List<String> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
     globals.logger.printTrace(
@@ -618,7 +618,7 @@ Future<void> _copyNativeCodeAssetsForOS(
 ///
 /// This will invoke `hook/build.dart` and `hook/link.dart` (if applicable) for
 /// all transitive dart packages that define such hooks.
-Future<DartBuildResult> _runDartBuild({
+Future<DartHookResult> _runDartHooks({
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
   required List<Architecture>? architectures,
@@ -774,7 +774,7 @@ Future<DartBuildResult> _runDartBuild({
   globals.logger.printTrace('Building native assets for $targetString done.');
 
   final DateTime buildEnd = DateTime.now();
-  return DartBuildResult(buildStart, buildEnd, codeAssets, dataAssets, dependencies.toList());
+  return DartHookResult(buildStart, buildEnd, codeAssets, dataAssets, dependencies.toList());
 }
 
 List<Architecture> _architecturesForOS(

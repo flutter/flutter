@@ -70,11 +70,11 @@ abstract class AndroidAssetBundle extends Target {
           .file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
-    final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
+    final DartHookResult dartHookResult = await DartBuild.loadBuildResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       outputDirectory,
-      dartBuildResult: dartBuildResult,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],

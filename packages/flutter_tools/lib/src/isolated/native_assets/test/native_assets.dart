@@ -62,7 +62,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   };
 
   // First perform the dart build.
-  final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+  final DartHookResult dartHookResult = await runFlutterSpecificHooks(
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
     targetPlatform: TargetPlatform.tester,
@@ -72,7 +72,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
 
   // Then "install" the code assets so they can be used at runtime.
   await installCodeAssets(
-    dartBuildResult: dartBuildResult,
+    dartHookResult: dartHookResult,
     environmentDefines: environmentDefines,
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
