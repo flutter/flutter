@@ -646,14 +646,31 @@ class RenderTable extends RenderBox {
       // cells and thus different number of children in the semantics tree.
       for (int x = 0; x < columns && cellIndex < children.length; x++, cellIndex++) {
         // Get the cell at the current index.
-        final SemanticsNode cell = children.elementAt(cellIndex);
+        final SemanticsNode child = children.elementAt(cellIndex);
+
         final Offset offset =
-            (cell.transform != null ? MatrixUtils.getAsTranslation(cell.transform!) : null) ??
+            (child.transform != null ? MatrixUtils.getAsTranslation(child.transform!) : null) ??
             Offset.zero;
         // This cell belong to next row. break.
-        if (cell.rect.shift(offset).top > rowBox.bottom) {
+        if (child.rect.shift(offset).top > rowBox.bottom) {
           break;
         }
+        // Assign the role cell to the child if it doesn't have a role.
+        if (child.role == SemanticsRole.none) {
+          child.role = SemanticsRole.cell;
+          continue;
+        }
+        // If the child is not a cell or columnHeader, create a new semantic node with role cell to wrap it.
+        final bool addCellWrapper =
+            child.role != SemanticsRole.cell && child.role != SemanticsRole.columnHeader;
+
+        final SemanticsNode cell =
+            addCellWrapper ? child : SemanticsNode()
+              ..updateWith(
+                config: SemanticsConfiguration()..role = SemanticsRole.cell,
+                childrenInInversePaintOrder: <SemanticsNode>[child],
+              );
+
         cell.indexInParent = x;
 
         // Shift the cell's transform to be relative to the row.
@@ -673,9 +690,11 @@ class RenderTable extends RenderBox {
           ..transform = cellTransform
           ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
 
-        //  If the cell has no role, set it to cell.
-        if (cell.role == SemanticsRole.none) {
-          cell.role = SemanticsRole.cell;
+        // Clear child transform.
+        if (addCellWrapper) {
+          child
+            ..transform = null
+            ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
         }
         cells.add(cell);
       }
