@@ -32,6 +32,7 @@ void main() {
     String path,
     String name, {
     List<String>? assets,
+    Map<String, String>? dependencies,
     List<(String path, String flavor)>? flavoredAssets,
   }) {
     String assetsSection;
@@ -61,6 +62,8 @@ flutter:
       assetsSection = buffer.toString();
     }
 
+    dependencies = dependencies ?? <String, String>{};
+
     globals.fs.file(fixPath(path))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -68,6 +71,7 @@ name: $name
 dependencies:
   flutter:
     sdk: flutter
+${dependencies.entries.map((MapEntry<String, String> d) => '  ${d.key}: {path: ${d.value}}').join('\n')}
 $assetsSection
 ''');
   }
@@ -143,7 +147,7 @@ $assetsSection
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
-          mainLibName: 'my_app',
+          mainLibName: 'test',
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
@@ -178,7 +182,7 @@ $assetsSection
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
-          mainLibName: 'my_app',
+          mainLibName: 'test',
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
@@ -217,7 +221,7 @@ $assetsSection
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
-          mainLibName: 'my_app',
+          mainLibName: 'test',
         );
 
         final List<String> assets = <String>['a/foo'];
@@ -248,7 +252,7 @@ $assetsSection
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
-          mainLibName: 'my_app',
+          mainLibName: 'test',
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
@@ -276,7 +280,7 @@ $assetsSection
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
           packages: <String, String>{'test_package': 'p/p/'},
-          mainLibName: 'my_app',
+          mainLibName: 'test',
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: <String>['a/foo', 'a/bar']);
 
@@ -308,7 +312,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test', assets: <String>['packages/test_package/a/foo']);
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
@@ -338,7 +342,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
 
@@ -373,7 +377,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
 
@@ -404,7 +408,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'},
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: <String>['a/foo']);
@@ -446,7 +450,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'},
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
@@ -485,7 +489,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'},
         );
         writePubspecFile(
@@ -519,7 +523,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
         writePubspecFile(
@@ -557,7 +561,7 @@ $assetsSection
       writePubspecFile('pubspec.yaml', 'test');
       writePackageConfigFile(
         directory: globals.fs.currentDirectory,
-        mainLibName: 'my_app',
+        mainLibName: 'test',
         packages: <String, String>{'test_package': 'p/p/'},
       );
 
@@ -588,7 +592,7 @@ $assetsSection
       writePubspecFile('pubspec.yaml', 'test');
       writePackageConfigFile(
         directory: globals.fs.currentDirectory,
-        mainLibName: 'my_app',
+        mainLibName: 'test',
         packages: <String, String>{'test_package': 'p/p/'},
       );
 
@@ -620,7 +624,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
 
@@ -653,7 +657,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
 
@@ -686,7 +690,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
 
@@ -723,7 +727,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
 
@@ -753,7 +757,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
 
@@ -781,7 +785,7 @@ $assetsSection
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
           packages: <String, String>{'test_package': 'p/p/'},
         );
 

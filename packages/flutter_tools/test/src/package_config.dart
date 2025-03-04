@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:file/file.dart';
 
 /// Writes a `.dart_tool/package_config.json` file at [directory].
@@ -20,7 +21,29 @@ File writePackageConfigFile({
   required String mainLibName,
   Map<String, String> packages = const <String, String>{},
   Map<String, String> languageVersions = const <String, String>{},
+  List<String> devDependencies = const <String>[],
 }) {
+  directory.childDirectory('.dart_tool').childFile('package_graph.json')
+    ..createSync(recursive: true)
+    ..writeAsStringSync(
+      json.encode(<String, Object?>{
+        'roots': <Object?>[mainLibName],
+        'packages': <Object>[
+          <String, Object?>{
+            'name': mainLibName,
+            'dependencies': packages.keys.toList().whereNot(devDependencies.contains).toList(),
+            'devDependencies': devDependencies,
+          },
+          ...packages.entries.map(
+            (MapEntry<String, String> entry) => <String, Object?>{
+              'name': entry.key,
+              'dependencies': <String>[],
+            },
+          ),
+        ],
+        'configVersion': 1,
+      }),
+    );
   return directory.childDirectory('.dart_tool').childFile('package_config.json')
     ..createSync(recursive: true)
     ..writeAsStringSync(

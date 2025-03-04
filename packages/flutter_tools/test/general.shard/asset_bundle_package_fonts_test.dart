@@ -26,7 +26,12 @@ void main() {
     return path.replaceAll('/', globals.fs.path.separator);
   }
 
-  void writePubspecFile(String path, String name, {String? fontsSection}) {
+  void writePubspecFile(
+    String path,
+    String name, {
+    String? fontsSection,
+    Map<String, String> deps = const <String, String>{},
+  }) {
     if (fontsSection == null) {
       fontsSection = '';
     } else {
@@ -44,6 +49,7 @@ name: $name
 dependencies:
   flutter:
     sdk: flutter
+${deps.entries.map((MapEntry<String, String> entry) => '  ${entry.key}: {path: ${entry.value}}').join('\n')}
 $fontsSection
 ''');
   }
@@ -102,7 +108,7 @@ $fontsSection
         writePackageConfigFile(
           directory: globals.fs.currentDirectory,
           packages: deps,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
@@ -283,7 +289,7 @@ $fontsSection
           directory: globals.fs.currentDirectory,
 
           packages: deps,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
         );
 
         const String pubspec = '''

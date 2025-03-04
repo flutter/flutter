@@ -134,6 +134,10 @@ void main() {
           ];
           for (final String templatePath in templatePaths) {
             globals.fs.directory(templatePath).createSync(recursive: true);
+            globals.fs
+                .directory(templatePath)
+                .childFile('pubspec.yaml.tmpl')
+                .writeAsStringSync('name: my_app');
           }
           // Set up enough of the packages to satisfy the templating code.
           final File packagesFile = globals.fs.file(

@@ -21,9 +21,9 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
+import '../../src/throwing_pub.dart';
 
 enum _StdioStream { stdout, stderr }
 
@@ -440,7 +440,7 @@ environement:
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   });
