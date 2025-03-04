@@ -64,6 +64,13 @@ void main() {
     iosEnvironment.buildDir.createSync(recursive: true);
     androidEnvironment.buildDir.createSync(recursive: true);
   });
+  testWithoutContext('NativeAssets throws error if missing target platform', () async {
+    iosEnvironment.defines.remove(kTargetPlatform);
+    expect(
+      const DartBuildForNative().build(iosEnvironment),
+      throwsA(isA<MissingDefineException>()),
+    );
+  });
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
     writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
