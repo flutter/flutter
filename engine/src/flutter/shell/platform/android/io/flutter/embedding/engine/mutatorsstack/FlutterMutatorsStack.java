@@ -8,6 +8,8 @@ import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
+
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -59,6 +61,7 @@ public class FlutterMutatorsStack {
     public FlutterMutator(Rect rect) {
       this.type = FlutterMutatorType.CLIP_RECT;
       this.rect = rect;
+      if (Build.VERSION.SDK_INT > 22);
     }
 
     /**
