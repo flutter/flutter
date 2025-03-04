@@ -38,46 +38,6 @@ import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
 
-bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
-  if (a == b) {
-    return true;
-  }
-  if ((a == null) != (b == null)) {
-    return false;
-  }
-  // They most both be non-null now.
-  if (a!.length != b!.length) {
-    return false;
-  }
-
-  if (a.length == 1) {
-    return a.first == b.first;
-  }
-
-  if (a.length == 2) {
-    return a.first == b.first && a.last == b.last || a.last == b.first && b.first == a.last;
-  }
-
-  // Complex cases.
-  final Map<T, int> wordCounts = <T, int>{};
-  for (final T word in a) {
-    int count = wordCounts[word] ?? 0;
-    wordCounts[word] = count + 1;
-  }
-
-  for (final T otherWord in b) {
-    int? count = wordCounts[otherWord];
-    if (count == null || count == 0) {
-      return false;
-    }
-    if (count == 1) {
-      wordCounts.remove(otherWord);
-    }
-    wordCounts[otherWord] = count - 1;
-  }
-  return wordCounts.isEmpty;
-}
-
 class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   const EngineAccessibilityFeatures(this._index);
 
