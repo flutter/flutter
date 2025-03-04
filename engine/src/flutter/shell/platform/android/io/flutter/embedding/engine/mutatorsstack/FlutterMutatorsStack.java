@@ -220,6 +220,11 @@ public class FlutterMutatorsStack {
     finalOpacity *= opacity;
   }
 
+  /**
+   * Push a clipPath {@link FlutterMutatorsStack.FlutterMutator} to the stack.
+   *
+   * @param path the path to be clipped.
+   */
   public void pushClipPath(Path path) {
     FlutterMutator mutator = new FlutterMutator(path);
     mutators.add(mutator);
