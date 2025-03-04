@@ -7382,7 +7382,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback? onFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
     ui.SemanticsRole? role,
-    Set<String>? controlsVisibilityOfNodes,
+    Set<String>? controlsNodes,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -7458,7 +7458,7 @@ class Semantics extends SingleChildRenderObjectWidget {
                    ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
                    : null,
            role: role,
-           controlsVisibilityOfNodes: controlsVisibilityOfNodes,
+           controlsNodes: controlsNodes,
          ),
        );
 

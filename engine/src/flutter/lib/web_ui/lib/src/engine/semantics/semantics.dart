@@ -50,7 +50,33 @@ bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
     return false;
   }
 
-  return a.toSet().containsAll(b);
+  if (a.length == 1) {
+    return a.first == b.first;
+  }
+
+  if (a.length == 2) {
+    return a.first == b.first && a.last == b.last ||
+      a.last == b.first && b.first == a.last;
+  }
+
+  // Complex cases.
+  final Map<String, int> wordCounts = <String, int>{};
+  for (final String word in a) {
+    int count = wordCounts[word] ?? 0;
+    wordCounts[word] = count + 1;
+  }
+
+  for (final String otherWord in b) {
+    int? count = wordCounts[otherWord];
+    if (count == null || count = 0) {
+      return false;
+    }
+    if (count == 1) {
+      wordCounts.remove(otherWord);
+    }
+    wordCounts[otherWord] = count - 1;
+  }
+  return wordCounts.isEmpty;
 }
 
 class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
@@ -254,7 +280,7 @@ class SemanticsNodeUpdate {
     required this.headingLevel,
     this.linkUrl,
     required this.role,
-    required this.controlsVisibilityOfNodes,
+    required this.controlsNodes,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -366,7 +392,7 @@ class SemanticsNodeUpdate {
   final ui.SemanticsRole role;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<String>? controlsVisibilityOfNodes;
+  final List<String>? controlsNodes;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -692,7 +718,7 @@ abstract class SemanticRole {
       _updateIdentifier();
     }
 
-    if (semanticsObject.isControlsVisibilityOfNodesDirty) {
+    if (semanticsObject.isControlsNodesDirty) {
       _updateControls();
     }
   }
@@ -706,9 +732,9 @@ abstract class SemanticRole {
   }
 
   void _updateControls() {
-    if (semanticsObject.hasControlsVisibilityOfNodes) {
+    if (semanticsObject.hasControlsNodes) {
       final List<String> elementIds = <String>[];
-      for (final String identifier in semanticsObject.controlsVisibilityOfNodes!) {
+      for (final String identifier in semanticsObject.controlsNodes!) {
         final Set<int>? semanticNodeIds = SemanticsObject.identifiersToIds[identifier];
         if (semanticNodeIds == null) {
           continue;
@@ -1320,22 +1346,21 @@ class SemanticsObject {
   /// The role of this node.
   late ui.SemanticsRole role;
 
-  /// List of nodes whose visibilities are control by this node.
+  /// List of nodes whose contents are controlled by this node.
   ///
   /// The list contains [identifier]s of those nodes.
-  List<String>? controlsVisibilityOfNodes;
+  List<String>? controlsNodes;
 
-  /// Whether this object contains a non-empty link URL.
-  bool get hasControlsVisibilityOfNodes =>
-      controlsVisibilityOfNodes != null && controlsVisibilityOfNodes!.isNotEmpty;
+  /// Whether this object controls at least one node.
+  bool get hasControlsNodes => controlsNodes != null && controlsNodes!.isNotEmpty;
 
-  static const int _controlsVisibilityOfNodesIndex = 1 << 27;
+  static const int _controlsNodesIndex = 1 << 27;
 
-  /// Whether the [linkUrl] field has been updated but has not been
+  /// Whether the [controlsNodes] field has been updated but has not been
   /// applied to the DOM yet.
-  bool get isControlsVisibilityOfNodesDirty => _isDirty(_controlsVisibilityOfNodesIndex);
-  void _markControlsVisibilityOfNodesDirty() {
-    _dirtyFields |= _controlsVisibilityOfNodesIndex;
+  bool get isControlsNodesDirty => _isDirty(_controlsNodesIndex);
+  void _markControlsNodesDirty() {
+    _dirtyFields |= _controlsNodesIndex;
   }
 
   /// Bitfield showing which fields have been updated but have not yet been
@@ -1642,9 +1667,9 @@ class SemanticsObject {
 
     role = update.role;
 
-    if (!unorderedListEqual<String>(controlsVisibilityOfNodes, update.controlsVisibilityOfNodes)) {
-      controlsVisibilityOfNodes = update.controlsVisibilityOfNodes;
-      _markControlsVisibilityOfNodesDirty();
+    if (!unorderedListEqual<String>(controlsNodes, update.controlsNodes)) {
+      controlsNodes = update.controlsNodes;
+      _markControlsNodesDirty();
     }
 
     // Apply updates to the DOM.

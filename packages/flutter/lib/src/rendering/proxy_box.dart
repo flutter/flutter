@@ -4540,8 +4540,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (properties.role != null) {
       config.role = _properties.role!;
     }
-    if (_properties.controlsVisibilityOfNodes != null) {
-      config.controlsVisibilityOfNodes = _properties.controlsVisibilityOfNodes;
+    if (_properties.controlsNodes != null) {
+      config.controlsNodes = _properties.controlsNodes;
     }
 
     // Registering _perform* as action handlers instead of the user provided
