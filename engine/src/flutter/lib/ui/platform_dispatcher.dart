@@ -301,6 +301,17 @@ class PlatformDispatcher {
     _invoke(onMetricsChanged, _onMetricsChangedZone);
   }
 
+  void _sendViewFocusEvent(ViewFocusEvent event) {
+    _invoke1<ViewFocusEvent>(onViewFocusChange, _onViewFocusChangeZone, event);
+  }
+
+  /// Opaque engine identifier for the engine running current isolate. Can be used
+  /// in native code to retrieve the engine instance.
+  /// The identifier is valid while the isolate is running.
+  int? get engineId => _engineId;
+
+  int? _engineId;
+
   // Called from the engine, via hooks.dart.
   //
   // Updates the available displays.
@@ -384,8 +395,13 @@ class PlatformDispatcher {
     required ViewFocusState state,
     required ViewFocusDirection direction,
   }) {
-    // TODO(tugorez): implement this method. At the moment will be a no op call.
+    _requestViewFocusChange(viewId, state.index, direction.index);
   }
+
+  @Native<Void Function(Int64, Int64, Int64)>(
+    symbol: 'PlatformConfigurationNativeApi::RequestViewFocusChange',
+  )
+  external static void _requestViewFocusChange(int viewId, int state, int direction);
 
   /// A callback invoked when any view begins a frame.
   ///

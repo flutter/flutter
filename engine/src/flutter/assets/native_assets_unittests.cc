@@ -32,6 +32,18 @@ const char* kTestManifest = R"({
                 "libmy_package.so"
             ]
         },
+        "fuchsia_arm64": {
+            "package:my_package/my_package_bindings_generated.dart": [
+                "absolute",
+                "libmy_package.so"
+            ]
+        },
+        "fuchsia_x64": {
+            "package:my_package/my_package_bindings_generated.dart": [
+                "absolute",
+                "libmy_package.so"
+            ]
+        },
         "macos_arm64": {
             "package:my_package/my_package_bindings_generated.dart": [
                 "absolute",
@@ -75,7 +87,7 @@ TEST(NativeAssetsManagerTest, NativeAssetsManifestParsing) {
   ASSERT_EQ(existing_asset[0], "absolute");
 #if defined(FML_OS_MACOSX)
   ASSERT_EQ(existing_asset[1], "my_package.framework/my_package");
-#elif defined(FML_OS_LINUX)
+#elif defined(FML_OS_LINUX) || defined(FML_OS_FUCHSIA)
   ASSERT_EQ(existing_asset[1], "libmy_package.so");
 #elif defined(FML_OS_WIN)
   ASSERT_EQ(existing_asset[1], "my_package.dll");

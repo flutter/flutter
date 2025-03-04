@@ -43,8 +43,8 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
     // further culling during `DisplayList::Dispatch`. Further, this canvas
     // will live underneath any platform views so we do not need to compute
     // exact coverage to describe "pixel ownership" to the platform.
-    dl_builder_ = sk_make_sp<DisplayListBuilder>(SkRect::Make(frame_size),
-                                                 /*prepare_rtree=*/false);
+    dl_builder_ = sk_make_sp<DisplayListBuilder>(
+        DlRect::MakeSize(ToDlISize(frame_size)), /*prepare_rtree=*/false);
     canvas_ = dl_builder_.get();
   }
 }

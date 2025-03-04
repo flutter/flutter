@@ -326,18 +326,35 @@ ContentContext::ContentContext(
     if (context_->GetCapabilities()->SupportsSSBO()) {
       linear_gradient_ssbo_fill_pipelines_.CreateDefault(*context_, options);
       radial_gradient_ssbo_fill_pipelines_.CreateDefault(*context_, options);
-      conical_gradient_ssbo_fill_pipelines_.CreateDefault(*context_, options);
+      conical_gradient_ssbo_fill_pipelines_.CreateDefault(*context_, options,
+                                                          {3.0});
+      conical_gradient_ssbo_fill_radial_pipelines_.CreateDefault(
+          *context_, options, {1.0});
+      conical_gradient_ssbo_fill_strip_pipelines_.CreateDefault(*context_,
+                                                                options, {2.0});
+      conical_gradient_ssbo_fill_strip_and_radial_pipelines_.CreateDefault(
+          *context_, options, {0.0});
       sweep_gradient_ssbo_fill_pipelines_.CreateDefault(*context_, options);
     } else {
       linear_gradient_uniform_fill_pipelines_.CreateDefault(*context_, options);
       radial_gradient_uniform_fill_pipelines_.CreateDefault(*context_, options);
       conical_gradient_uniform_fill_pipelines_.CreateDefault(*context_,
                                                              options);
+      conical_gradient_uniform_fill_radial_pipelines_.CreateDefault(*context_,
+                                                                    options);
+      conical_gradient_uniform_fill_strip_pipelines_.CreateDefault(*context_,
+                                                                   options);
+      conical_gradient_uniform_fill_strip_and_radial_pipelines_.CreateDefault(
+          *context_, options);
       sweep_gradient_uniform_fill_pipelines_.CreateDefault(*context_, options);
 
       linear_gradient_fill_pipelines_.CreateDefault(*context_, options);
       radial_gradient_fill_pipelines_.CreateDefault(*context_, options);
       conical_gradient_fill_pipelines_.CreateDefault(*context_, options);
+      conical_gradient_fill_radial_pipelines_.CreateDefault(*context_, options);
+      conical_gradient_fill_strip_pipelines_.CreateDefault(*context_, options);
+      conical_gradient_fill_strip_and_radial_pipelines_.CreateDefault(*context_,
+                                                                      options);
       sweep_gradient_fill_pipelines_.CreateDefault(*context_, options);
     }
 

@@ -64,7 +64,7 @@ void Canvas::saveLayerWithoutBounds(Dart_Handle paint_objects,
         paint.paint(dl_paint, kSaveLayerWithPaintFlags, DlTileMode::kDecal);
     FML_DCHECK(save_paint);
     TRACE_EVENT0("flutter", "ui.Canvas::saveLayer (Recorded)");
-    builder()->SaveLayer(nullptr, save_paint);
+    builder()->SaveLayer(std::nullopt, save_paint);
   }
 }
 

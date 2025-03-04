@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:image/image.dart';
 import 'package:webdriver/async_io.dart' show WebDriver;
@@ -63,13 +64,15 @@ class WebDriverBrowser extends Browser {
 
   @override
   Future<Image> captureScreenshot(Rectangle<num> region) async {
-    final Image image = decodePng(await _driver.captureScreenshotAsList())!;
+    // The underlying return type is Uint8Lint – goto definitions to see
+    // Fixing in https://github.com/google/webdriver.dart/pull/323
+    final Image image = decodePng(await _driver.captureScreenshotAsList() as Uint8List)!;
     return copyCrop(
       image,
-      region.left.round(),
-      region.top.round(),
-      region.width.round(),
-      region.height.round(),
+      x: region.left.round(),
+      y: region.top.round(),
+      width: region.width.round(),
+      height: region.height.round(),
     );
   }
 }
