@@ -1369,10 +1369,7 @@ class SemanticsObject {
   /// When the scrollable container has no scroll extent, it won't have any scroll actions, but
   /// it's still a scrollable container. In this case, we need to use the implicit scrolling flag
   /// to check for scrollability.
-  bool get isScrollContainer =>
-      hasFlag(ui.SemanticsFlag.hasImplicitScrolling) ||
-      isVerticalScrollContainer ||
-      isHorizontalScrollContainer;
+  bool get isScrollContainer => hasFlag(ui.SemanticsFlag.hasImplicitScrolling);
 
   /// Whether this object has a non-empty list of children.
   bool get hasChildren =>
