@@ -279,6 +279,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             'or as the string "none" to disable the timeout entirely.',
       )
       ..addFlag(
+        'ignore-timeouts',
+        help:
+            'Ignore all timeouts. Useful when testing a big application '
+            'that requires a longer time to compile (e.g. running integration '
+            'tests for a Flutter app).',
+        negatable: false,
+      )
+      ..addFlag(
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
@@ -647,6 +655,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        ignoreTimeouts: boolArg('ignore-timeouts'),
         failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
@@ -675,6 +684,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        ignoreTimeouts: boolArg('ignore-timeouts'),
         failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
