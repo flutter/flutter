@@ -233,8 +233,10 @@ class SemanticScrollable extends SemanticRole {
         // Note that on Android overflow:hidden also works. However, we prefer
         // "scroll" because it works both on Android and iOS.
         if (semanticsObject.isVerticalScrollContainer) {
+          element.style.removeProperty('overflow');
           element.style.overflowY = 'scroll';
         } else if (semanticsObject.isHorizontalScrollContainer) {
+          element.style.removeProperty('overflow');
           element.style.overflowX = 'scroll';
         } else {
           element.style.overflow = 'hidden';
