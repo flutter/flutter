@@ -126,8 +126,7 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
   required FileSystem fileSystem,
 }) async {
   final bool isWeb = targetPlatform == TargetPlatform.web_javascript;
-  final OS? targetOS =
-      targetPlatform != null ? getNativeOSFromTargetPlatform(targetPlatform) : null;
+  final OS? targetOS = isWeb ? null : getNativeOSFromTargetPlatform(targetPlatform!);
   assert(featureFlags.isNativeAssetsEnabled || targetOS != null);
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
 
@@ -864,8 +863,7 @@ Never _throwNativeAssetsLinkFailed() {
   throwToolExit('Linking native assets failed. See the logs for more details.');
 }
 
-/// Returns null for the web, and non-null otherwise.
-OS? getNativeOSFromTargetPlatform(TargetPlatform platform) {
+OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.ios:
       return OS.iOS;
@@ -897,7 +895,7 @@ OS? getNativeOSFromTargetPlatform(TargetPlatform platform) {
         throw StateError('Unknown operating system');
       }
     case TargetPlatform.web_javascript:
-      return null;
+      throw StateError('No dart builds for web yet.');
   }
 }
 
