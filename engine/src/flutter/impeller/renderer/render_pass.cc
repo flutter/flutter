@@ -306,7 +306,8 @@ bool RenderPass::BindTexture(ShaderStage stage,
   TextureAndSampler data = TextureAndSampler{
       .stage = stage,
       .texture = std::move(resource),
-      .sampler = std::move(sampler),
+      // NOLINTNEXTLINE(performance-move-const-arg)
+      .sampler = sampler,
   };
 
   if (!bound_textures_start_.has_value()) {
