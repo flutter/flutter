@@ -154,7 +154,7 @@ TEST(FlAccessibleTextFieldTest, PerformAction) {
   fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
       MOCK_ENGINE_PROC(
           DispatchSemanticsAction,
-          ([&action_datas](auto engine, uint64_t id,
+          ([&action_datas](auto engine, int64_t view_id, uint64_t id,
                            FlutterSemanticsAction action, const uint8_t* data,
                            size_t data_length) {
             g_ptr_array_add(action_datas,
@@ -243,7 +243,7 @@ TEST(FlAccessibleTextFieldTest, SetCaretOffset) {
   fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
       MOCK_ENGINE_PROC(
           DispatchSemanticsAction,
-          ([&base, &extent](auto engine, uint64_t id,
+          ([&base, &extent](auto engine, int64_t view_id, uint64_t id,
                             FlutterSemanticsAction action, const uint8_t* data,
                             size_t data_length) {
             EXPECT_EQ(action, kFlutterSemanticsActionSetSelection);
@@ -324,7 +324,7 @@ TEST(FlAccessibleTextFieldTest, AddSelection) {
   fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
       MOCK_ENGINE_PROC(
           DispatchSemanticsAction,
-          ([&base, &extent](auto engine, uint64_t id,
+          ([&base, &extent](auto engine, int64_t view_id, uint64_t id,
                             FlutterSemanticsAction action, const uint8_t* data,
                             size_t data_length) {
             EXPECT_EQ(action, kFlutterSemanticsActionSetSelection);
@@ -364,7 +364,7 @@ TEST(FlAccessibleTextFieldTest, RemoveSelection) {
   fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
       MOCK_ENGINE_PROC(
           DispatchSemanticsAction,
-          ([&base, &extent](auto engine, uint64_t id,
+          ([&base, &extent](auto engine, int64_t view_id, uint64_t id,
                             FlutterSemanticsAction action, const uint8_t* data,
                             size_t data_length) {
             EXPECT_EQ(action, kFlutterSemanticsActionSetSelection);
@@ -410,7 +410,7 @@ TEST(FlAccessibleTextFieldTest, SetSelection) {
   fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
       MOCK_ENGINE_PROC(
           DispatchSemanticsAction,
-          ([&base, &extent](auto engine, uint64_t id,
+          ([&base, &extent](auto engine, int64_t view_id, uint64_t id,
                             FlutterSemanticsAction action, const uint8_t* data,
                             size_t data_length) {
             EXPECT_EQ(action, kFlutterSemanticsActionSetSelection);
@@ -451,7 +451,7 @@ TEST(FlAccessibleTextFieldTest, SetTextContents) {
   fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
       MOCK_ENGINE_PROC(
           DispatchSemanticsAction,
-          ([&text](auto engine, uint64_t id, FlutterSemanticsAction action,
+          ([&text](auto engine, int64_t view_id, uint64_t id, FlutterSemanticsAction action,
                    const uint8_t* data, size_t data_length) {
             EXPECT_EQ(action, kFlutterSemanticsActionSetText);
             g_autoptr(FlValue) value = decode_semantic_data(data, data_length);
@@ -482,7 +482,7 @@ TEST(FlAccessibleTextFieldTest, InsertDeleteText) {
   fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
       MOCK_ENGINE_PROC(
           DispatchSemanticsAction,
-          ([&text, &base, &extent](auto engine, uint64_t id,
+          ([&text, &base, &extent](auto engine, int64_t view_id, uint64_t id,
                                    FlutterSemanticsAction action,
                                    const uint8_t* data, size_t data_length) {
             EXPECT_THAT(action,
@@ -537,7 +537,7 @@ TEST(FlAccessibleTextFieldTest, CopyCutPasteText) {
   fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
       MOCK_ENGINE_PROC(
           DispatchSemanticsAction,
-          ([&act, &base, &extent](auto engine, uint64_t id,
+          ([&act, &base, &extent](auto engine, int64_t view_id, uint64_t id,
                                   FlutterSemanticsAction action,
                                   const uint8_t* data, size_t data_length) {
             EXPECT_THAT(action,

@@ -1325,14 +1325,14 @@ class PlatformDispatcher {
   }
 
   // Called from the engine, via hooks.dart
-  void _dispatchSemanticsAction(int nodeId, int action, ByteData? args) {
+  void _dispatchSemanticsAction(int viewId, int nodeId, int action, ByteData? args) {
     _invoke1<SemanticsActionEvent>(
       onSemanticsActionEvent,
       _onSemanticsActionEventZone,
       SemanticsActionEvent(
         type: SemanticsAction.fromIndex(action)!,
         nodeId: nodeId,
-        viewId: 0, // TODO(goderbauer): Wire up the real view ID.
+        viewId: viewId,
         arguments: args,
       ),
     );

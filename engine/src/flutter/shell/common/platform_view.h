@@ -450,12 +450,14 @@ class PlatformView {
   /// @brief      Used by embedders to dispatch an accessibility action to a
   ///             running isolate hosted by the engine.
   ///
+  /// @param[in]  view_id The identifier of the view.
   /// @param[in]  node_id The identifier of the accessibility node on which to
   ///                     perform the action.
   /// @param[in]  action  The action
   /// @param[in]  args    The arguments
   ///
-  void DispatchSemanticsAction(int32_t node_id,
+  void DispatchSemanticsAction(int64_t view_id,
+                               int32_t node_id,
                                SemanticsAction action,
                                fml::MallocMapping args);
 

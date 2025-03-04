@@ -143,7 +143,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
   MOCK_METHOD(void,
               OnPlatformViewDispatchSemanticsAction,
-              (int32_t id, SemanticsAction action, fml::MallocMapping args),
+              (int64_t view_id, int32_t id, SemanticsAction action, fml::MallocMapping args),
               (override));
 
   MOCK_METHOD(void,

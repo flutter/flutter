@@ -449,10 +449,11 @@ void Engine::DispatchPointerDataPacket(
   pointer_data_dispatcher_->DispatchPacket(std::move(packet), trace_flow_id);
 }
 
-void Engine::DispatchSemanticsAction(int node_id,
+void Engine::DispatchSemanticsAction(int64_t view_id,
+                                     int node_id,
                                      SemanticsAction action,
                                      fml::MallocMapping args) {
-  runtime_controller_->DispatchSemanticsAction(node_id, action,
+  runtime_controller_->DispatchSemanticsAction(view_id, node_id, action,
                                                std::move(args));
 }
 

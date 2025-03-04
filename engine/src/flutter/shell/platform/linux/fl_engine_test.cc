@@ -183,8 +183,9 @@ TEST(FlEngineTest, DispatchSemanticsAction) {
   fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
       MOCK_ENGINE_PROC(
           DispatchSemanticsAction,
-          ([&called](auto engine, uint64_t id, FlutterSemanticsAction action,
-                     const uint8_t* data, size_t data_length) {
+          ([&called](auto engine, int64_t view_id, uint64_t id,
+                     FlutterSemanticsAction action, const uint8_t* data, size_t data_length) {
+            EXPECT_EQ(view_id, static_cast<int64_t>(456));
             EXPECT_EQ(id, static_cast<uint64_t>(42));
             EXPECT_EQ(action, kFlutterSemanticsActionTap);
             EXPECT_EQ(data_length, static_cast<size_t>(4));
@@ -201,7 +202,7 @@ TEST(FlEngineTest, DispatchSemanticsAction) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
   g_autoptr(GBytes) data = g_bytes_new_static("test", 4);
-  fl_engine_dispatch_semantics_action(engine, 42, kFlutterSemanticsActionTap,
+  fl_engine_dispatch_semantics_action(engine, 456, 42, kFlutterSemanticsActionTap,
                                       data);
 
   EXPECT_TRUE(called);

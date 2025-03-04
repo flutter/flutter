@@ -364,7 +364,8 @@ void PlatformConfiguration::DispatchPointerDataPacket(
       tonic::DartInvoke(dispatch_pointer_data_packet_.Get(), {data_handle}));
 }
 
-void PlatformConfiguration::DispatchSemanticsAction(int32_t node_id,
+void PlatformConfiguration::DispatchSemanticsAction(int64_t view_id,
+                                                    int32_t node_id,
                                                     SemanticsAction action,
                                                     fml::MallocMapping args) {
   std::shared_ptr<tonic::DartState> dart_state =
@@ -383,8 +384,8 @@ void PlatformConfiguration::DispatchSemanticsAction(int32_t node_id,
 
   tonic::CheckAndHandleError(tonic::DartInvoke(
       dispatch_semantics_action_.Get(),
-      {tonic::ToDart(node_id), tonic::ToDart(static_cast<int32_t>(action)),
-       args_handle}));
+      {tonic::toDart(view_id), tonic::ToDart(node_id),
+       tonic::ToDart(static_cast<int32_t>(action)), args_handle}));
 }
 
 void PlatformConfiguration::BeginFrame(fml::TimePoint frameTime,
