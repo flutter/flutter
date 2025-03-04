@@ -13,6 +13,7 @@ import '../../dart/package_map.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
+import '../exceptions.dart' show MissingDefineException;
 import 'common.dart';
 
 export '../../isolated/native_assets/native_assets.dart'
@@ -34,7 +35,7 @@ class DartBuild extends Target {
     final FileSystem fileSystem = environment.fileSystem;
     final DartBuildResult result;
 
-    final TargetPlatform? targetPlatform =
+    final TargetPlatform targetPlatform =
         specifiedTargetPlatform ?? _getTargetPlatformFromEnvironment(environment, name);
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -142,7 +143,7 @@ class InstallCodeAssets extends Target {
   Future<void> build(Environment environment) async {
     final Uri projectUri = environment.projectDir.uri;
     final FileSystem fileSystem = environment.fileSystem;
-    final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name)!;
+    final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
     // We fetch the result from the [DartBuild].
     final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
@@ -196,9 +197,10 @@ class InstallCodeAssets extends Target {
   static const String depFilename = 'install_code_assets.d';
 }
 
-TargetPlatform? _getTargetPlatformFromEnvironment(Environment environment, String name) {
+TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String name) {
   final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
-  return targetPlatformEnvironment != null
-      ? getTargetPlatformForName(targetPlatformEnvironment)
-      : null;
+  if (targetPlatformEnvironment == null) {
+    throw MissingDefineException(kTargetPlatform, name);
+  }
+  return getTargetPlatformForName(targetPlatformEnvironment);
 }
