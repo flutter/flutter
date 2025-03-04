@@ -1215,58 +1215,62 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   }
 
   jclass android_build_class = env->FindClass("android/os/Build$VERSION");
-  jfieldID version_num_field_id = env->GetStaticFieldID(android_build_class, "SDK_INT", "I");
-  int version_code = env->GetStaticIntField(android_build_class, version_num_field_id);
+  jfieldID version_num_field_id =
+      env->GetStaticFieldID(android_build_class, "SDK_INT", "I");
+  int version_code =
+      env->GetStaticIntField(android_build_class, version_num_field_id);
 
-
-  // Android path class and methods. Used by Hybrid Composition++ (hc++), so only registered on 34+.
+  // Android path class and methods. Used by Hybrid Composition++ (hc++), so
+  // only registered on 34+.
   if (version_code >= 34) {
-      path_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
-              env, env->FindClass("android/graphics/Path"));
-      if (path_class->is_null()) {
-          FML_LOG(ERROR) << "Could not locate android.graphics.Path class";
-          return false;
-      }
+    path_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
+        env, env->FindClass("android/graphics/Path"));
+    if (path_class->is_null()) {
+      FML_LOG(ERROR) << "Could not locate android.graphics.Path class";
+      return false;
+    }
 
-      path_constructor = env->GetMethodID(path_class->obj(), "<init>", "()V");
-      if (path_constructor == nullptr) {
-          FML_LOG(ERROR) << "Could not locate android.graphics.Path constructor";
-          return false;
-      }
+    path_constructor = env->GetMethodID(path_class->obj(), "<init>", "()V");
+    if (path_constructor == nullptr) {
+      FML_LOG(ERROR) << "Could not locate android.graphics.Path constructor";
+      return false;
+    }
 
-      path_move_to_method = env->GetMethodID(path_class->obj(), "moveTo", "(FF)V");
-      if (path_move_to_method == nullptr) {
-          FML_LOG(ERROR) << "Could not locate android.graphics.Path.moveTo method";
-          return false;
-      }
-      path_line_to_method = env->GetMethodID(path_class->obj(), "lineTo", "(FF)V");
-      if (path_line_to_method == nullptr) {
-          FML_LOG(ERROR) << "Could not locate android.graphics.Path.lineTo method";
-          return false;
-      }
-      path_quad_to_method =
-              env->GetMethodID(path_class->obj(), "quadTo", "(FFFF)V");
-      if (path_quad_to_method == nullptr) {
-          FML_LOG(ERROR) << "Could not locate android.graphics.Path.quadTo method";
-          return false;
-      }
-      path_cubic_to_method =
-              env->GetMethodID(path_class->obj(), "cubicTo", "(FFFFFF)V");
-      if (path_cubic_to_method == nullptr) {
-          FML_LOG(ERROR) << "Could not locate android.graphics.Path.cubicTo method";
-          return false;
-      }
-      path_conic_to_method =
-              env->GetMethodID(path_class->obj(), "conicTo", "(FFFFF)V");
-      if (path_conic_to_method == nullptr) {
-          FML_LOG(ERROR) << "Could not locate android.graphics.Path.conicTo method";
-          return false;
-      }
-      path_close_method = env->GetMethodID(path_class->obj(), "close", "()V");
-      if (path_close_method == nullptr) {
-          FML_LOG(ERROR) << "Could not locate android.graphics.Path.close method";
-          return false;
-      }
+    path_move_to_method =
+        env->GetMethodID(path_class->obj(), "moveTo", "(FF)V");
+    if (path_move_to_method == nullptr) {
+      FML_LOG(ERROR) << "Could not locate android.graphics.Path.moveTo method";
+      return false;
+    }
+    path_line_to_method =
+        env->GetMethodID(path_class->obj(), "lineTo", "(FF)V");
+    if (path_line_to_method == nullptr) {
+      FML_LOG(ERROR) << "Could not locate android.graphics.Path.lineTo method";
+      return false;
+    }
+    path_quad_to_method =
+        env->GetMethodID(path_class->obj(), "quadTo", "(FFFF)V");
+    if (path_quad_to_method == nullptr) {
+      FML_LOG(ERROR) << "Could not locate android.graphics.Path.quadTo method";
+      return false;
+    }
+    path_cubic_to_method =
+        env->GetMethodID(path_class->obj(), "cubicTo", "(FFFFFF)V");
+    if (path_cubic_to_method == nullptr) {
+      FML_LOG(ERROR) << "Could not locate android.graphics.Path.cubicTo method";
+      return false;
+    }
+    path_conic_to_method =
+        env->GetMethodID(path_class->obj(), "conicTo", "(FFFFF)V");
+    if (path_conic_to_method == nullptr) {
+      FML_LOG(ERROR) << "Could not locate android.graphics.Path.conicTo method";
+      return false;
+    }
+    path_close_method = env->GetMethodID(path_class->obj(), "close", "()V");
+    if (path_close_method == nullptr) {
+      FML_LOG(ERROR) << "Could not locate android.graphics.Path.close method";
+      return false;
+    }
   }
 
   return RegisterApi(env);
