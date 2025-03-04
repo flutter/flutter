@@ -2561,15 +2561,9 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     }
   }
 
-  // Asserts in box.dart prenvent us from accessing size from the deferred
-  // layout child during layout.
-  Size? overlayPortalSize;
-
   @override
   void performLayout() {
     super.performLayout();
-    overlayPortalSize = size;
-
     final _RenderDeferredLayoutBox? deferredChild = _deferredLayoutChild;
     if (deferredChild == null) {
       return;
@@ -2670,14 +2664,6 @@ class _RenderLayoutBuilder extends RenderProxyBox
     final _RenderTheater theater = this.theater;
     final _RenderDeferredLayoutBox parent = this.parent! as _RenderDeferredLayoutBox;
     final _RenderLayoutSurrogateProxyBox layoutSurrogate = parent._layoutSurrogate;
-    assert(layoutSurrogate.hasSize);
-    assert(layoutSurrogate.child?.hasSize ?? true);
-    assert(
-      layoutSurrogate.child == null ||
-          layoutSurrogate.child!.debugSize == layoutSurrogate.debugSize,
-    );
-    assert(layoutSurrogate.child?.getTransformTo(layoutSurrogate).isIdentity() ?? true);
-
     assert(() {
       for (
         RenderObject? node = layoutSurrogate;
@@ -2702,21 +2688,26 @@ class _RenderLayoutBuilder extends RenderProxyBox
       }
       return true;
     }());
+    assert(layoutSurrogate.hasSize);
+    assert(layoutSurrogate.child?.hasSize ?? true);
+    assert(layoutSurrogate.child == null || layoutSurrogate.child!.size == layoutSurrogate.size);
+    assert(size == theater.size);
+    assert(layoutSurrogate.child?.getTransformTo(layoutSurrogate).isIdentity() ?? true);
     // The paint transform we're about to compute is only useful if this RenderBox
     // uses the same coordinates as the theater.
     assert(getTransformTo(theater).isIdentity());
-    assert(size == theater.debugSize);
-    return OverlayChildLayoutInfo._((
-      parent._layoutSurrogate.overlayPortalSize!,
-      layoutSurrogate.getTransformTo(theater),
-      size,
-    ));
+    final Size overlayPortalSize = parent._layoutSurrogate.size;
+    final Matrix4 paintTransform = layoutSurrogate.getTransformTo(theater);
+    return OverlayChildLayoutInfo._((overlayPortalSize, paintTransform, size));
   }
 
   int? _callbackId;
   @override
   void performLayout() {
-    final OverlayChildLayoutInfo newLayoutInfo = _computeNewLayoutInfo();
+    late OverlayChildLayoutInfo newLayoutInfo;
+    // The invokeLayoutCallback is a quirk to allow arbitrary access to the
+    // sizes of RenderBoxes the we know that have finished doing layout.
+    invokeLayoutCallback((_) => newLayoutInfo = _computeNewLayoutInfo());
     if (newLayoutInfo != _layoutInfo) {
       _layoutInfo = newLayoutInfo;
       rebuildIfNecessary();

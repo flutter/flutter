@@ -2237,22 +2237,6 @@ abstract class RenderBox extends RenderObject {
   /// Whether this render object has undergone layout and has a [size].
   bool get hasSize => _size != null;
 
-  /// Get the [size] of the [RenderBox] without checking if the size access is
-  /// allowed.
-  ///
-  /// Returns `null` if [hasSize] is false.
-  ///
-  /// Only valid when asserts are enabled; in release builds this always returns
-  /// `null`.
-  Size? get debugSize {
-    Size? size;
-    assert(() {
-      size = _size;
-      return true;
-    }());
-    return size;
-  }
-
   /// The size of this render box computed during layout.
   ///
   /// This value is stale whenever this object is marked as needing layout.
