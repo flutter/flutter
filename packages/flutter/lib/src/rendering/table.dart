@@ -651,10 +651,17 @@ class RenderTable extends RenderBox {
         final Offset offset =
             (child.transform != null ? MatrixUtils.getAsTranslation(child.transform!) : null) ??
             Offset.zero;
-        // This cell belong to next row. break.
-        if (child.rect.shift(offset).top > rowBox.bottom) {
+        final Rect childRect = child.rect.shift(offset);
+        // Break if this cell belong to next row.
+        // If the cell index in parent is null, it means the cell's parent is not set to a row yet,
+        // its rect is relative to the table. Check its rect to see if it belongs to the current row.
+        // If the cell index in parent is not null, it means the cell's parent is set to a row, check its index to see if
+        // it belongs to the current row or next row.
+        if ((child.indexInParent == null && childRect.top > rowBox.bottom) ||
+            (child.indexInParent != null && child.indexInParent != x)) {
           break;
         }
+
         // Assign the role cell to the child if it doesn't have a role.
         if (child.role == SemanticsRole.none) {
           child.role = SemanticsRole.cell;
