@@ -1020,7 +1020,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom CupertinoSliverNavigationBar.bottom fades and slides in from the left', (
+  testWidgets('Bottom CupertinoSliverNavigationBar.bottom fades and slides out from the left', (
     WidgetTester tester,
   ) async {
     await startTransitionBetween(
@@ -1047,6 +1047,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
 
+    // Halfway through the transition, the bottom is only slightly visible.
     checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.001);
 
     expect(
@@ -1055,7 +1056,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom CupertinoNavigationBar.bottom fades and slides in from the left', (
+  testWidgets('Bottom CupertinoNavigationBar.bottom fades and slides out from the left', (
     WidgetTester tester,
   ) async {
     await startTransitionBetween(
@@ -1082,6 +1083,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
 
+    // Halfway through the transition, the bottom is only slightly visible.
     checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.001);
 
     expect(
@@ -1296,7 +1298,7 @@ void main() {
   testWidgets('Top CupertinoSliverNavigationBar.bottom is aligned with top large title animation', (
     WidgetTester tester,
   ) async {
-    const double horizontalPadding = 16.0;
+    const double horizontalPadding = 16.0; // _kNavBarEdgePadding
     const double height = 30.0;
     await startTransitionBetween(
       tester,
@@ -1345,7 +1347,7 @@ void main() {
     );
   });
 
-  testWidgets('Top CupertinoNavigationBar.bottom fades and slides out to the right', (
+  testWidgets('Top CupertinoNavigationBar.bottom fades and slides in to the right', (
     WidgetTester tester,
   ) async {
     await startTransitionBetween(
