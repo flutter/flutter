@@ -1512,6 +1512,7 @@ void window_metrics_event_all_view_ids() {
 }
 
 @pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
 void remove_view_callback_too_early() {
   signalNativeTest();
 }
