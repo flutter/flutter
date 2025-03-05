@@ -590,30 +590,12 @@ class Switch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color? effectiveActiveThumbColor;
-    Color? effectiveActiveTrackColor;
-
-    switch (_switchType) {
-      case _SwitchType.material:
-        effectiveActiveThumbColor = activeColor;
-      case _SwitchType.adaptive:
-        switch (Theme.of(context).platform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            effectiveActiveThumbColor = activeColor;
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            effectiveActiveTrackColor = activeColor;
-        }
-    }
     return _MaterialSwitch(
       value: value,
       onChanged: onChanged,
       size: _getSwitchSize(context),
-      activeColor: effectiveActiveThumbColor,
-      activeTrackColor: activeTrackColor ?? effectiveActiveTrackColor,
+      activeColor: activeColor,
+      activeTrackColor: activeTrackColor,
       inactiveThumbColor: inactiveThumbColor,
       inactiveTrackColor: inactiveTrackColor,
       activeThumbImage: activeThumbImage,
