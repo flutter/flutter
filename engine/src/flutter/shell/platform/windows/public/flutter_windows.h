@@ -134,11 +134,6 @@ FLUTTER_EXPORT void FlutterDesktopViewControllerDestroy(
 FLUTTER_EXPORT FlutterDesktopViewId FlutterDesktopViewControllerGetViewId(
     FlutterDesktopViewControllerRef view_controller);
 
-// assign the D3D11 device associated with the engine to the given pointer
-FLUTTER_EXPORT bool FlutterDesktopPluginRegistrarGetID3D11Device(
-    FlutterDesktopPluginRegistrarRef registrar,
-    FlutterID3D11DeviceRef* device);
-
 // Returns the handle for the engine running in FlutterDesktopViewControllerRef.
 //
 // Its lifetime is the same as the |controller|'s.
@@ -252,6 +247,10 @@ FLUTTER_EXPORT HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view);
 
 // Returns the DXGI adapter used for rendering or nullptr in case of error.
 FLUTTER_EXPORT IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(
+    FlutterDesktopViewRef view);
+
+// Returns the ID3D11Device used for rendering or nullptr in case of error.
+FLUTTER_EXPORT FlutterID3D11DeviceRef FlutterDesktopPluginViewGetID3D11Device(
     FlutterDesktopViewRef view);
 
 // Called to pass an external window message to the engine for lifecycle
