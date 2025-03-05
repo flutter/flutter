@@ -2122,6 +2122,41 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         break;
       }
       case MutatorType::kClipPath: {
+        auto& dlPath = (*iter)->GetPath();
+        std::optional<DlRoundRect> path_rrect;
+        {
+          DlRect rect;
+          if (dlPath.IsOval(&rect)) {
+            path_rrect = DlRoundRect::MakeOval(rect);
+          } else {
+            DlRoundRect rrect;
+            if (dlPath.IsRoundRect(&rrect)) {
+              path_rrect = rrect;
+            }
+          }
+        }
+        if (path_rrect.has_value()) {
+          const DlRect& rect = path_rrect->GetBounds();
+          const DlRoundingRadii& radii = path_rrect->GetRadii();
+          SkScalar radiis[8] = {
+              radii.top_left.width,     radii.top_left.height,
+              radii.top_right.width,    radii.top_right.height,
+              radii.bottom_right.width, radii.bottom_right.height,
+              radii.bottom_left.width,  radii.bottom_left.height,
+          };
+          fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
+              env, env->NewFloatArray(8));
+          env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
+          env->CallVoidMethod(mutatorsStack,
+                              g_mutators_stack_push_cliprrect_method,
+                              static_cast<int>(rect.GetLeft()),    //
+                              static_cast<int>(rect.GetTop()),     //
+                              static_cast<int>(rect.GetRight()),   //
+                              static_cast<int>(rect.GetBottom()),  //
+                              radiisArray.obj());
+          break;
+        }
+
         // Define and populate an Android Path with data from the DlPath
         jobject androidPath =
             env->NewObject(path_class->obj(), path_constructor);
@@ -2137,7 +2172,7 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
           }
         };
 
-        auto& path = (*iter)->GetPath().GetPath();
+        auto& path = dlPath.GetPath();
         for (auto it = path.begin(), end = path.end(); it != end; ++it) {
           switch (it.type()) {
             case impeller::Path::ComponentType::kContour: {
