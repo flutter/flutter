@@ -25,6 +25,9 @@ class LineGeometry final : public Geometry {
 
   Scalar ComputeAlphaCoverage(const Matrix& transform) const override;
 
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+
  private:
   // Computes the 4 corners of a rectangle that defines the line and
   // possibly extended endpoints which will be rendered under the given
@@ -51,9 +54,6 @@ class LineGeometry final : public Geometry {
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const override;
-
-  // |Geometry|
-  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   Point p0_;
   Point p1_;
