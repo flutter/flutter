@@ -2616,13 +2616,15 @@ class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<OverlayChildLayou
 }
 
 // A RenderBox that:
-//  - matches the size and the paint transform of its parent and its theater.
+//  - has the same size and paint transform, as its parent and its theater, in
+//    other words the three RenderBoxes describe the same rect on screen.
 //  - is a relayout boundary, and gets marked dirty for relayout every frame
-//    (but only when a frame is already scheduled)
+//    (but only when a frame is already scheduled, and markNeedsLayout does not
+//    schedule a new frame since it's called in a transient callback).
 //  - runs a layout callback in performLayout.
 //
 // Additionally, like RenderDeferredLayoutBox, this RenderBox also uses the Stack
-// layout algorithm so developers can use Positioned.
+// layout algorithm so developers can use the Positioned widget.
 class _RenderLayoutBuilder extends RenderProxyBox
     with _RenderTheaterMixin, RenderConstrainedLayoutBuilder<OverlayChildLayoutInfo, RenderBox> {
   @override
@@ -2705,8 +2707,8 @@ class _RenderLayoutBuilder extends RenderProxyBox
   @override
   void performLayout() {
     late OverlayChildLayoutInfo newLayoutInfo;
-    // The invokeLayoutCallback is a quirk to allow arbitrary access to the
-    // sizes of RenderBoxes the we know that have finished doing layout.
+    // The invokeLayoutCallback allows arbitrary access to the sizes of
+    // RenderBoxes the we know that have finished doing layout.
     invokeLayoutCallback((_) => newLayoutInfo = _computeNewLayoutInfo());
     if (newLayoutInfo != _layoutInfo) {
       _layoutInfo = newLayoutInfo;
