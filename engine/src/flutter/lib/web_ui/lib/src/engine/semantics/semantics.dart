@@ -473,7 +473,7 @@ enum EngineSemanticsRole {
   /// presented horizontally.
   menuBar,
 
-  /// an option in a set of choices contained by a [menu] or [menubar].
+  /// An option in a set of choices contained by a [menu] or [menuBar].
   menuItem,
 }
 

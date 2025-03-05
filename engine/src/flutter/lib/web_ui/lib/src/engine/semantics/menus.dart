@@ -62,6 +62,8 @@ class SemanticMenuItem extends SemanticRole {
     }
     if (semanticsObject.hasEnabledState && !semanticsObject.isEnabled) {
       setAttribute('aria-disabled', 'true');
+    } else {
+      addTappable();
     }
   }
 
