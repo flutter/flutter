@@ -386,16 +386,9 @@ TEST_F(ImageDecoderFixtureTest, ImpellerUploadToSharedNoGpu) {
   ASSERT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   ASSERT_EQ(result.second, "");
   EXPECT_EQ(no_gpu_access_context->DidDisposeResources(), true);
-
-#if FML_OS_IOS
   EXPECT_EQ(
       result.first->impeller_texture()->GetTextureDescriptor().storage_mode,
       impeller::StorageMode::kHostVisible);
-#else
-  EXPECT_EQ(
-      result.first->impeller_texture()->GetTextureDescriptor().storage_mode,
-      impeller::StorageMode::kDevicePrivate);
-#endif  // FML_OS_IOS
 
   no_gpu_access_context->FlushTasks(/*fail=*/true);
 }
