@@ -40,6 +40,7 @@ import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.internal.extensions.core.extra
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 private const val FAKE_PROJECT_ROOT_DIR = "/fake/root/dir"
@@ -312,6 +313,76 @@ class DependencyVersionCheckerTest {
             )
         }
     }
+
+    @Test
+    fun `checkMinSdkVersion throws error when in error range for min SDK version`() {
+        val mockLogger = mockk<Logger>()
+        val mockExtraPropertiesExtension = mockk<ExtraPropertiesExtension>()
+        val projectDir = "projectDir"
+        val flavor = "flavor"
+        val version = 0
+
+        every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
+        every { mockLogger.error(any()) } returns Unit
+
+        val dependencyValidationException =
+            assertFailsWith<DependencyValidationException> {
+                DependencyVersionChecker.checkMinSdkVersion(
+                    minSdkVersion = MinSdkVersion(flavor, version),
+                    projectDirectory = projectDir,
+                    logger = mockLogger
+                )
+            }
+
+        assertEquals(
+            dependencyValidationException.message,
+            "Error: Your project's minimum Android SDK (flavor='flavor') version (0) is lower than " +
+                "Flutter's minimum supported version of 1. Please upgrade your minimum Android SDK " +
+                "(flavor='flavor') version. \n" +
+                "Alternatively, use the flag \"--android-skip-build-dependency-validation\" to " +
+                "bypass this check.\n" +
+                "\n" +
+                "Potential fix: Your project's minimum Android SDK version is typically defined in " +
+                "the android block of the app-level `build.gradle(.kts)` file " +
+                "(projectDir/app/build.gradle(.kts))."
+        )
+    }
+
+    @Test
+    fun `checkMinSdkVersion logs warning when in warning range for min SDK version`() {
+        val mockLogger = mockk<Logger>()
+        val mockExtraPropertiesExtension = mockk<ExtraPropertiesExtension>()
+        val projectDir = "projectDir"
+        val flavor = "flavor"
+        val version = 20
+
+        every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
+        every { mockLogger.error(any()) } returns Unit
+
+        DependencyVersionChecker.checkMinSdkVersion(
+            minSdkVersion = MinSdkVersion(flavor, version),
+            projectDirectory = projectDir,
+            logger = mockLogger
+        )
+
+        val warningMessageSlot = slot<String>()
+        verify {
+            mockLogger.error(capture(warningMessageSlot))
+        }
+
+        assertEquals(
+            warningMessageSlot.captured,
+            "Warning: Flutter support for your project's minimum Android SDK (flavor='flavor') " +
+                "version (20) will soon be dropped. Please upgrade your minimum Android SDK " +
+                "(flavor='flavor') version to a version of at least 21 soon.\n" +
+                "Alternatively, use the flag \"--android-skip-build-dependency-validation\" to " +
+                "bypass this check.\n" +
+                "\n" +
+                "Potential fix: Your project's minimum Android SDK version is typically defined in " +
+                "the android block of the app-level `build.gradle(.kts)` file " +
+                "(projectDir/app/build.gradle(.kts))."
+        )
+    }
 }
 
 // There isn't a way to create a real org.gradle.api.Project object for testing unfortunately, so
@@ -398,11 +469,10 @@ private object MockProjectFactory {
         } answers {
             minSdkVersions.forEach {
                 val variant = mockk<Variant>()
-                if (it.flavor != null) {
-                    every { variant.name } returns it.flavor
-                    every { variant.minSdk } returns mockk { every { apiLevel } returns it.version }
-                    onVariantsFnSlot.captured.invoke(variant)
-                }
+                every { variant.name } returns it.flavor
+                every { variant.minSdk } returns mockk { every { apiLevel } returns it.version }
+                every { variant.minSdkVersion } returns mockk { every { apiLevel } returns it.version }
+                onVariantsFnSlot.captured.invoke(variant)
             }
             return@answers Unit
         }

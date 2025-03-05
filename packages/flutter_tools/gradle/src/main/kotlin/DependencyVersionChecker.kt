@@ -6,6 +6,7 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.extra
 import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 
@@ -112,7 +113,7 @@ object DependencyVersionChecker {
         checkGradleVersion(getGradleVersion(project), project)
         checkJavaVersion(getJavaVersion(), project)
 
-        checkMinSdkForAndroidComponents(project)
+        configureMinSdkCheck(project)
 
         val agpVersion: AndroidPluginVersion? = getAGPVersion(project)
         if (agpVersion != null) {
@@ -131,17 +132,24 @@ object DependencyVersionChecker {
         // KGP is not required, so don't log any warning if we can't find the version.
     }
 
-    private fun checkMinSdkForAndroidComponents(project: Project) {
+    private fun configureMinSdkCheck(project: Project) {
         val androidComponents =
             project.extensions.findByType(AndroidComponentsExtension::class.java)
 
-        androidComponents?.onVariants {
-            val taskName = "${it.name.capitalize()}$MIN_SDK_CHECK_TASK_POSTFIX"
+        androidComponents?.onVariants(
+            androidComponents.selector().all()
+        ) {
+            val taskName = generateMinSdkCheckTaskName(it)
             val minSdkCheckTask =
                 project.tasks.register(taskName) {
                     doLast {
-                        val minSdkVersion = getMinSdkVersion(it)
-                        checkMinSdkVersion(minSdkVersion, project)
+                        val minSdkVersion = getMinSdkVersion(project, it)
+                        try {
+                            checkMinSdkVersion(minSdkVersion, project.rootDir.path, project.logger)
+                        } catch (e: DependencyValidationException) {
+                            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
+                            throw e
+                        }
                     }
                 }
 
@@ -158,7 +166,19 @@ object DependencyVersionChecker {
 
     private fun generateAssembleTaskName(it: Variant) = "$ASSEMBLE_PREFIX${it.name.capitalize()}"
 
-    private fun getMinSdkVersion(it: Variant) = MinSdkVersion(it.name, it.minSdk.apiLevel)
+    private fun generateMinSdkCheckTaskName(it: Variant) = "${it.name.capitalize()}$MIN_SDK_CHECK_TASK_POSTFIX"
+
+    private fun getMinSdkVersion(
+        project: Project,
+        it: Variant
+    ): MinSdkVersion {
+        val agpVersion: AndroidPluginVersion? = getAGPVersion(project)
+        return if (agpVersion != null && agpVersion.major >= 8 && agpVersion.minor >= 1) {
+            MinSdkVersion(it.name, it.minSdk.apiLevel)
+        } else {
+            MinSdkVersion(it.name, it.minSdkVersion.apiLevel)
+        }
+    }
 
     // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.invocation/-gradle/index.html#-837060600%2FFunctions%2F-1793262594
     @VisibleForTesting internal fun getGradleVersion(project: Project): Version {
@@ -344,7 +364,8 @@ object DependencyVersionChecker {
 
     @VisibleForTesting internal fun checkMinSdkVersion(
         minSdkVersion: MinSdkVersion,
-        project: Project
+        projectDirectory: String,
+        logger: Logger
     ) {
         // For Android SDK, only the major version is relevant, no need to do a full version check.
         if (minSdkVersion.version < errorMinSdkVersion) {
@@ -353,9 +374,8 @@ object DependencyVersionChecker {
                     getFlavorSpecificMessage(minSdkVersion.flavor, MIN_SDK_NAME),
                     minSdkVersion.version.toString(),
                     errorMinSdkVersion.toString(),
-                    getPotentialSDKFix(project.rootDir.path)
+                    getPotentialSDKFix(projectDirectory)
                 )
-            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
             throw DependencyValidationException(errorMessage)
         } else if (minSdkVersion.version < warnMinSdkVersion) {
             val warnMessage: String =
@@ -363,9 +383,9 @@ object DependencyVersionChecker {
                     getFlavorSpecificMessage(minSdkVersion.flavor, MIN_SDK_NAME),
                     minSdkVersion.version.toString(),
                     warnMinSdkVersion.toString(),
-                    getPotentialSDKFix(project.rootDir.path)
+                    getPotentialSDKFix(projectDirectory)
                 )
-            project.logger.error(warnMessage)
+            logger.error(warnMessage)
         }
     }
 }
@@ -424,5 +444,3 @@ internal class Version(
     val flavor: String,
     val version: Int
 )
-
-private fun String.capitalize(): String = replaceFirstChar { if (it.isLowerCase()) it.uppercase() else it.toString() }
