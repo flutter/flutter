@@ -223,7 +223,7 @@ Future<DateTime?> showDatePicker({
   final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
-  final CalendarDelegate calendarDelegate = const GregorianCalendarDelegate(),
+  final CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
 }) async {
   initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
   firstDate = calendarDelegate.dateOnly(firstDate);
@@ -458,7 +458,7 @@ class DatePickerDialog extends StatefulWidget {
   final EdgeInsets insetPadding;
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -1186,7 +1186,7 @@ Future<DateTimeRange?> showDateRangePicker({
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
   SelectableDayForRangePredicate? selectableDayPredicate,
-  CalendarDelegate calendarDelegate = const GregorianCalendarDelegate(),
+  CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
 }) async {
   initialDateRange = initialDateRange == null ? null : calendarDelegate.datesOnly(initialDateRange);
   firstDate = calendarDelegate.dateOnly(firstDate);
@@ -1284,7 +1284,7 @@ Future<DateTimeRange?> showDateRangePicker({
 /// (i.e. 'Jan 21, 2020').
 String _formatRangeStartDate(
   MaterialLocalizations localizations,
-  CalendarDelegate calendarDelegate,
+  CalendarDelegate<DateTime> calendarDelegate,
   DateTime? startDate,
   DateTime? endDate,
 ) {
@@ -1303,7 +1303,7 @@ String _formatRangeStartDate(
 /// include the year (i.e. 'Jan 21, 2020').
 String _formatRangeEndDate(
   MaterialLocalizations localizations,
-  CalendarDelegate calendarDelegate,
+  CalendarDelegate<DateTime> calendarDelegate,
   DateTime? startDate,
   DateTime? endDate,
   DateTime currentDate,
@@ -1482,7 +1482,7 @@ class DateRangePickerDialog extends StatefulWidget {
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
@@ -1802,7 +1802,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
   final VoidCallback? onCancel;
   final String confirmText;
   final String helpText;
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
   final Widget? entryModeButton;
 
   @override
@@ -2000,7 +2000,7 @@ class _CalendarDateRangePicker extends StatefulWidget {
   final ValueChanged<DateTime?>? onEndDateChanged;
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   State<_CalendarDateRangePicker> createState() => _CalendarDateRangePickerState();
@@ -2171,7 +2171,7 @@ class _CalendarKeyboardNavigator extends StatefulWidget {
   final DateTime firstDate;
   final DateTime lastDate;
   final DateTime initialFocusedDay;
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   _CalendarKeyboardNavigatorState createState() => _CalendarKeyboardNavigatorState();
@@ -2309,7 +2309,7 @@ class _FocusedDate extends InheritedWidget {
     this.scrollDirection,
   });
 
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
   final DateTime? date;
   final TraversalDirection? scrollDirection;
 
@@ -2552,7 +2552,7 @@ class _MonthItem extends StatefulWidget {
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   _MonthItemState createState() => _MonthItemState();
@@ -2820,7 +2820,7 @@ class _DayItem extends StatefulWidget {
 
   final bool isToday;
 
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   State<_DayItem> createState() => _DayItemState();
@@ -3065,7 +3065,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
   final String? cancelText;
   final String? helpText;
   final Widget? entryModeButton;
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   String _formatDateRange(BuildContext context, DateTime? start, DateTime? end, DateTime now) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -3294,7 +3294,7 @@ class _InputDateRangePicker extends StatefulWidget {
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   _InputDateRangePickerState createState() => _InputDateRangePickerState();

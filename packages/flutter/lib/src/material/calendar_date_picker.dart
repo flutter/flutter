@@ -184,7 +184,7 @@ class CalendarDatePicker extends StatefulWidget {
   final SelectableDayPredicate? selectableDayPredicate;
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   State<CalendarDatePicker> createState() => _CalendarDatePickerState();
@@ -562,7 +562,7 @@ class _MonthPicker extends StatefulWidget {
   final SelectableDayPredicate? selectableDayPredicate;
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   _MonthPickerState createState() => _MonthPickerState();
@@ -889,7 +889,7 @@ class _MonthPickerState extends State<_MonthPicker> {
 class _FocusedDate extends InheritedWidget {
   const _FocusedDate({required super.child, required this.calendarDelegate, this.date});
 
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
   final DateTime? date;
 
   @override
@@ -951,7 +951,7 @@ class _DayPicker extends StatefulWidget {
   final SelectableDayPredicate? selectableDayPredicate;
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   _DayPickerState createState() => _DayPickerState();
@@ -1312,7 +1312,7 @@ class YearPicker extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
-  final CalendarDelegate calendarDelegate;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   State<YearPicker> createState() => _YearPickerState();

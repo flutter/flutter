@@ -67,7 +67,7 @@ class _CalendarDatePickerExampleState extends State<CalendarDatePickerExample> {
 /// - **Even-numbered months (2, 4, 6, etc.)** always have **21 days**.
 /// - **Odd-numbered months (1, 3, 5, etc.)** always have **28 days**.
 /// - **The first day of every month is always a Monday**, ensuring a consistent weekly alignment.
-class CustomCalendarDelegate extends CalendarDelegate {
+class CustomCalendarDelegate extends CalendarDelegate<DateTime> {
   const CustomCalendarDelegate();
 
   @override

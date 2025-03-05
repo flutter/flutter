@@ -29,7 +29,6 @@ import 'material_localizations.dart';
 ///
 ///  * [GregorianCalendarDelegate], the default implementation for the Gregorian calendar.
 ///  * [CalendarDatePicker], which uses this delegate to manage calendar-specific behavior.
-@optionalTypeArgs
 abstract class CalendarDelegate<T extends DateTime> {
   /// Creates a calendar delegate.
   const CalendarDelegate();
