@@ -152,6 +152,25 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
+  ClipRSuperellipseLayer? pushClipRSuperellipse(
+    bool needsCompositing,
+    Offset offset,
+    Rect bounds,
+    RSuperellipse clipRSuperellipse,
+    PaintingContextCallback painter, {
+    Clip clipBehavior = Clip.antiAlias,
+    ClipRSuperellipseLayer? oldLayer,
+  }) {
+    clipRSuperellipseAndPaint(
+      clipRSuperellipse.shift(offset),
+      clipBehavior,
+      bounds.shift(offset),
+      () => painter(this, offset),
+    );
+    return null;
+  }
+
+  @override
   ClipPathLayer? pushClipPath(
     bool needsCompositing,
     Offset offset,
