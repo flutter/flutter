@@ -35,6 +35,8 @@ impeller_shaders("entity_shaders") {
     "shaders/gradients/radial_gradient_uniform_fill.frag",
     "shaders/gradients/sweep_gradient_fill.frag",
     "shaders/gradients/sweep_gradient_uniform_fill.frag",
+    "shaders/line.frag",
+    "shaders/line.vert",
     "shaders/rrect_blur.vert",
     "shaders/rrect_blur.frag",
     "shaders/runtime_effect.vert",
