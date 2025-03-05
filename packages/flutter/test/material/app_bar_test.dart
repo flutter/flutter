@@ -2267,11 +2267,13 @@ void main() {
       required double contentHeight,
       bool reverse = false,
       bool includeFlexibleSpace = false,
+      Color? surfaceTintColor,
     }) {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
             elevation: 0,
+            surfaceTintColor: surfaceTintColor,
             backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
               return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
             }),
@@ -2360,6 +2362,32 @@ void main() {
 
       expect(getAppBarBackgroundColor(tester), defaultColor);
       expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+    });
+
+    testWidgets('backgroundColor animation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildAppBar(contentHeight: 1200.0, surfaceTintColor: Colors.transparent),
+      );
+
+      expect(getAppBarAnimatedBackgroundColor(tester), defaultColor);
+
+      TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+      await gesture.up();
+      await tester.pump();
+
+      expect(getAppBarAnimatedBackgroundColor(tester), defaultColor);
+      await tester.pumpAndSettle();
+      expect(getAppBarAnimatedBackgroundColor(tester), scrolledColor);
+
+      gesture = await tester.startGesture(const Offset(50.0, 300.0));
+      await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+      await gesture.up();
+      await tester.pump();
+
+      expect(getAppBarAnimatedBackgroundColor(tester), scrolledColor);
+      await tester.pumpAndSettle();
+      expect(getAppBarAnimatedBackgroundColor(tester), defaultColor);
     });
 
     testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
