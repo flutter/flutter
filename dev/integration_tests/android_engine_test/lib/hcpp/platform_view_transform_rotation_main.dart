@@ -43,8 +43,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
 
   void _incrementAngle() {
     setState(() {
-      angle = angle + (0.1 * math.pi);
-      print('new angle is ${angle / math.pi} pi');
+      angle = angle + 0.5;
     });
   }
 
@@ -70,7 +69,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
             width: 200,
             height: 400,
             child: _HybridCompositionAndroidPlatformView(
-              viewType: 'blue_orange_gradient_surface_view_platform_view',
+              viewType: 'blue_orange_gradient_platform_view',
             ),
           ),
         ],
