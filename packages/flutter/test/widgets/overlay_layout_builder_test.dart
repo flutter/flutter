@@ -39,6 +39,9 @@ void main() {
                       setState = setter;
                       return Transform(
                         transform: transform,
+                        // RenderTransform uses size in its applyPaintTransform
+                        // implementation if alignment is set.
+                        alignment: Alignment.topLeft,
                         child: OverlayPortal.overlayChildLayoutBuilder(
                           controller: controller1,
                           overlayChildBuilder: (
