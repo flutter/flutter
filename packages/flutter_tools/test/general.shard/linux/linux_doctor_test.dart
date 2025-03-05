@@ -160,7 +160,11 @@ Configurations:
 
 // A command that will failure when running 'eglinfo'.
 FakeCommand _eglinfoMissingCommand() {
-  return const FakeCommand(command: <String>['eglinfo'], exitCode: 1);
+  return const FakeCommand(
+    command: <String>['eglinfo'],
+    exitCode: 1,
+    exception: ProcessException('eglinfo', <String>[]),
+  );
 }
 
 // Commands that give some failures for the GTK library pkg-config queries.

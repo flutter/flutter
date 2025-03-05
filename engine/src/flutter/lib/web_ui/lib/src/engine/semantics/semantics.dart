@@ -20,6 +20,7 @@ import '../vector_math.dart';
 import '../window.dart';
 import 'accessibility.dart';
 import 'checkable.dart';
+import 'expandable.dart';
 import 'focusable.dart';
 import 'header.dart';
 import 'heading.dart';
@@ -461,6 +462,7 @@ abstract class SemanticRole {
     addRouteName();
     addLabelAndValue(preferredRepresentation: preferredLabelRepresentation);
     addSelectableBehavior();
+    addExpandableBehavior();
   }
 
   /// Initializes a blank role for a [semanticsObject].
@@ -625,6 +627,10 @@ abstract class SemanticRole {
     if (semanticsObject.isSelectable && !semanticsObject.isCheckable) {
       addSemanticBehavior(Selectable(semanticsObject, this));
     }
+  }
+
+  void addExpandableBehavior() {
+    addSemanticBehavior(Expandable(semanticsObject, this));
   }
 
   /// Adds a semantic behavior to this role.
@@ -1946,6 +1952,19 @@ class SemanticsObject {
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
   bool get isSelected => hasFlag(ui.SemanticsFlag.isSelected);
+
+  /// If true, this node represents something that can be annotated as
+  /// "expanded", such as a expansion tile or drop down menu
+  ///
+  /// Expandability is managed by `aria-expanded`.
+  ///
+  /// See also:
+  ///
+  ///   * [isExpanded], which indicates whether the node is currently selected.
+  bool get isExpandable => hasFlag(ui.SemanticsFlag.hasExpandedState);
+
+  /// Indicates whether the node is currently expanded.
+  bool get isExpanded => hasFlag(ui.SemanticsFlag.isExpanded);
 
   /// Role-specific adjustment of the vertical position of the child container.
   ///
