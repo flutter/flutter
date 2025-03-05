@@ -644,8 +644,7 @@ if (enable_unittests) {
     binary = "display_list_unittests"
     resources = [
       {
-        path = rebase_path(
-                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
         dest = "assets/Roboto-Regular.ttf"
       },
     ]
@@ -657,8 +656,7 @@ if (enable_unittests) {
     binary = "display_list_rendertests"
     resources = [
       {
-        path = rebase_path(
-                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
         dest = "assets/Roboto-Regular.ttf"
       },
     ]
@@ -685,8 +683,7 @@ if (enable_unittests) {
         dest = "flutter/testing/resources/performance_overlay_gold_120fps.png"
       },
       {
-        path = rebase_path(
-                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
         dest = "assets/Roboto-Regular.ttf"
       },
     ]
@@ -733,8 +730,7 @@ if (enable_unittests) {
         dest = "assets/shelltest_screenshot.png"
       },
       {
-        path = rebase_path(
-                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
         dest = "assets/Roboto-Regular.ttf"
       },
     ]
@@ -744,7 +740,7 @@ if (enable_unittests) {
   }
 
   fuchsia_test_archive("txt_tests") {
-    deps = [ "//flutter/third_party/txt:txt_unittests" ]
+    deps = [ "//flutter/txt:txt_unittests" ]
     gen_cml_file = true
     binary = "txt_unittests"
 
