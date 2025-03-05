@@ -270,8 +270,8 @@ class _SensitiveContentState extends State<SensitiveContent> {
     }
 
     // Re-register SensitiveContent widget if the sensitivity level changes.
-    SensitiveContentHost.unregister(oldWidget.sensitivityLevel);
     _sensitiveContentRegistrationFuture = SensitiveContentHost.register(widget.sensitivityLevel);
+    SensitiveContentHost.unregister(oldWidget.sensitivityLevel);
   }
 
   @override
