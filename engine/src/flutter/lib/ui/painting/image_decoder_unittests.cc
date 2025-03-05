@@ -24,7 +24,6 @@
 #include "flutter/testing/test_gl_surface.h"
 #include "flutter/testing/testing.h"
 #include "fml/logging.h"
-#include "impeller/core/formats.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/renderer/command_queue.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
