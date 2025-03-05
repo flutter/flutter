@@ -1890,8 +1890,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   void _onOpen() {
     if (!_waitingToFocusMenu) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        // debugDumpRenderObjectSemanticsTree();
-        debugDumpSemanticsTree();
         if (mounted) {
           _buttonFocusNode.requestFocus();
           _waitingToFocusMenu = false;
