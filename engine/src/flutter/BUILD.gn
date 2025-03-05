@@ -149,7 +149,7 @@ group("flutter") {
       "//flutter/impeller/geometry:geometry_benchmarks",
       "//flutter/lib/ui:ui_benchmarks",
       "//flutter/shell/common:shell_benchmarks",
-      "//flutter/third_party/txt:txt_benchmarks",
+      "//flutter/txt:txt_benchmarks",
     ]
   }
 
@@ -200,7 +200,7 @@ group("unittests") {
       "//flutter/testing/dart",
       "//flutter/testing/smoke_test_failure",
       "//flutter/third_party/tonic/tests:tonic_unittests",
-      "//flutter/third_party/txt:txt_unittests",
+      "//flutter/txt:txt_unittests",
     ]
 
     # The accessibility library only supports Mac and Windows at the moment.
