@@ -3169,6 +3169,7 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
 
 FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t view_id,
     uint64_t node_id,
     FlutterSemanticsAction action,
     const uint8_t* data,
@@ -3179,7 +3180,7 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
   auto engine_action = static_cast<flutter::SemanticsAction>(action);
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
            ->DispatchSemanticsAction(
-               node_id, engine_action,
+               view_id, node_id, engine_action,
                fml::MallocMapping::Copy(data, data_length))) {
     return LOG_EMBEDDER_ERROR(kInternalInconsistency,
                               "Could not dispatch semantics action.");

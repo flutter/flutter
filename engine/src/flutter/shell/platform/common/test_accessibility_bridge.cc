@@ -24,4 +24,8 @@ void TestAccessibilityBridge::DispatchAccessibilityAction(
   performed_actions.push_back(action);
 }
 
+FlutterViewId TestAccessibilityBridge::GetViewId() const {
+  return 456;
+}
+
 }  // namespace flutter

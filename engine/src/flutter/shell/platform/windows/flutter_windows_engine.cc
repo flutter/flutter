@@ -884,12 +884,12 @@ bool FlutterWindowsEngine::PostRasterThreadTask(fml::closure callback) const {
 }
 
 bool FlutterWindowsEngine::DispatchSemanticsAction(
-    FlutterViewId view_id
+    FlutterViewId view_id,
     uint64_t target,
     FlutterSemanticsAction action,
     fml::MallocMapping data) {
-  return (embedder_api_.DispatchSemanticsAction(engine_, view_id, target, action,
-                                                data.GetMapping(),
+  return (embedder_api_.DispatchSemanticsAction(engine_, view_id, target,
+                                                action, data.GetMapping(),
                                                 data.GetSize()) == kSuccess);
 }
 

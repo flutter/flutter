@@ -195,6 +195,7 @@ class PlatformView {
     ///                     specified action.
     ///
     virtual void OnPlatformViewDispatchSemanticsAction(
+        int64_t view_id,
         int32_t node_id,
         SemanticsAction action,
         fml::MallocMapping args) = 0;

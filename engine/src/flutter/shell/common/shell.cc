@@ -1116,10 +1116,11 @@ void Shell::OnPlatformViewDispatchSemanticsAction(int64_t view_id,
 
   fml::TaskRunner::RunNowAndFlushMessages(
       task_runners_.GetUITaskRunner(),
-      fml::MakeCopyable([engine = engine_->GetWeakPtr(), node_id, action,
-                         args = std::move(args)]() mutable {
+      fml::MakeCopyable([engine = engine_->GetWeakPtr(), view_id, node_id,
+                         action, args = std::move(args)]() mutable {
         if (engine) {
-          engine->DispatchSemanticsAction(view_id, node_id, action, std::move(args));
+          engine->DispatchSemanticsAction(view_id, node_id, action,
+                                          std::move(args));
         }
       }));
 }

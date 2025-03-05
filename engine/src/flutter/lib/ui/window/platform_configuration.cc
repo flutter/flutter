@@ -384,7 +384,7 @@ void PlatformConfiguration::DispatchSemanticsAction(int64_t view_id,
 
   tonic::CheckAndHandleError(tonic::DartInvoke(
       dispatch_semantics_action_.Get(),
-      {tonic::toDart(view_id), tonic::ToDart(node_id),
+      {tonic::ToDart(view_id), tonic::ToDart(node_id),
        tonic::ToDart(static_cast<int32_t>(action)), args_handle}));
 }
 

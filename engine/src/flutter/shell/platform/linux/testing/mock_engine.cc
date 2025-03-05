@@ -152,6 +152,7 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
 
 FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t view_id,
     uint64_t id,
     FlutterSemanticsAction action,
     const uint8_t* data,

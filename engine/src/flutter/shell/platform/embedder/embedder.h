@@ -3079,6 +3079,7 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t view_id,
     uint64_t node_id,
     FlutterSemanticsAction action,
     const uint8_t* data,
@@ -3467,6 +3468,7 @@ typedef FlutterEngineResult (*FlutterEngineUpdateAccessibilityFeaturesFnPtr)(
     FlutterAccessibilityFeature features);
 typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t view_id,
     uint64_t id,
     FlutterSemanticsAction action,
     const uint8_t* data,

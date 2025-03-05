@@ -18,6 +18,7 @@ class TestAccessibilityBridge : public AccessibilityBridge {
                                    FlutterSemanticsAction action,
                                    fml::MallocMapping data) override;
 
+  FlutterViewId GetViewId() const override;
   std::vector<ui::AXEventGenerator::Event> accessibility_events;
   std::vector<FlutterSemanticsAction> performed_actions;
 

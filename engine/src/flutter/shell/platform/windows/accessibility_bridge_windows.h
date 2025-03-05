@@ -35,7 +35,7 @@ class AccessibilityBridgeWindows : public AccessibilityBridge,
                                    AccessibilityNodeId target,
                                    FlutterSemanticsAction action,
                                    fml::MallocMapping data) override;
-  
+
   // |AccessibilityBridge|
   FlutterViewId GetViewId() const override;
 
