@@ -123,6 +123,7 @@ void main() {
                       'NOT-FOUND "packages/data_asset_example/id2".'
                     else
                       'FOUND "packages/data_asset_example/id2": "content2".',
+                    if (isWeb) 'Successful hot restart' else 'Hot restart performed',
                   ],
                   handler: (_) {
                     if (!performReload) {
@@ -154,6 +155,7 @@ void main() {
                       'FOUND "packages/data_asset_example/id3": "content3".',
                     ],
                     'NOT-FOUND "packages/data_asset_example/id4".',
+                    if (isWeb) 'Successful hot restart' else 'Hot reload performed',
                   ],
                   handler: (_) {
                     return 'q'; // quit
