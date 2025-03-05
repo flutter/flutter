@@ -973,6 +973,10 @@ const String kAppFlavor = 'FLUTTER_APP_FLAVOR';
 /// The Xcode configuration used to build the project.
 const String kXcodeConfiguration = 'Configuration';
 
+/// The Xcode build setting SRCROOT. Identifies the directory containing the
+/// Xcode target's source files.
+const String kSrcRoot = 'SrcRoot';
+
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';
 

@@ -633,7 +633,7 @@ class FakeCache extends Fake implements Cache {
   FakeCache({this.olderThanToolsStamp = false});
 
   bool olderThanToolsStamp;
-  Map<String, bool> filesOlderThanToolsStamp = {};
+  Map<String, bool> filesOlderThanToolsStamp = <String, bool>{};
 
   @override
   bool isOlderThanToolsStamp(FileSystemEntity entity) {

@@ -350,12 +350,14 @@ class IosProject extends XcodeBasedProject {
   // The string starts with `applinks:` and ignores the query param which starts with `?`.
   static final RegExp _associatedDomainPattern = RegExp(r'^applinks:([^?]+)');
 
+  static const String _lldbPythonHelperTemplateName = 'flutter_lldb_helper.py';
+
   static const String _lldbInitTemplate = '''
 #
 # Generated file, do not edit.
 #
 
-command script import --relative-to-command-file lldb_helper.py
+command script import --relative-to-command-file $_lldbPythonHelperTemplateName
 ''';
 
   static const String _lldbPythonHelperTemplate = r'''
@@ -766,13 +768,13 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
         // to manually add the LLDB Init File to their native Xcode project.
         globals.logger.printWarning(
           'Debugging Flutter on new iOS versions requires an LLDB Init File. '
-          'To ensure debug mode works, please complete one of the following:\n'
-          '  * Set LLDB Init File in your scheme via Xcode > Product > Scheme > '
-          'Edit Scheme for both Run and Test to the following: \n'
-          '      ${lldbInitFile.path}\n'
+          'To ensure debug mode works, please complete one of the following in '
+          'your native Xcode project:\n'
+          '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and Test actions, set LLDB Init File to: \n\n'
+          '    ${lldbInitFile.path}\n\n'
           '  * If you are already using an LLDB Init File, please append the '
-          'following to your lldbinit:\n'
-          '      command source ${lldbInitFile.path}',
+          'following to your LLDB Init File:\n\n'
+          '    command source ${lldbInitFile.path}\n',
         );
       }
       await _renderTemplateToFile(_lldbInitTemplate, null, lldbInitFile, globals.templateRenderer);
@@ -871,7 +873,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   }
 
   File get lldbHelperPythonFile {
-    return ephemeralDirectory.childFile('flutter_lldb_helper.py');
+    return ephemeralDirectory.childFile(_lldbPythonHelperTemplateName);
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {

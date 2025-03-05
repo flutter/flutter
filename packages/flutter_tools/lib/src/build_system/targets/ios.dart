@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../artifacts.dart';
@@ -432,6 +433,101 @@ class DebugUnpackIOS extends UnpackIOS {
   BuildMode get buildMode => BuildMode.debug;
 }
 
+abstract class IosLLDBInit extends Target {
+  const IosLLDBInit();
+
+  @override
+  List<Source> get inputs => <Source>[
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+    ),
+  ];
+
+  @override
+  List<Source> get outputs {
+    final FlutterProject flutterProject = FlutterProject.current();
+    final String lldbInitFilePath = flutterProject.ios.lldbInitFile.path.replaceFirst(
+      flutterProject.directory.path,
+      '{PROJECT_DIR}/',
+    );
+    return <Source>[Source.pattern(lldbInitFilePath)];
+  }
+
+  @override
+  List<Target> get dependencies => <Target>[];
+
+  @visibleForOverriding
+  BuildMode get buildMode;
+
+  @override
+  Future<void> build(Environment environment) async {
+    final String? sdkRoot = environment.defines[kSdkRoot];
+    if (sdkRoot == null) {
+      throw MissingDefineException(kSdkRoot, name);
+    }
+    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+      sdkRoot,
+      environment.fileSystem,
+    );
+
+    // LLDB Init File is only required for physical devices in debug mode.
+    if (!buildMode.isJit || environmentType != EnvironmentType.physical) {
+      return;
+    }
+
+    // The scheme name is not available in Xcode Build Phases Run Scripts.
+    // Instead, find all xcscheme files in the Xcode project (this may be the
+    // Flutter Xcode project or an Add to App native Xcode project) and check
+    // if any of them contain "customLLDBInitFile". If none have it set, throw
+    // an error.
+    final String? srcRoot = environment.defines[kSrcRoot];
+    if (srcRoot == null) {
+      throw MissingDefineException(kSrcRoot, name);
+    }
+    final Directory xcodeProjectDir = environment.fileSystem.directory(srcRoot);
+    if (!xcodeProjectDir.existsSync()) {
+      throw Exception('Failed to find ${xcodeProjectDir.path}');
+    }
+
+    bool anyLLDBInitFound = false;
+    await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
+      if (path.extension(entity.path) == '.xcscheme' && entity is File) {
+        if (entity.readAsStringSync().contains('customLLDBInitFile')) {
+          anyLLDBInitFound = true;
+          break;
+        }
+      }
+    }
+    if (!anyLLDBInitFound) {
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      if (flutterProject.isModule) {
+        throwToolExit(
+          'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+          'ensure debug mode works, please run "flutter build ios --config-only" '
+          'in your Flutter project and follow the instructions to add the file.',
+        );
+      } else {
+        throwToolExit(
+          'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+          'ensure debug mode works, please run "flutter build ios --config-only" '
+          'in your Flutter project and automatically add the files.',
+        );
+      }
+    }
+    return;
+  }
+}
+
+class DebugIosLLDBInit extends IosLLDBInit {
+  const DebugIosLLDBInit();
+
+  @override
+  String get name => 'debug_ios_lldb_init';
+
+  @override
+  BuildMode get buildMode => BuildMode.debug;
+}
+
 /// The base class for all iOS bundle targets.
 ///
 /// This is responsible for setting up the basic App.framework structure, including:
@@ -583,7 +679,11 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[const DebugUniversalFramework(), ...super.dependencies];
+  List<Target> get dependencies => <Target>[
+    const DebugUniversalFramework(),
+    const DebugIosLLDBInit(),
+    ...super.dependencies,
+  ];
 }
 
 /// IosAssetBundle with debug symbols, used for Profile and Release builds.

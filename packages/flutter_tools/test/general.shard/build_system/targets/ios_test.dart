@@ -1152,6 +1152,57 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
   });
+
+  testUsingContext(
+    'DebugIosLLDBInit throws error if missing LLDB Init File in all schemes',
+    () async {
+      const String projectPath = 'path/to/project';
+      fileSystem.directory(projectPath).createSync(recursive: true);
+      environment.defines[kIosArchs] = 'arm64';
+      environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kSrcRoot] = projectPath;
+
+      expect(
+        const DebugIosLLDBInit().build(environment),
+        throwsToolExit(
+          message: 'Debugging Flutter on new iOS versions requires an LLDB Init File.',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+    },
+  );
+
+  testUsingContext(
+    'DebugIosLLDBInit does not throw error if there is an LLDB Init File in any scheme',
+    () async {
+      const String projectPath = 'path/to/project';
+      fileSystem.directory(projectPath).createSync(recursive: true);
+      fileSystem
+          .directory(projectPath)
+          .childDirectory('MyProject.xcodeproj')
+          .childDirectory('xcshareddata')
+          .childDirectory('xcschemes')
+          .childFile('MyProject.xcscheme')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'customLLDBInitFile = "some/path/.lldbinit"');
+      environment.defines[kIosArchs] = 'arm64';
+      environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kSrcRoot] = projectPath;
+
+      await const DebugIosLLDBInit().build(environment);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+    },
+  );
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {

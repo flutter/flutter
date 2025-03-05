@@ -169,7 +169,14 @@ Future<XcodeBuildResult> buildXcodeProject({
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
-    LLDBInitMigration(app.project, buildInfo, logger: globals.logger),
+    LLDBInitMigration(
+      app.project,
+      buildInfo,
+      globals.logger,
+      deviceID: deviceID,
+      fileSystem: globals.fs,
+      environmentType: environmentType,
+    ),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
