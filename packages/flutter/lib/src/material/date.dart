@@ -455,7 +455,7 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 @immutable
 @optionalTypeArgs
 class DateTimeRange<T extends DateTime> {
-  /// Creates a date range for the given start and end [T].
+  /// Creates a date range for the given start and end [DateTime].
   DateTimeRange({required this.start, required this.end}) : assert(!start.isAfter(end));
 
   /// The start of the range of dates.
