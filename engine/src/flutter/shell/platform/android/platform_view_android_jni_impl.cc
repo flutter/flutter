@@ -2122,56 +2122,78 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         break;
       }
       case MutatorType::kClipPath: {
-        const SkPath& path = (*iter)->GetPath();
-
-        // Define and populate an Android Path with data from the Skia SkPath
+        // Define and populate an Android Path with data from the DlPath
         jobject androidPath =
             env->NewObject(path_class->obj(), path_constructor);
 
-        SkPath::Iter pathIter(path, false);
-        SkPoint points[4];
-        SkPath::Verb verb;
+        bool subpath_needs_close = false;
+        std::optional<flutter::DlPoint> pending_moveto;
 
-        while ((verb = pathIter.next(points)) != SkPath::kDone_Verb) {
-          switch (verb) {
-            case SkPath::kMove_Verb: {
-              env->CallVoidMethod(androidPath, path_move_to_method,
-                                  points[0].fX, points[0].fY);
+        auto resolve_moveto = [&env, &pending_moveto, &androidPath]() {
+          if (pending_moveto.has_value()) {
+            env->CallVoidMethod(androidPath, path_move_to_method,
+                                pending_moveto->x, pending_moveto->y);
+            pending_moveto.reset();
+          }
+        };
+
+        auto& path = (*iter)->GetPath().GetPath();
+        for (auto it = path.begin(), end = path.end(); it != end; ++it) {
+          switch (it.type()) {
+            case impeller::Path::ComponentType::kContour: {
+              const impeller::ContourComponent* contour = it.contour();
+              FML_DCHECK(contour != nullptr);
+              if (subpath_needs_close) {
+                env->CallVoidMethod(androidPath, path_close_method);
+              }
+              pending_moveto = contour->destination;
+              subpath_needs_close = contour->IsClosed();
               break;
             }
-            case SkPath::kLine_Verb: {
+            case impeller::Path::ComponentType::kLinear: {
+              const impeller::LinearPathComponent* linear = it.linear();
+              FML_DCHECK(linear != nullptr);
+              resolve_moveto();
               env->CallVoidMethod(androidPath, path_line_to_method,
-                                  points[1].fX, points[1].fY);
+                                  linear->p2.x, linear->p2.y);
               break;
             }
-            case SkPath::kQuad_Verb: {
+            case impeller::Path::ComponentType::kQuadratic: {
+              const impeller::QuadraticPathComponent* quadratic =
+                  it.quadratic();
+              FML_DCHECK(quadratic != nullptr);
+              resolve_moveto();
               env->CallVoidMethod(androidPath, path_quad_to_method,
-                                  points[1].fX, points[1].fY, points[2].fX,
-                                  points[2].fY);
+                                  quadratic->cp.x, quadratic->cp.y,
+                                  quadratic->p2.x, quadratic->p2.y);
               break;
             }
-            case SkPath::kCubic_Verb: {
-              env->CallVoidMethod(androidPath, path_cubic_to_method,
-                                  points[1].fX, points[1].fY, points[2].fX,
-                                  points[2].fY, points[3].fX, points[3].fY);
-              break;
-            }
-            case SkPath::kConic_Verb: {
+            case impeller::Path::ComponentType::kConic: {
+              const impeller::ConicPathComponent* conic = it.conic();
+              FML_DCHECK(conic != nullptr);
+              resolve_moveto();
               FML_DCHECK(path_conic_to_method != nullptr);
               env->CallVoidMethod(androidPath, path_conic_to_method,
-                                  points[1].fX, points[1].fY, points[2].fX,
-                                  points[2].fY, pathIter.conicWeight());
+                                  conic->cp.x, conic->cp.y,  //
+                                  conic->p2.x, conic->p2.y, conic->weight);
               break;
             }
-
-            case SkPath::kClose_Verb: {
-              env->CallVoidMethod(androidPath, path_close_method);
+            case impeller::Path::ComponentType::kCubic: {
+              const impeller::CubicPathComponent* cubic = it.cubic();
+              FML_DCHECK(cubic != nullptr);
+              resolve_moveto();
+              env->CallVoidMethod(androidPath, path_cubic_to_method,
+                                  cubic->cp1.x, cubic->cp1.y,  //
+                                  cubic->cp2.x, cubic->cp2.y,  //
+                                  cubic->p2.x, cubic->p2.y);
               break;
             }
-            default:
-              break;
           }
         }
+        if (subpath_needs_close) {
+          env->CallVoidMethod(androidPath, path_close_method);
+        }
+
         env->CallVoidMethod(mutatorsStack,
                             g_mutators_stack_push_clippath_method, androidPath);
       }

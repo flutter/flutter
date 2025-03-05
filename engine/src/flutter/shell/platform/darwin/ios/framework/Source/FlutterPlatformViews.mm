@@ -393,7 +393,7 @@ static BOOL _preparedOnce = NO;
     }
   };
 
-  auto path = dlPath.GetPath();
+  auto& path = dlPath.GetPath();
   for (auto it = path.begin(), end = path.end(); it != end; ++it) {
     switch (it.type()) {
       case impeller::Path::ComponentType::kContour: {

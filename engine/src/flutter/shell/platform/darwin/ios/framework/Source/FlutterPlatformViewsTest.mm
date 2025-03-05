@@ -4509,17 +4509,16 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  CGFloat screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
-  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a translate matrix
-  SkMatrix translateMatrix = SkMatrix::Translate(100, 100);
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({100, 100});
   stack.PushTransform(translateMatrix);
-  SkMatrix finalMatrix;
-  finalMatrix.setConcat(screenScaleMatrix, translateMatrix);
+  flutter::DlMatrix finalMatrix = screenScaleMatrix * translateMatrix;
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
