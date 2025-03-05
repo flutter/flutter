@@ -307,7 +307,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
           final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
           SemanticsService.announce(
-            '${_localizations.selectedDateLabel} ${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix',
+            '${_localizations.selectedDateLabel} ${widget.calendarDelegate.formatFullDate(_selectedDate!, _localizations)}$semanticLabelSuffix',
             _textDirection,
           );
         case TargetPlatform.android:
@@ -1068,6 +1068,7 @@ class _DayPickerState extends State<_DayPicker> {
             isToday: isToday,
             onChanged: widget.onChanged,
             focusNode: _dayFocusNodes[day - 1],
+            calendarDelegate: widget.calendarDelegate,
           ),
         );
       }
@@ -1099,6 +1100,7 @@ class _Day extends StatefulWidget {
     required this.isToday,
     required this.onChanged,
     required this.focusNode,
+    required this.calendarDelegate,
   });
 
   final DateTime day;
@@ -1107,6 +1109,7 @@ class _Day extends StatefulWidget {
   final bool isToday;
   final ValueChanged<DateTime> onChanged;
   final FocusNode focusNode;
+  final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
   State<_Day> createState() => _DayState();
@@ -1199,7 +1202,7 @@ class _DayState extends State<_Day> {
           // for the day of month. To do that we prepend day of month to the
           // formatted full date.
           label:
-              '${localizations.formatDecimal(widget.day.day)}, ${localizations.formatFullDate(widget.day)}$semanticLabelSuffix',
+              '${localizations.formatDecimal(widget.day.day)}, ${widget.calendarDelegate.formatFullDate(widget.day, localizations)}$semanticLabelSuffix',
           // Set button to true to make the date selectable.
           button: true,
           selected: widget.isSelectedDay,
