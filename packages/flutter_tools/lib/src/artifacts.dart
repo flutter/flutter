@@ -1347,6 +1347,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
   String _genSnapshotPath() {
     const List<String> clangDirs = <String>[
       '.',
+      'universal',
       'clang_x64',
       'clang_x86',
       'clang_i386',
