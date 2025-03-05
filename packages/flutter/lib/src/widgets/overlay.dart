@@ -1890,9 +1890,14 @@ class _OverlayPortalState extends State<OverlayPortal> {
   }
 
   @override
-  void dispose() {
+  void deactivate() {
+    super.deactivate();
     assert(widget.controller._attachTarget == this);
     widget.controller._attachTarget = null;
+  }
+
+  @override
+  void dispose() {
     _locationCache?._debugMarkLocationInvalid();
     _locationCache = null;
     super.dispose();
