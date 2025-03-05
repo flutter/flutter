@@ -11972,6 +11972,13 @@ void main() {
   testWidgets('can change tap up outside behavior by overriding actions', (
     WidgetTester tester,
   ) async {
+    final CallbackAction<EditableTextTapOutsideIntent> noAction =
+        CallbackAction<EditableTextTapOutsideIntent>(
+          onInvoke: (EditableTextTapOutsideIntent intent) {
+            return null;
+          },
+        );
+
     bool myIntentWasCalled = false;
     final CallbackAction<EditableTextTapUpOutsideIntent> overrideAction =
         CallbackAction<EditableTextTapUpOutsideIntent>(
@@ -11987,13 +11994,18 @@ void main() {
           children: <Widget>[
             SizedBox(key: key, width: 200, height: 200),
             Actions(
-              actions: <Type, Action<Intent>>{EditableTextTapUpOutsideIntent: overrideAction},
+              actions: <Type, Action<Intent>>{
+                // The tap down has to be overridden so that the tap up will register.
+                EditableTextTapOutsideIntent: noAction,
+                EditableTextTapUpOutsideIntent: overrideAction,
+              },
               child: EditableText(
                 controller: controller,
                 focusNode: focusNode,
                 style: textStyle,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
+                autofocus: true,
               ),
             ),
           ],
