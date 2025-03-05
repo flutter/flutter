@@ -654,6 +654,7 @@ void AccessibilityBridge::SetLastFocusedId(AccessibilityNodeId node_id) {
         GetFlutterPlatformNodeDelegateFromID(last_focused_id_);
     if (!last_focused_child.expired()) {
       DispatchAccessibilityAction(
+          GetViewId(),
           last_focused_id_,
           FlutterSemanticsAction::
               kFlutterSemanticsActionDidLoseAccessibilityFocus,

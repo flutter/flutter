@@ -288,7 +288,7 @@ TEST(AccessibilityBridgeWindows, DispatchAccessibilityAction) {
       }));
 
   AccessibilityBridgeWindows delegate(&view);
-  delegate.DispatchAccessibilityAction(1, kFlutterSemanticsActionCopy, {});
+  delegate.DispatchAccessibilityAction(456, 1, kFlutterSemanticsActionCopy, {});
   EXPECT_EQ(actual_action, kFlutterSemanticsActionCopy);
 }
 

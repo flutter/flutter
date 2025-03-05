@@ -167,6 +167,10 @@ void AccessibilityBridgeWindows::DispatchAccessibilityAction(
   view_->GetEngine()->DispatchSemanticsAction(view_id, target, action, std::move(data));
 }
 
+FlutterViewId AccessibilityBridgeWindows::GetViewId() const {
+  return view_->view_id();
+}
+
 std::shared_ptr<FlutterPlatformNodeDelegate>
 AccessibilityBridgeWindows::CreateFlutterPlatformNodeDelegate() {
   return std::make_shared<FlutterPlatformNodeDelegateWindows>(

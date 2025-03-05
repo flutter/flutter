@@ -35,11 +35,12 @@ bool FlutterPlatformNodeDelegate::AccessibilityPerformAction(
   switch (data.action) {
     case ax::mojom::Action::kDoDefault:
       bridge_ptr->DispatchAccessibilityAction(
-          target, FlutterSemanticsAction::kFlutterSemanticsActionTap, {});
+          bridge_ptr->GetViewId(), target, FlutterSemanticsAction::kFlutterSemanticsActionTap, {});
       return true;
     case ax::mojom::Action::kFocus:
       bridge_ptr->SetLastFocusedId(target);
       bridge_ptr->DispatchAccessibilityAction(
+          bridge_ptr->GetViewId(),
           target,
           FlutterSemanticsAction::
               kFlutterSemanticsActionDidGainAccessibilityFocus,
@@ -47,7 +48,7 @@ bool FlutterPlatformNodeDelegate::AccessibilityPerformAction(
       return true;
     case ax::mojom::Action::kScrollToMakeVisible:
       bridge_ptr->DispatchAccessibilityAction(
-          target, FlutterSemanticsAction::kFlutterSemanticsActionShowOnScreen,
+          bridge_ptr->GetViewId(),target, FlutterSemanticsAction::kFlutterSemanticsActionShowOnScreen,
           {});
       return true;
     // TODO(chunhtai): support more actions.
