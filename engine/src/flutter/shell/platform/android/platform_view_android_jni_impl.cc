@@ -2123,6 +2123,18 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
       }
       case MutatorType::kClipPath: {
         auto& dlPath = (*iter)->GetPath();
+        // Sometimes a kClipPath mutator is actually housing a simpler
+        // shape. This isn't usually an issue, but the impeller Path version
+        // of an oval or round rect may be too approximated to really match
+        // well between the rendering operations (which check for simpler
+        // shapes) and handing a raw path to the platform. To make things
+        // match better, we do the same shape reduction checks here as most
+        // renderers perform (we don't look for a Rect shape, though as
+        // those match pretty well on their own).
+        //
+        // This should eventually be handled at a higher level, as in the
+        // clip_path_layer.
+        // See https://github.com/flutter/flutter/issues/164666
         std::optional<DlRoundRect> path_rrect;
         {
           DlRect rect;
