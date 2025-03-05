@@ -55,6 +55,8 @@ void main() {
       foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff7f)),
     ),
     locale: Locale('en'),
+    toggleModeForegroundColor: Color(0xffffff8f),
+    toggleModeStyle: TextStyle(fontSize: 13),
   );
 
   Material findDialogMaterial(WidgetTester tester) {
@@ -140,6 +142,8 @@ void main() {
     expect(theme.cancelButtonStyle, null);
     expect(theme.confirmButtonStyle, null);
     expect(theme.locale, null);
+    expect(theme.toggleModeForegroundColor, null);
+    expect(theme.toggleModeStyle, null);
   });
 
   testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
@@ -296,6 +300,8 @@ void main() {
       equalsIgnoringHashCodes(TextButton.styleFrom().toString()),
     );
     expect(m3.locale, null);
+    expect(m3.toggleModeForegroundColor, colorScheme.onSurface.withOpacity(0.60));
+    expect(m3.toggleModeStyle, textTheme.titleSmall?.apply(color: m3.toggleModeForegroundColor));
   });
 
   testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
@@ -450,6 +456,8 @@ void main() {
       equalsIgnoringHashCodes(TextButton.styleFrom().toString()),
     );
     expect(m2.locale, null);
+    expect(m2.toggleModeForegroundColor, colorScheme.onSurface.withOpacity(0.60));
+    expect(m2.toggleModeStyle, textTheme.titleSmall?.apply(color: m2.toggleModeForegroundColor));
   });
 
   testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
@@ -517,6 +525,8 @@ void main() {
         'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff6f)}))',
         'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff7f)}))',
         'locale: en',
+        'toggleModeStyle: TextStyle(inherit: true, size: 13.0)',
+        'toggleModeForegroundColor: ${const Color(0xffffff8f)}',
       ]),
     );
   });
@@ -588,6 +598,13 @@ void main() {
           ),
     );
     expect(day24Shape.side.width, datePickerTheme.todayBorder?.width);
+
+    // Test the toggle mode button
+    final Text january2023 = tester.widget<Text>(find.text('January 2023'));
+    expect(january2023.style?.fontSize, datePickerTheme.toggleModeStyle?.fontSize);
+    expect(january2023.style?.color, datePickerTheme.toggleModeForegroundColor);
+    final Icon arrowIcon = tester.widget<Icon>(find.byIcon(Icons.arrow_drop_down));
+    expect(arrowIcon.color, datePickerTheme.toggleModeForegroundColor);
 
     // Test the day overlay color.
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
