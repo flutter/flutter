@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../artifacts.dart';
@@ -491,7 +490,7 @@ abstract class IosLLDBInit extends Target {
 
     bool anyLLDBInitFound = false;
     await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
-      if (path.extension(entity.path) == '.xcscheme' && entity is File) {
+      if (environment.fileSystem.path.extension(entity.path) == '.xcscheme' && entity is File) {
         if (entity.readAsStringSync().contains('customLLDBInitFile')) {
           anyLLDBInitFound = true;
           break;

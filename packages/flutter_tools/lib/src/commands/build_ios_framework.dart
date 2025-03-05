@@ -381,7 +381,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       lldbInitSourceFile.copySync(lldbInitTargetFile.path);
       lldbHelperPythonFile.copySync(outputDirectory.childFile(lldbHelperPythonFile.basename).path);
       globals.printStatus(
-        'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+        '\nDebugging Flutter on new iOS versions requires an LLDB Init File. To '
         'ensure debug mode works, please complete one of the following in your '
         'native Xcode project:\n'
         '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and '
@@ -511,6 +511,7 @@ end
               globals.artifacts!,
             ).map((DarwinArch e) => e.name).join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
+            kSrcRoot: project.ios.hostAppRoot.path,
             ...buildInfo.toBuildSystemEnvironment(),
           },
           artifacts: globals.artifacts!,

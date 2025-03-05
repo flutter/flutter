@@ -454,7 +454,7 @@ class Context {
       '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
-      '-dSrcRoot=${environment['SRCROOT']}',
+      '-dSrcRoot=${environment['SRCROOT'] ?? ''}',
     ]);
 
     if (command == 'prepare') {

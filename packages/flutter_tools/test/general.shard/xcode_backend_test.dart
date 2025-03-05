@@ -54,6 +54,7 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
               'debug_ios_bundle_flutter_assets',
             ],
           ),
@@ -101,6 +102,7 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
               'debug_ios_bundle_flutter_assets',
             ],
           ),
@@ -133,6 +135,7 @@ void main() {
       const String splitDebugInfo = '/path/to/split/debug/info';
       const String trackWidgetCreation = 'true';
       const String treeShake = 'true';
+      const String srcRoot = '/path/to/project';
       final TestContext context = TestContext(
         <String>['build'],
         <String, String>{
@@ -154,6 +157,7 @@ void main() {
           'SPLIT_DEBUG_INFO': splitDebugInfo,
           'TRACK_WIDGET_CREATION': trackWidgetCreation,
           'TREE_SHAKE_ICONS': treeShake,
+          'SRCROOT': srcRoot,
         },
         commands: <FakeCommand>[
           FakeCommand(
@@ -178,6 +182,7 @@ void main() {
               '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
+              '-dSrcRoot=$srcRoot',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_ios_bundle_flutter_assets',
             ],
@@ -251,6 +256,7 @@ void main() {
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
               '-dPreBuildAction=PrepareFramework',
+              '-dSrcRoot=',
               'debug_unpack_ios',
             ],
           ),
@@ -298,6 +304,7 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -326,6 +333,7 @@ void main() {
       const String splitDebugInfo = '/path/to/split/debug/info';
       const String trackWidgetCreation = 'true';
       const String treeShake = 'true';
+      const String srcRoot = '/path/to/project';
       final TestContext context = TestContext(
         <String>['prepare'],
         <String, String>{
@@ -347,6 +355,7 @@ void main() {
           'SPLIT_DEBUG_INFO': splitDebugInfo,
           'TRACK_WIDGET_CREATION': trackWidgetCreation,
           'TREE_SHAKE_ICONS': treeShake,
+          'SRCROOT': srcRoot,
         },
         commands: <FakeCommand>[
           FakeCommand(
@@ -371,6 +380,7 @@ void main() {
               '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
+              '-dSrcRoot=$srcRoot',
               '-dPreBuildAction=PrepareFramework',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_unpack_ios',
@@ -422,6 +432,7 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -473,6 +484,7 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -523,6 +535,7 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
