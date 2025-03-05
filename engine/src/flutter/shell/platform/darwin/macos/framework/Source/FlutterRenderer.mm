@@ -46,7 +46,7 @@ namespace {
 id<MTLDevice> SelectMetalDevice() {
   NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
   for (id<MTLDevice> device in devices) {
-    if (!device.isRemovable && device.isLowPower) {
+    if (device.hasUnifiedMemory) {
       return device;
     }
   }
