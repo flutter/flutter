@@ -180,6 +180,7 @@ class SkwasmFontCollection implements FlutterFontCollection {
     } else {
       fontCollectionRegisterTypeface(handle, typeface.handle, nullptr);
     }
+    fontCollectionClearCaches(handle);
     return true;
   }
 
