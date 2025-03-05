@@ -13,10 +13,12 @@ class TestAccessibilityBridge : public AccessibilityBridge {
  public:
   TestAccessibilityBridge() = default;
 
-  void DispatchAccessibilityAction(AccessibilityNodeId target,
+  void DispatchAccessibilityAction(FlutterViewId view_id,
+                                   AccessibilityNodeId target,
                                    FlutterSemanticsAction action,
                                    fml::MallocMapping data) override;
 
+  FlutterViewId GetViewId() const override;
   std::vector<ui::AXEventGenerator::Event> accessibility_events;
   std::vector<FlutterSemanticsAction> performed_actions;
 

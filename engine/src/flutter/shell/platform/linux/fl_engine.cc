@@ -1202,6 +1202,7 @@ gboolean fl_engine_send_key_event_finish(FlEngine* self,
 }
 
 void fl_engine_dispatch_semantics_action(FlEngine* self,
+                                         int64_t view_id,
                                          uint64_t id,
                                          FlutterSemanticsAction action,
                                          GBytes* data) {
@@ -1218,7 +1219,7 @@ void fl_engine_dispatch_semantics_action(FlEngine* self,
         g_bytes_get_data(data, &action_data_length));
   }
 
-  self->embedder_api.DispatchSemanticsAction(self->engine, id, action,
+  self->embedder_api.DispatchSemanticsAction(self->engine, view_id, id, action,
                                              action_data, action_data_length);
 }
 

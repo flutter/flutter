@@ -31,9 +31,13 @@ class AccessibilityBridgeWindows : public AccessibilityBridge,
   virtual ~AccessibilityBridgeWindows() = default;
 
   // |AccessibilityBridge|
-  void DispatchAccessibilityAction(AccessibilityNodeId target,
+  void DispatchAccessibilityAction(FlutterViewId view_id,
+                                   AccessibilityNodeId target,
                                    FlutterSemanticsAction action,
                                    fml::MallocMapping data) override;
+
+  // |AccessibilityBridge|
+  FlutterViewId GetViewId() const override;
 
   // Dispatches a Windows accessibility event of the specified type, generated
   // by the accessibility node associated with the specified semantics node.

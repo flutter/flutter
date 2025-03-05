@@ -66,10 +66,11 @@ void ShellTest::SendPlatformMessage(Shell* shell,
 }
 
 void ShellTest::SendSemanticsAction(Shell* shell,
+                                    int64_t view_id,
                                     int32_t node_id,
                                     SemanticsAction action,
                                     fml::MallocMapping args) {
-  shell->OnPlatformViewDispatchSemanticsAction(node_id, action,
+  shell->OnPlatformViewDispatchSemanticsAction(view_id, node_id, action,
                                                std::move(args));
 }
 
