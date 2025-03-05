@@ -88,6 +88,8 @@ enum ContentSensitivity {
 
 /// Service for setting the content sensitivity of the native Android `View`
 /// that contains the app's widget tree.
+///
+/// This service is only currently supported on Android.
 class SensitiveContentService {
   /// Creates service to set content sensitivity of an Android `View` via
   /// communication over the sensitive content [MethodChannel].
@@ -122,14 +124,20 @@ class SensitiveContentService {
       );
       return ContentSensitivity.getContentSensitivityById(result!);
     } catch (e) {
-      // Content sensitivity failed to be set.
+      // Content sensitivity failed to be retrieved.
       throw FlutterError('Failed to retrieve content sensitivity: $e');
     }
   }
 
   /// Returns whether or not setting content sensitivity levels is supported
   /// by the device.
+  ///
+  /// This feature is only supported on Android currently.
   Future<bool> isSupported() async {
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      return false;
+    }
+
     try {
       final bool? result = await sensitiveContentChannel.invokeMethod<bool>(
         'SensitiveContent.isSupported',

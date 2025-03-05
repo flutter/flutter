@@ -74,7 +74,7 @@ class SensitiveContentHost {
   SensitiveContentHost._();
 
   bool? _contentSenstivityIsSupported;
-  ContentSensitivitySetting? _contentSensitivitySetting;
+  late ContentSensitivitySetting _contentSensitivitySetting = ContentSensitivitySetting();
   ContentSensitivity? _defaultContentSensitivitySetting;
 
   final SensitiveContentService _sensitiveContentService = SensitiveContentService();
@@ -115,9 +115,6 @@ class SensitiveContentHost {
     _defaultContentSensitivitySetting ??= await _sensitiveContentService.getContentSensitivity();
     currentContentSensitivityLevel ??= _defaultContentSensitivitySetting;
 
-    // If needed, then set the initial content sensitivity state.
-    _contentSensitivitySetting ??= ContentSensitivitySetting();
-
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
     _contentSensitivitySetting!.addWidgetWithContentSensitivity(desiredSensitivityLevel);
 
@@ -127,13 +124,10 @@ class SensitiveContentHost {
       return;
     }
 
-    // Set content sensitivity level as desiredSensitivityLevel.
-    try {
-      _sensitiveContentService.setContentSensitivity(desiredSensitivityLevel);
-    } catch (e) {
-      // If setting content sensitivity fails, do not update currentContentSensitivityLevel.
-      rethrow;
-    }
+    // Set content sensitivity level as desiredSensitivityLevel. If the call to set content
+    // sensitivity on the platform side fails, then we do not update the current content
+    // sensitivity level.
+    _sensitiveContentService.setContentSensitivity(desiredSensitivityLevel);
 
     // Update current content sensitivity level.
     currentContentSensitivityLevel = desiredSensitivityLevel;
@@ -161,13 +155,9 @@ class SensitiveContentHost {
 
     if (!_contentSensitivitySetting!.hasWidgets) {
       // Restore default content sensitivity setting if there are no more SensitiveContent
-      // widgets in the tree.
-      try {
-        _sensitiveContentService.setContentSensitivity(_defaultContentSensitivitySetting!);
-      } catch (e) {
-        // If setting content sensitivity fails, do not update currentContentSensitivityLevel.
-        rethrow;
-      }
+      // widgets in the tree. If the call to set content sensitivity on the platform side fails,
+      // then we do not update the current content sensitivity level.
+      _sensitiveContentService.setContentSensitivity(_defaultContentSensitivitySetting!);
 
       // Update current content sensitivity level.
       currentContentSensitivityLevel = _defaultContentSensitivitySetting;
@@ -179,13 +169,10 @@ class SensitiveContentHost {
         _contentSensitivitySetting!.contentSensitivityBasedOnWidgetCounts;
     if (contentSensitivityToRestore != null &&
         contentSensitivityToRestore != currentContentSensitivityLevel) {
-      // Set content sensitivity level as contentSensitivityToRestore.
-      try {
-        _sensitiveContentService.setContentSensitivity(contentSensitivityToRestore);
-      } catch (e) {
-        // If setting content sensitivity fails, do not update currentContentSensitivityLevel.
-        rethrow;
-      }
+      // Set content sensitivity level as contentSensitivityToRestore. If the call to set content
+      // sensitivity on the platform side fails, then we do not update the current content
+      // sensitivity level.
+      _sensitiveContentService.setContentSensitivity(contentSensitivityToRestore);
 
       // Update current content sensitivity level.
       currentContentSensitivityLevel = contentSensitivityToRestore;
