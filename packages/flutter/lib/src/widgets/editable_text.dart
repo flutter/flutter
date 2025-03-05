@@ -4329,9 +4329,6 @@ class EditableTextState extends State<EditableText>
       }
 
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(renderEditable.paintBounds);
-      final EdgeInsets caretPadding = widget.scrollPadding.copyWith(
-        bottom: widget.scrollPadding.bottom,
-      );
 
       _scrollController.animateTo(
         targetOffset.offset,
@@ -4340,7 +4337,7 @@ class EditableTextState extends State<EditableText>
       );
 
       renderEditable.showOnScreen(
-        rect: caretPadding.inflateRect(targetOffset.rect),
+        rect: targetOffset.rect,
         duration: _caretAnimationDuration,
         curve: _caretAnimationCurve,
       );
