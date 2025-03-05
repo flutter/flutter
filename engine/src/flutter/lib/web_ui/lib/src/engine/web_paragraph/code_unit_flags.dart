@@ -6,20 +6,35 @@ class CodeUnitFlags {
   CodeUnitFlags(this._value);
 
   bool get isWhitespace => (_value & kPartOfWhiteSpaceBreak) != 0;
+
   bool get isGraphemeStart => (_value & kGraphemeStart) != 0;
+
   bool get isSoftLineBreak => (_value & kSoftLineBreakBefore) != 0;
+
   bool get isHardLineBreak => (_value & kHardLineBreakBefore) != 0;
+
   bool get isWordBreak => (_value & kWordBreak) != 0;
 
-  set whitespace(bool flag) => _value = flag ? (_value | kPartOfWhiteSpaceBreak) : (_value & ~kPartOfWhiteSpaceBreak);
-  set graphemeStart(bool flag) => _value = flag ? (_value | kGraphemeStart) : (_value & ~kGraphemeStart);
-  set softLineBreak(bool flag) => _value = flag ? (_value | kSoftLineBreakBefore) : (_value & ~kSoftLineBreakBefore);
-  set hardLineBreak(bool flag) => _value = flag ? (_value | kHardLineBreakBefore) : (_value & ~kHardLineBreakBefore);
+  set whitespace(bool flag) =>
+      _value = flag ? (_value | kPartOfWhiteSpaceBreak) : (_value & ~kPartOfWhiteSpaceBreak);
+
+  set graphemeStart(bool flag) =>
+      _value = flag ? (_value | kGraphemeStart) : (_value & ~kGraphemeStart);
+
+  set softLineBreak(bool flag) =>
+      _value = flag ? (_value | kSoftLineBreakBefore) : (_value & ~kSoftLineBreakBefore);
+
+  set hardLineBreak(bool flag) =>
+      _value = flag ? (_value | kHardLineBreakBefore) : (_value & ~kHardLineBreakBefore);
+
   set wordBreak(bool flag) => _value = flag ? (_value | kWordBreak) : (_value & ~kWordBreak);
 
-  bool hasFlag(int flag) { return (_value & flag) != 0; }
+  bool hasFlag(int flag) {
+    return (_value & flag) != 0;
+  }
 
   int get value => _value;
+  int _value;
 
   String toString() {
     final String whitespaces = this.isWhitespace ? 'whitespace ' : '';
@@ -29,8 +44,6 @@ class CodeUnitFlags {
     final String word = this.isWordBreak ? 'word ' : '';
     return '${whitespaces}${grapheme}${softBreak}${hardBreak}${word}';
   }
-
-  int _value;
 
   static const int kNoCodeUnitFlag = 0 << 0;
   static const int kPartOfWhiteSpaceBreak = 1 << 0;
