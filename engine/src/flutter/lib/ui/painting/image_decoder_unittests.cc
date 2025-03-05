@@ -1120,7 +1120,7 @@ TEST_F(ImageDecoderFixtureTest, MultiFrameCodecIsPausedWhenGPUIsUnavailable) {
   fml::AutoResetWaitableEvent latch;
 
   auto validate_frame_callback = [&latch](Dart_NativeArguments args) {
-    EXPECT_FALSE(Dart_IsNull(Dart_GetNativeArgument(args, 0)));
+    EXPECT_TRUE(Dart_IsNull(Dart_GetNativeArgument(args, 0)));
     latch.Signal();
   };
 
