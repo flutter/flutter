@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+-// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -358,9 +358,9 @@ class CupertinoDatePicker extends StatefulWidget {
          'initial minute is not divisible by minute interval',
        ),
        assert(
-          !showTimeSeperator ||
-          mode == CupertinoDatePickerMode.dateAndTime ||
-          mode == CupertinoDatePickerMode.time,
+         !showTimeSeperator ||
+             mode == CupertinoDatePickerMode.dateAndTime ||
+             mode == CupertinoDatePickerMode.time,
          'showTimeSeperator is only supported in time or dateAndTime modes',
        );
 

@@ -2538,6 +2538,7 @@ void main() {
     expect(() => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}), returnsNormally);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/161773
   testWidgets('CupertinoDatePicker date value baseline alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
