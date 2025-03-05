@@ -2935,7 +2935,7 @@ class _NavigationBarComponentsTransition {
     if (topNavBarBottom == null ||
         topNavBarBottom.child is! _InactiveSearchableBottom ||
         bottomNavBarBottom.child is! _InactiveSearchableBottom) {
-      child = FadeTransition(opacity: fadeOutBy(0.6, curve: Curves.easeInOut), child: child);
+      child = FadeTransition(opacity: fadeOutBy(0.8), child: child);
     }
 
     return PositionedTransition(rect: animation.drive(positionTween), child: child);
@@ -3137,7 +3137,7 @@ class _NavigationBarComponentsTransition {
     return PositionedTransition(
       rect: animation.drive(positionTween),
       child: FadeTransition(
-        opacity: fadeInFrom(0.3),
+        opacity: fadeInFrom(0.0),
         child: DefaultTextStyle(
           style: topLargeTitleTextStyle!,
           maxLines: 1,
@@ -3175,7 +3175,7 @@ class _NavigationBarComponentsTransition {
     if (bottomNavBarBottom == null ||
         bottomNavBarBottom.child is! _InactiveSearchableBottom ||
         topNavBarBottom.child is! _InactiveSearchableBottom) {
-      child = FadeTransition(opacity: fadeInFrom(0.3, curve: Curves.easeInOut), child: child);
+      child = FadeTransition(opacity: fadeInFrom(0.0), child: child);
     }
 
     return PositionedTransition(rect: animation.drive(positionTween), child: child);

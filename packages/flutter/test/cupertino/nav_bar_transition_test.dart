@@ -1038,7 +1038,7 @@ void main() {
     expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.996);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.946);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
@@ -1047,7 +1047,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.0);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.001);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
@@ -1073,7 +1073,7 @@ void main() {
     expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.996);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.946);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
@@ -1082,7 +1082,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.0);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.001);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
@@ -1249,7 +1249,7 @@ void main() {
 
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.0);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.001);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(795.4206738471985, 54.0),
@@ -1257,7 +1257,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.2601277381181717);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.444);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(325.3008875846863, 54.0),
@@ -1278,7 +1278,7 @@ void main() {
 
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.0);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.001);
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))),
       const Offset(4.579326152801514, 54.0),
@@ -1286,7 +1286,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.2601277381181717);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.444);
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))),
       const Offset(474.6991124153137, 54.0),
@@ -1334,7 +1334,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.41);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.444);
 
     largeTitleOffset = tester.getTopLeft(flying(tester, find.text('Page 2')));
 
@@ -1361,7 +1361,7 @@ void main() {
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.0);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.001);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
@@ -1370,7 +1370,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.41);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.444);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
