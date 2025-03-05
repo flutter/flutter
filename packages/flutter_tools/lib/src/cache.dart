@@ -491,7 +491,7 @@ class Cache {
 
   /// The current version of the Flutter engine the flutter tool will download.
   String get engineRevision {
-    _engineRevision ??= getVersionFor('engine');
+    _engineRevision ??= getStampFor('engine');
     if (_engineRevision == null) {
       throwToolExit('Could not determine engine revision.');
     }
@@ -684,12 +684,14 @@ class Cache {
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
+  // TODO(matanlurey): Remove the ability to do "generic" realms, and special case for engine.
+  // https://github.com/flutter/flutter/issues/164315
   String? getRealmFor(String artifactName) {
     final File realmFile = _fileSystem.file(
       _fileSystem.path.join(
         _rootOverride?.path ?? flutterRoot!,
         'bin',
-        'internal',
+        'cache',
         '$artifactName.realm',
       ),
     );
@@ -929,6 +931,9 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   @override
   final String stampName;
+
+  @override
+  String? get version => cache.engineRevision;
 
   /// Return a list of (directory path, download URL path) tuples.
   List<List<String>> getBinaryDirs();
