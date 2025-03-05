@@ -14,6 +14,11 @@ class BaseFlutterTaskHelper(
     @VisibleForTesting
     internal var gradleErrorMessage = "Invalid Flutter source directory: ${baseFlutterTask.sourceDir}"
 
+    /**
+     * Gets the dependency file based on the path from the intermediate directory.
+     *
+     * @return the dependency file based on the current intermediate directory path.
+     */
     @OutputFiles
     @VisibleForTesting
     internal fun getDependenciesFiles(): FileCollection {
@@ -24,6 +29,11 @@ class BaseFlutterTaskHelper(
         return depfiles
     }
 
+    /**
+     * Checks precondition to ensures sourceDir is not null and is a directory.
+     *
+     * @throws GradleException if sourceDir is null or is not a directory
+     */
     @VisibleForTesting
     internal fun checkPreConditions() {
         if (baseFlutterTask.sourceDir == null || !baseFlutterTask.sourceDir!!.isDirectory) {
@@ -31,10 +41,15 @@ class BaseFlutterTaskHelper(
         }
     }
 
-    // Compute the rule name for flutter assemble. To speed up builds that contain
-    // multiple ABIs, the target name is used to communicate which ones are required
-    // rather than the TargetPlatform. This allows multiple builds to share the same
-    // cache.
+    /**
+     * Computes the rule names for flutter assemble. To speed up builds that contain
+     * multiple ABIs, the target name is used to communicate which ones are required
+     * rather than the TargetPlatform. This allows multiple builds to share the same
+     * cache.
+     *
+     * @param baseFlutterTask is a BaseFlutterTask to access its properties
+     * @return the list of rule names for flutter assemble.
+     */
     @VisibleForTesting
     internal fun generateRuleNames(baseFlutterTask: BaseFlutterTask): List<String> {
         val ruleNames: List<String> =
@@ -49,6 +64,14 @@ class BaseFlutterTaskHelper(
         return ruleNames
     }
 
+    /**
+     * Creates and configures the build processes of an Android Flutter application to be executed.
+     * The configuration includes setting the executable to the Flutter command-line tool (Flutter CLI)
+     * setting the working directory to the Flutter project's source directory, adding command-line arguments and build rules
+     * to configure various build options.
+     *
+     * @return an Action<ExecSpec> of build processes and options to be executed.
+     */
     @VisibleForTesting
     internal fun createExecSpecActionFromTask(): Action<ExecSpec> =
         Action<ExecSpec> {

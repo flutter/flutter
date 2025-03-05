@@ -68,7 +68,7 @@ abstract class BaseFlutterTask : DefaultTask() {
     var sourceDir: File? = null
 
     @Internal
-    var intermediateDir: File? = null
+    lateinit var intermediateDir: File
 
     @Optional
     @Input
@@ -136,7 +136,7 @@ abstract class BaseFlutterTask : DefaultTask() {
     fun buildBundle() {
         val helper = BaseFlutterTaskHelper(baseFlutterTask = this)
         helper.checkPreConditions()
-        intermediateDir!!.mkdirs()
+        intermediateDir.mkdirs()
 
         logging.captureStandardError(LogLevel.ERROR)
         project.exec(helper.createExecSpecActionFromTask())
