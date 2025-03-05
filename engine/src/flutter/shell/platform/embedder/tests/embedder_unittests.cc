@@ -1739,6 +1739,8 @@ TEST_F(EmbedderTest, RemoveViewCallbackIsInvokedAfterRasterThreadIsDone) {
   // remove view - raster thread must not be accessing any view resources.
   view_available = false;
   raster_thread_latch.Wait();
+
+  FlutterEngineDeinitialize(engine.get());
 }
 
 //------------------------------------------------------------------------------
