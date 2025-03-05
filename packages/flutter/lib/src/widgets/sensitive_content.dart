@@ -4,6 +4,7 @@
 
 import 'package:flutter/services.dart' show ContentSensitivity, SensitiveContentService;
 
+import '../../widgets.dart' show ConnectionState;
 import 'async.dart' show AsyncSnapshot, FutureBuilder;
 import 'container.dart';
 import 'framework.dart';
@@ -279,7 +280,7 @@ class _SensitiveContentState extends State<SensitiveContent> {
     return FutureBuilder<void>(
       future: _sensitiveContentRegistrationFuture,
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.done) {
           return widget.child;
         }
         return Container();
