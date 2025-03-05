@@ -436,6 +436,12 @@ class ManifestAssetBundle implements AssetBundle {
         entryUri: Uri.parse('packages/${dataAsset.package}/${dataAsset.name}'),
         package: package,
       );
+      if (assetVariants.containsKey(asset)) {
+        _logger.printError(
+          'Conflicting asset ids: The asset $asset was declared in the pubspec and the hooks.',
+        );
+        return 1;
+      }
       assetVariants[asset] = <_Asset>[asset];
     }
 

@@ -218,6 +218,57 @@ void main() {
         }
       });
     }
+
+    for (final String target in <String>[hostOs, 'web']) {
+      testWithoutContext('flutter build $target with conflicting assets', () async {
+        final Map<String, String> assets = <String, String>{'id1': 'content1', 'id2': 'content2'};
+        final List<String> available = <String>['id1'];
+        writeHookLibrary(root, assets, available: available);
+        writeHelperLibrary(root, 'version1', assets.keys.toList());
+
+        final File pubspecFile = root.childFile('pubspec.yaml');
+        final String content = await pubspecFile.readAsString();
+        final YamlEditor yamlEditor = YamlEditor(content);
+        yamlEditor.update(<String>['assets'], <String>['id1']);
+        pubspecFile.writeAsStringSync(yamlEditor.toString());
+
+        final ProcessTestResult result = await runFlutter(
+          <String>['build', '-v', target],
+          root.path,
+          <Transition>[Barrier.contains('Built build/$target')],
+          debug: true,
+        );
+        if (result.exitCode != 0) {
+          throw Exception(
+            'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+          );
+        }
+        final Directory buildTargetDir = root.childDirectory('build').childDirectory(target);
+
+        final List<File> manifestFiles =
+            buildTargetDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((File file) => file.path.endsWith('AssetManifest.json'))
+                .toList();
+
+        if (manifestFiles.isEmpty) {
+          throw Exception('Expected a `AssetManifest.json` to be avilable in the $buildTargetDir.');
+        }
+        for (final File manifestFile in manifestFiles) {
+          final Map<String, Object?> manifest =
+              json.decode(manifestFile.readAsStringSync()) as Map<String, Object?>;
+          for (final String id in available) {
+            final String key = 'packages/$packageName/$id';
+            final List<Object?> entry = manifest[key]! as List<Object?>;
+            expect(entry, equals(<String>[key]));
+
+            final File file = manifestFile.parent.childFile(key);
+            expect(file.readAsStringSync(), assets[id]);
+          }
+        }
+      });
+    }
   });
 }
 
