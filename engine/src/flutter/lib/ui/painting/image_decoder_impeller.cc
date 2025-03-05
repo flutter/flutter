@@ -466,11 +466,7 @@ ImageDecoderImpeller::UploadTextureToStorage(
   }
 
   impeller::TextureDescriptor texture_descriptor;
-#ifdef FML_OS_IOS
   texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
-#else
-  texture_descriptor.storage_mode = impeller::StorageMode::kDevicePrivate;
-#endif  // FML_OS_IOS
   texture_descriptor.format = pixel_format.value();
   texture_descriptor.size = {image_info.width(), image_info.height()};
   texture_descriptor.mip_count = 1;
