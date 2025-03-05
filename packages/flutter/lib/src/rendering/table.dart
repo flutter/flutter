@@ -611,10 +611,10 @@ class RenderTable extends RenderBox {
     config.explicitChildNodes = true;
   }
 
-  /// This method is overridden to build the semantics tree for the table
-  /// by generating nodes for rows and maybe cells. Because table rows are not
-  /// RenderObjects, we must create their semantics nodes separately. And if
-  /// a cell has a different semantic role, we create a new semantics node
+  /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
+  ///
+  /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
+  /// And if a cell has a different semantic role, we create a new semantics node
   /// to wrapp it.
   @override
   void assembleSemanticsNode(
@@ -665,14 +665,15 @@ class RenderTable extends RenderBox {
             (child.indexInParent != null && child.indexInParent != x)) {
           break;
         }
-
+        bool addCellWrapper = false;
         // Assign the role cell to the child if it doesn't have a role.
         if (child.role == SemanticsRole.none) {
           child.role = SemanticsRole.cell;
         }
         // If the child is not a cell or columnHeader, create a new semantic node with role cell to wrap it.
-        final bool addCellWrapper =
-            child.role != SemanticsRole.cell && child.role != SemanticsRole.columnHeader;
+        else if (child.role != SemanticsRole.cell && child.role != SemanticsRole.columnHeader) {
+          addCellWrapper = true;
+        }
 
         final SemanticsNode cell =
             addCellWrapper
