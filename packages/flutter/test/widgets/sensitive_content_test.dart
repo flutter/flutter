@@ -1409,7 +1409,7 @@ void main() {
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
 
-      // Change content sensitivity to autoSensitive.
+      // Change content sensitivity to notSensitive.
       final ChangeContentSensitivityTesterState scState = tester
           .firstState<ChangeContentSensitivityTesterState>(find.byKey(scKey));
       scState.changeContentSensitivityTo(ContentSensitivity.notSensitive);
@@ -1446,9 +1446,9 @@ void main() {
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
         // Change sc1 content sensitivity to autoSensitive.
-        final ChangeContentSensitivityTesterState scState = tester
+        final ChangeContentSensitivityTesterState sc1State = tester
             .firstState<ChangeContentSensitivityTesterState>(find.byKey(sc1Key));
-        scState.changeContentSensitivityTo(ContentSensitivity.autoSensitive);
+        sc1State.changeContentSensitivityTo(ContentSensitivity.autoSensitive);
 
         await tester.pump();
 
@@ -1482,9 +1482,9 @@ void main() {
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
         // Change sc1 content sensitivity to notSensitive.
-        final ChangeContentSensitivityTesterState scState = tester
+        final ChangeContentSensitivityTesterState sc1State = tester
             .firstState<ChangeContentSensitivityTesterState>(find.byKey(sc1Key));
-        scState.changeContentSensitivityTo(ContentSensitivity.notSensitive);
+        sc1State.changeContentSensitivityTo(ContentSensitivity.notSensitive);
 
         await tester.pump();
 
@@ -1595,7 +1595,7 @@ void main() {
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
-        // Change sc1= content sensitivity to autoSensitive.
+        // Change sc content sensitivity to autoSensitive.
         final ChangeContentSensitivityTesterState scState = tester
             .firstState<ChangeContentSensitivityTesterState>(find.byKey(scKey));
         scState.changeContentSensitivityTo(ContentSensitivity.autoSensitive);
@@ -1674,9 +1674,9 @@ void main() {
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
         // Change asc content sensitivity to sensitive.
-        final ChangeContentSensitivityTesterState scState = tester
+        final ChangeContentSensitivityTesterState ascState = tester
             .firstState<ChangeContentSensitivityTesterState>(find.byKey(ascKey));
-        scState.changeContentSensitivityTo(ContentSensitivity.sensitive);
+        ascState.changeContentSensitivityTo(ContentSensitivity.sensitive);
 
         await tester.pump();
 
@@ -1710,9 +1710,9 @@ void main() {
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
         // Change asc content sensitivity to notSensitive.
-        final ChangeContentSensitivityTesterState scState = tester
+        final ChangeContentSensitivityTesterState ascState = tester
             .firstState<ChangeContentSensitivityTesterState>(find.byKey(ascKey));
-        scState.changeContentSensitivityTo(ContentSensitivity.notSensitive);
+        ascState.changeContentSensitivityTo(ContentSensitivity.notSensitive);
 
         await tester.pump();
 
@@ -1746,9 +1746,9 @@ void main() {
         expect(setContentSensitivityArgs.length, 0);
 
         // Change asc1 content sensitivity to sensitive.
-        final ChangeContentSensitivityTesterState scState = tester
+        final ChangeContentSensitivityTesterState asc1State = tester
             .firstState<ChangeContentSensitivityTesterState>(find.byKey(asc1Key));
-        scState.changeContentSensitivityTo(ContentSensitivity.sensitive);
+        asc1State.changeContentSensitivityTo(ContentSensitivity.sensitive);
 
         await tester.pump();
 
@@ -1782,9 +1782,9 @@ void main() {
         expect(setContentSensitivityArgs.length, 0);
 
         // Change asc1 content sensitivity to notSensitive.
-        final ChangeContentSensitivityTesterState scState = tester
+        final ChangeContentSensitivityTesterState asc1State = tester
             .firstState<ChangeContentSensitivityTesterState>(find.byKey(asc1Key));
-        scState.changeContentSensitivityTo(ContentSensitivity.notSensitive);
+        asc1State.changeContentSensitivityTo(ContentSensitivity.notSensitive);
 
         await tester.pump();
 
@@ -1818,9 +1818,9 @@ void main() {
         expect(setContentSensitivityArgs.length, 0);
 
         // Change asc content sensitivity to sensitive.
-        final ChangeContentSensitivityTesterState scState = tester
+        final ChangeContentSensitivityTesterState ascState = tester
             .firstState<ChangeContentSensitivityTesterState>(find.byKey(ascKey));
-        scState.changeContentSensitivityTo(ContentSensitivity.sensitive);
+        ascState.changeContentSensitivityTo(ContentSensitivity.sensitive);
 
         await tester.pump();
 
@@ -1854,9 +1854,9 @@ void main() {
         expect(setContentSensitivityArgs.length, 0);
 
         // Change asc content sensitivity to notSensitive.
-        final ChangeContentSensitivityTesterState scState = tester
+        final ChangeContentSensitivityTesterState ascState = tester
             .firstState<ChangeContentSensitivityTesterState>(find.byKey(ascKey));
-        scState.changeContentSensitivityTo(ContentSensitivity.notSensitive);
+        ascState.changeContentSensitivityTo(ContentSensitivity.notSensitive);
 
         await tester.pump();
 
@@ -2059,9 +2059,9 @@ void main() {
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
 
         // Change nsc content sensitivity to sensitive.
-        final ChangeContentSensitivityTesterState scState = tester
+        final ChangeContentSensitivityTesterState nscState = tester
             .firstState<ChangeContentSensitivityTesterState>(find.byKey(nsc1Key));
-        scState.changeContentSensitivityTo(ContentSensitivity.sensitive);
+        nscState.changeContentSensitivityTo(ContentSensitivity.sensitive);
 
         await tester.pump();
 
@@ -2098,9 +2098,9 @@ void main() {
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
 
         // Change nsc1 content sensitivity to notSensitive.
-        final ChangeContentSensitivityTesterState scState = tester
+        final ChangeContentSensitivityTesterState nsc1State = tester
             .firstState<ChangeContentSensitivityTesterState>(find.byKey(nsc1Key));
-        scState.changeContentSensitivityTo(ContentSensitivity.autoSensitive);
+        nsc1State.changeContentSensitivityTo(ContentSensitivity.autoSensitive);
 
         await tester.pump();
 

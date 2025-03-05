@@ -52,7 +52,7 @@ class ContentSensitivitySetting {
   bool get hasWidgets =>
       _sensitiveWidgetCount + _autoSensitiveWidgetCount + _notSensitiveWigetCount > 0;
 
-  /// Returns the most severe [ContentSensitivity] setting of the [SensitiveContent] widgets
+  /// Returns the most severe [ContentSensitivity] level of the [SensitiveContent] widgets
   /// that this setting tracks.
   ContentSensitivity? get contentSensitivityBasedOnWidgetCounts {
     if (_sensitiveWidgetCount > 0) {
