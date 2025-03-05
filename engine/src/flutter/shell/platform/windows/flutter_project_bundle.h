@@ -71,7 +71,7 @@ class FlutterProjectBundle {
   }
 
   // Whether the Impeller rendering engine is enabled.
-  bool ImpellerEnabled() const { return impeller_enabled_; }
+  bool impeller_enabled() const { return impeller_enabled_; }
 
   // Returns the app's GPU preference.
   FlutterGpuPreference gpu_preference() const { return gpu_preference_; }

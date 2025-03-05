@@ -263,7 +263,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   std::string executable_name = GetExecutableName();
   std::vector<const char*> argv = {executable_name.c_str()};
   std::vector<std::string> switches = project_->GetSwitches();
-  if (project_->ImpellerEnabled()) {
+  if (project_->impeller_enabled()) {
     switches.push_back("--enable-impeller=true");
   } else if (std::find(switches.begin(), switches.end(),
                        "--enable-impeller=true") != switches.end()) {

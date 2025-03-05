@@ -108,7 +108,7 @@ class DartProject {
   void set_enable_impeller(bool value) { enable_impeller_ = value; }
 
   // Whether the Impeller rendering engine is enabled.
-  bool get_enable_impeller() const { return enable_impeller_; }
+  bool enable_impeller() const { return enable_impeller_; }
 
   // Sets the thread policy for UI isolate.
   void set_ui_thread_policy(UIThreadPolicy policy) {

@@ -73,7 +73,7 @@ TEST(FlutterProjectBundle, EnableImpeller) {
 
   FlutterProjectBundle project(properties);
 
-  EXPECT_TRUE(project.ImpellerEnabled());
+  EXPECT_TRUE(project.impeller_enabled());
 }
 
 #ifndef FLUTTER_RELEASE
