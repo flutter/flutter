@@ -1499,17 +1499,17 @@ void main() {
     testWidgets(
       'when one sensitive SensitiveContent widget changes to autoSensitive with an autoSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key sc1Key = Key('sc1Key');
-        const ChangeContentSensitivityTester sc1 = ChangeContentSensitivityTester(
-          key: sc1Key,
+        const Key scKey = Key('scKey');
+        const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+          key: scKey,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final SensitiveContent asc1 = SensitiveContent(
+        final SensitiveContent asc = SensitiveContent(
           sensitivityLevel: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
-        await tester.pumpWidget(Column(children: <Widget>[sc1, asc1]));
+        await tester.pumpWidget(Column(children: <Widget>[sc, asc]));
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
@@ -1517,9 +1517,9 @@ void main() {
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
-        // Change sc1 content sensitivity to autoSensitive.
+        // Change sc content sensitivity to autoSensitive.
         final ChangeContentSensitivityTesterState scState = tester
-            .firstState<ChangeContentSensitivityTesterState>(find.byKey(sc1Key));
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(scKey));
         scState.changeContentSensitivityTo(ContentSensitivity.autoSensitive);
 
         await tester.pump();
@@ -1538,17 +1538,17 @@ void main() {
     testWidgets(
       'when one sensitive SensitiveContent widget changes to notSensitive with an autoSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key sc1Key = Key('sc1Key');
-        const ChangeContentSensitivityTester sc1 = ChangeContentSensitivityTester(
-          key: sc1Key,
+        const Key scKey = Key('scKey');
+        const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+          key: scKey,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final SensitiveContent asc1 = SensitiveContent(
+        final SensitiveContent asc = SensitiveContent(
           sensitivityLevel: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
-        await tester.pumpWidget(Column(children: <Widget>[sc1, asc1]));
+        await tester.pumpWidget(Column(children: <Widget>[sc, asc]));
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
@@ -1556,9 +1556,9 @@ void main() {
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
-        // Change sc1 content sensitivity to notSensitive.
+        // Change sc content sensitivity to notSensitive.
         final ChangeContentSensitivityTesterState scState = tester
-            .firstState<ChangeContentSensitivityTesterState>(find.byKey(sc1Key));
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(scKey));
         scState.changeContentSensitivityTo(ContentSensitivity.notSensitive);
 
         await tester.pump();
@@ -1577,17 +1577,17 @@ void main() {
     testWidgets(
       'when one sensitive SensitiveContent widget changes to autoSensitive with a notSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key sc1Key = Key('sc1Key');
-        const ChangeContentSensitivityTester sc1 = ChangeContentSensitivityTester(
-          key: sc1Key,
+        const Key scKey = Key('sc1Key');
+        const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+          key: scKey,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final SensitiveContent nsc1 = SensitiveContent(
+        final SensitiveContent nsc = SensitiveContent(
           sensitivityLevel: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
-        await tester.pumpWidget(Column(children: <Widget>[sc1, nsc1]));
+        await tester.pumpWidget(Column(children: <Widget>[sc, nsc]));
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
@@ -1595,9 +1595,9 @@ void main() {
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
-        // Change sc1 content sensitivity to autoSensitive.
+        // Change sc1= content sensitivity to autoSensitive.
         final ChangeContentSensitivityTesterState scState = tester
-            .firstState<ChangeContentSensitivityTesterState>(find.byKey(sc1Key));
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(scKey));
         scState.changeContentSensitivityTo(ContentSensitivity.autoSensitive);
 
         await tester.pump();
@@ -1616,17 +1616,17 @@ void main() {
     testWidgets(
       'when one sensitive SensitiveContent widget changes to notSensitive with a notSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key sc1Key = Key('sc1Key');
-        const ChangeContentSensitivityTester sc1 = ChangeContentSensitivityTester(
-          key: sc1Key,
+        const Key scKey = Key('scKey');
+        const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+          key: scKey,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final SensitiveContent nsc1 = SensitiveContent(
+        final SensitiveContent nsc = SensitiveContent(
           sensitivityLevel: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
-        await tester.pumpWidget(Column(children: <Widget>[sc1, nsc1]));
+        await tester.pumpWidget(Column(children: <Widget>[sc, nsc]));
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
@@ -1634,9 +1634,9 @@ void main() {
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
-        // Change sc1 content sensitivity to notSensitive.
+        // Change sc content sensitivity to notSensitive.
         final ChangeContentSensitivityTesterState scState = tester
-            .firstState<ChangeContentSensitivityTesterState>(find.byKey(sc1Key));
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(scKey));
         scState.changeContentSensitivityTo(ContentSensitivity.notSensitive);
 
         await tester.pump();
@@ -1655,17 +1655,17 @@ void main() {
     testWidgets(
       'when one autoSensitive SensitiveContent widget changes to sensitive with a sensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key asc1Key = Key('asc1Key');
-        const ChangeContentSensitivityTester asc1 = ChangeContentSensitivityTester(
-          key: asc1Key,
+        const Key ascKey = Key('ascKey');
+        const ChangeContentSensitivityTester asc = ChangeContentSensitivityTester(
+          key: ascKey,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final SensitiveContent sc1 = SensitiveContent(
+        final SensitiveContent sc = SensitiveContent(
           sensitivityLevel: ContentSensitivity.sensitive,
           child: Container(),
         );
 
-        await tester.pumpWidget(Column(children: <Widget>[asc1, sc1]));
+        await tester.pumpWidget(Column(children: <Widget>[asc, sc]));
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
@@ -1673,9 +1673,9 @@ void main() {
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
-        // Change asc1 content sensitivity to sensitive.
+        // Change asc content sensitivity to sensitive.
         final ChangeContentSensitivityTesterState scState = tester
-            .firstState<ChangeContentSensitivityTesterState>(find.byKey(asc1Key));
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(ascKey));
         scState.changeContentSensitivityTo(ContentSensitivity.sensitive);
 
         await tester.pump();
@@ -1691,17 +1691,17 @@ void main() {
     testWidgets(
       'when one autoSensitive SensitiveContent widget changes to notSensitive with a sensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key asc1Key = Key('asc1Key');
-        const ChangeContentSensitivityTester asc1 = ChangeContentSensitivityTester(
-          key: asc1Key,
+        const Key ascKey = Key('ascKey');
+        const ChangeContentSensitivityTester asc = ChangeContentSensitivityTester(
+          key: ascKey,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final SensitiveContent sc1 = SensitiveContent(
+        final SensitiveContent sc = SensitiveContent(
           sensitivityLevel: ContentSensitivity.sensitive,
           child: Container(),
         );
 
-        await tester.pumpWidget(Column(children: <Widget>[asc1, sc1]));
+        await tester.pumpWidget(Column(children: <Widget>[asc, sc]));
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
@@ -1709,9 +1709,9 @@ void main() {
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
 
-        // Change asc1 content sensitivity to notSensitive.
+        // Change asc content sensitivity to notSensitive.
         final ChangeContentSensitivityTesterState scState = tester
-            .firstState<ChangeContentSensitivityTesterState>(find.byKey(asc1Key));
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(ascKey));
         scState.changeContentSensitivityTo(ContentSensitivity.notSensitive);
 
         await tester.pump();
@@ -1799,17 +1799,17 @@ void main() {
     testWidgets(
       'when one autoSensitive SensitiveContent widget changes to sensitive with a notSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key asc1Key = Key('asc1Key');
-        const ChangeContentSensitivityTester asc1 = ChangeContentSensitivityTester(
-          key: asc1Key,
+        const Key ascKey = Key('ascKey');
+        const ChangeContentSensitivityTester asc = ChangeContentSensitivityTester(
+          key: ascKey,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final SensitiveContent nsc1 = SensitiveContent(
+        final SensitiveContent nsc = SensitiveContent(
           sensitivityLevel: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
-        await tester.pumpWidget(Column(children: <Widget>[asc1, nsc1]));
+        await tester.pumpWidget(Column(children: <Widget>[asc, nsc]));
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
@@ -1817,9 +1817,9 @@ void main() {
         );
         expect(setContentSensitivityArgs.length, 0);
 
-        // Change asc1 content sensitivity to sensitive.
+        // Change asc content sensitivity to sensitive.
         final ChangeContentSensitivityTesterState scState = tester
-            .firstState<ChangeContentSensitivityTesterState>(find.byKey(asc1Key));
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(ascKey));
         scState.changeContentSensitivityTo(ContentSensitivity.sensitive);
 
         await tester.pump();
@@ -1835,17 +1835,17 @@ void main() {
     testWidgets(
       'when one autoSensitive SensitiveContent widget changes to notSensitive with a notSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key asc1Key = Key('asc1Key2');
-        const ChangeContentSensitivityTester asc1 = ChangeContentSensitivityTester(
-          key: asc1Key,
+        const Key ascKey = Key('ascKey');
+        const ChangeContentSensitivityTester asc = ChangeContentSensitivityTester(
+          key: ascKey,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final SensitiveContent nsc1 = SensitiveContent(
+        final SensitiveContent nsc = SensitiveContent(
           sensitivityLevel: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
-        await tester.pumpWidget(Column(children: <Widget>[asc1, nsc1]));
+        await tester.pumpWidget(Column(children: <Widget>[asc, nsc]));
 
         expect(
           sensitiveContentHost.currentContentSensitivityLevel,
@@ -1853,9 +1853,9 @@ void main() {
         );
         expect(setContentSensitivityArgs.length, 0);
 
-        // Change asc1 content sensitivity to notSensitive.
+        // Change asc content sensitivity to notSensitive.
         final ChangeContentSensitivityTesterState scState = tester
-            .firstState<ChangeContentSensitivityTesterState>(find.byKey(asc1Key));
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(ascKey));
         scState.changeContentSensitivityTo(ContentSensitivity.notSensitive);
 
         await tester.pump();
@@ -1865,6 +1865,396 @@ void main() {
           equals(ContentSensitivity.notSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
+      },
+    );
+
+    testWidgets(
+      'when one notSensitive SensitiveContent widget changes to sensitive with a sensitive SensitiveContent widget',
+      (WidgetTester tester) async {
+        const Key nscKey = Key('nscKey');
+        const ChangeContentSensitivityTester nsc = ChangeContentSensitivityTester(
+          key: nscKey,
+          initialContentSensitivity: ContentSensitivity.notSensitive,
+        );
+        final SensitiveContent sc = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.sensitive,
+          child: Container(),
+        );
+
+        await tester.pumpWidget(Column(children: <Widget>[nsc, sc]));
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.sensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.sensitive,
+        ]);
+
+        // Change nsc content sensitivity to sensitive.
+        final ChangeContentSensitivityTesterState nscState = tester
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(nscKey));
+        nscState.changeContentSensitivityTo(ContentSensitivity.sensitive);
+
+        await tester.pump();
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.sensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.sensitive,
+        ]);
+      },
+    );
+
+    testWidgets(
+      'when one notSensitive SensitiveContent widget changes to autoSensitive with a sensitive SensitiveContent widget',
+      (WidgetTester tester) async {
+        const Key nscKey = Key('nscKey');
+        const ChangeContentSensitivityTester nsc = ChangeContentSensitivityTester(
+          key: nscKey,
+          initialContentSensitivity: ContentSensitivity.notSensitive,
+        );
+        final SensitiveContent sc = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.sensitive,
+          child: Container(),
+        );
+
+        await tester.pumpWidget(Column(children: <Widget>[nsc, sc]));
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.sensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.sensitive,
+        ]);
+
+        // Change nsc content sensitivity to autoSensitive.
+        final ChangeContentSensitivityTesterState nscState = tester
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(nscKey));
+        nscState.changeContentSensitivityTo(ContentSensitivity.autoSensitive);
+
+        await tester.pump();
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.sensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.sensitive,
+        ]);
+      },
+    );
+
+    testWidgets(
+      'when one notSensitive SensitiveContent widget changes to sensitive with an autoSensitive SensitiveContent widget',
+      (WidgetTester tester) async {
+        const Key nscKey = Key('nscKey');
+        const ChangeContentSensitivityTester nsc = ChangeContentSensitivityTester(
+          key: nscKey,
+          initialContentSensitivity: ContentSensitivity.notSensitive,
+        );
+        final SensitiveContent asc2 = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.autoSensitive,
+          child: Container(),
+        );
+
+        await tester.pumpWidget(Column(children: <Widget>[nsc, asc2]));
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.autoSensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.autoSensitive,
+        ]);
+
+        // Change nsc content sensitivity to sensitive.
+        final ChangeContentSensitivityTesterState nscState = tester
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(nscKey));
+        nscState.changeContentSensitivityTo(ContentSensitivity.sensitive);
+
+        await tester.pump();
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.sensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.autoSensitive,
+          ContentSensitivity.sensitive,
+        ]);
+      },
+    );
+
+    testWidgets(
+      'when one notSensitive SensitiveContent widget changes to autoSensitive with an autoSensitive SensitiveContent widget',
+      (WidgetTester tester) async {
+        const Key nscKey = Key('nscKey');
+        const ChangeContentSensitivityTester nsc = ChangeContentSensitivityTester(
+          key: nscKey,
+          initialContentSensitivity: ContentSensitivity.notSensitive,
+        );
+        final SensitiveContent asc = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.autoSensitive,
+          child: Container(),
+        );
+
+        await tester.pumpWidget(Column(children: <Widget>[nsc, asc]));
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.autoSensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.autoSensitive,
+        ]);
+
+        // Change nsc content sensitivity to autoSensitive.
+        final ChangeContentSensitivityTesterState nscState = tester
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(nscKey));
+        nscState.changeContentSensitivityTo(ContentSensitivity.autoSensitive);
+
+        await tester.pump();
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.autoSensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.autoSensitive,
+        ]);
+      },
+    );
+
+    testWidgets(
+      'when one notSensitive SensitiveContent widget changes to sensitive with another notSensitive SensitiveContent widget',
+      (WidgetTester tester) async {
+        const Key nsc1Key = Key('nsc1Key');
+        const ChangeContentSensitivityTester nsc1 = ChangeContentSensitivityTester(
+          key: nsc1Key,
+          initialContentSensitivity: ContentSensitivity.notSensitive,
+        );
+        final SensitiveContent nsc2 = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.notSensitive,
+          child: Container(),
+        );
+
+        await tester.pumpWidget(Column(children: <Widget>[nsc1, nsc2]));
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.notSensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
+
+        // Change nsc content sensitivity to sensitive.
+        final ChangeContentSensitivityTesterState scState = tester
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(nsc1Key));
+        scState.changeContentSensitivityTo(ContentSensitivity.sensitive);
+
+        await tester.pump();
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.sensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.sensitive,
+        ]);
+      },
+    );
+
+    testWidgets(
+      'when one notSensitive SensitiveContent widget changes to autoSensitive with another notSensitive SensitiveContent widget',
+      (WidgetTester tester) async {
+        const Key nsc1Key = Key('nsc1Key');
+        const ChangeContentSensitivityTester nsc1 = ChangeContentSensitivityTester(
+          key: nsc1Key,
+          initialContentSensitivity: ContentSensitivity.notSensitive,
+        );
+        final SensitiveContent nsc2 = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.notSensitive,
+          child: Container(),
+        );
+
+        await tester.pumpWidget(Column(children: <Widget>[nsc1, nsc2]));
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.notSensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
+
+        // Change nsc1 content sensitivity to notSensitive.
+        final ChangeContentSensitivityTesterState scState = tester
+            .firstState<ChangeContentSensitivityTesterState>(find.byKey(nsc1Key));
+        scState.changeContentSensitivityTo(ContentSensitivity.autoSensitive);
+
+        await tester.pump();
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.autoSensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.autoSensitive,
+        ]);
+      },
+    );
+  });
+
+  group('SensitiveContent children of SensitiveContent widgets behaves as expected', () {
+    testWidgets('when a sensitive SensitiveContent widget has any SensitiveContent children', (
+      WidgetTester tester,
+    ) async {
+      for (final ContentSensitivity contentSensitivity in ContentSensitivity.values) {
+        final SensitiveContent scChild = SensitiveContent(
+          sensitivityLevel: contentSensitivity,
+          child: Container(),
+        );
+        final SensitiveContent sc = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.sensitive,
+          child: scChild,
+        );
+
+        await tester.pumpWidget(sc);
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.sensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
+      }
+    });
+
+    testWidgets(
+      'when an autoSensitive SensitiveContent widget has a sensitive SensitiveContent child',
+      (WidgetTester tester) async {
+        final SensitiveContent ascChild = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.autoSensitive,
+          child: Container(),
+        );
+        final SensitiveContent sc = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.sensitive,
+          child: ascChild,
+        );
+
+        await tester.pumpWidget(sc);
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.sensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
+      },
+    );
+
+    testWidgets(
+      'when an autoSensitive SensitiveContent widget has an autoSensitive SensitiveContent child',
+      (WidgetTester tester) async {
+        final SensitiveContent ascChild = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.autoSensitive,
+          child: Container(),
+        );
+        final SensitiveContent asc = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.autoSensitive,
+          child: ascChild,
+        );
+
+        await tester.pumpWidget(asc);
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.autoSensitive),
+        );
+        expect(setContentSensitivityArgs.length, 0);
+      },
+    );
+
+    testWidgets(
+      'when an autoSensitive SensitiveContent widget has an notSensitive SensitiveContent child',
+      (WidgetTester tester) async {
+        final SensitiveContent nscChild = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.notSensitive,
+          child: Container(),
+        );
+        final SensitiveContent asc = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.autoSensitive,
+          child: nscChild,
+        );
+
+        await tester.pumpWidget(asc);
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.autoSensitive),
+        );
+        expect(setContentSensitivityArgs.length, 0);
+      },
+    );
+
+    testWidgets(
+      'when an notSensitive SensitiveContent widget has a sensitive SensitiveContent child',
+      (WidgetTester tester) async {
+        final SensitiveContent scChild = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.sensitive,
+          child: Container(),
+        );
+        final SensitiveContent nsc = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.notSensitive,
+          child: scChild,
+        );
+
+        await tester.pumpWidget(nsc);
+        await tester.pump();
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.sensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.sensitive,
+        ]);
+      },
+    );
+
+    testWidgets(
+      'when an notSensitive SensitiveContent widget has an autoSensitive SensitiveContent child',
+      (WidgetTester tester) async {
+        final SensitiveContent ascChild = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.autoSensitive,
+          child: Container(),
+        );
+        final SensitiveContent nsc = SensitiveContent(
+          sensitivityLevel: ContentSensitivity.notSensitive,
+          child: ascChild,
+        );
+
+        await tester.pumpWidget(nsc);
+        await tester.pump();
+
+        expect(
+          sensitiveContentHost.currentContentSensitivityLevel,
+          equals(ContentSensitivity.autoSensitive),
+        );
+        expect(setContentSensitivityArgs, <ContentSensitivity>[
+          ContentSensitivity.notSensitive,
+          ContentSensitivity.autoSensitive,
+        ]);
       },
     );
   });
