@@ -14,6 +14,7 @@
 #include "unicode/uchar.h"
 
 #include "flutter/common/constants.h"
+#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/platform/android/jni_util.h"
@@ -159,6 +160,17 @@ static jmethodID g_mutators_stack_push_transform_method = nullptr;
 static jmethodID g_mutators_stack_push_cliprect_method = nullptr;
 static jmethodID g_mutators_stack_push_cliprrect_method = nullptr;
 static jmethodID g_mutators_stack_push_opacity_method = nullptr;
+static jmethodID g_mutators_stack_push_clippath_method = nullptr;
+
+// android.graphics.Path class and methods
+static fml::jni::ScopedJavaGlobalRef<jclass>* path_class = nullptr;
+static jmethodID path_constructor = nullptr;
+static jmethodID path_move_to_method = nullptr;
+static jmethodID path_line_to_method = nullptr;
+static jmethodID path_quad_to_method = nullptr;
+static jmethodID path_cubic_to_method = nullptr;
+static jmethodID path_conic_to_method = nullptr;
+static jmethodID path_close_method = nullptr;
 
 // Called By Java
 static jlong AttachJNI(JNIEnv* env, jclass clazz, jobject flutterJNI) {
@@ -1047,6 +1059,15 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
+  g_mutators_stack_push_clippath_method =
+      env->GetMethodID(g_mutators_stack_class->obj(), "pushClipPath",
+                       "(Landroid/graphics/Path;)V");
+  if (g_mutators_stack_push_clippath_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate FlutterMutatorsStack.pushClipPath method";
+    return false;
+  }
+
   g_java_weak_reference_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
       env, env->FindClass("java/lang/ref/WeakReference"));
   if (g_java_weak_reference_class->is_null()) {
@@ -1190,6 +1211,57 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       env, env->FindClass("java/lang/Long"));
   if (g_java_long_class->is_null()) {
     FML_LOG(ERROR) << "Could not locate java.lang.Long class";
+    return false;
+  }
+
+  // Android path class and methods.
+  path_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
+      env, env->FindClass("android/graphics/Path"));
+  if (path_class->is_null()) {
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path class";
+    return false;
+  }
+
+  path_constructor = env->GetMethodID(path_class->obj(), "<init>", "()V");
+  if (path_constructor == nullptr) {
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path constructor";
+    return false;
+  }
+
+  path_move_to_method = env->GetMethodID(path_class->obj(), "moveTo", "(FF)V");
+  if (path_move_to_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path.moveTo method";
+    return false;
+  }
+  path_line_to_method = env->GetMethodID(path_class->obj(), "lineTo", "(FF)V");
+  if (path_line_to_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path.lineTo method";
+    return false;
+  }
+  path_quad_to_method =
+      env->GetMethodID(path_class->obj(), "quadTo", "(FFFF)V");
+  if (path_quad_to_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path.quadTo method";
+    return false;
+  }
+  path_cubic_to_method =
+      env->GetMethodID(path_class->obj(), "cubicTo", "(FFFFFF)V");
+  if (path_cubic_to_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path.cubicTo method";
+    return false;
+  }
+  // Ensure we don't have any pending exceptions.
+  FML_CHECK(fml::jni::CheckException(env));
+
+  path_conic_to_method =
+      env->GetMethodID(path_class->obj(), "conicTo", "(FFFFF)V");
+  if (path_conic_to_method == nullptr) {
+    // Continue on as this method may not exist at API <= 34.
+    fml::jni::ClearException(env, true);
+  }
+  path_close_method = env->GetMethodID(path_class->obj(), "close", "()V");
+  if (path_close_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path.close method";
     return false;
   }
 
@@ -1995,7 +2067,60 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
       }
       // TODO(cyanglaz): Implement other mutators.
       // https://github.com/flutter/flutter/issues/58426
-      case kClipPath:
+      case kClipPath: {
+        const SkPath& path = (*iter)->GetPath();
+
+        // Define and populate an Android Path with data from the Skia SkPath
+        jobject androidPath =
+            env->NewObject(path_class->obj(), path_constructor);
+
+        SkPath::Iter pathIter(path, false);
+        SkPoint points[4];
+        SkPath::Verb verb;
+
+        while ((verb = pathIter.next(points)) != SkPath::kDone_Verb) {
+          switch (verb) {
+            case SkPath::kMove_Verb: {
+              env->CallVoidMethod(androidPath, path_move_to_method,
+                                  points[0].fX, points[0].fY);
+              break;
+            }
+            case SkPath::kLine_Verb: {
+              env->CallVoidMethod(androidPath, path_line_to_method,
+                                  points[1].fX, points[1].fY);
+              break;
+            }
+            case SkPath::kQuad_Verb: {
+              env->CallVoidMethod(androidPath, path_quad_to_method,
+                                  points[1].fX, points[1].fY, points[2].fX,
+                                  points[2].fY);
+              break;
+            }
+            case SkPath::kCubic_Verb: {
+              env->CallVoidMethod(androidPath, path_cubic_to_method,
+                                  points[1].fX, points[1].fY, points[2].fX,
+                                  points[2].fY, points[3].fX, points[3].fY);
+              break;
+            }
+            case SkPath::kConic_Verb: {
+              FML_DCHECK(path_conic_to_method != nullptr);
+              env->CallVoidMethod(androidPath, path_conic_to_method,
+                                  points[1].fX, points[1].fY, points[2].fX,
+                                  points[2].fY, pathIter.conicWeight());
+              break;
+            }
+
+            case SkPath::kClose_Verb: {
+              env->CallVoidMethod(androidPath, path_close_method);
+              break;
+            }
+            default:
+              break;
+          }
+        }
+        env->CallVoidMethod(mutatorsStack,
+                            g_mutators_stack_push_clippath_method, androidPath);
+      }
       case kBackdropFilter:
         break;
     }
