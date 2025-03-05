@@ -718,6 +718,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
       [self.platformViews[viewId].root_view removeFromSuperview];
     }
     self.platformViews.clear();
+    self.previousCompositionOrder.clear();
   });
 
   self.compositionOrder.clear();
