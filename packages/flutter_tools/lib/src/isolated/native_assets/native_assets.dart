@@ -127,7 +127,6 @@ Future<DartHookResult> runFlutterSpecificHooks({
 }) async {
   final bool isWeb = targetPlatform == TargetPlatform.web_javascript;
   final OS? targetOS = isWeb ? null : getNativeOSFromTargetPlatform(targetPlatform!);
-  assert(!featureFlags.isNativeAssetsEnabled || targetOS != null);
   final Uri buildUri = nativeAssetsBuildUri(projectUri, isWeb ? 'web' : targetOS!.name);
 
   // Sanity check.
