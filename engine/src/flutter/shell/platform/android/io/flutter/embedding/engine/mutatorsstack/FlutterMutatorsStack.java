@@ -60,7 +60,6 @@ public class FlutterMutatorsStack {
     public FlutterMutator(Rect rect) {
       this.type = FlutterMutatorType.CLIP_RECT;
       this.rect = rect;
-      if (Build.VERSION.SDK_INT > 22) ;
     }
 
     /**
