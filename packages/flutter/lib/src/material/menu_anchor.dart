@@ -1828,25 +1828,23 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             }
           }
 
-          child = MergeSemantics(
-            child: Semantics(
-              role: SemanticsRole.menuItem,
-              expanded: _enabled && controller.isOpen,
-              enabled: _enabled,
-              child: TextButton(
-                style: mergedStyle,
-                focusNode: _buttonFocusNode,
-                onFocusChange: _enabled ? widget.onFocusChange : null,
-                onPressed: _enabled ? toggleShowMenu : null,
-                isSemanticButton: null,
-                child: _MenuItemLabel(
-                  leadingIcon: widget.leadingIcon,
-                  trailingIcon: widget.trailingIcon,
-                  hasSubmenu: true,
-                  showDecoration: (_parent?._orientation ?? Axis.horizontal) == Axis.vertical,
-                  submenuIcon: submenuIcon,
-                  child: child,
-                ),
+          child = Semantics(
+            role: SemanticsRole.menuItem,
+            expanded: _enabled && controller.isOpen,
+            enabled: _enabled,
+            child: TextButton(
+              style: mergedStyle,
+              focusNode: _buttonFocusNode,
+              onFocusChange: _enabled ? widget.onFocusChange : null,
+              onPressed: _enabled ? toggleShowMenu : null,
+              isSemanticButton: null,
+              child: _MenuItemLabel(
+                leadingIcon: widget.leadingIcon,
+                trailingIcon: widget.trailingIcon,
+                hasSubmenu: true,
+                showDecoration: (_parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                submenuIcon: submenuIcon,
+                child: child,
               ),
             ),
           );
@@ -1892,6 +1890,8 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   void _onOpen() {
     if (!_waitingToFocusMenu) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
+        // debugDumpRenderObjectSemanticsTree();
+        debugDumpSemanticsTree();
         if (mounted) {
           _buttonFocusNode.requestFocus();
           _waitingToFocusMenu = false;
