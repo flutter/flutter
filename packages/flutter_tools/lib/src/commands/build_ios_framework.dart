@@ -511,7 +511,6 @@ end
               globals.artifacts!,
             ).map((DarwinArch e) => e.name).join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
-            kSrcRoot: project.ios.hostAppRoot.path,
             ...buildInfo.toBuildSystemEnvironment(),
           },
           artifacts: globals.artifacts!,

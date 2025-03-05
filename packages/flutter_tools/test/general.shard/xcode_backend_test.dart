@@ -55,6 +55,7 @@ void main() {
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
               '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               'debug_ios_bundle_flutter_assets',
             ],
           ),
@@ -103,6 +104,7 @@ void main() {
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
               '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               'debug_ios_bundle_flutter_assets',
             ],
           ),
@@ -136,6 +138,7 @@ void main() {
       const String trackWidgetCreation = 'true';
       const String treeShake = 'true';
       const String srcRoot = '/path/to/project';
+      const String iOSVersion = '18.3.1';
       final TestContext context = TestContext(
         <String>['build'],
         <String, String>{
@@ -158,6 +161,7 @@ void main() {
           'TRACK_WIDGET_CREATION': trackWidgetCreation,
           'TREE_SHAKE_ICONS': treeShake,
           'SRCROOT': srcRoot,
+          'TARGET_DEVICE_OS_VERSION': iOSVersion,
         },
         commands: <FakeCommand>[
           FakeCommand(
@@ -183,6 +187,7 @@ void main() {
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
               '-dSrcRoot=$srcRoot',
+              '-dTargetDeviceOSVersion=$iOSVersion',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_ios_bundle_flutter_assets',
             ],
@@ -257,6 +262,7 @@ void main() {
               '--ExtraFrontEndOptions=',
               '-dPreBuildAction=PrepareFramework',
               '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               'debug_unpack_ios',
             ],
           ),
@@ -305,6 +311,7 @@ void main() {
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
               '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -334,6 +341,7 @@ void main() {
       const String trackWidgetCreation = 'true';
       const String treeShake = 'true';
       const String srcRoot = '/path/to/project';
+      const String iOSVersion = '18.3.1';
       final TestContext context = TestContext(
         <String>['prepare'],
         <String, String>{
@@ -356,6 +364,7 @@ void main() {
           'TRACK_WIDGET_CREATION': trackWidgetCreation,
           'TREE_SHAKE_ICONS': treeShake,
           'SRCROOT': srcRoot,
+          'TARGET_DEVICE_OS_VERSION': iOSVersion,
         },
         commands: <FakeCommand>[
           FakeCommand(
@@ -381,6 +390,7 @@ void main() {
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
               '-dSrcRoot=$srcRoot',
+              '-dTargetDeviceOSVersion=$iOSVersion',
               '-dPreBuildAction=PrepareFramework',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_unpack_ios',
@@ -433,6 +443,7 @@ void main() {
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
               '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -485,6 +496,7 @@ void main() {
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
               '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -536,6 +548,7 @@ void main() {
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
               '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],

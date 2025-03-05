@@ -977,6 +977,11 @@ const String kXcodeConfiguration = 'Configuration';
 /// Xcode target's source files.
 const String kSrcRoot = 'SrcRoot';
 
+/// The Xcode build setting TARGET_DEVICE_OS_VERSION. The iOS version of the
+/// target device. Only available if a specific device is being targeted during
+/// the build.
+const String kTargetDeviceOSVersion = 'TargetDeviceOSVersion';
+
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';
 

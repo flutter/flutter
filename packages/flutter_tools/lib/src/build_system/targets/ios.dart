@@ -11,6 +11,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
+import '../../base/version.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals;
@@ -474,6 +475,27 @@ abstract class IosLLDBInit extends Target {
       return;
     }
 
+    final String? targetDeviceVersionString = environment.defines[kTargetDeviceOSVersion];
+    if (targetDeviceVersionString == null) {
+      // Skip if TARGET_DEVICE_OS_VERSION is not found. TARGET_DEVICE_OS_VERSION
+      // is not set if "build ios-framework" is called, which builds the
+      // DebugIosApplicationBundle directly rather than through flutter assemble.
+      // If may also be null if the build is targeting multiple device types.
+      return;
+    }
+    final Version? targetDeviceVersion = Version.parse(targetDeviceVersionString);
+    if (targetDeviceVersion == null) {
+      environment.logger.printError(
+        'Failed to parse Target Device Version $targetDeviceVersionString',
+      );
+      return;
+    }
+
+    // LLDB Init File is only needed for iOS 18.4+.
+    if (targetDeviceVersion < Version(18, 4, null)) {
+      return;
+    }
+
     // The scheme name is not available in Xcode Build Phases Run Scripts.
     // Instead, find all xcscheme files in the Xcode project (this may be the
     // Flutter Xcode project or an Add to App native Xcode project) and check
@@ -481,7 +503,7 @@ abstract class IosLLDBInit extends Target {
     // an error.
     final String? srcRoot = environment.defines[kSrcRoot];
     if (srcRoot == null) {
-      throw MissingDefineException(kSrcRoot, name);
+      throw MissingDefineException(kSdkRoot, name);
     }
     final Directory xcodeProjectDir = environment.fileSystem.directory(srcRoot);
     if (!xcodeProjectDir.existsSync()) {
