@@ -11,6 +11,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -230,7 +231,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     if (kIsWeb && dropdownMenuItem.enabled) {
       child = Shortcuts(shortcuts: _webShortcuts, child: child);
     }
-    return child;
+    return Semantics(role: SemanticsRole.menuItem, child: child);
   }
 }
 
@@ -332,6 +333,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           getSelectedItemOffset: () => route.getItemOffset(route.selectedIndex),
         ),
         child: Semantics(
+          role: SemanticsRole.menu,
           scopesRoute: true,
           namesRoute: true,
           explicitChildNodes: true,
