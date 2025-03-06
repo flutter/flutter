@@ -88,7 +88,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
       const SkImageInfo& image_info,
       const std::shared_ptr<SkBitmap>& bitmap,
       const std::optional<SkImageInfo>& resize_info,
-      const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch);
+      const std::shared_ptr<const fml::SyncSwitch>& gpu_disabled_switch);
 
   /// @brief Create a texture from the provided bitmap.
   /// @param context     The Impeller graphics context.
