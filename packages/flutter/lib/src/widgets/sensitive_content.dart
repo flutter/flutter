@@ -74,7 +74,7 @@ class SensitiveContentHost {
   SensitiveContentHost._();
 
   bool? _contentSenstivityIsSupported;
-  late ContentSensitivitySetting _contentSensitivitySetting = ContentSensitivitySetting();
+  late final ContentSensitivitySetting _contentSensitivitySetting = ContentSensitivitySetting();
   ContentSensitivity? _defaultContentSensitivitySetting;
 
   final SensitiveContentService _sensitiveContentService = SensitiveContentService();
@@ -116,7 +116,7 @@ class SensitiveContentHost {
     currentContentSensitivityLevel ??= _defaultContentSensitivitySetting;
 
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
-    _contentSensitivitySetting!.addWidgetWithContentSensitivity(desiredSensitivityLevel);
+    _contentSensitivitySetting.addWidgetWithContentSensitivity(desiredSensitivityLevel);
 
     // Verify that desiredSensitivityLevel should be set in order for sensitive
     // content to remain obscured.
@@ -151,9 +151,9 @@ class SensitiveContentHost {
 
     // Update SensitiveContent widget count for those with
     // desiredSensitivityLevel.
-    _contentSensitivitySetting!.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
+    _contentSensitivitySetting.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
 
-    if (!_contentSensitivitySetting!.hasWidgets) {
+    if (!_contentSensitivitySetting.hasWidgets) {
       // Restore default content sensitivity setting if there are no more SensitiveContent
       // widgets in the tree. If the call to set content sensitivity on the platform side fails,
       // then we do not update the current content sensitivity level.
@@ -166,7 +166,7 @@ class SensitiveContentHost {
 
     // Determine if another sensitivity level needs to be restored.
     late final ContentSensitivity? contentSensitivityToRestore =
-        _contentSensitivitySetting!.contentSensitivityBasedOnWidgetCounts;
+        _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts;
     if (contentSensitivityToRestore != null &&
         contentSensitivityToRestore != currentContentSensitivityLevel) {
       // Set content sensitivity level as contentSensitivityToRestore. If the call to set content
@@ -193,12 +193,12 @@ class SensitiveContentHost {
       case ContentSensitivity.sensitive:
         return true;
       case ContentSensitivity.autoSensitive:
-        return _contentSensitivitySetting!.contentSensitivityBasedOnWidgetCounts !=
+        return _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts !=
             ContentSensitivity.sensitive;
       case ContentSensitivity.notSensitive:
-        return _contentSensitivitySetting!.contentSensitivityBasedOnWidgetCounts !=
+        return _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts !=
                 ContentSensitivity.sensitive &&
-            _contentSensitivitySetting!.contentSensitivityBasedOnWidgetCounts !=
+            _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts !=
                 ContentSensitivity.autoSensitive;
     }
   }
