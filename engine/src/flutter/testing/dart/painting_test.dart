@@ -276,4 +276,19 @@ void main() {
       expect(colors[i], isNot(const Color(0xFF0000FF)));
     }
   });
+
+  test('Picture.toImage with empty image', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawPaint(Paint()..color = const Color(0xFF0000FF));
+
+    final Picture picture = recorder.endRecording();
+    Object? error;
+    try {
+      final Image image = await picture.toImage(0, 0);
+    } catch (err, st) {
+      error = err;
+    }
+    expect(error, isNot(null));
+  });
 }
