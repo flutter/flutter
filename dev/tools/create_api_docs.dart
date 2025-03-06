@@ -1265,7 +1265,7 @@ class FlutterInformation {
     info['engineRevision'] = flutterVersion['engineRevision'] as String;
     final File engineRealm = flutterRoot
         .childDirectory('bin')
-        .childDirectory('internal')
+        .childDirectory('cache')
         .childFile('engine.realm');
     info['engineRealm'] = engineRealm.existsSync() ? engineRealm.readAsStringSync().trim() : '';
 

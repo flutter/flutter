@@ -323,7 +323,7 @@ TEST_P(AiksTest, CanRenderTextInSaveLayer) {
 
   // Blend the layer with the parent pass using kClear to expose the coverage.
   paint.setBlendMode(DlBlendMode::kClear);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   ASSERT_TRUE(RenderTextInCanvasSkia(
       GetContext(), builder, "the quick brown fox jumped over the lazy dog!.?",
       "Roboto-Regular.ttf"));
@@ -441,7 +441,7 @@ TEST_P(AiksTest, CanRenderTextWithLargePerspectiveTransform) {
   DisplayListBuilder builder;
 
   DlPaint save_paint;
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
   builder.Transform(Matrix(2000, 0, 0, 0,   //
                            0, 2000, 0, 0,   //
                            0, 0, -1, 9000,  //

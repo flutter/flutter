@@ -67,15 +67,7 @@ abstract class ScrollActivityDelegate {
 abstract class ScrollActivity {
   /// Initializes [delegate] for subclasses.
   ScrollActivity(this._delegate) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$ScrollActivity',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'ScrollActivity', this));
   }
 
   /// The delegate that this activity will use to actuate the scroll view.
@@ -172,12 +164,7 @@ abstract class ScrollActivity {
   /// Called when the scroll view stops performing this activity.
   @mustCallSuper
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-
+    assert(debugMaybeDispatchDisposed(this));
     _isDisposed = true;
   }
 
@@ -285,15 +272,7 @@ class ScrollDragController implements Drag {
        _lastNonStationaryTimestamp = details.sourceTimeStamp,
        _kind = details.kind,
        _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0 {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$ScrollDragController',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'ScrollDragController', this));
   }
 
   /// The object that will actuate the scroll view as the user drags.
@@ -470,11 +449,7 @@ class ScrollDragController implements Drag {
   /// Called by the delegate when it is no longer sending events to this object.
   @mustCallSuper
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _lastDetails = null;
     onDragCanceled?.call();
   }

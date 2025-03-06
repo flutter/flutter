@@ -595,18 +595,18 @@ TEST_F(EmbedderTest, ExternalTextureMetalRefreshedTooOften) {
       .canvas = &canvas,
       .gr_context = surface->GetGrContext().get(),
   };
-  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false, sampling);
+  texture_->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false, sampling);
 
   EXPECT_TRUE(resolve_called);
   resolve_called = false;
 
-  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false, sampling);
+  texture_->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false, sampling);
 
   EXPECT_FALSE(resolve_called);
 
   texture_->MarkNewFrameAvailable();
 
-  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false, sampling);
+  texture_->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false, sampling);
 
   EXPECT_TRUE(resolve_called);
 }

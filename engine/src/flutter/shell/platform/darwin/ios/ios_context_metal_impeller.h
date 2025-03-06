@@ -7,7 +7,6 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.h"
-#include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #include "flutter/shell/platform/darwin/ios/ios_context.h"
 #include "impeller/display_list/aiks_context.h"
 
@@ -28,20 +27,9 @@ class IOSContextMetalImpeller final : public IOSContext {
 
   IOSRenderingBackend GetBackend() const override;
 
-  // |IOSContext|
-  sk_sp<GrDirectContext> GetMainContext() const override;
-
-  sk_sp<GrDirectContext> GetResourceContext() const;
-
  private:
   FlutterDarwinContextMetalImpeller* darwin_context_metal_impeller_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
-
-  // |IOSContext|
-  sk_sp<GrDirectContext> CreateResourceContext() override;
-
-  // |IOSContext|
-  std::unique_ptr<GLContextResult> MakeCurrent() override;
 
   // |IOSContext|
   std::unique_ptr<Texture> CreateExternalTexture(int64_t texture_id,

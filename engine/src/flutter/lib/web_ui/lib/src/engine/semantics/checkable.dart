@@ -40,6 +40,24 @@ _CheckableKind _checkableKindFromSemanticsFlag(SemanticsObject semanticsObject) 
   }
 }
 
+/// Renders semantics objects that contain a group of radio buttons.
+///
+/// Radio buttons in the group have the [SemanticCheckable] role and must have
+/// the [ui.SemanticsFlag.isInMutuallyExclusiveGroup] flag.
+class SemanticRadioGroup extends SemanticRole {
+  SemanticRadioGroup(SemanticsObject semanticsObject)
+    : super.withBasics(
+        EngineSemanticsRole.radioGroup,
+        semanticsObject,
+        preferredLabelRepresentation: LabelRepresentation.ariaLabel,
+      ) {
+    setAriaRole('radiogroup');
+  }
+
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
+}
+
 /// Renders semantics objects that have checkable (on/off) states.
 ///
 /// Three objects which are implemented by this class are checkboxes, radio

@@ -41,10 +41,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   DisplayListBuilder(DlScalar width, DlScalar height)
       : DisplayListBuilder(DlRect::MakeWH(width, height)) {}
 
-  explicit DisplayListBuilder(const SkRect& cull_rect,
-                              bool prepare_rtree = false)
-      : DisplayListBuilder(ToDlRect(cull_rect), prepare_rtree) {}
-
   ~DisplayListBuilder();
 
   // |DlCanvas|
@@ -118,6 +114,10 @@ class DisplayListBuilder final : public virtual DlCanvas,
                      DlClipOp clip_op = DlClipOp::kIntersect,
                      bool is_aa = false) override;
   // |DlCanvas|
+  void ClipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                             DlClipOp clip_op = DlClipOp::kIntersect,
+                             bool is_aa = false) override;
+  // |DlCanvas|
   void ClipPath(const DlPath& path,
                 DlClipOp clip_op = DlClipOp::kIntersect,
                 bool is_aa = false) override;
@@ -172,6 +172,9 @@ class DisplayListBuilder final : public virtual DlCanvas,
                          const DlRoundRect& inner,
                          const DlPaint& paint) override;
   // |DlCanvas|
+  void DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
+                             const DlPaint& paint) override;
+  // |DlCanvas|
   void DrawPath(const DlPath& path, const DlPaint& paint) override;
   // |DlCanvas|
   void DrawArc(const DlRect& bounds,
@@ -201,6 +204,9 @@ class DisplayListBuilder final : public virtual DlCanvas,
       DlImageSampling sampling,
       const DlPaint* paint = nullptr,
       DlSrcRectConstraint constraint = DlSrcRectConstraint::kFast) override;
+  // include overloads from the virtual base class
+  using DlCanvas::DrawImageRect;
+
   // |DlCanvas|
   void DrawImageNine(const sk_sp<DlImage>& image,
                      const DlIRect& center,
@@ -246,8 +252,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void Flush() override {}
 
   sk_sp<DisplayList> Build();
-
-  ENABLE_DL_CANVAS_BACKWARDS_COMPATIBILITY
 
  private:
   void Init(bool prepare_rtree);
@@ -409,6 +413,12 @@ class DisplayListBuilder final : public virtual DlCanvas,
     ClipRoundRect(rrect, clip_op, is_aa);
   }
   // |DlOpReceiver|
+  void clipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                     DlClipOp clip_op,
+                     bool is_aa) override {
+    ClipRoundSuperellipse(rse, clip_op, is_aa);
+  }
+  // |DlOpReceiver|
   void clipPath(const DlPath& path, DlClipOp clip_op, bool is_aa) override {
     ClipPath(path, clip_op, is_aa);
   }
@@ -437,6 +447,8 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // |DlOpReceiver|
   void drawDiffRoundRect(const DlRoundRect& outer,
                          const DlRoundRect& inner) override;
+  // |DlOpReceiver|
+  void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override;
   // |DlOpReceiver|
   void drawPath(const DlPath& path) override;
   // |DlOpReceiver|

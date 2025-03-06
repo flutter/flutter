@@ -11,13 +11,16 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 
 final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -206,11 +209,8 @@ void main() {
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
       // Project info
-      fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -268,6 +268,106 @@ void main() {
   );
 
   testUsingContext(
+    'DebugIosApplicationBundle with flavor',
+    () async {
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kCodesignIdentity] = 'ABC123';
+      environment.defines[kFlavor] = 'vanilla';
+      environment.defines[kXcodeConfiguration] = 'Debug-strawberry';
+      fileSystem.directory('/ios/Runner.xcodeproj').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+  name: example
+  flutter:
+    assets:
+      - assets/common/
+      - path: assets/vanilla/
+        flavors:
+          - vanilla
+      - path: assets/strawberry/
+        flavors:
+          - strawberry
+  ''');
+
+      fileSystem.file('assets/common/image.png').createSync(recursive: true);
+      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+      // Precompiled dart data
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      // Project info
+      fileSystem
+          .directory('.dart_tool')
+          .childFile('package_config.json')
+          .createSync(recursive: true);
+      // Plist file
+      fileSystem
+          .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+          .createSync(recursive: true);
+      // App kernel
+      environment.buildDir.childFile('app.dill').createSync(recursive: true);
+      environment.buildDir.childFile('native_assets.json').createSync();
+      // Stub framework
+      environment.buildDir
+          .childDirectory('App.framework')
+          .childFile('App')
+          .createSync(recursive: true);
+
+      final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+      final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+      ]);
+      await const DebugIosApplicationBundle().build(environment);
+
+      expect(
+        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/common/image.png'),
+        exists,
+      );
+      expect(
+        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/vanilla/ice-cream.png'),
+        isNot(exists),
+      );
+      expect(
+        fileSystem.file(
+          '${frameworkDirectory.path}/flutter_assets/assets/strawberry/ice-cream.png',
+        ),
+        exists,
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+      XcodeProjectInterpreter:
+          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
+    },
+  );
+
+  testUsingContext(
     'DebugIosApplicationBundle with impeller and shader compilation',
     () async {
       // Create impellerc to work around fallback detection logic.
@@ -288,11 +388,8 @@ void main() {
       // Project info
       fileSystem
           .file('pubspec.yaml')
-          .writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+          .writeAsStringSync('name: my_app\nflutter:\n  shaders:\n    - shader.glsl');
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -372,11 +469,9 @@ void main() {
       environment.defines[kXcodeAction] = 'build';
 
       // Project info
-      fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -1057,4 +1152,18 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
   });
+}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  FakeXcodeProjectInterpreter({this.isInstalled = true, this.schemes = const <String>['Runner']});
+
+  @override
+  final bool isInstalled;
+
+  List<String> schemes;
+
+  @override
+  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+    return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
+  }
 }

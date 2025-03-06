@@ -617,7 +617,6 @@ class AndroidDevice extends Device {
       );
     }
 
-    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     final String? traceAllowlist = debuggingOptions.traceAllowlist;
     final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
     final String? traceToFile = debuggingOptions.traceToFile;
@@ -684,7 +683,11 @@ class AndroidDevice extends Device {
           'disable-service-auth-codes',
           'true',
         ],
-        if (dartVmFlags.isNotEmpty) ...<String>['--es', 'dart-flags', dartVmFlags],
+        if (debuggingOptions.dartFlags.isNotEmpty) ...<String>[
+          '--es',
+          'dart-flags',
+          debuggingOptions.dartFlags,
+        ],
         if (debuggingOptions.useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
         if (debuggingOptions.verboseSystemLogs) ...<String>['--ez', 'verbose-logging', 'true'],
         if (userIdentifier != null) ...<String>['--user', userIdentifier],

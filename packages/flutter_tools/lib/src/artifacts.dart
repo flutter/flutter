@@ -16,6 +16,16 @@ import 'build_info.dart';
 import 'cache.dart';
 import 'globals.dart' as globals;
 
+//////////////////////////////////////////////////////////////////////
+//                                                                  //
+//  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
+//                                                                  //
+//  There is a link to this file in //docs/tool/Engine-artfiacts.md //
+//  and it would be very kind of you to update the link, if needed. //
+//                                                                  //
+//////////////////////////////////////////////////////////////////////
+
+/// Defines what engine artifacts are available (not necessarily on each platform).
 enum Artifact {
   /// The tool which compiles a dart kernel file into native code.
   genSnapshot,
@@ -122,8 +132,6 @@ enum HostArtifact {
 
   // The Impeller shader compiler.
   impellerc,
-  // The Impeller Scene 3D model importer.
-  scenec,
   // Impeller's tessellation library.
   libtessellator,
 }
@@ -264,8 +272,6 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
       return 'dart_sdk.js.map';
     case HostArtifact.impellerc:
       return 'impellerc$exe';
-    case HostArtifact.scenec:
-      return 'scenec$exe';
     case HostArtifact.libtessellator:
       return 'libtessellator$dll';
   }
@@ -480,7 +486,6 @@ class CachedArtifacts implements Artifacts {
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
-      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         final String engineDir =
@@ -1147,7 +1152,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
-      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         final File file = _fileSystem.file(
@@ -1506,7 +1510,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.iproxy:
       case HostArtifact.skyEnginePath:
       case HostArtifact.impellerc:
-      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         return _parent.getHostArtifact(artifact);
     }

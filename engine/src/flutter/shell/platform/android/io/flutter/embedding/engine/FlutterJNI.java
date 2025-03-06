@@ -180,7 +180,8 @@ public class FlutterJNI {
       @Nullable String bundlePath,
       @NonNull String appStoragePath,
       @NonNull String engineCachesPath,
-      long initTimeMillis);
+      long initTimeMillis,
+      int apiLevel);
 
   /**
    * Perform one time initialization of the Dart VM and Flutter engine.
@@ -193,6 +194,7 @@ public class FlutterJNI {
    * @param appStoragePath The path to the application data directory.
    * @param engineCachesPath The path to the application cache directory.
    * @param initTimeMillis The time, in milliseconds, taken for initialization.
+   * @param apiLevel The current Android API level.
    */
   public void init(
       @NonNull Context context,
@@ -200,13 +202,14 @@ public class FlutterJNI {
       @Nullable String bundlePath,
       @NonNull String appStoragePath,
       @NonNull String engineCachesPath,
-      long initTimeMillis) {
+      long initTimeMillis,
+      int apiLevel) {
     if (FlutterJNI.initCalled) {
       Log.w(TAG, "FlutterJNI.init called more than once");
     }
 
     FlutterJNI.nativeInit(
-        context, args, bundlePath, appStoragePath, engineCachesPath, initTimeMillis);
+        context, args, bundlePath, appStoragePath, engineCachesPath, initTimeMillis, apiLevel);
     FlutterJNI.initCalled = true;
   }
 
@@ -247,7 +250,7 @@ public class FlutterJNI {
    * VM Service URI for the VM instance.
    *
    * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
-   * String, long)} is run.
+   * String, long, int)} is run.
    */
   @Nullable
   public static String getVMServiceUri() {
@@ -258,7 +261,7 @@ public class FlutterJNI {
    * VM Service URI for the VM instance.
    *
    * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
-   * String, long)} is run.
+   * String, long, int)} is run.
    *
    * @deprecated replaced by {@link #getVMServiceUri()}.
    */
@@ -448,7 +451,8 @@ public class FlutterJNI {
    * #attachToNative()}.
    *
    * <p>Static methods that should be only called once such as {@link #init(Context, String[],
-   * String, String, String, long)} shouldn't be called again on the spawned FlutterJNI instance.
+   * String, String, String, long, int)} shouldn't be called again on the spawned FlutterJNI
+   * instance.
    */
   @UiThread
   @NonNull
@@ -456,7 +460,8 @@ public class FlutterJNI {
       @Nullable String entrypointFunctionName,
       @Nullable String pathToEntrypointFunction,
       @Nullable String initialRoute,
-      @Nullable List<String> entrypointArgs) {
+      @Nullable List<String> entrypointArgs,
+      long engineId) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     FlutterJNI spawnedJNI =
@@ -465,7 +470,8 @@ public class FlutterJNI {
             entrypointFunctionName,
             pathToEntrypointFunction,
             initialRoute,
-            entrypointArgs);
+            entrypointArgs,
+            engineId);
     Preconditions.checkState(
         spawnedJNI.nativeShellHolderId != null && spawnedJNI.nativeShellHolderId != 0,
         "Failed to spawn new JNI connected shell from existing shell.");
@@ -478,7 +484,8 @@ public class FlutterJNI {
       @Nullable String entrypointFunctionName,
       @Nullable String pathToEntrypointFunction,
       @Nullable String initialRoute,
-      @Nullable List<String> entrypointArgs);
+      @Nullable List<String> entrypointArgs,
+      long engineId);
 
   /**
    * Detaches this {@code FlutterJNI} instance from Flutter's native engine, which precludes any
@@ -487,7 +494,7 @@ public class FlutterJNI {
    * <p>This method must not be invoked if {@code FlutterJNI} is not already attached to native.
    *
    * <p>Invoking this method will result in the release of all native-side resources that were set
-   * up during {@link #attachToNative()} or {@link #spawn(String, String, String, List)}, or
+   * up during {@link #attachToNative()} or {@link #spawn(String, String, String, List, long)}, or
    * accumulated thereafter.
    *
    * <p>It is permissible to re-attach this instance to native after detaching it from native.
@@ -998,7 +1005,8 @@ public class FlutterJNI {
       @Nullable String entrypointFunctionName,
       @Nullable String pathToEntrypointFunction,
       @NonNull AssetManager assetManager,
-      @Nullable List<String> entrypointArgs) {
+      @Nullable List<String> entrypointArgs,
+      long engineId) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeRunBundleAndSnapshotFromLibrary(
@@ -1007,7 +1015,8 @@ public class FlutterJNI {
         entrypointFunctionName,
         pathToEntrypointFunction,
         assetManager,
-        entrypointArgs);
+        entrypointArgs,
+        engineId);
   }
 
   private native void nativeRunBundleAndSnapshotFromLibrary(
@@ -1016,7 +1025,8 @@ public class FlutterJNI {
       @Nullable String entrypointFunctionName,
       @Nullable String pathToEntrypointFunction,
       @NonNull AssetManager manager,
-      @Nullable List<String> entrypointArgs);
+      @Nullable List<String> entrypointArgs,
+      long engineId);
   // ------ End Dart Execution Support -------
 
   // --------- Start Platform Message Support ------
@@ -1636,16 +1646,6 @@ public class FlutterJNI {
   public interface AsyncWaitForVsyncDelegate {
     void asyncWaitForVsync(final long cookie);
   }
-
-  /**
-   * Whether Android Hardware Buffer import is known to not work on this particular vendor + API
-   * level and should be disabled.
-   */
-  public boolean ShouldDisableAHB() {
-    return nativeShouldDisableAHB();
-  }
-
-  private native boolean nativeShouldDisableAHB();
 
   /** Whether the SurfaceControl swapchain required for hcpp is enabled and active. */
   public boolean IsSurfaceControlEnabled() {

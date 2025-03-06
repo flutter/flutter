@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/tools/scene_importer.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -46,6 +45,7 @@ import '../src/fake_process_manager.dart';
 import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart' as test_fakes;
+import '../src/package_config.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{'streamId': 'Stdout'}),
@@ -114,7 +114,10 @@ void main() {
           .._devFS = webDevFS
           ..device = mockDevice
           ..generator = residentCompiler;
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+''');
+    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
@@ -396,6 +399,90 @@ void main() {
       );
 
       expect(await residentWebRunner.run(), 0);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
+    },
+  );
+
+  testUsingContext(
+    'Detach keeps device running',
+    () async {
+      final BufferLogger logger = BufferLogger.test();
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      fileSystem.directory('web').deleteSync(recursive: true);
+      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
+        flutterDevice,
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        fileSystem: fileSystem,
+        logger: logger,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
+        analytics: globals.analytics,
+        systemClock: globals.systemClock,
+        devtoolsHandler: createNoOpHandler,
+      );
+
+      mockDevice.dds = DartDevelopmentService(logger: logger);
+
+      expect(mockDevice.isRunning, false);
+      final Completer<DebugConnectionInfo> connectionInfoCompleter =
+          Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+      expect(mockDevice.isRunning, true);
+      await residentWebRunner.detach();
+      expect(residentWebRunner.stopAppDuringCleanup, false);
+      await residentWebRunner.exit();
+      await residentWebRunner.cleanupAtFinish();
+      expect(mockDevice.isRunning, true);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
+    },
+  );
+
+  testUsingContext(
+    'Quit stops device',
+    () async {
+      final BufferLogger logger = BufferLogger.test();
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      fileSystem.directory('web').deleteSync(recursive: true);
+      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
+        flutterDevice,
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        fileSystem: fileSystem,
+        logger: logger,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
+        analytics: globals.analytics,
+        systemClock: globals.systemClock,
+        devtoolsHandler: createNoOpHandler,
+      );
+
+      mockDevice.dds = DartDevelopmentService(logger: logger);
+
+      expect(mockDevice.isRunning, false);
+      final Completer<DebugConnectionInfo> connectionInfoCompleter =
+          Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+      expect(mockDevice.isRunning, true);
+      expect(residentWebRunner.stopAppDuringCleanup, true);
+      await residentWebRunner.cleanupAtFinish();
+      expect(mockDevice.isRunning, false);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1298,24 +1385,15 @@ void main() {
 }''');
       globals.fs.file('l10n.yaml').createSync();
       globals.fs.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
 flutter:
   generate: true
 ''');
-      globals.fs.directory('.dart_tool').childFile('package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "path_provider_linux",
-      "rootUri": "../../../path_provider_linux",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
+      writePackageConfigFile(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'my_app',
+        packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
+      );
       expect(await residentWebRunner.run(), 0);
       final File generatedLocalizationsFile = globals.fs
           .directory('lib')
@@ -1339,23 +1417,12 @@ flutter:
     'Does not generate dart_plugin_registrant.dart',
     () async {
       // Create necessary files for [DartPluginRegistrantTarget]
-      final File packageConfig = globals.fs
-          .directory('.dart_tool')
-          .childFile('package_config.json');
-      packageConfig.createSync(recursive: true);
-      packageConfig.writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "path_provider_linux",
-      "rootUri": "../../../path_provider_linux",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
+      writePackageConfigFile(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'my_app',
+        packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
+      );
+
       // Start with a dart_plugin_registrant.dart file.
       globals.fs
           .directory('.dart_tool')
@@ -1593,6 +1660,8 @@ class FakeDevice extends Fake implements Device {
 
   int count = 0;
 
+  bool isRunning = false;
+
   @override
   Future<String> get sdkNameAndVersion async => 'SDK Name and Version';
 
@@ -1613,6 +1682,7 @@ class FakeDevice extends Fake implements Device {
     bool ipv6 = false,
     String? userIdentifier,
   }) async {
+    isRunning = true;
     return LaunchResult.succeeded();
   }
 
@@ -1622,6 +1692,7 @@ class FakeDevice extends Fake implements Device {
       throw StateError('stopApp called more than once.');
     }
     count += 1;
+    isRunning = false;
     return true;
   }
 }
@@ -1727,7 +1798,6 @@ class FakeWebDevFS extends Fake implements WebDevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
-    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,

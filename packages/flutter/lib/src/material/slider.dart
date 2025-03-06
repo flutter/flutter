@@ -1294,6 +1294,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     _secondaryTrackValue = newValue;
+    markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
 

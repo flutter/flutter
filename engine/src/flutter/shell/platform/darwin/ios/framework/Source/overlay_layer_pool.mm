@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
 namespace flutter {
@@ -22,7 +23,7 @@ void OverlayLayer::UpdateViewState(UIView* flutter_view,
                                    SkRect rect,
                                    int64_t view_id,
                                    int64_t overlay_id) {
-  auto screenScale = [UIScreen mainScreen].scale;
+  auto screenScale = ((FlutterView*)flutter_view).screen.scale;
   // Set the size of the overlay view wrapper.
   // This wrapper view masks the overlay view.
   overlay_view_wrapper.frame = CGRectMake(rect.x() / screenScale, rect.y() / screenScale,
@@ -52,40 +53,25 @@ std::shared_ptr<OverlayLayer> OverlayLayerPool::GetNextLayer() {
   return result;
 }
 
-void OverlayLayerPool::CreateLayer(GrDirectContext* gr_context,
-                                   const std::shared_ptr<IOSContext>& ios_context,
-                                   MTLPixelFormat pixel_format) {
+void OverlayLayerPool::CreateLayer(const std::shared_ptr<IOSContext>& ios_context,
+                                   MTLPixelFormat pixel_format,
+                                   CGFloat screenScale) {
   FML_DCHECK([[NSThread currentThread] isMainThread]);
   std::shared_ptr<OverlayLayer> layer;
   UIView* overlay_view;
   UIView* overlay_view_wrapper;
 
-  bool impeller_enabled = !!ios_context->GetImpellerContext();
-  if (!gr_context && !impeller_enabled) {
-    overlay_view = [[FlutterOverlayView alloc] init];
-    overlay_view_wrapper = [[FlutterOverlayView alloc] init];
+  overlay_view = [[FlutterOverlayView alloc] initWithContentsScale:screenScale
+                                                       pixelFormat:pixel_format];
+  overlay_view_wrapper = [[FlutterOverlayView alloc] initWithContentsScale:screenScale
+                                                               pixelFormat:pixel_format];
 
-    CALayer* ca_layer = overlay_view.layer;
-    std::unique_ptr<IOSSurface> ios_surface = IOSSurface::Create(ios_context, ca_layer);
-    std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface();
+  CALayer* ca_layer = overlay_view.layer;
+  std::unique_ptr<IOSSurface> ios_surface = IOSSurface::Create(ios_context, ca_layer);
+  std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface();
 
-    layer = std::make_shared<OverlayLayer>(overlay_view, overlay_view_wrapper,
-                                           std::move(ios_surface), std::move(surface));
-  } else {
-    CGFloat screenScale = [UIScreen mainScreen].scale;
-    overlay_view = [[FlutterOverlayView alloc] initWithContentsScale:screenScale
-                                                         pixelFormat:pixel_format];
-    overlay_view_wrapper = [[FlutterOverlayView alloc] initWithContentsScale:screenScale
-                                                                 pixelFormat:pixel_format];
-
-    CALayer* ca_layer = overlay_view.layer;
-    std::unique_ptr<IOSSurface> ios_surface = IOSSurface::Create(ios_context, ca_layer);
-    std::unique_ptr<Surface> surface = ios_surface->CreateGPUSurface(gr_context);
-
-    layer = std::make_shared<OverlayLayer>(overlay_view, overlay_view_wrapper,
-                                           std::move(ios_surface), std::move(surface));
-    layer->gr_context = gr_context;
-  }
+  layer = std::make_shared<OverlayLayer>(overlay_view, overlay_view_wrapper, std::move(ios_surface),
+                                         std::move(surface));
   // The overlay view wrapper masks the overlay view.
   // This is required to keep the backing surface size unchanged between frames.
   //

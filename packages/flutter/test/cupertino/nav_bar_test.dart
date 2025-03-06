@@ -739,7 +739,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('Title')).dy, 44.0); // Extension gone.
   });
 
-  testWidgets('Auto back/close button', (WidgetTester tester) async {
+  testWidgets('Auto back/cancel button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(home: CupertinoNavigationBar(middle: Text('Home page'))),
     );
@@ -776,10 +776,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
 
-    expect(find.widgetWithText(CupertinoButton, 'Close'), findsOneWidget);
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
 
     // Test popping goes back correctly.
-    await tester.tap(find.text('Close'));
+    await tester.tap(find.text('Cancel'));
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
@@ -2606,6 +2606,69 @@ void main() {
     expect(searchFieldFinder, findsOneWidget);
     // A decoy 'Cancel' button used in the animation.
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
+  });
+
+  testWidgets('CupertinoSliverNavigationBar.search golden tests', (WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 850));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: RepaintBoundary(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverNavigationBar.search(
+                largeTitle: Text('Large title'),
+                searchField: CupertinoSearchTextField(),
+              ),
+              SliverFillRemaining(child: SizedBox(height: 300.0)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(CupertinoSliverNavigationBar),
+      matchesGoldenFile('nav_bar.search.inactive.png'),
+    );
+
+    // Tap the search field.
+    await tester.tap(find.byType(CupertinoSearchTextField), warnIfMissed: false);
+    await tester.pump();
+    // Pump halfway through the animation.
+    await tester.pump(const Duration(milliseconds: 150));
+
+    await expectLater(
+      find.byType(CupertinoSliverNavigationBar),
+      matchesGoldenFile('nav_bar.search.transition_forward.png'),
+    );
+
+    // Pump to the end of the animation.
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await expectLater(
+      find.byType(CupertinoSliverNavigationBar),
+      matchesGoldenFile('nav_bar.search.active.png'),
+    );
+
+    // Tap the 'Cancel' button to exit the search view.
+    await tester.tap(find.widgetWithText(CupertinoButton, 'Cancel'));
+    await tester.pump();
+    // Pump halfway through the animation.
+    await tester.pump(const Duration(milliseconds: 150));
+
+    await expectLater(
+      find.byType(CupertinoSliverNavigationBar),
+      matchesGoldenFile('nav_bar.search.transition_backward.png'),
+    );
+
+    // Pump for the duration of the search field animation.
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await expectLater(
+      find.byType(CupertinoSliverNavigationBar),
+      matchesGoldenFile('nav_bar.search.inactive.png'),
+    );
   });
 
   testWidgets('onSearchableBottomTap callback', (WidgetTester tester) async {

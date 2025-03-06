@@ -47,6 +47,7 @@ public class FlutterMutatorsStack {
     @Nullable private Rect rect;
     @Nullable private Path path;
     @Nullable private float[] radiis;
+    private float opacity = 1.f;
 
     private FlutterMutatorType type;
 
@@ -94,6 +95,16 @@ public class FlutterMutatorsStack {
     }
 
     /**
+     * Initialize an opacity mutator.
+     *
+     * @param opacity the opacity value to apply. The value must be between 0 and 1, inclusive.
+     */
+    public FlutterMutator(float opacity) {
+      this.type = FlutterMutatorType.OPACITY;
+      this.opacity = opacity;
+    }
+
+    /**
      * Get the mutator type.
      *
      * @return The type of the mutator.
@@ -128,18 +139,29 @@ public class FlutterMutatorsStack {
     public Matrix getMatrix() {
       return matrix;
     }
+
+    /**
+     * Get the opacity of the mutator if the {@link #getType()} returns FlutterMutatorType.OPACITY.
+     *
+     * @return the opacity of the mutator if the type is FlutterMutatorType.OPACITY; otherwise 1.
+     */
+    public float getOpacity() {
+      return opacity;
+    }
   }
 
   private @NonNull List<FlutterMutator> mutators;
 
   private List<Path> finalClippingPaths;
   private Matrix finalMatrix;
+  private float finalOpacity;
 
   /** Initialize the mutator stack. */
   public FlutterMutatorsStack() {
     this.mutators = new ArrayList<FlutterMutator>();
     finalMatrix = new Matrix();
     finalClippingPaths = new ArrayList<Path>();
+    finalOpacity = 1.f;
   }
 
   /**
@@ -188,6 +210,29 @@ public class FlutterMutatorsStack {
   }
 
   /**
+   * Push an opacity {@link FlutterMutatorsStack.FlutterMutator} to the stack.
+   *
+   * @param opacity the opacity value to be pushed to the stack.
+   */
+  public void pushOpacity(float opacity) {
+    FlutterMutator mutator = new FlutterMutator(opacity);
+    mutators.add(mutator);
+    finalOpacity *= opacity;
+  }
+
+  /**
+   * Push a clipPath {@link FlutterMutatorsStack.FlutterMutator} to the stack.
+   *
+   * @param path the path to be clipped.
+   */
+  public void pushClipPath(Path path) {
+    FlutterMutator mutator = new FlutterMutator(path);
+    mutators.add(mutator);
+    path.transform(finalMatrix);
+    finalClippingPaths.add(path);
+  }
+
+  /**
    * Get a list of all the raw mutators. The 0 index of the returned list is the top of the stack.
    */
   public List<FlutterMutator> getMutators() {
@@ -213,5 +258,13 @@ public class FlutterMutatorsStack {
    */
   public Matrix getFinalMatrix() {
     return finalMatrix;
+  }
+
+  /**
+   * Returns the final opacity. The value must be between 0 and 1, inclusive, or behavior will be
+   * undefined.
+   */
+  public float getFinalOpacity() {
+    return finalOpacity;
   }
 }
