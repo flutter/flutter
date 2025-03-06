@@ -561,10 +561,14 @@ bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
   if (a == b) {
     return true;
   }
+  if ((a?.isEmpty ?? true) && (b?.isEmpty ?? true)) {
+    return true;
+  }
+
   if ((a == null) != (b == null)) {
     return false;
   }
-  // They most both be non-null now.
+  // They most both be non-null now, and at least one of them is not empty.
   if (a!.length != b!.length) {
     return false;
   }
@@ -574,7 +578,7 @@ bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
   }
 
   if (a.length == 2) {
-    return a.first == b.first && a.last == b.last || a.last == b.first && b.first == a.last;
+    return (a.first == b.first && a.last == b.last) || (a.last == b.first && a.first == b.last);
   }
 
   // Complex cases.
@@ -591,8 +595,9 @@ bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
     }
     if (count == 1) {
       wordCounts.remove(otherWord);
+    } else {
+      wordCounts[otherWord] = count - 1;
     }
-    wordCounts[otherWord] = count - 1;
   }
   return wordCounts.isEmpty;
 }
