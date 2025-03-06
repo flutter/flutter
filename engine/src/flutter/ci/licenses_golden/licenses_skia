@@ -1,4 +1,4 @@
-Signature: bfd65bba3a82f7a66c2887bd4b0917f9
+Signature: b519dc263157e48cb4d2f4f7fe4854bc
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9854,6 +9854,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9862,6 +9863,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/Serializat
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h
+FILE: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h
 FILE: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h
 FILE: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp
