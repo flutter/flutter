@@ -58,6 +58,9 @@ void main() {
   tearDown(() {
     scheduler.additionalHandleBeginFrame = null;
     scheduler.additionalHandleDrawFrame = null;
+    PlatformDispatcher.instance
+      ..onBeginFrame = null
+      ..onDrawFrame = null;
   });
 
   test('Tasks are executed in the right order', () {
@@ -332,6 +335,29 @@ void main() {
     await result;
 
     expect(isCompleted, true);
+  });
+
+  test('Can schedule a frame callback with / without scheduling a new frame', () {
+    scheduler.handleBeginFrame(null);
+    scheduler.handleDrawFrame();
+    bool callbackInvoked = false;
+
+    assert(!scheduler.hasScheduledFrame);
+    scheduler.scheduleFrameCallback(scheduleNewFrame: false, (_) => callbackInvoked = true);
+    expect(scheduler.hasScheduledFrame, isFalse);
+    scheduler.handleBeginFrame(null);
+    scheduler.handleDrawFrame();
+    expect(callbackInvoked, isTrue);
+
+    assert(!scheduler.hasScheduledFrame);
+    callbackInvoked = false;
+    scheduler.scheduleFrameCallback((_) => callbackInvoked = true);
+    expect(scheduler.hasScheduledFrame, isTrue);
+    scheduler.handleBeginFrame(null);
+    scheduler.handleDrawFrame();
+    expect(callbackInvoked, isTrue);
+
+    assert(!scheduler.hasScheduledFrame);
   });
 }
 
