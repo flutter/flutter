@@ -1321,6 +1321,30 @@ void _testContainer() {
 }
 
 void _testVerticalScrolling() {
+  test('recognizes scrollable node when scroll actions not available', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+    );
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '''
+  <sem role="group" style="touch-action: none">
+  <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
+  </sem>''');
+
+    final DomElement scrollable = findScrollable(owner());
+    expect(scrollable.scrollTop, isZero);
+    semantics().semanticsEnabled = false;
+  });
+
   test('renders an empty scrollable node', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -1329,6 +1353,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1353,6 +1378,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1405,6 +1431,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1485,6 +1512,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1554,6 +1582,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -1576,6 +1605,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -1628,6 +1658,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),

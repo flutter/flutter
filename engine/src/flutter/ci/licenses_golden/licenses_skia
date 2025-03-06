@@ -1,4 +1,4 @@
-Signature: 24516b7d56b29ce1ddeb9c580c9e5fc6
+Signature: c6100650a205aaf356ad7c4d61fa9522
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9854,14 +9854,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h
+FILE: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h
 FILE: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h
 FILE: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h
 ----------------------------------------------------------------------------------------------------
