@@ -277,7 +277,7 @@ config("compiler") {
   }
 
   if (is_wasm) {
-    if (wasm_use_pthreads) {
+    if (wasm_use_workers) {
       cflags += [ "-sWASM_WORKERS=1" ]
       ldflags += [ "-sWASM_WORKERS=1" ]
     } if (wasm_shared_memory) {

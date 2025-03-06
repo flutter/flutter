@@ -6,24 +6,23 @@ import { createWasmInstantiator } from "./instantiate_wasm.js";
 import { resolveUrlWithSegments } from "./utils.js";
 
 export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
-  const fileStem = (browserEnvironment.crossOriginIsolated && !config.forceSingleThreadedSkwasm) ? "skwasm" : "skwasm_st";
-  const rawSkwasmUrl = resolveUrlWithSegments(baseUrl, `${fileStem}.js`)
+  const rawSkwasmUrl = resolveUrlWithSegments(baseUrl, 'skwasm.js')
   let skwasmUrl = rawSkwasmUrl;
-  console.log(`skwasmUrl: ${skwasmUrl}`);
   if (deps.flutterTT.policy) {
     skwasmUrl = deps.flutterTT.policy.createScriptURL(skwasmUrl);
   }
-  const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, `${fileStem}.wasm`));
+  const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, 'skwasm.wasm'));
   const skwasm = await import(skwasmUrl);
   return await skwasm.default({
-    skwasmSingleThreaded: !(browserEnvironment.crossOriginIsolated && !config.forceSingleThreadedSkwasm),
+    skwasmSingleThreaded: !browserEnvironment.crossOriginIsolated || config.forceSingleThreadedSkwasm,
     instantiateWasm: wasmInstantiator,
     locateFile: (filename, scriptDirectory) => {
-      // When hosted via a CDN or some other url that is not the same
-      // origin as the main script of the page, we will fail to create
-      // a web worker with the .worker.js script. This workaround will
-      // make sure that the worker JS can be loaded regardless of where
-      // it is hosted.
+      // The wasm workers API has a separate .ww.js file that bootstraps the
+      // web worker. However, it turns out this worker bootstrapper doesn't
+      // actually work with ES6 modules, which we have enabled. So we instead
+      // pass our own bootstrapper that loads skwasm.js as an ES6 module, and
+      // queues/flushes pending messages that were received during the
+      // asynchronous load.
       if (filename.endsWith('.ww.js')) {
         const url = resolveUrlWithSegments(baseUrl, filename);
         return URL.createObjectURL(new Blob(
@@ -69,15 +68,5 @@ addEventListener("message", eventListener);
     // can't locate the main script using a relative path to itself,
     // so we pass the main script location in.
     mainScriptUrlOrBlob: rawSkwasmUrl,
-
-    // // When hosted via a CDN or some other url that is not the same
-    // // origin as the main script of the page, we will fail to create
-    // // a web worker with the bootstrapping script. This workaround will
-    // // make sure that the worker JS can be loaded regardless of where
-    // // it is hosted.
-    // mainScriptUrlOrBlob: new Blob(
-    //   [`import '${skwasmUrl}'`],
-    //   { 'type': 'application/javascript' },
-    // ),
   });
 }

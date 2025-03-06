@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "surface.h"
+#include <emscripten/wasm_worker.h>
 #include <algorithm>
 
 #include "skwasm_support.h"
@@ -13,6 +14,24 @@
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLMakeWebGLInterface.h"
 
 using namespace Skwasm;
+
+Surface::Surface() {
+  if (skwasm_isSingleThreaded()) {
+    skwasm_connectThread(0);
+  } else {
+    printf("Creating surface: %p\n", this);
+    assert(emscripten_is_main_browser_thread());
+
+    _thread = emscripten_malloc_wasm_worker(65536);
+    emscripten_wasm_worker_post_function_v(_thread, []() {
+      // Listen to the main thread from the worker
+      skwasm_connectThread(0);
+    });
+
+    // Listen to messages from the worker
+    skwasm_connectThread(_thread);
+  }
+}
 
 // Worker thread only
 void Surface::dispose() {
@@ -288,4 +307,8 @@ SKWASM_EXPORT void surface_onRasterizeComplete(Surface* surface,
                                                SkData* data,
                                                uint32_t callbackId) {
   surface->onRasterizeComplete(callbackId, data);
+}
+
+SKWASM_EXPORT bool skwasm_isMultiThreaded() {
+  return !skwasm_isSingleThreaded();
 }
