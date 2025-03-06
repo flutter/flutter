@@ -132,7 +132,6 @@ class CopyArtifactsStep implements PipelineStep {
 
     final String fontsPath = pathlib.join(
       environment.flutterDirectory.path,
-      'third_party',
       'txt',
       'third_party',
       'fonts',

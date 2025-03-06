@@ -221,6 +221,18 @@ public class FlutterMutatorsStack {
   }
 
   /**
+   * Push a clipPath {@link FlutterMutatorsStack.FlutterMutator} to the stack.
+   *
+   * @param path the path to be clipped.
+   */
+  public void pushClipPath(Path path) {
+    FlutterMutator mutator = new FlutterMutator(path);
+    mutators.add(mutator);
+    path.transform(finalMatrix);
+    finalClippingPaths.add(path);
+  }
+
+  /**
    * Get a list of all the raw mutators. The 0 index of the returned list is the top of the stack.
    */
   public List<FlutterMutator> getMutators() {

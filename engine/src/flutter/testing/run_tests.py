@@ -37,7 +37,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 BUILDROOT_DIR = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
 OUT_DIR = os.path.join(BUILDROOT_DIR, 'out')
 GOLDEN_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'resources')
-FONTS_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'third_party', 'txt', 'third_party', 'fonts')
+FONTS_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'txt', 'third_party', 'fonts')
 ROBOTO_FONT_PATH = os.path.join(FONTS_DIR, 'Roboto-Regular.ttf')
 FONT_SUBSET_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'font_subset')
 
