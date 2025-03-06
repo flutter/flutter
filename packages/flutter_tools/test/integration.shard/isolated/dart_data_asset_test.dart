@@ -48,7 +48,7 @@ void main() {
     rootDependency = createAppWithName(packageNameDependency, tempDirectory);
   });
   tearDownAll(() {
-    // tryToDelete(tempDirectory);
+    tryToDelete(tempDirectory);
   });
 
   group('dart data assets', () {
