@@ -38,16 +38,19 @@ void main() {
   setUpAll(() async {
     processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
     processManager.runSync(<String>[flutterBin, 'config', '--enable-dart-data-assets']);
+  });
+
+  setUp(() async {
     tempDirectory = fileSystem.directory(
       fileSystem.systemTempDirectory.createTempSync().resolveSymbolicLinksSync(),
     );
-
     root = createAppWithName(packageName, tempDirectory);
     await createDataAssetApp(packageName, root);
 
     rootDependency = createAppWithName(packageNameDependency, tempDirectory);
   });
-  tearDownAll(() {
+
+  tearDown(() {
     tryToDelete(tempDirectory);
   });
 
