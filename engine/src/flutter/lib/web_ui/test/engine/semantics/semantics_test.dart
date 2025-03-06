@@ -4161,6 +4161,48 @@ void _testMenus() {
     expect(object.element.getAttribute('role'), 'menubar');
   });
 
+  test('nodes with menuitemcheckbox role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuItemCheckbox,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuItemCheckbox);
+    expect(object.element.getAttribute('role'), 'menuitemcheckbox');
+  });
+
+  test('nodes with menuitemRadio role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuItemRadio,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuItemRadio);
+    expect(object.element.getAttribute('role'), 'menuitemradio');
+  });
+
   semantics().semanticsEnabled = false;
 }
 

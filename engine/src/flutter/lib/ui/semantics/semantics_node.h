@@ -94,8 +94,10 @@ enum class SemanticsRole : int32_t {
   kProgressBar = 22,
   kHotKey = 23,
   kRadioGroup = 24,
-  kStatus = 25,
-  kAlert = 26,
+  kMenuItemCheckbox = 25,
+  kMenuItemRadio = 26,
+  kStatus = 27,
+  kAlert = 28,
 };
 
 /// C/C++ representation of `SemanticsFlags` defined in

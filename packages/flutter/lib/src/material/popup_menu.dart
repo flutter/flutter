@@ -6,6 +6,8 @@
 /// @docImport 'text_button.dart';
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -399,6 +401,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 
     return MergeSemantics(
       child: Semantics(
+        role: SemanticsRole.menuItem,
         enabled: widget.enabled,
         button: true,
         child: InkWell(
@@ -686,6 +689,7 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
       child: IntrinsicWidth(
         stepWidth: _kMenuWidthStep,
         child: Semantics(
+          role: SemanticsRole.menu,
           scopesRoute: true,
           namesRoute: true,
           explicitChildNodes: true,
