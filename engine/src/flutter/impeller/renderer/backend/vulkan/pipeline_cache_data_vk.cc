@@ -19,27 +19,30 @@ bool PipelineCacheDataPersist(const fml::UniqueFD& cache_directory,
   if (!cache_directory.is_valid()) {
     return false;
   }
-  size_t data_size = 0u;
-  if (cache.getOwner().getPipelineCacheData(*cache, &data_size, nullptr) !=
-      vk::Result::eSuccess) {
+  size_t maximum_data_size = 0u;
+  if (cache.getOwner().getPipelineCacheData(*cache, &maximum_data_size,
+                                            nullptr) != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not fetch pipeline cache size.";
     return false;
   }
-  if (data_size == 0u) {
+  if (maximum_data_size == 0u) {
     return true;
   }
+
   auto allocation = std::make_shared<Allocation>();
-  if (!allocation->Truncate(Bytes{sizeof(PipelineCacheHeaderVK) + data_size},
-                            false)) {
+  if (!allocation->Truncate(Bytes{maximum_data_size}, false)) {
     VALIDATION_LOG << "Could not allocate pipeline cache data staging buffer.";
     return false;
   }
-  const auto header = PipelineCacheHeaderVK{props, data_size};
+
+  const auto header = PipelineCacheHeaderVK{props, maximum_data_size};
   std::memcpy(allocation->GetBuffer(), &header, sizeof(header));
-  if (cache.getOwner().getPipelineCacheData(
-          *cache, &data_size, allocation->GetBuffer() + sizeof(header)) !=
-      vk::Result::eSuccess) {
-    VALIDATION_LOG << "Could not copy pipeline cache data.";
+  size_t written_data_size = maximum_data_size - sizeof(header);
+  auto result = cache.getOwner().getPipelineCacheData(
+      *cache, &written_data_size, allocation->GetBuffer() + sizeof(header));
+
+  if (result != vk::Result::eSuccess && result != vk::Result::eIncomplete) {
+    VALIDATION_LOG << "Could not copy pipeline cache data";
     return false;
   }
 

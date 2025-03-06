@@ -8,8 +8,26 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_library_vk.h"
+#include "vulkan/vulkan_to_string.hpp"
 
 namespace impeller {
+
+namespace {
+
+static bool RequiresYCBCRConversion(vk::Format format) {
+  switch (format) {
+    case vk::Format::eG8B8R83Plane420Unorm:
+    case vk::Format::eG8B8R82Plane420Unorm:
+    case vk::Format::eG8B8R83Plane422Unorm:
+    case vk::Format::eG8B8R82Plane422Unorm:
+    case vk::Format::eG8B8R83Plane444Unorm:
+      return true;
+    default:
+      // NOTE: NOT EXHAUSTIVE.
+      break;
+  }
+  return false;
+}
 
 using AHBProperties = vk::StructureChain<
     // For VK_ANDROID_external_memory_android_hardware_buffer
@@ -205,7 +223,8 @@ static vk::UniqueImageView CreateVKImageView(
   view_info.subresourceRange.layerCount = ahb_desc.layers;
 
   // We need a custom YUV conversion only if we don't recognize the format.
-  if (view_info.format == vk::Format::eUndefined) {
+  if (view_info.format == vk::Format::eUndefined ||
+      RequiresYCBCRConversion(view_info.format)) {
     view_chain.get<vk::SamplerYcbcrConversionInfo>().conversion =
         yuv_conversion;
   } else {
@@ -290,6 +309,7 @@ static TextureDescriptor ToTextureDescriptor(
   }
   return desc;
 }
+}  // namespace
 
 AHBTextureSourceVK::AHBTextureSourceVK(
     const std::shared_ptr<Context>& p_context,
@@ -355,7 +375,8 @@ AHBTextureSourceVK::AHBTextureSourceVK(
     return;
   }
 
-  needs_yuv_conversion_ = ahb_format.format == vk::Format::eUndefined;
+  needs_yuv_conversion_ = ahb_format.format == vk::Format::eUndefined ||
+                          RequiresYCBCRConversion(ahb_format.format);
   device_memory_ = std::move(device_memory);
   image_ = std::move(image);
   yuv_conversion_ = std::move(yuv_conversion);
