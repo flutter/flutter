@@ -18,6 +18,35 @@ using CreateGeometryCallback =
                                  RenderPass& pass,
                                  const Geometry* geometry)>;
 
+struct LineInfo {
+  Vector3 e0;
+  Vector3 e1;
+  Vector3 e2;
+  Vector3 e3;
+};
+
+LineInfo CalculateLineInfo(Point p0, Point p1, Scalar width, Scalar radius) {
+  Vector2 diff = p0 - p1;
+  float k = 2.0 / ((2.0 * radius + width) * sqrt(diff.Dot(diff)));
+
+  return LineInfo{
+      .e0 = Vector3(k * (p0.y - p1.y),  //
+                    k * (p1.x - p0.x),  //
+                    1.0 + k * (p0.x * p1.y - p1.x * p0.y)),
+      .e1 = Vector3(
+          k * (p1.x - p0.x),  //
+          k * (p1.y - p0.y),  //
+          1.0 + k * (p0.x * p0.x + p0.y * p0.y - p0.x * p1.x - p0.y * p1.y)),
+      .e2 = Vector3(k * (p1.y - p0.y),  //
+                    k * (p0.x - p1.x),  //
+                    1.0 + k * (p1.x * p0.y - p0.x * p1.y)),
+      .e3 = Vector3(
+          k * (p0.x - p1.x),  //
+          k * (p0.y - p1.y),  //
+          1.0 + k * (p1.x * p1.x + p1.y * p1.y - p0.x * p1.x - p0.y * p1.y)),
+  };
+}
+
 GeometryResult CreateGeometry(const ContentContext& renderer,
                               const Entity& entity,
                               RenderPass& pass,
@@ -49,17 +78,20 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
   auto& host_buffer = renderer.GetTransientsBuffer();
 
   size_t count = 4;
+  LineInfo line_info =
+      CalculateLineInfo(line_geometry->GetP0(), line_geometry->GetP1(),
+                        line_geometry->GetWidth(), /*radius=*/1.f);
   BufferView vertex_buffer = host_buffer.Emplace(
       count * sizeof(PerVertexData), alignof(PerVertexData),
-      [&corners](uint8_t* buffer) {
+      [&corners, &line_info](uint8_t* buffer) {
         auto vertices = reinterpret_cast<PerVertexData*>(buffer);
         for (auto& corner : corners) {
           *vertices++ = {
               .position = corner,
-              .e0 = {0, 0, 0},
-              .e1 = {0, 0, 0},
-              .e2 = {0, 0, 0},
-              .e3 = {0, 0, 0},
+              .e0 = line_info.e0,
+              .e1 = line_info.e1,
+              .e2 = line_info.e2,
+              .e3 = line_info.e3,
           };
         }
       });
