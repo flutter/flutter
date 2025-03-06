@@ -24,8 +24,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 INTERNAL NOTE
 -->
-
-## Flutter 3.29.1 Changes
+## Flutter 3.29 Changes
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
@@ -49,12 +48,19 @@ glyphs.
 - [flutter/163261](https://github.com/flutter/flutter/pull/163261) - Fixes for Impeller DrawVertices issues involving snapshots with empty sizes
 - [flutter/163672](https://github.com/flutter/flutter/pull/163672) - Check for tracked engine.version before overriding
 
-## Flutter 3.29 Changes
-
 ### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
 Initial stable release.
 
 ## Flutter 3.27 Changes
+
+### [3.27.4](https://github.com/flutter/flutter/releases/tag/3.27.4)
+- [flutter/162132](https://github.com/flutter/flutter/pull/162132) On all platforms DropdownMenu's menuChildren might be placed somewhere far from menuAnchor.
+
+### [3.27.3](https://github.com/flutter/flutter/releases/tag/3.27.3)
+- [flutter/159212](https://github.com/flutter/flutter/issues/159212) Track (via Google Analytics) if the Dart AOT Android "Deferred Components" feature is being meaningfully used.
+- [flutter/160631](https://github.com/flutter/flutter/issues/160631) Fixes an issue with Material 3 Tab Bar animations.
+- [flutter/159289](https://github.com/flutter/flutter/issues/159289) Fixes an issue with fullscreen route transitions.
+- [flutter/162132](https://github.com/flutter/flutter/issues/162132) Fixes an issue that incorrectly positions `MenuAnchor`s in nested overlays.
 
 ### [3.27.2](https://github.com/flutter/flutter/releases/tag/3.27.2)
 
@@ -148,7 +154,7 @@ Initial stable release.
 - [flutter/149704](https://github.com/flutter/flutter/issues/149704) - [Impeller] Fixes and issue on iOS where flickering may be occur when translating a blurred rounded rectangle.
 - [flutter/149745](https://github.com/flutter/flutter/issues/149745) - [Impeller] Fixes a segfault on iOS when tessellating empty convex polygons.
 - [flutter/149771](https://github.com/flutter/flutter/issues/149771) - [Impeller] Fixes a rendering error on iOS when advanced blend is double scaled.
-- [flutter/53183](https://github.com/flutter/engine/pull/53183) - Fixes an issue where Linux apps show visual corruption on some frames.
+- [flutter/53183](https://github.com/flutter/engine/pull/53183) - Fixes an issue where Linux apps show visual corruption on some frames
 - [flutter/149856](https://github.com/flutter/flutter/issues/149856) - Clarifies Flutter Fix log on how to update Kotlin Gradle Plugin that was introduced in Flutter 3.19.
 - [flutter/150617](https://github.com/flutter/flutter/pull/150617) - Fixes a bug in `flutter test` where `--flavor` wasn't considered when validating cached assets, causing the flavor-conditional asset bundling feature to not work as expected.
 - [flutter/150724](https://github.com/flutter/flutter/issues/150724) - Fixes an issue on Web+Linux that prevents users from inputting data using the numpad.
