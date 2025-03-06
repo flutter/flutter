@@ -31,7 +31,7 @@ public class SensitiveContentChannel {
             // No SensitiveContentChannel registered, call not forwarded to sensitive content
             // API.");
             return;
-          }
+          } // TODO(camsim99): add serialization
           String method = call.method;
           Log.v(TAG, "Received '" + method + "' message.");
           switch (method) {

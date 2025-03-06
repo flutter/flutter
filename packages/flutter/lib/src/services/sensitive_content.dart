@@ -50,7 +50,7 @@ enum ContentSensitivity {
   // TODO(camsim99): Implement `autoSensitive` mode that matches the behavior
   // of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented based on autofill hints; see
   // https://github.com/flutter/flutter/issues/160879.
-  autoSensitive(id: 0),
+  autoSensitive,
 
   /// The widget tree contains sensitive content.
   ///
@@ -59,7 +59,7 @@ enum ContentSensitivity {
   /// projection session.
   ///
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_SENSITIVE.
-  sensitive(id: 1),
+  sensitive,
 
   /// The widget tree does not contain sensitive content.
   ///
@@ -68,22 +68,7 @@ enum ContentSensitivity {
   /// widgets in the Flutter app with the [sensitive] level are present in the widget tree.
   ///
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
-  notSensitive(id: 2);
-
-  const ContentSensitivity({required this.id});
-
-  /// Identifier for each [ContentSensitivity] level, which matches the native Android value
-  /// of the constant that each level corresponds to.
-  ///
-  /// See https://developer.android.com/reference/android/view/View for the enum values for
-  /// the corresponding Android constants (CONTENT_SENSITIVITY_AUTO, CONTENT_SENSITIVITY_SENSITIVE,
-  /// CONTENT_SENSITIVITY_NOT_SENSITIVE).
-  final int id;
-
-  /// Retrieve [ContentSensitivity] level by [id].
-  static ContentSensitivity getContentSensitivityById(int id) {
-    return ContentSensitivity.values.firstWhere((ContentSensitivity value) => value.id == id);
-  }
+  notSensitive,
 }
 
 /// Service for setting the content sensitivity of the native Android `View`
@@ -107,7 +92,7 @@ class SensitiveContentService {
     try {
       sensitiveContentChannel.invokeMethod<void>(
         'SensitiveContent.setContentSensitivity',
-        contentSensitivity.id,
+        contentSensitivity.name,
       );
     } catch (e) {
       // Content sensitivity failed to be set.
@@ -119,10 +104,13 @@ class SensitiveContentService {
   /// the app's widget tree.
   Future<ContentSensitivity> getContentSensitivity() async {
     try {
-      final int? result = await sensitiveContentChannel.invokeMethod<int>(
+      final String? result = await sensitiveContentChannel.invokeMethod<String>(
         'SensitiveContent.getContentSensitivity',
       );
-      return ContentSensitivity.getContentSensitivityById(result!);
+      final ContentSensitivity contentSensitivity = ContentSensitivity.values.firstWhere(
+        (ContentSensitivity cs) => cs.name == result,
+      );
+      return contentSensitivity;
     } catch (e) {
       // Content sensitivity failed to be retrieved.
       throw FlutterError('Failed to retrieve content sensitivity: $e');
