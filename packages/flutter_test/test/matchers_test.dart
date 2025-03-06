@@ -747,6 +747,7 @@ void main() {
           hasCheckedState: true,
           isChecked: true,
           isCheckStateMixed: true,
+          hasSelectedState: true,
           isSelected: true,
           isButton: true,
           isSlider: true,
