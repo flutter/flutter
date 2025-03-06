@@ -316,6 +316,7 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     if (strcmp(product_model, kAndroidHuawei) == 0) {
       // Avoid using Vulkan on Huawei as AHB imports do not
       // consistently work.
+      return kVulkanUnsupportedFallback;
     }
 
     if (__system_property_find("ro.vendor.mediatek.platform") != nullptr) {
