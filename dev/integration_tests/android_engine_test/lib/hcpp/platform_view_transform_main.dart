@@ -39,26 +39,26 @@ final class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
-  late double angle;
-  late double scale;
-  late Offset translation;
-  late bool flippedX;
+  double angle = 0;
+  double scale = 1.0;
+  Offset translation = Offset.zero;
+  bool flippedX = false;
 
   void _incrementAngle() {
     setState(() {
-      angle = angle + 0.5;
+      angle += 0.5;
     });
   }
 
   void _incrementScale() {
     setState(() {
-      scale = scale + 0.1;
+      scale += 0.1;
     });
   }
 
   void _decrementScale() {
     setState(() {
-      scale = scale - 0.1;
+      scale -= 0.1;
     });
   }
 
@@ -82,11 +82,6 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
-    angle = 0;
-    scale = 1.0;
-    translation = Offset.zero;
-    flippedX = false;
-
     super.initState();
   }
 
