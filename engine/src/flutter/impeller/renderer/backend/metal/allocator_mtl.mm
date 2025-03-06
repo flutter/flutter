@@ -255,6 +255,10 @@ ISize AllocatorMTL::GetMaxTextureSizeSupported() const {
   return max_texture_supported_;
 }
 
+void AllocatorMTL::DebugSetSupportsUMA(bool value) {
+  supports_uma_ = value;
+}
+
 Bytes AllocatorMTL::DebugGetHeapUsage() const {
 #ifdef IMPELLER_DEBUG
   return debug_allocater_->GetAllocationSize();
