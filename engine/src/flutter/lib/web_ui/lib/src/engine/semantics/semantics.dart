@@ -69,7 +69,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
 
   @override
   String toString() {
-    final List<String> features = <String>[];
+    final features = <String>[];
     if (accessibleNavigation) {
       features.add('accessibleNavigation');
     }
@@ -693,7 +693,7 @@ abstract class SemanticRole {
   void _updateControls() {
     if (semanticsObject.hasControlsNodes) {
       semanticsObject.owner.addOneTimePostUpdateCallback(() {
-        final List<String> elementIds = <String>[];
+        final elementIds = <String>[];
         for (final String identifier in semanticsObject.controlsNodes!) {
           final int? semanticNodeId = semanticsObject.owner.identifiersToIds[identifier];
           if (semanticNodeId == null) {
@@ -1691,7 +1691,7 @@ class SemanticsObject {
 
     // Always render in traversal order, because the accessibility traversal
     // is determined by the DOM order of elements.
-    final List<SemanticsObject> childrenInRenderOrder = <SemanticsObject>[];
+    final childrenInRenderOrder = <SemanticsObject>[];
     for (int i = 0; i < childCount; i++) {
       childrenInRenderOrder.add(owner._semanticsTree[childrenInTraversalOrder[i]]!);
     }
@@ -1725,7 +1725,7 @@ class SemanticsObject {
     }
 
     // At this point it is guaranteed to have had a non-empty previous child list.
-    final List<SemanticsObject> previousChildrenInRenderOrder = _currentChildrenInRenderOrder!;
+    final previousChildrenInRenderOrder = _currentChildrenInRenderOrder!;
     final int previousCount = previousChildrenInRenderOrder.length;
 
     // Both non-empty case.
@@ -1746,7 +1746,7 @@ class SemanticsObject {
 
     // Indices into the old child list pointing at children that also exist in
     // the new child list.
-    final List<int> intersectionIndicesOld = <int>[];
+    final intersectionIndicesOld = <int>[];
 
     int newIndex = 0;
 
@@ -1780,7 +1780,7 @@ class SemanticsObject {
     // The longest sub-sequence in the old list maximizes the number of children
     // that do not need to be moved.
     final List<int?> longestSequence = longestIncreasingSubsequence(intersectionIndicesOld);
-    final List<int> stationaryIds = <int>[];
+    final stationaryIds = <int>[];
     for (int i = 0; i < longestSequence.length; i += 1) {
       stationaryIds.add(
         previousChildrenInRenderOrder[intersectionIndicesOld[longestSequence[i]!]].id,
@@ -2908,8 +2908,8 @@ AFTER: $description
 /// Complexity: n*log(n)
 List<int> longestIncreasingSubsequence(List<int> list) {
   final int len = list.length;
-  final List<int> predecessors = <int>[];
-  final List<int> mins = <int>[0];
+  final predecessors = <int>[];
+  final mins = <int>[0];
   int longest = 0;
   for (int i = 0; i < len; i++) {
     // Binary search for the largest positive `j ≤ longest`
@@ -2942,7 +2942,7 @@ List<int> longestIncreasingSubsequence(List<int> list) {
     }
   }
   // Reconstruct the longest subsequence
-  final List<int> seq = List<int>.filled(longest, 0);
+  final seq = List<int>.filled(longest, 0);
   int k = mins[longest];
   for (int i = longest - 1; i >= 0; i--) {
     seq[i] = k;
