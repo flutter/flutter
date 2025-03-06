@@ -619,11 +619,7 @@ void main() {
 
         // On web, the entire field is selected, and only part of that selection
         // is visible on the screen.
-        if (readOnly) {
-          expect(isCaretOnScreen(tester), false);
-        } else {
-          expect(isCaretOnScreen(tester), !kIsWeb);
-        }
+        expect(isCaretOnScreen(tester), !readOnly && !kIsWeb);
         expect(scrollController.offset, readOnly && kIsWeb ? 0.0 : greaterThan(0.0));
         expect(editableScrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
       });

@@ -4311,7 +4311,7 @@ class EditableTextState extends State<EditableText>
   }
 
   // Scrolls the screen to reveal a read-only field and ensures it is visible on the screen when focused.
-  void _scrollToRevealField() {
+  void scrollToReveal() {
     if (_scrollToRevealScheduled) {
       return;
     }
@@ -4645,7 +4645,7 @@ class EditableTextState extends State<EditableText>
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
       } else {
-        _scrollToRevealField();
+        scrollToReveal();
       }
       final TextSelection? updatedSelection = _adjustedSelectionWhenFocused();
       if (updatedSelection != null) {
