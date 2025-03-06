@@ -3028,11 +3028,6 @@
 ../../../flutter/third_party/tonic/filesystem/README.md
 ../../../flutter/third_party/tonic/filesystem/tests
 ../../../flutter/third_party/tonic/tests
-../../../flutter/third_party/txt/.clang-format
-../../../flutter/third_party/txt/.gitattributes
-../../../flutter/third_party/txt/.gitignore
-../../../flutter/third_party/txt/tests
-../../../flutter/third_party/txt/third_party/fonts
 ../../../flutter/third_party/vulkan-deps/.git
 ../../../flutter/third_party/vulkan-deps/.gitattributes
 ../../../flutter/third_party/vulkan-deps/.gitignore
@@ -3320,6 +3315,11 @@
 ../../../flutter/tools/licenses/lib/README
 ../../../flutter/tools/licenses/pubspec.yaml
 ../../../flutter/tools/licenses/test
+../../../flutter/txt/.clang-format
+../../../flutter/txt/.gitattributes
+../../../flutter/txt/.gitignore
+../../../flutter/txt/tests
+../../../flutter/txt/third_party/fonts
 ../../../flutter/web_sdk
 ../../../fuchsia/sdk/linux/.build-id
 ../../../fuchsia/sdk/linux/.versions
@@ -3467,6 +3467,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.serial/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.serialimpl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.sharedmemory/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spi.businfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spi/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spiimpl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spmi/meta.json
