@@ -26,11 +26,7 @@ float lookup(float x) {
 
 float CalculateLine() {
   vec3 pos = vec3(v_position.xy, 1.0);
-  vec4 d = vec4(
-      dot(pos, v_e0),
-      dot(pos, v_e1),
-      dot(pos, v_e2),
-      dot(pos, v_e3));
+  vec4 d = vec4(dot(pos, v_e0), dot(pos, v_e1), dot(pos, v_e2), dot(pos, v_e3));
 
   if (any(lessThan(d, vec4(0.0)))) {
     return 0.0;
