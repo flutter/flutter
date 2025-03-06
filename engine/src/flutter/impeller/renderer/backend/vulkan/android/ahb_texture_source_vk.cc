@@ -197,7 +197,7 @@ static std::shared_ptr<YUVConversionVK> CreateYUVConversion(
 static vk::UniqueImageView CreateVKImageView(
     const vk::Device& device,
     const vk::Image& image,
-    const vk::SamplerYcbcrConversion& yuv_conversion,
+    const std::shared_ptr<YUVConversionVK>& yuv_conversion_wrapper,
     const AHBProperties& ahb_props,
     const AHardwareBuffer_Desc& ahb_desc) {
   const auto& ahb_format =
@@ -226,7 +226,7 @@ static vk::UniqueImageView CreateVKImageView(
   if (view_info.format == vk::Format::eUndefined ||
       RequiresYCBCRConversion(view_info.format)) {
     view_chain.get<vk::SamplerYcbcrConversionInfo>().conversion =
-        yuv_conversion;
+        yuv_conversion_wrapper->GetConversion();
   } else {
     view_chain.unlink<vk::SamplerYcbcrConversionInfo>();
   }
@@ -359,24 +359,27 @@ AHBTextureSourceVK::AHBTextureSourceVK(
   }
 
   // Figure out how to perform YUV conversions.
-  auto yuv_conversion = CreateYUVConversion(context, ahb_props);
-  if (!yuv_conversion || !yuv_conversion->IsValid()) {
-    return;
+  needs_yuv_conversion_ = ahb_format.format == vk::Format::eUndefined ||
+                          RequiresYCBCRConversion(ahb_format.format);
+  std::shared_ptr<YUVConversionVK> yuv_conversion;
+  if (needs_yuv_conversion_) {
+    yuv_conversion = CreateYUVConversion(context, ahb_props);
+    if (!yuv_conversion || !yuv_conversion->IsValid()) {
+      return;
+    }
   }
 
   // Create image view for the newly created image.
-  auto image_view = CreateVKImageView(device,                           //
-                                      image.get(),                      //
-                                      yuv_conversion->GetConversion(),  //
-                                      ahb_props,                        //
-                                      ahb_desc                          //
+  auto image_view = CreateVKImageView(device,          //
+                                      image.get(),     //
+                                      yuv_conversion,  //
+                                      ahb_props,       //
+                                      ahb_desc         //
   );
   if (!image_view) {
     return;
   }
 
-  needs_yuv_conversion_ = ahb_format.format == vk::Format::eUndefined ||
-                          RequiresYCBCRConversion(ahb_format.format);
   device_memory_ = std::move(device_memory);
   image_ = std::move(image);
   yuv_conversion_ = std::move(yuv_conversion);
@@ -385,7 +388,10 @@ AHBTextureSourceVK::AHBTextureSourceVK(
 #ifdef IMPELLER_DEBUG
   context.SetDebugName(device_memory_.get(), "AHB Device Memory");
   context.SetDebugName(image_.get(), "AHB Image");
-  context.SetDebugName(yuv_conversion_->GetConversion(), "AHB YUV Conversion");
+  if (yuv_conversion_) {
+    context.SetDebugName(yuv_conversion_->GetConversion(),
+                         "AHB YUV Conversion");
+  }
   context.SetDebugName(image_view_.get(), "AHB ImageView");
 #endif  // IMPELLER_DEBUG
 
