@@ -458,7 +458,7 @@ public class FlutterRenderer implements TextureRegistry {
     // Will be true in tests and on Android API < 33.
     private boolean ignoringFence = false;
 
-    private static final boolean trimOnMemoryPressure = CLEANUP_ON_MEMORY_PRESSURE;
+    private boolean trimOnMemoryPressure = false;
 
     // The requested width and height are updated by setSize.
     private int requestedWidth = 1;
@@ -710,6 +710,11 @@ public class FlutterRenderer implements TextureRegistry {
             });
       }
       return r;
+    }
+
+    @Override
+    public void setReleaseMemoryIfRequested(boolean enable) {
+      trimOnMemoryPressure = enable;
     }
 
     @Override
