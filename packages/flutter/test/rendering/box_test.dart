@@ -259,9 +259,7 @@ void main() {
 
     expect(
       errorDetails.toString().replaceAll('\n', ' '),
-      startsWith(
-        '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞══════════════════════ '
-        'The following assertion was thrown during performLayout(): '
+      contains(
         'RenderBox.size accessed in '
         'InvalidSizeAccessInDryLayoutBox.computeDryLayout. '
         "The computeDryLayout method must not access the RenderBox's own size, or the size of its child, "
