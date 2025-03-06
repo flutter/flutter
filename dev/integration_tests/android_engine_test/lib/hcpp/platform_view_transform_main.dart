@@ -115,10 +115,9 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
     );
 
     final Widget widget = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
           children: <Widget>[
             TextButton(
               onPressed: _incrementAngle,
@@ -156,7 +155,10 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
       ],
     );
 
-    return MaterialApp(debugShowCheckedModeBanner: false, home: Center(child: widget));
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(body: Center(child: widget)),
+    );
   }
 }
 
