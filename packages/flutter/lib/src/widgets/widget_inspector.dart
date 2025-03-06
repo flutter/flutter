@@ -2546,15 +2546,9 @@ mixin WidgetInspectorService {
 
   /// Safely get the render object of an [Element].
   ///
-  /// If the call to get the render object throws, the result will be null.
-  RenderObject? _renderObjectOrNull(Element element) {
-    try {
-      return element.renderObject;
-    } catch (_) {
-      // If the render object was unmounted, this could throw.
-      return null;
-    }
-  }
+  /// If the element is not yet mounted, the result will be null.
+  RenderObject? _renderObjectOrNull(Element element) =>
+      element.mounted ? element.renderObject : null;
 }
 
 /// Accumulator for a count associated with a specific source location.
