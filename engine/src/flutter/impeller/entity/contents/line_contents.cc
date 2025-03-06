@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/line_contents.h"
+#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/geometry/rect_geometry.h"
 
 namespace impeller {
@@ -16,13 +16,64 @@ using CreateGeometryCallback =
     std::function<GeometryResult(const ContentContext& renderer,
                                  const Entity& entity,
                                  RenderPass& pass,
-                                 const Geometry* geom)>;
+                                 const Geometry* geometry)>;
 
-GeometryResult DefaultCreateGeometryCallback(const ContentContext& renderer,
-                                             const Entity& entity,
-                                             RenderPass& pass,
-                                             const Geometry* geom) {
-  return geom->GetPositionBuffer(renderer, entity, pass);
+GeometryResult CreateGeometry(const ContentContext& renderer,
+                              const Entity& entity,
+                              RenderPass& pass,
+                              const Geometry* geometry) {
+  using PerVertexData = LineVertexShader::PerVertexData;
+  const LineGeometry* line_geometry =
+      static_cast<const LineGeometry*>(geometry);
+
+  auto& transform = entity.GetTransform();
+
+  if (line_geometry->GetCap() == Cap::kRound) {
+    FML_CHECK(false) << "not implemented.";
+    // auto radius =
+    //   LineGeometry::ComputePixelHalfWidth(transform,
+    //   line_geometry->GetWidth());
+    // auto generator = renderer.GetTessellator().RoundCapLine(
+    //     transform, line_geometry->GetP0(), line_geometry->GetP1(), radius);
+    // return ComputePositionGeometry(renderer, generator, entity, pass);
+  }
+
+  Point corners[4];
+  if (!LineGeometry::ComputeCorners(
+          corners, transform, line_geometry->GetCap() == Cap::kSquare,
+          line_geometry->GetP0(), line_geometry->GetP1(),
+          line_geometry->GetWidth())) {
+    return kEmptyResult;
+  }
+
+  auto& host_buffer = renderer.GetTransientsBuffer();
+
+  size_t count = 4;
+  BufferView vertex_buffer = host_buffer.Emplace(
+      count * sizeof(PerVertexData), alignof(PerVertexData),
+      [&corners](uint8_t* buffer) {
+        auto vertices = reinterpret_cast<PerVertexData*>(buffer);
+        for (auto& corner : corners) {
+          *vertices++ = {
+              .position = corner,
+              .e0 = {0, 0, 0},
+              .e1 = {0, 0, 0},
+              .e2 = {0, 0, 0},
+              .e3 = {0, 0, 0},
+          };
+        }
+      });
+
+  return GeometryResult{
+      .type = PrimitiveType::kTriangleStrip,
+      .vertex_buffer =
+          {
+              .vertex_buffer = vertex_buffer,
+              .vertex_count = count,
+              .index_type = IndexType::kNone,
+          },
+      .transform = entity.GetShaderTransform(pass),
+  };
 }
 
 template <typename VertexShaderT>
@@ -34,9 +85,8 @@ bool DrawGeometry(const Contents* contents,
                   const PipelineBuilderCallback& pipeline_callback,
                   typename VertexShaderT::FrameInfo frame_info,
                   const BindFragmentCallback& bind_fragment_callback,
-                  bool force_stencil = false,
-                  const CreateGeometryCallback& create_geom_callback =
-                      DefaultCreateGeometryCallback) {
+                  bool force_stencil,
+                  const CreateGeometryCallback& create_geometry_callback) {
   auto options = OptionsFromPassAndEntity(pass, entity);
 
   GeometryResult::Mode geometry_mode = geometry->GetResultMode();
@@ -111,9 +161,10 @@ bool DrawGeometry(const Contents* contents,
   GeometryResult geometry_result;
   if (do_cover_draw) {
     RectGeometry geom(cover_area);
-    geometry_result = create_geom_callback(renderer, entity, pass, &geom);
+    geometry_result = create_geometry_callback(renderer, entity, pass, &geom);
   } else {
-    geometry_result = create_geom_callback(renderer, entity, pass, geometry);
+    geometry_result =
+        create_geometry_callback(renderer, entity, pass, geometry);
   }
 
   if (geometry_result.vertex_buffer.vertex_count == 0u) {
@@ -200,11 +251,14 @@ bool LineContents::Render(const ContentContext& renderer,
   return DrawGeometry<VS>(
       this, geometry_.get(), renderer, entity, pass, pipeline_callback,
       frame_info,
-      /*bind_fragment_callback=*/[&frag_info, &host_buffer](RenderPass& pass) {
+      /*bind_fragment_callback=*/
+      [&frag_info, &host_buffer](RenderPass& pass) {
         FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
         pass.SetCommandLabel("Line");
         return true;
-      });
+      },
+      /*force_stencil=*/false,
+      /*create_geometry_callback=*/CreateGeometry);
 }
 
 std::optional<Rect> LineContents::GetCoverage(const Entity& entity) const {

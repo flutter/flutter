@@ -28,7 +28,17 @@ class LineGeometry final : public Geometry {
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
- private:
+  Point GetP0() const { return p0_; }
+  Point GetP1() const { return p1_; }
+  Scalar GetWidth() const { return width_; }
+  Cap GetCap() const { return cap_; }
+
+  static Vector2 ComputeAlongVector(const Matrix& transform,
+                                    bool allow_zero_length,
+                                    Point p0,
+                                    Point p1,
+                                  Scalar width);
+
   // Computes the 4 corners of a rectangle that defines the line and
   // possibly extended endpoints which will be rendered under the given
   // transform, and returns true if such a rectangle is defined.
@@ -43,13 +53,14 @@ class LineGeometry final : public Geometry {
   // if the calling code is planning to draw the round caps on the ends.
   //
   // @return true if the transform and width were not degenerate
-  bool ComputeCorners(Point corners[4],
-                      const Matrix& transform,
-                      bool extend_endpoints) const;
+  static bool ComputeCorners(Point corners[4],
+                             const Matrix& transform,
+                             bool extend_endpoints,
+                             Point p0,
+                             Point p1,
+                             Scalar width);
 
-  Vector2 ComputeAlongVector(const Matrix& transform,
-                             bool allow_zero_length) const;
-
+ private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
