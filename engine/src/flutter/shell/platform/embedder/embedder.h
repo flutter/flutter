@@ -1587,6 +1587,8 @@ typedef struct {
   // Array of string attributes associated with the `decreased_value`.
   // Has length `decreased_value_attribute_count`.
   const FlutterStringAttribute** decreased_value_attributes;
+  // The ID of the view that this node is associated with.
+  int64_t view_id;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
@@ -3067,6 +3069,7 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
 
 //------------------------------------------------------------------------------
 /// @brief      Dispatch a semantics action to the specified semantics node.
+///             within the default view.
 ///
 /// @param[in]  engine       A running engine instance.
 /// @param[in]  node_id      The semantics node identifier.
@@ -3078,6 +3081,27 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
 ///
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineDispatchSemanticsAction(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    uint64_t node_id,
+    FlutterSemanticsAction action,
+    const uint8_t* data,
+    size_t data_length);
+
+//------------------------------------------------------------------------------
+/// @brief      Dispatch a semantics action to the specified semantics node
+///             within a specific view.
+///
+/// @param[in]  engine       A running engine instance.
+/// @param[in]  node_id      The semantics node identifier.
+/// @param[in]  view_id      The ID of the view.
+/// @param[in]  action       The semantics action.
+/// @param[in]  data         Data associated with the action.
+/// @param[in]  data_length  The data length.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineDispatchSemanticsActionOnView(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t view_id,
     uint64_t node_id,
@@ -3468,6 +3492,12 @@ typedef FlutterEngineResult (*FlutterEngineUpdateAccessibilityFeaturesFnPtr)(
     FlutterAccessibilityFeature features);
 typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    uint64_t id,
+    FlutterSemanticsAction action,
+    const uint8_t* data,
+    size_t data_length);
+typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionOnViewFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t view_id,
     uint64_t id,
     FlutterSemanticsAction action,
@@ -3555,6 +3585,7 @@ typedef struct {
   FlutterEngineUpdateSemanticsEnabledFnPtr UpdateSemanticsEnabled;
   FlutterEngineUpdateAccessibilityFeaturesFnPtr UpdateAccessibilityFeatures;
   FlutterEngineDispatchSemanticsActionFnPtr DispatchSemanticsAction;
+  FlutterEngineDispatchSemanticsActionOnViewFnPtr DispatchSemanticsActionOnView;
   FlutterEngineOnVsyncFnPtr OnVsync;
   FlutterEngineReloadSystemFontsFnPtr ReloadSystemFonts;
   FlutterEngineTraceEventDurationBeginFnPtr TraceEventDurationBegin;

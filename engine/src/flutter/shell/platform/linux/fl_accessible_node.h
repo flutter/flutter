@@ -62,7 +62,9 @@ struct _FlAccessibleNodeClass {
  *
  * Returns: a new #FlAccessibleNode.
  */
-FlAccessibleNode* fl_accessible_node_new(FlEngine* engine, int32_t id);
+FlAccessibleNode* fl_accessible_node_new(FlEngine* engine,
+                                         FlutterViewId view_id,
+                                         int32_t id);
 
 /**
  * fl_accessible_node_set_parent:
