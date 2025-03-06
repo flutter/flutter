@@ -47,105 +47,82 @@ void main() async {
 
   test('verify that HCPP is supported and enabled', () async {
     final Map<String, Object?> response =
-    json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
 
     expect(response['supported'], true);
   }, timeout: Timeout.none);
 
-  test(
-    'should rotate in a circle',
-        () async {
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.no_transform.png'),
-      );
-      await flutterDriver.tap(find.byValueKey('Rotate'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.half_pi_radians.png'),
-      );
-      await flutterDriver.tap(find.byValueKey('Rotate'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.one_pi_radians.png'),
-      );
-      await flutterDriver.tap(find.byValueKey('Rotate'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.one_and_a_half_pi_radians.png'),
-      );
-      await flutterDriver.tap(find.byValueKey('Rotate'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.no_transform.png'),
-      );
-    },
-    timeout: Timeout.none,
-  );
+  test('should rotate in a circle', () async {
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.no_transform.png'),
+    );
+    await flutterDriver.tap(find.byValueKey('Rotate'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.half_pi_radians.png'),
+    );
+    await flutterDriver.tap(find.byValueKey('Rotate'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.one_pi_radians.png'),
+    );
+    await flutterDriver.tap(find.byValueKey('Rotate'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.one_and_a_half_pi_radians.png'),
+    );
+    await flutterDriver.tap(find.byValueKey('Rotate'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.no_transform.png'),
+    );
+  }, timeout: Timeout.none);
 
-  test(
-    'should scale down and then back up',
-        () async {
-      await flutterDriver.tap(find.byValueKey('Scale Down'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.scaled_down.png'),
-      );
-      await flutterDriver.tap(find.byValueKey('Scale Up'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.no_transform.png'),
-      );
-    },
-    timeout: Timeout.none,
-  );
+  test('should scale down and then back up', () async {
+    await flutterDriver.tap(find.byValueKey('Scale Down'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.scaled_down.png'),
+    );
+    await flutterDriver.tap(find.byValueKey('Scale Up'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.no_transform.png'),
+    );
+  }, timeout: Timeout.none);
 
-  test(
-    'should flip and then flip back',
-        () async {
-      await flutterDriver.tap(find.byValueKey('Flip X'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.flipped_x.png'),
-      );
-      await flutterDriver.tap(find.byValueKey('Flip X'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.no_transform.png'),
-      );
-    },
-    timeout: Timeout.none,
-  );
+  test('should flip and then flip back', () async {
+    await flutterDriver.tap(find.byValueKey('Flip X'));
+    await expectLater(nativeDriver.screenshot(), matchesGoldenFile('$goldenPrefix.flipped_x.png'));
+    await flutterDriver.tap(find.byValueKey('Flip X'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.no_transform.png'),
+    );
+  }, timeout: Timeout.none);
 
-  test(
-    'should translate and then translate back',
-        () async {
-      await flutterDriver.tap(find.byValueKey('Translate Left'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.translated_left.png'),
-      );
-      await flutterDriver.tap(find.byValueKey('Translate Right'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.no_transform.png'),
-      );
-    },
-    timeout: Timeout.none,
-  );
+  test('should translate and then translate back', () async {
+    await flutterDriver.tap(find.byValueKey('Translate Left'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.translated_left.png'),
+    );
+    await flutterDriver.tap(find.byValueKey('Translate Right'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.no_transform.png'),
+    );
+  }, timeout: Timeout.none);
 
-  test(
-    'should match all applied',
-        () async {
-      await flutterDriver.tap(find.byValueKey('Flip X'));
-      await flutterDriver.tap(find.byValueKey('Translate Right'));
-      await flutterDriver.tap(find.byValueKey('Scale Down'));
-      await flutterDriver.tap(find.byValueKey('Rotate'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.all_applied.png'),
-      );
-    },
-    timeout: Timeout.none,
-  );
+  test('should match all applied', () async {
+    await flutterDriver.tap(find.byValueKey('Flip X'));
+    await flutterDriver.tap(find.byValueKey('Translate Right'));
+    await flutterDriver.tap(find.byValueKey('Scale Down'));
+    await flutterDriver.tap(find.byValueKey('Rotate'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.all_applied.png'),
+    );
+  }, timeout: Timeout.none);
 }
