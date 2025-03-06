@@ -1321,6 +1321,30 @@ void _testContainer() {
 }
 
 void _testVerticalScrolling() {
+  test('recognizes scrollable node when scroll actions not available', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+    );
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '''
+  <sem role="group" style="touch-action: none">
+  <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
+  </sem>''');
+
+    final DomElement scrollable = findScrollable(owner());
+    expect(scrollable.scrollTop, isZero);
+    semantics().semanticsEnabled = false;
+  });
+
   test('renders an empty scrollable node', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -1329,6 +1353,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1353,6 +1378,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1405,6 +1431,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1485,6 +1512,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1554,6 +1582,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -1576,6 +1605,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -1628,6 +1658,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2167,6 +2198,51 @@ void _testCheckables() {
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
 <sem role="radio" flt-tappable aria-checked="false"></sem>
+''');
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('renders a radio button group', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.radioGroup,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 40),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          isEnabled: true,
+          hasEnabledState: true,
+          hasCheckedState: true,
+          isInMutuallyExclusiveGroup: true,
+          isChecked: false,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
+        ),
+        tester.updateNode(
+          id: 2,
+          isEnabled: true,
+          hasEnabledState: true,
+          hasCheckedState: true,
+          isInMutuallyExclusiveGroup: true,
+          isChecked: true,
+          rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem role="radiogroup">
+  <sem-c>
+    <sem aria-checked="false"></sem>
+    <sem aria-checked="true"></sem>
+  </sem-c>
+</sem>
 ''');
 
     semantics().semanticsEnabled = false;
