@@ -457,7 +457,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       disablePortPublication: true,
       enableDds: enableDds,
       usingCISystem: usingCISystem,
-      enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
+      enableImpeller:
+          (argResults!['enable-impeller'] == false)
+              ? ImpellerStatus.disabled
+              : ImpellerStatus.enabled,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
