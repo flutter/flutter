@@ -5,8 +5,5 @@
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true,
-    "files.associations": {
-        "ostream": "cpp"
-    }
+    "files.trimTrailingWhitespace": true
 }
