@@ -2752,7 +2752,7 @@ abstract class RenderBox extends RenderObject {
         } finally {
           RenderObject.debugCheckingIntrinsics = false;
         }
-        if (_debugDryLayoutCalculationValid && dryLayoutSize != size) {
+        if (_debugDryLayoutCalculationValid && dryLayoutSize != _size) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
               'The size given to the ${objectRuntimeType(this, 'RenderBox')} class differs from the size computed by computeDryLayout.',

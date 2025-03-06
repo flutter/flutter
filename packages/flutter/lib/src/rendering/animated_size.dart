@@ -294,7 +294,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         return constraints.constrain(childSize);
       case RenderAnimatedSizeState.stable:
         if (_sizeTween.end != childSize) {
-          return constraints.constrain(_currentSize!);
+          return constraints.constrain(_currentSize);
         } else if (_controller.value == _controller.upperBound) {
           return constraints.constrain(childSize);
         }
