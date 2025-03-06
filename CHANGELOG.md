@@ -25,29 +25,35 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 INTERNAL NOTE
 -->
 
+## Flutter 3.29.1 Changes
+
+### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
+
+- [flutter/162198](https://github.com/flutter/flutter/issues/162198) Fixes double-download of canvaskit.wasm
+- [flutter/163830](https://github.com/flutter/flutter/pull/163830) - Fix Tab linear and elastic animation blink.
+- [flutter/164119](https://github.com/flutter/flutter/pull/164119) - Configuration changes to run test on macOS 14 for Flutter's CI.
+- [flutter/164155](https://github.com/flutter/flutter/pull/164155) - Roll .ci.yaml changes into the LUCI configuration only when the master branch is updated.
+- [flutter/164191](https://github.com/flutter/flutter/pull/164191) - Improve safaridriver launch process in Flutter's CI testing.
+- [flutter/164193](https://github.com/flutter/flutter/pull/164193) - Provide guided error message when app crashes due to JIT restriction on iPhones.
+- [flutter/164050](https://github.com/flutter/flutter/pull/164050) - Fixes test reorderable_list_test.dart failing for certain ordering seeds, such as 20250221.
+- [flutter/163316](https://github.com/flutter/flutter/pull/163316) - Configuration changes to run test on macOS 14 for Flutter's CI.
+- [flutter/163581](https://github.com/flutter/flutter/pull/163581) - Fix crash when using BackdropFilters in certain GLES drivers.
+- [flutter/163616](https://github.com/flutter/flutter/pull/163616) - Disable Vulkan on known bad Xclipse GPU drivers.
+- [flutter/163666](https://github.com/flutter/flutter/pull/163666) - always post new task during gesture dispatch.
+- [flutter/163667](https://github.com/flutter/flutter/pull/163667) - ensure that OpenGL "flipped" textures do not leak via texture readback.
+- [flutter/163741](https://github.com/flutter/flutter/pull/163741) - Flutter tool respects tracked engine.version.
+- [flutter/163754](https://github.com/flutter/flutter/pull/163754) - Fix text glitch when returning to foreground.
+- [flutter/163058](https://github.com/flutter/flutter/pull/163058) - Fixes jittery
+glyphs.
+- [flutter/163201](https://github.com/flutter/flutter/pull/163201) - Fixes buttons with icons ignore foregroundColor.
+- [flutter/163265](https://github.com/flutter/flutter/pull/163265) - disable Vulkan on known bad exynos SoCs.
+- [flutter/163261](https://github.com/flutter/flutter/pull/163261) - Fixes for Impeller DrawVertices issues involving snapshots with empty sizes
+- [flutter/163672](https://github.com/flutter/flutter/pull/163672) - Check for tracked engine.version before overriding
+
 ## Flutter 3.29 Changes
 
 ### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
-
-- [flutter/162198](https://github.com/flutter/flutter/issues/162198) Fixes double-download of canvaskit.wasm
-- [flutter/162969](https://github.com/flutter/flutter/issues/162969) DrawVertices may crash when using shaders built with certain parameters.
-- [flutter/161625](https://github.com/flutter/flutter/pull/161625) - Adds text
-  tests.
-- [flutter/162351](https://github.com/flutter/flutter/pull/162351) - Fixes
-  floating point math in text.
-- [flutter/162415](https://github.com/flutter/flutter/pull/162415) - Fixes
-  aspect ratio of glyphs.
-- [flutter/162555](https://github.com/flutter/flutter/pull/162555) - Increase
-  glyph atlas resolution.
-- [flutter/162824](https://github.com/flutter/flutter/pull/162824) - Fixes
-  subpixel alignment of glyphs.
-- [flutter/163304](https://github.com/flutter/flutter/issues/163304) Fixes crash when using backdrop filter on GLES backend.
-- [flutter/161334](https://github.com/flutter/flutter/issues/161334) Disable Vulkan on certain Xclipse GPU models.
-- [flutter/163315](https://github.com/flutter/flutter/issues/163315) Fixes OpenGLES texture readback resulting in "flipped" textures.
-- [flutter/163730](https://github.com/flutter/flutter/issues/163730) Fixes text rendering artifacts when returning application to foreground.
-- [flutter/163429](https://github.com/flutter/flutter/issues/163429) Fixes jittery scrolling on iOS devices.
-- [flutter/163236](https://github.com/flutter/flutter/pull/163236) Disable Vulkan on older Exynos SoC to work around Android HardwareBuffer import error.
-- [flutter/163672](https://github.com/flutter/flutter/pull/163672) - Check for tracked engine.version before overriding
+Initial stable release.
 
 ## Flutter 3.27 Changes
 
