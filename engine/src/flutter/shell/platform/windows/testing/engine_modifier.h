@@ -87,6 +87,10 @@ class EngineModifier {
     engine_->platform_view_plugin_ = std::move(manager);
   }
 
+  void OnViewFocusChangeRequest(const FlutterViewFocusChangeRequest* request) {
+    engine_->OnViewFocusChangeRequest(request);
+  }
+
  private:
   FlutterWindowsEngine* engine_;
 
