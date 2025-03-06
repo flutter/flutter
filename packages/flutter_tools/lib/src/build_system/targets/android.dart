@@ -70,9 +70,11 @@ abstract class AndroidAssetBundle extends Target {
           .file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       outputDirectory,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
@@ -89,7 +91,11 @@ abstract class AndroidAssetBundle extends Target {
   }
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 }
 
 /// An implementation of [AndroidAssetBundle] that includes dependencies on vm
