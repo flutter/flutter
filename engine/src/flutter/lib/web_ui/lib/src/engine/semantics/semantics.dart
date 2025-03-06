@@ -474,6 +474,12 @@ enum EngineSemanticsRole {
 
   /// An option in a set of choices contained by a [menu] or [menuBar].
   menuItem,
+
+  /// An option with a checkbox in a set of choices contained by a [menu] or [menuBar].
+  menuItemCheckbox,
+
+  /// An option with a radio button in a set of choices contained by a [menu] or [menuBar].
+  menuItemRadio,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -1882,6 +1888,10 @@ class SemanticsObject {
         return EngineSemanticsRole.menuBar;
       case ui.SemanticsRole.menuItem:
         return EngineSemanticsRole.menuItem;
+      case ui.SemanticsRole.menuItemCheckbox:
+        return EngineSemanticsRole.menuItemCheckbox;
+      case ui.SemanticsRole.menuItemRadio:
+        return EngineSemanticsRole.menuItemRadio;
       case ui.SemanticsRole.alert:
         return EngineSemanticsRole.alert;
       case ui.SemanticsRole.status:
@@ -1962,6 +1972,8 @@ class SemanticsObject {
       EngineSemanticsRole.menu => SemanticMenu(this),
       EngineSemanticsRole.menuBar => SemanticMenuBar(this),
       EngineSemanticsRole.menuItem => SemanticMenuItem(this),
+      EngineSemanticsRole.menuItemCheckbox => SemanticMenuItemCheckbox(this),
+      EngineSemanticsRole.menuItemRadio => SemanticMenuItemRadio(this),
       EngineSemanticsRole.alert => SemanticAlert(this),
       EngineSemanticsRole.status => SemanticStatus(this),
       EngineSemanticsRole.generic => GenericRole(this),
