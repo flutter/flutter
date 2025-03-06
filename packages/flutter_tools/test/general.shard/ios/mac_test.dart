@@ -20,13 +20,14 @@ import 'package:flutter_tools/src/ios/xcresult.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
+import '../../src/throwing_pub.dart';
 
 void main() {
   late BufferLogger logger;
@@ -685,7 +686,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   });
@@ -859,5 +860,14 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
-  Set<String> get dependencies => <String>{};
+  late final Set<String> dependencies = <String>{};
+
+  @override
+  late final Set<String> devDependencies = <String>{};
+
+  @override
+  String get appName => 'my_app';
+
+  @override
+  YamlMap toYaml() => YamlMap.wrap(<String, String>{});
 }
