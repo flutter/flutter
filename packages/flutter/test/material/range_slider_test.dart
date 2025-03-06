@@ -2838,21 +2838,18 @@ void main() {
     Widget buildApp({required SliderThemeData sliderTheme, int? divisions, bool enabled = true}) {
       final ValueChanged<RangeValues>? onChanged = enabled ? (RangeValues d) => value = d : null;
       return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: Theme(
-                data: baseTheme,
-                child: SliderTheme(
-                  data: sliderTheme,
-                  child: RangeSlider(
-                    values: value,
-                    max: 10,
-                    labels: RangeLabels(value.start.toString(), value.end.toString()),
-                    divisions: divisions,
-                    onChanged: onChanged,
-                  ),
+        home: Material(
+          child: Center(
+            child: Theme(
+              data: baseTheme,
+              child: SliderTheme(
+                data: sliderTheme,
+                child: RangeSlider(
+                  values: value,
+                  max: 10,
+                  labels: RangeLabels(value.start.toString(), value.end.toString()),
+                  divisions: divisions,
+                  onChanged: onChanged,
                 ),
               ),
             ),

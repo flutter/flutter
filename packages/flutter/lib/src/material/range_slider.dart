@@ -751,7 +751,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
   final LayerLink _layerLink = LayerLink();
   Widget _buildValueIndicator(ShowValueIndicator showValueIndicator) {
-    late final Widget valueIndicator = CompositedTransformFollower(
+    final Widget valueIndicator = CompositedTransformFollower(
       link: _layerLink,
       child: _ValueIndicatorRenderObjectWidget(state: this),
     );
