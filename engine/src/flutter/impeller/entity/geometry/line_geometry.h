@@ -37,7 +37,7 @@ class LineGeometry final : public Geometry {
                                     bool allow_zero_length,
                                     Point p0,
                                     Point p1,
-                                  Scalar width);
+                                    Scalar width);
 
   // Computes the 4 corners of a rectangle that defines the line and
   // possibly extended endpoints which will be rendered under the given
