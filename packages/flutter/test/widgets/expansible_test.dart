@@ -12,8 +12,12 @@ void main() {
       MaterialApp(
         home: Expansible(
           controller: controller,
-          bodyBuilder: (BuildContext context, bool isExpanded) => const Text('Body'),
-          headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+          bodyBuilder:
+              (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                  const Text('Body'),
+          headerBuilder:
+              (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                  const Text('Header'),
         ),
       ),
     );
@@ -35,8 +39,12 @@ void main() {
       MaterialApp(
         home: Expansible(
           controller: controller,
-          bodyBuilder: (BuildContext context, bool isExpanded) => const Text('Body'),
-          headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+          bodyBuilder:
+              (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                  const Text('Body'),
+          headerBuilder:
+              (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                  const Text('Header'),
           onExpansionChanged: (bool expanded) {
             expansionState = expanded;
           },
@@ -69,9 +77,19 @@ void main() {
       MaterialApp(
         home: Expansible(
           controller: controller,
-          bodyBuilder: (BuildContext context, bool isExpanded) => const Text('Body'),
-          headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
-          expansibleBuilder: (BuildContext context, Widget header, Widget body, bool expanded) {
+          bodyBuilder:
+              (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                  const Text('Body'),
+          headerBuilder:
+              (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                  const Text('Header'),
+          expansibleBuilder: (
+            BuildContext context,
+            Widget header,
+            Widget body,
+            bool expanded,
+            Animation<double> animation,
+          ) {
             return header;
           },
         ),
@@ -111,8 +129,12 @@ void main() {
               Expansible(
                 controller: controller,
                 initiallyExpanded: true,
-                bodyBuilder: (BuildContext context, bool isExpanded) => const Text('Body'),
-                headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+                bodyBuilder:
+                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                        const Text('Body'),
+                headerBuilder:
+                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                        const Text('Header'),
               ),
             ],
           ),
@@ -140,14 +162,20 @@ void main() {
                 controller: controller1,
                 maintainState: true,
                 bodyBuilder:
-                    (BuildContext context, bool isExpanded) => const Text('Maintaining State'),
-                headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                        const Text('Maintaining State'),
+                headerBuilder:
+                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                        const Text('Header'),
               ),
               Expansible(
                 controller: controller2,
                 bodyBuilder:
-                    (BuildContext context, bool isExpanded) => const Text('Discarding State'),
-                headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                        const Text('Discarding State'),
+                headerBuilder:
+                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                        const Text('Header'),
               ),
             ],
           ),
@@ -172,9 +200,11 @@ void main() {
           curve: Curves.easeOut,
           reverseCurve: Curves.easeIn,
           bodyBuilder:
-              (BuildContext context, bool isExpanded) =>
+              (BuildContext context, bool isExpanded, Animation<double> animation) =>
                   const SizedBox(height: 50.0, child: Placeholder()),
-          headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+          headerBuilder:
+              (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                  const Text('Header'),
         ),
       ),
     );

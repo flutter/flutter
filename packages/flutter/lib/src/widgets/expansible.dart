@@ -17,11 +17,16 @@ import 'transitions.dart';
 /// The `isExpanded` property allows for a different header or body depending on
 /// whether the [Expansible] is currently expanded or collapsed.
 ///
+/// The `animation` property exposes the underlying animation controller, which
+/// can be used to drive animations, such as a rotating icon, that sync up with
+/// the expansion animation.
+///
 /// See also:
 ///
 ///   * [Expansible.headerBuilder], which is of this type.
 ///   * [Expansible.bodyBuilder], which is also of this type.
-typedef ExpansibleComponentBuilder = Widget Function(BuildContext context, bool isExpanded);
+typedef ExpansibleComponentBuilder =
+    Widget Function(BuildContext context, bool isExpanded, Animation<double> animation);
 
 /// The type of the callback that uses the header and body of an [Expansible]
 /// widget to build the widget.
@@ -35,11 +40,21 @@ typedef ExpansibleComponentBuilder = Widget Function(BuildContext context, bool 
 /// The `isExpanded` property allows for a different return value depending on
 /// whether the [Expansible] is currently expanded or collapsed.
 ///
+/// The `animation` property exposes the underlying animation controller, which
+/// can be used to drive animations, such as a rotating icon, that sync up with
+/// the expansion animation.
+///
 /// See also:
 ///
 ///   * [Expansible.expansibleBuilder], which is of this type.
 typedef ExpansibleBuilder =
-    Widget Function(BuildContext context, Widget header, Widget body, bool isExpanded);
+    Widget Function(
+      BuildContext context,
+      Widget header,
+      Widget body,
+      bool isExpanded,
+      Animation<double> animation,
+    );
 
 /// A controller for managing the expansion state of an [Expansible].
 ///
@@ -364,13 +379,16 @@ class ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
 
     final Widget result = Offstage(
       offstage: closed,
-      child: TickerMode(enabled: !closed, child: widget.bodyBuilder(context, _isExpanded)),
+      child: TickerMode(
+        enabled: !closed,
+        child: widget.bodyBuilder(context, _isExpanded, _animationController),
+      ),
     );
 
     return AnimatedBuilder(
       animation: _animationController.view,
       builder: (BuildContext context, Widget? child) {
-        Widget header = widget.headerBuilder(context, _isExpanded);
+        Widget header = widget.headerBuilder(context, _isExpanded, _animationController);
         if (!widget.excludeHeaderGestures) {
           header = Semantics(
             button: true,
@@ -383,7 +401,13 @@ class ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
         }
         final Widget body = ClipRect(child: Align(heightFactor: _heightFactor.value, child: child));
         if (widget.expansibleBuilder != null) {
-          return widget.expansibleBuilder!(context, header, body, _isExpanded);
+          return widget.expansibleBuilder!(
+            context,
+            header,
+            body,
+            _isExpanded,
+            _animationController,
+          );
         }
         return _buildExpansible(context, header, body);
       },
