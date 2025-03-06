@@ -438,7 +438,7 @@ class ManifestAssetBundle implements AssetBundle {
       );
       if (assetVariants.containsKey(asset)) {
         _logger.printError(
-          'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook of package ${asset.package}.',
+          'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
         );
         return 1;
       }
