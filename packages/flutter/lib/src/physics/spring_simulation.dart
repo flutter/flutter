@@ -43,6 +43,57 @@ class SpringDescription {
     double ratio = 1.0,
   }) : damping = ratio * 2.0 * math.sqrt(mass * stiffness);
 
+  /// Creates a [SpringDescription] based on a desired animation duration and
+  /// bounce.
+  ///
+  /// This provides an intuitive way to define a spring, focusing on its visual
+  /// properties (duration and bounce) rather than explicit physical parameters
+  /// (mass, damping, stiffness). Internally, it approximates these visual
+  /// traits to compute the physical parameters.
+  ///
+  /// - [duration]: The perceptual duration of the animation. Defaults to
+  ///   `Duration(milliseconds: 500)`. Note that the real animation
+  ///   duration may slightly differ for natural spring-like motion.
+  /// - [bounce]: Determines the level of oscillation at the end of the
+  ///   animation, ranging from `0.0` (no bounce) to `1.0` (a strong bounce).
+  ///   Values above `1.0` can lead to more extreme oscillations, so use with
+  ///   caution. Defaults to `0.0` (no bounce).
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// final SpringDescription spring = SpringDescription.withDurationAndBounce(
+  ///   duration: const Duration(milliseconds: 300),
+  ///   bounce: 0.3,
+  /// );
+  /// ```
+  /// {@end-tool}
+  ///
+  /// The conversion uses a mass of 1.0 and calculates appropriate stiffness
+  /// and damping values to achieve the desired visual effect.
+  ///
+  /// See also:
+  /// * [SpringDescription.withDampingRatio] for creating a spring with a
+  ///   damping ratio.
+  /// * [SpringDescription] for creating a spring with explicit physical
+  ///   parameters.
+  factory SpringDescription.withDurationAndBounce({
+    Duration duration = const Duration(milliseconds: 500),
+    double bounce = 0.0,
+  }) {
+    assert(duration.inMilliseconds > 0, 'Duration must be positive');
+    // TODO(bernaferrari): bounce could be negative but it's tricky to guess
+    // the correct formula https://github.com/flutter/flutter/issues/152587).
+    assert(bounce >= 0, 'Bounce must be non-negative');
+
+    final double durationInSeconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
+    const double mass = 1.0;
+    final double stiffness = (4 * math.pi * math.pi * mass) / math.pow(durationInSeconds, 2);
+    final double dampingRatio = 1.0 - bounce;
+    final double damping = dampingRatio * 2.0 * math.sqrt(mass * stiffness);
+
+    return SpringDescription(mass: mass, stiffness: stiffness, damping: damping);
+  }
+
   /// The mass of the spring (m).
   ///
   /// The units are arbitrary, but all springs within a system should use
@@ -77,6 +128,44 @@ class SpringDescription {
   /// used for the value of the [mass] property, and T is the time unit used for
   /// driving the [SpringSimulation].
   final double damping;
+
+  /// Returns the perceptual duration of the spring animation.
+  ///
+  /// This getter estimates how long the spring appears to take to complete its
+  /// animation based on the current [mass] and [stiffness] values. This is
+  /// solely a perceptual estimate (the duration that the user perceives) and
+  /// may differ from the actual time taken by the simulation when measured
+  /// precisely. The real total duration can be influenced by initial
+  /// conditions and the [SpringSimulation.isDone] tolerance.
+  ///
+  /// This is the inverse calculation of what's used in
+  /// [withDurationAndBounce]. The actual duration of a spring animation may
+  /// vary depending on initial conditions and when the
+  /// [SpringSimulation.isDone] tolerance is reached.
+  ///
+  /// Returns a [Duration] object representing the estimated (perceptual)
+  /// animation time.
+  Duration get duration {
+    final double durationInSeconds = math.sqrt((4 * math.pi * math.pi * mass) / stiffness);
+    final int milliseconds = (durationInSeconds * Duration.millisecondsPerSecond).round();
+    return Duration(milliseconds: milliseconds);
+  }
+
+  /// Returns the approximate bounce factor of the spring.
+  ///
+  /// The bounce factor ranges approximately from 0.0 (no bounce) to 1.0
+  /// (high bounce) and potentially higher for extremely bouncy springs.
+  ///
+  /// This is the inverse calculation of what's used in
+  /// [withDurationAndBounce]. It calculates the damping ratio and then
+  /// converts it to a bounce value.
+  ///
+  /// A value of 0.0 indicates critical damping (no bounce), while values
+  /// greater than 0.0 indicate increasing levels of bounciness.
+  double get bounce {
+    final double dampingRatio = damping / (2.0 * math.sqrt(mass * stiffness));
+    return 1.0 - dampingRatio;
+  }
 
   @override
   String toString() =>
