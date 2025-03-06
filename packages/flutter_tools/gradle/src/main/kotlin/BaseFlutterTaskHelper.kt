@@ -51,22 +51,22 @@ class BaseFlutterTaskHelper(
      * @return the list of rule names for flutter assemble.
      */
     @VisibleForTesting
-    internal fun generateRuleNames(baseFlutterTask: BaseFlutterTask): List<String> {
-        val ruleNames: List<String> =
+    internal fun generateRuleNames(baseFlutterTask: BaseFlutterTask): Array<String> {
+        val ruleNames: Array<String> =
             when {
-                baseFlutterTask.buildMode == "debug" -> listOf("debug_android_application")
+                baseFlutterTask.buildMode == "debug" -> arrayOf("debug_android_application")
                 baseFlutterTask.deferredComponents!! ->
                     baseFlutterTask.targetPlatformValues!!.map {
                         "android_aot_deferred_components_bundle_${baseFlutterTask.buildMode}_$it"
-                    }
-                else -> baseFlutterTask.targetPlatformValues!!.map { "android_aot_bundle_${baseFlutterTask.buildMode}_$it" }
+                    }.toTypedArray()
+                else -> baseFlutterTask.targetPlatformValues!!.map { "android_aot_bundle_${baseFlutterTask.buildMode}_$it" }.toTypedArray()
             }
         return ruleNames
     }
 
     /**
      * Creates and configures the build processes of an Android Flutter application to be executed.
-     * The configuration includes setting the executable to the Flutter command-line tool (Flutter CLI)
+     * The configuration includes setting the executable to the Flutter command-line tool (Flutter CLI),
      * setting the working directory to the Flutter project's source directory, adding command-line arguments and build rules
      * to configure various build options.
      *

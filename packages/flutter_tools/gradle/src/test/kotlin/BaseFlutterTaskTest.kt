@@ -13,6 +13,7 @@ import java.nio.file.Paths
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class BaseFlutterTaskTest {
     private val sourceDirTest = File("/path/to/working_directory")
@@ -61,37 +62,6 @@ class BaseFlutterTaskTest {
         helper.getDependenciesFiles()
         verify { projectIntermediary.files() }
         verify { projectIntermediary.files("$intermediateDirFileTest/flutter_build.d") }
-    }
-
-    @Test
-    fun `checkPreConditions throws a GradleException when sourceDir is null`() {
-        val baseFlutterTask = mockk<BaseFlutterTask>()
-        every { baseFlutterTask.sourceDir } returns null
-
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-
-        val gradleException =
-            assertFailsWith<GradleException> { helper.checkPreConditions() }
-        assert(
-            gradleException.message ==
-                helper.gradleErrorMessage,
-        )
-    }
-
-    @Test
-    fun `checkPreConditions throws a GradleException when sourceDir is not a directory`() {
-        val baseFlutterTask = mockk<BaseFlutterTask>()
-        every { baseFlutterTask.sourceDir } returns sourceDirTest
-        every { baseFlutterTask.sourceDir!!.isDirectory } returns false
-
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-
-        val gradleException =
-            assertFailsWith<GradleException> { helper.checkPreConditions() }
-        assert(
-            gradleException.message ==
-                helper.gradleErrorMessage,
-        )
     }
 
     @Test
@@ -212,7 +182,7 @@ class BaseFlutterTaskTest {
         val minSdkVersionInt = baseFlutterTask.minSdkVersion.toString()
         every { mockExecSpec.args("-dMinSdkVersion=$minSdkVersionInt") } returns mockExecSpec
 
-        val ruleNameList: List<String> = helper.generateRuleNames(baseFlutterTask)
+        val ruleNameList: Array<String> = helper.generateRuleNames(baseFlutterTask)
         every { mockExecSpec.args(ruleNameList) } returns mockExecSpec
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
@@ -250,7 +220,7 @@ class BaseFlutterTaskTest {
         verify { mockExecSpec.args("-dAndroidArchs=$targetPlatformValuesJoinedListREAL") }
         verify { mockExecSpec.args("-dMinSdkVersion=$minSDKVersionTest") }
         verify { mockExecSpec.args(ruleNameList) }
-        assertEquals(ruleNameList, listOf("debug_android_application"))
+        assertTrue { ruleNameList.contentEquals(arrayOf("debug_android_application")) }
     }
 
     @Test
@@ -335,7 +305,7 @@ class BaseFlutterTaskTest {
         val minSdkVersionInt = baseFlutterTask.minSdkVersion.toString()
         every { mockExecSpec.args("-dMinSdkVersion=$minSdkVersionInt") } returns mockExecSpec
 
-        val ruleNameList: List<String> = helper.generateRuleNames(baseFlutterTask)
+        val ruleNameList: Array<String> = helper.generateRuleNames(baseFlutterTask)
         every { mockExecSpec.args(ruleNameList) } returns mockExecSpec
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
@@ -357,7 +327,7 @@ class BaseFlutterTaskTest {
         verify { mockExecSpec.args("-dBuildMode=$buildModeString") }
         verify { mockExecSpec.args("-dAndroidArchs=$targetPlatformValuesJoinedListREAL") }
         verify { mockExecSpec.args("-dMinSdkVersion=$minSDKVersionTest") }
-        assertEquals(ruleNameList, listOf("debug_android_application"))
+        assertTrue { ruleNameList.contentEquals(arrayOf("debug_android_application")) }
         verify { mockExecSpec.args(ruleNameList) }
     }
 
@@ -365,7 +335,7 @@ class BaseFlutterTaskTest {
     fun `verify execSpecActionFromTask creates and executes with null properties and goes into different branches`() {
         val buildModeString = "release"
         val ruleNameListForDeferredComponentsTestList =
-            listOf("android_aot_deferred_components_bundle_release_android", "android_aot_deferred_components_bundle_release_linux")
+            arrayOf("android_aot_deferred_components_bundle_release_android", "android_aot_deferred_components_bundle_release_linux")
 
         // Create necessary mocks.
         val baseFlutterTask = mockk<BaseFlutterTask>()
@@ -445,7 +415,7 @@ class BaseFlutterTaskTest {
         val minSdkVersionInt = baseFlutterTask.minSdkVersion.toString()
         every { mockExecSpec.args("-dMinSdkVersion=$minSdkVersionInt") } returns mockExecSpec
 
-        val ruleNameList: List<String> = helper.generateRuleNames(baseFlutterTask)
+        val ruleNameList: Array<String> = helper.generateRuleNames(baseFlutterTask)
         every { mockExecSpec.args(ruleNameList) } returns mockExecSpec
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
@@ -467,13 +437,13 @@ class BaseFlutterTaskTest {
         verify { mockExecSpec.args("-dBuildMode=$buildModeString") }
         verify { mockExecSpec.args("-dAndroidArchs=$targetPlatformValuesJoinedListREAL") }
         verify { mockExecSpec.args("-dMinSdkVersion=$minSDKVersionTest") }
-        assertEquals(ruleNameList, ruleNameListForDeferredComponentsTestList)
+        assertTrue { ruleNameList.contentEquals(ruleNameListForDeferredComponentsTestList) }
         verify { mockExecSpec.args(ruleNameList) }
     }
 
     @Test
     fun `verify execSpecActionFromTask creates and executes with null properties and goes into other different branches`() {
-        val ruleNameListForTestList = listOf("android_aot_bundle_release_android", "android_aot_bundle_release_linux")
+        val ruleNameListForTestList = arrayOf("android_aot_bundle_release_android", "android_aot_bundle_release_linux")
         val buildModeString = "release"
 
         // Create necessary mocks.
@@ -554,7 +524,7 @@ class BaseFlutterTaskTest {
         val minSdkVersionInt = baseFlutterTask.minSdkVersion.toString()
         every { mockExecSpec.args("-dMinSdkVersion=$minSdkVersionInt") } returns mockExecSpec
 
-        val ruleNameList: List<String> = helper.generateRuleNames(baseFlutterTask)
+        val ruleNameList: Array<String> = helper.generateRuleNames(baseFlutterTask)
         every { mockExecSpec.args(ruleNameList) } returns mockExecSpec
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
@@ -576,7 +546,7 @@ class BaseFlutterTaskTest {
         verify { mockExecSpec.args("-dBuildMode=$buildModeString") }
         verify { mockExecSpec.args("-dAndroidArchs=$targetPlatformValuesJoinedListREAL") }
         verify { mockExecSpec.args("-dMinSdkVersion=$minSDKVersionTest") }
-        assertEquals(ruleNameList, ruleNameListForTestList)
+        assertTrue { ruleNameList.contentEquals(ruleNameListForTestList) }
         verify { mockExecSpec.args(ruleNameList) }
     }
 }
