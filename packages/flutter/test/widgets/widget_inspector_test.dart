@@ -4772,7 +4772,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         service.disposeAllGroups();
       });
 
-      Future<Widget> pumpWidgetForLayoutExplorer(WidgetTester tester) async {
+      Future<void> pumpWidgetForLayoutExplorer(WidgetTester tester) async {
         const Widget widget = Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
@@ -4785,7 +4785,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         );
         await tester.pumpWidget(widget);
-        return widget;
       }
 
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with BoxParentData', (
@@ -4842,7 +4841,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         'ext.flutter.inspector.getLayoutExplorerNode does not throw for unmounted widget',
         (WidgetTester tester) async {
           // Mount the Row widget.
-          final Widget widget = await pumpWidgetForLayoutExplorer(tester);
+          await pumpWidgetForLayoutExplorer(tester);
 
           // Get the id of the Row widget.
           final Element rowElement = tester.element(find.byType(Row));
