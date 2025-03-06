@@ -1,0 +1,211 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  testWidgets('Controller expands and collapses the widget', (WidgetTester tester) async {
+    final ExpansibleController controller = ExpansibleController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Expansible(
+          controller: controller,
+          bodyBuilder: (BuildContext context, bool isExpanded) => const Text('Body'),
+          headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+        ),
+      ),
+    );
+
+    expect(find.text('Body'), findsNothing);
+    controller.expand();
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsOneWidget);
+
+    controller.collapse();
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsNothing);
+  });
+
+  testWidgets('onExpansionChanged callback', (WidgetTester tester) async {
+    final ExpansibleController controller = ExpansibleController();
+    bool? expansionState;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Expansible(
+          controller: controller,
+          bodyBuilder: (BuildContext context, bool isExpanded) => const Text('Body'),
+          headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+          onExpansionChanged: (bool expanded) {
+            expansionState = expanded;
+          },
+        ),
+      ),
+    );
+
+    // Tap on the header to toggle the expansion.
+    await tester.tap(find.text('Header'));
+    await tester.pumpAndSettle();
+    expect(expansionState, true);
+
+    await tester.tap(find.text('Header'));
+    await tester.pumpAndSettle();
+    expect(expansionState, false);
+
+    // Use the controller to toggle the expansion.
+    controller.expand();
+    await tester.pumpAndSettle();
+    expect(expansionState, true);
+
+    controller.collapse();
+    await tester.pumpAndSettle();
+    expect(expansionState, false);
+  });
+
+  testWidgets('Layout can be customized with expansibleBuilder', (WidgetTester tester) async {
+    final ExpansibleController controller = ExpansibleController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Expansible(
+          controller: controller,
+          bodyBuilder: (BuildContext context, bool isExpanded) => const Text('Body'),
+          headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+          expansibleBuilder: (BuildContext context, Widget header, Widget body, bool expanded) {
+            return header;
+          },
+        ),
+      ),
+    );
+
+    // Tap on the header to toggle the expansion.
+    await tester.tap(find.text('Header'));
+    await tester.pumpAndSettle();
+    expect(find.text('Header'), findsOneWidget);
+    expect(find.text('Body'), findsNothing);
+
+    await tester.tap(find.text('Header'));
+    await tester.pumpAndSettle();
+    expect(find.text('Header'), findsOneWidget);
+    expect(find.text('Body'), findsNothing);
+
+    // Use the controller to toggle the expansion.
+    controller.expand();
+    await tester.pumpAndSettle();
+    expect(find.text('Header'), findsOneWidget);
+    expect(find.text('Body'), findsNothing);
+
+    controller.collapse();
+    await tester.pumpAndSettle();
+    expect(find.text('Header'), findsOneWidget);
+    expect(find.text('Body'), findsNothing);
+  });
+
+  testWidgets('Respects initiallyExpanded', (WidgetTester tester) async {
+    final ExpansibleController controller = ExpansibleController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Expansible(
+                controller: controller,
+                initiallyExpanded: true,
+                bodyBuilder: (BuildContext context, bool isExpanded) => const Text('Body'),
+                headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Body'), findsOneWidget);
+
+    await tester.tap(find.text('Header'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Body'), findsNothing);
+  });
+
+  testWidgets('Respects maintainState', (WidgetTester tester) async {
+    final ExpansibleController controller1 = ExpansibleController();
+    final ExpansibleController controller2 = ExpansibleController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Expansible(
+                controller: controller1,
+                maintainState: true,
+                bodyBuilder:
+                    (BuildContext context, bool isExpanded) => const Text('Maintaining State'),
+                headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+              ),
+              Expansible(
+                controller: controller2,
+                bodyBuilder:
+                    (BuildContext context, bool isExpanded) => const Text('Discarding State'),
+                headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // This text should be offstage while the expansible widget is collapsed.
+    expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
+    expect(find.text('Maintaining State'), findsNothing);
+    // This text is not displayed while the expansible widget is collapsed.
+    expect(find.text('Discarding State'), findsNothing);
+  });
+
+  testWidgets('Respects animation duration and curves', (WidgetTester tester) async {
+    final ExpansibleController controller = ExpansibleController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Expansible(
+          controller: controller,
+          duration: const Duration(milliseconds: 120),
+          curve: Curves.easeOut,
+          reverseCurve: Curves.easeIn,
+          bodyBuilder:
+              (BuildContext context, bool isExpanded) =>
+                  const SizedBox(height: 50.0, child: Placeholder()),
+          headerBuilder: (BuildContext context, bool isExpanded) => const Text('Header'),
+        ),
+      ),
+    );
+
+    expect(find.byType(Placeholder), findsNothing);
+
+    await tester.tap(find.text('Header'));
+
+    // Check that the curve is respected.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 90.08984375);
+
+    // The animation has completed.
+    await tester.pump(const Duration(milliseconds: 60) + const Duration(microseconds: 1));
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 98.0);
+
+    // Since the animation has completed, the vertical position doesn't change.
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 98.0);
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Header'));
+
+    // Check that the reverse curve is respected.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 80.91015625);
+
+    // The animation has completed.
+    await tester.pump(const Duration(milliseconds: 60) + const Duration(microseconds: 1));
+    expect(find.byType(Placeholder), findsNothing);
+  });
+}
