@@ -49,7 +49,7 @@ class RoundSuperellipseBuilder {
  private:
   std::array<Point, 4> SuperellipseArcPoints(
       const RoundSuperellipseParam::Octant& param) {
-    Point start = {param.se_center.x, param.edge_mid.y};
+    Point start = {param.offset.x, param.offset.y + param.se_a};
     const Point& end = param.circle_start;
     constexpr Point start_tangent = {1, 0};
     Point circle_start_vector = param.circle_start - param.circle_center;
@@ -411,9 +411,10 @@ PathBuilder& PathBuilder::AddRoundSuperellipse(RoundSuperellipse rse) {
 
   auto param =
       RoundSuperellipseParam::MakeBoundsRadii(rse.GetBounds(), rse.GetRadii());
-  Point start = param.top_right.offset +
-                param.top_right.signed_scale *
-                    (param.top_right.top.offset + param.top_right.top.edge_mid);
+  Point start =
+      param.top_right.offset +
+      param.top_right.signed_scale *
+          (param.top_right.top.offset + Point(0, param.top_right.top.se_a));
   MoveTo(start);
 
   if (param.all_corners_same) {

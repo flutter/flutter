@@ -19,6 +19,9 @@ struct RoundSuperellipseParam {
   //
   // This structure is used to define an octant of an arbitrary rounded
   // superellipse.
+  //
+  // A `se_n` of 0 means that the radius is 0, this octant is a square
+  // of size `se_a` at `offset` and all other fields are ignored.
   struct Octant {
     // The offset of the square-like rounded superellipse's center from the
     // origin.
@@ -26,15 +29,6 @@ struct RoundSuperellipseParam {
     // All other coordinates in this structure are relative to this point.
     Point offset;
 
-    // The coordinate of the midpoint of the top edge, relative to the `offset`
-    // point.
-    //
-    // This is the starting point of the octant curve.
-    Point edge_mid;
-
-    // The coordinate of the superellipse's center, relative to the `offset`
-    // point.
-    Point se_center;
     // The semi-axis length of the superellipse.
     Scalar se_a;
     // The degree of the superellipse.
