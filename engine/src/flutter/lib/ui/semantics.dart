@@ -427,8 +427,14 @@ enum SemanticsRole {
   /// For example, a [MenuAnchor] or [DropdownButton].
   menu,
 
-  /// A item in a dropdown created by [menu] or [comboBox].
+  /// A item in a dropdown created by [menu] or [menuBar].
   menuItem,
+
+  /// A item with a checkbox in a dropdown created by [menu] or [menuBar].
+  menuItemCheckbox,
+
+  /// A item with a radio button in a dropdown created by [menu] or [menuBar].
+  menuItemRadio,
 
   /// A container to display multiple [listItem]s in vertical or horizontal
   /// layout.

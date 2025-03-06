@@ -941,9 +941,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       child = MouseRegion(onHover: _handlePointerHover, onExit: _handlePointerExit, child: child);
     }
 
-    return MergeSemantics(
-      child: Semantics(role: SemanticsRole.menuItem, enabled: widget.enabled, child: child),
-    );
+    return Semantics(role: SemanticsRole.menuItem, enabled: widget.enabled, child: child);
   }
 
   void _handleFocusChange() {
@@ -1157,44 +1155,54 @@ class CheckboxMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MenuItemButton(
-      key: key,
-      onPressed:
-          onChanged == null
-              ? null
-              : () {
-                switch (value) {
-                  case false:
-                    onChanged!(true);
-                  case true:
-                    onChanged!(tristate ? null : false);
-                  case null:
-                    onChanged!(false);
-                }
-              },
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      focusNode: focusNode,
-      style: style,
-      shortcut: shortcut,
-      statesController: statesController,
-      leadingIcon: ExcludeFocus(
-        child: IgnorePointer(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: Checkbox.width, maxWidth: Checkbox.width),
-            child: Checkbox(
-              tristate: tristate,
-              value: value,
-              onChanged: onChanged,
-              isError: isError,
+    return MergeSemantics(
+      child: Semantics(
+        role: SemanticsRole.menuItemCheckbox,
+        checked: value ?? false,
+        mixed: tristate ? value == null : null,
+        child: MenuItemButton(
+          key: key,
+          onPressed:
+              onChanged == null
+                  ? null
+                  : () {
+                    switch (value) {
+                      case false:
+                        onChanged!(true);
+                      case true:
+                        onChanged!(tristate ? null : false);
+                      case null:
+                        onChanged!(false);
+                    }
+                  },
+          onHover: onHover,
+          onFocusChange: onFocusChange,
+          focusNode: focusNode,
+          style: style,
+          shortcut: shortcut,
+          statesController: statesController,
+          leadingIcon: ExcludeFocus(
+            child: IgnorePointer(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: Checkbox.width,
+                  maxWidth: Checkbox.width,
+                ),
+                child: Checkbox(
+                  tristate: tristate,
+                  value: value,
+                  onChanged: onChanged,
+                  isError: isError,
+                ),
+              ),
             ),
           ),
+          clipBehavior: clipBehavior,
+          trailingIcon: trailingIcon,
+          closeOnActivate: closeOnActivate,
+          child: child,
         ),
       ),
-      clipBehavior: clipBehavior,
-      trailingIcon: trailingIcon,
-      closeOnActivate: closeOnActivate,
-      child: child,
     );
   }
 }
@@ -1356,40 +1364,49 @@ class RadioMenuButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MenuItemButton(
-      key: key,
-      onPressed:
-          onChanged == null
-              ? null
-              : () {
-                if (toggleable && groupValue == value) {
-                  return onChanged!(null);
-                }
-                onChanged!(value);
-              },
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      focusNode: focusNode,
-      style: style,
-      shortcut: shortcut,
-      statesController: statesController,
-      leadingIcon: ExcludeFocus(
-        child: IgnorePointer(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: Checkbox.width, maxWidth: Checkbox.width),
-            child: Radio<T>(
-              value: value,
-              groupValue: groupValue,
-              onChanged: onChanged,
-              toggleable: toggleable,
+    return MergeSemantics(
+      child: Semantics(
+        role: SemanticsRole.menuItemRadio,
+        checked: value == groupValue,
+        child: MenuItemButton(
+          key: key,
+          onPressed:
+              onChanged == null
+                  ? null
+                  : () {
+                    if (toggleable && groupValue == value) {
+                      return onChanged!(null);
+                    }
+                    onChanged!(value);
+                  },
+          onHover: onHover,
+          onFocusChange: onFocusChange,
+          focusNode: focusNode,
+          style: style,
+          shortcut: shortcut,
+          statesController: statesController,
+          leadingIcon: ExcludeFocus(
+            child: IgnorePointer(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: Checkbox.width,
+                  maxWidth: Checkbox.width,
+                ),
+                child: Radio<T>(
+                  value: value,
+                  groupValue: groupValue,
+                  onChanged: onChanged,
+                  toggleable: toggleable,
+                ),
+              ),
             ),
           ),
+          clipBehavior: clipBehavior,
+          trailingIcon: trailingIcon,
+          closeOnActivate: closeOnActivate,
+          child: child,
         ),
       ),
-      clipBehavior: clipBehavior,
-      trailingIcon: trailingIcon,
-      closeOnActivate: closeOnActivate,
-      child: child,
     );
   }
 }

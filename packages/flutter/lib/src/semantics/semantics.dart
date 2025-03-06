@@ -117,6 +117,8 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.menu => _semanticsMenu,
     SemanticsRole.menuBar => _semanticsMenuBar,
     SemanticsRole.menuItem => _noCheckRequired,
+    SemanticsRole.menuItemCheckbox => _semanticsMenuItemCheckbox,
+    SemanticsRole.menuItemRadio => _semanticsMenuItemRadio,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.row => _unimplemented,
@@ -223,6 +225,22 @@ sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _semanticsMenuBar(SemanticsNode node) {
     if (node.childrenCount < 1) {
       return FlutterError('a menu bar cannot be empty');
+    }
+
+    return null;
+  }
+
+  static FlutterError? _semanticsMenuItemCheckbox(SemanticsNode node) {
+    if (!node.hasFlag(SemanticsFlag.hasCheckedState)) {
+      return FlutterError('a menu item checkbox must have be checkable');
+    }
+
+    return null;
+  }
+
+  static FlutterError? _semanticsMenuItemRadio(SemanticsNode node) {
+    if (!node.hasFlag(SemanticsFlag.hasCheckedState)) {
+      return FlutterError('a menu item radio must have be checkable');
     }
 
     return null;
