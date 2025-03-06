@@ -239,6 +239,7 @@ class SemanticsNodeUpdate {
     required this.headingLevel,
     this.linkUrl,
     required this.role,
+    required this.controlsNodes,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -348,6 +349,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsRole role;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final List<String>? controlsNodes;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -672,6 +676,10 @@ abstract class SemanticRole {
     if (semanticsObject.isIdentifierDirty) {
       _updateIdentifier();
     }
+
+    if (semanticsObject.isControlsNodesDirty) {
+      _updateControls();
+    }
   }
 
   void _updateIdentifier() {
@@ -680,6 +688,26 @@ abstract class SemanticRole {
     } else {
       removeAttribute('flt-semantics-identifier');
     }
+  }
+
+  void _updateControls() {
+    if (semanticsObject.hasControlsNodes) {
+      semanticsObject.owner.addOneTimePostUpdateCallback(() {
+        final List<String> elementIds = <String>[];
+        for (final String identifier in semanticsObject.controlsNodes!) {
+          final int? semanticNodeId = semanticsObject.owner.identifiersToIds[identifier];
+          if (semanticNodeId == null) {
+            continue;
+          }
+          elementIds.add('flt-semantic-node-${semanticNodeId}');
+        }
+        if (elementIds.isNotEmpty) {
+          setAttribute('aria-controls', elementIds.join(' '));
+          return;
+        }
+      });
+    }
+    removeAttribute('aria-controls');
   }
 
   /// Whether this role was disposed of.
@@ -1277,6 +1305,23 @@ class SemanticsObject {
   /// The role of this node.
   late ui.SemanticsRole role;
 
+  /// List of nodes whose contents are controlled by this node.
+  ///
+  /// The list contains [identifier]s of those nodes.
+  List<String>? controlsNodes;
+
+  /// Whether this object controls at least one node.
+  bool get hasControlsNodes => controlsNodes != null && controlsNodes!.isNotEmpty;
+
+  static const int _controlsNodesIndex = 1 << 27;
+
+  /// Whether the [controlsNodes] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isControlsNodesDirty => _isDirty(_controlsNodesIndex);
+  void _markControlsNodesDirty() {
+    _dirtyFields |= _controlsNodesIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1419,7 +1464,13 @@ class SemanticsObject {
     }
 
     if (_identifier != update.identifier) {
+      if (_identifier?.isNotEmpty ?? false) {
+        owner.identifiersToIds.remove(_identifier);
+      }
       _identifier = update.identifier;
+      if (_identifier?.isNotEmpty ?? false) {
+        owner.identifiersToIds[_identifier!] = id;
+      }
       _markIdentifierDirty();
     }
 
@@ -1564,6 +1615,11 @@ class SemanticsObject {
     }
 
     role = update.role;
+
+    if (!unorderedListEqual<String>(controlsNodes, update.controlsNodes)) {
+      controlsNodes = update.controlsNodes;
+      _markControlsNodesDirty();
+    }
 
     // Apply updates to the DOM.
     _updateRole();
@@ -2547,6 +2603,7 @@ class EngineSemanticsOwner {
   SemanticsUpdatePhase _phase = SemanticsUpdatePhase.idle;
 
   final Map<int, SemanticsObject> _semanticsTree = <int, SemanticsObject>{};
+  final Map<String, int> identifiersToIds = <String, int>{};
 
   /// Map [SemanticsObject.id] to parent [SemanticsObject] it was attached to
   /// this frame.
