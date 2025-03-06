@@ -114,6 +114,8 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.cell => _semanticsCell,
     SemanticsRole.columnHeader => _semanticsColumnHeader,
     SemanticsRole.radioGroup => _semanticsRadioGroup,
+    SemanticsRole.list => _noCheckRequired,
+    SemanticsRole.listItem => _semanticsListItem,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.row => _unimplemented,
@@ -124,8 +126,6 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.menuBar => _unimplemented,
     SemanticsRole.menu => _unimplemented,
     SemanticsRole.menuItem => _unimplemented,
-    SemanticsRole.list => _unimplemented,
-    SemanticsRole.listItem => _unimplemented,
     SemanticsRole.form => _unimplemented,
     SemanticsRole.tooltip => _unimplemented,
     SemanticsRole.loadingSpinner => _unimplemented,
@@ -210,6 +210,25 @@ sealed class _DebugSemanticsRoleChecks {
 
     node.visitChildren(validateRadioGroupChildren);
     return error;
+  }
+
+  static FlutterError? _semanticsListItem(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    final SemanticsNode? parent = node.parent;
+    if (parent == null) {
+      return FlutterError(
+        "Semantics node ${node.id} has role ${data.role}, but doesn't have a parent",
+      );
+    }
+    final SemanticsData parentSemanticsData = parent.getSemanticsData();
+    if (parentSemanticsData.role != SemanticsRole.list) {
+      return FlutterError(
+        'Semantics node ${node.id} has role ${data.role}, but its '
+        "parent node ${parent.id} doesn't have the role ${SemanticsRole.list}. "
+        'Please assign the ${SemanticsRole.list} to node ${parent.id}',
+      );
+    }
+    return null;
   }
 }
 
