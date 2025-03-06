@@ -10,6 +10,8 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
+  const String customLLDBInitFileSchemeSetting =
+      r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"';
   test(
     'Ensure lldb is added to Xcode project',
     () async {
@@ -42,22 +44,6 @@ void main() {
 
         final String appDirectoryPath = fileSystem.path.join(workingDirectoryPath, appName);
 
-        final ProcessResult buildResult = await processManager.run(<String>[
-          flutterBin,
-          ...getLocalEngineArguments(),
-          'build',
-          'ios',
-          '--config-only',
-        ], workingDirectory: appDirectoryPath);
-        expect(
-          buildResult.exitCode,
-          0,
-          reason:
-              'Failed to build config for the app: \n'
-              'stdout: \n${buildResult.stdout}\n'
-              'stderr: \n${buildResult.stderr}\n',
-        );
-
         final File schemeFile = fileSystem
             .directory(appDirectoryPath)
             .childDirectory('ios')
@@ -66,9 +52,12 @@ void main() {
             .childDirectory('xcschemes')
             .childFile('Runner.xcscheme');
         expect(schemeFile.existsSync(), isTrue);
-        expect(
-          schemeFile.readAsStringSync(),
-          contains(r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"'),
+
+        // Remove customLLDBInitFile from the scheme so we can validate it
+        // gets re-added if missing.
+        expect(schemeFile.readAsStringSync(), contains(customLLDBInitFileSchemeSetting));
+        schemeFile.writeAsStringSync(
+          schemeFile.readAsStringSync().replaceAll(customLLDBInitFileSchemeSetting, ''),
         );
 
         final File lldbInitFile = fileSystem
@@ -85,6 +74,29 @@ void main() {
             .childDirectory('Flutter')
             .childDirectory('ephemeral')
             .childFile('flutter_lldb_helper.py');
+        expect(lldbPythonFile.existsSync(), isTrue);
+
+        // Delete LLDB files so we can verify they get re-added if missing.
+        lldbInitFile.deleteSync();
+        lldbPythonFile.deleteSync();
+
+        final ProcessResult buildResult = await processManager.run(<String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'build',
+          'ios',
+        ], workingDirectory: appDirectoryPath);
+        expect(
+          buildResult.exitCode,
+          0,
+          reason:
+              'Failed to build the app: \n'
+              'stdout: \n${buildResult.stdout}\n'
+              'stderr: \n${buildResult.stderr}\n',
+        );
+
+        expect(schemeFile.readAsStringSync(), contains(customLLDBInitFileSchemeSetting));
+        expect(lldbInitFile.existsSync(), isTrue);
         expect(lldbPythonFile.existsSync(), isTrue);
       } finally {
         ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
@@ -244,6 +256,13 @@ void main() {
         );
         pbxprojFile.writeAsStringSync(pbxprojContents);
 
+        // Remove customLLDBInitFile from the flavor's scheme so we can validate
+        // it gets re-added later.
+        expect(flavorSchemeFile.readAsStringSync(), contains(customLLDBInitFileSchemeSetting));
+        flavorSchemeFile.writeAsStringSync(
+          flavorSchemeFile.readAsStringSync().replaceAll(customLLDBInitFileSchemeSetting, ''),
+        );
+
         final ProcessResult buildResult = await processManager.run(<String>[
           flutterBin,
           ...getLocalEngineArguments(),
@@ -262,10 +281,7 @@ void main() {
               'stderr: \n${buildResult.stderr}\n',
         );
 
-        expect(
-          flavorSchemeFile.readAsStringSync(),
-          contains(r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"'),
-        );
+        expect(flavorSchemeFile.readAsStringSync(), contains(customLLDBInitFileSchemeSetting));
 
         final File lldbInitFile = fileSystem
             .directory(appDirectoryPath)

@@ -125,7 +125,7 @@ class LLDBInitMigration extends ProjectMigrator {
 
     // If the scheme is using a LLDB Init File that is not flutter_lldbinit,
     // attempt to read the file and check if it's importing flutter_lldbinit.
-    // If the file name contains a variable, attempt to subsitite the variable
+    // If the file name contains a variable, attempt to substitute the variable
     // using the build settings. If it fails to find the file or fails to
     // detect it's using flutter_lldbinit, print a warning to either remove
     // their LLDB Init file or append flutter_lldbinit to their existing one.
