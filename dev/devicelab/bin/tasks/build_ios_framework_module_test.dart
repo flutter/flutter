@@ -456,6 +456,14 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
     throw TaskResult.failure('Unexpected GeneratedPluginRegistrant.m.');
   }
 
+  if (File(path.join(outputPath, 'flutter_lldbinit')).existsSync() == isModule) {
+    throw TaskResult.failure('Unexpected flutter_lldbinit');
+  }
+
+  if (File(path.join(outputPath, 'flutter_lldb_helper.py')).existsSync() == isModule) {
+    throw TaskResult.failure('Unexpected flutter_lldb_helper.py.');
+  }
+
   section('Build frameworks without plugins');
   await _testBuildFrameworksWithoutPlugins(projectDir, platform: 'ios');
 
