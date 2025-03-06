@@ -316,7 +316,11 @@ copy("copy_asan_runtime_dylib") {
 action("copy_framework_info_plist") {
   script = "//flutter/build/copy_info_plist.py"
   visibility = [ ":*" ]
-  sources = [ "framework/Info.plist" ]
+  if (darwin_extension_safe) {
+    sources = [ "framework/Info-Extension.plist" ]
+  } else {
+    sources = [ "framework/Info.plist" ]
+  }
   outputs = [ "$_flutter_framework_dir/Info.plist" ]
   args = [
     "--source",
