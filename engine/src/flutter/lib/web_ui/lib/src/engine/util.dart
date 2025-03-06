@@ -584,12 +584,12 @@ bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
   // Complex cases.
   final Map<T, int> wordCounts = <T, int>{};
   for (final T word in a) {
-    int count = wordCounts[word] ?? 0;
+    final int count = wordCounts[word] ?? 0;
     wordCounts[word] = count + 1;
   }
 
   for (final T otherWord in b) {
-    int? count = wordCounts[otherWord];
+    final int? count = wordCounts[otherWord];
     if (count == null || count == 0) {
       return false;
     }
