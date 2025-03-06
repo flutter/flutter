@@ -29,6 +29,7 @@ import 'image.dart';
 import 'incrementable.dart';
 import 'label_and_value.dart';
 import 'link.dart';
+import 'list.dart';
 import 'live_region.dart';
 import 'platform_view.dart';
 import 'route.dart';
@@ -450,6 +451,12 @@ enum EngineSemanticsRole {
 
   /// A component provide important and usually time-sensitive information.
   alert,
+
+  /// A container that display its children in a list layout.
+  list,
+
+  /// An item in a [list].
+  listItem,
 
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
@@ -1920,6 +1927,8 @@ class SemanticsObject {
       EngineSemanticsRole.image => SemanticImage(this),
       EngineSemanticsRole.platformView => SemanticPlatformView(this),
       EngineSemanticsRole.link => SemanticLink(this),
+      EngineSemanticsRole.list => SemanticList(this),
+      EngineSemanticsRole.listItem => SemanticListItem(this),
       EngineSemanticsRole.heading => SemanticHeading(this),
       EngineSemanticsRole.header => SemanticHeader(this),
       EngineSemanticsRole.tab => SemanticTab(this),
