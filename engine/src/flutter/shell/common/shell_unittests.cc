@@ -1016,7 +1016,7 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
   // Make sure the filterRect is in global coordinates (contains the (1,1)
   // translation).
   ASSERT_EQ(mutator->GetFilterMutation().GetFilterRect(),
-            SkRect::MakeLTRB(1, 1, 31, 31));
+            DlRect::MakeLTRB(1, 1, 31, 31));
 
   DestroyShell(std::move(shell));
 #endif  // OS_FUCHSIA

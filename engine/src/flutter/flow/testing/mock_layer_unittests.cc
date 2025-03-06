@@ -53,8 +53,7 @@ TEST_F(MockLayerTest, SimpleParams) {
   EXPECT_EQ(preroll_context()->has_platform_view, false);
   EXPECT_EQ(layer->paint_bounds(), path.GetBounds());
   EXPECT_TRUE(layer->needs_painting(paint_context()));
-  EXPECT_EQ(layer->parent_mutators(),
-            std::vector{Mutator(ToSkMatrix(scale_matrix))});
+  EXPECT_EQ(layer->parent_mutators(), std::vector{Mutator(scale_matrix)});
   EXPECT_EQ(layer->parent_matrix(), combined_matrix);
   EXPECT_EQ(layer->parent_cull_rect(), local_cull_rect);
   EXPECT_EQ(layer->parent_has_platform_view(), parent_has_platform_view);

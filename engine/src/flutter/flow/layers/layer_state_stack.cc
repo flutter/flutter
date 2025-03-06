@@ -246,7 +246,7 @@ class SaveLayerEntry : public LayerStateStack::StateEntry {
 class OpacityEntry : public LayerStateStack::StateEntry {
  public:
   OpacityEntry(const DlRect& bounds,
-               SkScalar opacity,
+               DlScalar opacity,
                const LayerStateStack::RenderingAttributes& prev)
       : bounds_(bounds),
         opacity_(opacity),
@@ -376,18 +376,17 @@ class BackdropFilterEntry : public SaveLayerEntry {
 
 class TranslateEntry : public LayerStateStack::StateEntry {
  public:
-  TranslateEntry(SkScalar tx, SkScalar ty) : tx_(tx), ty_(ty) {}
+  TranslateEntry(DlScalar tx, DlScalar ty) : translation_(tx, ty) {}
 
   void apply(LayerStateStack* stack) const override {
-    stack->delegate_->translate(tx_, ty_);
+    stack->delegate_->translate(translation_.x, translation_.y);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
-    mutators_stack->PushTransform(SkMatrix::Translate(tx_, ty_));
+    mutators_stack->PushTransform(DlMatrix::MakeTranslation(translation_));
   }
 
  private:
-  const SkScalar tx_;
-  const SkScalar ty_;
+  const DlPoint translation_;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(TranslateEntry);
 };
@@ -400,7 +399,7 @@ class TransformMatrixEntry : public LayerStateStack::StateEntry {
     stack->delegate_->transform(matrix_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
-    mutators_stack->PushTransform(ToSkMatrix(matrix_));
+    mutators_stack->PushTransform(matrix_);
   }
 
  private:
@@ -430,7 +429,7 @@ class ClipRectEntry : public LayerStateStack::StateEntry {
     stack->delegate_->clipRect(clip_rect_, DlClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
-    mutators_stack->PushClipRect(ToSkRect(clip_rect_));
+    mutators_stack->PushClipRect(clip_rect_);
   }
 
  private:
@@ -449,7 +448,7 @@ class ClipRRectEntry : public LayerStateStack::StateEntry {
     stack->delegate_->clipRRect(clip_rrect_, DlClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
-    mutators_stack->PushClipRRect(ToSkRRect(clip_rrect_));
+    mutators_stack->PushClipRRect(clip_rrect_);
   }
 
  private:
@@ -470,13 +469,7 @@ class ClipRSuperellipseEntry : public LayerStateStack::StateEntry {
                                         DlClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
-    // MutatorsStack doesn't support non-Skia classes, and therefore this method
-    // has to use approximate RRect, which might cause trouble for certain
-    // embedded apps.
-    // TODO(dkwingsmt): Make this method push a correct ClipRoundedSuperellipse
-    // mutator.
-    // https://github.com/flutter/flutter/issues/163716
-    mutators_stack->PushClipRRect(ToApproximateSkRRect(clip_rsuperellipse_));
+    mutators_stack->PushClipRSE(clip_rsuperellipse_);
   }
 
  private:
@@ -496,7 +489,7 @@ class ClipPathEntry : public LayerStateStack::StateEntry {
     stack->delegate_->clipPath(clip_path_, DlClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
-    mutators_stack->PushClipPath(clip_path_.GetSkPath());
+    mutators_stack->PushClipPath(clip_path_);
   }
 
  private:
