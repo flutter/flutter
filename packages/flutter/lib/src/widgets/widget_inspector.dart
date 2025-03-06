@@ -2548,13 +2548,12 @@ mixin WidgetInspectorService {
   ///
   /// If the call to get the render object throws, the result will be null.
   RenderObject? _renderObjectOrNull(Element element) {
-    RenderObject? renderObject;
     try {
-      renderObject = element.renderObject;
+      return element.renderObject;
     } catch (_) {
       // If the render object was unmounted, this could throw.
+      return null;
     }
-    return renderObject;
   }
 }
 
