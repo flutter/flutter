@@ -319,7 +319,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           expressionCompiler: expressionCompiler,
           extraHeaders: debuggingOptions.webHeaders,
           chromiumLauncher: _chromiumLauncher,
-          nullAssertions: debuggingOptions.nullAssertions,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
           canaryFeatures: debuggingOptions.buildInfo.canaryFeatures ?? false,
