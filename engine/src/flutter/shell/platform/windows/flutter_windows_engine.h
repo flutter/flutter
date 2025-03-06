@@ -185,6 +185,9 @@ class FlutterWindowsEngine {
                     FlutterKeyEventCallback callback,
                     void* user_data);
 
+  // Informs the engine of an incoming focus event.
+  void SendViewFocusEvent(const FlutterViewFocusEvent& event);
+
   KeyboardHandlerBase* keyboard_key_handler() {
     return keyboard_key_handler_.get();
   }
@@ -330,6 +333,9 @@ class FlutterWindowsEngine {
   // Invoked by the engine when a listener is set or cleared on a platform
   // channel.
   virtual void OnChannelUpdate(std::string name, bool listening);
+
+  virtual void OnViewFocusChangeRequest(
+      const FlutterViewFocusChangeRequest* request);
 
  private:
   // Allows swapping out embedder_api_ calls in tests.
