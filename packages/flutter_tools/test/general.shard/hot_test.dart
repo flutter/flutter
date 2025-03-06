@@ -183,7 +183,10 @@ void main() {
       testUsingContext(
         'setupHotRestart function fails',
         () async {
-          writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+          fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+''');
+          writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
           final FakeDevice device = FakeDevice();
           final List<FlutterDevice> devices = <FlutterDevice>[FakeFlutterDevice(device)];
           final OperationResult result = await HotRunner(
@@ -211,7 +214,10 @@ void main() {
       testUsingContext(
         'setupHotReload function fails',
         () async {
-          writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+          fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+''');
+          writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
           final FakeDevice device = FakeDevice();
           final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
           final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
@@ -260,7 +266,7 @@ void main() {
       testUsingContext(
         'shutdown hook called after signal',
         () async {
-          writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+          writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
           final FakeDevice device = FakeDevice();
           final List<FlutterDevice> devices = <FlutterDevice>[
             FlutterDevice(
@@ -290,7 +296,7 @@ void main() {
       testUsingContext(
         'shutdown hook called after app stop',
         () async {
-          writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+          writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
           final FakeDevice device = FakeDevice();
           final List<FlutterDevice> devices = <FlutterDevice>[
             FlutterDevice(
@@ -653,7 +659,7 @@ void main() {
       'Exits with code 2 when HttpException is thrown '
       'during VM service connection',
       () async {
-        writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
 
         final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
         final FakeDevice device = FakeDevice();

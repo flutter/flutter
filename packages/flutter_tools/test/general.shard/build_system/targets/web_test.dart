@@ -66,7 +66,7 @@ void main() {
 name: foo
 ''');
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
           mainLibName: 'my_app',
           packages: <String, String>{'foo': 'foo/'},

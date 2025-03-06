@@ -40,7 +40,7 @@ void main() {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('name: foo\n');
-    writePackageConfigFile(mainLibName: 'foo', directory: fileSystem.currentDirectory);
+    writePackageConfigFiles(mainLibName: 'foo', directory: fileSystem.currentDirectory);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     logger = BufferLogger.test();
@@ -506,7 +506,7 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   }
 
   // Project files.
-  writePackageConfigFile(
+  writePackageConfigFiles(
     directory: fileSystem.currentDirectory,
     mainLibName: 'foo',
     packages: <String, String>{'fizz': 'bar'},

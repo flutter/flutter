@@ -53,7 +53,7 @@ void main() {
 name: foo
 ''');
     fileSystem.file('test/foo.dart').createSync(recursive: true);
-    writePackageConfigFile(mainLibName: 'foo', directory: fileSystem.currentDirectory);
+    writePackageConfigFiles(mainLibName: 'foo', directory: fileSystem.currentDirectory);
     residentCompiler = FakeResidentCompiler(fileSystem);
     logger = LoggingLogger();
   });
@@ -221,7 +221,7 @@ dependencies:
     sdk: flutter
   a_plugin: 1.0.0
 ''');
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: fileSystem.currentDirectory,
         mainLibName: 'foo',
         packages: <String, String>{'a_plugin': '/a_plugin'},

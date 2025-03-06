@@ -53,7 +53,7 @@ void main() {
 name: my_app
 ''');
 
-    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
   });

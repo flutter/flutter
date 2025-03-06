@@ -71,7 +71,7 @@ environement:
     final FlutterProject projectUnderTest = FlutterProject.fromDirectory(
       fileSystem.directory('project'),
     );
-    writePackageConfigFile(directory: projectUnderTest.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: projectUnderTest.directory, mainLibName: 'my_app');
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     projectUnderTest.macos.xcodeProject.createSync(recursive: true);
     return projectUnderTest;

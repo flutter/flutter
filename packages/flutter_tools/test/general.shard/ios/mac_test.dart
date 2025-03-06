@@ -788,7 +788,7 @@ void createFakePlugins(
   ''';
 
   final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
-  writePackageConfigFile(
+  writePackageConfigFiles(
     directory: flutterProject.directory,
     mainLibName: 'my_app',
     packages: <String, String>{
@@ -847,6 +847,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
+
+  @override
+  File get packageConfig => directory.childDirectory('.dart_tool').childFile('package_config.json');
 
   @override
   late final IosProject ios = FakeIosProject(

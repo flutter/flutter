@@ -117,7 +117,7 @@ void main() {
     fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 ''');
-    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
@@ -1389,7 +1389,7 @@ name: my_app
 flutter:
   generate: true
 ''');
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: globals.fs.currentDirectory,
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
@@ -1417,7 +1417,7 @@ flutter:
     'Does not generate dart_plugin_registrant.dart',
     () async {
       // Create necessary files for [DartPluginRegistrantTarget]
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: globals.fs.currentDirectory,
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},

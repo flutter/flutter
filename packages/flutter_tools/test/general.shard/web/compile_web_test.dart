@@ -58,7 +58,7 @@ environement:
 ''');
 
     flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
   });
 
   testUsingContext(

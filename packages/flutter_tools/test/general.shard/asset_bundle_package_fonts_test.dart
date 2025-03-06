@@ -105,7 +105,7 @@ $fontsSection
       () async {
         final Map<String, String> deps = <String, String>{'test_package': 'p/p/'};
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
           packages: deps,
           mainLibName: 'test',
@@ -140,7 +140,7 @@ $fontsSection
 ''';
         writePubspecFile('pubspec.yaml', 'my_app', fontsSection: fontsSection);
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
 
           packages: <String, String>{'test_package': 'p/p/'},
@@ -176,7 +176,7 @@ $fontsSection
            - asset: a/bar
 ''';
         writePubspecFile('pubspec.yaml', 'my_app', fontsSection: fontsSection);
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
 
           packages: <String, String>{'test_package': 'p/p/'},
@@ -207,11 +207,11 @@ $fontsSection
       () async {
         final Map<String, String> deps = <String, String>{'test_package': 'p/p/'};
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
 
           packages: deps,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
         );
         const String fontsSection = '''
        - family: foo
@@ -247,7 +247,7 @@ $fontsSection
           'test_package2': 'p2/p/',
         };
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
 
           packages: deps,
@@ -285,7 +285,7 @@ $fontsSection
       () async {
         final Map<String, String> deps = <String, String>{'test_package': 'p/p/'};
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
 
           packages: deps,
@@ -329,7 +329,7 @@ $fontsSection
            - asset: a/bar
 ''';
         writePubspecFile('pubspec.yaml', 'test', fontsSection: fontsSection);
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
           packages: deps,
           mainLibName: 'test',

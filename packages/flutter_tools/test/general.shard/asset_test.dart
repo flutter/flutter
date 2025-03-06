@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -44,11 +46,6 @@ void main() {
       });
 
       testWithoutContext('app font uses local font file', () async {
-        final String packagesPath = fileSystem.path.join(
-          'main',
-          '.dart_tool',
-          'package_config.json',
-        );
         final String manifestPath = fileSystem.path.join('main', 'pubspec.yaml');
         final ManifestAssetBundle assetBundle = ManifestAssetBundle(
           logger: logger,
@@ -78,30 +75,12 @@ flutter:
           ..createSync(recursive: true)
           ..writeAsStringSync('This is a fake font.');
 
-        fileSystem.file(fileSystem.path.join('main', '.dart_tool', 'package_config.json'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'''
-  {
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "font",
-      "rootUri": "../../font",
-      "packageUri": "lib/",
-      "languageVersion": "3.2"
-    },
-    {
-      "name": "main",
-      "rootUri": "../",
-      "packageUri": "lib/",
-      "languageVersion": "3.2"
-    }
-  ],
-  "generated": "2024-01-08T19:39:02.396620Z",
-  "generator": "pub",
-  "generatorVersion": "3.3.0-276.0.dev"
-}
-''');
+        final String packageConfigPath =
+            writePackageConfigFiles(
+              directory: fileSystem.directory('main'),
+              mainLibName: 'main',
+              packages: <String, String>{'font': '../font'},
+            ).path;
         fileSystem.file(manifestPath)
           ..createSync(recursive: true)
           ..writeAsStringSync(r'''
@@ -117,7 +96,7 @@ dependencies:
 ''');
 
         await assetBundle.build(
-          packageConfigPath: packagesPath,
+          packageConfigPath: packageConfigPath,
           manifestPath: manifestPath,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.directory('main')),
         );
@@ -131,7 +110,7 @@ dependencies:
         expect(
           assetBundle.inputFiles.map((File f) => f.path),
           equals(<String>[
-            packagesPath,
+            packageConfigPath,
             fileSystem.path.join(fileSystem.currentDirectory.path, manifestPath),
             fileSystem.path.join(fileSystem.currentDirectory.path, 'font', 'pubspec.yaml'),
             fileSystem.path.join(fileSystem.currentDirectory.path, 'font', 'test_font_file'),
@@ -211,11 +190,38 @@ flutter:
             ..createSync(recursive: true)
             ..writeAsStringSync('This is a fake font.');
 
-          writePackageConfigFile(
+          final File packageConfigFile = writePackageConfigFiles(
             mainLibName: 'workspace_root',
             directory: fileSystem.currentDirectory,
-            packages: <String, String>{'font': 'font', 'main': 'main'},
+            packages: <String, String>{
+              'font': 'font',
+              'main': 'main',
+              'dev_dependency': 'dev_dependency',
+            },
           );
+
+          // Overwrite the default package_graph.json:
+          packageConfigFile.parent
+              .childFile('package_graph.json')
+              .writeAsStringSync(
+                jsonEncode(<String, Object?>{
+                  'configVersion': 1,
+                  'packages': <Object>[
+                    <String, Object?>{
+                      'name': 'workspace_root',
+                      'dependencies': <String>[],
+                      'devDependencies': <String>[],
+                    },
+                    <String, Object?>{'name': 'font', 'dependencies': <String>[]},
+                    <String, Object?>{
+                      'name': 'main',
+                      'dependencies': <String>['font'],
+                      'devDependencies': <String>['dev_dependency'],
+                    },
+                    <String, Object?>{'name': 'dev_dependency', 'dependencies': <String>[]},
+                  ],
+                }),
+              );
 
           fileSystem.file(manifestPath)
             ..createSync(recursive: true)
@@ -333,21 +339,7 @@ flutter:
           'ink_sparkle.frag',
         );
         fileSystem.file(shaderPath).createSync(recursive: true);
-        fileSystem.file(fileSystem.path.join('.dart_tool', 'package_config.json'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'''
-{
-  "configVersion": 2,
-  "packages":[
-    {
-      "name": "my_package",
-      "rootUri": "file:///",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    }
-  ]
-}
-''');
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_package');
         final ManifestAssetBundle assetBundle = ManifestAssetBundle(
           logger: logger,
@@ -377,21 +369,7 @@ flutter:
           'ink_sparkle.frag',
         );
         fileSystem.file(shaderPath).createSync(recursive: true);
-        fileSystem.file(fileSystem.path.join('.dart_tool', 'package_config.json'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'''
-{
-  "configVersion": 2,
-  "packages":[
-    {
-      "name": "my_package",
-      "rootUri": "file:///",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    }
-  ]
-}
-''');
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_package');
         final ManifestAssetBundle assetBundle = ManifestAssetBundle(
           logger: logger,

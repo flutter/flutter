@@ -141,7 +141,7 @@ void main() {
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
@@ -184,7 +184,7 @@ name: path_provider_example
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
@@ -270,7 +270,7 @@ name: path_provider_example
           },
           generateDartPluginRegistry: true,
         );
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
@@ -296,7 +296,7 @@ name: path_provider_example
 
         // Simulate a user removing everything from pubspec.yaml.
         pubspec.writeAsStringSync(_kEmptyPubspecFile);
-        writePackageConfigFile(directory: projectDir, mainLibName: 'path_provider_example');
+        writePackageConfigFiles(directory: projectDir, mainLibName: 'path_provider_example');
 
         await DartPluginRegistrantTarget.test(testProject).build(environment);
         expect(generatedMain.existsSync(), isFalse);
@@ -325,7 +325,7 @@ name: path_provider_example
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},

@@ -357,7 +357,7 @@ class FakePub extends Fake implements Pub {
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     if (project != null) {
-      writePackageConfigFile(directory: project.directory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
     }
   }
 }

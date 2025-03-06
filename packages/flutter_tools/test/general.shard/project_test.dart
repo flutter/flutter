@@ -1823,7 +1823,7 @@ Future<FlutterProject> someProject({
   bool includePubspec = true,
 }) async {
   final Directory directory = globals.fs.directory('some_project');
-  writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'hello');
+  writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'hello');
   if (includePubspec) {
     directory.childFile('pubspec.yaml')
       ..createSync(recursive: true)
@@ -1840,7 +1840,7 @@ Future<FlutterProject> someProject({
 
 Future<FlutterProject> projectWithPluginDependency() async {
   final Directory directory = globals.fs.directory('some_project');
-  writePackageConfigFile(
+  writePackageConfigFiles(
     directory: directory,
     mainLibName: 'app_name',
     packages: <String, String>{'my_plugin': '/plugin_project'},
@@ -1913,7 +1913,7 @@ class MyPlugin extends FluttPlugin { /* ... */ }
 
 Future<FlutterProject> aModuleProject() async {
   final Directory directory = globals.fs.directory('module_project');
-  writePackageConfigFile(mainLibName: 'my_module', directory: directory);
+  writePackageConfigFiles(mainLibName: 'my_module', directory: directory);
   directory.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_module
 flutter:
@@ -1966,7 +1966,7 @@ void _testInMemory(
   // Set up enough of the packages to satisfy the templating code.
   final Directory dummyTemplateImagesDirectory = testFileSystem.directory(Cache.flutterRoot).parent;
   dummyTemplateImagesDirectory.createSync(recursive: true);
-  writePackageConfigFile(
+  writePackageConfigFiles(
     directory: testFileSystem
         .directory(Cache.flutterRoot)
         .childDirectory('packages')

@@ -285,7 +285,7 @@ flutter:
 class UrlLauncherPlugin {}
 ''');
   fileSystem.file(fileSystem.path.join('lib', 'main.dart')).writeAsStringSync('void main() { }');
-  writePackageConfigFile(
+  writePackageConfigFiles(
     directory: fileSystem.currentDirectory,
     mainLibName: 'foo',
     packages: <String, String>{'bar': 'bar'},

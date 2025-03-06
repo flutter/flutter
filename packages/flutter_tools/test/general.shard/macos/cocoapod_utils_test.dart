@@ -61,7 +61,7 @@ void main() {
 
       final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
 
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: flutterProject.directory,
         mainLibName: 'my_app',
         packages: <String, String>{

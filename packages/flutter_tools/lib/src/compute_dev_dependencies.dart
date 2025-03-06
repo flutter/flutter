@@ -50,17 +50,33 @@ Try running `flutter pub get`''');
     isExclusiveDevDependency: true,
   );
 
-  final List<String> packageNamesToVisit = <String>[
-    ...packageGraph.dependencies[project.manifest.appName]!,
-    ...packageGraph.devDependencies[project.manifest.appName]!,
-  ];
+  final List<String>? dependencies = packageGraph.dependencies[project.manifest.appName];
+  if (dependencies == null) {
+    throwToolExit('''
+Failed to parse ${packageGraphFile.path}: dependencies for `${project.manifest.appName}` missing.
+Try running `flutter pub get`''');
+  }
+  final List<String>? devDependencies = packageGraph.devDependencies[project.manifest.appName];
+  if (devDependencies == null) {
+    throwToolExit('''
+Failed to parse ${packageGraphFile.path}: devDependencies for `${project.manifest.appName}` missing.
+Try running `flutter pub get`''');
+  }
+  final List<String> packageNamesToVisit = <String>[...dependencies, ...devDependencies];
   while (packageNamesToVisit.isNotEmpty) {
     final String current = packageNamesToVisit.removeLast();
     if (result.containsKey(current)) {
       continue;
     }
 
-    packageNamesToVisit.addAll(packageGraph.dependencies[current]!);
+    final List<String>? dependencies = packageGraph.dependencies[current];
+
+    if (dependencies == null) {
+      throwToolExit('''
+Failed to parse ${packageGraphFile.path}: dependencies for `$current` missing.
+Try running `flutter pub get`''');
+    }
+    packageNamesToVisit.addAll(dependencies);
 
     result[current] = Dependency(
       current,

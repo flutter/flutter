@@ -60,7 +60,7 @@ void main() {
     final Directory package = fs.directory('package');
     package.childFile('pubspec.yaml').createSync(recursive: true);
     package.childFile('pubspec.yaml').writeAsStringSync(_pubspecContents);
-    writePackageConfigFile(
+    writePackageConfigFiles(
       directory: package,
       packages: <String, String>{
         'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
@@ -74,7 +74,7 @@ void main() {
         .childFile('some_integration_test.dart')
         .createSync(recursive: true);
 
-    writePackageConfigFile(
+    writePackageConfigFiles(
       directory: fs.directory(fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools')),
       packages: <String, String>{
         'ffi': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/ffi-2.1.2',
@@ -120,7 +120,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
     ''');
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: fs.currentDirectory,
         packages: <String, String>{
           'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',

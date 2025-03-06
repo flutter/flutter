@@ -46,7 +46,7 @@ void main() {
             ..flutterPluginsFile = directory.childFile('.flutter-plugins')
             ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies')
             ..dartPluginRegistrant = directory.childFile('dart_plugin_registrant.dart');
-      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
     });
 
     group('resolvePlatformImplementation', () {
@@ -1458,7 +1458,7 @@ void createFakeDartPlugins(
   Map<String, String> plugins,
 ) {
   final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
-  writePackageConfigFile(
+  writePackageConfigFiles(
     directory: flutterProject.directory,
     mainLibName: flutterProject.manifest.appName,
     packages: <String, String>{

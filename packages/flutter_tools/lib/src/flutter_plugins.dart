@@ -113,7 +113,6 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
         continue;
       }
     }
-
     final Plugin? plugin = await _pluginFromPackage(
       packageName,
       dependency.rootUri,
@@ -1203,7 +1202,6 @@ Future<void> injectPlugins(
   DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
   List<Plugin> plugins = await findPlugins(project);
-
   if (releaseMode) {
     plugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
   }

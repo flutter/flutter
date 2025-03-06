@@ -199,13 +199,11 @@ void main() {
 
       // Add basic properties to the Flutter project and subprojects
       setUpProject(fs);
-      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
     });
 
     void addToPackageConfig(String name, Directory packageDir, {bool isDevDependency = false}) {
-      final File packageConfigFile = flutterProject.directory
-          .childDirectory('.dart_tool')
-          .childFile('package_config.json');
+      final File packageConfigFile = flutterProject.packageConfig;
 
       final Map<String, Object?> packageConfig =
           jsonDecode(packageConfigFile.readAsStringSync()) as Map<String, Object?>;
@@ -217,7 +215,31 @@ void main() {
       });
 
       packageConfigFile.writeAsStringSync(jsonEncode(packageConfig));
-      (isDevDependency ? flutterManifest.devDependencies : flutterManifest.dependencies).add(name);
+
+      final File packageGraphFile = flutterProject.packageConfig.parent.childFile(
+        'package_graph.json',
+      );
+
+      final Map<String, Object?> packageGraph =
+          jsonDecode(packageGraphFile.readAsStringSync()) as Map<String, Object?>;
+
+      final List<Object?> packages = packageGraph['packages']! as List<Object?>;
+
+      packages.add(<String, Object?>{'name': name, 'dependencies': <Object?>[]});
+
+      final Map<String, Object?> mainPackage =
+          packages.firstWhere(
+                (Object? p) =>
+                    (p! as Map<String, Object?>)['name'] == flutterProject.manifest.appName,
+              )!
+              as Map<String, Object?>;
+      final List<Object?> dependencyList =
+          (mainPackage[isDevDependency ? 'devDependencies' : 'dependencies'] ??= <Object?>[])
+              as List<Object?>;
+
+      dependencyList.add(name);
+
+      packageGraphFile.writeAsStringSync(jsonEncode(packageGraph));
     }
 
     // Makes fake plugin packages for each plugin, adds them to flutterProject,
@@ -250,7 +272,7 @@ void main() {
 
       final List<Directory> directories = <Directory>[];
       final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
-      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
       for (final String nameOrPath in pluginNamesOrPaths) {
         final String name = fileSystem.path.basename(nameOrPath);
         final Directory pluginDirectory =
@@ -2434,7 +2456,7 @@ flutter:
           ..flutterPluginsDependenciesFile = dependenciesFile
           ..windows = windowsProject;
 
-        writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
+        writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
 
         const String dependenciesFileContents = r'''
 {
@@ -2742,7 +2764,7 @@ flutter:
       testUsingContext(
         'excludes dev dependencies from Windows plugin registrant',
         () async {
-          createPlugin(
+          final Directory pluginDir = createPlugin(
             name: testPluginName,
             platforms: const <String, _PluginPlatformInfo>{
               'windows': _PluginPlatformInfo(pluginClass: 'Foo'),
@@ -2751,6 +2773,12 @@ flutter:
           );
 
           const String expectedDevDepRegistration = '#include <$testPluginName/foo.h>';
+          writePackageConfigFiles(
+            directory: flutterProject.directory,
+            mainLibName: 'my_app',
+            packages: <String, String>{testPluginName: pluginDir.path},
+            devDependencies: <String>[testPluginName],
+          );
 
           // Test non-release mode.
           await injectPlugins(flutterProject, windowsPlatform: true, releaseMode: false);
@@ -2807,7 +2835,7 @@ flutter:
         )
         ..windows = windowsProject;
 
-      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
 
       createPluginSymlinks(
         flutterProject,
@@ -2904,6 +2932,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   late WindowsProject windows;
+
+  @override
+  File get packageConfig => directory.childDirectory('.dart_tool').childFile('package_config.json');
 }
 
 class FakeMacOSProject extends Fake implements MacOSProject {
