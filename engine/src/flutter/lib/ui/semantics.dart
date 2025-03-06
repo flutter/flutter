@@ -412,21 +412,29 @@ enum SemanticsRole {
 
   /// A input field with a dropdown list box attached.
   ///
-  /// For example, a [DropDownMenu]
+  /// For example, a [DropdownMenu]
   comboBox,
 
-  /// Contains a list of [menu]s.
+  /// A presentation of [menu] that usually remains visible and is usually
+  /// presented horizontally.
   ///
   /// For example, a [MenuBar].
   menuBar,
 
-  /// A button that opens a dropdown that contains multiple [menuItem]s.
+  /// A permanently visible list of controls or a widget that can be made to
+  /// open and close.
   ///
-  /// For example, a [MenuAnchor] or [DropDownButton].
+  /// For example, a [MenuAnchor] or [DropdownButton].
   menu,
 
-  /// A item in a dropdown created by [menu] or [comboBox].
+  /// A item in a dropdown created by [menu] or [menuBar].
   menuItem,
+
+  /// A item with a checkbox in a dropdown created by [menu] or [menuBar].
+  menuItemCheckbox,
+
+  /// A item with a radio button in a dropdown created by [menu] or [menuBar].
+  menuItemRadio,
 
   /// A container to display multiple [listItem]s in vertical or horizontal
   /// layout.
