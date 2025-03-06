@@ -772,6 +772,8 @@ void main() {
           hasImplicitScrolling: true,
           hasExpandedState: true,
           isExpanded: true,
+          hasRequiredState: true,
+          isRequired: true,
           /* Actions */
           hasTapAction: true,
           hasLongPressAction: true,
@@ -1070,6 +1072,8 @@ void main() {
           hasImplicitScrolling: true,
           hasExpandedState: true,
           isExpanded: true,
+          hasRequiredState: true,
+          isRequired: true,
           /* Actions */
           hasTapAction: true,
           hasLongPressAction: true,
@@ -1166,6 +1170,8 @@ void main() {
           hasImplicitScrolling: false,
           hasExpandedState: false,
           isExpanded: false,
+          hasRequiredState: false,
+          isRequired: false,
           /* Actions */
           hasTapAction: false,
           hasLongPressAction: false,
