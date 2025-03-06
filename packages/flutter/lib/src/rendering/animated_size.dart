@@ -242,7 +242,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     return _sizeTween.evaluate(_animation);
   }
 
-  Size? _currentSize;
+  late Size _currentSize;
 
   @override
   void performLayout() {
