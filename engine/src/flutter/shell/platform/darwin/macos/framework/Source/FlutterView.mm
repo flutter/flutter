@@ -25,7 +25,8 @@
                      commandQueue:(id<MTLCommandQueue>)commandQueue
                          delegate:(id<FlutterViewDelegate>)delegate
                threadSynchronizer:(FlutterThreadSynchronizer*)threadSynchronizer
-                   viewIdentifier:(FlutterViewIdentifier)viewIdentifier {
+                   viewIdentifier:(FlutterViewIdentifier)viewIdentifier
+                  enableWideGamut:(BOOL)enableWideGamut {
   self = [super initWithFrame:NSZeroRect];
   if (self) {
     [self setWantsLayer:YES];
@@ -37,7 +38,8 @@
     _surfaceManager = [[FlutterSurfaceManager alloc] initWithDevice:device
                                                        commandQueue:commandQueue
                                                               layer:self.layer
-                                                           delegate:self];
+                                                           delegate:self
+                                                    enableWideGamut:enableWideGamut];
   }
   return self;
 }

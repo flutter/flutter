@@ -590,6 +590,10 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
 }
 
+- (BOOL)enableWideGamut {
+  return _project.enableImpeller && _project.enableWideGamut;
+}
+
 - (BOOL)runWithEntrypoint:(NSString*)entrypoint {
   if (self.running) {
     return NO;

@@ -792,7 +792,8 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
                                    commandQueue:commandQueue
                                        delegate:self
                              threadSynchronizer:_threadSynchronizer
-                                 viewIdentifier:_viewIdentifier];
+                                 viewIdentifier:_viewIdentifier
+                                enableWideGamut:_engine.enableWideGamut];
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {

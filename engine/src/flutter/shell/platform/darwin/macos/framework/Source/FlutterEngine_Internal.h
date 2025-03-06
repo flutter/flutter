@@ -232,6 +232,12 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
  * This function must be called on the main thread.
  */
 + (nullable FlutterEngine*)engineForIdentifier:(int64_t)identifier;
+
+/**
+ * Whether wide gamut color should be enabled where supported.
+ */
+- (BOOL)enableWideGamut;
+
 @end
 
 @interface FlutterEngine (Tests)

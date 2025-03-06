@@ -38,14 +38,16 @@
 
 namespace flutter::testing {
 
-static FlutterSurfaceManager* CreateSurfaceManager(TestView* testView) {
+static FlutterSurfaceManager* CreateSurfaceManager(TestView* testView,
+                                                   bool enableWideGamut = false) {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   id<MTLCommandQueue> commandQueue = [device newCommandQueue];
   CALayer* layer = reinterpret_cast<CALayer*>(testView.layer);
   return [[FlutterSurfaceManager alloc] initWithDevice:device
                                           commandQueue:commandQueue
                                                  layer:layer
-                                              delegate:testView];
+                                              delegate:testView
+                                       enableWideGamut:enableWideGamut];
 }
 
 static FlutterSurfacePresentInfo* CreatePresentInfo(
@@ -71,6 +73,21 @@ TEST(FlutterSurfaceManager, MetalTextureSizeMatchesSurfaceSize) {
   id<MTLTexture> metalTexture = (__bridge id)texture.texture;
   EXPECT_EQ(metalTexture.width, 100ul);
   EXPECT_EQ(metalTexture.height, 50ul);
+  EXPECT_EQ(metalTexture.pixelFormat, MTLPixelFormatBGRA8Unorm);
+  texture.destruction_callback(texture.user_data);
+}
+
+TEST(FlutterSurfaceManager, MetalTextureWithWideGamut) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/true);
+
+  // Get back buffer, lookup should work for borrowed surfaces util present.
+  auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  auto texture = surface.asFlutterMetalTexture;
+  id<MTLTexture> metalTexture = (__bridge id)texture.texture;
+  EXPECT_EQ(metalTexture.width, 100ul);
+  EXPECT_EQ(metalTexture.height, 50ul);
+  EXPECT_EQ(metalTexture.pixelFormat, MTLPixelFormatBGRA10_XR);
   texture.destruction_callback(texture.user_data);
 }
 

@@ -50,7 +50,8 @@
 - (nullable instancetype)initWithDevice:(nonnull id<MTLDevice>)device
                            commandQueue:(nonnull id<MTLCommandQueue>)commandQueue
                                   layer:(nonnull CALayer*)containingLayer
-                               delegate:(nonnull id<FlutterSurfaceManagerDelegate>)delegate;
+                               delegate:(nonnull id<FlutterSurfaceManagerDelegate>)delegate
+                        enableWideGamut:(BOOL)enableWideGamut;
 
 /**
  * Returns a back buffer surface of the given size to which Flutter can render content.

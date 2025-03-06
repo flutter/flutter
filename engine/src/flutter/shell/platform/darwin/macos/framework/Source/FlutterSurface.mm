@@ -15,6 +15,7 @@
   id<MTLTexture> _texture;
   // Used for testing.
   BOOL _isInUseOverride;
+  MTLPixelFormat format;
 }
 @end
 
@@ -44,11 +45,16 @@
   _isInUseOverride = isInUseOverride;
 }
 
-- (instancetype)initWithSize:(CGSize)size device:(id<MTLDevice>)device {
+- (instancetype)initWithSize:(CGSize)size
+                      device:(id<MTLDevice>)device
+                 pixelFormat:(MTLPixelFormat)pixelFormat {
   if (self = [super init]) {
     self->_size = size;
-    self->_ioSurface.Reset([FlutterSurface createIOSurfaceWithSize:size]);
-    self->_texture = [FlutterSurface createTextureForIOSurface:_ioSurface size:size device:device];
+    self->_ioSurface.Reset([FlutterSurface createIOSurfaceWithSize:size pixelFormat:pixelFormat]);
+    self->_texture = [FlutterSurface createTextureForIOSurface:_ioSurface
+                                                          size:size
+                                                        device:device
+                                                   pixelFormat:pixelFormat];
   }
   return self;
 }
@@ -74,16 +80,26 @@
   return (__bridge FlutterSurface*)texture->user_data;
 }
 
-+ (IOSurfaceRef)createIOSurfaceWithSize:(CGSize)size {
-  unsigned pixelFormat = kCVPixelFormatType_32BGRA;
-  unsigned bytesPerElement = 4;
++ (IOSurfaceRef)createIOSurfaceWithSize:(CGSize)size pixelFormat:(MTLPixelFormat)pixelFormat {
+  unsigned pixelByteFormat;
+  unsigned bytesPerElement;
+  if (pixelFormat == MTLPixelFormatBGRA8Unorm) {
+    pixelByteFormat = kCVPixelFormatType_32BGRA;
+    bytesPerElement = 4;
+  } else if (pixelFormat == MTLPixelFormatBGRA10_XR) {
+    pixelByteFormat = kCVPixelFormatType_40ARGBLEWideGamut;
+    bytesPerElement = 8;
+  } else {
+    NSLog(@"Invalid Pixel Format: %lu.", static_cast<unsigned long>(pixelFormat));
+    return nil;
+  }
 
   size_t bytesPerRow = IOSurfaceAlignProperty(kIOSurfaceBytesPerRow, size.width * bytesPerElement);
   size_t totalBytes = IOSurfaceAlignProperty(kIOSurfaceAllocSize, size.height * bytesPerRow);
   NSDictionary* options = @{
     (id)kIOSurfaceWidth : @(size.width),
     (id)kIOSurfaceHeight : @(size.height),
-    (id)kIOSurfacePixelFormat : @(pixelFormat),
+    (id)kIOSurfacePixelFormat : @(pixelByteFormat),
     (id)kIOSurfaceBytesPerElement : @(bytesPerElement),
     (id)kIOSurfaceBytesPerRow : @(bytesPerRow),
     (id)kIOSurfaceAllocSize : @(totalBytes),
@@ -96,9 +112,10 @@
 
 + (id<MTLTexture>)createTextureForIOSurface:(IOSurfaceRef)surface
                                        size:(CGSize)size
-                                     device:(id<MTLDevice>)device {
+                                     device:(id<MTLDevice>)device
+                                pixelFormat:(MTLPixelFormat)pixelFormat {
   MTLTextureDescriptor* textureDescriptor =
-      [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+      [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
                                                          width:size.width
                                                         height:size.height
                                                      mipmapped:NO];
