@@ -118,6 +118,7 @@ class SemanticsTester {
     int? headingLevel,
     String? linkUrl,
     ui.SemanticsRole? role,
+    List<String>? controlsNodes,
   }) {
     // Flags
     if (hasCheckedState ?? false) {
@@ -333,6 +334,7 @@ class SemanticsTester {
       headingLevel: headingLevel ?? 0,
       linkUrl: linkUrl,
       role: role ?? ui.SemanticsRole.none,
+      controlsNodes: controlsNodes,
     );
     _nodeUpdates.add(update);
     return update;
