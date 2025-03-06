@@ -285,8 +285,8 @@ void main() {
     final Picture picture = recorder.endRecording();
     Object? error;
     try {
-      final Image image = await picture.toImage(0, 0);
-    } catch (err, st) {
+      await picture.toImage(0, 0);
+    } catch (err) {
       error = err;
     }
     expect(error, isNot(null));
