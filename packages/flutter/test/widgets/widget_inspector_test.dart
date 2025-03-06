@@ -4772,7 +4772,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         service.disposeAllGroups();
       });
 
-      Future<void> pumpWidgetForLayoutExplorer(WidgetTester tester) async {
+      Future<Widget> pumpWidgetForLayoutExplorer(WidgetTester tester) async {
         const Widget widget = Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
@@ -4785,6 +4785,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         );
         await tester.pumpWidget(widget);
+        return widget;
       }
 
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with BoxParentData', (
@@ -4836,6 +4837,32 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(parentData!['offsetX'], equals('0.0'));
         expect(parentData['offsetY'], equals('293.0'));
       });
+
+      testWidgets(
+        'ext.flutter.inspector.getLayoutExplorerNode does not throw for unmounted widget',
+        (WidgetTester tester) async {
+          // Mount the Row widget.
+          final Widget widget = await pumpWidgetForLayoutExplorer(tester);
+
+          // Get the id of the Row widget.
+          final Element rowElement = tester.element(find.byType(Row));
+          service.setSelection(rowElement, group);
+          final String id = service.toId(rowElement, group)!;
+
+          // Unmount the Row widget.
+          await tester.pumpWidget(const Placeholder());
+
+          // Verify that the call to getLayoutExplorerNode for the Row widget
+          // does not throw an exception.
+          expect(
+            () => service.testExtension(
+              WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+              <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+            ),
+            returnsNormally,
+          );
+        },
+      );
 
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with FlexParentData', (
         WidgetTester tester,
