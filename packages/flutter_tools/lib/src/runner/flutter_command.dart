@@ -132,13 +132,11 @@ abstract final class FlutterOptions {
   static const String kDartDefinesOption = 'dart-define';
   static const String kDartDefineFromFileOption = 'dart-define-from-file';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
-  static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
   static const String kDeviceTimeout = 'device-timeout';
   static const String kDeviceConnection = 'device-connection';
   static const String kAnalyzeSize = 'analyze-size';
   static const String kCodeSizeDirectory = 'code-size-directory';
-  static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
@@ -997,20 +995,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addNullSafetyModeOptions({required bool hide}) {
-    argParser.addFlag(
-      FlutterOptions.kNullSafety,
-      help: 'This flag is deprecated as only null-safe code is supported.',
-      defaultsTo: true,
-      hide: true,
-    );
-    argParser.addFlag(
-      FlutterOptions.kNullAssertions,
-      help: 'This flag is deprecated as only null-safe code is supported.',
-      hide: true,
-    );
-  }
-
   void usesFrontendServerStarterPathOption({required bool verboseHelp}) {
     argParser.addOption(
       FlutterOptions.kFrontendServerStarterPath,
@@ -1173,7 +1157,6 @@ abstract class FlutterCommand extends Command<void> {
     addBuildPerformanceFile(hide: !verboseHelp);
     addDartObfuscationOption();
     addEnableExperimentation(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addSplitDebugInfoOption();
     addTreeShakeIconsFlag();
     usesAnalyzeSizeFlag();
@@ -1506,12 +1489,6 @@ abstract class FlutterCommand extends Command<void> {
   // This adds the Dart defines used to access various Flutter version information at runtime.
   void _addFlutterVersionToDartDefines(FlutterVersion version, List<String> dartDefines) {
     for (final String dartDefine in flutterVersionDartDefines) {
-      if (globals.platform.environment[dartDefine] != null) {
-        throwToolExit(
-          '$dartDefine is used by the framework and cannot be set in the environment. '
-          'Use FlutterVersion to access it in Flutter code',
-        );
-      }
       if (dartDefines.any((String define) => define.startsWith(dartDefine))) {
         throwToolExit(
           '$dartDefine is used by the framework and cannot be '
@@ -1853,16 +1830,6 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
-    if (argParser.options.containsKey(FlutterOptions.kNullSafety) &&
-        argResults![FlutterOptions.kNullSafety] == false &&
-        globals.nonNullSafeBuilds == NonNullSafeBuilds.notAllowed) {
-      throwToolExit('''
-Could not find an option named "no-${FlutterOptions.kNullSafety}".
-
-Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.
-''');
-    }
-
     globals.preRunValidator.validate();
 
     if (refreshWirelessDevices) {
@@ -2162,9 +2129,3 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
 bool _isBlank(String s) => s.trim().isEmpty;
-
-/// Whether the tool should allow non-null safe builds.
-///
-/// The Dart SDK no longer supports non-null safe builds, so this value in the
-/// tool's context should always be [NonNullSafeBuilds.notAllowed].
-enum NonNullSafeBuilds { allowed, notAllowed }
