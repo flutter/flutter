@@ -23,6 +23,7 @@ import 'native_assets_test_utils.dart';
 
 final String hostOs = platform.operatingSystem;
 const String packageName = 'data_asset_example';
+const String packageNameDependency = 'data_asset_dependency';
 
 void main() {
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
@@ -33,16 +34,21 @@ void main() {
   // various test modes.
   late final Directory tempDirectory;
   late final Directory root;
+  late final Directory rootDependency;
   setUpAll(() async {
     processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
     processManager.runSync(<String>[flutterBin, 'config', '--enable-dart-data-assets']);
     tempDirectory = fileSystem.directory(
       fileSystem.systemTempDirectory.createTempSync().resolveSymbolicLinksSync(),
     );
-    root = await createDataAssetApp(packageName, tempDirectory);
+
+    root = createAppWithName(packageName, tempDirectory);
+    await createDataAssetApp(packageName, root);
+
+    rootDependency = createAppWithName(packageNameDependency, tempDirectory);
   });
   tearDownAll(() {
-    tryToDelete(tempDirectory);
+    // tryToDelete(tempDirectory);
   });
 
   group('dart data assets', () {
@@ -77,6 +83,7 @@ void main() {
           final bool performReload = isDebug;
 
           final Map<String, String> assets = <String, String>{'id1': 'content1', 'id2': 'content2'};
+          writeAssets(assets, root);
           writeHookLibrary(root, assets, available: <String>['id1']);
           writeHelperLibrary(root, 'version1', assets.keys.toList());
 
@@ -104,6 +111,7 @@ void main() {
                   // Now we trigger a hot-restart with new assets & new
                   // application code, we make the build hook now emit also the
                   // `id2` data asset.
+                  writeAssets(assets, root);
                   writeHookLibrary(root, assets, available: <String>['id1', 'id2']);
                   writeHelperLibrary(root, 'version2', assets.keys.toList());
                   return 'R';
@@ -134,6 +142,7 @@ void main() {
                     // `id3` data asset (but not `id4`).
                     assets['id3'] = 'content3';
                     assets['id4'] = 'content4';
+                    writeAssets(assets, root);
                     writeHookLibrary(root, assets, available: <String>['id1', 'id2', 'id3']);
                     writeHelperLibrary(root, 'version3', assets.keys.toList());
                     return 'r';
@@ -178,6 +187,7 @@ void main() {
       testWithoutContext('flutter build $target', () async {
         final Map<String, String> assets = <String, String>{'id1': 'content1', 'id2': 'content2'};
         final List<String> available = <String>['id1'];
+        writeAssets(assets, root);
         writeHookLibrary(root, assets, available: available);
         writeHelperLibrary(root, 'version1', assets.keys.toList());
 
@@ -221,74 +231,62 @@ void main() {
 
     for (final String target in <String>[hostOs, 'web']) {
       testWithoutContext('flutter build $target with conflicting assets', () async {
-        final Map<String, String> assets = <String, String>{'id1': 'content1', 'id2': 'content2'};
-        final List<String> available = <String>['id1'];
+        final Map<String, String> assets = <String, String>{
+          'id1.txt': 'content1',
+          'id2.txt': 'content2',
+        };
+        final List<String> available = <String>['id1.txt'];
+        writeAssets(assets, root);
+        writeAssets(assets, rootDependency);
         writeHookLibrary(root, assets, available: available);
+        writeHookLibrary(rootDependency, assets, available: available);
         writeHelperLibrary(root, 'version1', assets.keys.toList());
 
-        final File pubspecFile = root.childFile('pubspec.yaml');
-        final String content = await pubspecFile.readAsString();
-        final YamlEditor yamlEditor = YamlEditor(content);
-        yamlEditor.update(<String>['assets'], <String>['id1']);
-        pubspecFile.writeAsStringSync(yamlEditor.toString());
+        await modifyPubspec(root, (YamlEditor editor) {
+          editor.update(
+            <String>['dependencies', packageNameDependency],
+            <String, String>{'path': '../$packageNameDependency'},
+          );
+        });
+
+        await modifyPubspec(rootDependency, (YamlEditor editor) {
+          editor
+            ..update(<String>['flutter', 'assets'], <String>[assets.keys.first])
+            ..update(<String>['dependencies'], <String, String>{'native_assets_cli': '^0.11.0'});
+        });
 
         final ProcessTestResult result = await runFlutter(
           <String>['build', '-v', target],
           root.path,
-          <Transition>[Barrier.contains('Built build/$target')],
+          <Transition>[
+            Barrier.contains(
+              'Conflicting assets: The asset "asset: packages/data_asset_dependency/id1.txt" was declared in the pubspec and the hook',
+            ),
+          ],
           debug: true,
         );
-        if (result.exitCode != 0) {
-          throw Exception(
-            'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
-          );
-        }
-        final Directory buildTargetDir = root.childDirectory('build').childDirectory(target);
-
-        final List<File> manifestFiles =
-            buildTargetDir
-                .listSync(recursive: true)
-                .whereType<File>()
-                .where((File file) => file.path.endsWith('AssetManifest.json'))
-                .toList();
-
-        if (manifestFiles.isEmpty) {
-          throw Exception('Expected a `AssetManifest.json` to be avilable in the $buildTargetDir.');
-        }
-        for (final File manifestFile in manifestFiles) {
-          final Map<String, Object?> manifest =
-              json.decode(manifestFile.readAsStringSync()) as Map<String, Object?>;
-          for (final String id in available) {
-            final String key = 'packages/$packageName/$id';
-            final List<Object?> entry = manifest[key]! as List<Object?>;
-            expect(entry, equals(<String>[key]));
-
-            final File file = manifestFile.parent.childFile(key);
-            expect(file.readAsStringSync(), assets[id]);
-          }
-        }
+        expect(result.exitCode, isNonZero);
       });
     }
   });
 }
 
-Future<Directory> createDataAssetApp(String packageName, Directory tempDirectory) async {
-  final ProcessResult result = processManager.runSync(<String>[
-    flutterBin,
-    'create',
-    '--no-pub',
-    packageName,
-  ], workingDirectory: tempDirectory.path);
-  expect(result, const ProcessResultMatcher());
-
-  final Directory root = tempDirectory.childDirectory(packageName);
-
-  final File pubspecFile = root.childFile('pubspec.yaml');
+Future<void> modifyPubspec(Directory dir, void Function(YamlEditor editor) modify) async {
+  final File pubspecFile = dir.childFile('pubspec.yaml');
   final String content = await pubspecFile.readAsString();
   final YamlEditor yamlEditor = YamlEditor(content);
-  yamlEditor.update(<String>['dependencies'], <String, String>{'native_assets_cli': '^0.11.0'});
+  modify(yamlEditor);
   pubspecFile.writeAsStringSync(yamlEditor.toString());
+}
 
+Future<void> createDataAssetApp(String packageName, Directory root) async {
+  await modifyPubspec(
+    root,
+    (YamlEditor editor) =>
+        editor.update(<String>['dependencies'], <String, String>{'native_assets_cli': '^0.11.0'}),
+  );
+
+  final File pubspecFile = root.childFile('pubspec.yaml');
   await pinDependencies(pubspecFile);
 
   final File mainFile = root.childDirectory('lib').childFile('main.dart');
@@ -333,8 +331,27 @@ Future<Directory> createDataAssetApp(String packageName, Directory tempDirectory
     await processManager.run(<String>[flutterBin, 'pub', 'get'], workingDirectory: root.path),
     const ProcessResultMatcher(),
   );
+}
 
-  return root;
+Directory createAppWithName(String packageName, Directory tempDirectory) {
+  final ProcessResult result = processManager.runSync(<String>[
+    flutterBin,
+    'create',
+    '--no-pub',
+    packageName,
+  ], workingDirectory: tempDirectory.path);
+  expect(result, const ProcessResultMatcher());
+  final Directory packageDirectory = tempDirectory.childDirectory(packageName);
+
+  expect(
+    processManager.runSync(<String>[
+      flutterBin,
+      'pub',
+      'get',
+    ], workingDirectory: packageDirectory.path),
+    const ProcessResultMatcher(),
+  );
+  return packageDirectory;
 }
 
 void writeHookLibrary(
@@ -342,12 +359,6 @@ void writeHookLibrary(
   Map<String, String> dataAssets, {
   required List<String> available,
 }) {
-  final Directory assetDir = root.childDirectory('asset');
-
-  dataAssets.forEach((String id, String content) {
-    writeFile(assetDir.childFile('$id.txt'), content);
-  });
-
   final File hookFile = root.childDirectory('hook').childFile('build.dart');
   available = <String>[for (final String id in available) '"$id"'];
   writeFile(hookFile, '''
@@ -360,7 +371,7 @@ void writeHookLibrary(
               DataAsset(
                 package: input.packageName,
                 name: id,
-                file: input.packageRoot.resolve('asset/\$id.txt'),
+                file: input.packageRoot.resolve(id),
               ),
             );
           }
@@ -372,6 +383,12 @@ void writeHookLibrary(
         });
       }
   ''');
+}
+
+void writeAssets(Map<String, String> dataAssets, Directory root) {
+  dataAssets.forEach((String id, String content) {
+    writeFile(root.childFile(id), content);
+  });
 }
 
 void writeHelperLibrary(Directory root, String version, List<String> assetIds) {
