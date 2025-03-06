@@ -7,13 +7,11 @@
 
 #include <utility>
 
-#include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 
 #include "flutter/flow/embedded_views.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
-#include "third_party/skia/include/core/SkMatrix.h"
 
 #if FML_OS_ANDROID
 #include "flutter/fml/platform/android/scoped_java_ref.h"
@@ -238,6 +236,10 @@ class PlatformViewAndroidJNI {
                                       int32_t viewWidth,
                                       int32_t viewHeight,
                                       MutatorsStack mutators_stack) = 0;
+
+  virtual void showOverlaySurface2() = 0;
+
+  virtual void hideOverlaySurface2() = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Computes the locale Android would select.

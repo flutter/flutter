@@ -718,6 +718,64 @@ void main() {
     expect(box.size.width, customWidth);
   });
 
+  testWidgets('The width is determined by the menu entries', (WidgetTester tester) async {
+    const double entryLabelWidth = 100;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: 'Flutter',
+                labelWidget: SizedBox(width: entryLabelWidth),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final double width = tester.getSize(find.byType(DropdownMenu<int>)).width;
+    const double menuEntryPadding = 24.0; // See _kDefaultHorizontalPadding.
+    const double leadingWidth = 16.0;
+    const double trailingWidth = 56.0;
+
+    expect(width, entryLabelWidth + leadingWidth + trailingWidth + menuEntryPadding);
+  });
+
+  testWidgets('The width is determined by the label when it is longer than menu entries', (
+    WidgetTester tester,
+  ) async {
+    const double labelWidth = 120;
+    const double entryLabelWidth = 100;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            label: SizedBox(width: labelWidth),
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: 'Flutter',
+                labelWidget: SizedBox(width: entryLabelWidth),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final double width = tester.getSize(find.byType(DropdownMenu<int>)).width;
+    const double leadingWidth = 16.0;
+    const double trailingWidth = 56.0;
+    const double labelPadding = 8.0; // See RenderEditable.floatingCursorAddedMargin.
+
+    expect(width, labelWidth + labelPadding + leadingWidth + trailingWidth);
+  });
+
   testWidgets('The width of MenuAnchor respects MenuAnchor.expandedInsets', (
     WidgetTester tester,
   ) async {
@@ -962,7 +1020,7 @@ void main() {
     // Default text field (without leading icon).
     await tester.pumpWidget(buildTest(themeData, menuChildren, label: const Text('label')));
 
-    final Finder label = find.text('label');
+    final Finder label = find.text('label').first;
     final Offset labelTopLeft = tester.getTopLeft(label);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -985,7 +1043,7 @@ void main() {
 
     final Finder leadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double iconWidth = tester.getSize(leadingIcon).width;
-    final Finder updatedLabel = find.text('label');
+    final Finder updatedLabel = find.text('label').first;
     final Offset updatedLabelTopLeft = tester.getTopLeft(updatedLabel);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -1009,7 +1067,7 @@ void main() {
 
     final Finder largeLeadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double largeIconWidth = tester.getSize(largeLeadingIcon).width;
-    final Finder updatedLabel1 = find.text('label');
+    final Finder updatedLabel1 = find.text('label').first;
     final Offset updatedLabelTopLeft1 = tester.getTopLeft(updatedLabel1);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -1040,7 +1098,7 @@ void main() {
       ),
     );
 
-    final Finder label = find.text('label');
+    final Finder label = find.text('label').first;
     final Offset labelTopRight = tester.getTopRight(label);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -1072,7 +1130,7 @@ void main() {
     final Finder leadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double iconWidth = tester.getSize(leadingIcon).width;
     final Offset dropdownMenuTopRight = tester.getTopRight(find.byType(DropdownMenu<TestMenu>));
-    final Finder updatedLabel = find.text('label');
+    final Finder updatedLabel = find.text('label').first;
     final Offset updatedLabelTopRight = tester.getTopRight(updatedLabel);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -1110,7 +1168,7 @@ void main() {
     final Offset updatedDropdownMenuTopRight = tester.getTopRight(
       find.byType(DropdownMenu<TestMenu>),
     );
-    final Finder updatedLabel1 = find.text('label');
+    final Finder updatedLabel1 = find.text('label').first;
     final Offset updatedLabelTopRight1 = tester.getTopRight(updatedLabel1);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -2111,7 +2169,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(menuAnchor.controller!.isOpen, true);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    // Simulate `TextInputAction.done` on textfield
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     expect(menuAnchor.controller!.isOpen, false);
   });
@@ -2164,7 +2223,15 @@ void main() {
     // Test onSelected on key press
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+
+    // On mobile platforms, the TextField cannot gain focus by default; the focus is
+    // on a FocusNode specifically used for keyboard navigation. Therefore,
+    // LogicalKeyboardKey.enter should be used.
+    if (isMobile) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    } else {
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+    }
     await tester.pumpAndSettle();
     expect(selectionCount, expectedCount);
 
@@ -3951,6 +4018,73 @@ void main() {
     );
     textField = tester.widget(find.byType(TextField));
     expect(textField.textInputAction, TextInputAction.next);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/162539
+  testWidgets(
+    'When requestFocusOnTap is true, the TextField should gain focus after being tapped.',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: true,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+      final Element textField = tester.firstElement(find.byType(TextField));
+      expect(Focus.of(textField).hasFocus, isTrue);
+    },
+  );
+
+  testWidgets('items can be constrainted to be smaller than the text field with menuStyle', (
+    WidgetTester tester,
+  ) async {
+    const String longLabel = 'This is a long text that it can overflow.';
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(value: 0, label: longLabel),
+            ],
+            menuStyle: MenuStyle(maximumSize: WidgetStatePropertyAll<Size>(Size(150.0, 50.0))),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(findMenuItemButton(longLabel)).width, 150.0);
+
+    // The overwrite of menuStyle is different when a width is provided,
+    // So it needs to be tested separately.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            width: 200.0,
+            dropdownMenuEntries: menuChildren,
+            menuStyle: const MenuStyle(
+              maximumSize: WidgetStatePropertyAll<Size>(Size(150.0, 50.0)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 150.0);
   });
 }
 

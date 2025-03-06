@@ -191,6 +191,10 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
              KeyEventCallback callback) override;
 
   // |WindowBindingHandlerDelegate|
+  void OnFocus(FlutterViewFocusState focus_state,
+               FlutterViewFocusDirection direction) override;
+
+  // |WindowBindingHandlerDelegate|
   void OnComposeBegin() override;
 
   // |WindowBindingHandlerDelegate|
@@ -245,6 +249,10 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // |WindowBindingHandlerDelegate|
   void OnWindowStateEvent(HWND hwnd, WindowStateEvent event) override;
+
+  // Focus the view.
+  // Returns true if the view was focused.
+  virtual bool Focus();
 
  protected:
   virtual void NotifyWinEventWrapper(ui::AXPlatformNodeWin* node,
@@ -352,6 +360,10 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                bool was_down,
                KeyEventCallback callback);
 
+  // Reports a focus event to Flutter engine.
+  void SendFocus(FlutterViewFocusState focus_state,
+                 FlutterViewFocusDirection direction);
+
   // Reports an IME compose begin event.
   //
   // Triggered when the user begins editing composing text using a multi-step
@@ -429,10 +441,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Currently configured WindowBindingHandler for view.
   std::unique_ptr<WindowBindingHandler> binding_handler_;
 
-  // Resize events are synchronized using this mutex and the corresponding
-  // condition variable.
+  // Protects resize_status_, resize_target_width_ and resize_target_height_.
   std::mutex resize_mutex_;
-  std::condition_variable resize_cv_;
 
   // Indicates the state of a window resize event. Platform thread will be
   // blocked while this is not done. Guarded by resize_mutex_.

@@ -23,6 +23,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -60,7 +61,7 @@ void main() {
   // Creates the mock files necessary to look like a Flutter project.
   void setUpMockCoreProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -616,7 +617,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[cmakeCommand('release'), ninjaCommand('release')]);
       fileSystem.file('lib/other.dart').createSync(recursive: true);
-      fileSystem.file('foo/bar.sksl.json').createSync(recursive: true);
 
       await createTestCommandRunner(command).run(const <String>[
         'build',
@@ -630,7 +630,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         '--dart-define=foo.bar=2',
         '--dart-define=fizz.far=3',
         '--tree-shake-icons',
-        '--bundle-sksl-path=foo/bar.sksl.json',
       ]);
 
       final File cmakeConfig = fileSystem.currentDirectory
@@ -653,7 +652,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
           'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
           'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
           'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-          '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw=="',
+          '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI="',
           '  "DART_OBFUSCATION=true"',
           '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
           '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
@@ -663,7 +662,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
           '  "FLUTTER_ROOT=$_kTestFlutterRoot"',
           '  "PROJECT_DIR=${fileSystem.currentDirectory.path}"',
           '  "FLUTTER_TARGET=lib/other.dart"',
-          '  "BUNDLE_SKSL_PATH=foo/bar.sksl.json"',
         ]),
       );
     },
@@ -688,10 +686,7 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "fizz_bar")
 ''');
       fileSystem.file('pubspec.yaml').createSync();
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
         fileSystem.currentDirectory,
       );
