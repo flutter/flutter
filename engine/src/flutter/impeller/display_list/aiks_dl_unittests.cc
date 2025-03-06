@@ -1111,6 +1111,8 @@ TEST_P(AiksTest, DisplayListToTextureAllocationFailure) {
   DisplayListBuilder builder;
 
   AiksContext aiks_context(GetContext(), nullptr);
+  // Use intentionally invalid dimensions that would trigger an allocation
+  // failure.
   auto texture =
       DisplayListToTexture(builder.Build(), ISize{0, 0}, aiks_context);
 
