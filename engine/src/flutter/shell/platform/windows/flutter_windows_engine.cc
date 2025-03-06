@@ -233,6 +233,10 @@ FlutterWindowsEngine::~FlutterWindowsEngine() {
   Stop();
 }
 
+FlutterWindowsEngine* FlutterWindowsEngine::GetEngineForId(int64_t engine_id) {
+  return reinterpret_cast<FlutterWindowsEngine*>(engine_id);
+}
+
 void FlutterWindowsEngine::SetSwitches(
     const std::vector<std::string>& switches) {
   project_->SetSwitches(switches);
@@ -309,6 +313,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = argv.empty() ? nullptr : argv.data();
+  args.engine_id = reinterpret_cast<int64_t>(this);
 
   // Fail if conflicting non-default entrypoints are specified in the method
   // argument and the project.
@@ -388,6 +393,11 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
                             SAFE_ACCESS(update, listening, false));
     }
   };
+  args.view_focus_change_request_callback =
+      [](const FlutterViewFocusChangeRequest* request, void* user_data) {
+        auto host = static_cast<FlutterWindowsEngine*>(user_data);
+        host->OnViewFocusChangeRequest(request);
+      };
 
   args.custom_task_runners = &custom_task_runners;
 
@@ -706,6 +716,13 @@ void FlutterWindowsEngine::SendKeyEvent(const FlutterKeyEvent& event,
   }
 }
 
+void FlutterWindowsEngine::SendViewFocusEvent(
+    const FlutterViewFocusEvent& event) {
+  if (engine_) {
+    embedder_api_.SendViewFocusEvent(engine_, &event);
+  }
+}
+
 bool FlutterWindowsEngine::SendPlatformMessage(
     const char* channel,
     const uint8_t* message,
@@ -991,6 +1008,19 @@ void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {
   } else if (name == "flutter/lifecycle" && listening) {
     lifecycle_manager_->BeginProcessingLifecycle();
   }
+}
+
+void FlutterWindowsEngine::OnViewFocusChangeRequest(
+    const FlutterViewFocusChangeRequest* request) {
+  std::shared_lock read_lock(views_mutex_);
+
+  auto iterator = views_.find(request->view_id);
+  if (iterator == views_.end()) {
+    return;
+  }
+
+  FlutterWindowsView* view = iterator->second;
+  view->Focus();
 }
 
 bool FlutterWindowsEngine::Present(const FlutterPresentViewInfo* info) {

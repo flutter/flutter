@@ -135,25 +135,6 @@ static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
   }
 }
 
-static gboolean get_mouse_button(GdkEvent* event, int64_t* button) {
-  guint event_button = 0;
-  gdk_event_get_button(event, &event_button);
-
-  switch (event_button) {
-    case GDK_BUTTON_PRIMARY:
-      *button = kFlutterPointerButtonMousePrimary;
-      return TRUE;
-    case GDK_BUTTON_MIDDLE:
-      *button = kFlutterPointerButtonMouseMiddle;
-      return TRUE;
-    case GDK_BUTTON_SECONDARY:
-      *button = kFlutterPointerButtonMouseSecondary;
-      return TRUE;
-    default:
-      return FALSE;
-  }
-}
-
 // Called when the mouse cursor changes.
 static void cursor_changed_cb(FlView* self) {
   FlMouseCursorHandler* handler =
@@ -323,10 +304,8 @@ static gboolean button_press_event_cb(FlView* self,
     return FALSE;
   }
 
-  int64_t button;
-  if (!get_mouse_button(event, &button)) {
-    return FALSE;
-  }
+  guint button = 0;
+  gdk_event_get_button(event, &button);
 
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
@@ -345,10 +324,8 @@ static gboolean button_release_event_cb(FlView* self,
                                         GdkEventButton* button_event) {
   GdkEvent* event = reinterpret_cast<GdkEvent*>(button_event);
 
-  int64_t button;
-  if (!get_mouse_button(event, &button)) {
-    return FALSE;
-  }
+  guint button = 0;
+  gdk_event_get_button(event, &button);
 
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
@@ -512,6 +489,10 @@ static void realize_cb(FlView* self) {
   fl_socket_accessible_embed(
       FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
       atk_plug_get_id(ATK_PLUG(self->view_accessible)));
+}
+
+static void secondary_realize_cb(FlView* self) {
+  setup_cursor(self);
 }
 
 static gboolean render_cb(FlView* self, GdkGLContext* context) {
@@ -799,7 +780,8 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, engine);
 
-  setup_cursor(self);
+  g_signal_connect_swapped(self->gl_area, "realize",
+                           G_CALLBACK(secondary_realize_cb), self);
 
   return self;
 }
