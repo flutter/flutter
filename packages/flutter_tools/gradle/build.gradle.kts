@@ -8,7 +8,7 @@ plugins {
     `java-gradle-plugin`
     groovy
     `kotlin-dsl`
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm") version "1.9.20"
 }
 
 group = "dev.flutter.plugin"
@@ -60,7 +60,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 
 dependencies {
     // Versions available https://mvnrepository.com/artifact/androidx.annotation/annotation-jvm.
-    compileOnly("androidx.annotation:annotation-jvm:1.6.0")
+    compileOnly("androidx.annotation:annotation-jvm:1.9.1")
     // Must match the version applied in "plugins"
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
     // Update to 1.8.0 when min kotlin is 2.1
