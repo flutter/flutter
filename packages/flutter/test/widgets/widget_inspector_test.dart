@@ -4837,6 +4837,32 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(parentData['offsetY'], equals('293.0'));
       });
 
+      testWidgets(
+        'ext.flutter.inspector.getLayoutExplorerNode does not throw for unmounted widget',
+        (WidgetTester tester) async {
+          // Mount the Row widget.
+          await pumpWidgetForLayoutExplorer(tester);
+
+          // Get the id of the Row widget.
+          final Element rowElement = tester.element(find.byType(Row));
+          service.setSelection(rowElement, group);
+          final String id = service.toId(rowElement, group)!;
+
+          // Unmount the Row widget.
+          await tester.pumpWidget(const Placeholder());
+
+          // Verify that the call to getLayoutExplorerNode for the Row widget
+          // does not throw an exception.
+          expect(
+            () => service.testExtension(
+              WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+              <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+            ),
+            returnsNormally,
+          );
+        },
+      );
+
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with FlexParentData', (
         WidgetTester tester,
       ) async {
