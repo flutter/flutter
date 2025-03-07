@@ -268,7 +268,7 @@ DlPath DlPath::operator+(const DlPath& other) const {
   return DlPath(path);
 }
 
-SkPath DlPath::ConvertToSkiaPath(const Path& path, const DlPoint& shift) {
+SkPath DlPath::ConvertToSkiaPath(const Path& path) {
   SkPath sk_path;
 
   DlPathReceiver receiver{
@@ -368,12 +368,12 @@ void DlPath::DispatchFromImpellerPath(const impeller::Path& path,
   }
 }
 
-Path DlPath::ConvertToImpellerPath(const SkPath& path, const DlPoint& shift) {
-  if (path.isEmpty() || !shift.IsFinite()) {
+Path DlPath::ConvertToImpellerPath(const SkPath& path) {
+  if (path.isEmpty()) {
     return Path{};
   }
+
   PathBuilder builder;
-  std::optional<DlRect> path_bounds;
   DlPathFillType path_fill_type;
 
   DlPathReceiver receiver{
@@ -383,7 +383,7 @@ Path DlPath::ConvertToImpellerPath(const SkPath& path, const DlPoint& shift) {
             builder.Reserve(point_count + 8, verb_count + 8);
           },
       .recommend_bounds =
-          [&path_bounds](const DlRect& bounds) { path_bounds = bounds; },
+          [&builder](const DlRect& bounds) { builder.SetBounds(bounds); },
       .path_info =
           [&builder, &path_fill_type](DlPathFillType fill_type,
                                       bool is_convex) {
@@ -410,16 +410,6 @@ Path DlPath::ConvertToImpellerPath(const SkPath& path, const DlPoint& shift) {
   };
 
   DispatchFromSkiaPath(path, receiver);
-
-  if (!shift.IsZero()) {
-    builder.Shift(shift);
-    if (path_bounds.has_value()) {
-      path_bounds = path_bounds.value().Shift(shift);
-    }
-  }
-  if (path_bounds.has_value()) {
-    builder.SetBounds(path_bounds.value());
-  }
 
   return builder.TakePath(path_fill_type);
 }

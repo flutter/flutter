@@ -2140,6 +2140,7 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
                 [](DlPathFillType type, bool is_convex) {
                   // Need to convert the fill type to the Android enum and
                   // call setFillType on the path...
+                  // see https://github.com/flutter/flutter/issues/164808
                 },
             .move_to =
                 [&env, &androidPath](const DlPoint& p2) {
