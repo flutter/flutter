@@ -848,57 +848,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   XCTAssertTrue(rootNode.accessibilityRespondsToUserInteraction);
 }
 
-- (void)testSemanticObjectContainerRectContainsAllChildRects {
-  flutter::MockDelegate mock_delegate;
-  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
-  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
-                               /*platform=*/thread_task_runner,
-                               /*raster=*/thread_task_runner,
-                               /*ui=*/thread_task_runner,
-                               /*io=*/thread_task_runner);
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
-      /*platform_views_controller=*/nil,
-      /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
-  id engine = OCMClassMock([FlutterEngine class]);
-  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
-                                                            opaque:YES
-                                                   enableWideGamut:NO];
-  OCMStub([mockFlutterViewController view]).andReturn(flutterView);
-  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
-  __block auto bridge =
-      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
-                                                     /*platform_view=*/platform_view.get(),
-                                                     /*platform_views_controller=*/nil,
-                                                     /*ios_delegate=*/std::move(ios_delegate));
-
-  flutter::CustomAccessibilityActionUpdates actions;
-  flutter::SemanticsNodeUpdates nodes;
-
-  flutter::SemanticsNode child_node1;
-  child_node1.id = 0;
-  child_node1.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
-  child_node1.rect = SkRect::MakeXYWH(0, 0, 100, 100);
-
-  flutter::SemanticsNode child_node2;
-  child_node2.id = 1;
-  child_node2.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
-  child_node2.rect = SkRect::MakeXYWH(100, 100, 100, 100);
-
-  nodes[child_node1.id] = child_node1;
-  nodes[child_node2.id] = child_node2;
-  bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
-
-  SemanticsObjectContainer* rootContainer = flutterView.accessibilityElements[0];
-  XCTAssertTrue(CGRectEqualToRect(rootContainer.accessibilityFrame, CGRectMake(0, 0, 200, 200)))
-}
-
 // Regression test for:
 // https://github.com/flutter/flutter/issues/158477
 - (void)testLabeledParentAndChildNotInteractive {

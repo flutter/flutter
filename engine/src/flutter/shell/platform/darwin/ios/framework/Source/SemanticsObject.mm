@@ -946,8 +946,11 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   CGRect boundingRect = self.semanticsObject.accessibilityFrame;
   for (SemanticsObject* child in children) {
     CGRect childRect = child.accessibilityFrame;
+    NSLog(@"childRect %@", NSStringFromCGRect(childRect));
     boundingRect = CGRectUnion(boundingRect, childRect);
   }
+  NSLog(@"boundingRect %@", NSStringFromCGRect(boundingRect));
+
   return boundingRect;
 }
 
