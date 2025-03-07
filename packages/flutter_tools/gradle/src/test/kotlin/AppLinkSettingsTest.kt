@@ -11,8 +11,8 @@ import kotlin.test.assertTrue
 class AppLinkSettingsTest {
     @Test
     fun canCreateThenEditDeeplinks() {
-        val deeplink1 = Deeplink("scheme1", "host1", "path1", null)
-        val deeplink2 = Deeplink("scheme2", "host2", "path2", null)
+        val deeplink1 = Deeplink("scheme1", "host1", "path1", IntentFilterCheck())
+        val deeplink2 = Deeplink("scheme2", "host2", "path2", IntentFilterCheck())
         val appLinkSettings = AppLinkSettings(applicationId = "testApplicationId")
 
         appLinkSettings.deeplinks.add(deeplink1)
@@ -30,8 +30,8 @@ class AppLinkSettingsTest {
 
     @Test
     fun canCreateAppLinkSettingsJson() {
-        val deeplink1 = Deeplink("scheme1", "host1", "path1", null)
-        val deeplink2 = Deeplink("scheme2", "host2", "path2", null)
+        val deeplink1 = Deeplink("scheme1", "host1", "path1", IntentFilterCheck())
+        val deeplink2 = Deeplink("scheme2", "host2", "path2", IntentFilterCheck())
         val appLinkSettings = AppLinkSettings(applicationId = "testApplicationId")
         appLinkSettings.deeplinkingFlagEnabled = true
         appLinkSettings.deeplinks.addAll(listOf(deeplink1, deeplink2))
