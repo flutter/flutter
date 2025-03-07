@@ -257,7 +257,7 @@ sealed class _DebugSemanticsRoleChecks {
     final SemanticsNode? parent = node.parent;
     if (parent == null) {
       return FlutterError(
-        "Semantics node ${node.id} has role ${data.role}, but doesn't have a parent",
+        "Semantics node ${node.id} has role ${data.role} but doesn't have a parent",
       );
     }
     final SemanticsData parentSemanticsData = parent.getSemanticsData();
