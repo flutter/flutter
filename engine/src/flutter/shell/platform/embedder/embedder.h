@@ -1587,8 +1587,6 @@ typedef struct {
   // Array of string attributes associated with the `decreased_value`.
   // Has length `decreased_value_attribute_count`.
   const FlutterStringAttribute** decreased_value_attributes;
-  // The ID of the view that this node is associated with.
-  int64_t view_id;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
@@ -1682,6 +1680,8 @@ typedef struct {
   /// Array of semantics custom action pointers. Has length
   /// `custom_action_count`.
   FlutterSemanticsCustomAction2** custom_actions;
+  // The ID of the view that this node is associated with.
+  int64_t view_id;
 } FlutterSemanticsUpdate2;
 
 typedef void (*FlutterUpdateSemanticsNodeCallback)(

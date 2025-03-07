@@ -117,6 +117,7 @@ EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
       .nodes = node_pointers_.data(),
       .custom_action_count = action_pointers_.size(),
       .custom_actions = action_pointers_.data(),
+      .view_id = view_id
   };
 }
 

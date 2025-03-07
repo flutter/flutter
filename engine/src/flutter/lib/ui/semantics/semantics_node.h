@@ -182,6 +182,7 @@ struct SemanticsNode {
 
   std::string linkUrl;
   SemanticsRole role;
+  int64_t view_id = 0;
 };
 
 // Contains semantic nodes that need to be updated.
