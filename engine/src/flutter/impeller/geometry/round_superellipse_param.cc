@@ -296,14 +296,13 @@ bool CornerContains(const RoundSuperellipseParam::Quadrant& param,
 
 RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
     const Rect& bounds,
-    const RoundingRadii& original_radii) {
-  RoundingRadii radii = original_radii.Scaled(bounds);
+    const RoundingRadii& radii) {
   if (radii.AreAllCornersSame() && !radii.top_left.IsEmpty()) {
     // Having four empty corners indicate a rectangle, which needs special
     // treatment on border containment and therefore is not `all_corners_same`.
     return RoundSuperellipseParam{
         .top_right = ComputeQuadrant(bounds.GetCenter(), bounds.GetRightTop(),
-                                     original_radii.top_right),
+                                     radii.top_right),
         .all_corners_same = true,
     };
   }
