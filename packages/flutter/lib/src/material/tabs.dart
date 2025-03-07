@@ -847,7 +847,7 @@ class _TabBarScrollController extends ScrollController {
 /// Signature for [TabBar] callbacks that report that an underlying value has
 /// changed for a given [Tab] at `index`.
 ///
-/// Used for [TabBar.onHover] and [TabBar.onFocusChanged] callbacks.
+/// Used for [TabBar.onHover] and [TabBar.onFocusChange] callbacks.
 typedef TabValueChanged<T> = void Function(T value, int index);
 
 /// A Material Design primary tab bar.
