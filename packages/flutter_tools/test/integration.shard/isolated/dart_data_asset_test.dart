@@ -29,18 +29,17 @@ void main() {
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
     return;
   }
-
-  // Create project structure once as we can re-use this for executing the
-  // various test modes.
-  late final Directory tempDirectory;
-  late final Directory root;
-  late final Directory rootDependency;
   setUpAll(() async {
     processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
     processManager.runSync(<String>[flutterBin, 'config', '--enable-dart-data-assets']);
   });
 
+  late Directory tempDirectory;
+  late Directory root;
+  late Directory rootDependency;
+
   setUp(() async {
+    // Do not reuse project structure to be able to make local changes
     tempDirectory = fileSystem.directory(
       fileSystem.systemTempDirectory.createTempSync().resolveSymbolicLinksSync(),
     );
