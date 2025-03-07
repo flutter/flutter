@@ -52,7 +52,7 @@ class ContentSensitivitySetting {
   bool get hasWidgets =>
       _sensitiveWidgetCount + _autoSensitiveWidgetCount + _notSensitiveWigetCount > 0;
 
-  /// Returns the most severe [ContentSensitivity] level of the [SensitiveContent] widgets
+  /// Returns the highest prioritized [ContentSensitivity] level of the [SensitiveContent] widgets
   /// that this setting tracks.
   ContentSensitivity? get contentSensitivityBasedOnWidgetCounts {
     if (_sensitiveWidgetCount > 0) {
@@ -177,30 +177,6 @@ class SensitiveContentHost {
 
       // Update current content sensitivity level.
       currentContentSensitivityLevel = contentSensitivityToRestore;
-    }
-  }
-
-  /// Return whether or not [desiredSensitivityLevel] should be set as the new
-  /// [ContentSensitivity] level for the widget tree.
-  ///
-  /// [desiredSensitivityLevel] should only be set if it is strictly more
-  /// severe than any of the other [SensitiveContent] widgets in the widget tree.
-  bool shouldSetContentSensitivity(ContentSensitivity desiredSensitivityLevel) {
-    if (currentContentSensitivityLevel == desiredSensitivityLevel) {
-      return false;
-    }
-
-    switch (desiredSensitivityLevel) {
-      case ContentSensitivity.sensitive:
-        return true;
-      case ContentSensitivity.autoSensitive:
-        return _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts !=
-            ContentSensitivity.sensitive;
-      case ContentSensitivity.notSensitive:
-        return _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts !=
-                ContentSensitivity.sensitive &&
-            _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts !=
-                ContentSensitivity.autoSensitive;
     }
   }
 }
