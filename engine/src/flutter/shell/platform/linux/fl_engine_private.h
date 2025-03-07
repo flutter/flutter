@@ -447,6 +447,7 @@ gboolean fl_engine_send_key_event_finish(FlEngine* engine,
  * @data: (allow-none): data associated with the action.
  */
 void fl_engine_dispatch_semantics_action(FlEngine* engine,
+                                         FlutterViewId view_id,
                                          uint64_t id,
                                          FlutterSemanticsAction action,
                                          GBytes* data);

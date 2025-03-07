@@ -280,8 +280,7 @@ TEST(AccessibilityBridgeWindows, DispatchAccessibilityAction) {
   FlutterSemanticsAction actual_action = kFlutterSemanticsActionTap;
   modifier.embedder_api().DispatchSemanticsActionOnView = MOCK_ENGINE_PROC(
       DispatchSemanticsActionOnView,
-      ([&actual_action](FLUTTER_API_SYMBOL(FlutterEngine) engine,
-                        uint64_t view_id, uint64_t id,
+      ([&actual_action](FLUTTER_API_SYMBOL(FlutterEngine) engine, uint64_t id,
                         FlutterSemanticsAction action, const uint8_t* data,
                         size_t data_length) {
         actual_action = action;
@@ -289,7 +288,7 @@ TEST(AccessibilityBridgeWindows, DispatchAccessibilityAction) {
       }));
 
   AccessibilityBridgeWindows delegate(&view);
-  delegate.DispatchAccessibilityAction(456, 1, kFlutterSemanticsActionCopy, {});
+  delegate.DispatchAccessibilityAction(1, kFlutterSemanticsActionCopy, {});
   EXPECT_EQ(actual_action, kFlutterSemanticsActionCopy);
 }
 

@@ -160,12 +160,10 @@ void AccessibilityBridgeWindows::OnAccessibilityEvent(
 }
 
 void AccessibilityBridgeWindows::DispatchAccessibilityAction(
-    FlutterViewId view_id,
     AccessibilityNodeId target,
     FlutterSemanticsAction action,
     fml::MallocMapping data) {
-  view_->GetEngine()->DispatchSemanticsAction(view_id, target, action,
-                                              std::move(data));
+  view_->GetEngine()->DispatchSemanticsAction(target, action, std::move(data));
 }
 
 FlutterViewId AccessibilityBridgeWindows::GetViewId() const {

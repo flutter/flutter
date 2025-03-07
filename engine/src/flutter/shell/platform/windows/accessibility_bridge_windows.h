@@ -31,8 +31,7 @@ class AccessibilityBridgeWindows : public AccessibilityBridge,
   virtual ~AccessibilityBridgeWindows() = default;
 
   // |AccessibilityBridge|
-  void DispatchAccessibilityAction(FlutterViewId view_id,
-                                   AccessibilityNodeId target,
+  void DispatchAccessibilityAction(AccessibilityNodeId target,
                                    FlutterSemanticsAction action,
                                    fml::MallocMapping data) override;
 

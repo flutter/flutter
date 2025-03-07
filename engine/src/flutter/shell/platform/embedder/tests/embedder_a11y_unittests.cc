@@ -252,9 +252,8 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
     notify_semantics_action_latch.Signal();
   };
   std::vector<uint8_t> bytes({2, 1});
-  result = FlutterEngineDispatchSemanticsAction(engine.get(), 456, 42,
-                                                kFlutterSemanticsActionTap,
-                                                &bytes[0], bytes.size());
+  result = FlutterEngineDispatchSemanticsAction(
+      engine.get(), 42, kFlutterSemanticsActionTap, &bytes[0], bytes.size());
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_action_latch.Wait();
 
@@ -550,9 +549,8 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
     notify_semantics_action_latch.Signal();
   };
   std::vector<uint8_t> bytes({2, 1});
-  result = FlutterEngineDispatchSemanticsAction(engine.get(), 456, 42,
-                                                kFlutterSemanticsActionTap,
-                                                &bytes[0], bytes.size());
+  result = FlutterEngineDispatchSemanticsAction(
+      engine.get(), 42, kFlutterSemanticsActionTap, &bytes[0], bytes.size());
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_action_latch.Wait();
 
@@ -750,9 +748,8 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV1Callbacks) {
     notify_semantics_action_latch.Signal();
   };
   std::vector<uint8_t> bytes({2, 1});
-  result = FlutterEngineDispatchSemanticsAction(engine.get(), 456, 42,
-                                                kFlutterSemanticsActionTap,
-                                                &bytes[0], bytes.size());
+  result = FlutterEngineDispatchSemanticsAction(
+      engine.get(), 42, kFlutterSemanticsActionTap, &bytes[0], bytes.size());
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_action_latch.Wait();
 

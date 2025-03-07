@@ -151,9 +151,9 @@ TEST(FlAccessibleTextFieldTest, PerformAction) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
-  fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
+  fl_engine_get_embedder_api(engine)->DispatchSemanticsActionOnView =
       MOCK_ENGINE_PROC(
-          DispatchSemanticsAction,
+          DispatchSemanticsActionOnView,
           ([&action_datas](auto engine, int64_t view_id, uint64_t id,
                            FlutterSemanticsAction action, const uint8_t* data,
                            size_t data_length) {
@@ -240,9 +240,9 @@ TEST(FlAccessibleTextFieldTest, SetCaretOffset) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
-  fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
+  fl_engine_get_embedder_api(engine)->DispatchSemanticsActionOnView =
       MOCK_ENGINE_PROC(
-          DispatchSemanticsAction,
+          DispatchSemanticsActionOnView,
           ([&base, &extent](auto engine, int64_t view_id, uint64_t id,
                             FlutterSemanticsAction action, const uint8_t* data,
                             size_t data_length) {
@@ -321,9 +321,9 @@ TEST(FlAccessibleTextFieldTest, AddSelection) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
-  fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
+  fl_engine_get_embedder_api(engine)->DispatchSemanticsActionOnView =
       MOCK_ENGINE_PROC(
-          DispatchSemanticsAction,
+          DispatchSemanticsActionOnView,
           ([&base, &extent](auto engine, int64_t view_id, uint64_t id,
                             FlutterSemanticsAction action, const uint8_t* data,
                             size_t data_length) {
@@ -361,9 +361,9 @@ TEST(FlAccessibleTextFieldTest, RemoveSelection) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
-  fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
+  fl_engine_get_embedder_api(engine)->DispatchSemanticsActionOnView =
       MOCK_ENGINE_PROC(
-          DispatchSemanticsAction,
+          DispatchSemanticsActionOnView,
           ([&base, &extent](auto engine, int64_t view_id, uint64_t id,
                             FlutterSemanticsAction action, const uint8_t* data,
                             size_t data_length) {
@@ -407,9 +407,9 @@ TEST(FlAccessibleTextFieldTest, SetSelection) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
-  fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
+  fl_engine_get_embedder_api(engine)->DispatchSemanticsActionOnView =
       MOCK_ENGINE_PROC(
-          DispatchSemanticsAction,
+          DispatchSemanticsActionOnView,
           ([&base, &extent](auto engine, int64_t view_id, uint64_t id,
                             FlutterSemanticsAction action, const uint8_t* data,
                             size_t data_length) {
@@ -448,9 +448,9 @@ TEST(FlAccessibleTextFieldTest, SetTextContents) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
-  fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
+  fl_engine_get_embedder_api(engine)->DispatchSemanticsActionOnView =
       MOCK_ENGINE_PROC(
-          DispatchSemanticsAction,
+          DispatchSemanticsActionOnView,
           ([&text](auto engine, int64_t view_id, uint64_t id,
                    FlutterSemanticsAction action, const uint8_t* data,
                    size_t data_length) {
@@ -480,9 +480,9 @@ TEST(FlAccessibleTextFieldTest, InsertDeleteText) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
-  fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
+  fl_engine_get_embedder_api(engine)->DispatchSemanticsActionOnView =
       MOCK_ENGINE_PROC(
-          DispatchSemanticsAction,
+          DispatchSemanticsActionOnView,
           ([&text, &base, &extent](auto engine, int64_t view_id, uint64_t id,
                                    FlutterSemanticsAction action,
                                    const uint8_t* data, size_t data_length) {
@@ -535,9 +535,9 @@ TEST(FlAccessibleTextFieldTest, CopyCutPasteText) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
-  fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
+  fl_engine_get_embedder_api(engine)->DispatchSemanticsActionOnView =
       MOCK_ENGINE_PROC(
-          DispatchSemanticsAction,
+          DispatchSemanticsActionOnView,
           ([&act, &base, &extent](auto engine, int64_t view_id, uint64_t id,
                                   FlutterSemanticsAction action,
                                   const uint8_t* data, size_t data_length) {

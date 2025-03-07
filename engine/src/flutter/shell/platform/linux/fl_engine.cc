@@ -1216,7 +1216,7 @@ gboolean fl_engine_send_key_event_finish(FlEngine* self,
 }
 
 void fl_engine_dispatch_semantics_action(FlEngine* self,
-                                         int64_t view_id,
+                                         FlutterViewId view_id,
                                          uint64_t id,
                                          FlutterSemanticsAction action,
                                          GBytes* data) {

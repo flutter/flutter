@@ -420,7 +420,8 @@ static void fl_accessible_node_perform_action_impl(
     FlutterSemanticsAction action,
     GBytes* data) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
-  fl_engine_dispatch_semantics_action(priv->engine, priv->id, action, data);
+  fl_engine_dispatch_semantics_action(priv->engine, priv->view_id, priv->id,
+                                      action, data);
 }
 
 static void fl_accessible_node_class_init(FlAccessibleNodeClass* klass) {

@@ -150,7 +150,7 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
   return kSuccess;
 }
 
-FlutterEngineResult FlutterEngineDispatchSemanticsAction(
+FlutterEngineResult FlutterEngineDispatchSemanticsActionOnView(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t view_id,
     uint64_t id,
@@ -229,7 +229,8 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   table->RunTask = &FlutterEngineRunTask;
   table->UpdateLocales = &FlutterEngineUpdateLocales;
   table->UpdateSemanticsEnabled = &FlutterEngineUpdateSemanticsEnabled;
-  table->DispatchSemanticsAction = &FlutterEngineDispatchSemanticsAction;
+  table->DispatchSemanticsActionOnView =
+      &FlutterEngineDispatchSemanticsActionOnView;
   table->RunsAOTCompiledDartCode = &FlutterEngineRunsAOTCompiledDartCode;
   table->RegisterExternalTexture = &FlutterEngineRegisterExternalTexture;
   table->MarkExternalTextureFrameAvailable =

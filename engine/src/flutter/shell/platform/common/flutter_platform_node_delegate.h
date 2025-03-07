@@ -63,14 +63,12 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
     ///             FlutterSemanticsAction::kFlutterSemanticsActionTap is
     ///             fired when user click or touch the screen.
     ///
-    /// @param[in]  view_id             The view_id of the action target.
     /// @param[in]  target              The semantics node id of the action
     ///                                 target.
     /// @param[in]  action              The generated flutter semantics action.
     /// @param[in]  data                Additional data associated with the
     ///                                 action.
-    virtual void DispatchAccessibilityAction(FlutterViewId view_id,
-                                             AccessibilityNodeId target,
+    virtual void DispatchAccessibilityAction(AccessibilityNodeId target,
                                              FlutterSemanticsAction action,
                                              fml::MallocMapping data) = 0;
 
