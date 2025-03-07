@@ -340,6 +340,10 @@ void RenderPassVK::SetCommandLabel(std::string_view label) {
 
 // |RenderPass|
 void RenderPassVK::SetStencilReference(uint32_t value) {
+  if (current_stencil_ == value) {
+    return;
+  }
+  current_stencil_ = value;
   command_buffer_vk_.setStencilReference(
       vk::StencilFaceFlagBits::eVkStencilFrontAndBack, value);
 }
