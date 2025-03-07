@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_RATIONAL_H_
-#define FLUTTER_IMPELLER_RATIONAL_H_
+#ifndef FLUTTER_IMPELLER_GEOMETRY_RATIONAL_H_
+#define FLUTTER_IMPELLER_GEOMETRY_RATIONAL_H_
 
 #include <cstdint>
 #include "impeller/geometry/scalar.h"
@@ -28,9 +28,7 @@ class Rational {
 
   uint64_t GetHash() const;
 
-  explicit operator Scalar() const {
-    return static_cast<float>(num_) / den_;
-  }
+  explicit operator Scalar() const { return static_cast<float>(num_) / den_; }
 
   Rational Invert() const;
 
@@ -41,4 +39,4 @@ class Rational {
 
 }  // namespace impeller
 
-#endif
+#endif  // FLUTTER_IMPELLER_GEOMETRY_RATIONAL_H_
