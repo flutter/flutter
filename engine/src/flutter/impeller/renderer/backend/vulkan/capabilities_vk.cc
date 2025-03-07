@@ -637,7 +637,6 @@ bool CapabilitiesVK::SetPhysicalDevice(
       HasExtension(OptionalAndroidDeviceExtensionVK::kKHRExternalFence) &&
       HasExtension(OptionalAndroidDeviceExtensionVK::kKHRExternalSemaphore) &&
       HasExtension(OptionalAndroidDeviceExtensionVK::kKHRExternalSemaphoreFd)) {
-    FML_LOG(ERROR) << "HAS EXTENSIONS!!!";
     supports_external_fence_and_semaphore_ = true;
   }
 
