@@ -8861,4 +8861,281 @@ void main() {
       ),
     );
   });
+
+  testWidgets('onHover is triggered when mouse pointer is over a tab', (WidgetTester tester) async {
+    final List<({bool hover, int index})> hoverEvents = <({bool hover, int index})>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                onHover: (bool value, int index) {
+                  hoverEvents.add((hover: value, index: index));
+                },
+                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[Text('Tab 1 View'), Text('Tab 2 View'), Text('Tab 3 View')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(hoverEvents.isEmpty, isTrue);
+
+    // Hover over the first tab.
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.text('Tab 1')));
+    await tester.pump();
+
+    // Hover entered first tab.
+    expect(hoverEvents, <({bool hover, int index})>[(hover: true, index: 0)]);
+
+    await gesture.moveTo(tester.getCenter(find.text('Tab 2')));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+    ]);
+
+    await gesture.moveTo(tester.getCenter(find.text('Tab 3')));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+      (hover: false, index: 1), // Second tab hover exit
+      (hover: true, index: 2), // Third tab hover enter
+    ]);
+
+    await gesture.moveTo(tester.getCenter(find.byType(TabBarView)));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+      (hover: false, index: 1), // Second tab hover exit
+      (hover: true, index: 2), // Third tab hover enter
+      (hover: false, index: 2), // Third tab hover exit
+    ]);
+
+    hoverEvents.clear();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar.secondary(
+                onHover: (bool value, int index) {
+                  hoverEvents.add((hover: value, index: index));
+                },
+                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[Text('Tab 1 View'), Text('Tab 2 View'), Text('Tab 3 View')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(hoverEvents.isEmpty, isTrue);
+
+    // Hover over the first tab.
+    await gesture.moveTo(tester.getCenter(find.text('Tab 1')));
+    await tester.pump();
+
+    // Hover enters first tab.
+    expect(hoverEvents, <({bool hover, int index})>[(hover: true, index: 0)]);
+
+    await gesture.moveTo(tester.getCenter(find.text('Tab 2')));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+    ]);
+
+    await gesture.moveTo(tester.getCenter(find.text('Tab 3')));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+      (hover: false, index: 1), // Second tab hover exit
+      (hover: true, index: 2), // Third tab hover enter
+    ]);
+
+    await gesture.moveTo(tester.getCenter(find.byType(TabBarView)));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+      (hover: false, index: 1), // Second tab hover exit
+      (hover: true, index: 2), // Third tab hover enter
+      (hover: false, index: 2), // Third tab hover exit
+    ]);
+  });
+
+  testWidgets('onFocusChange is triggered when tabs gain and lose focus', (WidgetTester tester) async {
+    final List<({bool focus, int index})> focusEvents = <({bool focus, int index})>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                onFocusChange: (bool value, int index) {
+                  focusEvents.add((focus: value, index: index));
+                },
+                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[Text('Tab 1 View'), Text('Tab 2 View'), Text('Tab 3 View')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusEvents.isEmpty, isTrue);
+
+    // Focus on the first tab.
+    Element tabElement = tester.element(find.text('Tab 1'));
+    FocusNode node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+
+    // Focus gained at first tab.
+    expect(focusEvents, <({bool focus, int index})>[(focus: true, index: 0)]);
+
+    tabElement = tester.element(find.text('Tab 2'));
+    node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+    ]);
+
+    tabElement = tester.element(find.text('Tab 3'));
+    node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+    expect(node.hasFocus, isTrue);
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+      (focus: false, index: 1), // Second tab loses focus
+      (focus: true, index: 2), // Third tab gains focus
+    ]);
+
+    node.unfocus();
+    await tester.pump();
+
+    expect(node.hasFocus, isFalse);
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+      (focus: false, index: 1), // Second tab loses focus
+      (focus: true, index: 2), // Third tab gains focus
+      (focus: false, index: 2), // Third tab loses focus
+    ]);
+
+    focusEvents.clear();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar.secondary(
+                onFocusChange: (bool value, int index) {
+                  focusEvents.add((focus: value, index: index));
+                },
+                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[Text('Tab 1 View'), Text('Tab 2 View'), Text('Tab 3 View')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusEvents.isEmpty, isTrue);
+
+    // Focus on the first tab.
+    tabElement = tester.element(find.text('Tab 1'));
+    node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+
+    // Focus gained at first tab.
+    expect(focusEvents, <({bool focus, int index})>[(focus: true, index: 0)]);
+
+    tabElement = tester.element(find.text('Tab 2'));
+    node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+    ]);
+
+    tabElement = tester.element(find.text('Tab 3'));
+    node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+    expect(node.hasFocus, isTrue);
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+      (focus: false, index: 1), // Second tab loses focus
+      (focus: true, index: 2), // Third tab gains focus
+    ]);
+
+    node.unfocus();
+    await tester.pump();
+
+    expect(node.hasFocus, isFalse);
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+      (focus: false, index: 1), // Second tab loses focus
+      (focus: true, index: 2), // Third tab gains focus
+      (focus: false, index: 2), // Third tab loses focus
+    ]);
+  });
 }
