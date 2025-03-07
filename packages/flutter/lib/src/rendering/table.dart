@@ -661,7 +661,8 @@ class RenderTable extends RenderBox {
         // its rect is relative to the table. Check its rect to see if it belongs to the current row.
         // Otherwise if the cell index in parent is not null, it means the cell's parent is set to a row,
         // check its index to see if it belongs to the current row or next row.
-        if ((child.indexInParent == null && childRect.top > rowBox.bottom) ||
+
+        if ((child.indexInParent == null && childRect.top + 0.001 > rowBox.bottom) ||
             (child.indexInParent != null && child.indexInParent != x)) {
           break;
         }
