@@ -13,7 +13,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'color_scheme.dart';
 import 'date.dart';
 import 'date_picker_theme.dart';
 import 'debug.dart';
@@ -24,7 +23,6 @@ import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
-import 'text_theme.dart';
 import 'theme.dart';
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
@@ -431,9 +429,11 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
-    final Color controlColor = colorScheme.onSurface.withOpacity(0.60);
+    final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
+    final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
+    final TextStyle? buttonTextStyle = datePickerTheme.toggleModeStyle ?? defaults.toggleModeStyle;
+    final Color? toggleModeForegroundColor =
+        datePickerTheme.toggleModeForegroundColor ?? defaults.toggleModeForegroundColor;
 
     return SizedBox(
       height: _subHeaderHeight,
@@ -458,12 +458,12 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
                             child: Text(
                               widget.title,
                               overflow: TextOverflow.ellipsis,
-                              style: textTheme.titleSmall?.copyWith(color: controlColor),
+                              style: buttonTextStyle?.apply(color: toggleModeForegroundColor),
                             ),
                           ),
                           RotationTransition(
                             turns: _controller,
-                            child: Icon(Icons.arrow_drop_down, color: controlColor),
+                            child: Icon(Icons.arrow_drop_down, color: toggleModeForegroundColor),
                           ),
                         ],
                       ),
