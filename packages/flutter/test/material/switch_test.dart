@@ -1041,19 +1041,19 @@ void main() {
           ..rrect(color: Colors.yellow[500]),
       );
 
-        await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
-        await tester.pump();
+      await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+      await tester.pump();
 
-        expect(
-          Material.of(tester.element(find.byType(Switch))),
-          paints
-            ..rrect(color: Colors.green[500], rrect: trackRRect)
-            ..rrect(color: const Color(0x00000000))
-            ..rrect(color: const Color(0x33000000))
-            ..rrect(color: const Color(0x24000000))
-            ..rrect(color: const Color(0x1f000000))
-            ..rrect(color: Colors.red),
-        );
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.green[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x33000000))
+          ..rrect(color: const Color(0x24000000))
+          ..rrect(color: const Color(0x1f000000))
+          ..rrect(color: Colors.red),
+      );
     }
   });
 
