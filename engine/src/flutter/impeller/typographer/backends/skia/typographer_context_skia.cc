@@ -222,7 +222,7 @@ static void DrawGlyph(SkCanvas* canvas,
   sk_font.setHinting(SkFontHinting::kSlight);
   sk_font.setEmbolden(metrics.embolden);
   sk_font.setSubpixel(true);
-  sk_font.setSize(sk_font.getSize() * scaled_font.scale);
+  sk_font.setSize(sk_font.getSize() * static_cast<Scalar>(scaled_font.scale));
 
   auto glyph_color = prop.has_value() ? prop->color.ToARGB() : SK_ColorBLACK;
 
@@ -231,7 +231,8 @@ static void DrawGlyph(SkCanvas* canvas,
   glyph_paint.setBlendMode(SkBlendMode::kSrc);
   if (prop.has_value() && prop->stroke) {
     glyph_paint.setStroke(true);
-    glyph_paint.setStrokeWidth(prop->stroke_width * scaled_font.scale);
+    glyph_paint.setStrokeWidth(prop->stroke_width *
+                               static_cast<Scalar>(scaled_font.scale));
     glyph_paint.setStrokeCap(ToSkiaCap(prop->stroke_cap));
     glyph_paint.setStrokeJoin(ToSkiaJoin(prop->stroke_join));
     glyph_paint.setStrokeMiter(prop->stroke_miter);
@@ -437,7 +438,8 @@ TypographerContextSkia::CollectNewGlyphs(
     for (const auto& run : frame->GetRuns()) {
       auto metrics = run.GetFont().GetMetrics();
 
-      auto rounded_scale = TextFrame::RoundScaledFontSize(frame->GetScale());
+      // TODO(gaaclarke): Should we have a clamp here?
+      auto rounded_scale = frame->GetScale();
       ScaledFont scaled_font{.font = run.GetFont(), .scale = rounded_scale};
 
       FontGlyphAtlas* font_glyph_atlas =
@@ -453,7 +455,8 @@ TypographerContextSkia::CollectNewGlyphs(
       // Rather than computing the bounds at the requested point size and
       // scaling up the bounds, we scale up the font size and request the
       // bounds. This seems to give more accurate bounds information.
-      sk_font.setSize(sk_font.getSize() * scaled_font.scale);
+      sk_font.setSize(sk_font.getSize() *
+                      static_cast<Scalar>(scaled_font.scale));
       sk_font.setSubpixel(true);
 
       for (const auto& glyph_position : run.GetGlyphPositions()) {
@@ -467,9 +470,16 @@ TypographerContextSkia::CollectNewGlyphs(
             font_glyph_atlas->FindGlyphBounds(subpixel_glyph);
 
         if (!font_glyph_bounds.has_value()) {
+          FML_LOG(ERROR) << "add " << glyph_position.glyph.index << " "
+                         << static_cast<int>(
+                                scaled_font.font.GetAxisAlignment())
+                         << " "
+                         << frame->GetTransform() *
+                                Matrix::MakeTranslation(frame->GetOffset())
+                         << " " << subpixel;
           new_glyphs.push_back(FontGlyphPair{scaled_font, subpixel_glyph});
-          auto glyph_bounds =
-              ComputeGlyphSize(sk_font, subpixel_glyph, scaled_font.scale);
+          auto glyph_bounds = ComputeGlyphSize(
+              sk_font, subpixel_glyph, static_cast<Scalar>(scaled_font.scale));
           glyph_sizes.push_back(glyph_bounds);
 
           auto frame_bounds = FrameBounds{

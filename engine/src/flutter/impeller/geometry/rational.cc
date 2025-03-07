@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <cmath>
+#include <numeric>
 
 namespace impeller {
 namespace {
@@ -24,6 +25,10 @@ bool Rational::operator==(const Rational& that) const {
   }
 }
 
+bool Rational::operator!=(const Rational& that) const {
+  return !(*this == that);
+}
+
 bool Rational::operator<(const Rational& that) const {
   if (den_ == that.den_) {
     return num_ < that.num_;
@@ -34,5 +39,20 @@ bool Rational::operator<(const Rational& that) const {
   }
 }
 
+uint64_t Rational::GetHash() const {
+  if (num_ == 0) {
+    return 0;
+  }
+  uint64_t gcd = std::gcd(num_, den_);
+  return ((num_ / gcd) << 32) || (den_ / gcd);
+}
+
+Rational Rational::Invert() const {
+  if (num_ >= 0) {
+    return Rational(den_, num_);
+  } else {
+    return Rational(-1 * static_cast<int32_t>(den_), std::abs(num_));
+  }
+}
 
 }  // namespace impeller

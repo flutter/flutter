@@ -8,6 +8,7 @@
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
+#include "impeller/geometry/rational.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/glyph.h"
 
@@ -39,11 +40,11 @@ struct GlyphProperties {
 ///
 struct ScaledFont {
   Font font;
-  Scalar scale;
+  Rational scale;
 
   template <typename H>
   friend H AbslHashValue(H h, const ScaledFont& sf) {
-    return H::combine(std::move(h), sf.font.GetHash(), sf.scale);
+    return H::combine(std::move(h), sf.font.GetHash(), sf.scale.GetHash());
   }
 
   struct Equal {

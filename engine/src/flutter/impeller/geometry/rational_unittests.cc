@@ -46,4 +46,8 @@ TEST(RationalTest, NotLessThanDifferentDen) {
   EXPECT_FALSE(Rational(25, 23) < Rational(1, 2));
 }
 
+TEST(RationalTest, SameHashes) {
+  EXPECT_TRUE(Rational(1, 2).GetHash() == Rational(2, 4).GetHash());
+}
+
 }  // namespace impeller

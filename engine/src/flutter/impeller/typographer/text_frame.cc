@@ -51,13 +51,14 @@ bool TextFrame::HasColor() const {
 }
 
 // static
-Scalar TextFrame::RoundScaledFontSize(Scalar scale) {
+Rational TextFrame::RoundScaledFontSize(Scalar scale) {
   // An arbitrarily chosen maximum text scale to ensure that regardless of the
   // CTM, a glyph will fit in the atlas. If we clamp significantly, this may
   // reduce fidelity but is preferable to the alternative of failing to render.
-  constexpr Scalar kMaximumTextScale = 48;
-  Scalar result = std::round(scale * 200) / 200;
-  return std::clamp(result, 0.0f, kMaximumTextScale);
+  constexpr uint32_t denominator = 200;
+  constexpr Rational kMaximumTextScale(48 * denominator, denominator);
+  Rational result = Rational(std::round(scale * denominator), denominator);
+  return std::clamp(result, Rational(0, denominator), kMaximumTextScale);
 }
 
 static constexpr Scalar ComputeFractionalPosition(Scalar value) {
@@ -97,11 +98,11 @@ Point TextFrame::ComputeSubpixelPosition(
   }
 }
 
-void TextFrame::SetPerFrameData(Scalar scale,
+void TextFrame::SetPerFrameData(Rational scale,
                                 Point offset,
                                 const Matrix& transform,
                                 std::optional<GlyphProperties> properties) {
-  if (!transform_.Equals(transform) || !ScalarNearlyEqual(scale_, scale) ||
+  if (!transform_.Equals(transform) || scale_ != scale ||
       !ScalarNearlyEqual(offset_.x, offset.x) ||
       !ScalarNearlyEqual(offset_.y, offset.y) ||
       !TextPropertiesEquals(properties_, properties)) {
@@ -113,7 +114,7 @@ void TextFrame::SetPerFrameData(Scalar scale,
   transform_ = transform;
 }
 
-Scalar TextFrame::GetScale() const {
+Rational TextFrame::GetScale() const {
   return scale_;
 }
 

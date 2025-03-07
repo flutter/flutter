@@ -6,12 +6,15 @@
 #define FLUTTER_IMPELLER_RATIONAL_H_
 
 #include <cstdint>
+#include "impeller/geometry/scalar.h"
 
 namespace impeller {
 
 class Rational {
  public:
-  Rational(int32_t num, uint32_t den) : num_(num), den_(den) {}
+  constexpr Rational(int32_t num) : num_(num), den_(1) {}
+
+  constexpr Rational(int32_t num, uint32_t den) : num_(num), den_(den) {}
 
   int32_t GetNumerator() const { return num_; }
 
@@ -19,7 +22,17 @@ class Rational {
 
   bool operator==(const Rational& that) const;
 
+  bool operator!=(const Rational& that) const;
+
   bool operator<(const Rational& that) const;
+
+  uint64_t GetHash() const;
+
+  explicit operator Scalar() const {
+    return static_cast<float>(num_) / den_;
+  }
+
+  Rational Invert() const;
 
  private:
   int32_t num_;
