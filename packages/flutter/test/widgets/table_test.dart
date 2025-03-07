@@ -959,11 +959,11 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Table(
-            children: const <TableRow>[
+            children: <TableRow>[
               TableRow(
                 children: <Widget>[
-                  TableCell(child: Text('Data Cell 1')),
-                  TableCell(child: Text('Data Cell 2')),
+                  TableCell(child: const Text('Data Cell 1')),
+                  TableCell(child: const Text('Data Cell 2')),
                 ],
               ),
             ],
