@@ -444,7 +444,7 @@ enum EngineSemanticsRole {
   /// A cell in a [table] contains header information for a column.
   columnHeader,
 
-  /// A container that display its children in a list layout.
+  /// A container whose children are logically a list of items.
   list,
 
   /// An item in a [list].

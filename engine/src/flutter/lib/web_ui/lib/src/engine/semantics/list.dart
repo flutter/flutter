@@ -9,7 +9,7 @@ import 'semantics.dart';
 ///
 /// Uses aria list role to convey this semantic information to the element.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 class SemanticList extends SemanticRole {
   SemanticList(SemanticsObject semanticsObject)
     : super.withBasics(
@@ -24,11 +24,11 @@ class SemanticList extends SemanticRole {
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
 
-/// Indicates a item in a list.
+/// Indicates an item in a list.
 ///
 /// Uses aria listitem role to convey this semantic information to the element.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 class SemanticListItem extends SemanticRole {
   SemanticListItem(SemanticsObject semanticsObject)
     : super.withBasics(
