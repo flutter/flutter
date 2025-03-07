@@ -181,11 +181,9 @@ class DlPath {
   static void DispatchFromImpellerPath(const impeller::Path& path,
                                        DlPathReceiver& receiver);
 
-  static SkPath ConvertToSkiaPath(const impeller::Path& path,
-                                  const DlPoint& shift = DlPoint());
+  static SkPath ConvertToSkiaPath(const impeller::Path& path);
 
-  static impeller::Path ConvertToImpellerPath(const SkPath& path,
-                                              const DlPoint& shift = DlPoint());
+  static impeller::Path ConvertToImpellerPath(const SkPath& path);
 };
 
 }  // namespace flutter

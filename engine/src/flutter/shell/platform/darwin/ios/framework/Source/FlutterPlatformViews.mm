@@ -389,6 +389,7 @@ static BOOL _preparedOnce = NO;
           [](flutter::DlPathFillType type, bool is_convex) {
             // CGPaths do not have an inherit fill type, we would need to remember
             // the fill type and employ it when we use the path.
+            // see https://github.com/flutter/flutter/issues/164826
           },
       .move_to =
           [&pathRef](const flutter::DlPoint& p2) {  //
