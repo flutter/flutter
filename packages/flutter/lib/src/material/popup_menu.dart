@@ -17,6 +17,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
+import 'divider_theme.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -110,13 +111,62 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
-  const PopupMenuDivider({super.key, this.height = _kMenuDividerHeight});
+  const PopupMenuDivider({
+    super.key,
+    this.height = _kMenuDividerHeight,
+    this.thickness,
+    this.indent,
+    this.endIndent,
+    this.radius,
+    this.color,
+  });
 
   /// The height of the divider entry.
   ///
   /// Defaults to 16 pixels.
   @override
   final double height;
+
+  /// The thickness of the line drawn within the divider.
+  ///
+  /// A divider with a [thickness] of 0.0 is always drawn as a line with a
+  /// height of exactly one device pixel.
+  ///
+  /// If this is null, then the [DividerThemeData.thickness] is used. If
+  /// that is also null, then this defaults to 0.0.
+  final double? thickness;
+
+  /// The amount of empty space to the leading edge of the divider.
+  ///
+  /// If this is null, then the [DividerThemeData.indent] is used. If that is
+  /// also null, then this defaults to 0.0.
+  final double? indent;
+
+  /// The amount of empty space to the trailing edge of the divider.
+  ///
+  /// If this is null, then the [DividerThemeData.endIndent] is used. If that is
+  /// also null, then this defaults to 0.0.
+  final double? endIndent;
+
+  /// The amount of radius for the border of the divider.
+  ///
+  /// If this is null, then the default radius of [BoxDecoration] will be used.
+  final BorderRadiusGeometry? radius;
+
+  /// The color to use when painting the line.
+  ///
+  /// If this is null, then the [DividerThemeData.color] is used. If that is
+  /// also null, then [ThemeData.dividerColor] is used.
+  ///
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// const PopupMenuDivider(
+  ///   color: Colors.deepOrange,
+  /// )
+  /// ```
+  /// {@end-tool}
+  final Color? color;
 
   @override
   bool represents(void value) => false;
@@ -127,7 +177,16 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
 
 class _PopupMenuDividerState extends State<PopupMenuDivider> {
   @override
-  Widget build(BuildContext context) => Divider(height: widget.height);
+  Widget build(BuildContext context) {
+    return Divider(
+      height: widget.height,
+      thickness: widget.thickness,
+      indent: widget.indent,
+      color: widget.color,
+      endIndent: widget.endIndent,
+      radius: widget.radius,
+    );
+  }
 }
 
 // This widget only exists to enable _PopupMenuRoute to save the sizes of
