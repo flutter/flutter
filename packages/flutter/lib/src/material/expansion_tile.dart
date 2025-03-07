@@ -769,7 +769,6 @@ class _ExpansionTileState extends State<ExpansionTile> {
       duration: _duration,
       reverseCurve: _reverseCurve,
       maintainState: widget.maintainState,
-      excludeHeaderGestures: true,
       headerBuilder: _buildHeader,
       bodyBuilder: _buildBody,
       expansibleBuilder: _buildExpansible,

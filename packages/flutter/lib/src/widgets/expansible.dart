@@ -213,6 +213,11 @@ class ExpansibleController extends ChangeNotifier {
 /// build the header and body widgets. An additional [expansibleBuilder]
 /// callback can be provided to further customize the layout of the widget.
 ///
+/// The [Expansible] does not inherently toggle the expansion state. To toggle
+/// the expansion state, call [ExpansibleController.expand] and
+/// [ExpansibleController.collapse] as needed, most typically when the header
+/// returned in [headerBuilder] is tapped.
+///
 /// Remember to dispose of the [ExpansibleController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
 ///
@@ -231,16 +236,19 @@ class Expansible extends StatefulWidget {
     this.curve = Curves.ease,
     this.reverseCurve,
     this.maintainState = false,
-    this.excludeHeaderGestures = false,
   });
 
-  /// Used to programmatically expand and collapse the widget.
+  /// Expands and collapses the widget.
+  ///
+  /// The controller manages the expansion state and toggles the expansion.
   final ExpansibleController controller;
 
   /// Builds the always-displayed header.
   ///
-  /// If this header already has an `onTap` or `onPressed` method that toggles
-  /// its expansion, set [excludeHeaderGestures] to true.
+  /// Many use cases involve toggling the expansion state when this header is
+  /// tapped. To toggle the expansion state, call [ExpansibleController.expand]
+  /// or [ExpansibleController.collapse].
+  ///
   final ExpansibleComponentBuilder headerBuilder;
 
   /// Builds the collapsible body.
@@ -249,7 +257,7 @@ class Expansible extends StatefulWidget {
   /// its fully extended height.
   final ExpansibleComponentBuilder bodyBuilder;
 
-  /// Lays out the widget with the results of [headerBuilder] and [bodyBuilder].
+  /// Builds the widget with the results of [headerBuilder] and [bodyBuilder].
   ///
   /// Defaults to placing the header and body in a [Column].
   final ExpansibleBuilder? expansibleBuilder;
@@ -266,18 +274,6 @@ class Expansible extends StatefulWidget {
 
   /// The reverse curve of the expansion animation.
   final Curve? reverseCurve;
-
-  /// If the header already coordinates its behavior on tap using the
-  /// [controller].
-  ///
-  /// By default, the header returned from [headerBuilder] is wrapped in a
-  /// [GestureDetector] to toggle the expansion when tapped. Set this to true to
-  /// avoid conflicting gestures if the header returned in [headerBuilder]
-  /// already toggles its expansion on tap using [ExpansibleController.expand]
-  /// or [ExpansibleController.collapse].
-  ///
-  /// Defaults to false.
-  final bool excludeHeaderGestures;
 
   /// If the state of the body is maintained when the widget expands or
   /// collapses.
@@ -375,17 +371,7 @@ class _ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
     return AnimatedBuilder(
       animation: _animationController.view,
       builder: (BuildContext context, Widget? child) {
-        Widget header = widget.headerBuilder(context, _animationController);
-        if (!widget.excludeHeaderGestures) {
-          header = Semantics(
-            button: true,
-            child: GestureDetector(
-              onTap: _toggleExpansion,
-              excludeFromSemantics: true,
-              child: header,
-            ),
-          );
-        }
+        final Widget header = widget.headerBuilder(context, _animationController);
         final Widget body = ClipRect(child: Align(heightFactor: _heightFactor.value, child: child));
         if (widget.expansibleBuilder != null) {
           return widget.expansibleBuilder!(context, header, body, _animationController);

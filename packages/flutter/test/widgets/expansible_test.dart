@@ -14,7 +14,10 @@ void main() {
           controller: controller,
           bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
           headerBuilder:
-              (BuildContext context, Animation<double> animation) => const Text('Header'),
+              (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
+              ),
         ),
       ),
     );
@@ -44,7 +47,10 @@ void main() {
           controller: controller,
           bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
           headerBuilder:
-              (BuildContext context, Animation<double> animation) => const Text('Header'),
+              (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
+              ),
         ),
       ),
     );
@@ -83,7 +89,10 @@ void main() {
                 bodyBuilder:
                     (BuildContext context, Animation<double> animation) => const Text('Body'),
                 headerBuilder:
-                    (BuildContext context, Animation<double> animation) => const Text('Header'),
+                    (BuildContext context, Animation<double> animation) => GestureDetector(
+                      onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                      child: const Text('Header'),
+                    ),
               ),
             ],
           ),
@@ -109,7 +118,10 @@ void main() {
           controller: controller,
           bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
           headerBuilder:
-              (BuildContext context, Animation<double> animation) => const Text('Header'),
+              (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
+              ),
           expansibleBuilder: (
             BuildContext context,
             Widget header,
@@ -162,7 +174,10 @@ void main() {
                     (BuildContext context, Animation<double> animation) =>
                         const Text('Maintaining State'),
                 headerBuilder:
-                    (BuildContext context, Animation<double> animation) => const Text('Header'),
+                    (BuildContext context, Animation<double> animation) => GestureDetector(
+                      onTap: controller1.isExpanded ? controller1.collapse : controller1.expand,
+                      child: const Text('Header'),
+                    ),
               ),
               Expansible(
                 controller: controller2,
@@ -170,7 +185,10 @@ void main() {
                     (BuildContext context, Animation<double> animation) =>
                         const Text('Discarding State'),
                 headerBuilder:
-                    (BuildContext context, Animation<double> animation) => const Text('Header'),
+                    (BuildContext context, Animation<double> animation) => GestureDetector(
+                      onTap: controller2.isExpanded ? controller2.collapse : controller2.expand,
+                      child: const Text('Header'),
+                    ),
               ),
             ],
           ),
@@ -201,7 +219,10 @@ void main() {
               (BuildContext context, Animation<double> animation) =>
                   const SizedBox(height: 50.0, child: Placeholder()),
           headerBuilder:
-              (BuildContext context, Animation<double> animation) => const Text('Header'),
+              (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
+              ),
         ),
       ),
     );
