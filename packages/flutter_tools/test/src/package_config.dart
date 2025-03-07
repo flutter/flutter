@@ -26,9 +26,11 @@ import 'package:file/file.dart';
 File writePackageConfigFiles({
   required Directory directory,
   required String mainLibName,
+  String mainLibRootUri = '.',
   Map<String, String> packages = const <String, String>{},
   Map<String, String> languageVersions = const <String, String>{},
   List<String> devDependencies = const <String>[],
+  List<String>? dependencies,
 }) {
   directory.childDirectory('.dart_tool').childFile('package_graph.json')
     ..createSync(recursive: true)
@@ -38,7 +40,8 @@ File writePackageConfigFiles({
         'packages': <Object>[
           <String, Object?>{
             'name': mainLibName,
-            'dependencies': packages.keys.toList().whereNot(devDependencies.contains).toList(),
+            'dependencies':
+                dependencies ?? packages.keys.toList().whereNot(devDependencies.contains).toList(),
             'devDependencies': devDependencies,
           },
           ...packages.entries.map(
@@ -58,7 +61,7 @@ File writePackageConfigFiles({
         'packages': <Object>[
           <String, Object?>{
             'name': mainLibName,
-            'rootUri': '../',
+            'rootUri': Uri.parse('../').resolve(mainLibRootUri).toString(),
             'packageUri': 'lib/',
             'languageVersion': languageVersions[mainLibName] ?? '3.7',
           },

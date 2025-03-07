@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -190,38 +188,18 @@ flutter:
             ..createSync(recursive: true)
             ..writeAsStringSync('This is a fake font.');
 
-          final File packageConfigFile = writePackageConfigFiles(
-            mainLibName: 'workspace_root',
+          writePackageConfigFiles(
+            mainLibName: 'main',
+            mainLibRootUri: 'main',
             directory: fileSystem.currentDirectory,
             packages: <String, String>{
               'font': 'font',
-              'main': 'main',
               'dev_dependency': 'dev_dependency',
+              'workspace_root': '.',
             },
+            dependencies: <String>['font'],
+            devDependencies: <String>['dev_dependency'],
           );
-
-          // Overwrite the default package_graph.json:
-          packageConfigFile.parent
-              .childFile('package_graph.json')
-              .writeAsStringSync(
-                jsonEncode(<String, Object?>{
-                  'configVersion': 1,
-                  'packages': <Object>[
-                    <String, Object?>{
-                      'name': 'workspace_root',
-                      'dependencies': <String>[],
-                      'devDependencies': <String>[],
-                    },
-                    <String, Object?>{'name': 'font', 'dependencies': <String>[]},
-                    <String, Object?>{
-                      'name': 'main',
-                      'dependencies': <String>['font'],
-                      'devDependencies': <String>['dev_dependency'],
-                    },
-                    <String, Object?>{'name': 'dev_dependency', 'dependencies': <String>[]},
-                  ],
-                }),
-              );
 
           fileSystem.file(manifestPath)
             ..createSync(recursive: true)

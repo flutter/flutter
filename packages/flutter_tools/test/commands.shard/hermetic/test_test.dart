@@ -67,6 +67,7 @@ void main() {
         'integration_test': 'file:///path/to/flutter/packages/integration_test',
       },
       mainLibName: 'my_app',
+      devDependencies: <String>['test_api', 'integration_test'],
     );
     package.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
     package
@@ -1482,9 +1483,22 @@ dev_dependencies:
       final Directory package = fs.directory('${root}package').absolute;
       package.childFile('pubspec.yaml').createSync(recursive: true);
       package.childFile('pubspec.yaml').writeAsStringSync('''
+name: workspace
 workspace:
   - app/
 ''');
+      writePackageConfigFiles(
+        mainLibName: 'my_app',
+        mainLibRootUri: 'app',
+        directory: package,
+        packages: <String, String>{
+          'workspace': package.path,
+          'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+          'integration_test': 'file:///path/to/flutter/packages/integration_test',
+        },
+        dependencies: <String>[],
+        devDependencies: <String>['test_api', 'integration_test'],
+      );
 
       final Directory app = package.childDirectory('app');
       app.createSync();
