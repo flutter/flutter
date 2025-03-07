@@ -56,9 +56,10 @@ class BaseFlutterTaskHelper(
             when {
                 baseFlutterTask.buildMode == "debug" -> arrayOf("debug_android_application")
                 baseFlutterTask.deferredComponents!! ->
-                    baseFlutterTask.targetPlatformValues!!.map {
-                        "android_aot_deferred_components_bundle_${baseFlutterTask.buildMode}_$it"
-                    }.toTypedArray()
+                    baseFlutterTask.targetPlatformValues!!
+                        .map {
+                            "android_aot_deferred_components_bundle_${baseFlutterTask.buildMode}_$it"
+                        }.toTypedArray()
                 else -> baseFlutterTask.targetPlatformValues!!.map { "android_aot_bundle_${baseFlutterTask.buildMode}_$it" }.toTypedArray()
             }
         return ruleNames
