@@ -5,6 +5,8 @@
 #ifndef FLUTTER_DISPLAY_LIST_GEOMETRY_DL_PATH_H_
 #define FLUTTER_DISPLAY_LIST_GEOMETRY_DL_PATH_H_
 
+#include <functional>
+
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/impeller/geometry/path.h"
 #include "flutter/impeller/geometry/path_builder.h"
@@ -14,6 +16,38 @@ namespace flutter {
 
 using DlPathFillType = impeller::FillType;
 using DlPathBuilder = impeller::PathBuilder;
+
+/// @brief   Collection of functions to receive path segments from the
+///          underlying path representation via the DlPath::Dispatch method.
+///
+/// The conic_to function is optional. If the receiver understands rational
+/// quadratic Bezier curve forms then it should accept the curve parameters
+/// and return true, otherwise it can return false and the dispatcher will
+/// provide the path segment in a different form via the other methods.
+///
+/// The dispatcher might not call the recommend_size or recommend_bounds
+/// functions if the original path does not contain such information.
+///
+/// The dispatcher will always call the path_info function, though the
+/// is_convex parameter may be conservatively reported as false if the
+/// original path does not contain such info.
+struct DlPathReceiver {
+  std::function<void(size_t verb_count, size_t point_count)> recommend_size =
+      [](size_t, size_t) {};
+  std::function<void(const DlRect& bounds)> recommend_bounds =
+      [](const DlRect& bounds) {};
+  std::function<void(DlPathFillType fill_type, bool is_convex)> path_info;
+  std::function<void(const DlPoint& p2)> move_to;
+  std::function<void(const DlPoint& p2)> line_to;
+  std::function<void(const DlPoint& cp, const DlPoint& p2)> quad_to;
+  std::function<bool(const DlPoint& cp, const DlPoint& p2, DlScalar weight)>
+      conic_to = [](const DlPoint& cp, const DlPoint& p2, DlScalar weight) {
+        return false;
+      };
+  std::function<void(const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2)>
+      cubic_to;
+  std::function<void()> close;
+};
 
 class DlPath {
  public:
@@ -68,6 +102,8 @@ class DlPath {
 
   const SkPath& GetSkPath() const;
   const impeller::Path& GetPath() const;
+
+  void Dispatch(DlPathReceiver& receiver) const;
 
   /// Intent to render an SkPath multiple times will make the path
   /// non-volatile to enable caching in Skia. Calling this method
@@ -138,6 +174,12 @@ class DlPath {
   }
 
   std::shared_ptr<Data> data_;
+
+  static void DispatchFromSkiaPath(const SkPath& path,
+                                   DlPathReceiver& receiver);
+
+  static void DispatchFromImpellerPath(const impeller::Path& path,
+                                       DlPathReceiver& receiver);
 
   static SkPath ConvertToSkiaPath(const impeller::Path& path,
                                   const DlPoint& shift = DlPoint());
