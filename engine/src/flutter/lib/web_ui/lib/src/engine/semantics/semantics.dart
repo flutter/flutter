@@ -1995,7 +1995,6 @@ class SemanticsObject {
 
     // Reparent element.
     if (previousElement != element) {
-      previousElement?.children.forEach((child) => element.append(child));
       final DomElement? parent = previousElement?.parent;
       if (parent != null) {
         parent.insertBefore(element, previousElement);
@@ -2089,22 +2088,21 @@ class SemanticsObject {
   /// Indicates whether the node is currently expanded.
   bool get isExpanded => hasFlag(ui.SemanticsFlag.isExpanded);
 
-  /// Role-specific adjustment of the vertical position of the child container.
+  /// Role-specific adjustment of the vertical position of the children.
   ///
   /// This is used, for example, by the [SemanticScrollable] to compensate for the
   /// `scrollTop` offset in the DOM.
   ///
   /// This field must not be null.
-  double verticalContainerAdjustment = 0.0;
+  double verticalScrollAdjustment = 0.0;
 
-  /// Role-specific adjustment of the horizontal position of the child
-  /// container.
+  /// Role-specific adjustment of the horizontal position of children.
   ///
   /// This is used, for example, by the [SemanticScrollable] to compensate for the
   /// `scrollLeft` offset in the DOM.
   ///
   /// This field must not be null.
-  double horizontalContainerAdjustment = 0.0;
+  double horizontalScrollAdjustment = 0.0;
 
   double verticalAdjustmentFromParent = 0.0;
   double horizontalAdjustmentFromParent = 0.0;
@@ -2121,9 +2119,11 @@ class SemanticsObject {
     final bool hasIdentityTransform =
         transform == null || isIdentityFloat32ListTransform(transform);
 
+    // If this node has children, we need to compensate for the parent's rect and
+    // pass down the scroll adjustments.
     if (hasChildren) {
-      double translateX = -_rect!.left + horizontalContainerAdjustment;
-      double translateY = -_rect!.top + verticalContainerAdjustment;
+      double translateX = -_rect!.left + horizontalScrollAdjustment;
+      double translateY = -_rect!.top + verticalScrollAdjustment;
 
       for (var childOrder in _childrenInTraversalOrder!) {
         final child = owner._semanticsTree[childOrder];
@@ -2148,13 +2148,7 @@ class SemanticsObject {
 
     final double left = _rect!.left + horizontalAdjustmentFromParent;
     final double top = _rect!.top + verticalAdjustmentFromParent;
-    // if (verticalAdjustmentFromParent != 0.0)
-    //   print(
-    //     'id: $id, horizontalAdjustmentFromParent: $horizontalAdjustmentFromParent,'
-    //     'verticalAdjustmentFromParent: $verticalAdjustmentFromParent,left: $left, top: $top, transform: $transform,',
-    //   );
 
-    // so here it changed the rect to transform!
     if (left != 0.0 || top != 0.0) {
       if (transform == null) {
         effectiveTransform = Matrix4.translationValues(left, top, 0.0);
@@ -2178,6 +2172,7 @@ class SemanticsObject {
     }
   }
 
+  /// Computes the size and position of children.
   void updateChildrenPositionAndSize() {
     for (var childOrder in _childrenInTraversalOrder!) {
       final child = owner._semanticsTree[childOrder];
