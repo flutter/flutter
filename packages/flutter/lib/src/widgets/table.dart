@@ -437,7 +437,6 @@ class _TableElement extends RenderObjectElement {
 ///
 /// To create an empty [TableCell], provide a [SizedBox.shrink]
 /// as the [child].
-///
 class TableCell extends StatelessWidget {
   /// Creates a widget that controls how a child of a [Table] is aligned.
   const TableCell({super.key, this.verticalAlignment, required this.child});
