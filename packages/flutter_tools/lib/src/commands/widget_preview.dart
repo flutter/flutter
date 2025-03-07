@@ -5,6 +5,7 @@
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:path/path.dart';
 
 import '../base/common.dart';
 import '../base/deferred_component.dart';
@@ -556,14 +557,19 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     //
     // `pub add` will also generate/update .dart_tool/package_config.json.
     const String pubAdd = 'add';
+    final Context context = rootProject.directory.fileSystem.path;
+    // Use `json.encode` to handle escapes correctly.
+    final String pathDescriptor = json.encode(<String, Object?>{
+      // `pub add` interprets relative paths relative to the current directory.
+      'path': context.relative(rootProject.directory.path),
+    });
     await pub.interactively(
       <String>[
         pubAdd,
         if (offline) '--offline',
         '--directory',
         widgetPreviewScaffoldProject.directory.path,
-        // Ensure the path using POSIX separators, otherwise the "path_not_posix" check will fail.
-        '${rootProject.manifest.appName}:{"path":${rootProject.directory.path.replaceAll(r"\", "/")}}',
+        '${rootProject.manifest.appName}:$pathDescriptor',
         'flutter_lints',
       ],
       context: PubContext.pubAdd,
