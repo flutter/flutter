@@ -3189,13 +3189,24 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FlutterSemanticsAction action,
     const uint8_t* data,
     size_t data_length) {
+  return FlutterEngineDispatchSemanticsActionOnView(
+      engine, kFlutterImplicitViewId, node_id, action, data, data_length);
+}
+
+FlutterEngineResult FlutterEngineDispatchSemanticsActionOnView(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t view_id,
+    uint64_t node_id,
+    FlutterSemanticsAction action,
+    const uint8_t* data,
+    size_t data_length) {
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
   auto engine_action = static_cast<flutter::SemanticsAction>(action);
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
            ->DispatchSemanticsAction(
-               node_id, engine_action,
+               view_id, node_id, engine_action,
                fml::MallocMapping::Copy(data, data_length))) {
     return LOG_EMBEDDER_ERROR(kInternalInconsistency,
                               "Could not dispatch semantics action.");
@@ -3705,6 +3716,8 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(UpdateAccessibilityFeatures,
            FlutterEngineUpdateAccessibilityFeatures);
   SET_PROC(DispatchSemanticsAction, FlutterEngineDispatchSemanticsAction);
+  SET_PROC(DispatchSemanticsActionOnView,
+           FlutterEngineDispatchSemanticsActionOnView);
   SET_PROC(OnVsync, FlutterEngineOnVsync);
   SET_PROC(ReloadSystemFonts, FlutterEngineReloadSystemFonts);
   SET_PROC(TraceEventDurationBegin, FlutterEngineTraceEventDurationBegin);

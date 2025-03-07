@@ -44,6 +44,7 @@ namespace flutter {
 namespace {
 
 static constexpr int kMinAPILevelHCPP = 34;
+static constexpr int64_t kImplicitViewId = 0;
 
 AndroidContext::ContextSettings CreateContextSettings(
     const Settings& p_settings) {
@@ -271,7 +272,7 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
                                                   jint args_position) {
   if (env->IsSameObject(args, NULL)) {
     PlatformView::DispatchSemanticsAction(
-        id, static_cast<flutter::SemanticsAction>(action),
+        kImplicitViewId, id, static_cast<flutter::SemanticsAction>(action),
         fml::MallocMapping());
     return;
   }
@@ -280,7 +281,7 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
   auto args_vector = fml::MallocMapping::Copy(args_data, args_position);
 
   PlatformView::DispatchSemanticsAction(
-      id, static_cast<flutter::SemanticsAction>(action),
+      kImplicitViewId, id, static_cast<flutter::SemanticsAction>(action),
       std::move(args_vector));
 }
 

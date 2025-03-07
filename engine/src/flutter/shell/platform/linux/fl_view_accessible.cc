@@ -35,7 +35,7 @@ static FlAccessibleNode* create_node(FlViewAccessible* self,
     return fl_accessible_text_field_new(engine, semantics->id);
   }
 
-  return fl_accessible_node_new(engine, semantics->id);
+  return fl_accessible_node_new(engine, semantics->view_id, semantics->id);
 }
 
 static FlAccessibleNode* lookup_node(FlViewAccessible* self, int32_t id) {

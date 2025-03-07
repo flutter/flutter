@@ -201,8 +201,8 @@ TEST(FlEngineTest, DispatchSemanticsAction) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
   g_autoptr(GBytes) data = g_bytes_new_static("test", 4);
-  fl_engine_dispatch_semantics_action(engine, 42, kFlutterSemanticsActionTap,
-                                      data);
+  fl_engine_dispatch_semantics_action(engine, 456, 42,
+                                      kFlutterSemanticsActionTap, data);
 
   EXPECT_TRUE(called);
 }
