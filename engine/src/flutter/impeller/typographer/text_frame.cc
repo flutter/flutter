@@ -61,40 +61,42 @@ Rational TextFrame::RoundScaledFontSize(Scalar scale) {
   return std::clamp(result, Rational(0, denominator), kMaximumTextScale);
 }
 
-static constexpr Scalar ComputeFractionalPosition(Scalar value) {
+static constexpr SubpixelPosition ComputeFractionalPosition(Scalar value) {
   value += 0.125;
   value = (value - floorf(value));
   if (value < 0.25) {
-    return 0;
+    return SubpixelPosition::kSubpixel00;
   }
   if (value < 0.5) {
-    return 0.25;
+    return SubpixelPosition::kSubpixel01;
   }
   if (value < 0.75) {
-    return 0.5;
+    return SubpixelPosition::kSubpixel02;
   }
-  return 0.75;
+  return SubpixelPosition::kSubpixel03;
 }
 
 // Compute subpixel position for glyphs based on X position and provided
 // max basis length (scale).
 // This logic is based on the SkPackedGlyphID logic in SkGlyph.h
 // static
-Point TextFrame::ComputeSubpixelPosition(
+SubpixelPosition TextFrame::ComputeSubpixelPosition(
     const TextRun::GlyphPosition& glyph_position,
     AxisAlignment alignment,
     const Matrix& transform) {
   Point pos = transform * glyph_position.position;
   switch (alignment) {
     case AxisAlignment::kNone:
-      return Point(0, 0);
+      return SubpixelPosition::kSubpixel00;
     case AxisAlignment::kX:
-      return Point(ComputeFractionalPosition(pos.x), 0);
+      return ComputeFractionalPosition(pos.x);
     case AxisAlignment::kY:
-      return Point(0, ComputeFractionalPosition(pos.y));
+      return static_cast<SubpixelPosition>(ComputeFractionalPosition(pos.y)
+                                           << 2);
     case AxisAlignment::kAll:
-      return Point(ComputeFractionalPosition(pos.x),
-                   ComputeFractionalPosition(pos.y));
+      return static_cast<SubpixelPosition>(
+          ComputeFractionalPosition(pos.x) |
+          (ComputeFractionalPosition(pos.y) << 2));
   }
 }
 

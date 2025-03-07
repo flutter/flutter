@@ -148,7 +148,7 @@ void TextContents::ComputeVertexData(
           VALIDATION_LOG << "Could not find font in the atlas.";
           continue;
         }
-        Point subpixel = TextFrame::ComputeSubpixelPosition(
+        SubpixelPosition subpixel = TextFrame::ComputeSubpixelPosition(
             glyph_position, font.GetAxisAlignment(), entity_transform);
 
         std::optional<FrameBounds> maybe_atlas_glyph_bounds =

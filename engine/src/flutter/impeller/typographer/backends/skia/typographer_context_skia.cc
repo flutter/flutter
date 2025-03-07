@@ -205,6 +205,10 @@ static ISize ComputeNextAtlasSize(
   return {};
 }
 
+static Point SubpixelPositionToPoint(SubpixelPosition pos) {
+  return Point((pos & 0xff) / 4.f, (pos >> 2 & 0xff) / 4.f);
+}
+
 static void DrawGlyph(SkCanvas* canvas,
                       const SkPoint position,
                       const ScaledFont& scaled_font,
@@ -238,7 +242,8 @@ static void DrawGlyph(SkCanvas* canvas,
     glyph_paint.setStrokeMiter(prop->stroke_miter);
   }
   canvas->save();
-  canvas->translate(glyph.subpixel_offset.x, glyph.subpixel_offset.y);
+  Point subpixel_offset = SubpixelPositionToPoint(glyph.subpixel_offset);
+  canvas->translate(subpixel_offset.x, subpixel_offset.y);
   canvas->drawGlyphs(1u,         // count
                      &glyph_id,  // glyphs
                      &position,  // positions
@@ -401,7 +406,7 @@ static Rect ComputeGlyphSize(const SkFont& font,
 
   // Expand the bounds of glyphs at subpixel offsets by 2 in the x direction.
   Scalar adjustment = 0.0;
-  if (glyph.subpixel_offset != Point(0, 0)) {
+  if (glyph.subpixel_offset != SubpixelPosition::kSubpixel00) {
     adjustment = 1.0;
   }
   return Rect::MakeLTRB(scaled_bounds.fLeft - adjustment, scaled_bounds.fTop,
@@ -460,7 +465,7 @@ TypographerContextSkia::CollectNewGlyphs(
       sk_font.setSubpixel(true);
 
       for (const auto& glyph_position : run.GetGlyphPositions()) {
-        Point subpixel = TextFrame::ComputeSubpixelPosition(
+        SubpixelPosition subpixel = TextFrame::ComputeSubpixelPosition(
             glyph_position, scaled_font.font.GetAxisAlignment(),
             frame->GetTransform() *
                 Matrix::MakeTranslation(frame->GetOffset()));
@@ -470,13 +475,6 @@ TypographerContextSkia::CollectNewGlyphs(
             font_glyph_atlas->FindGlyphBounds(subpixel_glyph);
 
         if (!font_glyph_bounds.has_value()) {
-          FML_LOG(ERROR) << "add " << glyph_position.glyph.index << " "
-                         << static_cast<int>(
-                                scaled_font.font.GetAxisAlignment())
-                         << " "
-                         << frame->GetTransform() *
-                                Matrix::MakeTranslation(frame->GetOffset())
-                         << " " << subpixel;
           new_glyphs.push_back(FontGlyphPair{scaled_font, subpixel_glyph});
           auto glyph_bounds = ComputeGlyphSize(
               sk_font, subpixel_glyph, static_cast<Scalar>(scaled_font.scale));

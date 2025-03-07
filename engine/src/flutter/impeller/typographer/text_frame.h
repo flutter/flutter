@@ -28,7 +28,7 @@ class TextFrame {
 
   ~TextFrame();
 
-  static Point ComputeSubpixelPosition(
+  static SubpixelPosition ComputeSubpixelPosition(
       const TextRun::GlyphPosition& glyph_position,
       AxisAlignment alignment,
       const Matrix& transform);

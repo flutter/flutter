@@ -55,16 +55,35 @@ struct ScaledFont {
   };
 };
 
+enum SubpixelPosition : uint8_t {
+  kSubpixel00 = 0x0,
+  kSubpixel01 = 0x1,
+  kSubpixel02 = 0x2,
+  kSubpixel03 = 0x3,
+  kSubpixel10 = kSubpixel01 << 2,
+  kSubpixel20 = kSubpixel02 << 2,
+  kSubpixel30 = kSubpixel03 << 2,
+  kSubpixel11 = kSubpixel10 | kSubpixel01,
+  kSubpixel12 = kSubpixel10 | kSubpixel02,
+  kSubpixel13 = kSubpixel10 | kSubpixel03,
+  kSubpixel21 = kSubpixel20 | kSubpixel01,
+  kSubpixel22 = kSubpixel20 | kSubpixel02,
+  kSubpixel23 = kSubpixel20 | kSubpixel03,
+  kSubpixel31 = kSubpixel30 | kSubpixel01,
+  kSubpixel32 = kSubpixel30 | kSubpixel02,
+  kSubpixel33 = kSubpixel30 | kSubpixel03,
+};
+
 //------------------------------------------------------------------------------
 /// @brief      A glyph and its subpixel position.
 ///
 struct SubpixelGlyph {
   Glyph glyph;
-  Point subpixel_offset;
+  SubpixelPosition subpixel_offset;
   std::optional<GlyphProperties> properties;
 
   SubpixelGlyph(Glyph p_glyph,
-                Point p_subpixel_offset,
+                SubpixelPosition p_subpixel_offset,
                 std::optional<GlyphProperties> p_properties)
       : glyph(p_glyph),
         subpixel_offset(p_subpixel_offset),
@@ -73,14 +92,12 @@ struct SubpixelGlyph {
   template <typename H>
   friend H AbslHashValue(H h, const SubpixelGlyph& sg) {
     if (!sg.properties.has_value()) {
-      return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset.x,
-                        sg.subpixel_offset.y);
+      return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset);
     }
-    return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset.x,
-                      sg.subpixel_offset.y, sg.properties->color.ToARGB(),
-                      sg.properties->stroke, sg.properties->stroke_cap,
-                      sg.properties->stroke_join, sg.properties->stroke_miter,
-                      sg.properties->stroke_width);
+    return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset,
+                      sg.properties->color.ToARGB(), sg.properties->stroke,
+                      sg.properties->stroke_cap, sg.properties->stroke_join,
+                      sg.properties->stroke_miter, sg.properties->stroke_width);
   }
 
   struct Equal {
