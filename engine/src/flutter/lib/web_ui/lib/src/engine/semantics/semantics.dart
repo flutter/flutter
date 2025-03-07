@@ -452,7 +452,7 @@ enum EngineSemanticsRole {
   /// A component provide important and usually time-sensitive information.
   alert,
 
-  /// A container that display its children in a list layout.
+  /// A container whose children are logically a list of items.
   list,
 
   /// An item in a [list].
