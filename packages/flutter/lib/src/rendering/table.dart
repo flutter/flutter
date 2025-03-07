@@ -665,15 +665,12 @@ class RenderTable extends RenderBox {
             (child.indexInParent != null && child.indexInParent != x)) {
           break;
         }
-        bool addCellWrapper = false;
-        // Assign the role cell to the child if it doesn't have a role.
-        if (child.role == SemanticsRole.none) {
-          child.role = SemanticsRole.cell;
-        }
+
         // If the child is not a cell or columnHeader, create a new semantic node with role cell to wrap it.
-        else if (child.role != SemanticsRole.cell && child.role != SemanticsRole.columnHeader) {
-          addCellWrapper = true;
-        }
+        // This can happen when the cell has a different semantic role, or the cell doesn't have a semantic
+        // role because user is not using the `TableCell` widget.
+        final bool addCellWrapper =
+            child.role != SemanticsRole.cell && child.role != SemanticsRole.columnHeader;
 
         final SemanticsNode cell =
             addCellWrapper
