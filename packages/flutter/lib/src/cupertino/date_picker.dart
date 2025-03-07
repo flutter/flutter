@@ -2195,12 +2195,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   late int selectedMinute;
   int? selectedSecond;
 
-  // On iOS the selected values won't be reported until the scrolling fully stops.
-  // The values below are the latest selected values when the picker comes to a full stop.
-  int? lastSelectedHour;
-  int? lastSelectedMinute;
-  int? lastSelectedSecond;
-
   final TextPainter textPainter = TextPainter();
   final List<String> numbers = List<String>.generate(10, (int i) => '${9 - i}');
   late double numberLabelWidth;
@@ -2355,14 +2349,18 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             child: Baseline(
               baseline: numberLabelBaseline,
               baselineType: TextBaseline.alphabetic,
-              child: Text(
-                text,
-                style: const TextStyle(
-                  fontSize: _kTimerPickerLabelFontSize,
-                  fontWeight: FontWeight.w600,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 50),
+                child: Text(
+                  text,
+                  key: ValueKey<String>(text),
+                  style: const TextStyle(
+                    fontSize: _kTimerPickerLabelFontSize,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  softWrap: false,
                 ),
-                maxLines: 1,
-                softWrap: false,
               ),
             ),
           ),
@@ -2434,19 +2432,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     return Stack(
       children: <Widget>[
-        NotificationListener<ScrollEndNotification>(
-          onNotification: (ScrollEndNotification notification) {
-            setState(() {
-              lastSelectedHour = selectedHour;
-            });
-            return false;
-          },
-          child: _buildHourPicker(additionalPadding, selectionOverlay),
-        ),
-        _buildLabel(
-          localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour!) ?? '',
-          additionalPadding,
-        ),
+        _buildHourPicker(additionalPadding, selectionOverlay),
+        _buildLabel(localizations.timerPickerHourLabel(selectedHour!) ?? '', additionalPadding),
       ],
     );
   }
@@ -2507,19 +2494,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     return Stack(
       children: <Widget>[
-        NotificationListener<ScrollEndNotification>(
-          onNotification: (ScrollEndNotification notification) {
-            setState(() {
-              lastSelectedMinute = selectedMinute;
-            });
-            return false;
-          },
-          child: _buildMinutePicker(additionalPadding, selectionOverlay),
-        ),
-        _buildLabel(
-          localizations.timerPickerMinuteLabel(lastSelectedMinute ?? selectedMinute) ?? '',
-          additionalPadding,
-        ),
+        _buildMinutePicker(additionalPadding, selectionOverlay),
+        _buildLabel(localizations.timerPickerMinuteLabel(selectedMinute) ?? '', additionalPadding),
       ],
     );
   }
@@ -2576,19 +2552,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     return Stack(
       children: <Widget>[
-        NotificationListener<ScrollEndNotification>(
-          onNotification: (ScrollEndNotification notification) {
-            setState(() {
-              lastSelectedSecond = selectedSecond;
-            });
-            return false;
-          },
-          child: _buildSecondPicker(additionalPadding, selectionOverlay),
-        ),
-        _buildLabel(
-          localizations.timerPickerSecondLabel(lastSelectedSecond ?? selectedSecond!) ?? '',
-          additionalPadding,
-        ),
+        _buildSecondPicker(additionalPadding, selectionOverlay),
+        _buildLabel(localizations.timerPickerSecondLabel(selectedSecond!) ?? '', additionalPadding),
       ],
     );
   }
