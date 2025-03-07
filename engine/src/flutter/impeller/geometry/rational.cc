@@ -4,8 +4,8 @@
 
 #include "flutter/impeller/geometry/rational.h"
 
-#include <cstdlib>
 #include <cmath>
+#include <cstdlib>
 #include <numeric>
 
 namespace impeller {
@@ -18,7 +18,7 @@ uint32_t AbsToUnsigned(int32_t x) {
 bool Rational::operator==(const Rational& that) const {
   if (den_ == that.den_) {
     return num_ == that.num_;
-  } else if ((num_ >= 0) != (that.num_ >= 0)) { 
+  } else if ((num_ >= 0) != (that.num_ >= 0)) {
     return false;
   } else {
     return AbsToUnsigned(num_) * that.den_ == AbsToUnsigned(that.num_) * den_;
@@ -32,7 +32,7 @@ bool Rational::operator!=(const Rational& that) const {
 bool Rational::operator<(const Rational& that) const {
   if (den_ == that.den_) {
     return num_ < that.num_;
-  } else if ((num_ >= 0) != (that.num_ >= 0)) { 
+  } else if ((num_ >= 0) != (that.num_ >= 0)) {
     return num_ < that.num_;
   } else {
     return AbsToUnsigned(num_) * that.den_ < AbsToUnsigned(that.num_) * den_;
