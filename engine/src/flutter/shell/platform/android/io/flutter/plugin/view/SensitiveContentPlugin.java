@@ -80,16 +80,15 @@ public class SensitiveContentPlugin
    * mFlutterViewId}.
    */
   @Override
-  public void getContentSensitivity(@NonNull MethodChannel.Result result) {
+  public Integer getContentSensitivity() {
     if (!isSupported()) {
       // This feature is only available on >= API 35.
-      result.success(null);
-      return;
+      return null;
     }
 
     final View flutterView = mFlutterActivity.findViewById(mFlutterViewId);
     final int currentContentSensitivity = flutterView.getContentSensitivity();
-    result.success(currentContentSensitivity);
+    return currentContentSensitivity;
   }
 
   /**

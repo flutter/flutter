@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.engine.systemchannels;
 
+import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.Log;
@@ -18,6 +19,13 @@ import io.flutter.plugin.common.StandardMethodCodec;
  */
 public class SensitiveContentChannel {
   private static final String TAG = "SensitiveContentChannel";
+
+  /* Flutter ContentSensitivity enum names that represent different Android View content sensitivity settings. */
+  @VisibleForTesting static final String AUTO_SENSITIVE_CONTENT_SENSITIVITY = "autoSensitive";
+
+  @VisibleForTesting static final String SENSITIVE_CONTENT_SENSITIVITY = "sensitive";
+
+  @VisibleForTesting static final String NOT_SENSITIVE_CONTENT_SENSITIVITY = "notSensitive";
 
   public final MethodChannel channel;
   private SensitiveContentMethodHandler sensitiveContentMethodHandler;
@@ -36,17 +44,19 @@ public class SensitiveContentChannel {
           Log.v(TAG, "Received '" + method + "' message.");
           switch (method) {
             case "SensitiveContent.setContentSensitivity":
-              final int contentSensitivityLevel = call.arguments();
+              final String contentSensitivityLevelStr = call.arguments();
               try {
                 sensitiveContentMethodHandler.setContentSensitivity(
-                    contentSensitivityLevel, result);
+                    deserializeContentSensitivity(contentSensitivityLevelStr), result);
               } catch (IllegalStateException exception) {
                 result.error("error", exception.getMessage(), null);
               }
               break;
             case "SensitiveContent.getContentSensitivity":
               try {
-                sensitiveContentMethodHandler.getContentSensitivity(result);
+                final Integer currentContentSensitvity =
+                    sensitiveContentMethodHandler.getContentSensitivity();
+                result.success(serializeContentSensitivity(currentContentSensitvity));
               } catch (IllegalStateException exception) {
                 result.error("error", exception.getMessage(), null);
               }
@@ -66,6 +76,38 @@ public class SensitiveContentChannel {
           }
         }
       };
+
+  private int deserializeContentSensitivity(String contentSensitivityName) {
+    switch (contentSensitivityName) {
+      case AUTO_SENSITIVE_CONTENT_SENSITIVITY:
+        return View.CONTENT_SENSITIVITY_AUTO;
+      case SENSITIVE_CONTENT_SENSITIVITY:
+        return View.CONTENT_SENSITIVITY_NOT_SENSITIVE;
+      case NOT_SENSITIVE_CONTENT_SENSITIVITY:
+        return View.CONTENT_SENSITIVITY_SENSITIVE;
+      default:
+        throw new IllegalArgumentException(
+            "contentSensitivityName "
+                + contentSensitivityName
+                + " not known to the SensitiveContentChannel.");
+    }
+  }
+
+  private String serializeContentSensitivity(int contentSensitivityValue) {
+    switch (contentSensitivityValue) {
+      case View.CONTENT_SENSITIVITY_AUTO:
+        return AUTO_SENSITIVE_CONTENT_SENSITIVITY;
+      case View.CONTENT_SENSITIVITY_NOT_SENSITIVE:
+        return SENSITIVE_CONTENT_SENSITIVITY;
+      case View.CONTENT_SENSITIVITY_SENSITIVE:
+        return NOT_SENSITIVE_CONTENT_SENSITIVITY;
+      default:
+        throw new IllegalArgumentException(
+            "Android View content sensitivity constant with value "
+                + contentSensitivityValue
+                + " not known to the SensitiveContentChannel.");
+    }
+  }
 
   public SensitiveContentChannel(@NonNull DartExecutor dartExecutor) {
     channel =
@@ -91,7 +133,7 @@ public class SensitiveContentChannel {
         @NonNull int requestedContentSensitivity, @NonNull MethodChannel.Result result);
 
     /** Returns the current content sensitivity level of a Flutter Android {@code View}. */
-    void getContentSensitivity(@NonNull MethodChannel.Result result);
+    Integer getContentSensitivity();
 
     /** Returns whether or not marking content sensitivity is supported on the device. */
     void isSupported(@NonNull MethodChannel.Result result);
