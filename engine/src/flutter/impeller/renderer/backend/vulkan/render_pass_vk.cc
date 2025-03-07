@@ -340,6 +340,9 @@ void RenderPassVK::SetCommandLabel(std::string_view label) {
 
 // |RenderPass|
 void RenderPassVK::SetStencilReference(uint32_t value) {
+  if (current_stencil_ == value) {
+    return;
+  }
   command_buffer_vk_.setStencilReference(
       vk::StencilFaceFlagBits::eVkStencilFrontAndBack, value);
 }
@@ -545,9 +548,9 @@ fml::Status RenderPassVK::Draw() {
   instance_count_ = 1u;
   base_vertex_ = 0u;
   element_count_ = 0u;
-  pipeline_ = PipelineRef(nullptr);
-  pipeline_uses_input_attachments_ = false;
-  immutable_sampler_ = nullptr;
+  // pipeline_ = PipelineRef(nullptr);
+  // pipeline_uses_input_attachments_ = false;
+  // immutable_sampler_ = nullptr;
   return fml::Status();
 }
 
