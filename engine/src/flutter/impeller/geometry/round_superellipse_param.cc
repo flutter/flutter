@@ -241,16 +241,13 @@ bool OctantContains(const RoundSuperellipseParam::Octant& param,
                     const Point& p) {
   // Check whether the point is within the octant.
   if (p.x < 0 || p.y < 0 || p.y < p.x) {
-    // printf("Return not octant\n");fflush(stdout);
     return true;
   }
   // Check if the point is within the superellipsoid segment.
   if (p.x <= param.circle_start.x) {
-    // printf("Return se\n");fflush(stdout);
     Point p_se = p / param.se_a;
     return powf(p_se.x, param.se_n) + powf(p_se.y, param.se_n) <= 1;
   }
-  // printf("Return circle\n");fflush(stdout);
   Scalar circle_radius =
       param.circle_start.GetDistanceSquared(param.circle_center);
   Point p_circle = p - param.circle_center;

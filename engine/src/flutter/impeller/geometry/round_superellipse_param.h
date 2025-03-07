@@ -20,7 +20,7 @@ struct RoundSuperellipseParam {
   // This structure is used to define an octant of an arbitrary rounded
   // superellipse.
   //
-  // A `se_n` of 0 means that the radius is 0, this octant is a square
+  // A `se_n` of 0 means that the radius is 0, and this octant is a square
   // of size `se_a` at `offset` and all other fields are ignored.
   struct Octant {
     // The offset of the square-like rounded superellipse's center from the
@@ -32,6 +32,8 @@ struct RoundSuperellipseParam {
     // The semi-axis length of the superellipse.
     Scalar se_a;
     // The degree of the superellipse.
+    //
+    // If this value is 0, then this octant is a square of size `se_a`.
     Scalar se_n;
     // The range of the parameter "theta" used to define the superellipse curve.
     //
