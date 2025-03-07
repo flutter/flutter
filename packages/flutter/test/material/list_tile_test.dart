@@ -2621,8 +2621,8 @@ void main() {
       );
     }
 
-    testWidgets('test 1', (WidgetTester tester) async {
-      // Test a trailing widget that exceeds the list tile width.
+    testWidgets('leading', (WidgetTester tester) async {
+      // Test a leading widget that exceeds the list tile width.
       // 16 (content padding) + 61 (leading width) + 24 (content padding) = 101.
       // List tile width is 100 as a result, an exception should be thrown.
       FlutterError.onError = onError;
@@ -2648,7 +2648,7 @@ void main() {
       );
     });
 
-    testWidgets('test 2', (WidgetTester tester) async {
+    testWidgets('trailing', (WidgetTester tester) async {
       // Test a trailing widget that exceeds the list tile width.
       // 16 (content padding) + 61 (trailing width) + 24 (content padding) = 101.
       // List tile width is 100 as a result, an exception should be thrown.
