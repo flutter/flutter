@@ -790,7 +790,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   if (!self.node.customAccessibilityActions.empty()) {
     return true;
   }
-
   return false;
 }
 
@@ -941,7 +940,15 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (CGRect)accessibilityFrame {
-  return self.semanticsObject.accessibilityFrame;
+  // For OverlayPortals, the element is sometimes outside the bounds of the parent
+  // Find the min rect containing the children, and set the accessibilityFrame to that.
+  NSArray<SemanticsObject*>* children = self.semanticsObject.children;
+  CGRect boundingRect = self.semanticsObject.accessibilityFrame;
+  for (SemanticsObject* child in children) {
+      CGRect childRect = child.accessibilityFrame;
+      boundingRect = CGRectUnion(boundingRect, childRect);
+  }
+  return boundingRect;
 }
 
 - (id)accessibilityContainer {
@@ -958,5 +965,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 - (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
   return [self.semanticsObject accessibilityScroll:direction];
 }
+
+
 
 @end
