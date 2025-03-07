@@ -909,6 +909,296 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/164619
+  testWidgets('Material2 - Switch.adaptive(Cupertino) can be set color', (
+    WidgetTester tester,
+  ) async {
+    bool value = false;
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform, useMaterial3: false),
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Switch.adaptive(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    activeColor: Colors.red[500],
+                    activeTrackColor: Colors.green[500],
+                    inactiveThumbColor: Colors.yellow[500],
+                    inactiveTrackColor: Colors.blue[500],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    ]) {
+      value = false;
+      final RRect trackRRect =
+          platform == TargetPlatform.iOS
+              ? RRect.fromLTRBR(4.0, 8.5, 55.0, 39.5, const Radius.circular(15.5))
+              : RRect.fromLTRBR(4.0, 4.5, 55.0, 35.5, const Radius.circular(15.5));
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.blue[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000))
+          ..rrect(color: Colors.yellow[500]),
+      );
+
+      await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+      await tester.pump();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.green[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000))
+          ..rrect(color: Colors.red),
+      );
+    }
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/164619
+  testWidgets('Material2 - Switch.adaptive(Material) can be set color', (
+    WidgetTester tester,
+  ) async {
+    bool value = false;
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform, useMaterial3: false),
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Switch.adaptive(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    activeColor: Colors.red[500],
+                    activeTrackColor: Colors.green[500],
+                    inactiveThumbColor: Colors.yellow[500],
+                    inactiveTrackColor: Colors.blue[500],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    ]) {
+      value = false;
+      final RRect trackRRect =
+          platform == TargetPlatform.fuchsia || platform == TargetPlatform.android
+              ? RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))
+              : RRect.fromLTRBR(13.0, 13.0, 46.0, 27.0, const Radius.circular(7.0));
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.blue[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x33000000))
+          ..rrect(color: const Color(0x24000000))
+          ..rrect(color: const Color(0x1f000000))
+          ..rrect(color: Colors.yellow[500]),
+      );
+
+        await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+        await tester.pump();
+
+        expect(
+          Material.of(tester.element(find.byType(Switch))),
+          paints
+            ..rrect(color: Colors.green[500], rrect: trackRRect)
+            ..rrect(color: const Color(0x00000000))
+            ..rrect(color: const Color(0x33000000))
+            ..rrect(color: const Color(0x24000000))
+            ..rrect(color: const Color(0x1f000000))
+            ..rrect(color: Colors.red),
+        );
+    }
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/164619
+  testWidgets('Material3 - Switch.adaptive(Cupertino) can be set color', (
+    WidgetTester tester,
+  ) async {
+    bool value = false;
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform, useMaterial3: true),
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Switch.adaptive(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    activeColor: Colors.red[500],
+                    activeTrackColor: Colors.green[500],
+                    inactiveThumbColor: Colors.yellow[500],
+                    inactiveTrackColor: Colors.blue[500],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    ]) {
+      value = false;
+      final RRect trackRRect =
+          platform == TargetPlatform.iOS
+              ? RRect.fromLTRBR(4.5, 8.5, 55.5, 39.5, const Radius.circular(15.5))
+              : RRect.fromLTRBR(4.5, 4.5, 55.5, 35.5, const Radius.circular(15.5));
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.blue[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000))
+          ..rrect(color: Colors.yellow[500]),
+      );
+
+      await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+      await tester.pump();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.green[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000))
+          ..rrect(color: Colors.red),
+      );
+    }
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/164619
+  testWidgets('Material3 - Switch.adaptive(Material) can be set color', (
+    WidgetTester tester,
+  ) async {
+    bool value = false;
+    final ColorScheme colors = ThemeData(useMaterial3: true).colorScheme;
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform, useMaterial3: true),
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Switch.adaptive(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    activeColor: Colors.red[500],
+                    activeTrackColor: Colors.green[500],
+                    inactiveThumbColor: Colors.yellow[500],
+                    inactiveTrackColor: Colors.blue[500],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    ]) {
+      value = false;
+      final RRect trackRRect =
+          platform == TargetPlatform.fuchsia || platform == TargetPlatform.android
+              ? RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0))
+              : RRect.fromLTRBR(4.0, 4.0, 56.0, 36.0, const Radius.circular(16.0));
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(style: PaintingStyle.fill, color: Colors.blue[500], rrect: trackRRect)
+          ..rrect(style: PaintingStyle.stroke, color: colors.outline)
+          ..rrect(color: Colors.yellow[500]),
+      );
+      await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+      await tester.pump();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(style: PaintingStyle.fill, color: Colors.green[500], rrect: trackRRect)
+          ..rrect()
+          ..rrect(color: Colors.red[500]),
+      );
+    }
+  });
+
   testWidgets('Drag ends after animation completes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17773
 
