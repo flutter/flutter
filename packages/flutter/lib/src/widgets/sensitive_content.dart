@@ -120,7 +120,8 @@ class SensitiveContentHost {
 
     // Verify that desiredSensitivityLevel should be set in order for sensitive
     // content to remain obscured.
-    if (!shouldSetContentSensitivity(desiredSensitivityLevel)) {
+    if (currentContentSensitivityLevel ==
+        _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts) {
       return;
     }
 

@@ -7,6 +7,7 @@ package io.flutter.embedding.engine.systemchannels;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodCall;
@@ -20,12 +21,31 @@ import io.flutter.plugin.common.StandardMethodCodec;
 public class SensitiveContentChannel {
   private static final String TAG = "SensitiveContentChannel";
 
-  /* Flutter ContentSensitivity enum names that represent different Android View content sensitivity settings. */
-  @VisibleForTesting static final String AUTO_SENSITIVE_CONTENT_SENSITIVITY = "autoSensitive";
+  /**
+   * Flutter ContentSensitivity.autoSensitive name that represents Android's
+   * `View.CONTENT_SENSITIVITY_AUTO` setting.
+   *
+   * <p>See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO.
+   */
+  @VisibleForTesting
+  public static final String AUTO_SENSITIVE_CONTENT_SENSITIVITY = "autoSensitive";
 
-  @VisibleForTesting static final String SENSITIVE_CONTENT_SENSITIVITY = "sensitive";
+  /**
+   * Flutter ContentSensitivity.sensitive name that represents Android's
+   * `View.CONTENT_SENSITIVITY_SENSITIVE` setting.
+   *
+   * <p>See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_SENSITIVE.
+   */
+  @VisibleForTesting public static final String SENSITIVE_CONTENT_SENSITIVITY = "sensitive";
 
-  @VisibleForTesting static final String NOT_SENSITIVE_CONTENT_SENSITIVITY = "notSensitive";
+  /**
+   * Flutter ContentSensitivity.notSensitive name that represents Android's
+   * `View.CONTENT_SENSITIVITY_NOT_SENSITIVE` setting.
+   *
+   * <p>See
+   * https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
+   */
+  @VisibleForTesting public static final String NOT_SENSITIVE_CONTENT_SENSITIVITY = "notSensitive";
 
   public final MethodChannel channel;
   private SensitiveContentMethodHandler sensitiveContentMethodHandler;
@@ -39,7 +59,7 @@ public class SensitiveContentChannel {
             // No SensitiveContentChannel registered, call not forwarded to sensitive content
             // API.");
             return;
-          } // TODO(camsim99): add serialization
+          }
           String method = call.method;
           Log.v(TAG, "Received '" + method + "' message.");
           switch (method) {
@@ -48,25 +68,24 @@ public class SensitiveContentChannel {
               try {
                 sensitiveContentMethodHandler.setContentSensitivity(
                     deserializeContentSensitivity(contentSensitivityLevelStr), result);
-              } catch (IllegalStateException exception) {
+              } catch (IllegalArgumentException exception) {
                 result.error("error", exception.getMessage(), null);
               }
               break;
             case "SensitiveContent.getContentSensitivity":
               try {
                 final Integer currentContentSensitvity =
-                    sensitiveContentMethodHandler.getContentSensitivity();
+                    sensitiveContentMethodHandler.getContentSensitivity(result);
+
+                // Report result if fetching currentContentSensitvity did not encounter
+                // an error.
                 result.success(serializeContentSensitivity(currentContentSensitvity));
-              } catch (IllegalStateException exception) {
+              } catch (IllegalArgumentException exception) {
                 result.error("error", exception.getMessage(), null);
               }
               break;
             case "SensitiveContent.isSupported":
-              try {
-                sensitiveContentMethodHandler.isSupported(result);
-              } catch (IllegalStateException exception) {
-                result.error("error", exception.getMessage(), null);
-              }
+              sensitiveContentMethodHandler.isSupported(result);
               break;
             default:
               Log.v(
@@ -98,9 +117,9 @@ public class SensitiveContentChannel {
       case View.CONTENT_SENSITIVITY_AUTO:
         return AUTO_SENSITIVE_CONTENT_SENSITIVITY;
       case View.CONTENT_SENSITIVITY_NOT_SENSITIVE:
-        return SENSITIVE_CONTENT_SENSITIVITY;
-      case View.CONTENT_SENSITIVITY_SENSITIVE:
         return NOT_SENSITIVE_CONTENT_SENSITIVITY;
+      case View.CONTENT_SENSITIVITY_SENSITIVE:
+        return SENSITIVE_CONTENT_SENSITIVITY;
       default:
         throw new IllegalArgumentException(
             "Android View content sensitivity constant with value "
@@ -132,10 +151,19 @@ public class SensitiveContentChannel {
     void setContentSensitivity(
         @NonNull int requestedContentSensitivity, @NonNull MethodChannel.Result result);
 
-    /** Returns the current content sensitivity level of a Flutter Android {@code View}. */
-    Integer getContentSensitivity();
+    /**
+     * Returns the current content sensitivity level of a Flutter Android {@code View}.
+     *
+     * <p>{@code result} passed in the event that this method encounters an error. In the case that
+     * an error is encounted, {@code null} is returned.
+     */
+    Integer getContentSensitivity(@NonNull MethodChannel.Result result);
 
-    /** Returns whether or not marking content sensitivity is supported on the device. */
+    /**
+     * Returns whether or not marking content sensitivity is supported on the device.
+     *
+     * <p>This value is static and will not change while a Flutter app runs.
+     */
     void isSupported(@NonNull MethodChannel.Result result);
   }
 }
