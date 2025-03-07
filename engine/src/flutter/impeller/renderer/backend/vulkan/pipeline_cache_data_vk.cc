@@ -37,9 +37,9 @@ bool PipelineCacheDataPersist(const fml::UniqueFD& cache_directory,
     return false;
   }
 
-  const auto header = PipelineCacheHeaderVK{props, maximum_data_size};
-  std::memcpy(allocation->GetBuffer(), &header, sizeof(header));
   size_t written_data_size = maximum_data_size - sizeof(PipelineCacheHeaderVK);
+  const auto header = PipelineCacheHeaderVK{props, written_data_size};
+  std::memcpy(allocation->GetBuffer(), &header, sizeof(header));
   vk::Result result = cache.getOwner().getPipelineCacheData(
       *cache, &written_data_size, allocation->GetBuffer() + sizeof(header));
 
