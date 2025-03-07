@@ -8996,7 +8996,9 @@ void main() {
     ]);
   });
 
-  testWidgets('onFocusChange is triggered when tabs gain and lose focus', (WidgetTester tester) async {
+  testWidgets('onFocusChange is triggered when tabs gain and lose focus', (
+    WidgetTester tester,
+  ) async {
     final List<({bool focus, int index})> focusEvents = <({bool focus, int index})>[];
     await tester.pumpWidget(
       MaterialApp(
