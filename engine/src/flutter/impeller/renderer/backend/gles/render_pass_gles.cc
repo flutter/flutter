@@ -222,15 +222,20 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   } else {
     // Create and bind an offscreen FBO.
     if (!color_gles.GetCachedFBO().IsDead()) {
-      gl.BindFramebuffer(
-          GL_FRAMEBUFFER,
-          reactor.GetGLHandle(color_gles.GetCachedFBO()).value());
+      auto fbo = reactor.GetGLHandle(color_gles.GetCachedFBO());
+      if (!fbo.has_value()) {
+        return false;
+      }
+      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
     } else {
       HandleGLES cached_fbo =
           reactor.CreateUntrackedHandle(HandleType::kFrameBuffer);
       color_gles.SetCachedFBO(cached_fbo);
-      gl.BindFramebuffer(GL_FRAMEBUFFER,
-                         reactor.GetGLHandle(cached_fbo).value());
+      auto fbo = reactor.GetGLHandle(cached_fbo);
+      if (!fbo.has_value()) {
+        return false;
+      }
+      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
 
       if (!color_gles.SetAsFramebufferAttachment(
               GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
