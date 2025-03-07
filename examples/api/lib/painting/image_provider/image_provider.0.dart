@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 @immutable
 class CustomNetworkImage extends ImageProvider<Uri> {
@@ -30,17 +30,17 @@ class CustomNetworkImage extends ImageProvider<Uri> {
     return SynchronousFuture<Uri>(result);
   }
 
-  static HttpClient get _httpClient {
-    HttpClient? client;
-    assert(() {
-      if (debugNetworkImageHttpClientProvider != null) {
-        client = debugNetworkImageHttpClientProvider!();
-      }
-      return true;
-    }());
-    return client ?? HttpClient()
-      ..autoUncompress = false;
-  }
+  static http.Client get _httpClient =>
+      // FIXME is an equivalent to this assert needed for http.Client?
+      // assert(() {
+      //   if (debugNetworkImageHttpClientProvider != null) {
+      //     client = debugNetworkImageHttpClientProvider!();
+      //   }
+      //   return true;
+      // }());
+      http.Client();
+  // FIXME confirm whether http.Client has an equivalent to this that needs to be called
+  // ..autoUncompress = false;
 
   @override
   ImageStreamCompleter loadImage(Uri key, ImageDecoderCallback decode) {
@@ -48,18 +48,8 @@ class CustomNetworkImage extends ImageProvider<Uri> {
     debugPrint('Fetching "$key"...');
     return MultiFrameImageStreamCompleter(
       codec: _httpClient
-          .getUrl(key)
-          .then<HttpClientResponse>((HttpClientRequest request) => request.close())
-          .then<Uint8List>((HttpClientResponse response) {
-            return consolidateHttpClientResponseBytes(
-              response,
-              onBytesReceived: (int cumulative, int? total) {
-                chunkEvents.add(
-                  ImageChunkEvent(cumulativeBytesLoaded: cumulative, expectedTotalBytes: total),
-                );
-              },
-            );
-          })
+          .get(key)
+          .then<Uint8List>((http.Response response) => response.bodyBytes)
           .catchError((Object e, StackTrace stack) {
             scheduleMicrotask(() {
               PaintingBinding.instance.imageCache.evict(key);
