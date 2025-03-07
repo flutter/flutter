@@ -17,10 +17,9 @@ namespace {
 // Utility functions used to build a rounded superellipse.
 class RoundSuperellipseBuilder {
  public:
-  typedef std::function<
-      void(const Point&, const Point&, const Point&, const Point&)>
-      CubicAdder;
-  typedef std::function<void(const Point&)> PointAdder;
+  using CubicAdder = std::function<
+      void(const Point&, const Point&, const Point&, const Point&)>;
+  using PointAdder = std::function<void(const Point&)>;
 
   // Create a builder.
   //
