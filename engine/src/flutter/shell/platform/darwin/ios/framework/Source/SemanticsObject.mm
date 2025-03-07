@@ -945,8 +945,8 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   NSArray<SemanticsObject*>* children = self.semanticsObject.children;
   CGRect boundingRect = self.semanticsObject.accessibilityFrame;
   for (SemanticsObject* child in children) {
-      CGRect childRect = child.accessibilityFrame;
-      boundingRect = CGRectUnion(boundingRect, childRect);
+    CGRect childRect = child.accessibilityFrame;
+    boundingRect = CGRectUnion(boundingRect, childRect);
   }
   return boundingRect;
 }
@@ -965,7 +965,5 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 - (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
   return [self.semanticsObject accessibilityScroll:direction];
 }
-
-
 
 @end
