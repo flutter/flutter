@@ -379,6 +379,7 @@ Path DlPath::ConvertToImpellerPath(const SkPath& path, const DlPoint& shift) {
   DlPathReceiver receiver{
       .recommend_size =
           [&builder](size_t verb_count, size_t point_count) {
+            // Reserve a path size with some arbitrarily additional padding.
             builder.Reserve(point_count + 8, verb_count + 8);
           },
       .recommend_bounds =
@@ -396,6 +397,9 @@ Path DlPath::ConvertToImpellerPath(const SkPath& path, const DlPoint& shift) {
           [&builder](const DlPoint& cp, const DlPoint& p2) {  //
             builder.QuadraticCurveTo(cp, p2);
           },
+      // .conic_to = ... for legacy compatibility we let the SkPath dispatcher
+      //                 convert conics to quads until we update Impeller for
+      //                 full support of rational quadratics
       .cubic_to =
           [&builder](const DlPoint& cp1,   //
                      const DlPoint& cp2,   //
