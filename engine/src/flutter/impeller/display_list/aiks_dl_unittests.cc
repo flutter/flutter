@@ -21,10 +21,12 @@
 #include "flutter/testing/testing.h"
 #include "fml/synchronization/count_down_latch.h"
 #include "imgui.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/geometry/scalar.h"
@@ -1102,6 +1104,19 @@ TEST_P(AiksTest, ToImageFromImage) {
   canvas.DrawImage(DlImageImpeller::Make(reupload_texture), DlPoint(0, 100),
                    DlImageSampling::kNearestNeighbor, &paint);
   OpenPlaygroundHere(canvas.Build());
+}
+
+TEST_P(AiksTest, DisplayListToTextureAllocationFailure) {
+  ScopedValidationDisable disable_validations;
+  DisplayListBuilder builder;
+
+  AiksContext aiks_context(GetContext(), nullptr);
+  // Use intentionally invalid dimensions that would trigger an allocation
+  // failure.
+  auto texture =
+      DisplayListToTexture(builder.Build(), ISize{0, 0}, aiks_context);
+
+  EXPECT_EQ(texture, nullptr);
 }
 
 }  // namespace testing
