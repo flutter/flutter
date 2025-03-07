@@ -8,13 +8,12 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_library_vk.h"
-#include "vulkan/vulkan_to_string.hpp"
 
 namespace impeller {
 
 namespace {
 
-static bool RequiresYCBCRConversion(vk::Format format) {
+bool RequiresYCBCRConversion(vk::Format format) {
   switch (format) {
     case vk::Format::eG8B8R83Plane420Unorm:
     case vk::Format::eG8B8R82Plane420Unorm:
@@ -35,7 +34,7 @@ using AHBProperties = vk::StructureChain<
     // For VK_ANDROID_external_memory_android_hardware_buffer
     vk::AndroidHardwareBufferFormatPropertiesANDROID>;
 
-static vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
+vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
     const vk::Device& device,
     const AHBProperties& ahb_props,
     const AHardwareBuffer_Desc& ahb_desc) {
@@ -112,7 +111,7 @@ static vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
   return std::move(image.value);
 }
 
-static vk::UniqueDeviceMemory ImportVKDeviceMemoryFromAndroidHarwareBuffer(
+vk::UniqueDeviceMemory ImportVKDeviceMemoryFromAndroidHarwareBuffer(
     const vk::Device& device,
     const vk::PhysicalDevice& physical_device,
     const vk::Image& image,
@@ -156,7 +155,7 @@ static vk::UniqueDeviceMemory ImportVKDeviceMemoryFromAndroidHarwareBuffer(
   return std::move(device_memory.value);
 }
 
-static std::shared_ptr<YUVConversionVK> CreateYUVConversion(
+std::shared_ptr<YUVConversionVK> CreateYUVConversion(
     const ContextVK& context,
     const AHBProperties& ahb_props) {
   YUVConversionDescriptorVK conversion_chain;
@@ -194,7 +193,7 @@ static std::shared_ptr<YUVConversionVK> CreateYUVConversion(
   return context.GetYUVConversionLibrary()->GetConversion(conversion_chain);
 }
 
-static vk::UniqueImageView CreateVKImageView(
+vk::UniqueImageView CreateVKImageView(
     const vk::Device& device,
     const vk::Image& image,
     const std::shared_ptr<YUVConversionVK>& yuv_conversion_wrapper,
@@ -241,7 +240,7 @@ static vk::UniqueImageView CreateVKImageView(
   return std::move(image_view.value);
 }
 
-static PixelFormat ToPixelFormat(AHardwareBuffer_Format format) {
+PixelFormat ToPixelFormat(AHardwareBuffer_Format format) {
   switch (format) {
     case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
       return PixelFormat::kR8G8B8A8UNormInt;
@@ -275,7 +274,7 @@ static PixelFormat ToPixelFormat(AHardwareBuffer_Format format) {
   return PixelFormat::kR8G8B8A8UNormInt;
 }
 
-static TextureType ToTextureType(const AHardwareBuffer_Desc& ahb_desc) {
+TextureType ToTextureType(const AHardwareBuffer_Desc& ahb_desc) {
   if (ahb_desc.layers == 1u) {
     return TextureType::kTexture2D;
   }
@@ -288,8 +287,7 @@ static TextureType ToTextureType(const AHardwareBuffer_Desc& ahb_desc) {
   return TextureType::kTexture2D;
 }
 
-static TextureDescriptor ToTextureDescriptor(
-    const AHardwareBuffer_Desc& ahb_desc) {
+TextureDescriptor ToTextureDescriptor(const AHardwareBuffer_Desc& ahb_desc) {
   const auto ahb_size = ISize{ahb_desc.width, ahb_desc.height};
   TextureDescriptor desc;
   // We are not going to touch hardware buffers on the CPU or use them as
