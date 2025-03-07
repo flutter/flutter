@@ -211,7 +211,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   }
 #endif  // IMPELLER_DEBUG
 
-  GLuint fbo = GL_NONE;
   TextureGLES& color_gles = TextureGLES::Cast(*pass_data.color_attachment);
   const bool is_default_fbo = color_gles.IsWrapped();
 
@@ -222,14 +221,21 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     }
   } else {
     // Create and bind an offscreen FBO.
-    GLuint cached_fbo = color_gles.GetCachedFBO();
-    if (cached_fbo != GL_NONE) {
-      fbo = cached_fbo;
-      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
+    if (!color_gles.GetCachedFBO().IsDead()) {
+      auto fbo = reactor.GetGLHandle(color_gles.GetCachedFBO());
+      if (!fbo.has_value()) {
+        return false;
+      }
+      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
     } else {
-      gl.GenFramebuffers(1u, &fbo);
-      color_gles.SetCachedFBO(fbo);
-      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
+      HandleGLES cached_fbo =
+          reactor.CreateUntrackedHandle(HandleType::kFrameBuffer);
+      color_gles.SetCachedFBO(cached_fbo);
+      auto fbo = reactor.GetGLHandle(cached_fbo);
+      if (!fbo.has_value()) {
+        return false;
+      }
+      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
 
       if (!color_gles.SetAsFramebufferAttachment(
               GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
