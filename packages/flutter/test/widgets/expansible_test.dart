@@ -12,12 +12,9 @@ void main() {
       MaterialApp(
         home: Expansible(
           controller: controller,
-          bodyBuilder:
-              (BuildContext context, bool isExpanded, Animation<double> animation) =>
-                  const Text('Body'),
+          bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
           headerBuilder:
-              (BuildContext context, bool isExpanded, Animation<double> animation) =>
-                  const Text('Header'),
+              (BuildContext context, Animation<double> animation) => const Text('Header'),
         ),
       ),
     );
@@ -32,22 +29,20 @@ void main() {
     expect(find.text('Body'), findsNothing);
   });
 
-  testWidgets('onExpansionChanged callback', (WidgetTester tester) async {
+  testWidgets('Can listen to the expansion state', (WidgetTester tester) async {
     final ExpansibleController controller = ExpansibleController();
     bool? expansionState;
+    controller.addListener(() {
+      expansionState = controller.isExpanded;
+    });
+
     await tester.pumpWidget(
       MaterialApp(
         home: Expansible(
           controller: controller,
-          bodyBuilder:
-              (BuildContext context, bool isExpanded, Animation<double> animation) =>
-                  const Text('Body'),
+          bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
           headerBuilder:
-              (BuildContext context, bool isExpanded, Animation<double> animation) =>
-                  const Text('Header'),
-          onExpansionChanged: (bool expanded) {
-            expansionState = expanded;
-          },
+              (BuildContext context, Animation<double> animation) => const Text('Header'),
         ),
       ),
     );
@@ -71,23 +66,48 @@ void main() {
     expect(expansionState, false);
   });
 
-  testWidgets('Layout can be customized with expansibleBuilder', (WidgetTester tester) async {
+  testWidgets('Can set expansible to be initially expanded', (WidgetTester tester) async {
+    final ExpansibleController controller = ExpansibleController();
+    controller.isExpanded = true;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Expansible(
+                controller: controller,
+                bodyBuilder:
+                    (BuildContext context, Animation<double> animation) => const Text('Body'),
+                headerBuilder:
+                    (BuildContext context, Animation<double> animation) => const Text('Header'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Body'), findsOneWidget);
+
+    await tester.tap(find.text('Header'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Body'), findsNothing);
+  });
+
+  testWidgets('Can compose header and body with expansibleBuilder', (WidgetTester tester) async {
     final ExpansibleController controller = ExpansibleController();
     await tester.pumpWidget(
       MaterialApp(
         home: Expansible(
           controller: controller,
-          bodyBuilder:
-              (BuildContext context, bool isExpanded, Animation<double> animation) =>
-                  const Text('Body'),
+          bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
           headerBuilder:
-              (BuildContext context, bool isExpanded, Animation<double> animation) =>
-                  const Text('Header'),
+              (BuildContext context, Animation<double> animation) => const Text('Header'),
           expansibleBuilder: (
             BuildContext context,
             Widget header,
             Widget body,
-            bool expanded,
             Animation<double> animation,
           ) {
             return header;
@@ -119,37 +139,6 @@ void main() {
     expect(find.text('Body'), findsNothing);
   });
 
-  testWidgets('Respects initiallyExpanded', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Expansible(
-                controller: controller,
-                initiallyExpanded: true,
-                bodyBuilder:
-                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
-                        const Text('Body'),
-                headerBuilder:
-                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
-                        const Text('Header'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(find.text('Body'), findsOneWidget);
-
-    await tester.tap(find.text('Header'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Body'), findsNothing);
-  });
-
   testWidgets('Respects maintainState', (WidgetTester tester) async {
     final ExpansibleController controller1 = ExpansibleController();
     final ExpansibleController controller2 = ExpansibleController();
@@ -162,20 +151,18 @@ void main() {
                 controller: controller1,
                 maintainState: true,
                 bodyBuilder:
-                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                    (BuildContext context, Animation<double> animation) =>
                         const Text('Maintaining State'),
                 headerBuilder:
-                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
-                        const Text('Header'),
+                    (BuildContext context, Animation<double> animation) => const Text('Header'),
               ),
               Expansible(
                 controller: controller2,
                 bodyBuilder:
-                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
+                    (BuildContext context, Animation<double> animation) =>
                         const Text('Discarding State'),
                 headerBuilder:
-                    (BuildContext context, bool isExpanded, Animation<double> animation) =>
-                        const Text('Header'),
+                    (BuildContext context, Animation<double> animation) => const Text('Header'),
               ),
             ],
           ),
@@ -200,11 +187,10 @@ void main() {
           curve: Curves.easeOut,
           reverseCurve: Curves.easeIn,
           bodyBuilder:
-              (BuildContext context, bool isExpanded, Animation<double> animation) =>
+              (BuildContext context, Animation<double> animation) =>
                   const SizedBox(height: 50.0, child: Placeholder()),
           headerBuilder:
-              (BuildContext context, bool isExpanded, Animation<double> animation) =>
-                  const Text('Header'),
+              (BuildContext context, Animation<double> animation) => const Text('Header'),
         ),
       ),
     );

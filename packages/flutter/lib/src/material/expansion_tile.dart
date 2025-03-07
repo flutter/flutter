@@ -445,7 +445,7 @@ class ExpansionTile extends StatefulWidget {
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
 
-class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateMixin {
+class _ExpansionTileState extends State<ExpansionTile> {
   static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
   static final Animatable<double> _easeOutTween = CurveTween(curve: Curves.easeOut);
   static final Animatable<double> _halfTween = Tween<double>(begin: 0.0, end: 0.5);
@@ -474,6 +474,10 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
     _curve = Curves.easeIn;
     _duration = _kExpand;
     _tileController = widget.controller ?? ExpansionTileController();
+    if (widget.initiallyExpanded) {
+      _tileController.isExpanded = true;
+    }
+    _tileController.addListener(_onExpansionChanged);
   }
 
   @override
@@ -483,10 +487,11 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
     super.dispose();
   }
 
-  void _onExpansionChanged(bool isExpanded) {
+  void _onExpansionChanged() {
     final TextDirection textDirection = WidgetsLocalizations.of(context).textDirection;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String stateHint = isExpanded ? localizations.collapsedHint : localizations.expandedHint;
+    final String stateHint =
+        _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint;
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       // TODO(tahatesser): This is a workaround for VoiceOver interrupting
@@ -500,7 +505,7 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
     } else {
       SemanticsService.announce(stateHint, textDirection);
     }
-    widget.onExpansionChanged?.call(isExpanded);
+    widget.onExpansionChanged?.call(_tileController.isExpanded);
   }
 
   // Platform or null affinity defaults to trailing.
@@ -536,13 +541,13 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
     return _buildIcon(context, animation);
   }
 
-  Widget _buildHeader(BuildContext context, bool isExpanded, Animation<double> animation) {
+  Widget _buildHeader(BuildContext context, Animation<double> animation) {
     _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
     final ThemeData theme = Theme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String onTapHint =
-        isExpanded
+        _tileController.isExpanded
             ? localizations.expansionTileExpandedTapHint
             : localizations.expansionTileCollapsedTapHint;
     String? semanticsHint;
@@ -550,7 +555,7 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         semanticsHint =
-            isExpanded
+            _tileController.isExpanded
                 ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
                 : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
       case TargetPlatform.android:
@@ -568,7 +573,7 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
         textColor: _headerColor.value,
         child: ListTile(
           enabled: widget.enabled,
-          onTap: isExpanded ? _tileController.collapse : _tileController.expand,
+          onTap: _tileController.isExpanded ? _tileController.collapse : _tileController.expand,
           dense: widget.dense,
           visualDensity: widget.visualDensity,
           enableFeedback: widget.enableFeedback,
@@ -587,7 +592,7 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
     );
   }
 
-  Widget _buildBody(BuildContext context, bool isExpanded, Animation<double> animation) {
+  Widget _buildBody(BuildContext context, Animation<double> animation) {
     return Align(
       alignment:
           widget.expandedAlignment ?? _expansionTileTheme.expandedAlignment ?? Alignment.center,
@@ -605,7 +610,6 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
     BuildContext context,
     Widget header,
     Widget body,
-    bool isExpanded,
     Animation<double> animation,
   ) {
     _backgroundColor = animation.drive(_backgroundColorTween.chain(_easeOutTween));
@@ -755,7 +759,6 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
   Widget build(BuildContext context) {
     return Expansible(
       controller: _tileController,
-      initiallyExpanded: widget.initiallyExpanded,
       curve: _curve,
       duration: _duration,
       reverseCurve: _reverseCurve,
@@ -763,7 +766,6 @@ class _ExpansionTileState extends State<ExpansionTile> with TickerProviderStateM
       excludeHeaderGestures: true,
       headerBuilder: _buildHeader,
       bodyBuilder: _buildBody,
-      onExpansionChanged: _onExpansionChanged,
       expansibleBuilder: _buildExpansible,
     );
   }
