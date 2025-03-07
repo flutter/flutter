@@ -23,8 +23,8 @@ import io.flutter.plugin.common.MethodChannel;
 public class SensitiveContentPlugin
     implements SensitiveContentChannel.SensitiveContentMethodHandler {
 
+  private Activity mFlutterActivity;
   private final int mFlutterViewId;
-  private final Activity mFlutterActivity;
   private final SensitiveContentChannel mSensitiveContentChannel;
 
   public SensitiveContentPlugin(
@@ -38,6 +38,14 @@ public class SensitiveContentPlugin
     mSensitiveContentChannel.setSensitiveContentMethodHandler(this);
   }
 
+  private String getNotSupportedErrorReason() {
+    return "isSupported() should be called before attempting to set content sensitivity as it is not supported on this device.";
+  }
+
+  private String getFlutterViewNotFoundErrorReason() {
+    return "FlutterView with ID " + mFlutterViewId + "not found";
+  }
+
   /**
    * Sets content sensitivity level of the Android {@code View} associated with this plugin's {@code
    * mFlutterViewId} to the level specified by {@requestedContentSensitivity}.
@@ -47,19 +55,19 @@ public class SensitiveContentPlugin
       @NonNull int requestedContentSensitivity, @NonNull MethodChannel.Result result) {
     if (!isSupported()) {
       // This feature is only available on >= API 35.
-      result.error(
-          "error",
-          "Setting content sensitivity with value "
-              + requestedContentSensitivity
-              + " failed because this feature is only available on Android API >= 35.",
-          null);
+      result.error("error", getNotSupportedErrorReason(), null);
       return;
     }
 
     final View flutterView = mFlutterActivity.findViewById(mFlutterViewId);
-    final int initialContentSensitivity = flutterView.getContentSensitivity();
+    if (flutterView == null) {
+      result.error("error", getFlutterViewNotFoundErrorReason(), null);
+      return;
+    }
 
-    if (initialContentSensitivity == requestedContentSensitivity) {
+    final int currentContentSensitivity = flutterView.getContentSensitivity();
+
+    if (currentContentSensitivity == requestedContentSensitivity) {
       // Content sensitivity for the requested View already set to requestedContentSensitivity.
       result.success(null);
       return;
@@ -80,13 +88,19 @@ public class SensitiveContentPlugin
    * mFlutterViewId}.
    */
   @Override
-  public Integer getContentSensitivity() {
+  public Integer getContentSensitivity(@NonNull MethodChannel.Result result) {
     if (!isSupported()) {
       // This feature is only available on >= API 35.
+      result.error("error", getNotSupportedErrorReason(), null);
       return null;
     }
 
     final View flutterView = mFlutterActivity.findViewById(mFlutterViewId);
+    if (flutterView == null) {
+      result.error("error", getFlutterViewNotFoundErrorReason(), null);
+      return null;
+    }
+
     final int currentContentSensitivity = flutterView.getContentSensitivity();
     return currentContentSensitivity;
   }
@@ -112,5 +126,6 @@ public class SensitiveContentPlugin
    */
   public void destroy() {
     this.mSensitiveContentChannel.setSensitiveContentMethodHandler(null);
+    this.mFlutterActivity = null;
   }
 }

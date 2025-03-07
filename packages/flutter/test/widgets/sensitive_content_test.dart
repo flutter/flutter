@@ -27,10 +27,12 @@ void main() {
       (MethodCall methodCall) async {
         if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
           setContentSensitivityArgs.add(
-            ContentSensitivity.getContentSensitivityById(methodCall.arguments as int),
+            ContentSensitivity.values.firstWhere(
+              (ContentSensitivity cs) => cs.name == methodCall.arguments as String,
+            ),
           );
         } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-          return defaultContentSensitivitySetting.id;
+          return defaultContentSensitivitySetting.name;
         } else if (methodCall.method == 'SensitiveContent.isSupported') {
           return true;
         }

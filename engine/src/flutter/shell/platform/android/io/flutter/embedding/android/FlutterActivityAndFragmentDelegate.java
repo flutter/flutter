@@ -1203,6 +1203,8 @@ import java.util.List;
      * Hook for host to create/provide a {@link SensitiveContentPlugin} if the associated Flutter
      * experience should set content sensitivity for the {@link FlutterView} that {@code activity}
      * creates.
+     *
+     * <p>Expect a null {@code SensitiveContentPlugin} if {@code activity} is null.
      */
     @Nullable
     SensitiveContentPlugin provideSensitiveContentPlugin(

@@ -71,22 +71,22 @@ enum ContentSensitivity {
   notSensitive,
 }
 
-/// Service for setting the content sensitivity of the native Android `View`
+/// Service for setting the content sensitivity of the native app window (Android `View`)
 /// that contains the app's widget tree.
 ///
 /// This service is only currently supported on Android.
 class SensitiveContentService {
-  /// Creates service to set content sensitivity of an Android `View` via
+  /// Creates service to set content sensitivity of an app window (Android `View`) via
   /// communication over the sensitive content [MethodChannel].
   SensitiveContentService() {
     sensitiveContentChannel = SystemChannels.sensitiveContent;
   }
 
   /// The channel used to communicate with the shell side to get and set the
-  /// content sensitivity of an Android `View`.
+  /// content sensitivity of an app window (Android `View`).
   late MethodChannel sensitiveContentChannel;
 
-  /// Sets content sensitivity level of the Android `View` that contains the app's widget tree to the level
+  /// Sets content sensitivity level of the app window (Android `View`) that contains the app's widget tree to the level
   /// specified by [contentSensitivity] via a call to the native embedder.
   void setContentSensitivity(ContentSensitivity contentSensitivity) {
     try {
@@ -100,7 +100,7 @@ class SensitiveContentService {
     }
   }
 
-  /// Gets content sensitivity level of the Android `View` that contains
+  /// Gets content sensitivity level of the app window (Android `View`) that contains
   /// the app's widget tree.
   Future<ContentSensitivity> getContentSensitivity() async {
     try {
@@ -120,6 +120,9 @@ class SensitiveContentService {
   /// Returns whether or not setting content sensitivity levels is supported
   /// by the device.
   ///
+  /// This method must be called before attempting to call [getContentSensitivity]
+  /// or [setContentSensitivity].
+  ///
   /// This feature is only supported on Android currently.
   Future<bool> isSupported() async {
     if (defaultTargetPlatform != TargetPlatform.android) {
@@ -132,7 +135,7 @@ class SensitiveContentService {
       );
       return result!;
     } catch (e) {
-      // Content sensitivity failed to be set.
+      // Sensitive content support failed to be fetched.
       throw FlutterError('Failed to retrieve content sensitivity: $e');
     }
   }
