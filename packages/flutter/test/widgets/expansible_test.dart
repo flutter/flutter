@@ -27,6 +27,8 @@ void main() {
     controller.collapse();
     await tester.pumpAndSettle();
     expect(find.text('Body'), findsNothing);
+
+    controller.dispose();
   });
 
   testWidgets('Can listen to the expansion state', (WidgetTester tester) async {
@@ -64,6 +66,8 @@ void main() {
     controller.collapse();
     await tester.pumpAndSettle();
     expect(expansionState, false);
+
+    controller.dispose();
   });
 
   testWidgets('Can set expansible to be initially expanded', (WidgetTester tester) async {
@@ -93,6 +97,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Body'), findsNothing);
+
+    controller.dispose();
   });
 
   testWidgets('Can compose header and body with expansibleBuilder', (WidgetTester tester) async {
@@ -137,6 +143,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Header'), findsOneWidget);
     expect(find.text('Body'), findsNothing);
+
+    controller.dispose();
   });
 
   testWidgets('Respects maintainState', (WidgetTester tester) async {
@@ -175,6 +183,9 @@ void main() {
     expect(find.text('Maintaining State'), findsNothing);
     // This text is not displayed while the expansible widget is collapsed.
     expect(find.text('Discarding State'), findsNothing);
+
+    controller1.dispose();
+    controller2.dispose();
   });
 
   testWidgets('Respects animation duration and curves', (WidgetTester tester) async {
@@ -223,5 +234,7 @@ void main() {
     // The animation has completed.
     await tester.pump(const Duration(milliseconds: 60) + const Duration(microseconds: 1));
     expect(find.byType(Placeholder), findsNothing);
+
+    controller.dispose();
   });
 }

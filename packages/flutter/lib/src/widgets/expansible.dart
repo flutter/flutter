@@ -213,6 +213,9 @@ class ExpansibleController extends ChangeNotifier {
 /// build the header and body widgets. An additional [expansibleBuilder]
 /// callback can be provided to further customize the layout of the widget.
 ///
+/// Remember to dispose of the [ExpansibleController] when it is no longer
+/// needed. This will ensure we discard any resources used by the object.
+///
 /// See also:
 ///
 ///  * [ExpansionTile], a Material-styled widget that expands and collapses.

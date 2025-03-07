@@ -59,6 +59,9 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// The controller's `expand` and `collapse` methods cause the
 /// the [ExpansionTile] to rebuild, so they may not be called from
 /// a build method.
+///
+/// Remember to dispose of the [ExpansionTileController] when it is no longer
+/// needed. This will ensure we discard any resources used by the object.
 typedef ExpansionTileController = ExpansibleController;
 
 /// A single-line [ListTile] with an expansion arrow icon that expands or collapses
