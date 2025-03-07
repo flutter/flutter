@@ -1057,9 +1057,10 @@ void main() {
     );
   });
 
-  testWidgets('ListTile can be splashed and has correct splash color', (WidgetTester tester) async {
+  testWidgets('Material3 - ListTile can be splashed and has correct splash color', (
+    WidgetTester tester,
+  ) async {
     final Widget buildApp = MaterialApp(
-      theme: ThemeData(useMaterial3: false),
       home: Material(
         child: Center(
           child: SizedBox(
@@ -1076,8 +1077,18 @@ void main() {
     final TestGesture gesture = await tester.startGesture(
       tester.getRect(find.byType(ListTile)).center,
     );
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(Material), paints..circle(x: 50, y: 50, color: const Color(0xff88ff88)));
+    expect(
+      find.byType(Material),
+      paints
+        ..rect()
+        ..rect()
+        ..rect(
+          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          color: const Color.from(alpha: 0.4, red: 0.73737, green: 0.7373, blue: 0.7373),
+        ),
+    );
     await gesture.up();
   });
 
@@ -1345,15 +1356,14 @@ void main() {
     expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
-  testWidgets('ListTile shows Material ripple effects on top of tileColor', (
+  // Regression test for https://github.com/flutter/flutter/issues/73616
+  testWidgets('Material3 - ListTile shows Material ripple effects on top of tileColor', (
     WidgetTester tester,
   ) async {
-    // Regression test for https://github.com/flutter/flutter/issues/73616
-    final Color tileColor = Colors.red.shade500;
+    const Color tileColor = Color(0XFFF00000);
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Center(
             child: ListTile(tileColor: tileColor, onTap: () {}, title: const Text('Title')),
@@ -1367,6 +1377,7 @@ void main() {
 
     // Tap on tile to trigger ink effect and wait for it to be underway.
     await tester.tap(find.byType(ListTile));
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
     // After tap, the tile could be drawn in tileColor, with the ripple (circle) on top
@@ -1374,7 +1385,7 @@ void main() {
       find.byType(Material),
       paints
         ..rect(color: tileColor)
-        ..circle(),
+        ..rect(),
     );
   });
 
@@ -1906,7 +1917,7 @@ void main() {
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 60.0));
   });
 
-  testWidgets('colors are applied to leading and trailing text widgets', (
+  testWidgets('Material3 - colors are applied to leading and trailing text widgets', (
     WidgetTester tester,
   ) async {
     final Key leadingKey = UniqueKey();
@@ -1915,7 +1926,6 @@ void main() {
     late ThemeData theme;
     Widget buildFrame({bool enabled = true, bool selected = false}) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Center(
             child: Builder(
@@ -1938,21 +1948,19 @@ void main() {
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
 
     await tester.pumpWidget(buildFrame());
-    // Enabled color should be default bodyMedium color.
-    expect(textColor(leadingKey), theme.textTheme.bodyMedium!.color);
-    expect(textColor(trailingKey), theme.textTheme.bodyMedium!.color);
+
+    expect(textColor(leadingKey), theme.colorScheme.onSurfaceVariant);
+    expect(textColor(trailingKey), theme.colorScheme.onSurfaceVariant);
 
     await tester.pumpWidget(buildFrame(selected: true));
     // Wait for text color to animate.
     await tester.pumpAndSettle();
-    // Selected color should be ThemeData.primaryColor by default.
     expect(textColor(leadingKey), theme.primaryColor);
     expect(textColor(trailingKey), theme.primaryColor);
 
     await tester.pumpWidget(buildFrame(enabled: false));
     // Wait for text color to animate.
     await tester.pumpAndSettle();
-    // Disabled color should be ThemeData.disabledColor by default.
     expect(textColor(leadingKey), theme.disabledColor);
     expect(textColor(trailingKey), theme.disabledColor);
   });
@@ -2300,12 +2308,10 @@ void main() {
     },
   );
 
-  testWidgets('ListTile.dense does not throw assertion', (WidgetTester tester) async {
-    // This is a regression test for https://github.com/flutter/flutter/pull/116908
-
-    Widget buildFrame({required bool useMaterial3}) {
-      return MaterialApp(
-        theme: ThemeData(useMaterial3: useMaterial3),
+  // Regression test for https://github.com/flutter/flutter/pull/116908
+  testWidgets('Material3 - ListTile.dense does not throw assertion', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
         home: Material(
           child: Center(
             child: StatefulBuilder(
@@ -2315,13 +2321,8 @@ void main() {
             ),
           ),
         ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(useMaterial3: false));
-    expect(tester.takeException(), isNull);
-
-    await tester.pumpWidget(buildFrame(useMaterial3: true));
+      ),
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -4360,6 +4361,135 @@ void main() {
       expect(leadingOffset.dy - tileOffset.dy, minVerticalPadding);
       expect(trailingOffset.dy - tileOffset.dy, minVerticalPadding);
     });
+  });
+
+  testWidgets('Material2 - ListTile can be splashed and has correct splash color', (
+    WidgetTester tester,
+  ) async {
+    final Widget buildApp = MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: Material(
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: ListTile(onTap: () {}, splashColor: const Color(0xff88ff88)),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildApp);
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(
+      tester.getRect(find.byType(ListTile)).center,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(Material), paints..circle(x: 50, y: 50, color: const Color(0xff88ff88)));
+    await gesture.up();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/73616
+  testWidgets('Material2 - ListTile shows Material ripple effects on top of tileColor', (
+    WidgetTester tester,
+  ) async {
+    final Color tileColor = Colors.red.shade500;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: Center(
+            child: ListTile(tileColor: tileColor, onTap: () {}, title: const Text('Title')),
+          ),
+        ),
+      ),
+    );
+
+    // Before ListTile is tapped, it should be tileColor
+    expect(find.byType(Material), paints..rect(color: tileColor));
+
+    // Tap on tile to trigger ink effect and wait for it to be underway.
+    await tester.tap(find.byType(ListTile));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // After tap, the tile could be drawn in tileColor, with the ripple (circle) on top
+    expect(
+      find.byType(Material),
+      paints
+        ..rect(color: tileColor)
+        ..circle(),
+    );
+  });
+
+  testWidgets('Material2 - colors are applied to leading and trailing text widgets', (
+    WidgetTester tester,
+  ) async {
+    final Key leadingKey = UniqueKey();
+    final Key trailingKey = UniqueKey();
+
+    late ThemeData theme;
+    Widget buildFrame({bool enabled = true, bool selected = false}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                theme = Theme.of(context);
+                return ListTile(
+                  enabled: enabled,
+                  selected: selected,
+                  leading: TestText('leading', key: leadingKey),
+                  title: const TestText('title'),
+                  trailing: TestText('trailing', key: trailingKey),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
+
+    await tester.pumpWidget(buildFrame());
+    // Enabled color should be default bodyMedium color.
+    expect(textColor(leadingKey), theme.textTheme.bodyMedium!.color);
+    expect(textColor(trailingKey), theme.textTheme.bodyMedium!.color);
+
+    await tester.pumpWidget(buildFrame(selected: true));
+    // Wait for text color to animate.
+    await tester.pumpAndSettle();
+    // Selected color should be ThemeData.primaryColor by default.
+    expect(textColor(leadingKey), theme.primaryColor);
+    expect(textColor(trailingKey), theme.primaryColor);
+
+    await tester.pumpWidget(buildFrame(enabled: false));
+    // Wait for text color to animate.
+    await tester.pumpAndSettle();
+    // Disabled color should be ThemeData.disabledColor by default.
+    expect(textColor(leadingKey), theme.disabledColor);
+    expect(textColor(trailingKey), theme.disabledColor);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/pull/116908
+  testWidgets('Material2 - ListTile.dense does not throw assertion', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return const ListTile(dense: true, title: Text('Title'));
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/165453
