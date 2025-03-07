@@ -14,8 +14,21 @@ const DlRect ClipPathLayer::clip_shape_bounds() const {
 }
 
 void ClipPathLayer::ApplyClip(LayerStateStack::MutatorContext& mutator) const {
-  clip_shape().WillRenderSkPath();
-  mutator.clipPath(clip_shape(), clip_behavior() != Clip::kHardEdge);
+  bool is_aa = clip_behavior() != Clip::kHardEdge;
+  DlRect rect;
+  if (clip_shape().IsRect(&rect)) {
+    mutator.clipRect(rect, is_aa);
+  } else if (clip_shape().IsOval(&rect)) {
+    mutator.clipRRect(DlRoundRect::MakeOval(rect), is_aa);
+  } else {
+    DlRoundRect rrect;
+    if (clip_shape().IsRoundRect(&rrect)) {
+      mutator.clipRRect(rrect, is_aa);
+    } else {
+      clip_shape().WillRenderSkPath();
+      mutator.clipPath(clip_shape(), is_aa);
+    }
+  }
 }
 
 }  // namespace flutter
