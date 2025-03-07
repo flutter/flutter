@@ -481,8 +481,8 @@ TEST_F(FlutterWindowsEngineTest, DispatchSemanticsAction) {
 
   bool called = false;
   std::string message = "Hello";
-  modifier.embedder_api().DispatchSemanticsAction = MOCK_ENGINE_PROC(
-      DispatchSemanticsAction,
+  modifier.embedder_api().DispatchSemanticsActionOnView = MOCK_ENGINE_PROC(
+      DispatchSemanticsActionOnView,
       ([&called, &message](auto engine, auto view_id, auto target, auto action,
                            auto data, auto data_length) {
         called = true;

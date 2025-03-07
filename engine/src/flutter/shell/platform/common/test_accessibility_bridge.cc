@@ -17,15 +17,10 @@ void TestAccessibilityBridge::OnAccessibilityEvent(
 }
 
 void TestAccessibilityBridge::DispatchAccessibilityAction(
-    FlutterViewId view_id,
     AccessibilityNodeId target,
     FlutterSemanticsAction action,
     fml::MallocMapping data) {
   performed_actions.push_back(action);
-}
-
-FlutterViewId TestAccessibilityBridge::GetViewId() const {
-  return 456;
 }
 
 }  // namespace flutter

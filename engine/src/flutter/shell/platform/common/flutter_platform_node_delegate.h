@@ -91,10 +91,6 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
     ///
     /// @param[in]  node_id     The id of the focused node.
     virtual void SetLastFocusedId(AccessibilityNodeId node_id) = 0;
-
-    //---------------------------------------------------------------------------
-    /// @brief      Returns the ID of the view associated with this bridge.
-    virtual FlutterViewId GetViewId() const = 0;
   };
 
   FlutterPlatformNodeDelegate();
