@@ -103,12 +103,12 @@ TEST_P(PipelineCacheDataVKPlaygroundTest, CanPersistAndRetrievePipelineCache) {
 
   {
     auto cache = context_vk.GetDevice().createPipelineCacheUnique({});
-    ASSERT_EQ(cache.result, vk::Result::eSuccess);
-    ASSERT_FALSE(fml::FileExists(temp_dir.fd(), "flutter.impeller.vkcache"));
-    ASSERT_TRUE(PipelineCacheDataPersist(
+    EXPECT_EQ(cache.result, vk::Result::eSuccess);
+    EXPECT_FALSE(fml::FileExists(temp_dir.fd(), "flutter.impeller.vkcache"));
+    EXPECT_TRUE(PipelineCacheDataPersist(
         temp_dir.fd(), caps.GetPhysicalDeviceProperties(), cache.value));
   }
-  ASSERT_TRUE(fml::FileExists(temp_dir.fd(), "flutter.impeller.vkcache"));
+  EXPECT_TRUE(fml::FileExists(temp_dir.fd(), "flutter.impeller.vkcache"));
 
   auto mapping = PipelineCacheDataRetrieve(temp_dir.fd(),
                                            caps.GetPhysicalDeviceProperties());

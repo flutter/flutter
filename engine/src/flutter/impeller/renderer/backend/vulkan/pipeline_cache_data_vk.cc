@@ -25,7 +25,10 @@ bool PipelineCacheDataPersist(const fml::UniqueFD& cache_directory,
     VALIDATION_LOG << "Could not fetch pipeline cache size.";
     return false;
   }
-  if (maximum_data_size == 0u) {
+  // If the maximum size that can be written is smaller than the header
+  // metadata, we effectively cannot write anything to the cache.
+  if (maximum_data_size == 0u ||
+      maximum_data_size <= sizeof(PipelineCacheHeaderVK)) {
     return true;
   }
 
@@ -37,16 +40,17 @@ bool PipelineCacheDataPersist(const fml::UniqueFD& cache_directory,
 
   const auto header = PipelineCacheHeaderVK{props, maximum_data_size};
   std::memcpy(allocation->GetBuffer(), &header, sizeof(header));
-  size_t written_data_size = maximum_data_size - sizeof(header);
-  auto result = cache.getOwner().getPipelineCacheData(
+  size_t written_data_size = maximum_data_size - sizeof(PipelineCacheHeaderVK);
+  vk::Result result = cache.getOwner().getPipelineCacheData(
       *cache, &written_data_size, allocation->GetBuffer() + sizeof(header));
 
   if (result != vk::Result::eSuccess && result != vk::Result::eIncomplete) {
-    VALIDATION_LOG << "Could not copy pipeline cache data";
+    VALIDATION_LOG << "Could not copy pipeline cache data.";
     return false;
   }
 
-  auto allocation_mapping = CreateMappingFromAllocation(allocation);
+  std::shared_ptr<fml::Mapping> allocation_mapping =
+      CreateMappingFromAllocation(allocation);
   if (!allocation_mapping) {
     return false;
   }
