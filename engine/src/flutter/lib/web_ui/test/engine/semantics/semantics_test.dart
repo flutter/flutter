@@ -146,10 +146,8 @@ void _testSemanticRole() {
 
     tester.expectSemantics('''
 <sem id="flt-semantic-node-0">
-  <sem-c>
     <sem id="flt-semantic-node-372"></sem>
     <sem id="flt-semantic-node-599"></sem>
-  </sem-c>
 </sem>''');
 
     tester.updateNode(
@@ -163,10 +161,8 @@ void _testSemanticRole() {
 
     tester.expectSemantics('''
 <sem id="flt-semantic-node-0">
-  <sem-c>
     <sem id="flt-semantic-node-372" flt-semantics-identifier="test-id-123"></sem>
     <sem id="flt-semantic-node-599"></sem>
-  </sem-c>
 </sem>''');
 
     tester.updateNode(
@@ -181,11 +177,9 @@ void _testSemanticRole() {
 
     tester.expectSemantics('''
 <sem id="flt-semantic-node-0">
-  <sem-c>
     <sem id="flt-semantic-node-372"></sem>
     <sem id="flt-semantic-node-599" flt-semantics-identifier="test-id-211"></sem>
     <sem id="flt-semantic-node-612" flt-semantics-identifier="test-id-333"></sem>
-  </sem-c>
 </sem>''');
   });
 }
@@ -464,9 +458,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>Hello</span></sem>
-  </sem-c>
 </sem>''');
 
     // Update
@@ -474,9 +466,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>World</span></sem>
-  </sem-c>
 </sem>''');
 
     // Remove
@@ -484,9 +474,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -507,9 +495,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>Hello</span></sem>
-  </sem-c>
 </sem>''');
 
     // Update
@@ -522,9 +508,7 @@ void _testEngineSemanticsOwner() {
     expect(tree[1]!.element.tagName.toLowerCase(), 'a');
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <a style="display: block;">Hello</a>
-  </sem-c>
 </sem>''');
     expect(existingParent, tree[1]!.element.parent);
 
@@ -546,9 +530,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>tooltip</span></sem>
-  </sem-c>
 </sem>''');
 
     // Update
@@ -556,9 +538,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>tooltip\nHello</span></sem>
-  </sem-c>
 </sem>''');
 
     // Remove
@@ -566,9 +546,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -793,7 +771,7 @@ void _testHeader() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-<header aria-label="Header of the page"><sem-c><sem></sem></sem-c></header>
+<header aria-label="Header of the page"><sem></sem></header>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -900,7 +878,7 @@ label hint''');
 }
 
 void _testContainer() {
-  test('container node has no transform when there is no rect offset', () async {
+  test('child node has no transform when there is no rect offset', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -917,35 +895,30 @@ void _testContainer() {
     updateNode(builder, id: 1, transform: Matrix4.identity().toFloat64(), rect: zeroOffsetRect);
 
     owner().updateSemantics(builder.build());
-    expectSemanticsTree(owner(), '''
-<sem>
-  <sem-c>
-    <sem></sem>
-  </sem-c>
-</sem>''');
+    expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
 
     final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
-    final DomElement container = owner().semanticsHost.querySelector('flt-semantics-container')!;
+    final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
 
     if (isMacOrIOS) {
       expect(parentElement.style.top, '0px');
       expect(parentElement.style.left, '0px');
-      expect(container.style.top, '0px');
-      expect(container.style.left, '0px');
+      expect(childElement.style.top, '0px');
+      expect(childElement.style.left, '0px');
     } else {
       expect(parentElement.style.top, '');
       expect(parentElement.style.left, '');
-      expect(container.style.top, '');
-      expect(container.style.left, '');
+      expect(childElement.style.top, '');
+      expect(childElement.style.left, '');
     }
     expect(parentElement.style.transform, '');
     expect(parentElement.style.transformOrigin, '');
-    expect(container.style.transform, '');
-    expect(container.style.transformOrigin, '');
+    expect(childElement.style.transform, '');
+    expect(childElement.style.transformOrigin, '');
     semantics().semanticsEnabled = false;
   });
 
-  test('container node compensates for rect offset', () async {
+  test('child node transform compensates for parent rect offset', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -962,19 +935,14 @@ void _testContainer() {
       builder,
       id: 1,
       transform: Matrix4.identity().toFloat64(),
-      rect: const ui.Rect.fromLTRB(10, 10, 20, 20),
+      rect: const ui.Rect.fromLTRB(0, 0, 5, 5),
     );
 
     owner().updateSemantics(builder.build());
-    expectSemanticsTree(owner(), '''
-<sem>
-  <sem-c>
-    <sem></sem>
-  </sem-c>
-</sem>''');
+    expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
 
     final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
-    final DomElement container = owner().semanticsHost.querySelector('flt-semantics-container')!;
+    final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
 
     expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
     if (isSafari) {
@@ -983,60 +951,17 @@ void _testContainer() {
         parentElement.style.transformOrigin,
         anyOf(contains('0px 0px 0px'), contains('0px 0px')),
       );
+      expect(
+        childElement.style.transformOrigin,
+        anyOf(contains('0px 0px 0px'), contains('0px 0px')),
+      );
     } else {
       expect(parentElement.style.transformOrigin, '0px 0px 0px');
+      expect(childElement.style.transformOrigin, '0px 0px 0px');
     }
-    expect(container.style.top, '-10px');
-    expect(container.style.left, '-10px');
-    semantics().semanticsEnabled = false;
-  });
-
-  test('0 offsets are not removed for voiceover', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(
-      builder,
-      transform: Matrix4.identity().toFloat64(),
-      rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
-      childrenInHitTestOrder: Int32List.fromList(<int>[1]),
-      childrenInTraversalOrder: Int32List.fromList(<int>[1]),
-    );
-    updateNode(
-      builder,
-      id: 1,
-      transform: Matrix4.identity().toFloat64(),
-      rect: const ui.Rect.fromLTRB(10, 10, 20, 20),
-    );
-
-    owner().updateSemantics(builder.build());
-    expectSemanticsTree(owner(), '''
-<sem>
-  <sem-c>
-    <sem></sem>
-  </sem-c>
-</sem>''');
-
-    final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
-    final DomElement container = owner().semanticsHost.querySelector('flt-semantics-container')!;
-
-    if (isMacOrIOS) {
-      expect(parentElement.style.top, '0px');
-      expect(parentElement.style.left, '0px');
-      expect(container.style.top, '0px');
-      expect(container.style.left, '0px');
-    } else {
-      expect(parentElement.style.top, '');
-      expect(parentElement.style.left, '');
-      expect(container.style.top, '');
-      expect(container.style.left, '');
-    }
-    expect(parentElement.style.transform, '');
-    expect(parentElement.style.transformOrigin, '');
-    expect(container.style.transform, '');
-    expect(container.style.transformOrigin, '');
+    expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -10, -10)');
+    expect(childElement.style.left, '0px');
+    expect(childElement.style.top, '0px');
 
     semantics().semanticsEnabled = false;
   });
@@ -1062,12 +987,10 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 4"></sem>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
     }
 
@@ -1082,12 +1005,10 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 4"></sem>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
     }
 
@@ -1102,12 +1023,10 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 1"></sem>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 4"></sem>
-  </sem-c>
 </sem>''');
     }
 
@@ -1122,110 +1041,12 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 4"></sem>
     <sem style="z-index: 1"></sem>
     <sem style="z-index: 3"></sem>
-  </sem-c>
 </sem>''');
     }
-
-    semantics().semanticsEnabled = false;
-  });
-
-  test('container nodes are transparent and leaf children are opaque hit-test wise', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(
-      builder,
-      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
-      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
-    );
-    updateNode(builder, id: 1);
-    updateNode(builder, id: 2);
-
-    owner().updateSemantics(builder.build());
-    expectSemanticsTree(owner(), '''
-<sem>
-  <sem-c>
-    <sem style="z-index: 2"></sem>
-    <sem style="z-index: 1"></sem>
-  </sem-c>
-</sem>''');
-
-    final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
-    expect(root.style.pointerEvents, 'none');
-
-    final DomElement child1 = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
-    expect(child1.style.pointerEvents, 'all');
-
-    final DomElement child2 = owner().semanticsHost.querySelector('#flt-semantic-node-2')!;
-    expect(child2.style.pointerEvents, 'all');
-
-    semantics().semanticsEnabled = false;
-  });
-
-  test('containers can be opaque if tappable', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(
-      builder,
-      actions: 0 | ui.SemanticsAction.tap.index,
-      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
-      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
-    );
-    updateNode(builder, id: 1);
-    updateNode(builder, id: 2);
-
-    owner().updateSemantics(builder.build());
-    expectSemanticsTree(owner(), '''
-<sem>
-  <sem-c>
-    <sem style="z-index: 2"></sem>
-    <sem style="z-index: 1"></sem>
-  </sem-c>
-</sem>''');
-
-    final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
-    expect(root.style.pointerEvents, 'all');
-
-    semantics().semanticsEnabled = false;
-  });
-
-  test('container can be opaque if it is a text field', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(
-      builder,
-      flags: 0 | ui.SemanticsFlag.isTextField.index,
-      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
-      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
-    );
-    updateNode(builder, id: 1);
-    updateNode(builder, id: 2);
-
-    owner().updateSemantics(builder.build());
-    expectSemanticsTree(owner(), '''
-<sem>
-  <input>
-  <sem-c>
-    <sem style="z-index: 2"></sem>
-    <sem style="z-index: 1"></sem>
-  </sem-c>
-</sem>''');
-
-    final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
-    expect(root.style.pointerEvents, 'all');
 
     semantics().semanticsEnabled = false;
   });
@@ -1262,20 +1083,14 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
   <sem>
-    <sem-c>
       <sem style="z-index: 2">
-        <sem-c>
           <sem style="z-index: 2"></sem>
           <sem style="z-index: 1"></sem>
-        </sem-c>
       </sem>
       <sem style="z-index: 1">
-        <sem-c>
           <sem style="z-index: 2"></sem>
           <sem style="z-index: 1"></sem>
-        </sem-c>
       </sem>
-    </sem-c>
   </sem>''');
 
       expect(
@@ -1302,15 +1117,11 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
   <sem>
-    <sem-c>
       <sem style="z-index: 2">
-        <sem-c>
           <sem style="z-index: 3"></sem>
           <sem style="z-index: 2"></sem>
           <sem style="z-index: 1"></sem>
-        </sem-c>
       </sem>
-    </sem-c>
   </sem>''');
 
       expect(owner().debugSemanticsTree!.keys.toList(), unorderedEquals(<int>[0, 1, 3, 4, 6]));
@@ -1396,9 +1207,7 @@ void _testVerticalScrolling() {
     expectSemanticsTree(owner(), '''
 <sem style="touch-action: none; overflow-y: scroll">
 <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement scrollable = findScrollable(owner());
@@ -1452,11 +1261,9 @@ void _testVerticalScrolling() {
     expectSemanticsTree(owner(), '''
 <sem style="touch-action: none; overflow-y: scroll">
   <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
-  <sem-c>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement scrollable = owner().debugSemanticsTree![0]!.element;
@@ -1533,11 +1340,9 @@ void _testVerticalScrolling() {
     expectSemanticsTree(owner(), '''
 <sem style="touch-action: none; overflow-y: scroll">
   <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
-  <sem-c>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement scrollable = owner().debugSemanticsTree![0]!.element;
@@ -1623,9 +1428,7 @@ void _testHorizontalScrolling() {
     expectSemanticsTree(owner(), '''
 <sem style="touch-action: none; overflow-x: scroll">
 <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement scrollable = findScrollable(owner());
@@ -1679,11 +1482,9 @@ void _testHorizontalScrolling() {
     expectSemanticsTree(owner(), '''
 <sem style="touch-action: none; overflow-x: scroll">
   <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
-  <sem-c>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement scrollable = findScrollable(owner());
@@ -2238,10 +2039,8 @@ void _testCheckables() {
 
     expectSemanticsTree(owner(), '''
 <sem role="radiogroup">
-  <sem-c>
     <sem aria-checked="false"></sem>
     <sem aria-checked="true"></sem>
-  </sem-c>
 </sem>
 ''');
 
@@ -2339,11 +2138,9 @@ void _testSelectables() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
     <sem aria-selected="false"></sem>
     <sem aria-selected="true"></sem>
-  </sem-c>
 </sem>
 ''');
 
@@ -2368,11 +2165,9 @@ void _testSelectables() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
     <sem aria-selected="true"></sem>
     <sem aria-selected="false"></sem>
-  </sem-c>
 </sem>
 ''');
 
@@ -2437,11 +2232,9 @@ void _testExpandables() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
     <sem aria-expanded="false"></sem>
     <sem aria-expanded="true"></sem>
-  </sem-c>
 </sem>
 ''');
 
@@ -2466,11 +2259,9 @@ void _testExpandables() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
     <sem aria-expanded="true"></sem>
     <sem aria-expanded="false"></sem>
-  </sem-c>
 </sem>
 ''');
 
@@ -2724,9 +2515,7 @@ void _testTappable() {
 
     expectSemanticsTree(owner(), '''
 <sem flt-tappable role="button">
-  <sem-c>
     <sem flt-tappable role="button"></sem>
-  </sem-c>
 </sem>
 ''');
 
@@ -2817,9 +2606,7 @@ void _testImage() {
     expectSemanticsTree(owner(), '''
 <sem>
   <sem-img role="img" aria-label="Test Image Label"></sem-img>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -2869,9 +2656,7 @@ void _testImage() {
     expectSemanticsTree(owner(), '''
 <sem>
   <sem-img role="img"></sem-img>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -3088,11 +2873,9 @@ void _testPlatformView() {
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2" aria-owns="flt-pv-0"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
@@ -3186,7 +2969,7 @@ void _testGroup() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-<sem role="group" aria-label="this is a label for a group of elements"><sem-c><sem></sem></sem-c></sem>
+<sem role="group" aria-label="this is a label for a group of elements"><sem></sem></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -3218,7 +3001,7 @@ void _testRoute() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label="this is a route label"><sem-c><sem></sem></sem-c></sem>
+      <sem role="dialog" aria-label="this is a route label"><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -3257,7 +3040,7 @@ void _testRoute() {
 
     // But still sets the dialog role.
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label=""><sem-c><sem></sem></sem-c></sem>
+      <sem role="dialog" aria-label=""><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -3289,13 +3072,9 @@ void _testRoute() {
 
       expectSemanticsTree(owner(), '''
         <sem role="dialog" aria-describedby="flt-semantic-node-2">
-          <sem-c>
             <sem>
-              <sem-c>
                 <sem><span>$label</span></sem>
-              </sem-c>
             </sem>
-          </sem-c>
         </sem>
       ''');
     }
@@ -3355,13 +3134,9 @@ void _testRoute() {
 
     expectSemanticsTree(owner(), '''
       <sem>
-        <sem-c>
           <sem>
-            <sem-c>
               <sem><span>Hello</span></sem>
-            </sem-c>
           </sem>
-        </sem-c>
       </sem>
     ''');
 
@@ -3538,16 +3313,12 @@ void _testRoute() {
 
     tester.expectSemantics('''
 <flt-semantics>
-  <flt-semantics-container>
     <flt-semantics>
-      <flt-semantics-container>
         <flt-semantics id="flt-semantic-node-2">
           <span tabindex="-1">Heading</span>
         </flt-semantics>
         <flt-semantics role="button" tabindex="0" flt-tappable="">Click me!</flt-semantics>
-      </flt-semantics-container>
     </flt-semantics>
-  </flt-semantics-container>
 </flt-semantics>''');
 
     final DomElement span = owner().debugSemanticsTree![2]!.element.querySelectorAll('span').single;
@@ -3647,13 +3418,9 @@ void _testDialogs() {
 
       expectSemanticsTree(owner(), '''
         <sem role="dialog" aria-describedby="flt-semantic-node-2">
-          <sem-c>
             <sem>
-              <sem-c>
                 <sem><span>$label</span></sem>
-              </sem-c>
             </sem>
-          </sem-c>
         </sem>
       ''');
     }
@@ -3812,9 +3579,7 @@ void _testFocusable() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>focusable text</span></sem>
-  </sem-c>
 </sem>
 ''');
 
