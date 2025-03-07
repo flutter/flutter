@@ -1708,6 +1708,7 @@ class Scaffold extends StatefulWidget {
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
     this.extendBody = false,
+    this.drawerDismissible = true,
     this.extendBodyBehindAppBar = false,
     this.drawerScrimColor,
     this.drawerEdgeDragWidth,
@@ -1735,6 +1736,11 @@ class Scaffold extends StatefulWidget {
   ///  * [extendBodyBehindAppBar], which extends the height of the body
   ///    to the top of the scaffold.
   final bool extendBody;
+
+  /// If false, and a [drawer] is specified, then the barrier behind the drawer should not
+  /// respond to a tap event and thus remain open. The default behavior is to close upon the
+  /// user tapping on the barrier.
+  final bool drawerDismissible;
 
   /// If true, and an [appBar] is specified, then the height of the [body] is
   /// extended to include the height of the app bar and the top of the body
@@ -2867,6 +2873,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
           isDrawerOpen: _endDrawerOpened.value,
+          drawerDismissible: widget.drawerDismissible,
           child: widget.endDrawer!,
         ),
         _ScaffoldSlot.endDrawer,
@@ -2893,6 +2900,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
           isDrawerOpen: _drawerOpened.value,
+          drawerDismissible: widget.drawerDismissible,
           child: widget.drawer!,
         ),
         _ScaffoldSlot.drawer,
