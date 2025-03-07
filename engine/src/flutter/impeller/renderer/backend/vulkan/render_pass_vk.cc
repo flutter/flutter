@@ -548,9 +548,9 @@ fml::Status RenderPassVK::Draw() {
   instance_count_ = 1u;
   base_vertex_ = 0u;
   element_count_ = 0u;
-  // pipeline_ = PipelineRef(nullptr);
-  // pipeline_uses_input_attachments_ = false;
-  // immutable_sampler_ = nullptr;
+  pipeline_ = PipelineRef(nullptr);
+  pipeline_uses_input_attachments_ = false;
+  immutable_sampler_ = nullptr;
   return fml::Status();
 }
 
