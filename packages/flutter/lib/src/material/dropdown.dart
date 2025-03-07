@@ -130,7 +130,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
 }
 
 class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> {
-  CurvedAnimation? _opacityAnimation;
+  late CurvedAnimation _opacityAnimation;
 
   @override
   void initState() {
@@ -145,12 +145,12 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         oldWidget.route.animation != widget.route.animation ||
         oldWidget.route.selectedIndex != widget.route.selectedIndex ||
         widget.route.items.length != oldWidget.route.items.length) {
+      _opacityAnimation.dispose();
       _setOpacityAnimation();
     }
   }
 
   void _setOpacityAnimation() {
-    _opacityAnimation?.dispose();
     final double unit = 0.5 / (widget.route.items.length + 1.5);
     if (widget.itemIndex == widget.route.selectedIndex) {
       _opacityAnimation = CurvedAnimation(
@@ -204,7 +204,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
   @override
   void dispose() {
-    _opacityAnimation?.dispose();
+    _opacityAnimation.dispose();
     super.dispose();
   }
 
@@ -226,7 +226,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         child: child,
       );
     }
-    child = FadeTransition(opacity: _opacityAnimation!, child: child);
+    child = FadeTransition(opacity: _opacityAnimation, child: child);
     if (kIsWeb && dropdownMenuItem.enabled) {
       child = Shortcuts(shortcuts: _webShortcuts, child: child);
     }
