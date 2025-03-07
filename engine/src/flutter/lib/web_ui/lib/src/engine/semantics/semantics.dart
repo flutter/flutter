@@ -1854,6 +1854,10 @@ class SemanticsObject {
         return EngineSemanticsRole.columnHeader;
       case ui.SemanticsRole.radioGroup:
         return EngineSemanticsRole.radioGroup;
+      case ui.SemanticsRole.list:
+        return EngineSemanticsRole.list;
+      case ui.SemanticsRole.listItem:
+        return EngineSemanticsRole.listItem;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.searchBox:
@@ -1863,8 +1867,6 @@ class SemanticsObject {
       case ui.SemanticsRole.menuBar:
       case ui.SemanticsRole.menu:
       case ui.SemanticsRole.menuItem:
-      case ui.SemanticsRole.list:
-      case ui.SemanticsRole.listItem:
       case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
       case ui.SemanticsRole.loadingSpinner:
