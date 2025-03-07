@@ -13,7 +13,7 @@ class Deeplink(
     var scheme: String?,
     var host: String?,
     var path: String?,
-    var intentFilterCheck: IntentFilterCheck?
+    var intentFilterCheck: IntentFilterCheck
 ) {
     // TODO(gmackall): This behavior was kept identical to the original Groovy behavior as part of
     // the Groovy->Kotlin conversion, but should be changed once the conversion is complete.
@@ -37,6 +37,6 @@ class Deeplink(
             put("scheme", scheme)
             put("host", host)
             put("path", path)
-            intentFilterCheck?.let { put("intentFilterCheck", it.toJson()) }
+            put("intentFilterCheck", intentFilterCheck.toJson())
         }
 }

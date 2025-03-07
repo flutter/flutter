@@ -9,23 +9,23 @@ import kotlin.test.assertTrue
 class DeeplinkTest {
     @Test
     fun `equals should return true for equal objects`() {
-        val deeplink1 = Deeplink("scheme1", "host1", "path1", null)
-        val deeplink2 = Deeplink("scheme1", "host1", "path1", null)
+        val deeplink1 = Deeplink("scheme1", "host1", "path1", IntentFilterCheck())
+        val deeplink2 = Deeplink("scheme1", "host1", "path1", IntentFilterCheck())
 
         assertTrue { deeplink1 == deeplink2 }
     }
 
     @Test
     fun `equals should return false for unequal objects`() {
-        val deeplink1 = Deeplink("scheme1", "host1", "path1", null)
-        val deeplink2 = Deeplink("scheme2", "host2", "path2", null)
+        val deeplink1 = Deeplink("scheme1", "host1", "path1", IntentFilterCheck())
+        val deeplink2 = Deeplink("scheme2", "host2", "path2", IntentFilterCheck())
 
         assertFalse { deeplink1 == deeplink2 }
     }
 
     @Test
     fun `equals should return false for other of different type`() {
-        val deeplink1 = Deeplink("scheme1", "host1", "path1", null)
+        val deeplink1 = Deeplink("scheme1", "host1", "path1", IntentFilterCheck())
         val notADeeplink = 5
 
         assertFalse { deeplink1.equals(notADeeplink) }
@@ -34,22 +34,10 @@ class DeeplinkTest {
     @Suppress("UnusedEquals")
     @Test
     fun `equals should throw NullPointerException for null other`() {
-        val deeplink1 = Deeplink("scheme1", "host1", "path1", null)
+        val deeplink1 = Deeplink("scheme1", "host1", "path1", IntentFilterCheck())
         val deeplink2 = null
 
         assertThrows(NullPointerException::class.java, { deeplink1.equals(deeplink2) })
-    }
-
-    @Test
-    fun canCreateDeeplinkJson() {
-        val deeplink = Deeplink("scheme1", "host1", "path1", null)
-        val linkJson = deeplink.toJson()
-        // Keys are not a reference because the key values are accessed
-        // across the gradle/dart boundery.
-        assertTrue(linkJson.containsKey("scheme"))
-        assertTrue(linkJson.containsKey("host"))
-        assertTrue(linkJson.containsKey("path"))
-        assertFalse(linkJson.containsKey("intentFilterCheck"))
     }
 
     @Test
