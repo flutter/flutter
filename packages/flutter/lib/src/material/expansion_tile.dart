@@ -485,6 +485,9 @@ class _ExpansionTileState extends State<ExpansionTile> {
     _timer?.cancel();
     _timer = null;
     super.dispose();
+    if (widget.controller == null) {
+      _tileController.dispose();
+    }
   }
 
   void _onExpansionChanged() {
