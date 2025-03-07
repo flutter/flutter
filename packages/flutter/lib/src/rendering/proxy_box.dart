@@ -4540,6 +4540,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (properties.role != null) {
       config.role = _properties.role!;
     }
+    if (_properties.controlsNodes != null) {
+      config.controlsNodes = _properties.controlsNodes;
+    }
+
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
