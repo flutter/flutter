@@ -496,8 +496,10 @@ void Engine::Render(int64_t view_id,
 }
 
 void Engine::UpdateSemantics(SemanticsNodeUpdates update,
-                             CustomAccessibilityActionUpdates actions) {
-  delegate_.OnEngineUpdateSemantics(std::move(update), std::move(actions));
+                             CustomAccessibilityActionUpdates actions,
+                             int64_t view_id) {
+  delegate_.OnEngineUpdateSemantics(std::move(update), std::move(actions),
+                                    view_id);
 }
 
 void Engine::HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {

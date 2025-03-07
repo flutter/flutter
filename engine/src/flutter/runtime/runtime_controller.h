@@ -766,7 +766,7 @@ class RuntimeController : public PlatformConfigurationClient,
               double height) override;
 
   // |PlatformConfigurationClient|
-  void UpdateSemantics(SemanticsUpdate* update) override;
+  void UpdateSemantics(SemanticsUpdate* update, int64_t view_id) override;
 
   // |PlatformConfigurationClient|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;

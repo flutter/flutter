@@ -89,17 +89,15 @@ EmbedderSemanticsUpdate::~EmbedderSemanticsUpdate() {}
 
 EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
     const SemanticsNodeUpdates& nodes,
-    const CustomAccessibilityActionUpdates& actions) {
+    const CustomAccessibilityActionUpdates& actions,
+    int64_t view_id) {
   nodes_.reserve(nodes.size());
   node_pointers_.reserve(nodes.size());
   actions_.reserve(actions.size());
   action_pointers_.reserve(actions.size());
 
-  int64_t view_id = -1;
   for (const auto& value : nodes) {
     AddNode(value.second);
-    if (view_id < 0)
-      view_id = value.second.view_id;
   }
 
   for (const auto& value : actions) {

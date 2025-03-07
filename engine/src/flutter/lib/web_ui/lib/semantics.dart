@@ -370,6 +370,7 @@ class SemanticsUpdateBuilder {
     int headingLevel = 0,
     String? linkUrl,
     SemanticsRole role = SemanticsRole.none,
+    int viewId = 0,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');

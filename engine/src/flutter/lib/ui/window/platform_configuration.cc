@@ -646,10 +646,11 @@ void PlatformConfigurationNativeApi::EndWarmUpFrame() {
   UIDartState::Current()->platform_configuration()->client()->EndWarmUpFrame();
 }
 
-void PlatformConfigurationNativeApi::UpdateSemantics(SemanticsUpdate* update) {
+void PlatformConfigurationNativeApi::UpdateSemantics(SemanticsUpdate* update,
+                                                     int64_t viewId) {
   UIDartState::ThrowIfUIOperationsProhibited();
   UIDartState::Current()->platform_configuration()->client()->UpdateSemantics(
-      update);
+      update, viewId);
 }
 
 Dart_Handle PlatformConfigurationNativeApi::ComputePlatformResolvedLocale(

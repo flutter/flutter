@@ -507,9 +507,11 @@ class PlatformView {
   ///                      key and the node properties as the value.
   /// @param[in]  actions  A map with the stable semantics node identifier as
   ///                      key and the custom node action as the value.
+  /// @param[in]  view_id  The ID of the view that this update is for
   ///
   virtual void UpdateSemantics(SemanticsNodeUpdates updates,
-                               CustomAccessibilityActionUpdates actions);
+                               CustomAccessibilityActionUpdates actions,
+                               int64_t view_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Used by the framework to tell the embedder that it has

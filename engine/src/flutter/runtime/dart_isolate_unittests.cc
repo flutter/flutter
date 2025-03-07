@@ -711,7 +711,7 @@ class FakePlatformConfigurationClient : public PlatformConfigurationClient {
               Scene* scene,
               double width,
               double height) override {}
-  void UpdateSemantics(SemanticsUpdate* update) override {}
+  void UpdateSemantics(SemanticsUpdate* update, int64_t view_id) override {}
   void HandlePlatformMessage(
       std::unique_ptr<PlatformMessage> message) override {}
   FontCollection& GetFontCollection() override {

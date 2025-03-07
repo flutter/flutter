@@ -154,10 +154,12 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///                      key and the node properties as the value.
     /// @param[in]  actions  A map with the stable semantics node identifier as
     ///                      key and the custom node action as the value.
+    /// @param[in]  view_id  The ID of the view that this update is for
     ///
     virtual void OnEngineUpdateSemantics(
         SemanticsNodeUpdates updates,
-        CustomAccessibilityActionUpdates actions) = 0;
+        CustomAccessibilityActionUpdates actions,
+        int64_t view_id) = 0;
 
     //--------------------------------------------------------------------------
     /// @brief      When the Flutter application has a message to send to the
@@ -1011,7 +1013,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
   // |RuntimeDelegate|
   void UpdateSemantics(SemanticsNodeUpdates update,
-                       CustomAccessibilityActionUpdates actions) override;
+                       CustomAccessibilityActionUpdates actions,
+                       int64_t view_id) override;
 
   // |RuntimeDelegate|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;

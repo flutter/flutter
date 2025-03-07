@@ -1845,7 +1845,8 @@ CreateEmbedderSemanticsUpdateCallbackV1(
   return [update_semantics_node_callback,
           update_semantics_custom_action_callback,
           user_data](const flutter::SemanticsNodeUpdates& nodes,
-                     const flutter::CustomAccessibilityActionUpdates& actions) {
+                     const flutter::CustomAccessibilityActionUpdates& actions,
+                     int64_t view_id) {
     flutter::EmbedderSemanticsUpdate update{nodes, actions};
     FlutterSemanticsUpdate* update_ptr = update.get();
 
@@ -1891,7 +1892,8 @@ CreateEmbedderSemanticsUpdateCallbackV2(
     void* user_data) {
   return [update_semantics_callback, user_data](
              const flutter::SemanticsNodeUpdates& nodes,
-             const flutter::CustomAccessibilityActionUpdates& actions) {
+             const flutter::CustomAccessibilityActionUpdates& actions,
+             int64_t view_id) {
     flutter::EmbedderSemanticsUpdate update{nodes, actions};
 
     update_semantics_callback(update.get(), user_data);
@@ -1906,8 +1908,9 @@ CreateEmbedderSemanticsUpdateCallbackV3(
     void* user_data) {
   return [update_semantics_callback, user_data](
              const flutter::SemanticsNodeUpdates& nodes,
-             const flutter::CustomAccessibilityActionUpdates& actions) {
-    flutter::EmbedderSemanticsUpdate2 update{nodes, actions};
+             const flutter::CustomAccessibilityActionUpdates& actions,
+             int64_t view_id) {
+    flutter::EmbedderSemanticsUpdate2 update{nodes, actions, view_id};
 
     update_semantics_callback(update.get(), user_data);
   };
