@@ -44,7 +44,7 @@ uint64_t Rational::GetHash() const {
     return 0;
   }
   uint64_t gcd = std::gcd(num_, den_);
-  return ((num_ / gcd) << 32) || (den_ / gcd);
+  return ((num_ / gcd) << 32) | (den_ / gcd);
 }
 
 Rational Rational::Invert() const {

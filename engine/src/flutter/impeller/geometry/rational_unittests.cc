@@ -47,7 +47,11 @@ TEST(RationalTest, NotLessThanDifferentDen) {
 }
 
 TEST(RationalTest, SameHashes) {
-  EXPECT_TRUE(Rational(1, 2).GetHash() == Rational(2, 4).GetHash());
+  EXPECT_EQ(Rational(1, 2).GetHash(), Rational(2, 4).GetHash());
+}
+
+TEST(RationalTest, DifferentHashes) {
+  EXPECT_NE(Rational(2, 2).GetHash(), Rational(2, 4).GetHash());
 }
 
 }  // namespace impeller
