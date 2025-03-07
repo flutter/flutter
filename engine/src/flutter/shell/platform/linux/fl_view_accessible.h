@@ -43,7 +43,8 @@ G_DECLARE_FINAL_TYPE(FlViewAccessible,
  *
  * Returns: a new #FlViewAccessible.
  */
-FlViewAccessible* fl_view_accessible_new(FlEngine* engine, FlutterViewId view_id);
+FlViewAccessible* fl_view_accessible_new(FlEngine* engine,
+                                         FlutterViewId view_id);
 
 /**
  * fl_view_accessible_handle_update_semantics:

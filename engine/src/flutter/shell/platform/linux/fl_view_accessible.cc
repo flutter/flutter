@@ -131,7 +131,8 @@ static void fl_view_accessible_init(FlViewAccessible* self) {
       g_direct_hash, g_direct_equal, nullptr, g_object_unref);
 }
 
-FlViewAccessible* fl_view_accessible_new(FlEngine* engine, FlutterViewId view_id) {
+FlViewAccessible* fl_view_accessible_new(FlEngine* engine,
+                                         FlutterViewId view_id) {
   FlViewAccessible* self =
       FL_VIEW_ACCESSIBLE(g_object_new(fl_view_accessible_get_type(), nullptr));
   g_weak_ref_init(&self->engine, engine);

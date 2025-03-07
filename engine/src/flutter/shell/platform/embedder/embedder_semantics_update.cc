@@ -95,8 +95,11 @@ EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
   actions_.reserve(actions.size());
   action_pointers_.reserve(actions.size());
 
+  int64_t view_id = -1;
   for (const auto& value : nodes) {
     AddNode(value.second);
+    if (view_id < 0)
+      view_id = value.second.view_id;
   }
 
   for (const auto& value : actions) {
@@ -111,14 +114,12 @@ EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
     action_pointers_.push_back(&actions_[i]);
   }
 
-  update_ = {
-      .struct_size = sizeof(FlutterSemanticsUpdate2),
-      .node_count = node_pointers_.size(),
-      .nodes = node_pointers_.data(),
-      .custom_action_count = action_pointers_.size(),
-      .custom_actions = action_pointers_.data(),
-      .view_id = view_id
-  };
+  update_ = {.struct_size = sizeof(FlutterSemanticsUpdate2),
+             .node_count = node_pointers_.size(),
+             .nodes = node_pointers_.data(),
+             .custom_action_count = action_pointers_.size(),
+             .custom_actions = action_pointers_.data(),
+             .view_id = view_id};
 }
 
 EmbedderSemanticsUpdate2::~EmbedderSemanticsUpdate2() {}

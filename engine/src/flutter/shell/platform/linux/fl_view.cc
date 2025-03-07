@@ -803,7 +803,7 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
   self->pointer_manager = fl_pointer_manager_new(self->view_id, engine);
 
   // TODO(mattkae): We should make the fl_engine_set_update_semantics_handler
-  // that iterates over all of the views and finds the right one. At the moment, 
+  // that iterates over all of the views and finds the right one. At the moment,
   // we only update semantics on the first view.
 
   setup_cursor(self);
