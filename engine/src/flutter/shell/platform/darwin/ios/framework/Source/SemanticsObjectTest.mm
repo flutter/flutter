@@ -639,7 +639,7 @@ const float kFloatCompareEpsilon = 0.001;
   [parentObject setSemanticsNode:&parent];
 
   FlutterSemanticsObject* childObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
-                                                                                    uid:1];
+                                                                                   uid:1];
   childObject.accessibilityFrame = CGRectMake(0, 0, 100, 100);
   [childObject setSemanticsNode:&child];
 
