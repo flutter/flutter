@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.view;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
@@ -44,7 +45,7 @@ public class SensitiveContentPluginTest {
   @SuppressWarnings("deprecation")
   // setMessageHandler is deprecated.
   @Test
-  public void respondsToSensitiveContentChannelMessage() {
+  public void respondsToSensitiveContentChannelSetContentSensitivityMessageAsExpected() {
     ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
         ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
     DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
@@ -60,13 +61,52 @@ public class SensitiveContentPluginTest {
 
     BinaryMessenger.BinaryMessageHandler binaryMessageHandler =
         binaryMessageHandlerCaptor.getValue();
-    final int contentSensitivityLevel = 2;
+
+    // Test each possible content sensitivity value.
+    sendToBinaryMessageHandler(
+        binaryMessageHandler,
+        "SensitiveContent.setContentSensitivity",
+        SensitiveContentChannel.AUTO_SENSITIVE_CONTENT_SENSITIVITY);
+    verify(mockHandler)
+        .setContentSensitivity(eq(View.CONTENT_SENSITIVITY_AUTO), any(MethodChannel.Result.class));
 
     sendToBinaryMessageHandler(
-        binaryMessageHandler, "SensitiveContent.setContentSensitivity", contentSensitivityLevel);
-
+        binaryMessageHandler,
+        "SensitiveContent.setContentSensitivity",
+        SensitiveContentChannel.SENSITIVE_CONTENT_SENSITIVITY);
     verify(mockHandler)
-        .setContentSensitivity(eq(contentSensitivityLevel), any(MethodChannel.Result.class));
+        .setContentSensitivity(
+            eq(View.CONTENT_SENSITIVITY_NOT_SENSITIVE), any(MethodChannel.Result.class));
+
+    sendToBinaryMessageHandler(
+        binaryMessageHandler,
+        "SensitiveContent.setContentSensitivity",
+        SensitiveContentChannel.NOT_SENSITIVE_CONTENT_SENSITIVITY);
+    verify(mockHandler)
+        .setContentSensitivity(
+            eq(View.CONTENT_SENSITIVITY_SENSITIVE), any(MethodChannel.Result.class));
+  }
+
+  @SuppressWarnings("deprecation")
+  // setMessageHandler is deprecated.
+  @Test
+  public void sensitiveContentChannelResultsWithExpectedContentSensitivity() {
+    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    SensitiveContentChannel.SensitiveContentMethodHandler mockHandler =
+        mock(SensitiveContentChannel.SensitiveContentMethodHandler.class);
+    SensitiveContentChannel sensitiveContentChannel =
+        new SensitiveContentChannel(mockBinaryMessenger);
+
+    // Test each possible content sensitivity value.
+    // TODO: fix
+    MethodCall methodCall = new MethodCall("getContentSensitivity", null);
+    MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
+
+    when(mockHandler.getContentSensitivity()).thenReturn(View.CONTENT_SENSITIVITY_AUTO);
+
+    sensitiveContentChannel.parsingMethodHandler.onMethodCall(methodCall, mockResult);
+
+    verify(mockResult).success(SensitiveContentChannel.AUTO_SENSITIVE_CONTENT_SENSITIVITY);
   }
 
   @Test
@@ -148,10 +188,8 @@ public class SensitiveContentPluginTest {
             fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel);
     final MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
 
-    sensitiveContentPlugin.getContentSensitivity(mockResult);
-
+    assertEquals(sensitiveContentPlugin.getContentSensitivity(), null);
     verifyNoMoreInteractions(mockFlutterActivity);
-    verify(mockResult).success(null);
   }
 
   @Test
@@ -170,9 +208,7 @@ public class SensitiveContentPluginTest {
     when(mockFlutterActivity.findViewById(fakeFlutterViewId)).thenReturn(mockFlutterView);
     when(mockFlutterView.getContentSensitivity()).thenReturn(testCurrentContentSensitivityValue);
 
-    sensitiveContentPlugin.getContentSensitivity(mockResult);
-
-    verify(mockResult).success(testCurrentContentSensitivityValue);
+    assertEquals(sensitiveContentPlugin.getContentSensitivity(), true);
   }
 
   @Test
