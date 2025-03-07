@@ -5,6 +5,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/file.h"
 #include "flutter/testing/testing.h"
+#include "gtest/gtest.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
@@ -103,6 +104,15 @@ TEST_P(PipelineCacheDataVKPlaygroundTest, CanPersistAndRetrievePipelineCache) {
 
   {
     auto cache = context_vk.GetDevice().createPipelineCacheUnique({});
+
+    size_t max_size = 0;
+    EXPECT_EQ(cache.value.getOwner().getPipelineCacheData(*cache.value,
+                                                          &max_size, nullptr),
+              vk::Result::eSuccess);
+    if (max_size < sizeof(PipelineCacheHeaderVK)) {
+      GTEST_SKIP() << "Pipeline cache too small for test.";
+    }
+
     EXPECT_EQ(cache.result, vk::Result::eSuccess);
     EXPECT_FALSE(fml::FileExists(temp_dir.fd(), "flutter.impeller.vkcache"));
     EXPECT_TRUE(PipelineCacheDataPersist(
@@ -131,6 +141,15 @@ TEST_P(PipelineCacheDataVKPlaygroundTest,
 
   {
     auto cache = context_vk.GetDevice().createPipelineCacheUnique({});
+
+    size_t max_size = 0;
+    EXPECT_EQ(cache.value.getOwner().getPipelineCacheData(*cache.value,
+                                                          &max_size, nullptr),
+              vk::Result::eSuccess);
+    if (max_size < sizeof(PipelineCacheHeaderVK)) {
+      GTEST_SKIP() << "Pipeline cache too small for test.";
+    }
+
     ASSERT_EQ(cache.result, vk::Result::eSuccess);
     ASSERT_FALSE(fml::FileExists(temp_dir.fd(), "flutter.impeller.vkcache"));
     ASSERT_TRUE(PipelineCacheDataPersist(

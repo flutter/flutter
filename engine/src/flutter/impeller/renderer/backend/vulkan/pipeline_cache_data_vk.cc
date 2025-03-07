@@ -27,8 +27,7 @@ bool PipelineCacheDataPersist(const fml::UniqueFD& cache_directory,
   }
   // If the maximum size that can be written is smaller than the header
   // metadata, we effectively cannot write anything to the cache.
-  if (maximum_data_size == 0u ||
-      maximum_data_size <= sizeof(PipelineCacheHeaderVK)) {
+  if (maximum_data_size <= sizeof(PipelineCacheHeaderVK)) {
     return true;
   }
 
