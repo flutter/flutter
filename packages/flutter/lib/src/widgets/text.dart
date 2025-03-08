@@ -695,7 +695,7 @@ class Text extends StatelessWidget {
 
     // Ensures text height follows TextStyle inheritance if `inherit` is true;
     // otherwise, it strictly follows StrutStyle.
-    final bool forceStrutHeight = effectiveTextStyle?.inherit ?? false;
+    final bool forceStrutHeight = effectiveTextStyle?.height != null;
 
     final StrutStyle? defaultStrutStyle =
         effectiveTextStyle != null
