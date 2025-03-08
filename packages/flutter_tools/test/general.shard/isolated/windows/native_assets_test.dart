@@ -107,7 +107,7 @@ void main() {
           };
           final TargetPlatform targetPlatform =
               flutterTester ? TargetPlatform.tester : TargetPlatform.windows_x64;
-          final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+          final DartHookResult dartHookResult = await runFlutterSpecificHooks(
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
             projectUri: projectUri,
@@ -123,7 +123,7 @@ void main() {
                   )
                   : nonFlutterTesterAssetUri;
           await installCodeAssets(
-            dartBuildResult: dartBuildResult,
+            dartHookResult: dartHookResult,
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
             projectUri: projectUri,
