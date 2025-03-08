@@ -393,6 +393,17 @@ void main() {
     expect(const Color(0x00000000), isSameColorAs(const Color(0x00000002), threshold: 0.008));
   });
 
+  testWidgets('isSystemTextScaler', (WidgetTester tester) async {
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+    tester.platformDispatcher.textScaleFactorTestValue = 123;
+
+    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
+    final TextScaler systemScaler = mediaQueryData.textScaler;
+    expect(systemScaler, isSystemTextScaler());
+    expect(systemScaler, isSystemTextScaler(withScaleFactor: 123));
+    expect(systemScaler, isNot(isSystemTextScaler(withScaleFactor: 2)));
+  });
+
   group('coversSameAreaAs', () {
     test('empty Paths', () {
       expect(
@@ -719,6 +730,7 @@ void main() {
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1018,6 +1030,7 @@ void main() {
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1114,6 +1127,7 @@ void main() {
         headingLevel: 0,
         linkUrl: null,
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1217,6 +1231,7 @@ void main() {
         headingLevel: 0,
         linkUrl: null,
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1248,6 +1263,7 @@ void main() {
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1335,6 +1351,7 @@ void main() {
         headingLevel: 0,
         linkUrl: null,
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 

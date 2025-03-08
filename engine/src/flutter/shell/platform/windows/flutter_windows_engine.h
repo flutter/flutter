@@ -96,6 +96,12 @@ class FlutterWindowsEngine {
 
   virtual ~FlutterWindowsEngine();
 
+  // Returns the engine associated with the given identifier.
+  // The engine_id must be valid and for a running engine, otherwise
+  // the behavior is undefined.
+  // Must be called on the platform thread.
+  static FlutterWindowsEngine* GetEngineForId(int64_t engine_id);
+
   // Starts running the entrypoint function specifed in the project bundle. If
   // unspecified, defaults to main().
   //
@@ -178,6 +184,9 @@ class FlutterWindowsEngine {
   void SendKeyEvent(const FlutterKeyEvent& event,
                     FlutterKeyEventCallback callback,
                     void* user_data);
+
+  // Informs the engine of an incoming focus event.
+  void SendViewFocusEvent(const FlutterViewFocusEvent& event);
 
   KeyboardHandlerBase* keyboard_key_handler() {
     return keyboard_key_handler_.get();
@@ -324,6 +333,9 @@ class FlutterWindowsEngine {
   // Invoked by the engine when a listener is set or cleared on a platform
   // channel.
   virtual void OnChannelUpdate(std::string name, bool listening);
+
+  virtual void OnViewFocusChangeRequest(
+      const FlutterViewFocusChangeRequest* request);
 
  private:
   // Allows swapping out embedder_api_ calls in tests.

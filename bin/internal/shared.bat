@@ -21,7 +21,7 @@ SET stamp_path=%cache_dir%\flutter_tools.stamp
 SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
 SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
-SET engine_version_path=%FLUTTER_ROOT%\bin\internal\engine.version
+SET engine_version_path=%cache_dir%\engine.stamp
 SET dart=%dart_sdk_path%\bin\dart.exe
 
 REM Ensure that bin/cache exists.

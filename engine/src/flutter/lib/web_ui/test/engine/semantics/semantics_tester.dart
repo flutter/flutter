@@ -34,6 +34,8 @@ class SemanticsTester {
     bool? isChecked,
     bool? isSelectable,
     bool? isSelected,
+    bool? isExpandable,
+    bool? isExpanded,
     bool? isButton,
     bool? isLink,
     bool? isTextField,
@@ -116,6 +118,7 @@ class SemanticsTester {
     int? headingLevel,
     String? linkUrl,
     ui.SemanticsRole? role,
+    List<String>? controlsNodes,
   }) {
     // Flags
     if (hasCheckedState ?? false) {
@@ -129,6 +132,12 @@ class SemanticsTester {
     }
     if (isSelected ?? false) {
       flags |= ui.SemanticsFlag.isSelected.index;
+    }
+    if (isExpandable ?? false) {
+      flags |= ui.SemanticsFlag.hasExpandedState.index;
+    }
+    if (isExpanded ?? false) {
+      flags |= ui.SemanticsFlag.isExpanded.index;
     }
     if (isButton ?? false) {
       flags |= ui.SemanticsFlag.isButton.index;
@@ -325,6 +334,7 @@ class SemanticsTester {
       headingLevel: headingLevel ?? 0,
       linkUrl: linkUrl,
       role: role ?? ui.SemanticsRole.none,
+      controlsNodes: controlsNodes,
     );
     _nodeUpdates.add(update);
     return update;
