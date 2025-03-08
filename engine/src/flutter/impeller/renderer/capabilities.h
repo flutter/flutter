@@ -120,6 +120,13 @@ class Capabilities {
   ///        supported by the renderer without using specialized shaders.
   virtual bool SupportsAdvancedBlendOperations() const { return false; }
 
+  /// @brief Whether the XR formats are supported on this device.
+  ///
+  /// This is only ever true for iOS and macOS devices. We may need
+  /// to revisit this API when approaching wide gamut rendering for
+  /// Vulkan and GLES.
+  virtual bool SupportsExtendedRangeFormats() const = 0;
+
  protected:
   Capabilities();
 
@@ -158,6 +165,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsDeviceTransientTextures(bool value);
 
+  CapabilitiesBuilder& SetSupportsExtendedRangeFormats(bool value);
+
   CapabilitiesBuilder& SetDefaultGlyphAtlasFormat(PixelFormat value);
 
   CapabilitiesBuilder& SetSupportsTriangleFan(bool value);
@@ -177,6 +186,7 @@ class CapabilitiesBuilder {
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_device_transient_textures_ = false;
   bool supports_triangle_fan_ = false;
+  bool supports_extended_range_formats_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
   std::optional<PixelFormat> default_depth_stencil_format_ = std::nullopt;

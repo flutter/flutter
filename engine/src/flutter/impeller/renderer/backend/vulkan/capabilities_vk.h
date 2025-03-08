@@ -269,6 +269,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsPrimitiveRestart() const override;
 
   // |Capabilities|
+  bool SupportsExtendedRangeFormats() const override;
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|
