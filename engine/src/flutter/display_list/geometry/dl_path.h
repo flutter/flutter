@@ -162,8 +162,6 @@ class DlPath {
   static SkPath ConvertToSkiaPath(const impeller::Path& path);
 
   static impeller::Path ConvertToImpellerPath(const SkPath& path);
-
-  friend class SkiaPathReceiver;
 };
 
 }  // namespace flutter
