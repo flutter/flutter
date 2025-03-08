@@ -116,6 +116,8 @@ class Capabilities {
   /// Note that this may be smaller than the maximum allocatable texture size.
   virtual ISize GetMaximumRenderPassAttachmentSize() const = 0;
 
+  /// @brief Whether advanced blend operations (screen and greater) are natively
+  ///        supported by the renderer without using specialized shaders.
   virtual bool SupportsAdvancedBlendOperations() const { return false; }
 
  protected:

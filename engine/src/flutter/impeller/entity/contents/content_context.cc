@@ -33,6 +33,7 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   color0.alpha_blend_op = BlendOperation::kAdd;
   color0.color_blend_op = BlendOperation::kAdd;
   color0.write_mask = ColorWriteMaskBits::kAll;
+  color0.advanced_blend_op = std::nullopt;
 
   switch (pipeline_blend) {
     case BlendMode::kClear:

@@ -181,8 +181,10 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   vk::SubpassDescription subpass0;
   subpass0.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
 
-  subpass0.setPInputAttachments(color_refs.data());
-  subpass0.setInputAttachmentCount(color_index);
+  if (topology_ == RenderPassBuilderVK::Topology::kProgrammableBlend) {
+    subpass0.setPInputAttachments(color_refs.data());
+    subpass0.setInputAttachmentCount(color_index);
+  }
 
   subpass0.setPColorAttachments(color_refs.data());
   subpass0.setColorAttachmentCount(color_index);

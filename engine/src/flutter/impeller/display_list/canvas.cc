@@ -1302,8 +1302,8 @@ bool Canvas::Restore() {
 
     if (element_entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
       if (renderer_.GetDeviceCapabilities().SupportsAdvancedBlendOperations()) {
-        // Let entity renderer with advanced blend mode, the backend supports
-        // rasterization of it without intervention.
+        // Let entity render with advanced blend mode, the backend supports
+        // rasterization of it without additional shaders.
       } else if (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch()) {
         ApplyFramebufferBlend(element_entity);
       } else {
@@ -1531,8 +1531,8 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
 
   if (entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
     if (renderer_.GetDeviceCapabilities().SupportsAdvancedBlendOperations()) {
-      // Let entity renderer with advanced blend mode, the backend supports
-      // rasterization of it without intervention.
+      // Let entity render with advanced blend mode, the backend supports
+      // rasterization of it without additional shaders.
     } else if (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch()) {
       ApplyFramebufferBlend(entity);
     } else {

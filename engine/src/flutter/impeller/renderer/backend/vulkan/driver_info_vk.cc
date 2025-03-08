@@ -356,9 +356,9 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   // https://github.com/flutter/flutter/issues/160866
   // https://github.com/flutter/flutter/issues/160804
   // https://github.com/flutter/flutter/issues/160406
-  // if (vendor_ == VendorVK::kImgTec) {
-  //   return true;
-  // }
+  if (vendor_ == VendorVK::kImgTec) {
+    return true;
+  }
   return false;
 }
 

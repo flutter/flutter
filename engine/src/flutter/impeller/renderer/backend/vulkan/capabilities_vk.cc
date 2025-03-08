@@ -11,7 +11,6 @@
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/workarounds_vk.h"
-#include "vulkan/vulkan_core.h"
 
 namespace impeller {
 
