@@ -42,7 +42,7 @@
                                   delegate:(nonnull id<FlutterViewDelegate>)delegate
                         threadSynchronizer:(nonnull FlutterThreadSynchronizer*)threadSynchronizer
                             viewIdentifier:(FlutterViewIdentifier)viewIdentifier
-    NS_DESIGNATED_INITIALIZER;
+                           enableWideGamut:(BOOL)enableWideGamut NS_DESIGNATED_INITIALIZER;
 
 - (nullable instancetype)initWithFrame:(NSRect)frameRect
                            pixelFormat:(nullable NSOpenGLPixelFormat*)format NS_UNAVAILABLE;

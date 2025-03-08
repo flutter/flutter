@@ -68,6 +68,15 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
   return NO;
 }
 
+- (BOOL)enableWideGamut {
+  NSNumber* enableWideGamut =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
+  if (enableWideGamut != nil) {
+    return enableWideGamut.boolValue;
+  }
+  return YES;
+}
+
 - (NSString*)assetsPath {
   if (_assetsPath) {
     return _assetsPath;
