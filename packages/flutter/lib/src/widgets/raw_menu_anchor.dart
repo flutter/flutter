@@ -282,7 +282,7 @@ class RawMenuAnchor extends StatefulWidget {
 }
 
 // Base mixin that provides the common interface and state for both types of
-// [RawMenuAnchor]s, [RawMenuAnchor] and [RawMenuAnchorGroup].
+// [RawMenuAnchor]s: [RawMenuAnchor] and [RawMenuAnchorGroup].
 @optionalTypeArgs
 mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   final List<_RawMenuAnchorBaseMixin> _anchorChildren = <_RawMenuAnchorBaseMixin>[];
@@ -306,11 +306,11 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  /// Whether this [_RawMenuAnchorBaseMixin] is the top node of the menu tree.
+  // Whether this anchor is the top node of the menu tree.
   @protected
   bool get isRoot => _parent == null;
 
-  /// The [MenuController] that is used by the [_RawMenuAnchorBaseMixin].
+  // The [MenuController] that is used by the anchor
   MenuController get menuController;
 
   /// Whether this menu layer is open.
