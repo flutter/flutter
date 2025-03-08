@@ -692,9 +692,14 @@ class Text extends StatelessWidget {
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     }
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
+
+    // Ensures text height follows TextStyle inheritance if `inherit` is true;
+    // otherwise, it strictly follows StrutStyle.
+    final bool forceStrutHeight = effectiveTextStyle?.inherit ?? false;
+
     final StrutStyle? defaultStrutStyle =
         effectiveTextStyle != null
-            ? StrutStyle.fromTextStyle(effectiveTextStyle, forceStrutHeight: true)
+            ? StrutStyle.fromTextStyle(effectiveTextStyle, forceStrutHeight: forceStrutHeight)
             : null;
 
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
