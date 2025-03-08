@@ -607,7 +607,116 @@ class RenderTable extends RenderBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.role = SemanticsRole.table;
+    config.isSemanticBoundary = true;
     config.explicitChildNodes = true;
+  }
+
+  /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
+  ///
+  /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
+  /// And if a cell has a different semantic role, we create a new semantics node
+  /// to wrapp it.
+  @override
+  void assembleSemanticsNode(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    final List<SemanticsNode> rows = <SemanticsNode>[];
+    int cellIndex = 0;
+
+    for (int y = 0; y < _rows; y++) {
+      final Rect rowBox = getRowBox(y);
+      // Skip row if it's empty
+      if (rowBox.height == 0) {
+        continue;
+      }
+      final SemanticsNode newRow = SemanticsNode(
+        showOnScreen: () {
+          showOnScreen(descendant: this, rect: rowBox);
+        },
+      );
+
+      final SemanticsConfiguration configuration =
+          SemanticsConfiguration()
+            ..indexInParent = y
+            ..role = SemanticsRole.row;
+
+      // The list of cells of this Row.
+      final List<SemanticsNode> cells = <SemanticsNode>[];
+
+      // Use two index to loop. x is the index of the cell in the row, cellIndex is the index of the
+      // cell in the table's children. Use two index because each row may have different number of visible
+      // cells and thus different number of children in the semantics tree.
+      for (int x = 0; x < columns && cellIndex < children.length; x++, cellIndex++) {
+        // Get the cell at the current index.
+        final SemanticsNode child = children.elementAt(cellIndex);
+
+        final Offset offset =
+            (child.transform != null ? MatrixUtils.getAsTranslation(child.transform!) : null) ??
+            Offset.zero;
+        final Rect childRect = child.rect.shift(offset);
+        // Break if this cell belong to next row.
+        // If the cell index in parent is null, it means the cell's parent is not set to a row yet,
+        // its rect is relative to the table. Check its rect to see if it belongs to the current row.
+        // Otherwise if the cell index in parent is not null, it means the cell's parent is set to a row,
+        // check its index to see if it belongs to the current row or next row.
+        if ((child.indexInParent == null && childRect.top > rowBox.bottom) ||
+            (child.indexInParent != null && child.indexInParent != x)) {
+          break;
+        }
+
+        // If the child is not a cell or columnHeader, create a new semantic node with role cell to wrap it.
+        // This can happen when the cell has a different semantic role, or the cell doesn't have a semantic
+        // role because user is not using the `TableCell` widget.
+        final bool addCellWrapper =
+            child.role != SemanticsRole.cell && child.role != SemanticsRole.columnHeader;
+
+        final SemanticsNode cell =
+            addCellWrapper
+                ? (SemanticsNode()..updateWith(
+                  config: SemanticsConfiguration()..role = SemanticsRole.cell,
+                  childrenInInversePaintOrder: <SemanticsNode>[child],
+                ))
+                : child;
+
+        cell.indexInParent = x;
+
+        // Shift the cell's transform to be relative to the row.
+        final Matrix4 cellTransform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0);
+
+        final double cellWidth =
+            x == _columns - 1
+                ? rowBox.width - _columnLefts!.elementAt(x)
+                : _columnLefts!.elementAt(x + 1) - _columnLefts!.elementAt(x);
+
+        // Skip cell if it's invisible
+        if (cellWidth <= 0.0) {
+          continue;
+        }
+
+        cell
+          ..transform = cellTransform
+          ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
+
+        // Clear child transform.
+        if (addCellWrapper) {
+          child
+            ..transform = null
+            ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
+        }
+        cells.add(cell);
+      }
+
+      newRow
+        ..updateWith(config: configuration, childrenInInversePaintOrder: cells)
+        ..transform = Matrix4.translationValues(rowBox.left, rowBox.top, 0)
+        ..rect = Rect.fromLTWH(0, 0, rowBox.width, rowBox.height);
+
+      rows.add(newRow);
+    }
+
+    node.updateWith(config: config, childrenInInversePaintOrder: rows);
   }
 
   /// Replaces the children of this table with the given cells.
