@@ -7,7 +7,6 @@ library;
 
 import 'basic.dart';
 import 'framework.dart';
-import 'gesture_detector.dart';
 import 'page_storage.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -30,9 +29,7 @@ typedef ExpansibleComponentBuilder =
 /// The type of the callback that uses the header and body of an [Expansible]
 /// widget to build the widget.
 ///
-/// The `header` property is the header returned by [Expansible.headerBuilder]
-/// wrapped in a [GestureDetector] to toggle the expansion when tapped.
-///
+/// The `header` property is the header returned by [Expansible.headerBuilder].
 /// The `body` property is the body returned by [Expansible.bodyBuilder] wrapped
 /// in an [Offstage] to hide the body when the [Expansible] is collapsed.
 ///
