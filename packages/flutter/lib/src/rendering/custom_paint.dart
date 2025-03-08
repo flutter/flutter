@@ -984,6 +984,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.liveRegion != null) {
       config.liveRegion = properties.liveRegion!;
     }
+    if (properties.required != null) {
+      config.isRequired = properties.required;
+    }
     if (properties.maxValueLength != null) {
       config.maxValueLength = properties.maxValueLength;
     }
