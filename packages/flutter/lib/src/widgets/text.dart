@@ -692,6 +692,16 @@ class Text extends StatelessWidget {
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     }
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
+
+    // Ensure that StrutStyle forceStrutHeight is applied correctly only
+    // when it's needed to explicitly enforce line height behavior.
+    final bool forceStrutHeight = effectiveTextStyle?.height != null;
+
+    final StrutStyle? defaultStrutStyle =
+        effectiveTextStyle != null
+            ? StrutStyle.fromTextStyle(effectiveTextStyle, forceStrutHeight: forceStrutHeight)
+            : null;
+
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
       (final TextScaler textScaler, _) => textScaler,
       // For unmigrated apps, fall back to textScaleFactor.
@@ -712,7 +722,7 @@ class Text extends StatelessWidget {
           overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
           textScaler: textScaler,
           maxLines: maxLines ?? defaultTextStyle.maxLines,
-          strutStyle: strutStyle,
+          strutStyle: strutStyle ?? defaultStrutStyle,
           textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
           textHeightBehavior:
               textHeightBehavior ??
@@ -739,7 +749,7 @@ class Text extends StatelessWidget {
         overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
         textScaler: textScaler,
         maxLines: maxLines ?? defaultTextStyle.maxLines,
-        strutStyle: strutStyle,
+        strutStyle: strutStyle ?? defaultStrutStyle,
         textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
         textHeightBehavior:
             textHeightBehavior ??
