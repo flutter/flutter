@@ -52,6 +52,15 @@ static bool DeviceSupportsComputeSubgroups(id<MTLDevice> device) {
   return supports_subgroups;
 }
 
+// See "Extended Range and wide color pixel formats" in the metal feature set
+// tables.
+static bool DeviceSupportsExtendedRangeFormats(id<MTLDevice> device) {
+  if (@available(macOS 10.15, iOS 13, tvOS 13, *)) {
+    return [device supportsFamily:MTLGPUFamilyApple3];
+  }
+  return false;
+}
+
 static std::unique_ptr<Capabilities> InferMetalCapabilities(
     id<MTLDevice> device,
     PixelFormat color_format) {
@@ -71,6 +80,8 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetDefaultGlyphAtlasFormat(PixelFormat::kA8UNormInt)
       .SetSupportsTriangleFan(false)
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
+      .SetSupportsExtendedRangeFormats(
+          DeviceSupportsExtendedRangeFormats(device))
       .Build();
 }
 

@@ -798,4 +798,8 @@ bool CapabilitiesVK::SupportsExternalSemaphoreExtensions() const {
   return supports_external_fence_and_semaphore_;
 }
 
+bool CapabilitiesVK::SupportsExtendedRangeFormats() const {
+  return false;
+}
+
 }  // namespace impeller
