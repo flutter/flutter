@@ -8,6 +8,29 @@
 #include "flutter/impeller/geometry/path_builder.h"
 #include "impeller/geometry/path.h"
 
+namespace {
+inline constexpr flutter::DlPathFillType ToDlFillType(SkPathFillType sk_type) {
+  switch (sk_type) {
+    case SkPathFillType::kEvenOdd:
+      return impeller::FillType::kOdd;
+    case SkPathFillType::kWinding:
+      return impeller::FillType::kNonZero;
+    case SkPathFillType::kInverseEvenOdd:
+    case SkPathFillType::kInverseWinding:
+      FML_UNREACHABLE();
+  }
+}
+
+inline constexpr SkPathFillType ToSkFillType(flutter::DlPathFillType dl_type) {
+  switch (dl_type) {
+    case impeller::FillType::kOdd:
+      return SkPathFillType::kEvenOdd;
+    case impeller::FillType::kNonZero:
+      return SkPathFillType::kWinding;
+  }
+}
+}  // namespace
+
 namespace flutter {
 
 using Path = impeller::Path;
@@ -292,10 +315,11 @@ static void ReduceConic(DlPathReceiver& receiver,
   }
 }
 
-class SkiaPathReceiver final : public virtual DlPathReceiver {
+namespace {
+class SkiaPathReceiver final : public DlPathReceiver {
  public:
   void SetPathInfo(DlPathFillType fill_type, bool is_convex) override {
-    sk_path_.setFillType(DlPath::ToSkFillType(fill_type));
+    sk_path_.setFillType(ToSkFillType(fill_type));
   }
   void MoveTo(const DlPoint& p2) override { sk_path_.moveTo(ToSkPoint(p2)); }
   void LineTo(const DlPoint& p2) override { sk_path_.lineTo(ToSkPoint(p2)); }
@@ -318,6 +342,7 @@ class SkiaPathReceiver final : public virtual DlPathReceiver {
  private:
   SkPath sk_path_;
 };
+}  // namespace
 
 SkPath DlPath::ConvertToSkiaPath(const Path& path) {
   SkiaPathReceiver receiver;
@@ -395,7 +420,8 @@ void DlPath::DispatchFromImpellerPath(const impeller::Path& path,
   }
 }
 
-class ImpellerPathReceiver final : public virtual DlPathReceiver {
+namespace {
+class ImpellerPathReceiver final : public DlPathReceiver {
  public:
   void RecommendSizes(size_t verb_count, size_t point_count) override {
     // Reserve a path size with some arbitrarily additional padding.
@@ -430,6 +456,7 @@ class ImpellerPathReceiver final : public virtual DlPathReceiver {
   PathBuilder builder_;
   DlPathFillType fill_type_;
 };
+}  // namespace
 
 Path DlPath::ConvertToImpellerPath(const SkPath& path) {
   if (path.isEmpty()) {

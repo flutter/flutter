@@ -44,7 +44,7 @@ CATransform3D GetCATransform3DFromDlMatrix(const flutter::DlMatrix& matrix) {
   return transform;
 }
 
-class CGPathReceiver final : public virtual flutter::DlPathReceiver {
+class CGPathReceiver final : public flutter::DlPathReceiver {
  public:
   void SetPathInfo(flutter::DlPathFillType type, bool is_convex) override {
     // CGPaths do not have an inherit fill type, we would need to remember
