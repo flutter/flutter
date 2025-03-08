@@ -570,7 +570,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   static const double defaultBlurSigma = 30.0;
 
   /// The default corner radius of a [CupertinoPopupSurface].
-  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(12));
+  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(13));
 
   // The [ColorFilter] matrix used to saturate widgets underlying a
   // [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
