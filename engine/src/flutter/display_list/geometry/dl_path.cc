@@ -364,6 +364,8 @@ void DlPath::DispatchFromImpellerPath(const impeller::Path& path,
     }
   };
 
+  // The Impeller Point Count is way overestimated due to duplicate
+  // points between elements.
   receiver.RecommendSizes(path.GetComponentCount(), path.GetPointCount());
   std::optional<DlRect> bounds = path.GetBoundingBox();
   if (bounds.has_value()) {
