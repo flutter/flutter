@@ -52,27 +52,27 @@ class CGPathReceiver final : public flutter::DlPathReceiver {
     // see https://github.com/flutter/flutter/issues/164826
   }
   void MoveTo(const flutter::DlPoint& p2) override {  //
-    CGPathMoveToPoint(pathRef_, nil, p2.x, p2.y);
+    CGPathMoveToPoint(path_ref_, nil, p2.x, p2.y);
   }
   void LineTo(const flutter::DlPoint& p2) override {
-    CGPathAddLineToPoint(pathRef_, nil, p2.x, p2.y);
+    CGPathAddLineToPoint(path_ref_, nil, p2.x, p2.y);
   }
   void QuadTo(const flutter::DlPoint& cp, const flutter::DlPoint& p2) override {
-    CGPathAddQuadCurveToPoint(pathRef_, nil, cp.x, cp.y, p2.x, p2.y);
+    CGPathAddQuadCurveToPoint(path_ref_, nil, cp.x, cp.y, p2.x, p2.y);
   }
   // bool conic_to(...) { CGPath has no equivalent to the conic curve type }
   void CubicTo(const flutter::DlPoint& cp1,
                const flutter::DlPoint& cp2,
                const flutter::DlPoint& p2) override {
-    CGPathAddCurveToPoint(pathRef_, nil,  //
+    CGPathAddCurveToPoint(path_ref_, nil,  //
                           cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
   }
-  void Close() override { CGPathCloseSubpath(pathRef_); }
+  void Close() override { CGPathCloseSubpath(path_ref_); }
 
-  CGMutablePathRef TakePath() { return pathRef_; }
+  CGMutablePathRef TakePath() { return path_ref_; }
 
  private:
-  CGMutablePathRef pathRef_ = CGPathCreateMutable();
+  CGMutablePathRef path_ref_ = CGPathCreateMutable();
 };
 }  // namespace
 
