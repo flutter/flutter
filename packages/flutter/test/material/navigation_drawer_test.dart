@@ -123,14 +123,16 @@ void main() {
     await tester.tap(find.text('AC'));
     await tester.pump();
 
-    expect(findDestinationInk('AC'), findsNothing);
+    // When no background color is set, only the non-visible indicator Ink is expected.
+    expect(findDestinationInk('AC'), findsOne);
 
     // Destination with a custom background color.
     await tester.tap(find.byIcon(Icons.access_alarm));
     await tester.pump();
 
     // A Material is added with the custom color.
-    expect(findDestinationInk('Alarm'), findsOne);
+    expect(findDestinationInk('Alarm'), findsNWidgets(2));
+    // The drawer destination Ink is the first one, the second is the indicator's one.
     final BoxDecoration destinationDecoration =
         tester.firstWidget<Ink>(findDestinationInk('Alarm')).decoration! as BoxDecoration;
     expect(destinationDecoration.color, color);
@@ -506,8 +508,8 @@ InkWell? _getInkWell(WidgetTester tester) {
 
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
-          .firstWidget<Container>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Container)),
+          .firstWidget<Ink>(
+            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Ink)),
           )
           .decoration
       as ShapeDecoration?;
