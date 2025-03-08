@@ -65,7 +65,7 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
   if (enableImpeller != nil) {
     return enableImpeller.boolValue;
   }
-  return NO;
+  return YES;
 }
 
 - (NSString*)assetsPath {
