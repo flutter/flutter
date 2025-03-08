@@ -151,27 +151,6 @@ class DlPath {
     const bool sk_path_original;
   };
 
-  inline constexpr static DlPathFillType ToDlFillType(SkPathFillType sk_type) {
-    switch (sk_type) {
-      case SkPathFillType::kEvenOdd:
-        return impeller::FillType::kOdd;
-      case SkPathFillType::kWinding:
-        return impeller::FillType::kNonZero;
-      case SkPathFillType::kInverseEvenOdd:
-      case SkPathFillType::kInverseWinding:
-        FML_UNREACHABLE();
-    }
-  }
-
-  inline constexpr static SkPathFillType ToSkFillType(DlPathFillType dl_type) {
-    switch (dl_type) {
-      case impeller::FillType::kOdd:
-        return SkPathFillType::kEvenOdd;
-      case impeller::FillType::kNonZero:
-        return SkPathFillType::kWinding;
-    }
-  }
-
   std::shared_ptr<Data> data_;
 
   static void DispatchFromSkiaPath(const SkPath& path,

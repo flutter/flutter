@@ -2023,7 +2023,8 @@ void PlatformViewAndroidJNIImpl::destroyOverlaySurface2() {
   FML_CHECK(fml::jni::CheckException(env));
 }
 
-class AndroidPathReceiver final : public virtual DlPathReceiver {
+namespace {
+class AndroidPathReceiver final : public DlPathReceiver {
  public:
   explicit AndroidPathReceiver(JNIEnv* env)
       : env_(env),
@@ -2068,6 +2069,7 @@ class AndroidPathReceiver final : public virtual DlPathReceiver {
   JNIEnv* env_;
   jobject android_path_;
 };
+}  // namespace
 
 void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
     int32_t view_id,
