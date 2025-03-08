@@ -126,6 +126,11 @@ abstract class BaseFlutterTask : DefaultTask() {
     @Input
     var flavor: String? = null
 
+    /**
+     * Gets the dependency file(s) based on the path from the intermediate directory.
+     *
+     * @return the dependency file(s) based on the current intermediate directory path.
+     */
     @OutputFiles
     fun getDependenciesFiles(): FileCollection {
         val helper = BaseFlutterTaskHelper(baseFlutterTask = this)
@@ -133,10 +138,14 @@ abstract class BaseFlutterTask : DefaultTask() {
         return depFiles
     }
 
+    /**
+     * Builds a Flutter Android application bundle by verifying the Flutter source directory,
+     * creating an intermediate build directory if necessary, and running flutter assemble by
+     * configuring and executing with a set of build configurations.
+     */
     fun buildBundle() {
         val helper = BaseFlutterTaskHelper(baseFlutterTask = this)
         helper.checkPreConditions()
-        intermediateDir.mkdirs()
 
         logging.captureStandardError(LogLevel.ERROR)
         project.exec(helper.createExecSpecActionFromTask())

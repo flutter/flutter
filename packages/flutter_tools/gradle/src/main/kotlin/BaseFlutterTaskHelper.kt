@@ -15,15 +15,16 @@ class BaseFlutterTaskHelper(
     internal var gradleErrorMessage = "Invalid Flutter source directory: ${baseFlutterTask.sourceDir}"
 
     /**
-     * Gets the dependency file based on the path from the intermediate directory.
+     * Gets the dependency file(s) based on the path from the intermediate directory.
      *
-     * @return the dependency file based on the current intermediate directory path.
+     * @return the dependency file(s) based on the current intermediate directory path.
      */
     @OutputFiles
     @VisibleForTesting
     internal fun getDependenciesFiles(): FileCollection {
         var depfiles: FileCollection = baseFlutterTask.project.files()
 
+        // TODO(jesswon): During cleanup determine if .../flutter_build.d is ever a directory and refactor accordingly
         // Includes all sources used in the flutter compilation.
         depfiles += baseFlutterTask.project.files("${baseFlutterTask.intermediateDir}/flutter_build.d")
         return depfiles
@@ -39,6 +40,7 @@ class BaseFlutterTaskHelper(
         if (baseFlutterTask.sourceDir == null || !baseFlutterTask.sourceDir!!.isDirectory) {
             throw GradleException(gradleErrorMessage)
         }
+        baseFlutterTask.intermediateDir.mkdirs()
     }
 
     /**

@@ -6,6 +6,7 @@ import io.mockk.verify
 import org.gradle.api.GradleException
 import org.gradle.process.ExecSpec
 import org.gradle.process.ProcessForkOptions
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.io.File
 import java.nio.file.Paths
 import kotlin.test.Test
@@ -66,6 +67,22 @@ class BaseFlutterTaskHelperTest {
             gradleException.message ==
                 helper.gradleErrorMessage,
         )
+    }
+
+    // TODO(jesswon): Add a test for intermediateDir is not valid during cleanup for handling NPEs.
+    @Test
+    fun `checkPreConditions does not throw a GradleException and intermediateDir is valid`() {
+        val baseFlutterTask = mockk<BaseFlutterTask>()
+
+        every { baseFlutterTask.sourceDir } returns sourceDirTest
+        every { baseFlutterTask.sourceDir!!.isDirectory } returns true
+
+        every { baseFlutterTask.intermediateDir } returns intermediateDirFileTest
+        // There is already an intermediate directory, so there is no need to create it.
+        every { baseFlutterTask.intermediateDir.mkdirs() } returns false
+
+        val helper = BaseFlutterTaskHelper(baseFlutterTask)
+        assertDoesNotThrow { helper.checkPreConditions() }
     }
 
     @Test
