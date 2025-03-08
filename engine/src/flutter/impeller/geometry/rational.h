@@ -12,7 +12,7 @@ namespace impeller {
 
 class Rational {
  public:
-  constexpr Rational(int32_t num) : num_(num), den_(1) {}
+  constexpr explicit Rational(int32_t num) : num_(num), den_(1) {}
 
   constexpr Rational(int32_t num, uint32_t den) : num_(num), den_(den) {}
 

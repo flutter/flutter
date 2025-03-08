@@ -186,7 +186,7 @@ TEST_P(TextContentsTest, MaintainsShape) {
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
   ASSERT_TRUE(context && context->IsValid());
   for (int i = 0; i <= 1000; ++i) {
-    Scalar font_scale = 0.440 + (i / 1000.0);
+    Rational font_scale(440 + i, 1000.0);
     Rect position_rect[2];
     Rect uv_rect[2];
 
@@ -199,8 +199,10 @@ TEST_P(TextContentsTest, MaintainsShape) {
       ISize texture_size = atlas->GetTexture()->GetSize();
 
       TextContents::ComputeVertexData(
-          data, text_frame, font_scale,
-          /*entity_transform=*/Matrix::MakeScale({font_scale, font_scale, 1}),
+          data, text_frame, static_cast<Scalar>(font_scale),
+          /*entity_transform=*/
+          Matrix::MakeScale({static_cast<Scalar>(font_scale),
+                             static_cast<Scalar>(font_scale), 1}),
           /*offset=*/Vector2(0, 0),
           /*glyph_properties=*/std::nullopt, atlas);
       position_rect[0] = PerVertexDataPositionToRect(data);
@@ -233,7 +235,7 @@ TEST_P(TextContentsTest, SimpleSubpixel) {
   Point offset = Point(0.5, 0);
   std::shared_ptr<GlyphAtlas> atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
-                       GlyphAtlas::Type::kAlphaBitmap, /*scale=*/1.0f,
+                       GlyphAtlas::Type::kAlphaBitmap, /*scale=*/Rational(1),
                        atlas_context, text_frame, offset);
 
   ISize texture_size = atlas->GetTexture()->GetSize();
@@ -267,7 +269,7 @@ TEST_P(TextContentsTest, SimpleSubpixel3x) {
   std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
   ASSERT_TRUE(context && context->IsValid());
-  Scalar font_scale = 3.f;
+  Rational font_scale(3, 1);
   Point offset = {0.16667, 0};
   std::shared_ptr<GlyphAtlas> atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
@@ -276,10 +278,11 @@ TEST_P(TextContentsTest, SimpleSubpixel3x) {
 
   ISize texture_size = atlas->GetTexture()->GetSize();
   TextContents::ComputeVertexData(
-      data, text_frame, font_scale,
+      data, text_frame, static_cast<Scalar>(font_scale),
       /*entity_transform=*/
       Matrix::MakeTranslation(offset) *
-          Matrix::MakeScale({font_scale, font_scale, 1}),
+          Matrix::MakeScale({static_cast<Scalar>(font_scale),
+                             static_cast<Scalar>(font_scale), 1}),
       offset,
       /*glyph_properties=*/std::nullopt, atlas);
 
@@ -313,7 +316,7 @@ TEST_P(TextContentsTest, SimpleSubpixel26) {
   Point offset = Point(0.26, 0);
   std::shared_ptr<GlyphAtlas> atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
-                       GlyphAtlas::Type::kAlphaBitmap, /*scale=*/1.0f,
+                       GlyphAtlas::Type::kAlphaBitmap, /*scale=*/Rational(1),
                        atlas_context, text_frame, offset);
 
   ISize texture_size = atlas->GetTexture()->GetSize();
@@ -350,7 +353,7 @@ TEST_P(TextContentsTest, SimpleSubpixel80) {
   Point offset = Point(0.80, 0);
   std::shared_ptr<GlyphAtlas> atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
-                       GlyphAtlas::Type::kAlphaBitmap, /*scale=*/1.0f,
+                       GlyphAtlas::Type::kAlphaBitmap, /*scale=*/Rational(1),
                        atlas_context, text_frame, offset);
 
   ISize texture_size = atlas->GetTexture()->GetSize();
