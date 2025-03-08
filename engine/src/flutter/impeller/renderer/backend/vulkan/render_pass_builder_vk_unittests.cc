@@ -13,7 +13,8 @@ namespace impeller {
 namespace testing {
 
 TEST(RenderPassBuilder, CreatesRenderPassWithNoDepthStencil) {
-  RenderPassBuilderVK builder = RenderPassBuilderVK();
+  RenderPassBuilderVK builder =
+      RenderPassBuilderVK(RenderPassBuilderVK::Topology::kProgrammableBlend);
   auto const context = MockVulkanContextBuilder().Build();
 
   // Create a single color attachment with a transient depth stencil.
@@ -28,7 +29,8 @@ TEST(RenderPassBuilder, CreatesRenderPassWithNoDepthStencil) {
 }
 
 TEST(RenderPassBuilder, RenderPassWithLoadOpUsesCurrentLayout) {
-  RenderPassBuilderVK builder = RenderPassBuilderVK();
+  RenderPassBuilderVK builder =
+      RenderPassBuilderVK(RenderPassBuilderVK::Topology::kProgrammableBlend);
   auto const context = MockVulkanContextBuilder().Build();
 
   builder.SetColorAttachment(0, PixelFormat::kR8G8B8A8UNormInt,
@@ -53,8 +55,35 @@ TEST(RenderPassBuilder, RenderPassWithLoadOpUsesCurrentLayout) {
   EXPECT_EQ(color.storeOp, vk::AttachmentStoreOp::eStore);
 }
 
+TEST(RenderPassBuilder, RenderPassWithPerformanceTopology) {
+  RenderPassBuilderVK builder =
+      RenderPassBuilderVK(RenderPassBuilderVK::Topology::kPerformance);
+  auto const context = MockVulkanContextBuilder().Build();
+
+  builder.SetColorAttachment(0, PixelFormat::kR8G8B8A8UNormInt,
+                             SampleCount::kCount1, LoadAction::kLoad,
+                             StoreAction::kStore, vk::ImageLayout::eUndefined);
+
+  auto render_pass = builder.Build(context->GetDevice());
+
+  EXPECT_TRUE(!!render_pass);
+
+  std::optional<vk::AttachmentDescription> maybe_color = builder.GetColor0();
+  ASSERT_TRUE(maybe_color.has_value());
+  if (!maybe_color.has_value()) {
+    return;
+  }
+  vk::AttachmentDescription color = maybe_color.value();
+
+  EXPECT_EQ(color.initialLayout, vk::ImageLayout::eUndefined);
+  EXPECT_EQ(color.finalLayout, vk::ImageLayout::eColorAttachmentOptimal);
+  EXPECT_EQ(color.loadOp, vk::AttachmentLoadOp::eLoad);
+  EXPECT_EQ(color.storeOp, vk::AttachmentStoreOp::eStore);
+}
+
 TEST(RenderPassBuilder, CreatesRenderPassWithCombinedDepthStencil) {
-  RenderPassBuilderVK builder = RenderPassBuilderVK();
+  RenderPassBuilderVK builder =
+      RenderPassBuilderVK(RenderPassBuilderVK::Topology::kProgrammableBlend);
   auto const context = MockVulkanContextBuilder().Build();
 
   // Create a single color attachment with a transient depth stencil.
@@ -99,7 +128,8 @@ TEST(RenderPassBuilder, CreatesRenderPassWithCombinedDepthStencil) {
 }
 
 TEST(RenderPassBuilder, CreatesRenderPassWithOnlyStencil) {
-  RenderPassBuilderVK builder = RenderPassBuilderVK();
+  RenderPassBuilderVK builder =
+      RenderPassBuilderVK(RenderPassBuilderVK::Topology::kProgrammableBlend);
   auto const context = MockVulkanContextBuilder().Build();
 
   // Create a single color attachment with a transient depth stencil.
@@ -131,7 +161,8 @@ TEST(RenderPassBuilder, CreatesRenderPassWithOnlyStencil) {
 }
 
 TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStore) {
-  RenderPassBuilderVK builder = RenderPassBuilderVK();
+  RenderPassBuilderVK builder =
+      RenderPassBuilderVK(RenderPassBuilderVK::Topology::kProgrammableBlend);
   auto const context = MockVulkanContextBuilder().Build();
 
   // Create an MSAA color attachment.
@@ -166,6 +197,47 @@ TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStore) {
   // MSAA Resolve Texture.
   EXPECT_EQ(resolve.initialLayout, vk::ImageLayout::eUndefined);
   EXPECT_EQ(resolve.finalLayout, vk::ImageLayout::eGeneral);
+  EXPECT_EQ(resolve.loadOp, vk::AttachmentLoadOp::eClear);
+  EXPECT_EQ(resolve.storeOp, vk::AttachmentStoreOp::eStore);
+}
+
+TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStorePerformance) {
+  RenderPassBuilderVK builder =
+      RenderPassBuilderVK(RenderPassBuilderVK::Topology::kPerformance);
+  auto const context = MockVulkanContextBuilder().Build();
+
+  // Create an MSAA color attachment.
+  builder.SetColorAttachment(0, PixelFormat::kR8G8B8A8UNormInt,
+                             SampleCount::kCount4, LoadAction::kClear,
+                             StoreAction::kMultisampleResolve);
+
+  auto render_pass = builder.Build(context->GetDevice());
+
+  EXPECT_TRUE(!!render_pass);
+
+  auto maybe_color = builder.GetColor0();
+  ASSERT_TRUE(maybe_color.has_value());
+  if (!maybe_color.has_value()) {
+    return;
+  }
+  vk::AttachmentDescription color = maybe_color.value();
+
+  // MSAA Texture.
+  EXPECT_EQ(color.initialLayout, vk::ImageLayout::eUndefined);
+  EXPECT_EQ(color.finalLayout, vk::ImageLayout::eColorAttachmentOptimal);
+  EXPECT_EQ(color.loadOp, vk::AttachmentLoadOp::eClear);
+  EXPECT_EQ(color.storeOp, vk::AttachmentStoreOp::eDontCare);
+
+  auto maybe_resolve = builder.GetColor0Resolve();
+  ASSERT_TRUE(maybe_resolve.has_value());
+  if (!maybe_resolve.has_value()) {
+    return;
+  }
+  vk::AttachmentDescription resolve = maybe_resolve.value();
+
+  // MSAA Resolve Texture.
+  EXPECT_EQ(resolve.initialLayout, vk::ImageLayout::eUndefined);
+  EXPECT_EQ(resolve.finalLayout, vk::ImageLayout::eColorAttachmentOptimal);
   EXPECT_EQ(resolve.loadOp, vk::AttachmentLoadOp::eClear);
   EXPECT_EQ(resolve.storeOp, vk::AttachmentStoreOp::eStore);
 }

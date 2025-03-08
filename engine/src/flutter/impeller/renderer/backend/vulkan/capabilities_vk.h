@@ -151,6 +151,13 @@ enum class OptionalDeviceExtensionVK : uint32_t {
   ///
   kEXTImageCompressionControl,
 
+  //----------------------------------------------------------------------------
+  /// For advanced blend operations with out subpass self dependencies.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/latest/man/html/VK_EXT_blend_operation_advanced.html
+  ///
+  kEXTBlendOperationAdvanced,
+
   kLast,
 };
 
@@ -211,7 +218,8 @@ class CapabilitiesVK final : public Capabilities,
       vk::StructureChain<vk::PhysicalDeviceFeatures2,
                          vk::PhysicalDeviceSamplerYcbcrConversionFeaturesKHR,
                          vk::PhysicalDevice16BitStorageFeatures,
-                         vk::PhysicalDeviceImageCompressionControlFeaturesEXT>;
+                         vk::PhysicalDeviceImageCompressionControlFeaturesEXT,
+                         vk::PhysicalDeviceBlendOperationAdvancedFeaturesEXT>;
 
   std::optional<PhysicalDeviceFeatures> GetEnabledDeviceFeatures(
       const vk::PhysicalDevice& physical_device) const;
@@ -285,6 +293,9 @@ class CapabilitiesVK final : public Capabilities,
   /// are available.
   bool SupportsExternalSemaphoreExtensions() const;
 
+  // |Capabilities|
+  bool SupportsAdvancedBlendOperations() const override;
+
   //----------------------------------------------------------------------------
   /// @brief      Get the fixed compression rate supported by the context for
   ///             the given format and usage.
@@ -324,6 +335,7 @@ class CapabilitiesVK final : public Capabilities,
   bool has_primitive_restart_ = true;
   bool has_framebuffer_fetch_ = true;
   bool supports_external_fence_and_semaphore_ = false;
+  bool supports_advanced_blends_ = false;
   bool is_valid_ = false;
 
   // The embedder.h API is responsible for providing the instance and device

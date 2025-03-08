@@ -12,7 +12,6 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
-#include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/pipeline_descriptor.h"
@@ -27,12 +26,6 @@ namespace impeller {
 void ContentContextOptions::ApplyToPipelineDescriptor(
     PipelineDescriptor& desc) const {
   auto pipeline_blend = blend_mode;
-  if (blend_mode > Entity::kLastPipelineBlendMode) {
-    VALIDATION_LOG << "Cannot use blend mode " << static_cast<int>(blend_mode)
-                   << " as a pipeline blend.";
-    pipeline_blend = BlendMode::kSourceOver;
-  }
-
   desc.SetSampleCount(sample_count);
 
   ColorAttachmentDescriptor color0 = *desc.GetColorAttachmentDescriptor(0u);
@@ -138,7 +131,13 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
       color0.src_color_blend_factor = BlendFactor::kZero;
       break;
     default:
-      FML_UNREACHABLE();
+      // Advanced blends
+      color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+      color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+      color0.src_alpha_blend_factor = BlendFactor::kOne;
+      color0.src_color_blend_factor = BlendFactor::kOne;
+      color0.advanced_blend_op = pipeline_blend;
+      //
   }
   desc.SetColorAttachmentDescriptor(0u, color0);
 
@@ -216,7 +215,6 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   }
 
   desc.SetPrimitiveType(primitive_type);
-
   desc.SetPolygonMode(wireframe ? PolygonMode::kLine : PolygonMode::kFill);
 }
 
@@ -375,6 +373,7 @@ ContentContext::ContentContext(
     for (auto& color_attachment : clip_color_attachments) {
       color_attachment.second.write_mask = ColorWriteMaskBits::kNone;
     }
+
     clip_pipeline_descriptor->SetColorAttachmentDescriptors(
         std::move(clip_color_attachments));
     clip_pipelines_.SetDefault(
@@ -427,7 +426,9 @@ ContentContext::ContentContext(
                                           porter_duff_constants[14]);
   }
 
-  if (context_->GetCapabilities()->SupportsFramebufferFetch()) {
+  if (context_->GetCapabilities()->SupportsFramebufferFetch() &&
+      !context_->GetCapabilities()->SupportsAdvancedBlendOperations()) {
+    // See note in blend_filter_contents.cc
     framebuffer_blend_color_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kColor), supports_decal});

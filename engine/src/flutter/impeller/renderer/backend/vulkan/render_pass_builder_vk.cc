@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 
+#include "fml/logging.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 
@@ -21,9 +22,20 @@ constexpr auto kSelfDependencyDstAccessMask =
 
 constexpr auto kSelfDependencyFlags = vk::DependencyFlagBits::eByRegion;
 
-RenderPassBuilderVK::RenderPassBuilderVK() = default;
+RenderPassBuilderVK::RenderPassBuilderVK(Topology topology)
+    : topology_(topology) {}
 
 RenderPassBuilderVK::~RenderPassBuilderVK() = default;
+
+vk::ImageLayout RenderPassBuilderVK::GetColorLayoutForTopology() const {
+  switch (topology_) {
+    case kPerformance:
+      return vk::ImageLayout::eColorAttachmentOptimal;
+    case kProgrammableBlend:
+      return vk::ImageLayout::eGeneral;
+  }
+  FML_UNREACHABLE();
+}
 
 RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
     size_t index,
@@ -44,7 +56,7 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
   } else {
     desc.initialLayout = vk::ImageLayout::eUndefined;
   }
-  desc.finalLayout = vk::ImageLayout::eGeneral;
+  desc.finalLayout = GetColorLayoutForTopology();
 
   const bool performs_resolves = StoreActionPerformsResolve(store_action);
   if (index == 0u) {
@@ -127,14 +139,14 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   if (color0_.has_value()) {
     vk::AttachmentReference color_ref;
     color_ref.attachment = attachments_index;
-    color_ref.layout = vk::ImageLayout::eGeneral;
+    color_ref.layout = GetColorLayoutForTopology();
     color_refs.at(color_index++) = color_ref;
     attachments.at(attachments_index++) = color0_.value();
 
     if (color0_resolve_.has_value()) {
       vk::AttachmentReference resolve_ref;
       resolve_ref.attachment = attachments_index;
-      resolve_ref.layout = vk::ImageLayout::eGeneral;
+      resolve_ref.layout = GetColorLayoutForTopology();
       resolve_refs.at(resolve_index++) = resolve_ref;
       attachments.at(attachments_index++) = color0_resolve_.value();
     } else {
@@ -145,14 +157,14 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   for (const auto& color : colors_) {
     vk::AttachmentReference color_ref;
     color_ref.attachment = attachments_index;
-    color_ref.layout = vk::ImageLayout::eGeneral;
+    color_ref.layout = GetColorLayoutForTopology();
     color_refs.at(color_index++) = color_ref;
     attachments.at(attachments_index++) = color.second;
 
     if (auto found = resolves_.find(color.first); found != resolves_.end()) {
       vk::AttachmentReference resolve_ref;
       resolve_ref.attachment = attachments_index;
-      resolve_ref.layout = vk::ImageLayout::eGeneral;
+      resolve_ref.layout = GetColorLayoutForTopology();
       resolve_refs.at(resolve_index++) = resolve_ref;
       attachments.at(attachments_index++) = found->second;
     } else {
@@ -162,18 +174,19 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
 
   if (depth_stencil_.has_value()) {
     depth_stencil_ref.attachment = attachments_index;
-    depth_stencil_ref.layout = vk::ImageLayout::eGeneral;
+    depth_stencil_ref.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
     attachments.at(attachments_index++) = depth_stencil_.value();
   }
 
   vk::SubpassDescription subpass0;
   subpass0.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+
   subpass0.setPInputAttachments(color_refs.data());
   subpass0.setInputAttachmentCount(color_index);
+
   subpass0.setPColorAttachments(color_refs.data());
   subpass0.setColorAttachmentCount(color_index);
   subpass0.setPResolveAttachments(resolve_refs.data());
-
   subpass0.setPDepthStencilAttachment(&depth_stencil_ref);
 
   vk::SubpassDependency self_dep;
@@ -189,7 +202,9 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   render_pass_desc.setPAttachments(attachments.data());
   render_pass_desc.setAttachmentCount(attachments_index);
   render_pass_desc.setSubpasses(subpass0);
-  render_pass_desc.setDependencies(self_dep);
+  if (topology_ == RenderPassBuilderVK::Topology::kProgrammableBlend) {
+    render_pass_desc.setDependencies(self_dep);
+  }
 
   auto [result, pass] = device.createRenderPassUnique(render_pass_desc);
   if (result != vk::Result::eSuccess) {
@@ -202,7 +217,8 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
 void InsertBarrierForInputAttachmentRead(const vk::CommandBuffer& buffer,
                                          const vk::Image& image) {
   // This barrier must be a subset of the masks specified in the subpass
-  // dependency setup.
+  // dependency setup. This barrier is only valid if the render pass topology
+  // is programmable blend.
   vk::ImageMemoryBarrier barrier;
   barrier.srcAccessMask = kSelfDependencySrcAccessMask;
   barrier.dstAccessMask = kSelfDependencyDstAccessMask;

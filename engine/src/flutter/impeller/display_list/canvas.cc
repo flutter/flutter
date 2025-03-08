@@ -1301,7 +1301,10 @@ bool Canvas::Restore() {
         Matrix::MakeTranslation(Vector3(subpass_texture_position)));
 
     if (element_entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
-      if (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+      if (renderer_.GetDeviceCapabilities().SupportsAdvancedBlendOperations()) {
+        // Let entity renderer with advanced blend mode, the backend supports
+        // rasterization of it without intervention.
+      } else if (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch()) {
         ApplyFramebufferBlend(element_entity);
       } else {
         // End the active pass and flush the buffer before rendering "advanced"
@@ -1527,7 +1530,10 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
   entity.SetClipDepth(current_depth_);
 
   if (entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
-    if (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+    if (renderer_.GetDeviceCapabilities().SupportsAdvancedBlendOperations()) {
+      // Let entity renderer with advanced blend mode, the backend supports
+      // rasterization of it without intervention.
+    } else if (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch()) {
       ApplyFramebufferBlend(entity);
     } else {
       // End the active pass and flush the buffer before rendering "advanced"

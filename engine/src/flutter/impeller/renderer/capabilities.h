@@ -116,6 +116,8 @@ class Capabilities {
   /// Note that this may be smaller than the maximum allocatable texture size.
   virtual ISize GetMaximumRenderPassAttachmentSize() const = 0;
 
+  virtual bool SupportsAdvancedBlendOperations() const { return false; }
+
  protected:
   Capabilities();
 

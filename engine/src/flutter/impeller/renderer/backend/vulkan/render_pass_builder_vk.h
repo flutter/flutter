@@ -20,7 +20,21 @@ static constexpr size_t kMaxAttachments =
 
 class RenderPassBuilderVK {
  public:
-  RenderPassBuilderVK();
+  enum Topology {
+    /// A default render pass topology that uses attachment optimal layouts.
+    kPerformance,
+
+    /// A render pass topology with a self dependency to support programmable
+    /// blending.
+    ///
+    /// May be slower overall than default and should only be used if advanced
+    /// blend operations are not natively supported. Or if it can be proven that
+    /// they won't be used. Note that switching topologies should be avoided as
+    /// it will invalidate all PSOs.
+    kProgrammableBlend,
+  };
+
+  explicit RenderPassBuilderVK(Topology topology);
 
   ~RenderPassBuilderVK();
 
@@ -65,6 +79,9 @@ class RenderPassBuilderVK {
   std::optional<vk::AttachmentDescription> GetColor0Resolve() const;
 
  private:
+  vk::ImageLayout GetColorLayoutForTopology() const;
+
+  const Topology topology_;
   std::optional<vk::AttachmentDescription> color0_;
   std::optional<vk::AttachmentDescription> color0_resolve_;
   std::optional<vk::AttachmentDescription> depth_stencil_;

@@ -680,7 +680,12 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
   RenderTarget render_target =
       rt_allocator.CreateOffscreenMSAA(*this, {1, 1}, 1);
 
-  RenderPassBuilderVK builder;
+  RenderPassBuilderVK::Topology topology =
+      RenderPassBuilderVK::Topology::kProgrammableBlend;
+  if (GetCapabilities()->SupportsAdvancedBlendOperations()) {
+    topology = RenderPassBuilderVK::Topology::kPerformance;
+  }
+  RenderPassBuilderVK builder(topology);
 
   render_target.IterateAllColorAttachments(
       [&builder](size_t index, const ColorAttachment& attachment) -> bool {

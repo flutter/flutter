@@ -79,7 +79,12 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     const ContextVK& context,
     const SharedHandleVK<vk::RenderPass>& recycled_renderpass,
     const std::shared_ptr<CommandBufferVK>& command_buffer) const {
-  RenderPassBuilderVK builder;
+  RenderPassBuilderVK::Topology topology =
+      RenderPassBuilderVK::Topology::kProgrammableBlend;
+  if (context.GetCapabilities()->SupportsAdvancedBlendOperations()) {
+    topology = RenderPassBuilderVK::Topology::kPerformance;
+  }
+  RenderPassBuilderVK builder(topology);
 
   render_target_.IterateAllColorAttachments([&](size_t bind_point,
                                                 const ColorAttachment&
@@ -177,11 +182,10 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
     is_valid_ = false;
     return;
   }
+
   if (resolve_image_vk_) {
     TextureVK::Cast(*resolve_image_vk_).SetCachedFramebuffer(framebuffer);
     TextureVK::Cast(*resolve_image_vk_).SetCachedRenderPass(render_pass_);
-    TextureVK::Cast(*resolve_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
   }
 
   std::array<vk::ClearValue, kMaxAttachments> clears;
@@ -198,13 +202,16 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
 
   command_buffer_vk_.beginRenderPass(pass_info, vk::SubpassContents::eInline);
 
+  vk::ImageLayout initial_layout = vk::ImageLayout::eGeneral;
+  if (context->GetCapabilities()->SupportsAdvancedBlendOperations()) {
+    initial_layout = vk::ImageLayout::eColorAttachmentOptimal;
+  }
   if (resolve_image_vk_) {
     TextureVK::Cast(*resolve_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+        .SetLayoutWithoutEncoding(initial_layout);
   }
   if (color_image_vk_) {
-    TextureVK::Cast(*color_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+    TextureVK::Cast(*color_image_vk_).SetLayoutWithoutEncoding(initial_layout);
   }
 
   // Set the initial viewport.

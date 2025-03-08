@@ -11,6 +11,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/workarounds_vk.h"
+#include "vulkan/vulkan_core.h"
 
 namespace impeller {
 
@@ -222,6 +223,8 @@ static const char* GetExtensionName(OptionalDeviceExtensionVK ext) {
       return "VK_KHR_portability_subset";
     case OptionalDeviceExtensionVK::kEXTImageCompressionControl:
       return VK_EXT_IMAGE_COMPRESSION_CONTROL_EXTENSION_NAME;
+    case OptionalDeviceExtensionVK::kEXTBlendOperationAdvanced:
+      return VK_EXT_BLEND_OPERATION_ADVANCED_EXTENSION_NAME;
     case OptionalDeviceExtensionVK::kLast:
       return "Unknown";
   }
@@ -457,6 +460,31 @@ CapabilitiesVK::GetEnabledDeviceFeatures(
         .unlink<vk::PhysicalDeviceImageCompressionControlFeaturesEXT>();
   }
 
+  // VK_EXT_blend_operation_advanced
+  if (IsExtensionInList(
+          enabled_extensions.value(),
+          OptionalDeviceExtensionVK::kEXTBlendOperationAdvanced)) {
+    auto& required =
+        required_chain
+            .get<vk::PhysicalDeviceBlendOperationAdvancedFeaturesEXT>();
+    const auto& supported =
+        supported_chain
+            .get<vk::PhysicalDeviceBlendOperationAdvancedFeaturesEXT>();
+    // Note: only "coherent" advanced blend support is supported. To support
+    // incoherent advanced blends, render_pass_vk must insert memory barriers
+    // after advanced blend ops.
+    if (!supported.advancedBlendCoherentOperations) {
+      required_chain
+          .unlink<vk::PhysicalDeviceBlendOperationAdvancedFeaturesEXT>();
+    } else {
+      required.setAdvancedBlendCoherentOperations(
+          supported.advancedBlendCoherentOperations);
+    }
+  } else {
+    required_chain
+        .unlink<vk::PhysicalDeviceBlendOperationAdvancedFeaturesEXT>();
+  }
+
   // Vulkan 1.1
   {
     auto& required =
@@ -491,6 +519,10 @@ bool CapabilitiesVK::HasExtension(const std::string& ext) const {
 
 bool CapabilitiesVK::SupportsPrimitiveRestart() const {
   return has_primitive_restart_;
+}
+
+bool CapabilitiesVK::SupportsAdvancedBlendOperations() const {
+  return supports_advanced_blends_;
 }
 
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
@@ -607,6 +639,13 @@ bool CapabilitiesVK::SetPhysicalDevice(
       enabled_features
           .get<vk::PhysicalDeviceImageCompressionControlFeaturesEXT>()
           .imageCompressionControl;
+
+  supports_advanced_blends_ =
+      enabled_features
+          .isLinked<vk::PhysicalDeviceBlendOperationAdvancedFeaturesEXT>() &&
+      enabled_features
+          .get<vk::PhysicalDeviceBlendOperationAdvancedFeaturesEXT>()
+          .advancedBlendCoherentOperations;
 
   max_render_pass_attachment_size_ =
       ISize{device_properties_.limits.maxFramebufferWidth,

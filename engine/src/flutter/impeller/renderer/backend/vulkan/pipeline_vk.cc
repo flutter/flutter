@@ -126,8 +126,9 @@ static void ReportPipelineCreationFeedback(
 ///
 static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
     const vk::Device& device,
-    const PipelineDescriptor& desc) {
-  RenderPassBuilderVK builder;
+    const PipelineDescriptor& desc,
+    RenderPassBuilderVK::Topology topology) {
+  RenderPassBuilderVK builder(topology);
 
   for (const auto& [bind_point, color] : desc.GetColorAttachmentDescriptors()) {
     builder.SetColorAttachment(bind_point,             //
@@ -376,8 +377,26 @@ fml::StatusOr<vk::UniquePipeline> MakePipeline(
     attachment_blend_state.push_back(
         ToVKPipelineColorBlendAttachmentState(color_desc.second));
   }
-  vk::PipelineColorBlendStateCreateInfo blend_state;
+
+  vk::StructureChain<vk::PipelineColorBlendStateCreateInfo,
+                     vk::PipelineColorBlendAdvancedStateCreateInfoEXT>
+      combined_blend_state;
+
+  auto& blend_state =
+      combined_blend_state.get<vk::PipelineColorBlendStateCreateInfo>();
   blend_state.setAttachments(attachment_blend_state);
+
+  if (caps->SupportsAdvancedBlendOperations()) {
+    auto& advanced_state =
+        combined_blend_state
+            .get<vk::PipelineColorBlendAdvancedStateCreateInfoEXT>();
+    advanced_state.srcPremultiplied = true;
+    advanced_state.dstPremultiplied = true;
+  } else {
+    combined_blend_state
+        .unlink<vk::PipelineColorBlendAdvancedStateCreateInfoEXT>();
+  }
+
   pipeline_info.setPColorBlendState(&blend_state);
 
   // Convention wisdom says that the base acceleration pipelines are never used
@@ -487,9 +506,14 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
   if (!pipeline_layout.ok()) {
     return nullptr;
   }
+  RenderPassBuilderVK::Topology topology =
+      RenderPassBuilderVK::Topology::kProgrammableBlend;
+  if (pso_cache->GetCapabilities()->SupportsAdvancedBlendOperations()) {
+    topology = RenderPassBuilderVK::Topology::kPerformance;
+  }
 
-  vk::UniqueRenderPass render_pass =
-      CreateCompatRenderPassForPipeline(device_holder->GetDevice(), desc);
+  vk::UniqueRenderPass render_pass = CreateCompatRenderPassForPipeline(
+      device_holder->GetDevice(), desc, topology);
   if (!render_pass) {
     VALIDATION_LOG << "Could not create render pass for pipeline.";
     return nullptr;
