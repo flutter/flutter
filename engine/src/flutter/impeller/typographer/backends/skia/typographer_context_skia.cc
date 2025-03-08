@@ -443,8 +443,7 @@ TypographerContextSkia::CollectNewGlyphs(
     for (const auto& run : frame->GetRuns()) {
       auto metrics = run.GetFont().GetMetrics();
 
-      // TODO(gaaclarke): Should we have a clamp here?
-      auto rounded_scale = frame->GetScale();
+      auto rounded_scale = TextFrame::RoundScaledFontSize(frame->GetScale());
       ScaledFont scaled_font{.font = run.GetFont(), .scale = rounded_scale};
 
       FontGlyphAtlas* font_glyph_atlas =
@@ -465,10 +464,10 @@ TypographerContextSkia::CollectNewGlyphs(
       sk_font.setSubpixel(true);
 
       for (const auto& glyph_position : run.GetGlyphPositions()) {
+        auto foo =
+            frame->GetTransform() * Matrix::MakeTranslation(frame->GetOffset());
         SubpixelPosition subpixel = TextFrame::ComputeSubpixelPosition(
-            glyph_position, scaled_font.font.GetAxisAlignment(),
-            frame->GetTransform() *
-                Matrix::MakeTranslation(frame->GetOffset()));
+            glyph_position, scaled_font.font.GetAxisAlignment(), foo);
         SubpixelGlyph subpixel_glyph(glyph_position.glyph, subpixel,
                                      frame->GetProperties());
         const auto& font_glyph_bounds =

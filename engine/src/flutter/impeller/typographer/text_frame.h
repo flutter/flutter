@@ -34,6 +34,7 @@ class TextFrame {
       const Matrix& transform);
 
   static Rational RoundScaledFontSize(Scalar scale);
+  static Rational RoundScaledFontSize(Rational scale);
 
   //----------------------------------------------------------------------------
   /// @brief      The conservative bounding box for this text frame.
