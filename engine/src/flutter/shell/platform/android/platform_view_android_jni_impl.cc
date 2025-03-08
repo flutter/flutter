@@ -2023,6 +2023,52 @@ void PlatformViewAndroidJNIImpl::destroyOverlaySurface2() {
   FML_CHECK(fml::jni::CheckException(env));
 }
 
+class AndroidPathReceiver final : public virtual DlPathReceiver {
+ public:
+  explicit AndroidPathReceiver(JNIEnv* env)
+      : env_(env),
+        android_path_(env->NewObject(path_class->obj(), path_constructor)) {}
+
+  void SetPathInfo(DlPathFillType type, bool is_convex) override {
+    // Need to convert the fill type to the Android enum and
+    // call setFillType on the path...
+    // see https://github.com/flutter/flutter/issues/164808
+  }
+  void MoveTo(const DlPoint& p2) override {
+    env_->CallVoidMethod(android_path_, path_move_to_method, p2.x, p2.y);
+  }
+  void LineTo(const DlPoint& p2) override {
+    env_->CallVoidMethod(android_path_, path_line_to_method, p2.x, p2.y);
+  }
+  void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
+    env_->CallVoidMethod(android_path_, path_quad_to_method,  //
+                         cp.x, cp.y, p2.x, p2.y);
+  }
+  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
+    if (!path_conic_to_method) {
+      return false;
+    }
+    env_->CallVoidMethod(android_path_, path_conic_to_method,  //
+                         cp.x, cp.y, p2.x, p2.y, weight);
+    return true;
+  };
+  void CubicTo(const DlPoint& cp1,
+               const DlPoint& cp2,
+               const DlPoint& p2) override {
+    env_->CallVoidMethod(android_path_, path_cubic_to_method,  //
+                         cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+  }
+  void Close() override {
+    env_->CallVoidMethod(android_path_, path_close_method);
+  }
+
+  jobject TakePath() { return android_path_; }
+
+ private:
+  JNIEnv* env_;
+  jobject android_path_;
+};
+
 void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
     int32_t view_id,
     int32_t x,
@@ -2132,62 +2178,13 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         FML_DCHECK(!dlPath.IsRoundRect());
 
         // Define and populate an Android Path with data from the DlPath
-        jobject androidPath =
-            env->NewObject(path_class->obj(), path_constructor);
-
-        DlPathReceiver receiver{
-            .path_info =
-                [](DlPathFillType type, bool is_convex) {
-                  // Need to convert the fill type to the Android enum and
-                  // call setFillType on the path...
-                  // see https://github.com/flutter/flutter/issues/164808
-                },
-            .move_to =
-                [&env, &androidPath](const DlPoint& p2) {
-                  env->CallVoidMethod(androidPath, path_move_to_method,  //
-                                      p2.x, p2.y);
-                },
-            .line_to =
-                [&env, &androidPath](const DlPoint& p2) {
-                  env->CallVoidMethod(androidPath, path_line_to_method,  //
-                                      p2.x, p2.y);
-                },
-            .quad_to =
-                [&env, &androidPath](const DlPoint& cp, const DlPoint& p2) {
-                  env->CallVoidMethod(androidPath, path_quad_to_method,  //
-                                      cp.x, cp.y,                        //
-                                      p2.x, p2.y);
-                },
-            .cubic_to =
-                [&env, &androidPath](const DlPoint& cp1,  //
-                                     const DlPoint& cp2,  //
-                                     const DlPoint& p2) {
-                  env->CallVoidMethod(androidPath, path_cubic_to_method,  //
-                                      cp1.x, cp1.y,                       //
-                                      cp2.x, cp2.y,                       //
-                                      p2.x, p2.y);
-                },
-            .close =
-                [&env, &androidPath]() {
-                  env->CallVoidMethod(androidPath, path_close_method);
-                },
-        };
-        if (path_conic_to_method) {
-          receiver.conic_to = [&env, &androidPath](const DlPoint& cp,
-                                                   const DlPoint& p2,
-                                                   DlScalar weight) {
-            env->CallVoidMethod(androidPath, path_conic_to_method,  //
-                                cp.x, cp.y,                         //
-                                p2.x, p2.y,                         //
-                                weight);
-            return true;
-          };
-        }
+        AndroidPathReceiver receiver(env);
 
         dlPath.Dispatch(receiver);
 
         env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_clippath_method, androidPath);
+                            g_mutators_stack_push_clippath_method,
+                            receiver.TakePath());
         break;
       }
       // TODO(cyanglaz): Implement other mutators.
