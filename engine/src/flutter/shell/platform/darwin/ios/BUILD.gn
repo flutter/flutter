@@ -22,6 +22,11 @@ shell_gpu_configuration("ios_gpu_configuration") {
   enable_metal = true
 }
 
+config("config_swift") {
+  include_dirs = [ target_gen_dir ]
+  lib_dirs = ios_swift_lib_paths
+}
+
 # The headers that will be copied to the Flutter.framework and be accessed
 # from outside the Flutter engine source root.
 _flutter_framework_headers = [
@@ -38,6 +43,13 @@ _flutter_framework_headers = [
 ]
 
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
+
+source_set("flutter_framework_swift") {
+  visibility = [ ":*" ]
+  configs += [ ":config_swift" ]
+
+  sources = [ "framework/Source/FlutterFoo.swift" ]
+}
 
 source_set("flutter_framework_source") {
   visibility = [ ":*" ]
@@ -168,6 +180,7 @@ source_set("flutter_framework_source") {
   }
 
   deps = [
+    ":flutter_framework_swift",
     ":ios_gpu_configuration",
     "//flutter/common:common",
     "//flutter/common/graphics",
@@ -275,7 +288,10 @@ shared_library("create_flutter_framework_dylib") {
 
   public = _flutter_framework_headers
 
-  deps = [ ":flutter_framework_source" ]
+  deps = [
+    ":flutter_framework_source",
+    ":flutter_framework_swift",
+  ]
 
   public_configs = [ "//flutter:config" ]
   configs += [ "//build/config/ios:ios_application_extension" ]

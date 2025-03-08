@@ -6,6 +6,57 @@ config("sdk") {
   cflags_cc = [ "-stdlib=libc++" ]
 }
 
+config("compiler") {
+  # CPU architecture.
+  if (current_cpu == "x64") {
+    _triplet_cpu = "x86_64"
+  } else if (current_cpu == "x86") {
+    _triplet_cpu = "i386"
+  } else if (current_cpu == "arm" || current_cpu == "armv7") {
+    _triplet_cpu = "armv7"
+  } else if (current_cpu == "arm64") {
+    _triplet_cpu = "arm64"
+  } else {
+    assert(false, "unsupported cpu: $current_cpu")
+  }
+  # Environment.
+  if (use_ios_simulator) {
+    _triplet_environment = "-simulator"
+  } else {
+    _triplet_environment = ""
+  }
+  # OS.
+  if (is_ios) {
+    _triplet_os = "apple-ios"
+  } else if (is_mac) {
+    _triplet_os = "apple-macos"
+  } else {
+    assert(false, "unsupported Apple os")
+  }
+  _target_triplet = "$_triplet_cpu-$_triplet_os$ios_deployment_target$_triplet_environment"
+
+  # TODO(cbracken): Look up xcode_version in ios_sdk.gni/mac_sdk.gni.
+  #
+  # This is here so that all files get recompiled after an Xcode update.
+  # (defines are passed via the command line, and build system rebuild things
+  # when their commandline changes). Nothing should ever read this define.
+  #defines = [ "CR_XCODE_VERSION=$xcode_version" ]
+
+  _sdk_root = ios_sdk_path
+  if (create_xcode_symlinks) {
+    _sdk_root = rebase_path(ios_sdk_path, root_build_dir)
+  }
+
+  swiftflags = [
+    "-sdk",
+    _sdk_root,
+    "-target",
+    _target_triplet,
+    "-swift-version",
+    "5"
+  ]
+}
+
 config("ios_application_extension") {
   cflags_objc = [ "-fapplication-extension" ]
   cflags_objcc = [ "-fapplication-extension" ]

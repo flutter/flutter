@@ -27,6 +27,13 @@ declare_args() {
   # The path to the iOS simulator SDK.
   ios_simulator_sdk_path = ""
 
+  # Path to the Xcode toolchain (XcodeDefault.xctoolchain).
+  # TODO(cbracken): merge with mac_toolchain_path into apple_sdk.gni.
+  ios_toolchain_path = ""
+
+  # The path to iOS SDK Swift libraries.
+  ios_swift_lib_paths = []
+
   # Version of iOS that we're targeting for tests.
   ios_testing_deployment_target = "13.0"
 }
@@ -64,5 +71,25 @@ if (ios_sdk_path == "") {
   } else {
     assert(ios_device_sdk_path != "")
     ios_sdk_path = ios_device_sdk_path
+  }
+}
+
+if (ios_toolchain_path == "") {
+  # The tool will print the SDK path on the first line, and the version on the
+  # second line.
+  _find_sdk_lines =
+      exec_script("//build/mac/find_sdk.py", ["--print_sdk_path", "1.0"] , "list lines")
+
+  ios_toolchain_path = _find_sdk_lines[1]
+}
+
+if (ios_swift_lib_paths == []) {
+  ios_swift_lib_paths += [rebase_path("$ios_sdk_path/usr/lib/swift")]
+  if (ios_toolchain_path != "") {
+    if (use_ios_simulator) {
+      ios_swift_lib_paths += [rebase_path("$ios_toolchain_path/usr/lib/swift/iphonesimulator")]
+    } else {
+      ios_swift_lib_paths += [rebase_path("$ios_toolchain_path/usr/lib/swift/iphoneos")]
+    }
   }
 }
