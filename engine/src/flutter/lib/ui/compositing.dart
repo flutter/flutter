@@ -756,7 +756,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushClipRSuperellipse(
       engineLayer,
-      rse._getValue32(),
+      rse as _NativeRSuperellipse,
       clipBehavior.index,
       oldLayer?._nativeLayer,
     );
@@ -765,12 +765,12 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     return layer;
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle, Int32, Handle)>(
+  @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Int32, Handle)>(
     symbol: 'SceneBuilder::pushClipRSuperellipse',
   )
   external void _pushClipRSuperellipse(
     EngineLayer layer,
-    Float32List rrect,
+    _NativeRSuperellipse rse,
     int clipBehavior,
     EngineLayer? oldLayer,
   );

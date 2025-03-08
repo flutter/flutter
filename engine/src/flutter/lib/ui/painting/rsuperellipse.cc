@@ -6,54 +6,48 @@
 
 #include "flutter/fml/logging.h"
 #include "third_party/tonic/logging/dart_error.h"
-#include "third_party/tonic/typed_data/typed_list.h"
 
-using flutter::RSuperellipse;
+namespace flutter {
 
-namespace tonic {
+IMPLEMENT_WRAPPERTYPEINFO(ui, RSuperellipse);
 
-// Construct an DlRoundSuperellipse from a Dart RSuperellipse object.
-// The Dart RSuperellipse is a Float32List containing
-//   [left, top, right, bottom, xRadius, yRadius]
-RSuperellipse DartConverter<flutter::RSuperellipse>::FromDart(
-    Dart_Handle value) {
-  Float32List buffer(value);
-
-  RSuperellipse result;
-  result.is_null = true;
-  if (buffer.data() == nullptr) {
-    return result;
+RSuperellipse::RSuperellipse(const tonic::Float64List& values) {
+  for (size_t i = 0; i < kValueCount; i++) {
+    values_[i] = values[i];
   }
+}
 
+RSuperellipse::~RSuperellipse() = default;
+
+flutter::DlRoundSuperellipse RSuperellipse::rsuperellipse() const {
   // The Flutter rect may be inverted (upside down, backward, or both)
   // Historically, Skia would normalize such rects but we will do that
   // manually below when we construct the Impeller RoundRect
-  flutter::DlRect raw_rect =
-      flutter::DlRect::MakeLTRB(buffer[0], buffer[1], buffer[2], buffer[3]);
+  flutter::DlRect raw_rect = flutter::DlRect::MakeLTRB(
+      _value32(0), _value32(1), _value32(2), _value32(3));
 
   // Flutter has radii in TL,TR,BR,BL (clockwise) order,
   // but Impeller uses TL,TR,BL,BR (zig-zag) order
   impeller::RoundingRadii radii = {
-      .top_left = flutter::DlSize(buffer[4], buffer[5]),
-      .top_right = flutter::DlSize(buffer[6], buffer[7]),
-      .bottom_left = flutter::DlSize(buffer[10], buffer[11]),
-      .bottom_right = flutter::DlSize(buffer[8], buffer[9]),
+      .top_left = flutter::DlSize(_value32(4), _value32(5)),
+      .top_right = flutter::DlSize(_value32(6), _value32(7)),
+      .bottom_left = flutter::DlSize(_value32(10), _value32(11)),
+      .bottom_right = flutter::DlSize(_value32(8), _value32(9)),
   };
 
-  result.rsuperellipse = flutter::DlRoundSuperellipse::MakeRectRadii(
-      raw_rect.GetPositive(), radii);
-
-  result.is_null = false;
-  return result;
+  return flutter::DlRoundSuperellipse::MakeRectRadii(raw_rect.GetPositive(),
+                                                     radii);
 }
 
-RSuperellipse DartConverter<flutter::RSuperellipse>::FromArguments(
-    Dart_NativeArguments args,
-    int index,
-    Dart_Handle& exception) {
-  Dart_Handle value = Dart_GetNativeArgument(args, index);
-  FML_DCHECK(!CheckAndHandleError(value));
-  return FromDart(value);
+double RSuperellipse::getValue(int index) const {
+  if (index < 0 || index >= kValueCount) {
+    return 0;
+  }
+  return values_[index];
 }
 
-}  // namespace tonic
+impeller::Scalar RSuperellipse::_value32(int index) const {
+  return static_cast<impeller::Scalar>(getValue(index));
+}
+
+}  // namespace flutter

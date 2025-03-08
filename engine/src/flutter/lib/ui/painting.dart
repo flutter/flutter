@@ -6639,11 +6639,11 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void clipRSuperellipse(RSuperellipse rse, {bool doAntiAlias = true}) {
     assert(_rseIsValid(rse));
-    _clipRSuperellipse(rse._getValue32(), doAntiAlias);
+    _clipRSuperellipse(rse, doAntiAlias);
   }
 
   @Native<Void Function(Pointer<Void>, Handle, Bool)>(symbol: 'Canvas::clipRSuperellipse')
-  external void _clipRSuperellipse(Float32List rse, bool doAntiAlias);
+  external void _clipRSuperellipse(RSuperellipse rse, bool doAntiAlias);
 
   @override
   void clipPath(Path path, {bool doAntiAlias = true}) {
@@ -6758,12 +6758,14 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void drawRSuperellipse(RSuperellipse rse, Paint paint) {
     assert(_rseIsValid(rse));
-    _drawRSuperellipse(rse._getValue32(), paint._objects, paint._data);
+    _drawRSuperellipse(rse as _NativeRSuperellipse, paint._objects, paint._data);
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle, Handle)>(symbol: 'Canvas::drawRSuperellipse')
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Handle, Handle)>(
+    symbol: 'Canvas::drawRSuperellipse',
+  )
   external void _drawRSuperellipse(
-    Float32List rse,
+    _NativeRSuperellipse rse,
     List<Object?>? paintObjects,
     ByteData paintData,
   );

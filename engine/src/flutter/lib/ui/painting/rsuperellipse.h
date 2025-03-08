@@ -6,40 +6,41 @@
 #define FLUTTER_LIB_UI_PAINTING_RSUPERELLIPSE_H_
 
 #include "flutter/display_list/geometry/dl_geometry_types.h"
-#include "third_party/dart/runtime/include/dart_api.h"
-#include "third_party/tonic/converter/dart_converter.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
+#include "flutter/lib/ui/dart_wrapper.h"
+#include "flutter/lib/ui/ui_dart_state.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 namespace flutter {
 
-class RSuperellipse {
+class RSuperellipse : public RefCountedDartWrappable<RSuperellipse> {
+  DEFINE_WRAPPERTYPEINFO();
+  FML_FRIEND_MAKE_REF_COUNTED(RSuperellipse);
+
  public:
-  DlRoundSuperellipse rsuperellipse;
-  bool is_null;
+  static void Create(Dart_Handle wrapper, const tonic::Float64List& values) {
+    UIDartState::ThrowIfUIOperationsProhibited();
+    auto res = fml::MakeRefCounted<RSuperellipse>(values);
+    res->AssociateWithDartWrapper(wrapper);
+  }
+
+  ~RSuperellipse() override;
+
+  double getValue(int index) const;
+
+  flutter::DlRoundSuperellipse rsuperellipse() const;
+
+ private:
+  static constexpr int kValueCount = 12;
+
+  explicit RSuperellipse(const tonic::Float64List& values);
+
+  impeller::Scalar _value32(int index) const;
+
+  std::array<double, kValueCount> values_;
+  std::optional<impeller::RoundSuperellipseParam> rse_;
 };
 
 }  // namespace flutter
-
-namespace tonic {
-
-template <>
-struct DartConverter<flutter::RSuperellipse> {
-  using NativeType = flutter::RSuperellipse;
-  using FfiType = Dart_Handle;
-  static constexpr const char* kFfiRepresentation = "Handle";
-  static constexpr const char* kDartRepresentation = "Object";
-  static constexpr bool kAllowedInLeafCall = false;
-
-  static NativeType FromDart(Dart_Handle handle);
-  static NativeType FromArguments(Dart_NativeArguments args,
-                                  int index,
-                                  Dart_Handle& exception);
-
-  static NativeType FromFfi(FfiType val) { return FromDart(val); }
-  static const char* GetFfiRepresentation() { return kFfiRepresentation; }
-  static const char* GetDartRepresentation() { return kDartRepresentation; }
-  static bool AllowedInLeafCall() { return kAllowedInLeafCall; }
-};
-
-}  // namespace tonic
 
 #endif  // FLUTTER_LIB_UI_PAINTING_RSUPERELLIPSE_H_
