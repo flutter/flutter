@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_LAZY_GLYPH_ATLAS_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_LAZY_GLYPH_ATLAS_H_
 
+#include "impeller/geometry/rational.h"
 #include "impeller/renderer/context.h"
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_frame.h"
@@ -20,7 +21,7 @@ class LazyGlyphAtlas {
   ~LazyGlyphAtlas();
 
   void AddTextFrame(const std::shared_ptr<TextFrame>& frame,
-                    Scalar scale,
+                    Rational scale,
                     Point offset,
                     const Matrix& transform,
                     std::optional<GlyphProperties> properties);
