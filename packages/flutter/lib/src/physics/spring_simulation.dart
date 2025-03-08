@@ -52,7 +52,7 @@ class SpringDescription {
   /// traits to compute the physical parameters.
   ///
   /// - [duration]: The perceptual duration of the animation. Defaults to
-  ///   `Duration(milliseconds: 500)`. The real animation duration will differ.
+  ///   `Duration(milliseconds: 500)`. The real animation duration may differ.
   /// - [bounce]: Determines the level of oscillation at the end of the
   ///   animation, ranging from `0.0` (no bounce) to `1.0` (a strong bounce).
   ///   Values above `1.0` can lead to more extreme oscillations, so use with
