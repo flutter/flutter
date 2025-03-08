@@ -37,12 +37,20 @@ void main() {
   });
 
   group('SpringDescription.withDurationAndBounce', () {
-    test('creates spring with expected parameters for given duration and bounce', () {
+    test('creates spring with expected results', () {
       final SpringDescription spring = SpringDescription.withDurationAndBounce(bounce: 0.3);
 
       expect(spring.mass, equals(1.0));
       expect(spring.stiffness, moreOrLessEquals(157.91, epsilon: 0.01));
       expect(spring.damping, moreOrLessEquals(17.59, epsilon: 0.01));
+    });
+
+    test('creates spring with negative bounce', () {
+      final SpringDescription spring = SpringDescription.withDurationAndBounce(bounce: -0.3);
+
+      expect(spring.mass, equals(1.0));
+      expect(spring.stiffness, moreOrLessEquals(157.91, epsilon: 0.01));
+      expect(spring.damping, moreOrLessEquals(35.90, epsilon: 0.01));
     });
 
     test('get duration and bounce based on mass and stiffness', () {
@@ -67,16 +75,6 @@ void main() {
 
       expect(
         () => SpringDescription.withDurationAndBounce(duration: Duration.zero, bounce: 0.3),
-        throwsA(isAssertionError),
-      );
-    });
-
-    test('negative bounce should fail', () {
-      expect(
-        () => SpringDescription.withDurationAndBounce(
-          duration: const Duration(milliseconds: 300),
-          bounce: -0.3,
-        ),
         throwsA(isAssertionError),
       );
     });

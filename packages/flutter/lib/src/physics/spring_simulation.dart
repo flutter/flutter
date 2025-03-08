@@ -52,8 +52,7 @@ class SpringDescription {
   /// traits to compute the physical parameters.
   ///
   /// - [duration]: The perceptual duration of the animation. Defaults to
-  ///   `Duration(milliseconds: 500)`. Note that the real animation
-  ///   duration may slightly differ for natural spring-like motion.
+  ///   `Duration(milliseconds: 500)`. The real animation duration will differ.
   /// - [bounce]: Determines the level of oscillation at the end of the
   ///   animation, ranging from `0.0` (no bounce) to `1.0` (a strong bounce).
   ///   Values above `1.0` can lead to more extreme oscillations, so use with
@@ -81,14 +80,10 @@ class SpringDescription {
     double bounce = 0.0,
   }) {
     assert(duration.inMilliseconds > 0, 'Duration must be positive');
-    // TODO(bernaferrari): bounce could be negative but it's tricky to guess
-    // the correct formula https://github.com/flutter/flutter/issues/152587).
-    assert(bounce >= 0, 'Bounce must be non-negative');
-
     final double durationInSeconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
     const double mass = 1.0;
     final double stiffness = (4 * math.pi * math.pi * mass) / math.pow(durationInSeconds, 2);
-    final double dampingRatio = 1.0 - bounce;
+    final double dampingRatio = bounce > 0 ? (1.0 - bounce) : (1 / (bounce + 1));
     final double damping = dampingRatio * 2.0 * math.sqrt(mass * stiffness);
 
     return SpringDescription(mass: mass, stiffness: stiffness, damping: damping);
