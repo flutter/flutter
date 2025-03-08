@@ -257,6 +257,10 @@ class CupertinoSheetTransition extends StatefulWidget {
     final bool isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
     final Color overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
 
+    if (child != null && secondaryAnimation.isDismissed) {
+      return child;
+    }
+
     final Widget? contrastedChild =
         child != null && !secondaryAnimation.isDismissed
             ? Stack(
