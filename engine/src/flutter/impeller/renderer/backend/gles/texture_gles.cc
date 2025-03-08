@@ -219,8 +219,8 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
 // |Texture|
 TextureGLES::~TextureGLES() {
   reactor_->CollectHandle(handle_);
-  if (cached_fbo_ != GL_NONE) {
-    reactor_->GetProcTable().DeleteFramebuffers(1, &cached_fbo_);
+  if (!cached_fbo_.IsDead()) {
+    reactor_->CollectHandle(cached_fbo_);
   }
 }
 
@@ -659,11 +659,11 @@ std::optional<HandleGLES> TextureGLES::GetSyncFence() const {
   return fence_;
 }
 
-void TextureGLES::SetCachedFBO(GLuint fbo) {
+void TextureGLES::SetCachedFBO(HandleGLES fbo) {
   cached_fbo_ = fbo;
 }
 
-GLuint TextureGLES::GetCachedFBO() const {
+const HandleGLES& TextureGLES::GetCachedFBO() const {
   return cached_fbo_;
 }
 

@@ -1807,6 +1807,101 @@ void main() {
       });
     });
   });
+
+  group('Calendar Delegate', () {
+    testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DateRangePickerDialog(
+              initialDateRange: initialDateRange,
+              firstDate: firstDate,
+              lastDate: lastDate,
+            ),
+          ),
+        ),
+      );
+
+      final DateRangePickerDialog dialog = tester.widget(find.byType(DateRangePickerDialog));
+      expect(dialog.calendarDelegate, isA<GregorianCalendarDelegate>());
+    });
+
+    testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DateRangePickerDialog(
+              initialDateRange: initialDateRange,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final DateRangePickerDialog dialog = tester.widget(find.byType(DateRangePickerDialog));
+      expect(dialog.calendarDelegate, isA<TestCalendarDelegate>());
+    });
+
+    testWidgets('Displays calendar based on the calendar delegate', (WidgetTester tester) async {
+      Finder getMonthItem() {
+        final Finder dayItem = find.descendant(
+          of: find.byType(ConstrainedBox),
+          matching: find.text('1'),
+        );
+        return find.ancestor(of: dayItem, matching: find.byType(Column));
+      }
+
+      int getDayCount(Finder parent) {
+        final Finder dayItem = find.descendant(
+          of: parent,
+          matching: find.descendant(of: find.byType(InkResponse), matching: find.byType(Text)),
+        );
+        return tester.widgetList(dayItem).length;
+      }
+
+      Text getMonthYear(Finder parent) {
+        return tester.widget(
+          find
+              .descendant(
+                of: parent,
+                matching: find.descendant(
+                  of: find.byType(ConstrainedBox),
+                  matching: find.byType(Text),
+                ),
+              )
+              .first,
+        );
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DateRangePickerDialog(
+              initialDateRange: initialDateRange,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final Finder monthItem = getMonthItem();
+
+      final Finder firstMonthItem = monthItem.at(0);
+      expect(getMonthYear(firstMonthItem).data, 'January 2016');
+      expect(getDayCount(firstMonthItem), 28);
+
+      final Finder secondMonthItem = monthItem.at(2);
+      expect(getMonthYear(secondMonthItem).data, 'February 2016');
+      expect(getDayCount(secondMonthItem), 21);
+    });
+  });
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {
@@ -1906,5 +2001,19 @@ class _RestorableDateRangePickerDialogTestWidgetState
         ),
       ),
     );
+  }
+}
+
+class TestCalendarDelegate extends GregorianCalendarDelegate {
+  const TestCalendarDelegate();
+
+  @override
+  int getDaysInMonth(int year, int month) {
+    return month.isEven ? 21 : 28;
+  }
+
+  @override
+  int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
+    return 1;
   }
 }
