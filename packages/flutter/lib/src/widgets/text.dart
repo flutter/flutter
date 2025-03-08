@@ -693,8 +693,8 @@ class Text extends StatelessWidget {
     }
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
 
-    // Ensures text height follows TextStyle inheritance if `inherit` is true;
-    // otherwise, it strictly follows StrutStyle.
+    // Ensure that StrutStyle forceStrutHeight is applied correctly only
+    // when it's needed to explicitly enforce line height behavior.
     final bool forceStrutHeight = effectiveTextStyle?.height != null;
 
     final StrutStyle? defaultStrutStyle =
