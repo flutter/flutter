@@ -32,10 +32,10 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// tile based on a system event. To do so, create an [ExpansionTile]
 /// with an [ExpansionTileController] that's owned by a stateful widget
 /// or look up the tile's automatically created [ExpansionTileController]
-/// with `ExpansionTileController.of`.
+/// with [ExpansibleController.of].
 ///
 /// {@tool dartpad}
-/// Typical usage of the `ExpansionTileController.of` function is to call it from within the
+/// Typical usage of the [ExpansibleController.of] function is to call it from within the
 /// `build` method of a descendant of an [ExpansionTile].
 ///
 /// When the [ExpansionTile] is actually created in the same `build`
@@ -56,8 +56,8 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// populated by instances of your new inner widgets, and then in
 /// these inner widgets you would use `ExpansionTileController.of`.
 ///
-/// The controller's `expand` and `collapse` methods cause the
-/// the [ExpansionTile] to rebuild, so they may not be called from
+/// The  [ExpansibleController.expand] and [ExpansibleController.collapse]
+/// methods cause the [ExpansionTile] to rebuild, so they may not be called from
 /// a build method.
 ///
 /// Remember to dispose of the [ExpansionTileController] when it is no longer

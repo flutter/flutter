@@ -169,7 +169,7 @@ void main() {
             children: <Widget>[
               Expansible(
                 controller: controller1,
-                maintainState: true,
+                maintainState: false,
                 bodyBuilder:
                     (BuildContext context, Animation<double> animation) =>
                         const Text('Maintaining State'),
@@ -196,8 +196,8 @@ void main() {
       ),
     );
 
-    // This text should be offstage while the expansible widget is collapsed.
-    expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
+    // This text is not offstage while the expansible widget is collapsed.
+    expect(find.text('Maintaining State', skipOffstage: false), findsNothing);
     expect(find.text('Maintaining State'), findsNothing);
     // This text is not displayed while the expansible widget is collapsed.
     expect(find.text('Discarding State'), findsNothing);

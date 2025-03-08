@@ -218,9 +218,6 @@ class ExpansibleController extends ChangeNotifier {
 /// [ExpansibleController.collapse] as needed, most typically when the header
 /// returned in [headerBuilder] is tapped.
 ///
-/// Remember to dispose of the [ExpansibleController] when it is no longer
-/// needed. This will ensure we discard any resources used by the object.
-///
 /// See also:
 ///
 ///  * [ExpansionTile], a Material-styled widget that expands and collapses.
@@ -235,7 +232,7 @@ class Expansible extends StatefulWidget {
     this.duration = const Duration(milliseconds: 200),
     this.curve = Curves.ease,
     this.reverseCurve,
-    this.maintainState = false,
+    this.maintainState = true,
   });
 
   /// Expands and collapses the widget.
@@ -248,7 +245,6 @@ class Expansible extends StatefulWidget {
   /// Many use cases involve toggling the expansion state when this header is
   /// tapped. To toggle the expansion state, call [ExpansibleController.expand]
   /// or [ExpansibleController.collapse].
-  ///
   final ExpansibleComponentBuilder headerBuilder;
 
   /// Builds the collapsible body.
