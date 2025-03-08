@@ -14,8 +14,9 @@ void main() {
   runApp(const NestedMenuControllerDecoratorApp());
 }
 
-class AnimatedMenuController extends MenuControllerDecorator {
-  const AnimatedMenuController({required super.menuController, required this.animationController});
+// RawMenuAnchor will interact with _MenuAnimator to open and close the menu.
+class _MenuAnimator extends MenuControllerDecorator {
+  const _MenuAnimator({required super.menuController, required this.animationController});
   final AnimationController animationController;
 
   @override
@@ -114,7 +115,7 @@ class Menu extends StatefulWidget {
 }
 
 class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
-  late final AnimatedMenuController menuController;
+  late final _MenuAnimator _menuAnimator;
   late final AnimationController animationController;
   late final CurvedAnimation animation;
   bool get isSubmenu => MenuController.maybeOf(context) != null;
@@ -127,7 +128,7 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
       duration: const Duration(milliseconds: 200),
     );
     animation = CurvedAnimation(parent: animationController, curve: Curves.easeOutQuart);
-    menuController = AnimatedMenuController(
+    _menuAnimator = _MenuAnimator(
       menuController: MenuController(),
       animationController: animationController,
     );
@@ -143,7 +144,7 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return RawMenuAnchor(
-      controller: menuController,
+      controller: _menuAnimator,
       overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
         final ui.Offset position =
             isSubmenu ? info.anchorRect.topRight : info.anchorRect.bottomLeft;
@@ -160,7 +161,7 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
               child: TapRegion(
                 groupId: info.tapRegionGroupId,
                 onTapOutside: (PointerDownEvent event) {
-                  menuController.close();
+                  _menuAnimator.close();
                 },
                 child: FadeTransition(
                   opacity: animation,

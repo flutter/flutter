@@ -15,8 +15,8 @@ void main() {
   runApp(const MenuControllerDecoratorApp());
 }
 
-class AnimatedMenuController extends MenuControllerDecorator {
-  const AnimatedMenuController({required super.menuController, required this.animationController});
+class _MenuAnimator extends MenuControllerDecorator {
+  const _MenuAnimator({required super.menuController, required this.animationController});
   final AnimationController animationController;
   SpringSimulation get forwardSpring => SpringSimulation(
     SpringDescription.withDampingRatio(mass: 1.0, stiffness: 150, ratio: 0.7),
@@ -58,7 +58,7 @@ class MenuControllerDecoratorExample extends StatefulWidget {
 class _MenuControllerDecoratorExampleState extends State<MenuControllerDecoratorExample>
     with SingleTickerProviderStateMixin {
   late final AnimationController animationController;
-  late final AnimatedMenuController menuController;
+  late final _MenuAnimator _menuAnimator;
 
   @override
   void initState() {
@@ -66,7 +66,7 @@ class _MenuControllerDecoratorExampleState extends State<MenuControllerDecorator
     // Use an unbounded animation controller to allow simulations to run
     // indefinitely.
     animationController = AnimationController.unbounded(vsync: this);
-    menuController = AnimatedMenuController(
+    _menuAnimator = _MenuAnimator(
       menuController: MenuController(),
       animationController: animationController,
     );
@@ -81,7 +81,7 @@ class _MenuControllerDecoratorExampleState extends State<MenuControllerDecorator
   @override
   Widget build(BuildContext context) {
     return RawMenuAnchor(
-      controller: menuController,
+      controller: _menuAnimator,
       overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
         // Center the menu below the anchor.
         final ui.Offset position = info.anchorRect.bottomCenter.translate(-75, 4);
@@ -97,7 +97,7 @@ class _MenuControllerDecoratorExampleState extends State<MenuControllerDecorator
               child: TapRegion(
                 groupId: info.tapRegionGroupId,
                 onTapOutside: (PointerDownEvent event) {
-                  menuController.close();
+                  _menuAnimator.close();
                 },
                 child: ScaleTransition(
                   scale: animationController.view,

@@ -300,18 +300,9 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     assert(mounted);
     if (_animationStatus != status) {
       _animationStatus = status;
-      // TODO(davidhicks980): Create a helper function to safely call setState
-      if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-        setState(() {
-          // Mark dirty now, but only if not in a build.
-        });
-      } else {
-        SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-          setState(() {
-            // Mark dirty
-          });
-        });
-      }
+      setState(() {
+        // Mark dirty
+      });
     }
   }
 
@@ -815,26 +806,17 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
 ///
 /// A [MenuController] is used to control and interrogate a menu after it has
 /// been created, with methods such as [open] and [close], and state accessors
-/// like [isOpen].
+/// like [isOpen] and [animationStatus].
 ///
 /// [MenuController.maybeOf] can be used to retrieve a controller from the
 /// [BuildContext] of a widget that is a descendant of a [MenuAnchor],
 /// [MenuBar], [SubmenuButton], or [RawMenuAnchor]. Doing so will not establish
 /// a dependency relationship.
 ///
-/// Calling [MenuController.maybeIsOpenOf] will return whether the nearest
-/// ancestor menu overlay is shown. Unlike [MenuController.maybeOf], this method
-/// will establish a dependency relationship, so the calling widget will rebuild
-/// when a menu begins opening or finishes closing.
-///
-/// Similarly, [MenuController.maybeAnimationStatusOf] can be used to access the
-/// [AnimationStatus] of the nearest ancestor menu. Like
-/// [MenuController.maybeIsOpenOf], a dependency relationship is formed, so the
-/// calling widget will rebuild when the menu begins opening, finishes opening,
-/// begins closing, or finishes closing. If the nearest ancestor menu is not
-/// animated, then the [AnimationStatus] will be [AnimationStatus.dismissed]
-/// when the menu is closed, and [AnimationStatus.completed] when the menu is
-/// open.
+/// The controller has some methods that not only query the status of the
+/// nearest ancestor, but also establish a dependency relationship between
+/// the calling widget and the ancestor, such as [maybeIsOpenOf] and
+/// [maybeAnimationStatusOf].
 ///
 /// See also:
 ///
@@ -913,10 +895,10 @@ abstract class MenuController {
     return _anchor?.animationStatus ?? AnimationStatus.dismissed;
   }
 
-  /// The anchor that this controller controls.
-  ///
-  /// This is set automatically when a [MenuController] is given to the anchor
-  /// it controls.
+  // The anchor that this controller controls.
+  //
+  // This is set automatically when a [MenuController] is given to the anchor
+  // it controls.
   _RawMenuAnchorBaseMixin? get _anchor;
 
   // Attach this controller to an anchor.
