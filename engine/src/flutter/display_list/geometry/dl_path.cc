@@ -268,39 +268,63 @@ DlPath DlPath::operator+(const DlPath& other) const {
   return DlPath(path);
 }
 
-SkPath DlPath::ConvertToSkiaPath(const Path& path) {
-  SkPath sk_path;
+static void ReduceConic(DlPathReceiver& receiver,
+                        const DlPoint& p1,
+                        const DlPoint& cp,
+                        const DlPoint& p2,
+                        DlScalar weight) {
+  // We might eventually have conic conversion math that deals with
+  // degenerate conics gracefully (or have all receivers just handle
+  // them directly). But, until then, we will just convert them to a
+  // pair of quads and accept the results as "close enough".
+  if (p1 != cp) {
+    if (cp != p2) {
+      std::array<DlPoint, 5> points;
+      impeller::ConicPathComponent conic(p1, cp, p2, weight);
+      conic.SubdivideToQuadraticPoints(points);
+      receiver.QuadTo(points[1], points[2]);
+      receiver.QuadTo(points[3], points[4]);
+    } else {
+      receiver.LineTo(cp);
+    }
+  } else if (cp != p2) {
+    receiver.LineTo(p2);
+  }
+}
 
-  DlPathReceiver receiver{
-      .path_info =
-          [&sk_path](DlPathFillType fill_type, bool is_convex) {
-            sk_path.setFillType(ToSkFillType(fill_type));
-          },
-      .move_to =
-          [&sk_path](const DlPoint& p2) { sk_path.moveTo(ToSkPoint(p2)); },
-      .line_to =
-          [&sk_path](const DlPoint& p2) { sk_path.lineTo(ToSkPoint(p2)); },
-      .quad_to =
-          [&sk_path](const DlPoint& cp, const DlPoint& p2) {
-            sk_path.quadTo(ToSkPoint(cp), ToSkPoint(p2));
-          },
-      .conic_to =
-          [&sk_path](const DlPoint& cp, const DlPoint& p2, DlScalar weight) {
-            sk_path.conicTo(ToSkPoint(cp), ToSkPoint(p2), weight);
-            return true;
-          },
-      .cubic_to =
-          [&sk_path](const DlPoint& cp1,  //
-                     const DlPoint& cp2,  //
-                     const DlPoint& p2) {
-            sk_path.cubicTo(ToSkPoint(cp1), ToSkPoint(cp2), ToSkPoint(p2));
-          },
-      .close = [&sk_path]() { sk_path.close(); },
-  };
+class SkiaPathReceiver final : public virtual DlPathReceiver {
+ public:
+  void SetPathInfo(DlPathFillType fill_type, bool is_convex) override {
+    sk_path_.setFillType(DlPath::ToSkFillType(fill_type));
+  }
+  void MoveTo(const DlPoint& p2) override { sk_path_.moveTo(ToSkPoint(p2)); }
+  void LineTo(const DlPoint& p2) override { sk_path_.lineTo(ToSkPoint(p2)); }
+  void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
+    sk_path_.quadTo(ToSkPoint(cp), ToSkPoint(p2));
+  }
+  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
+    sk_path_.conicTo(ToSkPoint(cp), ToSkPoint(p2), weight);
+    return true;
+  }
+  void CubicTo(const DlPoint& cp1,
+               const DlPoint& cp2,
+               const DlPoint& p2) override {
+    sk_path_.cubicTo(ToSkPoint(cp1), ToSkPoint(cp2), ToSkPoint(p2));
+  }
+  void Close() override { sk_path_.close(); }
+
+  SkPath TakePath() { return sk_path_; }
+
+ private:
+  SkPath sk_path_;
+};
+
+SkPath DlPath::ConvertToSkiaPath(const Path& path) {
+  SkiaPathReceiver receiver;
 
   DispatchFromImpellerPath(path, receiver);
 
-  return sk_path;
+  return receiver.TakePath();
 }
 
 void DlPath::DispatchFromImpellerPath(const impeller::Path& path,
@@ -310,24 +334,24 @@ void DlPath::DispatchFromImpellerPath(const impeller::Path& path,
 
   auto resolve_moveto = [&receiver, &pending_moveto]() {
     if (pending_moveto.has_value()) {
-      receiver.move_to(pending_moveto.value());
+      receiver.MoveTo(pending_moveto.value());
       pending_moveto.reset();
     }
   };
 
-  receiver.recommend_size(path.GetComponentCount(), path.GetPointCount());
+  receiver.RecommendSizes(path.GetComponentCount(), path.GetPointCount());
   std::optional<DlRect> bounds = path.GetBoundingBox();
   if (bounds.has_value()) {
-    receiver.recommend_bounds(bounds.value());
+    receiver.RecommendBounds(bounds.value());
   }
-  receiver.path_info(path.GetFillType(), path.IsConvex());
+  receiver.SetPathInfo(path.GetFillType(), path.IsConvex());
   for (auto it = path.begin(), end = path.end(); it != end; ++it) {
     switch (it.type()) {
       case ComponentType::kContour: {
         const impeller::ContourComponent* contour = it.contour();
         FML_DCHECK(contour != nullptr);
         if (subpath_needs_close) {
-          receiver.close();
+          receiver.Close();
         }
         pending_moveto = contour->destination;
         subpath_needs_close = contour->IsClosed();
@@ -337,81 +361,86 @@ void DlPath::DispatchFromImpellerPath(const impeller::Path& path,
         const impeller::LinearPathComponent* linear = it.linear();
         FML_DCHECK(linear != nullptr);
         resolve_moveto();
-        receiver.line_to(linear->p2);
+        receiver.LineTo(linear->p2);
         break;
       }
       case ComponentType::kQuadratic: {
         const impeller::QuadraticPathComponent* quadratic = it.quadratic();
         FML_DCHECK(quadratic != nullptr);
         resolve_moveto();
-        receiver.quad_to(quadratic->cp, quadratic->p2);
+        receiver.QuadTo(quadratic->cp, quadratic->p2);
         break;
       }
       case ComponentType::kConic: {
         const impeller::ConicPathComponent* conic = it.conic();
         FML_DCHECK(conic != nullptr);
         resolve_moveto();
-        receiver.conic_to(conic->cp, conic->p2, conic->weight.x);
+        if (!receiver.ConicTo(conic->cp, conic->p2, conic->weight.x)) {
+          ReduceConic(receiver, conic->p1, conic->cp, conic->p2,
+                      conic->weight.x);
+        }
         break;
       }
       case ComponentType::kCubic: {
         const impeller::CubicPathComponent* cubic = it.cubic();
         FML_DCHECK(cubic != nullptr);
         resolve_moveto();
-        receiver.cubic_to(cubic->cp1, cubic->cp2, cubic->p2);
+        receiver.CubicTo(cubic->cp1, cubic->cp2, cubic->p2);
         break;
       }
     }
   }
   if (subpath_needs_close) {
-    receiver.close();
+    receiver.Close();
   }
 }
+
+class ImpellerPathReceiver final : public virtual DlPathReceiver {
+ public:
+  void RecommendSizes(size_t verb_count, size_t point_count) override {
+    // Reserve a path size with some arbitrarily additional padding.
+    builder_.Reserve(point_count + 8, verb_count + 8);
+  }
+  void RecommendBounds(const DlRect& bounds) override {
+    builder_.SetBounds(bounds);
+  }
+  void SetPathInfo(DlPathFillType fill_type, bool is_convex) override {
+    this->fill_type_ = fill_type;
+    builder_.SetConvexity(is_convex ? Convexity::kConvex  //
+                                    : Convexity::kUnknown);
+  }
+  void MoveTo(const DlPoint& p2) override { builder_.MoveTo(p2); }
+  void LineTo(const DlPoint& p2) override { builder_.LineTo(p2); }
+  void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
+    builder_.QuadraticCurveTo(cp, p2);
+  }
+  // For legacy compatibility we do not override ConicTo to let the dispatcher
+  // convert conics to quads until we update Impeller for full support of
+  // rational quadratics
+  void CubicTo(const DlPoint& cp1,
+               const DlPoint& cp2,
+               const DlPoint& p2) override {
+    builder_.CubicCurveTo(cp1, cp2, p2);
+  }
+  void Close() override { builder_.Close(); }
+
+  impeller::Path TakePath() { return builder_.TakePath(fill_type_); }
+
+ private:
+  PathBuilder builder_;
+  DlPathFillType fill_type_;
+};
 
 Path DlPath::ConvertToImpellerPath(const SkPath& path) {
   if (path.isEmpty()) {
     return Path{};
   }
 
-  PathBuilder builder;
-  DlPathFillType path_fill_type;
-
-  DlPathReceiver receiver{
-      .recommend_size =
-          [&builder](size_t verb_count, size_t point_count) {
-            // Reserve a path size with some arbitrarily additional padding.
-            builder.Reserve(point_count + 8, verb_count + 8);
-          },
-      .recommend_bounds =
-          [&builder](const DlRect& bounds) { builder.SetBounds(bounds); },
-      .path_info =
-          [&builder, &path_fill_type](DlPathFillType fill_type,
-                                      bool is_convex) {
-            path_fill_type = fill_type;
-            builder.SetConvexity(is_convex ? Convexity::kConvex
-                                           : Convexity::kUnknown);
-          },
-      .move_to = [&builder](const DlPoint& p2) { builder.MoveTo(p2); },
-      .line_to = [&builder](const DlPoint& p2) { builder.LineTo(p2); },
-      .quad_to =
-          [&builder](const DlPoint& cp, const DlPoint& p2) {  //
-            builder.QuadraticCurveTo(cp, p2);
-          },
-      // .conic_to = ... for legacy compatibility we let the SkPath dispatcher
-      //                 convert conics to quads until we update Impeller for
-      //                 full support of rational quadratics
-      .cubic_to =
-          [&builder](const DlPoint& cp1,   //
-                     const DlPoint& cp2,   //
-                     const DlPoint& p2) {  //
-            builder.CubicCurveTo(cp1, cp2, p2);
-          },
-      .close = [&builder]() { builder.Close(); },
-  };
+  ImpellerPathReceiver receiver;
 
   DispatchFromSkiaPath(path, receiver);
 
-  return builder.TakePath(path_fill_type);
+  return receiver.TakePath();
 }
 
 void DlPath::DispatchFromSkiaPath(const SkPath& path,
@@ -430,58 +459,40 @@ void DlPath::DispatchFromSkiaPath(const SkPath& path,
 
   PathData data;
 
-  receiver.recommend_size(path.countVerbs(), path.countPoints());
-  receiver.recommend_bounds(ToDlRect(path.getBounds()));
-  receiver.path_info(ToDlFillType(path.getFillType()), path.isConvex());
+  receiver.RecommendSizes(path.countVerbs(), path.countPoints());
+  receiver.RecommendBounds(ToDlRect(path.getBounds()));
+  receiver.SetPathInfo(ToDlFillType(path.getFillType()), path.isConvex());
   auto verb = SkPath::Verb::kDone_Verb;
   do {
     verb = iterator.next(data.points);
     switch (verb) {
       case SkPath::kMove_Verb:
-        receiver.move_to(ToDlPoint(data.points[0]));
+        receiver.MoveTo(ToDlPoint(data.points[0]));
         break;
       case SkPath::kLine_Verb:
-        receiver.line_to(ToDlPoint(data.points[1]));
+        receiver.LineTo(ToDlPoint(data.points[1]));
         break;
       case SkPath::kQuad_Verb:
-        receiver.quad_to(ToDlPoint(data.points[1]), ToDlPoint(data.points[2]));
+        receiver.QuadTo(ToDlPoint(data.points[1]), ToDlPoint(data.points[2]));
         break;
       case SkPath::kConic_Verb:
-        if (receiver.conic_to(ToDlPoint(data.points[1]),
+        if (!receiver.ConicTo(ToDlPoint(data.points[1]),
                               ToDlPoint(data.points[2]),
                               iterator.conicWeight())) {
-          // The conic parameters were understood and accepted, we are done
-          // with this path segment.
-          break;
-        }
-
-        // We might eventually have conic conversion math that deals with
-        // degenerate conics gracefully (or have all receivers just handle
-        // them directly). But, until then, we will just convert them to a
-        // pair of quads and accept the results as "close enough".
-        if (data.points[0] != data.points[1]) {
-          if (data.points[1] != data.points[2]) {
-            std::array<DlPoint, 5> points;
-            impeller::ConicPathComponent conic(
-                ToDlPoint(data.points[0]), ToDlPoint(data.points[1]),
-                ToDlPoint(data.points[2]), iterator.conicWeight());
-            conic.SubdivideToQuadraticPoints(points);
-            receiver.quad_to(points[1], points[2]);
-            receiver.quad_to(points[3], points[4]);
-          } else {
-            receiver.line_to(ToDlPoint(data.points[1]));
-          }
-        } else if (data.points[1] != data.points[2]) {
-          receiver.line_to(ToDlPoint(data.points[2]));
+          ReduceConic(receiver,                   //
+                      ToDlPoint(data.points[0]),  //
+                      ToDlPoint(data.points[1]),  //
+                      ToDlPoint(data.points[2]),  //
+                      iterator.conicWeight());
         }
         break;
       case SkPath::kCubic_Verb:
-        receiver.cubic_to(ToDlPoint(data.points[1]),  //
-                          ToDlPoint(data.points[2]),  //
-                          ToDlPoint(data.points[3]));
+        receiver.CubicTo(ToDlPoint(data.points[1]),  //
+                         ToDlPoint(data.points[2]),  //
+                         ToDlPoint(data.points[3]));
         break;
       case SkPath::kClose_Verb:
-        receiver.close();
+        receiver.Close();
         break;
       case SkPath::kDone_Verb:
         break;

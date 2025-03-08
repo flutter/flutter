@@ -43,6 +43,37 @@ CATransform3D GetCATransform3DFromDlMatrix(const flutter::DlMatrix& matrix) {
   transform.m44 = matrix.m[15];
   return transform;
 }
+
+class CGPathReceiver final : public virtual flutter::DlPathReceiver {
+ public:
+  void SetPathInfo(flutter::DlPathFillType type, bool is_convex) override {
+    // CGPaths do not have an inherit fill type, we would need to remember
+    // the fill type and employ it when we use the path.
+    // see https://github.com/flutter/flutter/issues/164826
+  }
+  void MoveTo(const flutter::DlPoint& p2) override {  //
+    CGPathMoveToPoint(pathRef_, nil, p2.x, p2.y);
+  }
+  void LineTo(const flutter::DlPoint& p2) override {
+    CGPathAddLineToPoint(pathRef_, nil, p2.x, p2.y);
+  }
+  void QuadTo(const flutter::DlPoint& cp, const flutter::DlPoint& p2) override {
+    CGPathAddQuadCurveToPoint(pathRef_, nil, cp.x, cp.y, p2.x, p2.y);
+  }
+  // bool conic_to(...) { CGPath has no equivalent to the conic curve type }
+  void CubicTo(const flutter::DlPoint& cp1,
+               const flutter::DlPoint& cp2,
+               const flutter::DlPoint& p2) override {
+    CGPathAddCurveToPoint(pathRef_, nil,  //
+                          cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+  }
+  void Close() override { CGPathCloseSubpath(pathRef_); }
+
+  CGMutablePathRef TakePath() { return pathRef_; }
+
+ private:
+  CGMutablePathRef pathRef_ = CGPathCreateMutable();
+};
 }  // namespace
 
 @interface PlatformViewFilter ()
@@ -382,48 +413,15 @@ static BOOL _preparedOnce = NO;
 
 - (void)clipPath:(const flutter::DlPath&)dlPath matrix:(const flutter::DlMatrix&)matrix {
   containsNonRectPath_ = YES;
-  CGMutablePathRef pathRef = CGPathCreateMutable();
 
-  flutter::DlPathReceiver receiver{
-      .path_info =
-          [](flutter::DlPathFillType type, bool is_convex) {
-            // CGPaths do not have an inherit fill type, we would need to remember
-            // the fill type and employ it when we use the path.
-            // see https://github.com/flutter/flutter/issues/164826
-          },
-      .move_to =
-          [&pathRef](const flutter::DlPoint& p2) {  //
-            CGPathMoveToPoint(pathRef, nil, p2.x, p2.y);
-          },
-      .line_to =
-          [&pathRef](const flutter::DlPoint& p2) {
-            CGPathAddLineToPoint(pathRef, nil, p2.x, p2.y);
-          },
-      .quad_to =
-          [&pathRef](const flutter::DlPoint& cp, const flutter::DlPoint& p2) {
-            CGPathAddQuadCurveToPoint(pathRef, nil,  //
-                                      cp.x, cp.y,    //
-                                      p2.x, p2.y);
-          },
-      // .conic_to = ... CGPath has no equivalent to the conic curve type
-      .cubic_to =
-          [&pathRef](const flutter::DlPoint& cp1,  //
-                     const flutter::DlPoint& cp2,  //
-                     const flutter::DlPoint& p2) {
-            CGPathAddCurveToPoint(pathRef, nil,  //
-                                  cp1.x, cp1.y,  //
-                                  cp2.x, cp2.y,  //
-                                  p2.x, p2.y);
-          },
-      .close = [&pathRef]() { CGPathCloseSubpath(pathRef); },
-  };
+  CGPathReceiver receiver;
 
   dlPath.Dispatch(receiver);
 
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
   CATransform3D matrixInPoints =
       CATransform3DConcat(GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
-  paths_.push_back([self getTransformedPath:pathRef matrix:matrixInPoints]);
+  paths_.push_back([self getTransformedPath:receiver.TakePath() matrix:matrixInPoints]);
 }
 
 - (CGAffineTransform)affineWithMatrix:(CATransform3D)matrix {
