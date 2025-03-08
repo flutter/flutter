@@ -2123,51 +2123,13 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
       }
       case MutatorType::kClipPath: {
         auto& dlPath = (*iter)->GetPath();
-        // Sometimes a kClipPath mutator is actually housing a simpler
-        // shape. This isn't usually an issue, but the impeller Path version
-        // of an oval or round rect may be too approximated to really match
-        // well between the rendering operations (which check for simpler
-        // shapes) and handing a raw path to the platform. To make things
-        // match better, we do the same shape reduction checks here as most
-        // renderers perform (we don't look for a Rect shape, though as
-        // those match pretty well on their own).
-        //
-        // This should eventually be handled at a higher level, as in the
-        // clip_path_layer.
-        // See https://github.com/flutter/flutter/issues/164666
-        std::optional<DlRoundRect> path_rrect;
-        {
-          DlRect rect;
-          if (dlPath.IsOval(&rect)) {
-            path_rrect = DlRoundRect::MakeOval(rect);
-          } else {
-            DlRoundRect rrect;
-            if (dlPath.IsRoundRect(&rrect)) {
-              path_rrect = rrect;
-            }
-          }
-        }
-        if (path_rrect.has_value()) {
-          const DlRect& rect = path_rrect->GetBounds();
-          const DlRoundingRadii& radii = path_rrect->GetRadii();
-          SkScalar radiis[8] = {
-              radii.top_left.width,     radii.top_left.height,
-              radii.top_right.width,    radii.top_right.height,
-              radii.bottom_right.width, radii.bottom_right.height,
-              radii.bottom_left.width,  radii.bottom_left.height,
-          };
-          fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
-              env, env->NewFloatArray(8));
-          env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
-          env->CallVoidMethod(mutatorsStack,
-                              g_mutators_stack_push_cliprrect_method,
-                              static_cast<int>(rect.GetLeft()),    //
-                              static_cast<int>(rect.GetTop()),     //
-                              static_cast<int>(rect.GetRight()),   //
-                              static_cast<int>(rect.GetBottom()),  //
-                              radiisArray.obj());
-          break;
-        }
+        // The layer mutator mechanism should have already caught and
+        // redirected these simplified path cases, which is important because
+        // the conics they generate (in the case of oval and rrect) will
+        // not match the results of an impeller path conversion very closely.
+        FML_DCHECK(!dlPath.IsRect());
+        FML_DCHECK(!dlPath.IsOval());
+        FML_DCHECK(!dlPath.IsRoundRect());
 
         // Define and populate an Android Path with data from the DlPath
         jobject androidPath =

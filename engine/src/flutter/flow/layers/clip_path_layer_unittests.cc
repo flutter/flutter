@@ -63,7 +63,8 @@ TEST_F(ClipPathLayerTest, PaintingCulledLayerDies) {
   const DlRect layer_bounds = DlRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
   const DlRect distant_bounds = DlRect::MakeXYWH(100.0, 100.0, 10.0, 10.0);
   const DlPath child_path = DlPath::MakeRect(child_bounds);
-  const DlPath layer_path = DlPath::MakeRect(layer_bounds);
+  const DlPath layer_path = DlPath::MakeRect(layer_bounds) +
+                            DlPath::MakeRect(layer_bounds.Expand(-0.1, -0.1));
   auto mock_layer = std::make_shared<MockLayer>(child_path);
   auto layer = std::make_shared<ClipPathLayer>(layer_path, Clip::kHardEdge);
   layer->Add(mock_layer);
@@ -103,7 +104,8 @@ TEST_F(ClipPathLayerTest, ChildOutsideBounds) {
   const DlRect child_bounds = DlRect::MakeXYWH(2.5, 5.0, 4.5, 4.0);
   const DlRect clip_bounds = DlRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
   const DlPath child_path = DlPath::MakeRect(child_bounds);
-  const DlPath clip_path = DlPath::MakeRect(clip_bounds);
+  const DlPath clip_path = DlPath::MakeRect(clip_bounds) +
+                           DlPath::MakeRect(clip_bounds.Expand(-0.1f, -0.1f));
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ClipPathLayer>(clip_path, Clip::kHardEdge);
@@ -139,6 +141,147 @@ TEST_F(ClipPathLayerTest, ChildOutsideBounds) {
   EXPECT_FALSE(mock_layer->needs_painting(paint_context()));
   // Top level layer not visible so calling layer->Paint()
   // would trip an FML_DCHECK
+}
+
+TEST_F(ClipPathLayerTest, RectPathReducesToClipRect) {
+  const DlMatrix initial_matrix = DlMatrix::MakeTranslation({0.5f, 1.0f});
+  const DlRect child_bounds = DlRect::MakeXYWH(1.0, 2.0, 2.0, 2.0);
+  const DlRect layer_bounds = DlRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
+  const DlPath child_path = DlPath::MakeRect(child_bounds) +
+                            DlPath::MakeOval(child_bounds.Expand(-0.1f));
+  const DlPath layer_path = DlPath::MakeRect(layer_bounds);
+  const DlPaint child_paint = DlPaint(DlColor::kYellow());
+  auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
+  auto layer = std::make_shared<ClipPathLayer>(layer_path, Clip::kHardEdge);
+  layer->Add(mock_layer);
+
+  preroll_context()->state_stack.set_preroll_delegate(initial_matrix);
+  layer->Preroll(preroll_context());
+
+  // Untouched
+  EXPECT_EQ(preroll_context()->state_stack.device_cull_rect(), kGiantRect);
+  EXPECT_TRUE(preroll_context()->state_stack.is_empty());
+
+  EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
+  EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
+  EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
+  EXPECT_EQ(mock_layer->parent_cull_rect(), layer_bounds);
+  EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
+  EXPECT_EQ(mock_layer->parent_mutators(),
+            std::vector({Mutator(layer_bounds)}));
+
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ClipPath)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipRect(layer_bounds);
+      /* mock_layer::Paint */ {
+        expected_builder.DrawPath(child_path, child_paint);
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+}
+
+TEST_F(ClipPathLayerTest, OvalPathReducesToClipRRect) {
+  const DlMatrix initial_matrix = DlMatrix::MakeTranslation({0.5f, 1.0f});
+  const DlRect child_bounds = DlRect::MakeXYWH(1.0, 2.0, 2.0, 2.0);
+  const DlRect layer_bounds = DlRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
+  const DlPath child_path = DlPath::MakeRect(child_bounds) +
+                            DlPath::MakeOval(child_bounds.Expand(-0.1f));
+  const DlPath layer_path = DlPath::MakeOval(layer_bounds);
+  const DlPaint child_paint = DlPaint(DlColor::kYellow());
+  auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
+  auto layer = std::make_shared<ClipPathLayer>(layer_path, Clip::kHardEdge);
+  layer->Add(mock_layer);
+
+  preroll_context()->state_stack.set_preroll_delegate(initial_matrix);
+  layer->Preroll(preroll_context());
+
+  // Untouched
+  EXPECT_EQ(preroll_context()->state_stack.device_cull_rect(), kGiantRect);
+  EXPECT_TRUE(preroll_context()->state_stack.is_empty());
+
+  EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
+  EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
+  EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
+  EXPECT_EQ(mock_layer->parent_cull_rect(), layer_bounds);
+  EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
+  EXPECT_EQ(mock_layer->parent_mutators(),
+            std::vector({Mutator(DlRoundRect::MakeOval(layer_bounds))}));
+
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ClipPath)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipRoundRect(DlRoundRect::MakeOval(layer_bounds));
+      /* mock_layer::Paint */ {
+        expected_builder.DrawPath(child_path, child_paint);
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+}
+
+TEST_F(ClipPathLayerTest, RRectPathReducesToClipRRect) {
+  const DlMatrix initial_matrix = DlMatrix::MakeTranslation({0.5f, 1.0f});
+  const DlRect child_bounds = DlRect::MakeXYWH(1.0, 2.0, 2.0, 2.0);
+  const DlRect layer_bounds = DlRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
+  const DlPath child_path = DlPath::MakeRect(child_bounds) +
+                            DlPath::MakeOval(child_bounds.Expand(-0.1f));
+  const DlRoundRect layer_rrect =
+      DlRoundRect::MakeRectXY(layer_bounds, 0.1f, 0.1f);
+  const DlPath layer_path = DlPath::MakeRoundRect(layer_rrect);
+  const DlPaint child_paint = DlPaint(DlColor::kYellow());
+  auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
+  auto layer = std::make_shared<ClipPathLayer>(layer_path, Clip::kHardEdge);
+  layer->Add(mock_layer);
+  DlRoundRect converted_rrect;
+
+  // The conversion back to an RRect by "IsRoundRect" is lossy, so we need
+  // to use the version that will be reduced by the clip_path_layer.
+  EXPECT_TRUE(layer_path.IsRoundRect(&converted_rrect));
+
+  preroll_context()->state_stack.set_preroll_delegate(initial_matrix);
+  layer->Preroll(preroll_context());
+
+  // Untouched
+  EXPECT_EQ(preroll_context()->state_stack.device_cull_rect(), kGiantRect);
+  EXPECT_TRUE(preroll_context()->state_stack.is_empty());
+
+  EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
+  EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
+  EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
+  EXPECT_EQ(mock_layer->parent_cull_rect(), layer_bounds);
+  EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
+  EXPECT_EQ(mock_layer->parent_mutators(),
+            std::vector({Mutator(converted_rrect)}));
+
+  layer->Paint(display_list_paint_context());
+  EXPECT_EQ(display_list()->GetOpType(1u),
+            DisplayListOpType::kClipIntersectRoundRect);
+  DisplayListBuilder expected_builder;
+  /* (ClipPath)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipRoundRect(converted_rrect);
+      /* mock_layer::Paint */ {
+        expected_builder.DrawPath(child_path, child_paint);
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(ClipPathLayerTest, FullyContainedChild) {
