@@ -2049,10 +2049,10 @@ base class _NativeRSuperellipse extends NativeFieldWrapperClass1
     _constructor(values);
   }
 
-  @Native<Void Function(Handle, Handle)>(symbol: 'RSuperellipse::create')
+  @Native<Void Function(Handle, Handle)>(symbol: 'RSuperellipse::Create')
   external void _constructor(Float64List parameters);
 
-  @Native<Double Function(Handle, Int32)>(symbol: 'RSuperellipse::getValue')
+  @Native<Double Function(Pointer<Void>, Int32)>(symbol: 'RSuperellipse::getValue')
   external double _getValue(int index);
 
   @override
