@@ -489,7 +489,6 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
                                     displays.data(), displays.size());
 
   SendSystemLocales();
-  SetLifecycleState(flutter::AppLifecycleState::kResumed);
 
   settings_plugin_->StartWatching();
   settings_plugin_->SendSettings();
@@ -800,12 +799,6 @@ void FlutterWindowsEngine::SetNextFrameCallback(fml::closure callback) {
         self->task_runner_->PostTask(std::move(self->next_frame_callback_));
       },
       this);
-}
-
-void FlutterWindowsEngine::SetLifecycleState(flutter::AppLifecycleState state) {
-  if (lifecycle_manager_) {
-    lifecycle_manager_->SetLifecycleState(state);
-  }
 }
 
 void FlutterWindowsEngine::SendSystemLocales() {
