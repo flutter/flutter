@@ -2079,7 +2079,7 @@ class RSuperellipse with _RRectLike<RSuperellipse> {
   /// Returns an [RSuperellipse] instance with the same parameters that can
   /// cache intermediate values.
   ///
-  /// All shape-related calculations (such as [contains] or drawing) are
+  /// All shape-related calculations (such as [contains]) are
   /// performed by delegating to computed instances. Consider reusing computed
   /// instances for better performance.
   ///

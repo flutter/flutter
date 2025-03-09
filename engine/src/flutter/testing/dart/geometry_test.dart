@@ -614,13 +614,13 @@ void main() {
       checkPointWithOffset(rr, Offset(-p.dx, -p.dy), Offset(-0.02, -0.02));
     }
 
-    checkPointAndMirrors(Offset(0, 49.995));      // Top
-    checkPointAndMirrors(Offset(44.245, 49.95));  // Top curve start
-    checkPointAndMirrors(Offset(45.72, 49.87));   // Top joint
-    checkPointAndMirrors(Offset(48.53, 48.53));   // Circular arc mid
-    checkPointAndMirrors(Offset(49.87, 45.72));   // Right joint
-    checkPointAndMirrors(Offset(49.95, 44.245));  // Right curve start
-    checkPointAndMirrors(Offset(49.995, 0));      // Right
+    checkPointAndMirrors(Offset(0, 49.995)); // Top
+    checkPointAndMirrors(Offset(44.245, 49.95)); // Top curve start
+    checkPointAndMirrors(Offset(45.72, 49.87)); // Top joint
+    checkPointAndMirrors(Offset(48.53, 48.53)); // Circular arc mid
+    checkPointAndMirrors(Offset(49.87, 45.72)); // Right joint
+    checkPointAndMirrors(Offset(49.95, 44.245)); // Right curve start
+    checkPointAndMirrors(Offset(49.995, 0)); // Right
   });
 
   test('RSuperellipse.contains UniformEllipticalContains', () {
@@ -633,13 +633,13 @@ void main() {
       checkPointWithOffset(rr, Offset(-p.dx, -p.dy), Offset(-0.02, -0.02));
     }
 
-    checkPointAndMirrors(Offset(0, 49.995));       // Top
-    checkPointAndMirrors(Offset(44.245, 49.911));  // Top curve start
-    checkPointAndMirrors(Offset(45.72, 49.75));    // Top joint
-    checkPointAndMirrors(Offset(48.51, 47.07));    // Circular arc mid
-    checkPointAndMirrors(Offset(49.87, 41.44));    // Right joint
-    checkPointAndMirrors(Offset(49.95, 38.49));    // Right curve start
-    checkPointAndMirrors(Offset(49.995, 0));       // Right
+    checkPointAndMirrors(Offset(0, 49.995)); // Top
+    checkPointAndMirrors(Offset(44.245, 49.911)); // Top curve start
+    checkPointAndMirrors(Offset(45.72, 49.75)); // Top joint
+    checkPointAndMirrors(Offset(48.51, 47.07)); // Circular arc mid
+    checkPointAndMirrors(Offset(49.87, 41.44)); // Right joint
+    checkPointAndMirrors(Offset(49.95, 38.49)); // Right curve start
+    checkPointAndMirrors(Offset(49.995, 0)); // Right
   });
 
   test('RSuperellipse.contains UniformRectangularContains', () {
