@@ -1827,20 +1827,27 @@ class RRect with _RRectLike<RRect> {
 
 /// An immutable rounded superellipse.
 ///
-/// A rounded superellipse is a shape similar to a typical rounded rectangle
-/// ([RRect]), but with smoother transitions between the straight sides and the
-/// rounded corners. It resembles the `RoundedRectangle` shape in SwiftUI with
-/// the `.continuous` corner style.
+/// A rounded superellipse (not to be confused with a standard superellipse) is
+/// a shape formed by replacing the four curved corners of a superellipse with
+/// circular arcs. A superellipse follows the formula x^n + y^n = a^n, and while
+/// n > 2 gives it rounded corners, they tend to be too sharp and pronounced.
+/// Replacing them with circular arcs makes the shape feel softer and more
+/// natural.
 ///
-/// Technically, a canonical rounded superellipse, i.e. one with a uniform
-/// corner radius ([RSuperellipse.fromRectAndRadius]), is created by replacing
-/// the four corners of a superellipse (also known as a Lamé curve) with
-/// circular arcs. A rounded superellipse with non-uniform radii is extended on it
-/// by concatenating arc segments and transformation.
+/// Visually, a rounded superellipse looks similar to a typical rounded rectangle
+/// ([RRect]) but with smoother transitions between the straight edges and
+/// corners. It closely matches the `RoundedRectangle` shape in SwiftUI with the
+/// `.continuous` corner style.
 ///
-/// The corner radius parameters used in this class corresponds to SwiftUI's
-/// `cornerRadius` parameter, which is close to, but not exactly equals to, the
-/// radius of the corner circles.
+/// The [RSuperellipse] class is a data container and does not perform
+/// computations directly. For any calculations involving the shape, such as
+/// checking whether a point is inside or using it for drawing, it must first be
+/// converted to a [ComputedRSuperellipse] by calling [computed].
+///
+/// Unlike [RSuperellipse], [ComputedRSuperellipse] is not const and can cache
+/// intermediate values for better performance. For efficiency, it is
+/// recommended to reuse and cache [ComputedRSuperellipse] instances whenever
+/// possible.
 class RSuperellipse with _RRectLike<RSuperellipse> {
   /// Construct a rounded rectangle from its left, top, right, and bottom edges,
   /// and the same radii along its horizontal axis and its vertical axis.
@@ -2072,8 +2079,12 @@ class RSuperellipse with _RRectLike<RSuperellipse> {
   @override
   final double blRadiusY;
 
+  /// Returns a [ComputedRSuperellipse] with the same parameters.
+  ///
+  /// If this object is already a [ComputedRSuperellipse], this method returns
+  /// itself instead of creating a new instance.
   ComputedRSuperellipse computed() {
-    return ComputedRSuperellipse(
+    return ComputedRSuperellipse._raw(
       top: top,
       left: left,
       right: right,
@@ -2123,10 +2134,17 @@ class RSuperellipse with _RRectLike<RSuperellipse> {
   }
 }
 
+/// A [RSuperellipse] that supports computations.
+///
+/// This class is created by calling [RSuperellipse.computed].
+///
+/// [ComputedRSuperellipse] is not const and can therefore cache intermediate
+/// values for better performance. For efficiency, it is recommended to reuse
+/// and cache [ComputedRSuperellipse] instances whenever possible.
 class ComputedRSuperellipse extends NativeFieldWrapperClass1
     with _RRectLike<RSuperellipse>
     implements RSuperellipse {
-  ComputedRSuperellipse({
+  ComputedRSuperellipse._raw({
     required double left,
     required double top,
     required double right,
