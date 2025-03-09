@@ -135,7 +135,7 @@ source_set("common") {
     "//flutter/shell/version",
     "//flutter/third_party/rapidjson",
     "//flutter/third_party/tonic",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
   ]
 
   deps = [
@@ -205,7 +205,7 @@ if (enable_unittests) {
     fixtures = [
       "fixtures/shelltest_screenshot.png",
       "fixtures/hello_loop_2.gif",
-      "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf",
+      "//flutter/txt/third_party/fonts/Roboto-Regular.ttf",
     ]
   }
 

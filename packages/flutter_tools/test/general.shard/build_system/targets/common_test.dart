@@ -794,7 +794,7 @@ void main() {
         FakeCommand(
           command: <String>[
             // This path is not known by the cache due to the iOS gen_snapshot split.
-            'Artifact.genSnapshot.TargetPlatform.ios.profile_arm64',
+            'Artifact.genSnapshotArm64.TargetPlatform.ios.profile',
             '--deterministic',
             '--write-v8-snapshot-profile-to=code_size_1/snapshot.arm64.json',
             '--trace-precompiler-to=code_size_1/trace.arm64.json',

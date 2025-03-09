@@ -33,7 +33,7 @@
             "flutter/lib/ui:ui_benchmarks",
             "flutter/shell/common:shell_benchmarks",
             "flutter/shell/testing",
-            "flutter/third_party/txt:txt_benchmarks",
+            "flutter/txt:txt_benchmarks",
             "flutter/tools/path_ops",
             "flutter/build/archives:flutter_patched_sdk",
             "flutter:unittests"

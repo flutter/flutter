@@ -21,8 +21,8 @@ DART_SDK_PATH_OLD="$DART_SDK_PATH.old"
 ENGINE_STAMP="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
 OS="$(uname -s)"
 
-ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
-ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
+ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/cache/engine.stamp")
+ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/cache/engine.realm" | tr -d '[:space:]')
 
 if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; then
   command -v curl > /dev/null 2>&1 || {

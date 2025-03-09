@@ -1,4 +1,4 @@
-Signature: ac991c4bc9a6a8622ee709ec55e1018c
+Signature: 5382e61287e09b86b90a63bade449181
 
 ====================================================================================================
 LIBRARY: etc1
@@ -398,12 +398,6 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
-FILE: ../../../flutter/third_party/skia/relnotes/codec_is_animated_api.md
-FILE: ../../../flutter/third_party/skia/relnotes/getpipelinelabelapi.md
-FILE: ../../../flutter/third_party/skia/relnotes/graphiteincludes.md
-FILE: ../../../flutter/third_party/skia/relnotes/pdf_jpeg.md
-FILE: ../../../flutter/third_party/skia/relnotes/serializedkeyprecompilation.md
-FILE: ../../../flutter/third_party/skia/relnotes/userdefinedknownruntimeeffects.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -3062,7 +3056,6 @@ ORIGIN: ../../../flutter/third_party/skia/gm/annotated_text.cpp + ../../../flutt
 ORIGIN: ../../../flutter/third_party/skia/gm/badpaint.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/bigrrectaaeffect.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/bigtileimagefilter.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/gm/blend.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/blurredclippedcircle.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/bmpfilterqualityrepeat.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/concavepaths.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -3337,7 +3330,6 @@ FILE: ../../../flutter/third_party/skia/gm/annotated_text.cpp
 FILE: ../../../flutter/third_party/skia/gm/badpaint.cpp
 FILE: ../../../flutter/third_party/skia/gm/bigrrectaaeffect.cpp
 FILE: ../../../flutter/third_party/skia/gm/bigtileimagefilter.cpp
-FILE: ../../../flutter/third_party/skia/gm/blend.cpp
 FILE: ../../../flutter/third_party/skia/gm/blurredclippedcircle.cpp
 FILE: ../../../flutter/third_party/skia/gm/bmpfilterqualityrepeat.cpp
 FILE: ../../../flutter/third_party/skia/gm/concavepaths.cpp
@@ -9862,14 +9854,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h
+FILE: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h
 FILE: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h
 FILE: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h
 ----------------------------------------------------------------------------------------------------
