@@ -3724,6 +3724,53 @@ void main() {
       },
     );
 
+    testWidgets('menus should respect overflow on right with the provided offset', (
+      WidgetTester tester,
+    ) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Builder(
+            builder: (BuildContext context) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: MenuAnchor(
+                    alignmentOffset: const Offset(-50, 0),
+                    menuChildren: const <Widget>[MenuItemButton(child: Text('Button1'))],
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
+                      return FilledButton(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: const Text('Tap me'),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+
+      expect(find.byType(MenuItemButton), findsOneWidget);
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[Rect.fromLTRB(634.0, 488.0, 756.0, 552.0)]),
+      );
+    });
+
     Future<void> buildDensityPaddingApp(
       WidgetTester tester, {
       required TextDirection textDirection,
