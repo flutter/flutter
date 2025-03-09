@@ -267,11 +267,21 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   std::string executable_name = GetExecutableName();
   std::vector<const char*> argv = {executable_name.c_str()};
   std::vector<std::string> switches = project_->GetSwitches();
-  if (project_->impeller_enabled()) {
-    switches.push_back("--enable-impeller=true");
-  } else if (std::find(switches.begin(), switches.end(),
-                       "--enable-impeller=true") != switches.end()) {
-    switches.push_back("--enable-impeller=false");
+
+  // If there is already an --enable-impeller=true/false flag, then prefer that
+  // setting to the bundle value. This allows developers to control the runtime
+  // behavior via the command line flag for debugging without continually
+  // changing the application source code.
+  const bool has_impeller_flag =
+      std::find_if(
+          switches.begin(), switches.end(), [](std::string_view value) {
+            return value.rfind("--enable-impeller=", 0) != std::string::npos;
+          }) != switches.end();
+
+  if (!has_impeller_flag) {
+    switches.push_back(project_->impeller_enabled()
+                           ? "--enable-impeller=true"
+                           : "--enable-impeller=false");
   }
 
   std::transform(
