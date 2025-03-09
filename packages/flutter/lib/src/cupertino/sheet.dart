@@ -135,6 +135,7 @@ Future<T?> showCupertinoSheet<T>({
   required BuildContext context,
   required WidgetBuilder pageBuilder,
   bool useNestedNavigation = false,
+  bool enableDrag = true,
 }) {
   final WidgetBuilder builder;
   final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
@@ -175,7 +176,7 @@ Future<T?> showCupertinoSheet<T>({
   return Navigator.of(
     context,
     rootNavigator: true,
-  ).push<T>(CupertinoSheetRoute<T>(builder: builder));
+  ).push<T>(CupertinoSheetRoute<T>(builder: builder, enableDrag: enableDrag));
 }
 
 /// Provides an iOS-style sheet transition.
@@ -478,15 +479,17 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 ///     `CupertinoSheetRoute`, with optional nested navigation built in.
 class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTransitionMixin<T> {
   /// Creates a page route that displays an iOS styled sheet.
-  CupertinoSheetRoute({super.settings, required this.builder});
+  CupertinoSheetRoute({super.settings, required this.builder, this.enableDrag = true});
 
   /// Builds the primary contents of the sheet route.
   final WidgetBuilder builder;
 
   @override
+  final bool enableDrag;
+
+  @override
   Widget buildContent(BuildContext context) {
     final double bottomPadding = MediaQuery.sizeOf(context).height * _kTopGapRatio;
-
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
@@ -581,8 +584,13 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     );
   }
 
+  /// Determines whether the content can be scrolled.
+  ///
+  /// If `true`, scrolling is enabled; otherwise, it remains fixed.
+  bool get enableDrag;
+
   /// Returns a [CupertinoSheetTransition].
-  static Widget buildPageTransitions<T>(
+  Widget buildPageTransitions(
     ModalRoute<T> route,
     BuildContext context,
     Animation<double> animation,
@@ -595,7 +603,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,
       child: _CupertinoDownGestureDetector<T>(
-        enabledCallback: () => true,
+        enabledCallback: () => enableDrag,
         onStartPopGesture: () => _startPopGesture<T>(route),
         child: child,
       ),
@@ -614,7 +622,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
+    return buildPageTransitions(this, context, animation, secondaryAnimation, child);
   }
 }
 
