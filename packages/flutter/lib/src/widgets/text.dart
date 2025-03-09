@@ -695,7 +695,8 @@ class Text extends StatelessWidget {
 
     // Ensure that StrutStyle forceStrutHeight is applied correctly only
     // when it's needed to explicitly enforce line height behavior.
-    final bool forceStrutHeight = effectiveTextStyle?.height != null;
+    final bool forceStrutHeight =
+        effectiveTextStyle?.height != null && effectiveTextStyle?.inherit == false;
 
     final StrutStyle? defaultStrutStyle =
         effectiveTextStyle != null
