@@ -756,7 +756,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushClipRSuperellipse(
       engineLayer,
-      rse as _NativeRSuperellipse,
+      rse.computed(),
       clipBehavior.index,
       oldLayer?._nativeLayer,
     );
@@ -770,7 +770,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
   )
   external void _pushClipRSuperellipse(
     EngineLayer layer,
-    _NativeRSuperellipse rse,
+    ComputedRSuperellipse rse,
     int clipBehavior,
     EngineLayer? oldLayer,
   );
