@@ -9,6 +9,8 @@
 
 namespace flutter {
 
+using impeller::Scalar;
+
 IMPLEMENT_WRAPPERTYPEINFO(ui, RSuperellipse);
 
 RSuperellipse::RSuperellipse(const tonic::Float64List& values) {
@@ -20,23 +22,7 @@ RSuperellipse::RSuperellipse(const tonic::Float64List& values) {
 RSuperellipse::~RSuperellipse() = default;
 
 flutter::DlRoundSuperellipse RSuperellipse::rsuperellipse() const {
-  // The Flutter rect may be inverted (upside down, backward, or both)
-  // Historically, Skia would normalize such rects but we will do that
-  // manually below when we construct the Impeller RoundRect
-  flutter::DlRect raw_rect = flutter::DlRect::MakeLTRB(
-      _value32(0), _value32(1), _value32(2), _value32(3));
-
-  // Flutter has radii in TL,TR,BR,BL (clockwise) order,
-  // but Impeller uses TL,TR,BL,BR (zig-zag) order
-  impeller::RoundingRadii radii = {
-      .top_left = flutter::DlSize(_value32(4), _value32(5)),
-      .top_right = flutter::DlSize(_value32(6), _value32(7)),
-      .bottom_left = flutter::DlSize(_value32(10), _value32(11)),
-      .bottom_right = flutter::DlSize(_value32(8), _value32(9)),
-  };
-
-  return flutter::DlRoundSuperellipse::MakeRectRadii(raw_rect.GetPositive(),
-                                                     radii);
+  return flutter::DlRoundSuperellipse::MakeRectRadii(bounds(), radii());
 }
 
 double RSuperellipse::getValue(int index) const {
@@ -46,8 +32,41 @@ double RSuperellipse::getValue(int index) const {
   return values_[index];
 }
 
-impeller::Scalar RSuperellipse::_value32(int index) const {
-  return static_cast<impeller::Scalar>(getValue(index));
+bool RSuperellipse::contains(double x, double y) const {
+  return param().Contains(
+      DlPoint(static_cast<Scalar>(x), static_cast<Scalar>(y)));
+}
+
+impeller::Scalar RSuperellipse::value32(int index) const {
+  return static_cast<Scalar>(getValue(index));
+}
+
+flutter::DlRect RSuperellipse::bounds() const {
+  // The Flutter rect may be inverted (upside down, backward, or both)
+  // Historically, Skia would normalize such rects but we will do that
+  // manually below when we construct the Impeller RoundRect
+  flutter::DlRect raw_rect =
+      flutter::DlRect::MakeLTRB(value32(0), value32(1), value32(2), value32(3));
+  return raw_rect.GetPositive();
+}
+
+impeller::RoundingRadii RSuperellipse::radii() const {
+  // Flutter has radii in TL,TR,BR,BL (clockwise) order,
+  // but Impeller uses TL,TR,BL,BR (zig-zag) order
+  return impeller::RoundingRadii{
+      .top_left = flutter::DlSize(value32(4), value32(5)),
+      .top_right = flutter::DlSize(value32(6), value32(7)),
+      .bottom_left = flutter::DlSize(value32(10), value32(11)),
+      .bottom_right = flutter::DlSize(value32(8), value32(9)),
+  };
+}
+
+const impeller::RoundSuperellipseParam& RSuperellipse::param() const {
+  if (!cached_param_.has_value()) {
+    cached_param_ =
+        impeller::RoundSuperellipseParam::MakeBoundsRadii(bounds(), radii());
+  }
+  return cached_param_.value();
 }
 
 }  // namespace flutter

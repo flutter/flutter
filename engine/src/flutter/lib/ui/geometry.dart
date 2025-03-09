@@ -1839,14 +1839,11 @@ class RRect with _RRectLike<RRect> {
 /// corners. It closely matches the `RoundedRectangle` shape in SwiftUI with the
 /// `.continuous` corner style.
 ///
-/// The [RSuperellipse] class is a data container and does not perform
-/// computations directly. For any calculations involving the shape, such as
-/// checking whether a point is inside or using it for drawing, it must first be
-/// converted to a [ComputedRSuperellipse] by calling [computed].
-///
-/// Unlike [RSuperellipse], [ComputedRSuperellipse] is not const and can cache
-/// intermediate values for better performance. For efficiency, it is
-/// recommended to reuse and cache [ComputedRSuperellipse] instances whenever
+/// The [RSuperellipse] class is `const`-constructible, making it efficiently
+/// comparable. However, this also means that computations must start from
+/// scratch each time they are performed. The [computed] method returns an
+/// instance that can cache intermediate values, improving performance. For
+/// efficiency, it is recommended to reuse and cache these instances whenever
 /// possible.
 class RSuperellipse with _RRectLike<RSuperellipse> {
   /// Construct a rounded rectangle from its left, top, right, and bottom edges,
@@ -2079,12 +2076,17 @@ class RSuperellipse with _RRectLike<RSuperellipse> {
   @override
   final double blRadiusY;
 
-  /// Returns a [ComputedRSuperellipse] with the same parameters.
+  /// Returns an [RSuperellipse] instance with the same parameters that can
+  /// cache intermediate values.
   ///
-  /// If this object is already a [ComputedRSuperellipse], this method returns
-  /// itself instead of creating a new instance.
-  ComputedRSuperellipse computed() {
-    return ComputedRSuperellipse._raw(
+  /// All shape-related calculations (such as [contains] or drawing) are
+  /// performed by delegating to computed instances. Consider reusing computed
+  /// instances for better performance.
+  ///
+  /// If this object is already computed, this method returns itself instead of
+  /// creating a new instance.
+  RSuperellipse computed() {
+    return _ComputedRSuperellipse._raw(
       top: top,
       left: left,
       right: right,
@@ -2098,6 +2100,10 @@ class RSuperellipse with _RRectLike<RSuperellipse> {
       brRadiusX: brRadiusX,
       brRadiusY: brRadiusY,
     );
+  }
+
+  bool contains(Offset offset) {
+    return computed().contains(offset);
   }
 
   /// A rounded rectangle with all the values set to zero.
@@ -2134,17 +2140,17 @@ class RSuperellipse with _RRectLike<RSuperellipse> {
   }
 }
 
-/// A [RSuperellipse] that supports computations.
-///
-/// This class is created by calling [RSuperellipse.computed].
-///
-/// [ComputedRSuperellipse] is not const and can therefore cache intermediate
-/// values for better performance. For efficiency, it is recommended to reuse
-/// and cache [ComputedRSuperellipse] instances whenever possible.
-class ComputedRSuperellipse extends NativeFieldWrapperClass1
+// A [RSuperellipse] that supports computations.
+//
+// This class is created by calling [RSuperellipse.computed].
+//
+// [ComputedRSuperellipse] is not const and can therefore cache intermediate
+// values for better performance. For efficiency, it is recommended to reuse
+// and cache [ComputedRSuperellipse] instances whenever possible.
+class _ComputedRSuperellipse extends NativeFieldWrapperClass1
     with _RRectLike<RSuperellipse>
     implements RSuperellipse {
-  ComputedRSuperellipse._raw({
+  _ComputedRSuperellipse._raw({
     required double left,
     required double top,
     required double right,
@@ -2248,11 +2254,19 @@ class ComputedRSuperellipse extends NativeFieldWrapperClass1
   }
 
   @override
-  ComputedRSuperellipse computed() => this;
+  bool contains(Offset offset) {
+    return _contains(offset.dx, offset.dy);
+  }
+
+  @Native<Bool Function(Pointer<Void>, Double, Double)>(symbol: 'RSuperellipse::contains')
+  external bool _contains(double x, double y);
+
+  @override
+  RSuperellipse computed() => this;
 
   @override
   String toString() {
-    return _toString(className: 'ComputedRSuperellipse');
+    return _toString(className: '_ComputedRSuperellipse');
   }
 
   static const int _kValueSize = 12;

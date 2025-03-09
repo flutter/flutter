@@ -285,6 +285,7 @@ typedef CanvasPath Path;
   V(Picture, toImage)                            \
   V(Picture, toImageSync)                        \
   V(RSuperellipse, getValue)                     \
+  V(RSuperellipse, contains)                     \
   V(SceneBuilder, addPerformanceOverlay)         \
   V(SceneBuilder, addPicture)                    \
   V(SceneBuilder, addPlatformView)               \
