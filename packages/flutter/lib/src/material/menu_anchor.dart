@@ -2944,7 +2944,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   final Axis orientation;
 
   // The orientation of this menu's parent.
-  final Axis parentOrientation;
+  final Axis? parentOrientation;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -3021,7 +3021,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
           }
         }
       } else if (offRightSide(x)) {
-        if (parentOrientation != orientation) {
+        if (parentOrientation != null && parentOrientation != orientation) {
           x = allowedRect.right - childSize.width;
         } else {
           final double newX = anchorRect.left - childSize.width - alignmentOffset.dx;
@@ -3048,10 +3048,10 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         final double newY = anchorRect.top - childSize.height;
         if (!offTop(newY)) {
           // Only move the menu up if its parent is horizontal (MenuAnchor/MenuBar).
-          if (parentOrientation == Axis.horizontal) {
-            y = newY - alignmentOffset.dy;
-          } else {
+          if (parentOrientation == Axis.vertical) {
             y = newY;
+          } else {
+            y = newY - alignmentOffset.dy;
           }
         } else {
           y = allowedRect.bottom - childSize.height;
@@ -3396,7 +3396,7 @@ class _Submenu extends StatelessWidget {
                 alignmentOffset: alignmentOffset,
                 menuPosition: menuPosition.position,
                 orientation: anchor._orientation,
-                parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
+                parentOrientation: anchor._parent?._orientation,
               ),
               child: menuPanel,
             );
