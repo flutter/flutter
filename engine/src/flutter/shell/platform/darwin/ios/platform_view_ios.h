@@ -104,7 +104,8 @@ class PlatformViewIOS final : public PlatformView {
 
   // |PlatformView|
   void UpdateSemantics(flutter::SemanticsNodeUpdates update,
-                       flutter::CustomAccessibilityActionUpdates actions) override;
+                       flutter::CustomAccessibilityActionUpdates actions,
+                       int64_t view_id) override;
 
   // |PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
