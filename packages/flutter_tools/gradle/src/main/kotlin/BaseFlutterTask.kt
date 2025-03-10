@@ -68,7 +68,7 @@ abstract class BaseFlutterTask : DefaultTask() {
     var sourceDir: File? = null
 
     @Internal
-    lateinit var intermediateDir: File
+    var intermediateDir: File? = null
 
     @Optional
     @Input

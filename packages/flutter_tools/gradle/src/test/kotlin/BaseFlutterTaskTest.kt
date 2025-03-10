@@ -51,7 +51,7 @@ class BaseFlutterTaskTest {
         every { baseFlutterTask.sourceDir!!.isDirectory } returns true
 
         every { baseFlutterTask.intermediateDir } returns BaseFlutterTaskPropertiesTest.intermediateDirFileTest
-        every { baseFlutterTask.intermediateDir.mkdirs() } returns false
+        every { baseFlutterTask.intermediateDir!!.mkdirs() } returns false
 
         val helper = BaseFlutterTaskHelper(baseFlutterTask)
         assertDoesNotThrow { helper.checkPreConditions() }

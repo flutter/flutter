@@ -9,7 +9,7 @@ import org.gradle.process.ExecSpec
 import java.nio.file.Paths
 
 class BaseFlutterTaskHelper(
-    private var baseFlutterTask: BaseFlutterTask
+    private var baseFlutterTask: BaseFlutterTask,
 ) {
     @VisibleForTesting
     internal var gradleErrorMessage = "Invalid Flutter source directory: ${baseFlutterTask.sourceDir}"
@@ -40,7 +40,7 @@ class BaseFlutterTaskHelper(
         if (baseFlutterTask.sourceDir == null || !baseFlutterTask.sourceDir!!.isDirectory) {
             throw GradleException(gradleErrorMessage)
         }
-        baseFlutterTask.intermediateDir.mkdirs()
+        baseFlutterTask.intermediateDir!!.mkdirs()
     }
 
     /**

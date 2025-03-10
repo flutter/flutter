@@ -82,7 +82,7 @@ class BaseFlutterTaskHelperTest {
 
         every { baseFlutterTask.intermediateDir } returns BaseFlutterTaskPropertiesTest.intermediateDirFileTest
         // There is already an intermediate directory, so there is no need to create it.
-        every { baseFlutterTask.intermediateDir.mkdirs() } returns false
+        every { baseFlutterTask.intermediateDir!!.mkdirs() } returns false
 
         val helper = BaseFlutterTaskHelper(baseFlutterTask)
         assertDoesNotThrow { helper.checkPreConditions() }
