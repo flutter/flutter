@@ -1026,7 +1026,6 @@ void main() {
     expect(events, <String>['down#1', 'up#1', 'down#2', 'panstart#2', 'panupdate#2', 'panend#2']);
   });
 
-
   testGesture('Does drag when consecutive taps is greater than minTaps', (GestureTester tester) {
     setUpTapAndPanGestureRecognizer(minTaps: 2);
 
@@ -1068,8 +1067,9 @@ void main() {
     ]);
   });
 
-
-  testGesture('Does not drag when consecutive taps is reset and less than min taps', (GestureTester tester) {
+  testGesture('Does not drag when consecutive taps is reset and less than min taps', (
+    GestureTester tester,
+  ) {
     setUpTapAndPanGestureRecognizer(minTaps: 3);
 
     final TestPointer pointer = TestPointer(5);
@@ -1129,7 +1129,6 @@ void main() {
       'cancel',
     ]);
   });
-
 
   // This is a regression or https://github.com/flutter/flutter/issues/102084.
   testGesture('Does not call onDragEnd if not provided', (GestureTester tester) {
