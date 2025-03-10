@@ -302,7 +302,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T>
 /// [AnimationController]) for the lifetime of your [State], then using a
 /// [SingleTickerProviderStateMixin] is more efficient. This is the common case.
 ///
-/// When creating multiple [AnimationController]s, using a single state with 
+/// When creating multiple [AnimationController]s, using a single state with
 /// [TickerProviderStateMixin] as vsync for all [AnimationController]s is more
 /// efficient than creating multiple states with
 /// [SingleTickerProviderStateMixin].
