@@ -942,7 +942,7 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Mouse cursor resolves in pressed/disabled states', (WidgetTester tester) async {
+  testWidgets('Mouse cursor resolves in enabled/disabled states', (WidgetTester tester) async {
     Widget buildButton({required bool enabled, MouseCursor? cursor}) {
       return CupertinoApp(
         home: Center(
@@ -971,7 +971,7 @@ void main() {
     await gesture.removePointer();
 
     // Test disabled state mouse cursor
-    await tester.pumpWidget(buildButton(enabled: false, cursor: SystemMouseCursors.forbidden));
+    await tester.pumpWidget(buildButton(enabled: false, cursor: const _ButtonMouseCursor()));
     await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
     await tester.pump();
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoButton)));
@@ -982,12 +982,12 @@ void main() {
     await gesture.removePointer();
 
     // Test clicked state mouse cursor
-    await tester.pumpWidget(buildButton(enabled: true, cursor: SystemMouseCursors.click));
+    await tester.pumpWidget(buildButton(enabled: true, cursor: const _ButtonMouseCursor()));
     await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      SystemMouseCursors.basic,
     );
   });
 }
