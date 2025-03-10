@@ -304,7 +304,8 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T>
 ///
 /// When creating multiple [AnimationController]s, using a single state with 
 /// [TickerProviderStateMixin] as vsync for all [AnimationController]s is more
-/// efficient than creating multiple states with [SingleTickerProviderStateMixin].
+/// efficient than creating multiple states with
+/// [SingleTickerProviderStateMixin].
 @optionalTypeArgs
 mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements TickerProvider {
   Set<Ticker>? _tickers;
