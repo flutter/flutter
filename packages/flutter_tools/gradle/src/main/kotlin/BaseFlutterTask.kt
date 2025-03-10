@@ -146,7 +146,6 @@ abstract class BaseFlutterTask : DefaultTask() {
     fun buildBundle() {
         val helper = BaseFlutterTaskHelper(baseFlutterTask = this)
         helper.checkPreConditions()
-
         logging.captureStandardError(LogLevel.ERROR)
         project.exec(helper.createExecSpecActionFromTask())
     }
