@@ -99,11 +99,13 @@ class TextFrame {
 
   const Matrix& GetTransform() const { return transform_; }
 
+  Point GetOffset() const;
+
+  Matrix GetOffsetTransform() const;
+
  private:
   friend class TypographerContextSkia;
   friend class LazyGlyphAtlas;
-
-  Point GetOffset() const;
 
   std::optional<GlyphProperties> GetProperties() const;
 

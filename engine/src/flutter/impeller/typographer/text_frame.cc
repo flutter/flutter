@@ -84,6 +84,10 @@ Point TextFrame::ComputeSubpixelPosition(
   }
 }
 
+Matrix TextFrame::GetOffsetTransform() const {
+  return transform_ * Matrix::MakeTranslation(offset_);
+}
+
 void TextFrame::SetPerFrameData(Scalar scale,
                                 Point offset,
                                 const Matrix& transform,
