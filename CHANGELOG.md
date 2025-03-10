@@ -29,6 +29,7 @@ INTERNAL NOTE
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
 - [flutter/164036](https://github.com/flutter/flutter/pull/164036) - Increase the maximum number of concurrent background image decode tasks to 64.
+- [flutter/162198](https://github.com/flutter/flutter/issues/162198) Fixes double-download of canvaskit.wasm
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
