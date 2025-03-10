@@ -149,15 +149,15 @@ class SensitiveContentHost {
   }
 
   void _unregister(ContentSensitivity widgetSensitivityLevel) {
-    if (!_contentSenstivityIsSupported!) {
-      // Setting content sensitivity is not supported on this device.
-      return;
-    }
-
     assert(
       _contentSenstivityIsSupported != null,
       'SensitiveContentHost.register must be called before SensitiveContentHost.unregister',
     );
+
+    if (!_contentSenstivityIsSupported!) {
+      // Setting content sensitivity is not supported on this device.
+      return;
+    }
 
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
     _contentSensitivitySetting.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
