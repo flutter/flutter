@@ -28,7 +28,7 @@ class BaseFlutterTaskHelperTest {
         internal const val EXTRA_GEN_SNAPSHOT_OPTIONS_TEST = "--debugger"
         internal const val SPLIT_DEBUG_INFO_TEST = "/path/to/build/debug_info_directory"
         internal const val CODE_SIZE_DIRECTORY_TEST = "/path/to/build/code_size_directory"
-        internal const val MIN_SDK_VERSION_TEST = 21
+        val MIN_SDK_VERSION_TEST = DependencyVersionChecker.warnMinSdkVersion
         internal const val BUNDLE_SK_SL_PATH_TEST = "/path/to/custom/shaders"
         internal const val FLUTTER_TARGET_FILE_PATH = "/path/to/flutter/examples/splash/lib/main.dart"
         internal const val FLUTTER_TARGET_PATH = "/path/to/main.dart"
