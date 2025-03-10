@@ -24,6 +24,9 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 INTERNAL NOTE
 -->
+### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
+
+#164024: Add back an empty io.flutter.app.FlutterApplication for Android apps that reference that class post v2 embedder migration
 
 ## Flutter 3.29.1 Changes
 
