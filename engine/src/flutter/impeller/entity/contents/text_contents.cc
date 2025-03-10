@@ -106,8 +106,7 @@ void TextContents::ComputeVertexData(
   for (const TextRun& run : frame->GetRuns()) {
     const Font& font = run.GetFont();
     Scalar rounded_scale = frame->GetScale();
-    const Matrix transform =
-        frame->GetTransform() * Matrix::MakeTranslation(frame->GetOffset());
+    const Matrix transform = frame->GetOffsetTransform();
     FontGlyphAtlas* font_atlas = nullptr;
 
     // Adjust glyph position based on the subpixel rounding
