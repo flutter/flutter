@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "surface.h"
+#include <emscripten/wasm_worker.h>
 #include <algorithm>
 
 #include "skwasm_support.h"
@@ -13,6 +14,23 @@
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLMakeWebGLInterface.h"
 
 using namespace Skwasm;
+
+Surface::Surface() {
+  if (skwasm_isSingleThreaded()) {
+    skwasm_connectThread(0);
+  } else {
+    assert(emscripten_is_main_browser_thread());
+
+    _thread = emscripten_malloc_wasm_worker(65536);
+    emscripten_wasm_worker_post_function_v(_thread, []() {
+      // Listen to the main thread from the worker
+      skwasm_connectThread(0);
+    });
+
+    // Listen to messages from the worker
+    skwasm_connectThread(_thread);
+  }
+}
 
 // Worker thread only
 void Surface::dispose() {
@@ -59,15 +77,7 @@ void Surface::setCallbackHandler(CallbackHandler* callbackHandler) {
 }
 
 // Worker thread only
-void Surface::_runWorker() {
-  _init();
-  emscripten_exit_with_live_runtime();
-}
-
-// Worker thread only
 void Surface::_init() {
-  // Listen to messages from the main thread
-  skwasm_connectThread(0);
   _glContext = skwasm_createOffscreenCanvas(256, 256);
   if (!_glContext) {
     printf("Failed to create context!\n");
@@ -95,6 +105,8 @@ void Surface::_init() {
 
   emscripten_glGetIntegerv(GL_SAMPLES, &_sampleCount);
   emscripten_glGetIntegerv(GL_STENCIL_BITS, &_stencil);
+
+  _isInitialized = true;
 }
 
 // Worker thread only
@@ -122,6 +134,10 @@ void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
                                      int pictureCount,
                                      uint32_t callbackId,
                                      double rasterStart) {
+  if (!_isInitialized) {
+    _init();
+  }
+
   // This is populated by the `captureImageBitmap` call the first time it is
   // passed in.
   SkwasmObject imageBitmapArray = __builtin_wasm_ref_null_extern();
@@ -147,6 +163,10 @@ void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
 void Surface::rasterizeImageOnWorker(SkImage* image,
                                      ImageByteFormat format,
                                      uint32_t callbackId) {
+  if (!_isInitialized) {
+    _init();
+  }
+
   // We handle PNG encoding with browser APIs so that we can omit libpng from
   // skia to save binary size.
   assert(format != ImageByteFormat::png);
@@ -280,4 +300,8 @@ SKWASM_EXPORT void surface_onRasterizeComplete(Surface* surface,
                                                SkData* data,
                                                uint32_t callbackId) {
   surface->onRasterizeComplete(callbackId, data);
+}
+
+SKWASM_EXPORT bool skwasm_isMultiThreaded() {
+  return !skwasm_isSingleThreaded();
 }

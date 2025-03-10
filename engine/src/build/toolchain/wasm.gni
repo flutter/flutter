@@ -11,7 +11,7 @@ declare_args() {
   # The location of an activated embedded emsdk.
   emsdk_dir = rebase_path("//flutter/prebuilts/emsdk")
 
-  wasm_use_pthreads = false
+  wasm_use_workers = false
   wasm_shared_memory = false
   wasm_use_dwarf = false
 }
