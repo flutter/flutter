@@ -4232,6 +4232,7 @@ class EditableTextState extends State<EditableText>
   static const Curve _caretAnimationCurve = Curves.fastOutSlowIn;
 
   bool _showCaretOnScreenScheduled = false;
+  bool _scrollToRevealScheduled = false;
 
   void _scheduleShowCaretOnScreen({required bool withAnimation}) {
     if (_showCaretOnScreenScheduled) {
@@ -4307,6 +4308,40 @@ class EditableTextState extends State<EditableText>
         renderEditable.showOnScreen(rect: caretPadding.inflateRect(rectToReveal));
       }
     }, debugLabel: 'EditableText.showCaret');
+  }
+
+  // Scrolls the screen to reveal a read-only field and ensures it is visible on the screen when focused.
+  void _scrollToReveal() {
+    if (_scrollToRevealScheduled) {
+      return;
+    }
+    _scrollToRevealScheduled = true;
+
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      _scrollToRevealScheduled = false;
+      // Since we are in a post frame callback, check currentContext in case
+      // RenderEditable has been disposed (in which case it will be null).
+      final RenderEditable? renderEditable =
+          _editableKey.currentContext?.findRenderObject() as RenderEditable?;
+
+      if (renderEditable == null) {
+        return;
+      }
+
+      final RevealedOffset targetOffset = _getOffsetToRevealCaret(renderEditable.paintBounds);
+
+      _scrollController.animateTo(
+        targetOffset.offset,
+        duration: _caretAnimationDuration,
+        curve: _caretAnimationCurve,
+      );
+
+      renderEditable.showOnScreen(
+        rect: targetOffset.rect,
+        duration: _caretAnimationDuration,
+        curve: _caretAnimationCurve,
+      );
+    }, debugLabel: 'EditableText.scrollToReveal');
   }
 
   late double _lastBottomViewInset;
@@ -4609,6 +4644,8 @@ class EditableTextState extends State<EditableText>
       _lastBottomViewInset = View.of(context).viewInsets.bottom;
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
+      } else {
+        _scrollToReveal();
       }
       final TextSelection? updatedSelection = _adjustedSelectionWhenFocused();
       if (updatedSelection != null) {
