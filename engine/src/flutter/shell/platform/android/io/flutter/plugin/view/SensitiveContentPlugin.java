@@ -11,7 +11,6 @@ import android.os.Build;
 import android.view.View;
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
-import io.flutter.plugin.common.MethodChannel;
 
 /**
  * {@link SensitiveContentPlugin} is the implementation of all functionality needed to set and
@@ -51,25 +50,21 @@ public class SensitiveContentPlugin
    * mFlutterViewId} to the level specified by {@requestedContentSensitivity}.
    */
   @Override
-  public void setContentSensitivity(
-      @NonNull int requestedContentSensitivity, @NonNull MethodChannel.Result result) {
+  public void setContentSensitivity(@NonNull int requestedContentSensitivity) {
     if (!isSupported()) {
       // This feature is only available on >= API 35.
-      result.error("error", getNotSupportedErrorReason(), null);
-      return;
+      throw new IllegalStateException(getNotSupportedErrorReason());
     }
 
     final View flutterView = mFlutterActivity.findViewById(mFlutterViewId);
     if (flutterView == null) {
-      result.error("error", getFlutterViewNotFoundErrorReason(), null);
-      return;
+      throw new IllegalArgumentException(getFlutterViewNotFoundErrorReason());
     }
 
     final int currentContentSensitivity = flutterView.getContentSensitivity();
 
     if (currentContentSensitivity == requestedContentSensitivity) {
       // Content sensitivity for the requested View already set to requestedContentSensitivity.
-      result.success(null);
       return;
     }
 
@@ -79,8 +74,6 @@ public class SensitiveContentPlugin
     // Invalidate the View to force a redraw in order to ensure that it updates to be
     // obscured/unobscured as expected.
     flutterView.invalidate();
-
-    result.success(null);
   }
 
   /**
@@ -88,17 +81,15 @@ public class SensitiveContentPlugin
    * mFlutterViewId}.
    */
   @Override
-  public Integer getContentSensitivity(@NonNull MethodChannel.Result result) {
+  public Integer getContentSensitivity() {
     if (!isSupported()) {
       // This feature is only available on >= API 35.
-      result.error("error", getNotSupportedErrorReason(), null);
-      return null;
+      throw new IllegalStateException(getNotSupportedErrorReason());
     }
 
     final View flutterView = mFlutterActivity.findViewById(mFlutterViewId);
     if (flutterView == null) {
-      result.error("error", getFlutterViewNotFoundErrorReason(), null);
-      return null;
+      throw new IllegalArgumentException(getFlutterViewNotFoundErrorReason());
     }
 
     final int currentContentSensitivity = flutterView.getContentSensitivity();
@@ -111,11 +102,7 @@ public class SensitiveContentPlugin
    * <p>It is supported on devices running Android API >= 35.
    */
   @Override
-  public void isSupported(@NonNull MethodChannel.Result result) {
-    result.success(isSupported());
-  }
-
-  private boolean isSupported() {
+  public boolean isSupported() {
     return Build.VERSION.SDK_INT >= API_LEVELS.API_35;
   }
 
