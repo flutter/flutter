@@ -114,6 +114,8 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.cell => _semanticsCell,
     SemanticsRole.columnHeader => _semanticsColumnHeader,
     SemanticsRole.radioGroup => _semanticsRadioGroup,
+    SemanticsRole.alert => _noCheckRequired,
+    SemanticsRole.status => _noCheckRequired,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.row => _unimplemented,

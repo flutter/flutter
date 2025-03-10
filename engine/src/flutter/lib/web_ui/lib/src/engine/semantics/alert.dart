@@ -9,17 +9,17 @@ import 'semantics.dart';
 ///
 /// Uses the ARIA role "alert".
 ///
-/// An alert is similar to [SemanticStatus], but with higher priority.
+/// An alert is similar to [SemanticStatus], but with a higher importantness.
+/// For example, a form validation error text.
 class SemanticAlert extends SemanticRole {
   SemanticAlert(SemanticsObject semanticsObject)
     : super.withBasics(
         EngineSemanticsRole.alert,
         semanticsObject,
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
-      );
-
-  @override
-  DomElement createElement() => createDomElement('alert');
+      ) {
+    setAriaRole('alert');
+  }
 
   @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
@@ -29,18 +29,17 @@ class SemanticAlert extends SemanticRole {
 ///
 /// Uses the ARIA role "status".
 ///
-/// A status is usually a current status update, such as loading messages, that
-/// does not justify to be a [SemanticAlert].
+/// A status is typically used for status updates, such as loading messages,
+/// which do not justify to be [SemanticAlert]s.
 class SemanticStatus extends SemanticRole {
   SemanticStatus(SemanticsObject semanticsObject)
     : super.withBasics(
         EngineSemanticsRole.status,
         semanticsObject,
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
-      );
-
-  @override
-  DomElement createElement() => createDomElement('status');
+      ) {
+    setAriaRole('status');
+  }
 
   @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
