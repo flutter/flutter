@@ -68,6 +68,9 @@ struct FlAccessibleNodePrivate {
   // Weak reference to the engine this node is created for.
   FlEngine* engine;
 
+  /// The unique identifier of the view to which this node belongs.
+  FlutterViewId view_id;
+
   // Weak reference to the parent node of this one or %NULL.
   AtkObject* parent;
 
@@ -417,7 +420,8 @@ static void fl_accessible_node_perform_action_impl(
     FlutterSemanticsAction action,
     GBytes* data) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
-  fl_engine_dispatch_semantics_action(priv->engine, priv->id, action, data);
+  fl_engine_dispatch_semantics_action(priv->engine, priv->view_id, priv->id,
+                                      action, data);
 }
 
 static void fl_accessible_node_class_init(FlAccessibleNodeClass* klass) {
@@ -479,9 +483,12 @@ static void fl_accessible_node_init(FlAccessibleNode* self) {
   priv->children = g_ptr_array_new_with_free_func(g_object_unref);
 }
 
-FlAccessibleNode* fl_accessible_node_new(FlEngine* engine, int32_t id) {
-  FlAccessibleNode* self = FL_ACCESSIBLE_NODE(g_object_new(
-      fl_accessible_node_get_type(), "engine", engine, "id", id, nullptr));
+FlAccessibleNode* fl_accessible_node_new(FlEngine* engine,
+                                         FlutterViewId view_id,
+                                         int32_t id) {
+  FlAccessibleNode* self = FL_ACCESSIBLE_NODE(
+      g_object_new(fl_accessible_node_get_type(), "engine", engine, "view_id",
+                   view_id, "id", id, nullptr));
   return self;
 }
 

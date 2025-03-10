@@ -54,7 +54,7 @@ class MockDelegate : public Engine::Delegate {
  public:
   MOCK_METHOD(void,
               OnEngineUpdateSemantics,
-              (SemanticsNodeUpdates, CustomAccessibilityActionUpdates),
+              (SemanticsNodeUpdates, CustomAccessibilityActionUpdates, int64_t),
               (override));
   MOCK_METHOD(void,
               OnEngineHandlePlatformMessage,

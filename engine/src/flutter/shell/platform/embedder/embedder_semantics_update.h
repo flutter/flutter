@@ -48,7 +48,8 @@ class EmbedderSemanticsUpdate {
 class EmbedderSemanticsUpdate2 {
  public:
   EmbedderSemanticsUpdate2(const SemanticsNodeUpdates& nodes,
-                           const CustomAccessibilityActionUpdates& actions);
+                           const CustomAccessibilityActionUpdates& actions,
+                           int64_t view_id);
 
   ~EmbedderSemanticsUpdate2();
 

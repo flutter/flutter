@@ -450,10 +450,11 @@ void Engine::DispatchPointerDataPacket(
   pointer_data_dispatcher_->DispatchPacket(std::move(packet), trace_flow_id);
 }
 
-void Engine::DispatchSemanticsAction(int node_id,
+void Engine::DispatchSemanticsAction(int64_t view_id,
+                                     int node_id,
                                      SemanticsAction action,
                                      fml::MallocMapping args) {
-  runtime_controller_->DispatchSemanticsAction(node_id, action,
+  runtime_controller_->DispatchSemanticsAction(view_id, node_id, action,
                                                std::move(args));
 }
 
@@ -496,8 +497,10 @@ void Engine::Render(int64_t view_id,
 }
 
 void Engine::UpdateSemantics(SemanticsNodeUpdates update,
-                             CustomAccessibilityActionUpdates actions) {
-  delegate_.OnEngineUpdateSemantics(std::move(update), std::move(actions));
+                             CustomAccessibilityActionUpdates actions,
+                             int64_t view_id) {
+  delegate_.OnEngineUpdateSemantics(std::move(update), std::move(actions),
+                                    view_id);
 }
 
 void Engine::HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {

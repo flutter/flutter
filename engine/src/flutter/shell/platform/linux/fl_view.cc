@@ -222,8 +222,16 @@ static void view_added_cb(GObject* object,
 }
 
 // Called when the engine updates accessibility.
-static void update_semantics_cb(FlView* self,
-                                const FlutterSemanticsUpdate2* update) {
+static void update_semantics_cb(FlEngine* engine,
+                                const FlutterSemanticsUpdate2* update,
+                                gpointer user_data) {
+  FlView* self = FL_VIEW(user_data);
+
+  // A semantics update is routed to a particular view.
+  if (update->view_id != self->view_id) {
+    return;
+  }
+
   fl_view_accessible_handle_update_semantics(self->view_accessible, update);
 }
 
@@ -485,7 +493,7 @@ static void realize_cb(FlView* self) {
 
   handle_geometry_changed(self);
 
-  self->view_accessible = fl_view_accessible_new(self->engine);
+  self->view_accessible = fl_view_accessible_new(self->engine, self->view_id);
   fl_socket_accessible_embed(
       FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
       atk_plug_get_id(ATK_PLUG(self->view_accessible)));
@@ -780,9 +788,12 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, engine);
 
+  // TODO(mattkae): We should make the fl_engine_set_update_semantics_handler
+  // that iterates over all of the views and finds the right one. At the moment,
+  // we only update semantics on the first view.
+
   g_signal_connect_swapped(self->gl_area, "realize",
                            G_CALLBACK(secondary_realize_cb), self);
-
   return self;
 }
 

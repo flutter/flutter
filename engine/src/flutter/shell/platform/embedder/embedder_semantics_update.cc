@@ -89,7 +89,8 @@ EmbedderSemanticsUpdate::~EmbedderSemanticsUpdate() {}
 
 EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
     const SemanticsNodeUpdates& nodes,
-    const CustomAccessibilityActionUpdates& actions) {
+    const CustomAccessibilityActionUpdates& actions,
+    int64_t view_id) {
   nodes_.reserve(nodes.size());
   node_pointers_.reserve(nodes.size());
   actions_.reserve(actions.size());
@@ -111,13 +112,12 @@ EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
     action_pointers_.push_back(&actions_[i]);
   }
 
-  update_ = {
-      .struct_size = sizeof(FlutterSemanticsUpdate2),
-      .node_count = node_pointers_.size(),
-      .nodes = node_pointers_.data(),
-      .custom_action_count = action_pointers_.size(),
-      .custom_actions = action_pointers_.data(),
-  };
+  update_ = {.struct_size = sizeof(FlutterSemanticsUpdate2),
+             .node_count = node_pointers_.size(),
+             .nodes = node_pointers_.data(),
+             .custom_action_count = action_pointers_.size(),
+             .custom_actions = action_pointers_.data(),
+             .view_id = view_id};
 }
 
 EmbedderSemanticsUpdate2::~EmbedderSemanticsUpdate2() {}
