@@ -9,15 +9,15 @@ import 'semantics.dart';
 ///
 /// Uses the ARIA role "alert".
 class SemanticAlert extends SemanticRole {
-  SemanticHeader(SemanticsObject semanticsObject)
-      : super.withBasics(
-    EngineSemanticsRole.alert,
-    semanticsObject,
-    preferredLabelRepresentation: LabelRepresentation.ariaLabel,
-  );
+  SemanticAlert(SemanticsObject semanticsObject)
+    : super.withBasics(
+        EngineSemanticsRole.alert,
+        semanticsObject,
+        preferredLabelRepresentation: LabelRepresentation.ariaLabel,
+      );
 
   @override
-  DomElement createElement() => createDomElement('header');
+  DomElement createElement() => createDomElement('alert');
 
   @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
