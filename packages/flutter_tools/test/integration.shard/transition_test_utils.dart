@@ -47,7 +47,9 @@ abstract class Transition {
     if (pattern is RegExp) {
       // Ideally this would also distinguish between "contains" and "equals"
       // operation.
-      return line.contains(pattern);
+      final bool contains = line.contains(pattern);
+      debugPrint('$line contains $pattern: $contains');
+      return contains;
     }
     return contains ? line.contains(pattern) : line == pattern;
   }
