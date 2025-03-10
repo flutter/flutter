@@ -631,8 +631,9 @@ void DlDispatcherBase::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
-                                         const DlRoundSuperellipse& inner) {
+void DlDispatcherBase::drawDiffRoundSuperellipse(
+    const DlRoundSuperellipse& outer,
+    const DlRoundSuperellipse& inner) {
   AUTO_DEPTH_WATCHER(1u);
 
   PathBuilder builder;

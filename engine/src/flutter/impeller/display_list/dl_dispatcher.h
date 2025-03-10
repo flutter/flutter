@@ -185,7 +185,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
 
   // |flutter::DlOpReceiver|
   void drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
-                          const DlRoundSuperellipse& inner) override;
+                                 const DlRoundSuperellipse& inner) override;
 
   // |flutter::DlOpReceiver|
   void drawPath(const DlPath& path) override;

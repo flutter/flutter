@@ -155,7 +155,7 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
                          const DlRoundRect& inner) override;
   void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override;
   void drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
-                         const DlRoundSuperellipse& inner) override;
+                                 const DlRoundSuperellipse& inner) override;
   void drawPath(const DlPath& path) override;
   void drawArc(const DlRect& oval_bounds,
                DlScalar start_degrees,
@@ -457,9 +457,9 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
     RecordByType(DisplayListOpType::kDrawRoundSuperellipse);
   }
   void drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
-                         const DlRoundSuperellipse& inner) override {
+                                 const DlRoundSuperellipse& inner) override {
     RecordByType(DisplayListOpType::kDrawDiffRoundSuperellipse);
- }
+  }
   void drawPath(const DlPath& path) override {
     RecordByType(DisplayListOpType::kDrawPath);
   }

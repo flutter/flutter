@@ -1271,8 +1271,9 @@ void DisplayListBuilder::DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawRSuperellipseFlags);
   drawRoundSuperellipse(rse);
 }
-void DisplayListBuilder::drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
-                                           const DlRoundSuperellipse& inner) {
+void DisplayListBuilder::drawDiffRoundSuperellipse(
+    const DlRoundSuperellipse& outer,
+    const DlRoundSuperellipse& inner) {
   DisplayListAttributeFlags flags = kDrawDRSuperellipseFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect &&
@@ -1282,9 +1283,10 @@ void DisplayListBuilder::drawDiffRoundSuperellipse(const DlRoundSuperellipse& ou
     UpdateLayerResult(result);
   }
 }
-void DisplayListBuilder::DrawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
-                                           const DlRoundSuperellipse& inner,
-                                           const DlPaint& paint) {
+void DisplayListBuilder::DrawDiffRoundSuperellipse(
+    const DlRoundSuperellipse& outer,
+    const DlRoundSuperellipse& inner,
+    const DlPaint& paint) {
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawDRSuperellipseFlags);
   drawDiffRoundSuperellipse(outer, inner);
 }

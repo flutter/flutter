@@ -69,7 +69,7 @@ void DlOpSpy::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
   did_draw_ |= will_draw_;
 }
 void DlOpSpy::drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
-                                const DlRoundSuperellipse& inner) {
+                                        const DlRoundSuperellipse& inner) {
   did_draw_ |= will_draw_;
 }
 void DlOpSpy::drawPath(const DlPath& path) {

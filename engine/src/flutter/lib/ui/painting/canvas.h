@@ -98,10 +98,10 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                          Dart_Handle paint_objects,
                          Dart_Handle paint_data);
 
-void drawDRSuperellipse(const RSuperellipse* outer,
-                        const RSuperellipse* inner,
-                        Dart_Handle paint_objects,
-                        Dart_Handle paint_data);
+  void drawDRSuperellipse(const RSuperellipse* outer,
+                          const RSuperellipse* inner,
+                          Dart_Handle paint_objects,
+                          Dart_Handle paint_data);
 
   void drawOval(double left,
                 double top,

@@ -780,12 +780,13 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        {
            {1, 104, 1,
             [](DlOpReceiver& r) {
-              r.drawDiffRoundSuperellipse(kTestRSuperellipse, kTestInnerRSuperellipse);
+              r.drawDiffRoundSuperellipse(kTestRSuperellipse,
+                                          kTestInnerRSuperellipse);
             }},
            {1, 104, 1,
             [](DlOpReceiver& r) {
               r.drawDiffRoundSuperellipse(kTestRSuperellipse.Shift(5, 5),
-                                  kTestInnerRSuperellipse.Shift(4, 4));
+                                          kTestInnerRSuperellipse.Shift(4, 4));
             }},
        }},
       {"DrawPath",

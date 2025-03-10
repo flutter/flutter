@@ -316,16 +316,17 @@ void Canvas::drawRSuperellipse(const RSuperellipse& rse,
 }
 
 void Canvas::drawDRSuperellipse(const RSuperellipse* outer,
-                        const RSuperellipse* inner,
-                        Dart_Handle paint_objects,
-                        Dart_Handle paint_data) {
+                                const RSuperellipse* inner,
+                                Dart_Handle paint_objects,
+                                Dart_Handle paint_data) {
   Paint paint(paint_objects, paint_data);
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
     paint.paint(dl_paint, kDrawDRSuperellipseFlags, DlTileMode::kDecal);
-    builder()->DrawDiffRoundSuperellipse(outer->rsuperellipse(), inner->rsuperellipse(), dl_paint);
+    builder()->DrawDiffRoundSuperellipse(outer->rsuperellipse(),
+                                         inner->rsuperellipse(), dl_paint);
   }
 }
 

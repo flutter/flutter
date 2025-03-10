@@ -96,7 +96,7 @@ class IgnoreDrawDispatchHelper : public virtual DlOpReceiver {
   void drawDiffRoundRect(const DlRoundRect& outer,
                          const DlRoundRect& inner) override {}
   void drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
-                          const DlRoundSuperellipse& inner) override {}
+                                 const DlRoundSuperellipse& inner) override {}
   void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override {}
   void drawPath(const DlPath& path) override {}
   void drawArc(const DlRect& oval_bounds,

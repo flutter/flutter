@@ -176,8 +176,8 @@ class DisplayListBuilder final : public virtual DlCanvas,
                              const DlPaint& paint) override;
   // |DlCanvas|
   void DrawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
-                         const DlRoundSuperellipse& inner,
-                         const DlPaint& paint) override;
+                                 const DlRoundSuperellipse& inner,
+                                 const DlPaint& paint) override;
   // |DlCanvas|
   void DrawPath(const DlPath& path, const DlPaint& paint) override;
   // |DlCanvas|

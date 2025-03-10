@@ -318,7 +318,7 @@ class DlOpReceiver {
                                  const DlRoundRect& inner) = 0;
   virtual void drawRoundSuperellipse(const DlRoundSuperellipse& rse) = 0;
   virtual void drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
-                                 const DlRoundSuperellipse& inner) = 0;
+                                         const DlRoundSuperellipse& inner) = 0;
   virtual void drawPath(const DlPath& path) = 0;
   virtual void drawArc(const DlRect& oval_bounds,
                        DlScalar start_degrees,

@@ -644,7 +644,11 @@ struct DrawPathOp final : DrawOpBase {
 DEFINE_DRAW_2ARG_OP(Line, DlPoint, p0, DlPoint, p1)
 DEFINE_DRAW_2ARG_OP(Circle, DlPoint, center, DlScalar, radius)
 DEFINE_DRAW_2ARG_OP(DiffRoundRect, DlRoundRect, outer, DlRoundRect, inner)
-DEFINE_DRAW_2ARG_OP(DiffRoundSuperellipse, DlRoundSuperellipse, outer, DlRoundSuperellipse, inner)
+DEFINE_DRAW_2ARG_OP(DiffRoundSuperellipse,
+                    DlRoundSuperellipse,
+                    outer,
+                    DlRoundSuperellipse,
+                    inner)
 #undef DEFINE_DRAW_2ARG_OP
 
 // 4 byte header + 24 byte payload packs into 32 bytes (4 bytes unused)

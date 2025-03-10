@@ -116,7 +116,7 @@ namespace flutter {
   V(DrawRoundRect)                   \
   V(DrawDiffRoundRect)               \
   V(DrawRoundSuperellipse)           \
-  V(DrawDiffRoundSuperellipse)           \
+  V(DrawDiffRoundSuperellipse)       \
   V(DrawArc)                         \
   V(DrawPath)                        \
                                      \
