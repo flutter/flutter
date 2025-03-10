@@ -1206,7 +1206,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int headingLevel = 0,
     String linkUrl = '',
     SemanticsRole role = SemanticsRole.none,
-    int viewId = 0,
     required List<String>? controlsNodes,
   }) {
     assert(_matrix4IsValid(transform));
@@ -1254,7 +1253,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       headingLevel,
       linkUrl,
       role.index,
-      viewId,
       controlsNodes,
     );
   }
@@ -1301,7 +1299,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Int32,
       Handle,
       Int32,
-      Int64,
       Handle,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
@@ -1345,7 +1342,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int headingLevel,
     String linkUrl,
     int role,
-    int viewId,
     List<String>? controlsNodes,
   );
 
