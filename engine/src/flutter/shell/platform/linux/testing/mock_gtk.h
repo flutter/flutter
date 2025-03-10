@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_WINDOW_H_
-#define FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_WINDOW_H_
+#ifndef FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_GTK_H_
+#define FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_GTK_H_
 
 #include "gmock/gmock.h"
 
@@ -82,4 +82,4 @@ class MockGtk {
 // Calls original gtk_widget_destroy.
 void fl_gtk_widget_destroy(GtkWidget* widget);
 
-#endif  // FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_WINDOW_H_
+#endif  // FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_GTK_H_
