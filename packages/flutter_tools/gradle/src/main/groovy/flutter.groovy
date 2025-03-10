@@ -4,12 +4,12 @@
 // found in the LICENSE file.
 
 import com.android.build.OutputFile
+import com.flutter.gradle.AppLinkSettings
 import com.flutter.gradle.BaseApplicationNameHandler
 import com.flutter.gradle.Deeplink
 import com.flutter.gradle.DependencyVersionChecker
 import com.flutter.gradle.IntentFilterCheck
 import com.flutter.gradle.VersionUtils
-import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -479,9 +479,7 @@ class FlutterPlugin implements Plugin<Project> {
                     dependsOn processResources.name
                 }
                 doLast {
-                    AppLinkSettings appLinkSettings = new AppLinkSettings()
-                    appLinkSettings.applicationId = variant.applicationId
-                    appLinkSettings.deeplinks = [] as Set<Deeplink>
+                    AppLinkSettings appLinkSettings = new AppLinkSettings(variant.applicationId)
                     variant.outputs.configureEach { output ->
                         Object processResources = output.hasProperty(propProcessResourcesProvider) ?
                                 output.processResourcesProvider.get() : output.processResources
@@ -557,8 +555,7 @@ class FlutterPlugin implements Plugin<Project> {
                             }
                         }
                     }
-                    JsonGenerator generator = new JsonGenerator.Options().build()
-                    new File(project.getProperty("outputPath")).write(generator.toJson(appLinkSettings))
+                    new File(project.getProperty("outputPath")).write(appLinkSettings.toJson().toString())
                 }
             }
         }
@@ -1526,14 +1523,6 @@ class FlutterPlugin implements Plugin<Project> {
         // If we got this far then all the common indices are identical, so whichever version is longer must be more recent
         return firstVersion.size() <=> secondVersion.size()
     }
-
-}
-
-class AppLinkSettings {
-
-    String applicationId
-    Set<Deeplink> deeplinks
-    boolean deeplinkingFlagEnabled
 
 }
 
