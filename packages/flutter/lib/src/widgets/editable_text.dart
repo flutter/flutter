@@ -3266,7 +3266,8 @@ class EditableTextState extends State<EditableText>
     }
 
     if (_hasInputConnection) {
-      if (oldWidget.obscureText != widget.obscureText) {
+      if (oldWidget.obscureText != widget.obscureText ||
+          oldWidget.keyboardType != widget.keyboardType) {
         _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
       }
     }
