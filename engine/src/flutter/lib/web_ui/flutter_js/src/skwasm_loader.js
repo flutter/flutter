@@ -32,31 +32,28 @@ export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
 let eventListener;
 eventListener = (message) => {
     const pendingMessages = [];
-    const d = message.data;
-    d["instantiateWasm"] = (info,receiveInstance) => {
-        var instance=new WebAssembly.Instance(d["wasm"],info);
-        return receiveInstance(instance,d["wasm"])
+    const data = message.data;
+    data["instantiateWasm"] = (info,receiveInstance) => {
+        const instance = new WebAssembly.Instance(data["wasm"], info);
+        return receiveInstance(instance, data["wasm"])
     };
-    import(d.js).then(async (skwasm)=>{
-        await skwasm.default(d);
+    import(data.js).then(async (skwasm) => {
+        await skwasm.default(data);
 
-        console.log("removing queueing listener");
         removeEventListener("message", eventListener);
         for (const message of pendingMessages) {
-            console.log("flushing message");
             dispatchEvent(message);
         }
     });
     console.log("removing initial listener");
     removeEventListener("message", eventListener);
     eventListener = (message) => {
-        console.log("queueing message: "+ JSON.stringify(message));
+
         pendingMessages.push(message);
     };
-    console.log("adding queuing listener");
+
     addEventListener("message", eventListener);
 };
-console.log("adding initial listener");
 addEventListener("message", eventListener);
 `
           ],
