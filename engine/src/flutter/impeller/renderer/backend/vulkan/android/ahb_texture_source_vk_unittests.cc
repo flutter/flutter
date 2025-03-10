@@ -38,7 +38,10 @@ std::shared_ptr<Context> CreateContext() {
 }
 
 TEST(AndroidVulkanTest, CanImportRGBA) {
-  std::cout << "A" << std::endl;
+  if (!HardwareBuffer::IsAvailableOnPlatform()) {
+    GTEST_SKIP() << "Hardware buffers are not supported on this platform.";
+  }
+
   HardwareBufferDescriptor desc;
   desc.size = ISize{1, 1};
   desc.format = HardwareBufferFormat::kR8G8B8A8UNormInt;
@@ -59,6 +62,10 @@ TEST(AndroidVulkanTest, CanImportRGBA) {
 }
 
 TEST(AndroidVulkanTest, CanImportWithYUB) {
+  if (!HardwareBuffer::IsAvailableOnPlatform()) {
+    GTEST_SKIP() << "Hardware buffers are not supported on this platform.";
+  }
+
   AHardwareBuffer_Desc desc;
   desc.width = 16;
   desc.height = 16;
