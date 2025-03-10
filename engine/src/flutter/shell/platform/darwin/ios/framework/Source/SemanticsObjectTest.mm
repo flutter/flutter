@@ -614,6 +614,51 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue([object.accessibilityLabel isEqualToString:@"label\ntooltip"]);
 }
 
+- (void)testSemanticsObjectContainerAccessibilityFrameContainsAllChildrenFrames {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode parent;
+  parent.id = 0;
+  parent.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+
+  flutter::SemanticsNode child;
+  child.id = 1;
+  child.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  child.rect = SkRect::MakeXYWH(0, 0, 100, 100);
+  parent.childrenInTraversalOrder.push_back(1);
+
+  flutter::SemanticsNode child2;
+  child2.id = 2;
+  child2.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  child.rect = SkRect::MakeXYWH(100, 100, 100, 100);
+  parent.childrenInTraversalOrder.push_back(2);
+
+  FlutterSemanticsObject* parentObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                    uid:0];
+  [parentObject setSemanticsNode:&parent];
+
+  FlutterSemanticsObject* childObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                   uid:1];
+  [childObject setSemanticsNode:&child];
+
+  FlutterSemanticsObject* childObject2 = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                    uid:2];
+  [childObject2 setSemanticsNode:&child2];
+
+  parentObject.children = @[ childObject, childObject2 ];
+  [parentObject accessibilityBridgeDidFinishUpdate];
+  [childObject accessibilityBridgeDidFinishUpdate];
+  [childObject2 accessibilityBridgeDidFinishUpdate];
+  SemanticsObjectContainer* container =
+      static_cast<SemanticsObjectContainer*>(parentObject.accessibilityContainer);
+
+  // The rect is transformed from local to global coordinates
+  XCTAssertTrue(CGRectEqualToRect(container.accessibilityFrame, CGRectMake(0, 0, 100, 100)));
+}
+
 - (void)testFlutterSemanticsObjectAttributedStringsDoNotCrashWhenEmpty {
   flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;
