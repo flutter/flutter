@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:multi_window_ref_app/app/window_controller_render.dart';
 
+import 'window_controller_render.dart';
 import 'window_settings.dart';
 import 'window_settings_dialog.dart';
 import 'window_manager_model.dart';
 import 'regular_window_edit_dialog.dart';
 
 class MainWindow extends StatefulWidget {
-  MainWindow({super.key, required WindowController mainController}) {
-    _windowManagerModel.add(KeyedWindowController(
-        isMainWindow: true, key: UniqueKey(), controller: mainController));
-  }
+  const MainWindow(
+      {super.key,
+      required this.controller,
+      required this.settings,
+      required this.windowManagerModel});
 
-  final WindowManagerModel _windowManagerModel = WindowManagerModel();
-  final WindowSettings _settings = WindowSettings();
+  final WindowController controller;
+  final WindowSettings settings;
+  final WindowManagerModel windowManagerModel;
 
   @override
   State<MainWindow> createState() => _MainWindowState();
@@ -34,7 +36,7 @@ class _MainWindowState extends State<MainWindow> {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: _ActiveWindowsTable(
-                  windowManagerModel: widget._windowManagerModel),
+                  windowManagerModel: widget.windowManagerModel),
             ),
           ),
           Expanded(
@@ -43,12 +45,12 @@ class _MainWindowState extends State<MainWindow> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ListenableBuilder(
-                    listenable: widget._windowManagerModel,
+                    listenable: widget.windowManagerModel,
                     builder: (BuildContext context, Widget? child) {
                       return _WindowCreatorCard(
-                          selectedWindow: widget._windowManagerModel.selected,
-                          windowManagerModel: widget._windowManagerModel,
-                          windowSettings: widget._settings);
+                          selectedWindow: widget.windowManagerModel.selected,
+                          windowManagerModel: widget.windowManagerModel,
+                          windowSettings: widget.settings);
                     })
               ],
             ),
@@ -59,21 +61,21 @@ class _MainWindowState extends State<MainWindow> {
 
     return ViewAnchor(
         view: ListenableBuilder(
-            listenable: widget._windowManagerModel,
+            listenable: widget.windowManagerModel,
             builder: (BuildContext context, Widget? _) {
               final List<Widget> childViews = <Widget>[];
               for (final KeyedWindowController controller
-                  in widget._windowManagerModel.windows) {
-                if (controller.parent == null && !controller.isMainWindow) {
+                  in widget.windowManagerModel.windows) {
+                if (controller.parent == widget.controller) {
                   childViews.add(WindowControllerRender(
                     controller: controller.controller,
                     key: controller.key,
-                    windowSettings: widget._settings,
-                    windowManagerModel: widget._windowManagerModel,
+                    windowSettings: widget.settings,
+                    windowManagerModel: widget.windowManagerModel,
                     onDestroyed: () =>
-                        widget._windowManagerModel.remove(controller.key),
+                        widget.windowManagerModel.remove(controller.key),
                     onError: () =>
-                        widget._windowManagerModel.remove(controller.key),
+                        widget.windowManagerModel.remove(controller.key),
                   ));
                 }
               }
