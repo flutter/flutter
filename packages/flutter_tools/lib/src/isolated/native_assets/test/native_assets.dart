@@ -22,7 +22,7 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 
   @override
   String windowsBuildDirectory(FlutterProject project) =>
-      nativeAssetsBuildUri(project.directory.uri, OS.windows).toFilePath();
+      nativeAssetsBuildUri(project.directory.uri, OS.windows.name).toFilePath();
 }
 
 Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
@@ -54,7 +54,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   // `build/native_assets/<os>/native_assets.json` file which uses absolute
   // paths to the shared libraries.
   final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name);
   final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
 
   final Map<String, String> environmentDefines = <String, String>{
@@ -62,7 +62,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   };
 
   // First perform the dart build.
-  final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+  final DartHookResult dartHookResult = await runFlutterSpecificHooks(
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
     targetPlatform: TargetPlatform.tester,
@@ -72,7 +72,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
 
   // Then "install" the code assets so they can be used at runtime.
   await installCodeAssets(
-    dartBuildResult: dartBuildResult,
+    dartHookResult: dartHookResult,
     environmentDefines: environmentDefines,
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
