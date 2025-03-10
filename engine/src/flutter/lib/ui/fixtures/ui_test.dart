@@ -1060,7 +1060,7 @@ void hooksTests() async {
       };
     });
 
-    _callHook('_dispatchSemanticsAction', 456, 3, 1234, 4, null);
+    _callHook('_dispatchSemanticsAction', 3, 456, 1234, 4, null);
     expectIdentical(runZone, innerZone);
     expectEquals(action.viewId, 456);
     expectEquals(action.nodeId, 1234);
