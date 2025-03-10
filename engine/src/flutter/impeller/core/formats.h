@@ -526,8 +526,18 @@ struct ColorAttachmentDescriptor {
   BlendFactor src_alpha_blend_factor = BlendFactor::kSourceAlpha;
   BlendOperation alpha_blend_op = BlendOperation::kAdd;
   BlendFactor dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+  std::optional<BlendMode> advanced_blend_op = std::nullopt;
 
   ColorWriteMask write_mask = ColorWriteMaskBits::kAll;
+
+  static bool BlendOpEqual(std::optional<BlendMode> a,
+                           std::optional<BlendMode> b) {
+    if (a.has_value() && b.has_value()) {
+      return a.value() == b.value();
+    } else {
+      return !a.has_value() && !b.has_value();
+    }
+  }
 
   constexpr bool operator==(const ColorAttachmentDescriptor& o) const {
     return format == o.format &&                                  //
@@ -538,7 +548,8 @@ struct ColorAttachmentDescriptor {
            src_alpha_blend_factor == o.src_alpha_blend_factor &&  //
            alpha_blend_op == o.alpha_blend_op &&                  //
            dst_alpha_blend_factor == o.dst_alpha_blend_factor &&  //
-           write_mask == o.write_mask;
+           write_mask == o.write_mask &&                          //
+           BlendOpEqual(advanced_blend_op, o.advanced_blend_op);
   }
 
   constexpr size_t Hash() const {
