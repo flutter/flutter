@@ -730,6 +730,7 @@ void main() {
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1029,6 +1030,7 @@ void main() {
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1125,6 +1127,7 @@ void main() {
         headingLevel: 0,
         linkUrl: null,
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1228,6 +1231,7 @@ void main() {
         headingLevel: 0,
         linkUrl: null,
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1259,6 +1263,7 @@ void main() {
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1346,6 +1351,7 @@ void main() {
         headingLevel: 0,
         linkUrl: null,
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
