@@ -81,7 +81,7 @@ public class SensitiveContentPlugin
    * mFlutterViewId}.
    */
   @Override
-  public Integer getContentSensitivity() {
+  public int getContentSensitivity() {
     if (!isSupported()) {
       // This feature is only available on >= API 35.
       throw new IllegalStateException(getNotSupportedErrorReason());
