@@ -46,8 +46,9 @@ enum ContentSensitivity {
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO for how
   /// this mode behaves on native Android.
   ///
-  /// This mode currently does not work for Flutter, and thus, will never obscure the screen during
-  /// an active media projection. However, it will still logically be prioritized over [notSensitive].
+  /// For Android `View`s, this mode attempts to auto detect passwords, 2factor tokens, and other
+  /// sensitive content. As of API 35, Android cannot determine if Flutter `View`s contain sensitive
+  /// content automatically, and thus will never obscure the screen.
   // TODO(camsim99): Implement `autoSensitive` mode that matches the behavior
   // of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented based on autofill hints; see
   // https://github.com/flutter/flutter/issues/160879.
@@ -124,20 +125,13 @@ class SensitiveContentService {
   /// This method must be called before attempting to call [getContentSensitivity]
   /// or [setContentSensitivity].
   ///
-  /// This feature is only supported on Android currently.
+  /// This feature is only supported on Android currently. Its return value will
+  /// not change and thus, is safe cache.
   Future<bool> isSupported() async {
     if (defaultTargetPlatform != TargetPlatform.android) {
       return false;
     }
 
-    try {
-      final bool? result = await sensitiveContentChannel.invokeMethod<bool>(
-        'SensitiveContent.isSupported',
-      );
-      return result!;
-    } catch (e) {
-      // Sensitive content support failed to be fetched.
-      throw FlutterError('Failed to retrieve content sensitivity: $e');
-    }
+    return (await sensitiveContentChannel.invokeMethod<bool>('SensitiveContent.isSupported'))!;
   }
 }

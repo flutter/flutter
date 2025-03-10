@@ -149,10 +149,8 @@ public class SensitiveContentChannel {
 
     /**
      * Returns the current content sensitivity level of a Flutter Android {@code View}.
-     *
-     * <p>??? when is null returned TODO(camille)
      */
-    Integer getContentSensitivity();
+    int getContentSensitivity();
 
     /**
      * Returns whether or not marking content sensitivity is supported on the device.
