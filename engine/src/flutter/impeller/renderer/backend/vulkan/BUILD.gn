@@ -187,7 +187,7 @@ if (is_android) {
     defines = [ "TESTING" ]
   }
 
-  executable("unittests") {
+  executable("vulkan_android_unittests") {
     assert(is_android)
 
     testonly = true
@@ -197,7 +197,7 @@ if (is_android) {
     deps = [ ":unittests_lib" ]
   }
 
-  native_activity_apk("apk_unittests") {
+  native_activity_apk("vulkan_android_apk_unittests") {
     apk_name = "impeller_vulkan_android_unittests"
 
     testonly = true
