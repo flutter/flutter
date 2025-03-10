@@ -67,25 +67,22 @@ public class SensitiveContentChannel {
               final String contentSensitivityLevelStr = call.arguments();
               try {
                 sensitiveContentMethodHandler.setContentSensitivity(
-                    deserializeContentSensitivity(contentSensitivityLevelStr), result);
-              } catch (IllegalArgumentException exception) {
-                result.error("error", exception.getMessage(), null);
+                    deserializeContentSensitivity(contentSensitivityLevelStr));
+              } catch (IllegalStateException | IllegalArgumentException e) {
+                result.error("error", e.getMessage(), null);
               }
               break;
             case "SensitiveContent.getContentSensitivity":
               try {
                 final Integer currentContentSensitvity =
-                    sensitiveContentMethodHandler.getContentSensitivity(result);
-
-                // Report result if fetching currentContentSensitvity did not encounter
-                // an error.
+                    sensitiveContentMethodHandler.getContentSensitivity();
                 result.success(serializeContentSensitivity(currentContentSensitvity));
-              } catch (IllegalArgumentException exception) {
-                result.error("error", exception.getMessage(), null);
+              } catch (IllegalStateException | IllegalArgumentException e) {
+                result.error("error", e.getMessage(), null);
               }
               break;
             case "SensitiveContent.isSupported":
-              sensitiveContentMethodHandler.isSupported(result);
+              result.success(sensitiveContentMethodHandler.isSupported());
               break;
             default:
               Log.v(
@@ -148,22 +145,20 @@ public class SensitiveContentChannel {
      * Requests that a native Flutter Android {@code View} sets its content sensitivity level to
      * {@code requestedContentSensitivity}.
      */
-    void setContentSensitivity(
-        @NonNull int requestedContentSensitivity, @NonNull MethodChannel.Result result);
+    void setContentSensitivity(@NonNull int requestedContentSensitivity);
 
     /**
      * Returns the current content sensitivity level of a Flutter Android {@code View}.
      *
-     * <p>{@code result} passed in the event that this method encounters an error. In the case that
-     * an error is encounted, {@code null} is returned.
+     * <p>??? when is null returned TODO(camille)
      */
-    Integer getContentSensitivity(@NonNull MethodChannel.Result result);
+    Integer getContentSensitivity();
 
     /**
      * Returns whether or not marking content sensitivity is supported on the device.
      *
      * <p>This value is static and will not change while a Flutter app runs.
      */
-    void isSupported(@NonNull MethodChannel.Result result);
+    boolean isSupported();
   }
 }
