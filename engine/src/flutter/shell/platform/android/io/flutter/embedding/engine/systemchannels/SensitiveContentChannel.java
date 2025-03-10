@@ -147,9 +147,7 @@ public class SensitiveContentChannel {
      */
     void setContentSensitivity(@NonNull int requestedContentSensitivity);
 
-    /**
-     * Returns the current content sensitivity level of a Flutter Android {@code View}.
-     */
+    /** Returns the current content sensitivity level of a Flutter Android {@code View}. */
     int getContentSensitivity();
 
     /**
