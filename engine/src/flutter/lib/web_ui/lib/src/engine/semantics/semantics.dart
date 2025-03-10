@@ -443,6 +443,13 @@ enum EngineSemanticsRole {
   /// A cell in a [table] contains header information for a column.
   columnHeader,
 
+  /// A component provide advisory information that is not import to justify
+  /// an [alert].
+  status,
+
+  /// A component provide important and usually time-sensitive information.
+  alert,
+
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
   ///
