@@ -27,7 +27,9 @@
  */
 @interface FlutterSurface (Private)
 
-- (nonnull instancetype)initWithSize:(CGSize)size device:(nonnull id<MTLDevice>)device;
+- (nonnull instancetype)initWithSize:(CGSize)size
+                              device:(nonnull id<MTLDevice>)device
+                         pixelFormat:(MTLPixelFormat)pixelFormat;
 
 @property(readonly, nonatomic, nonnull) IOSurfaceRef ioSurface;
 @property(readonly, nonatomic) CGSize size;

@@ -36,6 +36,8 @@
   CATextLayer* _infoLayer;
 
   CFTimeInterval _lastPresentationTime;
+
+  MTLPixelFormat _surfacePixelFormat;
 }
 
 /**
@@ -104,7 +106,8 @@ static void UpdateContentSubLayers(CALayer* layer,
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                   commandQueue:(id<MTLCommandQueue>)commandQueue
                          layer:(CALayer*)containingLayer
-                      delegate:(__weak id<FlutterSurfaceManagerDelegate>)delegate {
+                      delegate:(__weak id<FlutterSurfaceManagerDelegate>)delegate
+               enableWideGamut:(BOOL)enableWideGamut {
   if (self = [super init]) {
     _device = device;
     _commandQueue = commandQueue;
@@ -114,6 +117,16 @@ static void UpdateContentSubLayers(CALayer* layer,
     _backBufferCache = [[FlutterBackBufferCache alloc] init];
     _frontSurfaces = [NSMutableArray array];
     _layers = [NSMutableArray array];
+
+    // According to https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf ,
+    // MTLPixelFormatBGRA10_XR is first available on Apple3 series, whereas the enum
+    // is available on 11.0 and later.
+    _surfacePixelFormat = MTLPixelFormatBGRA8Unorm;
+    if (@available(macOS 11.0, *)) {
+      if ([device supportsFamily:MTLGPUFamilyApple3] && enableWideGamut) {
+        _surfacePixelFormat = MTLPixelFormatBGRA10_XR;
+      }
+    }
   }
   return self;
 }
@@ -133,7 +146,9 @@ static void UpdateContentSubLayers(CALayer* layer,
 - (FlutterSurface*)surfaceForSize:(CGSize)size {
   FlutterSurface* surface = [_backBufferCache removeSurfaceForSize:size];
   if (surface == nil) {
-    surface = [[FlutterSurface alloc] initWithSize:size device:_device];
+    surface = [[FlutterSurface alloc] initWithSize:size
+                                            device:_device
+                                       pixelFormat:_surfacePixelFormat];
   }
   return surface;
 }

@@ -37,6 +37,11 @@
 @property(nonatomic, readonly) BOOL enableImpeller;
 
 /**
+ * Whether Wide gamut rendering is enabled
+ */
+@property(nonatomic, readonly) BOOL enableWideGamut;
+
+/**
  * Instead of looking up the assets and ICU data path in the application bundle, this initializer
  * allows callers to create a Dart project with custom locations specified for the both.
  */
