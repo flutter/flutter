@@ -183,7 +183,6 @@ function verify_licenses() (
     echo "double-check that all newly added files have a BSD-style license"
     echo "header with the following copyright:"
     echo "    Copyright 2013 The Flutter Authors. All rights reserved."
-    echo "Files in 'third_party/txt' may have an Apache license header instead."
     echo "If you're absolutely sure that the change in license count is"
     echo "intentional, update 'flutter/ci/licenses.sh' with the new count."
     echo "================================================================="
