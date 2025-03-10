@@ -50,58 +50,72 @@ bool TextFrame::HasColor() const {
   return has_color_;
 }
 
+namespace {
+constexpr uint32_t kDenominator = 200;
+constexpr Rational kMaximumTextScale(48 * kDenominator, kDenominator);
+}  // namespace
+
 // static
-Scalar TextFrame::RoundScaledFontSize(Scalar scale) {
+Rational TextFrame::RoundScaledFontSize(Scalar scale) {
   // An arbitrarily chosen maximum text scale to ensure that regardless of the
   // CTM, a glyph will fit in the atlas. If we clamp significantly, this may
   // reduce fidelity but is preferable to the alternative of failing to render.
-  constexpr Scalar kMaximumTextScale = 48;
-  Scalar result = std::round(scale * 200) / 200;
-  return std::clamp(result, 0.0f, kMaximumTextScale);
+  Rational result = Rational(std::round(scale * kDenominator), kDenominator);
+  return std::clamp(result, Rational(0, kDenominator), kMaximumTextScale);
 }
 
-static constexpr Scalar ComputeFractionalPosition(Scalar value) {
+Rational TextFrame::RoundScaledFontSize(Rational scale) {
+  Rational result = Rational(
+      std::round((scale.GetNumerator() * static_cast<Scalar>(kDenominator))) /
+          scale.GetDenominator(),
+      kDenominator);
+  return std::clamp(result, Rational(0, kDenominator), kMaximumTextScale);
+}
+
+static constexpr SubpixelPosition ComputeFractionalPosition(Scalar value) {
   value += 0.125;
   value = (value - floorf(value));
   if (value < 0.25) {
-    return 0;
+    return SubpixelPosition::kSubpixel00;
   }
   if (value < 0.5) {
-    return 0.25;
+    return SubpixelPosition::kSubpixel01;
   }
   if (value < 0.75) {
-    return 0.5;
+    return SubpixelPosition::kSubpixel02;
   }
-  return 0.75;
+  return SubpixelPosition::kSubpixel03;
 }
 
 // Compute subpixel position for glyphs based on X position and provided
 // max basis length (scale).
 // This logic is based on the SkPackedGlyphID logic in SkGlyph.h
 // static
-Point TextFrame::ComputeSubpixelPosition(
+SubpixelPosition TextFrame::ComputeSubpixelPosition(
     const TextRun::GlyphPosition& glyph_position,
     AxisAlignment alignment,
     const Matrix& transform) {
   Point pos = transform * glyph_position.position;
   switch (alignment) {
     case AxisAlignment::kNone:
-      return Point(0, 0);
+      return SubpixelPosition::kSubpixel00;
     case AxisAlignment::kX:
-      return Point(ComputeFractionalPosition(pos.x), 0);
+      return ComputeFractionalPosition(pos.x);
     case AxisAlignment::kY:
-      return Point(0, ComputeFractionalPosition(pos.y));
+      return static_cast<SubpixelPosition>(ComputeFractionalPosition(pos.y)
+                                           << 2);
     case AxisAlignment::kAll:
-      return Point(ComputeFractionalPosition(pos.x),
-                   ComputeFractionalPosition(pos.y));
+      return static_cast<SubpixelPosition>(
+          ComputeFractionalPosition(pos.x) |
+          (ComputeFractionalPosition(pos.y) << 2));
   }
 }
 
-void TextFrame::SetPerFrameData(Scalar scale,
+void TextFrame::SetPerFrameData(Rational scale,
                                 Point offset,
                                 const Matrix& transform,
                                 std::optional<GlyphProperties> properties) {
-  if (!transform_.Equals(transform) || !ScalarNearlyEqual(scale_, scale) ||
+  if (!transform_.Equals(transform) || scale_ != scale ||
       !ScalarNearlyEqual(offset_.x, offset.x) ||
       !ScalarNearlyEqual(offset_.y, offset.y) ||
       !TextPropertiesEquals(properties_, properties)) {
@@ -113,7 +127,7 @@ void TextFrame::SetPerFrameData(Scalar scale,
   transform_ = transform;
 }
 
-Scalar TextFrame::GetScale() const {
+Rational TextFrame::GetScale() const {
   return scale_;
 }
 
