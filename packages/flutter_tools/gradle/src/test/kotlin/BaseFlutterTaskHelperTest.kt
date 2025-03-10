@@ -8,36 +8,38 @@ import org.gradle.process.ExecSpec
 import org.gradle.process.ProcessForkOptions
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.io.File
-import java.nio.file.Paths
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class BaseFlutterTaskHelperTest {
     object BaseFlutterTaskPropertiesTest {
-        internal const val FLUTTER_ROOT_ABSOLUTE_PATH_TEST = "/path/to/flutter"
-        internal const val FLUTTER_EXECUTABLE_ABSOLUTE_PATH_TEST = "/path/to/flutter/bin/flutter"
         internal const val LOCAL_ENGINE_TEST = "android_debug_arm64"
         internal const val LOCAL_ENGINE_HOST_TEST = "host_debug"
-        internal const val LOCAL_ENGINE_SRC_PATH_TEST = "/path/to/flutter/engine/src"
-        internal const val PERFORMANCE_MEASUREMENT_FILE_TEST = "/path/to/build/performance_file"
         internal const val DART_DEFINES_TEST = "ENVIRONMENT=development"
         internal const val FLAVOR_TEST = "dev"
-        internal const val FRONTEND_SERVER_STARTER_PATH_TEST = "/path/to/starter/script_file"
         internal const val EXTRA_FRONTEND_OPTIONS_TEST = "--enable-asserts"
         internal const val EXTRA_GEN_SNAPSHOT_OPTIONS_TEST = "--debugger"
-        internal const val SPLIT_DEBUG_INFO_TEST = "/path/to/build/debug_info_directory"
-        internal const val CODE_SIZE_DIRECTORY_TEST = "/path/to/build/code_size_directory"
-        internal const val MIN_SDK_VERSION_TEST = 21
-        internal const val BUNDLE_SK_SL_PATH_TEST = "/path/to/custom/shaders"
-        internal const val FLUTTER_TARGET_FILE_PATH = "/path/to/flutter/examples/splash/lib/main.dart"
-        internal const val FLUTTER_TARGET_PATH = "/path/to/main.dart"
         internal const val TARGET_PLATFORM_VALUES_JOINED_LIST = "android linux"
+        val MIN_SDK_VERSION_TEST = DependencyVersionChecker.warnMinSdkVersion
 
-        internal val sourceDirTest = File("/path/to/working_directory")
-        internal val flutterRootTest = File("/path/to/flutter")
-        internal val flutterExecutableTest = File("/path/to/flutter/bin/flutter")
-        internal val intermediateDirFileTest = File("/path/to/build/app/intermediates/flutter/release")
+        // Using File.separator to ensure all paths use platform-specific separators
+        internal val FLUTTER_ROOT_ABSOLUTE_PATH_TEST = "/path/to/flutter".replace("/", File.separator)
+        internal val FLUTTER_EXECUTABLE_ABSOLUTE_PATH_TEST = "/path/to/flutter/bin/flutter".replace("/", File.separator)
+        internal val LOCAL_ENGINE_SRC_PATH_TEST = "/path/to/flutter/engine/src".replace("/", File.separator)
+        internal val PERFORMANCE_MEASUREMENT_FILE_TEST = "/path/to/build/performance_file".replace("/", File.separator)
+        internal val FRONTEND_SERVER_STARTER_PATH_TEST = "/path/to/starter/script_file".replace("/", File.separator)
+        internal val SPLIT_DEBUG_INFO_TEST = "/path/to/build/debug_info_directory".replace("/", File.separator)
+        internal val CODE_SIZE_DIRECTORY_TEST = "/path/to/build/code_size_directory".replace("/", File.separator)
+
+        internal val BUNDLE_SK_SL_PATH_TEST = "/path/to/custom/shaders".replace("/", File.separator)
+        internal val FLUTTER_TARGET_FILE_PATH = "/path/to/flutter/examples/splash/lib/main.dart".replace("/", File.separator)
+        internal val FLUTTER_TARGET_PATH = "/path/to/main.dart".replace("/", File.separator)
+
+        internal val sourceDirTest = File("/path/to/working_directory".replace("/", File.separator))
+        internal val flutterRootTest = File("/path/to/flutter".replace("/", File.separator))
+        internal val flutterExecutableTest = File("/path/to/flutter/bin/flutter".replace("/", File.separator))
+        internal val intermediateDirFileTest = File("/path/to/build/app/intermediates/flutter/release".replace("/", File.separator))
         internal val targetPlatformValuesList = listOf("android", "linux")
     }
 
@@ -52,7 +54,7 @@ class BaseFlutterTaskHelperTest {
             assertFailsWith<GradleException> { helper.checkPreConditions() }
         assert(
             gradleException.message ==
-                helper.gradleErrorMessage,
+                helper.gradleErrorMessage
         )
     }
 
@@ -68,7 +70,7 @@ class BaseFlutterTaskHelperTest {
             assertFailsWith<GradleException> { helper.checkPreConditions() }
         assert(
             gradleException.message ==
-                helper.gradleErrorMessage,
+                helper.gradleErrorMessage
         )
     }
 
@@ -82,7 +84,7 @@ class BaseFlutterTaskHelperTest {
 
         every { baseFlutterTask.intermediateDir } returns BaseFlutterTaskPropertiesTest.intermediateDirFileTest
         // There is already an intermediate directory, so there is no need to create it.
-        every { baseFlutterTask.intermediateDir.mkdirs() } returns false
+        every { baseFlutterTask.intermediateDir!!.mkdirs() } returns false
 
         val helper = BaseFlutterTaskHelper(baseFlutterTask)
         assertDoesNotThrow { helper.checkPreConditions() }
@@ -101,7 +103,7 @@ class BaseFlutterTaskHelperTest {
         val helper = BaseFlutterTaskHelper(baseFlutterTask)
         val ruleNamesList = helper.generateRuleNames(baseFlutterTask)
 
-        assertTrue { ruleNamesList.contentEquals(arrayOf("debug_android_application")) }
+        assertEquals(ruleNamesList, listOf("debug_android_application"))
     }
 
     @Test
@@ -119,14 +121,13 @@ class BaseFlutterTaskHelperTest {
         val helper = BaseFlutterTaskHelper(baseFlutterTask)
         val ruleNamesList = helper.generateRuleNames(baseFlutterTask)
 
-        assertTrue {
-            ruleNamesList.contentEquals(
-                arrayOf(
-                    "android_aot_deferred_components_bundle_release_android",
-                    "android_aot_deferred_components_bundle_release_linux",
-                ),
+        assertEquals(
+            ruleNamesList,
+            listOf(
+                "android_aot_deferred_components_bundle_release_android",
+                "android_aot_deferred_components_bundle_release_linux"
             )
-        }
+        )
     }
 
     @Test
@@ -144,14 +145,13 @@ class BaseFlutterTaskHelperTest {
         val helper = BaseFlutterTaskHelper(baseFlutterTask)
         val ruleNamesList = helper.generateRuleNames(baseFlutterTask)
 
-        assertTrue {
-            ruleNamesList.contentEquals(
-                arrayOf(
-                    "android_aot_bundle_release_android",
-                    "android_aot_bundle_release_linux",
-                ),
+        assertEquals(
+            ruleNamesList,
+            listOf(
+                "android_aot_bundle_release_android",
+                "android_aot_bundle_release_linux"
             )
-        }
+        )
     }
 
     @Test
@@ -207,75 +207,16 @@ class BaseFlutterTaskHelperTest {
 
         every { baseFlutterTask.minSdkVersion } returns BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST
 
-        // Mock the actual method calls. We don't make real calls because we cannot create a real
-        // ExecSpec object.
-        val taskAbsolutePath = baseFlutterTask.flutterExecutable!!.absolutePath
-        every { mockExecSpec.executable(taskAbsolutePath) } returns mockProcessForkOptions
+        // Mock the method calls. We collapse all the args mock calls into four calls.
+        every { mockExecSpec.executable(any<String>()) } returns mockExecSpec
+        every { mockExecSpec.workingDir(any()) } returns mockProcessForkOptions
+        every { mockExecSpec.args(any<String>(), any()) } returns mockExecSpec
+        every { mockExecSpec.args(any<String>(), any()) } returns mockExecSpec
+        every { mockExecSpec.args(any<String>()) } returns mockExecSpec
+        every { mockExecSpec.args(any<List<String>>()) } returns mockExecSpec
 
-        val sourceDirFile = baseFlutterTask.sourceDir
-        every { mockExecSpec.workingDir(sourceDirFile) } returns mockProcessForkOptions
-
-        val localEngine = baseFlutterTask.localEngine
-        every { mockExecSpec.args("--local-engine", localEngine) } returns mockExecSpec
-
-        val localEngineSrcPath = baseFlutterTask.localEngineSrcPath
-        every { mockExecSpec.args("--local-engine-src-path", localEngineSrcPath) } returns mockExecSpec
-
-        val localEngineHost = baseFlutterTask.localEngineHost
-        every { mockExecSpec.args("--local-engine-host", localEngineHost) } returns mockExecSpec
-        every { mockExecSpec.args("--verbose") } returns mockExecSpec
-        every { mockExecSpec.args("assemble") } returns mockExecSpec
-        every { mockExecSpec.args("--no-version-check") } returns mockExecSpec
-
-        val intermediateDir = baseFlutterTask.intermediateDir.toString()
-        val depfilePath = "$intermediateDir/flutter_build.d"
-        every { mockExecSpec.args("--depfile", depfilePath) } returns mockExecSpec
-        every { mockExecSpec.args("--output", intermediateDir) } returns mockExecSpec
-
-        val performanceMeasurementFile = baseFlutterTask.performanceMeasurementFile
-        every { mockExecSpec.args("--performance-measurement-file=$performanceMeasurementFile") } returns mockExecSpec
-        val taskRootAbsolutePath = baseFlutterTask.flutterRoot!!.absolutePath
-        val targetFilePath = Paths.get(taskRootAbsolutePath, "examples", "splash", "lib", "main.dart")
-        every { mockExecSpec.args("-dTargetFile=$targetFilePath") } returns mockExecSpec
-
-        every { mockExecSpec.args("-dTargetPlatform=android") } returns mockExecSpec
-
-        val buildModeTaskString = baseFlutterTask.buildMode
-        every { mockExecSpec.args("-dBuildMode=$buildModeTaskString") } returns mockExecSpec
-
-        val trackWidgetCreationBool = baseFlutterTask.trackWidgetCreation
-        every { mockExecSpec.args("-dTrackWidgetCreation=$trackWidgetCreationBool") } returns mockExecSpec
-
-        val splitDebugInfo = baseFlutterTask.splitDebugInfo
-        every { mockExecSpec.args("-dSplitDebugInfo=$splitDebugInfo") } returns mockExecSpec
-        every { mockExecSpec.args("-dTreeShakeIcons=true") } returns mockExecSpec
-
-        every { mockExecSpec.args("-dDartObfuscation=true") } returns mockExecSpec
-        val dartDefines = baseFlutterTask.dartDefines
-        every { mockExecSpec.args("--DartDefines=$dartDefines") } returns mockExecSpec
-        val bundleSkSLPath = baseFlutterTask.bundleSkSLPath
-        every { mockExecSpec.args("-dBundleSkSLPath=$bundleSkSLPath") } returns mockExecSpec
-
-        val codeSizeDirectory = baseFlutterTask.codeSizeDirectory
-        every { mockExecSpec.args("-dCodeSizeDirectory=$codeSizeDirectory") } returns mockExecSpec
-        val flavor = baseFlutterTask.flavor
-        every { mockExecSpec.args("-dFlavor=$flavor") } returns mockExecSpec
-        val extraGenSnapshotOptions = baseFlutterTask.extraGenSnapshotOptions
-        every { mockExecSpec.args("--ExtraGenSnapshotOptions=$extraGenSnapshotOptions") } returns mockExecSpec
-
-        val frontServerStarterPath = baseFlutterTask.frontendServerStarterPath
-        every { mockExecSpec.args("-dFrontendServerStarterPath=$frontServerStarterPath") } returns mockExecSpec
-        val extraFrontEndOptions = baseFlutterTask.extraFrontEndOptions
-        every { mockExecSpec.args("--ExtraFrontEndOptions=$extraFrontEndOptions") } returns mockExecSpec
-
-        val joinTestList = BaseFlutterTaskPropertiesTest.targetPlatformValuesList.joinToString(" ")
-        every { mockExecSpec.args("-dAndroidArchs=$joinTestList") } returns mockExecSpec
-
-        val minSdkVersionInt = baseFlutterTask.minSdkVersion.toString()
-        every { mockExecSpec.args("-dMinSdkVersion=$minSdkVersionInt") } returns mockExecSpec
-
-        val ruleNamesArray: Array<String> = helper.generateRuleNames(baseFlutterTask)
-        every { mockExecSpec.args(ruleNamesArray) } returns mockExecSpec
+        // Generate rule names for verification and can only be generated after buildMode is mocked.
+        val ruleNamesList: List<String> = helper.generateRuleNames(baseFlutterTask)
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.kotlin.dsl/-kotlin-script/exec.html?query=abstract%20fun%20exec(configuration:%20Action%3CExecSpec%3E):%20ExecResult
@@ -311,7 +252,7 @@ class BaseFlutterTaskHelperTest {
         verify { mockExecSpec.args("--ExtraFrontEndOptions=${BaseFlutterTaskPropertiesTest.EXTRA_FRONTEND_OPTIONS_TEST}") }
         verify { mockExecSpec.args("-dAndroidArchs=${BaseFlutterTaskPropertiesTest.TARGET_PLATFORM_VALUES_JOINED_LIST}") }
         verify { mockExecSpec.args("-dMinSdkVersion=${BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST}") }
-        verify { mockExecSpec.args(ruleNamesArray) }
+        verify { mockExecSpec.args(ruleNamesList) }
     }
 
     @Test
@@ -367,39 +308,16 @@ class BaseFlutterTaskHelperTest {
 
         every { baseFlutterTask.minSdkVersion } returns BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST
 
-        // Mock the actual method calls. We don't make real calls because we cannot create a real
-        // ExecSpec object.
-        val taskAbsolutePath = baseFlutterTask.flutterExecutable!!.absolutePath
-        every { mockExecSpec.executable(taskAbsolutePath) } returns mockProcessForkOptions
+        // Mock the method calls. We collapse all the args mock calls into four calls.
+        every { mockExecSpec.executable(any<String>()) } returns mockExecSpec
+        every { mockExecSpec.workingDir(any()) } returns mockProcessForkOptions
+        every { mockExecSpec.args(any<String>(), any()) } returns mockExecSpec
+        every { mockExecSpec.args(any<String>(), any()) } returns mockExecSpec
+        every { mockExecSpec.args(any<String>()) } returns mockExecSpec
+        every { mockExecSpec.args(any<List<String>>()) } returns mockExecSpec
 
-        val sourceDirFile = baseFlutterTask.sourceDir
-        every { mockExecSpec.workingDir(sourceDirFile) } returns mockProcessForkOptions
-
-        every { mockExecSpec.args("--verbose") } returns mockExecSpec
-        every { mockExecSpec.args("assemble") } returns mockExecSpec
-        every { mockExecSpec.args("--no-version-check") } returns mockExecSpec
-
-        val intermediateDir = baseFlutterTask.intermediateDir.toString()
-        val depfilePath = "$intermediateDir/flutter_build.d"
-        every { mockExecSpec.args("--depfile", depfilePath) } returns mockExecSpec
-        every { mockExecSpec.args("--output", intermediateDir) } returns mockExecSpec
-
-        val taskRootAbsolutePath = baseFlutterTask.flutterRoot!!.absolutePath
-        val targetFilePath = Paths.get(taskRootAbsolutePath, "examples", "splash", "lib", "main.dart")
-        every { mockExecSpec.args("-dTargetFile=$targetFilePath") } returns mockExecSpec
-        every { mockExecSpec.args("-dTargetPlatform=android") } returns mockExecSpec
-
-        val buildModeTaskString = baseFlutterTask.buildMode
-        every { mockExecSpec.args("-dBuildMode=$buildModeTaskString") } returns mockExecSpec
-
-        val joinTestList = BaseFlutterTaskPropertiesTest.targetPlatformValuesList.joinToString(" ")
-        every { mockExecSpec.args("-dAndroidArchs=$joinTestList") } returns mockExecSpec
-
-        val minSdkVersionInt = baseFlutterTask.minSdkVersion.toString()
-        every { mockExecSpec.args("-dMinSdkVersion=$minSdkVersionInt") } returns mockExecSpec
-
-        val ruleNameList: Array<String> = helper.generateRuleNames(baseFlutterTask)
-        every { mockExecSpec.args(ruleNameList) } returns mockExecSpec
+        // Generate rule names for verification and can only be generated after buildMode is mocked.
+        val ruleNamesList: List<String> = helper.generateRuleNames(baseFlutterTask)
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.kotlin.dsl/-kotlin-script/exec.html?query=abstract%20fun%20exec(configuration:%20Action%3CExecSpec%3E):%20ExecResult
@@ -420,8 +338,7 @@ class BaseFlutterTaskHelperTest {
         verify { mockExecSpec.args("-dBuildMode=$buildModeString") }
         verify { mockExecSpec.args("-dAndroidArchs=${BaseFlutterTaskPropertiesTest.TARGET_PLATFORM_VALUES_JOINED_LIST}") }
         verify { mockExecSpec.args("-dMinSdkVersion=${BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST}") }
-        assertTrue { ruleNameList.contentEquals(arrayOf("debug_android_application")) }
-        verify { mockExecSpec.args(ruleNameList) }
+        verify { mockExecSpec.args(ruleNamesList) }
     }
 
     @Test
@@ -476,75 +393,16 @@ class BaseFlutterTaskHelperTest {
 
         every { baseFlutterTask.minSdkVersion } returns BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST
 
-        // Mock the actual method calls. We don't make real calls because we cannot create a real
-        // ExecSpec object.
-        val taskAbsolutePath = baseFlutterTask.flutterExecutable!!.absolutePath
-        every { mockExecSpec.executable(taskAbsolutePath) } returns mockProcessForkOptions
+        // Mock the method calls. We collapse all the args mock calls into four calls.
+        every { mockExecSpec.executable(any<String>()) } returns mockExecSpec
+        every { mockExecSpec.workingDir(any()) } returns mockProcessForkOptions
+        every { mockExecSpec.args(any<String>(), any()) } returns mockExecSpec
+        every { mockExecSpec.args(any<String>(), any()) } returns mockExecSpec
+        every { mockExecSpec.args(any<String>()) } returns mockExecSpec
+        every { mockExecSpec.args(any<List<String>>()) } returns mockExecSpec
 
-        val sourceDirFile = baseFlutterTask.sourceDir
-        every { mockExecSpec.workingDir(sourceDirFile) } returns mockProcessForkOptions
-
-        val localEngine = baseFlutterTask.localEngine
-        every { mockExecSpec.args("--local-engine", localEngine) } returns mockExecSpec
-
-        val localEngineSrcPath = baseFlutterTask.localEngineSrcPath
-        every { mockExecSpec.args("--local-engine-src-path", localEngineSrcPath) } returns mockExecSpec
-
-        val localEngineHost = baseFlutterTask.localEngineHost
-        every { mockExecSpec.args("--local-engine-host", localEngineHost) } returns mockExecSpec
-        every { mockExecSpec.args("--quiet") } returns mockExecSpec
-        every { mockExecSpec.args("assemble") } returns mockExecSpec
-        every { mockExecSpec.args("--no-version-check") } returns mockExecSpec
-
-        val intermediateDir = baseFlutterTask.intermediateDir.toString()
-        val depfilePath = "$intermediateDir/flutter_build.d"
-        every { mockExecSpec.args("--depfile", depfilePath) } returns mockExecSpec
-        every { mockExecSpec.args("--output", intermediateDir) } returns mockExecSpec
-
-        val performanceMeasurementFile = baseFlutterTask.performanceMeasurementFile
-        every { mockExecSpec.args("--performance-measurement-file=$performanceMeasurementFile") } returns mockExecSpec
-
-        val targetFilePath = baseFlutterTask.targetPath
-        every { mockExecSpec.args("-dTargetFile=$targetFilePath") } returns mockExecSpec
-
-        every { mockExecSpec.args("-dTargetPlatform=android") } returns mockExecSpec
-
-        val buildModeTaskString = baseFlutterTask.buildMode
-        every { mockExecSpec.args("-dBuildMode=$buildModeTaskString") } returns mockExecSpec
-
-        val trackWidgetCreationBool = baseFlutterTask.trackWidgetCreation
-        every { mockExecSpec.args("-dTrackWidgetCreation=$trackWidgetCreationBool") } returns mockExecSpec
-
-        val splitDebugInfo = baseFlutterTask.splitDebugInfo
-        every { mockExecSpec.args("-dSplitDebugInfo=$splitDebugInfo") } returns mockExecSpec
-        every { mockExecSpec.args("-dTreeShakeIcons=true") } returns mockExecSpec
-
-        every { mockExecSpec.args("-dDartObfuscation=true") } returns mockExecSpec
-        val dartDefines = baseFlutterTask.dartDefines
-        every { mockExecSpec.args("--DartDefines=$dartDefines") } returns mockExecSpec
-        val bundleSkSLPath = baseFlutterTask.bundleSkSLPath
-        every { mockExecSpec.args("-dBundleSkSLPath=$bundleSkSLPath") } returns mockExecSpec
-
-        val codeSizeDirectory = baseFlutterTask.codeSizeDirectory
-        every { mockExecSpec.args("-dCodeSizeDirectory=$codeSizeDirectory") } returns mockExecSpec
-        val flavor = baseFlutterTask.flavor
-        every { mockExecSpec.args("-dFlavor=$flavor") } returns mockExecSpec
-        val extraGenSnapshotOptions = baseFlutterTask.extraGenSnapshotOptions
-        every { mockExecSpec.args("--ExtraGenSnapshotOptions=$extraGenSnapshotOptions") } returns mockExecSpec
-
-        val frontServerStarterPath = baseFlutterTask.frontendServerStarterPath
-        every { mockExecSpec.args("-dFrontendServerStarterPath=$frontServerStarterPath") } returns mockExecSpec
-        val extraFrontEndOptions = baseFlutterTask.extraFrontEndOptions
-        every { mockExecSpec.args("--ExtraFrontEndOptions=$extraFrontEndOptions") } returns mockExecSpec
-
-        val joinTestList = BaseFlutterTaskPropertiesTest.targetPlatformValuesList.joinToString(" ")
-        every { mockExecSpec.args("-dAndroidArchs=$joinTestList") } returns mockExecSpec
-
-        val minSdkVersionInt = baseFlutterTask.minSdkVersion.toString()
-        every { mockExecSpec.args("-dMinSdkVersion=$minSdkVersionInt") } returns mockExecSpec
-
-        val ruleNamesArray: Array<String> = helper.generateRuleNames(baseFlutterTask)
-        every { mockExecSpec.args(ruleNamesArray) } returns mockExecSpec
+        // Generate rule names for verification and can only be generated after buildMode is mocked.
+        val ruleNamesList: List<String> = helper.generateRuleNames(baseFlutterTask)
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.kotlin.dsl/-kotlin-script/exec.html?query=abstract%20fun%20exec(configuration:%20Action%3CExecSpec%3E):%20ExecResult
@@ -580,7 +438,7 @@ class BaseFlutterTaskHelperTest {
         verify { mockExecSpec.args("--ExtraFrontEndOptions=${BaseFlutterTaskPropertiesTest.EXTRA_FRONTEND_OPTIONS_TEST}") }
         verify { mockExecSpec.args("-dAndroidArchs=${BaseFlutterTaskPropertiesTest.TARGET_PLATFORM_VALUES_JOINED_LIST}") }
         verify { mockExecSpec.args("-dMinSdkVersion=${BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST}") }
-        verify { mockExecSpec.args(ruleNamesArray) }
+        verify { mockExecSpec.args(ruleNamesList) }
     }
 
     @Test
@@ -636,75 +494,16 @@ class BaseFlutterTaskHelperTest {
 
         every { baseFlutterTask.minSdkVersion } returns BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST
 
-        // Mock the actual method calls. We don't make real calls because we cannot create a real
-        // ExecSpec object.
-        val taskAbsolutePath = baseFlutterTask.flutterExecutable!!.absolutePath
-        every { mockExecSpec.executable(taskAbsolutePath) } returns mockProcessForkOptions
+        // Mock the method calls. We collapse all the args mock calls into four calls.
+        every { mockExecSpec.executable(any<String>()) } returns mockExecSpec
+        every { mockExecSpec.workingDir(any()) } returns mockProcessForkOptions
+        every { mockExecSpec.args(any<String>(), any()) } returns mockExecSpec
+        every { mockExecSpec.args(any<String>(), any()) } returns mockExecSpec
+        every { mockExecSpec.args(any<String>()) } returns mockExecSpec
+        every { mockExecSpec.args(any<List<String>>()) } returns mockExecSpec
 
-        val sourceDirFile = baseFlutterTask.sourceDir
-        every { mockExecSpec.workingDir(sourceDirFile) } returns mockProcessForkOptions
-
-        val localEngine = baseFlutterTask.localEngine
-        every { mockExecSpec.args("--local-engine", localEngine) } returns mockExecSpec
-
-        val localEngineSrcPath = baseFlutterTask.localEngineSrcPath
-        every { mockExecSpec.args("--local-engine-src-path", localEngineSrcPath) } returns mockExecSpec
-
-        val localEngineHost = baseFlutterTask.localEngineHost
-        every { mockExecSpec.args("--local-engine-host", localEngineHost) } returns mockExecSpec
-        every { mockExecSpec.args("--verbose") } returns mockExecSpec
-        every { mockExecSpec.args("assemble") } returns mockExecSpec
-        every { mockExecSpec.args("--no-version-check") } returns mockExecSpec
-
-        val intermediateDir = baseFlutterTask.intermediateDir.toString()
-        val depfilePath = "$intermediateDir/flutter_build.d"
-        every { mockExecSpec.args("--depfile", depfilePath) } returns mockExecSpec
-        every { mockExecSpec.args("--output", intermediateDir) } returns mockExecSpec
-
-        val performanceMeasurementFile = baseFlutterTask.performanceMeasurementFile
-        every { mockExecSpec.args("--performance-measurement-file=$performanceMeasurementFile") } returns mockExecSpec
-
-        val targetFilePath = baseFlutterTask.targetPath
-        every { mockExecSpec.args("-dTargetFile=$targetFilePath") } returns mockExecSpec
-
-        every { mockExecSpec.args("-dTargetPlatform=android") } returns mockExecSpec
-
-        val buildModeTaskString = baseFlutterTask.buildMode
-        every { mockExecSpec.args("-dBuildMode=$buildModeTaskString") } returns mockExecSpec
-
-        val trackWidgetCreationBool = baseFlutterTask.trackWidgetCreation
-        every { mockExecSpec.args("-dTrackWidgetCreation=$trackWidgetCreationBool") } returns mockExecSpec
-
-        val splitDebugInfo = baseFlutterTask.splitDebugInfo
-        every { mockExecSpec.args("-dSplitDebugInfo=$splitDebugInfo") } returns mockExecSpec
-        every { mockExecSpec.args("-dTreeShakeIcons=true") } returns mockExecSpec
-
-        every { mockExecSpec.args("-dDartObfuscation=true") } returns mockExecSpec
-        val dartDefines = baseFlutterTask.dartDefines
-        every { mockExecSpec.args("--DartDefines=$dartDefines") } returns mockExecSpec
-        val bundleSkSLPath = baseFlutterTask.bundleSkSLPath
-        every { mockExecSpec.args("-dBundleSkSLPath=$bundleSkSLPath") } returns mockExecSpec
-
-        val codeSizeDirectory = baseFlutterTask.codeSizeDirectory
-        every { mockExecSpec.args("-dCodeSizeDirectory=$codeSizeDirectory") } returns mockExecSpec
-        val flavor = baseFlutterTask.flavor
-        every { mockExecSpec.args("-dFlavor=$flavor") } returns mockExecSpec
-        val extraGenSnapshotOptions = baseFlutterTask.extraGenSnapshotOptions
-        every { mockExecSpec.args("--ExtraGenSnapshotOptions=$extraGenSnapshotOptions") } returns mockExecSpec
-
-        val frontServerStarterPath = baseFlutterTask.frontendServerStarterPath
-        every { mockExecSpec.args("-dFrontendServerStarterPath=$frontServerStarterPath") } returns mockExecSpec
-        val extraFrontEndOptions = baseFlutterTask.extraFrontEndOptions
-        every { mockExecSpec.args("--ExtraFrontEndOptions=$extraFrontEndOptions") } returns mockExecSpec
-
-        val joinTestList = BaseFlutterTaskPropertiesTest.targetPlatformValuesList.joinToString(" ")
-        every { mockExecSpec.args("-dAndroidArchs=$joinTestList") } returns mockExecSpec
-
-        val minSdkVersionInt = baseFlutterTask.minSdkVersion.toString()
-        every { mockExecSpec.args("-dMinSdkVersion=$minSdkVersionInt") } returns mockExecSpec
-
-        val ruleNamesArray: Array<String> = helper.generateRuleNames(baseFlutterTask)
-        every { mockExecSpec.args(ruleNamesArray) } returns mockExecSpec
+        // Generate rule names for verification and can only be generated after buildMode is mocked.
+        val ruleNamesList: List<String> = helper.generateRuleNames(baseFlutterTask)
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.kotlin.dsl/-kotlin-script/exec.html?query=abstract%20fun%20exec(configuration:%20Action%3CExecSpec%3E):%20ExecResult
@@ -740,6 +539,6 @@ class BaseFlutterTaskHelperTest {
         verify { mockExecSpec.args("--ExtraFrontEndOptions=${BaseFlutterTaskPropertiesTest.EXTRA_FRONTEND_OPTIONS_TEST}") }
         verify { mockExecSpec.args("-dAndroidArchs=${BaseFlutterTaskPropertiesTest.TARGET_PLATFORM_VALUES_JOINED_LIST}") }
         verify { mockExecSpec.args("-dMinSdkVersion=${BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST}") }
-        verify { mockExecSpec.args(ruleNamesArray) }
+        verify { mockExecSpec.args(ruleNamesList) }
     }
 }

@@ -15,9 +15,10 @@ class BaseFlutterTaskHelper(
     internal var gradleErrorMessage = "Invalid Flutter source directory: ${baseFlutterTask.sourceDir}"
 
     /**
-     * Gets the dependency file(s) based on the path from the intermediate directory.
+     * Gets the dependency file(s) that tracks the dependencies or input files used for a specific
+     * Flutter build step based on the current intermediate directory.
      *
-     * @return the dependency file(s) based on the current intermediate directory path.
+     * @return the dependency file(s) based on the current intermediate directory.
      */
     @OutputFiles
     @VisibleForTesting
@@ -31,7 +32,8 @@ class BaseFlutterTaskHelper(
     }
 
     /**
-     * Checks precondition to ensures sourceDir is not null and is a directory.
+     * Checks precondition to ensures sourceDir is not null and is a directory. Also checks
+     * if intermediateDir is valid valid and creates it (and parent directories if needed) if invalid.
      *
      * @throws GradleException if sourceDir is null or is not a directory
      */
@@ -40,7 +42,7 @@ class BaseFlutterTaskHelper(
         if (baseFlutterTask.sourceDir == null || !baseFlutterTask.sourceDir!!.isDirectory) {
             throw GradleException(gradleErrorMessage)
         }
-        baseFlutterTask.intermediateDir.mkdirs()
+        baseFlutterTask.intermediateDir!!.mkdirs()
     }
 
     /**
@@ -53,16 +55,16 @@ class BaseFlutterTaskHelper(
      * @return the list of rule names for flutter assemble.
      */
     @VisibleForTesting
-    internal fun generateRuleNames(baseFlutterTask: BaseFlutterTask): Array<String> {
-        val ruleNames: Array<String> =
+    internal fun generateRuleNames(baseFlutterTask: BaseFlutterTask): List<String> {
+        val ruleNames: List<String> =
             when {
-                baseFlutterTask.buildMode == "debug" -> arrayOf("debug_android_application")
+                baseFlutterTask.buildMode == "debug" -> listOf("debug_android_application")
                 baseFlutterTask.deferredComponents!! ->
                     baseFlutterTask.targetPlatformValues!!
                         .map {
                             "android_aot_deferred_components_bundle_${baseFlutterTask.buildMode}_$it"
-                        }.toTypedArray()
-                else -> baseFlutterTask.targetPlatformValues!!.map { "android_aot_bundle_${baseFlutterTask.buildMode}_$it" }.toTypedArray()
+                        }
+                else -> baseFlutterTask.targetPlatformValues!!.map { "android_aot_bundle_${baseFlutterTask.buildMode}_$it" }
             }
         return ruleNames
     }
@@ -81,11 +83,11 @@ class BaseFlutterTaskHelper(
             executable(baseFlutterTask.flutterExecutable!!.absolutePath)
             workingDir(baseFlutterTask.sourceDir)
             baseFlutterTask.localEngine?.let {
-                args("--local-engine", baseFlutterTask.localEngine)
+                args("--local-engine", it)
                 args("--local-engine-src-path", baseFlutterTask.localEngineSrcPath)
             }
             baseFlutterTask.localEngineHost?.let {
-                args("--local-engine-host", baseFlutterTask.localEngineHost)
+                args("--local-engine-host", it)
             }
             if (baseFlutterTask.verbose == true) {
                 args("--verbose")
@@ -97,7 +99,7 @@ class BaseFlutterTaskHelper(
             args("--depfile", "${baseFlutterTask.intermediateDir}/flutter_build.d")
             args("--output", "${baseFlutterTask.intermediateDir}")
             baseFlutterTask.performanceMeasurementFile?.let {
-                args("--performance-measurement-file=${baseFlutterTask.performanceMeasurementFile}")
+                args("--performance-measurement-file=$it")
             }
             if (!baseFlutterTask.fastStart!! || baseFlutterTask.buildMode != "debug") {
                 args("-dTargetFile=${baseFlutterTask.targetPath}")
@@ -107,10 +109,10 @@ class BaseFlutterTaskHelper(
             args("-dTargetPlatform=android")
             args("-dBuildMode=${baseFlutterTask.buildMode}")
             baseFlutterTask.trackWidgetCreation?.let {
-                args("-dTrackWidgetCreation=${baseFlutterTask.trackWidgetCreation}")
+                args("-dTrackWidgetCreation=$it")
             }
             baseFlutterTask.splitDebugInfo?.let {
-                args("-dSplitDebugInfo=${baseFlutterTask.splitDebugInfo}")
+                args("-dSplitDebugInfo=$it")
             }
             if (baseFlutterTask.treeShakeIcons == true) {
                 args("-dTreeShakeIcons=true")
@@ -119,25 +121,25 @@ class BaseFlutterTaskHelper(
                 args("-dDartObfuscation=true")
             }
             baseFlutterTask.dartDefines?.let {
-                args("--DartDefines=${baseFlutterTask.dartDefines}")
+                args("--DartDefines=$it")
             }
             baseFlutterTask.bundleSkSLPath?.let {
-                args("-dBundleSkSLPath=${baseFlutterTask.bundleSkSLPath}")
+                args("-dBundleSkSLPath=$it")
             }
             baseFlutterTask.codeSizeDirectory?.let {
-                args("-dCodeSizeDirectory=${baseFlutterTask.codeSizeDirectory}")
+                args("-dCodeSizeDirectory=$it")
             }
             baseFlutterTask.flavor?.let {
-                args("-dFlavor=${baseFlutterTask.flavor}")
+                args("-dFlavor=$it")
             }
             baseFlutterTask.extraGenSnapshotOptions?.let {
-                args("--ExtraGenSnapshotOptions=${baseFlutterTask.extraGenSnapshotOptions}")
+                args("--ExtraGenSnapshotOptions=$it")
             }
             baseFlutterTask.frontendServerStarterPath?.let {
-                args("-dFrontendServerStarterPath=${baseFlutterTask.frontendServerStarterPath}")
+                args("-dFrontendServerStarterPath=$it")
             }
             baseFlutterTask.extraFrontEndOptions?.let {
-                args("--ExtraFrontEndOptions=${baseFlutterTask.extraFrontEndOptions}")
+                args("--ExtraFrontEndOptions=$it")
             }
 
             args("-dAndroidArchs=${baseFlutterTask.targetPlatformValues!!.joinToString(" ")}")

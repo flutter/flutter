@@ -68,7 +68,7 @@ abstract class BaseFlutterTask : DefaultTask() {
     var sourceDir: File? = null
 
     @Internal
-    lateinit var intermediateDir: File
+    var intermediateDir: File? = null
 
     @Optional
     @Input
@@ -127,7 +127,7 @@ abstract class BaseFlutterTask : DefaultTask() {
     var flavor: String? = null
 
     /**
-     * Gets the dependency file(s) based on the path from the intermediate directory.
+     * Gets the dependency file(s) by calling [com.flutter.gradle.BaseFlutterTaskHelper.getDependenciesFiles].
      *
      * @return the dependency file(s) based on the current intermediate directory path.
      */
