@@ -59,7 +59,7 @@ void main() {
         fileSystem: fs,
         userMessages: UserMessages(),
       );
-      writePackageConfigFile(directory: fs.currentDirectory, mainLibName: 'test');
+      writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'test');
     });
 
     void createPubspec({required List<String> assets}) {
@@ -286,7 +286,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         userMessages: UserMessages(),
       );
 
-      writePackageConfigFile(directory: fs.currentDirectory, mainLibName: 'test');
+      writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'test');
 
       fs.file('pubspec.yaml').writeAsStringSync('''
 name: test
