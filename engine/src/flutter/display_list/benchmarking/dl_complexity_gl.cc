@@ -341,6 +341,12 @@ void DisplayListGLComplexityCalculator::GLHelper::drawRoundSuperellipse(
   drawRoundRect(rse.ToApproximateRoundRect());
 }
 
+void DisplayListGLComplexityCalculator::GLHelper::drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
+                        const DlRoundSuperellipse& inner) {
+  // Drawing RSEs on Skia falls back to RRect.
+  drawDiffRoundRect(outer.ToApproximateRoundRect(), inner.ToApproximateRoundRect());
+}
+
 void DisplayListGLComplexityCalculator::GLHelper::drawPath(const DlPath& path) {
   if (IsComplex()) {
     return;

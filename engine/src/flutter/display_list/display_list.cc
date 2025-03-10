@@ -319,6 +319,7 @@ DisplayListOpCategory DisplayList::GetOpCategory(DisplayListOpType type) {
     case DisplayListOpType::kDrawRoundRect:
     case DisplayListOpType::kDrawDiffRoundRect:
     case DisplayListOpType::kDrawRoundSuperellipse:
+    case DisplayListOpType::kDrawDiffRoundSuperellipse:
     case DisplayListOpType::kDrawArc:
     case DisplayListOpType::kDrawPath:
     case DisplayListOpType::kDrawPoints:

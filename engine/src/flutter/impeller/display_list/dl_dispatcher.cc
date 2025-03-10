@@ -631,6 +631,18 @@ void DlDispatcherBase::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
 }
 
 // |flutter::DlOpReceiver|
+void DlDispatcherBase::drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
+                                         const DlRoundSuperellipse& inner) {
+  AUTO_DEPTH_WATCHER(1u);
+
+  PathBuilder builder;
+  builder.AddRoundSuperellipse(outer);
+  builder.AddRoundSuperellipse(inner);
+  builder.SetBounds(outer.GetBounds().Union(inner.GetBounds()));
+  GetCanvas().DrawPath(builder.TakePath(FillType::kOdd), paint_);
+}
+
+// |flutter::DlOpReceiver|
 void DlDispatcherBase::drawPath(const DlPath& path) {
   AUTO_DEPTH_WATCHER(1u);
 

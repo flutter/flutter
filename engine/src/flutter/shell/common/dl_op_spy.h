@@ -58,6 +58,8 @@ class DlOpSpy final : public virtual DlOpReceiver,
   void drawDiffRoundRect(const DlRoundRect& outer,
                          const DlRoundRect& inner) override;
   void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override;
+  void drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
+                         const DlRoundSuperellipse& inner) override;
   void drawPath(const DlPath& path) override;
   void drawArc(const DlRect& oval_bounds,
                DlScalar start_degrees,

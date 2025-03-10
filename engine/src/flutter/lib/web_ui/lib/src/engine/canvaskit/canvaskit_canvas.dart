@@ -208,14 +208,6 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   @override
-  void drawRSuperellipse(ui.RSuperellipse rse, ui.Paint paint) {
-    assert(rsuperellipseIsValid(rse));
-    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    _drawRRect(rse.toApproximateRRect(), paint);
-  }
-
-  @override
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
     assert(rrectIsValid(outer));
     assert(rrectIsValid(inner));
@@ -224,6 +216,23 @@ class CanvasKitCanvas implements ui.Canvas {
 
   void _drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
     _canvas.drawDRRect(outer, inner, paint as CkPaint);
+  }
+
+  @override
+  void drawRSuperellipse(ui.RSuperellipse rse, ui.Paint paint) {
+    assert(rsuperellipseIsValid(rse));
+    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    _drawRRect(rse.toApproximateRRect(), paint);
+  }
+
+  @override
+  void drawDRSuperellipse(ui.RSuperellipse inner, ui.RSuperellipse outer, ui.Paint paint) {
+    assert(rsuperellipseIsValid(inner));
+    assert(rsuperellipseIsValid(outer));
+    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    _drawDRRect(inner.toApproximateRRect(), outer.toApproximateRRect(), paint);
   }
 
   @override

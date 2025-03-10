@@ -125,6 +125,9 @@ class DlCanvas {
                                  const DlPaint& paint) = 0;
   virtual void DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
                                      const DlPaint& paint) = 0;
+  virtual void DrawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
+                                 const DlRoundSuperellipse& inner,
+                                 const DlPaint& paint) = 0;
   virtual void DrawPath(const DlPath& path, const DlPaint& paint) = 0;
   virtual void DrawArc(const DlRect& bounds,
                        DlScalar start,

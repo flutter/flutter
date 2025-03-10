@@ -6025,6 +6025,13 @@ abstract class Canvas {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rsuperellipse.png#gh-dark-mode-only)
   void drawRSuperellipse(RSuperellipse rse, Paint paint);
 
+  /// Draws a shape consisting of the difference between two rounded
+  /// superellipses with the given [Paint]. Whether this shape is filled or
+  /// stroked (or both) is controlled by [Paint.style].
+  ///
+  /// This shape is almost but not quite entirely unlike an annulus.
+  void drawDRSuperellipse(RSuperellipse outer, RSuperellipse inner, Paint paint);
+
   /// Draws an axis-aligned oval that fills the given axis-aligned rectangle
   /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
   /// controlled by [Paint.style].
@@ -6764,6 +6771,28 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @Native<Void Function(Pointer<Void>, Handle, Handle, Handle)>(symbol: 'Canvas::drawRSuperellipse')
   external void _drawRSuperellipse(
     Float32List rse,
+    List<Object?>? paintObjects,
+    ByteData paintData,
+  );
+
+  @override
+  void drawDRSuperellipse(RSuperellipse outer, RSuperellipse inner, Paint paint) {
+    assert(_rseIsValid(outer));
+    assert(_rseIsValid(inner));
+    _drawDRSuperellipse(
+      outer.computed() as _ComputedRSuperellipse,
+      inner.computed() as _ComputedRSuperellipse,
+      paint._objects,
+      paint._data,
+    );
+  }
+
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Pointer<Void>, Handle, Handle)>(
+    symbol: 'Canvas::drawDRSuperellipse',
+  )
+  external void _drawDRSuperellipse(
+    _ComputedRSuperellipse outer,
+    _ComputedRSuperellipse inner,
     List<Object?>? paintObjects,
     ByteData paintData,
   );

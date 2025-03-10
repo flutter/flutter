@@ -1271,6 +1271,23 @@ void DisplayListBuilder::DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawRSuperellipseFlags);
   drawRoundSuperellipse(rse);
 }
+void DisplayListBuilder::drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
+                                           const DlRoundSuperellipse& inner) {
+  DisplayListAttributeFlags flags = kDrawDRSuperellipseFlags;
+  OpResult result = PaintResult(current_, flags);
+  if (result != OpResult::kNoEffect &&
+      AccumulateOpBounds(outer.GetBounds(), flags)) {
+    Push<DrawDiffRoundSuperellipseOp>(0, outer, inner);
+    CheckLayerOpacityCompatibility();
+    UpdateLayerResult(result);
+  }
+}
+void DisplayListBuilder::DrawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
+                                           const DlRoundSuperellipse& inner,
+                                           const DlPaint& paint) {
+  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawDRSuperellipseFlags);
+  drawDiffRoundSuperellipse(outer, inner);
+}
 void DisplayListBuilder::drawPath(const DlPath& path) {
   DisplayListAttributeFlags flags = kDrawPathFlags;
   OpResult result = PaintResult(current_, flags);

@@ -248,6 +248,13 @@ void DlSkCanvasAdapter::DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
   delegate_->drawRRect(ToApproximateSkRRect(rse), ToSk(paint));
 }
 
+void DlSkCanvasAdapter::DrawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
+                                 const DlRoundSuperellipse& inner,
+                                 const DlPaint& paint) {
+  // Skia doesn't support round superellipse, thus fall back to round rectangle.
+  delegate_->drawDRRect(ToApproximateSkRRect(outer), ToApproximateSkRRect(inner), ToSk(paint));
+}
+
 void DlSkCanvasAdapter::DrawPath(const DlPath& path, const DlPaint& paint) {
   path.WillRenderSkPath();
   delegate_->drawPath(path.GetSkPath(), ToSk(paint));

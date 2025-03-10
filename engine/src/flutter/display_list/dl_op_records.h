@@ -626,6 +626,7 @@ struct DrawPathOp final : DrawOpBase {
 // DlPoint + DlScalar is 12 more bytes, packing efficiently into 16 bytes total
 // 2 x DlRoundRect is 96 more bytes, using 100 and rounding up to 104 bytes
 //             total (4 bytes unused)
+// 2 x DlRoundSuperellipse is the same as 2 x DlRoundRect
 #define DEFINE_DRAW_2ARG_OP(op_name, type1, name1, type2, name2)     \
   struct Draw##op_name##Op final : DrawOpBase {                      \
     static constexpr auto kType = DisplayListOpType::kDraw##op_name; \
@@ -643,6 +644,7 @@ struct DrawPathOp final : DrawOpBase {
 DEFINE_DRAW_2ARG_OP(Line, DlPoint, p0, DlPoint, p1)
 DEFINE_DRAW_2ARG_OP(Circle, DlPoint, center, DlScalar, radius)
 DEFINE_DRAW_2ARG_OP(DiffRoundRect, DlRoundRect, outer, DlRoundRect, inner)
+DEFINE_DRAW_2ARG_OP(DiffRoundSuperellipse, DlRoundSuperellipse, outer, DlRoundSuperellipse, inner)
 #undef DEFINE_DRAW_2ARG_OP
 
 // 4 byte header + 24 byte payload packs into 32 bytes (4 bytes unused)

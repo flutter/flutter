@@ -753,6 +753,18 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
            {1, 56, 1,
             [](DlOpReceiver& r) { r.drawRoundRect(kTestRRect.Shift(5, 5)); }},
        }},
+      {"DrawDRRect",
+       {
+           {1, 104, 1,
+            [](DlOpReceiver& r) {
+              r.drawDiffRoundRect(kTestRRect, kTestInnerRRect);
+            }},
+           {1, 104, 1,
+            [](DlOpReceiver& r) {
+              r.drawDiffRoundRect(kTestRRect.Shift(5, 5),
+                                  kTestInnerRRect.Shift(4, 4));
+            }},
+       }},
       {"DrawRSuperellipse",
        {
            {1, 56, 1,
@@ -764,16 +776,16 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
               r.drawRoundSuperellipse(kTestRSuperellipse.Shift(5, 5));
             }},
        }},
-      {"DrawDRRect",
+      {"DrawDRSuperellipse",
        {
            {1, 104, 1,
             [](DlOpReceiver& r) {
-              r.drawDiffRoundRect(kTestRRect, kTestInnerRRect);
+              r.drawDiffRoundSuperellipse(kTestRSuperellipse, kTestInnerRSuperellipse);
             }},
            {1, 104, 1,
             [](DlOpReceiver& r) {
-              r.drawDiffRoundRect(kTestRRect.Shift(5, 5),
-                                  kTestInnerRRect.Shift(4, 4));
+              r.drawDiffRoundSuperellipse(kTestRSuperellipse.Shift(5, 5),
+                                  kTestInnerRSuperellipse.Shift(4, 4));
             }},
        }},
       {"DrawPath",
