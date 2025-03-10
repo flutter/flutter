@@ -234,6 +234,24 @@ const float kFloatCompareEpsilon = 0.001;
 }
 @end
 
+@interface FlutterPlatformViewsTestMockFlutterViewController : FlutterViewController
+
+- (UIScreen*)flutterScreenIfViewLoaded;
+
+@end
+
+@implementation FlutterPlatformViewsTestMockFlutterViewController
+
+- (UIScreen*)flutterScreenIfViewLoaded {
+  UIScreen* mockScreen = OCMClassMock([UIScreen class]);
+  CGFloat screenScale = 3;
+  OCMStub([mockScreen scale]).andReturn(screenScale);
+
+  return mockScreen;
+}
+
+@end
+
 namespace flutter {
 namespace {
 class FlutterPlatformViewsTestMockPlatformViewDelegate : public PlatformView::Delegate {
@@ -245,6 +263,7 @@ class FlutterPlatformViewsTestMockPlatformViewDelegate : public PlatformView::De
                              const ViewportMetrics& viewport_metrics,
                              AddViewCallback callback) override {}
   void OnPlatformViewRemoveView(int64_t view_id, RemoveViewCallback callback) override {}
+  void OnPlatformViewSendViewFocusEvent(const ViewFocusEvent& event) override {};
   void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) override {}
   void OnPlatformViewSetViewportMetrics(int64_t view_id, const ViewportMetrics& metrics) override {}
   const flutter::Settings& OnPlatformViewGetSettings() const override { return settings_; }
@@ -306,9 +325,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -329,22 +346,24 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                                        @"viewType" : @"MockFlutterPlatformView"
                                                      }]
             result:result];
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a translate matrix
-  SkMatrix translateMatrix = SkMatrix::Translate(100, 100);
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({100, 100});
   stack.PushTransform(translateMatrix);
-  SkMatrix finalMatrix;
-  finalMatrix.setConcat(screenScaleMatrix, translateMatrix);
+  flutter::DlMatrix finalMatrix = screenScaleMatrix * translateMatrix;
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -367,9 +386,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -464,9 +481,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -490,20 +505,24 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
   auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
-  stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+  stack.PushBackdropFilter(filter,
+                           flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -547,9 +566,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -573,20 +590,24 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
   auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
-  stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 8, screenScale * 8));
+  stack.PushBackdropFilter(filter,
+                           flutter::DlRect::MakeXYWH(0, 0, screenScale * 8, screenScale * 8));
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(5, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(5, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -630,9 +651,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -656,22 +675,26 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   for (int i = 0; i < 50; i++) {
     auto filter = flutter::DlBlurImageFilter::Make(i, 2, flutter::DlTileMode::kClamp);
-    stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+    stack.PushBackdropFilter(filter,
+                             flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(20, 20), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(20, 20), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -714,9 +737,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -740,20 +761,24 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
   auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
-  stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+  stack.PushBackdropFilter(filter,
+                           flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -790,11 +815,12 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   stack2.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   for (int i = 0; i < 2; i++) {
-    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+    stack2.PushBackdropFilter(filter,
+                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
-                                                                     SkSize::Make(10, 10), stack2);
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -843,9 +869,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -869,22 +893,26 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
   for (int i = 0; i < 5; i++) {
-    stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+    stack.PushBackdropFilter(filter,
+                             flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -919,11 +947,12 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   stack2.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   for (int i = 0; i < 4; i++) {
-    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+    stack2.PushBackdropFilter(filter,
+                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
-                                                                     SkSize::Make(10, 10), stack2);
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -965,8 +994,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   }
   // No backdrop filters in the stack, so no nothing to push
 
-  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
-                                                                     SkSize::Make(10, 10), stack2);
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -999,9 +1028,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -1025,22 +1052,26 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
   for (int i = 0; i < 5; i++) {
-    stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+    stack.PushBackdropFilter(filter,
+                             flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1078,16 +1109,17 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
     if (i == 3) {
       auto filter2 = flutter::DlBlurImageFilter::Make(2, 5, flutter::DlTileMode::kClamp);
 
-      stack2.PushBackdropFilter(filter2,
-                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+      stack2.PushBackdropFilter(
+          filter2, flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
-    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+    stack2.PushBackdropFilter(filter,
+                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
-                                                                     SkSize::Make(10, 10), stack2);
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1135,16 +1167,17 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   for (int i = 0; i < 5; i++) {
     if (i == 0) {
       auto filter2 = flutter::DlBlurImageFilter::Make(2, 5, flutter::DlTileMode::kClamp);
-      stack2.PushBackdropFilter(filter2,
-                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+      stack2.PushBackdropFilter(
+          filter2, flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
-    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+    stack2.PushBackdropFilter(filter,
+                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
-                                                                     SkSize::Make(10, 10), stack2);
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1190,16 +1223,17 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   for (int i = 0; i < 5; i++) {
     if (i == 4) {
       auto filter2 = flutter::DlBlurImageFilter::Make(2, 5, flutter::DlTileMode::kClamp);
-      stack2.PushBackdropFilter(filter2,
-                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+      stack2.PushBackdropFilter(
+          filter2, flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
-    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+    stack2.PushBackdropFilter(filter,
+                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
-                                                                     SkSize::Make(10, 10), stack2);
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1247,11 +1281,12 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   for (int i = 0; i < 5; i++) {
     auto filter2 = flutter::DlBlurImageFilter::Make(i, 2, flutter::DlTileMode::kClamp);
 
-    stack2.PushBackdropFilter(filter2, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+    stack2.PushBackdropFilter(filter2,
+                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
-                                                                     SkSize::Make(10, 10), stack2);
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1300,9 +1335,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -1326,20 +1359,23 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a dilate backdrop filter
   auto dilateFilter = flutter::DlDilateImageFilter::Make(5, 2);
-  stack.PushBackdropFilter(dilateFilter, SkRect::MakeEmpty());
+  stack.PushBackdropFilter(dilateFilter, flutter::DlRect());
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1373,17 +1409,17 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   for (int i = 0; i < 5; i++) {
     if (i == 2) {
-      stack2.PushBackdropFilter(dilateFilter,
-                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+      stack2.PushBackdropFilter(
+          dilateFilter, flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
     stack2.PushBackdropFilter(blurFilter,
-                              SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
-                                                                     SkSize::Make(10, 10), stack2);
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1416,17 +1452,17 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Push backdrop filters and dilate filter
   for (int i = 0; i < 5; i++) {
     if (i == 0) {
-      stack2.PushBackdropFilter(dilateFilter,
-                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+      stack2.PushBackdropFilter(
+          dilateFilter, flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
     stack2.PushBackdropFilter(blurFilter,
-                              SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
-                                                                     SkSize::Make(10, 10), stack2);
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1459,17 +1495,17 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Push backdrop filters and dilate filter
   for (int i = 0; i < 5; i++) {
     if (i == 4) {
-      stack2.PushBackdropFilter(dilateFilter,
-                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+      stack2.PushBackdropFilter(
+          dilateFilter, flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
     stack2.PushBackdropFilter(blurFilter,
-                              SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
-                                                                     SkSize::Make(10, 10), stack2);
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1502,11 +1538,11 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Push dilate filters
   for (int i = 0; i < 5; i++) {
     stack2.PushBackdropFilter(dilateFilter,
-                              SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+                              flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
-  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
-                                                                     SkSize::Make(10, 10), stack2);
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1633,9 +1669,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -1659,22 +1693,24 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a translate matrix
-  SkMatrix translateMatrix = SkMatrix::Translate(100, 100);
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({100, 100});
   stack.PushTransform(translateMatrix);
-  SkMatrix finalMatrix;
-  finalMatrix.setConcat(screenScaleMatrix, translateMatrix);
+  flutter::DlMatrix finalMatrix = screenScaleMatrix * translateMatrix;
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1700,9 +1736,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -1726,17 +1760,20 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(0, 0)];
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
@@ -1773,8 +1810,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssertEqual(numberOfExpectedVisualEffectView, 1u);
 
   // New frame, with no filter pushed.
-  auto embeddedViewParams2 =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
   [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(0, 0)];
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams2)];
@@ -1810,9 +1847,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -1836,23 +1871,24 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a rotate matrix
-  SkMatrix rotateMatrix;
-  rotateMatrix.setRotate(10);
+  flutter::DlMatrix rotateMatrix = flutter::DlMatrix::MakeRotationZ(flutter::DlDegrees(10));
   stack.PushTransform(rotateMatrix);
-  SkMatrix finalMatrix;
-  finalMatrix.setConcat(screenScaleMatrix, rotateMatrix);
+  flutter::DlMatrix finalMatrix = screenScaleMatrix * rotateMatrix;
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1892,9 +1928,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -1918,28 +1952,31 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params.
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack.
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
-  SkMatrix translateMatrix = SkMatrix::Translate(5, 5);
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({5, 5});
   // The platform view's rect for this test will be (5, 5, 10, 10).
   stack.PushTransform(translateMatrix);
   // Push a clip rect, big enough to contain the entire platform view bound.
-  SkRect rect = SkRect::MakeXYWH(0, 0, 25, 25);
+  flutter::DlRect rect = flutter::DlRect::MakeXYWH(0, 0, 25, 25);
   stack.PushClipRect(rect);
   // Push a clip rrect, big enough to contain the entire platform view bound without clipping it.
   // Make the origin (-1, -1) so that the top left rounded corner isn't clipping the PlatformView.
-  SkRect rect_for_rrect = SkRect::MakeXYWH(-1, -1, 25, 25);
-  SkRRect rrect = SkRRect::MakeRectXY(rect_for_rrect, 1, 1);
+  flutter::DlRect rect_for_rrect = flutter::DlRect::MakeXYWH(-1, -1, 25, 25);
+  flutter::DlRoundRect rrect = flutter::DlRoundRect::MakeRectXY(rect_for_rrect, 1, 1);
   stack.PushClipRRect(rrect);
 
   auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
-      SkMatrix::Concat(screenScaleMatrix, translateMatrix), SkSize::Make(5, 5), stack);
+      flutter::ToSkMatrix(screenScaleMatrix * translateMatrix), SkSize::Make(5, 5), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -1970,9 +2007,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -1996,26 +2031,29 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack.
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
-  SkMatrix translateMatrix = SkMatrix::Translate(5, 5);
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({5, 5});
   // The platform view's rect for this test will be (5, 5, 10, 10).
   stack.PushTransform(translateMatrix);
 
   // Push a clip rrect, the rect of the rrect is the same as the PlatformView of the corner should.
   // clip the PlatformView.
-  SkRect rect_for_rrect = SkRect::MakeXYWH(0, 0, 10, 10);
-  SkRRect rrect = SkRRect::MakeRectXY(rect_for_rrect, 1, 1);
+  flutter::DlRect rect_for_rrect = flutter::DlRect::MakeXYWH(0, 0, 10, 10);
+  flutter::DlRoundRect rrect = flutter::DlRoundRect::MakeRectXY(rect_for_rrect, 1, 1);
   stack.PushClipRRect(rrect);
 
   auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
-      SkMatrix::Concat(screenScaleMatrix, translateMatrix), SkSize::Make(5, 5), stack);
+      flutter::ToSkMatrix(screenScaleMatrix * translateMatrix), SkSize::Make(5, 5), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -2047,9 +2085,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -2073,20 +2109,23 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a clip rect
-  SkRect rect = SkRect::MakeXYWH(2, 2, 3, 3);
+  flutter::DlRect rect = flutter::DlRect::MakeXYWH(2, 2, 3, 3);
   stack.PushClipRect(rect);
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -2129,9 +2168,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -2155,23 +2192,26 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a clip rect
-  SkRect rect1 = SkRect::MakeXYWH(2, 2, 3, 3);
+  flutter::DlRect rect1 = flutter::DlRect::MakeXYWH(2, 2, 3, 3);
   stack.PushClipRect(rect1);
   // Push another clip rect
-  SkRect rect2 = SkRect::MakeXYWH(3, 3, 3, 3);
+  flutter::DlRect rect2 = flutter::DlRect::MakeXYWH(3, 3, 3, 3);
   stack.PushClipRect(rect2);
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -2231,9 +2271,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -2257,20 +2295,24 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a clip rrect
-  SkRRect rrect = SkRRect::MakeRectXY(SkRect::MakeXYWH(2, 2, 6, 6), 1, 1);
+  flutter::DlRoundRect rrect =
+      flutter::DlRoundRect::MakeRectXY(flutter::DlRect::MakeXYWH(2, 2, 6, 6), 1, 1);
   stack.PushClipRRect(rrect);
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -2340,9 +2382,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -2366,23 +2406,27 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a clip rrect
-  SkRRect rrect = SkRRect::MakeRectXY(SkRect::MakeXYWH(2, 2, 6, 6), 1, 1);
+  flutter::DlRoundRect rrect =
+      flutter::DlRoundRect::MakeRectXY(flutter::DlRect::MakeXYWH(2, 2, 6, 6), 1, 1);
   stack.PushClipRRect(rrect);
   // Push a clip rect
-  SkRect rect = SkRect::MakeXYWH(4, 2, 6, 6);
+  flutter::DlRect rect = flutter::DlRect::MakeXYWH(4, 2, 6, 6);
   stack.PushClipRect(rect);
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -2466,9 +2510,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -2492,21 +2534,24 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a clip path
-  SkPath path;
-  path.addRoundRect(SkRect::MakeXYWH(2, 2, 6, 6), 1, 1);
+  flutter::DlPath path =
+      flutter::DlPath::MakeRoundRectXY(flutter::DlRect::MakeXYWH(2, 2, 6, 6), 1, 1);
   stack.PushClipPath(path);
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -2576,9 +2621,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -2602,24 +2645,27 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a clip path
-  SkPath path;
-  path.addRoundRect(SkRect::MakeXYWH(2, 2, 6, 6), 1, 1);
+  flutter::DlPath path =
+      flutter::DlPath::MakeRoundRectXY(flutter::DlRect::MakeXYWH(2, 2, 6, 6), 1, 1);
   stack.PushClipPath(path);
   // Push a clip rect
-  SkRect rect = SkRect::MakeXYWH(4, 2, 6, 6);
+  flutter::DlRect rect = flutter::DlRect::MakeXYWH(4, 2, 6, 6);
   stack.PushClipRect(rect);
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
@@ -2703,9 +2749,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -2774,9 +2818,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -2902,9 +2944,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -3019,9 +3059,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -3087,9 +3125,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -3196,9 +3232,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -3261,9 +3295,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -3326,9 +3358,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -3387,9 +3417,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -3447,9 +3475,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -3473,12 +3499,16 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
+
   // Create embedded view params
   flutter::MutatorsStack stack;
-  SkMatrix finalMatrix;
+  flutter::DlMatrix finalMatrix;
 
-  auto embeddedViewParams_1 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  auto embeddedViewParams_1 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams_1)];
@@ -3494,11 +3524,10 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/SkISize::Make(800, 600));
   XCTAssertFalse([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
-  auto embeddedViewParams_2 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  auto embeddedViewParams_2 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams_2)];
   [flutterPlatformViewsController
@@ -3512,8 +3541,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/SkISize::Make(800, 600));
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface_submit_true)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 }
 
 - (void)
@@ -3530,9 +3558,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -3560,13 +3586,13 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
               result:result];
 
     flutter::MutatorsStack stack;
-    SkMatrix finalMatrix;
-    auto embeddedViewParams =
-        std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+    flutter::DlMatrix finalMatrix;
+    auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+        flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
     [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                       withParams:std::move(embeddedViewParams)];
 
-    // Not calling |[flutterPlatformViewsController submitFrame:withIosContext:grContext:]| so that
+    // Not calling |[flutterPlatformViewsController submitFrame:withIosContext:]| so that
     // the platform views are not added to flutter_view_.
 
     XCTAssertNotNil(gMockPlatformView);
@@ -3588,14 +3614,15 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
@@ -3619,9 +3646,9 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // First frame, |embeddedViewCount| is not empty after composite.
   [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(300, 300)];
   flutter::MutatorsStack stack;
-  SkMatrix finalMatrix;
-  auto embeddedViewParams1 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  flutter::DlMatrix finalMatrix;
+  auto embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:0
                                                     withParams:std::move(embeddedViewParams1)];
   [flutterPlatformViewsController
@@ -3634,8 +3661,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(300, 300)];
   XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 0UL);
 
-  auto embeddedViewParams2 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:0
                                                     withParams:std::move(embeddedViewParams2)];
   [flutterPlatformViewsController
@@ -3659,14 +3686,15 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
@@ -3699,30 +3727,26 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(300, 300)];
   flutter::MutatorsStack stack;
-  SkMatrix finalMatrix;
-  auto embeddedViewParams1 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  flutter::DlMatrix finalMatrix;
+  auto embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:0
                                                     withParams:std::move(embeddedViewParams1)];
 
-  auto embeddedViewParams2 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(500, 500), stack);
+  auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(500, 500), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams2)];
 
-  // SKSurface is required if the root FlutterView is present.
-  const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-  sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      std::move(mock_sk_surface), framebuffer_info,
+      nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600));
+      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -3734,26 +3758,24 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Need to recreate these params since they are `std::move`ed.
   [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(300, 300)];
   // Process the second frame in the opposite order.
-  embeddedViewParams2 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(500, 500), stack);
+  embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(500, 500), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams2)];
 
-  embeddedViewParams1 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:0
                                                     withParams:std::move(embeddedViewParams1)];
 
-  mock_sk_surface = SkSurfaces::Raster(image_info);
   mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      std::move(mock_sk_surface), framebuffer_info,
+      nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600));
+      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] >
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -3774,14 +3796,15 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
@@ -3814,30 +3837,26 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(300, 300)];
   flutter::MutatorsStack stack;
-  SkMatrix finalMatrix;
-  auto embeddedViewParams1 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  flutter::DlMatrix finalMatrix;
+  auto embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:0
                                                     withParams:std::move(embeddedViewParams1)];
 
-  auto embeddedViewParams2 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(500, 500), stack);
+  auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(500, 500), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams2)];
 
-  // SKSurface is required if the root FlutterView is present.
-  const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-  sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      std::move(mock_sk_surface), framebuffer_info,
+      nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600));
+      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -3849,26 +3868,24 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Need to recreate these params since they are `std::move`ed.
   [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(300, 300)];
   // Process the second frame in the same order.
-  embeddedViewParams1 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:0
                                                     withParams:std::move(embeddedViewParams1)];
 
-  embeddedViewParams2 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(500, 500), stack);
+  embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(500, 500), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams2)];
 
-  mock_sk_surface = SkSurfaces::Raster(image_info);
   mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      std::move(mock_sk_surface), framebuffer_info,
+      nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600));
+      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()
-           grContext:nil]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] <
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -3926,13 +3943,13 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
 - (void)testFlutterClippingMaskViewPoolReuseViewsAfterRecycle {
   FlutterClippingMaskViewPool* pool = [[FlutterClippingMaskViewPool alloc] initWithCapacity:2];
-  FlutterClippingMaskView* view1 = [pool getMaskViewWithFrame:CGRectZero];
-  FlutterClippingMaskView* view2 = [pool getMaskViewWithFrame:CGRectZero];
+  FlutterClippingMaskView* view1 = [pool getMaskViewWithFrame:CGRectZero screenScale:1];
+  FlutterClippingMaskView* view2 = [pool getMaskViewWithFrame:CGRectZero screenScale:1];
   [pool insertViewToPoolIfNeeded:view1];
   [pool insertViewToPoolIfNeeded:view2];
   CGRect newRect = CGRectMake(0, 0, 10, 10);
-  FlutterClippingMaskView* view3 = [pool getMaskViewWithFrame:newRect];
-  FlutterClippingMaskView* view4 = [pool getMaskViewWithFrame:newRect];
+  FlutterClippingMaskView* view3 = [pool getMaskViewWithFrame:newRect screenScale:1];
+  FlutterClippingMaskView* view4 = [pool getMaskViewWithFrame:newRect screenScale:1];
   // view3 and view4 should randomly get either of view1 and view2.
   NSSet* set1 = [NSSet setWithObjects:view1, view2, nil];
   NSSet* set2 = [NSSet setWithObjects:view3, view4, nil];
@@ -3943,9 +3960,9 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
 - (void)testFlutterClippingMaskViewPoolAllocsNewMaskViewsAfterReachingCapacity {
   FlutterClippingMaskViewPool* pool = [[FlutterClippingMaskViewPool alloc] initWithCapacity:2];
-  FlutterClippingMaskView* view1 = [pool getMaskViewWithFrame:CGRectZero];
-  FlutterClippingMaskView* view2 = [pool getMaskViewWithFrame:CGRectZero];
-  FlutterClippingMaskView* view3 = [pool getMaskViewWithFrame:CGRectZero];
+  FlutterClippingMaskView* view1 = [pool getMaskViewWithFrame:CGRectZero screenScale:1];
+  FlutterClippingMaskView* view2 = [pool getMaskViewWithFrame:CGRectZero screenScale:1];
+  FlutterClippingMaskView* view3 = [pool getMaskViewWithFrame:CGRectZero screenScale:1];
   XCTAssertNotEqual(view1, view3);
   XCTAssertNotEqual(view2, view3);
 }
@@ -3954,7 +3971,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   __weak UIView* weakView;
   @autoreleasepool {
     FlutterClippingMaskViewPool* pool = [[FlutterClippingMaskViewPool alloc] initWithCapacity:2];
-    FlutterClippingMaskView* view = [pool getMaskViewWithFrame:CGRectZero];
+    FlutterClippingMaskView* view = [pool getMaskViewWithFrame:CGRectZero screenScale:1];
     weakView = view;
     XCTAssertNotNil(weakView);
   }
@@ -3974,9 +3991,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -3999,20 +4014,23 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
             result:result];
 
   XCTAssertNotNil(gMockPlatformView);
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack1;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack1.PushTransform(screenScaleMatrix);
   // Push a clip rect
-  SkRect rect = SkRect::MakeXYWH(2, 2, 3, 3);
+  flutter::DlRect rect = flutter::DlRect::MakeXYWH(2, 2, 3, 3);
   stack1.PushClipRect(rect);
 
   auto embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
-      screenScaleMatrix, SkSize::Make(10, 10), stack1);
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack1);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams1)];
@@ -4028,9 +4046,9 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(100, 100)];
   flutter::MutatorsStack stack2;
   auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
-      screenScaleMatrix, SkSize::Make(10, 10), stack2);
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
   auto embeddedViewParams3 = std::make_unique<flutter::EmbeddedViewParams>(
-      screenScaleMatrix, SkSize::Make(10, 10), stack2);
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams3)];
   [flutterPlatformViewsController
@@ -4049,7 +4067,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
             result:result];
 
   auto embeddedViewParams4 = std::make_unique<flutter::EmbeddedViewParams>(
-      screenScaleMatrix, SkSize::Make(10, 10), stack1);
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack1);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams4)];
   [flutterPlatformViewsController
@@ -4077,9 +4095,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -4114,25 +4130,28 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   UIView* view2 = gMockPlatformView;
 
   XCTAssertNotNil(gMockPlatformView);
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack1;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack1.PushTransform(screenScaleMatrix);
   // Push a clip rect
-  SkRect rect = SkRect::MakeXYWH(2, 2, 3, 3);
+  flutter::DlRect rect = flutter::DlRect::MakeXYWH(2, 2, 3, 3);
   stack1.PushClipRect(rect);
 
   auto embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
-      screenScaleMatrix, SkSize::Make(10, 10), stack1);
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack1);
 
   flutter::MutatorsStack stack2;
   stack2.PushClipRect(rect);
   auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
-      screenScaleMatrix, SkSize::Make(10, 10), stack2);
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams1)];
@@ -4167,9 +4186,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -4193,25 +4210,28 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
             result:result];
 
   XCTAssertNotNil(gMockPlatformView);
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack1;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack1.PushTransform(screenScaleMatrix);
   // Push a clip rect
-  SkRect rect = SkRect::MakeXYWH(2, 2, 3, 3);
+  flutter::DlRect rect = flutter::DlRect::MakeXYWH(2, 2, 3, 3);
   stack1.PushClipRect(rect);
 
   auto embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
-      screenScaleMatrix, SkSize::Make(10, 10), stack1);
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack1);
 
   flutter::MutatorsStack stack2;
   stack2.PushClipRect(rect);
   auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
-      screenScaleMatrix, SkSize::Make(10, 10), stack2);
+      flutter::ToSkMatrix(screenScaleMatrix), SkSize::Make(10, 10), stack2);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams1)];
@@ -4266,14 +4286,15 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
@@ -4306,14 +4327,14 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
     // No view should be disposed, or removed from the composition order.
     [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(300, 300)];
     flutter::MutatorsStack stack;
-    SkMatrix finalMatrix;
-    auto embeddedViewParams0 =
-        std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+    flutter::DlMatrix finalMatrix;
+    auto embeddedViewParams0 = std::make_unique<flutter::EmbeddedViewParams>(
+        flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
     [flutterPlatformViewsController prerollCompositeEmbeddedView:0
                                                       withParams:std::move(embeddedViewParams0)];
 
-    auto embeddedViewParams1 =
-        std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+    auto embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
+        flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
     [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                       withParams:std::move(embeddedViewParams1)];
 
@@ -4329,18 +4350,16 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
               result:disposeResult];
     [self waitForExpectationsWithTimeout:30 handler:nil];
 
-    const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-    sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
     flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
     auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-        std::move(mock_sk_surface), framebuffer_info,
+        nullptr, framebuffer_info,
         [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
         [](const flutter::SurfaceFrame& surface_frame) { return true; },
-        /*frame_size=*/SkISize::Make(800, 600));
+        /*frame_size=*/SkISize::Make(800, 600), nullptr,
+        /*display_list_fallback=*/true);
     XCTAssertTrue([flutterPlatformViewsController
            submitFrame:std::move(mock_surface)
-        withIosContext:std::make_shared<flutter::IOSContextNoop>()
-             grContext:nil]);
+        withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 2UL);
@@ -4353,24 +4372,21 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
     // View 0 is removed from the composition order in this frame, hence also disposed.
     [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(300, 300)];
     flutter::MutatorsStack stack;
-    SkMatrix finalMatrix;
-    auto embeddedViewParams1 =
-        std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+    flutter::DlMatrix finalMatrix;
+    auto embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
+        flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
     [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                       withParams:std::move(embeddedViewParams1)];
 
-    const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-    sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
     flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
     auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-        std::move(mock_sk_surface), framebuffer_info,
+        nullptr, framebuffer_info,
         [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
         [](const flutter::SurfaceFrame& surface_frame) { return true; },
-        /*frame_size=*/SkISize::Make(800, 600));
+        /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
     XCTAssertTrue([flutterPlatformViewsController
            submitFrame:std::move(mock_surface)
-        withIosContext:std::make_shared<flutter::IOSContextNoop>()
-             grContext:nil]);
+        withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
@@ -4391,9 +4407,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -4414,38 +4428,36 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                                        @"viewType" : @"MockFlutterPlatformView"
                                                      }]
             result:result];
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a translate matrix
-  SkMatrix translateMatrix = SkMatrix::Translate(100, 100);
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({100, 100});
   stack.PushTransform(translateMatrix);
-  SkMatrix finalMatrix;
-  finalMatrix.setConcat(screenScaleMatrix, translateMatrix);
+  flutter::DlMatrix finalMatrix = screenScaleMatrix * translateMatrix;
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
 
-  // SKSurface is required if the root FlutterView is present.
-  const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-  sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      std::move(mock_sk_surface), framebuffer_info,
+      nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600));
+      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
-                                    grContext:nil];
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
 
   UIView* someView = [[UIView alloc] init];
   [flutterView addSubview:someView];
@@ -4453,6 +4465,81 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   [flutterPlatformViewsController reset];
   XCTAssertEqual(flutterView.subviews.count, 1u);
   XCTAssertEqual(flutterView.subviews.firstObject, someView);
+}
+
+- (void)testResetClearsPreviousCompositionOrder {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/GetDefaultTaskRunner(),
+                               /*raster=*/GetDefaultTaskRunner(),
+                               /*ui=*/GetDefaultTaskRunner(),
+                               /*io=*/GetDefaultTaskRunner());
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      [[FlutterPlatformViewsController alloc] init];
+  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView"
+                                                     }]
+            result:result];
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  stack.PushTransform(screenScaleMatrix);
+  // Push a translate matrix
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({100, 100});
+  stack.PushTransform(translateMatrix);
+  flutter::DlMatrix finalMatrix = screenScaleMatrix * translateMatrix;
+
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
+
+  [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                    withParams:std::move(embeddedViewParams)];
+
+  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
+  auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
+      nullptr, framebuffer_info,
+      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+      [](const flutter::SurfaceFrame& surface_frame) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
+
+  // The above code should result in previousCompositionOrder having one viewId in it
+  XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.size(), 1ul);
+
+  // reset should clear previousCompositionOrder
+  [flutterPlatformViewsController reset];
+
+  // previousCompositionOrder should now be empty
+  XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.size(), 0ul);
 }
 
 - (void)testNilPlatformViewDoesntCrash {
@@ -4468,9 +4555,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
@@ -4491,39 +4576,37 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                                        @"viewType" : @"MockFlutterPlatformView"
                                                      }]
             result:result];
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a translate matrix
-  SkMatrix translateMatrix = SkMatrix::Translate(100, 100);
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({100, 100});
   stack.PushTransform(translateMatrix);
-  SkMatrix finalMatrix;
-  finalMatrix.setConcat(screenScaleMatrix, translateMatrix);
+  flutter::DlMatrix finalMatrix = screenScaleMatrix * translateMatrix;
 
-  auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
 
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
 
-  // SKSurface is required if the root FlutterView is present.
-  const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-  sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      std::move(mock_sk_surface), framebuffer_info,
+      nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/SkISize::Make(800, 600));
+      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
-                                    grContext:nil];
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
 
   XCTAssertEqual(flutterView.subviews.count, 1u);
 }
@@ -4536,19 +4619,18 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 }
 
 - (void)testLayerPool {
-  // Create an IOSContext and GrDirectContext.
+  // Create an IOSContext.
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   [engine run];
   XCTAssertTrue(engine.platformView != nullptr);
   auto ios_context = engine.platformView->GetIosContext();
-  auto gr_context = ios_context->GetMainContext();
 
   auto pool = flutter::OverlayLayerPool{};
 
   // Add layers to the pool.
-  pool.CreateLayer(gr_context.get(), ios_context, MTLPixelFormatBGRA8Unorm);
+  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm, 1);
   XCTAssertEqual(pool.size(), 1u);
-  pool.CreateLayer(gr_context.get(), ios_context, MTLPixelFormatBGRA8Unorm);
+  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm, 1);
   XCTAssertEqual(pool.size(), 2u);
 
   // Mark all layers as unused.
@@ -4574,14 +4656,15 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
@@ -4612,38 +4695,35 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   [flutterPlatformViewsController beginFrameWithSize:SkISize::Make(300, 300)];
   flutter::MutatorsStack stack;
-  SkMatrix finalMatrix;
-  auto embeddedViewParams1 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+  flutter::DlMatrix finalMatrix;
+  auto embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(300, 300), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:0
                                                     withParams:std::move(embeddedViewParams1)];
 
-  auto embeddedViewParams2 =
-      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(500, 500), stack);
+  auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
+      flutter::ToSkMatrix(finalMatrix), SkSize::Make(500, 500), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams2)];
 
-  // SKSurface is required if the root FlutterView is present.
-  const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-  sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   std::optional<flutter::SurfaceFrame::SubmitInfo> submit_info;
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      std::move(mock_sk_surface), framebuffer_info,
+      nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [&](const flutter::SurfaceFrame& surface_frame) {
         submit_info = surface_frame.submit_info();
         return true;
       },
-      /*frame_size=*/SkISize::Make(800, 600));
+      /*frame_size=*/SkISize::Make(800, 600), nullptr,
+      /*display_list_fallback=*/true);
   mock_surface->set_submit_info({
       .frame_damage = SkIRect::MakeWH(800, 600),
       .buffer_damage = SkIRect::MakeWH(400, 600),
   });
 
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
-                                    grContext:nil];
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
 
   XCTAssertTrue(submit_info.has_value());
   XCTAssertEqual(*submit_info->frame_damage, SkIRect::MakeWH(800, 600));

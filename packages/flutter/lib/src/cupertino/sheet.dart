@@ -11,6 +11,19 @@ import 'interface_level.dart';
 import 'route.dart';
 import 'theme.dart';
 
+// Smoothing factor applied to the device's top padding (which approximates the corner radius)
+// to achieve a smoother end to the corner radius animation.  A value of 1.0 would use
+// the full top padding. Values less than 1.0 reduce the effective corner radius, improving
+// the animation's appearance.  Determined through empirical testing.
+const double _kDeviceCornerRadiusSmoothingFactor = 0.9;
+
+// Threshold in logical pixels. If the calculated device corner radius (after applying
+// the smoothing factor) is below this value, the corner radius transition animation will
+// start from zero. This prevents abrupt transitions for devices with small or negligible
+// corner radii.  This value, combined with the smoothing factor, corresponds roughly
+// to double the targeted radius of 12.  Determined through testing and visual inspection.
+const double _kRoundedDeviceCornersThreshold = 20.0;
+
 // The distance from the top of the open sheet to the top of the screen, as a ratio
 // of the total height of the screen. Found from eyeballing a simulator running
 // iOS 18.0.
@@ -221,10 +234,15 @@ class CupertinoSheetTransition extends StatefulWidget {
       reverseCurve: reverseCurve,
       parent: secondaryAnimation,
     );
-    final double deviceCornerRadius = MediaQuery.maybeViewPaddingOf(context)?.top ?? 0;
+
+    final double deviceCornerRadius =
+        (MediaQuery.maybeViewPaddingOf(context)?.top ?? 0) * _kDeviceCornerRadiusSmoothingFactor;
+    final bool roundedDeviceCorners = deviceCornerRadius > _kRoundedDeviceCornersThreshold;
 
     final Animatable<BorderRadiusGeometry> decorationTween = Tween<BorderRadiusGeometry>(
-      begin: BorderRadius.circular(deviceCornerRadius),
+      begin: BorderRadius.vertical(
+        top: Radius.circular(roundedDeviceCorners ? deviceCornerRadius : 0),
+      ),
       end: BorderRadius.circular(12),
     );
 
@@ -262,7 +280,13 @@ class CupertinoSheetTransition extends StatefulWidget {
           animation: radiusAnimation,
           child: child,
           builder: (BuildContext context, Widget? child) {
-            return ClipRRect(borderRadius: radiusAnimation.value, child: contrastedChild);
+            return ClipRRect(
+              borderRadius:
+                  !secondaryAnimation.isDismissed
+                      ? radiusAnimation.value
+                      : BorderRadius.circular(0),
+              child: contrastedChild,
+            );
           },
         ),
       ),

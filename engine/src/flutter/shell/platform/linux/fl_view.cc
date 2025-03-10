@@ -33,8 +33,11 @@ struct _FlView {
   // Engine this view is showing.
   FlEngine* engine;
 
-  // Signal subscription for engine restarts.
+  // Signal subscription for engine restart signal.
   guint on_pre_engine_restart_cb_id;
+
+  // Signal subscription for updating semantics signal.
+  guint update_semantics_cb_id;
 
   // ID for this view.
   FlutterViewId view_id;
@@ -132,25 +135,6 @@ static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
   }
 }
 
-static gboolean get_mouse_button(GdkEvent* event, int64_t* button) {
-  guint event_button = 0;
-  gdk_event_get_button(event, &event_button);
-
-  switch (event_button) {
-    case GDK_BUTTON_PRIMARY:
-      *button = kFlutterPointerButtonMousePrimary;
-      return TRUE;
-    case GDK_BUTTON_MIDDLE:
-      *button = kFlutterPointerButtonMouseMiddle;
-      return TRUE;
-    case GDK_BUTTON_SECONDARY:
-      *button = kFlutterPointerButtonMouseSecondary;
-      return TRUE;
-    default:
-      return FALSE;
-  }
-}
-
 // Called when the mouse cursor changes.
 static void cursor_changed_cb(FlView* self) {
   FlMouseCursorHandler* handler =
@@ -238,11 +222,8 @@ static void view_added_cb(GObject* object,
 }
 
 // Called when the engine updates accessibility.
-static void update_semantics_cb(FlEngine* engine,
-                                const FlutterSemanticsUpdate2* update,
-                                gpointer user_data) {
-  FlView* self = FL_VIEW(user_data);
-
+static void update_semantics_cb(FlView* self,
+                                const FlutterSemanticsUpdate2* update) {
   fl_view_accessible_handle_update_semantics(self->view_accessible, update);
 }
 
@@ -323,10 +304,8 @@ static gboolean button_press_event_cb(FlView* self,
     return FALSE;
   }
 
-  int64_t button;
-  if (!get_mouse_button(event, &button)) {
-    return FALSE;
-  }
+  guint button = 0;
+  gdk_event_get_button(event, &button);
 
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
@@ -345,10 +324,8 @@ static gboolean button_release_event_cb(FlView* self,
                                         GdkEventButton* button_event) {
   GdkEvent* event = reinterpret_cast<GdkEvent*>(button_event);
 
-  int64_t button;
-  if (!get_mouse_button(event, &button)) {
-    return FALSE;
-  }
+  guint button = 0;
+  gdk_event_get_button(event, &button);
 
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
@@ -514,6 +491,10 @@ static void realize_cb(FlView* self) {
       atk_plug_get_id(ATK_PLUG(self->view_accessible)));
 }
 
+static void secondary_realize_cb(FlView* self) {
+  setup_cursor(self);
+}
+
 static gboolean render_cb(FlView* self, GdkGLContext* context) {
   if (gtk_gl_area_get_error(self->gl_area) != NULL) {
     return FALSE;
@@ -565,9 +546,6 @@ static void fl_view_dispose(GObject* object) {
   g_cancellable_cancel(self->cancellable);
 
   if (self->engine != nullptr) {
-    fl_engine_set_update_semantics_handler(self->engine, nullptr, nullptr,
-                                           nullptr);
-
     FlMouseCursorHandler* handler =
         fl_engine_get_mouse_cursor_handler(self->engine);
     if (self->cursor_changed_cb_id != 0) {
@@ -587,6 +565,11 @@ static void fl_view_dispose(GObject* object) {
     g_signal_handler_disconnect(self->engine,
                                 self->on_pre_engine_restart_cb_id);
     self->on_pre_engine_restart_cb_id = 0;
+  }
+
+  if (self->update_semantics_cb_id != 0) {
+    g_signal_handler_disconnect(self->engine, self->update_semantics_cb_id);
+    self->update_semantics_cb_id = 0;
   }
 
   g_clear_object(&self->engine);
@@ -762,11 +745,11 @@ G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, engine);
 
-  fl_engine_set_update_semantics_handler(self->engine, update_semantics_cb,
-                                         self, nullptr);
   self->on_pre_engine_restart_cb_id =
-      g_signal_connect_swapped(engine, "on-pre-engine-restart",
+      g_signal_connect_swapped(self->engine, "on-pre-engine-restart",
                                G_CALLBACK(on_pre_engine_restart_cb), self);
+  self->update_semantics_cb_id = g_signal_connect_swapped(
+      engine, "update-semantics", G_CALLBACK(update_semantics_cb), self);
 
   g_signal_connect_swapped(self->gl_area, "create-context",
                            G_CALLBACK(create_context_cb), self);
@@ -790,14 +773,15 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
       g_signal_connect_swapped(engine, "on-pre-engine-restart",
                                G_CALLBACK(on_pre_engine_restart_cb), self);
 
-  self->view_id = fl_engine_add_view(self->engine, 1, 1, 1.0, self->cancellable,
+  self->view_id = fl_engine_add_view(engine, 1, 1, 1.0, self->cancellable,
                                      view_added_cb, self);
   fl_renderer_add_renderable(FL_RENDERER(self->renderer), self->view_id,
                              FL_RENDERABLE(self));
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, engine);
 
-  setup_cursor(self);
+  g_signal_connect_swapped(self->gl_area, "realize",
+                           G_CALLBACK(secondary_realize_cb), self);
 
   return self;
 }
