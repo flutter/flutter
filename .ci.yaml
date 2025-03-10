@@ -545,6 +545,9 @@ targets:
     recipe: infra/ci_yaml
     presubmit: false
     timeout: 30
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
@@ -4119,7 +4122,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      os: Mac-13
+      os: Mac-14
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
@@ -4127,6 +4130,11 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:35v1"}
         ]
+      # TODO(vashworth): Remove once Xcode 16 is used by all tests
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "16c5032a"
+        }
       shard: framework_tests
       subshard: misc
       tags: >

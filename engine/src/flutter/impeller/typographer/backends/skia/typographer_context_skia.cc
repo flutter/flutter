@@ -417,13 +417,17 @@ TypographerContextSkia::CollectNewGlyphs(
   size_t generation_id = atlas->GetAtlasGeneration();
   intptr_t atlas_id = reinterpret_cast<intptr_t>(atlas.get());
   for (const auto& frame : text_frames) {
-    auto [frame_generation_id, frame_atlas_id] =
-        frame->GetAtlasGenerationAndID();
-    if (atlas->IsValid() && frame->IsFrameComplete() &&
+// TODO(jonahwilliams): re-enable glyph condition once
+// https://github.com/flutter/flutter/issues/163730 is fixed
+#if false
+  auto [frame_generation_id, frame_atlas_id] =
+  frame->GetAtlasGenerationAndID();
+        if (atlas->IsValid() && frame->IsFrameComplete() &&
         frame_generation_id == generation_id && frame_atlas_id == atlas_id &&
         !frame->GetFrameBounds(0).is_placeholder) {
       continue;
     }
+#endif  // false
     frame->ClearFrameBounds();
     frame->SetAtlasGeneration(generation_id, atlas_id);
 
@@ -452,7 +456,8 @@ TypographerContextSkia::CollectNewGlyphs(
       for (const auto& glyph_position : run.GetGlyphPositions()) {
         Point subpixel = TextFrame::ComputeSubpixelPosition(
             glyph_position, scaled_font.font.GetAxisAlignment(),
-            frame->GetOffset(), frame->GetScale());
+            frame->GetTransform() *
+                Matrix::MakeTranslation(frame->GetOffset()));
         SubpixelGlyph subpixel_glyph(glyph_position.glyph, subpixel,
                                      frame->GetProperties());
         const auto& font_glyph_bounds =
