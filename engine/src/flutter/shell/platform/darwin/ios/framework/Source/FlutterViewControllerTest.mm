@@ -779,6 +779,56 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertTrue(viewControllerMock.targetViewInsetBottom == 0);
 }
 
+- (void)testStopKeyBoardAnimationWhenReceivedWillHideNotificationAfterWillShowNotification {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+
+  // keyboard is empty
+  UIScreen* screen = [self setUpMockScreen];
+  CGFloat screenWidth = screen.bounds.size.width;
+  CGFloat screenHeight = screen.bounds.size.height;
+  CGRect keyboardFrame = CGRectMake(0, screenHeight - 320, screenWidth, 320);
+  CGRect viewFrame = screen.bounds;
+  BOOL isLocal = YES;
+  [self setUpMockView:viewControllerMock
+               screen:screen
+            viewFrame:viewFrame
+       convertedFrame:viewFrame];
+  viewControllerMock.targetViewInsetBottom = 0;
+
+  NSNotification* fakeShowNotification =
+      [NSNotification notificationWithName:UIKeyboardWillShowNotification
+                                    object:nil
+                                  userInfo:@{
+                                    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+                                    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+                                  }];
+  // Receive will show notification
+  [viewControllerMock handleKeyboardNotification:fakeShowNotification];
+  XCTAssertTrue(viewControllerMock.targetViewInsetBottom == 320 * screen.scale);
+
+  NSNotification* fakeHideNotification =
+      [NSNotification notificationWithName:UIKeyboardWillHideNotification
+                                    object:nil
+                                  userInfo:@{
+                                    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+                                    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.0),
+                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+                                  }];
+  // Receive will hide notification
+  [viewControllerMock handleKeyboardNotification:fakeHideNotification];
+  XCTAssertTrue(viewControllerMock.targetViewInsetBottom == 0);
+
+  // Check animation is stopped
+  XCTAssertNil(viewControllerMock.keyboardAnimationView);
+  XCTAssertNil(viewControllerMock.keyboardSpringAnimation);
+}
+
 - (void)testEnsureViewportMetricsWillInvokeAndDisplayLinkWillInvalidateInViewDidDisappear {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
