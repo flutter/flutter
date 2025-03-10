@@ -88,12 +88,6 @@ void TextFrame::SetPerFrameData(Scalar scale,
                                 Point offset,
                                 const Matrix& transform,
                                 std::optional<GlyphProperties> properties) {
-  // if (!transform_.Equals(transform) || !ScalarNearlyEqual(scale_, scale) ||
-  //     !ScalarNearlyEqual(offset_.x, offset.x) ||
-  //     !ScalarNearlyEqual(offset_.y, offset.y) ||
-  //     !TextPropertiesEquals(properties_, properties)) {
-  //   bound_values_.clear();
-  // }
   bound_values_.clear();
   scale_ = scale;
   offset_ = offset;
