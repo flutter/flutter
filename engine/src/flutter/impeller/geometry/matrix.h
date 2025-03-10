@@ -355,6 +355,8 @@ struct Matrix {
 
   constexpr bool HasTranslation() const { return m[12] != 0 || m[13] != 0; }
 
+  constexpr Point GetTransaction() const { return Point(m[12], m[13]); }
+
   constexpr bool IsAligned2D(Scalar tolerance = 0) const {
     if (HasPerspective2D()) {
       return false;

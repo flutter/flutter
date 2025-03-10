@@ -41,6 +41,8 @@ class LineGeometry final : public Geometry {
   //
   // @return true if the transform and width were not degenerate
   bool ComputeCorners(Point corners[4],
+                      Point p0,
+                      Point p1,
                       const Matrix& transform,
                       bool extend_endpoints) const;
 

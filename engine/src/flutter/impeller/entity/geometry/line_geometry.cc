@@ -46,6 +46,8 @@ Vector2 LineGeometry::ComputeAlongVector(const Matrix& transform,
 }
 
 bool LineGeometry::ComputeCorners(Point corners[4],
+                                  Point p0,
+                                  Point p1,
                                   const Matrix& transform,
                                   bool extend_endpoints) const {
   auto along = ComputeAlongVector(transform, extend_endpoints);
@@ -54,10 +56,10 @@ bool LineGeometry::ComputeCorners(Point corners[4],
   }
 
   auto across = Vector2(along.y, -along.x);
-  corners[0] = p0_ - across;
-  corners[1] = p1_ - across;
-  corners[2] = p0_ + across;
-  corners[3] = p1_ + across;
+  corners[0] = p0 - across;
+  corners[1] = p1 - across;
+  corners[2] = p0 + across;
+  corners[3] = p1 + across;
   if (extend_endpoints) {
     corners[0] -= along;
     corners[1] += along;
@@ -76,17 +78,31 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                RenderPass& pass) const {
   using VT = SolidFillVertexShader::PerVertexData;
 
-  auto& transform = entity.GetTransform();
-  auto radius = ComputePixelHalfWidth(transform, width_);
+  const Matrix& transform = entity.GetTransform();
+  Scalar radius = ComputePixelHalfWidth(transform, width_);
+
+  // If the line is perfectly horizontal or vertical, it must be aligned to
+  // the physical pixel grid so that animating its position does not cause
+  // flickering. We can guarantee that the line width will be at least 1px
+  // based on the pixel half width check above.
+  Point p0 = p0_;
+  Point p1 = p1_;
+  if ((p0.x == p1.x || p0.y == p1.y) && transform.IsTranslationScaleOnly()) {
+    auto scales = transform.GetScale();
+    p0 = ((Vector2(scales.x, scales.y) * p0) - Point(0.5, 0.5)).Ceil() /
+         Vector2(scales.x, scales.y);
+    p1 = ((Vector2(scales.x, scales.y) * p1) - Point(0.5, 0.5)).Ceil() /
+         Vector2(scales.x, scales.y);
+  }
 
   if (cap_ == Cap::kRound) {
-    auto generator =
-        renderer.GetTessellator().RoundCapLine(transform, p0_, p1_, radius);
+    const auto generator =
+        renderer.GetTessellator().RoundCapLine(transform, p0, p1, radius);
     return ComputePositionGeometry(renderer, generator, entity, pass);
   }
 
   Point corners[4];
-  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare)) {
+  if (!ComputeCorners(corners, p0, p1, transform, cap_ == Cap::kSquare)) {
     return kEmptyResult;
   }
 
@@ -118,14 +134,15 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
 std::optional<Rect> LineGeometry::GetCoverage(const Matrix& transform) const {
   Point corners[4];
   // Note: MSAA boolean doesn't matter for coverage computation.
-  if (!ComputeCorners(corners, transform, cap_ != Cap::kButt)) {
+  if (!ComputeCorners(corners, p0_, p1_, transform, cap_ != Cap::kButt)) {
     return {};
   }
 
   for (int i = 0; i < 4; i++) {
     corners[i] = transform * corners[i];
   }
-  return Rect::MakePointBounds(std::begin(corners), std::end(corners));
+  return Rect::MakePointBounds(std::begin(corners), std::end(corners))
+      ->Expand(transform.GetMaxBasisLengthXY());
 }
 
 bool LineGeometry::CoversArea(const Matrix& transform, const Rect& rect) const {
