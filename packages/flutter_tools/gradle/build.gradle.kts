@@ -8,7 +8,6 @@ plugins {
     `java-gradle-plugin`
     groovy
     `kotlin-dsl`
-    kotlin("jvm") version "1.9.20"
 }
 
 group = "dev.flutter.plugin"
