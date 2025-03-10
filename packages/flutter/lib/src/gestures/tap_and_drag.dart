@@ -768,6 +768,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     super.supportedDevices,
     super.allowedButtonsFilter,
     this.eagerVictoryOnDrag = true,
+    this.minTaps = 1,
   }) : _deadline = kPressTimeout,
        dragStartBehavior = DragStartBehavior.start;
 
@@ -810,6 +811,10 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   ///
   /// Defaults to `true`.
   bool eagerVictoryOnDrag;
+
+  /// The minimum number of consecutive taps required for this recognizer to resolve
+  /// when a drag is detected.
+  final int minTaps;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
@@ -1112,8 +1117,10 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
         _currentPosition = OffsetPair.fromEventPosition(event);
         _checkDragUpdate(event);
       } else if (_dragState == _DragState.possible) {
-        if (_start == null) {
-          // Only check for a drag if the start of a drag was not already identified.
+        if (_start == null && _consecutiveTapCount >= minTaps) {
+          // Only check for a drag if the start of a drag was not already identified
+          // and the tap series is greater than or equal to the minimum number of taps
+          // required for this recognizer to resolve when a drag is detected.
           _checkDrag(event);
         }
 
@@ -1447,7 +1454,7 @@ class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecogni
 /// {@endtemplate}
 class TapAndPanGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   /// Create a gesture recognizer for interactions on a plane.
-  TapAndPanGestureRecognizer({super.debugOwner, super.supportedDevices});
+  TapAndPanGestureRecognizer({super.debugOwner, super.supportedDevices, super.minTaps});
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
