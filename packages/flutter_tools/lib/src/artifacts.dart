@@ -16,9 +16,21 @@ import 'build_info.dart';
 import 'cache.dart';
 import 'globals.dart' as globals;
 
+//////////////////////////////////////////////////////////////////////
+//                                                                  //
+//  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
+//                                                                  //
+//  There is a link to this file in //docs/tool/Engine-artfiacts.md //
+//  and it would be very kind of you to update the link, if needed. //
+//                                                                  //
+//////////////////////////////////////////////////////////////////////
+
+/// Defines what engine artifacts are available (not necessarily on each platform).
 enum Artifact {
   /// The tool which compiles a dart kernel file into native code.
   genSnapshot,
+  genSnapshotArm64,
+  genSnapshotX64,
 
   /// The flutter tester binary.
   flutterTester,
@@ -163,6 +175,10 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [BuildMode
   switch (artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
+    case Artifact.genSnapshotArm64:
+      return 'gen_snapshot_arm64';
+    case Artifact.genSnapshotX64:
+      return 'gen_snapshot_x64';
     case Artifact.flutterTester:
       return 'flutter_tester$exe';
     case Artifact.flutterFramework:
@@ -533,6 +549,8 @@ class CachedArtifacts implements Artifacts {
     final String engineDir = _getEngineArtifactsPath(platform, mode)!;
     switch (artifact) {
       case Artifact.genSnapshot:
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
         return _fileSystem.path.join(engineDir, _artifactToFileName(artifact, _platform));
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
@@ -571,6 +589,8 @@ class CachedArtifacts implements Artifacts {
     final String engineDir = _getEngineArtifactsPath(platform, mode)!;
     switch (artifact) {
       case Artifact.genSnapshot:
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
 
         // TODO(cbracken): Build Android gen_snapshot as Arm64 binary to run
@@ -626,6 +646,8 @@ class CachedArtifacts implements Artifacts {
   ) {
     switch (artifact) {
       case Artifact.genSnapshot:
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
       case Artifact.flutterXcframework:
         final String artifactFileName = _artifactToFileName(artifact, _platform)!;
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
@@ -676,6 +698,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.genSnapshot:
         final String genSnapshot = mode.isRelease ? 'gen_snapshot_product' : 'gen_snapshot';
         return _fileSystem.path.join(root, runtime, 'dart_binaries', genSnapshot);
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
+        throw ArgumentError('$artifact is not available on this platform');
       case Artifact.flutterPatchedSdkPath:
         const String artifactFileName = 'flutter_runner_patched_sdk';
         return _fileSystem.path.join(root, runtime, artifactFileName);
@@ -731,6 +756,8 @@ class CachedArtifacts implements Artifacts {
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode? mode) {
     switch (artifact) {
       case Artifact.genSnapshot:
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
         // android_arm in profile mode because it is available on all supported host platforms.
         return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
@@ -1168,7 +1195,9 @@ class CachedLocalEngineArtifacts implements Artifacts {
         isDirectoryArtifact ? null : _artifactToFileName(artifact, _platform, mode);
     switch (artifact) {
       case Artifact.genSnapshot:
-        return _genSnapshotPath();
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
+        return _genSnapshotPath(artifact);
       case Artifact.flutterTester:
         return _flutterTesterPath(platform!);
       case Artifact.isolateSnapshotData:
@@ -1334,7 +1363,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
     return _fileSystem.path.join(localEngineInfo.targetOutPath, 'flutter_web_sdk');
   }
 
-  String _genSnapshotPath() {
+  String _genSnapshotPath(Artifact artifact) {
     const List<String> clangDirs = <String>[
       '.',
       'clang_x64',
@@ -1342,7 +1371,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
       'clang_i386',
       'clang_arm64',
     ];
-    final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot, _platform)!;
+    final String genSnapshotName = _artifactToFileName(artifact, _platform)!;
     for (final String clangDir in clangDirs) {
       final String genSnapshotPath = _fileSystem.path.join(
         localEngineInfo.targetOutPath,
@@ -1412,6 +1441,8 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
             _artifactToFileName(artifact, _platform, mode),
           );
         case Artifact.genSnapshot:
+        case Artifact.genSnapshotArm64:
+        case Artifact.genSnapshotX64:
         case Artifact.flutterTester:
         case Artifact.flutterFramework:
         case Artifact.flutterFrameworkDsym:
