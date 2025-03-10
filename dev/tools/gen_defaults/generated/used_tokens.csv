@@ -102,6 +102,8 @@ md.comp.date-picker.modal.range-selection.date.in-range.pressed.state-layer.colo
 md.comp.date-picker.modal.range-selection.date.in-range.pressed.state-layer.opacity,
 md.comp.date-picker.modal.range-selection.header.headline.text-style,
 md.comp.date-picker.modal.range-selection.month.subhead.text-style,
+md.comp.date-picker.modal.toggle-mode.button.text-style,
+md.comp.date-picker.modal.toggle-mode.foreground.color,
 md.comp.date-picker.modal.weekdays.label-text.color,
 md.comp.date-picker.modal.weekdays.label-text.text-style,
 md.comp.date-picker.modal.year-selection.year.focus.state-layer.opacity,

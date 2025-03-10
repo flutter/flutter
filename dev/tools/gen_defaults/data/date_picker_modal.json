@@ -72,5 +72,7 @@
   "md.comp.date-picker.modal.year-selection.year.unselected.focus.state-layer.color": "onSurfaceVariant",
   "md.comp.date-picker.modal.year-selection.year.unselected.hover.state-layer.color": "onSurfaceVariant",
   "md.comp.date-picker.modal.year-selection.year.unselected.label-text.color": "onSurfaceVariant",
-  "md.comp.date-picker.modal.year-selection.year.unselected.pressed.state-layer.color": "onSurfaceVariant"
+  "md.comp.date-picker.modal.year-selection.year.unselected.pressed.state-layer.color": "onSurfaceVariant",
+  "md.comp.date-picker.modal.toggle-mode.foreground.color": "onSurface",
+  "md.comp.date-picker.modal.toggle-mode.button.text-style": "titleSmall"
 }
