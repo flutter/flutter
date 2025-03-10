@@ -1188,6 +1188,15 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
 
   static const RSuperellipse zero = RSuperellipse._raw();
 
+  bool contains(Offset point) {
+    // Web doesn't support RSE, but falls back to RRect in all use cases.
+    // Therefore this `contains` is implemented as RRect. Once Web supports RSE
+    // this method should be changed to the correct RSE shape.
+    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    return toApproximateRRect().contains(point);
+  }
+
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
     if (a == null) {
       if (b == null) {
