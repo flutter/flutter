@@ -1260,7 +1260,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
 /// input field.
 ///
 /// To observe open/close state changes of search view, provide
-/// [SearchAnchor]'s [viewOnOpen] or [viewOnClose] callbacks.
+/// [SearchAnchor.viewOnOpen] and/or [SearchAnchor.viewOnClose] callbacks.
 ///
 /// See also:
 ///
