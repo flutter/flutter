@@ -13,6 +13,7 @@ static constexpr char kBadArgumentsError[] = "Bad Arguments";
 static constexpr char kCreateRegularMethod[] = "createRegular";
 static constexpr char kModifyRegularMethod[] = "modifyRegular";
 static constexpr char kDestroyWindowMethod[] = "destroyWindow";
+static constexpr char kOnWindowDestroyedMethod[] = "onWindowDestroyed";
 
 static constexpr char kSizeKey[] = "size";
 static constexpr char kMinSizeKey[] = "minSize";
@@ -52,6 +53,13 @@ static FlWindowingSize* parse_size_value(FlValue* value) {
   size->width = fl_value_get_float(fl_value_get_list_value(value, 0));
   size->height = fl_value_get_float(fl_value_get_list_value(value, 1));
   return size;
+}
+
+static FlValue* make_size_value(FlWindowingSize* size) {
+  FlValue* size_value = fl_value_new_list();
+  fl_value_append_take(size_value, fl_value_new_float(size->width));
+  fl_value_append_take(size_value, fl_value_new_float(size->height));
+  return size_value;
 }
 
 static gboolean parse_window_state_value(FlValue* value, FlWindowState* state) {
@@ -272,16 +280,37 @@ FlWindowingChannel* fl_windowing_channel_new(FlBinaryMessenger* messenger,
   return self;
 }
 
+void fl_windowing_channel_on_window_destroyed(FlWindowingChannel* self,
+                                              int64_t view_id,
+                                              GCancellable* cancellable,
+                                              GAsyncReadyCallback callback,
+                                              gpointer user_data) {
+  g_return_if_fail(FL_IS_WINDOWING_CHANNEL(self));
+
+  g_autoptr(FlValue) args = fl_value_new_map();
+  fl_value_set_string_take(args, kViewIdKey, fl_value_new_int(view_id));
+  fl_method_channel_invoke_method(self->channel, kOnWindowDestroyedMethod, args,
+                                  cancellable, callback, user_data);
+}
+
+gboolean fl_windowing_channel_on_window_destroyed_finish(GObject* object,
+                                                         GAsyncResult* result,
+                                                         GError** error) {
+  g_autoptr(FlMethodResponse) response = fl_method_channel_invoke_method_finish(
+      FL_METHOD_CHANNEL(object), result, error);
+  if (response == nullptr) {
+    return FALSE;
+  }
+  return fl_method_response_get_result(response, error) != nullptr;
+}
+
 FlMethodResponse* fl_windowing_channel_make_create_regular_response(
     int64_t view_id,
     FlWindowingSize* size,
     FlWindowState state) {
   g_autoptr(FlValue) result = fl_value_new_map();
   fl_value_set_string_take(result, kViewIdKey, fl_value_new_int(view_id));
-  g_autoptr(FlValue) size_value = fl_value_new_list();
-  fl_value_append_take(size_value, fl_value_new_float(size->width));
-  fl_value_append_take(size_value, fl_value_new_float(size->height));
-  fl_value_set_string(result, kSizeKey, size_value);
+  fl_value_set_string_take(result, kSizeKey, make_size_value(size));
   fl_value_set_string_take(result, kStateKey,
                            fl_value_new_string(window_state_to_string(state)));
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
