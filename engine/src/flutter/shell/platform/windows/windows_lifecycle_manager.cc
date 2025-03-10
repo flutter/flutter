@@ -217,7 +217,7 @@ void WindowsLifecycleManager::UpdateState() {
 
 void WindowsLifecycleManager::OnWindowStateEvent(HWND hwnd,
                                                  WindowStateEvent event) {
-  // Instad of updating the state immediately, remember all
+  // Instead of updating the state immediately, remember all
   // changes to individual window and then update the state in next run loop
   // turn. Otherwise the application would be temporarily deactivated when
   // switching focus between windows for example.
