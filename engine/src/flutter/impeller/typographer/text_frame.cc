@@ -65,8 +65,11 @@ Rational TextFrame::RoundScaledFontSize(Scalar scale) {
 }
 
 Rational TextFrame::RoundScaledFontSize(Rational scale) {
-  FML_DCHECK(scale.GetDenominator() <= kDenominator);
-  return std::clamp(scale, Rational(0, kDenominator), kMaximumTextScale);
+  Rational result = Rational(
+      std::round((scale.GetNumerator() * static_cast<Scalar>(kDenominator))) /
+          scale.GetDenominator(),
+      kDenominator);
+  return std::clamp(result, Rational(0, kDenominator), kMaximumTextScale);
 }
 
 static constexpr SubpixelPosition ComputeFractionalPosition(Scalar value) {
