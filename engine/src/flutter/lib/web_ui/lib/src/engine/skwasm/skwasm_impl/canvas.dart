@@ -184,13 +184,6 @@ class SkwasmCanvas implements SceneCanvas {
   }
 
   @override
-  void drawRSuperellipse(ui.RSuperellipse rse, ui.Paint paint) {
-    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    drawRRect(rse.toApproximateRRect(), paint);
-  }
-
-  @override
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
     final paintHandle = (paint as SkwasmPaint).toRawPaint();
     withStackScope((StackScope s) {
@@ -202,6 +195,20 @@ class SkwasmCanvas implements SceneCanvas {
       );
     });
     paintDispose(paintHandle);
+  }
+
+  @override
+  void drawRSuperellipse(ui.RSuperellipse rse, ui.Paint paint) {
+    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    drawRRect(rse.toApproximateRRect(), paint);
+  }
+
+  @override
+  void drawDRSuperellipse(ui.RSuperellipse outer, ui.RSuperellipse inner, ui.Paint paint) {
+    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    drawDRRect(inner.toApproximateRRect(), outer.toApproximateRRect(), paint);
   }
 
   @override

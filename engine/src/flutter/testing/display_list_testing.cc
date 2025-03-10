@@ -847,6 +847,11 @@ void DisplayListStreamDispatcher::drawDiffRoundRect(const DlRoundRect& outer,
 void DisplayListStreamDispatcher::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
   startl() << "drawRSuperellipse(" << rse << ");" << std::endl;
 }
+void DisplayListStreamDispatcher::drawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
+                                                    const DlRoundSuperellipse& inner) {
+  startl() << "drawDRSuperellipse(outer: " << outer << ", " << std::endl;
+  startl() << "                   inner: " << inner << ");" << std::endl;
+}
 void DisplayListStreamDispatcher::drawPath(const DlPath& path) {
   startl() << "drawPath(" << path << ");" << std::endl;
 }

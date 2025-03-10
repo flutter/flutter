@@ -176,6 +176,8 @@ static const SkRRect kTestSkRRect = SkRRect::MakeRectXY(kTestSkBounds, 5, 5);
 static const SkRRect kTestRRectRect = SkRRect::MakeRect(kTestSkBounds);
 static const DlRoundRect kTestInnerRRect =
     DlRoundRect::MakeRectXY(kTestBounds.Expand(-5, -5), 2, 2);
+static const DlRoundSuperellipse kTestInnerRSuperellipse =
+    DlRoundSuperellipse::MakeRectXY(kTestBounds.Expand(-5, -5), 2, 2);
 static const SkRRect kTestSkInnerRRect =
     SkRRect::MakeRectXY(kTestSkBounds.makeInset(5, 5), 2, 2);
 static const DlPath kTestPathRect = DlPath(SkPath::Rect(kTestSkBounds));
