@@ -215,6 +215,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   TextureGLES& color_gles = TextureGLES::Cast(*pass_data.color_attachment);
   const bool is_default_fbo = color_gles.IsWrapped();
 
+  std::optional<GLuint> fbo = 0;
   if (is_default_fbo) {
     if (color_gles.GetFBO().has_value()) {
       // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -223,7 +224,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   } else {
     // Create and bind an offscreen FBO.
     if (!color_gles.GetCachedFBO().IsDead()) {
-      auto fbo = reactor.GetGLHandle(color_gles.GetCachedFBO());
+      fbo = reactor.GetGLHandle(color_gles.GetCachedFBO());
       if (!fbo.has_value()) {
         return false;
       }
@@ -232,7 +233,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       HandleGLES cached_fbo =
           reactor.CreateUntrackedHandle(HandleType::kFrameBuffer);
       color_gles.SetCachedFBO(cached_fbo);
-      auto fbo = reactor.GetGLHandle(cached_fbo);
+      fbo = reactor.GetGLHandle(cached_fbo);
       if (!fbo.has_value()) {
         return false;
       }
@@ -545,29 +546,28 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     }
 
     // Bind MSAA renderbuffer to read framebuffer.
-    gl.BindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    gl.BindFramebuffer(GL_READ_FRAMEBUFFER, fbo.value());
     gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo);
 
     RenderPassGLES::ResetGLState(gl);
     auto size = pass_data.color_attachment->GetSize();
 
-    gl.BlitFramebuffer(0,                    // srcX0
-                       0,                    // srcY0
-                       size.width,           // srcX1
-                       size.height,          // srcY1
-                       0,                    // dstX0
-                       0,                    // dstY0
-                       size.width,           // dstX1
-                       size.height,          // dstY1
-                       GL_COLOR_BUFFER_BIT,  // mask
-                       GL_NEAREST            // filter
-    );
+    gl.BlitFramebuffer(/*srcX0=*/0,
+                       /*srcY0=*/0,
+                       /*srcX1=*/size.width,
+                       /*srcY1=*/size.height,
+                       /*dstX0=*/0,
+                       /*dstY0=*/0,
+                       /*dstX1=*/size.width,
+                       /*dstY1=*/size.height,
+                       /*mask=*/GL_COLOR_BUFFER_BIT,
+                       /*filter=*/GL_NEAREST);
 
     gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, GL_NONE);
     gl.BindFramebuffer(GL_READ_FRAMEBUFFER, GL_NONE);
     gl.DeleteFramebuffers(1u, &resolve_fbo);
     // Rebind the original FBO so that we can discard it below.
-    gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
+    gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
   }
 
   if (gl.DiscardFramebufferEXT.IsAvailable()) {
@@ -638,7 +638,9 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
 
   // When we are using EXT_multisampled_render_to_texture, it is implicitly
   // resolved when we bind the texture to the framebuffer. We don't need to
-  // discard the attachment when we are done.
+  // discard the attachment when we are done. If not using
+  // EXT_multisampled_render_to_texture but still using MSAA we discard the
+  // attachment as normal.
   if (color0.resolve_texture) {
     pass_data->discard_color_attachment =
         pass_data->discard_color_attachment &&

@@ -46,7 +46,7 @@ static bool IsDepthStencilFormat(PixelFormat format) {
 
 static TextureGLES::Type GetTextureTypeFromDescriptor(
     const TextureDescriptor& desc,
-    bool supports_implict_msaa) {
+    const std::shared_ptr<const CapabilitiesGLES>& capabilities) {
   const auto usage = static_cast<TextureUsageMask>(desc.usage);
   const auto render_target = TextureUsage::kRenderTarget;
   const auto is_msaa = desc.sample_count == SampleCount::kCount4;
@@ -54,7 +54,7 @@ static TextureGLES::Type GetTextureTypeFromDescriptor(
     return is_msaa ? TextureGLES::Type::kRenderBufferMultisampled
                    : TextureGLES::Type::kRenderBuffer;
   }
-  return is_msaa ? (supports_implict_msaa
+  return is_msaa ? (capabilities->SupportsImplicitResolvingMSAA()
                         ? TextureGLES::Type::kTextureMultisampled
                         : TextureGLES::Type::kRenderBufferMultisampled)
                  : TextureGLES::Type::kTexture;
@@ -195,11 +195,9 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
                          std::optional<HandleGLES> external_handle)
     : Texture(desc),
       reactor_(std::move(reactor)),
-      type_(
-          GetTextureTypeFromDescriptor(GetTextureDescriptor(),
-                                       reactor_->GetProcTable()
-                                           .GetCapabilities()
-                                           ->SupportsImplicitResolvingMSAA())),
+      type_(GetTextureTypeFromDescriptor(
+          GetTextureDescriptor(),
+          reactor_->GetProcTable().GetCapabilities())),
       handle_(external_handle.has_value()
                   ? external_handle.value()
                   : reactor_->CreateUntrackedHandle(ToHandleType(type_))),
