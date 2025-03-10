@@ -52,16 +52,20 @@ bool TextFrame::HasColor() const {
 
 namespace {
 constexpr uint32_t kDenominator = 200;
-constexpr Rational kMaximumTextScale(48 * kDenominator, kDenominator);
+constexpr int32_t kMaximumTextScale = 48;
+constexpr Rational kZero(0, kDenominator);
 }  // namespace
 
 // static
 Rational TextFrame::RoundScaledFontSize(Scalar scale) {
+  if (scale > kMaximumTextScale) {
+    return Rational(kMaximumTextScale * kDenominator, kDenominator);
+  }
   // An arbitrarily chosen maximum text scale to ensure that regardless of the
   // CTM, a glyph will fit in the atlas. If we clamp significantly, this may
   // reduce fidelity but is preferable to the alternative of failing to render.
   Rational result = Rational(std::round(scale * kDenominator), kDenominator);
-  return std::clamp(result, Rational(0, kDenominator), kMaximumTextScale);
+  return result < kZero ? kZero : result;
 }
 
 Rational TextFrame::RoundScaledFontSize(Rational scale) {
@@ -69,7 +73,8 @@ Rational TextFrame::RoundScaledFontSize(Rational scale) {
       std::round((scale.GetNumerator() * static_cast<Scalar>(kDenominator))) /
           scale.GetDenominator(),
       kDenominator);
-  return std::clamp(result, Rational(0, kDenominator), kMaximumTextScale);
+  return std::clamp(result, Rational(0, kDenominator),
+                    Rational(kMaximumTextScale * kDenominator, kDenominator));
 }
 
 static constexpr SubpixelPosition ComputeFractionalPosition(Scalar value) {
