@@ -463,8 +463,10 @@ enum SemanticsRole {
   /// A group of radio buttons.
   radioGroup,
 
-  /// A component provide advisory information that is not import to justify
-  /// an [alert].
+  /// A component to provide advisory information that is not import to
+  /// justify an [alert].
+  ///
+  /// For example, a loading message for a web page.
   status,
 
   /// A component provide important and usually time-sensitive information.
