@@ -990,6 +990,93 @@ class ColorScheme with Diagnosticable {
        _onBackground = onBackground,
        _surfaceVariant = surfaceVariant;
 
+  static ui.PlatformDispatcher get _platformDispatcher =>
+      WidgetsBinding.instance.platformDispatcher;
+
+  factory ColorScheme.systemColorsLight({
+    Color? primary,
+    Color? onPrimary,
+    Color? secondary,
+    Color? onSecondary,
+    Color? error,
+    Color? onError,
+    Color? surface,
+    Color? onSurface,
+  }) => ColorScheme._systemColors(
+    ui.SystemColor.light,
+    primary: primary,
+    onPrimary: onPrimary,
+    secondary: secondary,
+    onSecondary: onSecondary,
+    error: error,
+    onError: onError,
+    surface: surface,
+    onSurface: onSurface,
+  );
+
+  factory ColorScheme.systemColorsDark({
+    Color? primary,
+    Color? onPrimary,
+    Color? secondary,
+    Color? onSecondary,
+    Color? error,
+    Color? onError,
+    Color? surface,
+    Color? onSurface,
+  }) => ColorScheme._systemColors(
+    ui.SystemColor.dark,
+    primary: primary,
+    onPrimary: onPrimary,
+    secondary: secondary,
+    onSecondary: onSecondary,
+    error: error,
+    onError: onError,
+    surface: surface,
+    onSurface: onSurface,
+  );
+
+  factory ColorScheme._systemColors(
+    ui.SystemColorPalette systemColorPalette, {
+    Color? primary,
+    Color? onPrimary,
+    Color? secondary,
+    Color? onSecondary,
+    Color? error,
+    Color? onError,
+    Color? surface,
+    Color? onSurface,
+  }) {
+    final Color seedColor = systemColorPalette.canvasText.value!;
+
+    primary ??= systemColorPalette.canvasText.value!;
+    onPrimary ??= systemColorPalette.canvas.value!;
+    secondary ??= systemColorPalette.accentColorText.value ?? primary;
+    onSecondary ??= systemColorPalette.accentColor.value ?? onPrimary;
+    surface ??= systemColorPalette.canvas.value ?? primary;
+    onSurface ??= systemColorPalette.canvasText.value ?? onPrimary;
+
+    print('Seed color: $seedColor');
+    // print('ui.SystemColor.canvas: ${ui.SystemColor.canvas?.value}');
+    // print('ui.SystemColor.canvasText: ${ui.SystemColor.canvasText?.value}');
+    return ColorScheme.fromSeed(
+      seedColor: seedColor,
+      brightness: systemColorPalette.brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.content,
+      primary: primary,
+      onPrimary: onPrimary,
+      secondary: secondary,
+      onSecondary: onSecondary,
+      error:
+          error ??
+          (systemColorPalette.brightness == Brightness.dark
+              ? const Color(0xffcf6679)
+              : const Color(0xffb00020)),
+      onError: onError ?? onPrimary,
+      surface: surface,
+      onSurface: onSurface,
+    );
+  }
+
   /// Creates a color scheme from a [MaterialColor] swatch.
   ///
   /// In Material 3, this constructor is ignored by [ThemeData] when creating

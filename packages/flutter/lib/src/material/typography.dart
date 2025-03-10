@@ -7,8 +7,11 @@
 /// @docImport 'theme_data.dart';
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -378,6 +381,90 @@ class Typography with Diagnosticable {
       DiagnosticsProperty<TextTheme>('tall', tall, defaultValue: defaultTypography.tall),
     );
   }
+
+  // static SystemColorPalette get _systemColorPalette => WidgetsBinding.instance.platformDispatcher.sys;
+
+  static TextTheme systemColorsLight = _systemColors(ui.SystemColor.light);
+  static TextTheme systemColorsDark = _systemColors(ui.SystemColor.dark);
+
+  static TextTheme _systemColors(ui.SystemColorPalette systemColorPalette) => TextTheme(
+    final suffix = systemColorPalette.brightness == ui.Brightness.light ? 'light' : 'dark';
+    displayLarge: TextStyle(
+      debugLabel: 'systemColor.$suffix displayLarge',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    displayMedium: TextStyle(
+      debugLabel: 'systemColor.$suffix displayMedium',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    displaySmall: TextStyle(
+      debugLabel: 'systemColor.$suffix displaySmall',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    headlineLarge: TextStyle(
+      debugLabel: 'systemColor.$suffix headlineLarge',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    headlineMedium: TextStyle(
+      debugLabel: 'systemColor.$suffix headlineMedium',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    headlineSmall: TextStyle(
+      debugLabel: 'systemColor.$suffix headlineSmall',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    titleLarge: TextStyle(
+      debugLabel: 'systemColor.$suffix titleLarge',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    titleMedium: TextStyle(
+      debugLabel: 'systemColor.$suffix titleMedium',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    titleSmall: TextStyle(
+      debugLabel: 'systemColor.$suffix titleSmall',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    bodyLarge: TextStyle(
+      debugLabel: 'systemColor.$suffix bodyLarge',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    bodyMedium: TextStyle(
+      debugLabel: 'systemColor.$suffix bodyMedium',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    bodySmall: TextStyle(
+      debugLabel: 'systemColor.$suffix bodySmall',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    labelLarge: TextStyle(
+      debugLabel: 'systemColor.$suffix labelLarge',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    labelMedium: TextStyle(
+      debugLabel: 'systemColor.$suffix labelMedium',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+    labelSmall: TextStyle(
+      debugLabel: 'systemColor.$suffix labelSmall',
+      color: systemColorPalette.canvasText.value,
+      decoration: TextDecoration.none,
+    ),
+  );
 
   /// A Material Design text theme with dark glyphs based on Roboto.
   ///
