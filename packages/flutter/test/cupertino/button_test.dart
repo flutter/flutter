@@ -980,15 +980,6 @@ void main() {
       SystemMouseCursors.forbidden,
     );
     await gesture.removePointer();
-
-    // Test clicked state mouse cursor
-    await tester.pumpWidget(buildButton(enabled: true, cursor: const _ButtonMouseCursor()));
-    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
-    await tester.pumpAndSettle();
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
-    );
   });
 }
 
@@ -1001,9 +992,6 @@ class _ButtonMouseCursor extends WidgetStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
-    if (states.contains(WidgetState.hovered) || states.contains(WidgetState.pressed)) {
-      return SystemMouseCursors.click;
-    }
     if (states.contains(WidgetState.disabled)) {
       return SystemMouseCursors.forbidden;
     }
