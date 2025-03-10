@@ -12,11 +12,15 @@
 namespace flutter {
 namespace testing {
 
-class MockWindow {
+class MockGtk {
  public:
-  MockWindow();
-  ~MockWindow();
+  MockGtk();
+  ~MockGtk();
 
+  MOCK_METHOD(GdkKeymap*, gdk_keymap_get_for_display, (GdkDisplay * display));
+  MOCK_METHOD(guint,
+              gdk_keymap_lookup_key,
+              (GdkKeymap * keymap, const GdkKeymapKey* key));
   MOCK_METHOD(GdkWindowState, gdk_window_get_state, (GdkWindow * window));
   MOCK_METHOD(void, gtk_window_new, (GtkWindow * window, GtkWindowType type));
   MOCK_METHOD(void,
@@ -40,6 +44,36 @@ class MockWindow {
   MOCK_METHOD(void, gtk_window_iconify, (GtkWindow * window));
   MOCK_METHOD(void, gtk_window_deiconify, (GtkWindow * window));
   MOCK_METHOD(void, gtk_widget_destroy, (GtkWidget * widget));
+  MOCK_METHOD(gboolean,
+              gtk_widget_translate_coordinates,
+              (GtkWidget * src_widget,
+               GtkWidget* dest_widget,
+               gint src_x,
+               gint src_y,
+               gint* dest_x,
+               gint* dest_y));
+  MOCK_METHOD(GtkWidget*, gtk_widget_get_toplevel, (GtkWidget * widget));
+  MOCK_METHOD(void,
+              gtk_im_context_set_client_window,
+              (GtkIMContext * context, GdkWindow* window));
+  MOCK_METHOD(void,
+              gtk_im_context_get_preedit_string,
+              (GtkIMContext * context,
+               gchar** str,
+               PangoAttrList** attrs,
+               gint* cursor_pos));
+  MOCK_METHOD(gboolean,
+              gtk_im_context_filter_keypress,
+              (GtkIMContext * context, GdkEventKey* event));
+  MOCK_METHOD(gboolean, gtk_im_context_focus_in, (GtkIMContext * context));
+  MOCK_METHOD(void, gtk_im_context_focus_out, (GtkIMContext * context));
+  MOCK_METHOD(void,
+              gtk_im_context_set_cursor_location,
+              (GtkIMContext * context, const GdkRectangle* area));
+  MOCK_METHOD(
+      void,
+      gtk_im_context_set_surrounding,
+      (GtkIMContext * context, const gchar* text, gint len, gint cursor_index));
 };
 
 }  // namespace testing
