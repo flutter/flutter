@@ -80,10 +80,10 @@ ImageDecoderImpeller::ImageDecoderImpeller(
     const TaskRunners& runners,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
     const fml::WeakPtr<IOManager>& io_manager,
-    bool supports_wide_gamut,
+    bool wide_gamut_enabled,
     const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch)
     : ImageDecoder(runners, std::move(concurrent_task_runner), io_manager),
-      supports_wide_gamut_(supports_wide_gamut),
+      wide_gamut_enabled_(wide_gamut_enabled),
       gpu_disabled_switch_(gpu_disabled_switch) {
   std::promise<std::shared_ptr<impeller::Context>> context_promise;
   context_ = context_promise.get_future();
@@ -405,7 +405,7 @@ void ImageDecoderImpeller::UploadTextureToPrivate(
     const SkImageInfo& image_info,
     const std::shared_ptr<SkBitmap>& bitmap,
     const std::optional<SkImageInfo>& resize_info,
-    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch) {
+    const std::shared_ptr<const fml::SyncSwitch>& gpu_disabled_switch) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!context) {
     result(nullptr, "No Impeller context is available");
@@ -526,7 +526,7 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
        target_size = SkISize::Make(target_width, target_height),  //
        io_runner = runners_.GetIOTaskRunner(),                    //
        result,
-       supports_wide_gamut = supports_wide_gamut_,  //
+       wide_gamut_enabled = wide_gamut_enabled_,  //
        gpu_disabled_switch = gpu_disabled_switch_]() {
 #if FML_OS_IOS_SIMULATOR
         // No-op backend.
@@ -545,7 +545,8 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
         // Always decompress on the concurrent runner.
         auto bitmap_result = DecompressTexture(
             raw_descriptor, target_size, max_size_supported,
-            /*supports_wide_gamut=*/supports_wide_gamut,
+            /*supports_wide_gamut=*/wide_gamut_enabled &&
+                context->GetCapabilities()->SupportsExtendedRangeFormats(),
             context->GetCapabilities(), context->GetResourceAllocator());
         if (!bitmap_result.device_buffer) {
           result(nullptr, bitmap_result.decode_error);

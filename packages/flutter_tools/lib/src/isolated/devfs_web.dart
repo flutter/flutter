@@ -189,6 +189,8 @@ class WebAssetServer implements AssetReader {
     _hotRestartGeneration++;
   }
 
+  static const String _reloadScriptsFileName = 'reload_scripts.json';
+
   /// Given a list of [modules] that need to be reloaded, writes a file that
   /// contains a list of objects each with two fields:
   ///
@@ -219,13 +221,16 @@ class WebAssetServer implements AssetReader {
       final List<String> libraries = metadata.libraries.keys.toList();
       moduleToLibrary.add(<String, Object>{'src': module, 'libraries': libraries});
     }
-    writeFile('reload_scripts.json', json.encode(moduleToLibrary));
+    writeFile(_reloadScriptsFileName, json.encode(moduleToLibrary));
   }
 
   @visibleForTesting
   List<String> write(File codeFile, File manifestFile, File sourcemapFile, File metadataFile) {
     return _webMemoryFS.write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }
+
+  Uri? get baseUri => _baseUri;
+  Uri? _baseUri;
 
   /// Start the web asset server on a [hostname] and [port].
   ///
@@ -314,6 +319,15 @@ class WebAssetServer implements AssetReader {
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
     );
+    final int selectedPort = server.selectedPort;
+    String url = '$hostname:$selectedPort';
+    if (hostname == 'any') {
+      url = 'localhost:$selectedPort';
+    }
+    server._baseUri = Uri.http(url, server.basePath);
+    if (tlsCertPath != null && tlsCertKeyPath != null) {
+      server._baseUri = Uri.https(url, server.basePath);
+    }
     if (testMode) {
       return server;
     }
@@ -386,6 +400,10 @@ class WebAssetServer implements AssetReader {
                     ),
                   ),
                   packageConfigPath: buildInfo.packageConfigPath,
+                  hotReloadSourcesUri: server._baseUri!.replace(
+                    pathSegments: List<String>.from(server._baseUri!.pathSegments)
+                      ..add(_reloadScriptsFileName),
+                  ),
                 ).strategy
                 : FrontendServerRequireStrategyProvider(
                   ReloadConfiguration.none,
@@ -831,7 +849,6 @@ class WebDevFS implements DevFS {
     required this.expressionCompiler,
     required this.extraHeaders,
     required this.chromiumLauncher,
-    required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.ddcModuleSystem,
     required this.canaryFeatures,
@@ -865,7 +882,6 @@ class WebDevFS implements DevFS {
   final bool canaryFeatures;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
-  final bool nullAssertions;
   final bool nativeNullAssertions;
   final int _port;
   final String? tlsCertPath;
@@ -948,8 +964,7 @@ class WebDevFS implements DevFS {
   Set<String> get assetPathsToEvict => const <String>{};
 
   @override
-  Uri? get baseUri => _baseUri;
-  Uri? _baseUri;
+  Uri? get baseUri => webAssetServer._baseUri;
 
   @override
   Future<Uri> create() async {
@@ -976,17 +991,7 @@ class WebDevFS implements DevFS {
       ddcModuleSystem: ddcModuleSystem,
       canaryFeatures: canaryFeatures,
     );
-
-    final int selectedPort = webAssetServer.selectedPort;
-    String url = '$hostname:$selectedPort';
-    if (hostname == 'any') {
-      url = 'localhost:$selectedPort';
-    }
-    _baseUri = Uri.http(url, webAssetServer.basePath);
-    if (tlsCertPath != null && tlsCertKeyPath != null) {
-      _baseUri = Uri.https(url, webAssetServer.basePath);
-    }
-    return _baseUri!;
+    return baseUri!;
   }
 
   @override
@@ -1086,15 +1091,13 @@ class WebDevFS implements DevFS {
         ddcModuleSystem
             ? generateDDCLibraryBundleMainModule(
               entrypoint: entrypoint,
-              nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
               onLoadEndBootstrap: onLoadEndBootstrap,
             )
             : generateMainModule(
               entrypoint: entrypoint,
-              nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
-              loaderRootDirectory: _baseUri.toString(),
+              loaderRootDirectory: baseUri.toString(),
             ),
       );
       // TODO(zanderso): refactor the asset code in this and the regular devfs to

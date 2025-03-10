@@ -281,6 +281,7 @@ enum SemanticsRole {
   loadingSpinner,
   progressBar,
   hotKey,
+  radioGroup,
 }
 
 // When adding a new StringAttributeType, the classes in these file must be
@@ -371,6 +372,7 @@ class SemanticsUpdateBuilder {
     String? linkUrl,
     SemanticsRole role = SemanticsRole.none,
     int viewId = 0,
+    required List<String>? controlsNodes,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -413,6 +415,7 @@ class SemanticsUpdateBuilder {
         headingLevel: headingLevel,
         linkUrl: linkUrl,
         role: role,
+        controlsNodes: controlsNodes,
       ),
     );
   }

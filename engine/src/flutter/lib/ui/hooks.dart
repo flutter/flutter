@@ -69,6 +69,11 @@ void _sendViewFocusEvent(int viewId, int viewFocusState, int viewFocusDirection)
 }
 
 @pragma('vm:entry-point')
+void _setEngineId(int engineId) {
+  PlatformDispatcher.instance._engineId = engineId;
+}
+
+@pragma('vm:entry-point')
 void _updateDisplays(
   List<int> ids,
   List<double> widths,

@@ -626,6 +626,60 @@ class PaintingContext extends ClipContext {
     }
   }
 
+  /// Clip further painting using a rounded superellipse.
+  ///
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
+  ///
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.offset}
+  ///
+  /// The `bounds` argument is used to specify the region of the canvas (in the
+  /// caller's coordinate system) into which `painter` will paint.
+  ///
+  /// The `clipRSuperellipse` argument specifies the rounded-superellipse (in the caller's
+  /// coordinate system) to use to clip the painting done by `painter`. It
+  /// should not include the `offset`.
+  ///
+  /// The `painter` callback will be called while the `clipRSuperellipse` is applied. It
+  /// is called synchronously during the call to [pushClipRSuperellipse].
+  ///
+  /// The `clipBehavior` argument controls how the rounded rectangle is clipped.
+  ///
+  /// Hit tests are performed based on the bounding box of the [RSuperellipse].
+  ///
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
+  ClipRSuperellipseLayer? pushClipRSuperellipse(
+    bool needsCompositing,
+    Offset offset,
+    Rect bounds,
+    RSuperellipse clipRSuperellipse,
+    PaintingContextCallback painter, {
+    Clip clipBehavior = Clip.antiAlias,
+    ClipRSuperellipseLayer? oldLayer,
+  }) {
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    }
+    final Rect offsetBounds = bounds.shift(offset);
+    final RSuperellipse offsetShape = clipRSuperellipse.shift(offset);
+    if (needsCompositing) {
+      final ClipRSuperellipseLayer layer = oldLayer ?? ClipRSuperellipseLayer();
+      layer
+        ..clipRSuperellipse = offsetShape
+        ..clipBehavior = clipBehavior;
+      pushLayer(layer, painter, offset, childPaintBounds: offsetBounds);
+      return layer;
+    } else {
+      clipRSuperellipseAndPaint(
+        offsetShape,
+        clipBehavior,
+        offsetBounds,
+        () => painter(this, offset),
+      );
+      return null;
+    }
+  }
+
   /// Clip further painting using a path.
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
@@ -884,16 +938,7 @@ typedef LayoutCallback<T extends Constraints> = void Function(T constraints);
 
 class _LocalSemanticsHandle implements SemanticsHandle {
   _LocalSemanticsHandle._(PipelineOwner owner, this.listener) : _owner = owner {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/rendering.dart',
-        className: '$_LocalSemanticsHandle',
-        object: this,
-      );
-    }
-
+    assert(debugMaybeDispatchCreated('rendering', '_LocalSemanticsHandle', this));
     if (listener != null) {
       _owner.semanticsOwner!.addListener(listener!);
     }
@@ -906,12 +951,7 @@ class _LocalSemanticsHandle implements SemanticsHandle {
 
   @override
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-
+    assert(debugMaybeDispatchDisposed(this));
     if (listener != null) {
       _owner.semanticsOwner!.removeListener(listener!);
     }
@@ -974,15 +1014,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     this.onSemanticsUpdate,
     this.onSemanticsOwnerDisposed,
   }) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/rendering.dart',
-        className: '$PipelineOwner',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('rendering', 'PipelineOwner', this));
   }
 
   /// Called when a render object associated with this pipeline owner wishes to
@@ -1598,9 +1630,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     assert(rootNode == null);
     assert(_manifold == null);
     assert(_debugParent == null);
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _semanticsOwner?.dispose();
     _semanticsOwner = null;
     _nodesNeedingLayout.clear();
@@ -1663,8 +1693,6 @@ abstract class PipelineManifold implements Listenable {
   ///    implementations typically call to implement this method.
   void requestVisualUpdate();
 }
-
-const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 
 /// An object in the render tree.
 ///
@@ -1794,13 +1822,7 @@ const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarget {
   /// Initializes internal fields for subclasses.
   RenderObject() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterRenderingLibrary,
-        className: '$RenderObject',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('rendering', 'RenderObject', this));
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
     _wasRepaintBoundary = isRepaintBoundary;
   }
@@ -1861,9 +1883,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @mustCallSuper
   void dispose() {
     assert(!_debugDisposed);
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _layerHandle.layer = null;
     assert(() {
       // TODO(dnfield): Enable this assert once clients have had a chance to
