@@ -1488,7 +1488,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
             value: timeOfDay.hour,
             label:
                 timeOfDay.hour != 0
-                    ? '${timeOfDay.hour}'
+                    ? localizations.formatDecimal(timeOfDay.hour)
                     : localizations.formatHour(timeOfDay, alwaysUse24HourFormat: true),
             onTap: () {
               _selectHour(timeOfDay.hour);
