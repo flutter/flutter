@@ -19,9 +19,11 @@ void main() {
 
   void setUpTapAndPanGestureRecognizer({
     bool eagerVictoryOnDrag = true, // This is the default for [BaseTapAndDragGestureRecognizer].
+    int minTaps = 1,
   }) {
     tapAndDrag =
         TapAndPanGestureRecognizer()
+          ..minTaps = minTaps
           ..dragStartBehavior = DragStartBehavior.down
           ..eagerVictoryOnDrag = eagerVictoryOnDrag
           ..maxConsecutiveTap = 3
@@ -988,7 +990,148 @@ void main() {
     expect(events, <String>['down#1', 'up#1']);
   });
 
-  // This is a regression test for https://github.com/flutter/flutter/issues/102084.
+  testGesture('Does not drag when minTaps is not satisfied', (GestureTester tester) {
+    setUpTapAndPanGestureRecognizer(minTaps: 2);
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+    tester.route(pointer.move(const Offset(40.0, 45.0)));
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+    expect(events, <String>['down#1', 'cancel']);
+  });
+
+  testGesture('Does drag when consecutive taps equal minTaps', (GestureTester tester) {
+    setUpTapAndPanGestureRecognizer(minTaps: 2);
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downA);
+    tester.closeArena(5);
+    tester.route(downA);
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+
+    tester.async.elapse(kConsecutiveTapDelay);
+
+    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downB);
+    tester.closeArena(5);
+    tester.route(downB);
+    tester.route(pointer.move(const Offset(40.0, 45.0)));
+    tester.route(pointer.up());
+    expect(events, <String>['down#1', 'up#1', 'down#2', 'panstart#2', 'panupdate#2', 'panend#2']);
+  });
+
+
+  testGesture('Does drag when consecutive taps is greater than minTaps', (GestureTester tester) {
+    setUpTapAndPanGestureRecognizer(minTaps: 2);
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downA);
+    tester.closeArena(5);
+    tester.route(downA);
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+
+    tester.async.elapse(kConsecutiveTapDelay);
+
+    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downB);
+    tester.closeArena(5);
+    tester.route(downB);
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+
+    tester.async.elapse(kConsecutiveTapDelay);
+
+    final PointerDownEvent downC = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downC);
+    tester.closeArena(5);
+    tester.route(downC);
+    tester.route(pointer.move(const Offset(40.0, 45.0)));
+    tester.route(pointer.up());
+
+    expect(events, <String>[
+      'down#1',
+      'up#1',
+      'down#2',
+      'up#2',
+      'down#3',
+      'panstart#3',
+      'panupdate#3',
+      'panend#3',
+    ]);
+  });
+
+
+  testGesture('Does not drag when consecutive taps is reset and less than min taps', (GestureTester tester) {
+    setUpTapAndPanGestureRecognizer(minTaps: 3);
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downA);
+    tester.closeArena(5);
+    tester.route(downA);
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+
+    tester.async.elapse(kConsecutiveTapDelay);
+
+    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downB);
+    tester.closeArena(5);
+    tester.route(downB);
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+
+    tester.async.elapse(kConsecutiveTapDelay);
+
+    final PointerDownEvent downC = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downC);
+    tester.closeArena(5);
+    tester.route(downC);
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+
+    tester.async.elapse(kConsecutiveTapDelay);
+
+    final PointerDownEvent downD = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downD);
+    tester.closeArena(5);
+    tester.route(downD);
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+
+    tester.async.elapse(kConsecutiveTapDelay);
+
+    final PointerDownEvent downE = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downE);
+    tester.closeArena(5);
+    tester.route(downE);
+    tester.route(pointer.move(const Offset(40.0, 45.0)));
+    tester.route(pointer.up());
+
+    expect(events, <String>[
+      'down#1',
+      'up#1',
+      'down#2',
+      'up#2',
+      'down#3',
+      'up#3',
+      'down#1',
+      'up#1',
+      'down#2',
+      'cancel',
+    ]);
+  });
+
+
+  // This is a regression or https://github.com/flutter/flutter/issues/102084.
   testGesture('Does not call onDragEnd if not provided', (GestureTester tester) {
     tapAndDrag =
         TapAndDragGestureRecognizer()

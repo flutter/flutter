@@ -814,7 +814,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
   /// The minimum number of consecutive taps required for this recognizer to resolve
   /// when a drag is detected.
-  final int minTaps;
+  int minTaps;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
@@ -1022,7 +1022,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     // resolve(GestureDisposition.accepted) will be called when the [PointerMoveEvent]
     // has moved a sufficient global distance to be considered a drag and
     // `eagerVictoryOnDrag` is set to `true`.
-    if (_start != null && eagerVictoryOnDrag) {
+    if (_start != null && eagerVictoryOnDrag && consecutiveTapCount >= minTaps) {
       assert(_dragState == _DragState.accepted);
       assert(currentUp == null);
       _acceptDrag(_start!);
@@ -1030,7 +1030,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
     // This recognizer will wait until it is the last one in the gesture arena
     // before accepting a drag when `eagerVictoryOnDrag` is set to `false`.
-    if (_start != null && !eagerVictoryOnDrag) {
+    if (_start != null && !eagerVictoryOnDrag && consecutiveTapCount >= minTaps) {
       assert(_dragState == _DragState.possible);
       assert(currentUp == null);
       _dragState = _DragState.accepted;
@@ -1052,7 +1052,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       case _DragState.possible:
         if (_pastSlopTolerance) {
           // This means the pointer was not accepted as a tap.
-          if (_wonArenaForPrimaryPointer) {
+          if (_wonArenaForPrimaryPointer && consecutiveTapCount >= minTaps) {
             // If the recognizer has already won the arena for the primary pointer being tracked
             // but the pointer has exceeded the tap tolerance, then the pointer is accepted as a
             // drag gesture.
@@ -1117,7 +1117,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
         _currentPosition = OffsetPair.fromEventPosition(event);
         _checkDragUpdate(event);
       } else if (_dragState == _DragState.possible) {
-        if (_start == null && _consecutiveTapCount >= minTaps) {
+        if (_start == null && consecutiveTapCount >= minTaps) {
           // Only check for a drag if the start of a drag was not already identified
           // and the tap series is greater than or equal to the minimum number of taps
           // required for this recognizer to resolve when a drag is detected.
@@ -1126,7 +1126,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
         // This can occur when the recognizer is accepted before a [PointerMoveEvent] has been
         // received that moves the pointer a sufficient global distance to be considered a drag.
-        if (_start != null && _wonArenaForPrimaryPointer) {
+        if (_start != null && _wonArenaForPrimaryPointer && consecutiveTapCount >= minTaps) {
           _dragState = _DragState.accepted;
           _acceptDrag(_start!);
         }
