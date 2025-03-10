@@ -572,7 +572,7 @@ TEST_F(WindowsTest, Lifecycle) {
     PumpMessage();
   }
 
-  // Resets teh view, simulating the window being hidden.
+  // Resets the view, simulating the window being hidden.
   controller.reset();
 
   while (lifecycle_manager_ptr->IsUpdateStateScheduled()) {
