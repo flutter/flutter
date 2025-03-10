@@ -790,6 +790,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   if (!self.node.customAccessibilityActions.empty()) {
     return true;
   }
+  
   return false;
 }
 
