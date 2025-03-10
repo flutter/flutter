@@ -301,6 +301,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T>
 /// If you only have a single [Ticker] (for example only a single
 /// [AnimationController]) for the lifetime of your [State], then using a
 /// [SingleTickerProviderStateMixin] is more efficient. This is the common case.
+///
 /// Using one [TickerProviderStateMixin] twice is more efficient than two
 /// [SingleTickerProviderStateMixin]s.
 @optionalTypeArgs
