@@ -91,6 +91,8 @@ class TextFrame {
   // processed.
   std::pair<size_t, intptr_t> GetAtlasGenerationAndID() const;
 
+  Scalar GetScale() const;
+
   TextFrame& operator=(TextFrame&& other) = default;
 
   TextFrame(const TextFrame& other) = default;
@@ -100,8 +102,6 @@ class TextFrame {
  private:
   friend class TypographerContextSkia;
   friend class LazyGlyphAtlas;
-
-  Scalar GetScale() const;
 
   Point GetOffset() const;
 

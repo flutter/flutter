@@ -105,7 +105,9 @@ void TextContents::ComputeVertexData(
   size_t bounds_offset = 0u;
   for (const TextRun& run : frame->GetRuns()) {
     const Font& font = run.GetFont();
-    Scalar rounded_scale = TextFrame::RoundScaledFontSize(scale);
+    Scalar rounded_scale = frame->GetScale();
+    const Matrix transform =
+        frame->GetTransform() * Matrix::MakeTranslation(offset);
     FontGlyphAtlas* font_atlas = nullptr;
 
     // Adjust glyph position based on the subpixel rounding
@@ -149,7 +151,7 @@ void TextContents::ComputeVertexData(
           continue;
         }
         Point subpixel = TextFrame::ComputeSubpixelPosition(
-            glyph_position, font.GetAxisAlignment(), entity_transform);
+            glyph_position, font.GetAxisAlignment(), transform);
 
         std::optional<FrameBounds> maybe_atlas_glyph_bounds =
             font_atlas->FindGlyphBounds(SubpixelGlyph{
