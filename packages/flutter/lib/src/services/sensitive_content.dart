@@ -76,7 +76,7 @@ enum ContentSensitivity {
 /// Service for setting the content sensitivity of the native app window (Android `View`)
 /// that contains the app's widget tree.
 ///
-/// This service is only currently supported on Android.
+/// This service is only currently supported on Android API 35+.
 class SensitiveContentService {
   /// Creates service to set content sensitivity of an app window (Android `View`) via
   /// communication over the sensitive content [MethodChannel].
@@ -125,13 +125,12 @@ class SensitiveContentService {
   /// This method must be called before attempting to call [getContentSensitivity]
   /// or [setContentSensitivity].
   ///
-  /// This feature is only supported on Android currently. Its return value will
+  /// This feature is only supported on Android 35+ currently. Its return value will
   /// not change and thus, is safe cache.
   Future<bool> isSupported() async {
     if (defaultTargetPlatform != TargetPlatform.android) {
       return false;
     }
-
     return (await sensitiveContentChannel.invokeMethod<bool>('SensitiveContent.isSupported'))!;
   }
 }
