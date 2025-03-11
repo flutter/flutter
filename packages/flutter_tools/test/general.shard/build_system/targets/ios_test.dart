@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -1155,7 +1157,7 @@ void main() {
 
   group('DebugIosLLDBInit', () {
     testUsingContext(
-      'throws error if missing LLDB Init File in all schemes',
+      'prints warning if missing LLDB Init File in all schemes',
       () async {
         const String projectPath = 'path/to/project';
         fileSystem.directory(projectPath).createSync(recursive: true);
@@ -1165,11 +1167,12 @@ void main() {
         environment.defines[kSrcRoot] = projectPath;
         environment.defines[kTargetDeviceOSVersion] = '18.4.1';
 
+        final StringBuffer buffer = await capturedConsolePrint(() async {
+          await const DebugIosLLDBInit().build(environment);
+        });
         expect(
-          const DebugIosLLDBInit().build(environment),
-          throwsToolExit(
-            message: 'Debugging Flutter on new iOS versions requires an LLDB Init File.',
-          ),
+          buffer.toString(),
+          contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
         );
       },
       overrides: <Type, Generator>{
@@ -1260,4 +1263,21 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
   }
+}
+
+/// Capture console print events into a string buffer.
+Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
+  final StringBuffer buffer = StringBuffer();
+  await runZoned<Future<void>>(
+    () async {
+      // Service the event loop.
+      await body();
+    },
+    zoneSpecification: ZoneSpecification(
+      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+        buffer.writeln(line);
+      },
+    ),
+  );
+  return buffer;
 }
