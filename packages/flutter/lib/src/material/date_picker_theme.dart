@@ -19,7 +19,6 @@ import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'input_decorator.dart';
-import 'material_state.dart';
 import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -985,10 +984,10 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get dayForegroundColor =>
-      WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
+      WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
           return _colors.onPrimary;
-        } else if (states.contains(MaterialState.disabled)) {
+        } else if (states.contains(WidgetState.disabled)) {
           return _colors.onSurface.withOpacity(0.38);
         }
         return _colors.onSurface;
@@ -996,8 +995,8 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get dayBackgroundColor =>
-      WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
+      WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
           return _colors.primary;
         }
         return null;
@@ -1005,25 +1004,25 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get dayOverlayColor =>
-      WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
-          if (states.contains(MaterialState.pressed)) {
+      WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
+          if (states.contains(WidgetState.pressed)) {
             return _colors.onPrimary.withOpacity(0.38);
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return _colors.onPrimary.withOpacity(0.08);
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return _colors.onPrimary.withOpacity(0.12);
           }
         } else {
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return _colors.onSurfaceVariant.withOpacity(0.12);
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return _colors.onSurfaceVariant.withOpacity(0.08);
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return _colors.onSurfaceVariant.withOpacity(0.12);
           }
         }
@@ -1032,10 +1031,10 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get todayForegroundColor =>
-      WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
+      WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
           return _colors.onPrimary;
-        } else if (states.contains(MaterialState.disabled)) {
+        } else if (states.contains(WidgetState.disabled)) {
           return _colors.onSurface.withOpacity(0.38);
         }
         return _colors.primary;
@@ -1076,25 +1075,25 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get rangeSelectionOverlayColor =>
-      WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
-          if (states.contains(MaterialState.pressed)) {
+      WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
+          if (states.contains(WidgetState.pressed)) {
             return _colors.onPrimary.withOpacity(0.38);
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return _colors.onPrimary.withOpacity(0.08);
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return _colors.onPrimary.withOpacity(0.12);
           }
         } else {
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return _colors.onSurfaceVariant.withOpacity(0.12);
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return _colors.onSurfaceVariant.withOpacity(0.08);
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return _colors.onSurfaceVariant.withOpacity(0.12);
           }
         }
@@ -1168,10 +1167,10 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get dayForegroundColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return _colors.onPrimary;
-      } else if (states.contains(MaterialState.disabled)) {
+      } else if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
       return _colors.onSurface;
@@ -1179,8 +1178,8 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get dayBackgroundColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return _colors.primary;
       }
       return null;
@@ -1188,25 +1187,25 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get dayOverlayColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onPrimary.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onPrimary.withOpacity(0.1);
         }
       } else {
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onSurfaceVariant.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onSurfaceVariant.withOpacity(0.1);
         }
       }
@@ -1215,10 +1214,10 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get todayForegroundColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return _colors.onPrimary;
-      } else if (states.contains(MaterialState.disabled)) {
+      } else if (states.contains(WidgetState.disabled)) {
         return _colors.primary.withOpacity(0.38);
       }
       return _colors.primary;
@@ -1235,10 +1234,10 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get yearForegroundColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return _colors.onPrimary;
-      } else if (states.contains(MaterialState.disabled)) {
+      } else if (states.contains(WidgetState.disabled)) {
         return _colors.onSurfaceVariant.withOpacity(0.38);
       }
       return _colors.onSurfaceVariant;
@@ -1246,8 +1245,8 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get yearBackgroundColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return _colors.primary;
       }
       return null;
@@ -1255,25 +1254,25 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get yearOverlayColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onPrimary.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onPrimary.withOpacity(0.1);
         }
       } else {
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.pressed)) {
           return _colors.onSurfaceVariant.withOpacity(0.1);
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return _colors.onSurfaceVariant.withOpacity(0.1);
         }
       }
@@ -1291,14 +1290,14 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   WidgetStateProperty<Color?>? get rangeSelectionOverlayColor =>
-    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onPrimaryContainer.withOpacity(0.1);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onPrimaryContainer.withOpacity(0.08);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.onPrimaryContainer.withOpacity(0.1);
       }
       return null;
