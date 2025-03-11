@@ -105,9 +105,9 @@ public class SensitiveContentChannel {
       case AUTO_SENSITIVE_CONTENT_SENSITIVITY:
         return View.CONTENT_SENSITIVITY_AUTO;
       case SENSITIVE_CONTENT_SENSITIVITY:
-        return View.CONTENT_SENSITIVITY_NOT_SENSITIVE;
-      case NOT_SENSITIVE_CONTENT_SENSITIVITY:
         return View.CONTENT_SENSITIVITY_SENSITIVE;
+      case NOT_SENSITIVE_CONTENT_SENSITIVITY:
+        return View.CONTENT_SENSITIVITY_NOT_SENSITIVE;
       default:
         throw new IllegalArgumentException(
             "contentSensitivityName "
@@ -126,10 +126,10 @@ public class SensitiveContentChannel {
     switch (contentSensitivityValue) {
       case View.CONTENT_SENSITIVITY_AUTO:
         return AUTO_SENSITIVE_CONTENT_SENSITIVITY;
-      case View.CONTENT_SENSITIVITY_NOT_SENSITIVE:
-        return NOT_SENSITIVE_CONTENT_SENSITIVITY;
       case View.CONTENT_SENSITIVITY_SENSITIVE:
         return SENSITIVE_CONTENT_SENSITIVITY;
+      case View.CONTENT_SENSITIVITY_NOT_SENSITIVE:
+        return NOT_SENSITIVE_CONTENT_SENSITIVITY;
       default:
         throw new IllegalArgumentException(
             "Android View content sensitivity constant with value "
@@ -157,14 +157,26 @@ public class SensitiveContentChannel {
     /**
      * Requests that a native Flutter Android {@code View} sets its content sensitivity level to
      * {@code requestedContentSensitivity}.
+     *
+     * <p>The {@code requestedContentSensitivity} should be one of the {@code View} constants that
+     * represent a content sensitivity mode. See
+     * https://developer.android.com/reference/android/view/View#setContentSensitivity(int) for the
+     * available modes.
      */
     void setContentSensitivity(@NonNull int requestedContentSensitivity);
 
-    /** Returns the current content sensitivity level of a Flutter Android {@code View}. */
+    /**
+     * Returns the current content sensitivity level of a Flutter Android {@code View}.
+     *
+     * <p>The return value should be one of the {@code View} constants that represent a content
+     * sensitivity modes. See
+     * https://developer.android.com/reference/android/view/View#getContentSensitivity() for the
+     * available modes.
+     */
     int getContentSensitivity();
 
     /**
-     * Returns whether or not marking content sensitivity is supported on the device.
+     * Returns whether or not setting/getting content sensitivity is supported on the device.
      *
      * <p>This value is static and will not change while a Flutter app runs.
      */

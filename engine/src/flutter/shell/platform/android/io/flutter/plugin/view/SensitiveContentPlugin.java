@@ -91,8 +91,9 @@ public class SensitiveContentPlugin
   @Override
   public int getContentSensitivity() {
     if (!isSupported()) {
-      // This feature is only available on >= API 35.
-      throw new IllegalStateException(getNotSupportedErrorReason());
+      // This feature is only available on >= API 35. Return not sensitive content
+      // sensitivity mode since every other mode is unavailable.
+      return View.CONTENT_SENSITIVITY_NOT_SENSITIVE;
     }
 
     final View flutterView = mFlutterActivity.findViewById(mFlutterViewId);

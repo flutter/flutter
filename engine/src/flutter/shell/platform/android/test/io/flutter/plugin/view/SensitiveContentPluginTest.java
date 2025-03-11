@@ -80,13 +80,13 @@ public class SensitiveContentPluginTest {
         binaryMessageHandler,
         setContentSensitivityMethodName,
         SensitiveContentChannel.SENSITIVE_CONTENT_SENSITIVITY);
-    verify(mockHandler).setContentSensitivity(eq(View.CONTENT_SENSITIVITY_NOT_SENSITIVE));
+    verify(mockHandler).setContentSensitivity(eq(View.CONTENT_SENSITIVITY_SENSITIVE));
 
     sendToBinaryMessageHandler(
         binaryMessageHandler,
         setContentSensitivityMethodName,
         SensitiveContentChannel.NOT_SENSITIVE_CONTENT_SENSITIVITY);
-    verify(mockHandler).setContentSensitivity(eq(View.CONTENT_SENSITIVITY_SENSITIVE));
+    verify(mockHandler).setContentSensitivity(eq(View.CONTENT_SENSITIVITY_NOT_SENSITIVE));
   }
 
   @Test
@@ -288,21 +288,24 @@ public class SensitiveContentPluginTest {
 
   @Test
   @Config(maxSdk = 34)
-  public void getContentSensitivity_throwsExceptionWhenRunningBelowApi35() {
+  public void getContentSensitivity_returnsNotSensitiveRunningBelowApi35() {
     final int fakeFlutterViewId = 33;
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
     final SensitiveContentPlugin sensitiveContentPlugin =
         new SensitiveContentPlugin(
             fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel);
+    final View mockFlutterView = mock(View.class);
 
-    assertThrows(IllegalStateException.class, () -> sensitiveContentPlugin.getContentSensitivity());
+    when(mockFlutterActivity.findViewById(fakeFlutterViewId)).thenReturn(mockFlutterView);
+
+    assertEquals(
+        sensitiveContentPlugin.getContentSensitivity(), View.CONTENT_SENSITIVITY_NOT_SENSITIVE);
   }
 
   @Test
   @Config(minSdk = 35)
-  public void
-      getContentSensitivity_throwsExceptionWhenRunningAboveApi35AndFlutterViewNotFound() { // TODO(camille)
+  public void getContentSensitivity_throwsExceptionWhenRunningAboveApi35AndFlutterViewNotFound() {
     final int fakeFlutterViewId = 80;
     final Activity mockFlutterActivity = mock(Activity.class);
     final SensitiveContentChannel mockSensitiveContentChannel = mock(SensitiveContentChannel.class);
@@ -326,7 +329,7 @@ public class SensitiveContentPluginTest {
         new SensitiveContentPlugin(
             fakeFlutterViewId, mockFlutterActivity, mockSensitiveContentChannel);
     final View mockFlutterView = mock(View.class);
-    final Integer testCurrentContentSensitivityValue = 2;
+    final int testCurrentContentSensitivityValue = 2;
 
     when(mockFlutterActivity.findViewById(fakeFlutterViewId)).thenReturn(mockFlutterView);
     when(mockFlutterView.getContentSensitivity()).thenReturn(testCurrentContentSensitivityValue);
