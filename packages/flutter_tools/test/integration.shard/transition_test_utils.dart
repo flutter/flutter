@@ -49,7 +49,6 @@ abstract class Transition {
       // operation.
       return line.contains(pattern);
     }
-    debugPrint('$line contains $pattern: ${line.contains(pattern)}');
     return contains ? line.contains(pattern) : line == pattern;
   }
 
