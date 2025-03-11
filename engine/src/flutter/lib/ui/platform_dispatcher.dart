@@ -1545,18 +1545,20 @@ class PlatformDispatcher {
 /// Example:
 ///
 /// ```dart
-/// Color? systemAccentColor;
-/// if (SystemColor.platformProvidesSystemColors) {
-///   if (PlatformDispatcher.instance.platformBrightness == Brightness.light) {
-///     systemAccentColor = SystemColor.light.accentColor.value;
-///   } else {
-///     systemAccentColor = SystemColor.dark.accentColor.value;
+/// ColorScheme createColorScheme() {
+///   Color? systemAccentColor;
+///   if (SystemColor.platformProvidesSystemColors) {
+///     if (PlatformDispatcher.instance.platformBrightness == Brightness.light) {
+///       systemAccentColor = SystemColor.light.accentColor.value;
+///     } else {
+///       systemAccentColor = SystemColor.dark.accentColor.value;
+///     }
 ///   }
-/// }
 ///
-/// final ColorScheme colorScheme = ColorScheme.fromSeed(
-///   seedColor: systemAccentColor ?? Color(0xFF007AFF),
-/// );
+///   return ColorScheme.fromSeed(
+///     seedColor: systemAccentColor ?? Color(0xFF007AFF),
+///   );
+/// }
 /// ```
 ///
 /// See also:
