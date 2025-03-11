@@ -9,19 +9,6 @@
 
 namespace impeller {
 
-namespace {
-static bool TextPropertiesEquals(const std::optional<GlyphProperties>& a,
-                                 const std::optional<GlyphProperties>& b) {
-  if (!a.has_value() && !b.has_value()) {
-    return true;
-  }
-  if (a.has_value() && b.has_value()) {
-    return GlyphProperties::Equal{}(a.value(), b.value());
-  }
-  return false;
-}
-}  // namespace
-
 TextFrame::TextFrame() = default;
 
 TextFrame::TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color)
@@ -97,16 +84,15 @@ Point TextFrame::ComputeSubpixelPosition(
   }
 }
 
+Matrix TextFrame::GetOffsetTransform() const {
+  return transform_ * Matrix::MakeTranslation(offset_);
+}
+
 void TextFrame::SetPerFrameData(Scalar scale,
                                 Point offset,
                                 const Matrix& transform,
                                 std::optional<GlyphProperties> properties) {
-  if (!transform_.Equals(transform) || !ScalarNearlyEqual(scale_, scale) ||
-      !ScalarNearlyEqual(offset_.x, offset.x) ||
-      !ScalarNearlyEqual(offset_.y, offset.y) ||
-      !TextPropertiesEquals(properties_, properties)) {
-    bound_values_.clear();
-  }
+  bound_values_.clear();
   scale_ = scale;
   offset_ = offset;
   properties_ = properties;

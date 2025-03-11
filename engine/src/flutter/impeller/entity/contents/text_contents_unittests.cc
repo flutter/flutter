@@ -58,8 +58,10 @@ std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
     const std::shared_ptr<TextFrame>& frame,
     Point offset) {
-  frame->SetPerFrameData(scale, /*offset=*/offset, /*transform=*/Matrix(),
-                         /*properties=*/std::nullopt);
+  frame->SetPerFrameData(
+      TextFrame::RoundScaledFontSize(scale), /*offset=*/offset,
+      /*transform=*/Matrix::MakeScale(Vector3{scale, scale, 1}),
+      /*properties=*/std::nullopt);
   return typographer_context->CreateGlyphAtlas(context, type, host_buffer,
                                                atlas_context, {frame});
 }
@@ -183,6 +185,7 @@ TEST_P(TextContentsTest, MaintainsShape) {
   std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
   ASSERT_TRUE(context && context->IsValid());
+
   for (int i = 0; i <= 1000; ++i) {
     Scalar font_scale = 0.440 + (i / 1000.0);
     Rect position_rect[2];
