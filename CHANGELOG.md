@@ -24,8 +24,12 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 INTERNAL NOTE
 -->
+## Flutter 3.29 Changes
 
-## Flutter 3.29.1 Changes
+### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
+
+- [flutter/164201](https://github.com/flutter/flutter/pull/164201) - Always use Android hardware buffers for platform views when supported.
+- [flutter/162198](https://github.com/flutter/flutter/issues/162198) Fixes double-download of canvaskit.wasm
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
@@ -48,8 +52,6 @@ glyphs.
 - [flutter/163265](https://github.com/flutter/flutter/pull/163265) - disable Vulkan on known bad exynos SoCs.
 - [flutter/163261](https://github.com/flutter/flutter/pull/163261) - Fixes for Impeller DrawVertices issues involving snapshots with empty sizes
 - [flutter/163672](https://github.com/flutter/flutter/pull/163672) - Check for tracked engine.version before overriding
-
-## Flutter 3.29 Changes
 
 ### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
 Initial stable release.
