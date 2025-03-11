@@ -801,7 +801,6 @@ TEST_F(FlutterWindowsEngineTest, TestExit) {
   modifier.SetImplicitView(&view);
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
   auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState(AppLifecycleState::kResumed));
   EXPECT_CALL(*handler, Quit)
       .WillOnce([&finished](std::optional<HWND> hwnd,
                             std::optional<WPARAM> wparam,
@@ -838,7 +837,6 @@ TEST_F(FlutterWindowsEngineTest, TestExitCancel) {
   modifier.SetImplicitView(&view);
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
   auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState(AppLifecycleState::kResumed));
   EXPECT_CALL(*handler, IsLastWindowOfProcess).WillRepeatedly(Return(true));
   EXPECT_CALL(*handler, Quit).Times(0);
   modifier.SetLifecycleManager(std::move(handler));
@@ -886,7 +884,6 @@ TEST_F(FlutterWindowsEngineTest, TestExitSecondCloseMessage) {
   modifier.SetImplicitView(&view);
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
   auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState(AppLifecycleState::kResumed));
   EXPECT_CALL(*handler, IsLastWindowOfProcess).WillOnce(Return(true));
   EXPECT_CALL(*handler, Quit)
       .WillOnce([handler_ptr = handler.get()](
@@ -946,7 +943,6 @@ TEST_F(FlutterWindowsEngineTest, TestExitCloseMultiWindow) {
   modifier.SetImplicitView(&view);
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
   auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState(AppLifecycleState::kResumed));
   EXPECT_CALL(*handler, IsLastWindowOfProcess).WillOnce([&finished]() {
     finished = true;
     return false;
@@ -1024,24 +1020,6 @@ TEST_F(FlutterWindowsEngineTest, ApplicationLifecycleExternalWindow) {
   engine->lifecycle_manager()->ExternalWindowMessage(0, WM_CLOSE, 0, 0);
 }
 
-TEST_F(FlutterWindowsEngineTest, AppStartsInResumedState) {
-  FlutterWindowsEngineBuilder builder{GetContext()};
-
-  auto engine = builder.Build();
-  auto window_binding_handler =
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
-  MockFlutterWindowsView view(engine.get(), std::move(window_binding_handler));
-
-  EngineModifier modifier(engine.get());
-  modifier.SetImplicitView(&view);
-  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
-  auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState(AppLifecycleState::kResumed))
-      .Times(1);
-  modifier.SetLifecycleManager(std::move(handler));
-  engine->Run();
-}
-
 TEST_F(FlutterWindowsEngineTest, LifecycleStateTransition) {
   FlutterWindowsEngineBuilder builder{GetContext()};
 
@@ -1057,16 +1035,41 @@ TEST_F(FlutterWindowsEngineTest, LifecycleStateTransition) {
 
   engine->window_proc_delegate_manager()->OnTopLevelWindowProc(
       (HWND)1, WM_SIZE, SIZE_RESTORED, 0);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
+
+  EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
+            AppLifecycleState::kInactive);
+
+  engine->lifecycle_manager()->OnWindowStateEvent((HWND)1,
+                                                  WindowStateEvent::kFocus);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
+
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
             AppLifecycleState::kResumed);
 
   engine->window_proc_delegate_manager()->OnTopLevelWindowProc(
       (HWND)1, WM_SIZE, SIZE_MINIMIZED, 0);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
+
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
             AppLifecycleState::kHidden);
 
   engine->window_proc_delegate_manager()->OnTopLevelWindowProc(
       (HWND)1, WM_SIZE, SIZE_RESTORED, 0);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
+
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
             AppLifecycleState::kInactive);
 }
@@ -1090,6 +1093,10 @@ TEST_F(FlutterWindowsEngineTest, ExternalWindowMessage) {
                                        TRUE, NULL);
   engine->ProcessExternalWindowMessage(reinterpret_cast<HWND>(1), WM_SHOWWINDOW,
                                        FALSE, NULL);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
 
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
             AppLifecycleState::kHidden);
@@ -1118,11 +1125,19 @@ TEST_F(FlutterWindowsEngineTest, InnerWindowHidden) {
   view.OnWindowStateEvent(inner, WindowStateEvent::kShow);
   view.OnWindowStateEvent(inner, WindowStateEvent::kFocus);
 
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
+
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
             AppLifecycleState::kResumed);
 
   // Hide Flutter window, but not top level window.
   view.OnWindowStateEvent(inner, WindowStateEvent::kHide);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
 
   // The top-level window is still visible, so we ought not enter hidden state.
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
@@ -1245,7 +1260,6 @@ TEST_F(FlutterWindowsEngineTest, ChannelListenedTo) {
 
   bool lifecycle_began = false;
   auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState).Times(1);
   handler->begin_processing_callback = [&]() { lifecycle_began = true; };
   modifier.SetLifecycleManager(std::move(handler));
 
