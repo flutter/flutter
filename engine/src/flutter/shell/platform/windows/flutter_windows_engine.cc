@@ -354,9 +354,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
                                        void* user_data) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
 
-    // TODO(loicsharma): Remove implicit view assumption.
-    // https://github.com/flutter/flutter/issues/142845
-    auto view = host->view(kImplicitViewId);
+    auto view = host->view(update->view_id);
     if (!view) {
       return;
     }
