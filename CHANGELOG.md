@@ -30,7 +30,7 @@ INTERNAL NOTE
 
 - [flutter/164201](https://github.com/flutter/flutter/pull/164201) - Always use Android hardware buffers for platform views when supported.
 - [flutter/162198](https://github.com/flutter/flutter/issues/162198) - Fixes double-download of canvaskit.wasm
-- [flutter/164392](https://github.com/flutter/flutter/pull/164392) - Fixes a crash that can occur when animating and interacting with a scrollable simultaneously.
+- [flutter/164392](https://github.com/flutter/flutter/pull/164392) - All platforms, Fixes a crash that can occur when animating and interacting with a scrollable simultaneously.
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
