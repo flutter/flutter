@@ -238,18 +238,6 @@ void flutter_get_window_size(void* window, FlutterWindowSize* size) {
 }
 
 G_MODULE_EXPORT
-void flutter_set_window_size(void* window, const FlutterWindowSize* size) {
-  GtkWindow* gtk_window = GTK_WINDOW(window);
-  gtk_window_resize(gtk_window, size->width, size->height);
-}
-
-G_MODULE_EXPORT
-void flutter_set_window_title(void* window, const char* title) {
-  GtkWindow* gtk_window = GTK_WINDOW(window);
-  gtk_window_set_title(gtk_window, title);
-}
-
-G_MODULE_EXPORT
 int64_t flutter_get_window_state(void* window) {
   GtkWindow* gtk_window = GTK_WINDOW(window);
   GdkWindowState window_state =

@@ -149,10 +149,10 @@ class RegularWindowControllerLinux extends RegularWindowController {
   @Native<Void Function(Pointer<Void>, Pointer<_Size>)>(symbol: 'flutter_get_window_size')
   external static void _getWindowSize(Pointer<Void> windowHandle, Pointer<_Size> size);
 
-  @Native<Void Function(Pointer<Void>, Double, Double)>(symbol: 'flutter_set_window_size')
+  @Native<Void Function(Pointer<Void>, Double, Double)>(symbol: 'gtk_window_resize')
   external static void _setWindowSize(Pointer<Void> windowHandle, double width, double height);
 
-  @Native<Void Function(Pointer<Void>, Pointer<ffi.Utf8>)>(symbol: 'flutter_set_window_title')
+  @Native<Void Function(Pointer<Void>, Pointer<ffi.Utf8>)>(symbol: 'gtk_window_set_title')
   external static void _setWindowTitle(Pointer<Void> windowHandle, Pointer<ffi.Utf8> title);
 
   @Native<Int64 Function(Pointer<Void>)>(symbol: 'flutter_get_window_state')
