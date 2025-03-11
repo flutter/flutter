@@ -2855,7 +2855,7 @@ class _DayItemState extends State<_DayItem> {
     }
 
     T? resolve<T>(
-      MaterialStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
+      WidgetStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
       Set<MaterialState> states,
     ) {
       return effectiveValue((DatePickerThemeData? theme) {
@@ -2878,7 +2878,7 @@ class _DayItemState extends State<_DayItem> {
       (DatePickerThemeData? theme) => theme?.dayBackgroundColor,
       states,
     );
-    final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
+    final WidgetStateProperty<Color?> dayOverlayColor = WidgetStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) => effectiveValue(
         (DatePickerThemeData? theme) =>
             widget.isInRange
