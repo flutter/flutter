@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'window_macos.dart';
 import 'window_win32.dart';
 
 /// Defines the possible archetypes for a window.
@@ -185,6 +186,8 @@ abstract class WindowingOwner {
   static WindowingOwner createDefaultOwner() {
     if (defaultTargetPlatform == TargetPlatform.windows) {
       return WindowingOwnerWin32();
+    } else if (defaultTargetPlatform == TargetPlatform.macOS) {
+      return WindowingOwnerMacOS();
     } else {
       return _FallbackWindowingOwner();
     }

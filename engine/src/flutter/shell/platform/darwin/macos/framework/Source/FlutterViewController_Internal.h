@@ -53,6 +53,8 @@
  */
 - (void)updateSemantics:(nonnull const FlutterSemanticsUpdate2*)update;
 
+- (void)dispose;
+
 @end
 
 // Private methods made visible for testing
