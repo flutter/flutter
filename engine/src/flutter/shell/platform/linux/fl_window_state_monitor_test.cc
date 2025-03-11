@@ -6,17 +6,17 @@
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
-#include "flutter/shell/platform/linux/testing/mock_window.h"
+#include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
 #include "gtest/gtest.h"
 
 TEST(FlWindowStateMonitorTest, GainFocus) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   gtk_init(0, nullptr);
 
-  EXPECT_CALL(mock_window, gdk_window_get_state)
+  EXPECT_CALL(mock_gtk, gdk_window_get_state)
       .WillOnce(::testing::Return(static_cast<GdkWindowState>(0)));
 
   gboolean called = TRUE;
@@ -47,11 +47,11 @@ TEST(FlWindowStateMonitorTest, GainFocus) {
 
 TEST(FlWindowStateMonitorTest, LoseFocus) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   gtk_init(0, nullptr);
 
-  EXPECT_CALL(mock_window, gdk_window_get_state)
+  EXPECT_CALL(mock_gtk, gdk_window_get_state)
       .WillOnce(::testing::Return(GDK_WINDOW_STATE_FOCUSED));
   gboolean called = TRUE;
   fl_mock_binary_messenger_set_string_message_channel(
@@ -82,11 +82,11 @@ TEST(FlWindowStateMonitorTest, LoseFocus) {
 
 TEST(FlWindowStateMonitorTest, EnterIconified) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   gtk_init(0, nullptr);
 
-  EXPECT_CALL(mock_window, gdk_window_get_state)
+  EXPECT_CALL(mock_gtk, gdk_window_get_state)
       .WillOnce(::testing::Return(static_cast<GdkWindowState>(0)));
   gboolean called = TRUE;
   fl_mock_binary_messenger_set_string_message_channel(
@@ -116,11 +116,11 @@ TEST(FlWindowStateMonitorTest, EnterIconified) {
 
 TEST(FlWindowStateMonitorTest, LeaveIconified) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   gtk_init(0, nullptr);
 
-  EXPECT_CALL(mock_window, gdk_window_get_state)
+  EXPECT_CALL(mock_gtk, gdk_window_get_state)
       .WillOnce(::testing::Return(GDK_WINDOW_STATE_ICONIFIED));
   gboolean called = TRUE;
   fl_mock_binary_messenger_set_string_message_channel(
@@ -151,11 +151,11 @@ TEST(FlWindowStateMonitorTest, LeaveIconified) {
 
 TEST(FlWindowStateMonitorTest, LeaveIconifiedFocused) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   gtk_init(0, nullptr);
 
-  EXPECT_CALL(mock_window, gdk_window_get_state)
+  EXPECT_CALL(mock_gtk, gdk_window_get_state)
       .WillOnce(::testing::Return(GDK_WINDOW_STATE_ICONIFIED));
   gboolean called = TRUE;
   fl_mock_binary_messenger_set_string_message_channel(
@@ -186,11 +186,11 @@ TEST(FlWindowStateMonitorTest, LeaveIconifiedFocused) {
 
 TEST(FlWindowStateMonitorTest, EnterWithdrawn) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   gtk_init(0, nullptr);
 
-  EXPECT_CALL(mock_window, gdk_window_get_state)
+  EXPECT_CALL(mock_gtk, gdk_window_get_state)
       .WillOnce(::testing::Return(static_cast<GdkWindowState>(0)));
   gboolean called = TRUE;
   fl_mock_binary_messenger_set_string_message_channel(
@@ -220,11 +220,11 @@ TEST(FlWindowStateMonitorTest, EnterWithdrawn) {
 
 TEST(FlWindowStateMonitorTest, LeaveWithdrawn) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   gtk_init(0, nullptr);
 
-  EXPECT_CALL(mock_window, gdk_window_get_state)
+  EXPECT_CALL(mock_gtk, gdk_window_get_state)
       .WillOnce(::testing::Return(GDK_WINDOW_STATE_WITHDRAWN));
   gboolean called = TRUE;
   fl_mock_binary_messenger_set_string_message_channel(
@@ -255,11 +255,11 @@ TEST(FlWindowStateMonitorTest, LeaveWithdrawn) {
 
 TEST(FlWindowStateMonitorTest, LeaveWithdrawnFocused) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   gtk_init(0, nullptr);
 
-  EXPECT_CALL(mock_window, gdk_window_get_state)
+  EXPECT_CALL(mock_gtk, gdk_window_get_state)
       .WillOnce(::testing::Return(GDK_WINDOW_STATE_WITHDRAWN));
   gboolean called = TRUE;
   fl_mock_binary_messenger_set_string_message_channel(
