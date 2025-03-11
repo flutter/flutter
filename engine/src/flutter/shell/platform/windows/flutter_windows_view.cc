@@ -315,6 +315,11 @@ void FlutterWindowsView::OnKey(int key,
   SendKey(key, scancode, action, character, extended, was_down, callback);
 }
 
+void FlutterWindowsView::OnFocus(FlutterViewFocusState focus_state,
+                                 FlutterViewFocusDirection direction) {
+  SendFocus(focus_state, direction);
+}
+
 void FlutterWindowsView::OnComposeBegin() {
   SendComposeBegin();
 }
@@ -368,7 +373,7 @@ void FlutterWindowsView::OnResetImeComposing() {
   binding_handler_->OnResetImeComposing();
 }
 
-// Sends new size  information to FlutterEngine.
+// Sends new size information to FlutterEngine.
 void FlutterWindowsView::SendWindowMetrics(size_t width,
                                            size_t height,
                                            double pixel_ratio) const {
@@ -555,6 +560,16 @@ void FlutterWindowsView::SendKey(int key,
           callback(handled);
         }
       });
+}
+
+void FlutterWindowsView::SendFocus(FlutterViewFocusState focus_state,
+                                   FlutterViewFocusDirection direction) {
+  FlutterViewFocusEvent event = {};
+  event.struct_size = sizeof(event);
+  event.view_id = view_id_;
+  event.state = focus_state;
+  event.direction = direction;
+  engine_->SendViewFocusEvent(event);
 }
 
 void FlutterWindowsView::SendComposeBegin() {
@@ -824,6 +839,10 @@ void FlutterWindowsView::OnDwmCompositionChanged() {
 
 void FlutterWindowsView::OnWindowStateEvent(HWND hwnd, WindowStateEvent event) {
   engine_->OnWindowStateEvent(hwnd, event);
+}
+
+bool FlutterWindowsView::Focus() {
+  return binding_handler_->Focus();
 }
 
 bool FlutterWindowsView::NeedsVsync() const {

@@ -133,6 +133,10 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
       gl.GetIntegerv(GL_MAX_SAMPLES_EXT, &value);
       supports_offscreen_msaa_ = value >= 4;
     }
+  } else if (desc->GetGlVersion().major_version >= 3 && desc->IsES()) {
+    GLint value = 0;
+    gl.GetIntegerv(GL_MAX_SAMPLES, &value);
+    supports_offscreen_msaa_ = value >= 4;
   }
   is_es_ = desc->IsES();
   is_angle_ = desc->IsANGLE();
@@ -216,6 +220,10 @@ bool CapabilitiesGLES::IsANGLE() const {
 }
 
 bool CapabilitiesGLES::SupportsPrimitiveRestart() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsExtendedRangeFormats() const {
   return false;
 }
 
