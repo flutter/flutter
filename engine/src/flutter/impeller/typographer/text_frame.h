@@ -91,19 +91,21 @@ class TextFrame {
   // processed.
   std::pair<size_t, intptr_t> GetAtlasGenerationAndID() const;
 
+  Scalar GetScale() const;
+
   TextFrame& operator=(TextFrame&& other) = default;
 
   TextFrame(const TextFrame& other) = default;
 
   const Matrix& GetTransform() const { return transform_; }
 
+  Point GetOffset() const;
+
+  Matrix GetOffsetTransform() const;
+
  private:
   friend class TypographerContextSkia;
   friend class LazyGlyphAtlas;
-
-  Scalar GetScale() const;
-
-  Point GetOffset() const;
 
   std::optional<GlyphProperties> GetProperties() const;
 

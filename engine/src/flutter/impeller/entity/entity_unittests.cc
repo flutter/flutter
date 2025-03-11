@@ -17,7 +17,6 @@
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/raw_ptr.h"
 #include "impeller/core/texture_descriptor.h"
-#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
@@ -55,10 +54,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
-#include "impeller/typographer/backends/skia/text_frame_skia.h"
-#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/imgui/imgui.h"
-#include "third_party/skia/include/core/SkTextBlob.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
 // NOLINTBEGIN(bugprone-unchecked-optional-access)
