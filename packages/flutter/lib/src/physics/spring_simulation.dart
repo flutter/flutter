@@ -145,7 +145,7 @@ class SpringDescription {
   ///    before settling. A value of 1 represents an undamped spring that
   ///    oscillates indefinitely.
   ///  * Negative values indicate overdamping, where the motion is slow and
-  ///    resistive, like moving through a thick fluid. The minimum value is -1.0.
+  ///    resistive, like moving through a thick fluid.
   ///
   /// Defaults to 0.
   double get bounce {
