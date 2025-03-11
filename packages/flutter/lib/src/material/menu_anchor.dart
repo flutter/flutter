@@ -1892,9 +1892,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     // After closing the children of this submenu, this submenu button will
     // regain focus. Because submenu buttons open on focus, this submenu will
     // immediately reopen. To prevent this from happening, we prevent focus on
-    // SubmenuButtons that do not already have focus using the _openOnFocus
+    // SubmenuButtons that do not already have focus using the _isOpenOnFocusEnabled
     // flag. This flag is reset after one frame.
-    if (!_buttonFocusNode.hasFocus) {
+    if (!_buttonFocusNode.hasPrimaryFocus) {
       _isOpenOnFocusEnabled = false;
       SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
         FocusManager.instance.applyFocusChangesIfNeeded();
