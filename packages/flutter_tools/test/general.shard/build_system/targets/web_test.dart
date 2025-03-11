@@ -1071,7 +1071,7 @@ name: foo
             '--no-minify',
             '--no-source-maps',
             '-O4',
-            '--stage=dump-info-all',
+            '--dump-info',
             '-o',
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
