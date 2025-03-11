@@ -2916,8 +2916,8 @@ class _NavigationBarComponentsTransition {
     Widget child = bottomNavBarBottom.child;
     final Curve animationCurve =
         animation.status == AnimationStatus.forward
-            ? Curves.easeOutQuart
-            : Curves.easeOutQuart.flipped;
+            ? Curves.easeOutCirc
+            : Curves.easeOutQuad.flipped;
 
     // Fade out only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.

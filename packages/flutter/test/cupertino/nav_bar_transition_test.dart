@@ -974,11 +974,11 @@ void main() {
     expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.850);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.706);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-98.22, epsilon: 0.01),
+      moreOrLessEquals(-197.36, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
@@ -988,7 +988,7 @@ void main() {
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-790.86, epsilon: 0.01),
+      moreOrLessEquals(-795.54, epsilon: 0.01),
     );
   });
 
@@ -1010,11 +1010,11 @@ void main() {
     expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.850);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.706);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-98.22, epsilon: 0.01),
+      moreOrLessEquals(-197.36, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
@@ -1024,7 +1024,7 @@ void main() {
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-790.86, epsilon: 0.01),
+      moreOrLessEquals(-795.54, epsilon: 0.01),
     );
   });
 
