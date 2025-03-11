@@ -611,6 +611,13 @@ class RenderTable extends RenderBox {
     config.explicitChildNodes = true;
   }
 
+  Rect _rectWithOffset(SemanticsNode child) {
+    final Offset offset =
+        (child.transform != null ? MatrixUtils.getAsTranslation(child.transform!) : null) ??
+        Offset.zero;
+    return child.rect.shift(offset);
+  }
+
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
   ///
   /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
@@ -623,7 +630,28 @@ class RenderTable extends RenderBox {
     Iterable<SemanticsNode> children,
   ) {
     final List<SemanticsNode> rows = <SemanticsNode>[];
-    int cellIndex = 0;
+
+    final List<List<List<SemanticsNode>>> rawCells = List<List<List<SemanticsNode>>>.generate(
+      _rows,
+      (int rowIndex) =>
+          List<List<SemanticsNode>>.generate(_columns, (int columnIndex) => <SemanticsNode>[]),
+    );
+
+    for (final SemanticsNode child in children) {
+      if (child.tags != null && child.tags!.isNotEmpty) {
+        final String cellIndex = child.tags!.first.name;
+        final int rowIndex = int.parse(cellIndex.split(',')[0]);
+        final int columnIndex = int.parse(cellIndex.split(',')[1]);
+        rawCells[rowIndex][columnIndex].add(child);
+      } else {
+        final Rect rect = _rectWithOffset(child);
+        final double top = _rowTops.lastWhere((double rowTop) => rowTop <= rect.top);
+        final int y = _rowTops.indexOf(top);
+        final double left = _columnLefts!.lastWhere((double columnLeft) => columnLeft <= rect.left);
+        final int x = _columnLefts!.toList().indexOf(left);
+        rawCells[y][x].add(child);
+      }
+    }
 
     for (int y = 0; y < _rows; y++) {
       final Rect rowBox = getRowBox(y);
@@ -645,43 +673,28 @@ class RenderTable extends RenderBox {
       // The list of cells of this Row.
       final List<SemanticsNode> cells = <SemanticsNode>[];
 
-      // Use two index to loop. x is the index of the cell in the row, cellIndex is the index of the
-      // cell in the table's children. Use two index because each row may have different number of visible
-      // cells and thus different number of children in the semantics tree.
-      for (int x = 0; x < columns && cellIndex < children.length; x++, cellIndex++) {
-        // Get the cell at the current index.
-        final SemanticsNode child = children.elementAt(cellIndex);
-
-        final Offset offset =
-            (child.transform != null ? MatrixUtils.getAsTranslation(child.transform!) : null) ??
-            Offset.zero;
-        final Rect childRect = child.rect.shift(offset);
-        // Break if this cell belong to next row.
-        // If the cell index in parent is null, it means the cell's parent is not set to a row yet,
-        // its rect is relative to the table. Check its rect to see if it belongs to the current row.
-        // Otherwise if the cell index in parent is not null, it means the cell's parent is set to a row,
-        // check its index to see if it belongs to the current row or next row.
-
-        if ((child.indexInParent == null && childRect.top + 0.001 > rowBox.bottom) ||
-            (child.indexInParent != null && child.indexInParent != x)) {
-          break;
+      for (int x = 0; x < columns; x++) {
+        final List<SemanticsNode> rawChildrens = rawCells[y][x];
+        if (rawChildrens.isEmpty) {
+          continue;
         }
 
-        // If the child is not a cell or columnHeader, create a new semantic node with role cell to wrap it.
+        // If the cell has multiple children or the only child is not a cell or columnHeader,
+        // create a new semantic node with role cell to wrap it.
         // This can happen when the cell has a different semantic role, or the cell doesn't have a semantic
         // role because user is not using the `TableCell` widget.
         final bool addCellWrapper =
-            child.role != SemanticsRole.cell && child.role != SemanticsRole.columnHeader;
+            rawChildrens.length > 1 ||
+            rawChildrens.single.role != SemanticsRole.cell &&
+                rawChildrens.single.role != SemanticsRole.columnHeader;
 
         final SemanticsNode cell =
             addCellWrapper
                 ? (SemanticsNode()..updateWith(
                   config: SemanticsConfiguration()..role = SemanticsRole.cell,
-                  childrenInInversePaintOrder: <SemanticsNode>[child],
+                  childrenInInversePaintOrder: rawChildrens,
                 ))
-                : child;
-
-        cell.indexInParent = x;
+                : rawChildrens.single;
 
         // Shift the cell's transform to be relative to the row.
         final Matrix4 cellTransform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0);
@@ -696,16 +709,31 @@ class RenderTable extends RenderBox {
           continue;
         }
 
+        // Shift child transform.
+        if (addCellWrapper) {
+          for (final SemanticsNode child in rawChildrens) {
+            final Matrix4? previousTransform = child.transform;
+            // previousTransform is relative to the table.
+            final Offset offset =
+                (previousTransform != null
+                    ? MatrixUtils.getAsTranslation(previousTransform)
+                    : null) ??
+                Offset.zero;
+            // newTransform is relative to the cell.
+            final Matrix4 newTransform = Matrix4.translationValues(
+              offset.dx - _columnLefts!.elementAt(x),
+              offset.dy - _rowTops.elementAt(y),
+              0,
+            );
+            child.transform = newTransform;
+          }
+        }
+
         cell
+          ..indexInParent = x
+          ..tags = <SemanticsTag>{SemanticsTag('$y,$x')}
           ..transform = cellTransform
           ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
-
-        // Clear child transform.
-        if (addCellWrapper) {
-          child
-            ..transform = null
-            ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
-        }
         cells.add(cell);
       }
 
