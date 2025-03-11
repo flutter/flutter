@@ -1649,6 +1649,8 @@ TEST_F(EmbedderTest, CanRemoveView) {
   ASSERT_EQ(message, "View IDs: [0]");
 }
 
+// Regression test for:
+// https://github.com/flutter/flutter/issues/164564
 TEST_F(EmbedderTest, RemoveViewCallbackIsInvokedAfterRasterThreadIsDone) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   EmbedderConfigBuilder builder(context);
