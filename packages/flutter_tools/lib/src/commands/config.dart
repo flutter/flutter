@@ -35,7 +35,7 @@ class ConfigCommand extends FlutterCommand {
           'Clear the saved development certificate choice used to sign apps for iOS device deployment.',
     );
     argParser.addFlag(
-      'select-ios-signing-cert',
+      'select-ios-signing-settings',
       negatable: false,
       help: 'Complete prompt to save code signing settings',
     );
@@ -163,7 +163,7 @@ class ConfigCommand extends FlutterCommand {
       XcodeCodeSigningSettings.resetSettings(globals.config, globals.logger);
     }
 
-    if (argResults!.wasParsed('select-ios-signing-cert')) {
+    if (argResults!.wasParsed('select-ios-signing-settings')) {
       final XcodeCodeSigningSettings settings = XcodeCodeSigningSettings(
         config: globals.config,
         logger: globals.logger,
