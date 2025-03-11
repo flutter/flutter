@@ -21,6 +21,7 @@
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/compositor_opengl.h"
 #include "flutter/shell/platform/windows/compositor_software.h"
+#include "flutter/shell/platform/windows/flutter_host_window_controller.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/system_utils.h"
@@ -209,8 +210,18 @@ FlutterWindowsEngine::FlutterWindowsEngine(
         FlutterWindowsEngine* that =
             static_cast<FlutterWindowsEngine*>(user_data);
         BASE_DCHECK(that->lifecycle_manager_);
-        return that->lifecycle_manager_->WindowProc(hwnd, msg, wpar, lpar,
-                                                    result);
+        bool handled =
+            that->lifecycle_manager_->WindowProc(hwnd, msg, wpar, lpar, result);
+        if (handled) {
+          return true;
+        }
+        auto message_result =
+            that->host_window_controller_->HandleMessage(hwnd, msg, wpar, lpar);
+        if (message_result) {
+          *result = *message_result;
+          return true;
+        }
+        return false;
       },
       static_cast<void*>(this));
 
@@ -228,12 +239,17 @@ FlutterWindowsEngine::FlutterWindowsEngine(
       std::make_unique<CursorHandler>(messenger_wrapper_.get(), this);
   platform_handler_ =
       std::make_unique<PlatformHandler>(messenger_wrapper_.get(), this);
+  if (enable_multi_window_) {
+    host_window_controller_ =
+        std::make_unique<FlutterHostWindowController>(this);
+  }
   settings_plugin_ = std::make_unique<SettingsPlugin>(messenger_wrapper_.get(),
                                                       task_runner_.get());
 }
 
 FlutterWindowsEngine::~FlutterWindowsEngine() {
   messenger_->SetEngine(nullptr);
+  host_window_controller_.reset();
   Stop();
 }
 
@@ -304,7 +320,8 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
       &WindowsPlatformThreadPrioritySetter;
 
   if (project_->ui_thread_policy() ==
-      FlutterUIThreadPolicy::RunOnPlatformThread) {
+          FlutterUIThreadPolicy::RunOnPlatformThread ||
+      enable_multi_window_) {
     FML_LOG(WARNING)
         << "Running with merged platform and UI thread. Experimental.";
     custom_task_runners.ui_task_runner = &platform_task_runner;
@@ -502,6 +519,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
 
 bool FlutterWindowsEngine::Stop() {
   if (engine_) {
+    host_window_controller_->OnEngineShutdown();
     for (const auto& [callback, registrar] :
          plugin_registrar_destruction_callbacks_) {
       callback(registrar);
@@ -840,6 +858,20 @@ HCURSOR FlutterWindowsEngine::GetCursorByName(
     idc_name = it->second;
   }
   return windows_proc_table_->LoadCursor(nullptr, idc_name);
+}
+
+FlutterWindowsView* FlutterWindowsEngine::GetViewFromTopLevelWindow(
+    HWND hwnd) const {
+  std::shared_lock read_lock(views_mutex_);
+  auto const iterator =
+      std::find_if(views_.begin(), views_.end(), [hwnd](auto const& pair) {
+        FlutterWindowsView* const view = pair.second;
+        return GetAncestor(view->GetWindowHandle(), GA_ROOT) == hwnd;
+      });
+  if (iterator != views_.end()) {
+    return iterator->second;
+  }
+  return nullptr;
 }
 
 void FlutterWindowsEngine::SendSystemLocales() {
