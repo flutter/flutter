@@ -10,9 +10,12 @@ class AppDelegate: FlutterAppDelegate {
   override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
     return true
   }
-    
+
+  var engine : FlutterEngine?;
+
+
   override func applicationDidFinishLaunching(_ notification: Notification) {
-    let engine = FlutterEngine(name: "project", project: nil);
-    engine.run(withEntrypoint:nil);
+    engine = FlutterEngine(name: "project", project: nil);
+    engine?.run(withEntrypoint:nil);
   }
 }
