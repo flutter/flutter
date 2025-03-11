@@ -105,7 +105,8 @@ void TextContents::ComputeVertexData(
   size_t bounds_offset = 0u;
   for (const TextRun& run : frame->GetRuns()) {
     const Font& font = run.GetFont();
-    Scalar rounded_scale = TextFrame::RoundScaledFontSize(scale);
+    Rational rounded_scale = frame->GetScale();
+    const Matrix transform = frame->GetOffsetTransform();
     FontGlyphAtlas* font_atlas = nullptr;
 
     // Adjust glyph position based on the subpixel rounding
@@ -148,8 +149,8 @@ void TextContents::ComputeVertexData(
           VALIDATION_LOG << "Could not find font in the atlas.";
           continue;
         }
-        Point subpixel = TextFrame::ComputeSubpixelPosition(
-            glyph_position, font.GetAxisAlignment(), entity_transform);
+        SubpixelPosition subpixel = TextFrame::ComputeSubpixelPosition(
+            glyph_position, font.GetAxisAlignment(), transform);
 
         std::optional<FrameBounds> maybe_atlas_glyph_bounds =
             font_atlas->FindGlyphBounds(SubpixelGlyph{
@@ -164,7 +165,8 @@ void TextContents::ComputeVertexData(
         atlas_glyph_bounds = maybe_atlas_glyph_bounds.value().atlas_bounds;
       }
 
-      Rect scaled_bounds = glyph_bounds.Scale(1.0 / rounded_scale);
+      Rect scaled_bounds =
+          glyph_bounds.Scale(static_cast<Scalar>(rounded_scale.Invert()));
       // For each glyph, we compute two rectangles. One for the vertex
       // positions and one for the texture coordinates (UVs). The atlas
       // glyph bounds are used to compute UVs in cases where the
