@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart' show flutterBin;
