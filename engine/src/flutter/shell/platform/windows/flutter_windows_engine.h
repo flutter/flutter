@@ -481,6 +481,8 @@ class FlutterWindowsEngine {
 
   bool enable_impeller_ = false;
 
+  bool enable_multi_window_ = false;
+
   // The manager for WindowProc delegate registration and callbacks.
   std::unique_ptr<WindowProcDelegateManager> window_proc_delegate_manager_;
 
