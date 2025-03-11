@@ -95,7 +95,7 @@ class BuildWebCommand extends BuildSubCommand {
       negatable: false,
       help:
           'Passes "--dump-info" to the Javascript compiler which generates '
-          'information about the generated code is a .js.info.json file.',
+          'information about the generated code in main.dart.js.info.json.',
     );
     argParser.addFlag(
       'no-frequency-based-minification',

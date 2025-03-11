@@ -252,6 +252,12 @@ class Dart2JSTarget extends Dart2WebTarget {
             return true;
           }
         }
+
+        if (compilerConfig.dumpInfo) {
+          if (file.basename == 'main.dart.js.info.json') {
+            return true;
+          }
+        }
         return false;
       });
 
