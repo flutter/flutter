@@ -2485,20 +2485,13 @@ class _NavigationBarTransition extends StatelessWidget {
   }) : heightTween = Tween<double>(
          begin: bottomNavBar.renderBox.size.height,
          end: topNavBar.renderBox.size.height,
-       ),
-       backgroundTween = ColorTween(
-         begin: bottomNavBar.backgroundColor,
-         end: topNavBar.backgroundColor,
-       ),
-       borderTween = BorderTween(begin: bottomNavBar.border, end: topNavBar.border);
+       );
 
   final Animation<double> animation;
   final _TransitionableNavigationBar topNavBar;
   final _TransitionableNavigationBar bottomNavBar;
 
   final Tween<double> heightTween;
-  final ColorTween backgroundTween;
-  final BorderTween borderTween;
 
   @override
   Widget build(BuildContext context) {
@@ -2511,20 +2504,6 @@ class _NavigationBarTransition extends StatelessWidget {
         );
 
     final List<Widget> children = <Widget>[
-      // Draw an empty navigation bar box with changing shape behind all the
-      // moving components without any components inside it itself.
-      AnimatedBuilder(
-        animation: animation,
-        builder: (BuildContext context, Widget? child) {
-          return _wrapWithBackground(
-            // Don't update the system status bar color mid-flight.
-            updateSystemUiOverlay: false,
-            backgroundColor: backgroundTween.evaluate(animation)!,
-            border: borderTween.evaluate(animation),
-            child: SizedBox(height: heightTween.evaluate(animation), width: double.infinity),
-          );
-        },
-      ),
       // Draw all the components on top of the empty bar box.
       if (componentsTransition.bottomBackChevron != null) componentsTransition.bottomBackChevron!,
       if (componentsTransition.bottomBackLabel != null) componentsTransition.bottomBackLabel!,
@@ -2637,7 +2616,7 @@ class _NavigationBarComponentsTransition {
   // x-axis unity number representing the direction of growth for text.
   final double forwardDirection;
 
-  // Take a widget it its original ancestor navigation bar render box and
+  // Take a widget in its original ancestor navigation bar render box and
   // translate it into a RelativeBox in the transition navigation bar box.
   RelativeRect positionInTransitionBox(GlobalKey key, {required RenderBox from}) {
     final RenderBox componentBox = key.currentContext!.findRenderObject()! as RenderBox;
@@ -2931,20 +2910,27 @@ class _NavigationBarComponentsTransition {
     // Shift in from the leading edge of the screen.
     final RelativeRectTween positionTween = RelativeRectTween(
       begin: from,
-      end: from.shift(Offset(-forwardDirection * bottomNavBarBox.size.width, 0.0)),
+      end: from.shift(Offset(forwardDirection * -bottomNavBarBox.size.width, 0.0)),
     );
 
     Widget child = bottomNavBarBottom.child;
+    final Curve animationCurve =
+        animation.status == AnimationStatus.forward
+            ? Curves.easeOutQuart
+            : Curves.easeOutQuart.flipped;
 
     // Fade out only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
     if (topNavBarBottom == null ||
         topNavBarBottom.child is! _InactiveSearchableBottom ||
         bottomNavBarBottom.child is! _InactiveSearchableBottom) {
-      child = FadeTransition(opacity: fadeOutBy(0.8), child: child);
+      child = FadeTransition(opacity: fadeOutBy(0.8, curve: animationCurve), child: child);
     }
 
-    return PositionedTransition(rect: animation.drive(positionTween), child: child);
+    return PositionedTransition(
+      rect: animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
+      child: child,
+    );
   }
 
   Widget? get topLeading {
@@ -3140,10 +3126,15 @@ class _NavigationBarComponentsTransition {
       end: to,
     );
 
+    final Curve animationCurve =
+        animation.status == AnimationStatus.forward
+            ? Curves.easeOutQuart
+            : Curves.easeOutQuart.flipped;
+
     return PositionedTransition(
-      rect: animation.drive(positionTween),
+      rect: animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
       child: FadeTransition(
-        opacity: fadeInFrom(0.0),
+        opacity: fadeInFrom(0.0, curve: animationCurve),
         child: DefaultTextStyle(
           style: topLargeTitleTextStyle!,
           maxLines: 1,
@@ -3176,15 +3167,23 @@ class _NavigationBarComponentsTransition {
 
     Widget child = topNavBarBottom.child;
 
+    final Curve animationCurve =
+        animation.status == AnimationStatus.forward
+            ? Curves.easeOutQuart
+            : Curves.easeOutQuart.flipped;
+
     // Fade in only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
     if (bottomNavBarBottom == null ||
         bottomNavBarBottom.child is! _InactiveSearchableBottom ||
         topNavBarBottom.child is! _InactiveSearchableBottom) {
-      child = FadeTransition(opacity: fadeInFrom(0.0), child: child);
+      child = FadeTransition(opacity: fadeInFrom(0.0, curve: animationCurve), child: child);
     }
 
-    return PositionedTransition(rect: animation.drive(positionTween), child: child);
+    return PositionedTransition(
+      rect: animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
+      child: child,
+    );
   }
 }
 
