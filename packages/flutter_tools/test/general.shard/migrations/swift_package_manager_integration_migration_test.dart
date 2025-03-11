@@ -2694,9 +2694,9 @@ String _validBuildActions(
       </PreActions>''';
   }
 
-  String buildEntires = '';
+  String buildEntries = '';
   if (hasBuildEntries) {
-    buildEntires = '''
+    buildEntries = '''
 \n      <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
@@ -2715,7 +2715,7 @@ ${_validBuildableReference(platform)}
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
-      buildImplicitDependencies = "YES">$preActions$buildEntires
+      buildImplicitDependencies = "YES">$preActions$buildEntries
    </BuildAction>
    <LaunchAction>
       <BuildableProductRunnable
