@@ -148,11 +148,11 @@ void testMain() {
 
   group('SystemColorPalette', () {
     test('.light', () {
-      testPalette(ui.SystemColorPalette.light);
+      testPalette(ui.SystemColor.light);
     });
 
     test('.dark', () {
-      testPalette(ui.SystemColorPalette.dark);
+      testPalette(ui.SystemColor.dark);
     });
   });
 }

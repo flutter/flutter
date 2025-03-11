@@ -1539,6 +1539,24 @@ class PlatformDispatcher {
 /// recommended that widgets use system-specified colors to make content more
 /// legible for users.
 ///
+/// The "light" system colors are available through [SystemColor.light], and the "dark" system
+/// colors are available through [SystemColor.dark].
+///
+/// Example:
+///
+/// ```dart
+/// const Color kDefaultAccentColor = Color(0xFF007AFF);
+///
+/// final Color accentColor;
+/// if (SystemColor.platformProvidesSystemColors) {
+///   accentColor = SystemColor.dark.accentColor.value ?? kDefaultAccentColor;
+/// } else {
+///   accentColor = kDefaultAccentColor;
+/// }
+///
+/// final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: accentColor);
+/// ```
+///
 /// See also:
 ///
 ///   * https://drafts.csswg.org/css-color/#css-system-colors
@@ -1591,6 +1609,12 @@ final class SystemColor {
   ///
   ///   * [isSupported], which returns whether a specific color is supported.
   static bool get platformProvidesSystemColors => false;
+
+  /// A palette of system colors for light mode.
+  static final SystemColorPalette light = SystemColorPalette._(Brightness.light);
+
+  /// A palette of system colors for dark mode.
+  static final SystemColorPalette dark = SystemColorPalette._(Brightness.dark);
 }
 
 /// A palette of system colors specified in the operating system for a given [brightness].
@@ -1599,12 +1623,6 @@ final class SystemColor {
 /// colors defined by the [W3C CSS specification](https://drafts.csswg.org/css-color/#css-system-colors).
 final class SystemColorPalette {
   SystemColorPalette._(this.brightness);
-
-  /// A palette of system colors for light mode.
-  static final SystemColorPalette light = SystemColorPalette._(Brightness.light);
-
-  /// A palette of system colors for dark mode.
-  static final SystemColorPalette dark = SystemColorPalette._(Brightness.dark);
 
   /// The brightness mode for which this palette is defined.
   final Brightness brightness;

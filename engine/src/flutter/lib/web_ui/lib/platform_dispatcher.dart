@@ -161,10 +161,6 @@ final class SystemColor {
   final Color? value;
   bool get isSupported => value != null;
   static bool get platformProvidesSystemColors => true;
-}
-
-final class SystemColorPalette {
-  SystemColorPalette._(this._detector);
 
   static final SystemColorPalette light = SystemColorPalette._(
     engine.SystemColorPaletteDetector.light,
@@ -173,6 +169,10 @@ final class SystemColorPalette {
   static final SystemColorPalette dark = SystemColorPalette._(
     engine.SystemColorPaletteDetector.dark,
   );
+}
+
+final class SystemColorPalette {
+  SystemColorPalette._(this._detector);
 
   Brightness get brightness => _detector.brightness;
 
