@@ -124,7 +124,7 @@ class SpringDescription {
   /// corresponds to the oscillation period.
   ///
   /// This duration does not represent the exact time for the spring to stop
-  /// moving. For example, when [bounce] is `1`, the spring oscillates
+  /// moving. For example, when [bounce] is 1, the spring oscillates
   /// indefinitely, even though [duration] has a finite value. To determine
   /// when the motion has effectively stopped within a certain tolerance,
   /// use [SpringSimulation.isDone].
