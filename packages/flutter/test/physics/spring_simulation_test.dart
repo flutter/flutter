@@ -68,20 +68,20 @@ void main() {
         damping: 17.59,
       );
 
-      expect(spring.duration.inMilliseconds, const Duration(milliseconds: 500).inMilliseconds);
+      expect(spring.duration.inMilliseconds, equals(500));
       expect(spring.bounce, moreOrLessEquals(0.3, epsilon: 0.001));
     });
 
     test('custom duration', () {
       final SpringDescription spring = SpringDescription.withDurationAndBounce(
-        duration: const Duration(seconds: 1),
+        duration: const Duration(milliseconds: 100),
       );
 
       expect(spring.mass, equals(1.0));
-      expect(spring.stiffness, moreOrLessEquals(39.47, epsilon: 0.01));
-      expect(spring.damping, moreOrLessEquals(12.56, epsilon: 0.01));
+      expect(spring.stiffness, moreOrLessEquals(3947.84, epsilon: 0.01));
+      expect(spring.damping, moreOrLessEquals(125.66, epsilon: 0.01));
 
-      expect(spring.duration.inMilliseconds, const Duration(seconds: 1).inMilliseconds);
+      expect(spring.duration.inMilliseconds, equals(100));
       expect(spring.bounce, moreOrLessEquals(0, epsilon: 0.001));
     });
 
