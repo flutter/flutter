@@ -78,7 +78,7 @@ void main() {
 
   testWidgets('Can set expansible to be initially expanded', (WidgetTester tester) async {
     final ExpansibleController controller = ExpansibleController();
-    controller.isExpanded = true;
+    controller.expand();
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(

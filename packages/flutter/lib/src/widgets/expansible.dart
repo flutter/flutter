@@ -64,7 +64,7 @@ class ExpansibleController extends ChangeNotifier {
   /// Creates a controller to be used with [Expansible.controller].
   ExpansibleController();
 
-  _ExpansibleState? _state;
+  bool _isExpanded = false;
 
   /// Whether the expansible widget built with this controller is in expanded
   /// state.
@@ -77,16 +77,8 @@ class ExpansibleController extends ChangeNotifier {
   ///  * [expand], which expands the expansible widget.
   ///  * [collapse], which collapses the expansible widget.
   bool get isExpanded => _isExpanded;
-  bool _isExpanded = false;
-  set isExpanded(bool value) {
-    if (_isExpanded == value) {
-      return;
-    }
-    _isExpanded = value;
-    notifyListeners();
-  }
 
-  /// Expands the expansible widget that was built with this controller.
+  /// Expands the [Expansible] that was built with this controller.
   ///
   /// If the widget is already in the expanded state (see [isExpanded]), calling
   /// this method has no effect.
@@ -102,13 +94,13 @@ class ExpansibleController extends ChangeNotifier {
   ///  * [collapse], which collapses the expansible widget.
   ///  * [isExpanded] to check whether the expansible widget is expanded.
   void expand() {
-    assert(_state != null);
     if (!_isExpanded) {
-      _state!._toggleExpansion();
+      _isExpanded = true;
+      notifyListeners();
     }
   }
 
-  /// Collapses the expansible widget that was built with this controller.
+  /// Collapses the [Expansible] that was built with this controller.
   ///
   /// If the widget is already in the collapsed state (see [isExpanded]),
   /// calling this method has no effect.
@@ -124,9 +116,9 @@ class ExpansibleController extends ChangeNotifier {
   ///  * [expand], which expands the [Expansible].
   ///  * [isExpanded] to check whether the [Expansible] is expanded.
   void collapse() {
-    assert(_state != null);
     if (_isExpanded) {
-      _state!._toggleExpansion();
+      _isExpanded = false;
+      notifyListeners();
     }
   }
 
@@ -266,9 +258,11 @@ class Expansible extends StatefulWidget {
   final Curve curve;
 
   /// The reverse curve of the expansion animation.
+  ///
+  /// If null, uses [curve] in both directions.
   final Curve? reverseCurve;
 
-  /// If the state of the body is maintained when the widget expands or
+  /// Whether the state of the body is maintained when the widget expands or
   /// collapses.
   ///
   /// If true, the body is kept in the tree while the widget is
@@ -289,13 +283,10 @@ class _ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    assert(widget.controller._state == null);
-    widget.controller._state = this;
     _animationController = AnimationController(duration: widget.duration, vsync: this);
-    widget.controller.isExpanded =
+    final bool initiallyExpanded =
         PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.controller.isExpanded;
-    // If the expansible should be initially expanded.
-    if (widget.controller.isExpanded) {
+    if (initiallyExpanded) {
       _animationController.value = 1.0;
     }
     final Tween<double> heightFactorTween = Tween<double>(begin: 0.0, end: 1.0);
@@ -304,6 +295,7 @@ class _ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
       curve: widget.curve,
       reverseCurve: widget.reverseCurve,
     );
+    widget.controller.addListener(_toggleExpansion);
   }
 
   @override
@@ -322,7 +314,6 @@ class _ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    widget.controller._state = null;
     _animationController.dispose();
     _heightFactor.dispose();
     super.dispose();
@@ -330,7 +321,6 @@ class _ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
 
   void _toggleExpansion() {
     setState(() {
-      widget.controller.isExpanded = !widget.controller.isExpanded;
       if (widget.controller.isExpanded) {
         _animationController.forward();
       } else {

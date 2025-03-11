@@ -478,7 +478,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
     _duration = _kExpand;
     _tileController = widget.controller ?? ExpansionTileController();
     if (widget.initiallyExpanded) {
-      _tileController.isExpanded = true;
+      _tileController.expand();
     }
     _tileController.addListener(_onExpansionChanged);
   }
