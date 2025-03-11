@@ -33,6 +33,7 @@ class PipelineVK final
       const PipelineDescriptor& desc,
       const std::shared_ptr<DeviceHolderVK>& device_holder,
       const std::weak_ptr<PipelineLibrary>& weak_library,
+      uint64_t pipeline_key,
       std::shared_ptr<SamplerVK> immutable_sampler = {});
 
   // |Pipeline|
@@ -46,6 +47,8 @@ class PipelineVK final
 
   std::shared_ptr<PipelineVK> CreateVariantForImmutableSamplers(
       const std::shared_ptr<SamplerVK>& immutable_sampler) const;
+
+  uint64_t GetPipelineKey() const { return pipeline_key_; }
 
  private:
   friend class PipelineLibraryVK;
@@ -62,6 +65,7 @@ class PipelineVK final
   vk::UniquePipelineLayout layout_;
   vk::UniqueDescriptorSetLayout descriptor_set_layout_;
   std::shared_ptr<SamplerVK> immutable_sampler_;
+  uint64_t pipeline_key_;
   mutable Mutex immutable_sampler_variants_mutex_;
   mutable ImmutableSamplerVariants immutable_sampler_variants_ IPLR_GUARDED_BY(
       immutable_sampler_variants_mutex_);
@@ -74,6 +78,7 @@ class PipelineVK final
              vk::UniqueRenderPass render_pass,
              vk::UniquePipelineLayout layout,
              vk::UniqueDescriptorSetLayout descriptor_set_layout,
+             uint64_t pipeline_key,
              std::shared_ptr<SamplerVK> immutable_sampler);
 
   // |Pipeline|

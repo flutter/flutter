@@ -4,23 +4,16 @@
 
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 
-#include <chrono>
 #include <cstdint>
-#include <optional>
-#include <sstream>
 
 #include "flutter/fml/container.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/promise.h"
-#include "impeller/base/timing.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_function_vk.h"
-#include "impeller/renderer/backend/vulkan/vertex_descriptor_vk.h"
-#include "vulkan/vulkan_core.h"
-#include "vulkan/vulkan_enums.hpp"
 
 namespace impeller {
 
@@ -151,8 +144,8 @@ std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
       desc,                              //
       std::move(pipeline),               //
       std::move(pipeline_layout.value),  //
-      std::move(descs_layout)            //
-  );
+      std::move(descs_layout),           //
+      pipeline_key_++);
 }
 
 // |PipelineLibrary|
@@ -179,7 +172,8 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
 
   auto weak_this = weak_from_this();
 
-  auto generation_task = [descriptor, weak_this, promise]() {
+  uint64_t next_key = pipeline_key_++;
+  auto generation_task = [descriptor, weak_this, promise, next_key]() {
     auto thiz = weak_this.lock();
     if (!thiz) {
       promise->set_value(nullptr);
@@ -191,7 +185,8 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
     promise->set_value(PipelineVK::Create(
         descriptor,                                            //
         PipelineLibraryVK::Cast(*thiz).device_holder_.lock(),  //
-        weak_this                                              //
+        weak_this,                                             //
+        next_key                                               //
         ));
   };
 

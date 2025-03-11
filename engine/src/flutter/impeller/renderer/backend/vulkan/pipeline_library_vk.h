@@ -46,6 +46,7 @@ class PipelineLibraryVK final
   ComputePipelineMap compute_pipelines_ IPLR_GUARDED_BY(
       compute_pipelines_mutex_);
   std::atomic_size_t frames_acquired_ = 0u;
+  uint64_t pipeline_key_ = 0;
   bool is_valid_ = false;
   bool cache_dirty_ = false;
 

@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep.
-#include "fml/closure.h"
-#include "fml/synchronization/waitable_event.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
-#include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 
 namespace impeller {
@@ -31,29 +28,10 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
   {
     // Fetch a pool (which will be created).
     auto pool = DescriptorPoolVK(context);
-    pool.AllocateDescriptorSets({}, *context);
+    pool.AllocateDescriptorSets({}, 0, *context);
   }
 
-  // There is a chance that the first death rattle item below is destroyed in
-  // the same reclaim cycle as the pool allocation above. These items are placed
-  // into a std::vector and free'd, which may free in reverse order. That would
-  // imply that the death rattle and subsequent waitable event fires before the
-  // pool is reset. To work around this, we can either manually remove items
-  // from the vector or use two death rattles.
-  for (auto i = 0u; i < 2; i++) {
-    // Add something to the resource manager and have it notify us when it's
-    // destroyed. That should give us a non-flaky signal that the pool has been
-    // reclaimed as well.
-    auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = fml::ScopedCleanupClosure([&waiter]() { waiter.Signal(); });
-    {
-      UniqueResourceVKT<fml::ScopedCleanupClosure> resource(
-          context->GetResourceManager(), std::move(rattle));
-    }
-    waiter.Wait();
-  }
-
-  auto const pool = context->GetDescriptorPoolRecycler()->Get();
+  auto const pool = context->GetDescriptorPoolRecycler()->GetDescriptorPool();
 
   // Now check that we only ever created one pool.
   auto const called = GetMockVulkanFunctions(context->GetDevice());
@@ -71,48 +49,25 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     std::vector<std::unique_ptr<DescriptorPoolVK>> pools;
     for (auto i = 0u; i < 33; i++) {
       auto pool = std::make_unique<DescriptorPoolVK>(context);
-      pool->AllocateDescriptorSets({}, *context);
+      pool->AllocateDescriptorSets({}, 0, *context);
       pools.push_back(std::move(pool));
     }
-  }
-
-  // See note above.
-  for (auto i = 0u; i < 2; i++) {
-    auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = fml::ScopedCleanupClosure([&waiter]() { waiter.Signal(); });
-    {
-      UniqueResourceVKT<fml::ScopedCleanupClosure> resource(
-          context->GetResourceManager(), std::move(rattle));
-    }
-    waiter.Wait();
   }
 
   auto const called = GetMockVulkanFunctions(context->GetDevice());
   EXPECT_EQ(
       std::count(called->begin(), called->end(), "vkCreateDescriptorPool"),
       33u);
-  EXPECT_EQ(std::count(called->begin(), called->end(), "vkResetDescriptorPool"),
-            33u);
 
   // Now create 33 more descriptor pools and observe that only one more is
   // allocated.
   {
-    std::vector<std::unique_ptr<DescriptorPoolVK>> pools;
+    std::vector<std::shared_ptr<DescriptorPoolVK>> pools;
     for (auto i = 0u; i < 33; i++) {
-      auto pool = std::make_unique<DescriptorPoolVK>(context);
-      pool->AllocateDescriptorSets({}, *context);
+      auto pool = context->GetDescriptorPoolRecycler()->GetDescriptorPool();
+      pool->AllocateDescriptorSets({}, 0, *context);
       pools.push_back(std::move(pool));
     }
-  }
-
-  for (auto i = 0u; i < 2; i++) {
-    auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = fml::ScopedCleanupClosure([&waiter]() { waiter.Signal(); });
-    {
-      UniqueResourceVKT<fml::ScopedCleanupClosure> resource(
-          context->GetResourceManager(), std::move(rattle));
-    }
-    waiter.Wait();
   }
 
   auto const called_twice = GetMockVulkanFunctions(context->GetDevice());
