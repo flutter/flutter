@@ -97,7 +97,17 @@ class Surface extends DisplayCanvas {
   DomOffscreenCanvas? _offscreenCanvas;
 
   /// Returns the underlying OffscreenCanvas. Should only be used in tests.
-  DomOffscreenCanvas? get debugOffscreenCanvas => _offscreenCanvas;
+  DomOffscreenCanvas? debugGetOffscreenCanvas() {
+    bool assertsEnabled = false;
+    assert(() {
+      assertsEnabled = true;
+      return true;
+    }());
+    if (!assertsEnabled) {
+      throw StateError('debugGetOffscreenCanvas() can only be used in tests');
+    }
+    return _offscreenCanvas;
+  }
 
   /// The <canvas> backing this Surface in the case that OffscreenCanvas isn't
   /// supported.

@@ -26,7 +26,7 @@ void testMain() {
     test('Surface allocates canvases efficiently', () {
       final Surface surface = Surface();
       final CkSurface originalSurface = surface.acquireFrame(const ui.Size(9, 19)).skiaSurface;
-      final DomOffscreenCanvas original = surface.debugOffscreenCanvas!;
+      final DomOffscreenCanvas original = surface.debugGetOffscreenCanvas()!;
 
       // Expect exact requested dimensions.
       expect(original.width, 9);
@@ -37,7 +37,7 @@ void testMain() {
       // Shrinking causes the surface to create a new canvas with the exact
       // size requested.
       final CkSurface shrunkSurface = surface.acquireFrame(const ui.Size(5, 15)).skiaSurface;
-      final DomOffscreenCanvas shrunk = surface.debugOffscreenCanvas!;
+      final DomOffscreenCanvas shrunk = surface.debugGetOffscreenCanvas()!;
       expect(shrunk, same(original));
       expect(shrunkSurface, isNot(same(originalSurface)));
       expect(shrunkSurface.width(), 5);
@@ -47,7 +47,7 @@ void testMain() {
       // requested size.
       final CkSurface firstIncreaseSurface =
           surface.acquireFrame(const ui.Size(10, 20)).skiaSurface;
-      final DomOffscreenCanvas firstIncrease = surface.debugOffscreenCanvas!;
+      final DomOffscreenCanvas firstIncrease = surface.debugGetOffscreenCanvas()!;
       expect(firstIncrease, same(original));
       expect(firstIncreaseSurface, isNot(same(shrunkSurface)));
 
@@ -60,7 +60,7 @@ void testMain() {
       // Subsequent increases within 40% will still allocate a new canvas.
       final CkSurface secondIncreaseSurface =
           surface.acquireFrame(const ui.Size(11, 22)).skiaSurface;
-      final DomOffscreenCanvas secondIncrease = surface.debugOffscreenCanvas!;
+      final DomOffscreenCanvas secondIncrease = surface.debugGetOffscreenCanvas()!;
       expect(secondIncrease, same(firstIncrease));
       expect(secondIncreaseSurface, isNot(same(firstIncreaseSurface)));
       expect(secondIncreaseSurface.width(), 11);
@@ -68,7 +68,7 @@ void testMain() {
 
       // Increases beyond the 40% limit will cause a new allocation.
       final CkSurface hugeSurface = surface.acquireFrame(const ui.Size(20, 40)).skiaSurface;
-      final DomOffscreenCanvas huge = surface.debugOffscreenCanvas!;
+      final DomOffscreenCanvas huge = surface.debugGetOffscreenCanvas()!;
       expect(huge, same(secondIncrease));
       expect(hugeSurface, isNot(same(secondIncreaseSurface)));
 
@@ -80,7 +80,7 @@ void testMain() {
 
       // Shrink again. Create a new surface.
       final CkSurface shrunkSurface2 = surface.acquireFrame(const ui.Size(5, 15)).skiaSurface;
-      final DomOffscreenCanvas shrunk2 = surface.debugOffscreenCanvas!;
+      final DomOffscreenCanvas shrunk2 = surface.debugGetOffscreenCanvas()!;
       expect(shrunk2, same(huge));
       expect(shrunkSurface2, isNot(same(hugeSurface)));
       expect(shrunkSurface2.width(), 5);
@@ -90,7 +90,7 @@ void testMain() {
       // This tests https://github.com/flutter/flutter/issues/77084
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
       final CkSurface dpr2Surface2 = surface.acquireFrame(const ui.Size(5, 15)).skiaSurface;
-      final DomOffscreenCanvas dpr2Canvas = surface.debugOffscreenCanvas!;
+      final DomOffscreenCanvas dpr2Canvas = surface.debugGetOffscreenCanvas()!;
       expect(dpr2Canvas, same(huge));
       expect(dpr2Surface2, isNot(same(hugeSurface)));
       expect(dpr2Surface2.width(), 5);
@@ -205,7 +205,7 @@ void testMain() {
         expect(afterAcquireFrame, same(before));
 
         // Emulate WebGL context loss.
-        final DomOffscreenCanvas canvas = surface.debugOffscreenCanvas!;
+        final DomOffscreenCanvas canvas = surface.debugGetOffscreenCanvas()!;
         final Object ctx = canvas.getContext('webgl2')!;
         final Object loseContextExtension = js_util.callMethod(ctx, 'getExtension', <String>[
           'WEBGL_lose_context',
@@ -243,8 +243,8 @@ void testMain() {
 
         expect(original.width(), 10);
         expect(original.height(), 16);
-        expect(surface.debugOffscreenCanvas!.width, 10);
-        expect(surface.debugOffscreenCanvas!.height, 16);
+        expect(surface.debugGetOffscreenCanvas()!.width, 10);
+        expect(surface.debugGetOffscreenCanvas()!.height, 16);
 
         // Increase device-pixel ratio: this makes CSS pixels bigger, so we need
         // fewer of them to cover the browser window.
@@ -252,8 +252,8 @@ void testMain() {
         final CkSurface highDpr = surface.acquireFrame(const ui.Size(10, 16)).skiaSurface;
         expect(highDpr.width(), 10);
         expect(highDpr.height(), 16);
-        expect(surface.debugOffscreenCanvas!.width, 10);
-        expect(surface.debugOffscreenCanvas!.height, 16);
+        expect(surface.debugGetOffscreenCanvas()!.width, 10);
+        expect(surface.debugGetOffscreenCanvas()!.height, 16);
 
         // Decrease device-pixel ratio: this makes CSS pixels smaller, so we need
         // more of them to cover the browser window.
@@ -261,8 +261,8 @@ void testMain() {
         final CkSurface lowDpr = surface.acquireFrame(const ui.Size(10, 16)).skiaSurface;
         expect(lowDpr.width(), 10);
         expect(lowDpr.height(), 16);
-        expect(surface.debugOffscreenCanvas!.width, 10);
-        expect(surface.debugOffscreenCanvas!.height, 16);
+        expect(surface.debugGetOffscreenCanvas()!.width, 10);
+        expect(surface.debugGetOffscreenCanvas()!.height, 16);
 
         // See https://github.com/flutter/flutter/issues/77084#issuecomment-1120151172
         EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
@@ -270,8 +270,8 @@ void testMain() {
             surface.acquireFrame(const ui.Size(9.9, 15.9)).skiaSurface;
         expect(changeRatioAndSize.width(), 10);
         expect(changeRatioAndSize.height(), 16);
-        expect(surface.debugOffscreenCanvas!.width, 10);
-        expect(surface.debugOffscreenCanvas!.height, 16);
+        expect(surface.debugGetOffscreenCanvas()!.width, 10);
+        expect(surface.debugGetOffscreenCanvas()!.height, 16);
       },
       skip: !Surface.offscreenCanvasSupported,
     );
