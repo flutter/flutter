@@ -516,6 +516,7 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
       view_id, this, std::move(window), windows_proc_table_);
 
   view->CreateRenderSurface();
+  view->UpdateSemanticsEnabled(semantics_enabled_);
 
   next_view_id_++;
 
