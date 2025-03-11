@@ -1077,7 +1077,9 @@ void main() {
     );
   });
 
-  testWidgets('MultiFrameImageStreamCompleter image callback can remove listener', (WidgetTester tester) async {
+  testWidgets('MultiFrameImageStreamCompleter image callback can remove listener', (
+    WidgetTester tester,
+  ) async {
     final Completer<Codec> completer = Completer<Codec>();
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
