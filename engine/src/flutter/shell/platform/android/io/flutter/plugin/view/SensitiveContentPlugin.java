@@ -4,6 +4,8 @@
 
 package io.flutter.plugin.view;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Build;
@@ -109,9 +111,9 @@ public class SensitiveContentPlugin
    * <p>It is supported on devices running Android API >= 35.
    */
   @Override
-  @ChecksSdkIntAtLeast(api = Build.API_LEVELS.API_35)
+  @ChecksSdkIntAtLeast(api = API_LEVELS.API_35)
   public boolean isSupported() {
-    return Build.VERSION.SDK_INT >= Build.API_LEVELS.API_35;
+    return Build.VERSION.SDK_INT >= API_LEVELS.API_35;
   }
 
   /**
