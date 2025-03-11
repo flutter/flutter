@@ -9,6 +9,7 @@ import static io.flutter.Build.API_LEVELS;
 import android.app.Activity;
 import android.os.Build;
 import android.view.View;
+import androidx.annotation.ChecksSdkIntAtLeast;
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
 
@@ -102,6 +103,7 @@ public class SensitiveContentPlugin
    * <p>It is supported on devices running Android API >= 35.
    */
   @Override
+  @ChecksSdkIntAtLeast(api = API_LEVELS.API_35)
   public boolean isSupported() {
     return Build.VERSION.SDK_INT >= API_LEVELS.API_35;
   }

@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.engine.systemchannels;
 
+import android.annotation.SuppressLint;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -93,6 +94,12 @@ public class SensitiveContentChannel {
         }
       };
 
+  // The annotation to suppress the "InlinedApi" lint prevents lint warnings
+  // caused by usage of Android 35 APIs. This call is safe because these values
+  // will never be used to set content sensitivity for a View via a
+  // SensitiveContentMethodHandler because it must ensure a device is API 35+ before
+  // doing so to avoid exceptions on other devices.
+  @SuppressLint({"InlinedApi"})
   private int deserializeContentSensitivity(String contentSensitivityName) {
     switch (contentSensitivityName) {
       case AUTO_SENSITIVE_CONTENT_SENSITIVITY:
@@ -109,6 +116,12 @@ public class SensitiveContentChannel {
     }
   }
 
+  // The annotation to suppress the "InlinedApi" lint prevents lint warnings
+  // caused by usage of Android 35 APIs. This call is safe because these values
+  // will never be used to set content sensitivity for a View via a
+  // SensitiveContentMethodHandler because it must ensure a device is API 35+ before
+  // doing so to avoid exceptions on other devices.
+  @SuppressLint({"InlinedApi"})
   private String serializeContentSensitivity(int contentSensitivityValue) {
     switch (contentSensitivityValue) {
       case View.CONTENT_SENSITIVITY_AUTO:
