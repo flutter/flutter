@@ -63,16 +63,15 @@ class WindowsLifecycleManager {
   // message to the framework notifying it of the state change.
   virtual void SetLifecycleState(AppLifecycleState state);
 
-  // Respond to a change in window state. Transitions as follows:
-  // When the only visible window is hidden, transition from resumed or
-  // inactive to hidden.
-  // When the only focused window is unfocused, transition from resumed to
-  // inactive.
-  // When a window is focused, transition from inactive to resumed.
-  // When a window is shown, transition from hidden to inactive.
+  // Respond to a change in window state.
+  // Saves the state for the HWND and schedules UpdateState to be called
+  // if it is not already scheduled.
   virtual void OnWindowStateEvent(HWND hwnd, WindowStateEvent event);
 
   AppLifecycleState GetLifecycleState() { return state_; }
+
+  // Used in tests to wait until the state is updated.
+  bool IsUpdateStateScheduled() const { return update_state_scheduled_; }
 
   // Called by the engine when a non-Flutter window receives an event that may
   // alter the lifecycle state. The logic for external windows must differ from
@@ -114,12 +113,20 @@ class WindowsLifecycleManager {
   bool process_exit_ = false;
 
   std::set<HWND> visible_windows_;
-
   std::set<HWND> focused_windows_;
 
-  std::mutex state_update_lock_;
+  // Transitions the application state. If any windows are focused,
+  // the application is considered resumed. If no windows are focused
+  // but there are visible windows, application is considered inactive.
+  // Otherwise, if there are no visible window, application is considered
+  // hidden.
+  void UpdateState();
 
-  flutter::AppLifecycleState state_;
+  // Whether update state is scheduled to be called in next run loop turn.
+  // This is needed to provide atomic updates of the state.
+  bool update_state_scheduled_ = false;
+
+  AppLifecycleState state_ = AppLifecycleState::kDetached;
 };
 
 }  // namespace flutter

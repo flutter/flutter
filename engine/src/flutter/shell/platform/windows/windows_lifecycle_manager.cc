@@ -205,49 +205,48 @@ void WindowsLifecycleManager::SetLifecycleState(AppLifecycleState state) {
   }
 }
 
+void WindowsLifecycleManager::UpdateState() {
+  AppLifecycleState new_state = AppLifecycleState::kResumed;
+  if (visible_windows_.empty()) {
+    new_state = AppLifecycleState::kHidden;
+  } else if (focused_windows_.empty()) {
+    new_state = AppLifecycleState::kInactive;
+  }
+  SetLifecycleState(new_state);
+}
+
 void WindowsLifecycleManager::OnWindowStateEvent(HWND hwnd,
                                                  WindowStateEvent event) {
-  // Synthesize an unfocus event when a focused window is hidden.
-  if (event == WindowStateEvent::kHide &&
-      focused_windows_.find(hwnd) != focused_windows_.end()) {
-    OnWindowStateEvent(hwnd, WindowStateEvent::kUnfocus);
+  // Instead of updating the state immediately, remember all
+  // changes to individual window and then update the state in next run loop
+  // turn. Otherwise the application would be temporarily deactivated when
+  // switching focus between windows for example.
+  if (!update_state_scheduled_) {
+    update_state_scheduled_ = true;
+    // Task runner will be destroyed together with engine so it is safe
+    // to keep reference to it.
+    engine_->task_runner()->PostTask([this]() {
+      update_state_scheduled_ = false;
+      UpdateState();
+    });
   }
 
-  std::lock_guard guard(state_update_lock_);
   switch (event) {
     case WindowStateEvent::kShow: {
-      bool first_shown_window = visible_windows_.empty();
-      auto pair = visible_windows_.insert(hwnd);
-      if (first_shown_window && pair.second &&
-          state_ == AppLifecycleState::kHidden) {
-        SetLifecycleState(AppLifecycleState::kInactive);
-      }
+      visible_windows_.insert(hwnd);
       break;
     }
     case WindowStateEvent::kHide: {
-      bool present = visible_windows_.erase(hwnd);
-      bool empty = visible_windows_.empty();
-      if (present && empty &&
-          (state_ == AppLifecycleState::kResumed ||
-           state_ == AppLifecycleState::kInactive)) {
-        SetLifecycleState(AppLifecycleState::kHidden);
-      }
+      visible_windows_.erase(hwnd);
+      focused_windows_.erase(hwnd);
       break;
     }
     case WindowStateEvent::kFocus: {
-      bool first_focused_window = focused_windows_.empty();
-      auto pair = focused_windows_.insert(hwnd);
-      if (first_focused_window && pair.second &&
-          state_ == AppLifecycleState::kInactive) {
-        SetLifecycleState(AppLifecycleState::kResumed);
-      }
+      focused_windows_.insert(hwnd);
       break;
     }
     case WindowStateEvent::kUnfocus: {
-      if (focused_windows_.erase(hwnd) && focused_windows_.empty() &&
-          state_ == AppLifecycleState::kResumed) {
-        SetLifecycleState(AppLifecycleState::kInactive);
-      }
+      focused_windows_.erase(hwnd);
       break;
     }
   }
