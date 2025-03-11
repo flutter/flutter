@@ -611,6 +611,8 @@ class RenderTable extends RenderBox {
     config.explicitChildNodes = true;
   }
 
+  final Map<int, _Index> _idToIndexMap = <int, _Index>{};
+
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
   ///
   /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
@@ -622,6 +624,9 @@ class RenderTable extends RenderBox {
     SemanticsConfiguration config,
     Iterable<SemanticsNode> children,
   ) {
+    print('------!!!!assembleSemanticsNode node row: $row, column: $column');
+    for (final child in children) print('  --child: ${child}');
+
     final List<SemanticsNode> rows = <SemanticsNode>[];
 
     final List<List<List<SemanticsNode>>> rawCells = List<List<List<SemanticsNode>>>.generate(
@@ -630,11 +635,11 @@ class RenderTable extends RenderBox {
           List<List<SemanticsNode>>.generate(_columns, (int columnIndex) => <SemanticsNode>[]),
     );
 
-    Rect rectWithOffset(SemanticsNode child) {
+    Rect rectWithOffset(SemanticsNode node) {
       final Offset offset =
-          (child.transform != null ? MatrixUtils.getAsTranslation(child.transform!) : null) ??
+          (node.transform != null ? MatrixUtils.getAsTranslation(node.transform!) : null) ??
           Offset.zero;
-      return child.rect.shift(offset);
+      return node.rect.shift(offset);
     }
 
     int findRowIndex(double top) {
@@ -658,17 +663,21 @@ class RenderTable extends RenderBox {
       return -1;
     }
 
+    void shiftTransform(SemanticsNode node, double dx, double dy) {
+      final Matrix4? previousTransform = node.transform;
+      final Offset offset =
+          (previousTransform != null ? MatrixUtils.getAsTranslation(previousTransform) : null) ??
+          Offset.zero;
+      final Matrix4 newTransform = Matrix4.translationValues(offset.dx + dx, offset.dy + dy, 0);
+      node.transform = newTransform;
+    }
+
     for (final SemanticsNode child in children) {
-      if (child.tags != null && child.tags!.isNotEmpty) {
-        final String cellIndex = child.tags!.first.name;
-        final List<String> parts = cellIndex.split(',');
-        if (parts.length == 2) {
-          final int y = int.parse(parts[0]);
-          final int x = int.parse(parts[1]);
-          if (y >= 0 && y < _rows && x >= 0 && x < _columns) {
-            rawCells[y][x].add(child);
-          }
-        }
+      if (_idToIndexMap.containsKey(child.id)) {
+        final index = _idToIndexMap[child.id]!;
+        final int y = index.y;
+        final int x = index.x;
+        rawCells[y][x].add(child);
       } else {
         final Rect rect = rectWithOffset(child);
         final int y = findRowIndex(rect.top);
@@ -691,11 +700,6 @@ class RenderTable extends RenderBox {
         },
       );
 
-      final SemanticsConfiguration configuration =
-          SemanticsConfiguration()
-            ..indexInParent = y
-            ..role = SemanticsRole.row;
-
       // The list of cells of this Row.
       final List<SemanticsNode> cells = <SemanticsNode>[];
 
@@ -711,8 +715,8 @@ class RenderTable extends RenderBox {
         // role because user is not using the `TableCell` widget.
         final bool addCellWrapper =
             rawChildrens.length > 1 ||
-            rawChildrens.single.role != SemanticsRole.cell &&
-                rawChildrens.single.role != SemanticsRole.columnHeader;
+            (rawChildrens.single.role != SemanticsRole.cell &&
+                rawChildrens.single.role != SemanticsRole.columnHeader);
 
         final SemanticsNode cell =
             addCellWrapper
@@ -721,9 +725,6 @@ class RenderTable extends RenderBox {
                   childrenInInversePaintOrder: rawChildrens,
                 ))
                 : rawChildrens.single;
-
-        // Shift the cell's transform to be relative to the row.
-        final Matrix4 cellTransform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0);
 
         final double cellWidth =
             x == _columns - 1
@@ -738,33 +739,40 @@ class RenderTable extends RenderBox {
         // Shift child transform.
         if (addCellWrapper) {
           for (final SemanticsNode child in rawChildrens) {
-            final Matrix4? previousTransform = child.transform;
-            // previousTransform is relative to the table.
-            final Offset offset =
-                (previousTransform != null
-                    ? MatrixUtils.getAsTranslation(previousTransform)
-                    : null) ??
-                Offset.zero;
-            // newTransform is relative to the cell.
-            final Matrix4 newTransform = Matrix4.translationValues(
-              offset.dx - _columnLefts!.elementAt(x),
-              offset.dy - _rowTops.elementAt(y),
-              0,
-            );
-            child.transform = newTransform;
+            if (!_idToIndexMap.containsKey(child.id)) {
+              // The cell's transform is relative to the table. Shift the cell's transform to be relative to the cell.
+              shiftTransform(child, -_columnLefts!.elementAt(x), -_rowTops.elementAt(y));
+              _idToIndexMap[child.id] = _Index(y, x);
+            }
+            // It used to be a single cell, now it's under the wrapper.
+            else if (child.role == SemanticsRole.cell) {
+              // The cell's transform is relative to the row. Shift the cell's transform to be relative to the cell.
+              shiftTransform(child, -_columnLefts!.elementAt(x), 0);
+            }
           }
+          cell
+            ..transform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0)
+            ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
+        } else {
+          shiftTransform(cell, 0, -_rowTops.elementAt(y));
+          _idToIndexMap[cell.id] = _Index(y, x);
         }
 
-        cell
-          ..indexInParent = x
-          ..tags = <SemanticsTag>{SemanticsTag('$y,$x')}
-          ..transform = cellTransform
-          ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
+        cell.indexInParent = x;
         cells.add(cell);
+        print('  --added cell: $y, $x  ${cell}');
+        print('  --cell width: ${cellWidth}');
+        print('rawChildrens: ${rawChildrens}');
       }
 
       newRow
-        ..updateWith(config: configuration, childrenInInversePaintOrder: cells)
+        ..updateWith(
+          config:
+              SemanticsConfiguration()
+                ..indexInParent = y
+                ..role = SemanticsRole.row,
+          childrenInInversePaintOrder: cells,
+        )
         ..transform = Matrix4.translationValues(rowBox.left, rowBox.top, 0)
         ..rect = Rect.fromLTWH(0, 0, rowBox.width, rowBox.height);
 
@@ -1538,4 +1546,11 @@ class RenderTable extends RenderBox {
             ),
     ];
   }
+}
+
+/// Index for a cell.
+class _Index {
+  _Index(this.y, this.x);
+  int y;
+  int x;
 }

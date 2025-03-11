@@ -192,8 +192,8 @@ sealed class _DebugSemanticsRoleChecks {
   }
 
   static FlutterError? _semanticsCell(SemanticsNode node) {
-    if (node.parent?.role != SemanticsRole.row) {
-      return FlutterError('A cell must be a child of a row');
+    if (node.parent?.role != SemanticsRole.row && node.parent?.role != SemanticsRole.cell) {
+      return FlutterError('A cell must be a child of a row or another cell');
     }
     return null;
   }

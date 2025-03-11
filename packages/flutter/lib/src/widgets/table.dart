@@ -451,7 +451,7 @@ class TableCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return _TableCell(
       verticalAlignment: verticalAlignment,
-      child: Semantics(role: SemanticsRole.cell, child: child),
+      child: Semantics(role: SemanticsRole.cell, container: true, child: child),
     );
   }
 }
