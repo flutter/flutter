@@ -1734,8 +1734,8 @@ class Transform extends SingleChildRenderObjectWidget {
   /// ```dart
   /// Transform.rotate(
   ///   angle: math.pi,
-  ///   origin: Offset(100, 100), // Offset from center, not top-left
-  ///   child: Widget(),
+  ///   origin: const Offset(100, 100), // Offset from center, not top-left
+  ///   child: const Widget(),
   /// )
   /// ```
   ///
@@ -1744,8 +1744,8 @@ class Transform extends SingleChildRenderObjectWidget {
   /// Transform.rotate(
   ///   angle: math.pi,
   ///   alignment: Alignment.topLeft, // Must set this first
-  ///   origin: Offset(100, 100), // Now correctly offset from top-left
-  ///   child: Widget(),
+  ///   origin: const Offset(100, 100), // Now correctly offset from top-left
+  ///   child: const Widget(),
   /// )
   /// ```
   ///
