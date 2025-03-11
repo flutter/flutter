@@ -43,6 +43,10 @@ void main() {
       expect(spring.mass, equals(1.0));
       expect(spring.stiffness, moreOrLessEquals(157.91, epsilon: 0.01));
       expect(spring.damping, moreOrLessEquals(17.59, epsilon: 0.01));
+
+      // Verify that getters recalculate correctly
+      expect(spring.bounce, moreOrLessEquals(0.3, epsilon: 0.0001));
+      expect(spring.duration.inMilliseconds, equals(500));
     });
 
     test('creates spring with negative bounce', () {
@@ -51,6 +55,10 @@ void main() {
       expect(spring.mass, equals(1.0));
       expect(spring.stiffness, moreOrLessEquals(157.91, epsilon: 0.01));
       expect(spring.damping, moreOrLessEquals(35.90, epsilon: 0.01));
+
+      // Verify that getters recalculate correctly
+      expect(spring.bounce, moreOrLessEquals(-0.3, epsilon: 0.0001));
+      expect(spring.duration.inMilliseconds, equals(500));
     });
 
     test('get duration and bounce based on mass and stiffness', () {
