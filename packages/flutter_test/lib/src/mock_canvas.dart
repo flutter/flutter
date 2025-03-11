@@ -289,6 +289,19 @@ abstract class PaintPattern {
     PaintingStyle style,
   });
 
+  /// Indicates that a rounded superellipse clip is expected next.
+  ///
+  /// The next rounded superellipse clip is examined. Any arguments that are
+  /// passed to this method are compared to the actual
+  /// [Canvas.clipRSuperellipse] call's argument and any mismatches result in
+  /// failure.
+  ///
+  /// If no call to [Canvas.clipRSuperellipse] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.clipRSuperellipse] call are ignored.
+  void clipRSuperellipse({RSuperellipse? rsuperellipse});
+
   /// Indicates that a circle is expected next.
   ///
   /// The next circle is examined. Any arguments that are passed to this method
@@ -901,6 +914,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher
         style: style,
       ),
     );
+  }
+
+  @override
+  void clipRSuperellipse({RSuperellipse? rsuperellipse}) {
+    _predicates.add(_FunctionPaintPredicate(#clipRSuperellipse, <dynamic>[rsuperellipse]));
   }
 
   @override

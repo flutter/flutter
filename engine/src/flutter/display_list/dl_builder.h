@@ -41,10 +41,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   DisplayListBuilder(DlScalar width, DlScalar height)
       : DisplayListBuilder(DlRect::MakeWH(width, height)) {}
 
-  explicit DisplayListBuilder(const SkRect& cull_rect,
-                              bool prepare_rtree = false)
-      : DisplayListBuilder(ToDlRect(cull_rect), prepare_rtree) {}
-
   ~DisplayListBuilder();
 
   // |DlCanvas|
@@ -208,6 +204,9 @@ class DisplayListBuilder final : public virtual DlCanvas,
       DlImageSampling sampling,
       const DlPaint* paint = nullptr,
       DlSrcRectConstraint constraint = DlSrcRectConstraint::kFast) override;
+  // include overloads from the virtual base class
+  using DlCanvas::DrawImageRect;
+
   // |DlCanvas|
   void DrawImageNine(const sk_sp<DlImage>& image,
                      const DlIRect& center,
@@ -253,8 +252,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void Flush() override {}
 
   sk_sp<DisplayList> Build();
-
-  ENABLE_DL_CANVAS_BACKWARDS_COMPATIBILITY
 
  private:
   void Init(bool prepare_rtree);

@@ -489,12 +489,6 @@ WindowState FlutterHostWindow::GetState() const {
   return state_;
 }
 
-void FlutterHostWindow::FocusViewOf(FlutterHostWindow* window) {
-  if (window != nullptr && window->child_content_ != nullptr) {
-    SetFocus(window->child_content_);
-  }
-};
-
 LRESULT FlutterHostWindow::WndProc(HWND hwnd,
                                    UINT message,
                                    WPARAM wparam,
@@ -588,12 +582,10 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
     }
 
     case WM_ACTIVATE:
-      FocusViewOf(this);
+      if (LOWORD(wparam) != WA_INACTIVE && child_content_ != nullptr) {
+        SetFocus(child_content_);
+      }
       return 0;
-
-    case WM_MOUSEACTIVATE:
-      FocusViewOf(this);
-      return MA_ACTIVATE;
 
     case WM_DWMCOLORIZATIONCOLORCHANGED:
       UpdateTheme(hwnd);

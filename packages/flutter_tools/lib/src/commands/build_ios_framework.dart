@@ -45,7 +45,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
 
     argParser
@@ -370,6 +369,27 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       globals.printStatus(
         '\nCopy the ${globals.fs.path.basenameWithoutExtension(pluginRegistrantHeader.path)} class into your project.\n'
         'See https://flutter.dev/to/ios-create-flutter-engine for more information.',
+      );
+    }
+
+    if (!project.isModule && buildInfos.any((BuildInfo info) => info.isDebug)) {
+      // Add-to-App must manually add the LLDB Init File to their native Xcode
+      // project, so provide the files and instructions.
+      final File lldbInitSourceFile = project.ios.lldbInitFile;
+      final File lldbInitTargetFile = outputDirectory.childFile(lldbInitSourceFile.basename);
+      final File lldbHelperPythonFile = project.ios.lldbHelperPythonFile;
+      lldbInitSourceFile.copySync(lldbInitTargetFile.path);
+      lldbHelperPythonFile.copySync(outputDirectory.childFile(lldbHelperPythonFile.basename).path);
+      globals.printStatus(
+        '\nDebugging Flutter on new iOS versions requires an LLDB Init File. To '
+        'ensure debug mode works, please complete one of the following in your '
+        'native Xcode project:\n'
+        '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and '
+        'Test actions, set LLDB Init File to: \n\n'
+        '    ${lldbInitTargetFile.path}\n\n'
+        '  * If you are already using an LLDB Init File, please append the '
+        'following to your LLDB Init File:\n\n'
+        '    command source ${lldbInitTargetFile.path}\n',
       );
     }
 

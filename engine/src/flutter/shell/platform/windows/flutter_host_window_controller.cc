@@ -16,7 +16,6 @@ namespace {
 
 // Names of the messages sent by the controller in response to window events.
 constexpr char kOnWindowChangedMethod[] = "onWindowChanged";
-constexpr char kOnWindowCreatedMethod[] = "onWindowCreated";
 constexpr char kOnWindowDestroyedMethod[] = "onWindowDestroyed";
 
 // Keys used in the onWindow* messages sent through the channel.
@@ -195,7 +194,7 @@ Size FlutterHostWindowController::GetViewSize(FlutterViewId view_id) const {
 void FlutterHostWindowController::SendOnWindowChanged(
     FlutterViewId view_id,
     std::optional<Size> size,
-    std::optional<Size> relative_position) const {
+    std::optional<Offset> relative_position) const {
   if (channel_) {
     EncodableMap map{{EncodableValue(kViewIdKey), EncodableValue(view_id)}};
     if (size) {
@@ -206,9 +205,9 @@ void FlutterHostWindowController::SendOnWindowChanged(
     }
     if (relative_position) {
       map.insert({EncodableValue(kRelativePositionKey),
-                  EncodableValue(EncodableList{
-                      EncodableValue(relative_position->width()),
-                      EncodableValue(relative_position->height())})});
+                  EncodableValue(
+                      EncodableList{EncodableValue(relative_position->dx()),
+                                    EncodableValue(relative_position->dy())})});
     }
     channel_->InvokeMethod(kOnWindowChangedMethod,
                            std::make_unique<EncodableValue>(map));

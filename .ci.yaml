@@ -252,10 +252,6 @@ platform_properties:
       os: Mac-13|Mac-14
       cpu: x86
       device_type: "mokey"
-      $flutter/osx_sdk : >-
-        {
-          "skip_xcode_install": true
-        }
   mac_arm64_mokey:
     properties:
       dependencies: >-
@@ -266,10 +262,6 @@ platform_properties:
       os: Mac-13|Mac-14
       cpu: arm64
       device_type: "mokey"
-      $flutter/osx_sdk : >-
-        {
-          "skip_xcode_install": true
-        }
 
   mac_pixel_7pro:
     properties:
@@ -374,7 +366,7 @@ targets:
       shard: analyze
       dependencies: >-
         [
-          {"dependency": "ktlint", "version": "version_1_1_1"}
+          {"dependency": "ktlint", "version": "version_1_5_0"}
         ]
       tags: >
         ["framework","hostonly","shard","linux"]
@@ -585,7 +577,9 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
+      # TODO(flutter/flutter#164140): Reduce timeout once customer
+      # tests are sharded.
+      test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
   - name: Linux docs_publish
     recipe: flutter/docs
@@ -1245,7 +1239,8 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux tool_integration_tests_1_6
+  - name: Linux tool_integration_tests_1_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1261,7 +1256,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: tool_integration_tests
-      subshard: "1_6"
+      subshard: "1_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -1273,7 +1268,8 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux tool_integration_tests_2_6
+  - name: Linux tool_integration_tests_2_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1289,7 +1285,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: tool_integration_tests
-      subshard: "2_6"
+      subshard: "2_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -1301,7 +1297,8 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux tool_integration_tests_3_6
+  - name: Linux tool_integration_tests_3_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1317,7 +1314,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: tool_integration_tests
-      subshard: "3_6"
+      subshard: "3_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -1329,7 +1326,8 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux tool_integration_tests_4_6
+  - name: Linux tool_integration_tests_4_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1345,7 +1343,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: tool_integration_tests
-      subshard: "4_6"
+      subshard: "4_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -1357,7 +1355,8 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux tool_integration_tests_5_6
+  - name: Linux tool_integration_tests_5_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1373,7 +1372,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: tool_integration_tests
-      subshard: "5_6"
+      subshard: "5_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -1385,7 +1384,8 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux tool_integration_tests_6_6
+  - name: Linux tool_integration_tests_6_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1401,7 +1401,36 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: tool_integration_tests
-      subshard: "6_6"
+      subshard: "6_7"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Linux tool_integration_tests_7_7
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:35v1"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      shard: tool_integration_tests
+      subshard: "7_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -3091,7 +3120,6 @@ targets:
   # Samsung Galaxy S24, Impeller (Vulkan)
   - name: Linux_galaxy_s24 new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -3253,7 +3281,6 @@ targets:
       task_name: routing_test
 
   - name: Linux_pixel_7pro service_extensions_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/157852
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4574,6 +4601,7 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5254,6 +5282,22 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: hot_mode_dev_cycle_ios__benchmark
+
+  - name: Mac_arm64_ios hot_mode_dev_cycle_ios_beta__benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      os: Mac-15
+      device_os: iOS-18.4
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "16e5104o"
+        }
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
