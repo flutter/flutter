@@ -28,8 +28,9 @@ INTERNAL NOTE
 
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
-- [flutter/164628](https://github.com/flutter/flutter/issues/164628) Fixes crash when allocation of surface for toImage/toImageSync fails.
-- [flutter/162198](https://github.com/flutter/flutter/issues/162198) Fixes double-download of canvaskit.wasm
+- [flutter/164628](https://github.com/flutter/flutter/issues/164628) - iOS Fixes crash when allocation of surface for toImage/toImageSync fails.
+- [flutter/164201](https://github.com/flutter/flutter/pull/164201) - Always use Android hardware buffers for platform views when supported.
+- [flutter/162198](https://github.com/flutter/flutter/issues/162198) - Fixes double-download of canvaskit.wasm
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
