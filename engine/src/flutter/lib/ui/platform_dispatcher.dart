@@ -1545,6 +1545,8 @@ class PlatformDispatcher {
 /// Example:
 ///
 /// ```dart
+/// import 'dart:ui';
+///
 /// ColorScheme createColorScheme() {
 ///   Color? systemAccentColor;
 ///   if (SystemColor.platformProvidesSystemColors) {
@@ -1556,7 +1558,7 @@ class PlatformDispatcher {
 ///   }
 ///
 ///   return ColorScheme.fromSeed(
-///     seedColor: systemAccentColor ?? Color(0xFF007AFF),
+///     seedColor: systemAccentColor ?? const Color(0xFF007AFF),
 ///   );
 /// }
 /// ```
