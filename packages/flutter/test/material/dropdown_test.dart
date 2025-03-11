@@ -1390,6 +1390,7 @@ void main() {
               textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
+                  role: SemanticsRole.menu,
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                   label: 'Popup menu',
                   children: <TestSemantics>[
@@ -1399,6 +1400,7 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               label: 'one',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[
@@ -1413,6 +1415,7 @@ void main() {
                               ],
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               label: 'two',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[
@@ -1426,6 +1429,7 @@ void main() {
                               ],
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               label: 'three',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[
@@ -1439,6 +1443,7 @@ void main() {
                               ],
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               label: 'four',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[

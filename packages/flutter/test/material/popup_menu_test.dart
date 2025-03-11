@@ -1280,6 +1280,7 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
+                      role: SemanticsRole.menu,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       label: 'Popup menu',
                       textDirection: TextDirection.ltr,
@@ -1288,6 +1289,7 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1302,6 +1304,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1316,6 +1319,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1330,6 +1334,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1344,6 +1349,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1419,6 +1425,7 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
+                      role: SemanticsRole.menu,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       label: 'Popup menu',
                       textDirection: TextDirection.ltr,
@@ -1427,6 +1434,7 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1499,6 +1507,7 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
+                      role: SemanticsRole.menu,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       label: 'Popup menu',
                       textDirection: TextDirection.ltr,
@@ -1507,6 +1516,7 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1521,6 +1531,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1530,6 +1541,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1544,6 +1556,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1558,6 +1571,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
