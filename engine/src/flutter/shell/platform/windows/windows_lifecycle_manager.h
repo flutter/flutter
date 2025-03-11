@@ -115,7 +115,7 @@ class WindowsLifecycleManager {
   std::set<HWND> visible_windows_;
   std::set<HWND> focused_windows_;
 
-  // Transitions the application state. If any windows is focused,
+  // Transitions the application state. If any windows are focused,
   // the application is considered resumed. If no windows are focused
   // but there are visible windows, application is considered inactive.
   // Otherwise, if there are no visible window, application is considered
