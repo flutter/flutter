@@ -2106,10 +2106,6 @@ void Shell::OnPlatformViewRemoveView(int64_t view_id,
         if (engine) {
           removed = engine->RemoveView(view_id);
         }
-        // Don't wait for the raster task here, which only cleans up memory and
-        // does not affect functionality. Make sure it is done after Dart
-        // removes the view to avoid receiving another rasterization request
-        // that adds back the view record.
         task_runners.GetRasterTaskRunner()->PostTask(
             [rasterizer, view_id, callback = std::move(callback), removed]() {
               if (rasterizer) {
