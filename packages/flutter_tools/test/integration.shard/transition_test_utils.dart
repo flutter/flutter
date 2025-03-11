@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart' show flutterBin;
@@ -47,10 +48,9 @@ abstract class Transition {
     if (pattern is RegExp) {
       // Ideally this would also distinguish between "contains" and "equals"
       // operation.
-      final bool contains = line.contains(pattern);
-      debugPrint('$line contains $pattern: $contains');
-      return contains;
+      return line.contains(pattern);
     }
+    debugPrint('$line contains $pattern: ${line.contains(pattern)}');
     return contains ? line.contains(pattern) : line == pattern;
   }
 
@@ -236,8 +236,8 @@ Future<ProcessTestResult> runFlutter(
   }
 
   String stamp() => '[${(clock.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1).padLeft(5)}s]';
-  void processStdout(String line) {
-    final LogLine log = LogLine('stdout', stamp(), line);
+
+  void logLine(LogLine log, String line) {
     if (logging) {
       logs.add(log);
     }
@@ -281,12 +281,14 @@ Future<ProcessTestResult> runFlutter(
     }
   }
 
-  void processStderr(String line) {
+  void processStdout(String line) {
     final LogLine log = LogLine('stdout', stamp(), line);
-    logs.add(log);
-    if (streamingLogs) {
-      log.printClearly();
-    }
+    logLine(log, line);
+  }
+
+  void processStderr(String line) {
+    final LogLine log = LogLine('stderr', stamp(), line);
+    logLine(log, line);
   }
 
   if (debug) {
