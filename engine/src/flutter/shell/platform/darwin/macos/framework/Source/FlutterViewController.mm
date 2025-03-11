@@ -306,6 +306,17 @@ struct MouseState {
 
 @dynamic accessibilityBridge;
 
+// Returns the text input plugin associated with this view controller.
+// This method only returns non nil instance if the text input plugin has active
+// client with viewId matching this controller's view identifier.
+- (FlutterTextInputPlugin*)activeTextInputPlugin {
+  if (_engine.textInputPlugin.currentViewController == self) {
+    return _engine.textInputPlugin;
+  } else {
+    return nil;
+  }
+}
+
 /**
  * Performs initialization that's common between the different init paths.
  */
@@ -326,7 +337,6 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
             @"the FlutterEngine is mocked. Please subclass these classes instead.",
             controller.engine, controller.viewIdentifier);
   controller->_mouseTrackingMode = kFlutterMouseTrackingModeInKeyWindow;
-  controller->_textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:controller];
   [controller notifySemanticsEnabledChanged];
 }
 
@@ -544,7 +554,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
                                      NSResponder* firstResponder = [[event window] firstResponder];
                                      if (weakSelf.viewLoaded && weakSelf.flutterView &&
                                          (firstResponder == weakSelf.flutterView ||
-                                          firstResponder == weakSelf.textInputPlugin) &&
+                                          firstResponder == weakSelf.activeTextInputPlugin) &&
                                          ([event modifierFlags] & NSEventModifierFlagCommand) &&
                                          ([event type] == NSEventTypeKeyUp)) {
                                        [weakSelf keyUp:event];
@@ -772,12 +782,12 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 }
 
 - (void)onAccessibilityStatusChanged:(BOOL)enabled {
-  if (!enabled && self.viewLoaded && [_textInputPlugin isFirstResponder]) {
+  if (!enabled && self.viewLoaded && [self.activeTextInputPlugin isFirstResponder]) {
     // Normally TextInputPlugin, when editing, is child of FlutterViewWrapper.
-    // When accessiblity is enabled the TextInputPlugin gets added as an indirect
+    // When accessibility is enabled the TextInputPlugin gets added as an indirect
     // child to FlutterTextField. When disabling the plugin needs to be reparented
     // back.
-    [self.view addSubview:_textInputPlugin];
+    [self.view addSubview:self.activeTextInputPlugin];
   }
 }
 
@@ -818,7 +828,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   // Only allow FlutterView to become first responder if TextInputPlugin is
   // not active. Otherwise a mouse event inside FlutterView would cause the
   // TextInputPlugin to lose first responder status.
-  return !_textInputPlugin.isFirstResponder;
+  return !self.activeTextInputPlugin.isFirstResponder;
 }
 
 #pragma mark - FlutterPluginRegistry
@@ -834,7 +844,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 #pragma mark - FlutterKeyboardViewDelegate
 
 - (BOOL)onTextInputKeyEvent:(nonnull NSEvent*)event {
-  return [_textInputPlugin handleKeyEvent:event];
+  return [self.activeTextInputPlugin handleKeyEvent:event];
 }
 
 #pragma mark - NSResponder
