@@ -56,23 +56,23 @@ struct ScaledFont {
 };
 
 /// All possible positions for a subpixel alignment.
-/// The name is in the format kSubpixelYX where X and Y are numerators to 1/4
+/// The name is in the format kSubpixelXY where X and Y are numerators to 1/4
 /// fractions in their respective directions.
 enum SubpixelPosition : uint8_t {
   // Subpixel at {0, 0}.
   kSubpixel00 = 0x0,
   // Subpixel at {0.25, 0}.
-  kSubpixel01 = 0x1,
+  kSubpixel10 = 0x1,
   // Subpixel at {0.5, 0}.
-  kSubpixel02 = 0x2,
+  kSubpixel20 = 0x2,
   // Subpixel at {0.75, 0}.
-  kSubpixel03 = 0x3,
+  kSubpixel30 = 0x3,
   // Subpixel at {0, 0.25}.
-  kSubpixel10 = kSubpixel01 << 2,
+  kSubpixel01 = kSubpixel10 << 2,
   // Subpixel at {0, 0.5}.
-  kSubpixel20 = kSubpixel02 << 2,
+  kSubpixel02 = kSubpixel20 << 2,
   // Subpixel at {0, 0.75}.
-  kSubpixel30 = kSubpixel03 << 2,
+  kSubpixel03 = kSubpixel30 << 2,
   kSubpixel11 = kSubpixel10 | kSubpixel01,
   kSubpixel12 = kSubpixel10 | kSubpixel02,
   kSubpixel13 = kSubpixel10 | kSubpixel03,

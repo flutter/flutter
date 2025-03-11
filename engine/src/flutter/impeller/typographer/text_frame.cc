@@ -71,12 +71,12 @@ static constexpr SubpixelPosition ComputeFractionalPosition(Scalar value) {
     return SubpixelPosition::kSubpixel00;
   }
   if (value < 0.5) {
-    return SubpixelPosition::kSubpixel01;
+    return SubpixelPosition::kSubpixel10;
   }
   if (value < 0.75) {
-    return SubpixelPosition::kSubpixel02;
+    return SubpixelPosition::kSubpixel20;
   }
-  return SubpixelPosition::kSubpixel03;
+  return SubpixelPosition::kSubpixel30;
 }
 
 // Compute subpixel position for glyphs based on X position and provided
