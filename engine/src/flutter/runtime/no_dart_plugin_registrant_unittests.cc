@@ -26,6 +26,9 @@ class DartIsolateTest : public FixtureTest {
 };
 
 TEST_F(DartIsolateTest, DartPluginRegistrantIsNotPresent) {
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
+#else
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 
   std::vector<std::string> messages;
@@ -70,6 +73,7 @@ TEST_F(DartIsolateTest, DartPluginRegistrantIsNotPresent) {
   ASSERT_EQ(messages.size(), 1u);
   ASSERT_EQ(messages[0], "main() was called");
   ASSERT_FALSE(did_throw_exception);
+#endif
 }
 
 }  // namespace testing

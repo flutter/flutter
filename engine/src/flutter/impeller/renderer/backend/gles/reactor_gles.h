@@ -180,7 +180,7 @@ class ReactorGLES {
   /// creating/accessing the handle.
   /// @param type The type of handle to create.
   /// @return The reactor handle.
-  HandleGLES CreateUntrackedHandle(HandleType type);
+  HandleGLES CreateUntrackedHandle(HandleType type) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Collect a reactor handle.

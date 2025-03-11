@@ -38,10 +38,26 @@ static bool OnAcquireExternalTexture(void* user_data,
   FlutterDarwinContextMetalSkia* _darwinMetalContext;
 }
 
+namespace {
+
+// Attempts to find the integrated GPU backed metal device.
+//
+// See also: https://developer.apple.com/documentation/metal/multi-gpu-systems?language=objc
+id<MTLDevice> SelectMetalDevice() {
+  NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
+  for (id<MTLDevice> device in devices) {
+    if (device.hasUnifiedMemory) {
+      return device;
+    }
+  }
+  return MTLCreateSystemDefaultDevice();
+}
+}  // namespace
+
 - (instancetype)initWithFlutterEngine:(nonnull FlutterEngine*)flutterEngine {
   self = [super initWithDelegate:self engine:flutterEngine];
   if (self) {
-    _device = MTLCreateSystemDefaultDevice();
+    _device = SelectMetalDevice();
     if (!_device) {
       NSLog(@"Could not acquire Metal device.");
       return nil;

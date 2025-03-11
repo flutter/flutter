@@ -266,6 +266,24 @@ void main() {
     });
   });
 
+  test('PaintingContext.pushClipRSuperellipse reuses the layer', () {
+    _testPaintingContextLayerReuse<ClipRSuperellipseLayer>((
+      PaintingContextCallback painter,
+      PaintingContext context,
+      Offset offset,
+      Layer? oldLayer,
+    ) {
+      return context.pushClipRSuperellipse(
+        true,
+        offset,
+        Rect.zero,
+        RSuperellipse.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)),
+        painter,
+        oldLayer: oldLayer as ClipRSuperellipseLayer?,
+      );
+    });
+  });
+
   test('PaintingContext.pushClipPath reuses the layer', () {
     _testPaintingContextLayerReuse<ClipPathLayer>((
       PaintingContextCallback painter,

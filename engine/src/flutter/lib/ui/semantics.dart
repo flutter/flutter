@@ -459,6 +459,9 @@ enum SemanticsRole {
   ///
   /// For example, [Shortcuts].
   hotKey,
+
+  /// A group of radio buttons.
+  radioGroup,
 }
 
 /// A Boolean value that can be associated with a semantics node.
@@ -1051,7 +1054,7 @@ abstract class SemanticsUpdateBuilder {
   ///
   /// For scrollable nodes `scrollPosition` describes the current scroll
   /// position in logical pixel. `scrollExtentMax` and `scrollExtentMin`
-  /// describe the maximum and minimum in-rage values that `scrollPosition` can
+  /// describe the maximum and minimum in-range values that `scrollPosition` can
   /// be. Both or either may be infinity to indicate unbound scrolling. The
   /// value for `scrollPosition` can (temporarily) be outside this range, for
   /// example during an overscroll. `scrollChildren` is the count of the
@@ -1126,6 +1129,7 @@ abstract class SemanticsUpdateBuilder {
     int headingLevel = 0,
     String linkUrl = '',
     SemanticsRole role = SemanticsRole.none,
+    required List<String>? controlsNodes,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -1202,6 +1206,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int headingLevel = 0,
     String linkUrl = '',
     SemanticsRole role = SemanticsRole.none,
+    required List<String>? controlsNodes,
   }) {
     assert(_matrix4IsValid(transform));
     assert(
@@ -1248,6 +1253,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       headingLevel,
       linkUrl,
       role.index,
+      controlsNodes,
     );
   }
 
@@ -1293,6 +1299,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Int32,
       Handle,
       Int32,
+      Handle,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
@@ -1335,6 +1342,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int headingLevel,
     String linkUrl,
     int role,
+    List<String>? controlsNodes,
   );
 
   @override

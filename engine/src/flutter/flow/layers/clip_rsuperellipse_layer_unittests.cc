@@ -93,7 +93,7 @@ TEST_F(ClipRSuperellipseLayerTest, PaintingCulledLayerDies) {
   EXPECT_EQ(mock_layer->parent_cull_rect(), DlRect());
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(),
-            std::vector({Mutator(ToApproximateSkRRect(layer_rsuperellipse))}));
+            std::vector({Mutator(layer_rsuperellipse)}));
 
   auto mutator = paint_context().state_stack.save();
   mutator.clipRect(distant_bounds, false);
@@ -145,7 +145,7 @@ TEST_F(ClipRSuperellipseLayerTest, ChildOutsideBounds) {
   EXPECT_EQ(mock_layer->parent_cull_rect(), clip_cull_rect.value());
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(),
-            std::vector({Mutator(ToApproximateSkRRect(clip_rsuperellipse))}));
+            std::vector({Mutator(clip_rsuperellipse)}));
 
   EXPECT_FALSE(mock_layer->needs_painting(paint_context()));
   ASSERT_FALSE(layer->needs_painting(paint_context()));
@@ -182,7 +182,7 @@ TEST_F(ClipRSuperellipseLayerTest, FullyContainedChild) {
   EXPECT_EQ(mock_layer->parent_cull_rect(), layer_bounds);
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(),
-            std::vector({Mutator(ToApproximateSkRRect(layer_rsuperellipse))}));
+            std::vector({Mutator(layer_rsuperellipse)}));
 
   layer->Paint(display_list_paint_context());
   DisplayListBuilder expected_builder;
@@ -238,7 +238,7 @@ TEST_F(ClipRSuperellipseLayerTest, PartiallyContainedChild) {
   EXPECT_EQ(mock_layer->parent_cull_rect(), clip_cull_rect.value());
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(),
-            std::vector({Mutator(ToApproximateSkRRect(clip_rsuperellipse))}));
+            std::vector({Mutator(clip_rsuperellipse)}));
 
   layer->Paint(display_list_paint_context());
   DisplayListBuilder expected_builder;
