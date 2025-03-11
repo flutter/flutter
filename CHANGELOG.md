@@ -28,7 +28,7 @@ INTERNAL NOTE
 
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
-- [flutter/163175](https://github.com/flutter/flutter/issues/163175) Improve performance of CanvasKit rendering.
+- [flutter/163175](https://github.com/flutter/flutter/pull/163175) Improve performance of CanvasKit rendering for web.
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
