@@ -68,8 +68,8 @@ void main() {
         damping: 17.59,
       );
 
-      expect(spring.duration.inMilliseconds, equals(500));
       expect(spring.bounce, moreOrLessEquals(0.3, epsilon: 0.001));
+      expect(spring.duration.inMilliseconds, equals(500));
     });
 
     test('custom duration', () {
@@ -81,8 +81,8 @@ void main() {
       expect(spring.stiffness, moreOrLessEquals(3947.84, epsilon: 0.01));
       expect(spring.damping, moreOrLessEquals(125.66, epsilon: 0.01));
 
-      expect(spring.duration.inMilliseconds, equals(100));
       expect(spring.bounce, moreOrLessEquals(0, epsilon: 0.001));
+      expect(spring.duration.inMilliseconds, equals(100));
     });
 
     test('duration <= 0 should fail', () {
