@@ -161,6 +161,8 @@ source_set("flutter_linux_sources") {
     "fl_window_state_monitor.cc",
     "fl_windowing_channel.cc",
     "fl_windowing_handler.cc",
+    "fl_windowing.cc",
+    "fl_windowing.h",
     "key_mapping.g.cc",
   ]
 
@@ -174,6 +176,7 @@ source_set("flutter_linux_sources") {
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
+    "//flutter/shell/platform/common:common_cpp_isolate_scope",
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/third_party/rapidjson",

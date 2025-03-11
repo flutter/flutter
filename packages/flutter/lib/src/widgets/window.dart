@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'window_linux.dart';
 import 'window_macos.dart';
 import 'window_win32.dart';
 
@@ -188,6 +189,8 @@ abstract class WindowingOwner {
       return WindowingOwnerWin32();
     } else if (defaultTargetPlatform == TargetPlatform.macOS) {
       return WindowingOwnerMacOS();
+    } else if (defaultTargetPlatform == TargetPlatform.linux) {
+      return WindowingOwnerLinux();
     } else {
       return _FallbackWindowingOwner();
     }
