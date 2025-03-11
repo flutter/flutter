@@ -4,8 +4,7 @@
 
 package io.flutter.plugin.view;
 
-import static io.flutter.Build.API_LEVELS;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Build;
 import android.view.View;
@@ -50,6 +49,9 @@ public class SensitiveContentPlugin
    * Sets content sensitivity level of the Android {@code View} associated with this plugin's {@code
    * mFlutterViewId} to the level specified by {@requestedContentSensitivity}.
    */
+  // Suppress lint to calls getContentSensitivity, setContentSensitivity since these are guarded by
+  // the call to isSupported.
+  @SuppressLint("NewApi")
   @Override
   public void setContentSensitivity(@NonNull int requestedContentSensitivity) {
     if (!isSupported()) {
@@ -81,6 +83,9 @@ public class SensitiveContentPlugin
    * Gets content sensitivity level of the Android {@code View} associated with this plugin's {@code
    * mFlutterViewId}.
    */
+  // Suppress lint to call getContentSensitivity since this is guarded by the
+  // call to isSupported.
+  @SuppressLint("NewApi")
   @Override
   public int getContentSensitivity() {
     if (!isSupported()) {
@@ -94,6 +99,7 @@ public class SensitiveContentPlugin
     }
 
     final int currentContentSensitivity = flutterView.getContentSensitivity();
+
     return currentContentSensitivity;
   }
 
@@ -103,9 +109,9 @@ public class SensitiveContentPlugin
    * <p>It is supported on devices running Android API >= 35.
    */
   @Override
-  @ChecksSdkIntAtLeast(api = API_LEVELS.API_35)
+  @ChecksSdkIntAtLeast(api = Build.API_LEVELS.API_35)
   public boolean isSupported() {
-    return Build.VERSION.SDK_INT >= API_LEVELS.API_35;
+    return Build.VERSION.SDK_INT >= Build.API_LEVELS.API_35;
   }
 
   /**
