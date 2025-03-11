@@ -27,7 +27,7 @@ TEST_F(WindowsLifecycleManagerTest, StateTransitions) {
   FlutterWindowsEngineBuilder builder{GetContext()};
   std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
 
-  WindowsLifecycleManager manager(engine.get());
+  WindowsLifecycleManager manager{engine.get()};
   HWND win1 = reinterpret_cast<HWND>(1);
   HWND win2 = reinterpret_cast<HWND>(2);
 
