@@ -28,7 +28,9 @@ INTERNAL NOTE
 
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
-- [flutter/163175](https://github.com/flutter/flutter/pull/163175) Improve performance of CanvasKit rendering for web.
+- [flutter/163175](https://github.com/flutter/flutter/pull/163175) - Improve performance of CanvasKit rendering for web.
+- [flutter/164201](https://github.com/flutter/flutter/pull/164201) - Always use Android hardware buffers for platform views when supported.
+- [flutter/162198](https://github.com/flutter/flutter/issues/162198) Fixes double-download of canvaskit.wasm
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
