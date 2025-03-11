@@ -694,10 +694,7 @@ class Text extends StatelessWidget {
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
 
     // TODO(Mairramer): Find a correct way to do forceStrutHeight.
-    final bool forceStrutHeight =
-        effectiveTextStyle?.height != null &&
-        effectiveTextStyle?.inherit == false &&
-        registrar == null;
+    final bool forceStrutHeight = effectiveTextStyle?.height != null && registrar == null;
 
     final StrutStyle? defaultStrutStyle =
         effectiveTextStyle != null
