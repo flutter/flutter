@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../convert.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../ios/code_signing.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 
@@ -32,6 +33,11 @@ class ConfigCommand extends FlutterCommand {
       negatable: false,
       help:
           'Clear the saved development certificate choice used to sign apps for iOS device deployment.',
+    );
+    argParser.addFlag(
+      'select-ios-signing-cert',
+      negatable: false,
+      help: 'Complete prompt to save code signing settings',
     );
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption(
@@ -154,7 +160,22 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults!.wasParsed('clear-ios-signing-cert')) {
-      _updateConfig('ios-signing-cert', '');
+      XcodeCodeSigningSettings.resetSettings(globals.config, globals.logger);
+    }
+
+    if (argResults!.wasParsed('select-ios-signing-cert')) {
+      final XcodeCodeSigningSettings settings = XcodeCodeSigningSettings(
+        config: globals.config,
+        logger: globals.logger,
+        platform: globals.platform,
+        processUtils: globals.processUtils,
+        fileSystem: globals.fs,
+        fileSystemUtils: globals.fsUtils,
+        terminal: globals.terminal,
+        plistParser: globals.plistParser,
+      );
+
+      await settings.selectSettings();
     }
 
     if (argResults!.wasParsed('build-dir')) {
