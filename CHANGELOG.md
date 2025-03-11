@@ -30,6 +30,8 @@ INTERNAL NOTE
 
 - [flutter/164628](https://github.com/flutter/flutter/issues/164628) - iOS Fixes crash when allocation of surface for toImage/toImageSync fails.
 - [flutter/164201](https://github.com/flutter/flutter/pull/164201) - Always use Android hardware buffers for platform views when supported.
+- [flutter/162198](https://github.com/flutter/flutter/issues/162198) Fixes double-download of canvaskit.wasm
+- [flutter/164024](https://github.com/flutter/flutter/issues/164024): - Add back an empty io.flutter.app.FlutterApplication for Android apps post v2 embedder migration.
 - [flutter/162198](https://github.com/flutter/flutter/issues/162198) - Fixes double-download of canvaskit.wasm
 - [flutter/164392](https://github.com/flutter/flutter/pull/164392) - All platforms, Fixes a crash that can occur when animating and interacting with a scrollable simultaneously.
 
