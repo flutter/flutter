@@ -72,6 +72,19 @@ void main() {
       expect(spring.bounce, moreOrLessEquals(0.3, epsilon: 0.001));
     });
 
+    test('custom duration', () {
+      final SpringDescription spring = SpringDescription.withDurationAndBounce(
+        duration: const Duration(seconds: 1),
+      );
+
+      expect(spring.mass, equals(1.0));
+      expect(spring.stiffness, moreOrLessEquals(39.47, epsilon: 0.01));
+      expect(spring.damping, moreOrLessEquals(12.56, epsilon: 0.01));
+
+      expect(spring.duration.inMilliseconds, const Duration(seconds: 1).inMilliseconds);
+      expect(spring.bounce, moreOrLessEquals(0, epsilon: 0.001));
+    });
+
     test('duration <= 0 should fail', () {
       expect(
         () => SpringDescription.withDurationAndBounce(
