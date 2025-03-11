@@ -25,10 +25,11 @@ class WindowControllerRender extends StatelessWidget {
         return RegularWindow(
             key: key,
             controller: controller as RegularWindowController,
-            child: RegularWindowContent(
-                window: controller as RegularWindowController,
-                windowSettings: windowSettings,
-                windowManagerModel: windowManagerModel));
+            child: MaterialApp(
+                home: RegularWindowContent(
+                    window: controller as RegularWindowController,
+                    windowSettings: windowSettings,
+                    windowManagerModel: windowManagerModel)));
       default:
         throw UnimplementedError(
             "The provided window type does not have an implementation");
