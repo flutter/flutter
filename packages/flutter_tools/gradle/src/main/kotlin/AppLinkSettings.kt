@@ -31,7 +31,9 @@ data class AppLinkSettings(
             put("applicationId", applicationId)
             put("deeplinkingFlagEnabled", deeplinkingFlagEnabled)
             putJsonArray("deeplinks") {
-                deeplinks.map { add(it.toJson()) }
+                for (deeplink: Deeplink in deeplinks) {
+                    add(deeplink.toJson())
+                }
             }
         }
 }
