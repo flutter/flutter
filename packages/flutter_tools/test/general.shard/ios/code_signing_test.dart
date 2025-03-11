@@ -196,7 +196,7 @@ void main() {
               'DeveloperCertificates': <List<int>>[
                 <int>[0, 1, 2, 3],
               ],
-              'TeamIdentifier': <String>['TEAM_ID'],
+              'TeamIdentifier': <String>['ABCDE1F2DH'],
               'UUID': 'UUID1234',
             },
           ],
@@ -226,7 +226,7 @@ void main() {
           FakeCommand(
             command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
             stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=TEAM_ID/O=Company LLC/C=US',
+                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
         ]);
 
@@ -252,7 +252,7 @@ void main() {
         );
         expect(signingConfigs, <String, String>{
           'CODE_SIGN_STYLE': 'Manual',
-          'DEVELOPMENT_TEAM': 'TEAM_ID',
+          'DEVELOPMENT_TEAM': 'ABCDE1F2DH',
           'PROVISIONING_PROFILE_SPECIFIER': 'Company Development',
         });
       });
@@ -477,7 +477,7 @@ void main() {
                 'DeveloperCertificates': <List<int>>[
                   <int>[0, 1, 2, 3],
                 ],
-                'TeamIdentifier': <String>['TEAM_ID'],
+                'TeamIdentifier': <String>['ABCDE1F2DH'],
                 'UUID': 'UUID1234',
               },
             ],
@@ -553,7 +553,7 @@ void main() {
                 'DeveloperCertificates': <List<int>>[
                   <int>[0, 1, 2, 3],
                 ],
-                'TeamIdentifier': <String>['TEAM_ID'],
+                'TeamIdentifier': <String>['ABCDE1F2DH'],
                 'UUID': 'UUID1234',
               },
             ],
@@ -628,7 +628,7 @@ void main() {
                 'DeveloperCertificates': <List<int>>[
                   <int>[0, 1, 2, 3],
                 ],
-                'TeamIdentifier': <String>['TEAM_ID'],
+                'TeamIdentifier': <String>['ABCDE1F2DH'],
                 'UUID': 'UUID1234',
               },
             ],
@@ -658,7 +658,7 @@ void main() {
             FakeCommand(
               command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
               stdout:
-                  'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=TEAM_ID/O=Company LLC/C=US',
+                  'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
             ),
           ]);
 
@@ -1643,7 +1643,7 @@ void main() {
               'DeveloperCertificates': <List<int>>[
                 <int>[0, 1, 2, 3],
               ],
-              'TeamIdentifier': <String>['TEAM_ID'],
+              'TeamIdentifier': <String>['ABCDE1F2DH'],
               'UUID': 'UUIDProfile1',
             },
           ],
@@ -1682,7 +1682,7 @@ void main() {
               'DER',
             ],
             stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=TEAM_ID/O=Company LLC/C=US',
+                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
         ]);
 
@@ -1752,7 +1752,7 @@ void main() {
                 'DeveloperCertificates': <List<int>>[
                   <int>[0, 1, 2, 3],
                 ],
-                'TeamIdentifier': <String>['TEAM_ID'],
+                'TeamIdentifier': <String>['ABCDE1F2DH'],
                 'UUID': 'UUIDProfile1',
               },
             ],
@@ -1791,7 +1791,7 @@ void main() {
                 'DER',
               ],
               stdout:
-                  'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=TEAM_ID/O=Company LLC/C=US',
+                  'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
             ),
           ]);
 
@@ -1883,7 +1883,7 @@ void main() {
                 <int>[0, 1, 2, 3],
                 <int>[0, 1, 2, 3, 4],
               ],
-              'TeamIdentifier': <String>['TEAM_ID'],
+              'TeamIdentifier': <String>['ABCDE1F2DH'],
               'UUID': 'UUIDProfile1',
             },
             <String, Object>{
@@ -1893,7 +1893,7 @@ void main() {
               'DeveloperCertificates': <List<int>>[
                 <int>[0, 1, 2, 3],
               ],
-              'TeamIdentifier': <String>['TEAM_ID'],
+              'TeamIdentifier': <String>['ABCDE1F2DH'],
               'UUID': 'UUIDProfile2',
             },
             <String, Object>{
@@ -1903,7 +1903,7 @@ void main() {
               'DeveloperCertificates': <List<int>>[
                 <int>[0, 1, 2, 3],
               ],
-              'TeamIdentifier': <String>['TEAM_ID'],
+              'TeamIdentifier': <String>['ABCDE1F2DH'],
               'UUID': 'UUIDProfile3',
             },
           ],
@@ -1942,7 +1942,7 @@ void main() {
               'DER',
             ],
             stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: No matching (12ABCD234E)/OU=TEAM_ID/O=Company LLC/C=US',
+                'subject= /UID=A123BC4D5E/CN=Apple Development: No matching (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
           FakeCommand(
             command: <String>[
@@ -1955,7 +1955,7 @@ void main() {
               'DER',
             ],
             stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=TEAM_ID/O=Company LLC/C=US',
+                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
           FakeCommand(
             command: <String>[
@@ -1994,7 +1994,7 @@ void main() {
               'DER',
             ],
             stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: No match (12ABCD234E)/OU=TEAM_ID/O=Company LLC/C=US',
+                'subject= /UID=A123BC4D5E/CN=Apple Development: No match (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
         ]);
 
