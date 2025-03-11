@@ -23,7 +23,7 @@ class LineContents : public Contents {
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
  private:
-  LineContents(std::unique_ptr<LineGeometry> geometry);
+  explicit LineContents(std::unique_ptr<LineGeometry> geometry);
 
   std::unique_ptr<LineGeometry> geometry_;
 };
