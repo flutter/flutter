@@ -24,24 +24,24 @@ class FontFallbackManager {
   factory FontFallbackManager(FallbackFontRegistry registry) =>
       FontFallbackManager._(registry, getFallbackFontList());
 
-  FontFallbackManager._(this.registry, this.fallbackFonts)
-    : _notoSymbols = fallbackFonts.singleWhere(
+  FontFallbackManager._(this._registry, this._fallbackFonts)
+    : _notoSymbols = _fallbackFonts.singleWhere(
         (NotoFont font) => font.name == 'Noto Sans Symbols',
       ) {
-    downloadQueue = FallbackFontDownloadQueue(this);
+    _downloadQueue = _FallbackFontDownloadQueue(this);
   }
 
-  final FallbackFontRegistry registry;
+  final FallbackFontRegistry _registry;
 
-  late final FallbackFontDownloadQueue downloadQueue;
+  late final _FallbackFontDownloadQueue _downloadQueue;
 
   /// Code points that no known font has a glyph for.
-  final Set<int> codePointsWithNoKnownFont = <int>{};
+  final Set<int> _codePointsWithNoKnownFont = <int>{};
 
   /// Code points which are known to be covered by at least one fallback font.
-  final Set<int> knownCoveredCodePoints = <int>{};
+  final Set<int> _knownCoveredCodePoints = <int>{};
 
-  final List<NotoFont> fallbackFonts;
+  final List<NotoFont> _fallbackFonts;
 
   // By default, we use the system language to determine the user's preferred
   // language. This can be overridden through [debugUserPreferredLanguage] for testing.
@@ -54,6 +54,9 @@ class FontFallbackManager {
   set debugUserPreferredLanguage(String value) {
     _language = value;
   }
+
+  @visibleForTesting
+  void Function(String family)? debugOnLoadFontFamily;
 
   final NotoFont _notoSymbols;
 
@@ -101,8 +104,8 @@ class FontFallbackManager {
     for (final int rune in text.runes) {
       // Filter out code points that don't need checking.
       if (!(rune < 160 || // ASCII and Unicode control points.
-          knownCoveredCodePoints.contains(rune) || // Points we've already covered
-          codePointsWithNoKnownFont.contains(rune)) // Points that don't have a fallback font
+          _knownCoveredCodePoints.contains(rune) || // Points we've already covered
+          _codePointsWithNoKnownFont.contains(rune)) // Points that don't have a fallback font
       ) {
         runesToCheck.add(rune);
       }
@@ -112,7 +115,7 @@ class FontFallbackManager {
     }
 
     final List<int> codePoints = runesToCheck.toList();
-    final List<int> missingCodePoints = registry.getMissingCodePoints(codePoints, fontFamilies);
+    final List<int> missingCodePoints = _registry.getMissingCodePoints(codePoints, fontFamilies);
 
     if (missingCodePoints.isNotEmpty) {
       addMissingCodePoints(codePoints);
@@ -126,7 +129,7 @@ class FontFallbackManager {
       _idleFuture = Future<void>.delayed(Duration.zero, () async {
         _ensureFallbackFonts();
         _scheduledCodePointCheck = false;
-        await downloadQueue.waitForIdle();
+        await _downloadQueue.waitForIdle();
       });
     }
   }
@@ -168,7 +171,7 @@ class FontFallbackManager {
   /// user's locale.
   ///
   /// If a code point is not covered by any font, it is added to
-  /// [codePointsWithNoKnownFont] so it can be omitted next time to avoid
+  /// [_codePointsWithNoKnownFont] so it can be omitted next time to avoid
   /// searching for fonts unnecessarily.
   void findFontsForMissingCodePoints(List<int> codePoints) {
     final List<int> missingCodePoints = <int>[];
@@ -227,18 +230,18 @@ class FontFallbackManager {
       candidateFonts.removeWhere((NotoFont font) => font.coverCount == 0);
     }
 
-    selectedFonts.forEach(downloadQueue.add);
+    selectedFonts.forEach(_downloadQueue.add);
 
     // Report code points not covered by any fallback font and ensure we don't
     // process those code points again.
     if (missingCodePoints.isNotEmpty) {
-      if (!downloadQueue.isPending) {
+      if (!_downloadQueue.isPending) {
         printWarning(
           'Could not find a set of Noto fonts to display all missing '
           'characters. Please add a font asset for the missing characters.'
           ' See: https://flutter.dev/docs/cookbook/design/fonts',
         );
-        codePointsWithNoKnownFont.addAll(missingCodePoints);
+        _codePointsWithNoKnownFont.addAll(missingCodePoints);
       }
     }
   }
@@ -335,7 +338,7 @@ class FontFallbackManager {
       if (kFontIndexDigit0 <= code && code < kFontIndexDigit0 + kFontIndexRadix) {
         final int delta = prefix * kFontIndexRadix + (code - kFontIndexDigit0);
         final int index = previousIndex + delta + 1;
-        result.add(fallbackFonts[index]);
+        result.add(_fallbackFonts[index]);
         previousIndex = index;
         prefix = 0;
       } else if (kPrefixDigit0 <= code && code < kPrefixDigit0 + kPrefixRadix) {
@@ -436,19 +439,15 @@ class _UnicodePropertyLookup<P> {
   }
 }
 
-class FallbackFontDownloadQueue {
-  FallbackFontDownloadQueue(this.fallbackManager);
+class _FallbackFontDownloadQueue {
+  _FallbackFontDownloadQueue(this.fallbackManager);
 
   final FontFallbackManager fallbackManager;
-
-  String get fallbackFontUrlPrefix => configuration.fontFallbackBaseUrl;
 
   final Set<NotoFont> downloadedFonts = <NotoFont>{};
   final Map<String, NotoFont> pendingFonts = <String, NotoFont>{};
 
   bool get isPending => pendingFonts.isNotEmpty;
-
-  void Function(String family)? debugOnLoadFontFamily;
 
   Completer<void>? _idleCompleter;
 
@@ -478,17 +477,14 @@ class FallbackFontDownloadQueue {
     final List<String> downloadedFontFamilies = <String>[];
     for (final NotoFont font in pendingFonts.values) {
       downloads[font.url] = Future<void>(() async {
+        final String url = '${configuration.fontFallbackBaseUrl}${font.url}';
         try {
-          final String url = '$fallbackFontUrlPrefix${font.url}';
-          debugOnLoadFontFamily?.call(font.name);
-          await fallbackManager.registry.loadFallbackFont(font.name, url);
+          fallbackManager.debugOnLoadFontFamily?.call(font.name);
+          await fallbackManager._registry.loadFallbackFont(font.name, url);
           downloadedFontFamilies.add(font.url);
         } catch (e) {
           pendingFonts.remove(font.url);
-          printWarning(
-            'Failed to load font ${font.name} at '
-            '$fallbackFontUrlPrefix${font.url}',
-          );
+          printWarning('Failed to load font ${font.name} at $url');
           printWarning(e.toString());
           return;
         }
@@ -508,7 +504,7 @@ class FallbackFontDownloadQueue {
     }
 
     if (pendingFonts.isEmpty) {
-      fallbackManager.registry.updateFallbackFontFamilies(fallbackManager.globalFontFallbacks);
+      fallbackManager._registry.updateFallbackFontFamilies(fallbackManager.globalFontFallbacks);
       sendFontChangeMessage();
       final Completer<void> idleCompleter = _idleCompleter!;
       _idleCompleter = null;

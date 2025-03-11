@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
@@ -44,7 +43,7 @@ void testMain() {
         <String, Object?>{'fontFallbackBaseUrl': 'assets/fallback_fonts/'}.jsify()
             as JsFlutterConfiguration?,
       );
-      renderer.fontCollection.fontFallbackManager!.downloadQueue.debugOnLoadFontFamily =
+      renderer.fontCollection.fontFallbackManager!.debugOnLoadFontFamily =
           (String family) => downloadedFontFamilies.add(family);
       savedCallback = ui.PlatformDispatcher.instance.onPlatformMessage;
     });
@@ -59,19 +58,13 @@ void testMain() {
     });
 
     test('can override font fallback base URL using JS', () {
-      expect(
-        renderer.fontCollection.fontFallbackManager!.downloadQueue.fallbackFontUrlPrefix,
-        'assets/fallback_fonts/',
-      );
+      expect(configuration.fontFallbackBaseUrl, 'assets/fallback_fonts/');
       debugOverrideJsConfiguration(
         <String, Object?>{'fontFallbackBaseUrl': 'http://my-special-fonts.com/'}.jsify()
             as JsFlutterConfiguration?,
       );
 
-      expect(
-        renderer.fontCollection.fontFallbackManager!.downloadQueue.fallbackFontUrlPrefix,
-        'http://my-special-fonts.com/',
-      );
+      expect(configuration.fontFallbackBaseUrl, 'http://my-special-fonts.com/');
     });
 
     test('will download Noto Sans Arabic if Arabic text is added', () async {
