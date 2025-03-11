@@ -611,13 +611,6 @@ class RenderTable extends RenderBox {
     config.explicitChildNodes = true;
   }
 
-  Rect _rectWithOffset(SemanticsNode child) {
-    final Offset offset =
-        (child.transform != null ? MatrixUtils.getAsTranslation(child.transform!) : null) ??
-        Offset.zero;
-    return child.rect.shift(offset);
-  }
-
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
   ///
   /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
@@ -637,19 +630,52 @@ class RenderTable extends RenderBox {
           List<List<SemanticsNode>>.generate(_columns, (int columnIndex) => <SemanticsNode>[]),
     );
 
+    Rect rectWithOffset(SemanticsNode child) {
+      final Offset offset =
+          (child.transform != null ? MatrixUtils.getAsTranslation(child.transform!) : null) ??
+          Offset.zero;
+      return child.rect.shift(offset);
+    }
+
+    int findRowIndex(double top) {
+      for (int i = _rowTops.length - 1; i >= 0; i--) {
+        if (_rowTops[i] <= top) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    int findColumnIndex(double left) {
+      if (_columnLefts == null) {
+        return -1;
+      }
+      for (int i = _columnLefts!.length - 1; i >= 0; i--) {
+        if (_columnLefts!.elementAt(i) <= left) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
     for (final SemanticsNode child in children) {
       if (child.tags != null && child.tags!.isNotEmpty) {
         final String cellIndex = child.tags!.first.name;
-        final int rowIndex = int.parse(cellIndex.split(',')[0]);
-        final int columnIndex = int.parse(cellIndex.split(',')[1]);
-        rawCells[rowIndex][columnIndex].add(child);
+        final List<String> parts = cellIndex.split(',');
+        if (parts.length == 2) {
+          final int y = int.parse(parts[0]);
+          final int x = int.parse(parts[1]);
+          if (y >= 0 && y < _rows && x >= 0 && x < _columns) {
+            rawCells[y][x].add(child);
+          }
+        }
       } else {
-        final Rect rect = _rectWithOffset(child);
-        final double top = _rowTops.lastWhere((double rowTop) => rowTop <= rect.top);
-        final int y = _rowTops.indexOf(top);
-        final double left = _columnLefts!.lastWhere((double columnLeft) => columnLeft <= rect.left);
-        final int x = _columnLefts!.toList().indexOf(left);
-        rawCells[y][x].add(child);
+        final Rect rect = rectWithOffset(child);
+        final int y = findRowIndex(rect.top);
+        final int x = findColumnIndex(rect.left);
+        if (y != -1 && x != -1) {
+          rawCells[y][x].add(child);
+        }
       }
     }
 
