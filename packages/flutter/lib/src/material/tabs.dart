@@ -847,7 +847,10 @@ class _TabBarScrollController extends ScrollController {
 /// Signature for [TabBar] callbacks that report that an underlying value has
 /// changed for a given [Tab] at `index`.
 ///
-/// Used for [TabBar.onHover] and [TabBar.onFocusChanged] callbacks.
+/// Used for [TabBar.onHover] and [TabBar.onFocusChanged] callbacks The provided
+/// `value` being true indicates focus has been gained, or a pointer has hovered
+/// over the tab, with false indicated focus has been lost or the pointer has
+/// exited hovering.
 typedef TabValueChanged<T> = void Function(T value, int index);
 
 /// A Material Design primary tab bar.
