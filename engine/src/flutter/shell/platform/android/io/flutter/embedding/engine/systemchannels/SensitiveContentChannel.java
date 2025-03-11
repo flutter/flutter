@@ -176,7 +176,8 @@ public class SensitiveContentChannel {
     int getContentSensitivity();
 
     /**
-     * Returns whether or not setting/getting content sensitivity is supported on the device.
+     * Returns whether or not setting/getting content sensitivity via Android APIs is supported on
+     * the device.
      *
      * <p>This value is static and will not change while a Flutter app runs.
      */
