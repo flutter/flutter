@@ -29,15 +29,18 @@ class ConfigCommand extends FlutterCommand {
           'and "--${FlutterGlobalOptions.kDisableAnalyticsFlag}" top level flags.)',
     );
     argParser.addFlag(
-      'clear-ios-signing-cert',
+      'clear-ios-signing-settings',
       negatable: false,
+      aliases: <String>['clear-ios-signing-cert'],
       help:
-          'Clear the saved development certificate choice used to sign apps for iOS device deployment.',
+          'Clear the saved development certificate or provisioning profile choice used to sign apps for iOS device deployment.',
     );
     argParser.addFlag(
       'select-ios-signing-settings',
       negatable: false,
-      help: 'Complete prompt to save code signing settings',
+      help:
+          'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
+      hide: true,
     );
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption(
@@ -159,7 +162,7 @@ class ConfigCommand extends FlutterCommand {
       _updateConfig('jdk-dir', stringArg('jdk-dir')!);
     }
 
-    if (argResults!.wasParsed('clear-ios-signing-cert')) {
+    if (argResults!.wasParsed('clear-ios-signing-settings')) {
       XcodeCodeSigningSettings.resetSettings(globals.config, globals.logger);
     }
 

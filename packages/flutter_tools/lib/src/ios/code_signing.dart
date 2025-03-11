@@ -22,7 +22,8 @@ const String _codeSignStyleBuildSettingNAme = 'CODE_SIGN_STYLE';
 const String _provisioningProfileSpecifierBuildSettingName = 'PROVISIONING_PROFILE_SPECIFIER';
 const String _provisioningProfileBuildSettingName = 'PROVISIONING_PROFILE';
 
-const String _codeSignSelectionCanceled = 'Code-signing setup canceled. Your changes have not been saved.';
+const String _codeSignSelectionCanceled =
+    'Code-signing setup canceled. Your changes have not been saved.';
 
 /// User message when no development certificates are found in the keychain.
 ///
@@ -90,11 +91,38 @@ const String fixWithDevelopmentTeamInstruction = '''
          - Let Xcode automatically provision a profile for your app
   4- Build or run your project again''';
 
+/// Pattern to identity from list of identities.
+///
+/// Example:
+///
+/// `  1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"`
+/// extracts `iPhone Developer: Profile 1 (1111AAAA11)`
 final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern = RegExp(
   r'^\s*\d+\).+"(.+Develop(ment|er).+)"$',
 );
+
+/// Pattern to extract unique identifier from certificate Common Name.
+///
+/// Example:
+///
+/// `iPhone Developer: Profile 1 (1111AAAA11)`
+/// extracts `1111AAAA11`
 final RegExp _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-Z0-9]+)\)');
+
+/// Pattern to extract OU (Organizational Unit) from certificate subject.
+///
+/// Example:
+///
+/// `subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O/O=Company LLC/C=US`
+/// extracts `ABCDE1F2DH`
 final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
+
+/// Pattern to extract CN (Common Name) from certificate subject.
+///
+/// Example:
+///
+/// `subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O/O=Company LLC/C=US`
+/// extracts `Apple Development: Company Development (12ABCD234E)`
 final RegExp _certificateCommonNameExtractionPattern = RegExp(r'CN=([a-zA-Z0-9\s:\(\)]+)');
 
 /// Given a [BuildableIOSApp], find build settings for either automatic (identity)
@@ -605,7 +633,8 @@ class XcodeCodeSigningSettings {
 
     if (savedCertChoice != null || savedProfile != null) {
       _logger.printError(
-        'Code-signing settings are already set. To reset them, use "flutter config --clear-ios-signing-cert"',
+        'Code-signing settings are already set. To reset them, use "flutter config '
+        '--clear-ios-signing-settings"',
       );
       return;
     }
