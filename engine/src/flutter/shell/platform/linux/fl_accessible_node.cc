@@ -462,9 +462,9 @@ static void fl_accessible_node_class_init(FlAccessibleNodeClass* klass) {
                                    G_PARAM_STATIC_STRINGS)));
   g_object_class_install_property(
       G_OBJECT_CLASS(klass), PROP_VIEW_ID,
-      g_param_spec_int(
+      g_param_spec_int64(
           "view_id", "view_id", "View ID that this node belongs to", 0,
-          G_MAXINT, 0,
+          G_MAXINT64, 0,
           static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY)));
   g_object_class_install_property(
       G_OBJECT_CLASS(klass), PROP_ID,
