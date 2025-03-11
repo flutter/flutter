@@ -29,6 +29,7 @@ INTERNAL NOTE
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
 - [flutter/162198](https://github.com/flutter/flutter/issues/162198) Fixes double-download of canvaskit.wasm
+- [flutter/164392](https://github.com/flutter/flutter/pull/164392) - Fix race condition causing crash when interacting with an animating scrollable.
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
