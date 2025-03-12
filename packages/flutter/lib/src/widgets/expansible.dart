@@ -338,6 +338,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
 
   void _toggleExpansion() {
     setState(() {
+      // Rebuild with the header and the animating body.
       if (widget.controller.isExpanded) {
         _animationController.forward();
       } else {
