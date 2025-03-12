@@ -350,6 +350,12 @@ class IconButton extends StatelessWidget {
   /// The padding around the button's icon. The entire padded icon will react
   /// to input gestures.
   ///
+  /// If [ThemeData.useMaterial3] is set to false, apply padding in the square
+  /// proportion to the button's splash/highlight shape. For example, if the
+  /// button is a circle, use padding on all sides to center the icon inside the
+  /// splash/highlight circle. Otherwise, wrap the [IconButton] with a [Padding]
+  /// widget to apply padding in the desired direction.
+  ///
   /// This property can be null. If null, it defaults to 8.0 padding on all sides.
   final EdgeInsetsGeometry? padding;
 
