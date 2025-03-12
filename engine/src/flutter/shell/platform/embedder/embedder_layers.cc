@@ -79,56 +79,57 @@ static std::unique_ptr<FlutterPlatformViewMutation> ConvertMutation(
 }
 
 static std::unique_ptr<FlutterPlatformViewMutation> ConvertMutation(
-    const SkRect& rect) {
+    const DlRect& rect) {
   FlutterPlatformViewMutation mutation = {};
   mutation.type = kFlutterPlatformViewMutationTypeClipRect;
-  mutation.clip_rect.left = rect.left();
-  mutation.clip_rect.top = rect.top();
-  mutation.clip_rect.right = rect.right();
-  mutation.clip_rect.bottom = rect.bottom();
+  mutation.clip_rect.left = rect.GetLeft();
+  mutation.clip_rect.top = rect.GetTop();
+  mutation.clip_rect.right = rect.GetRight();
+  mutation.clip_rect.bottom = rect.GetBottom();
   return std::make_unique<FlutterPlatformViewMutation>(mutation);
 }
 
-static FlutterSize VectorToSize(const SkVector& vector) {
+static FlutterSize ConvertSize(const DlSize& vector) {
   FlutterSize size = {};
-  size.width = vector.x();
-  size.height = vector.y();
+  size.width = vector.width;
+  size.height = vector.height;
   return size;
 }
 
 static std::unique_ptr<FlutterPlatformViewMutation> ConvertMutation(
-    const SkRRect& rrect) {
+    const DlRoundRect& rrect) {
   FlutterPlatformViewMutation mutation = {};
   mutation.type = kFlutterPlatformViewMutationTypeClipRoundedRect;
-  const auto& rect = rrect.rect();
-  mutation.clip_rounded_rect.rect.left = rect.left();
-  mutation.clip_rounded_rect.rect.top = rect.top();
-  mutation.clip_rounded_rect.rect.right = rect.right();
-  mutation.clip_rounded_rect.rect.bottom = rect.bottom();
+  const auto& rect = rrect.GetBounds();
+  mutation.clip_rounded_rect.rect.left = rect.GetLeft();
+  mutation.clip_rounded_rect.rect.top = rect.GetTop();
+  mutation.clip_rounded_rect.rect.right = rect.GetRight();
+  mutation.clip_rounded_rect.rect.bottom = rect.GetBottom();
+  const auto& radii = rrect.GetRadii();
   mutation.clip_rounded_rect.upper_left_corner_radius =
-      VectorToSize(rrect.radii(SkRRect::Corner::kUpperLeft_Corner));
+      ConvertSize(radii.top_left);
   mutation.clip_rounded_rect.upper_right_corner_radius =
-      VectorToSize(rrect.radii(SkRRect::Corner::kUpperRight_Corner));
+      ConvertSize(radii.top_right);
   mutation.clip_rounded_rect.lower_right_corner_radius =
-      VectorToSize(rrect.radii(SkRRect::Corner::kLowerRight_Corner));
+      ConvertSize(radii.bottom_right);
   mutation.clip_rounded_rect.lower_left_corner_radius =
-      VectorToSize(rrect.radii(SkRRect::Corner::kLowerLeft_Corner));
+      ConvertSize(radii.bottom_left);
   return std::make_unique<FlutterPlatformViewMutation>(mutation);
 }
 
 static std::unique_ptr<FlutterPlatformViewMutation> ConvertMutation(
-    const SkMatrix& matrix) {
+    const DlMatrix& matrix) {
   FlutterPlatformViewMutation mutation = {};
   mutation.type = kFlutterPlatformViewMutationTypeTransformation;
-  mutation.transformation.scaleX = matrix[SkMatrix::kMScaleX];
-  mutation.transformation.skewX = matrix[SkMatrix::kMSkewX];
-  mutation.transformation.transX = matrix[SkMatrix::kMTransX];
-  mutation.transformation.skewY = matrix[SkMatrix::kMSkewY];
-  mutation.transformation.scaleY = matrix[SkMatrix::kMScaleY];
-  mutation.transformation.transY = matrix[SkMatrix::kMTransY];
-  mutation.transformation.pers0 = matrix[SkMatrix::kMPersp0];
-  mutation.transformation.pers1 = matrix[SkMatrix::kMPersp1];
-  mutation.transformation.pers2 = matrix[SkMatrix::kMPersp2];
+  mutation.transformation.scaleX = matrix.m[0];
+  mutation.transformation.skewX = matrix.m[4];
+  mutation.transformation.transX = matrix.m[12];
+  mutation.transformation.skewY = matrix.m[1];
+  mutation.transformation.scaleY = matrix.m[5];
+  mutation.transformation.transY = matrix.m[13];
+  mutation.transformation.pers0 = matrix.m[3];
+  mutation.transformation.pers1 = matrix.m[7];
+  mutation.transformation.pers2 = matrix.m[15];
   return std::make_unique<FlutterPlatformViewMutation>(mutation);
 }
 
@@ -159,12 +160,18 @@ void EmbedderLayers::PushPlatformViewLayer(
                   .emplace_back(ConvertMutation(mutator->GetRRect()))
                   .get());
         } break;
+        case MutatorType::kClipRSE: {
+          mutations_array.push_back(
+              mutations_referenced_
+                  .emplace_back(ConvertMutation(mutator->GetRSEApproximation()))
+                  .get());
+        } break;
         case MutatorType::kClipPath: {
           // Unsupported mutation.
         } break;
         case MutatorType::kTransform: {
           const auto& matrix = mutator->GetMatrix();
-          if (!matrix.isIdentity()) {
+          if (!matrix.IsIdentity()) {
             mutations_array.push_back(
                 mutations_referenced_.emplace_back(ConvertMutation(matrix))
                     .get());
@@ -188,10 +195,9 @@ void EmbedderLayers::PushPlatformViewLayer(
       // If there are going to be any mutations, they must first take into
       // account the root surface transformation.
       if (!root_surface_transformation_.isIdentity()) {
+        auto matrix = ToDlMatrix(root_surface_transformation_);
         mutations_array.push_back(
-            mutations_referenced_
-                .emplace_back(ConvertMutation(root_surface_transformation_))
-                .get());
+            mutations_referenced_.emplace_back(ConvertMutation(matrix)).get());
       }
 
       auto mutations =

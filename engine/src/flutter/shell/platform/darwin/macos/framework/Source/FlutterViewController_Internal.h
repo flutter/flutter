@@ -18,11 +18,6 @@
 // The FlutterView for this view controller.
 @property(nonatomic, readonly, nullable) FlutterView* flutterView;
 
-/**
- * The text input plugin that handles text editing state for text fields.
- */
-@property(nonatomic, readonly, nonnull) FlutterTextInputPlugin* textInputPlugin;
-
 @property(nonatomic, readonly) std::weak_ptr<flutter::AccessibilityBridgeMac> accessibilityBridge;
 
 /**
