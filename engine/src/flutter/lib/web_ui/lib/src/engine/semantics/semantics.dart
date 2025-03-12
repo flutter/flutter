@@ -656,6 +656,10 @@ abstract class SemanticRole {
     );
   }
 
+  void addCheckedBehavior() {
+    addSemanticBehavior(Checkable(semanticsObject, this));
+  }
+
   void addDisabledBehavior() {
     addSemanticBehavior(Disable(semanticsObject, this));
   }
@@ -2067,6 +2071,14 @@ class SemanticsObject {
   /// not use the [Selectable] behavior.
   bool get isCheckable =>
       hasFlag(ui.SemanticsFlag.hasCheckedState) || hasFlag(ui.SemanticsFlag.hasToggledState);
+
+  /// If true, this node represents something that can be in a "checked" or
+  /// state, such as checkboxes, radios, and switches.
+  bool get isChecked => hasFlag(ui.SemanticsFlag.isChecked);
+
+  /// If true, this node represents something that can be in a "mixed" or
+  /// state, such as checkboxes.
+  bool get isMixed => hasFlag(ui.SemanticsFlag.isCheckStateMixed);
 
   /// If true, this node represents something that can be annotated as
   /// "selected", such as a tab, or an item in a list.

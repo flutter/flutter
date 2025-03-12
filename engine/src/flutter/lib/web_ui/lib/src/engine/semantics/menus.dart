@@ -97,17 +97,7 @@ class SemanticMenuItemCheckbox extends SemanticRole {
     super.update();
 
     if (semanticsObject.isFlagsDirty) {
-      String checkedValue;
-      if (semanticsObject.isCheckable && semanticsObject.hasFlag(ui.SemanticsFlag.isChecked)) {
-        checkedValue = 'true';
-      } else if (semanticsObject.isCheckable &&
-          semanticsObject.hasFlag(ui.SemanticsFlag.isCheckStateMixed)) {
-        checkedValue = 'mixed';
-      } else {
-        checkedValue = 'false';
-      }
-      setAttribute('aria-checked', checkedValue);
-
+      addCheckedBehavior();
       addDisabledBehavior();
     }
   }
@@ -135,11 +125,7 @@ class SemanticMenuItemRadio extends SemanticRole {
   void update() {
     super.update();
     if (semanticsObject.isFlagsDirty) {
-      setAttribute(
-        'aria-checked',
-        (semanticsObject.hasFlag(ui.SemanticsFlag.isChecked)) ? 'true' : 'false',
-      );
-
+      addCheckedBehavior();
       addDisabledBehavior();
     }
   }
