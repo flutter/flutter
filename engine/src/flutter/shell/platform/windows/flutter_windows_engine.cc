@@ -897,11 +897,14 @@ bool FlutterWindowsEngine::DispatchSemanticsAction(
     uint64_t target,
     FlutterSemanticsAction action,
     fml::MallocMapping data) {
-  FlutterDispatchSemanticsActionInfo info {
-    .struct_size = sizeof(FlutterDispatchSemanticsActionInfo),
-    .view_id = view_id, .node_id = target, .action = action,
-    .data = data.GetMapping(), .data_length = data.GetSize(),
-  }
+  FlutterDispatchSemanticsActionInfo info{
+      .struct_size = sizeof(FlutterDispatchSemanticsActionInfo),
+      .view_id = view_id,
+      .node_id = target,
+      .action = action,
+      .data = data.GetMapping(),
+      .data_length = data.GetSize(),
+  };
   return (embedder_api_.DispatchSemanticsActionOnView(engine_, &info));
 }
 
