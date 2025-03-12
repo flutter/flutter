@@ -626,6 +626,60 @@ class PaintingContext extends ClipContext {
     }
   }
 
+  /// Clip further painting using a rounded superellipse.
+  ///
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
+  ///
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.offset}
+  ///
+  /// The `bounds` argument is used to specify the region of the canvas (in the
+  /// caller's coordinate system) into which `painter` will paint.
+  ///
+  /// The `clipRSuperellipse` argument specifies the rounded-superellipse (in the caller's
+  /// coordinate system) to use to clip the painting done by `painter`. It
+  /// should not include the `offset`.
+  ///
+  /// The `painter` callback will be called while the `clipRSuperellipse` is applied. It
+  /// is called synchronously during the call to [pushClipRSuperellipse].
+  ///
+  /// The `clipBehavior` argument controls how the rounded rectangle is clipped.
+  ///
+  /// Hit tests are performed based on the bounding box of the [RSuperellipse].
+  ///
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
+  ClipRSuperellipseLayer? pushClipRSuperellipse(
+    bool needsCompositing,
+    Offset offset,
+    Rect bounds,
+    RSuperellipse clipRSuperellipse,
+    PaintingContextCallback painter, {
+    Clip clipBehavior = Clip.antiAlias,
+    ClipRSuperellipseLayer? oldLayer,
+  }) {
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    }
+    final Rect offsetBounds = bounds.shift(offset);
+    final RSuperellipse offsetShape = clipRSuperellipse.shift(offset);
+    if (needsCompositing) {
+      final ClipRSuperellipseLayer layer = oldLayer ?? ClipRSuperellipseLayer();
+      layer
+        ..clipRSuperellipse = offsetShape
+        ..clipBehavior = clipBehavior;
+      pushLayer(layer, painter, offset, childPaintBounds: offsetBounds);
+      return layer;
+    } else {
+      clipRSuperellipseAndPaint(
+        offsetShape,
+        clipBehavior,
+        offsetBounds,
+        () => painter(this, offset),
+      );
+      return null;
+    }
+  }
+
   /// Clip further painting using a path.
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
@@ -2540,7 +2594,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   void scheduleInitialLayout() {
     assert(!_debugDisposed);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingLayout);
     assert(_relayoutBoundary == null);
     _relayoutBoundary = this;
@@ -2658,7 +2712,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
     final bool isRelayoutBoundary =
-        !parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject;
+        !parentUsesSize || sizedByParent || constraints.isTight || parent == null;
     final RenderObject relayoutBoundary = isRelayoutBoundary ? this : parent!._relayoutBoundary!;
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
@@ -3023,8 +3077,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return;
     }
     _needsCompositingBitsUpdate = true;
-    if (parent is RenderObject) {
-      final RenderObject parent = this.parent!;
+    final RenderObject? parent = this.parent;
+    if (parent != null) {
       if (parent._needsCompositingBitsUpdate) {
         return;
       }
@@ -3035,9 +3089,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }
     }
     // parent is fine (or there isn't one), but we are dirty
-    if (owner != null) {
-      owner!._nodesNeedingCompositingBitsUpdate.add(this);
-    }
+    owner?._nodesNeedingCompositingBitsUpdate.add(this);
   }
 
   late bool _needsCompositing; // initialized in the constructor
@@ -3245,7 +3297,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(_layerHandle.layer != null);
     assert(!_layerHandle.layer!.attached);
     RenderObject? node = parent;
-    while (node is RenderObject) {
+    while (node != null) {
       if (node.isRepaintBoundary) {
         if (node._layerHandle.layer == null) {
           // Looks like the subtree here has never been painted. Let it handle itself.
@@ -3270,7 +3322,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   void scheduleInitialPaint(ContainerLayer rootLayer) {
     assert(rootLayer.attached);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingPaint);
     assert(isRepaintBoundary);
     assert(_layerHandle.layer == null);
@@ -3288,7 +3340,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(!_debugDisposed);
     assert(rootLayer.attached);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingPaint);
     assert(isRepaintBoundary);
     assert(_layerHandle.layer != null); // use scheduleInitialPaint the first time
@@ -3337,8 +3389,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
     assert(() {
       if (_needsCompositingBitsUpdate) {
-        if (parent is RenderObject) {
-          final RenderObject parent = this.parent!;
+        final RenderObject? parent = this.parent;
+        if (parent != null) {
           bool visitedByParent = false;
           parent.visitChildren((RenderObject child) {
             if (child == this) {
@@ -3615,7 +3667,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   void scheduleInitialSemantics() {
     assert(!_debugDisposed);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingSemantics);
     assert(_semantics.parentDataDirty || !_semantics.built);
     assert(owner!._semanticsOwner != null);
@@ -3951,14 +4003,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    if (parent is RenderObject) {
-      parent!.showOnScreen(
-        descendant: descendant ?? this,
-        rect: rect,
-        duration: duration,
-        curve: curve,
-      );
-    }
+    parent?.showOnScreen(
+      descendant: descendant ?? this,
+      rect: rect,
+      duration: duration,
+      curve: curve,
+    );
   }
 
   /// Adds a debug representation of a [RenderObject] optimized for including in

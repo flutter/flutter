@@ -422,7 +422,7 @@ TEST(DisplayListSkConversions, ConicPathToQuads) {
     sk_path.conicTo(20, 10, 20, 20, weight);
 
     DlPath dl_path(sk_path);
-    impeller::Path i_path = dl_path.GetPath();
+    const impeller::Path& i_path = dl_path.GetPath();
 
     auto it = i_path.begin();
     ASSERT_EQ(it.type(), impeller::Path::ComponentType::kContour);

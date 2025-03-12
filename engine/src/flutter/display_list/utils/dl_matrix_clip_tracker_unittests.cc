@@ -468,15 +468,23 @@ TEST(DisplayListMatrixClipState, RectCoverage) {
   DlRect rect = DlRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   DisplayListMatrixClipState state(rect);
 
-  EXPECT_TRUE(state.rect_covers_cull(rect));
-  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.1f, 0.0f, 0.0f, 0.0f)));
-  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.1f, 0.0f, 0.0f)));
-  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.1f, 0.0f)));
-  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.0f, 0.1f)));
-  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(-0.1f, 0.0f, 0.0f, 0.0f)));
-  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, -0.1f, 0.0f, 0.0f)));
-  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, -0.1f, 0.0f)));
-  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.0f, -0.1f)));
+  auto test_rect = [&state](const DlRect& test_rect, bool expect) {
+    EXPECT_EQ(state.rect_covers_cull(test_rect), expect) << test_rect;
+    EXPECT_EQ(DisplayListMatrixClipState::TransformedRectCoversBounds(
+                  test_rect, state.matrix(), state.GetDeviceCullCoverage()),
+              expect)
+        << test_rect;
+  };
+
+  test_rect(rect, true);
+  test_rect(rect.Expand(0.1f, 0.0f, 0.0f, 0.0f), true);
+  test_rect(rect.Expand(0.0f, 0.1f, 0.0f, 0.0f), true);
+  test_rect(rect.Expand(0.0f, 0.0f, 0.1f, 0.0f), true);
+  test_rect(rect.Expand(0.0f, 0.0f, 0.0f, 0.1f), true);
+  test_rect(rect.Expand(-0.1f, 0.0f, 0.0f, 0.0f), false);
+  test_rect(rect.Expand(0.0f, -0.1f, 0.0f, 0.0f), false);
+  test_rect(rect.Expand(0.0f, 0.0f, -0.1f, 0.0f), false);
+  test_rect(rect.Expand(0.0f, 0.0f, 0.0f, -0.1f), false);
 }
 
 TEST(DisplayListMatrixClipState, RectCoverageAccuracy) {
@@ -495,15 +503,23 @@ TEST(DisplayListMatrixClipState, RectCoverageAccuracy) {
   DisplayListMatrixClipState state(cull);
   state.scale(DPR, DPR);
 
-  EXPECT_TRUE(state.rect_covers_cull(rect));
-  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.1f, 0.0f, 0.0f, 0.0f)));
-  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.1f, 0.0f, 0.0f)));
-  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.1f, 0.0f)));
-  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.0f, 0.1f)));
-  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(-0.1f, 0.0f, 0.0f, 0.0f)));
-  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, -0.1f, 0.0f, 0.0f)));
-  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, -0.1f, 0.0f)));
-  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.0f, -0.1f)));
+  auto test_rect = [&state](const DlRect& test_rect, bool expect) {
+    EXPECT_EQ(state.rect_covers_cull(test_rect), expect) << test_rect;
+    EXPECT_EQ(DisplayListMatrixClipState::TransformedRectCoversBounds(
+                  test_rect, state.matrix(), state.GetDeviceCullCoverage()),
+              expect)
+        << test_rect;
+  };
+
+  test_rect(rect, true);
+  test_rect(rect.Expand(0.1f, 0.0f, 0.0f, 0.0f), true);
+  test_rect(rect.Expand(0.0f, 0.1f, 0.0f, 0.0f), true);
+  test_rect(rect.Expand(0.0f, 0.0f, 0.1f, 0.0f), true);
+  test_rect(rect.Expand(0.0f, 0.0f, 0.0f, 0.1f), true);
+  test_rect(rect.Expand(-0.1f, 0.0f, 0.0f, 0.0f), false);
+  test_rect(rect.Expand(0.0f, -0.1f, 0.0f, 0.0f), false);
+  test_rect(rect.Expand(0.0f, 0.0f, -0.1f, 0.0f), false);
+  test_rect(rect.Expand(0.0f, 0.0f, 0.0f, -0.1f), false);
 }
 
 TEST(DisplayListMatrixClipState, RectCoverageUnderScale) {
@@ -511,16 +527,24 @@ TEST(DisplayListMatrixClipState, RectCoverageUnderScale) {
   DisplayListMatrixClipState state(rect);
   state.scale(2.0f, 2.0f);
 
-  EXPECT_FALSE(state.rect_covers_cull(DlRect::MakeLTRB(100, 100, 200, 200)));
-  EXPECT_TRUE(state.rect_covers_cull(DlRect::MakeLTRB(50, 50, 100, 100)));
-  EXPECT_TRUE(state.rect_covers_cull(DlRect::MakeLTRB(49, 50, 100, 100)));
-  EXPECT_TRUE(state.rect_covers_cull(DlRect::MakeLTRB(50, 49, 100, 100)));
-  EXPECT_TRUE(state.rect_covers_cull(DlRect::MakeLTRB(50, 50, 101, 100)));
-  EXPECT_TRUE(state.rect_covers_cull(DlRect::MakeLTRB(50, 50, 100, 101)));
-  EXPECT_FALSE(state.rect_covers_cull(DlRect::MakeLTRB(51, 50, 100, 100)));
-  EXPECT_FALSE(state.rect_covers_cull(DlRect::MakeLTRB(50, 51, 100, 100)));
-  EXPECT_FALSE(state.rect_covers_cull(DlRect::MakeLTRB(50, 50, 99, 100)));
-  EXPECT_FALSE(state.rect_covers_cull(DlRect::MakeLTRB(50, 50, 100, 99)));
+  auto test_rect = [&state](const DlRect& test_rect, bool expect) {
+    EXPECT_EQ(state.rect_covers_cull(test_rect), expect) << test_rect;
+    EXPECT_EQ(DisplayListMatrixClipState::TransformedRectCoversBounds(
+                  test_rect, state.matrix(), state.GetDeviceCullCoverage()),
+              expect)
+        << test_rect;
+  };
+
+  test_rect(DlRect::MakeLTRB(100, 100, 200, 200), false);
+  test_rect(DlRect::MakeLTRB(50, 50, 100, 100), true);
+  test_rect(DlRect::MakeLTRB(49, 50, 100, 100), true);
+  test_rect(DlRect::MakeLTRB(50, 49, 100, 100), true);
+  test_rect(DlRect::MakeLTRB(50, 50, 101, 100), true);
+  test_rect(DlRect::MakeLTRB(50, 50, 100, 101), true);
+  test_rect(DlRect::MakeLTRB(51, 50, 100, 100), false);
+  test_rect(DlRect::MakeLTRB(50, 51, 100, 100), false);
+  test_rect(DlRect::MakeLTRB(50, 50, 99, 100), false);
+  test_rect(DlRect::MakeLTRB(50, 50, 100, 99), false);
 }
 
 TEST(DisplayListMatrixClipState, RectCoverageUnderRotation) {
@@ -537,6 +561,11 @@ TEST(DisplayListMatrixClipState, RectCoverageUnderRotation) {
         << "  testing " << test_true << std::endl
         << "    contains " << state.GetLocalCullCoverage() << std::endl
         << "    at " << i << " degrees";
+    EXPECT_TRUE(DisplayListMatrixClipState::TransformedRectCoversBounds(
+        test_true, DlMatrix::MakeRotationZ(DlDegrees(i)), cull))
+        << "  testing " << test_true << std::endl
+        << "    contains " << state.GetLocalCullCoverage() << std::endl
+        << "    at " << i << " degrees";
     if ((i % 90) == 45) {
       // The cull rect is largest when viewed at multiples of 45
       // degrees so we will fail to contain it at those angles
@@ -544,10 +573,20 @@ TEST(DisplayListMatrixClipState, RectCoverageUnderRotation) {
           << "  testing " << test_false << std::endl
           << "    contains " << state.GetLocalCullCoverage() << std::endl
           << "    at " << i << " degrees";
+      EXPECT_FALSE(DisplayListMatrixClipState::TransformedRectCoversBounds(
+          test_false, DlMatrix::MakeRotationZ(DlDegrees(i)), cull))
+          << "  testing " << test_false << std::endl
+          << "    contains " << state.GetLocalCullCoverage() << std::endl
+          << "    at " << i << " degrees";
     } else {
       // At other angles, the cull rect is not quite so big as to encroach
       // upon the expanded test rectangle.
       EXPECT_TRUE(state.rect_covers_cull(test_false))
+          << "  testing " << test_false << std::endl
+          << "    contains " << state.GetLocalCullCoverage() << std::endl
+          << "    at " << i << " degrees";
+      EXPECT_TRUE(DisplayListMatrixClipState::TransformedRectCoversBounds(
+          test_false, DlMatrix::MakeRotationZ(DlDegrees(i)), cull))
           << "  testing " << test_false << std::endl
           << "    contains " << state.GetLocalCullCoverage() << std::endl
           << "    at " << i << " degrees";
@@ -564,15 +603,23 @@ TEST(DisplayListMatrixClipState, OvalCoverage) {
   // then use larger expansion/contractions of 0.1f to cover/not-cover it.
   DlRect test = cull.Scale(impeller::kSqrt2).Expand(0.02f);
 
-  EXPECT_TRUE(state.oval_covers_cull(test));
-  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.1f, 0.0f, 0.0f, 0.0f)));
-  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.1f, 0.0f, 0.0f)));
-  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.1f, 0.0f)));
-  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.0f, 0.1f)));
-  EXPECT_FALSE(state.oval_covers_cull(test.Expand(-0.1f, 0.0f, 0.0f, 0.0f)));
-  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, -0.1f, 0.0f, 0.0f)));
-  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, -0.1f, 0.0f)));
-  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.0f, -0.1f)));
+  auto test_oval = [&state](const DlRect& test_rect, bool expect) {
+    EXPECT_EQ(state.oval_covers_cull(test_rect), expect) << test_rect;
+    EXPECT_EQ(DisplayListMatrixClipState::TransformedOvalCoversBounds(
+                  test_rect, state.matrix(), state.GetDeviceCullCoverage()),
+              expect)
+        << test_rect;
+  };
+
+  test_oval(test, true);
+  test_oval(test.Expand(0.1f, 0.0f, 0.0f, 0.0f), true);
+  test_oval(test.Expand(0.0f, 0.1f, 0.0f, 0.0f), true);
+  test_oval(test.Expand(0.0f, 0.0f, 0.1f, 0.0f), true);
+  test_oval(test.Expand(0.0f, 0.0f, 0.0f, 0.1f), true);
+  test_oval(test.Expand(-0.1f, 0.0f, 0.0f, 0.0f), false);
+  test_oval(test.Expand(0.0f, -0.1f, 0.0f, 0.0f), false);
+  test_oval(test.Expand(0.0f, 0.0f, -0.1f, 0.0f), false);
+  test_oval(test.Expand(0.0f, 0.0f, 0.0f, -0.1f), false);
 }
 
 TEST(DisplayListMatrixClipState, OvalCoverageUnderScale) {
@@ -587,15 +634,23 @@ TEST(DisplayListMatrixClipState, OvalCoverageUnderScale) {
   // the cull rect under a 2.0 scale.
   DlRect test = cull.Scale(0.5f * impeller::kSqrt2).Expand(0.02f);
 
-  EXPECT_TRUE(state.oval_covers_cull(test));
-  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.1f, 0.0f, 0.0f, 0.0f)));
-  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.1f, 0.0f, 0.0f)));
-  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.1f, 0.0f)));
-  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.0f, 0.1f)));
-  EXPECT_FALSE(state.oval_covers_cull(test.Expand(-0.1f, 0.0f, 0.0f, 0.0f)));
-  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, -0.1f, 0.0f, 0.0f)));
-  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, -0.1f, 0.0f)));
-  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.0f, -0.1f)));
+  auto test_oval = [&state](const DlRect& test_rect, bool expect) {
+    EXPECT_EQ(state.oval_covers_cull(test_rect), expect) << test_rect;
+    EXPECT_EQ(DisplayListMatrixClipState::TransformedOvalCoversBounds(
+                  test_rect, state.matrix(), state.GetDeviceCullCoverage()),
+              expect)
+        << test_rect;
+  };
+
+  test_oval(test, true);
+  test_oval(test.Expand(0.1f, 0.0f, 0.0f, 0.0f), true);
+  test_oval(test.Expand(0.0f, 0.1f, 0.0f, 0.0f), true);
+  test_oval(test.Expand(0.0f, 0.0f, 0.1f, 0.0f), true);
+  test_oval(test.Expand(0.0f, 0.0f, 0.0f, 0.1f), true);
+  test_oval(test.Expand(-0.1f, 0.0f, 0.0f, 0.0f), false);
+  test_oval(test.Expand(0.0f, -0.1f, 0.0f, 0.0f), false);
+  test_oval(test.Expand(0.0f, 0.0f, -0.1f, 0.0f), false);
+  test_oval(test.Expand(0.0f, 0.0f, 0.0f, -0.1f), false);
 }
 
 TEST(DisplayListMatrixClipState, OvalCoverageUnderRotation) {
@@ -620,6 +675,17 @@ TEST(DisplayListMatrixClipState, OvalCoverageUnderRotation) {
         << "  testing " << test_false << std::endl
         << "    contains " << state.GetLocalCullCoverage() << std::endl
         << "    at " << i << " degrees";
+
+    EXPECT_TRUE(DisplayListMatrixClipState::TransformedOvalCoversBounds(
+        test_true, DlMatrix::MakeRotationZ(DlDegrees(i)), cull))
+        << "  testing " << test_true << std::endl
+        << "    contains " << state.GetLocalCullCoverage() << std::endl
+        << "    at " << i << " degrees";
+    EXPECT_FALSE(DisplayListMatrixClipState::TransformedOvalCoversBounds(
+        test_false, DlMatrix::MakeRotationZ(DlDegrees(i)), cull))
+        << "  testing " << test_false << std::endl
+        << "    contains " << state.GetLocalCullCoverage() << std::endl
+        << "    at " << i << " degrees";
   }
 }
 
@@ -632,13 +698,21 @@ TEST(DisplayListMatrixClipState, RRectCoverage) {
   // RRect of cull with no corners covers
   EXPECT_TRUE(
       state.rrect_covers_cull(DlRoundRect::MakeRectXY(cull, 0.0f, 0.0f)));
+  EXPECT_TRUE(DisplayListMatrixClipState::TransformedRRectCoversBounds(
+      DlRoundRect::MakeRectXY(cull, 0.0f, 0.0f), DlMatrix(), cull));
+
   // RRect of cull with even the tiniest corners does not cover
   EXPECT_FALSE(
       state.rrect_covers_cull(DlRoundRect::MakeRectXY(cull, 0.01f, 0.01f)));
+  EXPECT_FALSE(DisplayListMatrixClipState::TransformedRRectCoversBounds(
+      DlRoundRect::MakeRectXY(cull, 0.01f, 0.01f), DlMatrix(), cull));
 
   // Expanded by 2.0 and then with a corner of 2.0 obviously still covers
   EXPECT_TRUE(
       state.rrect_covers_cull(DlRoundRect::MakeRectXY(test, 2.0f, 2.0f)));
+  EXPECT_TRUE(DisplayListMatrixClipState::TransformedRRectCoversBounds(
+      DlRoundRect::MakeRectXY(test, 2.0f, 2.0f), DlMatrix(), cull));
+
   // The corner point of the cull rect is at (c-2, c-2) relative to the
   // corner of the rrect bounds so we compute its distance to the center
   // of the circular part and compare it to the radius of the corner (c)
@@ -663,9 +737,14 @@ TEST(DisplayListMatrixClipState, RRectCoverage) {
   // corners set to 6.82 should still cover the cull rect
   EXPECT_TRUE(
       state.rrect_covers_cull(DlRoundRect::MakeRectXY(test, 6.82f, 6.82f)));
+  EXPECT_TRUE(DisplayListMatrixClipState::TransformedRRectCoversBounds(
+      DlRoundRect::MakeRectXY(test, 6.82f, 6.82f), DlMatrix(), cull));
+
   // but corners set to 6.83 should not cover the cull rect
   EXPECT_FALSE(
       state.rrect_covers_cull(DlRoundRect::MakeRectXY(test, 6.84f, 6.84f)));
+  EXPECT_FALSE(DisplayListMatrixClipState::TransformedRRectCoversBounds(
+      DlRoundRect::MakeRectXY(test, 6.84f, 6.84f), DlMatrix(), cull));
 }
 
 }  // namespace testing
