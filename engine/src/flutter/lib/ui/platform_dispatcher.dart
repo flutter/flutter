@@ -1547,7 +1547,7 @@ class PlatformDispatcher {
 /// ```dart
 /// import 'dart:ui';
 ///
-/// ColorScheme createColorScheme() {
+/// Color getSystemAccentColor() {
 ///   Color? systemAccentColor;
 ///   if (SystemColor.platformProvidesSystemColors) {
 ///     if (PlatformDispatcher.instance.platformBrightness == Brightness.light) {
@@ -1557,9 +1557,7 @@ class PlatformDispatcher {
 ///     }
 ///   }
 ///
-///   return ColorScheme.fromSeed(
-///     seedColor: systemAccentColor ?? const Color(0xFF007AFF),
-///   );
+///   return systemAccentColor ?? const Color(0xFF007AFF);
 /// }
 /// ```
 ///
