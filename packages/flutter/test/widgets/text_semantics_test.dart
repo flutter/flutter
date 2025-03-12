@@ -138,4 +138,39 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('SemanticsIdentifier creates a functional SemanticsNode', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            text: 'Hello, ',
+            children: <TextSpan>[
+              TextSpan(text: '1 new '),
+              TextSpan(text: 'semantics node ', semanticsIdentifier: 'new_semantics_node'),
+              TextSpan(text: 'has been '),
+              TextSpan(text: 'created.'),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Hello, 1 new semantics node has been created.'), findsOneWidget);
+    final SemanticsNode node = tester.getSemantics(
+      find.text('Hello, 1 new semantics node has been created.'),
+    );
+    final Map<String, String> labelToNodeId = <String, String>{};
+    node.visitChildren((SemanticsNode node) {
+      labelToNodeId[node.label] = node.identifier;
+      return true;
+    });
+    expect(node.id, 1);
+    expect(labelToNodeId['Hello, 1 new '], '');
+    expect(labelToNodeId['semantics node '], 'new_semantics_node');
+    expect(labelToNodeId['has been created.'], '');
+    expect(labelToNodeId.length, 3);
+  });
 }
