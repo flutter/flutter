@@ -7568,7 +7568,13 @@ class Semantics extends SingleChildRenderObjectWidget {
     final bool containsText =
         properties.attributedLabel != null ||
         properties.label != null ||
+        properties.attributedDecreasedValue != null ||
+        properties.attributedIncreasedValue != null ||
+        properties.attributedValue != null ||
+        properties.decreasedValue != null ||
+        properties.increasedValue != null ||
         properties.value != null ||
+        properties.attributedHint != null ||
         properties.hint != null ||
         properties.tooltip != null;
 
