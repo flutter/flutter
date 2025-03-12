@@ -40,7 +40,6 @@ class ConfigCommand extends FlutterCommand {
       negatable: false,
       help:
           'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
-      hide: true,
     );
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption(
