@@ -37,6 +37,8 @@ G_DECLARE_FINAL_TYPE(FlViewAccessible,
 
 /**
  * fl_view_accessible_new:
+ * @engine: the #FlEngine.
+ * @view_id: the Flutter view id.
  *
  * Creates a new accessibility object that exposes Flutter accessibility
  * information to ATK.

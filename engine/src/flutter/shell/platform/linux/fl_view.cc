@@ -787,6 +787,7 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
 
   self->view_id = fl_engine_add_view(engine, 1, 1, 1.0, self->cancellable,
                                      view_added_cb, self);
+
   fl_renderer_add_renderable(FL_RENDERER(self->renderer), self->view_id,
                              FL_RENDERABLE(self));
 
