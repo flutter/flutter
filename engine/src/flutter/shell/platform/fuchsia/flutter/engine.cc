@@ -394,6 +394,8 @@ void Engine::Initialize(
             auto platform_view = shell_->GetPlatformView();
 
             if (platform_view) {
+              // TODO(fuchsia): Remove implicit view assumption.
+              // https://github.com/flutter/flutter/issues/142845
               platform_view->DispatchSemanticsAction(kImplicitViewId, node_id,
                                                      action, {});
             }
