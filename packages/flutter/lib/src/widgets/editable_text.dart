@@ -5384,7 +5384,6 @@ class EditableTextState extends State<EditableText>
 
     _hadFocusOnTapDown = true;
 
-
     if (widget.onTapOutside != null) {
       widget.onTapOutside!(event);
     } else {
