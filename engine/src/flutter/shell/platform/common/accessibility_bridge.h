@@ -181,6 +181,7 @@ class AccessibilityBridge
     FlutterTransformation transform;
     std::vector<int32_t> children_in_traversal_order;
     std::vector<int32_t> custom_accessibility_actions;
+    std::string identifier;
   } SemanticsNode;
 
   // See FlutterSemanticsCustomAction in embedder.h
