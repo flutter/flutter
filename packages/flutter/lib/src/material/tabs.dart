@@ -1274,6 +1274,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The value passed to the callback is true if a pointer has entered the
   /// [Tab] at `index` and false if a pointer has exited.
   ///
+  /// When hover is moved from one tab directly to another, this will be called
+  /// twice. First to represent hover exiting the initial tab, and then second
+  /// for the pointer entering hover over the next tab.
+  ///
   /// {@tool dartpad}
   /// This sample shows how to customize a [Tab] in response to hovering over a
   /// [TabBar].
@@ -1289,6 +1293,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The value passed to the callback is true if the node has gained focus for
   /// the [Tab] at `index` and false if focus has been lost.
+  ///
+  /// When focus is moved from one tab directly to another, this will be called
+  /// twice. First to represent focus being lost by the initially focused tab,
+  /// and then second for the next tab gaining focus.
   ///
   /// {@tool dartpad}
   /// This sample shows how to customize a [Tab] based on focus traversal in
