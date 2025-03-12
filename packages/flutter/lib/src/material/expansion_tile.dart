@@ -493,6 +493,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
 
   @override
   void dispose() {
+    _tileController.removeListener(_onExpansionChanged);
     _timer?.cancel();
     _timer = null;
     super.dispose();

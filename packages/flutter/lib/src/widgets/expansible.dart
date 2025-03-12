@@ -66,11 +66,21 @@ class ExpansibleController extends ChangeNotifier {
 
   bool _isExpanded = false;
 
+  void _setExpansionState(bool newValue) {
+    if (newValue != _isExpanded) {
+      _isExpanded = newValue;
+      notifyListeners();
+    }
+  }
+
   /// Whether the expansible widget built with this controller is in expanded
   /// state.
   ///
   /// This property doesn't take the animation into account. It reports `true`
   /// even if the expansion animation is not completed.
+  ///
+  /// To be notified when this property changes, add a listener to the
+  /// controller using [ExpansibleController.addListener].
   ///
   /// See also:
   ///
@@ -94,10 +104,7 @@ class ExpansibleController extends ChangeNotifier {
   ///  * [collapse], which collapses the expansible widget.
   ///  * [isExpanded] to check whether the expansible widget is expanded.
   void expand() {
-    if (!_isExpanded) {
-      _isExpanded = true;
-      notifyListeners();
-    }
+    _setExpansionState(true);
   }
 
   /// Collapses the [Expansible] that was built with this controller.
@@ -116,10 +123,7 @@ class ExpansibleController extends ChangeNotifier {
   ///  * [expand], which expands the [Expansible].
   ///  * [isExpanded] to check whether the [Expansible] is expanded.
   void collapse() {
-    if (_isExpanded) {
-      _isExpanded = false;
-      notifyListeners();
-    }
+    _setExpansionState(false);
   }
 
   /// Finds the [ExpansibleController] for the closest [Expansible] instance
@@ -217,7 +221,7 @@ class Expansible extends StatefulWidget {
     required this.headerBuilder,
     required this.bodyBuilder,
     required this.controller,
-    this.expansibleBuilder,
+    this.expansibleBuilder = _defaultExpansibleBuilder,
     this.duration = const Duration(milliseconds: 200),
     this.curve = Curves.ease,
     this.reverseCurve,
@@ -241,11 +245,6 @@ class Expansible extends StatefulWidget {
   /// When this widget is expanded, the height of its body animates from 0 to
   /// its fully extended height.
   final ExpansibleComponentBuilder bodyBuilder;
-
-  /// Builds the widget with the results of [headerBuilder] and [bodyBuilder].
-  ///
-  /// Defaults to placing the header and body in a [Column].
-  final ExpansibleBuilder? expansibleBuilder;
 
   /// The duration of the expansion animation.
   ///
@@ -272,11 +271,25 @@ class Expansible extends StatefulWidget {
   /// Defaults to false.
   final bool maintainState;
 
+  /// Builds the widget with the results of [headerBuilder] and [bodyBuilder].
+  ///
+  /// Defaults to placing the header and body in a [Column].
+  final ExpansibleBuilder expansibleBuilder;
+
+  static Widget _defaultExpansibleBuilder(
+    BuildContext context,
+    Widget header,
+    Widget body,
+    Animation<double> animation,
+  ) {
+    return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]);
+  }
+
   @override
   State<StatefulWidget> createState() => _ExpansibleState();
 }
 
-class _ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
+class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late CurvedAnimation _heightFactor;
 
@@ -314,12 +327,14 @@ class _ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    widget.controller.removeListener(_toggleExpansion);
     _animationController.dispose();
     _heightFactor.dispose();
     super.dispose();
   }
 
   void _toggleExpansion() {
+    // Rebuild to call widget.expansibleBuilder.
     setState(() {
       if (widget.controller.isExpanded) {
         _animationController.forward();
@@ -337,12 +352,9 @@ class _ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
     });
   }
 
-  Widget _buildExpansible(BuildContext context, Widget header, Widget body) {
-    return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]);
-  }
-
   @override
   Widget build(BuildContext context) {
+    assert(!_animationController.isDismissed || !widget.controller.isExpanded);
     final bool closed = !widget.controller.isExpanded && _animationController.isDismissed;
     final bool shouldRemoveBody = closed && !widget.maintainState;
 
@@ -356,10 +368,7 @@ class _ExpansibleState extends State<Expansible> with TickerProviderStateMixin {
       builder: (BuildContext context, Widget? child) {
         final Widget header = widget.headerBuilder(context, _animationController);
         final Widget body = ClipRect(child: Align(heightFactor: _heightFactor.value, child: child));
-        if (widget.expansibleBuilder != null) {
-          return widget.expansibleBuilder!(context, header, body, _animationController);
-        }
-        return _buildExpansible(context, header, body);
+        return widget.expansibleBuilder(context, header, body, _animationController);
       },
       child: shouldRemoveBody ? null : result,
     );
