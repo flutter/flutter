@@ -48,10 +48,10 @@ std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
     GlyphAtlas::Type type,
     Scalar scale,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
-    const std::shared_ptr<TextFrame>& frame,
-    Point offset) {
+    const std::shared_ptr<TextFrame>& frame) {
   frame->SetPerFrameData(
-      TextFrame::RoundScaledFontSize(scale), /*offset=*/offset,
+      TextFrame::RoundScaledFontSize(scale), /*offset=*/{0, 0},
+      /*transform=*/Matrix::MakeScale(Vector3{scale, scale, 1}),
       /*properties=*/std::nullopt);
   return typographer_context->CreateGlyphAtlas(context, type, host_buffer,
                                                atlas_context, {frame});
