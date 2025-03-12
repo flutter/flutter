@@ -24,7 +24,7 @@ TEST(RenderPassBuilder, CreatesRenderPassWithNoDepthStencil) {
 
   auto render_pass = builder.Build(context->GetDevice());
 
-  EXPECT_TRUE(!!render_pass);
+  EXPECT_TRUE(render_pass);
   EXPECT_FALSE(builder.GetDepthStencil().has_value());
 }
 
@@ -40,7 +40,7 @@ TEST(RenderPassBuilder, RenderPassWithLoadOpUsesCurrentLayout) {
 
   auto render_pass = builder.Build(context->GetDevice());
 
-  EXPECT_TRUE(!!render_pass);
+  EXPECT_TRUE(render_pass);
 
   std::optional<vk::AttachmentDescription> maybe_color = builder.GetColor0();
   ASSERT_TRUE(maybe_color.has_value());
@@ -66,7 +66,7 @@ TEST(RenderPassBuilder, RenderPassWithPerformanceTopology) {
 
   auto render_pass = builder.Build(context->GetDevice());
 
-  EXPECT_TRUE(!!render_pass);
+  EXPECT_TRUE(render_pass);
 
   std::optional<vk::AttachmentDescription> maybe_color = builder.GetColor0();
   ASSERT_TRUE(maybe_color.has_value());
@@ -96,7 +96,7 @@ TEST(RenderPassBuilder, CreatesRenderPassWithCombinedDepthStencil) {
 
   auto render_pass = builder.Build(context->GetDevice());
 
-  EXPECT_TRUE(!!render_pass);
+  EXPECT_TRUE(render_pass);
 
   std::optional<vk::AttachmentDescription> maybe_color = builder.GetColor0();
   ASSERT_TRUE(maybe_color.has_value());
@@ -141,7 +141,7 @@ TEST(RenderPassBuilder, CreatesRenderPassWithOnlyStencil) {
 
   auto render_pass = builder.Build(context->GetDevice());
 
-  EXPECT_TRUE(!!render_pass);
+  EXPECT_TRUE(render_pass);
 
   std::optional<vk::AttachmentDescription> maybe_depth_stencil =
       builder.GetDepthStencil();
@@ -172,7 +172,7 @@ TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStore) {
 
   auto render_pass = builder.Build(context->GetDevice());
 
-  EXPECT_TRUE(!!render_pass);
+  EXPECT_TRUE(render_pass);
 
   auto maybe_color = builder.GetColor0();
   ASSERT_TRUE(maybe_color.has_value());
@@ -213,7 +213,7 @@ TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStorePerformance) {
 
   auto render_pass = builder.Build(context->GetDevice());
 
-  EXPECT_TRUE(!!render_pass);
+  EXPECT_TRUE(render_pass);
 
   auto maybe_color = builder.GetColor0();
   ASSERT_TRUE(maybe_color.has_value());

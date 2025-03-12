@@ -20,6 +20,8 @@ static constexpr size_t kMaxAttachments =
 
 class RenderPassBuilderVK {
  public:
+  /// The topology describes the subpasses, input attachments, and dependencies
+  /// of the render pass constructed by the builder.
   enum Topology {
     /// A default render pass topology that uses attachment optimal layouts.
     kPerformance,

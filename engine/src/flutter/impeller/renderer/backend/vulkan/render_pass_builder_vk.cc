@@ -30,8 +30,11 @@ RenderPassBuilderVK::~RenderPassBuilderVK() = default;
 vk::ImageLayout RenderPassBuilderVK::GetColorLayoutForTopology() const {
   switch (topology_) {
     case kPerformance:
+      // The recommended layout for color attachments.
       return vk::ImageLayout::eColorAttachmentOptimal;
     case kProgrammableBlend:
+      // Layout required to take a self dependency / registering an input
+      // attachment.
       return vk::ImageLayout::eGeneral;
   }
   FML_UNREACHABLE();
