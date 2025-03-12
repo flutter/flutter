@@ -465,7 +465,7 @@ void Canvas::DrawLine(const Point& p0,
 
   if (!paint.color_filter && !paint.invert_colors && !paint.image_filter &&
       !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
-    auto contents = LineContents::Make(std::move(geometry));
+    auto contents = LineContents::Make(std::move(geometry), paint.color);
     entity.SetContents(std::move(contents));
     AddRenderEntityToCurrentPass(entity, reuse_depth);
   } else {

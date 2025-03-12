@@ -7,14 +7,15 @@
 
 #include <memory>
 
-#include "impeller/entity/contents/contents.h"
-#include "impeller/entity/geometry/line_geometry.h"
+#include "flutter/impeller/entity/contents/contents.h"
+#include "flutter/impeller/entity/geometry/line_geometry.h"
 
 namespace impeller {
 class LineContents : public Contents {
  public:
   static std::unique_ptr<LineContents> Make(
-      std::unique_ptr<LineGeometry> geometry);
+      std::unique_ptr<LineGeometry> geometry,
+      Color color);
 
   bool Render(const ContentContext& renderer,
               const Entity& entity,
@@ -23,9 +24,10 @@ class LineContents : public Contents {
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
  private:
-  explicit LineContents(std::unique_ptr<LineGeometry> geometry);
+  explicit LineContents(std::unique_ptr<LineGeometry> geometry, Color color);
 
   std::unique_ptr<LineGeometry> geometry_;
+  Color color_;
 };
 }  // namespace impeller
 
