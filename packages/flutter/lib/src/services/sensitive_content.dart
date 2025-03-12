@@ -132,7 +132,7 @@ class SensitiveContentService {
         'Android Flutter View has a content sensitivity mode '
         'that is not recognized by Flutter. If you see this error, '
         'it is possible the View uses a new mode that Flutter needs to '
-        'support. Please file an issue at https://github.com/flutter/flutter/issues/new.',
+        'support; please file an issue.',
       );
     }
 
