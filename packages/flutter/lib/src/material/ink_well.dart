@@ -368,7 +368,7 @@ class InkResponse extends StatelessWidget {
   ///
   /// The secondary button is a mouse button that can be configured
   /// based on the user's system settings. By default, it is the
-  /// right button for right-handed users and the left button for  
+  /// right button for right-handed users and the left button for
   /// left-handed users.
   final GestureTapCallback? onSecondaryTap;
 
