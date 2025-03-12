@@ -48,6 +48,12 @@ public class SensitiveContentChannel {
    */
   @VisibleForTesting public static final String NOT_SENSITIVE_CONTENT_SENSITIVITY = "notSensitive";
 
+  /**
+   * Flutter ContentSensitivity.unknown name that represents a content sensitivity
+   * setting that the Flutter SensitiveContent widget does not recognize.
+   */
+  @VisibleForTesting public static final String UNKNOWN_CONTENT_SENSITIVITY = "unknown";
+
   public final MethodChannel channel;
   private SensitiveContentMethodHandler sensitiveContentMethodHandler;
 
