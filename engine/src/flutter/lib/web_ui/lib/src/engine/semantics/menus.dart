@@ -69,11 +69,7 @@ class SemanticMenuItem extends SemanticRole {
   void update() {
     super.update();
     if (semanticsObject.isFlagsDirty) {
-      if (semanticsObject.hasEnabledState && !semanticsObject.isEnabled) {
-        setAttribute('aria-disabled', 'true');
-      } else {
-        removeAttribute('aria-disabled');
-      }
+      addDisabledBehavior();
     }
   }
 
@@ -111,6 +107,8 @@ class SemanticMenuItemCheckbox extends SemanticRole {
         checkedValue = 'false';
       }
       setAttribute('aria-checked', checkedValue);
+
+      addDisabledBehavior();
     }
   }
 
@@ -141,6 +139,8 @@ class SemanticMenuItemRadio extends SemanticRole {
         'aria-checked',
         (semanticsObject.hasFlag(ui.SemanticsFlag.isChecked)) ? 'true' : 'false',
       );
+
+      addDisabledBehavior();
     }
   }
 

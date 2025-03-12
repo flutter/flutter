@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'semantics.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -24,11 +25,7 @@ class SemanticButton extends SemanticRole {
   void update() {
     super.update();
 
-    if (semanticsObject.enabledState() == EnabledState.disabled) {
-      setAttribute('aria-disabled', 'true');
-    } else {
-      removeAttribute('aria-disabled');
-    }
+    addDisabledBehavior();
   }
 }
 
