@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_DESCRIPTOR_POOL_VK_H_
 
 #include <cstdint>
+#include <unordered_map>
 
 #include "fml/status_or.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
@@ -20,7 +21,7 @@ struct DescriptorCache {
   std::vector<vk::DescriptorSet> used;
 };
 
-using DescriptorCacheMap = absl::flat_hash_map<PipelineKey, DescriptorCache>;
+using DescriptorCacheMap = std::unordered_map<PipelineKey, DescriptorCache>;
 
 //------------------------------------------------------------------------------
 /// @brief      A per-frame descriptor pool. Descriptors

@@ -61,7 +61,7 @@ fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
     const vk::DescriptorSetLayout& layout,
     PipelineKey pipeline_key,
     const ContextVK& context_vk) {
-  auto existing = descriptor_sets_.find(pipeline_key);
+  DescriptorCacheMap::iterator existing = descriptor_sets_.find(pipeline_key);
   if (existing != descriptor_sets_.end() && !existing->second.unused.empty()) {
     auto descriptor_set = existing->second.unused.back();
     existing->second.unused.pop_back();

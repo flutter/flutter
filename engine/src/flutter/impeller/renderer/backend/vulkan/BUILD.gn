@@ -154,7 +154,6 @@ impeller_component("vulkan") {
     "../../../shader_archive",
     "//flutter/flutter_vma",
     "//flutter/fml",
-    "//flutter/third_party/abseil-cpp/absl/container:flat_hash_map",
     "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
     "//flutter/third_party/vulkan_memory_allocator",
   ]
