@@ -47,7 +47,7 @@ class ComputePipelineVK final
   vk::UniquePipeline pipeline_;
   vk::UniquePipelineLayout layout_;
   vk::UniqueDescriptorSetLayout descriptor_set_layout_;
-  PipelineKey pipeline_key_;
+  const PipelineKey pipeline_key_;
   bool is_valid_ = false;
 
   // |Pipeline|

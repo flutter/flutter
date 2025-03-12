@@ -62,7 +62,7 @@ class PipelineVK final
   vk::UniquePipelineLayout layout_;
   vk::UniqueDescriptorSetLayout descriptor_set_layout_;
   std::shared_ptr<SamplerVK> immutable_sampler_;
-  PipelineKey pipeline_key_;
+  const PipelineKey pipeline_key_;
   mutable Mutex immutable_sampler_variants_mutex_;
   mutable ImmutableSamplerVariants immutable_sampler_variants_ IPLR_GUARDED_BY(
       immutable_sampler_variants_mutex_);

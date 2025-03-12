@@ -11,10 +11,10 @@ namespace impeller {
 namespace testing {
 
 TEST(DescriptorPoolRecyclerVKTest, GetDescriptorPoolRecyclerCreatesNewPools) {
-  auto const context = MockVulkanContextBuilder().Build();
+  const auto context = MockVulkanContextBuilder().Build();
 
-  auto const pool1 = context->GetDescriptorPoolRecycler()->Get();
-  auto const pool2 = context->GetDescriptorPoolRecycler()->Get();
+  const auto pool1 = context->GetDescriptorPoolRecycler()->Get();
+  const auto pool2 = context->GetDescriptorPoolRecycler()->Get();
 
   // The two descriptor pools should be different.
   EXPECT_NE(pool1.get(), pool2.get());
@@ -23,7 +23,7 @@ TEST(DescriptorPoolRecyclerVKTest, GetDescriptorPoolRecyclerCreatesNewPools) {
 }
 
 TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
-  auto const context = MockVulkanContextBuilder().Build();
+  const auto context = MockVulkanContextBuilder().Build();
 
   {
     // Fetch a pool (which will be created).
@@ -31,10 +31,10 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
     pool.AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
   }
 
-  auto const pool = context->GetDescriptorPoolRecycler()->GetDescriptorPool();
+  const auto pool = context->GetDescriptorPoolRecycler()->GetDescriptorPool();
 
   // Now check that we only ever created one pool.
-  auto const called = GetMockVulkanFunctions(context->GetDevice());
+  const auto called = GetMockVulkanFunctions(context->GetDevice());
   EXPECT_EQ(
       std::count(called->begin(), called->end(), "vkCreateDescriptorPool"), 1u);
 
@@ -42,7 +42,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
 }
 
 TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
-  auto const context = MockVulkanContextBuilder().Build();
+  const auto context = MockVulkanContextBuilder().Build();
 
   // Create 33 pools
   {
@@ -54,7 +54,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     }
   }
 
-  auto const called = GetMockVulkanFunctions(context->GetDevice());
+  const auto called = GetMockVulkanFunctions(context->GetDevice());
   EXPECT_EQ(
       std::count(called->begin(), called->end(), "vkCreateDescriptorPool"),
       33u);
@@ -70,7 +70,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     }
   }
 
-  auto const called_twice = GetMockVulkanFunctions(context->GetDevice());
+  const auto called_twice = GetMockVulkanFunctions(context->GetDevice());
   // 32 of the descriptor pools were recycled, so only one more is created.
   EXPECT_EQ(
       std::count(called->begin(), called->end(), "vkCreateDescriptorPool"),
@@ -80,7 +80,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
 }
 
 TEST(DescriptorPoolRecyclerVKTest, MultipleCommandBuffersShareDescriptorPool) {
-  auto const context = MockVulkanContextBuilder().Build();
+  const auto context = MockVulkanContextBuilder().Build();
 
   auto cmd_buffer_1 = context->CreateCommandBuffer();
   auto cmd_buffer_2 = context->CreateCommandBuffer();
@@ -99,6 +99,30 @@ TEST(DescriptorPoolRecyclerVKTest, MultipleCommandBuffersShareDescriptorPool) {
   EXPECT_NE(&vk_1.GetDescriptorPool(), &vk_3.GetDescriptorPool());
 
   context->Shutdown();
+}
+
+TEST(DescriptorPoolRecyclerVKTest, DescriptorsAreRecycled) {
+  const auto context = MockVulkanContextBuilder().Build();
+
+  {
+    auto pool = DescriptorPoolVK(context);
+    pool.AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+  }
+
+  // Should reuse the same descriptor set allocated above.
+  const auto pool = context->GetDescriptorPoolRecycler()->GetDescriptorPool();
+  pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+
+  const auto called = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(
+      std::count(called->begin(), called->end(), "vkAllocateDescriptorSets"),
+      1);
+
+  // Should allocate a new descriptor set.
+  pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+  EXPECT_EQ(
+      std::count(called->begin(), called->end(), "vkAllocateDescriptorSets"),
+      2);
 }
 
 }  // namespace testing
