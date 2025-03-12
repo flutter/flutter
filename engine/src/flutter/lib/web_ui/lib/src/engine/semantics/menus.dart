@@ -62,11 +62,7 @@ class SemanticMenuItem extends SemanticRole {
     if (semanticsObject.hasExpandedState) {
       setAttribute('aria-haspopup', 'menu');
     }
-    if (semanticsObject.hasEnabledState && !semanticsObject.isEnabled) {
-      setAttribute('aria-disabled', 'true');
-    } else {
-      addTappable();
-    }
+    addTappable();
   }
 
   @override
