@@ -710,6 +710,9 @@ class AppDomain extends Domain {
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         logger: globals.logger,
+        terminal: globals.terminal,
+        platform: globals.platform,
+        outputPreferences: globals.outputPreferences,
         fileSystem: globals.fs,
       );
     } else if (enableHotReload) {
@@ -924,7 +927,7 @@ class AppDomain extends Domain {
     final Map<String, Object?>? result = await device.vmService!.invokeFlutterExtensionRpcRaw(
       methodName,
       args: params,
-      isolateId: views.first.uiIsolate!.id!,
+      isolateId: views.first.uiIsolate!.id,
     );
     if (result == null) {
       throw DaemonException('method not available: $methodName');

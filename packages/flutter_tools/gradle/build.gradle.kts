@@ -51,14 +51,23 @@ tasks.withType<JavaCompile> {
 tasks.test {
     useJUnitPlatform()
 }
-
-kotlin {
+// https://stackoverflow.com/questions/55456176/unresolved-reference-compilekotlin-in-build-gradle-kts
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 
 dependencies {
+    // Versions available https://mvnrepository.com/artifact/androidx.annotation/annotation-jvm.
+    // Version release notes https://developer.android.com/jetpack/androidx/releases/annotation
+    compileOnly("androidx.annotation:annotation-jvm:1.9.1")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
+    // Update to 1.8.0 when min kotlin is 2.1
+    // https://github.com/Kotlin/kotlinx.serialization/releases for kotlin version compatibility.
+    // All kotlinx implementation dependencies must work with the oldest kotlin supported versions.
+    // Defined in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
     // When bumping, also update:
     //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
     //  * AGP version in the buildscript block in packages/flutter_tools/gradle/src/main/kotlin_scripts/dependency_version_checker.gradle.kts
@@ -68,4 +77,5 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("com.android.tools.build:gradle:8.7.3")
     testImplementation("org.mockito:mockito-core:4.8.0")
+    testImplementation("io.mockk:mockk:1.13.16")
 }

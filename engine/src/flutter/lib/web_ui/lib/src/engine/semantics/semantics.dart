@@ -20,6 +20,7 @@ import '../vector_math.dart';
 import '../window.dart';
 import 'accessibility.dart';
 import 'checkable.dart';
+import 'expandable.dart';
 import 'focusable.dart';
 import 'header.dart';
 import 'heading.dart';
@@ -32,6 +33,7 @@ import 'platform_view.dart';
 import 'route.dart';
 import 'scrollable.dart';
 import 'semantics_helper.dart';
+import 'table.dart';
 import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
@@ -67,7 +69,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
 
   @override
   String toString() {
-    final List<String> features = <String>[];
+    final features = <String>[];
     if (accessibleNavigation) {
       features.add('accessibleNavigation');
     }
@@ -237,6 +239,7 @@ class SemanticsNodeUpdate {
     required this.headingLevel,
     this.linkUrl,
     required this.role,
+    required this.controlsNodes,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -346,6 +349,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsRole role;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final List<String>? controlsNodes;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -364,6 +370,9 @@ enum EngineSemanticsRole {
 
   /// Contains editable text.
   textField,
+
+  /// A group of radio buttons.
+  radioGroup,
 
   /// A control that has a checked state, such as a check box or a radio button.
   checkable,
@@ -416,6 +425,24 @@ enum EngineSemanticsRole {
   /// A main content for a tab.
   tabPanel,
 
+  /// A popup dialog.
+  dialog,
+
+  /// An alert dialog.
+  alertDialog,
+
+  /// A table structure containing data arranged in rows and columns.
+  table,
+
+  /// A cell in a [table] that does not contain column or row header information.
+  cell,
+
+  /// A row of [cell]s or or [columnHeader]s in a [table].
+  row,
+
+  /// A cell in a [table] contains header information for a column.
+  columnHeader,
+
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
   ///
@@ -442,6 +469,7 @@ abstract class SemanticRole {
     addRouteName();
     addLabelAndValue(preferredRepresentation: preferredLabelRepresentation);
     addSelectableBehavior();
+    addExpandableBehavior();
   }
 
   /// Initializes a blank role for a [semanticsObject].
@@ -608,6 +636,10 @@ abstract class SemanticRole {
     }
   }
 
+  void addExpandableBehavior() {
+    addSemanticBehavior(Expandable(semanticsObject, this));
+  }
+
   /// Adds a semantic behavior to this role.
   ///
   /// This method should be called by concrete implementations of
@@ -644,6 +676,10 @@ abstract class SemanticRole {
     if (semanticsObject.isIdentifierDirty) {
       _updateIdentifier();
     }
+
+    if (semanticsObject.isControlsNodesDirty) {
+      _updateControls();
+    }
   }
 
   void _updateIdentifier() {
@@ -652,6 +688,26 @@ abstract class SemanticRole {
     } else {
       removeAttribute('flt-semantics-identifier');
     }
+  }
+
+  void _updateControls() {
+    if (semanticsObject.hasControlsNodes) {
+      semanticsObject.owner.addOneTimePostUpdateCallback(() {
+        final elementIds = <String>[];
+        for (final String identifier in semanticsObject.controlsNodes!) {
+          final int? semanticNodeId = semanticsObject.owner.identifiersToIds[identifier];
+          if (semanticNodeId == null) {
+            continue;
+          }
+          elementIds.add('flt-semantic-node-$semanticNodeId');
+        }
+        if (elementIds.isNotEmpty) {
+          setAttribute('aria-controls', elementIds.join(' '));
+          return;
+        }
+      });
+    }
+    removeAttribute('aria-controls');
   }
 
   /// Whether this role was disposed of.
@@ -1249,6 +1305,23 @@ class SemanticsObject {
   /// The role of this node.
   late ui.SemanticsRole role;
 
+  /// List of nodes whose contents are controlled by this node.
+  ///
+  /// The list contains [identifier]s of those nodes.
+  List<String>? controlsNodes;
+
+  /// Whether this object controls at least one node.
+  bool get hasControlsNodes => controlsNodes != null && controlsNodes!.isNotEmpty;
+
+  static const int _controlsNodesIndex = 1 << 27;
+
+  /// Whether the [controlsNodes] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isControlsNodesDirty => _isDirty(_controlsNodesIndex);
+  void _markControlsNodesDirty() {
+    _dirtyFields |= _controlsNodesIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1337,7 +1410,11 @@ class SemanticsObject {
       hasAction(ui.SemanticsAction.scrollLeft) || hasAction(ui.SemanticsAction.scrollRight);
 
   /// Whether this object represents a scrollable area in any direction.
-  bool get isScrollContainer => isVerticalScrollContainer || isHorizontalScrollContainer;
+  ///
+  /// When the scrollable container has no scroll extent, it won't have any scroll actions, but
+  /// it's still a scrollable container. In this case, we need to use the implicit scrolling flag
+  /// to check for scrollability.
+  bool get isScrollContainer => hasFlag(ui.SemanticsFlag.hasImplicitScrolling);
 
   /// Whether this object has a non-empty list of children.
   bool get hasChildren =>
@@ -1391,7 +1468,13 @@ class SemanticsObject {
     }
 
     if (_identifier != update.identifier) {
+      if (_identifier?.isNotEmpty ?? false) {
+        owner.identifiersToIds.remove(_identifier);
+      }
       _identifier = update.identifier;
+      if (_identifier?.isNotEmpty ?? false) {
+        owner.identifiersToIds[_identifier!] = id;
+      }
       _markIdentifierDirty();
     }
 
@@ -1537,6 +1620,11 @@ class SemanticsObject {
 
     role = update.role;
 
+    if (!unorderedListEqual<String>(controlsNodes, update.controlsNodes)) {
+      controlsNodes = update.controlsNodes;
+      _markControlsNodesDirty();
+    }
+
     // Apply updates to the DOM.
     _updateRole();
 
@@ -1603,7 +1691,7 @@ class SemanticsObject {
 
     // Always render in traversal order, because the accessibility traversal
     // is determined by the DOM order of elements.
-    final List<SemanticsObject> childrenInRenderOrder = <SemanticsObject>[];
+    final childrenInRenderOrder = <SemanticsObject>[];
     for (int i = 0; i < childCount; i++) {
       childrenInRenderOrder.add(owner._semanticsTree[childrenInTraversalOrder[i]]!);
     }
@@ -1637,7 +1725,7 @@ class SemanticsObject {
     }
 
     // At this point it is guaranteed to have had a non-empty previous child list.
-    final List<SemanticsObject> previousChildrenInRenderOrder = _currentChildrenInRenderOrder!;
+    final previousChildrenInRenderOrder = _currentChildrenInRenderOrder!;
     final int previousCount = previousChildrenInRenderOrder.length;
 
     // Both non-empty case.
@@ -1658,7 +1746,7 @@ class SemanticsObject {
 
     // Indices into the old child list pointing at children that also exist in
     // the new child list.
-    final List<int> intersectionIndicesOld = <int>[];
+    final intersectionIndicesOld = <int>[];
 
     int newIndex = 0;
 
@@ -1692,7 +1780,7 @@ class SemanticsObject {
     // The longest sub-sequence in the old list maximizes the number of children
     // that do not need to be moved.
     final List<int?> longestSequence = longestIncreasingSubsequence(intersectionIndicesOld);
-    final List<int> stationaryIds = <int>[];
+    final stationaryIds = <int>[];
     for (int i = 0; i < longestSequence.length; i += 1) {
       stationaryIds.add(
         previousChildrenInRenderOrder[intersectionIndicesOld[longestSequence[i]!]].id,
@@ -1745,6 +1833,36 @@ class SemanticsObject {
         return EngineSemanticsRole.tabPanel;
       case ui.SemanticsRole.tabBar:
         return EngineSemanticsRole.tabList;
+      case ui.SemanticsRole.dialog:
+        return EngineSemanticsRole.dialog;
+      case ui.SemanticsRole.alertDialog:
+        return EngineSemanticsRole.alertDialog;
+      case ui.SemanticsRole.table:
+        return EngineSemanticsRole.table;
+      case ui.SemanticsRole.cell:
+        return EngineSemanticsRole.cell;
+      case ui.SemanticsRole.row:
+        return EngineSemanticsRole.row;
+      case ui.SemanticsRole.columnHeader:
+        return EngineSemanticsRole.columnHeader;
+      case ui.SemanticsRole.radioGroup:
+        return EngineSemanticsRole.radioGroup;
+      // TODO(chunhtai): implement these roles.
+      // https://github.com/flutter/flutter/issues/159741.
+      case ui.SemanticsRole.searchBox:
+      case ui.SemanticsRole.dragHandle:
+      case ui.SemanticsRole.spinButton:
+      case ui.SemanticsRole.comboBox:
+      case ui.SemanticsRole.menuBar:
+      case ui.SemanticsRole.menu:
+      case ui.SemanticsRole.menuItem:
+      case ui.SemanticsRole.list:
+      case ui.SemanticsRole.listItem:
+      case ui.SemanticsRole.form:
+      case ui.SemanticsRole.tooltip:
+      case ui.SemanticsRole.loadingSpinner:
+      case ui.SemanticsRole.progressBar:
+      case ui.SemanticsRole.hotKey:
       case ui.SemanticsRole.none:
       // fallback to checking semantics properties.
     }
@@ -1784,6 +1902,7 @@ class SemanticsObject {
       EngineSemanticsRole.scrollable => SemanticScrollable(this),
       EngineSemanticsRole.incrementable => SemanticIncrementable(this),
       EngineSemanticsRole.button => SemanticButton(this),
+      EngineSemanticsRole.radioGroup => SemanticRadioGroup(this),
       EngineSemanticsRole.checkable => SemanticCheckable(this),
       EngineSemanticsRole.route => SemanticRoute(this),
       EngineSemanticsRole.image => SemanticImage(this),
@@ -1794,6 +1913,12 @@ class SemanticsObject {
       EngineSemanticsRole.tab => SemanticTab(this),
       EngineSemanticsRole.tabList => SemanticTabList(this),
       EngineSemanticsRole.tabPanel => SemanticTabPanel(this),
+      EngineSemanticsRole.dialog => SemanticDialog(this),
+      EngineSemanticsRole.alertDialog => SemanticAlertDialog(this),
+      EngineSemanticsRole.table => SemanticTable(this),
+      EngineSemanticsRole.cell => SemanticCell(this),
+      EngineSemanticsRole.row => SemanticRow(this),
+      EngineSemanticsRole.columnHeader => SemanticColumnHeader(this),
       EngineSemanticsRole.generic => GenericRole(this),
     };
   }
@@ -1893,6 +2018,19 @@ class SemanticsObject {
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
   bool get isSelected => hasFlag(ui.SemanticsFlag.isSelected);
+
+  /// If true, this node represents something that can be annotated as
+  /// "expanded", such as a expansion tile or drop down menu
+  ///
+  /// Expandability is managed by `aria-expanded`.
+  ///
+  /// See also:
+  ///
+  ///   * [isExpanded], which indicates whether the node is currently selected.
+  bool get isExpandable => hasFlag(ui.SemanticsFlag.hasExpandedState);
+
+  /// Indicates whether the node is currently expanded.
+  bool get isExpanded => hasFlag(ui.SemanticsFlag.isExpanded);
 
   /// Role-specific adjustment of the vertical position of the child container.
   ///
@@ -2274,6 +2412,15 @@ class EngineSemantics {
   GestureMode get gestureMode => _gestureMode;
   GestureMode _gestureMode = GestureMode.browserGestures;
 
+  /// Resets [gestureMode] back to its original value [GestureMode.browserGestures].
+  ///
+  /// This is intended to be used in tests only.
+  @visibleForTesting
+  void debugResetGestureMode() {
+    _gestureModeClock?.datetime = null;
+    _gestureMode = GestureMode.browserGestures;
+  }
+
   AlarmClock? _gestureModeClock;
 
   AlarmClock? _getGestureModeClock() {
@@ -2353,6 +2500,12 @@ class EngineSemantics {
       'mousemove',
       'mouseleave',
       'mouseup',
+
+      // The wheel event disables browser gestures to allow the framework handle
+      // the scrolling. Doing otherwise would cause [SemanticScrollable] to send
+      // [SemanticsAction.scrollUp/Down] to the framework leading to scroll
+      // position jerks. See https://github.com/flutter/flutter/issues/159358.
+      'wheel',
     ];
 
     if (pointerEventTypes.contains(event.type)) {
@@ -2454,6 +2607,7 @@ class EngineSemanticsOwner {
   SemanticsUpdatePhase _phase = SemanticsUpdatePhase.idle;
 
   final Map<int, SemanticsObject> _semanticsTree = <int, SemanticsObject>{};
+  final Map<String, int> identifiersToIds = <String, int>{};
 
   /// Map [SemanticsObject.id] to parent [SemanticsObject] it was attached to
   /// this frame.
@@ -2754,8 +2908,8 @@ AFTER: $description
 /// Complexity: n*log(n)
 List<int> longestIncreasingSubsequence(List<int> list) {
   final int len = list.length;
-  final List<int> predecessors = <int>[];
-  final List<int> mins = <int>[0];
+  final predecessors = <int>[];
+  final mins = <int>[0];
   int longest = 0;
   for (int i = 0; i < len; i++) {
     // Binary search for the largest positive `j ≤ longest`
@@ -2788,7 +2942,7 @@ List<int> longestIncreasingSubsequence(List<int> list) {
     }
   }
   // Reconstruct the longest subsequence
-  final List<int> seq = List<int>.filled(longest, 0);
+  final seq = List<int>.filled(longest, 0);
   int k = mins[longest];
   for (int i = longest - 1; i >= 0; i--) {
     seq[i] = k;

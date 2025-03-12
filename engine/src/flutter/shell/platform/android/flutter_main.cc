@@ -6,6 +6,7 @@
 
 #include <android/log.h>
 #include <sys/system_properties.h>
+#include <cstring>
 #include <optional>
 #include <string>
 #include <vector>
@@ -14,22 +15,18 @@
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/native_library.h"
-#include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
-#include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
+#include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "impeller/base/validation.h"
 #include "impeller/toolkit/android/proc_table.h"
-#include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "txt/platform.h"
 
 namespace flutter {
@@ -48,10 +45,30 @@ namespace {
 
 fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 
+static const constexpr char* kAndroidHuawei = "android-huawei";
+
+/// These are SoCs that crash when using AHB imports.
+static constexpr const char* kBLC[] = {
+    // Most Exynos Series SoC
+    "exynos7870",  //
+    "exynos7880",  //
+    "exynos7872",  //
+    "exynos7884",  //
+    "exynos7885",  //
+    "exynos8890",  //
+    "exynos8895",  //
+    "exynos7904",  //
+    "exynos9609",  //
+    "exynos9610",  //
+    "exynos9611",  //
+    "exynos9810"   //
+};
+
 }  // anonymous namespace
 
-FlutterMain::FlutterMain(const flutter::Settings& settings)
-    : settings_(settings) {}
+FlutterMain::FlutterMain(const flutter::Settings& settings,
+                         flutter::AndroidRenderingAPI android_rendering_api)
+    : settings_(settings), android_rendering_api_(android_rendering_api) {}
 
 FlutterMain::~FlutterMain() = default;
 
@@ -67,6 +84,10 @@ const flutter::Settings& FlutterMain::GetSettings() const {
   return settings_;
 }
 
+flutter::AndroidRenderingAPI FlutterMain::GetAndroidRenderingAPI() {
+  return android_rendering_api_;
+}
+
 void FlutterMain::Init(JNIEnv* env,
                        jclass clazz,
                        jobject context,
@@ -74,7 +95,8 @@ void FlutterMain::Init(JNIEnv* env,
                        jstring kernelPath,
                        jstring appStoragePath,
                        jstring engineCachesPath,
-                       jlong initTimeMillis) {
+                       jlong initTimeMillis,
+                       jint api_level) {
   std::vector<std::string> args;
   args.push_back("flutter");
   for (auto& arg : fml::jni::StringArrayToVector(env, jargs)) {
@@ -97,9 +119,13 @@ void FlutterMain::Init(JNIEnv* env,
           "Dart DevTools.");
     }
   }
+  // The API level must be provided from java, as the NDK function
+  // android_get_device_api_level() is only available on API 24 and greater, and
+  // Flutter still supports 21, 22, and 23.
 
-  settings.android_rendering_api = SelectedRenderingAPI(settings);
-  switch (settings.android_rendering_api) {
+  AndroidRenderingAPI android_rendering_api =
+      SelectedRenderingAPI(settings, api_level);
+  switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
     case AndroidRenderingAPI::kSkiaOpenGLES:
       settings.enable_impeller = false;
@@ -169,8 +195,7 @@ void FlutterMain::Init(JNIEnv* env,
 
   // Not thread safe. Will be removed when FlutterMain is refactored to no
   // longer be a singleton.
-  g_flutter_main.reset(new FlutterMain(settings));
-
+  g_flutter_main.reset(new FlutterMain(settings, android_rendering_api));
   g_flutter_main->SetupDartVMServiceUriCallback(env);
 }
 
@@ -213,7 +238,7 @@ bool FlutterMain::Register(JNIEnv* env) {
       {
           .name = "nativeInit",
           .signature = "(Landroid/content/Context;[Ljava/lang/String;Ljava/"
-                       "lang/String;Ljava/lang/String;Ljava/lang/String;J)V",
+                       "lang/String;Ljava/lang/String;Ljava/lang/String;JI)V",
           .fnPtr = reinterpret_cast<void*>(&Init),
       },
       {
@@ -238,8 +263,21 @@ bool FlutterMain::IsDeviceEmulator(std::string_view product_model) {
 }
 
 // static
+bool FlutterMain::IsKnownBadSOC(std::string_view hardware) {
+  // TODO(jonahwilliams): if the list gets too long (> 16), convert
+  // to a hash map first.
+  for (const auto& board : kBLC) {
+    if (strcmp(board, hardware.data()) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// static
 AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
-    const flutter::Settings& settings) {
+    const flutter::Settings& settings,
+    int api_level) {
   if (settings.enable_software_rendering) {
     FML_CHECK(!settings.enable_impeller)
         << "Impeller does not support software rendering. Either disable "
@@ -269,7 +307,6 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     // Even if this check returns true, Impeller may determine it cannot use
     // Vulkan for some other reason, such as a missing required extension or
     // feature.
-    int api_level = android_get_device_api_level();
     if (api_level < kMinimumAndroidApiLevelForVulkan) {
       return kVulkanUnsupportedFallback;
     }
@@ -277,6 +314,23 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     __system_property_get("ro.product.model", product_model);
     if (IsDeviceEmulator(product_model)) {
       // Avoid using Vulkan on known emulators.
+      return kVulkanUnsupportedFallback;
+    }
+
+    __system_property_get("ro.com.google.clientidbase", product_model);
+    if (strcmp(product_model, kAndroidHuawei) == 0) {
+      // Avoid using Vulkan on Huawei as AHB imports do not
+      // consistently work.
+    }
+
+    if (__system_property_find("ro.vendor.mediatek.platform") != nullptr) {
+      // Probably MediaTek. Avoid Vulkan.
+      return kVulkanUnsupportedFallback;
+    }
+
+    __system_property_get("ro.product.board", product_model);
+    if (IsKnownBadSOC(product_model)) {
+      // Avoid using Vulkan on known bad SoCs.
       return kVulkanUnsupportedFallback;
     }
 

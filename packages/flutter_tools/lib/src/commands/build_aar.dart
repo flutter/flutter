@@ -48,7 +48,6 @@ class BuildAarCommand extends BuildSubCommand {
     usesDartDefineOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: false);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     argParser.addMultiOption(
@@ -112,7 +111,7 @@ class BuildAarCommand extends BuildSubCommand {
   }
 
   @override
-  bool get regeneratePlatformSpecificToolingDurifyVerify => false;
+  bool get regeneratePlatformSpecificToolingDuringVerify => false;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -150,8 +149,6 @@ class BuildAarCommand extends BuildSubCommand {
     if (androidBuildInfo.isEmpty) {
       throwToolExit('Please specify a build mode and try again.');
     }
-
-    displayNullSafetyMode(androidBuildInfo.first.buildInfo);
 
     await androidBuilder?.buildAar(
       project: project,

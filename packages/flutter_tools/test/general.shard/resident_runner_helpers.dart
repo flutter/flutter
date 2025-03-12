@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/tools/scene_importer.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -235,7 +234,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
@@ -285,7 +283,6 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
@@ -453,9 +450,6 @@ class FakeDevFS extends Fake implements DevFS {
   Set<String> shaderPathsToEvict = <String>{};
 
   @override
-  Set<String> scenePathsToEvict = <String>{};
-
-  @override
   bool didUpdateFontManifest = false;
 
   UpdateFSReport nextUpdateReport = UpdateFSReport(success: true);
@@ -483,7 +477,6 @@ class FakeDevFS extends Fake implements DevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
-    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,

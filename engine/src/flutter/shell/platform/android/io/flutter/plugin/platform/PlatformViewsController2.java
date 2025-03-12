@@ -27,6 +27,7 @@ import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.android.MotionEventTracker;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.*;
@@ -50,6 +51,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private AndroidTouchProcessor androidTouchProcessor;
   private Context context;
   private FlutterView flutterView;
+  private FlutterJNI flutterJNI = null;
 
   @Nullable private TextInputPlugin textInputPlugin;
 
@@ -63,6 +65,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private final ArrayList<SurfaceControl.Transaction> pendingTransactions;
   private final ArrayList<SurfaceControl.Transaction> activeTransactions;
   private Surface overlayerSurface = null;
+  private SurfaceControl overlaySurfaceControl = null;
 
   public PlatformViewsController2() {
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
@@ -75,6 +78,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   public void setRegistry(@NonNull PlatformViewRegistry registry) {
     this.registry = (PlatformViewRegistryImpl) registry;
+  }
+
+  /** Whether the SurfaceControl swapchain mode is enabled. */
+  public void setFlutterJNI(FlutterJNI flutterJNI) {
+    this.flutterJNI = flutterJNI;
   }
 
   @Override
@@ -570,6 +578,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       tx.setLayer(surfaceControl, 1000);
       tx.apply();
       overlayerSurface = new Surface(surfaceControl);
+      overlaySurfaceControl = surfaceControl;
     }
 
     return new FlutterOverlaySurface(0, overlayerSurface);
@@ -579,7 +588,30 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlayerSurface != null) {
       overlayerSurface.release();
       overlayerSurface = null;
+      overlaySurfaceControl = null;
     }
+  }
+
+  @TargetApi(API_LEVELS.API_34)
+  @RequiresApi(API_LEVELS.API_34)
+  public void showOverlaySurface() {
+    if (overlaySurfaceControl == null) {
+      return;
+    }
+    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
+    tx.apply();
+  }
+
+  @TargetApi(API_LEVELS.API_34)
+  @RequiresApi(API_LEVELS.API_34)
+  public void hideOverlaySurface() {
+    if (overlaySurfaceControl == null) {
+      return;
+    }
+    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
+    tx.apply();
   }
 
   //// Message Handler ///////
@@ -678,6 +710,14 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
             return;
           }
           embeddedView.clearFocus();
+        }
+
+        @Override
+        public boolean isSurfaceControlEnabled() {
+          if (flutterJNI == null) {
+            return false;
+          }
+          return flutterJNI.IsSurfaceControlEnabled();
         }
       };
 }

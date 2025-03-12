@@ -13,9 +13,12 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/testing/testing.h"
+#include "impeller/entity/contents/text_contents.h"
+#include "impeller/entity/entity.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "txt/platform.h"
 
 using namespace flutter;
@@ -155,6 +158,28 @@ TEST_P(AiksTest, CanRenderTextFrameWithHalfScaling) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// This is a test that looks for glyph artifacts we've see.
+TEST_P(AiksTest, ScaledK) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+  for (int i = 0; i < 6; ++i) {
+    builder.Save();
+    builder.Translate(300 * i, 0);
+    Scalar scale = 0.445 - (i / 1000.f);
+    builder.Scale(scale, scale);
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "k", "Roboto-Regular.ttf",
+        TextRenderOptions{.font_size = 600, .position = DlPoint(10, 500)});
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "k", "Roboto-Regular.ttf",
+        TextRenderOptions{.font_size = 300, .position = DlPoint(10, 800)});
+    builder.Restore();
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderTextFrameWithFractionScaling) {
   Scalar fine_scale = 0.f;
   bool is_subpixel = false;
@@ -179,6 +204,44 @@ TEST_P(AiksTest, CanRenderTextFrameWithFractionScaling) {
     return builder.Build();
   };
 
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+// https://github.com/flutter/flutter/issues/164958
+TEST_P(AiksTest, TextRotated180Degrees) {
+  float fpivot[2] = {200 + 30, 200 - 20};
+  float rotation = 180;
+  float foffset[2] = {200, 200};
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("pivotx", &fpivot[0], 0, 300);
+      ImGui::SliderFloat("pivoty", &fpivot[1], 0, 300);
+      ImGui::SliderFloat("rotation", &rotation, 0, 360);
+      ImGui::SliderFloat("foffsetx", &foffset[0], 0, 300);
+      ImGui::SliderFloat("foffsety", &foffset[1], 0, 300);
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
+    builder.DrawPaint(DlPaint().setColor(DlColor(0xffffeeff)));
+
+    builder.Save();
+    DlPoint pivot = Point(fpivot[0], fpivot[1]);
+    builder.Translate(pivot.x, pivot.y);
+    builder.Rotate(rotation);
+    builder.Translate(-pivot.x, -pivot.y);
+
+    RenderTextInCanvasSkia(GetContext(), builder, "test", "Roboto-Regular.ttf",
+                           TextRenderOptions{
+                               .color = DlColor::kBlack(),
+                               .position = DlPoint(foffset[0], foffset[1]),
+                           });
+
+    builder.Restore();
+    return builder.Build();
+  };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
@@ -301,7 +364,7 @@ TEST_P(AiksTest, CanRenderTextInSaveLayer) {
 
   // Blend the layer with the parent pass using kClear to expose the coverage.
   paint.setBlendMode(DlBlendMode::kClear);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   ASSERT_TRUE(RenderTextInCanvasSkia(
       GetContext(), builder, "the quick brown fox jumped over the lazy dog!.?",
       "Roboto-Regular.ttf"));
@@ -419,7 +482,7 @@ TEST_P(AiksTest, CanRenderTextWithLargePerspectiveTransform) {
   DisplayListBuilder builder;
 
   DlPaint save_paint;
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
   builder.Transform(Matrix(2000, 0, 0, 0,   //
                            0, 2000, 0, 0,   //
                            0, 0, -1, 9000,  //
@@ -571,6 +634,72 @@ TEST_P(AiksTest, DifferenceClipsMustRenderIdenticallyAcrossBackends) {
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+
+  // Verifies that TextContents only use the scale/transform that is
+  // computed during preroll.
+  constexpr const char* font_fixture = "Roboto-Regular.ttf";
+
+  // Construct the text blob.
+  auto c_font_fixture = std::string(font_fixture);
+  auto mapping = flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
+  ASSERT_TRUE(mapping);
+
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont sk_font(font_mgr->makeFromData(mapping), 16);
+
+  auto blob = SkTextBlob::MakeFromString("Hello World", sk_font);
+  ASSERT_TRUE(blob);
+
+  auto text_frame = MakeTextFrameFromTextBlobSkia(blob);
+
+  // Simulate recording the text frame during preroll.
+  Matrix preroll_matrix =
+      Matrix::MakeTranslateScale({1.5, 1.5, 1}, {100, 50, 0});
+  Point preroll_point = Point{23, 45};
+  {
+    auto scale = TextFrame::RoundScaledFontSize(
+        (preroll_matrix * Matrix::MakeTranslation(preroll_point))
+            .GetMaxBasisLengthXY());
+
+    aiks_context.GetContentContext().GetLazyGlyphAtlas()->AddTextFrame(
+        text_frame,     //
+        scale,          //
+        preroll_point,  //
+        preroll_matrix,
+        std::nullopt  //
+    );
+  }
+
+  // Now simulate rendering with a slightly different scale factor.
+  RenderTarget render_target =
+      aiks_context.GetContentContext()
+          .GetRenderTargetCache()
+          ->CreateOffscreenMSAA(*aiks_context.GetContext(), {100, 100}, 1);
+
+  TextContents text_contents;
+  text_contents.SetTextFrame(text_frame);
+  text_contents.SetOffset(preroll_point);
+  text_contents.SetScale(1.6);
+  text_contents.SetColor(Color::Aqua());
+
+  Matrix not_preroll_matrix =
+      Matrix::MakeTranslateScale({1.5, 1.5, 1}, {100, 50, 0});
+
+  Entity entity;
+  entity.SetTransform(not_preroll_matrix);
+
+  std::shared_ptr<CommandBuffer> command_buffer =
+      aiks_context.GetContext()->CreateCommandBuffer();
+  std::shared_ptr<RenderPass> render_pass =
+      command_buffer->CreateRenderPass(render_target);
+
+  EXPECT_TRUE(text_contents.Render(aiks_context.GetContentContext(), entity,
+                                   *render_pass));
 }
 
 }  // namespace testing

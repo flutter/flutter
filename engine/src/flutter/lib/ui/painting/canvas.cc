@@ -64,7 +64,7 @@ void Canvas::saveLayerWithoutBounds(Dart_Handle paint_objects,
         paint.paint(dl_paint, kSaveLayerWithPaintFlags, DlTileMode::kDecal);
     FML_DCHECK(save_paint);
     TRACE_EVENT0("flutter", "ui.Canvas::saveLayer (Recorded)");
-    builder()->SaveLayer(nullptr, save_paint);
+    builder()->SaveLayer(std::nullopt, save_paint);
   }
 }
 
@@ -174,6 +174,13 @@ void Canvas::clipRect(double left,
 void Canvas::clipRRect(const RRect& rrect, bool doAntiAlias) {
   if (display_list_builder_) {
     builder()->ClipRoundRect(rrect.rrect, DlClipOp::kIntersect, doAntiAlias);
+  }
+}
+
+void Canvas::clipRSuperellipse(const RSuperellipse& rse, bool doAntiAlias) {
+  if (display_list_builder_) {
+    builder()->ClipRoundSuperellipse(rse.rsuperellipse, DlClipOp::kIntersect,
+                                     doAntiAlias);
   }
 }
 
@@ -292,6 +299,19 @@ void Canvas::drawDRRect(const RRect& outer,
     DlPaint dl_paint;
     paint.paint(dl_paint, kDrawDRRectFlags, DlTileMode::kDecal);
     builder()->DrawDiffRoundRect(outer.rrect, inner.rrect, dl_paint);
+  }
+}
+
+void Canvas::drawRSuperellipse(const RSuperellipse& rse,
+                               Dart_Handle paint_objects,
+                               Dart_Handle paint_data) {
+  Paint paint(paint_objects, paint_data);
+
+  FML_DCHECK(paint.isNotNull());
+  if (display_list_builder_) {
+    DlPaint dl_paint;
+    paint.paint(dl_paint, kDrawDRRectFlags, DlTileMode::kDecal);
+    builder()->DrawRoundSuperellipse(rse.rsuperellipse, dl_paint);
   }
 }
 

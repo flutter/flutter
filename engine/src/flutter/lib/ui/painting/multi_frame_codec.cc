@@ -6,10 +6,12 @@
 
 #include <utility>
 
+#include "display_list/image/dl_image.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/painting/display_list_image_gpu.h"
 #include "flutter/lib/ui/painting/image.h"
 #if IMPELLER_SUPPORTS_RENDERING
+#include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 #endif  // IMPELLER_SUPPORTS_RENDERING
 #include "third_party/dart/runtime/include/dart_api.h"
@@ -55,10 +57,10 @@ static void InvokeNextFrameCallback(
 
 std::pair<sk_sp<DlImage>, std::string>
 MultiFrameCodec::State::GetNextFrameImage(
-    fml::WeakPtr<GrDirectContext> resourceContext,
+    const fml::WeakPtr<GrDirectContext>& resourceContext,
     const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
     const std::shared_ptr<impeller::Context>& impeller_context,
-    fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue) {
+    const fml::RefPtr<flutter::SkiaUnrefQueue>& unref_queue) {
   SkBitmap bitmap = SkBitmap();
   SkImageInfo info = generator_->GetInfo().makeColorType(kN32_SkColorType);
   if (info.alphaType() == kUnpremul_SkAlphaType) {
@@ -144,10 +146,36 @@ MultiFrameCodec::State::GetNextFrameImage(
 
 #if IMPELLER_SUPPORTS_RENDERING
   if (is_impeller_enabled_) {
+#ifdef FML_OS_IOS
     // This is safe regardless of whether the GPU is available or not because
     // without mipmap creation there is no command buffer encoding done.
     return ImageDecoderImpeller::UploadTextureToStorage(
         impeller_context, std::make_shared<SkBitmap>(bitmap));
+#else
+    sk_sp<DlImage> dl_image;
+    std::string error_message;
+    auto mapping = std::make_unique<fml::NonOwnedMapping>(
+        reinterpret_cast<const uint8_t*>(bitmap.getAddr(0, 0)),  // data
+        bitmap.dimensions().area() * info.bytesPerPixel(),       // size
+        [bitmap](auto, auto) mutable { bitmap.reset(); }         // proc
+    );
+    std::shared_ptr<impeller::DeviceBuffer> device_buffer =
+        impeller_context->GetResourceAllocator()->CreateBufferWithCopy(
+            *mapping);
+    if (!device_buffer) {
+      return std::make_pair(nullptr, "Failed to allocate staging buffer.");
+    }
+
+    ImageDecoderImpeller::UploadTextureToPrivate(
+        [&](sk_sp<DlImage> image, std::string message) {
+          dl_image = std::move(image);
+          error_message = std::move(message);
+        },
+        impeller_context, device_buffer, info,
+        std::make_shared<SkBitmap>(bitmap), std::nullopt,
+        gpu_disable_sync_switch);
+    return std::make_pair(dl_image, error_message);
+#endif
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
@@ -175,7 +203,7 @@ MultiFrameCodec::State::GetNextFrameImage(
             }
           }));
 
-  return std::make_pair(DlImageGPU::Make({skImage, std::move(unref_queue)}),
+  return std::make_pair(DlImageGPU::Make({skImage, unref_queue}),
                         std::string());
 #else   //  !SLIMPELLER
   return std::make_pair(nullptr, "Unsupported backend.");
@@ -185,8 +213,8 @@ MultiFrameCodec::State::GetNextFrameImage(
 void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     std::unique_ptr<tonic::DartPersistentValue> callback,
     const fml::RefPtr<fml::TaskRunner>& ui_task_runner,
-    fml::WeakPtr<GrDirectContext> resourceContext,
-    fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
+    const fml::WeakPtr<GrDirectContext>& resourceContext,
+    const fml::RefPtr<flutter::SkiaUnrefQueue>& unref_queue,
     const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
     size_t trace_id,
     const std::shared_ptr<impeller::Context>& impeller_context) {
@@ -205,9 +233,8 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
   int duration = 0;
   sk_sp<DlImage> dlImage;
   std::string decode_error;
-  std::tie(dlImage, decode_error) =
-      GetNextFrameImage(std::move(resourceContext), gpu_disable_sync_switch,
-                        impeller_context, std::move(unref_queue));
+  std::tie(dlImage, decode_error) = GetNextFrameImage(
+      resourceContext, gpu_disable_sync_switch, impeller_context, unref_queue);
   if (dlImage) {
     image = CanvasImage::Create();
     image->set_image(dlImage);
