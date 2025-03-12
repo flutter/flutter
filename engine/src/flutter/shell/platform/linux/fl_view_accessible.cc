@@ -34,7 +34,7 @@ static FlAccessibleNode* create_node(FlViewAccessible* self,
   }
 
   if (semantics->flags & kFlutterSemanticsFlagIsTextField) {
-    return fl_accessible_text_field_new(engine, semantics->id);
+    return fl_accessible_text_field_new(engine, self->view_id, semantics->id);
   }
 
   return fl_accessible_node_new(engine, self->view_id, semantics->id);

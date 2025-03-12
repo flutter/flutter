@@ -26,7 +26,8 @@ static FlValue* decode_semantic_data(const uint8_t* data, size_t data_length) {
 TEST(FlAccessibleTextFieldTest, SetValue) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   // "" -> "Flutter"
   {
@@ -83,7 +84,8 @@ TEST(FlAccessibleTextFieldTest, SetValue) {
 TEST(FlAccessibleTextFieldTest, SetTextSelection) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   // [-1,-1] -> [2,3]
   {
@@ -161,7 +163,8 @@ TEST(FlAccessibleTextFieldTest, PerformAction) {
             return kSuccess;
           }));
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
   fl_accessible_node_set_actions(
       node, static_cast<FlutterSemanticsAction>(
                 kFlutterSemanticsActionMoveCursorForwardByCharacter |
@@ -184,7 +187,8 @@ TEST(FlAccessibleTextFieldTest, PerformAction) {
 TEST(FlAccessibleTextFieldTest, GetCharacterCount) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   EXPECT_EQ(atk_text_get_character_count(ATK_TEXT(node)), 0);
 
@@ -197,7 +201,8 @@ TEST(FlAccessibleTextFieldTest, GetCharacterCount) {
 TEST(FlAccessibleTextFieldTest, GetText) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   g_autofree gchar* empty = atk_text_get_text(ATK_TEXT(node), 0, -1);
   EXPECT_STREQ(empty, "");
@@ -218,7 +223,8 @@ TEST(FlAccessibleTextFieldTest, GetText) {
 TEST(FlAccessibleTextFieldTest, GetCaretOffset) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   EXPECT_EQ(atk_text_get_caret_offset(ATK_TEXT(node)), -1);
 
@@ -253,7 +259,8 @@ TEST(FlAccessibleTextFieldTest, SetCaretOffset) {
             return kSuccess;
           }));
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   EXPECT_TRUE(atk_text_set_caret_offset(ATK_TEXT(node), 3));
   EXPECT_EQ(base, 3);
@@ -264,7 +271,8 @@ TEST(FlAccessibleTextFieldTest, SetCaretOffset) {
 TEST(FlAccessibleTextFieldTest, GetNSelections) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   EXPECT_EQ(atk_text_get_n_selections(ATK_TEXT(node)), 0);
 
@@ -277,7 +285,8 @@ TEST(FlAccessibleTextFieldTest, GetNSelections) {
 TEST(FlAccessibleTextFieldTest, GetSelection) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   EXPECT_EQ(atk_text_get_selection(ATK_TEXT(node), 0, nullptr, nullptr),
             nullptr);
@@ -334,7 +343,8 @@ TEST(FlAccessibleTextFieldTest, AddSelection) {
             return kSuccess;
           }));
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   EXPECT_TRUE(atk_text_add_selection(ATK_TEXT(node), 2, 4));
   EXPECT_EQ(base, 2);
@@ -374,7 +384,8 @@ TEST(FlAccessibleTextFieldTest, RemoveSelection) {
             return kSuccess;
           }));
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   // no selection
   EXPECT_FALSE(atk_text_remove_selection(ATK_TEXT(node), 0));
@@ -420,7 +431,8 @@ TEST(FlAccessibleTextFieldTest, SetSelection) {
             return kSuccess;
           }));
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   // selection num != 0
   EXPECT_FALSE(atk_text_set_selection(ATK_TEXT(node), 1, 2, 4));
@@ -460,7 +472,8 @@ TEST(FlAccessibleTextFieldTest, SetTextContents) {
             return kSuccess;
           }));
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   atk_editable_text_set_text_contents(ATK_EDITABLE_TEXT(node), "Flutter");
   EXPECT_STREQ(text, "Flutter");
@@ -504,7 +517,8 @@ TEST(FlAccessibleTextFieldTest, InsertDeleteText) {
             return kSuccess;
           }));
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
   fl_accessible_node_set_value(node, "Fler");
 
   gint pos = 2;
@@ -555,7 +569,8 @@ TEST(FlAccessibleTextFieldTest, CopyCutPasteText) {
             return kSuccess;
           }));
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   atk_editable_text_copy_text(ATK_EDITABLE_TEXT(node), 2, 5);
   EXPECT_EQ(base, 2);
@@ -576,7 +591,8 @@ TEST(FlAccessibleTextFieldTest, CopyCutPasteText) {
 TEST(FlAccessibleTextFieldTest, TextBoundary) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlAccessibleNode) node = fl_accessible_text_field_new(engine, 1);
+  g_autoptr(FlAccessibleNode) node =
+      fl_accessible_text_field_new(engine, 123, 1);
 
   fl_accessible_node_set_value(node,
                                "Lorem ipsum.\nDolor sit amet. Praesent commodo?"
