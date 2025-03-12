@@ -200,7 +200,7 @@ bool ReactorGLES::RegisterCleanupCallback(const HandleGLES& handle,
   return false;
 }
 
-HandleGLES ReactorGLES::CreateUntrackedHandle(HandleType type) {
+HandleGLES ReactorGLES::CreateUntrackedHandle(HandleType type) const {
   FML_DCHECK(CanReactOnCurrentThread());
   auto new_handle = HandleGLES::Create(type);
   std::optional<ReactorGLES::GLStorage> gl_handle =
