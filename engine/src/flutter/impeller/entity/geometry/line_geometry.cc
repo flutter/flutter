@@ -140,8 +140,11 @@ std::optional<Rect> LineGeometry::GetCoverage(const Matrix& transform) const {
   for (int i = 0; i < 4; i++) {
     corners[i] = transform * corners[i];
   }
-  return Rect::MakePointBounds(std::begin(corners), std::end(corners))
-      ->Expand(transform.GetMaxBasisLengthXY());
+  auto rect = Rect::MakePointBounds(std::begin(corners), std::end(corners));
+  if (rect.has_value()) {
+    return rect->Expand(transform.GetMaxBasisLengthXY());
+  }
+  return rect;
 }
 
 bool LineGeometry::CoversArea(const Matrix& transform, const Rect& rect) const {
