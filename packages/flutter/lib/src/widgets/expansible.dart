@@ -301,6 +301,9 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
         PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.controller.isExpanded;
     if (initiallyExpanded) {
       _animationController.value = 1.0;
+      widget.controller.expand();
+    } else {
+      widget.controller.collapse();
     }
     final Tween<double> heightFactorTween = Tween<double>(begin: 0.0, end: 1.0);
     _heightFactor = CurvedAnimation(
@@ -334,7 +337,6 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   }
 
   void _toggleExpansion() {
-    // Rebuild to call widget.expansibleBuilder.
     setState(() {
       if (widget.controller.isExpanded) {
         _animationController.forward();

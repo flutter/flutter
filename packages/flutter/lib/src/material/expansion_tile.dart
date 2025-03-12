@@ -212,7 +212,7 @@ class ExpansionTile extends StatefulWidget {
   /// Specifies if the list tile is initially expanded (true) or collapsed (false).
   ///
   /// Alternatively, a provided [controller] can be used to initially expand the
-  /// tile if [controller.expand] is called before this widget is built.
+  /// tile if [ExpansibleController.expand] is called before this widget is built.
   ///
   /// Defaults to false.
   final bool initiallyExpanded;
