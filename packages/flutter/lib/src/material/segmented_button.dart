@@ -619,18 +619,13 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       );
     }
 
-    final OutlinedBorder resolvedEnabledBorder =
+    final OutlinedBorder effectiveBorder =
         resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape) ??
         const RoundedRectangleBorder();
-    final OutlinedBorder resolvedDisabledBorder =
-        resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape) ??
-        const RoundedRectangleBorder();
-    final BorderSide enabledSide =
+    final BorderSide effectiveSide =
         resolve<BorderSide?>((ButtonStyle? style) => style?.side) ?? BorderSide.none;
-    final BorderSide disabledSide =
-        resolve<BorderSide?>((ButtonStyle? style) => style?.side) ?? BorderSide.none;
-    final OutlinedBorder enabledBorder = resolvedEnabledBorder.copyWith(side: enabledSide);
-    final OutlinedBorder disabledBorder = resolvedDisabledBorder.copyWith(side: disabledSide);
+    final OutlinedBorder enabledBorder = effectiveBorder.copyWith(side: effectiveSide);
+    final OutlinedBorder disabledBorder = effectiveBorder.copyWith(side: effectiveSide);
     final VisualDensity resolvedVisualDensity =
         segmentStyle.visualDensity ??
         segmentThemeStyle.visualDensity ??
