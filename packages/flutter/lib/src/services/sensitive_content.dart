@@ -71,6 +71,12 @@ enum ContentSensitivity {
   ///
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
   notSensitive,
+
+  /// The sensitivity content level is unknown to Flutter.
+  ///
+  /// This mode may represent the current content sensitivity of the window if, for example, Android
+  /// adds a new mode that is not recognized by the [SensitiveContent] widget.
+  unknown,
 }
 
 /// Service for setting the content sensitivity of the native app window (Android `View`)
