@@ -36,5 +36,6 @@ float CalculateLine() {
 }
 
 void main() {
-  frag_color = CalculateLine() * frag_info.color;
+  float line = CalculateLine();
+  frag_color = vec4(line, line, line, 1.0) * frag_info.color;
 }
