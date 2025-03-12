@@ -487,7 +487,7 @@ TEST_F(FlutterWindowsEngineTest, DispatchSemanticsAction) {
       ([&called, &message](auto engine, auto info) {
         called = true;
         EXPECT_EQ(info->view_id, 456);
-        EXPECT_EQ(info->target, 42);
+        EXPECT_EQ(info->node_id, 42);
         EXPECT_EQ(info->action, kFlutterSemanticsActionDismiss);
         EXPECT_EQ(memcmp(info->data, message.c_str(), message.size()), 0);
         EXPECT_EQ(info->data_length, message.size());
