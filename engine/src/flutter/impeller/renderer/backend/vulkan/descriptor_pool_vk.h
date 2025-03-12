@@ -11,7 +11,6 @@
 #include "fml/status_or.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/pipeline.h"
-#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
 
