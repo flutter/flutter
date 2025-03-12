@@ -1218,8 +1218,14 @@ void fl_engine_dispatch_semantics_action(FlEngine* self,
         g_bytes_get_data(data, &action_data_length));
   }
 
-  self->embedder_api.DispatchSemanticsActionOnView(
-      self->engine, view_id, node_id, action, action_data, action_data_length);
+  FlutterDispatchSemanticsActionInfo info;
+  info.struct_size = sizeof(FlutterDispatchSemanticsActionInfo);
+  info.view_id = view_id;
+  info.node_id = node_id;
+  info.action = action;
+  info.data = action_data;
+  info.data_length = action_data_length;
+  self->embedder_api.DispatchSemanticsActionOnView(self->engine, &info);
 }
 
 gboolean fl_engine_mark_texture_frame_available(FlEngine* self,

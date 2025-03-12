@@ -152,11 +152,7 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
 
 FlutterEngineResult FlutterEngineDispatchSemanticsActionOnView(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    int64_t view_id,
-    uint64_t node_id,
-    FlutterSemanticsAction action,
-    const uint8_t* data,
-    size_t data_length) {
+    const FlutterDispatchSemanticsActionInfo* info) {
   return kSuccess;
 }
 

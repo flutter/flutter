@@ -281,10 +281,8 @@ TEST(AccessibilityBridgeWindows, DispatchAccessibilityAction) {
   modifier.embedder_api().DispatchSemanticsActionOnView = MOCK_ENGINE_PROC(
       DispatchSemanticsActionOnView,
       ([&actual_action](FLUTTER_API_SYMBOL(FlutterEngine) engine,
-                        int64_t view_id, uint64_t node_id,
-                        FlutterSemanticsAction action, const uint8_t* data,
-                        size_t data_length) {
-        actual_action = action;
+                        const FlutterDispatchSemanticsActionInfo* info) {
+        actual_action = info->action;
         return kSuccess;
       }));
 

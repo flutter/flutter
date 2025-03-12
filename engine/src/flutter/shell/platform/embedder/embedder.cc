@@ -3192,25 +3192,27 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FlutterSemanticsAction action,
     const uint8_t* data,
     size_t data_length) {
-  return FlutterEngineDispatchSemanticsActionOnView(
-      engine, kFlutterImplicitViewId, node_id, action, data, data_length);
+  FlutterDispatchSemanticsActionInfo info{
+      .struct_size = sizeof(FlutterDispatchSemanticsActionInfo),
+      .view_id = kFlutterImplicitViewId,
+      .node_id = node_id,
+      .action = action,
+      .data = data,
+      .data_length = data_length};
+  return FlutterEngineDispatchSemanticsActionOnView(engine, &info);
 }
 
 FlutterEngineResult FlutterEngineDispatchSemanticsActionOnView(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    int64_t view_id,
-    uint64_t node_id,
-    FlutterSemanticsAction action,
-    const uint8_t* data,
-    size_t data_length) {
+    const FlutterDispatchSemanticsActionInfo* info) {
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
-  auto engine_action = static_cast<flutter::SemanticsAction>(action);
+  auto engine_action = static_cast<flutter::SemanticsAction>(info->action);
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
            ->DispatchSemanticsAction(
-               view_id, node_id, engine_action,
-               fml::MallocMapping::Copy(data, data_length))) {
+               info->view_id, info->node_id, engine_action,
+               fml::MallocMapping::Copy(info->data, info->data_length))) {
     return LOG_EMBEDDER_ERROR(kInternalInconsistency,
                               "Could not dispatch semantics action.");
   }

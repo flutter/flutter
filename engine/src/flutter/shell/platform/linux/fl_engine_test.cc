@@ -183,17 +183,16 @@ TEST(FlEngineTest, DispatchSemanticsAction) {
   fl_engine_get_embedder_api(engine)->DispatchSemanticsActionOnView =
       MOCK_ENGINE_PROC(
           DispatchSemanticsActionOnView,
-          ([&called](auto engine, int64_t view_id, uint64_t node_id,
-                     FlutterSemanticsAction action, const uint8_t* data,
-                     size_t data_length) {
-            EXPECT_EQ(view_id, static_cast<int64_t>(456));
-            EXPECT_EQ(node_id, static_cast<uint64_t>(42));
-            EXPECT_EQ(action, kFlutterSemanticsActionTap);
-            EXPECT_EQ(data_length, static_cast<size_t>(4));
-            EXPECT_EQ(data[0], 't');
-            EXPECT_EQ(data[1], 'e');
-            EXPECT_EQ(data[2], 's');
-            EXPECT_EQ(data[3], 't');
+          ([&called](auto engine,
+                     const FlutterDispatchSemanticsActionInfo* info) {
+            EXPECT_EQ(info->view_id, static_cast<int64_t>(456));
+            EXPECT_EQ(info->node_id, static_cast<uint64_t>(42));
+            EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
+            EXPECT_EQ(info->data_length, static_cast<size_t>(4));
+            EXPECT_EQ(info->data[0], 't');
+            EXPECT_EQ(info->data[1], 'e');
+            EXPECT_EQ(info->data[2], 's');
+            EXPECT_EQ(info->data[3], 't');
             called = true;
 
             return kSuccess;

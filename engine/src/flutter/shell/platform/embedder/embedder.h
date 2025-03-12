@@ -2640,6 +2640,27 @@ typedef struct {
   int64_t engine_id;
 } FlutterProjectArgs;
 
+typedef struct {
+  /// The size of this struct. Must be
+  /// sizeof(FlutterDispatchSemanticsActionInfo).
+  size_t struct_size;
+
+  /// The ID of the view that includes the node.
+  FlutterViewId view_id;
+
+  /// The semantics node identifier.
+  uint64_t node_id;
+
+  /// The semantics action.
+  FlutterSemanticsAction action;
+
+  /// Data associated with the action.
+  const uint8_t* data;
+
+  /// The data length.
+  size_t data_length;
+} FlutterDispatchSemanticsActionInfo;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -3096,23 +3117,17 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
 /// @brief      Dispatch a semantics action to the specified semantics node
 ///             within a specific view.
 ///
-/// @param[in]  engine       A running engine instance.
-/// @param[in]  node_id      The semantics node identifier.
-/// @param[in]  view_id      The ID of the view.
-/// @param[in]  action       The semantics action.
-/// @param[in]  data         Data associated with the action.
-/// @param[in]  data_length  The data length.
+/// @param[in]  engine  A running engine instance.
+/// @param[in]  info    The dispatch semantics on view arguments.
+///                     This can be deallocated once |FlutterEngineAddView|
+///                     returns.
 ///
 /// @return     The result of the call.
 ///
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineDispatchSemanticsActionOnView(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    FlutterViewId view_id,
-    uint64_t node_id,
-    FlutterSemanticsAction action,
-    const uint8_t* data,
-    size_t data_length);
+    const FlutterDispatchSemanticsActionInfo* info);
 
 //------------------------------------------------------------------------------
 /// @brief      Notify the engine that a vsync event occurred. A baton passed to
@@ -3503,11 +3518,7 @@ typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionFnPtr)(
     size_t data_length);
 typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionOnViewFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    FlutterViewId view_id,
-    uint64_t node_id,
-    FlutterSemanticsAction action,
-    const uint8_t* data,
-    size_t data_length);
+    const FlutterDispatchSemanticsActionInfo* info);
 typedef FlutterEngineResult (*FlutterEngineOnVsyncFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     intptr_t baton,
