@@ -5,6 +5,7 @@
 export 'semantics/accessibility.dart';
 export 'semantics/alert.dart';
 export 'semantics/checkable.dart';
+export 'semantics/disable.dart';
 export 'semantics/expandable.dart';
 export 'semantics/focusable.dart';
 export 'semantics/header.dart';

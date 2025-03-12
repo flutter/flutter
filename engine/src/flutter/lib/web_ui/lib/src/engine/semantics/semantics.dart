@@ -19,6 +19,7 @@ import '../util.dart';
 import '../vector_math.dart';
 import '../window.dart';
 import 'accessibility.dart';
+import 'disable.dart';
 import 'alert.dart';
 import 'checkable.dart';
 import 'expandable.dart';
@@ -653,6 +654,10 @@ abstract class SemanticRole {
         preferredRepresentation: preferredRepresentation,
       ),
     );
+  }
+
+  void addDisabledBehavior() {
+    addSemanticBehavior(Disable(semanticsObject, this));
   }
 
   /// Adds generic functionality for handling taps and clicks.
