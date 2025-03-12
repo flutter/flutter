@@ -427,13 +427,28 @@ enum SemanticsRole {
   /// For example, a [MenuAnchor] or [DropdownButton].
   menu,
 
-  /// A item in a dropdown created by [menu] or [menuBar].
+  /// An item in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItemCheckbox], a menu item with a checkbox. The [menuItemCheckbox]
+  ///  can also be used within [menu] and [menuBar].
+  /// * [menuItemRadio], a menu item with a radio button. This role is used by
+  /// [menu] or [menuBar] as well.
   menuItem,
 
-  /// A item with a checkbox in a dropdown created by [menu] or [menuBar].
+  /// An item with a checkbox in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItem] and [menuItemRadio] for menu related roles.
   menuItemCheckbox,
 
-  /// A item with a radio button in a dropdown created by [menu] or [menuBar].
+  /// An item with a radio button in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItem] and [menuItemCheckbox] for menu related roles.
   menuItemRadio,
 
   /// A container to display multiple [listItem]s in vertical or horizontal
