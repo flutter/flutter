@@ -4691,7 +4691,6 @@ targets:
   - name: Mac_mokey microbenchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # Flaky: codefu
     timeout: 60
     properties:
       tags: >
