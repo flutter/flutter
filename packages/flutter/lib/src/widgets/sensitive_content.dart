@@ -120,20 +120,7 @@ class SensitiveContentHost {
     // auto sensitive if it is otherwise unset by the developer. Also, initialize as the calculated
     // content sensitivity level if we have not yet registered the first `SensitiveContent` widget
     // to ensure we update that setting appropriately.
-    if (_fallbackContentSensitivitySetting == null) {
-      final ContentSensitivity potentialFallbackContentSensitivity =
-          await _sensitiveContentService.getContentSensitivity();
-
-      if (potentialFallbackContentSensitivity == ContentSensitivity.unknown) {
-        throw FlutterError(
-          'The call to get the current content sensitivity returned an unknown '
-          'value that SensitiveContent widgets cannot understand. If you are '
-          'seeing this error, please file an issue at https://github.com/flutter/flutter/issues/new',
-        );
-      }
-
-      _fallbackContentSensitivitySetting = potentialFallbackContentSensitivity;
-    }
+    _fallbackContentSensitivitySetting ??= await _sensitiveContentService.getContentSensitivity();
     calculatedContentSensitivityLevel ??= _fallbackContentSensitivitySetting;
 
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
@@ -216,20 +203,10 @@ class SensitiveContentHost {
 ///    [SensitiveContent] widget can set.
 class SensitiveContent extends StatefulWidget {
   /// Creates a [SensitiveContent] widget.
-  SensitiveContent({super.key, required this.sensitivityLevel, required this.child}) {
-    if (sensitivityLevel == ContentSensitivity.unknown) {
-      throw FlutterError(
-        'ContentSensitivity.unknown is an illegal argument for the '
-        'sensitivityLevel of a SensitiveContent widget.',
-      );
-    }
-  }
+  const SensitiveContent({super.key, required this.sensitivityLevel, required this.child});
 
   /// The sensitivity level that the [SensitiveContent] widget should sets for the
   /// Android native `View` hosting the widget tree.
-  ///
-  /// This should be one of [ContentSensitivity.sensitive], [ContentSensitivity.autoSensitive],
-  /// or [ContentSensitivity.notSensitive]; [ContentSensitivity.unknown] is not allowed.
   final ContentSensitivity sensitivityLevel;
 
   /// The child widget of this [SensitiveContent].
