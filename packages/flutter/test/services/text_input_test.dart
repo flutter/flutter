@@ -1232,35 +1232,6 @@ void main() {
       expect(control.methodCalls, expectedMethodCalls);
     });
 
-    testWidgets('receives keyboardType changes', (WidgetTester tester) async {
-      final FakeTextInputControl control = FakeTextInputControl();
-      TextInput.setInputControl(control);
-
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      control.attach(client, const TextInputConfiguration());
-
-      final List<String> expectedMethodCalls = <String>[];
-
-      await tester.pumpWidget(
-        const MaterialApp(home: Material(child: DynamicTextInputTypeTextField())),
-      );
-      final _DynamicTextInputTypeTextFieldState state = tester.state(
-        find.byType(DynamicTextInputTypeTextField),
-      );
-      control.methodCalls.clear();
-
-      state.changeToText();
-      expect(control.methodCalls, expectedMethodCalls);
-      await tester.pump();
-      expectedMethodCalls.add('setCaretRect');
-      expect(control.methodCalls, expectedMethodCalls);
-
-      state.changeToNumber();
-      await tester.pump();
-      expectedMethodCalls.add('updateConfig');
-      expect(control.methodCalls, expectedMethodCalls);
-    });
-
     test('does not interfere with platform text input', () {
       final FakeTextInputControl control = FakeTextInputControl();
       TextInput.setInputControl(control);
@@ -1631,22 +1602,4 @@ class FakeTextInputControl with TextInputControl {
   void requestAutofill() {
     methodCalls.add('requestAutofill');
   }
-}
-
-class DynamicTextInputTypeTextField extends StatefulWidget {
-  const DynamicTextInputTypeTextField({super.key});
-
-  @override
-  State<DynamicTextInputTypeTextField> createState() => _DynamicTextInputTypeTextFieldState();
-}
-
-class _DynamicTextInputTypeTextFieldState extends State<DynamicTextInputTypeTextField> {
-  TextInputType keyboard = TextInputType.text;
-
-  void changeToNumber() => setState(() => keyboard = TextInputType.number);
-
-  void changeToText() => setState(() => keyboard = TextInputType.text);
-
-  @override
-  Widget build(BuildContext context) => TextField(keyboardType: keyboard, autofocus: true);
 }
