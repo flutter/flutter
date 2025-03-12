@@ -222,11 +222,12 @@ class SensitiveContentHost {
 /// Widget to set the [ContentSensitivity] level of content in the widget
 /// tree.
 ///
-/// Currently, this widget is only supported on Android. On all non-Android
-/// platforms, this does nothing; the screen will never be obscured regardless
-/// of the [sensitivityLevel] set.
-///
 /// {@macro flutter.services.ContentSensitivity}
+///
+/// Currently, this widget is only supported on Android API 35+. On all lower Android
+/// versions and non-Android platforms, this does nothing; the screen will never be
+/// obscured regardless  of the [sensitivityLevel] set. To programmatically check if
+/// a device supports this widget, call [SensitiveContentService.isSupported].
 ///
 /// See also:
 ///
