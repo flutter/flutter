@@ -580,7 +580,7 @@ TEST(DisplayListPath, IsLineFromImpellerPath) {
   DlPoint end;
   EXPECT_TRUE(path.IsLine(&start, &end));
   EXPECT_EQ(start, DlPoint::MakeXY(0, 0));
-  EXPECT_EQ(end, DlPoint::MakeXY(100, 100));
+  EXPECT_EQ(end, DlPoint::MakeXY(100, 0));
 
   {
     DlPathBuilder path_builder;
