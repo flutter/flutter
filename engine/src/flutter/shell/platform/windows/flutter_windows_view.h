@@ -191,6 +191,10 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
              KeyEventCallback callback) override;
 
   // |WindowBindingHandlerDelegate|
+  void OnFocus(FlutterViewFocusState focus_state,
+               FlutterViewFocusDirection direction) override;
+
+  // |WindowBindingHandlerDelegate|
   void OnComposeBegin() override;
 
   // |WindowBindingHandlerDelegate|
@@ -245,6 +249,10 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // |WindowBindingHandlerDelegate|
   void OnWindowStateEvent(HWND hwnd, WindowStateEvent event) override;
+
+  // Focus the view.
+  // Returns true if the view was focused.
+  virtual bool Focus();
 
  protected:
   virtual void NotifyWinEventWrapper(ui::AXPlatformNodeWin* node,
@@ -351,6 +359,10 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                bool extended,
                bool was_down,
                KeyEventCallback callback);
+
+  // Reports a focus event to Flutter engine.
+  void SendFocus(FlutterViewFocusState focus_state,
+                 FlutterViewFocusDirection direction);
 
   // Reports an IME compose begin event.
   //
