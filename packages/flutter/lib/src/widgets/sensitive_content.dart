@@ -35,6 +35,14 @@ class ContentSensitivitySetting {
         _autoSensitiveWidgetCount++;
       case ContentSensitivity.notSensitive:
         _notSensitiveWigetCount++;
+      // ignore is safe because it protects this setting from tracking SensitiveContent
+      // widgets with an _unknown ContentSensitivity. _unknown is private to avoid
+      // developers using it as a SensitiveContent sensitivity level.
+      // ignore: no_default_cases
+      default:
+        throw FlutterError(
+          'Adding a SensitiveContent widget with ContentSensitivity $sensitivityLevel is unsupported by ContentSensitivitySetting',
+        );
     }
   }
 
@@ -47,6 +55,14 @@ class ContentSensitivitySetting {
         _autoSensitiveWidgetCount--;
       case ContentSensitivity.notSensitive:
         _notSensitiveWigetCount--;
+      // ignore is safe because it protects this setting from tracking SensitiveContent
+      // widgets with an _unknown ContentSensitivity. _unknown is private to avoid
+      // developers using it as a SensitiveContent sensitivity level.
+      // ignore: no_default_cases
+      default:
+        throw FlutterError(
+          'Removing a SensitiveContent widget with ContentSensitivity $sensitivityLevel is unsupported by ContentSensitivitySetting',
+        );
     }
   }
 
@@ -116,24 +132,22 @@ class SensitiveContentHost {
     }
 
     // When the first `SensitiveContent` widget is registered, determine the content sensitivity
-    // level we should fallback to if/when no `SensitiveContent` widgets remain in the tree. This will be
-    // auto sensitive if it is otherwise unset by the developer. Also, initialize as the calculated
-    // content sensitivity level if we have not yet registered the first `SensitiveContent` widget
-    // to ensure we update that setting appropriately.
+    // level we should fallback to if/when no `SensitiveContent` widgets remain in the tree.
+    // For Android API 35, this will be auto sensitive if it is otherwise unset by the developer.
     if (_fallbackContentSensitivitySetting == null) {
-      final ContentSensitivity potentialFallbackContentSensitivity =
-          await _sensitiveContentService.getContentSensitivity();
-
-      if (potentialFallbackContentSensitivity == ContentSensitivity.unknown) {
-        throw FlutterError(
-          'The call to get the current content sensitivity returned an unknown '
-          'value that SensitiveContent widgets cannot understand. If you are '
-          'seeing this error, please file an issue at https://github.com/flutter/flutter/issues/new',
-        );
+      try {
+        final ContentSensitivity potentialFallbackContentSensitivity =
+            await _sensitiveContentService.getContentSensitivity();
+        _fallbackContentSensitivitySetting = potentialFallbackContentSensitivity;
+      } on UnsupportedError {
+        // Unknown ContentSensitivity detected; fallback to not sensitive mode since we
+        // cannot determine the desired behavior of the current mode.
+        _fallbackContentSensitivitySetting = ContentSensitivity.notSensitive;
       }
-
-      _fallbackContentSensitivitySetting = potentialFallbackContentSensitivity;
     }
+
+    // Initialize  the calculated content sensitivity level if we have not yet registered the
+    // first `SensitiveContent` widget to ensure we update that setting appropriately.
     calculatedContentSensitivityLevel ??= _fallbackContentSensitivitySetting;
 
     // Update SensitiveContent widget count for those with desiredSensitivityLevel.
@@ -208,6 +222,10 @@ class SensitiveContentHost {
 /// Widget to set the [ContentSensitivity] level of content in the widget
 /// tree.
 ///
+/// Currently, this widget is only supported on Android. On all non-Android
+/// platforms, this does nothing; the screen will never be obscured regardless
+/// of the [sensitivityLevel] set.
+///
 /// {@macro flutter.services.ContentSensitivity}
 ///
 /// See also:
@@ -216,20 +234,10 @@ class SensitiveContentHost {
 ///    [SensitiveContent] widget can set.
 class SensitiveContent extends StatefulWidget {
   /// Creates a [SensitiveContent] widget.
-  SensitiveContent({super.key, required this.sensitivityLevel, required this.child}) {
-    if (sensitivityLevel == ContentSensitivity.unknown) {
-      throw FlutterError(
-        'ContentSensitivity.unknown is an illegal argument for the '
-        'sensitivityLevel of a SensitiveContent widget.',
-      );
-    }
-  }
+  const SensitiveContent({super.key, required this.sensitivityLevel, required this.child});
 
   /// The sensitivity level that the [SensitiveContent] widget should sets for the
   /// Android native `View` hosting the widget tree.
-  ///
-  /// This should be one of [ContentSensitivity.sensitive], [ContentSensitivity.autoSensitive],
-  /// or [ContentSensitivity.notSensitive]; [ContentSensitivity.unknown] is not allowed.
   final ContentSensitivity sensitivityLevel;
 
   /// The child widget of this [SensitiveContent].

@@ -76,7 +76,9 @@ enum ContentSensitivity {
   ///
   /// This mode may represent the current content sensitivity of the window if, for example, Android
   /// adds a new mode that is not recognized by the [SensitiveContent] widget.
-  unknown,
+  ///
+  /// This mode cannot be used to set the sensitivity level of a [SensitiveContent] widget.
+  _unknown,
 }
 
 /// Service for setting the content sensitivity of the native app window (Android `View`)
@@ -111,18 +113,30 @@ class SensitiveContentService {
   /// Gets content sensitivity level of the app window (Android `View`) that contains
   /// the app's widget tree.
   Future<ContentSensitivity> getContentSensitivity() async {
+    String? result;
     try {
-      final String? result = await sensitiveContentChannel.invokeMethod<String>(
+      result = await sensitiveContentChannel.invokeMethod<String>(
         'SensitiveContent.getContentSensitivity',
       );
-      final ContentSensitivity contentSensitivity = ContentSensitivity.values.firstWhere(
-        (ContentSensitivity cs) => cs.name == result,
-      );
-      return contentSensitivity;
     } catch (e) {
       // Content sensitivity failed to be retrieved.
       throw FlutterError('Failed to retrieve content sensitivity: $e');
     }
+
+    final ContentSensitivity contentSensitivity = ContentSensitivity.values.firstWhere(
+      (ContentSensitivity cs) => cs.name == result,
+    );
+
+    if (contentSensitivity == ContentSensitivity._unknown) {
+      throw UnsupportedError(
+        'Android Flutter View has a content sensitivity mode '
+        'that is not recognized by Flutter. If you see this error, '
+        'it is possible the View uses a new mode that Flutter needs to '
+        'support. Please file an issue at https://github.com/flutter/flutter/issues/new.',
+      );
+    }
+
+    return contentSensitivity;
   }
 
   /// Returns whether or not setting content sensitivity levels is supported

@@ -49,10 +49,10 @@ public class SensitiveContentChannel {
   @VisibleForTesting public static final String NOT_SENSITIVE_CONTENT_SENSITIVITY = "notSensitive";
 
   /**
-   * Flutter ContentSensitivity.unknown name that represents a content sensitivity
-   * setting that the Flutter SensitiveContent widget does not recognize.
+   * Flutter ContentSensitivity.unknown name that represents a content sensitivity setting that the
+   * Flutter SensitiveContent widget does not recognize.
    */
-  @VisibleForTesting public static final String UNKNOWN_CONTENT_SENSITIVITY = "unknown";
+  @VisibleForTesting public static final String UNKNOWN_CONTENT_SENSITIVITY = "_unknown";
 
   public final MethodChannel channel;
   private SensitiveContentMethodHandler sensitiveContentMethodHandler;
@@ -137,10 +137,9 @@ public class SensitiveContentChannel {
       case View.CONTENT_SENSITIVITY_NOT_SENSITIVE:
         return NOT_SENSITIVE_CONTENT_SENSITIVITY;
       default:
-        throw new IllegalArgumentException(
-            "Android View content sensitivity constant with value "
-                + contentSensitivityValue
-                + " not known to the SensitiveContentChannel.");
+        // Signal to Flutter framework that the embedder does not recognize
+        // the content sensitivity mode queried.
+        return UNKNOWN_CONTENT_SENSITIVITY;
     }
   }
 

@@ -2123,6 +2123,12 @@ void main() {
       WidgetTester tester,
     ) async {
       for (final ContentSensitivity contentSensitivity in ContentSensitivity.values) {
+        if (contentSensitivity != ContentSensitivity.autoSensitive ||
+            contentSensitivity != ContentSensitivity.sensitive ||
+            contentSensitivity != ContentSensitivity.notSensitive) {
+          // Ignore ContentSensitivity.unknown for this test.
+          break;
+        }
         final SensitiveContent scChild = SensitiveContent(
           sensitivityLevel: contentSensitivity,
           child: Container(),
@@ -2260,48 +2266,6 @@ void main() {
       },
     );
   });
-
-  testWidgets(
-    'when SensitiveContentService.getContentSensitivity returns ContentSensitivity.unknown, an error is thrown',
-    (WidgetTester tester) async {
-      // Mock calls to the sensitive content method channel with calls `getContentSensitivity` returning
-      // the unknown value.
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-        SystemChannels.sensitiveContent,
-        (MethodCall methodCall) async {
-          if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
-            setContentSensitivityArgs.add(
-              ContentSensitivity.values.firstWhere(
-                (ContentSensitivity cs) => cs.name == methodCall.arguments as String,
-              ),
-            );
-          } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-            return ContentSensitivity.unknown.name;
-          } else if (methodCall.method == 'SensitiveContent.isSupported') {
-            return true;
-          }
-          return null;
-        },
-      );
-
-      expect(
-        () async => tester.pumpWidget(
-          SensitiveContent(sensitivityLevel: ContentSensitivity.autoSensitive, child: Container()),
-        ),
-        throwsA(isA<FlutterError>()),
-      );
-    },
-  );
-
-  test(
-    'when SensitiveContent sensitivityLevel is ContentSensitivity.unknown, an error is thrown',
-    () {
-      expect(
-        SensitiveContent(sensitivityLevel: ContentSensitivity.unknown, child: Container()),
-        throwsA(isA<FlutterError>),
-      );
-    },
-  );
 }
 
 class DisposeTester extends StatefulWidget {
