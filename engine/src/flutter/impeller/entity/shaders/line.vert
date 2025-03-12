@@ -24,7 +24,7 @@ out vec3 v_e3;
 
 void main() {
   gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
-  v_position = gl_Position.xy;
+  v_position = position;
   v_e0 = e0;
   v_e1 = e1;
   v_e2 = e2;
