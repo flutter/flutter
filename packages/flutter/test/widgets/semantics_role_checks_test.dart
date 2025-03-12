@@ -56,16 +56,16 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Semantics(
-            role: SemanticsRole.listItem,
-            child: const Text('some child'),
-          ),
+          child: Semantics(role: SemanticsRole.listItem, child: const Text('some child')),
         ),
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
       final FlutterError error = exception! as FlutterError;
-      expect(error.message, startsWith('Semantics node 1 has role ${SemanticsRole.listItem}, but its parent'));
+      expect(
+        error.message,
+        startsWith('Semantics node 1 has role ${SemanticsRole.listItem}, but its parent'),
+      );
     });
 
     testWidgets('Success case', (WidgetTester tester) async {
@@ -75,10 +75,7 @@ void main() {
           child: Semantics(
             role: SemanticsRole.list,
             explicitChildNodes: true,
-            child: Semantics(
-              role: SemanticsRole.listItem,
-              child: const Text('some child'),
-            ),
+            child: Semantics(role: SemanticsRole.listItem, child: const Text('some child')),
           ),
         ),
       );
