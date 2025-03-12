@@ -624,7 +624,7 @@ class RenderTable extends RenderBox {
     SemanticsConfiguration config,
     Iterable<SemanticsNode> children,
   ) {
-    print('------!!!!assembleSemanticsNode node row: $row, column: $column');
+    print('------!!!!assembleSemanticsNode node row: $_rows, column: $_columns');
     for (final child in children) print('  --child: ${child}');
 
     final List<SemanticsNode> rows = <SemanticsNode>[];
@@ -673,17 +673,20 @@ class RenderTable extends RenderBox {
     }
 
     for (final SemanticsNode child in children) {
+      print('  --child: $child');
       if (_idToIndexMap.containsKey(child.id)) {
         final index = _idToIndexMap[child.id]!;
         final int y = index.y;
         final int x = index.x;
         rawCells[y][x].add(child);
+        print('  --added child from index in map: $y, $x ');
       } else {
         final Rect rect = rectWithOffset(child);
         final int y = findRowIndex(rect.top);
         final int x = findColumnIndex(rect.left);
         if (y != -1 && x != -1) {
           rawCells[y][x].add(child);
+          print('  --added child by rect: $y, $x ');
         }
       }
     }
@@ -733,29 +736,25 @@ class RenderTable extends RenderBox {
 
         // Skip cell if it's invisible
         if (cellWidth <= 0.0) {
+          print('  --skipped cell: $y, $x  ${cell}');
           continue;
         }
-
-        // Shift child transform.
+        // Add wrapper transform
         if (addCellWrapper) {
-          for (final SemanticsNode child in rawChildrens) {
-            if (!_idToIndexMap.containsKey(child.id)) {
-              // The cell's transform is relative to the table. Shift the cell's transform to be relative to the cell.
-              shiftTransform(child, -_columnLefts!.elementAt(x), -_rowTops.elementAt(y));
-              _idToIndexMap[child.id] = _Index(y, x);
-            }
-            // It used to be a single cell, now it's under the wrapper.
-            else if (child.role == SemanticsRole.cell) {
-              // The cell's transform is relative to the row. Shift the cell's transform to be relative to the cell.
-              shiftTransform(child, -_columnLefts!.elementAt(x), 0);
-            }
-          }
           cell
             ..transform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0)
             ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
-        } else {
-          shiftTransform(cell, 0, -_rowTops.elementAt(y));
-          _idToIndexMap[cell.id] = _Index(y, x);
+        }
+        for (final SemanticsNode child in rawChildrens) {
+          _idToIndexMap[child.id] = _Index(y, x);
+
+          // Shift child transform.
+          final Rect localRect = rectWithOffset(child);
+          final double dy = localRect.top < rowBox.height ? 0.0 : -_rowTops.elementAt(y);
+          final double dx = localRect.left < cellWidth ? 0.0 : -_columnLefts!.elementAt(x);
+          if (dx != 0 || dy != 0) {
+            shiftTransform(child, dx, dy);
+          }
         }
 
         cell.indexInParent = x;
