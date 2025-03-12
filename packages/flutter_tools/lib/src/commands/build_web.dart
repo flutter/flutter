@@ -218,7 +218,7 @@ class BuildWebCommand extends BuildSubCommand {
       );
     }
     if (!project.web.existsSync()) {
-      throwToolExit('Missing index.html.');
+      throwToolExit('Run flutter create . --platforms web');
     }
     if (!_fileSystem.currentDirectory
             .childDirectory('web')

@@ -483,6 +483,33 @@ void main() {
       ProcessManager: () => processManager,
     },
   );
+
+  testUsingContext(
+    'Refuses to build for web when folder is missing',
+    () async {
+      fileSystem.file(fileSystem.path.join('web')).deleteSync(recursive: true);
+      final CommandRunner<void> runner = createTestCommandRunner(
+        BuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: logger,
+          osUtils: FakeOperatingSystemUtils(),
+        ),
+      );
+
+      expect(
+        () => runner.run(<String>['build', 'web', '--no-pub']),
+        throwsToolExit(message: 'Run flutter create . --platforms web'),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+    },
+  );
 }
 
 void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
