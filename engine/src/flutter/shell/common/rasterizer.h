@@ -671,6 +671,16 @@ class Rasterizer final : public SnapshotDelegate,
   }
 
   // |SnapshotController::Delegate|
+  bool IsAiksContextInitialized() const override {
+#if IMPELLER_SUPPORTS_RENDERING
+    return surface_ && surface_->GetAiksContext();
+    return false;
+#else
+    return false;
+#endif
+  }
+
+  // |SnapshotController::Delegate|
   std::shared_ptr<impeller::AiksContext> GetAiksContext() const override {
 #if IMPELLER_SUPPORTS_RENDERING
     if (surface_) {
