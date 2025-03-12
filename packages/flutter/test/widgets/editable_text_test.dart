@@ -12031,9 +12031,7 @@ void main() {
           children: <Widget>[
             SizedBox(key: key, width: 200, height: 200),
             Actions(
-              actions: <Type, Action<Intent>>{
-                EditableTextTapUpOutsideIntent: overrideAction,
-              },
+              actions: <Type, Action<Intent>>{EditableTextTapUpOutsideIntent: overrideAction},
               child: EditableText(
                 controller: controller,
                 focusNode: focusNode,
@@ -17100,7 +17098,6 @@ void main() {
       ),
     );
     await tester.pump();
-
 
     expect(tapOutsideCount, 0);
     await tester.tap(find.text('Outside'));
