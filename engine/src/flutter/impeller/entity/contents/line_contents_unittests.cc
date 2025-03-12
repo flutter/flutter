@@ -17,7 +17,7 @@ TEST(LineContents, Create) {
       /*width=*/width,         //
       /*cap=*/Cap::kSquare);
   std::unique_ptr<LineContents> contents =
-      LineContents::Make(std::move(geometry));
+      LineContents::Make(std::move(geometry), Color(1.f, 0.f, 0.f, 1.f));
   EXPECT_TRUE(contents);
   Entity entity;
   std::optional<Rect> coverage = contents->GetCoverage(entity);

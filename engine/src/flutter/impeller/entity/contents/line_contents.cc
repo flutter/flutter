@@ -256,12 +256,14 @@ bool DrawGeometry(const Contents* contents,
 }  // namespace
 
 std::unique_ptr<LineContents> LineContents::Make(
-    std::unique_ptr<LineGeometry> geometry) {
-  return std::unique_ptr<LineContents>(new LineContents(std::move(geometry)));
+    std::unique_ptr<LineGeometry> geometry,
+    Color color) {
+  return std::unique_ptr<LineContents>(
+      new LineContents(std::move(geometry), color));
 }
 
-LineContents::LineContents(std::unique_ptr<LineGeometry> geometry)
-    : geometry_(std::move(geometry)) {}
+LineContents::LineContents(std::unique_ptr<LineGeometry> geometry, Color color)
+    : geometry_(std::move(geometry)), color_(color) {}
 
 bool LineContents::Render(const ContentContext& renderer,
                           const Entity& entity,
@@ -273,8 +275,7 @@ bool LineContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
-  frag_info.color =
-      Color(/*r=*/1.0, /*g=*/0.0, /*b=*/0.0, /*a=*/1.0).Premultiply();
+  frag_info.color = color_.Premultiply();
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
