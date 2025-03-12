@@ -199,8 +199,8 @@ sealed class _DebugSemanticsRoleChecks {
   }
 
   static FlutterError? _semanticsColumnHeader(SemanticsNode node) {
-    if (node.parent?.role != SemanticsRole.row) {
-      return FlutterError('A columnHeader must be a child of a row');
+    if (node.parent?.role != SemanticsRole.row && node.parent?.role != SemanticsRole.cell) {
+      return FlutterError('A columnHeader must be a child or another cell');
     }
     return null;
   }

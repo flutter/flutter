@@ -676,7 +676,7 @@ class RenderTable extends RenderBox {
     for (final SemanticsNode child in children) {
       //  print('  --child: $child');
       if (_idToIndexMap.containsKey(child.id)) {
-        final index = _idToIndexMap[child.id]!;
+        final _Index index = _idToIndexMap[child.id]!;
         final int y = index.y;
         final int x = index.x;
         if (y < _rows && x < _columns) {
@@ -753,9 +753,19 @@ class RenderTable extends RenderBox {
 
           // Shift child transform.
           final Rect localRect = rectWithOffset(child);
+          // The rect should satisfy 0 <= localRect.top < localRect.bottom <= rowBox.height
           final double dy = localRect.top >= rowBox.height ? -_rowTops.elementAt(y) : 0.0;
+
+          // if addCellWrapper is true, the rect is relative to the cell
+          // The rect should satisfy 0 <= localRect.left < localRect.right <= cellWidth
+          // if addCellWrapper is false, the rect is relative to the raw
+          // The rect should satisfy _columnLefts!.elementAt(x) <= localRect.left < localRect.right <= _columnLefts!.elementAt(x+1)
           final double dx =
-              (addCellWrapper && localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0;
+              addCellWrapper
+                  ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0)
+                  : (localRect.right <= _columnLefts!.elementAt(x)
+                      ? _columnLefts!.elementAt(x)
+                      : 0.0);
 
           if (dx != 0 || dy != 0) {
             shiftTransform(child, dx, dy);
