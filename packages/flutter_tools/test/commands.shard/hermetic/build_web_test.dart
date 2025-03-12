@@ -63,7 +63,7 @@ void main() {
 
       expect(
         () => runner.run(<String>['build', 'web', '--no-pub']),
-        throwsToolExit(message: 'Missing index.html.'),
+        throwsToolExit(message: 'Run flutter create . --platforms web'),
       );
     },
     overrides: <Type, Generator>{
