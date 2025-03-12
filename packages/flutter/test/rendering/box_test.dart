@@ -48,6 +48,18 @@ class BadBaselineRenderBox extends RenderBox {
   }
 }
 
+class InvalidSizeAccessInDryLayoutBox extends RenderBox {
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    return constraints.constrain(hasSize ? size : Size.infinite);
+  }
+
+  @override
+  void performLayout() {
+    size = getDryLayout(constraints);
+  }
+}
+
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -229,6 +241,31 @@ void main() {
         2,
       );
     }
+  });
+
+  test('Invalid size access error message', () {
+    final InvalidSizeAccessInDryLayoutBox testBox = InvalidSizeAccessInDryLayoutBox();
+
+    late FlutterErrorDetails errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails = details;
+    };
+    try {
+      testBox.layout(const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    } finally {
+      FlutterError.onError = oldHandler;
+    }
+
+    expect(
+      errorDetails.toString().replaceAll('\n', ' '),
+      contains(
+        'RenderBox.size accessed in '
+        'InvalidSizeAccessInDryLayoutBox.computeDryLayout. '
+        "The computeDryLayout method must not access the RenderBox's own size, or the size of its child, "
+        "because it's established in performLayout or performResize using different BoxConstraints.",
+      ),
+    );
   });
 
   test('Flex and padding', () {
