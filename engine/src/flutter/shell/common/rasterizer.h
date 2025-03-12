@@ -674,7 +674,6 @@ class Rasterizer final : public SnapshotDelegate,
   bool IsAiksContextInitialized() const override {
 #if IMPELLER_SUPPORTS_RENDERING
     return surface_ && surface_->GetAiksContext();
-    return false;
 #else
     return false;
 #endif
