@@ -1139,7 +1139,14 @@ class WebDevFS implements DevFS {
       recompileRestart: fullRestart,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
-      return UpdateFSReport();
+      return UpdateFSReport(
+        // TODO(srujzs): We're currently reliant on compile error string parsing
+        // as hot reload rejections are sent to stderr just like other
+        // compilation errors. Ideally, we should have some shared parsing
+        // functionality, but that would require a shared package.
+        // See https://github.com/dart-lang/sdk/issues/60275.
+        hotReloadRejected: compilerOutput?.errorMessage?.contains('Hot reload rejected') ?? false,
+      );
     }
 
     // Only update the last compiled time if we successfully compiled.

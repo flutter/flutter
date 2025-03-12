@@ -298,7 +298,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     await device.vmService!.invokeFlutterExtensionRpcRaw(
       method,
       args: params,
-      isolateId: views.first.uiIsolate!.id!,
+      isolateId: views.first.uiIsolate!.id,
     );
   }
 

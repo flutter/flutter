@@ -684,7 +684,7 @@ class FlutterVmService {
     );
   }
 
-  Future<Map<String, Object?>?> flutterReassemble({required String isolateId}) {
+  Future<Map<String, Object?>?> flutterReassemble({required String? isolateId}) {
     return invokeFlutterExtensionRpcRaw('ext.flutter.reassemble', isolateId: isolateId);
   }
 
@@ -803,12 +803,12 @@ class FlutterVmService {
   /// available, returns null.
   Future<Map<String, Object?>?> invokeFlutterExtensionRpcRaw(
     String method, {
-    required String isolateId,
+    required String? isolateId,
     Map<String, Object?>? args,
   }) async {
     final vm_service.Response? response = await _checkedCallServiceExtension(
       method,
-      args: <String, Object?>{'isolateId': isolateId, ...?args},
+      args: <String, Object?>{if (isolateId != null) 'isolateId': isolateId, ...?args},
     );
     return response?.json;
   }

@@ -1416,7 +1416,7 @@ Future<ReassembleResult> _defaultReassembleHelper(
         // If the tool identified a change in a single widget, do a fast instead
         // of a full reassemble.
         final Future<void> reassembleWork = device.vmService!.flutterReassemble(
-          isolateId: view.uiIsolate!.id!,
+          isolateId: view.uiIsolate!.id,
         );
         reassembleFutures.add(
           reassembleWork.then(
