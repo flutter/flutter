@@ -617,5 +617,5 @@ static void fl_accessible_text_field_init(FlAccessibleTextField* self) {
 
 FlAccessibleNode* fl_accessible_text_field_new(FlEngine* engine, int32_t id) {
   return FL_ACCESSIBLE_NODE(g_object_new(fl_accessible_text_field_get_type(),
-                                         "engine", engine, "id", id, nullptr));
+                                         "engine", engine, "node-id", id, nullptr));
 }
