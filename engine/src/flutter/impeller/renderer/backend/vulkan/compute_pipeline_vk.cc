@@ -13,7 +13,7 @@ ComputePipelineVK::ComputePipelineVK(
     vk::UniquePipeline pipeline,
     vk::UniquePipelineLayout layout,
     vk::UniqueDescriptorSetLayout descriptor_set_layout,
-    uint64_t pipeline_key)
+    PipelineKey pipeline_key)
     : Pipeline(std::move(library), desc),
       device_holder_(std::move(device_holder)),
       pipeline_(std::move(pipeline)),
@@ -53,7 +53,7 @@ const vk::DescriptorSetLayout& ComputePipelineVK::GetDescriptorSetLayout()
   return *descriptor_set_layout_;
 }
 
-uint64_t ComputePipelineVK::GetPipelineKey() const {
+PipelineKey ComputePipelineVK::GetPipelineKey() const {
   return pipeline_key_;
 }
 

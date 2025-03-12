@@ -28,7 +28,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
   {
     // Fetch a pool (which will be created).
     auto pool = DescriptorPoolVK(context);
-    pool.AllocateDescriptorSets({}, 0, *context);
+    pool.AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
   }
 
   auto const pool = context->GetDescriptorPoolRecycler()->GetDescriptorPool();
@@ -49,7 +49,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     std::vector<std::unique_ptr<DescriptorPoolVK>> pools;
     for (auto i = 0u; i < 33; i++) {
       auto pool = std::make_unique<DescriptorPoolVK>(context);
-      pool->AllocateDescriptorSets({}, 0, *context);
+      pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
       pools.push_back(std::move(pool));
     }
   }
@@ -65,7 +65,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     std::vector<std::shared_ptr<DescriptorPoolVK>> pools;
     for (auto i = 0u; i < 33; i++) {
       auto pool = context->GetDescriptorPoolRecycler()->GetDescriptorPool();
-      pool->AllocateDescriptorSets({}, 0, *context);
+      pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
       pools.push_back(std::move(pool));
     }
   }

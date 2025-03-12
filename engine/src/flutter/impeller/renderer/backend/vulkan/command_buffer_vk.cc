@@ -160,7 +160,7 @@ bool CommandBufferVK::Track(const std::shared_ptr<const Texture>& texture) {
 
 fml::StatusOr<vk::DescriptorSet> CommandBufferVK::AllocateDescriptorSets(
     const vk::DescriptorSetLayout& layout,
-    uint64_t pipeline_key,
+    PipelineKey pipeline_key,
     const ContextVK& context) {
   if (!IsValid()) {
     return fml::Status(fml::StatusCode::kUnknown, "command encoder invalid");

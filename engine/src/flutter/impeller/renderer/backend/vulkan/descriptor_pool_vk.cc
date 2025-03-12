@@ -59,7 +59,7 @@ DescriptorPoolVK::~DescriptorPoolVK() {
 
 fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
     const vk::DescriptorSetLayout& layout,
-    uint64_t pipeline_key,
+    PipelineKey pipeline_key,
     const ContextVK& context_vk) {
   auto existing = descriptor_sets_.find(pipeline_key);
   if (existing != descriptor_sets_.end() && !existing->second.unused.empty()) {
@@ -125,12 +125,12 @@ void DescriptorPoolRecyclerVK::Reclaim(
   }
 
   // Move the pool to the recycled list. If more than 32 pool are
-  // cached then delete the oldest entry.
+  // cached then delete the newest entry.
   Lock recycled_lock(recycled_mutex_);
-  if (recycled_.size() >= kMaxRecycledPools) {
-    auto& front = recycled_.front();
-    front->Destroy();
-    recycled_.erase(recycled_.begin());
+  while (recycled_.size() >= kMaxRecycledPools) {
+    auto& back_entry = recycled_.back();
+    back_entry->Destroy();
+    recycled_.pop_back();
   }
   recycled_.push_back(std::make_shared<DescriptorPoolVK>(
       context_, std::move(descriptor_sets), std::move(pools)));

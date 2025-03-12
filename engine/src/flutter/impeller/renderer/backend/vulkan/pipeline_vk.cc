@@ -465,7 +465,7 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
     const PipelineDescriptor& desc,
     const std::shared_ptr<DeviceHolderVK>& device_holder,
     const std::weak_ptr<PipelineLibrary>& weak_library,
-    uint64_t pipeline_key,
+    PipelineKey pipeline_key,
     std::shared_ptr<SamplerVK> immutable_sampler) {
   TRACE_EVENT1("flutter", "PipelineVK::Create", "Name", desc.GetLabel().data());
 
@@ -528,7 +528,7 @@ PipelineVK::PipelineVK(std::weak_ptr<DeviceHolderVK> device_holder,
                        vk::UniqueRenderPass render_pass,
                        vk::UniquePipelineLayout layout,
                        vk::UniqueDescriptorSetLayout descriptor_set_layout,
-                       uint64_t pipeline_key,
+                       PipelineKey pipeline_key,
                        std::shared_ptr<SamplerVK> immutable_sampler)
     : Pipeline(std::move(library), desc),
       device_holder_(std::move(device_holder)),
