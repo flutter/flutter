@@ -847,7 +847,7 @@ class _TabBarScrollController extends ScrollController {
 /// Signature for [TabBar] callbacks that report that an underlying value has
 /// changed for a given [Tab] at `index`.
 ///
-/// Used for [TabBar.onHover] and [TabBar.onFocusChanged] callbacks The provided
+/// Used for [TabBar.onHover] and [TabBar.onFocusChange] callbacks The provided
 /// `value` being true indicates focus has been gained, or a pointer has hovered
 /// over the tab, with false indicated focus has been lost or the pointer has
 /// exited hovering.
@@ -1273,6 +1273,13 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The value passed to the callback is true if a pointer has entered the
   /// [Tab] at `index` and false if a pointer has exited.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to customize a [Tab] in response to hovering over a
+  /// [TabBar].
+  ///
+  /// ** See code in examples/api/lib/material/tabs/tab_bar.onHover.dart **
+  /// {@end-tool}
   final TabValueChanged<bool>? onHover;
 
   /// An optional callback that's called when a [Tab]'s focus state in the
@@ -1282,6 +1289,13 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The value passed to the callback is true if the node has gained focus for
   /// the [Tab] at `index` and false if focus has been lost.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to customize a [Tab] based on focus traversal in
+  /// enclosing [TabBar].
+  ///
+  /// ** See code in examples/api/lib/material/tabs/tab_bar.onFocusChange.dart **
+  /// {@end-tool}
   final TabValueChanged<bool>? onFocusChange;
 
   /// How the [TabBar]'s scroll view should respond to user input.
