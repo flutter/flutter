@@ -88,11 +88,10 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
   Point p0 = p0_;
   Point p1 = p1_;
   if ((p0.x == p1.x || p0.y == p1.y) && transform.IsTranslationScaleOnly()) {
-    auto scales = transform.GetScale();
-    p0 = ((Vector2(scales.x, scales.y) * p0) - Point(0.5, 0.5)).Ceil() /
-         Vector2(scales.x, scales.y);
-    p1 = ((Vector2(scales.x, scales.y) * p1) - Point(0.5, 0.5)).Ceil() /
-         Vector2(scales.x, scales.y);
+    // We should find a faster way to do this.
+    Matrix inverse = transform.Invert();
+    p0 = inverse * ((transform * p0) - Point(0.5, 0.5)).Ceil();
+    p1 = inverse * ((transform * p1) - Point(0.5, 0.5)).Ceil();
   }
 
   if (cap_ == Cap::kRound) {
