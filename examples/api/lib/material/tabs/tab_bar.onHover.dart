@@ -14,7 +14,7 @@ class TabBarApp extends StatelessWidget {
 }
 
 class TabBarExample extends StatefulWidget {
-  TabBarExample({super.key});
+  const TabBarExample({super.key});
 
   @override
   State<TabBarExample> createState() => _TabBarExampleState();
