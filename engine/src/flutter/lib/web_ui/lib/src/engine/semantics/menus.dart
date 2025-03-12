@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:ui/ui.dart' as ui;
+
 import 'dart:typed_data';
 import 'label_and_value.dart';
 import 'semantics.dart';
