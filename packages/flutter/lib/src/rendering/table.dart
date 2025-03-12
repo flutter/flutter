@@ -679,7 +679,9 @@ class RenderTable extends RenderBox {
         final index = _idToIndexMap[child.id]!;
         final int y = index.y;
         final int x = index.x;
-        rawCells[y][x].add(child);
+        if (y < _rows && x < _columns) {
+          rawCells[y][x].add(child);
+        }
         //  print('  --added child from index in map: $y, $x ');
       } else {
         final Rect rect = rectWithOffset(child);
