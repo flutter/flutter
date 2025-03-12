@@ -488,6 +488,8 @@ static void DispatchSemanticsAction(JNIEnv* env,
                                     jint action,
                                     jobject args,
                                     jint args_position) {
+  // TODO(team-android): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
   ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchSemanticsAction(
       env,           //
       id,            //
