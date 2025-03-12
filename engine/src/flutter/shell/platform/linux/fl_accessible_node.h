@@ -55,7 +55,8 @@ struct _FlAccessibleNodeClass {
 /**
  * fl_accessible_node_new:
  * @engine: the #FlEngine this node came from.
- * @id: the semantics node ID this object represents.
+ * @view_id: the view ID this object represents.
+ * @node_id: the semantics node ID this object represents.
  *
  * Creates a new accessibility object that exposes Flutter accessibility
  * information to ATK.
@@ -64,7 +65,7 @@ struct _FlAccessibleNodeClass {
  */
 FlAccessibleNode* fl_accessible_node_new(FlEngine* engine,
                                          FlutterViewId view_id,
-                                         int32_t id);
+                                         int32_t node_id);
 
 /**
  * fl_accessible_node_set_parent:

@@ -939,7 +939,7 @@ class PlatformDispatcher {
     call `updateSemantics`.
   ''')
   void updateSemantics(SemanticsUpdate update) =>
-      _updateSemantics(update as _NativeSemanticsUpdate, 0);
+      _updateSemantics(update as _NativeSemanticsUpdate, _implicitViewId!);
 
   @Native<Void Function(Pointer<Void>, Int64)>(
     symbol: 'PlatformConfigurationNativeApi::UpdateSemantics',

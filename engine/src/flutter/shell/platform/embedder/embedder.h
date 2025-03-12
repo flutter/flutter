@@ -1680,8 +1680,8 @@ typedef struct {
   /// Array of semantics custom action pointers. Has length
   /// `custom_action_count`.
   FlutterSemanticsCustomAction2** custom_actions;
-  // The ID of the view that this node is associated with.
-  int64_t view_id;
+  // The ID of the view that this update is associated with.
+  FlutterViewId view_id;
 } FlutterSemanticsUpdate2;
 
 typedef void (*FlutterUpdateSemanticsNodeCallback)(
@@ -3074,7 +3074,7 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
 
 //------------------------------------------------------------------------------
 /// @brief      Dispatch a semantics action to the specified semantics node.
-///             within the default view.
+///             in the implicit view.
 ///
 /// @param[in]  engine       A running engine instance.
 /// @param[in]  node_id      The semantics node identifier.
@@ -3108,7 +3108,7 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineDispatchSemanticsActionOnView(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    int64_t view_id,
+    FlutterViewId view_id,
     uint64_t node_id,
     FlutterSemanticsAction action,
     const uint8_t* data,
@@ -3503,8 +3503,8 @@ typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionFnPtr)(
     size_t data_length);
 typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionOnViewFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    int64_t view_id,
-    uint64_t id,
+    FlutterViewId view_id,
+    uint64_t node_id,
     FlutterSemanticsAction action,
     const uint8_t* data,
     size_t data_length);

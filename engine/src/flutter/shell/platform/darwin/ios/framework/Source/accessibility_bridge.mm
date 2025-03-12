@@ -236,14 +236,15 @@ void AccessibilityBridge::UpdateSemantics(
   }
 }
 
-void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, flutter::SemanticsAction action) {
-  platform_view_->DispatchSemanticsAction(kImplicitViewId, uid, action, {});
+void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
+                                                  flutter::SemanticsAction action) {
+  platform_view_->DispatchSemanticsAction(kImplicitViewId, node_uid, action, {});
 }
 
-void AccessibilityBridge::DispatchSemanticsAction(int32_t uid,
+void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
                                                   flutter::SemanticsAction action,
                                                   fml::MallocMapping args) {
-  platform_view_->DispatchSemanticsAction(kImplicitViewId, uid, action, std::move(args));
+  platform_view_->DispatchSemanticsAction(kImplicitViewId, node_uid, action, std::move(args));
 }
 
 static void ReplaceSemanticsObject(SemanticsObject* oldObject,

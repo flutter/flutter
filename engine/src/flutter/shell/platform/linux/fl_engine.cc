@@ -1202,7 +1202,7 @@ gboolean fl_engine_send_key_event_finish(FlEngine* self,
 
 void fl_engine_dispatch_semantics_action(FlEngine* self,
                                          FlutterViewId view_id,
-                                         uint64_t id,
+                                         uint64_t node_id,
                                          FlutterSemanticsAction action,
                                          GBytes* data) {
   g_return_if_fail(FL_IS_ENGINE(self));
@@ -1219,7 +1219,7 @@ void fl_engine_dispatch_semantics_action(FlEngine* self,
   }
 
   self->embedder_api.DispatchSemanticsActionOnView(
-      self->engine, view_id, id, action, action_data, action_data_length);
+      self->engine, view_id, node_id, action, action_data, action_data_length);
 }
 
 gboolean fl_engine_mark_texture_frame_available(FlEngine* self,

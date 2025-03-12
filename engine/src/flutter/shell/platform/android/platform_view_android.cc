@@ -266,13 +266,13 @@ void PlatformViewAndroid::OnPreEngineRestart() const {
 }
 
 void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
-                                                  jint id,
+                                                  jint node_id,
                                                   jint action,
                                                   jobject args,
                                                   jint args_position) {
   if (env->IsSameObject(args, NULL)) {
     PlatformView::DispatchSemanticsAction(
-        kImplicitViewId, id, static_cast<flutter::SemanticsAction>(action),
+        kImplicitViewId, node_id, static_cast<flutter::SemanticsAction>(action),
         fml::MallocMapping());
     return;
   }
@@ -281,7 +281,7 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
   auto args_vector = fml::MallocMapping::Copy(args_data, args_position);
 
   PlatformView::DispatchSemanticsAction(
-      kImplicitViewId, id, static_cast<flutter::SemanticsAction>(action),
+      kImplicitViewId, node_id, static_cast<flutter::SemanticsAction>(action),
       std::move(args_vector));
 }
 

@@ -122,7 +122,7 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
       std::function<void(bool)> callback) {}
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
-                                             int32_t id,
+                                             int32_t node_id,
                                              flutter::SemanticsAction action,
                                              fml::MallocMapping args) {}
   // |flutter::PlatformView::Delegate|

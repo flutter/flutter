@@ -74,7 +74,7 @@ struct FlAccessibleNodePrivate {
   // Weak reference to the parent node of this one or %NULL.
   AtkObject* parent;
 
-  int32_t id;
+  int32_t node_id;
   gchar* name;
   gint index;
   gint x, y, width, height;
@@ -158,7 +158,7 @@ static void fl_accessible_node_set_property(GObject* object,
       priv->view_id = g_value_get_int64(value);
       break;
     case PROP_ID:
-      priv->id = g_value_get_int(value);
+      priv->node_id = g_value_get_int(value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -423,8 +423,8 @@ static void fl_accessible_node_perform_action_impl(
     FlutterSemanticsAction action,
     GBytes* data) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
-  fl_engine_dispatch_semantics_action(priv->engine, priv->view_id, priv->id,
-                                      action, data);
+  fl_engine_dispatch_semantics_action(priv->engine, priv->view_id,
+                                      priv->node_id, action, data);
 }
 
 static void fl_accessible_node_class_init(FlAccessibleNodeClass* klass) {
@@ -463,13 +463,13 @@ static void fl_accessible_node_class_init(FlAccessibleNodeClass* klass) {
   g_object_class_install_property(
       G_OBJECT_CLASS(klass), PROP_VIEW_ID,
       g_param_spec_int64(
-          "view_id", "view_id", "View ID that this node belongs to", 0,
+          "view-id", "view-id", "View ID that this node belongs to", 0,
           G_MAXINT64, 0,
           static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY)));
   g_object_class_install_property(
       G_OBJECT_CLASS(klass), PROP_ID,
       g_param_spec_int(
-          "id", "id", "Accessibility node ID", 0, G_MAXINT, 0,
+          "node-id", "node-id", "Accessibility node ID", 0, G_MAXINT, 0,
           static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY |
                                    G_PARAM_STATIC_STRINGS)));
 }
@@ -494,10 +494,10 @@ static void fl_accessible_node_init(FlAccessibleNode* self) {
 
 FlAccessibleNode* fl_accessible_node_new(FlEngine* engine,
                                          FlutterViewId view_id,
-                                         int32_t id) {
+                                         int32_t node_id) {
   FlAccessibleNode* self = FL_ACCESSIBLE_NODE(
-      g_object_new(fl_accessible_node_get_type(), "engine", engine, "view_id",
-                   view_id, "id", id, nullptr));
+      g_object_new(fl_accessible_node_get_type(), "engine", engine, "view-id",
+                   view_id, "node-id", node_id, nullptr));
   return self;
 }
 
