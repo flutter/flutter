@@ -288,6 +288,7 @@ void main() {
     late Cache cache;
     late FileSystem fileSystem;
     late Platform platform;
+    late FakeProcessManager processManager;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -301,6 +302,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
         artifacts: <ArtifactSet>[],
       );
+      processManager = FakeProcessManager.any();
       artifacts = CachedLocalWebSdkArtifacts(
         parent: CachedLocalEngineArtifacts(
           fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
@@ -312,7 +314,7 @@ void main() {
           cache: cache,
           fileSystem: fileSystem,
           platform: platform,
-          processManager: FakeProcessManager.any(),
+          processManager: processManager,
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
         webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
@@ -510,6 +512,12 @@ void main() {
       expect(
         artifacts.getHostArtifact(HostArtifact.libtessellator).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'),
+      );
+
+      processManager.excludedExecutables.add('/out/android_debug_unopt/./gen_snapshot');
+      expect(
+        artifacts.getArtifactPath(Artifact.genSnapshot),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'universal', 'gen_snapshot'),
       );
     });
 

@@ -228,10 +228,19 @@ if (host_os == "mac" &&
     host_arch = "x64"
   }
 
+  if (target_os == "android") {
+    # Each Android engine build targets a specific architecture and does not
+    # need to add the target architecture to the universal binary filename.
+    universal_binary_name = "gen_snapshot"
+  } else {
+    universal_binary_name = "gen_snapshot${gen_snapshot_suffix}"
+  }
+  universal_output_path = "${root_out_dir}/universal/${universal_binary_name}"
+
   # Create a universal binary from the two architecture-specific gen_snapshots.
   action("create_macos_gen_snapshots") {
     script = "//flutter/sky/tools/create_macos_binary.py"
-    outputs = [ "${root_out_dir}/gen_snapshot${gen_snapshot_suffix}" ]
+    outputs = [ universal_output_path ]
     args = [
       "--in-arm64",
       rebase_path(
@@ -240,7 +249,7 @@ if (host_os == "mac" &&
       rebase_path(
           "${root_out_dir}/artifacts_x64/gen_snapshot${gen_snapshot_suffix}"),
       "--out",
-      rebase_path("${root_out_dir}/gen_snapshot${gen_snapshot_suffix}"),
+      rebase_path(universal_output_path),
     ]
     deps = [
       ":create_macos_gen_snapshot_arm64${gen_snapshot_suffix}",
