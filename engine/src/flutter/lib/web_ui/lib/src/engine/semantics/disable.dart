@@ -10,8 +10,8 @@ import 'semantics.dart';
 /// is currently disabled (i.e. [SemanticsObject.isEnabled] is false). If the
 /// node is enabled (i.e. [SemanticsObject.isEnabled]
 /// is true), then `aria-disabled` is unset.
-class Disable extends SemanticBehavior {
-  Disable(super.semanticsObject, super.owner);
+class CanDisable extends SemanticBehavior {
+  CanDisable(super.semanticsObject, super.owner);
 
   @override
   void update() {

@@ -659,7 +659,7 @@ abstract class SemanticRole {
   }
 
   void addDisabledBehavior() {
-    addSemanticBehavior(Disable(semanticsObject, this));
+    addSemanticBehavior(CanDisable(semanticsObject, this));
   }
 
   /// Adds generic functionality for handling taps and clicks.

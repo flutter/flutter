@@ -169,7 +169,7 @@ class Selectable extends SemanticBehavior {
 /// false). If the node is not checkable (i.e. [SemanticsObject.isCheckable]
 /// is false), then `aria-checked` is unset.
 class Checkable extends SemanticBehavior {
-  Selectable(super.semanticsObject, super.owner);
+  Checkable(super.semanticsObject, super.owner);
 
   @override
   void update() {
