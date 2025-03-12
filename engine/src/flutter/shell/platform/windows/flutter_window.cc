@@ -185,6 +185,20 @@ void FlutterWindow::SetFlutterCursor(HCURSOR cursor) {
   ::SetCursor(current_cursor_);
 }
 
+bool FlutterWindow::Focus() {
+  auto hwnd = GetWindowHandle();
+  if (hwnd == nullptr) {
+    return false;
+  }
+
+  HWND prevFocus = ::SetFocus(hwnd);
+  if (prevFocus == nullptr) {
+    return false;
+  }
+
+  return true;
+}
+
 void FlutterWindow::OnDpiScale(unsigned int dpi) {};
 
 // When DesktopWindow notifies that a WM_Size message has come in
@@ -377,9 +391,19 @@ void FlutterWindow::OnWindowStateEvent(WindowStateEvent event) {
       break;
     case WindowStateEvent::kFocus:
       focused_ = true;
+      if (binding_handler_delegate_) {
+        binding_handler_delegate_->OnFocus(
+            FlutterViewFocusState::kFocused,
+            FlutterViewFocusDirection::kUndefined);
+      }
       break;
     case WindowStateEvent::kUnfocus:
       focused_ = false;
+      if (binding_handler_delegate_) {
+        binding_handler_delegate_->OnFocus(
+            FlutterViewFocusState::kUnfocused,
+            FlutterViewFocusDirection::kUndefined);
+      }
       break;
   }
   HWND hwnd = GetWindowHandle();
