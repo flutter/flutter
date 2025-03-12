@@ -7,6 +7,7 @@ import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
 
@@ -117,6 +118,14 @@ class WebTextStyle implements ui.TextStyle {
   }
 }
 
+class StyledTextRange {
+  StyledTextRange(int start, int end, this.textStyle) {
+    this.textRange = ui.TextRange(start: start, end: end);
+  }
+  ui.TextRange textRange = ui.TextRange(start: 0, end: 0);
+  WebTextStyle textStyle;
+}
+
 class WebStrutStyle implements ui.StrutStyle {
   WebStrutStyle({
     String? fontFamily,
@@ -146,7 +155,7 @@ class WebStrutStyle implements ui.StrutStyle {
 
 /// The Web implementation of [ui.Paragraph].
 class WebParagraph implements ui.Paragraph {
-  WebParagraph(this._paragraphStyle, this._text) {}
+  WebParagraph(this._paragraphStyle, this._styledTextRanges, this._text) {}
 
   /// The constraints from the last time we laid the paragraph out.
   ///
@@ -154,13 +163,14 @@ class WebParagraph implements ui.Paragraph {
   /// is deleted.
   double _lastLayoutConstraints = double.negativeInfinity;
 
-  /// The paragraph style used to build this paragraph.
-  ///
-  /// This is used to resurrect the paragraph if the initial paragraph
-  /// is deleted.
-  final WebParagraphStyle _paragraphStyle;
+  WebParagraphStyle get paragraphStyle => _paragraphStyle;
+  WebParagraphStyle _paragraphStyle;
 
-  final String _text;
+  List<StyledTextRange> get styledTextRanges => _styledTextRanges;
+  List<StyledTextRange> _styledTextRanges;
+
+  String get text => _text;
+  String _text = '';
 
   @override
   double get alphabeticBaseline => _alphabeticBaseline;
@@ -305,8 +315,6 @@ class WebParagraph implements ui.Paragraph {
     throw StateError('Paragraph.debugDisposed is only available when asserts are enabled.');
   }
 
-  String get text => _text;
-
   late final TextLayout _layout = TextLayout(this);
   late final TextPaint _paint = TextPaint(this);
 }
@@ -343,10 +351,16 @@ class WebLineMetrics implements ui.LineMetrics {
 class WebParagraphPlaceholder {}
 
 class WebParagraphBuilder implements ui.ParagraphBuilder {
-  WebParagraphBuilder(ui.ParagraphStyle style) : _style = style as WebParagraphStyle {}
+  WebParagraphBuilder(ui.ParagraphStyle paragraphStyle)
+    : paragraphStyle = paragraphStyle as WebParagraphStyle {
+    textStylesList.add(StyledTextRange(0, 0, paragraphStyle.getTextStyle()));
+    textStylesStack.add(0);
+  }
 
-  final WebParagraphStyle _style;
-  String _text = '';
+  final WebParagraphStyle paragraphStyle;
+  List<StyledTextRange> textStylesList = <StyledTextRange>[];
+  List<int> textStylesStack = <int>[]; // Indexes inside the textStylesList
+  String text = '';
 
   @override
   void addPlaceholder(
@@ -362,12 +376,24 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void addText(String text) {
-    _text += text;
+    this.text += text;
+    this.finishStyledTextRange(false);
   }
 
   @override
   WebParagraph build() {
-    final WebParagraph builtParagraph = WebParagraph(_style, _text);
+    this.finishStyledTextRange(true);
+    final WebParagraph builtParagraph = WebParagraph(
+      this.paragraphStyle,
+      this.textStylesList,
+      this.text,
+    );
+    WebParagraphDebug.log('WebParagraphBuilder.build(): "${this.text}" ${textStylesList.length}');
+    for (var i = 0; i < textStylesList.length; ++i) {
+      WebParagraphDebug.log(
+        '${i}: [${textStylesList[i].textRange.start}:${textStylesList[i].textRange.end})',
+      );
+    }
     return builtParagraph;
   }
 
@@ -378,8 +404,49 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   List<double> get placeholderScales => <double>[];
 
   @override
-  void pop() {}
+  void pop() {
+    if (!textStylesStack.isEmpty) {
+      final isEmpty = this.textStylesList[this.textStylesStack.last].textRange.isCollapsed;
+      this.textStylesStack.removeLast();
+      this.finishStyledTextRange(isEmpty);
+    } else {
+      // In this case we use paragraph style and skip Pop operation
+      WebParagraphDebug.error('Cannot perform pop operation: empty style list');
+    }
+  }
 
   @override
-  void pushStyle(ui.TextStyle leafStyle) {}
+  void pushStyle(ui.TextStyle textStyle) {
+    if (!textStylesStack.isEmpty) {
+      final last = this.textStylesList[this.textStylesStack.last];
+      if (last.textRange.end == text.length && last.textStyle == (textStyle as WebTextStyle)) {
+        // Just continue with the same style
+        return;
+      }
+    }
+    // Start a new text range
+    textStylesStack.add(textStylesList.length);
+    textStylesList.add(StyledTextRange(text.length, text.length, textStyle as WebTextStyle));
+  }
+
+  void finishStyledTextRange(bool canReduce) {
+    // Remove all text styles without text and update all onces with text
+    for (var i = this.textStylesStack.length - 1; i >= 0; i--) {
+      final index = this.textStylesStack[i];
+      if (canReduce && this.textStylesList[index].textRange.start == text.length) {
+        // The last textStyle didn't have any text in it
+        // We can safely remove it from both list and stack
+        // without messing up all the indexes
+        this.textStylesStack.removeLast();
+        this.textStylesList.removeAt(index);
+      } else {
+        // We found a text style with non-empty text
+        this.textStylesList[index].textRange = ui.TextRange(
+          start: this.textStylesList[index].textRange.start,
+          end: text.length,
+        );
+        canReduce = false;
+      }
+    }
+  }
 }

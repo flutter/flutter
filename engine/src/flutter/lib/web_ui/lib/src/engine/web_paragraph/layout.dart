@@ -48,8 +48,9 @@ class TextLayout {
 
     this.extractRuns();
 
-    final TextWrapper wrapper = TextWrapper(paragraph.text, this);
-    wrapper.breakLines(width);
+    this.wrapText(paragraph.text, width);
+
+    this.reorderVisuals();
   }
 
   void extractUnicodeInfo() {
@@ -85,6 +86,16 @@ class TextLayout {
 
   void extractRuns() {
     // TODO: Implement bidi (via SkUnicode API in CanvasKit)
+  }
+
+  void wrapText(String text, double width) {
+    final TextWrapper wrapper = TextWrapper(text, this);
+    wrapper.breakLines(width);
+  }
+
+  void reorderVisuals() {
+    // TODO: Use bidi API to reorder visual runs for all lines
+    // (maybe breaking these runs by lines in addition)
   }
 }
 
