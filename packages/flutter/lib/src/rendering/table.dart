@@ -624,8 +624,9 @@ class RenderTable extends RenderBox {
     SemanticsConfiguration config,
     Iterable<SemanticsNode> children,
   ) {
-    print('------!!!!assembleSemanticsNode node row: $_rows, column: $_columns');
-    for (final child in children) print('  --child: ${child}');
+    // print('------!!!!assembleSemanticsNode node row: $_rows, column: $_columns');
+    //for (final child in children) print('  --child: ${child}');
+    // print('---start');
 
     final List<SemanticsNode> rows = <SemanticsNode>[];
 
@@ -673,20 +674,20 @@ class RenderTable extends RenderBox {
     }
 
     for (final SemanticsNode child in children) {
-      print('  --child: $child');
+      //  print('  --child: $child');
       if (_idToIndexMap.containsKey(child.id)) {
         final index = _idToIndexMap[child.id]!;
         final int y = index.y;
         final int x = index.x;
         rawCells[y][x].add(child);
-        print('  --added child from index in map: $y, $x ');
+        //  print('  --added child from index in map: $y, $x ');
       } else {
         final Rect rect = rectWithOffset(child);
         final int y = findRowIndex(rect.top);
         final int x = findColumnIndex(rect.left);
         if (y != -1 && x != -1) {
           rawCells[y][x].add(child);
-          print('  --added child by rect: $y, $x ');
+          //   print('  --added child by rect: $y, $x ');
         }
       }
     }
@@ -736,7 +737,7 @@ class RenderTable extends RenderBox {
 
         // Skip cell if it's invisible
         if (cellWidth <= 0.0) {
-          print('  --skipped cell: $y, $x  ${cell}');
+          //   print('  --skipped cell: $y, $x  ${cell}');
           continue;
         }
         // Add wrapper transform
@@ -750,8 +751,10 @@ class RenderTable extends RenderBox {
 
           // Shift child transform.
           final Rect localRect = rectWithOffset(child);
-          final double dy = localRect.top < rowBox.height ? 0.0 : -_rowTops.elementAt(y);
-          final double dx = localRect.left < cellWidth ? 0.0 : -_columnLefts!.elementAt(x);
+          final double dy = localRect.top >= rowBox.height ? -_rowTops.elementAt(y) : 0.0;
+          final double dx =
+              (addCellWrapper && localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0;
+
           if (dx != 0 || dy != 0) {
             shiftTransform(child, dx, dy);
           }
@@ -759,9 +762,9 @@ class RenderTable extends RenderBox {
 
         cell.indexInParent = x;
         cells.add(cell);
-        print('  --added cell: $y, $x  ${cell}');
-        print('  --cell width: ${cellWidth}');
-        print('rawChildrens: ${rawChildrens}');
+        //    print('  --added cell: $y, $x  ${cell}');
+        //   print('  --cell width: ${cellWidth}');
+        //  print('rawChildrens: ${rawChildrens}');
       }
 
       newRow
