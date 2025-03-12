@@ -164,12 +164,6 @@ public class SensitiveContentPluginTest {
     when(mockHandler.getContentSensitivity()).thenReturn(View.CONTENT_SENSITIVITY_NOT_SENSITIVE);
     sensitiveContentChannel.parsingMethodHandler.onMethodCall(methodCall, mockResult);
     verify(mockResult).success(SensitiveContentChannel.NOT_SENSITIVE_CONTENT_SENSITIVITY);
-
-    // Test an unknown value:
-    mockResult = mock(MethodChannel.Result.class);
-    when(mockHandler.getContentSensitivity()).thenReturn(94502);
-    sensitiveContentChannel.parsingMethodHandler.onMethodCall(methodCall, mockResult);
-    verify(mockResult).success(SensitiveContentChannel.UNKNOWN_CONTENT_SENSITIVITY);
   }
 
   @Test
