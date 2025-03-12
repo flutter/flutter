@@ -168,6 +168,9 @@ class ExpansionTile extends StatefulWidget {
   /// When the tile starts expanding, this function is called with the value
   /// true. When the tile starts collapsing, this function is called with
   /// the value false.
+  ///
+  /// Instead of providing this property, consider adding this callback as a
+  /// listener to a provided [controller].
   final ValueChanged<bool>? onExpansionChanged;
 
   /// The widgets that are displayed when the tile expands.
@@ -206,7 +209,12 @@ class ExpansionTile extends StatefulWidget {
   /// Specifies if the [ExpansionTile] should build a default trailing icon if [trailing] is null.
   final bool showTrailingIcon;
 
-  /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
+  /// Specifies if the list tile is initially expanded (true) or collapsed (false).
+  ///
+  /// Alternatively, a provided [controller] can be used to initially expand the
+  /// tile if [controller.expand] is called before this widget is built.
+  ///
+  /// Defaults to false.
   final bool initiallyExpanded;
 
   /// Specifies whether the state of the children is maintained when the tile expands and collapses.
