@@ -210,11 +210,12 @@ TEST_P(AiksTest, TextRotated180Degrees) {
     builder.Rotate(rotation);
     builder.Translate(-pivot.x, -pivot.y);
 
-    RenderTextInCanvasSkia(GetContext(), builder, "test", "Roboto-Regular.ttf",
-                           TextRenderOptions{
-                               .color = DlColor::kBlack(),
-                               .position = DlPoint(foffset[0], foffset[1]),
-                           });
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "test", "Roboto-Regular.ttf",
+        TextRenderOptions{
+            .color = DlColor::kBlack(),
+            .position = SkPoint::Make(foffset[0], foffset[1]),
+        });
 
     builder.Restore();
     return builder.Build();
