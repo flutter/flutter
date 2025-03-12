@@ -236,6 +236,10 @@ class RenderConstrainedBox extends RenderProxyBox {
       return _additionalConstraints.minWidth;
     }
 
+    // [min] is used here instead of [_additionalConstraints.constrainHeight]
+    // as the parent will enforce constraints in the layout phase.
+    // In practice, this means that we should ignore the minHeight of the 
+    // additional constraints here, as it will be overridden by the parent.
     final double width = super.computeMinIntrinsicWidth(
       min(_additionalConstraints.maxHeight, height),
     );
@@ -252,6 +256,10 @@ class RenderConstrainedBox extends RenderProxyBox {
       return _additionalConstraints.minWidth;
     }
 
+    // [min] is used here instead of [_additionalConstraints.constrainHeight]
+    // as the parent will enforce constraints in the layout phase.
+    // In practice, this means that we should ignore the minHeight of the 
+    // additional constraints here, as it will be overridden by the parent.
     final double width = super.computeMaxIntrinsicWidth(
       min(_additionalConstraints.maxHeight, height),
     );
@@ -268,6 +276,10 @@ class RenderConstrainedBox extends RenderProxyBox {
       return _additionalConstraints.minHeight;
     }
 
+    // [min] is used here instead of [_additionalConstraints.constrainWidth]
+    // as the parent will enforce constraints in the layout phase.
+    // In practice, this means that we should ignore the minWidth of the 
+    // additional constraints here, as it will be overridden by the parent.
     final double height = super.computeMinIntrinsicHeight(
       min(_additionalConstraints.maxWidth, width),
     );
@@ -284,6 +296,10 @@ class RenderConstrainedBox extends RenderProxyBox {
       return _additionalConstraints.minHeight;
     }
 
+    // [min] is used here instead of [_additionalConstraints.constrainWidth]
+    // as the parent will enforce constraints in the layout phase.
+    // In practice, this means that we should ignore the minWidth of the 
+    // additional constraints here, as it will be overridden by the parent.
     final double height = super.computeMaxIntrinsicHeight(
       min(_additionalConstraints.maxWidth, width),
     );
