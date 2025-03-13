@@ -62,15 +62,8 @@ class SemanticMenuItem extends SemanticRole {
     if (semanticsObject.hasExpandedState) {
       setAttribute('aria-haspopup', 'menu');
     }
+    addDisabledBehavior();
     addTappable();
-  }
-
-  @override
-  void update() {
-    super.update();
-    if (semanticsObject.isFlagsDirty) {
-      addDisabledBehavior();
-    }
   }
 
   @override
@@ -90,16 +83,8 @@ class SemanticMenuItemCheckbox extends SemanticRole {
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
       ) {
     setAriaRole('menuitemcheckbox');
-  }
-
-  @override
-  void update() {
-    super.update();
-
-    if (semanticsObject.isFlagsDirty) {
-      addCheckedBehavior();
-      addDisabledBehavior();
-    }
+    addCheckedBehavior();
+    addDisabledBehavior();
   }
 
   @override
@@ -119,15 +104,8 @@ class SemanticMenuItemRadio extends SemanticRole {
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
       ) {
     setAriaRole('menuitemradio');
-  }
-
-  @override
-  void update() {
-    super.update();
-    if (semanticsObject.isFlagsDirty) {
-      addCheckedBehavior();
-      addDisabledBehavior();
-    }
+    addCheckedBehavior();
+    addDisabledBehavior();
   }
 
   @override
