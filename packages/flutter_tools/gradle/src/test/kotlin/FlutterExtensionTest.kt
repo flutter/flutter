@@ -2,6 +2,7 @@ package com.flutter.gradle
 
 import org.gradle.api.GradleException
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class FlutterExtensionTest {
@@ -22,7 +23,7 @@ class FlutterExtensionTest {
     fun `getVersionCode() returns flutterVersion without error when set and is a number`() {
         val flutterExtension: FlutterExtension = FlutterExtension()
         flutterExtension.flutterVersionCode = "123"
-        assert(flutterExtension.getVersionCode() == 123)
+        assertEquals(123, flutterExtension.getVersionCode())
     }
 
     @Test
@@ -35,6 +36,6 @@ class FlutterExtensionTest {
     fun `getVersionName() returns flutterVersionName without error when set`() {
         val flutterExtension: FlutterExtension = FlutterExtension()
         flutterExtension.flutterVersionName = "1.2.3"
-        assert(flutterExtension.getVersionName() == "1.2.3")
+        assertEquals("1.2.3", flutterExtension.getVersionName())
     }
 }
