@@ -9,10 +9,6 @@ for Android, iOS, and so-on).
 
 ![An example of cached engine artifacts](https://github.com/user-attachments/assets/47c45971-5c5c-4a01-8239-8af0b98cabb8)
 
-> [!NOTE]
->
-> This process is changing, see [#163986](https://github.com/flutter/flutter/issues/163896).
-
 When using a _released_ version of Flutter, i.e. from a channel such as `stable`,
 [`bin/internal/engine.version`](../../bin/internal/engine.version) is set to the
 git commit SHA for a merged commit in `https://github.com/flutter/flutter`, where
