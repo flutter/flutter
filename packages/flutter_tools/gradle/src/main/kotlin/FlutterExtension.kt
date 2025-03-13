@@ -13,7 +13,7 @@ import org.gradle.api.GradleException
  * Learn more about extensions in Gradle:
  *  * https://docs.gradle.org/8.0.2/userguide/custom_plugins.html#sec:getting_input_from_the_build
  */
-class FlutterExtension {
+open class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
     val compileSdkVersion: Int = 35
 
@@ -51,18 +51,20 @@ class FlutterExtension {
     var flutterVersionName: String? = null
 
     /** Returns flutterVersionCode as an integer with error handling. */
-    fun getVersionCode(): Int {
-        val versionCode =
-            flutterVersionCode
-                ?: throw GradleException("flutterVersionCode must not be null.")
+    val versionCode: Int
+        get() {
+            val versionCode =
+                flutterVersionCode
+                    ?: throw GradleException("flutterVersionCode must not be null.")
 
-        return versionCode.toIntOrNull()
-            ?: throw GradleException("flutterVersionCode must be an integer.")
-    }
+            return versionCode.toIntOrNull()
+                ?: throw GradleException("flutterVersionCode must be an integer.")
+        }
 
     /** Returns flutterVersionName with error handling. */
-    fun getVersionName(): String {
-        return flutterVersionName
-            ?: throw GradleException("flutterVersionName must not be null.")
-    }
+    val versionName: String
+        get() {
+            return flutterVersionName
+                ?: throw GradleException("flutterVersionName must not be null.")
+        }
 }
