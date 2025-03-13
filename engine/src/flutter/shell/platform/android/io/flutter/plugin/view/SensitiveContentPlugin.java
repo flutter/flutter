@@ -102,7 +102,6 @@ public class SensitiveContentPlugin
     }
 
     final int currentContentSensitivity = flutterView.getContentSensitivity();
-
     return currentContentSensitivity;
   }
 
