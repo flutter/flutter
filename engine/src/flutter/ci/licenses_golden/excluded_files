@@ -1073,6 +1073,7 @@
 ../../../flutter/third_party/boringssl/src/gen/README.md
 ../../../flutter/third_party/boringssl/src/gen/sources.bzl
 ../../../flutter/third_party/boringssl/src/gen/sources.cmake
+../../../flutter/third_party/boringssl/src/gen/sources.mk
 ../../../flutter/third_party/boringssl/src/gen/test_support
 ../../../flutter/third_party/boringssl/src/infra/config/README.md
 ../../../flutter/third_party/boringssl/src/pki/README.md
