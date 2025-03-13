@@ -1317,9 +1317,9 @@ void Shell::OnAnimatorDrawLastLayerTrees(
 }
 
 // |Engine::Delegate|
-void Shell::OnEngineUpdateSemantics(SemanticsNodeUpdates update,
-                                    CustomAccessibilityActionUpdates actions,
-                                    int64_t view_id) {
+void Shell::OnEngineUpdateSemantics(int64_t view_id,
+                                    SemanticsNodeUpdates update,
+                                    CustomAccessibilityActionUpdates actions) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
@@ -1328,7 +1328,7 @@ void Shell::OnEngineUpdateSemantics(SemanticsNodeUpdates update,
       [view = platform_view_->GetWeakPtr(), update = std::move(update),
        actions = std::move(actions), view_id = view_id] {
         if (view) {
-          view->UpdateSemantics(update, actions, view_id);
+          view->UpdateSemantics(view_id, update, actions);
         }
       });
 }

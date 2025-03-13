@@ -180,23 +180,21 @@ TEST(FlEngineTest, DispatchSemanticsAction) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
-  fl_engine_get_embedder_api(engine)->DispatchSemanticsActionOnView =
-      MOCK_ENGINE_PROC(
-          DispatchSemanticsActionOnView,
-          ([&called](auto engine,
-                     const FlutterDispatchSemanticsActionInfo* info) {
-            EXPECT_EQ(info->view_id, static_cast<int64_t>(456));
-            EXPECT_EQ(info->node_id, static_cast<uint64_t>(42));
-            EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
-            EXPECT_EQ(info->data_length, static_cast<size_t>(4));
-            EXPECT_EQ(info->data[0], 't');
-            EXPECT_EQ(info->data[1], 'e');
-            EXPECT_EQ(info->data[2], 's');
-            EXPECT_EQ(info->data[3], 't');
-            called = true;
+  fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction,
+      ([&called](auto engine, const FlutterDispatchSemanticsActionInfo* info) {
+        EXPECT_EQ(info->view_id, static_cast<int64_t>(456));
+        EXPECT_EQ(info->node_id, static_cast<uint64_t>(42));
+        EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
+        EXPECT_EQ(info->data_length, static_cast<size_t>(4));
+        EXPECT_EQ(info->data[0], 't');
+        EXPECT_EQ(info->data[1], 'e');
+        EXPECT_EQ(info->data[2], 's');
+        EXPECT_EQ(info->data[3], 't');
+        called = true;
 
-            return kSuccess;
-          }));
+        return kSuccess;
+      }));
 
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &error));

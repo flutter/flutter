@@ -666,9 +666,10 @@ class Shell final : public PlatformView::Delegate,
       std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) override;
 
   // |Engine::Delegate|
-  void OnEngineUpdateSemantics(SemanticsNodeUpdates update,
-                               CustomAccessibilityActionUpdates actions,
-                               int64_t view_id) override;
+  void OnEngineUpdateSemantics(
+      int64_t view_id,
+      SemanticsNodeUpdates update,
+      CustomAccessibilityActionUpdates actions) override;
 
   // |Engine::Delegate|
   void OnEngineHandlePlatformMessage(

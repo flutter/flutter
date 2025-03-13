@@ -32,9 +32,9 @@ class RuntimeDelegate {
                       std::unique_ptr<flutter::LayerTree> layer_tree,
                       float device_pixel_ratio) = 0;
 
-  virtual void UpdateSemantics(SemanticsNodeUpdates update,
-                               CustomAccessibilityActionUpdates actions,
-                               int64_t view_id) = 0;
+  virtual void UpdateSemantics(int64_t view_id,
+                               SemanticsNodeUpdates update,
+                               CustomAccessibilityActionUpdates actions) = 0;
 
   virtual void HandlePlatformMessage(
       std::unique_ptr<PlatformMessage> message) = 0;

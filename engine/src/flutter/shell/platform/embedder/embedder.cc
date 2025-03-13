@@ -3199,10 +3199,10 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
       .action = action,
       .data = data,
       .data_length = data_length};
-  return FlutterEngineDispatchSemanticsActionOnView(engine, &info);
+  return FlutterEngineSendSemanticsAction(engine, &info);
 }
 
-FlutterEngineResult FlutterEngineDispatchSemanticsActionOnView(
+FlutterEngineResult FlutterEngineSendSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterDispatchSemanticsActionInfo* info) {
   if (engine == nullptr) {
@@ -3721,8 +3721,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(UpdateAccessibilityFeatures,
            FlutterEngineUpdateAccessibilityFeatures);
   SET_PROC(DispatchSemanticsAction, FlutterEngineDispatchSemanticsAction);
-  SET_PROC(DispatchSemanticsActionOnView,
-           FlutterEngineDispatchSemanticsActionOnView);
+  SET_PROC(SendSemanticsAction, FlutterEngineSendSemanticsAction);
   SET_PROC(OnVsync, FlutterEngineOnVsync);
   SET_PROC(ReloadSystemFonts, FlutterEngineReloadSystemFonts);
   SET_PROC(TraceEventDurationBegin, FlutterEngineTraceEventDurationBegin);

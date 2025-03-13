@@ -509,9 +509,9 @@ class PlatformView {
   ///                      key and the custom node action as the value.
   /// @param[in]  view_id  The ID of the view that this update is for
   ///
-  virtual void UpdateSemantics(SemanticsNodeUpdates updates,
-                               CustomAccessibilityActionUpdates actions,
-                               int64_t view_id);
+  virtual void UpdateSemantics(int64_t view_id,
+                               SemanticsNodeUpdates updates,
+                               CustomAccessibilityActionUpdates actions);
 
   //----------------------------------------------------------------------------
   /// @brief      Used by the framework to tell the embedder that it has

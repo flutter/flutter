@@ -1225,7 +1225,7 @@ void fl_engine_dispatch_semantics_action(FlEngine* self,
   info.action = action;
   info.data = action_data;
   info.data_length = action_data_length;
-  self->embedder_api.DispatchSemanticsActionOnView(self->engine, &info);
+  self->embedder_api.SendSemanticsAction(self->engine, &info);
 }
 
 gboolean fl_engine_mark_texture_frame_available(FlEngine* self,

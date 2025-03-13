@@ -905,7 +905,7 @@ bool FlutterWindowsEngine::DispatchSemanticsAction(
       .data = data.GetMapping(),
       .data_length = data.GetSize(),
   };
-  return (embedder_api_.DispatchSemanticsActionOnView(engine_, &info));
+  return (embedder_api_.SendSemanticsAction(engine_, &info));
 }
 
 void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {

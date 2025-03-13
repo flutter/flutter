@@ -92,10 +92,10 @@ class PlatformConfigurationClient {
   //--------------------------------------------------------------------------
   /// @brief      Receives an updated semantics tree from the Framework.
   ///
-  /// @param[in] update The updated semantic tree to apply.
   /// @param[in] viewId The identifier of the view to update.
+  /// @param[in] update The updated semantic tree to apply.
   ///
-  virtual void UpdateSemantics(SemanticsUpdate* update, int64_t viewId) = 0;
+  virtual void UpdateSemantics(int64_t viewId, SemanticsUpdate* update) = 0;
 
   //--------------------------------------------------------------------------
   /// @brief      When the Flutter application has a message to send to the
@@ -623,7 +623,7 @@ class PlatformConfigurationNativeApi {
                      double width,
                      double height);
 
-  static void UpdateSemantics(SemanticsUpdate* update, int64_t viewId);
+  static void UpdateSemantics(int64_t viewId, SemanticsUpdate* update);
 
   static void SetNeedsReportTimings(bool value);
 

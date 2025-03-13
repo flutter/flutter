@@ -496,11 +496,11 @@ void Engine::Render(int64_t view_id,
   animator_->Render(view_id, std::move(layer_tree), device_pixel_ratio);
 }
 
-void Engine::UpdateSemantics(SemanticsNodeUpdates update,
-                             CustomAccessibilityActionUpdates actions,
-                             int64_t view_id) {
-  delegate_.OnEngineUpdateSemantics(std::move(update), std::move(actions),
-                                    view_id);
+void Engine::UpdateSemantics(int64_t view_id,
+                             SemanticsNodeUpdates update,
+                             CustomAccessibilityActionUpdates actions) {
+  delegate_.OnEngineUpdateSemantics(view_id, std::move(update),
+                                    std::move(actions));
 }
 
 void Engine::HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {

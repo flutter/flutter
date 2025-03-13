@@ -150,16 +150,16 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///             `CustomAccessibilityActionUpdates`,
     ///             `PlatformView::UpdateSemantics`
     ///
+    /// @param[in]  view_id  The ID of the view that this update is for
     /// @param[in]  updates  A map with the stable semantics node identifier as
     ///                      key and the node properties as the value.
     /// @param[in]  actions  A map with the stable semantics node identifier as
     ///                      key and the custom node action as the value.
-    /// @param[in]  view_id  The ID of the view that this update is for
     ///
     virtual void OnEngineUpdateSemantics(
+        int64_t view_id,
         SemanticsNodeUpdates updates,
-        CustomAccessibilityActionUpdates actions,
-        int64_t view_id) = 0;
+        CustomAccessibilityActionUpdates actions) = 0;
 
     //--------------------------------------------------------------------------
     /// @brief      When the Flutter application has a message to send to the
@@ -1012,9 +1012,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
               float device_pixel_ratio) override;
 
   // |RuntimeDelegate|
-  void UpdateSemantics(SemanticsNodeUpdates update,
-                       CustomAccessibilityActionUpdates actions,
-                       int64_t view_id) override;
+  void UpdateSemantics(int64_t view_id,
+                       SemanticsNodeUpdates update,
+                       CustomAccessibilityActionUpdates actions) override;
 
   // |RuntimeDelegate|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;

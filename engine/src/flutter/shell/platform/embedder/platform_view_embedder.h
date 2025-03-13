@@ -104,9 +104,10 @@ class PlatformViewEmbedder final : public PlatformView {
   ~PlatformViewEmbedder() override;
 
   // |PlatformView|
-  void UpdateSemantics(flutter::SemanticsNodeUpdates update,
-                       flutter::CustomAccessibilityActionUpdates actions,
-                       int64_t view_id) override;
+  void UpdateSemantics(
+      int64_t view_id,
+      flutter::SemanticsNodeUpdates update,
+      flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |PlatformView|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;

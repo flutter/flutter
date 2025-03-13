@@ -3094,8 +3094,10 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
     FlutterAccessibilityFeature features);
 
 //------------------------------------------------------------------------------
-/// @brief      Dispatch a semantics action to the specified semantics node.
+/// @brief      Dispatch a semantics action to the specified semantics node
 ///             in the implicit view.
+///
+/// @deprecated Use `FlutterEngineSendSemanticsAction` instead.
 ///
 /// @param[in]  engine       A running engine instance.
 /// @param[in]  node_id      The semantics node identifier.
@@ -3125,7 +3127,7 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
 /// @return     The result of the call.
 ///
 FLUTTER_EXPORT
-FlutterEngineResult FlutterEngineDispatchSemanticsActionOnView(
+FlutterEngineResult FlutterEngineSendSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterDispatchSemanticsActionInfo* info);
 
@@ -3516,7 +3518,7 @@ typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionFnPtr)(
     FlutterSemanticsAction action,
     const uint8_t* data,
     size_t data_length);
-typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionOnViewFnPtr)(
+typedef FlutterEngineResult (*FlutterEngineSendSemanticsActionFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterDispatchSemanticsActionInfo* info);
 typedef FlutterEngineResult (*FlutterEngineOnVsyncFnPtr)(
@@ -3601,7 +3603,7 @@ typedef struct {
   FlutterEngineUpdateSemanticsEnabledFnPtr UpdateSemanticsEnabled;
   FlutterEngineUpdateAccessibilityFeaturesFnPtr UpdateAccessibilityFeatures;
   FlutterEngineDispatchSemanticsActionFnPtr DispatchSemanticsAction;
-  FlutterEngineDispatchSemanticsActionOnViewFnPtr DispatchSemanticsActionOnView;
+  FlutterEngineSendSemanticsActionFnPtr SendSemanticsAction;
   FlutterEngineOnVsyncFnPtr OnVsync;
   FlutterEngineReloadSystemFontsFnPtr ReloadSystemFonts;
   FlutterEngineTraceEventDurationBeginFnPtr TraceEventDurationBegin;

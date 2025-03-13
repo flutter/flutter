@@ -278,8 +278,8 @@ TEST(AccessibilityBridgeWindows, DispatchAccessibilityAction) {
   PopulateAXTree(bridge);
 
   FlutterSemanticsAction actual_action = kFlutterSemanticsActionTap;
-  modifier.embedder_api().DispatchSemanticsActionOnView = MOCK_ENGINE_PROC(
-      DispatchSemanticsActionOnView,
+  modifier.embedder_api().SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction,
       ([&actual_action](FLUTTER_API_SYMBOL(FlutterEngine) engine,
                         const FlutterDispatchSemanticsActionInfo* info) {
         actual_action = info->action;
