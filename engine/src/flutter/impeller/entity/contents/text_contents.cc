@@ -173,11 +173,12 @@ void TextContents::ComputeVertexData(
       Point uv_origin = (atlas_glyph_bounds.GetLeftTop()) / atlas_size;
       Point uv_size = SizeToPoint(atlas_glyph_bounds.GetSize()) / atlas_size;
 
+      Matrix unscaled_basis =
+          Matrix::MakeScale({basis_transform.m[0] > 0 ? 1.f : -1.f,
+                             basis_transform.m[5] > 0 ? 1.f : -1.f, 1.f});
       Point unrounded_glyph_position =
           // This is for RTL text.
-          (basis_transform.m[0] < 0 ? Matrix::MakeScale({-1, 1, 1})
-                                    : Matrix()) *
-              glyph_bounds.GetLeftTop() +
+          unscaled_basis * glyph_bounds.GetLeftTop() +
           (basis_transform * glyph_position.position);
 
       Point screen_glyph_position =
@@ -187,7 +188,7 @@ void TextContents::ComputeVertexData(
         Point position;
         if (is_translation_scale) {
           position = (screen_glyph_position +
-                      (basis_transform * point * scaled_bounds.GetSize()))
+                      (unscaled_basis * point * glyph_bounds.GetSize()))
                          .Round();
         } else {
           position = entity_transform *
