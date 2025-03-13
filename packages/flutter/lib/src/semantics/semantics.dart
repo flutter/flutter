@@ -1116,7 +1116,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.namesRoute,
     this.image,
     this.liveRegion,
-    this.required,
+    this.isRequired,
     this.maxValueLength,
     this.currentValueLength,
     this.identifier,
@@ -1390,7 +1390,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If non-null, whether the node should be considered required.
   ///
   /// If true, user input is required on the semantics node before a form can
-  /// be submitted.
+  /// be submitted. If false, the node is optional before a form can be
+  /// submitted. If null, the node does not have a required semantics.
   ///
   /// For example, a login form requires its email text field to be non-empty.
   ///
@@ -1400,7 +1401,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// See also:
   ///
   ///  * [SemanticsFlag.isRequired], for the flag this setting controls.
-  final bool? required;
+  final bool? isRequired;
 
   /// The maximum number of characters that can be entered into an editable
   /// text field.
@@ -1993,7 +1994,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('required', required, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('isRequired', isRequired, defaultValue: null));
     properties.add(StringProperty('identifier', identifier, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(
