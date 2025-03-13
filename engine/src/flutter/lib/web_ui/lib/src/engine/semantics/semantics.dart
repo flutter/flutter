@@ -19,6 +19,7 @@ import '../util.dart';
 import '../vector_math.dart';
 import '../window.dart';
 import 'accessibility.dart';
+import 'alert.dart';
 import 'checkable.dart';
 import 'expandable.dart';
 import 'focusable.dart';
@@ -442,6 +443,13 @@ enum EngineSemanticsRole {
 
   /// A cell in a [table] contains header information for a column.
   columnHeader,
+
+  /// A component provide advisory information that is not import to justify
+  /// an [alert].
+  status,
+
+  /// A component provide important and usually time-sensitive information.
+  alert,
 
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
@@ -1847,6 +1855,10 @@ class SemanticsObject {
         return EngineSemanticsRole.columnHeader;
       case ui.SemanticsRole.radioGroup:
         return EngineSemanticsRole.radioGroup;
+      case ui.SemanticsRole.alert:
+        return EngineSemanticsRole.alert;
+      case ui.SemanticsRole.status:
+        return EngineSemanticsRole.status;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.searchBox:
@@ -1919,6 +1931,8 @@ class SemanticsObject {
       EngineSemanticsRole.cell => SemanticCell(this),
       EngineSemanticsRole.row => SemanticRow(this),
       EngineSemanticsRole.columnHeader => SemanticColumnHeader(this),
+      EngineSemanticsRole.alert => SemanticAlert(this),
+      EngineSemanticsRole.status => SemanticStatus(this),
       EngineSemanticsRole.generic => GenericRole(this),
     };
   }
