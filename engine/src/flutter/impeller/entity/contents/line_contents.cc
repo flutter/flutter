@@ -18,6 +18,8 @@ using CreateGeometryCallback =
                                  RenderPass& pass,
                                  const Geometry* geometry)>;
 
+const Scalar kSampleRadius = 1.f;
+
 struct LineInfo {
   Vector3 e0;
   Vector3 e1;
@@ -57,19 +59,12 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
 
   auto& transform = entity.GetTransform();
 
-  if (line_geometry->GetCap() == Cap::kRound) {
-    auto radius = LineGeometry::ComputePixelHalfWidth(
-        transform, line_geometry->GetWidth());
-    auto generator = renderer.GetTessellator().RoundCapLine(
-        transform, line_geometry->GetP0(), line_geometry->GetP1(), radius);
-    return Geometry::ComputePositionGeometry(renderer, generator, entity, pass);
-  }
-
   Point corners[4];
   if (!LineGeometry::ComputeCorners(
-          corners, transform, line_geometry->GetCap() == Cap::kSquare,
+          corners, transform,
+          /*extend_endpoints=*/line_geometry->GetCap() != Cap::kButt,
           line_geometry->GetP0(), line_geometry->GetP1(),
-          line_geometry->GetWidth())) {
+          line_geometry->GetWidth() + kSampleRadius)) {
     return kEmptyResult;
   }
 
@@ -78,7 +73,7 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
   size_t count = 4;
   LineInfo line_info =
       CalculateLineInfo(line_geometry->GetP0(), line_geometry->GetP1(),
-                        line_geometry->GetWidth(), /*radius=*/1.f);
+                        line_geometry->GetWidth(), kSampleRadius);
   BufferView vertex_buffer = host_buffer.Emplace(
       count * sizeof(PerVertexData), alignof(PerVertexData),
       [&corners, &line_info](uint8_t* buffer) {
