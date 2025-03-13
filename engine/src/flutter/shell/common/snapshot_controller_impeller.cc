@@ -146,12 +146,15 @@ sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshotSync(
 
 void SnapshotControllerImpeller::CacheRuntimeStage(
     const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) {
-  impeller::RuntimeEffectContents runtime_effect;
-  runtime_effect.SetRuntimeStage(runtime_stage);
+  if (!GetDelegate().IsAiksContextInitialized()) {
+    return;
+  }
   auto context = GetDelegate().GetAiksContext();
   if (!context) {
     return;
   }
+  impeller::RuntimeEffectContents runtime_effect;
+  runtime_effect.SetRuntimeStage(runtime_stage);
   runtime_effect.BootstrapShader(context->GetContentContext());
 }
 

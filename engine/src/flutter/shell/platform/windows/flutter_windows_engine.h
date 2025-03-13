@@ -347,9 +347,6 @@ class FlutterWindowsEngine {
   // system changes.
   void SendSystemLocales();
 
-  // Sends the current lifecycle state to the framework.
-  void SetLifecycleState(flutter::AppLifecycleState state);
-
   // Create the keyboard & text input sub-systems.
   //
   // This requires that a view is attached to the engine.
