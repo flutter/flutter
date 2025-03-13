@@ -25,7 +25,11 @@ class SemanticButton extends SemanticRole {
   void update() {
     super.update();
 
-    addDisabledBehavior();
+    if (semanticsObject.enabledState() == EnabledState.disabled) {
+      setAttribute('aria-disabled', 'true');
+    } else {
+      removeAttribute('aria-disabled');
+    }
   }
 }
 
