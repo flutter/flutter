@@ -51,20 +51,26 @@ open class FlutterExtension {
     var flutterVersionName: String? = null
 
     /** Returns flutterVersionCode as an integer with error handling. */
-    val versionCode: Int
-        get() {
-            val versionCode =
-                flutterVersionCode
-                    ?: throw GradleException("flutterVersionCode must not be null.")
+    fun getVersionCode(): Int {
+        val versionCode =
+            flutterVersionCode
+                ?: throw GradleException("flutterVersionCode must not be null.")
 
-            return versionCode.toIntOrNull()
-                ?: throw GradleException("flutterVersionCode must be an integer.")
-        }
+        return versionCode.toIntOrNull()
+            ?: throw GradleException("flutterVersionCode must be an integer.")
+    }
 
     /** Returns flutterVersionName with error handling. */
+    fun getVersionName(): String {
+        return flutterVersionName
+            ?: throw GradleException("flutterVersionName must not be null.")
+    }
+
+    @get:JvmName("getVersionCodeProperty")
+    val versionCode: Int
+        get() = getVersionCode()
+
+    @get:JvmName("getVersionNameProperty")
     val versionName: String
-        get() {
-            return flutterVersionName
-                ?: throw GradleException("flutterVersionName must not be null.")
-        }
+        get() = getVersionName()
 }
