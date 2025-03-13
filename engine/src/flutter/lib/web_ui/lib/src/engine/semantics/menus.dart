@@ -4,7 +4,6 @@
 
 import 'package:ui/ui.dart' as ui;
 
-import 'dart:typed_data';
 import 'label_and_value.dart';
 import 'semantics.dart';
 
@@ -25,21 +24,19 @@ class SemanticMenu extends SemanticRole {
 
   @override
   void update() {
+    super.update();
     // Menu items in DropdownButton, PopupMenuButton and MenuAnchor are not the
-    // immediate children, so we need to set `aria-owns` on menu. When the menu
-    // is open, the tree is still the ole one without the menu item information,
-    // so `addOneTimePostUpdateCallback` is added to get the latest tree info.
+    // immediate children of the menu, so we need to set `aria-owns` on menu.
+    // When the menu is open, the tree is still the old one without the menu
+    // item information, so `addOneTimePostUpdateCallback` is called here to get
+    // the latest tree info.
     semanticsObject.owner.addOneTimePostUpdateCallback(_updateMenuItemId);
   }
 
   bool _isMenuItem(SemanticsObject semanticsObject) {
-    if (semanticsObject!.role == null) {
-      return false;
-    }
-
-    if (semanticsObject!.role == ui.SemanticsRole.menuItem ||
-        semanticsObject!.role == ui.SemanticsRole.menuItemCheckbox ||
-        semanticsObject!.role == ui.SemanticsRole.menuItemRadio) {
+    if (semanticsObject.role == ui.SemanticsRole.menuItem ||
+        semanticsObject.role == ui.SemanticsRole.menuItemCheckbox ||
+        semanticsObject.role == ui.SemanticsRole.menuItemRadio) {
       return true;
     }
     return false;
@@ -50,14 +47,14 @@ class SemanticMenu extends SemanticRole {
   // the node is [menuItem], then set `aria-owns` attribute to them.
   void _updateMenuItemId() {
     final Map<int, SemanticsObject> tree = semanticsObject.owner.semanticsTree;
-    List<int> ids = [];
-    int root = semanticsObject.id;
-    List<int> queue = [];
+    final List<int> ids = [];
+    final int root = semanticsObject.id;
+    final List<int> queue = [];
     if (tree[root]?.childrenInTraversalOrder != null) {
       queue.addAll(tree[root]!.childrenInTraversalOrder!);
     }
     while (queue.isNotEmpty) {
-      int child = queue.removeAt(0);
+      final int child = queue.removeAt(0);
       if (tree[child] != null && _isMenuItem(tree[child]!)) {
         ids.add(child);
       }
@@ -66,7 +63,7 @@ class SemanticMenu extends SemanticRole {
         queue.addAll(tree[child]!.childrenInTraversalOrder!);
       }
     }
-    for (int id in ids) {
+    for (final int id in ids) {
       setAttribute('aria-owns', 'flt-semantic-node-$id');
     }
   }
@@ -92,21 +89,18 @@ class SemanticMenuBar extends SemanticRole {
 
   @override
   void update() {
-    // Menu items in Menu bar are not the immediate children, so we need to set
-    // `aria-owns` on menu. When the menu is open, the tree is still the ole one
-    // without the menu item information, so `addOneTimePostUpdateCallback` is
-    // added to get the latest tree info.
+    super.update();
+    // Menu items in Menu bar are not the immediate children of the menu, so we
+    // need to set `aria-owns` on menu bar. When the menu is open, the tree is
+    // still the old one without the menu item information, so
+    // `addOneTimePostUpdateCallback` is called to get the latest tree info.
     semanticsObject.owner.addOneTimePostUpdateCallback(_updateMenuItemId);
   }
 
   bool _isMenuItem(SemanticsObject semanticsObject) {
-    if (semanticsObject!.role == null) {
-      return false;
-    }
-
-    if (semanticsObject!.role == ui.SemanticsRole.menuItem ||
-        semanticsObject!.role == ui.SemanticsRole.menuItemCheckbox ||
-        semanticsObject!.role == ui.SemanticsRole.menuItemRadio) {
+    if (semanticsObject.role == ui.SemanticsRole.menuItem ||
+        semanticsObject.role == ui.SemanticsRole.menuItemCheckbox ||
+        semanticsObject.role == ui.SemanticsRole.menuItemRadio) {
       return true;
     }
     return false;
@@ -117,14 +111,14 @@ class SemanticMenuBar extends SemanticRole {
   // the node is [menuItem], then set `aria-owns` attribute to them.
   void _updateMenuItemId() {
     final Map<int, SemanticsObject> tree = semanticsObject.owner.semanticsTree;
-    List<int> ids = [];
-    int root = semanticsObject.id;
-    List<int> queue = [];
+    final List<int> ids = [];
+    final int root = semanticsObject.id;
+    final List<int> queue = [];
     if (tree[root]?.childrenInTraversalOrder != null) {
       queue.addAll(tree[root]!.childrenInTraversalOrder!);
     }
     while (queue.isNotEmpty) {
-      int child = queue.removeAt(0);
+      final int child = queue.removeAt(0);
       if (tree[child] != null && _isMenuItem(tree[child]!)) {
         ids.add(child);
       }
@@ -133,7 +127,7 @@ class SemanticMenuBar extends SemanticRole {
         queue.addAll(tree[child]!.childrenInTraversalOrder!);
       }
     }
-    for (int id in ids) {
+    for (final int id in ids) {
       setAttribute('aria-owns', 'flt-semantic-node-$id');
     }
   }
