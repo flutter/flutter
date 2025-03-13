@@ -644,7 +644,9 @@ void main() {
                 logger: testLogger,
               );
 
-              final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(platform);
+              final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(
+                platform,
+              );
 
               // Ensure that a non-default identifier works.
               expect(nativeTargetIdentifier, isNot(_runnerNativeTargetIdentifier(platform)));
@@ -1790,6 +1792,86 @@ void main() {
                 expect(plistParser.hasRemainingExpectations, isFalse);
               },
             );
+
+            testWithoutContext(
+              'successfully migrated when application product PBXNativeTarget has different identifier from default',
+              () async {
+                final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+                final BufferLogger testLogger = BufferLogger.test();
+                final FakeXcodeProject project = FakeXcodeProject(
+                  platform: platform.name,
+                  fileSystem: memoryFileSystem,
+                  logger: testLogger,
+                );
+
+                final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(
+                  platform,
+                );
+
+                // Ensure that a non-default identifier works.
+                expect(nativeTargetIdentifier, isNot(_runnerNativeTargetIdentifier(platform)));
+
+                // Create the Scheme file with a different BlueprintIdentifier
+                // to simulate that it is made for a different target.
+                _createProjectFiles(project, platform, createSchemeFile: false);
+                project.xcodeProjectSchemeFile().createSync(recursive: true);
+                project.xcodeProjectSchemeFile().writeAsStringSync(
+                  _validBuildActions(platform, blueprintIdentifier: nativeTargetIdentifier),
+                );
+
+                final List<String> settingsBeforeMigration = <String>[
+                  ..._allSectionsUnmigrated(platform, useAlternateIdentifier: true),
+                ];
+                settingsBeforeMigration[_nativeTargetSectionIndex] = unmigratedNativeTargetSection(
+                  platform,
+                  nativeTargetIdentifier: nativeTargetIdentifier,
+                );
+                project.xcodeProjectInfoFile.writeAsStringSync(
+                  _projectSettings(settingsBeforeMigration),
+                );
+
+                final List<String> settingsAsJsonBeforeMigration = <String>[
+                  ..._allSectionsUnmigratedAsJson(platform, useAlternateIdentifier: true),
+                ];
+                final List<String> expectedSettings = <String>[
+                  ..._allSectionsMigrated(platform, useAlternateIdentifier: true),
+                ];
+
+                expectedSettings[_nativeTargetSectionIndex] = migratedNativeTargetSection(
+                  platform,
+                  nativeTargetIdentifier: nativeTargetIdentifier,
+                );
+
+                final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
+                  _plutilOutput(settingsAsJsonBeforeMigration),
+                  _plutilOutput(_allSectionsMigratedAsJson(platform, useAlternateIdentifier: true)),
+                ]);
+
+                final SwiftPackageManagerIntegrationMigration projectMigration =
+                    SwiftPackageManagerIntegrationMigration(
+                      project,
+                      platform,
+                      BuildInfo.debug,
+                      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                      logger: testLogger,
+                      fileSystem: memoryFileSystem,
+                      plistParser: plistParser,
+                      features: swiftPackageManagerFullyEnabledFlags,
+                    );
+                await projectMigration.migrate();
+
+                expect(testLogger.errorText, isEmpty);
+                expect(
+                  testLogger.traceText.contains('PBXNativeTarget already migrated. Skipping...'),
+                  isFalse,
+                );
+                expect(
+                  project.xcodeProjectInfoFile.readAsStringSync(),
+                  _projectSettings(expectedSettings),
+                );
+                expect(plistParser.hasRemainingExpectations, isFalse);
+              },
+            );
           });
 
           group('migrate PBXProject', () {
@@ -2805,7 +2887,23 @@ const int _projectSectionIndex = 3;
 const int _localSwiftPackageReferenceSectionIndex = 4;
 const int _swiftPackageProductDependencySectionIndex = 5;
 
-List<String> _allSectionsMigrated(SupportedPlatform platform) {
+List<String> _allSectionsMigrated(
+  SupportedPlatform platform, {
+  bool useAlternateIdentifier = false,
+}) {
+  if (useAlternateIdentifier) {
+    final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(platform);
+
+    return <String>[
+      migratedBuildFileSection,
+      migratedFrameworksBuildPhaseSection(platform),
+      migratedNativeTargetSection(platform, nativeTargetIdentifier: nativeTargetIdentifier),
+      migratedProjectSection(platform, nativeTargetIdentifier: nativeTargetIdentifier),
+      migratedLocalSwiftPackageReferenceSection(),
+      migratedSwiftPackageProductDependencySection(),
+    ];
+  }
+
   return <String>[
     migratedBuildFileSection,
     migratedFrameworksBuildPhaseSection(platform),
@@ -2843,7 +2941,23 @@ List<String> _allSectionsMigratedAsJson(
   ];
 }
 
-List<String> _allSectionsUnmigrated(SupportedPlatform platform) {
+List<String> _allSectionsUnmigrated(
+  SupportedPlatform platform, {
+  bool useAlternateIdentifier = false,
+}) {
+  if (useAlternateIdentifier) {
+    final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(platform);
+
+    return <String>[
+      unmigratedBuildFileSection,
+      unmigratedFrameworksBuildPhaseSection(platform),
+      unmigratedNativeTargetSection(platform, nativeTargetIdentifier: nativeTargetIdentifier),
+      unmigratedProjectSection(platform, nativeTargetIdentifier: nativeTargetIdentifier),
+      unmigratedLocalSwiftPackageReferenceSection(),
+      unmigratedSwiftPackageProductDependencySection(),
+    ];
+  }
+
   return <String>[
     unmigratedBuildFileSection,
     unmigratedFrameworksBuildPhaseSection(platform),
@@ -2854,7 +2968,21 @@ List<String> _allSectionsUnmigrated(SupportedPlatform platform) {
   ];
 }
 
-List<String> _allSectionsUnmigratedAsJson(SupportedPlatform platform) {
+List<String> _allSectionsUnmigratedAsJson(
+  SupportedPlatform platform, {
+  bool useAlternateIdentifier = false,
+}) {
+  if (useAlternateIdentifier) {
+    final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(platform);
+
+    return <String>[
+      unmigratedBuildFileSectionAsJson,
+      unmigratedFrameworksBuildPhaseSectionAsJson(platform),
+      unmigratedNativeTargetSectionAsJson(platform, nativeTargetIdentifier: nativeTargetIdentifier),
+      unmigratedProjectSectionAsJson(platform, nativeTargetIdentifier: nativeTargetIdentifier),
+    ];
+  }
+
   return <String>[
     unmigratedBuildFileSectionAsJson,
     unmigratedFrameworksBuildPhaseSectionAsJson(platform),
@@ -3031,10 +3159,11 @@ String unmigratedNativeTargetSection(
   SupportedPlatform platform, {
   bool missingPackageProductDependencies = false,
   bool withOtherDependency = false,
+  String? nativeTargetIdentifier,
 }) {
   return <String>[
     '/* Begin PBXNativeTarget section */',
-    '		${_runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
+    '		${nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
     '			isa = PBXNativeTarget;',
     '			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;',
     '			buildPhases = (',
@@ -3067,6 +3196,7 @@ String migratedNativeTargetSection(
   SupportedPlatform platform, {
   bool missingPackageProductDependencies = false,
   bool withOtherDependency = false,
+  String? nativeTargetIdentifier,
 }) {
   final List<String> packageDependencies = <String>[
     '			packageProductDependencies = (',
@@ -3076,7 +3206,7 @@ String migratedNativeTargetSection(
   ];
   return <String>[
     '/* Begin PBXNativeTarget section */',
-    '		${_runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
+    '		${nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
     if (missingPackageProductDependencies) ...packageDependencies,
     '			isa = PBXNativeTarget;',
     '			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;',
@@ -3105,9 +3235,10 @@ String migratedNativeTargetSection(
 String unmigratedNativeTargetSectionAsJson(
   SupportedPlatform platform, {
   bool missingPackageProductDependencies = false,
+  String? nativeTargetIdentifier,
 }) {
   return <String>[
-    '    "${_runnerNativeTargetIdentifier(platform)}" : {',
+    '    "${nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform)}" : {',
     '      "buildConfigurationList" : "97C147051CF9000F007C117D",',
     '      "buildPhases" : [',
     '        "9740EEB61CF901F6004384FC",',
@@ -3171,7 +3302,11 @@ String unmigratedProjectSection(
   SupportedPlatform platform, {
   bool missingPackageReferences = false,
   bool withOtherReference = false,
+  String? nativeTargetIdentifier,
 }) {
+  final String effectiveNativeTargetIdentifier =
+      nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform);
+
   return <String>[
     '/* Begin PBXProject section */',
     '		${_projectIdentifier(platform)} /* Project object */ = {',
@@ -3183,9 +3318,9 @@ String unmigratedProjectSection(
     '				TargetAttributes = {',
     '					331C8080294A63A400263BE5 = {',
     '						CreatedOnToolsVersion = 14.0;',
-    '						TestTargetID = ${_runnerNativeTargetIdentifier(platform)};',
+    '						TestTargetID = $effectiveNativeTargetIdentifier;',
     '					};',
-    '					${_runnerNativeTargetIdentifier(platform)} = {',
+    '					$effectiveNativeTargetIdentifier = {',
     '						CreatedOnToolsVersion = 7.3.1;',
     '						LastSwiftMigration = 1100;',
     '					};',
@@ -3210,7 +3345,7 @@ String unmigratedProjectSection(
     '			projectDirPath = "";',
     '			projectRoot = "";',
     '			targets = (',
-    '				${_runnerNativeTargetIdentifier(platform)} /* Runner */,',
+    '				$effectiveNativeTargetIdentifier /* Runner */,',
     '				331C8080294A63A400263BE5 /* RunnerTests */,',
     '			);',
     '		};',
@@ -3222,7 +3357,11 @@ String migratedProjectSection(
   SupportedPlatform platform, {
   bool missingPackageReferences = false,
   bool withOtherReference = false,
+  String? nativeTargetIdentifier,
 }) {
+  final String effectiveNativeTargetIdentifier =
+      nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform);
+
   final List<String> packageDependencies = <String>[
     '			packageReferences = (',
     '				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,',
@@ -3242,9 +3381,9 @@ String migratedProjectSection(
     '				TargetAttributes = {',
     '					331C8080294A63A400263BE5 = {',
     '						CreatedOnToolsVersion = 14.0;',
-    '						TestTargetID = ${_runnerNativeTargetIdentifier(platform)};',
+    '						TestTargetID = $effectiveNativeTargetIdentifier;',
     '					};',
-    '					${_runnerNativeTargetIdentifier(platform)} = {',
+    '					$effectiveNativeTargetIdentifier = {',
     '						CreatedOnToolsVersion = 7.3.1;',
     '						LastSwiftMigration = 1100;',
     '					};',
@@ -3264,7 +3403,7 @@ String migratedProjectSection(
     '			projectDirPath = "";',
     '			projectRoot = "";',
     '			targets = (',
-    '				${_runnerNativeTargetIdentifier(platform)} /* Runner */,',
+    '				$effectiveNativeTargetIdentifier /* Runner */,',
     '				331C8080294A63A400263BE5 /* RunnerTests */,',
     '			);',
     '		};',
@@ -3275,7 +3414,11 @@ String migratedProjectSection(
 String unmigratedProjectSectionAsJson(
   SupportedPlatform platform, {
   bool missingPackageReferences = false,
+  String? nativeTargetIdentifier,
 }) {
+  final String effectiveNativeTargetIdentifier =
+      nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform);
+
   return <String>[
     '    "${_projectIdentifier(platform)}" : {',
     '      "attributes" : {',
@@ -3283,13 +3426,13 @@ String unmigratedProjectSectionAsJson(
     '        "LastUpgradeCheck" : "1510",',
     '        "ORGANIZATIONNAME" : "",',
     '        "TargetAttributes" : {',
-    '          "${_runnerNativeTargetIdentifier(platform)}" : {',
+    '          "$effectiveNativeTargetIdentifier" : {',
     '            "CreatedOnToolsVersion" : "7.3.1",',
     '            "LastSwiftMigration" : "1100"',
     '          },',
     '          "331C8080294A63A400263BE5" : {',
     '            "CreatedOnToolsVersion" : "14.0",',
-    '            "TestTargetID" : "${_runnerNativeTargetIdentifier(platform)}"',
+    '            "TestTargetID" : "$effectiveNativeTargetIdentifier"',
     '          }',
     '        }',
     '      },',
@@ -3308,7 +3451,7 @@ String unmigratedProjectSectionAsJson(
     '      "projectDirPath" : "",',
     '      "projectRoot" : "",',
     '      "targets" : [',
-    '        "${_runnerNativeTargetIdentifier(platform)}",',
+    '        "$effectiveNativeTargetIdentifier",',
     '        "331C8080294A63A400263BE5"',
     '      ]',
     '    }',
