@@ -184,6 +184,45 @@ TEST_P(AiksTest, CanRenderTextFrameWithFractionScaling) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+// https://github.com/flutter/flutter/issues/164958
+TEST_P(AiksTest, TextRotated180Degrees) {
+  float fpivot[2] = {200 + 30, 200 - 20};
+  float rotation = 180;
+  float foffset[2] = {200, 200};
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("pivotx", &fpivot[0], 0, 300);
+      ImGui::SliderFloat("pivoty", &fpivot[1], 0, 300);
+      ImGui::SliderFloat("rotation", &rotation, 0, 360);
+      ImGui::SliderFloat("foffsetx", &foffset[0], 0, 300);
+      ImGui::SliderFloat("foffsety", &foffset[1], 0, 300);
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
+    builder.DrawPaint(DlPaint().setColor(DlColor(0xffffeeff)));
+
+    builder.Save();
+    DlPoint pivot = Point(fpivot[0], fpivot[1]);
+    builder.Translate(pivot.x, pivot.y);
+    builder.Rotate(rotation);
+    builder.Translate(-pivot.x, -pivot.y);
+
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "test", "Roboto-Regular.ttf",
+        TextRenderOptions{
+            .color = DlColor::kBlack(),
+            .position = SkPoint::Make(foffset[0], foffset[1]),
+        });
+
+    builder.Restore();
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, TextFrameSubpixelAlignment) {
   // "Random" numbers between 0 and 1. Hardcoded to avoid flakiness in goldens.
   std::array<Scalar, 20> phase_offsets = {
