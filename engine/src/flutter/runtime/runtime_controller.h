@@ -799,7 +799,7 @@ class RuntimeController : public PlatformConfigurationClient,
   // |PlatformConfigurationClient|
   double GetScaledFontSize(double unscaled_font_size,
                            int configuration_id) const override;
-  
+
   // |PlatformConfigurationClient|
   void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
 
