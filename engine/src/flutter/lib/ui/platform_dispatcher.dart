@@ -939,12 +939,12 @@ class PlatformDispatcher {
     call `updateSemantics`.
   ''')
   void updateSemantics(SemanticsUpdate update) =>
-      _updateSemantics(update as _NativeSemanticsUpdate, _implicitViewId!);
+      _updateSemantics(_implicitViewId!, update as _NativeSemanticsUpdate);
 
-  @Native<Void Function(Pointer<Void>, Int64)>(
+  @Native<Void Function(Int64, Pointer<Void>)>(
     symbol: 'PlatformConfigurationNativeApi::UpdateSemantics',
   )
-  external static void _updateSemantics(_NativeSemanticsUpdate update, int viewId);
+  external static void _updateSemantics(int viewId, _NativeSemanticsUpdate update);
 
   /// The system-reported default locale of the device.
   ///
