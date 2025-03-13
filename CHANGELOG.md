@@ -28,7 +28,7 @@ INTERNAL NOTE
 
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
-- [flutter/164126](https://github.com/flutter/flutter/pull/164126) - Disable Vulkan on MediaTek Soc.
+- [flutter/164126](https://github.com/flutter/flutter/pull/164126) - On android use Open GL instead of Vulkan MediaTek Soc.
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
