@@ -96,8 +96,8 @@ class SensitiveContentService {
   /// content sensitivity of an app window (Android `View`).
   late MethodChannel sensitiveContentChannel;
 
-  /// Sets content sensitivity level of the app window (Android `View`) that contains the app's widget tree to the level
-  /// specified by [contentSensitivity] via a call to the native embedder.
+  /// Sets content sensitivity level of the app window (Android `View`) that contains the app's widget
+  /// tree to the level specified by [contentSensitivity] via a call to the native embedder.
   void setContentSensitivity(ContentSensitivity contentSensitivity) {
     try {
       sensitiveContentChannel.invokeMethod<void>(

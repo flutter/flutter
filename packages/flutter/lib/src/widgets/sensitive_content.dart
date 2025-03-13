@@ -91,6 +91,7 @@ class ContentSensitivitySetting {
 
 /// Host of the current content sensitivity level for the widget tree that contains
 /// some number [SensitiveContent] widgets.
+@visibleForTesting
 class SensitiveContentHost {
   SensitiveContentHost._();
 
