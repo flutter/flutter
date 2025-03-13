@@ -6,8 +6,7 @@ import 'dart:math' show max;
 
 import 'package:flutter/services.dart' show ContentSensitivity, SensitiveContentService;
 
-import '../../widgets.dart' show ConnectionState;
-import 'async.dart' show AsyncSnapshot, FutureBuilder;
+import 'async.dart' show AsyncSnapshot, ConnectionState, FutureBuilder;
 import 'container.dart';
 import 'framework.dart';
 
@@ -223,6 +222,10 @@ class SensitiveContentHost {
 /// Widget to set the [ContentSensitivity] level of content in the widget
 /// tree.
 ///
+/// The [sensitivityLevel] of the widget in conjunction with the other
+/// [SensitiveContent] widgets in the tree will determine whether or not the
+/// screen will be obscured during media projection, e.g. screen sharing.
+///
 /// {@macro flutter.services.ContentSensitivity}
 ///
 /// Currently, this widget is only supported on Android API 35+. On all lower Android
@@ -234,6 +237,16 @@ class SensitiveContentHost {
 ///
 ///  * [ContentSensitivity], which are the different content sensitivity levels that a
 ///    [SensitiveContent] widget can set.
+///
+/// This widget is marked visible for testing because it is not ready for use. It
+/// will be ready for use when it is implemented such that we can guarantee that no
+/// frames will be dropped when content is marked sensitive, ensuring that no sensitive
+/// content will be revealed during media projection.
+// TODO(camsim99): Fix `SensitiveContent` implementation to prevent revealing sensitive
+// content during media projection. Then, export this file to make the widget available
+// for use. See https://github.com/flutter/flutter/issues/160050 and
+// https://github.com/flutter/flutter/issues/164820.
+@visibleForTesting
 class SensitiveContent extends StatefulWidget {
   /// Creates a [SensitiveContent] widget.
   const SensitiveContent({super.key, required this.sensitivityLevel, required this.child});
