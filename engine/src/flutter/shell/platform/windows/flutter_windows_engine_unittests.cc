@@ -1378,5 +1378,57 @@ TEST_F(FlutterWindowsEngineTest, OnViewFocusChangeRequest) {
   modifier.OnViewFocusChangeRequest(&request);
 }
 
+TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder{context};
+  builder.SetDartEntrypoint("sendSemanticsTreeInfo");
+
+  // Setup: a signal for when we have send out all of our semantics updates
+  bool done = false;
+  auto native_entry =
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
+  context.AddNativeFunction("Signal", native_entry);
+
+  // Setup: Create the engine and two views + enable semantics
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  auto window_binding_handler1 =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  auto window_binding_handler2 =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+
+  const FlutterViewId first_view_id = 123;
+  const FlutterViewId second_view_id = 456;
+  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  MockFlutterWindowsView view1{windows_engine,
+                               std::move(window_binding_handler1)};
+  MockFlutterWindowsView view2{windows_engine,
+                               std::move(window_binding_handler2)};
+  EngineModifier modifier{windows_engine};
+  modifier.SetViewById(&view1, first_view_id);
+  modifier.SetViewById(&view2, second_view_id);
+
+  // Act: UpdateSemanticsEnabled will trigger the semantics updates
+  // to get sent.
+  bool called = false;
+  modifier.embedder_api().SendSemanticsAction = MOCK_ENGINE_PROC(
+      UpdateLocales,
+      ([&called](auto engine, const FlutterDispatchSemanticsActionInfo* info) {
+        called = true;
+        return kSuccess;
+      }));
+
+  windows_engine->UpdateSemanticsEnabled(true);
+
+  // Rely on timeout mechanism in CI.
+  while (!done) {
+    windows_engine->task_runner()->ProcessTasks();
+  }
+
+  // Expect: that the semantics update were indeed sent
+  EXPECT_TRUE(called);
+}
+
 }  // namespace testing
 }  // namespace flutter
