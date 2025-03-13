@@ -95,12 +95,9 @@ class SemanticMenuBar extends SemanticRole {
   }
 
   bool _isMenuItem(SemanticsObject semanticsObject) {
-    if (semanticsObject.role == ui.SemanticsRole.menuItem ||
+    return semanticsObject.role == ui.SemanticsRole.menuItem ||
         semanticsObject.role == ui.SemanticsRole.menuItemCheckbox ||
-        semanticsObject.role == ui.SemanticsRole.menuItemRadio) {
-      return true;
-    }
-    return false;
+        semanticsObject.role == ui.SemanticsRole.menuItemRadio;
   }
 
   // Starting from the current semantics node, this method traverses the
