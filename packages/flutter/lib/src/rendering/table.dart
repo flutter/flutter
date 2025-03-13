@@ -612,22 +612,20 @@ class RenderTable extends RenderBox {
   }
 
   final Map<int, _Index> _idToIndexMap = <int, _Index>{};
+  final Map<int, SemanticsNode> _cachedRows = <int, SemanticsNode>{};
+  final Map<_Index, SemanticsNode> _cachedCells = <_Index, SemanticsNode>{};
 
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
   ///
   /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
-  /// And if a cell has a different semantic role, we create a new semantics node
-  /// to wrapp it.
+  /// And if a cell has mutiple semantics node or has a different semantic role, we create
+  /// a new semantics node to wrap it.
   @override
   void assembleSemanticsNode(
     SemanticsNode node,
     SemanticsConfiguration config,
     Iterable<SemanticsNode> children,
   ) {
-    // print('------!!!!assembleSemanticsNode node row: $_rows, column: $_columns');
-    //for (final child in children) print('  --child: ${child}');
-    // print('---start');
-
     final List<SemanticsNode> rows = <SemanticsNode>[];
 
     final List<List<List<SemanticsNode>>> rawCells = List<List<List<SemanticsNode>>>.generate(
@@ -674,7 +672,6 @@ class RenderTable extends RenderBox {
     }
 
     for (final SemanticsNode child in children) {
-      //  print('  --child: $child');
       if (_idToIndexMap.containsKey(child.id)) {
         final _Index index = _idToIndexMap[child.id]!;
         final int y = index.y;
@@ -682,14 +679,12 @@ class RenderTable extends RenderBox {
         if (y < _rows && x < _columns) {
           rawCells[y][x].add(child);
         }
-        //  print('  --added child from index in map: $y, $x ');
       } else {
         final Rect rect = rectWithOffset(child);
         final int y = findRowIndex(rect.top);
         final int x = findColumnIndex(rect.left);
         if (y != -1 && x != -1) {
           rawCells[y][x].add(child);
-          //   print('  --added child by rect: $y, $x ');
         }
       }
     }
@@ -700,11 +695,14 @@ class RenderTable extends RenderBox {
       if (rowBox.height == 0) {
         continue;
       }
-      final SemanticsNode newRow = SemanticsNode(
-        showOnScreen: () {
-          showOnScreen(descendant: this, rect: rowBox);
-        },
-      );
+
+      final SemanticsNode newRow =
+          _cachedRows[y] ??
+          (_cachedRows[y] = SemanticsNode(
+            showOnScreen: () {
+              showOnScreen(descendant: this, rect: rowBox);
+            },
+          ));
 
       // The list of cells of this Row.
       final List<SemanticsNode> cells = <SemanticsNode>[];
@@ -726,10 +724,12 @@ class RenderTable extends RenderBox {
 
         final SemanticsNode cell =
             addCellWrapper
-                ? (SemanticsNode()..updateWith(
-                  config: SemanticsConfiguration()..role = SemanticsRole.cell,
-                  childrenInInversePaintOrder: rawChildrens,
-                ))
+                ? (_cachedCells[_Index(y, x)] ??
+                    (_cachedCells[_Index(y, x)] =
+                        SemanticsNode()..updateWith(
+                          config: SemanticsConfiguration()..role = SemanticsRole.cell,
+                          childrenInInversePaintOrder: rawChildrens,
+                        )))
                 : rawChildrens.single;
 
         final double cellWidth =
@@ -739,7 +739,6 @@ class RenderTable extends RenderBox {
 
         // Skip cell if it's invisible
         if (cellWidth <= 0.0) {
-          //   print('  --skipped cell: $y, $x  ${cell}');
           continue;
         }
         // Add wrapper transform
@@ -774,9 +773,6 @@ class RenderTable extends RenderBox {
 
         cell.indexInParent = x;
         cells.add(cell);
-        //    print('  --added cell: $y, $x  ${cell}');
-        //   print('  --cell width: ${cellWidth}');
-        //  print('rawChildrens: ${rawChildrens}');
       }
 
       newRow
