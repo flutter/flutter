@@ -24,8 +24,5 @@ void main() {
   print(color.opacity);
   print(color.value);
   print(color.alpha);
-  print(color.red);
-  print(color.blue);
-  print(color.green);
   color = color.withOpacity(0.55);
 }

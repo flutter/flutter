@@ -137,36 +137,6 @@ transforms:
       - kind: 'rename'
         newName: 'a'
 
-  - title: "Replace 'red' with 'r'"
-    date: 2024-09-10
-    element:
-      uris: [ 'painting.dart' ]
-      method: 'red'
-      inClass: 'Color'
-    changes:
-      - kind: 'rename'
-        newName: 'r * 255.0).round() & 0xff'
-
-  - title: "Replace 'green' with 'g'"
-    date: 2024-09-10
-    element:
-      uris: [ 'painting.dart' ]
-      method: 'green'
-      inClass: 'Color'
-    changes:
-      - kind: 'rename'
-        newName: 'g * 255.0).round() & 0xff'
-
-  - title: "Replace 'blue' with 'b'"
-    date: 2024-09-10
-    element:
-      uris: [ 'painting.dart' ]
-      method: 'blue'
-      inClass: 'Color'
-    changes:
-      - kind: 'rename'
-        newName: 'b * 255.0).round() & 0xff'
-
   - title: "Replace 'value' with 'toARGB32()'"
     date: 2025-02-03
     element:
@@ -174,8 +144,11 @@ transforms:
       method: 'value'
       inClass: 'Color'
     changes:
-      - kind: 'rename'
-        newName: 'toARGB32()'
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'painting.dart' ]
+          method: 'toARGB32'
+          inClass: 'Color'
 
   - title: "Rename 'withOpacity'"
     date: 2024-09-10
