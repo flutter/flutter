@@ -73,11 +73,7 @@ void CursorHandler::HandleMethodCall(
       return;
     }
     const auto& kind = std::get<std::string>(kind_iter->second);
-    if (!engine_->UpdateFlutterCursor(kind)) {
-      result->Error(kCursorError,
-                    "Cursor is not available in Windows headless mode");
-      return;
-    }
+    engine_->UpdateFlutterCursor(kind);
     result->Success();
   } else if (method.compare(kCreateCustomCursorMethod) == 0) {
     const auto& arguments = std::get<EncodableMap>(*method_call.arguments());
@@ -161,11 +157,7 @@ void CursorHandler::HandleMethodCall(
       return;
     }
     HCURSOR cursor = custom_cursors_[name];
-    if (!engine_->SetFlutterCursor(cursor)) {
-      result->Error(kCursorError,
-                    "Cursor is not available in Windows headless mode");
-      return;
-    }
+    engine_->SetFlutterCursor(cursor);
     result->Success();
   } else if (method.compare(kDeleteCustomCursorMethod) == 0) {
     const auto& arguments = std::get<EncodableMap>(*method_call.arguments());
