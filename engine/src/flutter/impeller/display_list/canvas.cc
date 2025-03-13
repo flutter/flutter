@@ -1792,9 +1792,10 @@ void Canvas::EndReplay() {
   if (requires_readback_) {
     BlitToOnscreen(/*is_onscreen_=*/is_onscreen_);
   }
-
-  if (!EnsureFinalMipmapGeneration() ||
-      !renderer_.GetContext()->FlushCommandBuffers()) {
+  if (!EnsureFinalMipmapGeneration()) {
+    VALIDATION_LOG << "Failed to generate onscreen mipmaps.";
+  }
+  if (!renderer_.GetContext()->FlushCommandBuffers()) {
     // Not much we can do.
     VALIDATION_LOG << "Failed to submit command buffers";
   }
