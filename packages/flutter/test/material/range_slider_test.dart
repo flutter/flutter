@@ -2815,6 +2815,7 @@ void main() {
   testWidgets('Discrete RangeSlider does not apply thumb padding in a non-rounded track shape', (
     WidgetTester tester,
   ) async {
+    // The default track left and right padding.
     const double sliderPadding = 24.0;
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
