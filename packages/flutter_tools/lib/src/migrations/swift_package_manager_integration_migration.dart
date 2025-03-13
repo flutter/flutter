@@ -576,9 +576,12 @@ $newContent
     required int startSectionIndex,
     required int endSectionIndex,
   }) {
+    final String targetName = nativeTarget.name ?? '';
+    final String pbxTargetName =
+        targetName.isNotEmpty ? 'PBXNativeTarget "$targetName"' : 'PBXNativeTarget';
     final String subsectionLineStart =
-        nativeTarget.name != null
-            ? '${nativeTarget.identifier} /* ${nativeTarget.name} */ = {'
+        targetName.isNotEmpty
+            ? '${nativeTarget.identifier} /* $targetName */ = {'
             : nativeTarget.identifier;
     final int nativeTargetStartIndex = lines.indexWhere(
       (String line) => line.trim().startsWith(subsectionLineStart),
@@ -587,7 +590,7 @@ $newContent
 
     if (nativeTargetStartIndex == -1 || nativeTargetStartIndex > endSectionIndex) {
       throw Exception(
-        'Unable to find PBXNativeTarget for ${_xcodeProject.hostAppProjectName} target.',
+        'Unable to find $pbxTargetName for ${_xcodeProject.hostAppProjectName} project.',
       );
     }
 
@@ -610,7 +613,7 @@ $newContent
     if (packageProductDependenciesIndex == -1 ||
         packageProductDependenciesIndex > endSectionIndex) {
       throw Exception(
-        'Unable to find packageProductDependencies for ${_xcodeProject.hostAppProjectName} PBXNativeTarget.',
+        'Unable to find packageProductDependencies for $pbxTargetName in ${_xcodeProject.hostAppProjectName} project.',
       );
     }
     const String newContent =

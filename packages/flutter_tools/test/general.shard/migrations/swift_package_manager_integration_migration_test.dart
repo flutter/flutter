@@ -1497,7 +1497,9 @@ void main() {
                     );
                 await expectLater(
                   () => projectMigration.migrate(),
-                  throwsToolExit(message: 'Unable to find PBXNativeTarget for Runner target'),
+                  throwsToolExit(
+                    message: 'Unable to find PBXNativeTarget "Runner" for Runner project',
+                  ),
                 );
               },
             );
@@ -1547,7 +1549,9 @@ void main() {
                     );
                 await expectLater(
                   () => projectMigration.migrate(),
-                  throwsToolExit(message: 'Unable to find PBXNativeTarget for Runner target'),
+                  throwsToolExit(
+                    message: 'Unable to find PBXNativeTarget "Runner" for Runner project',
+                  ),
                 );
               },
             );
