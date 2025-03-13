@@ -19,6 +19,9 @@ struct RoundSuperellipseParam {
   //
   // This structure is used to define an octant of an arbitrary rounded
   // superellipse.
+  //
+  // A `se_n` of 0 means that the radius is 0, and this octant is a square
+  // of size `se_a` at `offset` and all other fields are ignored.
   struct Octant {
     // The offset of the square-like rounded superellipse's center from the
     // origin.
@@ -26,26 +29,17 @@ struct RoundSuperellipseParam {
     // All other coordinates in this structure are relative to this point.
     Point offset;
 
-    // The coordinate of the midpoint of the top edge, relative to the `offset`
-    // point.
-    //
-    // This is the starting point of the octant curve.
-    Point edge_mid;
-
-    // The coordinate of the superellipse's center, relative to the `offset`
-    // point.
-    Point se_center;
     // The semi-axis length of the superellipse.
     Scalar se_a;
     // The degree of the superellipse.
+    //
+    // If this value is 0, then this octant is a square of size `se_a`.
     Scalar se_n;
     // The range of the parameter "theta" used to define the superellipse curve.
     //
     // The "theta" is not the angle of the curve but the implicit parameter
     // used in the curve's parametric equation.
     Scalar se_max_theta;
-
-    Scalar ratio;
 
     // The coordinate of the top left end of the circular arc, relative to the
     // `offset` point.
@@ -123,10 +117,6 @@ struct RoundSuperellipseParam {
   // Experiments indicate that the gap is linear with respect to the corner
   // radius on that dimension.
   static constexpr Scalar kGapFactor = 0.29289321881f;  // 1-cos(pi/4)
-
-  static void SuperellipseBezierArc(
-      Point* output,
-      const RoundSuperellipseParam::Octant& param);
 };
 
 }  // namespace impeller

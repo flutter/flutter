@@ -696,12 +696,6 @@ HWND FlutterHostWindow::GetWindowHandle() const {
   return window_handle_;
 }
 
-void FlutterHostWindow::FocusViewOf(FlutterHostWindow* window) {
-  if (window != nullptr && window->child_content_ != nullptr) {
-    SetFocus(window->child_content_);
-  }
-};
-
 LRESULT FlutterHostWindow::WndProc(HWND hwnd,
                                    UINT message,
                                    WPARAM wparam,
@@ -754,7 +748,7 @@ std::size_t FlutterHostWindow::CloseOwnedPopups() {
       // active. To prevent flickering during this transition, disable
       // redrawing the non-client area as inactive.
       owner->enable_redraw_non_client_as_inactive_ = false;
-      DestroyWindow(popup->GetWindowHandle());
+      PostMessage(popup->GetWindowHandle(), WM_CLOSE, 0, 0);
       owner->enable_redraw_non_client_as_inactive_ = true;
 
       // Repaint owner window to make sure its title bar is painted with the
@@ -806,7 +800,9 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
               owner_window->owned_windows_.erase(this);
               FML_CHECK(owner_window->num_owned_popups_ > 0);
               --owner_window->num_owned_popups_;
-              FocusViewOf(owner_window);
+              if (owner_window->child_content_) {
+                SetFocus(owner_window->child_content_);
+              }
             }
             break;
           default:
@@ -874,16 +870,20 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
     }
 
     case WM_ACTIVATE:
-      // Prevent disabled window from being activated using the task switcher
-      if (!IsWindowEnabled(hwnd) && LOWORD(wparam) != WA_INACTIVE) {
-        // Redirect focus and activation to the first enabled descendant
-        if (FlutterHostWindow* enabled_descendant =
-                FindFirstEnabledDescendant()) {
-          SetActiveWindow(enabled_descendant->GetWindowHandle());
+      if (LOWORD(wparam) != WA_INACTIVE) {
+        // Prevent disabled window from being activated using the task switcher
+        if (!IsWindowEnabled(hwnd)) {
+          // Redirect focus and activation to the first enabled descendant
+          if (FlutterHostWindow* enabled_descendant =
+                  FindFirstEnabledDescendant()) {
+            SetActiveWindow(enabled_descendant->GetWindowHandle());
+          }
+          return 0;
         }
-        return 0;
+        if (child_content_ != nullptr) {
+          SetFocus(child_content_);
+        }
       }
-      FocusViewOf(this);
       return 0;
 
     case WM_NCACTIVATE:
@@ -896,10 +896,6 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
         }
       }
       break;
-
-    case WM_MOUSEACTIVATE:
-      FocusViewOf(this);
-      return MA_ACTIVATE;
 
     case WM_DWMCOLORIZATIONCOLORCHANGED:
       UpdateTheme(hwnd);

@@ -160,6 +160,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   std::unique_ptr<flutter::ConnectionCollection> _connections;
 }
 
+- (int64_t)engineIdentifier {
+  return reinterpret_cast<int64_t>((__bridge void*)self);
+}
+
 - (instancetype)init {
   return [self initWithName:@"FlutterEngine" project:nil allowHeadlessExecution:YES];
 }
@@ -241,6 +245,11 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   return self;
 }
 
++ (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
+  NSAssert([[NSThread currentThread] isMainThread], @"Must be called on the main thread.");
+  return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
+}
+
 - (void)setUpSceneLifecycleNotifications:(NSNotificationCenter*)center API_AVAILABLE(ios(13.0)) {
   [center addObserver:self
              selector:@selector(sceneWillEnterForeground:)
@@ -264,7 +273,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (void)recreatePlatformViewsController {
-  _renderingApi = flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering);
+  _renderingApi = flutter::GetRenderingAPIForProcess(/*force_software=*/false);
   _platformViewsController = [[FlutterPlatformViewsController alloc] init];
 }
 
@@ -704,9 +713,13 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
           libraryURI:(NSString*)libraryOrNil
       entrypointArgs:(NSArray<NSString*>*)entrypointArgs {
   // Launch the Dart application with the inferred run configuration.
-  self.shell.RunEngine([self.dartProject runConfigurationForEntrypoint:entrypoint
-                                                          libraryOrNil:libraryOrNil
-                                                        entrypointArgs:entrypointArgs]);
+  flutter::RunConfiguration configuration =
+      [self.dartProject runConfigurationForEntrypoint:entrypoint
+                                         libraryOrNil:libraryOrNil
+                                       entrypointArgs:entrypointArgs];
+
+  configuration.SetEngineId(self.engineIdentifier);
+  self.shell.RunEngine(std::move(configuration));
 }
 
 - (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
@@ -743,7 +756,7 @@ static flutter::ThreadHost MakeThreadHost(NSString* thread_label,
   fml::MessageLoop::EnsureInitializedForCurrentThread();
 
   uint32_t threadHostType = flutter::ThreadHost::Type::kRaster | flutter::ThreadHost::Type::kIo;
-  if (!settings.enable_impeller || !settings.merged_platform_ui_thread) {
+  if (!settings.merged_platform_ui_thread) {
     threadHostType |= flutter::ThreadHost::Type::kUi;
   }
 
@@ -801,8 +814,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   } else if (settings.route.empty() == false) {
     self.initialRoute = [NSString stringWithUTF8String:settings.route.c_str()];
   }
-
-  FlutterView.forceSoftwareRendering = settings.enable_software_rendering;
 
   auto platformData = [self.dartProject defaultPlatformData];
 
@@ -1453,6 +1464,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                          libraryOrNil:libraryURI
                                        entrypointArgs:entrypointArgs];
 
+  configuration.SetEngineId(result.engineIdentifier);
+
   fml::WeakPtr<flutter::PlatformView> platform_view = _shell->GetPlatformView();
   FML_DCHECK(platform_view);
   // Static-cast safe since this class always creates PlatformViewIOS instances.
@@ -1495,10 +1508,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (FlutterDartProject*)project {
   return self.dartProject;
-}
-
-- (BOOL)isUsingImpeller {
-  return self.project.isImpellerEnabled;
 }
 
 @end

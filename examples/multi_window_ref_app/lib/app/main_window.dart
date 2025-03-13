@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:multi_window_ref_app/app/child_window_renderer.dart';
 
+import 'child_window_renderer.dart';
 import 'window_settings.dart';
 import 'window_settings_dialog.dart';
 import 'window_manager_model.dart';
 import 'positioner_settings.dart';
 import 'custom_positioner_dialog.dart';
-import 'window_controller_render.dart';
 import 'regular_window_edit_dialog.dart';
 
 class MainWindow extends StatefulWidget {
-  MainWindow({super.key, required this.mainController}) {
-    _windowManagerModel.add(KeyedWindowController(
-        isMainWindow: true, key: UniqueKey(), controller: mainController));
-  }
+  const MainWindow(
+      {super.key,
+      required this.controller,
+      required this.settings,
+      required this.positionerSettingsModifier,
+      required this.windowManagerModel});
 
-  final WindowManagerModel _windowManagerModel = WindowManagerModel();
-  final WindowSettings _settings = WindowSettings();
-  final PositionerSettingsModifier _positionerSettingsModifier =
-      PositionerSettingsModifier();
-  final WindowController mainController;
+  final WindowController controller;
+  final WindowSettings settings;
+  final PositionerSettingsModifier positionerSettingsModifier;
+  final WindowManagerModel windowManagerModel;
 
   @override
   State<MainWindow> createState() => _MainWindowState();
@@ -40,7 +40,7 @@ class _MainWindowState extends State<MainWindow> {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: _ActiveWindowsTable(
-                  windowManagerModel: widget._windowManagerModel),
+                  windowManagerModel: widget.windowManagerModel),
             ),
           ),
           Expanded(
@@ -49,19 +49,19 @@ class _MainWindowState extends State<MainWindow> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ListenableBuilder(
-                    listenable: widget._windowManagerModel,
+                    listenable: widget.windowManagerModel,
                     builder: (BuildContext context, Widget? child) {
                       return _WindowCreatorCard(
-                          selectedWindow: widget._windowManagerModel.selected,
-                          windowManagerModel: widget._windowManagerModel,
+                          selectedWindow: widget.windowManagerModel.selected,
+                          windowManagerModel: widget.windowManagerModel,
                           positionerSettings:
-                              widget._positionerSettingsModifier,
-                          windowSettings: widget._settings);
+                              widget.positionerSettingsModifier,
+                          windowSettings: widget.settings);
                     }),
                 const SizedBox(height: 12),
                 _PositionerEditorCard(
                     positionerSettingsModifier:
-                        widget._positionerSettingsModifier)
+                        widget.positionerSettingsModifier)
               ],
             ),
           ),
@@ -71,11 +71,10 @@ class _MainWindowState extends State<MainWindow> {
 
     return ViewAnchor(
         view: ChildWindowRenderer(
-          windowManagerModel: widget._windowManagerModel,
-          windowSettings: widget._settings,
-          positionerSettingsModifier: widget._positionerSettingsModifier,
-          controller: widget.mainController,
-          renderParentlessWindows: true),
+          windowManagerModel: widget.windowManagerModel,
+          windowSettings: widget.settings,
+          positionerSettingsModifier: widget.positionerSettingsModifier,
+          controller: widget.controller),
         child: child);
   }
 }

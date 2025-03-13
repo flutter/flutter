@@ -2093,6 +2093,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     settings.root_isolate_create_callback =
         [callback, user_data](const auto& isolate) { callback(user_data); };
   }
+
+  // Wire up callback for engine and print logging.
   if (SAFE_ACCESS(args, log_message_callback, nullptr) != nullptr) {
     FlutterLogMessageCallback callback =
         SAFE_ACCESS(args, log_message_callback, nullptr);
@@ -2101,7 +2103,17 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                                         const std::string& message) {
       callback(tag.c_str(), message.c_str(), user_data);
     };
+  } else {
+    settings.log_message_callback = [](const std::string& tag,
+                                       const std::string& message) {
+      // Fall back to logging to stdout if unspecified.
+      if (tag.empty()) {
+        std::cout << tag << ": ";
+      }
+      std::cout << message << std::endl;
+    };
   }
+
   if (SAFE_ACCESS(args, log_tag, nullptr) != nullptr) {
     settings.log_tag = SAFE_ACCESS(args, log_tag, nullptr);
   }
@@ -2226,6 +2238,24 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     };
   }
 
+  flutter::PlatformViewEmbedder::ViewFocusChangeRequestCallback
+      view_focus_change_request_callback = nullptr;
+  if (SAFE_ACCESS(args, view_focus_change_request_callback, nullptr) !=
+      nullptr) {
+    view_focus_change_request_callback =
+        [ptr = args->view_focus_change_request_callback,
+         user_data](const flutter::ViewFocusChangeRequest& request) {
+          FlutterViewFocusChangeRequest embedder_request{
+              .struct_size = sizeof(FlutterViewFocusChangeRequest),
+              .view_id = request.view_id(),
+              .state = static_cast<FlutterViewFocusState>(request.state()),
+              .direction =
+                  static_cast<FlutterViewFocusDirection>(request.direction()),
+          };
+          ptr(&embedder_request, user_data);
+        };
+  }
+
   auto external_view_embedder_result = InferExternalViewEmbedderFromArgs(
       SAFE_ACCESS(args, compositor, nullptr), settings.enable_impeller);
   if (external_view_embedder_result.second) {
@@ -2241,6 +2271,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
           compute_platform_resolved_locale_callback,  //
           on_pre_engine_restart_callback,             //
           channel_update_callback,                    //
+          view_focus_change_request_callback,         //
       };
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(
@@ -2389,6 +2420,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       arguments[i] = std::string{args->dart_entrypoint_argv[i]};
     }
     run_configuration.SetEntrypointArgs(std::move(arguments));
+  }
+
+  if (SAFE_ACCESS(args, engine_id, 0) != 0) {
+    run_configuration.SetEngineId(args->engine_id);
   }
 
   if (!run_configuration.IsValid()) {
@@ -2553,6 +2588,38 @@ FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
 
   embedder_engine->GetShell().GetPlatformView()->RemoveView(info->view_id,
                                                             callback);
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineSendViewFocusEvent(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterViewFocusEvent* event) {
+  if (!engine) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  if (!event) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "View focus event must not be null.");
+  }
+  // The engine must be running to focus a view.
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  if (!STRUCT_HAS_MEMBER(event, direction)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The event struct has invalid size.");
+  }
+
+  flutter::ViewFocusEvent flutter_event(
+      event->view_id,  //
+      static_cast<flutter::ViewFocusState>(event->state),
+      static_cast<flutter::ViewFocusDirection>(event->direction));
+
+  embedder_engine->GetShell().GetPlatformView()->SendViewFocusEvent(
+      flutter_event);
+
   return kSuccess;
 }
 
@@ -3657,6 +3724,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(SetNextFrameCallback, FlutterEngineSetNextFrameCallback);
   SET_PROC(AddView, FlutterEngineAddView);
   SET_PROC(RemoveView, FlutterEngineRemoveView);
+  SET_PROC(SendViewFocusEvent, FlutterEngineSendViewFocusEvent);
 #undef SET_PROC
 
   return kSuccess;

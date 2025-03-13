@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:multi_window_ref_app/app/popup_window_content.dart';
-import 'package:multi_window_ref_app/app/positioner_settings.dart';
+import 'positioner_settings.dart';
 import 'regular_window_content.dart';
 import 'window_manager_model.dart';
 import 'window_settings.dart';
@@ -29,11 +29,12 @@ class WindowControllerRender extends StatelessWidget {
         return RegularWindow(
             key: key,
             controller: controller as RegularWindowController,
-            child: RegularWindowContent(
+            child: MaterialApp(
+              home: RegularWindowContent(
                 controller: controller as RegularWindowController,
                 windowSettings: windowSettings,
                 positionerSettingsModifier: positionerSettingsModifier,
-                windowManagerModel: windowManagerModel));
+                windowManagerModel: windowManagerModel)));
       case WindowArchetype.popup:
         return PopupWindow(
             key: key,

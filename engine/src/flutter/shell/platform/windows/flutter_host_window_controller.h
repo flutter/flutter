@@ -66,7 +66,7 @@ class FlutterHostWindowController {
   LRESULT HandleMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
   // Sets the method channel through which the controller will send the window
-  // events "onWindowCreated", "onWindowDestroyed", and "onWindowChanged".
+  // events "onWindowDestroyed" and "onWindowChanged".
   void SetMethodChannel(std::shared_ptr<MethodChannel<EncodableValue>> channel);
 
   // Gets the engine that owns this controller.
@@ -76,10 +76,14 @@ class FlutterHostWindowController {
   // Retrieves the size of the view with ID |view_id|, in logical coordinates.
   Size GetViewSize(FlutterViewId view_id) const;
 
-  // Sends the "onWindowChanged" message to the Flutter engine.
+  // Sends the "onWindowChanged" message to the Flutter engine, where |view_id|
+  // is the ID of the root view, |size| is the size of the window's client
+  // rectangle in logical coordinates, and |relative_position| is the offset
+  // between the owner window (if there is one) and the current window, also in
+  // logical coordinates.
   void SendOnWindowChanged(FlutterViewId view_id,
                            std::optional<Size> size,
-                           std::optional<Point> relative_position) const;
+                           std::optional<Offset> relative_position) const;
 
   // Sends the "onWindowDestroyed" message to the Flutter engine.
   void SendOnWindowDestroyed(FlutterViewId view_id) const;

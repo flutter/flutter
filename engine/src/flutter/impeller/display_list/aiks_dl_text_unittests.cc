@@ -13,9 +13,12 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/testing/testing.h"
+#include "impeller/entity/contents/text_contents.h"
+#include "impeller/entity/entity.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "txt/platform.h"
 
 using namespace flutter;
@@ -323,7 +326,7 @@ TEST_P(AiksTest, CanRenderTextInSaveLayer) {
 
   // Blend the layer with the parent pass using kClear to expose the coverage.
   paint.setBlendMode(DlBlendMode::kClear);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   ASSERT_TRUE(RenderTextInCanvasSkia(
       GetContext(), builder, "the quick brown fox jumped over the lazy dog!.?",
       "Roboto-Regular.ttf"));
@@ -441,7 +444,7 @@ TEST_P(AiksTest, CanRenderTextWithLargePerspectiveTransform) {
   DisplayListBuilder builder;
 
   DlPaint save_paint;
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
   builder.Transform(Matrix(2000, 0, 0, 0,   //
                            0, 2000, 0, 0,   //
                            0, 0, -1, 9000,  //
@@ -593,6 +596,72 @@ TEST_P(AiksTest, DifferenceClipsMustRenderIdenticallyAcrossBackends) {
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+
+  // Verifies that TextContents only use the scale/transform that is
+  // computed during preroll.
+  constexpr const char* font_fixture = "Roboto-Regular.ttf";
+
+  // Construct the text blob.
+  auto c_font_fixture = std::string(font_fixture);
+  auto mapping = flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
+  ASSERT_TRUE(mapping);
+
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont sk_font(font_mgr->makeFromData(mapping), 16);
+
+  auto blob = SkTextBlob::MakeFromString("Hello World", sk_font);
+  ASSERT_TRUE(blob);
+
+  auto text_frame = MakeTextFrameFromTextBlobSkia(blob);
+
+  // Simulate recording the text frame during preroll.
+  Matrix preroll_matrix =
+      Matrix::MakeTranslateScale({1.5, 1.5, 1}, {100, 50, 0});
+  Point preroll_point = Point{23, 45};
+  {
+    auto scale = TextFrame::RoundScaledFontSize(
+        (preroll_matrix * Matrix::MakeTranslation(preroll_point))
+            .GetMaxBasisLengthXY());
+
+    aiks_context.GetContentContext().GetLazyGlyphAtlas()->AddTextFrame(
+        text_frame,     //
+        scale,          //
+        preroll_point,  //
+        preroll_matrix,
+        std::nullopt  //
+    );
+  }
+
+  // Now simulate rendering with a slightly different scale factor.
+  RenderTarget render_target =
+      aiks_context.GetContentContext()
+          .GetRenderTargetCache()
+          ->CreateOffscreenMSAA(*aiks_context.GetContext(), {100, 100}, 1);
+
+  TextContents text_contents;
+  text_contents.SetTextFrame(text_frame);
+  text_contents.SetOffset(preroll_point);
+  text_contents.SetScale(1.6);
+  text_contents.SetColor(Color::Aqua());
+
+  Matrix not_preroll_matrix =
+      Matrix::MakeTranslateScale({1.5, 1.5, 1}, {100, 50, 0});
+
+  Entity entity;
+  entity.SetTransform(not_preroll_matrix);
+
+  std::shared_ptr<CommandBuffer> command_buffer =
+      aiks_context.GetContext()->CreateCommandBuffer();
+  std::shared_ptr<RenderPass> render_pass =
+      command_buffer->CreateRenderPass(render_target);
+
+  EXPECT_TRUE(text_contents.Render(aiks_context.GetContentContext(), entity,
+                                   *render_pass));
 }
 
 }  // namespace testing

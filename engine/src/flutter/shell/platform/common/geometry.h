@@ -60,6 +60,27 @@ class Size {
   double height_ = 0.0;
 };
 
+// A displacement in Cartesian space.
+class Offset {
+ public:
+  Offset() = default;
+  Offset(double dx, double dy) : dx_(dx), dy_(dy) {}
+  Offset(const Offset&) = default;
+  Offset& operator=(const Offset&) = default;
+
+  double dx() const { return dx_; }
+  double dy() const { return dy_; }
+
+  bool operator==(const Offset& other) const {
+    return dx_ == other.dx_ && dy_ == other.dy_;
+  }
+  bool operator!=(const Offset& other) const { return !(*this == other); }
+
+ private:
+  double dx_ = 0.0;
+  double dy_ = 0.0;
+};
+
 // A rectangle with position in Cartesian space specified relative to a
 // separately-maintained origin.
 class Rect {
