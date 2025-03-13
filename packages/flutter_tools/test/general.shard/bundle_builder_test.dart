@@ -270,7 +270,7 @@ void main() {
   testUsingContext(
     'Release bundle includes native assets',
     () async {
-      List<String> dependencies = <String>[];
+      final List<String> dependencies = <String>[];
       final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,
