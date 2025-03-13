@@ -3121,8 +3121,8 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
 ///
 /// @param[in]  engine  A running engine instance.
 /// @param[in]  info    The dispatch semantics on view arguments.
-///                     This can be deallocated once |FlutterEngineAddView|
-///                     returns.
+///                     This can be deallocated once
+///                     |FlutterEngineSendSemanticsAction| returns.
 ///
 /// @return     The result of the call.
 ///
