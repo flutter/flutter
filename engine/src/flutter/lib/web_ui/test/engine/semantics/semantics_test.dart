@@ -4137,14 +4137,17 @@ void _testMenus() {
             tester.updateNode(id: 2, role: ui.SemanticsRole.menuItem),
             tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
             tester.updateNode(id: 4, role: ui.SemanticsRole.menuItem),
-          ]
+          ],
         ),
       ],
     );
     tester.apply();
 
     final SemanticsObject object = tester.getSemanticsObject(0);
-    expect(object.element.getAttribute('aria-owns'), 'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4');
+    expect(
+      object.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
   });
 
   test('nested menus have correct menu item nodes', () {
@@ -4179,20 +4182,23 @@ void _testMenus() {
                       children: <SemanticsNodeUpdate>[
                         tester.updateNode(id: 7, role: ui.SemanticsRole.menuItem),
                         tester.updateNode(id: 8, role: ui.SemanticsRole.menuItem),
-                      ]
-                    )
-                  ]
-                )
-              ]
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ]
+          ],
         ),
       ],
     );
     tester.apply();
 
     final SemanticsObject object0 = tester.getSemanticsObject(0);
-    expect(object0.element.getAttribute('aria-owns'), 'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4');
+    expect(
+      object0.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
     final SemanticsObject object1 = tester.getSemanticsObject(5);
     expect(object1.element.getAttribute('aria-owns'), 'flt-semantic-node-7 flt-semantic-node-8');
   });
@@ -4215,14 +4221,17 @@ void _testMenus() {
             tester.updateNode(id: 2, role: ui.SemanticsRole.menuItem),
             tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
             tester.updateNode(id: 4, role: ui.SemanticsRole.menuItem),
-          ]
+          ],
         ),
       ],
     );
     tester.apply();
 
     final SemanticsObject object = tester.getSemanticsObject(0);
-    expect(object.element.getAttribute('aria-owns'), 'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4');
+    expect(
+      object.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
   });
 
   test('menu bar and its submenu have correct menu item nodes', () {
@@ -4257,20 +4266,23 @@ void _testMenus() {
                       children: <SemanticsNodeUpdate>[
                         tester.updateNode(id: 7, role: ui.SemanticsRole.menuItem),
                         tester.updateNode(id: 8, role: ui.SemanticsRole.menuItem),
-                      ]
-                    )
-                  ]
-                )
-              ]
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ]
+          ],
         ),
       ],
     );
     tester.apply();
 
     final SemanticsObject object0 = tester.getSemanticsObject(0);
-    expect(object0.element.getAttribute('aria-owns'), 'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4');
+    expect(
+      object0.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
     final SemanticsObject object1 = tester.getSemanticsObject(5);
     expect(object1.element.getAttribute('aria-owns'), 'flt-semantic-node-7 flt-semantic-node-8');
   });
