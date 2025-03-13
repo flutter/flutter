@@ -619,6 +619,34 @@ void main() {
       expect(data.controlsNodes, <String>{'abc', 'ghi', 'def'});
     });
 
+    testWidgets('Semantics can set alert rule', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(key: key, role: SemanticsRole.alert, child: const Placeholder()),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData data = node.getSemanticsData();
+      expect(data.role, SemanticsRole.alert);
+    });
+
+    testWidgets('Semantics can set status rule', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(key: key, role: SemanticsRole.status, child: const Placeholder()),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData data = node.getSemanticsData();
+      expect(data.role, SemanticsRole.status);
+    });
+
     testWidgets('Semantics can merge attributed strings', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
