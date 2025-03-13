@@ -1022,6 +1022,89 @@ void _testContainer() {
     semantics().semanticsEnabled = false;
   });
 
+  test(
+    'child node transform compensates for parent rect offset when parent rect changed',
+    () async {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(10, 10, 20, 20),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(
+        builder,
+        id: 1,
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 5, 5),
+      );
+
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
+
+      final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
+      final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
+
+      expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
+      if (isSafari) {
+        // macOS 13 returns different values than macOS 12.
+        expect(
+          parentElement.style.transformOrigin,
+          anyOf(contains('0px 0px 0px'), contains('0px 0px')),
+        );
+        expect(
+          childElement.style.transformOrigin,
+          anyOf(contains('0px 0px 0px'), contains('0px 0px')),
+        );
+      } else {
+        expect(parentElement.style.transformOrigin, '0px 0px 0px');
+        expect(childElement.style.transformOrigin, '0px 0px 0px');
+      }
+      expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -10, -10)');
+      expect(childElement.style.left, '0px');
+      expect(childElement.style.top, '0px');
+
+      final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
+
+      updateNode(
+        builder2,
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(33, 33, 20, 20),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+      );
+
+      owner().updateSemantics(builder2.build());
+      expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
+
+      expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 33, 33)');
+      if (isSafari) {
+        // macOS 13 returns different values than macOS 12.
+        expect(
+          parentElement.style.transformOrigin,
+          anyOf(contains('0px 0px 0px'), contains('0px 0px')),
+        );
+        expect(
+          childElement.style.transformOrigin,
+          anyOf(contains('0px 0px 0px'), contains('0px 0px')),
+        );
+      } else {
+        expect(parentElement.style.transformOrigin, '0px 0px 0px');
+        expect(childElement.style.transformOrigin, '0px 0px 0px');
+      }
+      expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -33, -33)');
+      expect(childElement.style.left, '0px');
+      expect(childElement.style.top, '0px');
+
+      semantics().semanticsEnabled = false;
+    },
+  );
+
   test('renders in traversal order, hit-tests in reverse z-index order', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
