@@ -1116,6 +1116,7 @@ void Canvas::SaveLayer(const Paint& paint,
       const bool should_use_onscreen =
           renderer_.GetDeviceCapabilities().SupportsFramebufferFetch() &&
           backdrop_count_ == 0 && render_passes_.size() == 1u;
+      FML_LOG(ERROR) << "should_use_onscreen: " << should_use_onscreen;
       input_texture = FlipBackdrop(
           GetGlobalPassPosition(),                                //
           /*should_remove_texture=*/will_cache_backdrop_texture,  //
@@ -1718,7 +1719,6 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
   auto offscreen_target = render_passes_.back()
                               .inline_pass_context->GetPassTarget()
                               .GetRenderTarget();
-
   if (SupportsBlitToOnscreen()) {
     auto blit_pass = command_buffer->CreateBlitPass();
     blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),
@@ -1762,6 +1762,24 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
   }
 }
 
+bool Canvas::EnsureFinalMipmapGeneration() const {
+  if (!render_target_.GetRenderTargetTexture()->NeedsMipmapGeneration()) {
+    return true;
+  }
+  std::shared_ptr<CommandBuffer> cmd_buffer =
+      renderer_.GetContext()->CreateCommandBuffer();
+  if (!cmd_buffer) {
+    return false;
+  }
+  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+  if (!blit_pass) {
+    return false;
+  }
+  blit_pass->GenerateMipmap(render_target_.GetRenderTargetTexture());
+  blit_pass->EncodeCommands();
+  return renderer_.GetContext()->EnqueueCommandBuffer(std::move(cmd_buffer));
+}
+
 void Canvas::EndReplay() {
   FML_DCHECK(render_passes_.size() == 1u);
   render_passes_.back().inline_pass_context->GetRenderPass();
@@ -1776,7 +1794,8 @@ void Canvas::EndReplay() {
     BlitToOnscreen(/*is_onscreen_=*/is_onscreen_);
   }
 
-  if (!renderer_.GetContext()->FlushCommandBuffers()) {
+  if (!EnsureFinalMipmapGeneration() ||
+      !renderer_.GetContext()->FlushCommandBuffers()) {
     // Not much we can do.
     VALIDATION_LOG << "Failed to submit command buffers";
   }
