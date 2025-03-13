@@ -40,6 +40,7 @@ INTERNAL NOTE
 - [flutter/164024](https://github.com/flutter/flutter/issues/164024): - Add back an empty io.flutter.app.FlutterApplication for Android apps post v2 embedder migration.
 - [flutter/162198](https://github.com/flutter/flutter/issues/162198) - Fixes double-download of canvaskit.wasm
 - [flutter/164392](https://github.com/flutter/flutter/pull/164392) - All platforms, Fixes a crash that can occur when animating and interacting with a scrollable simultaneously.
+- [flutter/164126](https://github.com/flutter/flutter/pull/164126) - On android use Open GL instead of Vulkan MediaTek Soc.
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
