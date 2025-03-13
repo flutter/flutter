@@ -1116,7 +1116,6 @@ void Canvas::SaveLayer(const Paint& paint,
       const bool should_use_onscreen =
           renderer_.GetDeviceCapabilities().SupportsFramebufferFetch() &&
           backdrop_count_ == 0 && render_passes_.size() == 1u;
-      FML_LOG(ERROR) << "should_use_onscreen: " << should_use_onscreen;
       input_texture = FlipBackdrop(
           GetGlobalPassPosition(),                                //
           /*should_remove_texture=*/will_cache_backdrop_texture,  //
