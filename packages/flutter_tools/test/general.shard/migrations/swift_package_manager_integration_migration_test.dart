@@ -632,6 +632,59 @@ void main() {
               );
             },
           );
+
+          testWithoutContext(
+            'successfully updates scheme with BlueprintIdentifier that is different from the default',
+            () async {
+              final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+              final BufferLogger testLogger = BufferLogger.test();
+              final FakeXcodeProject project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+              );
+
+              final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(platform);
+
+              // Ensure that a non-default identifier works.
+              expect(nativeTargetIdentifier, isNot(_runnerNativeTargetIdentifier(platform)));
+
+              // Create the Scheme file with a different BlueprintIdentifier
+              // to simulate that it is made for a different target.
+              _createProjectFiles(project, platform, createSchemeFile: false);
+              project.xcodeProjectSchemeFile().createSync(recursive: true);
+              project.xcodeProjectSchemeFile().writeAsStringSync(
+                _validBuildActions(platform, blueprintIdentifier: nativeTargetIdentifier),
+              );
+
+              final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
+                _plutilOutput(_allSectionsMigratedAsJson(platform, useAlternateIdentifier: true)),
+                _plutilOutput(_allSectionsMigratedAsJson(platform, useAlternateIdentifier: true)),
+              ]);
+
+              final SwiftPackageManagerIntegrationMigration projectMigration =
+                  SwiftPackageManagerIntegrationMigration(
+                    project,
+                    platform,
+                    BuildInfo.debug,
+                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                    logger: testLogger,
+                    fileSystem: memoryFileSystem,
+                    plistParser: plistParser,
+                    features: swiftPackageManagerFullyEnabledFlags,
+                  );
+
+              await projectMigration.migrate();
+              expect(
+                project.xcodeProjectSchemeFile().readAsStringSync(),
+                _validBuildActions(
+                  platform,
+                  hasFrameworkScript: true,
+                  blueprintIdentifier: nativeTargetIdentifier,
+                ),
+              );
+            },
+          );
         });
       }
     });
@@ -2664,6 +2717,7 @@ String _validBuildActions(
   bool hasPreActions = false,
   bool hasFrameworkScript = false,
   bool hasBuildEntries = true,
+  String? blueprintIdentifier,
 }) {
   final String scriptText;
   if (platform == SupportedPlatform.ios) {
@@ -2685,7 +2739,7 @@ String _validBuildActions(
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
+                     BlueprintIdentifier = "${blueprintIdentifier ?? _runnerNativeTargetIdentifier(platform)}"
                      BuildableName = "Runner.app"
                      BlueprintName = "Runner"
                      ReferencedContainer = "container:Runner.xcodeproj">
@@ -2710,7 +2764,7 @@ String _validBuildActions(
             buildForProfiling = "YES"
             buildForArchiving = "YES"
             buildForAnalyzing = "YES">
-${_validBuildableReference(platform)}
+${_validBuildableReference(platform, blueprintIdentifier: blueprintIdentifier)}
          </BuildActionEntry>
       </BuildActionEntries>
 ''';
@@ -2726,18 +2780,18 @@ ${_validBuildableReference(platform)}
    <LaunchAction>
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
-${_validBuildableReference(platform)}
+${_validBuildableReference(platform, blueprintIdentifier: blueprintIdentifier)}
       </BuildableProductRunnable>
    </LaunchAction>
 </Scheme>
 ''';
 }
 
-String _validBuildableReference(SupportedPlatform platform) {
+String _validBuildableReference(SupportedPlatform platform, {String? blueprintIdentifier}) {
   return '''
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
+               BlueprintIdentifier = "${blueprintIdentifier ?? _runnerNativeTargetIdentifier(platform)}"
                BuildableName = "Runner.app"
                BlueprintName = "Runner"
                ReferencedContainer = "container:Runner.xcodeproj">
@@ -2762,7 +2816,23 @@ List<String> _allSectionsMigrated(SupportedPlatform platform) {
   ];
 }
 
-List<String> _allSectionsMigratedAsJson(SupportedPlatform platform) {
+List<String> _allSectionsMigratedAsJson(
+  SupportedPlatform platform, {
+  bool useAlternateIdentifier = false,
+}) {
+  if (useAlternateIdentifier) {
+    final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(platform);
+
+    return <String>[
+      migratedBuildFileSectionAsJson,
+      migratedFrameworksBuildPhaseSectionAsJson(platform),
+      migratedNativeTargetSectionAsJson(platform, nativeTargetIdentifier: nativeTargetIdentifier),
+      migratedProjectSectionAsJson(platform, nativeTargetIdentifier: nativeTargetIdentifier),
+      migratedLocalSwiftPackageReferenceSectionAsJson,
+      migratedSwiftPackageProductDependencySectionAsJson,
+    ];
+  }
+
   return <String>[
     migratedBuildFileSectionAsJson,
     migratedFrameworksBuildPhaseSectionAsJson(platform),
@@ -2819,10 +2889,21 @@ String _runnerFrameworksBuildPhaseIdentifier(SupportedPlatform platform) {
       : '33CC10EA2044A3C60003C045';
 }
 
+/// Get the default identifier for the Runner PBXNativeTarget.
 String _runnerNativeTargetIdentifier(SupportedPlatform platform) {
   return platform == SupportedPlatform.ios
       ? '97C146ED1CF9000F007C117D'
       : '33CC10EC2044A3C60003C045';
+}
+
+/// Get an identifier for a PBXNativeTarget that is different from the default Runner identifier.
+///
+/// The value returned by this method was generated by XCode,
+/// by duplicating the default Runner target for iOS and MacOS.
+String _alternateRunnerNativeTargetIdentifier(SupportedPlatform platform) {
+  return platform == SupportedPlatform.ios
+      ? '430ACF912D82C20700EB9716'
+      : '433CD29E2D82FFA9000230C8';
 }
 
 String _projectIdentifier(SupportedPlatform platform) {
@@ -3053,9 +3134,12 @@ String unmigratedNativeTargetSectionAsJson(
   ].join('\n');
 }
 
-String migratedNativeTargetSectionAsJson(SupportedPlatform platform) {
+String migratedNativeTargetSectionAsJson(
+  SupportedPlatform platform, {
+  String? nativeTargetIdentifier,
+}) {
   return '''
-    "${_runnerNativeTargetIdentifier(platform)}" : {
+    "${nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform)}" : {
       "buildConfigurationList" : "97C147051CF9000F007C117D",
       "buildPhases" : [
         "9740EEB61CF901F6004384FC",
@@ -3231,7 +3315,10 @@ String unmigratedProjectSectionAsJson(
   ].join('\n');
 }
 
-String migratedProjectSectionAsJson(SupportedPlatform platform) {
+String migratedProjectSectionAsJson(SupportedPlatform platform, {String? nativeTargetIdentifier}) {
+  final String effectiveNativeTargetIdentifier =
+      nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform);
+
   return '''
     "${_projectIdentifier(platform)}" : {
       "attributes" : {
@@ -3239,13 +3326,13 @@ String migratedProjectSectionAsJson(SupportedPlatform platform) {
         "LastUpgradeCheck" : "1510",
         "ORGANIZATIONNAME" : "",
         "TargetAttributes" : {
-          "${_runnerNativeTargetIdentifier(platform)}" : {
+          "$effectiveNativeTargetIdentifier" : {
             "CreatedOnToolsVersion" : "7.3.1",
             "LastSwiftMigration" : "1100"
           },
           "331C8080294A63A400263BE5" : {
             "CreatedOnToolsVersion" : "14.0",
-            "TestTargetID" : "${_runnerNativeTargetIdentifier(platform)}"
+            "TestTargetID" : "$effectiveNativeTargetIdentifier"
           }
         }
       },
@@ -3266,7 +3353,7 @@ String migratedProjectSectionAsJson(SupportedPlatform platform) {
       "projectDirPath" : "",
       "projectRoot" : "",
       "targets" : [
-        "${_runnerNativeTargetIdentifier(platform)}",
+        "$effectiveNativeTargetIdentifier",
         "331C8080294A63A400263BE5"
       ]
     }''';
