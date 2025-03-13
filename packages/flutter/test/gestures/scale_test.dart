@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../material/theme_test.dart';
 import 'gesture_tester.dart';
 
 void main() {
