@@ -1398,26 +1398,27 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
   auto window_binding_handler2 =
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
 
-  const FlutterViewId first_view_id = 123;
-  const FlutterViewId second_view_id = 456;
   auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
-  MockFlutterWindowsView view1{windows_engine,
-                               std::move(window_binding_handler1)};
-  MockFlutterWindowsView view2{windows_engine,
-                               std::move(window_binding_handler2)};
   EngineModifier modifier{windows_engine};
-  modifier.SetViewById(&view1, first_view_id);
-  modifier.SetViewById(&view2, second_view_id);
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
+  modifier.embedder_api().AddView =
+      MOCK_ENGINE_PROC(AddView, [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                   const FlutterAddViewInfo* info) {
+        FlutterAddViewResult result;
+        result.struct_size = sizeof(FlutterAddViewResult);
+        result.added = true;
+        result.user_data = info->user_data;
+        info->add_view_callback(&result);
+        return kSuccess;
+      });
+
+  auto view1 = windows_engine->CreateView(std::move(window_binding_handler1));
+  auto view2 = windows_engine->CreateView(std::move(window_binding_handler2));
+  // modifier.SetViewById(&view1, first_view_id);
+  // modifier.SetViewById(&view2, second_view_id);
 
   // Act: UpdateSemanticsEnabled will trigger the semantics updates
   // to get sent.
-  bool called = false;
-  modifier.embedder_api().SendSemanticsAction = MOCK_ENGINE_PROC(
-      UpdateLocales,
-      ([&called](auto engine, const FlutterDispatchSemanticsActionInfo* info) {
-        called = true;
-        return kSuccess;
-      }));
 
   windows_engine->UpdateSemanticsEnabled(true);
 
@@ -1426,8 +1427,15 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
     windows_engine->task_runner()->ProcessTasks();
   }
 
-  // Expect: that the semantics update were indeed sent
-  EXPECT_TRUE(called);
+  // Expect: that the semantics trees are updated with their
+  // respective nodes.
+  auto accessibility_bridge1 = view1->accessibility_bridge().lock();
+  auto tree1 = accessibility_bridge1->GetTree();
+  EXPECT_NE(tree1->GetFromId(1), nullptr);
+
+  auto accessibility_bridge2 = view2->accessibility_bridge().lock();
+  auto tree2 = accessibility_bridge2->GetTree();
+  EXPECT_NE(tree2->GetFromId(2), nullptr);
 }
 
 }  // namespace testing

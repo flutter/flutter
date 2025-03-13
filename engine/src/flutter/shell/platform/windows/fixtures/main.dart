@@ -5,8 +5,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
-import 'dart:typed_data' show ByteData, Uint8List;
+import 'dart:typed_data' show ByteData, Uint8List, Int32List, Float64List;
 import 'dart:ui' as ui;
+import 'dart:ffi';
 
 // Signals a waiting latch in the native test.
 @pragma('vm:external-name', 'Signal')
@@ -412,8 +413,16 @@ Future<void> sendSemanticsTreeInfo() async {
     await semanticsChanged;
   }
 
-  final createSemanticsUpdate = (int node_id) {
-    final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
+  final Iterable<ui.FlutterView> views = ui.PlatformDispatcher.instance.views;
+  ui.FlutterView view1 = views.firstWhere(
+    (ui.FlutterView view) => view != ui.PlatformDispatcher.instance.implicitView,
+  );
+  ui.FlutterView view2 = views.firstWhere(
+    (ui.FlutterView view) => view != view1 && view != ui.PlatformDispatcher.instance.implicitView,
+  );
+
+  void createSemanticsUpdate(int nodeId) {
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     final Float64List transform = Float64List(16);
     final Int32List childrenInTraversalOrder = Int32List(0);
     final Int32List childrenInHitTestOrder = Int32List(0);
@@ -423,7 +432,7 @@ Future<void> sendSemanticsTreeInfo() async {
     transform[5] = 1;
     transform[10] = 1;
     builder.updateNode(
-      id: node_id,
+      id: nodeId,
       flags: 0,
       actions: 0,
       maxValueLength: 0,
@@ -436,44 +445,35 @@ Future<void> sendSemanticsTreeInfo() async {
       scrollPosition: 0,
       scrollExtentMax: 0,
       scrollExtentMin: 0,
-      rect: Rect.fromLTRB(0, 0, 10, 10),
+      rect: ui.Rect.fromLTRB(0, 0, 10, 10),
       elevation: 0,
       thickness: 0,
-      identifier: "identifier",
-      label: "label",
-      labelAttributes: const <StringAttribute>[],
-      value: "value",
-      valueAttributes: const <StringAttribute>[],
-      increasedValue: "increasedValue",
-      increasedValueAttributes: const <StringAttribute>[],
-      decreasedValue: "decreasedValue",
-      decreasedValueAttributes: const <StringAttribute>[],
-      hint: "hint",
-      hintAttributes: const <StringAttribute>[],
-      tooltip: "tooltip",
-      textDirection: TextDirection.ltr,
+      identifier: 'identifier',
+      label: 'label',
+      labelAttributes: const <ui.StringAttribute>[],
+      value: 'value',
+      valueAttributes: const <ui.StringAttribute>[],
+      increasedValue: 'increasedValue',
+      increasedValueAttributes: const <ui.StringAttribute>[],
+      decreasedValue: 'decreasedValue',
+      decreasedValueAttributes: const <ui.StringAttribute>[],
+      hint: 'hint',
+      hintAttributes: const <ui.StringAttribute>[],
+      tooltip: 'tooltip',
+      textDirection: ui.TextDirection.ltr,
       transform: transform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: additionalActions,
       headingLevel: 0,
       linkUrl: '',
-      role: SemanticsRole.tab,
+      role: ui.SemanticsRole.tab,
       controlsNodes: null,
     );
-    return builder.builld();
-  };
+    return builder.build();
+  }
 
-  // Send the update to the first view
-  _updateSemantics(123, createSemanticsUpdate(1));
-
-  // Send the update to the second view
-  _updateSemantics(456, createSemanticsUpdate(2));
-
+  view1.updateSemantics(createSemanticsUpdate(1));
+  view2.updateSemantics(createSemanticsUpdate(2));
   signal();
 }
-
-@Native<Void Function(Int64, Pointer<Void>)>(
-  symbol: 'PlatformConfigurationNativeApi::UpdateSemantics',
-)
-external void _updateSemantics(int viewId, _NativeSemanticsUpdate update);
