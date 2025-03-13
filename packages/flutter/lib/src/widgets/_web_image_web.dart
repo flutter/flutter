@@ -18,6 +18,10 @@ import 'basic.dart';
 import 'framework.dart';
 import 'platform_view.dart';
 
+/// Function signature for `ui_web.platformViewRegistry.registerViewFactory`.
+@visibleForTesting
+typedef RegisterViewFactory = void Function(String, Object Function(int viewId), {bool isVisible});
+
 /// Displays an `<img>` element with `src` set to [src].
 class ImgElementPlatformView extends StatelessWidget {
   /// Creates a platform view backed with an `<img>` element.
@@ -30,10 +34,18 @@ class ImgElementPlatformView extends StatelessWidget {
   static const String _viewType = 'Flutter__ImgElementImage__';
   static bool _registered = false;
 
+  /// Override this to provide a custom implementation of [ui_web.platformViewRegistry.registerViewFactory].
+  ///
+  /// This should only be used for testing.
+  @visibleForTesting
+  static RegisterViewFactory? debugOverrideRegisterViewFactory;
+  static RegisterViewFactory get _registerViewFactory =>
+      debugOverrideRegisterViewFactory ?? ui_web.platformViewRegistry.registerViewFactory;
+
   static void _register() {
     assert(!_registered);
     _registered = true;
-    ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId, {Object? params}) {
+    _registerViewFactory(_viewType, (int viewId, {Object? params}) {
       final Map<Object?, Object?> paramsMap = params! as Map<Object?, Object?>;
       // Create a new <img> element. The browser is able to display the image
       // without fetching it over the network again.
