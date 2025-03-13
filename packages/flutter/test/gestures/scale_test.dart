@@ -1846,6 +1846,8 @@ void main() {
       didStartScale = false;
     };
 
+    // The default kind is touch.
+    // ignore: avoid_redundant_argument_values
     final TestPointer pointer1 = TestPointer(1, PointerDeviceKind.touch);
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
