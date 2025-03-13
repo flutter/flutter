@@ -2060,7 +2060,7 @@ class SemanticsObject {
   double horizontalAdjustmentFromParent = 0.0;
 
   /// Computes the size and position of [element] and, if this element
-  /// [hasChildren], Computes the parent adjustment for each child.
+  /// [hasChildren], computes the parent adjustment for each child.
   void recomputePositionAndSize() {
     element.style
       ..width = '${_rect!.width}px'
@@ -2077,7 +2077,7 @@ class SemanticsObject {
       double translateX = -_rect!.left + horizontalScrollAdjustment;
       double translateY = -_rect!.top + verticalScrollAdjustment;
 
-      for (var childOrder in _childrenInTraversalOrder!) {
+      for (final childIndex in _childrenInTraversalOrder!) {
         final child = owner._semanticsTree[childOrder];
         if (child == null) {
           continue;
@@ -2126,7 +2126,7 @@ class SemanticsObject {
 
   /// Computes the size and position of children.
   void updateChildrenPositionAndSize() {
-    for (var childOrder in _childrenInTraversalOrder!) {
+    for (final childIndex in _childrenInTraversalOrder!) {
       final child = owner._semanticsTree[childOrder];
       if (child == null) {
         continue;
