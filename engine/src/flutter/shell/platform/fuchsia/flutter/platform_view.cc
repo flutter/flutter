@@ -676,9 +676,9 @@ void PlatformView::SetSemanticsEnabled(bool enabled) {
 
 // |flutter::PlatformView|
 void PlatformView::UpdateSemantics(
+    int64_t view_id,
     flutter::SemanticsNodeUpdates update,
-    flutter::CustomAccessibilityActionUpdates actions,
-    int64_t view_id) {
+    flutter::CustomAccessibilityActionUpdates actions) {
   const float pixel_ratio =
       view_pixel_ratio_.has_value() ? *view_pixel_ratio_ : 0.f;
 

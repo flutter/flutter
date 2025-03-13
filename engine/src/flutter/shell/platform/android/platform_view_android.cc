@@ -287,9 +287,9 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
 
 // |PlatformView|
 void PlatformViewAndroid::UpdateSemantics(
+    int64_t view_id,
     flutter::SemanticsNodeUpdates update,
-    flutter::CustomAccessibilityActionUpdates actions,
-    int64_t view_id) {
+    flutter::CustomAccessibilityActionUpdates actions) {
   platform_view_android_delegate_.UpdateSemantics(update, actions);
 }
 

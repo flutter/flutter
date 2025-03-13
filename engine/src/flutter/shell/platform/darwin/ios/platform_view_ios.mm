@@ -181,9 +181,8 @@ void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
 }
 
 // |PlatformView|
-void PlatformViewIOS::UpdateSemantics(flutter::SemanticsNodeUpdates update,
-                                      flutter::CustomAccessibilityActionUpdates actions,
-                                      int64_t view_id) {
+void PlatformViewIOS::UpdateSemantics(int64_t view_id flutter::SemanticsNodeUpdates update,
+                                      flutter::CustomAccessibilityActionUpdates actions) {
   FML_DCHECK(owner_controller_);
   if (accessibility_bridge_) {
     accessibility_bridge_.get()->UpdateSemantics(std::move(update), actions);

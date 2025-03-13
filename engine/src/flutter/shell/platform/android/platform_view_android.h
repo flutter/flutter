@@ -132,9 +132,10 @@ class PlatformViewAndroid final : public PlatformView {
   bool android_use_new_platform_view_ = false;
 
   // |PlatformView|
-  void UpdateSemantics(flutter::SemanticsNodeUpdates update,
-                       flutter::CustomAccessibilityActionUpdates actions,
-                       int64_t view_id) override;
+  void UpdateSemantics(
+      int64_t view_id,
+      flutter::SemanticsNodeUpdates update,
+      flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |PlatformView|
   void HandlePlatformMessage(

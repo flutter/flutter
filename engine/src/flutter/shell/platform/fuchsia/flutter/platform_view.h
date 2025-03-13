@@ -133,9 +133,10 @@ class PlatformView : public flutter::PlatformView {
       std::unique_ptr<flutter::PlatformMessage> message) override;
 
   // |flutter::PlatformView|
-  void UpdateSemantics(flutter::SemanticsNodeUpdates update,
-                       flutter::CustomAccessibilityActionUpdates actions,
-                       int64_t view_id) override;
+  void UpdateSemantics(
+      int64_t view_id,
+      flutter::SemanticsNodeUpdates update,
+      flutter::CustomAccessibilityActionUpdates actions) override;
 
   // Channel handler for kAccessibilityChannel. This is currently not
   // being used, but it is necessary to handle accessibility messages
