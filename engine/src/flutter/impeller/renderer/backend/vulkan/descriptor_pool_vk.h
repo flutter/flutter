@@ -6,12 +6,21 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_DESCRIPTOR_POOL_VK_H_
 
 #include <cstdint>
+#include <unordered_map>
 
 #include "fml/status_or.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
-#include "vulkan/vulkan_handles.hpp"
+#include "impeller/renderer/pipeline.h"
 
 namespace impeller {
+
+/// Used and un-used descriptor sets.
+struct DescriptorCache {
+  std::vector<vk::DescriptorSet> unused;
+  std::vector<vk::DescriptorSet> used;
+};
+
+using DescriptorCacheMap = std::unordered_map<PipelineKey, DescriptorCache>;
 
 //------------------------------------------------------------------------------
 /// @brief      A per-frame descriptor pool. Descriptors
@@ -28,15 +37,25 @@ class DescriptorPoolVK {
  public:
   explicit DescriptorPoolVK(std::weak_ptr<const ContextVK> context);
 
+  DescriptorPoolVK(std::weak_ptr<const ContextVK> context,
+                   DescriptorCacheMap descriptor_sets,
+                   std::vector<vk::UniqueDescriptorPool> pools);
+
   ~DescriptorPoolVK();
 
   fml::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
       const vk::DescriptorSetLayout& layout,
+      PipelineKey pipeline_key,
       const ContextVK& context_vk);
 
  private:
+  friend class DescriptorPoolRecyclerVK;
+
   std::weak_ptr<const ContextVK> context_;
+  DescriptorCacheMap descriptor_sets_;
   std::vector<vk::UniqueDescriptorPool> pools_;
+
+  void Destroy();
 
   fml::Status CreateNewPool(const ContextVK& context_vk);
 
@@ -68,28 +87,22 @@ class DescriptorPoolRecyclerVK final
   ///             the necessary capacity.
   vk::UniqueDescriptorPool Get();
 
-  /// @brief      Returns the descriptor pool to be reset on a background
-  ///             thread.
-  ///
-  /// @param[in]  pool The pool to recycler.
-  void Reclaim(vk::UniqueDescriptorPool&& pool);
+  std::shared_ptr<DescriptorPoolVK> GetDescriptorPool();
+
+  void Reclaim(DescriptorCacheMap descriptor_sets,
+               std::vector<vk::UniqueDescriptorPool> pools);
 
  private:
   std::weak_ptr<ContextVK> context_;
 
   Mutex recycled_mutex_;
-  std::vector<vk::UniqueDescriptorPool> recycled_ IPLR_GUARDED_BY(
+  std::vector<std::shared_ptr<DescriptorPoolVK>> recycled_ IPLR_GUARDED_BY(
       recycled_mutex_);
 
   /// @brief      Creates a new |vk::CommandPool|.
   ///
   /// @returns    Returns a |std::nullopt| if a pool could not be created.
   vk::UniqueDescriptorPool Create();
-
-  /// @brief      Reuses a recycled |vk::CommandPool|, if available.
-  ///
-  /// @returns    Returns a |std::nullopt| if a pool was not available.
-  std::optional<vk::UniqueDescriptorPool> Reuse();
 
   DescriptorPoolRecyclerVK(const DescriptorPoolRecyclerVK&) = delete;
 

@@ -74,6 +74,7 @@ class CommandBufferVK final
   /// @brief Allocate a new descriptor set for the given [layout].
   fml::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
       const vk::DescriptorSetLayout& layout,
+      PipelineKey pipeline_key,
       const ContextVK& context);
 
   // Visible for testing.
