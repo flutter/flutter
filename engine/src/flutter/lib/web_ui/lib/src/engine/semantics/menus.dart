@@ -92,10 +92,10 @@ class SemanticMenuBar extends SemanticRole {
 
   @override
   void update() {
-    // Menu items in DropdownButton, PopupMenuButton and MenuAnchor are not the
-    // immediate children, so we need to set `aria-owns` on menu. When the menu
-    // is open, the tree is still the ole one without the menu item information,
-    // so `addOneTimePostUpdateCallback` is added to get the latest tree info.
+    // Menu items in Menu bar are not the immediate children, so we need to set
+    // `aria-owns` on menu. When the menu is open, the tree is still the ole one
+    // without the menu item information, so `addOneTimePostUpdateCallback` is
+    // added to get the latest tree info.
     semanticsObject.owner.addOneTimePostUpdateCallback(_updateMenuItemId);
   }
 
