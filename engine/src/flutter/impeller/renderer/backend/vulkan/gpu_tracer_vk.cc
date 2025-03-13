@@ -205,7 +205,6 @@ void GPUTracerVK::OnFenceComplete(size_t frame_index) {
       auto gpu_ms =
           (((largest_timestamp - smallest_timestamp) * timestamp_period_) /
            1000000);
-      FML_LOG(ERROR) << "GPU MS: " << gpu_ms;
       FML_TRACE_COUNTER("flutter", "GPUTracer",
                         reinterpret_cast<int64_t>(this),  // Trace Counter ID
                         "FrameTimeMS", gpu_ms);
