@@ -66,7 +66,6 @@ class MockFlutterWindow : public FlutterWindow {
               OnPointerLeave,
               (double, double, FlutterPointerDeviceKind, int32_t),
               (override));
-  MOCK_METHOD(void, OnSetCursor, (), (override));
   MOCK_METHOD(float, GetScrollOffsetMultiplier, (), (override));
   MOCK_METHOD(float, GetDpiScale, (), (override));
   MOCK_METHOD(void, UpdateCursorRect, (const Rect&), (override));
@@ -420,13 +419,6 @@ TEST_F(FlutterWindowTest, CachedLifecycleMessage) {
   win32window.SetView(&delegate);
   EXPECT_TRUE(focused);
   EXPECT_TRUE(restored);
-}
-
-TEST_F(FlutterWindowTest, UpdateCursor) {
-  FlutterWindow win32window(100, 100);
-  win32window.UpdateFlutterCursor("text");
-  HCURSOR cursor = ::GetCursor();
-  EXPECT_EQ(cursor, ::LoadCursor(nullptr, IDC_IBEAM));
 }
 
 }  // namespace testing

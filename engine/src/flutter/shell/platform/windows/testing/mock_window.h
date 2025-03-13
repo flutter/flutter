@@ -54,7 +54,6 @@ class MockWindow : public FlutterWindow {
               OnPointerLeave,
               (double, double, FlutterPointerDeviceKind, int32_t),
               (override));
-  MOCK_METHOD(void, OnSetCursor, (), (override));
   MOCK_METHOD(void, OnText, (const std::u16string&), (override));
   MOCK_METHOD(void,
               OnKey,

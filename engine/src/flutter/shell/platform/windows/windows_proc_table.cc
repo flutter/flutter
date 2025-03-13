@@ -58,4 +58,13 @@ HRESULT WindowsProcTable::DwmFlush() const {
   return ::DwmFlush();
 }
 
+HCURSOR WindowsProcTable::LoadCursor(HINSTANCE instance,
+                                     LPCWSTR cursor_name) const {
+  return ::LoadCursorW(instance, cursor_name);
+}
+
+HCURSOR WindowsProcTable::SetCursor(HCURSOR cursor) const {
+  return ::SetCursor(cursor);
+}
+
 }  // namespace flutter
