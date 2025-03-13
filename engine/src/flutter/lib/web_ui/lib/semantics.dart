@@ -282,6 +282,8 @@ enum SemanticsRole {
   progressBar,
   hotKey,
   radioGroup,
+  status,
+  alert,
 }
 
 // When adding a new StringAttributeType, the classes in these file must be

@@ -104,6 +104,7 @@ export 'engine/scene_builder.dart';
 export 'engine/scene_painting.dart';
 export 'engine/scene_view.dart';
 export 'engine/semantics/accessibility.dart';
+export 'engine/semantics/alert.dart';
 export 'engine/semantics/checkable.dart';
 export 'engine/semantics/expandable.dart';
 export 'engine/semantics/focusable.dart';

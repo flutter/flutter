@@ -462,6 +462,23 @@ enum SemanticsRole {
 
   /// A group of radio buttons.
   radioGroup,
+
+  /// A component to provide advisory information that is not important to
+  /// justify an [alert].
+  ///
+  /// For example, a loading message for a web page.
+  status,
+
+  /// A component to provide important and usually time-sensitive information.
+  ///
+  /// The alert role should only be used for information that requires the
+  /// user's immediate attention, for example:
+  ///
+  /// * An invalid value was entered into a form field.
+  /// * The user's login session is about to expire.
+  /// * The connection to the server was lost so local changes will not be
+  ///   saved.
+  alert,
 }
 
 /// A Boolean value that can be associated with a semantics node.
