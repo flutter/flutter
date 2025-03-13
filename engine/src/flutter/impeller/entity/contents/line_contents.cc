@@ -58,13 +58,11 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
   auto& transform = entity.GetTransform();
 
   if (line_geometry->GetCap() == Cap::kRound) {
-    FML_CHECK(false) << "not implemented.";
-    // auto radius =
-    //   LineGeometry::ComputePixelHalfWidth(transform,
-    //   line_geometry->GetWidth());
-    // auto generator = renderer.GetTessellator().RoundCapLine(
-    //     transform, line_geometry->GetP0(), line_geometry->GetP1(), radius);
-    // return ComputePositionGeometry(renderer, generator, entity, pass);
+    auto radius = LineGeometry::ComputePixelHalfWidth(
+        transform, line_geometry->GetWidth());
+    auto generator = renderer.GetTessellator().RoundCapLine(
+        transform, line_geometry->GetP0(), line_geometry->GetP1(), radius);
+    return Geometry::ComputePositionGeometry(renderer, generator, entity, pass);
   }
 
   Point corners[4];

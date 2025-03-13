@@ -320,7 +320,7 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
 
   auto draw = [&builder](DlPaint& paint) {
     for (auto cap :
-         {DlStrokeCap::kButt, DlStrokeCap::kSquare, /*DlStrokeCap::kRound*/}) {
+         {DlStrokeCap::kButt, DlStrokeCap::kSquare, DlStrokeCap::kRound}) {
       paint.setStrokeCap(cap);
       DlPoint origin = {100, 100};
       builder.DrawLine(DlPoint(150, 100), DlPoint(250, 100), paint);
