@@ -161,7 +161,7 @@ static void fl_renderer_unblock_main_thread(FlRenderer* self) {
 
     g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
     if (engine != nullptr) {
-      fl_task_runner_release_main_thread(fl_engine_get_task_runner(engine));
+      // fl_task_runner_release_main_thread(fl_engine_get_task_runner(engine));
     }
   }
 }
@@ -602,7 +602,7 @@ void fl_renderer_wait_for_frame(FlRenderer* self,
     priv->blocking_main_thread = true;
     g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
     if (engine != nullptr) {
-      fl_task_runner_block_main_thread(fl_engine_get_task_runner(engine));
+      // fl_task_runner_block_main_thread(fl_engine_get_task_runner(engine));
     }
   }
 }

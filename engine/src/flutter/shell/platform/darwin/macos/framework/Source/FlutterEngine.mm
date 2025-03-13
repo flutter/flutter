@@ -24,6 +24,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRunLoop.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTimeConverter.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
@@ -449,6 +450,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   // factories. Lifecycle is tied to the engine.
   FlutterPlatformViewController* _platformViewController;
 
+  FlutterWindowController* _windowController;
+
   // A message channel for sending user settings to the flutter engine.
   FlutterBasicMessageChannel* _settingsChannel;
 
@@ -457,8 +460,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
 
   // A method channel for miscellaneous platform functionality.
   FlutterMethodChannel* _platformChannel;
-
-  FlutterThreadSynchronizer* _threadSynchronizer;
 
   // Whether the application is currently the active application.
   BOOL _active;
@@ -482,7 +483,12 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
 
   // The text input plugin that handles text editing state for text fields.
   FlutterTextInputPlugin* _textInputPlugin;
+
+  BOOL _multiviewEnabled;
+  FlutterViewIdentifier _nextViewIdentifier;
 }
+
+@synthesize windowController = _windowController;
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
   return [self initWithName:labelPrefix project:project allowHeadlessExecution:YES];
@@ -508,6 +514,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
       allowHeadlessExecution:(BOOL)allowHeadlessExecution {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
+
+  [FlutterRunLoop ensureMainLoopInitialized];
+
   _pasteboard = [[FlutterPasteboard alloc] init];
   _active = NO;
   _visible = NO;
@@ -524,6 +533,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   [_isResponseValid addObject:@YES];
   _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
   _textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self];
+  _multiviewEnabled = NO;
+  _nextViewIdentifier = 1;
 
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
@@ -538,7 +549,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                            object:nil];
 
   _platformViewController = [[FlutterPlatformViewController alloc] init];
-  _threadSynchronizer = [[FlutterThreadSynchronizer alloc] init];
   // The macOS compositor must be initialized in the initializer because it is
   // used when adding views, which might happen before runWithEntrypoint.
   _macOSCompositor = std::make_unique<flutter::FlutterCompositor>(
@@ -546,6 +556,10 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
       [[FlutterTimeConverter alloc] initWithEngine:self], _platformViewController);
 
   [self setUpPlatformViewChannel];
+
+  _windowController = [[FlutterWindowController alloc] init];
+  _windowController.engine = self;
+
   [self setUpAccessibilityChannel];
   [self setUpNotificationCenterListeners];
   id<NSApplicationDelegate> appDelegate = [[NSApplication sharedApplication] delegate];
@@ -676,10 +690,24 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
             engine = nil;
           },
   };
+
+  bool mergedPlatformUIThread = true;
+  NSNumber* enableMergedPlatformUIThread =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableMergedPlatformUIThread"];
+  if (enableMergedPlatformUIThread != nil) {
+    mergedPlatformUIThread = enableMergedPlatformUIThread.boolValue;
+  }
+
+  if (mergedPlatformUIThread) {
+    NSLog(@"Running with merged UI and platform thread. Experimental.");
+  }
+
   const FlutterCustomTaskRunners custom_task_runners = {
       .struct_size = sizeof(FlutterCustomTaskRunners),
       .platform_task_runner = &cocoa_task_runner_description,
-      .thread_priority_setter = SetThreadPriority};
+      .thread_priority_setter = SetThreadPriority,
+      .ui_task_runner = mergedPlatformUIThread ? &cocoa_task_runner_description : nullptr,
+  };
   flutterArguments.custom_task_runners = &custom_task_runners;
 
   [self loadAOTData:_project.assetsPath];
@@ -697,6 +725,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   flutterArguments.vsync_callback = [](void* user_data, intptr_t baton) {
     FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
     [engine onVSync:baton];
+  };
+
+  flutterArguments.view_focus_change_request_callback = [](const FlutterViewFocusChangeRequest* req,
+                                                           void* user_data) {
+    NSLog(@"Focus calllback %lli %i\n", req->view_id, req->state);
   };
 
   FlutterRendererConfig rendererConfig = [_renderer createRendererConfig];
@@ -759,16 +792,14 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                  forIdentifier:(FlutterViewIdentifier)viewIdentifier {
   _macOSCompositor->AddView(viewIdentifier);
   NSAssert(controller != nil, @"The controller must not be nil.");
-  NSAssert(controller.engine == nil,
-           @"The FlutterViewController is unexpectedly attached to "
-           @"engine %@ before initialization.",
-           controller.engine);
+  // NSAssert(controller.engine == nil,
+  //          @"The FlutterViewController is unexpectedly attached to "
+  //          @"engine %@ before initialization.",
+  //          controller.engine);
   NSAssert([_viewControllers objectForKey:@(viewIdentifier)] == nil,
            @"The requested view ID is occupied.");
   [_viewControllers setObject:controller forKey:@(viewIdentifier)];
-  [controller setUpWithEngine:self
-               viewIdentifier:viewIdentifier
-           threadSynchronizer:_threadSynchronizer];
+  [controller setUpWithEngine:self viewIdentifier:viewIdentifier];
   NSAssert(controller.viewIdentifier == viewIdentifier, @"Failed to assign view ID.");
   // Verify that the controller's property are updated accordingly. Failing the
   // assertions is likely because either the FlutterViewController or the
@@ -781,6 +812,26 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
   if (controller.viewLoaded) {
     [self viewControllerViewDidLoad:controller];
+  }
+
+  if (viewIdentifier != kFlutterImplicitViewId) {
+    fml::AutoResetWaitableEvent latch;
+    FlutterWindowMetricsEvent metrics{
+        .struct_size = sizeof(FlutterWindowMetricsEvent),
+        .width = 100,
+        .height = 100,
+        .pixel_ratio = 2.0,
+    };
+    FlutterAddViewInfo info{.struct_size = sizeof(FlutterAddViewInfo),
+                            .view_id = viewIdentifier,
+                            .view_metrics = &metrics,
+                            .user_data = &latch,
+                            .add_view_callback = [](const FlutterAddViewResult* r) {
+                              auto l = reinterpret_cast<fml::AutoResetWaitableEvent*>(r->user_data);
+                              l->Signal();
+                            }};
+    _embedderAPI.AddView(_engine, &info);
+    latch.Wait();
   }
 }
 
@@ -796,23 +847,36 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                           [timeConverter CAMediaTimeToEngineTime:targetTimestamp];
                       FlutterEngine* engine = weakSelf;
                       if (engine) {
-                        // It is a bit unfortunate that embedder requires OnVSync call on
-                        // platform thread just to immediately redispatch it to UI thread.
-                        // We are already on UI thread right now, but have to do the
-                        // extra hop to main thread.
-                        [engine->_threadSynchronizer performOnPlatformThread:^{
-                          engine->_embedderAPI.OnVsync(_engine, baton, timeNanos, targetTimeNanos);
-                        }];
+                        engine->_embedderAPI.OnVsync(_engine, baton, timeNanos, targetTimeNanos);
                       }
                     }];
-  FML_DCHECK([_vsyncWaiters objectForKey:@(viewController.viewIdentifier)] == nil);
   @synchronized(_vsyncWaiters) {
+    FML_DCHECK([_vsyncWaiters objectForKey:@(viewController.viewIdentifier)] == nil);
     [_vsyncWaiters setObject:waiter forKey:@(viewController.viewIdentifier)];
   }
 }
 
 - (void)deregisterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  if (viewIdentifier != kFlutterImplicitViewId) {
+    bool removed = false;
+    FlutterRemoveViewInfo info;
+    info.struct_size = sizeof(FlutterRemoveViewInfo);
+    info.view_id = viewIdentifier;
+    info.user_data = &removed;
+    info.remove_view_callback = [](const FlutterRemoveViewResult* r) {
+      auto removed = reinterpret_cast<bool*>(r->user_data);
+      [FlutterRunLoop.mainRunLoop performBlock:^{
+        *removed = true;
+      }];
+    };
+    _embedderAPI.RemoveView(_engine, &info);
+    while (!removed) {
+      [[FlutterRunLoop mainRunLoop] pollFlutterMessagesOnce];
+    }
+  }
+
   _macOSCompositor->RemoveView(viewIdentifier);
+
   FlutterViewController* controller = [self viewControllerForIdentifier:viewIdentifier];
   // The controller can be nil. The engine stores only a weak ref, and this
   // method could have been called from the controller's dealloc.
@@ -913,11 +977,44 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 #pragma mark - Framework-internal methods
 
 - (void)addViewController:(FlutterViewController*)controller {
-  // FlutterEngine can only handle the implicit view for now. Adding more views
-  // throws an assertion.
-  NSAssert(self.viewController == nil,
-           @"The engine already has a view controller for the implicit view.");
-  self.viewController = controller;
+  if (!_multiviewEnabled) {
+    // FlutterEngine can only handle the implicit view for now. Adding more views
+    // throws an assertion.
+    NSAssert(self.viewController == nil,
+             @"The engine already has a view controller for the implicit view.");
+    self.viewController = controller;
+  } else {
+    FlutterViewIdentifier viewIdentifier = _nextViewIdentifier++;
+    [self registerViewController:controller forIdentifier:viewIdentifier];
+  }
+}
+
+- (void)enableMultiView {
+  if (!_multiviewEnabled) {
+    NSAssert(self.viewController == nil,
+             @"Multiview can only be enabled before adding any view controllers.");
+    _multiviewEnabled = YES;
+  }
+}
+
+- (void)windowDidBecomeKey:(FlutterViewIdentifier)viewIdentifier {
+  FlutterViewFocusEvent event{
+      .struct_size = sizeof(FlutterViewFocusEvent),
+      .view_id = viewIdentifier,
+      .state = kFocused,
+      .direction = kUndefined,
+  };
+  _embedderAPI.SendViewFocusEvent(_engine, &event);
+}
+
+- (void)windowDidResignKey:(FlutterViewIdentifier)viewIdentifier {
+  FlutterViewFocusEvent event{
+      .struct_size = sizeof(FlutterViewFocusEvent),
+      .view_id = viewIdentifier,
+      .state = kUnfocused,
+      .direction = kUndefined,
+  };
+  _embedderAPI.SendViewFocusEvent(_engine, &event);
 }
 
 - (void)removeViewController:(nonnull FlutterViewController*)viewController {
@@ -1135,12 +1232,24 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
 }
 
+// This will be called on UI thread, which maybe or may not be platform thread,
+// depending on the configuration.
 - (void)onVSync:(uintptr_t)baton {
-  @synchronized(_vsyncWaiters) {
+  auto block = ^{
     // TODO(knopp): Use vsync waiter for correct view.
     // https://github.com/flutter/flutter/issues/142845
-    FlutterVSyncWaiter* waiter = [_vsyncWaiters objectForKey:@(kFlutterImplicitViewId)];
-    [waiter waitForVSync:baton];
+    FlutterVSyncWaiter* waiter =
+        [_vsyncWaiters objectForKey:[_vsyncWaiters.keyEnumerator nextObject]];
+    if (waiter != nil) {
+      [waiter waitForVSync:baton];
+    } else {
+      self.embedderAPI.OnVsync(_engine, baton, 0, 0);
+    }
+  };
+  if ([NSThread isMainThread]) {
+    block();
+  } else {
+    [FlutterRunLoop.mainRunLoop performBlock:block];
   }
 }
 
@@ -1151,9 +1260,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   if (_engine == nullptr) {
     return;
   }
-
-  [_threadSynchronizer shutdown];
-  _threadSynchronizer = nil;
 
   FlutterEngineResult result = _embedderAPI.Deinitialize(_engine);
   if (result != kSuccess) {
@@ -1220,6 +1326,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   [FlutterMouseCursorPlugin registerWithRegistrar:[self registrarForPlugin:@"mousecursor"]
                                          delegate:self];
   [FlutterMenuPlugin registerWithRegistrar:[self registrarForPlugin:@"menu"]];
+
   _settingsChannel =
       [FlutterBasicMessageChannel messageChannelWithName:kFlutterSettingsChannel
                                          binaryMessenger:self.binaryMessenger
@@ -1351,10 +1458,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
 - (std::vector<std::string>)switches {
   return flutter::GetSwitchesFromEnvironment();
-}
-
-- (FlutterThreadSynchronizer*)testThreadSynchronizer {
-  return _threadSynchronizer;
 }
 
 #pragma mark - FlutterAppLifecycleDelegate
@@ -1540,29 +1643,21 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
 #pragma mark - Task runner integration
 
-- (void)runTaskOnEmbedder:(FlutterTask)task {
-  if (_engine) {
-    auto result = _embedderAPI.RunTask(_engine, &task);
-    if (result != kSuccess) {
-      NSLog(@"Could not post a task to the Flutter engine.");
-    }
-  }
-}
-
 - (void)postMainThreadTask:(FlutterTask)task targetTimeInNanoseconds:(uint64_t)targetTime {
   __weak FlutterEngine* weakSelf = self;
-  auto worker = ^{
-    [weakSelf runTaskOnEmbedder:task];
-  };
 
   const auto engine_time = _embedderAPI.GetCurrentTime();
-  if (targetTime <= engine_time) {
-    dispatch_async(dispatch_get_main_queue(), worker);
-
-  } else {
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, targetTime - engine_time),
-                   dispatch_get_main_queue(), worker);
-  }
+  [FlutterRunLoop.mainRunLoop
+      performBlock:^{
+        FlutterEngine* self = weakSelf;
+        if (self != nil && self->_engine != nil) {
+          auto result = _embedderAPI.RunTask(self->_engine, &task);
+          if (result != kSuccess) {
+            NSLog(@"Could not post a task to the Flutter engine.");
+          }
+        }
+      }
+        afterDelay:(targetTime - (double)engine_time) / 1000000000.0];
 }
 
 // Getter used by test harness, only exposed through the FlutterEngine(Test) category
