@@ -233,21 +233,21 @@ class SemanticScrollable extends SemanticRole {
         // Note that on Android overflow:hidden also works. However, we prefer
         // "scroll" because it works both on Android and iOS.
         if (semanticsObject.isVerticalScrollContainer) {
+          // This will reset both `overflow-x` and `overflow-y`.
+          element.style.removeProperty('overflow');
           element.style.overflowY = 'scroll';
-        } else {
-          assert(semanticsObject.isHorizontalScrollContainer);
+        } else if (semanticsObject.isHorizontalScrollContainer) {
+          // This will reset both `overflow-x` and `overflow-y`.
+          element.style.removeProperty('overflow');
           element.style.overflowX = 'scroll';
+        } else {
+          element.style.overflow = 'hidden';
         }
       case GestureMode.pointerEvents:
         // We use "hidden" instead of "scroll" so that the browser does
         // not "steal" pointer events. Flutter gesture recognizers need
         // all pointer events in order to recognize gestures correctly.
-        if (semanticsObject.isVerticalScrollContainer) {
-          element.style.overflowY = 'hidden';
-        } else {
-          assert(semanticsObject.isHorizontalScrollContainer);
-          element.style.overflowX = 'hidden';
-        }
+        element.style.overflow = 'hidden';
     }
   }
 

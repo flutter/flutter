@@ -35,4 +35,69 @@ void main() {
     expect(snappingSimulation.x(time), 1);
     expect(snappingSimulation.dx(time), 0);
   });
+
+  group('SpringDescription.withDurationAndBounce', () {
+    test('creates spring with expected results', () {
+      final SpringDescription spring = SpringDescription.withDurationAndBounce(bounce: 0.3);
+
+      expect(spring.mass, equals(1.0));
+      expect(spring.stiffness, moreOrLessEquals(157.91, epsilon: 0.01));
+      expect(spring.damping, moreOrLessEquals(17.59, epsilon: 0.01));
+
+      // Verify that getters recalculate correctly
+      expect(spring.bounce, moreOrLessEquals(0.3, epsilon: 0.0001));
+      expect(spring.duration.inMilliseconds, equals(500));
+    });
+
+    test('creates spring with negative bounce', () {
+      final SpringDescription spring = SpringDescription.withDurationAndBounce(bounce: -0.3);
+
+      expect(spring.mass, equals(1.0));
+      expect(spring.stiffness, moreOrLessEquals(157.91, epsilon: 0.01));
+      expect(spring.damping, moreOrLessEquals(35.90, epsilon: 0.01));
+
+      // Verify that getters recalculate correctly
+      expect(spring.bounce, moreOrLessEquals(-0.3, epsilon: 0.0001));
+      expect(spring.duration.inMilliseconds, equals(500));
+    });
+
+    test('get duration and bounce based on mass and stiffness', () {
+      const SpringDescription spring = SpringDescription(
+        mass: 1.0,
+        stiffness: 157.91,
+        damping: 17.59,
+      );
+
+      expect(spring.bounce, moreOrLessEquals(0.3, epsilon: 0.001));
+      expect(spring.duration.inMilliseconds, equals(500));
+    });
+
+    test('custom duration', () {
+      final SpringDescription spring = SpringDescription.withDurationAndBounce(
+        duration: const Duration(milliseconds: 100),
+      );
+
+      expect(spring.mass, equals(1.0));
+      expect(spring.stiffness, moreOrLessEquals(3947.84, epsilon: 0.01));
+      expect(spring.damping, moreOrLessEquals(125.66, epsilon: 0.01));
+
+      expect(spring.bounce, moreOrLessEquals(0, epsilon: 0.001));
+      expect(spring.duration.inMilliseconds, equals(100));
+    });
+
+    test('duration <= 0 should fail', () {
+      expect(
+        () => SpringDescription.withDurationAndBounce(
+          duration: const Duration(seconds: -1),
+          bounce: 0.3,
+        ),
+        throwsA(isAssertionError),
+      );
+
+      expect(
+        () => SpringDescription.withDurationAndBounce(duration: Duration.zero, bounce: 0.3),
+        throwsA(isAssertionError),
+      );
+    });
+  });
 }

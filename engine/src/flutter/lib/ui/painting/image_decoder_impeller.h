@@ -88,7 +88,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
       const SkImageInfo& image_info,
       const std::shared_ptr<SkBitmap>& bitmap,
       const std::optional<SkImageInfo>& resize_info,
-      const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch);
+      const std::shared_ptr<const fml::SyncSwitch>& gpu_disabled_switch);
 
   /// @brief Create a texture from the provided bitmap.
   /// @param context     The Impeller graphics context.
@@ -101,7 +101,10 @@ class ImageDecoderImpeller final : public ImageDecoder {
  private:
   using FutureContext = std::shared_future<std::shared_ptr<impeller::Context>>;
   FutureContext context_;
-  const bool supports_wide_gamut_;
+
+  /// Whether wide gamut rendering has been enabled (but not necessarily whether
+  /// or not it is supported).
+  const bool wide_gamut_enabled_;
   std::shared_ptr<fml::SyncSwitch> gpu_disabled_switch_;
 
   /// Only call this method if the GPU is available.

@@ -32,7 +32,7 @@ LazyGlyphAtlas::LazyGlyphAtlas(
 LazyGlyphAtlas::~LazyGlyphAtlas() = default;
 
 void LazyGlyphAtlas::AddTextFrame(const std::shared_ptr<TextFrame>& frame,
-                                  Scalar scale,
+                                  Rational scale,
                                   Point offset,
                                   const Matrix& transform,
                                   std::optional<GlyphProperties> properties) {

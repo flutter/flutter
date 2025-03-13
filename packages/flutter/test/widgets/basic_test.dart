@@ -380,6 +380,47 @@ void main() {
       expect(attributedHint.attributes[0].range, const TextRange(start: 1, end: 2));
     });
 
+    testWidgets('Semantics can set controls visibility of nodes', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key,
+              controlsNodes: const <String>{'abc'},
+              child: const Placeholder(),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData data = node.getSemanticsData();
+      expect(data.controlsNodes!.length, 1);
+      expect(data.controlsNodes!.first, 'abc');
+    });
+
+    testWidgets('Semantics can set controls visibility of nodes', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key,
+              controlsNodes: const <String>{'abc', 'ghi'},
+              child: Semantics(
+                controlsNodes: const <String>{'abc', 'def'},
+                child: const Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData data = node.getSemanticsData();
+      expect(data.controlsNodes!.length, 3);
+      expect(data.controlsNodes, <String>{'abc', 'ghi', 'def'});
+    });
+
     testWidgets('Semantics can merge attributed strings', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(

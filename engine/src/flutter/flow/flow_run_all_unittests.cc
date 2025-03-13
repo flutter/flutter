@@ -23,7 +23,6 @@ int main(int argc, char** argv) {
       cmd.GetOptionValueWithDefault("golden-dir", "flutter/testing/resources"));
 #endif
   flutter::SetFontFile(cmd.GetOptionValueWithDefault(
-      "font-file",
-      "flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf"));
+      "font-file", "flutter/txt/third_party/fonts/Roboto-Regular.ttf"));
   return RUN_ALL_TESTS();
 }

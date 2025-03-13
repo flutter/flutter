@@ -5,7 +5,7 @@
 #ifndef FLUTTER_IMPELLER_TOOLKIT_INTEROP_PARAGRAPH_H_
 #define FLUTTER_IMPELLER_TOOLKIT_INTEROP_PARAGRAPH_H_
 
-#include "flutter/third_party/txt/src/txt/paragraph.h"
+#include "flutter/txt/src/txt/paragraph.h"
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/object.h"
 

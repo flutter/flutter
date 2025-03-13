@@ -174,6 +174,7 @@
 ../../../flutter/impeller/geometry/geometry_unittests.cc
 ../../../flutter/impeller/geometry/matrix_unittests.cc
 ../../../flutter/impeller/geometry/path_unittests.cc
+../../../flutter/impeller/geometry/rational_unittests.cc
 ../../../flutter/impeller/geometry/rect_unittests.cc
 ../../../flutter/impeller/geometry/round_rect_unittests.cc
 ../../../flutter/impeller/geometry/round_superellipse_unittests.cc
@@ -192,6 +193,7 @@
 ../../../flutter/impeller/renderer/backend/metal/swapchain_transients_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/metal/texture_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk_unittests.cc
+../../../flutter/impeller/renderer/backend/vulkan/android/ahb_texture_source_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/command_encoder_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/context_vk_unittests.cc
@@ -202,6 +204,7 @@
 ../../../flutter/impeller/renderer/backend/vulkan/pipeline_cache_data_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/render_pass_builder_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/render_pass_cache_unittests.cc
+../../../flutter/impeller/renderer/backend/vulkan/render_pass_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/resource_manager_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/swapchain/README.md
 ../../../flutter/impeller/renderer/backend/vulkan/swapchain/khr/README.md
@@ -1070,6 +1073,7 @@
 ../../../flutter/third_party/boringssl/src/gen/README.md
 ../../../flutter/third_party/boringssl/src/gen/sources.bzl
 ../../../flutter/third_party/boringssl/src/gen/sources.cmake
+../../../flutter/third_party/boringssl/src/gen/sources.mk
 ../../../flutter/third_party/boringssl/src/gen/test_support
 ../../../flutter/third_party/boringssl/src/infra/config/README.md
 ../../../flutter/third_party/boringssl/src/pki/README.md
@@ -1650,10 +1654,8 @@
 ../../../flutter/third_party/dart/sdk/lib/_internal/fix_data.yaml
 ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/OWNERS
 ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/preambles/README
-../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/.packages
 ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/OWNERS
 ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/preambles/README
-../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/pubspec.yaml
 ../../../flutter/third_party/dart/sdk/lib/_internal/sdk_library_metadata/pubspec.yaml
 ../../../flutter/third_party/dart/sdk/lib/_internal/vm/OWNERS
 ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/OWNERS
@@ -3030,11 +3032,6 @@
 ../../../flutter/third_party/tonic/filesystem/README.md
 ../../../flutter/third_party/tonic/filesystem/tests
 ../../../flutter/third_party/tonic/tests
-../../../flutter/third_party/txt/.clang-format
-../../../flutter/third_party/txt/.gitattributes
-../../../flutter/third_party/txt/.gitignore
-../../../flutter/third_party/txt/tests
-../../../flutter/third_party/txt/third_party/fonts
 ../../../flutter/third_party/vulkan-deps/.git
 ../../../flutter/third_party/vulkan-deps/.gitattributes
 ../../../flutter/third_party/vulkan-deps/.gitignore
@@ -3322,6 +3319,11 @@
 ../../../flutter/tools/licenses/lib/README
 ../../../flutter/tools/licenses/pubspec.yaml
 ../../../flutter/tools/licenses/test
+../../../flutter/txt/.clang-format
+../../../flutter/txt/.gitattributes
+../../../flutter/txt/.gitignore
+../../../flutter/txt/tests
+../../../flutter/txt/third_party/fonts
 ../../../flutter/web_sdk
 ../../../fuchsia/sdk/linux/.build-id
 ../../../fuchsia/sdk/linux/.versions
