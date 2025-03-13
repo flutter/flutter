@@ -12,10 +12,18 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/swift_package_manager_integration_migration.dart';
 
 import 'package:flutter_tools/src/project.dart';
+import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart';
+
+/// An override for the return value of [_runnerNativeTargetIdentifier].
+///
+/// This is used in tests that need a different PBXNativeTarget identifier
+/// than the default for the Runner target.
+@visibleForTesting
+String? runnerNativeTargetIdentifierOverride;
 
 const List<SupportedPlatform> supportedPlatforms = <SupportedPlatform>[
   SupportedPlatform.ios,
@@ -26,6 +34,19 @@ void main() {
   final TestFeatureFlags swiftPackageManagerFullyEnabledFlags = TestFeatureFlags(
     isSwiftPackageManagerEnabled: true,
   );
+
+  test('runnerNativeTargetIdentifierOverride works', () {
+    for (final SupportedPlatform supportedPlatform in supportedPlatforms) {
+      runnerNativeTargetIdentifierOverride = null;
+      final String overrideValue = _alternateRunnerNativeTargetIdentifier(supportedPlatform);
+
+      expect(_runnerNativeTargetIdentifier(supportedPlatform), isNot(overrideValue));
+      runnerNativeTargetIdentifierOverride = overrideValue;
+      expect(_runnerNativeTargetIdentifier(supportedPlatform), overrideValue);
+    }
+
+    runnerNativeTargetIdentifierOverride = null;
+  });
 
   group('Flutter Package Migration', () {
     testWithoutContext('skips if swift package manager is off', () async {
@@ -650,18 +671,17 @@ void main() {
 
               // Ensure that a non-default identifier works.
               expect(nativeTargetIdentifier, isNot(_runnerNativeTargetIdentifier(platform)));
+              runnerNativeTargetIdentifierOverride = nativeTargetIdentifier;
 
               // Create the Scheme file with a different BlueprintIdentifier
               // to simulate that it is made for a different target.
               _createProjectFiles(project, platform, createSchemeFile: false);
               project.xcodeProjectSchemeFile().createSync(recursive: true);
-              project.xcodeProjectSchemeFile().writeAsStringSync(
-                _validBuildActions(platform, blueprintIdentifier: nativeTargetIdentifier),
-              );
+              project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildActions(platform));
 
               final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
-                _plutilOutput(_allSectionsMigratedAsJson(platform, useAlternateIdentifier: true)),
-                _plutilOutput(_allSectionsMigratedAsJson(platform, useAlternateIdentifier: true)),
+                _plutilOutput(_allSectionsMigratedAsJson(platform)),
+                _plutilOutput(_allSectionsMigratedAsJson(platform)),
               ]);
 
               final SwiftPackageManagerIntegrationMigration projectMigration =
@@ -679,12 +699,10 @@ void main() {
               await projectMigration.migrate();
               expect(
                 project.xcodeProjectSchemeFile().readAsStringSync(),
-                _validBuildActions(
-                  platform,
-                  hasFrameworkScript: true,
-                  blueprintIdentifier: nativeTargetIdentifier,
-                ),
+                _validBuildActions(platform, hasFrameworkScript: true),
               );
+
+              runnerNativeTargetIdentifierOverride = null;
             },
           );
         });
@@ -1810,41 +1828,34 @@ void main() {
 
                 // Ensure that a non-default identifier works.
                 expect(nativeTargetIdentifier, isNot(_runnerNativeTargetIdentifier(platform)));
+                runnerNativeTargetIdentifierOverride = nativeTargetIdentifier;
 
                 // Create the Scheme file with a different BlueprintIdentifier
                 // to simulate that it is made for a different target.
                 _createProjectFiles(project, platform, createSchemeFile: false);
                 project.xcodeProjectSchemeFile().createSync(recursive: true);
-                project.xcodeProjectSchemeFile().writeAsStringSync(
-                  _validBuildActions(platform, blueprintIdentifier: nativeTargetIdentifier),
-                );
+                project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildActions(platform));
 
                 final List<String> settingsBeforeMigration = <String>[
-                  ..._allSectionsUnmigrated(platform, useAlternateIdentifier: true),
+                  ..._allSectionsUnmigrated(platform),
                 ];
                 settingsBeforeMigration[_nativeTargetSectionIndex] = unmigratedNativeTargetSection(
                   platform,
-                  nativeTargetIdentifier: nativeTargetIdentifier,
                 );
                 project.xcodeProjectInfoFile.writeAsStringSync(
                   _projectSettings(settingsBeforeMigration),
                 );
 
                 final List<String> settingsAsJsonBeforeMigration = <String>[
-                  ..._allSectionsUnmigratedAsJson(platform, useAlternateIdentifier: true),
+                  ..._allSectionsUnmigratedAsJson(platform),
                 ];
-                final List<String> expectedSettings = <String>[
-                  ..._allSectionsMigrated(platform, useAlternateIdentifier: true),
-                ];
+                final List<String> expectedSettings = <String>[..._allSectionsMigrated(platform)];
 
-                expectedSettings[_nativeTargetSectionIndex] = migratedNativeTargetSection(
-                  platform,
-                  nativeTargetIdentifier: nativeTargetIdentifier,
-                );
+                expectedSettings[_nativeTargetSectionIndex] = migratedNativeTargetSection(platform);
 
                 final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
                   _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform, useAlternateIdentifier: true)),
+                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
                 ]);
 
                 final SwiftPackageManagerIntegrationMigration projectMigration =
@@ -1870,6 +1881,7 @@ void main() {
                   _projectSettings(expectedSettings),
                 );
                 expect(plistParser.hasRemainingExpectations, isFalse);
+                runnerNativeTargetIdentifierOverride = null;
               },
             );
           });
@@ -2799,7 +2811,6 @@ String _validBuildActions(
   bool hasPreActions = false,
   bool hasFrameworkScript = false,
   bool hasBuildEntries = true,
-  String? blueprintIdentifier,
 }) {
   final String scriptText;
   if (platform == SupportedPlatform.ios) {
@@ -2821,7 +2832,7 @@ String _validBuildActions(
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "${blueprintIdentifier ?? _runnerNativeTargetIdentifier(platform)}"
+                     BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
                      BuildableName = "Runner.app"
                      BlueprintName = "Runner"
                      ReferencedContainer = "container:Runner.xcodeproj">
@@ -2846,7 +2857,7 @@ String _validBuildActions(
             buildForProfiling = "YES"
             buildForArchiving = "YES"
             buildForAnalyzing = "YES">
-${_validBuildableReference(platform, blueprintIdentifier: blueprintIdentifier)}
+${_validBuildableReference(platform)}
          </BuildActionEntry>
       </BuildActionEntries>
 ''';
@@ -2862,18 +2873,18 @@ ${_validBuildableReference(platform, blueprintIdentifier: blueprintIdentifier)}
    <LaunchAction>
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
-${_validBuildableReference(platform, blueprintIdentifier: blueprintIdentifier)}
+${_validBuildableReference(platform)}
       </BuildableProductRunnable>
    </LaunchAction>
 </Scheme>
 ''';
 }
 
-String _validBuildableReference(SupportedPlatform platform, {String? blueprintIdentifier}) {
+String _validBuildableReference(SupportedPlatform platform) {
   return '''
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "${blueprintIdentifier ?? _runnerNativeTargetIdentifier(platform)}"
+               BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
                BuildableName = "Runner.app"
                BlueprintName = "Runner"
                ReferencedContainer = "container:Runner.xcodeproj">
@@ -2887,23 +2898,7 @@ const int _projectSectionIndex = 3;
 const int _localSwiftPackageReferenceSectionIndex = 4;
 const int _swiftPackageProductDependencySectionIndex = 5;
 
-List<String> _allSectionsMigrated(
-  SupportedPlatform platform, {
-  bool useAlternateIdentifier = false,
-}) {
-  if (useAlternateIdentifier) {
-    final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(platform);
-
-    return <String>[
-      migratedBuildFileSection,
-      migratedFrameworksBuildPhaseSection(platform),
-      migratedNativeTargetSection(platform, nativeTargetIdentifier: nativeTargetIdentifier),
-      migratedProjectSection(platform, nativeTargetIdentifier: nativeTargetIdentifier),
-      migratedLocalSwiftPackageReferenceSection(),
-      migratedSwiftPackageProductDependencySection(),
-    ];
-  }
-
+List<String> _allSectionsMigrated(SupportedPlatform platform) {
   return <String>[
     migratedBuildFileSection,
     migratedFrameworksBuildPhaseSection(platform),
@@ -2914,23 +2909,7 @@ List<String> _allSectionsMigrated(
   ];
 }
 
-List<String> _allSectionsMigratedAsJson(
-  SupportedPlatform platform, {
-  bool useAlternateIdentifier = false,
-}) {
-  if (useAlternateIdentifier) {
-    final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(platform);
-
-    return <String>[
-      migratedBuildFileSectionAsJson,
-      migratedFrameworksBuildPhaseSectionAsJson(platform),
-      migratedNativeTargetSectionAsJson(platform, nativeTargetIdentifier: nativeTargetIdentifier),
-      migratedProjectSectionAsJson(platform, nativeTargetIdentifier: nativeTargetIdentifier),
-      migratedLocalSwiftPackageReferenceSectionAsJson,
-      migratedSwiftPackageProductDependencySectionAsJson,
-    ];
-  }
-
+List<String> _allSectionsMigratedAsJson(SupportedPlatform platform) {
   return <String>[
     migratedBuildFileSectionAsJson,
     migratedFrameworksBuildPhaseSectionAsJson(platform),
@@ -2941,23 +2920,7 @@ List<String> _allSectionsMigratedAsJson(
   ];
 }
 
-List<String> _allSectionsUnmigrated(
-  SupportedPlatform platform, {
-  bool useAlternateIdentifier = false,
-}) {
-  if (useAlternateIdentifier) {
-    final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(platform);
-
-    return <String>[
-      unmigratedBuildFileSection,
-      unmigratedFrameworksBuildPhaseSection(platform),
-      unmigratedNativeTargetSection(platform, nativeTargetIdentifier: nativeTargetIdentifier),
-      unmigratedProjectSection(platform, nativeTargetIdentifier: nativeTargetIdentifier),
-      unmigratedLocalSwiftPackageReferenceSection(),
-      unmigratedSwiftPackageProductDependencySection(),
-    ];
-  }
-
+List<String> _allSectionsUnmigrated(SupportedPlatform platform) {
   return <String>[
     unmigratedBuildFileSection,
     unmigratedFrameworksBuildPhaseSection(platform),
@@ -2968,21 +2931,7 @@ List<String> _allSectionsUnmigrated(
   ];
 }
 
-List<String> _allSectionsUnmigratedAsJson(
-  SupportedPlatform platform, {
-  bool useAlternateIdentifier = false,
-}) {
-  if (useAlternateIdentifier) {
-    final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(platform);
-
-    return <String>[
-      unmigratedBuildFileSectionAsJson,
-      unmigratedFrameworksBuildPhaseSectionAsJson(platform),
-      unmigratedNativeTargetSectionAsJson(platform, nativeTargetIdentifier: nativeTargetIdentifier),
-      unmigratedProjectSectionAsJson(platform, nativeTargetIdentifier: nativeTargetIdentifier),
-    ];
-  }
-
+List<String> _allSectionsUnmigratedAsJson(SupportedPlatform platform) {
   return <String>[
     unmigratedBuildFileSectionAsJson,
     unmigratedFrameworksBuildPhaseSectionAsJson(platform),
@@ -3019,6 +2968,10 @@ String _runnerFrameworksBuildPhaseIdentifier(SupportedPlatform platform) {
 
 /// Get the default identifier for the Runner PBXNativeTarget.
 String _runnerNativeTargetIdentifier(SupportedPlatform platform) {
+  if (runnerNativeTargetIdentifierOverride != null) {
+    return runnerNativeTargetIdentifierOverride!;
+  }
+
   return platform == SupportedPlatform.ios
       ? '97C146ED1CF9000F007C117D'
       : '33CC10EC2044A3C60003C045';
@@ -3159,11 +3112,10 @@ String unmigratedNativeTargetSection(
   SupportedPlatform platform, {
   bool missingPackageProductDependencies = false,
   bool withOtherDependency = false,
-  String? nativeTargetIdentifier,
 }) {
   return <String>[
     '/* Begin PBXNativeTarget section */',
-    '		${nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
+    '		${_runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
     '			isa = PBXNativeTarget;',
     '			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;',
     '			buildPhases = (',
@@ -3196,7 +3148,6 @@ String migratedNativeTargetSection(
   SupportedPlatform platform, {
   bool missingPackageProductDependencies = false,
   bool withOtherDependency = false,
-  String? nativeTargetIdentifier,
 }) {
   final List<String> packageDependencies = <String>[
     '			packageProductDependencies = (',
@@ -3206,7 +3157,7 @@ String migratedNativeTargetSection(
   ];
   return <String>[
     '/* Begin PBXNativeTarget section */',
-    '		${nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
+    '		${_runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
     if (missingPackageProductDependencies) ...packageDependencies,
     '			isa = PBXNativeTarget;',
     '			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;',
@@ -3235,10 +3186,9 @@ String migratedNativeTargetSection(
 String unmigratedNativeTargetSectionAsJson(
   SupportedPlatform platform, {
   bool missingPackageProductDependencies = false,
-  String? nativeTargetIdentifier,
 }) {
   return <String>[
-    '    "${nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform)}" : {',
+    '    "${_runnerNativeTargetIdentifier(platform)}" : {',
     '      "buildConfigurationList" : "97C147051CF9000F007C117D",',
     '      "buildPhases" : [',
     '        "9740EEB61CF901F6004384FC",',
@@ -3265,12 +3215,9 @@ String unmigratedNativeTargetSectionAsJson(
   ].join('\n');
 }
 
-String migratedNativeTargetSectionAsJson(
-  SupportedPlatform platform, {
-  String? nativeTargetIdentifier,
-}) {
+String migratedNativeTargetSectionAsJson(SupportedPlatform platform) {
   return '''
-    "${nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform)}" : {
+    "${_runnerNativeTargetIdentifier(platform)}" : {
       "buildConfigurationList" : "97C147051CF9000F007C117D",
       "buildPhases" : [
         "9740EEB61CF901F6004384FC",
@@ -3302,10 +3249,8 @@ String unmigratedProjectSection(
   SupportedPlatform platform, {
   bool missingPackageReferences = false,
   bool withOtherReference = false,
-  String? nativeTargetIdentifier,
 }) {
-  final String effectiveNativeTargetIdentifier =
-      nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform);
+  final String nativeTargetIdentifier = _runnerNativeTargetIdentifier(platform);
 
   return <String>[
     '/* Begin PBXProject section */',
@@ -3318,9 +3263,9 @@ String unmigratedProjectSection(
     '				TargetAttributes = {',
     '					331C8080294A63A400263BE5 = {',
     '						CreatedOnToolsVersion = 14.0;',
-    '						TestTargetID = $effectiveNativeTargetIdentifier;',
+    '						TestTargetID = $nativeTargetIdentifier;',
     '					};',
-    '					$effectiveNativeTargetIdentifier = {',
+    '					$nativeTargetIdentifier = {',
     '						CreatedOnToolsVersion = 7.3.1;',
     '						LastSwiftMigration = 1100;',
     '					};',
@@ -3345,7 +3290,7 @@ String unmigratedProjectSection(
     '			projectDirPath = "";',
     '			projectRoot = "";',
     '			targets = (',
-    '				$effectiveNativeTargetIdentifier /* Runner */,',
+    '				$nativeTargetIdentifier /* Runner */,',
     '				331C8080294A63A400263BE5 /* RunnerTests */,',
     '			);',
     '		};',
@@ -3357,10 +3302,8 @@ String migratedProjectSection(
   SupportedPlatform platform, {
   bool missingPackageReferences = false,
   bool withOtherReference = false,
-  String? nativeTargetIdentifier,
 }) {
-  final String effectiveNativeTargetIdentifier =
-      nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform);
+  final String nativeTargetIdentifier = _runnerNativeTargetIdentifier(platform);
 
   final List<String> packageDependencies = <String>[
     '			packageReferences = (',
@@ -3381,9 +3324,9 @@ String migratedProjectSection(
     '				TargetAttributes = {',
     '					331C8080294A63A400263BE5 = {',
     '						CreatedOnToolsVersion = 14.0;',
-    '						TestTargetID = $effectiveNativeTargetIdentifier;',
+    '						TestTargetID = $nativeTargetIdentifier;',
     '					};',
-    '					$effectiveNativeTargetIdentifier = {',
+    '					$nativeTargetIdentifier = {',
     '						CreatedOnToolsVersion = 7.3.1;',
     '						LastSwiftMigration = 1100;',
     '					};',
@@ -3403,7 +3346,7 @@ String migratedProjectSection(
     '			projectDirPath = "";',
     '			projectRoot = "";',
     '			targets = (',
-    '				$effectiveNativeTargetIdentifier /* Runner */,',
+    '				$nativeTargetIdentifier /* Runner */,',
     '				331C8080294A63A400263BE5 /* RunnerTests */,',
     '			);',
     '		};',
@@ -3414,10 +3357,8 @@ String migratedProjectSection(
 String unmigratedProjectSectionAsJson(
   SupportedPlatform platform, {
   bool missingPackageReferences = false,
-  String? nativeTargetIdentifier,
 }) {
-  final String effectiveNativeTargetIdentifier =
-      nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform);
+  final String nativeTargetIdentifier = _runnerNativeTargetIdentifier(platform);
 
   return <String>[
     '    "${_projectIdentifier(platform)}" : {',
@@ -3426,13 +3367,13 @@ String unmigratedProjectSectionAsJson(
     '        "LastUpgradeCheck" : "1510",',
     '        "ORGANIZATIONNAME" : "",',
     '        "TargetAttributes" : {',
-    '          "$effectiveNativeTargetIdentifier" : {',
+    '          "$nativeTargetIdentifier" : {',
     '            "CreatedOnToolsVersion" : "7.3.1",',
     '            "LastSwiftMigration" : "1100"',
     '          },',
     '          "331C8080294A63A400263BE5" : {',
     '            "CreatedOnToolsVersion" : "14.0",',
-    '            "TestTargetID" : "$effectiveNativeTargetIdentifier"',
+    '            "TestTargetID" : "$nativeTargetIdentifier"',
     '          }',
     '        }',
     '      },',
@@ -3451,16 +3392,15 @@ String unmigratedProjectSectionAsJson(
     '      "projectDirPath" : "",',
     '      "projectRoot" : "",',
     '      "targets" : [',
-    '        "$effectiveNativeTargetIdentifier",',
+    '        "$nativeTargetIdentifier",',
     '        "331C8080294A63A400263BE5"',
     '      ]',
     '    }',
   ].join('\n');
 }
 
-String migratedProjectSectionAsJson(SupportedPlatform platform, {String? nativeTargetIdentifier}) {
-  final String effectiveNativeTargetIdentifier =
-      nativeTargetIdentifier ?? _runnerNativeTargetIdentifier(platform);
+String migratedProjectSectionAsJson(SupportedPlatform platform) {
+  final String nativeTargetIdentifier = _runnerNativeTargetIdentifier(platform);
 
   return '''
     "${_projectIdentifier(platform)}" : {
@@ -3469,13 +3409,13 @@ String migratedProjectSectionAsJson(SupportedPlatform platform, {String? nativeT
         "LastUpgradeCheck" : "1510",
         "ORGANIZATIONNAME" : "",
         "TargetAttributes" : {
-          "$effectiveNativeTargetIdentifier" : {
+          "$nativeTargetIdentifier" : {
             "CreatedOnToolsVersion" : "7.3.1",
             "LastSwiftMigration" : "1100"
           },
           "331C8080294A63A400263BE5" : {
             "CreatedOnToolsVersion" : "14.0",
-            "TestTargetID" : "$effectiveNativeTargetIdentifier"
+            "TestTargetID" : "$nativeTargetIdentifier"
           }
         }
       },
@@ -3496,7 +3436,7 @@ String migratedProjectSectionAsJson(SupportedPlatform platform, {String? nativeT
       "projectDirPath" : "",
       "projectRoot" : "",
       "targets" : [
-        "$effectiveNativeTargetIdentifier",
+        "$nativeTargetIdentifier",
         "331C8080294A63A400263BE5"
       ]
     }''';
