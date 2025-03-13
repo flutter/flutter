@@ -63,7 +63,18 @@ class DataTableExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
+      scrollBehavior: MyMaterialScrollBehavior(),
       home: SingleChildScrollView(padding: EdgeInsets.all(12.0), child: DataTableExample()),
+    );
+  }
+}
+
+class MyMaterialScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    return Scrollbar(
+      controller: details.controller,
+      child: child,
     );
   }
 }
