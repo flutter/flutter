@@ -58,7 +58,7 @@ void main() {
       // This test can be removed when `useMaterial3` is deprecated.
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false),
+          theme: ThemeData.light().copyWith(useMaterial3: false),
           home: Scaffold(body: NavigationRail(selectedIndex: 0, destinations: _destinations())),
         ),
       );
