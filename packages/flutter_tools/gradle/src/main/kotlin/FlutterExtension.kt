@@ -61,10 +61,9 @@ open class FlutterExtension {
     }
 
     /** Returns flutterVersionName with error handling. */
-    fun getVersionName(): String {
-        return flutterVersionName
+    fun getVersionName(): String =
+        flutterVersionName
             ?: throw GradleException("flutterVersionName must not be null.")
-    }
 
     // The default getter name that Kotlin creates conflicts with the above methods.
     @get:JvmName("getVersionCodeProperty")
