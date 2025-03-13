@@ -86,10 +86,9 @@ fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
     set_info.setDescriptorPool(pools_.back().get());
     result = context_vk.GetDevice().allocateDescriptorSets(&set_info, &set);
   }
-  if (existing == descriptor_sets_.end()) {
-    descriptor_sets_[pipeline_key] = DescriptorCache{};
-  }
-  descriptor_sets_[pipeline_key].used.push_back(set);
+  auto lookup_result =
+      descriptor_sets_.try_emplace(pipeline_key, DescriptorCache{});
+  lookup_result.first->second.used.push_back(set);
 
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not allocate descriptor sets: "

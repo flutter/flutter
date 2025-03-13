@@ -11,10 +11,10 @@ namespace impeller {
 namespace testing {
 
 TEST(DescriptorPoolRecyclerVKTest, GetDescriptorPoolRecyclerCreatesNewPools) {
-  const auto context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
 
-  const auto pool1 = context->GetDescriptorPoolRecycler()->Get();
-  const auto pool2 = context->GetDescriptorPoolRecycler()->Get();
+  vk::UniqueDescriptorPool pool1 = context->GetDescriptorPoolRecycler()->Get();
+  vk::UniqueDescriptorPool pool2 = context->GetDescriptorPoolRecycler()->Get();
 
   // The two descriptor pools should be different.
   EXPECT_NE(pool1.get(), pool2.get());
@@ -23,18 +23,20 @@ TEST(DescriptorPoolRecyclerVKTest, GetDescriptorPoolRecyclerCreatesNewPools) {
 }
 
 TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
-  const auto context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
 
   {
     // Fetch a pool (which will be created).
-    auto pool = DescriptorPoolVK(context);
+    DescriptorPoolVK pool = DescriptorPoolVK(context);
     pool.AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
   }
 
-  const auto pool = context->GetDescriptorPoolRecycler()->GetDescriptorPool();
+  std::shared_ptr<DescriptorPoolVK> pool =
+      context->GetDescriptorPoolRecycler()->GetDescriptorPool();
 
   // Now check that we only ever created one pool.
-  const auto called = GetMockVulkanFunctions(context->GetDevice());
+  std::shared_ptr<std::vector<std::string>> called =
+      GetMockVulkanFunctions(context->GetDevice());
   EXPECT_EQ(
       std::count(called->begin(), called->end(), "vkCreateDescriptorPool"), 1u);
 
@@ -42,19 +44,21 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
 }
 
 TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
-  const auto context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
 
   // Create 33 pools
   {
     std::vector<std::unique_ptr<DescriptorPoolVK>> pools;
-    for (auto i = 0u; i < 33; i++) {
-      auto pool = std::make_unique<DescriptorPoolVK>(context);
+    for (size_t i = 0u; i < 33; i++) {
+      std::unique_ptr<DescriptorPoolVK> pool =
+          std::make_unique<DescriptorPoolVK>(context);
       pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
       pools.push_back(std::move(pool));
     }
   }
 
-  const auto called = GetMockVulkanFunctions(context->GetDevice());
+  std::shared_ptr<std::vector<std::string>> called =
+      GetMockVulkanFunctions(context->GetDevice());
   EXPECT_EQ(
       std::count(called->begin(), called->end(), "vkCreateDescriptorPool"),
       33u);
@@ -63,14 +67,16 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
   // allocated.
   {
     std::vector<std::shared_ptr<DescriptorPoolVK>> pools;
-    for (auto i = 0u; i < 33; i++) {
-      auto pool = context->GetDescriptorPoolRecycler()->GetDescriptorPool();
+    for (size_t i = 0u; i < 33; i++) {
+      std::shared_ptr<DescriptorPoolVK> pool =
+          context->GetDescriptorPoolRecycler()->GetDescriptorPool();
       pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
       pools.push_back(std::move(pool));
     }
   }
 
-  const auto called_twice = GetMockVulkanFunctions(context->GetDevice());
+  std::shared_ptr<std::vector<std::string>> called_twice =
+      GetMockVulkanFunctions(context->GetDevice());
   // 32 of the descriptor pools were recycled, so only one more is created.
   EXPECT_EQ(
       std::count(called->begin(), called->end(), "vkCreateDescriptorPool"),
@@ -80,10 +86,10 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
 }
 
 TEST(DescriptorPoolRecyclerVKTest, MultipleCommandBuffersShareDescriptorPool) {
-  const auto context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
 
-  auto cmd_buffer_1 = context->CreateCommandBuffer();
-  auto cmd_buffer_2 = context->CreateCommandBuffer();
+  std::shared_ptr<CommandBuffer> cmd_buffer_1 = context->CreateCommandBuffer();
+  std::shared_ptr<CommandBuffer> cmd_buffer_2 = context->CreateCommandBuffer();
 
   CommandBufferVK& vk_1 = CommandBufferVK::Cast(*cmd_buffer_1);
   CommandBufferVK& vk_2 = CommandBufferVK::Cast(*cmd_buffer_2);
@@ -93,7 +99,7 @@ TEST(DescriptorPoolRecyclerVKTest, MultipleCommandBuffersShareDescriptorPool) {
   // Resetting resources creates a new pool.
   context->DisposeThreadLocalCachedResources();
 
-  auto cmd_buffer_3 = context->CreateCommandBuffer();
+  std::shared_ptr<CommandBuffer> cmd_buffer_3 = context->CreateCommandBuffer();
   CommandBufferVK& vk_3 = CommandBufferVK::Cast(*cmd_buffer_3);
 
   EXPECT_NE(&vk_1.GetDescriptorPool(), &vk_3.GetDescriptorPool());
@@ -102,18 +108,20 @@ TEST(DescriptorPoolRecyclerVKTest, MultipleCommandBuffersShareDescriptorPool) {
 }
 
 TEST(DescriptorPoolRecyclerVKTest, DescriptorsAreRecycled) {
-  const auto context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
 
   {
-    auto pool = DescriptorPoolVK(context);
+    DescriptorPoolVK pool = DescriptorPoolVK(context);
     pool.AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
   }
 
   // Should reuse the same descriptor set allocated above.
-  const auto pool = context->GetDescriptorPoolRecycler()->GetDescriptorPool();
+  std::shared_ptr<DescriptorPoolVK> pool =
+      context->GetDescriptorPoolRecycler()->GetDescriptorPool();
   pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
 
-  const auto called = GetMockVulkanFunctions(context->GetDevice());
+  std::shared_ptr<std::vector<std::string>> called =
+      GetMockVulkanFunctions(context->GetDevice());
   EXPECT_EQ(
       std::count(called->begin(), called->end(), "vkAllocateDescriptorSets"),
       1);
