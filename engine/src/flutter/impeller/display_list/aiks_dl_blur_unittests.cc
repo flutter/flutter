@@ -228,7 +228,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurInteractive) {
     save_paint.setBlendMode(DlBlendMode::kSrc);
 
     auto backdrop_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kClamp);
-    builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get());
+    builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
     builder.Restore();
 
     return builder.Build();
@@ -260,7 +260,7 @@ TEST_P(AiksTest, CanRenderBackdropBlur) {
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kSrc);
   auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
-  builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get());
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -283,7 +283,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurWithSingleBackdropId) {
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kSrc);
   auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
-  builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get(),
                     /*backdrop_id=*/1);
   builder.Restore();
   builder.Restore();
@@ -309,7 +309,7 @@ TEST_P(AiksTest, CanRenderMultipleBackdropBlurWithSingleBackdropId) {
     DlPaint save_paint;
     save_paint.setBlendMode(DlBlendMode::kSrc);
     auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
-    builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
+    builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get(),
                       /*backdrop_id=*/1);
     builder.Restore();
     builder.Restore();
@@ -338,7 +338,7 @@ TEST_P(AiksTest,
     save_paint.setBlendMode(DlBlendMode::kSrc);
     auto backdrop_filter =
         DlImageFilter::MakeBlur(30 + i, 30, DlTileMode::kClamp);
-    builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
+    builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get(),
                       /*backdrop_id=*/1);
     builder.Restore();
     builder.Restore();
@@ -359,7 +359,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
 
   auto backdrop_filter =
       DlImageFilter::MakeBlur(999999, 999999, DlTileMode::kClamp);
-  builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get());
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -466,6 +466,28 @@ TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
 
   builder.DrawCircle(DlPoint(300, 300), 200, paint);
   builder.DrawRect(DlRect::MakeLTRB(100, 300, 500, 600), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, MaskBlurOnZeroDimensionIsSkippedWideGamut) {
+  // Making sure this test is run on a wide gamut enabled backend
+  EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
+            PixelFormat::kB10G10R10A10XR);
+
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10));
+
+  // Zero height above
+  builder.DrawRect(DlRect::MakeLTRB(100, 250, 500, 250), paint);
+  // Regular rect
+  builder.DrawRect(DlRect::MakeLTRB(100, 300, 500, 600), paint);
+  // Zero width to the right
+  builder.DrawRect(DlRect::MakeLTRB(550, 300, 550, 600), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -790,7 +812,7 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryVertical) {
 
   auto backdrop_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kClamp);
 
-  builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get());
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -819,7 +841,7 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryHorizontal) {
   save_paint.setBlendMode(DlBlendMode::kSrc);
 
   auto backdrop_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kClamp);
-  builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get());
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
 
   builder.Restore();
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -866,7 +888,7 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
 
     auto backdrop_filter =
         DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kClamp);
-    builder.SaveLayer(nullptr, &paint, backdrop_filter.get());
+    builder.SaveLayer(std::nullopt, &paint, backdrop_filter.get());
     count += 1;
     return builder.Build();
   };
@@ -1084,7 +1106,7 @@ TEST_P(AiksTest, GaussianBlurOneDimension) {
   paint.setBlendMode(DlBlendMode::kSrc);
 
   auto backdrop_filter = DlImageFilter::MakeBlur(50, 0, DlTileMode::kClamp);
-  builder.SaveLayer(nullptr, &paint, backdrop_filter.get());
+  builder.SaveLayer(std::nullopt, &paint, backdrop_filter.get());
   builder.Restore();
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -1347,7 +1369,7 @@ TEST_P(AiksTest,
     if (i != 0) {
       DlPaint paint;
       paint.setColor(DlColor::kWhite().withAlphaF(0.95));
-      builder.SaveLayer(nullptr, &paint);
+      builder.SaveLayer(std::nullopt, &paint);
     }
     DlRoundRect rrect = DlRoundRect::MakeRectXY(
         DlRect::MakeXYWH(50 + (i * 100), 250, 100, 100), 20, 20);
@@ -1357,7 +1379,7 @@ TEST_P(AiksTest,
     DlPaint save_paint;
     save_paint.setBlendMode(DlBlendMode::kSrc);
     auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
-    builder.SaveLayer(nullptr, &save_paint, backdrop_filter.get(),
+    builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get(),
                       /*backdrop_id=*/1);
     builder.Restore();
     builder.Restore();
@@ -1381,12 +1403,12 @@ TEST_P(AiksTest, BlurGradientWithOpacity) {
 
   DlPaint save_paint;
   save_paint.setOpacity(0.5);
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint paint;
   paint.setColorSource(gradient);
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 1));
-  builder.DrawRect(SkRect::MakeXYWH(100, 100, 200, 200), paint);
+  builder.DrawRect(DlRect::MakeXYWH(100, 100, 200, 200), paint);
 
   builder.Restore();
 

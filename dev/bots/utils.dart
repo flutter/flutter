@@ -61,7 +61,7 @@ final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(P
 final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
-final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
+final String engineVersionFile = path.join(flutterRoot, 'bin', 'cache', 'engine.stamp');
 final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
 final bool runningInDartHHHBot =
     luciBotId.startsWith('luci-dart-') || luciBotId.startsWith('dart-tests-');

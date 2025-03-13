@@ -260,7 +260,7 @@ void main() {
   );
 
   test(
-    'Non-local engine builds use the engine.version file as an Artifact dependency',
+    'Non-local engine builds use the engine.stamp file as an Artifact dependency',
     () => testbed.run(() {
       final Artifacts artifacts = Artifacts.test();
       final Environment environment = Environment.test(
@@ -279,7 +279,7 @@ void main() {
       );
       fizzSource.accept(visitor);
 
-      expect(visitor.sources.single.path, contains('engine.version'));
+      expect(visitor.sources.single.path, contains('engine.stamp'));
     }),
   );
 }

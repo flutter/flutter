@@ -83,7 +83,7 @@ TEST_P(DisplayListTest, CanDrawTextWithSaveLayer) {
   flutter::DlPaint save_paint;
   float alpha = 0.5;
   save_paint.setAlpha(static_cast<uint8_t>(255 * alpha));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
   builder.DrawTextBlob(SkTextBlob::MakeFromString("Hello with half alpha",
                                                   CreateTestFontOfSize(100)),
                        100, 300, flutter::DlPaint(flutter::DlColor::kRed()));
@@ -514,7 +514,7 @@ TEST_P(DisplayListTest, IgnoreMaskFilterWhenSavingLayer) {
   auto filter = flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kNormal, 10.0f);
   flutter::DlPaint paint;
   paint.setMaskFilter(&filter);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(100, 100),
                     flutter::DlImageSampling::kNearestNeighbor);
   builder.Restore();
@@ -689,7 +689,7 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
     // correctly.
     if (add_clip) {
       builder.ClipRect(DlRect::MakeLTRB(0, 0, 99999, 99999),
-                       flutter::DlCanvas::ClipOp::kIntersect, true);
+                       flutter::DlClipOp::kIntersect, true);
     }
 
     builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(200, 200),
@@ -827,12 +827,11 @@ TEST_P(DisplayListTest, CanDrawPoints) {
   for (auto cap : caps) {
     paint.setStrokeCap(cap);
     builder.Save();
-    builder.DrawPoints(flutter::DlCanvas::PointMode::kPoints, 7, points, paint);
+    builder.DrawPoints(flutter::DlPointMode::kPoints, 7, points, paint);
     builder.Translate(150, 0);
-    builder.DrawPoints(flutter::DlCanvas::PointMode::kLines, 5, points, paint);
+    builder.DrawPoints(flutter::DlPointMode::kLines, 5, points, paint);
     builder.Translate(150, 0);
-    builder.DrawPoints(flutter::DlCanvas::PointMode::kPolygon, 5, points,
-                       paint);
+    builder.DrawPoints(flutter::DlPointMode::kPolygon, 5, points, paint);
     builder.Restore();
     builder.Translate(0, 150);
   }
@@ -995,7 +994,7 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
     flutter::DlPaint paint;
 
     if (enable_savelayer) {
-      builder.SaveLayer(nullptr, nullptr);
+      builder.SaveLayer(std::nullopt, nullptr);
     }
     {
       auto content_scale = GetContentScale();
@@ -1131,7 +1130,7 @@ TEST_P(DisplayListTest, CanDrawPaintWithColorSource) {
   auto clip_bounds = DlRect::MakeWH(300.0, 300.0);
   builder.Save();
   builder.Translate(100, 100);
-  builder.ClipRect(clip_bounds, flutter::DlCanvas::ClipOp::kIntersect, false);
+  builder.ClipRect(clip_bounds, flutter::DlClipOp::kIntersect, false);
   auto linear =
       flutter::DlColorSource::MakeLinear({0.0, 0.0}, {100.0, 100.0}, 2, colors,
                                          stops, flutter::DlTileMode::kRepeat);
@@ -1141,7 +1140,7 @@ TEST_P(DisplayListTest, CanDrawPaintWithColorSource) {
 
   builder.Save();
   builder.Translate(500, 100);
-  builder.ClipRect(clip_bounds, flutter::DlCanvas::ClipOp::kIntersect, false);
+  builder.ClipRect(clip_bounds, flutter::DlClipOp::kIntersect, false);
   auto radial = flutter::DlColorSource::MakeRadial(
       {100.0, 100.0}, 100.0, 2, colors, stops, flutter::DlTileMode::kRepeat);
   paint.setColorSource(radial);
@@ -1150,7 +1149,7 @@ TEST_P(DisplayListTest, CanDrawPaintWithColorSource) {
 
   builder.Save();
   builder.Translate(100, 500);
-  builder.ClipRect(clip_bounds, flutter::DlCanvas::ClipOp::kIntersect, false);
+  builder.ClipRect(clip_bounds, flutter::DlClipOp::kIntersect, false);
   auto sweep =
       flutter::DlColorSource::MakeSweep({100.0, 100.0}, 180.0, 270.0, 2, colors,
                                         stops, flutter::DlTileMode::kRepeat);
@@ -1160,7 +1159,7 @@ TEST_P(DisplayListTest, CanDrawPaintWithColorSource) {
 
   builder.Save();
   builder.Translate(500, 500);
-  builder.ClipRect(clip_bounds, flutter::DlCanvas::ClipOp::kIntersect, false);
+  builder.ClipRect(clip_bounds, flutter::DlClipOp::kIntersect, false);
   auto texture = CreateTextureForFixture("table_mountain_nx.png");
   auto image = flutter::DlColorSource::MakeImage(DlImageImpeller::Make(texture),
                                                  flutter::DlTileMode::kRepeat,
@@ -1176,7 +1175,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
   flutter::DisplayListBuilder builder;
 
   {
-    builder.SaveLayer(nullptr, nullptr);
+    builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(100, 100);
     flutter::DlPaint paint;
     paint.setColor(flutter::DlColor::kRed());
@@ -1187,7 +1186,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
     builder.Restore();
   }
   {
-    builder.SaveLayer(nullptr, nullptr);
+    builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(300, 100);
     flutter::DlPaint paint;
     paint.setColor(flutter::DlColor::kBlue().withAlpha(127));
@@ -1198,7 +1197,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
     builder.Restore();
   }
   {
-    builder.SaveLayer(nullptr, nullptr);
+    builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(100, 300);
     flutter::DlPaint paint;
     paint.setColor(flutter::DlColor::kRed());
@@ -1209,7 +1208,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
     builder.Restore();
   }
   {
-    builder.SaveLayer(nullptr, nullptr);
+    builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(300, 300);
     flutter::DlPaint paint;
     paint.setColor(flutter::DlColor::kBlue().withAlpha(127));

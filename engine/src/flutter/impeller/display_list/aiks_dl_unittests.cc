@@ -19,7 +19,14 @@
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/testing/testing.h"
+#include "fml/synchronization/count_down_latch.h"
 #include "imgui.h"
+#include "impeller/base/validation.h"
+#include "impeller/core/device_buffer.h"
+#include "impeller/core/device_buffer_descriptor.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/texture_descriptor.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/geometry/scalar.h"
@@ -39,7 +46,7 @@ TEST_P(AiksTest, CollapsedDrawPaintInSubpass) {
 
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kMultiply);
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kCornflowerBlue().modulateOpacity(0.75f));
@@ -58,7 +65,7 @@ TEST_P(AiksTest, CollapsedDrawPaintInSubpassBackdropFilter) {
   builder.DrawPaint(paint);
 
   auto filter = DlImageFilter::MakeBlur(20.0, 20.0, DlTileMode::kDecal);
-  builder.SaveLayer(nullptr, nullptr, filter.get());
+  builder.SaveLayer(std::nullopt, nullptr, filter.get());
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kCornflowerBlue());
@@ -80,7 +87,7 @@ TEST_P(AiksTest, ColorMatrixFilterSubpassCollapseOptimization) {
 
   DlPaint paint;
   paint.setColorFilter(filter);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   builder.Translate(500, 300);
   builder.Rotate(120);  // 120 deg
@@ -97,7 +104,7 @@ TEST_P(AiksTest, LinearToSrgbFilterSubpassCollapseOptimization) {
 
   DlPaint paint;
   paint.setColorFilter(DlColorFilter::MakeLinearToSrgbGamma());
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   builder.Translate(500, 300);
   builder.Rotate(120);  // 120 deg.
@@ -114,7 +121,7 @@ TEST_P(AiksTest, SrgbToLinearFilterSubpassCollapseOptimization) {
 
   DlPaint paint;
   paint.setColorFilter(DlColorFilter::MakeLinearToSrgbGamma());
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   builder.Translate(500, 300);
   builder.Rotate(120);  // 120 deg
@@ -135,7 +142,7 @@ TEST_P(AiksTest, TranslucentSaveLayerDrawsCorrectly) {
 
   DlPaint save_paint;
   save_paint.setColor(DlColor::kBlack().withAlpha(128));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
   builder.DrawRect(DlRect::MakeXYWH(100, 500, 300, 300), paint);
   builder.Restore();
 
@@ -155,7 +162,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendColorFilterDrawsCorrectly) {
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kDstOver));
   builder.Save();
   builder.ClipRect(DlRect::MakeXYWH(100, 500, 300, 300));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kBlue());
@@ -178,7 +185,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendImageFilterDrawsCorrectly) {
   save_paint.setImageFilter(DlImageFilter::MakeColorFilter(
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kDstOver)));
 
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kBlue());
@@ -201,7 +208,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorAndImageFilterDrawsCorrectly) {
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kDstOver));
   builder.Save();
   builder.ClipRect(DlRect::MakeXYWH(100, 500, 300, 300));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kBlue());
@@ -219,7 +226,7 @@ TEST_P(AiksTest, ImageFilteredUnboundedSaveLayerWithUnboundedContents) {
   DlPaint save_paint;
   save_paint.setImageFilter(
       DlImageFilter::MakeBlur(10.0, 10.0, DlTileMode::kDecal));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   {
     // DrawPaint to verify correct behavior when the contents are unbounded.
@@ -245,7 +252,7 @@ TEST_P(AiksTest, TranslucentSaveLayerImageDrawsCorrectly) {
 
   DlPaint paint;
   paint.setColor(DlColor::kBlack().withAlpha(128));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.DrawImage(image, DlPoint(100, 500), DlImageSampling::kMipmapLinear);
   builder.Restore();
 
@@ -267,7 +274,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorMatrixColorFilterDrawsCorrectly) {
   DlPaint paint;
   paint.setColor(DlColor::kBlack().withAlpha(128));
   paint.setColorFilter(DlColorFilter::MakeMatrix(matrix));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.DrawImage(image, DlPoint(100, 500), {});
   builder.Restore();
 
@@ -289,7 +296,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorMatrixImageFilterDrawsCorrectly) {
   DlPaint paint;
   paint.setColor(DlColor::kBlack().withAlpha(128));
   paint.setColorFilter(DlColorFilter::MakeMatrix(matrix));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.DrawImage(image, DlPoint(100, 500), {});
   builder.Restore();
 
@@ -315,7 +322,7 @@ TEST_P(AiksTest,
       DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix)));
   paint.setColorFilter(
       DlColorFilter::MakeBlend(DlColor::kGreen(), DlBlendMode::kModulate));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.DrawImage(image, DlPoint(100, 500), {});
   builder.Restore();
 
@@ -332,7 +339,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithAdvancedBlendModeDrawsCorrectly) {
   DlPaint save_paint;
   save_paint.setAlpha(128);
   save_paint.setBlendMode(DlBlendMode::kLighten);
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kGreen());
@@ -353,13 +360,13 @@ TEST_P(AiksTest, CanRenderTinyOverlappingSubpasses) {
   builder.DrawPaint(paint);
 
   // Draw two overlapping subpixel circles.
-  builder.SaveLayer({});
+  builder.SaveLayer(std::nullopt);
 
   DlPaint yellow_paint;
   yellow_paint.setColor(DlColor::kYellow());
   builder.DrawCircle(DlPoint(100, 100), 0.1, yellow_paint);
   builder.Restore();
-  builder.SaveLayer({});
+  builder.SaveLayer(std::nullopt);
   builder.DrawCircle(DlPoint(100, 100), 0.1, yellow_paint);
   builder.Restore();
 
@@ -382,7 +389,7 @@ TEST_P(AiksTest, CanRenderDestructiveSaveLayer) {
 
   DlPaint save_paint;
   save_paint.setBlendMode(DlBlendMode::kSrc);
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint draw_paint;
   draw_paint.setColor(DlColor::kGreen());
@@ -419,10 +426,10 @@ TEST_P(AiksTest, CanDrawPoints) {
   builder.DrawPaint(background);
   builder.Translate(200, 200);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(DlPointMode::kPoints, points.size(), points.data(),
                      paint_round);
   builder.Translate(150, 0);
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(DlPointMode::kPoints, points.size(), points.data(),
                      paint_square);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -459,10 +466,10 @@ TEST_P(AiksTest, CanDrawPointsWithTextureMap) {
   DisplayListBuilder builder(DlRect::MakeSize(GetWindowSize()));
   builder.Translate(200, 200);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(DlPointMode::kPoints, points.size(), points.data(),
                      paint_round);
   builder.Translate(150, 0);
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(DlPointMode::kPoints, points.size(), points.data(),
                      paint_square);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -634,7 +641,7 @@ TEST_P(AiksTest, MatrixImageFilterMagnify) {
     DlPaint paint;
     paint.setImageFilter(
         DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear));
-    builder.SaveLayer(nullptr, &paint);
+    builder.SaveLayer(std::nullopt, &paint);
 
     DlPaint rect_paint;
     rect_paint.setAlpha(0.5 * 255);
@@ -743,7 +750,7 @@ TEST_P(AiksTest, MatrixBackdropFilter) {
   DlPaint paint;
   paint.setColor(DlColor::kBlack());
   builder.DrawPaint(paint);
-  builder.SaveLayer(nullptr, nullptr);
+  builder.SaveLayer(std::nullopt, nullptr);
   {
     DlPaint paint;
     paint.setColor(DlColor::kGreen().withAlpha(0.5 * 255));
@@ -763,7 +770,7 @@ TEST_P(AiksTest, MatrixBackdropFilter) {
                       DlMatrix::MakeTranslation({-100, -100});
     auto backdrop_filter =
         DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear);
-    builder.SaveLayer(nullptr, nullptr, backdrop_filter.get());
+    builder.SaveLayer(std::nullopt, nullptr, backdrop_filter.get());
     builder.Restore();
   }
   builder.Restore();
@@ -777,7 +784,7 @@ TEST_P(AiksTest, MatrixSaveLayerFilter) {
   DlPaint paint;
   paint.setColor(DlColor::kBlack());
   builder.DrawPaint(paint);
-  builder.SaveLayer(nullptr, nullptr);
+  builder.SaveLayer(std::nullopt, nullptr);
   {
     paint.setColor(DlColor::kGreen().withAlpha(255 * 0.5));
     paint.setBlendMode(DlBlendMode::kPlus);
@@ -793,7 +800,7 @@ TEST_P(AiksTest, MatrixSaveLayerFilter) {
     save_paint.setImageFilter(
         DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear));
 
-    builder.SaveLayer(nullptr, &save_paint);
+    builder.SaveLayer(std::nullopt, &save_paint);
 
     DlPaint circle_paint;
     circle_paint.setColor(DlColor::kGreen().withAlpha(255 * 0.5));
@@ -821,8 +828,7 @@ TEST_P(AiksTest, CanDrawScaledPointsSmallScaleLargeRadius) {
   builder.Translate(200, 200);
   builder.Scale(0.000001, 0.000001);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, point.size(), point.data(),
-                     paint);
+  builder.DrawPoints(DlPointMode::kPoints, point.size(), point.data(), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -842,8 +848,7 @@ TEST_P(AiksTest, CanDrawScaledPointsLargeScaleSmallRadius) {
   builder.Translate(200, 200);
   builder.Scale(1000000, 1000000);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, point.size(), point.data(),
-                     paint);
+  builder.DrawPoints(DlPointMode::kPoints, point.size(), point.data(), paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
@@ -896,8 +901,7 @@ TEST_P(AiksTest, BackdropRestoreUsesCorrectCoverageForFirstRestoredClip) {
 
   DlPaint paint;
   // Add a difference clip that cuts out the bottom right corner
-  builder.ClipRect(DlRect::MakeLTRB(50, 50, 100, 100),
-                   DlCanvas::ClipOp::kDifference);
+  builder.ClipRect(DlRect::MakeLTRB(50, 50, 100, 100), DlClipOp::kDifference);
 
   // Draw a red rectangle that's going to be completely covered by green later.
   paint.setColor(DlColor::kRed());
@@ -912,7 +916,7 @@ TEST_P(AiksTest, BackdropRestoreUsesCorrectCoverageForFirstRestoredClip) {
       // Create a save layer with a backdrop blur filter.
       auto backdrop_filter =
           DlImageFilter::MakeBlur(10.0, 10.0, DlTileMode::kDecal);
-      builder.SaveLayer(nullptr, nullptr, backdrop_filter.get());
+      builder.SaveLayer(std::nullopt, nullptr, backdrop_filter.get());
     }
   }
   builder.RestoreToCount(count);
@@ -995,8 +999,7 @@ TEST_P(AiksTest, DepthValuesForLineMode) {
       DlPoint::MakeXY(0, 100),  DlPoint::MakeXY(400, 500),
       DlPoint::MakeXY(0, 150),  DlPoint::MakeXY(400, 600)};
 
-  builder.DrawPoints(DisplayListBuilder::PointMode::kLines, points.size(),
-                     points.data(),
+  builder.DrawPoints(DlPointMode::kLines, points.size(), points.data(),
                      DlPaint().setColor(DlColor::kBlue()).setStrokeWidth(10));
   builder.Restore();
 
@@ -1024,12 +1027,96 @@ TEST_P(AiksTest, DepthValuesForPolygonMode) {
       DlPoint::MakeXY(0, 100),  DlPoint::MakeXY(400, 500),
       DlPoint::MakeXY(0, 150),  DlPoint::MakeXY(400, 600)};
 
-  builder.DrawPoints(DisplayListBuilder::PointMode::kPolygon, points.size(),
-                     points.data(),
+  builder.DrawPoints(DlPointMode::kPolygon, points.size(), points.data(),
                      DlPaint().setColor(DlColor::kBlue()).setStrokeWidth(10));
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Verifies that an image rasterized and readback is in the correct orientation
+// by re-uploading it.
+TEST_P(AiksTest, ToImageFromImage) {
+  DisplayListBuilder builder;
+  DlPath path = DlPath::MakeArc(DlRect::MakeLTRB(0, 0, 100, 100), DlDegrees(0),
+                                DlDegrees(90),
+                                /*use_center=*/true);
+
+  builder.DrawPath(path, DlPaint().setColor(DlColor::kRed()));
+
+  AiksContext renderer(GetContext(), nullptr);
+  auto texture =
+      DisplayListToTexture(builder.Build(), ISize(100, 100), renderer);
+
+  // First, Readback the texture data into a host buffer.
+  impeller::DeviceBufferDescriptor desc;
+  desc.size = texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
+  desc.readback = true;
+  desc.storage_mode = StorageMode::kHostVisible;
+
+  auto device_buffer = GetContext()->GetResourceAllocator()->CreateBuffer(desc);
+  {
+    auto cmd_buffer = GetContext()->CreateCommandBuffer();
+    auto blit_pass = cmd_buffer->CreateBlitPass();
+
+    blit_pass->AddCopy(texture, device_buffer);
+    blit_pass->EncodeCommands();
+
+    auto latch = std::make_shared<fml::CountDownLatch>(1u);
+    GetContext()->GetCommandQueue()->Submit(
+        {cmd_buffer},
+        [latch](CommandBuffer::Status status) { latch->CountDown(); });
+    latch->Wait();
+  }
+
+  impeller::TextureDescriptor tex_desc = texture->GetTextureDescriptor();
+  auto reupload_texture =
+      GetContext()->GetResourceAllocator()->CreateTexture(tex_desc);
+
+  // Next, Re-upload the data into a new texture.
+  {
+    auto cmd_buffer = GetContext()->CreateCommandBuffer();
+    auto blit_pass = cmd_buffer->CreateBlitPass();
+    blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer),
+                       reupload_texture);
+    blit_pass->ConvertTextureToShaderRead(texture);
+    blit_pass->EncodeCommands();
+
+    auto latch = std::make_shared<fml::CountDownLatch>(1u);
+    GetContext()->GetCommandQueue()->Submit(
+        {cmd_buffer},
+        [latch](CommandBuffer::Status status) { latch->CountDown(); });
+    latch->Wait();
+  }
+
+  // Draw the results side by side. These should look the same.
+  DisplayListBuilder canvas;
+  DlPaint paint = DlPaint();
+  canvas.DrawRect(
+      DlRect::MakeLTRB(0, 0, 100, 100),
+      DlPaint().setColor(DlColor::kBlue()).setDrawStyle(DlDrawStyle::kStroke));
+  canvas.DrawImage(DlImageImpeller::Make(texture), DlPoint(0, 0),
+                   DlImageSampling::kNearestNeighbor, &paint);
+
+  canvas.DrawRect(
+      DlRect::MakeLTRB(0, 100, 100, 200),
+      DlPaint().setColor(DlColor::kRed()).setDrawStyle(DlDrawStyle::kStroke));
+  canvas.DrawImage(DlImageImpeller::Make(reupload_texture), DlPoint(0, 100),
+                   DlImageSampling::kNearestNeighbor, &paint);
+  OpenPlaygroundHere(canvas.Build());
+}
+
+TEST_P(AiksTest, DisplayListToTextureAllocationFailure) {
+  ScopedValidationDisable disable_validations;
+  DisplayListBuilder builder;
+
+  AiksContext aiks_context(GetContext(), nullptr);
+  // Use intentionally invalid dimensions that would trigger an allocation
+  // failure.
+  auto texture =
+      DisplayListToTexture(builder.Build(), ISize{0, 0}, aiks_context);
+
+  EXPECT_EQ(texture, nullptr);
 }
 
 }  // namespace testing

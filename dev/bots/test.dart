@@ -137,9 +137,6 @@ Future<void> main(List<String> args) async {
       'web_skwasm_tests': webTestsSuite.runWebSkwasmUnitTests,
       // All web integration tests
       'web_long_running_tests': webTestsSuite.webLongRunningTestsRunner,
-      // TODO(matanlurey): Remove once a post-submit runs with the new shards.
-      // (Part of https://github.com/flutter/flutter/issues/161333)
-      'android_engine_tests': () => runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
       'android_engine_vulkan_tests':
           () => runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
       'android_engine_opengles_tests':
@@ -347,7 +344,6 @@ Future<void> _runBuildTests() async {
         ..add(
           Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_app_with_extensions')),
         )
-        ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'platform_interaction')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'spell_check')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));

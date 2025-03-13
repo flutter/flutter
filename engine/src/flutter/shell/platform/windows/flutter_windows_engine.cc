@@ -26,6 +26,7 @@
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 #include "flutter/third_party/accessibility/ax/ax_node.h"
+#include "shell/platform/windows/flutter_project_bundle.h"
 
 // winbase.h defines GetCurrentTime as a macro.
 #undef GetCurrentTime
@@ -194,7 +195,8 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   enable_impeller_ = std::find(switches.begin(), switches.end(),
                                "--enable-impeller=true") != switches.end();
 
-  egl_manager_ = egl::Manager::Create();
+  egl_manager_ = egl::Manager::Create(
+      static_cast<egl::GpuPreference>(project_->gpu_preference()));
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
@@ -229,6 +231,10 @@ FlutterWindowsEngine::FlutterWindowsEngine(
 FlutterWindowsEngine::~FlutterWindowsEngine() {
   messenger_->SetEngine(nullptr);
   Stop();
+}
+
+FlutterWindowsEngine* FlutterWindowsEngine::GetEngineForId(int64_t engine_id) {
+  return reinterpret_cast<FlutterWindowsEngine*>(engine_id);
 }
 
 void FlutterWindowsEngine::SetSwitches(
@@ -293,6 +299,13 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   custom_task_runners.thread_priority_setter =
       &WindowsPlatformThreadPrioritySetter;
 
+  if (project_->ui_thread_policy() ==
+      FlutterUIThreadPolicy::RunOnPlatformThread) {
+    FML_LOG(WARNING)
+        << "Running with merged platform and UI thread. Experimental.";
+    custom_task_runners.ui_task_runner = &platform_task_runner;
+  }
+
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
   args.shutdown_dart_vm_when_done = true;
@@ -300,6 +313,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = argv.empty() ? nullptr : argv.data();
+  args.engine_id = reinterpret_cast<int64_t>(this);
 
   // Fail if conflicting non-default entrypoints are specified in the method
   // argument and the project.
@@ -379,6 +393,11 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
                             SAFE_ACCESS(update, listening, false));
     }
   };
+  args.view_focus_change_request_callback =
+      [](const FlutterViewFocusChangeRequest* request, void* user_data) {
+        auto host = static_cast<FlutterWindowsEngine*>(user_data);
+        host->OnViewFocusChangeRequest(request);
+      };
 
   args.custom_task_runners = &custom_task_runners;
 
@@ -470,7 +489,6 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
                                     displays.data(), displays.size());
 
   SendSystemLocales();
-  SetLifecycleState(flutter::AppLifecycleState::kResumed);
 
   settings_plugin_->StartWatching();
   settings_plugin_->SendSettings();
@@ -697,6 +715,13 @@ void FlutterWindowsEngine::SendKeyEvent(const FlutterKeyEvent& event,
   }
 }
 
+void FlutterWindowsEngine::SendViewFocusEvent(
+    const FlutterViewFocusEvent& event) {
+  if (engine_) {
+    embedder_api_.SendViewFocusEvent(engine_, &event);
+  }
+}
+
 bool FlutterWindowsEngine::SendPlatformMessage(
     const char* channel,
     const uint8_t* message,
@@ -774,12 +799,6 @@ void FlutterWindowsEngine::SetNextFrameCallback(fml::closure callback) {
         self->task_runner_->PostTask(std::move(self->next_frame_callback_));
       },
       this);
-}
-
-void FlutterWindowsEngine::SetLifecycleState(flutter::AppLifecycleState state) {
-  if (lifecycle_manager_) {
-    lifecycle_manager_->SetLifecycleState(state);
-  }
 }
 
 void FlutterWindowsEngine::SendSystemLocales() {
@@ -982,6 +1001,19 @@ void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {
   } else if (name == "flutter/lifecycle" && listening) {
     lifecycle_manager_->BeginProcessingLifecycle();
   }
+}
+
+void FlutterWindowsEngine::OnViewFocusChangeRequest(
+    const FlutterViewFocusChangeRequest* request) {
+  std::shared_lock read_lock(views_mutex_);
+
+  auto iterator = views_.find(request->view_id);
+  if (iterator == views_.end()) {
+    return;
+  }
+
+  FlutterWindowsView* view = iterator->second;
+  view->Focus();
 }
 
 bool FlutterWindowsEngine::Present(const FlutterPresentViewInfo* info) {

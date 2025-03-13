@@ -11,6 +11,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
+#include "impeller/renderer/backend/gles/test/mock_gles.h"
 
 namespace impeller::testing {
 
@@ -63,6 +64,33 @@ TEST_P(TextureGLESTest, CanSetSyncFence) {
 
   sync_fence = TextureGLES::Cast(*texture).GetSyncFence();
   ASSERT_FALSE(sync_fence.has_value());
+}
+
+TEST_P(TextureGLESTest, Binds2DTexture) {
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.size = {100, 100};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.type = TextureType::kTexture2DMultisample;
+  desc.sample_count = SampleCount::kCount4;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+
+  ASSERT_TRUE(texture);
+
+  if (GetContext()->GetCapabilities()->SupportsImplicitResolvingMSAA()) {
+    EXPECT_EQ(
+        TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_READ_FRAMEBUFFER),
+        TextureGLES::Type::kTexture);
+    EXPECT_EQ(TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_FRAMEBUFFER),
+              TextureGLES::Type::kTextureMultisampled);
+  } else {
+    EXPECT_EQ(
+        TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_READ_FRAMEBUFFER),
+        TextureGLES::Type::kRenderBufferMultisampled);
+    EXPECT_EQ(TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_FRAMEBUFFER),
+              TextureGLES::Type::kRenderBufferMultisampled);
+  }
 }
 
 }  // namespace impeller::testing

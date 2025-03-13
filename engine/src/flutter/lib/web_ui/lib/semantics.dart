@@ -256,7 +256,33 @@ class SemanticsFlag {
 }
 
 // Mirrors engine/src/flutter/lib/ui/semantics.dart
-enum SemanticsRole { none, tab, tabBar, tabPanel }
+enum SemanticsRole {
+  none,
+  tab,
+  tabBar,
+  tabPanel,
+  dialog,
+  alertDialog,
+  table,
+  cell,
+  row,
+  columnHeader,
+  searchBox,
+  dragHandle,
+  spinButton,
+  comboBox,
+  menuBar,
+  menu,
+  menuItem,
+  list,
+  listItem,
+  form,
+  tooltip,
+  loadingSpinner,
+  progressBar,
+  hotKey,
+  radioGroup,
+}
 
 // When adding a new StringAttributeType, the classes in these file must be
 // updated as well.
@@ -345,6 +371,7 @@ class SemanticsUpdateBuilder {
     int headingLevel = 0,
     String? linkUrl,
     SemanticsRole role = SemanticsRole.none,
+    required List<String>? controlsNodes,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -387,6 +414,7 @@ class SemanticsUpdateBuilder {
         headingLevel: headingLevel,
         linkUrl: linkUrl,
         role: role,
+        controlsNodes: controlsNodes,
       ),
     );
   }

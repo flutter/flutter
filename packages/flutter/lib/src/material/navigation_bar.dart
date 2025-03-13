@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'elevation_overlay.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -385,9 +386,12 @@ class NavigationDestination extends StatelessWidget {
   /// The text label that appears below the icon of this
   /// [NavigationDestination].
   ///
-  /// The accompanying [Text] widget will use
-  /// [NavigationBarThemeData.labelTextStyle]. If this are null, the default
-  /// text style would use [TextTheme.labelSmall] with [ColorScheme.onSurface].
+  /// The accompanying [Text] widget will use [NavigationBarThemeData.labelTextStyle].
+  /// If this is null, the default text style will use [TextTheme.labelMedium] with
+  /// [ColorScheme.onSurface] when the destination is selected and
+  /// [ColorScheme.onSurfaceVariant] when the destination is unselected. If
+  /// [ThemeData.useMaterial3] is false, then the default text style will use
+  /// [TextTheme.labelSmall] with [ColorScheme.onSurface].
   final String label;
 
   /// The text to display in the tooltip for this [NavigationDestination], when
@@ -850,7 +854,7 @@ class NavigationIndicator extends StatelessWidget {
             builder: (BuildContext context, Animation<double> fadeAnimation) {
               return FadeTransition(
                 opacity: fadeAnimation,
-                child: Container(
+                child: Ink(
                   width: width,
                   height: height,
                   decoration: ShapeDecoration(
@@ -996,6 +1000,7 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
         return Semantics(
           selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
           container: true,
+          button: true,
           child: child,
         );
       },

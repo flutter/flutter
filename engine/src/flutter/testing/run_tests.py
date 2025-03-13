@@ -37,7 +37,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 BUILDROOT_DIR = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
 OUT_DIR = os.path.join(BUILDROOT_DIR, 'out')
 GOLDEN_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'resources')
-FONTS_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'third_party', 'txt', 'third_party', 'fonts')
+FONTS_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'txt', 'third_party', 'fonts')
 ROBOTO_FONT_PATH = os.path.join(FONTS_DIR, 'Roboto-Regular.ttf')
 FONT_SUBSET_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'font_subset')
 
@@ -765,13 +765,7 @@ def run_android_tests(android_variant='android_debug_unopt', adb_path=None):
 
   run_android_unittest('flutter_shell_native_unittests', android_variant, adb_path)
   run_android_unittest('impeller_toolkit_android_unittests', android_variant, adb_path)
-
-  systrace_test = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'android_systrace_test.py')
-  scenario_apk = os.path.join(OUT_DIR, android_variant, 'firebase_apks', 'scenario_app.apk')
-  run_cmd([
-      systrace_test, '--adb-path', adb_path, '--apk-path', scenario_apk, '--package-name',
-      'dev.flutter.scenarios', '--activity-name', '.PlatformViewsActivity'
-  ])
+  run_android_unittest('impeller_vulkan_android_unittests', android_variant, adb_path)
 
 
 def run_objc_tests(ios_variant='ios_debug_sim_unopt', test_filter=None):
@@ -970,7 +964,6 @@ def build_dart_host_test_list(build_dir):
       os.path.join('flutter', 'ci'),
       os.path.join('flutter', 'flutter_frontend_server'),
       os.path.join('flutter', 'testing', 'skia_gold_client'),
-      os.path.join('flutter', 'testing', 'scenario_app'),
       os.path.join('flutter', 'tools', 'api_check'),
       os.path.join('flutter', 'tools', 'build_bucket_golden_scraper'),
       os.path.join('flutter', 'tools', 'clang_tidy'),
