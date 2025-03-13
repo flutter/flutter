@@ -326,6 +326,10 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     if (widget.duration != oldWidget.duration) {
       _animationController.duration = widget.duration;
     }
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller.removeListener(_toggleExpansion);
+      widget.controller.addListener(_toggleExpansion);
+    }
   }
 
   @override
