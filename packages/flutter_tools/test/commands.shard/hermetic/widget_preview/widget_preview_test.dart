@@ -19,6 +19,7 @@ import 'package:test_api/fake.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 
 void main() {
   group('WidgetPreviewStartCommand', () {
@@ -89,7 +90,6 @@ void main() {
         }
 
         expect(updated.shaders, root.shaders.map(WidgetPreviewStartCommand.transformAssetUri));
-        expect(updated.models, root.models.map(WidgetPreviewStartCommand.transformAssetUri));
 
         expect(updated.deferredComponents?.length, root.deferredComponents?.length);
         if (root.deferredComponents != null) {
@@ -161,8 +161,6 @@ flutter:
           asset: package/assetUri
   shaders:
     - shaderUri
-  models:
-    - modelUri
   deferred-components:
     - name: deferredComponent
       libraries:
@@ -176,19 +174,6 @@ flutter:
               args:
                 - deferredComponentArg
         - path: package/deferredComponentUri''';
-
-  static const String basicPackageConfig = '''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "test",
-      "rootUri": "fileSystem.currentDirectory.path",
-      "packageUri": "lib/"
-    }
-  ]
-}
-''';
 
   final String projectRoot;
   final FileSystem fileSystem;
@@ -215,10 +200,9 @@ flutter:
 
   @override
   late final File packageConfig = () {
-    final File file = fileSystem
-      .directory(fileSystem.path.join(projectRoot, '.dart_tool'))
-      .childFile('package_config.json')..createSync(recursive: true);
-    file.writeAsStringSync(basicPackageConfig);
-    return file;
+    return writePackageConfigFile(
+      directory: fileSystem.directory(projectRoot),
+      mainLibName: 'my_app',
+    );
   }();
 }

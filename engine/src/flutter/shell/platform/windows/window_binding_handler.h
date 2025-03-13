@@ -83,6 +83,10 @@ class WindowBindingHandler {
 
   // Retrieve the alert node.
   virtual ui::AXPlatformNodeWin* GetAlert() = 0;
+
+  // Focuses the current window.
+  // Returns true if the window was successfully focused.
+  virtual bool Focus() = 0;
 };
 
 }  // namespace flutter

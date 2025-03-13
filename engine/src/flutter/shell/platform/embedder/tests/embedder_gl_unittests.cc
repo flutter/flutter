@@ -4585,19 +4585,19 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
       .canvas = &canvas,
       .gr_context = context.get(),
   };
-  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
+  texture_->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false,
                   DlImageSampling::kLinear);
 
   EXPECT_TRUE(resolve_called);
   resolve_called = false;
 
-  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
+  texture_->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false,
                   DlImageSampling::kLinear);
 
   EXPECT_FALSE(resolve_called);
 
   texture_->MarkNewFrameAvailable();
-  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
+  texture_->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false,
                   DlImageSampling::kLinear);
 
   EXPECT_TRUE(resolve_called);
