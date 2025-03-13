@@ -54,15 +54,18 @@ class SemanticMenu extends SemanticRole {
       final int child = queue.removeAt(0);
       if (tree[child] != null && _isMenuItem(tree[child]!)) {
         ids.add(child);
+      } else {
+        if (tree[child]?.childrenInTraversalOrder != null) {
+          queue.addAll(tree[child]!.childrenInTraversalOrder!);
+        }
       }
+    }
 
-      if (tree[child]?.childrenInTraversalOrder != null) {
-        queue.addAll(tree[child]!.childrenInTraversalOrder!);
-      }
-    }
+    String attributeValue = '';
     for (final int id in ids) {
-      setAttribute('aria-owns', 'flt-semantic-node-$id');
+      attributeValue = attributeValue + ' flt-semantic-node-$id';
     }
+    setAttribute('aria-owns', attributeValue.trim());
   }
 
   @override
@@ -115,15 +118,18 @@ class SemanticMenuBar extends SemanticRole {
       final int child = queue.removeAt(0);
       if (tree[child] != null && _isMenuItem(tree[child]!)) {
         ids.add(child);
+      } else {
+        if (tree[child]?.childrenInTraversalOrder != null) {
+          queue.addAll(tree[child]!.childrenInTraversalOrder!);
+        }
       }
+    }
 
-      if (tree[child]?.childrenInTraversalOrder != null) {
-        queue.addAll(tree[child]!.childrenInTraversalOrder!);
-      }
-    }
+    String attributeValue = '';
     for (final int id in ids) {
-      setAttribute('aria-owns', 'flt-semantic-node-$id');
+      attributeValue = attributeValue + ' flt-semantic-node-$id';
     }
+    setAttribute('aria-owns', attributeValue.trim());
   }
 
   @override
@@ -143,11 +149,18 @@ class SemanticMenuItem extends SemanticRole {
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
       ) {
     setAriaRole('menuitem');
-    if (semanticsObject.hasExpandedState) {
-      setAttribute('aria-haspopup', 'menu');
-    }
     addDisabledBehavior();
     addTappable();
+  }
+
+  @override
+  void update() {
+    super.update();
+    if (semanticsObject.hasExpandedState) {
+      setAttribute('aria-haspopup', 'menu');
+    } else {
+      removeAttribute('aria-haspopup');
+    }
   }
 
   @override
