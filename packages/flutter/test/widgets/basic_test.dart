@@ -504,6 +504,33 @@ void main() {
       expect(attributedHint.attributes[1].range, const TextRange(start: 6, end: 7));
     });
 
+    testWidgets('Semantics can use list and list item', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              role: SemanticsRole.list,
+              container: true,
+              child: Semantics(
+                key: key2,
+                role: SemanticsRole.listItem,
+                container: true,
+                child: const Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode listNode = tester.getSemantics(find.byKey(key1));
+      final SemanticsNode listItemNode = tester.getSemantics(find.byKey(key2));
+
+      expect(listNode.role, SemanticsRole.list);
+      expect(listItemNode.role, SemanticsRole.listItem);
+    });
+
     testWidgets('Semantics can merge attributed strings with non attributed string', (
       WidgetTester tester,
     ) async {
