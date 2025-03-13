@@ -117,7 +117,7 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.radioGroup => _semanticsRadioGroup,
     SemanticsRole.menu => _semanticsMenu,
     SemanticsRole.menuBar => _semanticsMenuBar,
-    SemanticsRole.menuItem => _noCheckRequired,
+    SemanticsRole.menuItem => _semanticsMenuItem,
     SemanticsRole.menuItemCheckbox => _semanticsMenuItemCheckbox,
     SemanticsRole.menuItemRadio => _semanticsMenuItemRadio,
     SemanticsRole.alert => _noLiveRegion,
@@ -258,13 +258,33 @@ sealed class _DebugSemanticsRoleChecks {
     return null;
   }
 
+  static FlutterError? _semanticsMenuItem(SemanticsNode node) {
+    SemanticsNode? currentNode = node;
+    while (currentNode?.parent != null) {
+      if (currentNode?.parent?.role == SemanticsRole.menu ||
+          currentNode?.parent?.role == SemanticsRole.menuBar) {
+        return null;
+      }
+      currentNode = currentNode?.parent;
+    }
+    return FlutterError('A menu item checkbox must be a child of a menu or a menu bar');
+  }
+
   static FlutterError? _semanticsMenuItemCheckbox(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
     if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
       return FlutterError('a menu item checkbox must have be checkable');
     }
 
-    return null;
+    SemanticsNode? currentNode = node;
+    while (currentNode?.parent != null) {
+      if (currentNode?.parent?.role == SemanticsRole.menu ||
+          currentNode?.parent?.role == SemanticsRole.menuBar) {
+        return null;
+      }
+      currentNode = currentNode?.parent;
+    }
+    return FlutterError('A menu item checkbox must be a child of a menu or a menu bar');
   }
 
   static FlutterError? _semanticsMenuItemRadio(SemanticsNode node) {
@@ -273,7 +293,15 @@ sealed class _DebugSemanticsRoleChecks {
       return FlutterError('a menu item radio must have be checkable');
     }
 
-    return null;
+    SemanticsNode? currentNode = node;
+    while (currentNode?.parent != null) {
+      if (currentNode?.parent?.role == SemanticsRole.menu ||
+          currentNode?.parent?.role == SemanticsRole.menuBar) {
+        return null;
+      }
+      currentNode = currentNode?.parent;
+    }
+    return FlutterError('A menu item checkbox must be a child of a menu or a menu bar');
   }
 
   static FlutterError? _noLiveRegion(SemanticsNode node) {
