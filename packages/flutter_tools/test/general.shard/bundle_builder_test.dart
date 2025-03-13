@@ -266,6 +266,35 @@ void main() {
       'build/95b595cca01caa5f0ca0a690339dd7f6.cache.dill.track.dill',
     );
   });
+
+  testUsingContext(
+    'Release bundle includes native assets',
+    () async {
+      final List<String> dependencies = <String>[];
+      final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        for (final Target dep in target.dependencies) {
+          dependencies.add(dep.name);
+        }
+      });
+      await BundleBuilder().build(
+        platform: TargetPlatform.ios,
+        buildInfo: BuildInfo.release,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        mainPath: globals.fs.path.join('lib', 'main.dart'),
+        assetDirPath: 'example',
+        depfilePath: 'example.d',
+        buildSystem: buildSystem,
+      );
+      expect(dependencies, contains('install_code_assets'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 }
 
 class FakeAssetBundle extends Fake implements AssetBundle {
