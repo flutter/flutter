@@ -1450,7 +1450,9 @@ void main() {
                   );
               await expectLater(
                 () => projectMigration.migrate(),
-                throwsToolExit(message: 'Unable to find parsed PBXNativeTarget for Runner target'),
+                throwsToolExit(
+                  message: 'Unable to find parsed PBXNativeTargets for Runner project',
+                ),
               );
             });
 
@@ -2536,7 +2538,7 @@ void main() {
             );
             expect(
               testLogger.errorText,
-              contains('PBXNativeTarget was not migrated or was migrated incorrectly.'),
+              contains('Some PBXNativeTargets were not migrated or were migrated incorrectly.'),
             );
             expect(
               testLogger.errorText,

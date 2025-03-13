@@ -633,7 +633,7 @@ $newContent
 
     if (applicationNativeTargets.isEmpty) {
       throw Exception(
-        'Unable to find parsed PBXNativeTargets for ${_xcodeProject.hostAppProjectName} target.',
+        'Unable to find parsed PBXNativeTargets for ${_xcodeProject.hostAppProjectName} project.',
       );
     }
 
