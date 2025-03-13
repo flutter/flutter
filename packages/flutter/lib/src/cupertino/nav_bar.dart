@@ -95,6 +95,18 @@ const Border _kTransparentNavBarBorder = Border(
   bottom: BorderSide(color: Color(0x00000000), width: 0.0),
 );
 
+/// The curve of the animation of the top nav bar regardless of push/pop
+/// direction in the hero transition between two nav bars.
+///
+/// Eyeballed on an iPhone 15 Pro simulator running iOS 17.5.
+const Curve _kTopNavBarHeaderTransitionCurve = Cubic(0.0, 0.45, 0.45, 0.98);
+
+/// The curve of the animation of the bottom nav bar regardless of push/pop
+/// direction in the hero transition between two nav bars.
+///
+/// Eyeballed on an iPhone 15 Pro simulator running iOS 17.5.
+const Curve _kBottomNavBarHeaderTransitionCurve = Cubic(0.05, 0.90, 0.90, 0.95);
+
 // There's a single tag for all instances of navigation bars because they can
 // all transition between each other (per Navigator) via Hero transitions.
 const _HeroTag _defaultHeroTag = _HeroTag(null);
@@ -2916,8 +2928,8 @@ class _NavigationBarComponentsTransition {
     Widget child = bottomNavBarBottom.child;
     final Curve animationCurve =
         animation.status == AnimationStatus.forward
-            ? Curves.easeOutCirc
-            : Curves.easeOutQuad.flipped;
+            ? _kBottomNavBarHeaderTransitionCurve
+            : _kBottomNavBarHeaderTransitionCurve.flipped;
 
     // Fade out only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
@@ -3128,8 +3140,8 @@ class _NavigationBarComponentsTransition {
 
     final Curve animationCurve =
         animation.status == AnimationStatus.forward
-            ? Curves.easeOutQuart
-            : Curves.easeOutQuart.flipped;
+            ? _kTopNavBarHeaderTransitionCurve
+            : _kTopNavBarHeaderTransitionCurve.flipped;
 
     return PositionedTransition(
       rect: animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
@@ -3169,8 +3181,8 @@ class _NavigationBarComponentsTransition {
 
     final Curve animationCurve =
         animation.status == AnimationStatus.forward
-            ? Curves.easeOutQuart
-            : Curves.easeOutQuart.flipped;
+            ? _kTopNavBarHeaderTransitionCurve
+            : _kTopNavBarHeaderTransitionCurve.flipped;
 
     // Fade in only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.

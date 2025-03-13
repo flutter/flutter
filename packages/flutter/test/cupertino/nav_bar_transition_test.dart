@@ -974,21 +974,21 @@ void main() {
     expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.706);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.777);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-197.36, epsilon: 0.01),
+      moreOrLessEquals(-156.62, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
 
     // Halfway through the transition, the bottom is only slightly visible.
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.001);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.011);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-795.54, epsilon: 0.01),
+      moreOrLessEquals(-751.94, epsilon: 0.01),
     );
   });
 
@@ -1010,21 +1010,21 @@ void main() {
     expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.706);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.777);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-197.36, epsilon: 0.01),
+      moreOrLessEquals(-156.62, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
 
     // Halfway through the transition, the bottom is only slightly visible.
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.001);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.011);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-795.54, epsilon: 0.01),
+      moreOrLessEquals(-751.94, epsilon: 0.01),
     );
   });
 
@@ -1187,19 +1187,19 @@ void main() {
 
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.123);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.193);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))).dx,
-      moreOrLessEquals(717.78, epsilon: 0.01),
+      moreOrLessEquals(661.64, epsilon: 0.01),
     );
     expect(tester.getTopLeft(flying(tester, find.text('Page 2'))).dy, 54.0);
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.957);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.899);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))).dx,
-      moreOrLessEquals(50.32, epsilon: 0.01),
+      moreOrLessEquals(96.57, epsilon: 0.01),
     );
     expect(tester.getTopLeft(flying(tester, find.text('Page 2'))).dy, 54.0);
   });
@@ -1218,19 +1218,19 @@ void main() {
 
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.123);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.193);
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))).dx,
-      moreOrLessEquals(82.22, epsilon: 0.01),
+      moreOrLessEquals(138.36, epsilon: 0.01),
     );
     expect(tester.getTopRight(flying(tester, find.text('Page 2'))).dy, 54.0);
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.957);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.899);
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))).dx,
-      moreOrLessEquals(749.68, epsilon: 0.01),
+      moreOrLessEquals(703.43, epsilon: 0.01),
     );
     expect(tester.getTopRight(flying(tester, find.text('Page 2'))).dy, 54.0);
   });
@@ -1271,12 +1271,12 @@ void main() {
     // The nav bar bottom is horizontally aligned to the large title.
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      largeTitleOffset.dx - horizontalPadding,
+      moreOrLessEquals(largeTitleOffset.dx - horizontalPadding, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.957);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.899);
 
     largeTitleOffset = tester.getTopLeft(flying(tester, find.text('Page 2')));
 
@@ -1303,20 +1303,20 @@ void main() {
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.123);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.193);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(701.78, epsilon: 0.01),
+      moreOrLessEquals(645.64, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.957);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.899);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(34.32, epsilon: 0.01),
+      moreOrLessEquals(80.57, epsilon: 0.01),
     );
   });
 
