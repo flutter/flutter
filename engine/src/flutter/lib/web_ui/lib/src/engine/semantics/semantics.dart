@@ -2126,7 +2126,7 @@ class SemanticsObject {
       double translateY = -_rect!.top + verticalScrollAdjustment;
 
       for (final childIndex in _childrenInTraversalOrder!) {
-        final child = owner._semanticsTree[childOrder];
+        final child = owner._semanticsTree[childIndex];
         if (child == null) {
           continue;
         }
@@ -2175,7 +2175,7 @@ class SemanticsObject {
   /// Computes the size and position of children.
   void updateChildrenPositionAndSize() {
     for (final childIndex in _childrenInTraversalOrder!) {
-      final child = owner._semanticsTree[childOrder];
+      final child = owner._semanticsTree[childIndex];
       if (child == null) {
         continue;
       }
