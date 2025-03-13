@@ -72,16 +72,14 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// Called from the raster thread.
 - (flutter::PostPrerollResult)postPrerollActionWithThreadMerger:
-                                  (const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger
-                                                impellerEnabled:(BOOL)impellerEnabled;
+    (const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger;
 
 /// @brief Mark the end of a compositor frame.
 ///
 /// May determine changes are required to the thread merging state.
 /// Called from the raster thread.
 - (void)endFrameWithResubmit:(BOOL)shouldResubmitFrame
-                threadMerger:(const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger
-             impellerEnabled:(BOOL)impellerEnabled;
+                threadMerger:(const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger;
 
 /// @brief Returns the Canvas for the overlay slice for the given platform view.
 ///
@@ -140,6 +138,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params;
 
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId;
+
+- (std::vector<int64_t>&)previousCompositionOrder;
 
 @end
 

@@ -10,7 +10,7 @@
 #include "flutter/shell/platform/linux/fl_method_codec_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
-#include "flutter/shell/platform/linux/testing/mock_keymap.h"
+#include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -24,7 +24,7 @@ using ::flutter::testing::keycodes::kPhysicalKeyA;
 constexpr guint16 kKeyCodeKeyA = 0x26u;
 
 TEST(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =

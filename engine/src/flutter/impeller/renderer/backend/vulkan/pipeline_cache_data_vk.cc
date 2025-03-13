@@ -36,9 +36,13 @@ bool PipelineCacheDataPersist(const fml::UniqueFD& cache_directory,
   }
   const auto header = PipelineCacheHeaderVK{props, data_size};
   std::memcpy(allocation->GetBuffer(), &header, sizeof(header));
-  if (cache.getOwner().getPipelineCacheData(
-          *cache, &data_size, allocation->GetBuffer() + sizeof(header)) !=
-      vk::Result::eSuccess) {
+  vk::Result lookup_result = cache.getOwner().getPipelineCacheData(
+      *cache, &data_size, allocation->GetBuffer() + sizeof(header));
+
+  // Some drivers may return incomplete erroneously, but this is not an
+  // error condition as some/all data was still written.
+  if (lookup_result != vk::Result::eSuccess &&
+      lookup_result != vk::Result::eIncomplete) {
     VALIDATION_LOG << "Could not copy pipeline cache data.";
     return false;
   }

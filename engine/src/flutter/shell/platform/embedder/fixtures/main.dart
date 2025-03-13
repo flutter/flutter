@@ -198,6 +198,7 @@ Future<void> a11y_main() async {
           tooltip: 'tooltip',
           textDirection: TextDirection.ltr,
           additionalActions: Int32List(0),
+          controlsNodes: null,
         )
         ..updateNode(
           id: 84,
@@ -233,6 +234,7 @@ Future<void> a11y_main() async {
           additionalActions: Int32List(0),
           childrenInHitTestOrder: Int32List(0),
           childrenInTraversalOrder: Int32List(0),
+          controlsNodes: null,
         )
         ..updateNode(
           id: 96,
@@ -268,6 +270,7 @@ Future<void> a11y_main() async {
           tooltip: 'tooltip',
           textDirection: TextDirection.ltr,
           additionalActions: Int32List(0),
+          controlsNodes: null,
         )
         ..updateNode(
           id: 128,
@@ -303,6 +306,7 @@ Future<void> a11y_main() async {
           textDirection: TextDirection.ltr,
           childrenInHitTestOrder: Int32List(0),
           childrenInTraversalOrder: Int32List(0),
+          controlsNodes: null,
         )
         ..updateCustomAction(id: 21, label: 'Archive', hint: 'archive message');
 
@@ -390,6 +394,7 @@ Future<void> a11y_string_attributes() async {
         tooltip: 'tooltip',
         textDirection: TextDirection.ltr,
         additionalActions: Int32List(0),
+        controlsNodes: null,
       );
 
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
@@ -1599,4 +1604,31 @@ Future<void> render_impeller_image_snapshot_test() async {
 
   final bool result = (pixel & 0xFF) == color.alpha && ((pixel >> 8) & 0xFF) == color.blue;
   notifyBoolValue(result);
+}
+
+@pragma('vm:entry-point')
+void testSendViewFocusEvent() {
+  PlatformDispatcher.instance.onViewFocusChange = (ViewFocusEvent event) {
+    notifyStringValue('${event.viewId} ${event.state} ${event.direction}');
+  };
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+void testSendViewFocusChangeRequest() {
+  PlatformDispatcher.instance.requestViewFocusChange(
+    viewId: 1,
+    state: ViewFocusState.unfocused,
+    direction: ViewFocusDirection.undefined,
+  );
+  PlatformDispatcher.instance.requestViewFocusChange(
+    viewId: 2,
+    state: ViewFocusState.focused,
+    direction: ViewFocusDirection.forward,
+  );
+  PlatformDispatcher.instance.requestViewFocusChange(
+    viewId: 3,
+    state: ViewFocusState.focused,
+    direction: ViewFocusDirection.backward,
+  );
 }

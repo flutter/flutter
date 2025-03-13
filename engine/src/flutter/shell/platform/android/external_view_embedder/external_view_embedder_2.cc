@@ -135,7 +135,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       DlCanvas* overlay_canvas = overlay_frame->Canvas();
       int restore_count = overlay_canvas->GetSaveCount();
       overlay_canvas->Save();
-      overlay_canvas->ClipRect(overlay->second);
+      overlay_canvas->ClipRect(ToDlRect(overlay->second));
 
       // For all following platform views that would cover this overlay,
       // emulate the effect by adding a difference clip. This makes the

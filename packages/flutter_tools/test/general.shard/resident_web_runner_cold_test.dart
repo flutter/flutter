@@ -28,6 +28,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart';
+import '../src/package_config.dart';
 import '../src/test_build_system.dart';
 
 void main() {
@@ -48,8 +49,11 @@ void main() {
     mockFlutterDevice = FakeFlutterDevice(mockWebDevice);
     mockFlutterDevice._devFS = mockWebDevFS;
 
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
-    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+''');
+
+    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
   });
@@ -254,6 +258,11 @@ class FakeWebDevice extends Fake implements Device {
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     return true;
+  }
+
+  @override
+  Future<String> get sdkNameAndVersion async {
+    return 'Flutter Tools';
   }
 
   @override
