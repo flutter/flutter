@@ -20,6 +20,7 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/testing/testing.h"
 #include "fml/synchronization/count_down_latch.h"
+#include "gtest/gtest.h"
 #include "imgui.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/device_buffer.h"
@@ -35,6 +36,7 @@
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkRefCnt.h"
+#include "impeller/playground/playground.h"
 
 namespace impeller {
 namespace testing {
@@ -1135,6 +1137,27 @@ TEST_P(AiksTest, DisplayListToTextureAllocationFailure) {
       DisplayListToTexture(builder.Build(), ISize{0, 0}, aiks_context);
 
   EXPECT_EQ(texture, nullptr);
+}
+
+TEST_P(AiksTest, DisplayListToTextureWithMipGenerationOnGLES) {
+  if (GetBackend() != PlaygroundBackend::kOpenGLES) {
+    GTEST_SKIP() << "Only relevant for GLES";
+  }
+  DisplayListBuilder builder;
+
+  std::shared_ptr<DlImageFilter> filter =
+      DlImageFilter::MakeBlur(8, 8, DlTileMode::kClamp);
+  builder.SaveLayer(std::nullopt, nullptr, filter.get());
+  builder.Restore();
+
+  AiksContext aiks_context(GetContext(), nullptr);
+  // Use intentionally invalid dimensions that would trigger an allocation
+  // failure.
+  auto texture =
+      DisplayListToTexture(builder.Build(), ISize{10, 10}, aiks_context,
+                           /*reset_host_buffer=*/true, /*generate_mips=*/true);
+
+  EXPECT_FALSE(texture->NeedsMipmapGeneration());
 }
 
 }  // namespace testing

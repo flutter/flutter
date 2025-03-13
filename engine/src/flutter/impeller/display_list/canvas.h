@@ -261,6 +261,10 @@ class Canvas {
   // Visible for testing.
   bool SupportsBlitToOnscreen() const;
 
+  /// For picture snapshots we need addition steps to verify that final mipmaps
+  /// are generated.
+  bool EnsureFinalMipmapGeneration() const;
+
  private:
   ContentContext& renderer_;
   RenderTarget render_target_;
