@@ -28,7 +28,7 @@ INTERNAL NOTE
 
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
-- [flutter/164126](https://github.com/flutter/flutter/pull/164126) - On android use Open GL instead of Vulkan MediaTek Soc.
+- [flutter/164606](https://github.com/flutter/flutter/issues/164606) Fixes missing glyph error on Android and iOS devices using Impeller.
 - [flutter/164036](https://github.com/flutter/flutter/pull/164036) - On iOS devices Increase number of concurrent background image decode tasks to partially mitigate "Image upload failed due to loss of GPU access" errors.
 - [flutter/163175](https://github.com/flutter/flutter/pull/163175) - Improve performance of CanvasKit rendering for web.
 - [flutter/164628](https://github.com/flutter/flutter/issues/164628) - iOS Fixes crash when allocation of surface for toImage/toImageSync fails.
@@ -37,6 +37,7 @@ INTERNAL NOTE
 - [flutter/164024](https://github.com/flutter/flutter/issues/164024): - Add back an empty io.flutter.app.FlutterApplication for Android apps post v2 embedder migration.
 - [flutter/162198](https://github.com/flutter/flutter/issues/162198) - Fixes double-download of canvaskit.wasm
 - [flutter/164392](https://github.com/flutter/flutter/pull/164392) - All platforms, Fixes a crash that can occur when animating and interacting with a scrollable simultaneously.
+- [flutter/164126](https://github.com/flutter/flutter/pull/164126) - On android use Open GL instead of Vulkan MediaTek Soc.
 
 ### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
 
