@@ -106,7 +106,7 @@ const SkPath& DlPath::GetSkPath() const {
   return sk_path.value();
 }
 
-Path DlPath::GetPath() const {
+const Path& DlPath::GetPath() const {
   auto& sk_path = data_->sk_path;
   auto& path = data_->path;
   if (path.has_value()) {

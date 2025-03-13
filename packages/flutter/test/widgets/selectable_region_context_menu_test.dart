@@ -187,19 +187,16 @@ class RenderSelectionSpy extends RenderProxyBox with Selectable, SelectionRegist
   List<SelectionEvent> events = <SelectionEvent>[];
 
   @override
-  Size get size => _size;
-  Size _size = Size.zero;
-
-  @override
   List<Rect> get boundingBoxes => _boundingBoxes;
   final List<Rect> _boundingBoxes = <Rect>[];
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    _size = Size(constraints.maxWidth, constraints.maxHeight);
-    _boundingBoxes.add(Rect.fromLTWH(0.0, 0.0, constraints.maxWidth, constraints.maxHeight));
-    return _size;
+  void performLayout() {
+    _boundingBoxes.add(Offset.zero & (size = computeDryLayout(constraints)));
   }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
 
   @override
   void addListener(VoidCallback listener) => listeners.add(listener);

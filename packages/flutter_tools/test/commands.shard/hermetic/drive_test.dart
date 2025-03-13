@@ -567,7 +567,6 @@ void main() {
           '--trace-systrace',
           '--trace-to-file=path/to/trace.binpb',
           '--verbose-system-logs',
-          '--null-assertions',
           '--native-null-assertions',
           '--enable-impeller',
           '--trace-systrace',
@@ -588,7 +587,6 @@ void main() {
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');
       expect(options.verboseSystemLogs, true);
-      expect(options.nullAssertions, true);
       expect(options.nativeNullAssertions, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
       expect(options.traceSystrace, true);
