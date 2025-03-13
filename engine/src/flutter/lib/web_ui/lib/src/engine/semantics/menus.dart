@@ -23,6 +23,54 @@ class SemanticMenu extends SemanticRole {
     setAriaRole('menu');
   }
 
+  bool _isMenuItem(SemanticsObject semanticsObject) {
+    if (semanticsObject!.role == null) {
+      return false;
+    }
+
+    if (semanticsObject!.role == ui.SemanticsRole.menuItem ||
+        semanticsObject!.role == ui.SemanticsRole.menuItemCheckbox ||
+        semanticsObject!.role == ui.SemanticsRole.menuItemRadio) {
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  void update() {
+    // Menu items in DropdownButton, PopupMenuButton and MenuAnchor are not the
+    // immediate children, so we need to set `aria-owns` on menu. When the menu
+    // is open, the tree is still the ole one without the menu item information,
+    // so `addOneTimePostUpdateCallback` is added to get the latest tree info.
+    semanticsObject.owner.addOneTimePostUpdateCallback(_updateMenuItemId);
+  }
+
+  // Starting from the current semantics node, this method traverses the
+  // semantics tree and collects the menu items by checking whether the role of
+  // the node is [menuItem], then set `aria-owns` attribute to them.
+  void _updateMenuItemId() {
+    final Map<int, SemanticsObject> tree = semanticsObject.owner.semanticsTree;
+    List<int> ids = [];
+    int root = semanticsObject.id;
+    List<int> queue = [];
+    if (tree[root]?.childrenInTraversalOrder != null) {
+      queue.addAll(tree[root]!.childrenInTraversalOrder!);
+    }
+    while (queue.isNotEmpty) {
+      int child = queue.removeAt(0);
+      if (tree[child] != null && _isMenuItem(tree[child]!)) {
+        ids.add(child);
+      }
+
+      if (tree[child]?.childrenInTraversalOrder != null) {
+        queue.addAll(tree[child]!.childrenInTraversalOrder!);
+      }
+    }
+    for (int id in ids) {
+      setAttribute('aria-owns', 'flt-semantic-node-$id');
+    }
+  }
+
   @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
