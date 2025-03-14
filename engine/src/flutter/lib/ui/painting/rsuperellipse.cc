@@ -22,7 +22,7 @@ RSuperellipse::RSuperellipse(const tonic::Float64List& values) {
 RSuperellipse::~RSuperellipse() = default;
 
 flutter::DlRoundSuperellipse RSuperellipse::rsuperellipse() const {
-  return flutter::DlRoundSuperellipse::MakeRectRadii(bounds(), radii());
+  return flutter::DlRoundSuperellipse::MakeRectRadii(GetBounds(), radii());
 }
 
 double RSuperellipse::getValue(int index) const {
@@ -39,16 +39,17 @@ bool RSuperellipse::contains(double x, double y) const {
       DlPoint(static_cast<DlScalar>(x), static_cast<DlScalar>(y)));
 }
 
-DlScalar RSuperellipse::value32(int index) const {
-  return static_cast<DlScalar>(getValue(index));
+DlScalar RSuperellipse::scalar_value(int index) const {
+  return SafeNarrow(getValue(index));
 }
 
-flutter::DlRect RSuperellipse::bounds() const {
+flutter::DlRect RSuperellipse::GetBounds() const {
   // The Flutter rect may be inverted (upside down, backward, or both)
   // Historically, Skia would normalize such rects but we will do that
   // manually below when we construct the Impeller RoundRect
-  flutter::DlRect raw_rect = flutter::DlRect::MakeLTRB(
-      value32(kLeft), value32(kTop), value32(kRight), value32(kBottom));
+  flutter::DlRect raw_rect =
+      flutter::DlRect::MakeLTRB(scalar_value(kLeft), scalar_value(kTop),
+                                scalar_value(kRight), scalar_value(kBottom));
   return raw_rect.GetPositive();
 }
 
@@ -56,19 +57,21 @@ impeller::RoundingRadii RSuperellipse::radii() const {
   // Flutter has radii in TL,TR,BR,BL (clockwise) order,
   // but Impeller uses TL,TR,BL,BR (zig-zag) order
   return impeller::RoundingRadii{
-      .top_left = flutter::DlSize(value32(kTopLeftX), value32(kTopLeftY)),
-      .top_right = flutter::DlSize(value32(kTopRightX), value32(kTopRightY)),
-      .bottom_left =
-          flutter::DlSize(value32(kBottomLeftX), value32(kBottomLeftY)),
-      .bottom_right =
-          flutter::DlSize(value32(kBottomRightX), value32(kBottomRightY)),
+      .top_left =
+          flutter::DlSize(scalar_value(kTopLeftX), scalar_value(kTopLeftY)),
+      .top_right =
+          flutter::DlSize(scalar_value(kTopRightX), scalar_value(kTopRightY)),
+      .bottom_left = flutter::DlSize(scalar_value(kBottomLeftX),
+                                     scalar_value(kBottomLeftY)),
+      .bottom_right = flutter::DlSize(scalar_value(kBottomRightX),
+                                      scalar_value(kBottomRightY)),
   };
 }
 
 const impeller::RoundSuperellipseParam& RSuperellipse::param() const {
   if (!cached_param_.has_value()) {
     cached_param_ =
-        impeller::RoundSuperellipseParam::MakeBoundsRadii(bounds(), radii());
+        impeller::RoundSuperellipseParam::MakeBoundsRadii(GetBounds(), radii());
   }
   return cached_param_.value();
 }

@@ -51,7 +51,7 @@ class RSuperellipse : public RefCountedDartWrappable<RSuperellipse> {
 
   explicit RSuperellipse(const tonic::Float64List& values);
 
-  flutter::DlScalar value32(int index) const;
+  flutter::DlScalar scalar_value(int index) const;
   flutter::DlRect bounds() const;
   impeller::RoundingRadii radii() const;
   const impeller::RoundSuperellipseParam& param() const;
