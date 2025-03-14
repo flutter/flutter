@@ -1697,7 +1697,7 @@ class SemanticsObject {
     // Trivial case: previous list was empty => just populate the container.
     if (_currentChildrenInRenderOrder == null || _currentChildrenInRenderOrder!.isEmpty) {
       for (final SemanticsObject child in childrenInRenderOrder) {
-        element!.append(child.element);
+        element.append(child.element);
         owner._attachObject(parent: this, child: child);
       }
       _currentChildrenInRenderOrder = childrenInRenderOrder;
@@ -1781,9 +1781,9 @@ class SemanticsObject {
       final SemanticsObject child = childrenInRenderOrder[i];
       if (!stationaryIds.contains(child.id)) {
         if (refNode == null) {
-          element!.append(child.element);
+          element.append(child.element);
         } else {
-          element!.insertBefore(child.element, refNode);
+          element.insertBefore(child.element, refNode);
         }
         owner._attachObject(parent: this, child: child);
       } else {
@@ -2052,8 +2052,8 @@ class SemanticsObject {
     // If this node has children, we need to compensate for the parent's rect and
     // pass down the scroll adjustments.
     if (hasChildren) {
-      double translateX = -_rect!.left + horizontalScrollAdjustment;
-      double translateY = -_rect!.top + verticalScrollAdjustment;
+      final double translateX = -_rect!.left + horizontalScrollAdjustment;
+      final double translateY = -_rect!.top + verticalScrollAdjustment;
 
       for (final childIndex in _childrenInTraversalOrder!) {
         final child = owner._semanticsTree[childIndex];
@@ -2778,6 +2778,7 @@ class EngineSemanticsOwner {
       final SemanticsObject object = _semanticsTree[nodeUpdate.id]!;
       object.updateChildren();
       object._dirtyFields = 0;
+
       object.recomputePositionAndSize();
       object.updateChildrenPositionAndSize();
     }
