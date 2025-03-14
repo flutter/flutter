@@ -577,13 +577,15 @@ mixin SchedulerBinding on BindingBase {
 
   /// Schedules the given transient frame callback.
   ///
-  /// Adds the given callback to the list of frame callbacks and ensures that a
-  /// frame is scheduled.
+  /// Adds the given callback to the list of frame callbacks, and ensures that a
+  /// frame is scheduled if the `scheduleNewFrame` argument is true.
+  ///
+  /// The `scheduleNewFrame` argument dictates whether [scheduleFrame] should be
+  /// called to ensure a new frame. Defaults to true.
   ///
   /// If this is called during the frame's animation phase (when transient frame
-  /// callbacks are still being invoked), a new frame will be scheduled, and
-  /// `callback` will be called in the newly scheduled frame, not in the current
-  /// frame.
+  /// callbacks are still being invoked), `callback` will be called in the next
+  /// frame, not in the current frame.
   ///
   /// If this is a one-off registration, ignore the `rescheduling` argument.
   ///
@@ -605,8 +607,14 @@ mixin SchedulerBinding on BindingBase {
   ///  * [WidgetsBinding.drawFrame], which explains the phases of each frame
   ///    for those apps that use Flutter widgets (and where transient frame
   ///    callbacks fit into those phases).
-  int scheduleFrameCallback(FrameCallback callback, {bool rescheduling = false}) {
-    scheduleFrame();
+  int scheduleFrameCallback(
+    FrameCallback callback, {
+    bool rescheduling = false,
+    bool scheduleNewFrame = true,
+  }) {
+    if (scheduleNewFrame) {
+      scheduleFrame();
+    }
     _nextFrameCallbackId += 1;
     _transientCallbacks[_nextFrameCallbackId] = _FrameCallbackEntry(
       callback,
