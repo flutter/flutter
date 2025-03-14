@@ -93,11 +93,14 @@ void testMain() {
       'VisitedText',
     ];
 
-    final detector = SystemColorPaletteDetector();
-    expect(detector.systemColors.keys, containsAll(systemColorNames));
+    final detectorLight = SystemColorPaletteDetector(ui.Brightness.light);
+    expect(detectorLight.systemColors.keys, containsAll(systemColorNames));
+
+    final detectorDark = SystemColorPaletteDetector(ui.Brightness.dark);
+    expect(detectorDark.systemColors.keys, containsAll(systemColorNames));
 
     expect(
-      detector.systemColors.values.where((color) => color.isSupported),
+      detectorLight.systemColors.values.where((color) => color.isSupported),
       // Different browser/OS combinations support different colors. It's
       // impractical to encode the precise number for each combo. Instead, this
       // test only makes sure that at least some "reasonable" number of colors
@@ -106,6 +109,26 @@ void testMain() {
       // colors.
       hasLength(greaterThan(15)),
     );
+    expect(
+      detectorDark.systemColors.values.where((color) => color.isSupported),
+      hasLength(greaterThan(15)),
+    );
+
+    // Ensure that at least some colors are different between light and dark mode.
+    int differentCount = 0;
+    for (final colorName in systemColorNames) {
+      final lightColor = detectorLight.systemColors[colorName];
+      final darkColor = detectorDark.systemColors[colorName];
+      if (lightColor != null &&
+          darkColor != null &&
+          lightColor.isSupported &&
+          darkColor.isSupported &&
+          lightColor.value != darkColor.value) {
+        differentCount++;
+      }
+    }
+    // The number 3 has no special meaning. It's just to ensure that "some" colors are different.
+    expect(differentCount, greaterThan(3));
   });
 
   test('SystemColor', () {
@@ -121,51 +144,63 @@ void testMain() {
     expect(unsupportedColor.name, 'UnsupportedColor');
     expect(unsupportedColor.value, isNull);
     expect(unsupportedColor.isSupported, isFalse);
-
-    expect(ui.SystemColor.accentColor.name, 'AccentColor');
-    expect(ui.SystemColor.accentColorText.name, 'AccentColorText');
-    expect(ui.SystemColor.activeText.name, 'ActiveText');
-    expect(ui.SystemColor.buttonBorder.name, 'ButtonBorder');
-    expect(ui.SystemColor.buttonFace.name, 'ButtonFace');
-    expect(ui.SystemColor.buttonText.name, 'ButtonText');
-    expect(ui.SystemColor.canvas.name, 'Canvas');
-    expect(ui.SystemColor.canvasText.name, 'CanvasText');
-    expect(ui.SystemColor.field.name, 'Field');
-    expect(ui.SystemColor.fieldText.name, 'FieldText');
-    expect(ui.SystemColor.grayText.name, 'GrayText');
-    expect(ui.SystemColor.highlight.name, 'Highlight');
-    expect(ui.SystemColor.highlightText.name, 'HighlightText');
-    expect(ui.SystemColor.linkText.name, 'LinkText');
-    expect(ui.SystemColor.mark.name, 'Mark');
-    expect(ui.SystemColor.markText.name, 'MarkText');
-    expect(ui.SystemColor.selectedItem.name, 'SelectedItem');
-    expect(ui.SystemColor.selectedItemText.name, 'SelectedItemText');
-    expect(ui.SystemColor.visitedText.name, 'VisitedText');
-
-    final allColors = <ui.SystemColor>[
-      ui.SystemColor.accentColor,
-      ui.SystemColor.accentColorText,
-      ui.SystemColor.activeText,
-      ui.SystemColor.buttonBorder,
-      ui.SystemColor.buttonFace,
-      ui.SystemColor.buttonText,
-      ui.SystemColor.canvas,
-      ui.SystemColor.canvasText,
-      ui.SystemColor.field,
-      ui.SystemColor.fieldText,
-      ui.SystemColor.grayText,
-      ui.SystemColor.highlight,
-      ui.SystemColor.highlightText,
-      ui.SystemColor.linkText,
-      ui.SystemColor.mark,
-      ui.SystemColor.markText,
-      ui.SystemColor.selectedItem,
-      ui.SystemColor.selectedItemText,
-      ui.SystemColor.visitedText,
-    ];
-
-    for (final color in allColors) {
-      expect(color.value != null, color.isSupported);
-    }
   });
+
+  group('SystemColorPalette', () {
+    test('.light', () {
+      testPalette(ui.SystemColor.light);
+    });
+
+    test('.dark', () {
+      testPalette(ui.SystemColor.dark);
+    });
+  });
+}
+
+void testPalette(ui.SystemColorPalette palette) {
+  expect(palette.accentColor.name, 'AccentColor');
+  expect(palette.accentColorText.name, 'AccentColorText');
+  expect(palette.activeText.name, 'ActiveText');
+  expect(palette.buttonBorder.name, 'ButtonBorder');
+  expect(palette.buttonFace.name, 'ButtonFace');
+  expect(palette.buttonText.name, 'ButtonText');
+  expect(palette.canvas.name, 'Canvas');
+  expect(palette.canvasText.name, 'CanvasText');
+  expect(palette.field.name, 'Field');
+  expect(palette.fieldText.name, 'FieldText');
+  expect(palette.grayText.name, 'GrayText');
+  expect(palette.highlight.name, 'Highlight');
+  expect(palette.highlightText.name, 'HighlightText');
+  expect(palette.linkText.name, 'LinkText');
+  expect(palette.mark.name, 'Mark');
+  expect(palette.markText.name, 'MarkText');
+  expect(palette.selectedItem.name, 'SelectedItem');
+  expect(palette.selectedItemText.name, 'SelectedItemText');
+  expect(palette.visitedText.name, 'VisitedText');
+
+  final allColors = <ui.SystemColor>[
+    palette.accentColor,
+    palette.accentColorText,
+    palette.activeText,
+    palette.buttonBorder,
+    palette.buttonFace,
+    palette.buttonText,
+    palette.canvas,
+    palette.canvasText,
+    palette.field,
+    palette.fieldText,
+    palette.grayText,
+    palette.highlight,
+    palette.highlightText,
+    palette.linkText,
+    palette.mark,
+    palette.markText,
+    palette.selectedItem,
+    palette.selectedItemText,
+    palette.visitedText,
+  ];
+
+  for (final color in allColors) {
+    expect(color.value != null, color.isSupported);
+  }
 }

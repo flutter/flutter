@@ -570,7 +570,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   static const double defaultBlurSigma = 30.0;
 
   /// The default corner radius of a [CupertinoPopupSurface].
-  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(14));
+  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(13));
 
   // The [ColorFilter] matrix used to saturate widgets underlying a
   // [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
@@ -719,13 +719,13 @@ class CupertinoPopupSurface extends StatelessWidget {
     }
 
     if (filter != null) {
-      return ClipRRect(
+      return ClipRSuperellipse(
         borderRadius: _clipper,
         child: BackdropFilter(filter: filter, child: contents),
       );
     }
 
-    return ClipRRect(borderRadius: _clipper, child: contents);
+    return ClipRSuperellipse(borderRadius: _clipper, child: contents);
   }
 }
 

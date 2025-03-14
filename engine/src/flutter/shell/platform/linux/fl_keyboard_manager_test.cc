@@ -12,7 +12,7 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/key_mapping.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
-#include "flutter/shell/platform/linux/testing/mock_keymap.h"
+#include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
 #include "gtest/gtest.h"
 
@@ -109,7 +109,7 @@ extern const MockLayoutData kLayoutRussian;
 extern const MockLayoutData kLayoutFrench;
 
 TEST(FlKeyboardManagerTest, EngineNoResponseChannelHandled) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   // Channel handles all events.
@@ -174,7 +174,7 @@ TEST(FlKeyboardManagerTest, EngineNoResponseChannelHandled) {
 }
 
 TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledSync) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
 
@@ -219,7 +219,7 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledSync) {
 }
 
 TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledSync) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
 
@@ -264,7 +264,7 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledSync) {
 }
 
 TEST(FlKeyboardManagerTest, EngineHandledChannelHandledSync) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
 
@@ -309,7 +309,7 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelHandledSync) {
 }
 
 TEST(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledSync) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
 
@@ -362,7 +362,7 @@ static void channel_respond(FlMockBinaryMessenger* messenger,
 }
 
 TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledAsync) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
 
@@ -423,7 +423,7 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledAsync) {
 }
 
 TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledAsync) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
 
@@ -484,7 +484,7 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledAsync) {
 }
 
 TEST(FlKeyboardManagerTest, EngineHandledChannelHandledAsync) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
 
@@ -545,7 +545,7 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelHandledAsync) {
 }
 
 TEST(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledAsync) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
 
@@ -606,7 +606,7 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledAsync) {
 }
 
 TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
@@ -739,7 +739,7 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
 }
 
 TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
@@ -801,7 +801,7 @@ TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
 }
 
 TEST(FlKeyboardManagerTest, GetPressedState) {
-  ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =

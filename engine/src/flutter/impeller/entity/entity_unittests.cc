@@ -17,7 +17,6 @@
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/raw_ptr.h"
 #include "impeller/core/texture_descriptor.h"
-#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
@@ -55,10 +54,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
-#include "impeller/typographer/backends/skia/text_frame_skia.h"
-#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/imgui/imgui.h"
-#include "third_party/skia/include/core/SkTextBlob.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
 // NOLINTBEGIN(bugprone-unchecked-optional-access)
@@ -2114,11 +2110,11 @@ TEST_P(EntityTest, ColorFilterContentsWithLargeGeometry) {
 }
 
 TEST_P(EntityTest, TextContentsCeilsGlyphScaleToDecimal) {
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.4321111f), 0.43f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.5321111f), 0.53f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(2.1f), 2.1f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.0f), 0.0f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(100000000.0f), 48.0f);
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.4321111f), Rational(43, 100));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.5321111f), Rational(53, 100));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(2.1f), Rational(21, 10));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.0f), Rational(0, 1));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(100000000.0f), Rational(48, 1));
 }
 
 TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
