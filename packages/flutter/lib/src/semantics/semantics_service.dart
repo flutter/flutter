@@ -41,7 +41,8 @@ abstract final class SemanticsService {
   ///
   /// [1]: https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)
   ///
-  static Future<void> announce(String message,
+  static Future<void> announce(
+    String message,
     TextDirection textDirection, {
     Assertiveness assertiveness = Assertiveness.polite,
   }) async {

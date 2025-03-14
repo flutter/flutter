@@ -308,7 +308,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 TAG,
                 "Using AnnounceSemanticsEvent for accessibility is deprecated on Android. "
                     + "Migrate to using semantic properties for a more robust and accessible "
-                    + "user experience");
+                    + "user experience. See https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)");
           }
           rootAccessibilityView.announceForAccessibility(message);
         }
