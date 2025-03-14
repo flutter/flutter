@@ -77,6 +77,19 @@ void TextContents::SetTextProperties(Color color,
   }
 }
 
+namespace {
+Scalar AttractToOne(Scalar x) {
+  if (std::abs(x - 1.f) < kEhCloseEnough) {
+    return 1.f;
+  }
+  if (std::abs(x + 1.f) < kEhCloseEnough) {
+    return -1.f;
+  }
+  return x;
+}
+
+}  // namespace
+
 void TextContents::ComputeVertexData(
     VS::PerVertexData* vtx_contents,
     const std::shared_ptr<TextFrame>& frame,
@@ -165,8 +178,6 @@ void TextContents::ComputeVertexData(
         atlas_glyph_bounds = maybe_atlas_glyph_bounds.value().atlas_bounds;
       }
 
-      Rect scaled_bounds =
-          glyph_bounds.Scale(static_cast<Scalar>(rounded_scale.Invert()));
       // For each glyph, we compute two rectangles. One for the vertex
       // positions and one for the texture coordinates (UVs). The atlas
       // glyph bounds are used to compute UVs in cases where the
@@ -175,9 +186,17 @@ void TextContents::ComputeVertexData(
       Point uv_origin = (atlas_glyph_bounds.GetLeftTop()) / atlas_size;
       Point uv_size = SizeToPoint(atlas_glyph_bounds.GetSize()) / atlas_size;
 
+      Scalar inverted_rounded_scale =
+          static_cast<Scalar>(rounded_scale.Invert());
       Matrix unscaled_basis =
-          Matrix::MakeScale({basis_transform.m[0] > 0 ? 1.f : -1.f,
-                             basis_transform.m[5] > 0 ? 1.f : -1.f, 1.f});
+          basis_transform * Matrix::MakeScale({inverted_rounded_scale,
+                                               inverted_rounded_scale, 1});
+
+      // In typical scales < 48x these values should be -1 or 1. We round to
+      // those to avoid inaccuracies.
+      basis_transform.m[0] = AttractToOne(basis_transform.m[0]);
+      basis_transform.m[5] = AttractToOne(basis_transform.m[5]);
+
       Point unrounded_glyph_position =
           // This is for RTL text.
           unscaled_basis * glyph_bounds.GetLeftTop() +
@@ -193,6 +212,7 @@ void TextContents::ComputeVertexData(
                       (unscaled_basis * point * glyph_bounds.GetSize()))
                          .Round();
         } else {
+          Rect scaled_bounds = glyph_bounds.Scale(inverted_rounded_scale);
           position = entity_transform *
                      (glyph_position.position + scaled_bounds.GetLeftTop() +
                       point * scaled_bounds.GetSize());
