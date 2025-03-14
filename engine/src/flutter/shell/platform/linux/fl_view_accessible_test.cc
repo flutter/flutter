@@ -17,6 +17,7 @@ TEST(FlViewAccessibleTest, BuildTree) {
   int32_t children[] = {111, 222};
   FlutterSemanticsNode2 root_node = {
       .id = 0,
+      .identifier = "",
       .label = "root",
       .child_count = 2,
       .children_in_traversal_order = children,
