@@ -109,6 +109,8 @@ TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
 }
 
 TEST_P(AiksTest, RuntimeEffectWithInvalidSamplerDoesNotCrash) {
+  ScopedValidationDisable disable_validation;
+
   // Create a sampler that is not usable as an input to the runtime effect.
   std::vector<flutter::DlColor> colors = {flutter::DlColor::kBlue(),
                                           flutter::DlColor::kRed()};
