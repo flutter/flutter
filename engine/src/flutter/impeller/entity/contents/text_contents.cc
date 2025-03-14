@@ -200,7 +200,6 @@ void TextContents::ComputeVertexData(
       unscaled_basis.m[0] = AttractToOne(unscaled_basis.m[0]);
       unscaled_basis.m[5] = AttractToOne(unscaled_basis.m[5]);
 
-      FML_CHECK(unscaled_basis.m[0] == 1.f);
       Point unrounded_glyph_position =
           // This is for RTL text.
           unscaled_basis * glyph_bounds.GetLeftTop() +
