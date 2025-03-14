@@ -110,6 +110,9 @@ void runSemanticsTests() {
   group('accessibility builder', () {
     _testEngineAccessibilityBuilder();
   });
+  group('alert', () {
+    _testAlerts();
+  });
   group('group', () {
     _testGroup();
   });
@@ -128,6 +131,9 @@ void runSemanticsTests() {
   });
   group('table', () {
     _testTables();
+  });
+  group('list', () {
+    _testLists();
   });
   group('controlsNodes', () {
     _testControlsNodes();
@@ -294,6 +300,50 @@ void _testEngineAccessibilityBuilder() {
     builder.reduceMotion = true;
     features = builder.build();
     expect(features.reduceMotion, isTrue);
+  });
+}
+
+void _testAlerts() {
+  test('nodes with alert role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.alert,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.alert);
+    expect(object.element.getAttribute('role'), 'alert');
+  });
+
+  test('nodes with status role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.status,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.status);
+    expect(object.element.getAttribute('role'), 'status');
   });
 }
 
@@ -4036,6 +4086,52 @@ void _testTables() {
     final SemanticsObject object = pumpSemantics();
     expect(object.semanticRole?.kind, EngineSemanticsRole.columnHeader);
     expect(object.element.getAttribute('role'), 'columnheader');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testLists() {
+  test('nodes with list role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.list,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.list);
+    expect(object.element.getAttribute('role'), 'list');
+  });
+
+  test('nodes with list item role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.listItem,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.listItem);
+    expect(object.element.getAttribute('role'), 'listitem');
   });
 
   semantics().semanticsEnabled = false;

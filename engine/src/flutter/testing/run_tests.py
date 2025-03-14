@@ -765,6 +765,7 @@ def run_android_tests(android_variant='android_debug_unopt', adb_path=None):
 
   run_android_unittest('flutter_shell_native_unittests', android_variant, adb_path)
   run_android_unittest('impeller_toolkit_android_unittests', android_variant, adb_path)
+  run_android_unittest('impeller_vulkan_android_unittests', android_variant, adb_path)
 
 
 def run_objc_tests(ios_variant='ios_debug_sim_unopt', test_filter=None):
