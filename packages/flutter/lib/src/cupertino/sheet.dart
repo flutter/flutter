@@ -571,6 +571,11 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   DelegatedTransitionBuilder? get delegatedTransition =>
       CupertinoSheetTransition.delegateTransition;
 
+  /// Determines whether the content can be dragged.
+  ///
+  /// If `true`, dragging is enabled; otherwise, it remains fixed.
+  bool get enableDrag;
+
   @override
   Widget buildPage(
     BuildContext context,
@@ -588,11 +593,6 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       controller: route.controller!, // protected access
     );
   }
-
-  /// Determines whether the content can be scrolled.
-  ///
-  /// If `true`, scrolling is enabled; otherwise, it remains fixed.
-  bool get enableDrag;
 
   /// Returns a [CupertinoSheetTransition].
   static Widget buildPageTransitions<T>(
