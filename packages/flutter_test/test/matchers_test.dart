@@ -775,6 +775,8 @@ void main() {
           isExpanded: true,
           hasRequiredState: true,
           isRequired: true,
+          isProgressBar: true,
+          isLoadingSpinner: true,
           /* Actions */
           hasTapAction: true,
           hasLongPressAction: true,
@@ -1076,6 +1078,8 @@ void main() {
           isExpanded: true,
           hasRequiredState: true,
           isRequired: true,
+          isProgressBar: true,
+          isLoadingSpinner: true,
           /* Actions */
           hasTapAction: true,
           hasLongPressAction: true,
@@ -1175,6 +1179,8 @@ void main() {
           isExpanded: false,
           hasRequiredState: false,
           isRequired: false,
+          isProgressBar: false,
+          isLoadingSpinner: false,
           /* Actions */
           hasTapAction: false,
           hasLongPressAction: false,

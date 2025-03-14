@@ -136,6 +136,8 @@ enum class SemanticsFlags : int32_t {
   kHasSelectedState = 1 << 28,
   kHasRequiredState = 1 << 29,
   kIsRequired = 1 << 30,
+  kIsProgressBar = 1 << 31,
+  kIsLoadingSpinner = 1 << 32,
 };
 
 const int kScrollableSemanticsFlags =
