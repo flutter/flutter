@@ -20,7 +20,8 @@ TEST(FlViewAccessibleTest, BuildTree) {
                                      .label = "root",
                                      .child_count = 2,
                                      .children_in_traversal_order = children,
-                                     .flags2 = &flags};
+                                     .flags2 = &flags,
+                                     .identifier = ""};
   FlutterSemanticsNode2 child1_node = {
       .id = 111, .label = "child 1", .flags2 = &flags};
   FlutterSemanticsNode2 child2_node = {

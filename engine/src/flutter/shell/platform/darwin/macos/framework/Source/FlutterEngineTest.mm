@@ -338,6 +338,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
 
   FlutterSemanticsNode2 child1;
   child1.id = 1;
@@ -354,6 +355,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   child1.tooltip = "";
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
 
   FlutterSemanticsUpdate2 update;
   update.node_count = 2;
