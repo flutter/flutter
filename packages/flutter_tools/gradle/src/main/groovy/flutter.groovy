@@ -14,6 +14,7 @@ import com.flutter.gradle.BaseApplicationNameHandler
 import com.flutter.gradle.Deeplink
 import com.flutter.gradle.DependencyVersionChecker
 import com.flutter.gradle.FlutterExtension
+import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.IntentFilterCheck
 import com.flutter.gradle.VersionUtils
 import groovy.xml.QName
@@ -272,7 +273,7 @@ class FlutterPlugin implements Plugin<Project> {
             // This limitation has been removed experimentally in gradle plugin version 4.2, so we can remove
             // this check when we upgrade to 4.2+ gradle. Currently, deferred components apps may see
             // increased app size due to this.
-            if (shouldShrinkResources(project)) {
+            if (FlutterPluginUtils.shouldShrinkResources(project)) {
                 release {
                     // Enables code shrinking, obfuscation, and optimization for only
                     // your project's release build type.
@@ -307,20 +308,20 @@ class FlutterPlugin implements Plugin<Project> {
         project.android.buildTypes.all(this.&addFlutterDependencies)
     }
 
-    private static Boolean shouldShrinkResources(Project project) {
-        final String propShrink = "shrink"
-        if (project.hasProperty(propShrink)) {
-            return project.property(propShrink).toBoolean()
-        }
-        return true
-    }
+//    private static Boolean shouldShrinkResources(Project project) {
+//        final String propShrink = "shrink"
+//        if (project.hasProperty(propShrink)) {
+//            return project.property(propShrink).toBoolean()
+//        }
+//        return true
+//    }
 
-    private static String toCamelCase(List<String> parts) {
-        if (parts.empty) {
-            return ""
-        }
-        return "${parts[0]}${parts[1..-1].collect { it.capitalize() }.join('')}"
-    }
+//    private static String toCamelCase(List<String> parts) {
+//        if (parts.empty) {
+//            return ""
+//        }
+//        return "${parts[0]}${parts[1..-1].collect { it.capitalize() }.join('')}"
+//    }
 
     private static Properties readPropertiesIfExist(File propertiesFile) {
         Properties result = new Properties()
@@ -1181,7 +1182,8 @@ class FlutterPlugin implements Plugin<Project> {
 
             String variantBuildMode = buildModeFor(variant.buildType)
             String flavorValue = variant.getFlavorName()
-            String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
+            println("HI GRAY, getting to spot 1")
+            String taskName = FlutterPluginUtils.toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
             // Be careful when configuring task below, Groovy has bizarre
             // scoping rules: writing `verbose isVerbose()` means calling
             // `isVerbose` on the task itself - which would return `verbose`
