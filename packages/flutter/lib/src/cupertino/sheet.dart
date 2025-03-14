@@ -590,12 +590,13 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   bool get enableDrag;
 
   /// Returns a [CupertinoSheetTransition].
-  Widget buildPageTransitions(
+  static Widget buildPageTransitions<T>(
     ModalRoute<T> route,
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
+    bool enableDrag,
   ) {
     final bool linearTransition = route.popGestureInProgress;
     return CupertinoSheetTransition(
@@ -622,7 +623,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return buildPageTransitions(this, context, animation, secondaryAnimation, child);
+    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child, enableDrag);
   }
 }
 
