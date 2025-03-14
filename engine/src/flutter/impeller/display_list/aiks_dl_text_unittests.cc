@@ -181,13 +181,15 @@ TEST_P(AiksTest, ScaledK) {
 }
 
 TEST_P(AiksTest, CanRenderTextFrameWithScalingOverflow) {
-  Scalar scale = 40.0;
-  Scalar offset = 600.0;
+  Scalar scale = 60.0;
+  Scalar offsetx = -500.0;
+  Scalar offsety = 700.0;
   auto callback = [&]() -> sk_sp<DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("scale", &scale, 1.f, 300.f);
-      ImGui::SliderFloat("offset", &offset, 600.f, 2048.f);
+      ImGui::SliderFloat("offsetx", &offsetx, -600.f, 100.f);
+      ImGui::SliderFloat("offsety", &offsety, 600.f, 2048.f);
       ImGui::End();
     }
     DisplayListBuilder builder;
@@ -197,10 +199,11 @@ TEST_P(AiksTest, CanRenderTextFrameWithScalingOverflow) {
     builder.DrawPaint(paint);
     builder.Scale(scale, scale);
 
-    RenderTextInCanvasSkia(GetContext(), builder, "test", "Roboto-Regular.ttf",
-                           TextRenderOptions{
-                               .position = DlPoint(0, offset / scale),
-                           });
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "test", "Roboto-Regular.ttf",
+        TextRenderOptions{
+            .position = DlPoint(offsetx / scale, offsety / scale),
+        });
     return builder.Build();
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
