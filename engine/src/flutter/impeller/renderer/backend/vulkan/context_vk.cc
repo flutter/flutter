@@ -148,18 +148,8 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
-  raster_message_loop_ = fml::ConcurrentMessageLoop::Create(
-      ChooseThreadCountForWorkers(std::thread::hardware_concurrency()));
-  raster_message_loop_->PostTaskToAllWorkers([]() {
-    // Currently we only use the worker task pool for small parts of a frame
-    // workload, if this changes this setting may need to be adjusted.
-    fml::RequestAffinity(fml::CpuAffinity::kNotPerformance);
-#ifdef FML_OS_ANDROID
-    if (::setpriority(PRIO_PROCESS, gettid(), -5) != 0) {
-      VALIDATION_LOG << "Failed to set Workers task runner priority";
-    }
-#endif  // FML_OS_ANDROID
-  });
+  raster_message_loop_ =
+      fml::ConcurrentMessageLoop::Create(ChooseThreadCountForWorkers(2));
 
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
   dispatcher.init(settings.proc_address_callback);

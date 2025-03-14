@@ -9,6 +9,7 @@
 #include <memory>
 #include <optional>
 #include <unordered_map>
+#include <utility>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/status_or.h"
@@ -521,12 +522,19 @@ class ContentContext {
     void SetDefault(const ContentContextOptions& options,
                     std::unique_ptr<PipelineHandleT> pipeline) {
       default_options_ = options;
-      Set(options, std::move(pipeline));
+      if (pipeline) {
+        Set(options, std::move(pipeline));
+      }
+    }
+
+    void SetDefaultDescriptor(std::optional<PipelineDescriptor> desc) {
+      desc_ = std::move(desc);
     }
 
     void CreateDefault(const Context& context,
                        const ContentContextOptions& options,
-                       const std::vector<Scalar>& constants = {}) {
+                       const std::vector<Scalar>& constants = {},
+                       bool defer_construction = true) {
       auto desc = PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(
           context, constants);
       if (!desc.has_value()) {
@@ -534,7 +542,13 @@ class ContentContext {
         return;
       }
       options.ApplyToPipelineDescriptor(*desc);
-      SetDefault(options, std::make_unique<PipelineHandleT>(context, desc));
+      desc_ = desc;
+      if (defer_construction) {
+        SetDefault(options, nullptr);
+      } else {
+        SetDefault(options, std::make_unique<PipelineHandleT>(context, desc_,
+                                                              /*async=*/true));
+      }
     }
 
     PipelineHandleT* Get(const ContentContextOptions& options) const {
@@ -547,16 +561,30 @@ class ContentContext {
       return nullptr;
     }
 
-    PipelineHandleT* GetDefault() const {
+    bool IsDefault(const ContentContextOptions& opts) {
+      return default_options_.has_value() &&
+             opts.ToKey() == default_options_.value().ToKey();
+    }
+
+    PipelineHandleT* GetDefault(const Context& context) {
       if (!default_options_.has_value()) {
         return nullptr;
       }
+      PipelineHandleT* result = Get(default_options_.value());
+      if (result != nullptr) {
+        return result;
+      }
+      SetDefault(
+          default_options_.value(),
+          std::make_unique<PipelineHandleT>(context, desc_, /*async=*/false));
       return Get(default_options_.value());
     }
 
     size_t GetPipelineCount() const { return pipelines_.size(); }
 
    private:
+    std::weak_ptr<Context> context_;
+    std::optional<PipelineDescriptor> desc_;
     std::optional<ContentContextOptions> default_options_;
     std::vector<std::pair<uint64_t, std::unique_ptr<PipelineHandleT>>>
         pipelines_;
@@ -688,7 +716,10 @@ class ContentContext {
       return found;
     }
 
-    RenderPipelineHandleT* default_handle = container.GetDefault();
+    RenderPipelineHandleT* default_handle = container.GetDefault(*GetContext());
+    if (container.IsDefault(opts)) {
+      return default_handle;
+    }
 
     // The default must always be initialized in the constructor.
     FML_CHECK(default_handle != nullptr);

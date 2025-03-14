@@ -92,7 +92,8 @@ extern template class Pipeline<ComputePipelineDescriptor>;
 
 PipelineFuture<PipelineDescriptor> CreatePipelineFuture(
     const Context& context,
-    std::optional<PipelineDescriptor> desc);
+    std::optional<PipelineDescriptor> desc,
+    bool async = true);
 
 PipelineFuture<ComputePipelineDescriptor> CreatePipelineFuture(
     const Context& context,
@@ -116,14 +117,17 @@ class RenderPipelineHandle {
   using FragmentShader = FragmentShader_;
   using Builder = PipelineBuilder<VertexShader, FragmentShader>;
 
-  explicit RenderPipelineHandle(const Context& context)
+  explicit RenderPipelineHandle(const Context& context, bool async = true)
       : RenderPipelineHandle(CreatePipelineFuture(
             context,
-            Builder::MakeDefaultPipelineDescriptor(context))) {}
+            Builder::MakeDefaultPipelineDescriptor(context),
+            async)) {}
 
   explicit RenderPipelineHandle(const Context& context,
-                                std::optional<PipelineDescriptor> desc)
-      : RenderPipelineHandle(CreatePipelineFuture(context, desc)) {}
+                                std::optional<PipelineDescriptor> desc,
+                                bool async = true)
+      : RenderPipelineHandle(
+            CreatePipelineFuture(context, desc, /*async=*/async)) {}
 
   explicit RenderPipelineHandle(PipelineFuture<PipelineDescriptor> future)
       : pipeline_future_(std::move(future)) {}
