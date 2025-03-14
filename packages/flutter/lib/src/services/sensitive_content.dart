@@ -13,7 +13,7 @@ import 'system_channels.dart';
 ///
 /// {@template flutter.services.ContentSensitivity}
 /// There are three [ContentSensitivity] levels, and these can be set via the
-/// [SensitiveContent] widget.
+/// `SensitiveContent` widget.
 ///
 /// [ContentSensitivity.sensitive] is the highest prioritized setting, and if it is set,
 /// it will cause the tree to remain marked sensitive even if there are other
@@ -33,14 +33,14 @@ import 'system_channels.dart';
 /// https://developer.android.com/reference/android/view/View#getContentSensitivity().
 /// {@endtemplate}
 ///
-/// * See [SensitiveContent] for how to set a [ContentSensitivity] level
+/// * See `SensitiveContent` for how to set a [ContentSensitivity] level
 ///   in order for sensitive content to be obscured when the Flutter screen
 ///   is shared.
 enum ContentSensitivity {
   /// Content sensitivity is auto-detected by the native platform.
   ///
-  /// When this level is set via a [SensitiveContent] widget, the window
-  /// hosting the screen will only be marked as sensitive if other [SensitiveContent]
+  /// When this level is set via a `SensitiveContent` widget, the window
+  /// hosting the screen will only be marked as sensitive if other `SensitiveContent`
   /// widgets in the Flutter app with the [sensitive] level are present in the widget tree.
   ///
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO for how
@@ -56,7 +56,7 @@ enum ContentSensitivity {
 
   /// The widget tree contains sensitive content.
   ///
-  /// When this level is set via a [SensitiveContent] widget, the window
+  /// When this level is set via a `SensitiveContent` widget, the window
   /// hosting the screen will be marked as sensitive during an active media
   /// projection session.
   ///
@@ -65,8 +65,8 @@ enum ContentSensitivity {
 
   /// The widget tree does not contain sensitive content.
   ///
-  /// When this level is set via a [SensitiveContent] widget, the window
-  /// hosting the screen will only be marked as sensitive if other [SensitiveContent]
+  /// When this level is set via a `SensitiveContent` widget, the window
+  /// hosting the screen will only be marked as sensitive if other `SensitiveContent`
   /// widgets in the Flutter app with the [sensitive] level are present in the widget tree.
   ///
   /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
@@ -75,9 +75,9 @@ enum ContentSensitivity {
   /// The sensitivity content level is unknown to Flutter.
   ///
   /// This mode may represent the current content sensitivity of the window if, for example, Android
-  /// adds a new mode that is not recognized by the [SensitiveContent] widget.
+  /// adds a new mode that is not recognized by the `SensitiveContent` widget.
   ///
-  /// This mode cannot be used to set the sensitivity level of a [SensitiveContent] widget.
+  /// This mode cannot be used to set the sensitivity level of a `SensitiveContent` widget.
   _unknown,
 }
 
