@@ -67,6 +67,9 @@ void ReusableFragmentShader::SetImageSampler(Dart_Handle index_handle,
   if (index >= samplers_.size()) {
     Dart_ThrowException(tonic::ToDart("Sampler index out of bounds"));
   }
+  if (!image || !image->image()) {
+    Dart_ThrowException(tonic::ToDart("Image has been disposed"));
+  }
   if (!image->image()->isUIThreadSafe()) {
     Dart_ThrowException(tonic::ToDart("Image is not thread-safe"));
   }
