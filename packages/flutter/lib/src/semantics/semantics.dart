@@ -5539,22 +5539,6 @@ class SemanticsConfiguration {
 
   bool _hasFlag(SemanticsFlag flag) => (_flags & flag.index) != 0;
 
-  bool get _hasExplicitRole {
-    if (_role != SemanticsRole.none) {
-      return true;
-    }
-    if (_hasFlag(SemanticsFlag.isTextField) ||
-        _hasFlag(SemanticsFlag.isHeader) ||
-        _hasFlag(SemanticsFlag.isSlider) ||
-        _hasFlag(SemanticsFlag.isLink) ||
-        _hasFlag(SemanticsFlag.scopesRoute) ||
-        _hasFlag(SemanticsFlag.isImage) ||
-        _hasFlag(SemanticsFlag.isKeyboardKey)) {
-      return true;
-    }
-    return false;
-  }
-
   // CONFIGURATION COMBINATION LOGIC
 
   /// Whether this configuration is compatible with the provided `other`
@@ -5582,9 +5566,6 @@ class SemanticsConfiguration {
       return false;
     }
     if (_attributedValue.string.isNotEmpty && other._attributedValue.string.isNotEmpty) {
-      return false;
-    }
-    if (_hasExplicitRole && other._hasExplicitRole) {
       return false;
     }
     return true;
