@@ -263,14 +263,14 @@ class Color {
   ///
   /// A value of 0 means this color is fully transparent. A value of 255 means
   /// this color is fully opaque.
-  @Deprecated('Use .a.')
+  @Deprecated('Use (*.a * 255.0).round() & 0xff')
   int get alpha => (0xff000000 & value) >> 24;
 
   /// The alpha channel of this color as a double.
   ///
   /// A value of 0.0 means this color is fully transparent. A value of 1.0 means
   /// this color is fully opaque.
-  @Deprecated('Use (*.a * 255.0).round() & 0xff')
+  @Deprecated('Use .a.')
   double get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
