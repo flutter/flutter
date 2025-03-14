@@ -23,6 +23,5 @@ void main() {
   Color color = Color.from(alpha: 1, red: 0, green: 1, blue: 0);
   print(color.opacity);
   print(color.value);
-  print(color.alpha);
   color = color.withOpacity(0.55);
 }

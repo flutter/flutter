@@ -127,16 +127,6 @@ transforms:
       - kind: 'rename'
         newName: 'a'
 
-  - title: "Rename from 'alpha' to 'a'"
-    date: 2024-09-10
-    element:
-      uris: [ 'painting.dart' ]
-      method: 'alpha'
-      inClass: 'Color'
-    changes:
-      - kind: 'rename'
-        newName: 'a'
-
   - title: "Replace 'value' with 'toARGB32()'"
     date: 2025-02-03
     element:

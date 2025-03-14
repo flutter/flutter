@@ -270,7 +270,7 @@ class Color {
   ///
   /// A value of 0.0 means this color is fully transparent. A value of 1.0 means
   /// this color is fully opaque.
-  @Deprecated('Use .a.')
+  @Deprecated('Use (*.a * 255.0).round() & 0xff')
   double get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
