@@ -107,6 +107,12 @@ const Curve _kTopNavBarHeaderTransitionCurve = Cubic(0.0, 0.45, 0.45, 0.98);
 /// Eyeballed on an iPhone 15 Pro simulator running iOS 17.5.
 const Curve _kBottomNavBarHeaderTransitionCurve = Cubic(0.05, 0.90, 0.90, 0.95);
 
+/// The curve of the animation of the bottom nav bar in the hero transition
+/// between two nav bars when the top nav bar is dragged to swipe back.
+///
+/// Eyeballed on an iPhone 15 Pro simulator running iOS 17.5.
+const Curve _kHeaderDragTransitionCurve = Cubic(0.0, 0.3, 0.4, 0.15);
+
 // There's a single tag for all instances of navigation bars because they can
 // all transition between each other (per Navigator) via Hero transitions.
 const _HeroTag _defaultHeroTag = _HeroTag(null);
@@ -2926,10 +2932,11 @@ class _NavigationBarComponentsTransition {
     );
 
     Widget child = bottomNavBarBottom.child;
-    final Curve animationCurve =
-        animation.status == AnimationStatus.forward
-            ? _kBottomNavBarHeaderTransitionCurve
-            : _kBottomNavBarHeaderTransitionCurve.flipped;
+    final Curve animationCurve = switch (animation.status) {
+      AnimationStatus.forward => _kBottomNavBarHeaderTransitionCurve,
+      AnimationStatus.reverse => _kBottomNavBarHeaderTransitionCurve.flipped,
+      AnimationStatus.completed || AnimationStatus.dismissed => _kHeaderDragTransitionCurve,
+    };
 
     // Fade out only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
