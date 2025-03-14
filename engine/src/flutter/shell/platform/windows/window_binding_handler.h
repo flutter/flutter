@@ -54,13 +54,6 @@ class WindowBindingHandler {
   // Returns the bounds of the backing window in physical pixels.
   virtual PhysicalWindowBounds GetPhysicalWindowBounds() = 0;
 
-  // Sets the cursor that should be used when the mouse is over the Flutter
-  // content. See mouse_cursor.dart for the values and meanings of cursor_name.
-  virtual void UpdateFlutterCursor(const std::string& cursor_name) = 0;
-
-  // Sets the cursor directly from a cursor handle.
-  virtual void SetFlutterCursor(HCURSOR cursor) = 0;
-
   // Invoked when the cursor/composing rect has been updated in the framework.
   virtual void OnCursorRectUpdated(const Rect& rect) = 0;
 
@@ -90,6 +83,10 @@ class WindowBindingHandler {
 
   // Retrieve the alert node.
   virtual ui::AXPlatformNodeWin* GetAlert() = 0;
+
+  // Focuses the current window.
+  // Returns true if the window was successfully focused.
+  virtual bool Focus() = 0;
 };
 
 }  // namespace flutter

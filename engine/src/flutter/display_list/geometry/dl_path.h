@@ -67,7 +67,7 @@ class DlPath {
   DlPath& operator=(const DlPath&) = default;
 
   const SkPath& GetSkPath() const;
-  impeller::Path GetPath() const;
+  const impeller::Path& GetPath() const;
 
   /// Intent to render an SkPath multiple times will make the path
   /// non-volatile to enable caching in Skia. Calling this method
