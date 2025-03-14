@@ -149,7 +149,7 @@ class FlutterPlugin implements Plugin<Project> {
             throw new GradleException("flutter.sdk must point to the Flutter SDK directory")
         }
 
-        engineVersion = useLocalEngine()
+        engineVersion = FlutterPluginUtils.shouldProjectUseLocalEngine$gradle(project)
             ? "+" // Match any version since there's only one.
             : "1.0.0-" + Paths.get(flutterRoot.absolutePath, "bin", "cache", "engine.stamp").toFile().text.trim()
 
@@ -160,7 +160,7 @@ class FlutterPlugin implements Plugin<Project> {
 
         // Configure the Maven repository.
         String hostedRepository = System.getenv("FLUTTER_STORAGE_BASE_URL") ?: DEFAULT_MAVEN_HOST
-        String repository = useLocalEngine()
+        String repository = FlutterPluginUtils.shouldProjectUseLocalEngine$gradle(project)
             ? project.property(propLocalEngineRepo)
             : "$hostedRepository/${engineRealm}download.flutter.io"
         rootProject.allprojects {
@@ -192,7 +192,7 @@ class FlutterPlugin implements Plugin<Project> {
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
         // This is a noop when building a bundle.
-        if (shouldSplitPerAbi()) {
+        if (FlutterPluginUtils.shouldProjectSplitPerAbi$gradle(project)) {
             project.android {
                 splits {
                     abi {
@@ -217,7 +217,7 @@ class FlutterPlugin implements Plugin<Project> {
         getTargetPlatforms().each { targetArch ->
             String abiValue = PLATFORM_ARCH_MAP[targetArch]
             project.android {
-                if (shouldSplitPerAbi()) {
+                if (FlutterPluginUtils.shouldProjectSplitPerAbi$gradle(project)) {
                     splits {
                         abi {
                             include(abiValue)
@@ -288,7 +288,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        if (useLocalEngine()) {
+        if (FlutterPluginUtils.shouldProjectUseLocalEngine$gradle(project)) {
             // This is required to pass the local engine to flutter build aot.
             String engineOutPath = project.property("local-engine-out")
             File engineOut = project.file(engineOutPath)
@@ -590,14 +590,14 @@ class FlutterPlugin implements Plugin<Project> {
         try {
             // Read the contents of the settings.gradle file.
             // Remove block/line comments
-            String settingsText = settingsGradleFile(project).text
+            String settingsText = FlutterPluginUtils.settingsGradleFile$gradle(project).text
             settingsText = settingsText.replaceAll(/(?s)\/\*.*?\*\//, '').replaceAll(/(?m)\/\/.*$/, '')
 
             if (!settingsText.contains("'.flutter-plugins'")) {
                 return
             }
         } catch (FileNotFoundException ignored) {
-            throw new GradleException("settings.gradle/settings.gradle.kts does not exist: ${settingsGradleFile(project).absolutePath}")
+            throw new GradleException("settings.gradle/settings.gradle.kts does not exist: ${FlutterPluginUtils.settingsGradleFile$gradle(project).absolutePath}")
         }
         // TODO(matanlurey): https://github.com/flutter/flutter/issues/48918.
         project.logger.quiet("Warning: This project is still reading the deprecated '.flutter-plugins. file.")
@@ -638,36 +638,36 @@ class FlutterPlugin implements Plugin<Project> {
      * Kotlin variants exist, then Groovy (build.gradle) is preferred over
      * Kotlin (build.gradle.kts). This is the same behavior as Gradle 8.5.
      */
-    private static File buildGradleFile(Project project) {
-        File buildGradle = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle")
-        File buildGradleKts = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle.kts")
-        if (buildGradle.exists() && buildGradleKts.exists()) {
-            project.logger.error(
-                "Both build.gradle and build.gradle.kts exist, so " +
-                "build.gradle.kts is ignored. This is likely a mistake."
-            )
-        }
-
-        return buildGradle.exists() ? buildGradle : buildGradleKts
-    }
+//    private static File buildGradleFile(Project project) {
+//        File buildGradle = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle")
+//        File buildGradleKts = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle.kts")
+//        if (buildGradle.exists() && buildGradleKts.exists()) {
+//            project.logger.error(
+//                "Both build.gradle and build.gradle.kts exist, so " +
+//                "build.gradle.kts is ignored. This is likely a mistake."
+//            )
+//        }
+//
+//        return buildGradle.exists() ? buildGradle : buildGradleKts
+//    }
 
     /**
      * Returns the Gradle settings script for the build. When both Groovy and
      * Kotlin variants exist, then Groovy (settings.gradle) is preferred over
      * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
      */
-    private static File settingsGradleFile(Project project) {
-        File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
-        File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
-        if (settingsGradle.exists() && settingsGradleKts.exists()) {
-            project.logger.error(
-                "Both settings.gradle and settings.gradle.kts exist, so " +
-                "settings.gradle.kts is ignored. This is likely a mistake."
-            )
-        }
-
-        return settingsGradle.exists() ? settingsGradle : settingsGradleKts
-    }
+//    private static File settingsGradleFile(Project project) {
+//        File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
+//        File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
+//        if (settingsGradle.exists() && settingsGradleKts.exists()) {
+//            project.logger.error(
+//                "Both settings.gradle and settings.gradle.kts exist, so " +
+//                "settings.gradle.kts is ignored. This is likely a mistake."
+//            )
+//        }
+//
+//        return settingsGradle.exists() ? settingsGradle : settingsGradleKts
+//    }
 
     /** Adds the plugin project dependency to the app project. */
     private void configurePluginProject(Map<String, Object> pluginObject) {
@@ -811,7 +811,7 @@ class FlutterPlugin implements Plugin<Project> {
                             }
                             project.logger.error("""\
                                 Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
-                                Add the following to ${buildGradleFile(project).path}:
+                                Add the following to ${FlutterPluginUtils.buildGradleFile$gradle(project).path}:
 
                                     android {
                                         compileSdk = ${maxPluginCompileSdkVersion}
@@ -826,7 +826,7 @@ class FlutterPlugin implements Plugin<Project> {
                             }
                             project.logger.error("""\
                                 Fix this issue by using the highest Android NDK version (they are backward compatible).
-                                Add the following to ${buildGradleFile(project).path}:
+                                Add the following to ${FlutterPluginUtils.buildGradleFile$gradle(project).path}:
 
                                     android {
                                         ndkVersion = \"${maxPluginNdkVersion}\"
@@ -896,7 +896,7 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private List<Map<String, Object>> getPluginList(Project project) {
         if (pluginList == null) {
-            pluginList = project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
+            pluginList = project.ext.nativePluginLoader.getPlugins(FlutterPluginUtils.getFlutterSourceDirectory$gradle(project))
         }
         return pluginList
     }
@@ -924,7 +924,7 @@ class FlutterPlugin implements Plugin<Project> {
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List<Map<String, Object>> getPluginDependencies(Project project) {
         if (pluginDependencies == null) {
-            Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(getFlutterSourceDirectory())
+            Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(FlutterPluginUtils.getFlutterSourceDirectory$gradle(project))
             if (meta == null) {
                 pluginDependencies = []
             } else {
@@ -955,22 +955,22 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    private Boolean shouldSplitPerAbi() {
-        return project.findProperty("split-per-abi")?.toBoolean() ?: false
-    }
+//    private Boolean shouldSplitPerAbi() {
+//        return project.findProperty("split-per-abi")?.toBoolean() ?: false
+//    }
 
-    private Boolean useLocalEngine() {
-        return project.hasProperty(propLocalEngineRepo)
-    }
+//    private Boolean useLocalEngine() {
+//        return project.hasProperty(propLocalEngineRepo)
+//    }
 
-    private Boolean isVerbose() {
-        return project.findProperty("verbose")?.toBoolean() ?: false
-    }
+//    private Boolean isVerbose() {
+//        return project.findProperty("verbose")?.toBoolean() ?: false
+//    }
 
     /** Whether to build the debug app in "fast-start" mode. */
-    private Boolean isFastStart() {
-        return project.findProperty("fast-start")?.toBoolean() ?: false
-    }
+//    private Boolean isFastStart() {
+//        return project.findProperty("fast-start")?.toBoolean() ?: false
+//    }
 
     /**
      * Returns true if the build mode is supported by the current call to Gradle.
@@ -978,7 +978,7 @@ class FlutterPlugin implements Plugin<Project> {
      * is built for a specific mode, the call to Gradle must match that mode.
      */
     private Boolean supportsBuildMode(String flutterBuildMode) {
-        if (!useLocalEngine()) {
+        if (!FlutterPluginUtils.shouldProjectUseLocalEngine$gradle(project)) {
             return true
         }
         final String propLocalEngineBuildMode = "local-engine-build-mode"
@@ -992,24 +992,24 @@ class FlutterPlugin implements Plugin<Project> {
      * Gets the directory that contains the Flutter source code.
      * This is the directory containing the `android/` directory.
      */
-    private File getFlutterSourceDirectory() {
-        if (project.flutter.source == null) {
-            throw new GradleException("Must provide Flutter source directory")
-        }
-        return project.file(project.flutter.source)
-    }
+//    private File getFlutterSourceDirectory() {
+//        if (project.flutter.source == null) {
+//            throw new GradleException("Must provide Flutter source directory")
+//        }
+//        return project.file(project.flutter.source)
+//    }
 
     /**
      * Gets the target file. This is typically `lib/main.dart`.
      */
-    private String getFlutterTarget() {
-        String target = project.flutter.target ?: "lib/main.dart"
-        final String propTarget = "target"
-        if (project.hasProperty(propTarget)) {
-            target = project.property(propTarget)
-        }
-        return target
-    }
+//    private String getFlutterTarget() {
+//        String target = project.flutter.target ?: "lib/main.dart"
+//        final String propTarget = "target"
+//        if (project.hasProperty(propTarget)) {
+//            target = project.property(propTarget)
+//        }
+//        return target
+//    }
 
     // TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
     /**
@@ -1040,29 +1040,29 @@ class FlutterPlugin implements Plugin<Project> {
      * https://issuetracker.google.com/issues/158060799
      * https://issuetracker.google.com/issues/158753935
      */
-    private boolean shouldConfigureFlutterTask(Task assembleTask) {
-        List<String> cliTasksNames = project.gradle.startParameter.taskNames
-        if (cliTasksNames.size() != 1 || !cliTasksNames.first().contains("assemble")) {
-            return true
-        }
-        String taskName = cliTasksNames.first().split(":").last()
-        if (taskName == "assemble") {
-            return true
-        }
-        if (taskName == assembleTask.name) {
-            return true
-        }
-        if (taskName.endsWith("Release") && assembleTask.name.endsWith("Release")) {
-            return true
-        }
-        if (taskName.endsWith("Debug") && assembleTask.name.endsWith("Debug")) {
-            return true
-        }
-        if (taskName.endsWith("Profile") && assembleTask.name.endsWith("Profile")) {
-            return true
-        }
-        return false
-    }
+//    private boolean shouldConfigureFlutterTask(Task assembleTask) {
+//        List<String> cliTasksNames = project.gradle.startParameter.taskNames
+//        if (cliTasksNames.size() != 1 || !cliTasksNames.first().contains("assemble")) {
+//            return true
+//        }
+//        String taskName = cliTasksNames.first().split(":").last()
+//        if (taskName == "assemble") {
+//            return true
+//        }
+//        if (taskName == assembleTask.name) {
+//            return true
+//        }
+//        if (taskName.endsWith("Release") && assembleTask.name.endsWith("Release")) {
+//            return true
+//        }
+//        if (taskName.endsWith("Debug") && assembleTask.name.endsWith("Debug")) {
+//            return true
+//        }
+//        if (taskName.endsWith("Profile") && assembleTask.name.endsWith("Profile")) {
+//            return true
+//        }
+//        return false
+//    }
 
     private boolean isFlutterAppProject() {
         return project.android.hasProperty("applicationVariants")
@@ -1149,7 +1149,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
         List<String> targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
-            if (shouldSplitPerAbi()) {
+            if (FlutterPluginUtils.shouldProjectSplitPerAbi$gradle(project)) {
                 variant.outputs.each { output ->
                     // Assigns the new version code to versionCodeOverride, which changes the version code
                     // for only the output APK, not for the variant itself. Skipping this step simply
@@ -1198,14 +1198,14 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine(this.localEngine)
                 localEngineHost(this.localEngineHost)
                 localEngineSrcPath(this.localEngineSrcPath)
-                targetPath(getFlutterTarget())
-                verbose(this.isVerbose())
-                fastStart(this.isFastStart())
+                targetPath(FlutterPluginUtils.getFlutterTarget$gradle(project))
+                verbose(FlutterPluginUtils.isProjectVerbose$gradle(project))
+                fastStart(FlutterPluginUtils.isProjectFastStart$gradle(project))
                 fileSystemRoots(fileSystemRootsValue)
                 fileSystemScheme(fileSystemSchemeValue)
                 trackWidgetCreation(trackWidgetCreationValue)
                 targetPlatformValues = targetPlatforms
-                sourceDir(getFlutterSourceDirectory())
+                sourceDir(FlutterPluginUtils.getFlutterSourceDirectory$gradle(project))
                 intermediateDir(project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/")))
                 frontendServerStarterPath(frontendServerStarterPathValue)
                 extraFrontEndOptions(extraFrontEndOptionsValue)
@@ -1237,7 +1237,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                     // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
                     // The `$project.layout.buildDirectory` is '.android/Flutter/build/' instead of 'build/'.
-                    String buildDir = "${getFlutterSourceDirectory()}/build"
+                    String buildDir = "${FlutterPluginUtils.getFlutterSourceDirectory$gradle(project)}/build"
                     String nativeAssetsDir = "${buildDir}/native_assets/android/jniLibs/lib"
                     from("${nativeAssetsDir}/${abi}") {
                         include("*.so")
@@ -1260,7 +1260,8 @@ class FlutterPlugin implements Plugin<Project> {
 
                 // See https://docs.gradle.org/current/javadoc/org/gradle/api/file/ConfigurableFilePermissions.html
                 // See https://github.com/flutter/flutter/pull/50047
-                if (compareVersionStrings(currentGradleVersion, "8.3") >= 0) {
+                //compareVersionStrings()
+                if (FlutterPluginUtils.compareVersionStrings$gradle(currentGradleVersion, "8.3") >= 0) {
                     filePermissions {
                         user {
                             read = true
@@ -1315,7 +1316,7 @@ class FlutterPlugin implements Plugin<Project> {
             AbstractAppExtension android = (AbstractAppExtension) project.extensions.findByName("android")
             android.applicationVariants.configureEach { variant ->
                 Task assembleTask = variant.assembleProvider.get()
-                if (!shouldConfigureFlutterTask(assembleTask)) {
+                if (!FlutterPluginUtils.shouldConfigureFlutterTask$gradle(project, assembleTask)) {
                     return
                 }
                 Task copyFlutterAssetsTask = addFlutterDeps(variant)
@@ -1377,7 +1378,7 @@ class FlutterPlugin implements Plugin<Project> {
                 Task copyFlutterAssetsTask
                 appProject.android.applicationVariants.all { appProjectVariant ->
                     Task appAssembleTask = appProjectVariant.assembleProvider.get()
-                    if (!shouldConfigureFlutterTask(appAssembleTask)) {
+                    if (!FlutterPluginUtils.shouldConfigureFlutterTask$gradle(project, appAssembleTask)) {
                         return
                     }
                     // Find a compatible application variant in the host app.
@@ -1419,45 +1420,45 @@ class FlutterPlugin implements Plugin<Project> {
     // compareTo implementation of version strings in the format of ints and periods
     // Requires non null objects.
     // Will not crash on RC candidate strings but considers all RC candidates the same version.
-    static int compareVersionStrings(String firstString, String secondString) {
-        List firstVersion = firstString.tokenize(".")
-        List secondVersion = secondString.tokenize(".")
-
-        int commonIndices = Math.min(firstVersion.size(), secondVersion.size())
-
-        for (int i = 0; i < commonIndices; i++) {
-            String firstAtIndex = firstVersion[i]
-            String secondAtIndex = secondVersion[i]
-            int firstInt = 0
-            int secondInt = 0
-            try {
-                if (firstAtIndex.contains("-")) {
-                    // Strip any chars after "-". For example "8.6-rc-2"
-                    firstAtIndex = firstAtIndex.substring(0, firstAtIndex.indexOf('-'))
-                }
-                firstInt = firstAtIndex.toInteger()
-            } catch (NumberFormatException nfe) {
-                println(nfe)
-            }
-            try {
-                if (firstAtIndex.contains("-")) {
-                    // Strip any chars after "-". For example "8.6-rc-2"
-                    secondAtIndex = secondAtIndex.substring(0, secondAtIndex.indexOf('-'))
-                }
-                secondInt = secondAtIndex.toInteger()
-            } catch (NumberFormatException nfe) {
-                println(nfe)
-            }
-
-            if (firstInt != secondInt) {
-                // <=> in groovy delegates to compareTo
-                return firstInt <=> secondInt
-            }
-        }
-
-        // If we got this far then all the common indices are identical, so whichever version is longer must be more recent
-        return firstVersion.size() <=> secondVersion.size()
-    }
+//    static int compareVersionStrings(String firstString, String secondString) {
+//        List firstVersion = firstString.tokenize(".")
+//        List secondVersion = secondString.tokenize(".")
+//
+//        int commonIndices = Math.min(firstVersion.size(), secondVersion.size())
+//
+//        for (int i = 0; i < commonIndices; i++) {
+//            String firstAtIndex = firstVersion[i]
+//            String secondAtIndex = secondVersion[i]
+//            int firstInt = 0
+//            int secondInt = 0
+//            try {
+//                if (firstAtIndex.contains("-")) {
+//                    // Strip any chars after "-". For example "8.6-rc-2"
+//                    firstAtIndex = firstAtIndex.substring(0, firstAtIndex.indexOf('-'))
+//                }
+//                firstInt = firstAtIndex.toInteger()
+//            } catch (NumberFormatException nfe) {
+//                println(nfe)
+//            }
+//            try {
+//                if (firstAtIndex.contains("-")) {
+//                    // Strip any chars after "-". For example "8.6-rc-2"
+//                    secondAtIndex = secondAtIndex.substring(0, secondAtIndex.indexOf('-'))
+//                }
+//                secondInt = secondAtIndex.toInteger()
+//            } catch (NumberFormatException nfe) {
+//                println(nfe)
+//            }
+//
+//            if (firstInt != secondInt) {
+//                // <=> in groovy delegates to compareTo
+//                return firstInt <=> secondInt
+//            }
+//        }
+//
+//        // If we got this far then all the common indices are identical, so whichever version is longer must be more recent
+//        return firstVersion.size() <=> secondVersion.size()
+//    }
 
 }
 

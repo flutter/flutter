@@ -1,20 +1,19 @@
 package com.flutter.gradle
 
+import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.Task
+import java.io.File
 import java.util.Locale
 
+/**
+ * A collection of static utility functions used by the Flutter Gradle Plugin.
+ */
 object FlutterPluginUtils {
-    // TODO docs
-    @JvmStatic fun shouldShrinkResources(project: Project): Boolean {
-        val propShrink = "shrink"
-        if (project.hasProperty(propShrink)) {
-            val propertyValue = project.property(propShrink)
-            return propertyValue.toString().toBoolean()
-        }
-        return true
-    }
+    // ----------------- Methods for string manipulation and comparison. -----------------
 
-    @JvmStatic fun toCamelCase(parts: List<String>): String {
+    @JvmStatic
+    fun toCamelCase(parts: List<String>): String {
         if (parts.isEmpty()) {
             return ""
         }
@@ -23,6 +22,213 @@ object FlutterPluginUtils {
     }
 
     // Kotlin's capitalize function is deprecated. This is the suggested replacement.
-    @JvmStatic internal fun capitalize(string: String): String =
+    @JvmStatic
+    internal fun capitalize(string: String): String =
         string.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+
+    // compareTo implementation of version strings in the format of ints and periods
+    // Will not crash on RC candidate strings but considers all RC candidates the same version.
+    @JvmStatic
+    internal fun compareVersionStrings(
+        firstString: String,
+        secondString: String
+    ): Int {
+        val firstVersion = firstString.split(".")
+        val secondVersion = secondString.split(".")
+
+        val commonIndices = minOf(firstVersion.size, secondVersion.size)
+
+        for (i in 0 until commonIndices) {
+            var firstAtIndex = firstVersion[i]
+            var secondAtIndex = secondVersion[i]
+            var firstInt = 0
+            var secondInt = 0
+
+            // Strip any chars after "-". For example "8.6-rc-2"
+            firstAtIndex = firstAtIndex.substringBefore("-")
+            try {
+                firstInt = firstAtIndex.toInt()
+            } catch (nfe: NumberFormatException) {
+                println(nfe)
+            }
+
+            secondAtIndex = secondAtIndex.substringBefore("-")
+            try {
+                secondInt = secondAtIndex.toInt()
+            } catch (nfe: NumberFormatException) {
+                println(nfe)
+            }
+
+            val comparisonResult = firstInt.compareTo(secondInt)
+            if (comparisonResult != 0) {
+                return comparisonResult
+            }
+        }
+
+        // If we got this far then all the common indices are identical, so whichever version is longer must be more recent
+        return firstVersion.size.compareTo(secondVersion.size)
+    }
+
+    // ----------------- Methods that interact only with the Gradle project. -----------------
+
+    @JvmStatic
+    fun shouldShrinkResources(project: Project): Boolean {
+        val propShrink = "shrink"
+        if (project.hasProperty(propShrink)) {
+            val propertyValue = project.property(propShrink)
+            return propertyValue.toString().toBoolean()
+        }
+        return true
+    }
+
+    /**
+     * Returns the Gradle settings script for the build. When both Groovy and
+     * Kotlin variants exist, then Groovy (settings.gradle) is preferred over
+     * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
+     */
+    @JvmStatic
+    internal fun settingsGradleFile(project: Project): File {
+        val settingsGradle = File(project.projectDir.parentFile, "settings.gradle")
+        val settingsGradleKts = File(project.projectDir.parentFile, "settings.gradle.kts")
+        if (settingsGradle.exists() && settingsGradleKts.exists()) {
+            project.logger.error(
+                """
+                Both settings.gradle and settings.gradle.kts exist, so
+                settings.gradle.kts is ignored. This is likely a mistake.
+                """.trimIndent()
+            )
+        }
+
+        return if (settingsGradle.exists()) settingsGradle else settingsGradleKts
+    }
+
+    /**
+     * Returns the Gradle build script for the build. When both Groovy and
+     * Kotlin variants exist, then Groovy (build.gradle) is preferred over
+     * Kotlin (build.gradle.kts). This is the same behavior as Gradle 8.5.
+     */
+    @JvmStatic
+    internal fun buildGradleFile(project: Project): File {
+        val buildGradle = File(File(project.projectDir.parentFile, "app"), "build.gradle")
+        val buildGradleKts = File(File(project.projectDir.parentFile, "app"), "build.gradle.kts")
+        if (buildGradle.exists() && buildGradleKts.exists()) {
+            project.logger.error(
+                """
+                Both build.gradle and build.gradle.kts exist, so 
+                build.gradle.kts is ignored. This is likely a mistake.
+                """.trimIndent()
+            )
+        }
+
+        return if (buildGradle.exists()) buildGradle else buildGradleKts
+    }
+
+    @JvmStatic
+    internal fun shouldProjectSplitPerAbi(project: Project): Boolean =
+        project
+            .findProperty(
+                "split-per-abi"
+            )?.toString()
+            ?.toBoolean() ?: false
+
+    @JvmStatic
+    internal fun shouldProjectUseLocalEngine(project: Project): Boolean {
+        val propLocalEngineRepo = "localEngineRepo"
+        return project.hasProperty(propLocalEngineRepo)
+    }
+
+    @JvmStatic
+    internal fun isProjectVerbose(project: Project): Boolean = project.findProperty("verbose")?.toString()?.toBoolean() ?: false
+
+    @JvmStatic
+    internal fun isProjectFastStart(project: Project): Boolean = project.findProperty("fast-start")?.toString()?.toBoolean() ?: false
+
+    /**
+     * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
+     *
+     * In AGP 4.0, the Android linter task depends on the JAR tasks that generate `libapp.so`.
+     * When building APKs, this causes an issue where building release requires the debug JAR,
+     * but Gradle won't build debug.
+     *
+     * To workaround this issue, only configure the JAR task that is required given the task
+     * from the command line.
+     *
+     * The AGP team said that this issue is fixed in Gradle 7.0, which isn't released at the
+     * time of adding this code. Once released, this can be removed. However, after updating to
+     * AGP/Gradle 7.2.0/7.5, removing this hack still causes build failures. Further
+     * investigation necessary to remove this.
+     *
+     * Tested cases:
+     * * `./gradlew assembleRelease`
+     * * `./gradlew app:assembleRelease.`
+     * * `./gradlew assemble{flavorName}Release`
+     * * `./gradlew app:assemble{flavorName}Release`
+     * * `./gradlew assemble.`
+     * * `./gradlew app:assemble.`
+     * * `./gradlew bundle.`
+     * * `./gradlew bundleRelease.`
+     * * `./gradlew app:bundleRelease.`
+     *
+     * Related issues:
+     * https://issuetracker.google.com/issues/158060799
+     * https://issuetracker.google.com/issues/158753935
+     */
+    @JvmStatic internal fun shouldConfigureFlutterTask(
+        project: Project,
+        assembleTask: Task
+    ): Boolean {
+        val cliTasksNames = project.gradle.startParameter.taskNames
+        if (cliTasksNames.size != 1 || !cliTasksNames.first().contains("assemble")) {
+            return true
+        }
+        val taskName = cliTasksNames.first().split(":").last()
+        if (taskName == "assemble") {
+            return true
+        }
+        if (taskName == assembleTask.name) {
+            return true
+        }
+        if (taskName.endsWith("Release") && assembleTask.name.endsWith("Release")) {
+            return true
+        }
+        if (taskName.endsWith("Debug") && assembleTask.name.endsWith("Debug")) {
+            return true
+        }
+        if (taskName.endsWith("Profile") && assembleTask.name.endsWith("Profile")) {
+            return true
+        }
+        return false
+    }
+
+    private fun getFlutterExtensionOrNull(project: Project): FlutterExtension? = project.extensions.findByType(FlutterExtension::class.java)
+
+    /**
+     * Gets the directory that contains the Flutter source code.
+     * This is the directory containing the `android/` directory.
+     */
+    @JvmStatic internal fun getFlutterSourceDirectory(project: Project): File {
+        val flutterExtension = getFlutterExtensionOrNull(project)
+        // TODO(gmackall): clean up this NPE that is still around from the Groovy conversion.
+        if (flutterExtension!!.source == null) {
+            throw GradleException("Flutter source directory not set.")
+        }
+        return project.file(flutterExtension.source!!)
+    }
+
+    /**
+     * Gets the target file. This is typically `lib/main.dart`.
+     *
+     * Returns
+     *  1. the value of the `target` property, if it exists
+     *  2. the target value set in the FlutterExtension, if it exists
+     *  3. `lib/main.dart` otherwise
+     */
+    @JvmStatic internal fun getFlutterTarget(project: Project): String {
+        val targetProperty: String = "target"
+        if (project.hasProperty(targetProperty)) {
+            return project.property(targetProperty).toString()
+        }
+        val target: String = getFlutterExtensionOrNull(project)!!.target ?: "lib/main.dart"
+        return target
+    }
 }
