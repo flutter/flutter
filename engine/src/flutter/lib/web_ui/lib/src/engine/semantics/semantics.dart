@@ -19,6 +19,7 @@ import '../util.dart';
 import '../vector_math.dart';
 import '../window.dart';
 import 'accessibility.dart';
+import 'alert.dart';
 import 'checkable.dart';
 import 'expandable.dart';
 import 'focusable.dart';
@@ -28,6 +29,7 @@ import 'image.dart';
 import 'incrementable.dart';
 import 'label_and_value.dart';
 import 'link.dart';
+import 'list.dart';
 import 'live_region.dart';
 import 'platform_view.dart';
 import 'route.dart';
@@ -442,6 +444,19 @@ enum EngineSemanticsRole {
 
   /// A cell in a [table] contains header information for a column.
   columnHeader,
+
+  /// A component provide advisory information that is not import to justify
+  /// an [alert].
+  status,
+
+  /// A component provide important and usually time-sensitive information.
+  alert,
+
+  /// A container whose children are logically a list of items.
+  list,
+
+  /// An item in a [list].
+  listItem,
 
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
@@ -1847,6 +1862,14 @@ class SemanticsObject {
         return EngineSemanticsRole.columnHeader;
       case ui.SemanticsRole.radioGroup:
         return EngineSemanticsRole.radioGroup;
+      case ui.SemanticsRole.alert:
+        return EngineSemanticsRole.alert;
+      case ui.SemanticsRole.status:
+        return EngineSemanticsRole.status;
+      case ui.SemanticsRole.list:
+        return EngineSemanticsRole.list;
+      case ui.SemanticsRole.listItem:
+        return EngineSemanticsRole.listItem;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.searchBox:
@@ -1856,8 +1879,6 @@ class SemanticsObject {
       case ui.SemanticsRole.menuBar:
       case ui.SemanticsRole.menu:
       case ui.SemanticsRole.menuItem:
-      case ui.SemanticsRole.list:
-      case ui.SemanticsRole.listItem:
       case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
       case ui.SemanticsRole.loadingSpinner:
@@ -1908,6 +1929,8 @@ class SemanticsObject {
       EngineSemanticsRole.image => SemanticImage(this),
       EngineSemanticsRole.platformView => SemanticPlatformView(this),
       EngineSemanticsRole.link => SemanticLink(this),
+      EngineSemanticsRole.list => SemanticList(this),
+      EngineSemanticsRole.listItem => SemanticListItem(this),
       EngineSemanticsRole.heading => SemanticHeading(this),
       EngineSemanticsRole.header => SemanticHeader(this),
       EngineSemanticsRole.tab => SemanticTab(this),
@@ -1919,6 +1942,8 @@ class SemanticsObject {
       EngineSemanticsRole.cell => SemanticCell(this),
       EngineSemanticsRole.row => SemanticRow(this),
       EngineSemanticsRole.columnHeader => SemanticColumnHeader(this),
+      EngineSemanticsRole.alert => SemanticAlert(this),
+      EngineSemanticsRole.status => SemanticStatus(this),
       EngineSemanticsRole.generic => GenericRole(this),
     };
   }
