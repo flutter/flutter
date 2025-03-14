@@ -31,11 +31,26 @@ class RSuperellipse : public RefCountedDartWrappable<RSuperellipse> {
   flutter::DlRoundSuperellipse rsuperellipse() const;
 
  private:
-  static constexpr int kValueCount = 12;
+  // Index for the value vector.
+  enum {
+    kLeft = 0,
+    kTop,
+    kRight,
+    kBottom,
+    kTopLeftX,
+    kTopLeftY,
+    kTopRightX,
+    kTopRightY,
+    kBottomRightX,
+    kBottomRightY,
+    kBottomLeftX,
+    kBottomLeftY,
+    kValueCount
+  };
 
   explicit RSuperellipse(const tonic::Float64List& values);
 
-  impeller::Scalar value32(int index) const;
+  flutter::DlScalar value32(int index) const;
   flutter::DlRect bounds() const;
   impeller::RoundingRadii radii() const;
   const impeller::RoundSuperellipseParam& param() const;
