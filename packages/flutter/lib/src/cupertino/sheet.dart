@@ -104,6 +104,11 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// The whole sheet can be popped at once by either dragging down on the sheet,
 /// or calling [CupertinoSheetRoute.popSheet].
 ///
+/// When `enableDrag` is set to `true` (the default), users can dismiss the sheet
+/// by dragging it down or by calling [CupertinoSheetRoute.popSheet]. When
+/// `enableDrag` is `false`, users cannot dismiss the sheet by dragging, and it
+/// can only be closed by calling [CupertinoSheetRoute.popSheet].
+///
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
 /// of the widget that opened the sheet. As such, it is not recommended to push
 /// a non-sheet route that covers the sheet without first popping the sheet. If
