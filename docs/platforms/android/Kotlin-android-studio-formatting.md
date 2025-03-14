@@ -18,4 +18,4 @@ then there is good news! Android Studio can be configured to use `ktlint` to aut
    a. Both of these options should be available under `Android Studio > Settings > Tools > ktlint`.
 
 3. Additionally, Kotlin code in the Flutter repository currently uses some additional rules for compatibility with older versions of Kotlin.
-These rules can only be configured by an `.editorconfig` file in the directory from which Android Studio was opened. To configure these rules, create a copy of the [`.editorconfig` that is used by tests](../../../dev/bots/test/analyze-test-input/.editorconfig) in the root directory you intend to open with Android Studio.
+These rules can only be configured by an `.editorconfig` file in the directory from which Android Studio was opened. To configure these rules, create a copy of the [`.editorconfig`](../../../dev/bots/test/analyze-test-input/.editorconfig) that is used by tests in the root directory you intend to open with Android Studio.
