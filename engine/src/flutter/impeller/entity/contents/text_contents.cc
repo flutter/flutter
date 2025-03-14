@@ -181,6 +181,9 @@ void TextContents::ComputeVertexData(
         atlas_glyph_bounds = maybe_atlas_glyph_bounds.value().atlas_bounds;
       }
 
+      Scalar inverted_rounded_scale =
+          static_cast<Scalar>(rounded_scale.Invert());
+      Rect scaled_bounds = glyph_bounds.Scale(inverted_rounded_scale);
       // For each glyph, we compute two rectangles. One for the vertex
       // positions and one for the texture coordinates (UVs). The atlas
       // glyph bounds are used to compute UVs in cases where the
@@ -189,8 +192,6 @@ void TextContents::ComputeVertexData(
       Point uv_origin = (atlas_glyph_bounds.GetLeftTop()) / atlas_size;
       Point uv_size = SizeToPoint(atlas_glyph_bounds.GetSize()) / atlas_size;
 
-      Scalar inverted_rounded_scale =
-          static_cast<Scalar>(rounded_scale.Invert());
       Matrix unscaled_basis =
           basis_transform * Matrix::MakeScale({inverted_rounded_scale,
                                                inverted_rounded_scale, 1});
@@ -215,7 +216,6 @@ void TextContents::ComputeVertexData(
                       (unscaled_basis * point * glyph_bounds.GetSize()))
                          .Round();
         } else {
-          Rect scaled_bounds = glyph_bounds.Scale(inverted_rounded_scale);
           position = entity_transform *
                      (glyph_position.position + scaled_bounds.GetLeftTop() +
                       point * scaled_bounds.GetSize());
