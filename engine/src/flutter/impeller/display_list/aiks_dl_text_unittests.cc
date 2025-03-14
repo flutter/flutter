@@ -180,6 +180,32 @@ TEST_P(AiksTest, ScaledK) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderTextFrameWithScalingOverflow) {
+  Scalar scale = 40.0;
+  Scalar offset = 600.0;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("scale", &scale, 1.f, 300.f);
+      ImGui::SliderFloat("offset", &offset, 600.f, 2048.f);
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
+    DlPaint paint;
+    paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+    builder.DrawPaint(paint);
+    builder.Scale(scale, scale);
+
+    RenderTextInCanvasSkia(GetContext(), builder, "test", "Roboto-Regular.ttf",
+                           TextRenderOptions{
+                               .position = DlPoint(0, offset / scale),
+                           });
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, CanRenderTextFrameWithFractionScaling) {
   Scalar fine_scale = 0.f;
   bool is_subpixel = false;
