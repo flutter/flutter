@@ -31,7 +31,8 @@ class RSuperellipse : public RefCountedDartWrappable<RSuperellipse> {
   flutter::DlRoundSuperellipse rsuperellipse() const;
 
  private:
-  // Index for the value vector.
+  // Index for the value vector. This list should be kept in sync with the same
+  // list in RSuperellipse in geometry.dart.
   enum {
     kLeft = 0,
     kTop,

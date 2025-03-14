@@ -2165,18 +2165,18 @@ class _ComputedRSuperellipse extends NativeFieldWrapperClass1
     required double blRadiusY,
   }) {
     final Float64List values = Float64List(_kValueSize);
-    values[0] = left;
-    values[1] = top;
-    values[2] = right;
-    values[3] = bottom;
-    values[4] = tlRadiusX;
-    values[5] = tlRadiusY;
-    values[6] = trRadiusX;
-    values[7] = trRadiusY;
-    values[8] = brRadiusX;
-    values[9] = brRadiusY;
-    values[10] = blRadiusX;
-    values[11] = blRadiusY;
+    values[_kLeft] = left;
+    values[_kTop] = top;
+    values[_kRight] = right;
+    values[_kBottom] = bottom;
+    values[_kTopLeftX] = tlRadiusX;
+    values[_kTopLeftY] = tlRadiusY;
+    values[_kTopRightX] = trRadiusX;
+    values[_kTopRightY] = trRadiusY;
+    values[_kBottomRightX] = brRadiusX;
+    values[_kBottomRightY] = brRadiusY;
+    values[_kBottomLeftX] = blRadiusX;
+    values[_kBottomLeftY] = blRadiusY;
     _constructor(values);
   }
 
@@ -2187,40 +2187,40 @@ class _ComputedRSuperellipse extends NativeFieldWrapperClass1
   external double _getValue(int index);
 
   @override
-  double get left => _getValue(0);
+  double get left => _getValue(_kLeft);
 
   @override
-  double get top => _getValue(1);
+  double get top => _getValue(_kTop);
 
   @override
-  double get right => _getValue(2);
+  double get right => _getValue(_kRight);
 
   @override
-  double get bottom => _getValue(3);
+  double get bottom => _getValue(_kBottom);
 
   @override
-  double get tlRadiusX => _getValue(4);
+  double get tlRadiusX => _getValue(_kTopLeftX);
 
   @override
-  double get tlRadiusY => _getValue(5);
+  double get tlRadiusY => _getValue(_kTopLeftY);
 
   @override
-  double get trRadiusX => _getValue(6);
+  double get trRadiusX => _getValue(_kTopRightX);
 
   @override
-  double get trRadiusY => _getValue(7);
+  double get trRadiusY => _getValue(_kTopRightY);
 
   @override
-  double get brRadiusX => _getValue(8);
+  double get brRadiusX => _getValue(_kBottomRightX);
 
   @override
-  double get brRadiusY => _getValue(9);
+  double get brRadiusY => _getValue(_kBottomRightY);
 
   @override
-  double get blRadiusX => _getValue(10);
+  double get blRadiusX => _getValue(_kBottomLeftX);
 
   @override
-  double get blRadiusY => _getValue(11);
+  double get blRadiusY => _getValue(_kBottomLeftY);
 
   @override
   RSuperellipse _create({
@@ -2269,6 +2269,20 @@ class _ComputedRSuperellipse extends NativeFieldWrapperClass1
     return _toString(className: '_ComputedRSuperellipse');
   }
 
+  // Index for the value vector. This list should be kept in sync with the same
+  // list in RSuperellipse in rsuperellipse.cc.
+  static const int _kLeft = 0;
+  static const int _kTop = 1;
+  static const int _kRight = 2;
+  static const int _kBottom = 3;
+  static const int _kTopLeftX = 4;
+  static const int _kTopLeftY = 5;
+  static const int _kTopRightX = 6;
+  static const int _kTopRightY = 7;
+  static const int _kBottomRightX = 8;
+  static const int _kBottomRightY = 9;
+  static const int _kBottomLeftX = 10;
+  static const int _kBottomLeftY = 11;
   static const int _kValueSize = 12;
 }
 
