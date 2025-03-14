@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data' show ByteData, Uint8List, Int32List, Float64List;
 import 'dart:ui' as ui;
-import 'dart:ffi';
 
 // Signals a waiting latch in the native test.
 @pragma('vm:external-name', 'Signal')
@@ -427,7 +426,6 @@ Future<void> sendSemanticsTreeInfo() async {
     final Float64List transform = Float64List(16);
     final Int32List childrenInTraversalOrder = Int32List(0);
     final Int32List childrenInHitTestOrder = Int32List(0);
-    final Int32List additionalActions = Int32List(0);
     // Identity matrix 4x4.
     transform[0] = 1;
     transform[5] = 1;
@@ -446,7 +444,7 @@ Future<void> sendSemanticsTreeInfo() async {
       scrollPosition: 0,
       scrollExtentMax: 0,
       scrollExtentMin: 0,
-      rect: ui.Rect.fromLTRB(0, 0, 10, 10),
+      rect: const ui.Rect.fromLTRB(0, 0, 10, 10),
       elevation: 0,
       thickness: 0,
       identifier: 'identifier',
@@ -465,8 +463,6 @@ Future<void> sendSemanticsTreeInfo() async {
       transform: transform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
-      additionalActions: additionalActions,
-      headingLevel: 0,
       linkUrl: '',
       role: ui.SemanticsRole.tab,
       controlsNodes: null,
