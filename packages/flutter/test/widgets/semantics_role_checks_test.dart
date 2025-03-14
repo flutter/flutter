@@ -51,6 +51,38 @@ void main() {
     });
   });
 
+  group('list', () {
+    testWidgets('failure case, list item without list parent', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.listItem, child: const Text('some child')),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith('Semantics node 1 has role ${SemanticsRole.listItem}, but its parent'),
+      );
+    });
+
+    testWidgets('Success case', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.list,
+            explicitChildNodes: true,
+            child: Semantics(role: SemanticsRole.listItem, child: const Text('some child')),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('tabBar', () {
     testWidgets('failure case, empty child', (WidgetTester tester) async {
       await tester.pumpWidget(
