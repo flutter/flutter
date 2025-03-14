@@ -79,10 +79,13 @@ void TextContents::SetTextProperties(Color color,
 
 namespace {
 Scalar AttractToOne(Scalar x) {
-  if (std::abs(x - 1.f) < kEhCloseEnough) {
+  // Epsilon was decided by looking at the floating point inaccuracies in
+  // the ScaledK test.
+  const Scalar epsilon = 0.005f;
+  if (std::abs(x - 1.f) < epsilon) {
     return 1.f;
   }
-  if (std::abs(x + 1.f) < kEhCloseEnough) {
+  if (std::abs(x + 1.f) < epsilon) {
     return -1.f;
   }
   return x;
@@ -194,9 +197,10 @@ void TextContents::ComputeVertexData(
 
       // In typical scales < 48x these values should be -1 or 1. We round to
       // those to avoid inaccuracies.
-      basis_transform.m[0] = AttractToOne(basis_transform.m[0]);
-      basis_transform.m[5] = AttractToOne(basis_transform.m[5]);
+      unscaled_basis.m[0] = AttractToOne(unscaled_basis.m[0]);
+      unscaled_basis.m[5] = AttractToOne(unscaled_basis.m[5]);
 
+      FML_CHECK(unscaled_basis.m[0] == 1.f);
       Point unrounded_glyph_position =
           // This is for RTL text.
           unscaled_basis * glyph_bounds.GetLeftTop() +
