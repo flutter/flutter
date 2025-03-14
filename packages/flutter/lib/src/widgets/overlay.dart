@@ -2608,8 +2608,11 @@ class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<OverlayChildLayou
 
   @override
   final OverlayChildLayoutBuilder builder;
+
   @override
-  RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox>createRenderObject(BuildContext context) => _RenderLayoutBuilder();
+  RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox> createRenderObject(
+    BuildContext context,
+  ) => _RenderLayoutBuilder();
 
   @override
   bool updateShouldRebuild(_OverlayChildLayoutBuilder oldWidget) => oldWidget.builder != builder;

@@ -29,7 +29,9 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   const SliverLayoutBuilder({super.key, required super.builder});
 
   @override
-  RenderAbstractLayoutBuilderMixin<SliverConstraints, RenderSliver> createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
+  RenderAbstractLayoutBuilderMixin<SliverConstraints, RenderSliver> createRenderObject(
+    BuildContext context,
+  ) => _RenderSliverLayoutBuilder();
 }
 
 class _RenderSliverLayoutBuilder extends RenderSliver
