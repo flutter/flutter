@@ -2609,7 +2609,7 @@ class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<OverlayChildLayou
   @override
   final OverlayChildLayoutBuilder builder;
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
+  RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox>createRenderObject(BuildContext context) => _RenderLayoutBuilder();
 
   @override
   bool updateShouldRebuild(_OverlayChildLayoutBuilder oldWidget) => oldWidget.builder != builder;
@@ -2626,7 +2626,7 @@ class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<OverlayChildLayou
 // Additionally, like RenderDeferredLayoutBox, this RenderBox also uses the Stack
 // layout algorithm so developers can use the Positioned widget.
 class _RenderLayoutBuilder extends RenderProxyBox
-    with _RenderTheaterMixin, RenderConstrainedLayoutBuilder<OverlayChildLayoutInfo, RenderBox> {
+    with _RenderTheaterMixin, RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox> {
   @override
   Iterable<RenderBox> _childrenInPaintOrder() {
     final RenderBox? child = this.child;

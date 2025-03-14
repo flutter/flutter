@@ -29,11 +29,14 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// The [LayoutInfoType] should typically be immutable. The equality of the
 /// [LayoutInfoType] type is used by the implementation to avoid unnecessary
 /// rebuilds: if the new [LayoutInfoType] computed during layout is the same as
-/// (defined by [LayoutInfoType]'s [==] operator) the previous [LayoutInfoType],
-/// the implementation will try to avoid calling the [builder] again unless
-/// [updateShouldRebuild] returns true.
+/// (defined by `LayoutInfoType.==`) the previous [LayoutInfoType], the
+/// implementation will try to avoid calling the [builder] again unless
+/// [updateShouldRebuild] returns true. The corresponding [RenderObject] produced
+/// by this widget retains the most up-to-date [LayoutInfoType] for this purpose,
+/// which may keep a [LayoutInfoType] object in memory until the widget is removed
+/// from the tree.
 ///
-/// Subclasses must return a [RenderObject] that mixes in [RenderConstrainedLayoutBuilder].
+/// Subclasses must return a [RenderObject] that mixes in [RenderAbstractLayoutBuilderMixin].
 abstract class AbstractLayoutBuilder<LayoutInfoType> extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   const AbstractLayoutBuilder({super.key});
@@ -68,6 +71,11 @@ abstract class AbstractLayoutBuilder<LayoutInfoType> extends RenderObjectWidget 
   @protected
   bool updateShouldRebuild(covariant AbstractLayoutBuilder<LayoutInfoType> oldWidget) => true;
 
+  @override
+  RenderAbstractLayoutBuilderMixin<LayoutInfoType, RenderObject> createRenderObject(
+    BuildContext context,
+  );
+
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
 
@@ -98,8 +106,8 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
   _LayoutBuilderElement(AbstractLayoutBuilder<LayoutInfoType> super.widget);
 
   @override
-  RenderConstrainedLayoutBuilder<LayoutInfoType, RenderObject> get renderObject =>
-      super.renderObject as RenderConstrainedLayoutBuilder<LayoutInfoType, RenderObject>;
+  RenderAbstractLayoutBuilderMixin<LayoutInfoType, RenderObject> get renderObject =>
+      super.renderObject as RenderAbstractLayoutBuilderMixin<LayoutInfoType, RenderObject>;
 
   Element? _child;
 
@@ -206,7 +214,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
   }
 
   // The LayoutInfoType that was used to invoke the layout callback with last time,
-  // during layout. The `_previousLayoutInfo` value is compared to the new ones
+  // during layout. The `_previousLayoutInfo` value is compared to the new one
   // to determine whether [LayoutBuilderBase.builder] needs to be called.
   LayoutInfoType? _previousLayoutInfo;
   bool _needsBuild = true;
@@ -276,7 +284,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
 
   @override
   void removeRenderObjectChild(RenderObject child, Object? slot) {
-    final RenderConstrainedLayoutBuilder<LayoutInfoType, RenderObject> renderObject =
+    final RenderAbstractLayoutBuilderMixin<LayoutInfoType, RenderObject> renderObject =
         this.renderObject;
     assert(renderObject.child == child);
     renderObject.child = null;
@@ -284,16 +292,21 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
   }
 }
 
-/// Generic mixin for [RenderObject]s created by [AbstractLayoutBuilder].
+/// Generic mixin for [RenderObject]s created by an [AbstractLayoutBuilder] with
+/// the the same `LayoutInfoType`.
 ///
-/// Provides a callback that should be called at layout time, typically in
-/// [RenderObject.performLayout].
-mixin RenderConstrainedLayoutBuilder<LayoutInfoType, ChildType extends RenderObject>
+/// Provides a [rebuildIfNecessary] method that should be called at layout time,
+/// typically in [RenderObject.performLayout]. The method invokes
+/// [AbstractLayoutBuilder]'s builder callback if needed.
+///
+/// Implementers must provide a [layoutInfo] implementation that is safe to
+/// access in [rebuildIfNecessary], which is typically called in [performLayout].
+mixin RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType extends RenderObject>
     on RenderObjectWithChildMixin<ChildType> {
-  void Function(Constraints)? _callback;
+  LayoutCallback<Constraints>? _callback;
 
   /// Change the layout callback.
-  void _updateCallback(void Function(Constraints)? value) {
+  void _updateCallback(LayoutCallback<Constraints>? value) {
     if (value == _callback) {
       return;
     }
@@ -301,10 +314,16 @@ mixin RenderConstrainedLayoutBuilder<LayoutInfoType, ChildType extends RenderObj
     markNeedsLayout();
   }
 
-  /// Invoke the callback supplied via [_updateCallback].
+  /// Invoke the builder callback supplied via [AbstractLayoutBuilder] and
+  /// rebuilds the [AbstractLayoutBuilder]'s widget tree, if needed.
   ///
-  /// Typically this results in [ConstrainedLayoutBuilder.builder] being called
-  /// during layout.
+  /// No work will be done if [layoutInfo] has not changed since the last time
+  /// this method was called, and [AbstractLayoutBuilder.updateShouldRebuild]
+  /// returned `false` when the widget was rebuilt.
+  ///
+  /// This method should typically be called as soon as possible in the class's
+  /// [performLayout] implementation, before any layout work is done.
+  @protected
   void rebuildIfNecessary() {
     assert(_callback != null);
     invokeLayoutCallback(_callback!);
@@ -354,13 +373,15 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   const LayoutBuilder({super.key, required super.builder});
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
+  RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox> createRenderObject(
+    BuildContext context,
+  ) => _RenderLayoutBuilder();
 }
 
 class _RenderLayoutBuilder extends RenderBox
     with
         RenderObjectWithChildMixin<RenderBox>,
-        RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
+        RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox> {
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_debugThrowIfNotCheckingIntrinsics());

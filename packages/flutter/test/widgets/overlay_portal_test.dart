@@ -26,11 +26,11 @@ class _ManyRelayoutBoundaries extends StatelessWidget {
 }
 
 void rebuildLayoutBuilderSubtree(RenderBox descendant, WidgetTester tester) {
-  assert(descendant is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>);
+  assert(descendant is! RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox>);
 
   RenderObject? node = descendant.parent;
   while (node != null) {
-    if (node is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>) {
+    if (node is! RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox>) {
       node = node.parent;
     } else {
       final Element layoutBuilderElement = tester.element(
