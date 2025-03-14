@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
-import 'dart:typed_data' show ByteData, Uint8List, Int32List, Float64List;
+import 'dart:typed_data' show ByteData, Float64List, Int32List, Uint8List;
 import 'dart:ui' as ui;
 
 // Signals a waiting latch in the native test.
@@ -465,7 +465,6 @@ Future<void> sendSemanticsTreeInfo() async {
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: additionalActions,
-      linkUrl: '',
       role: ui.SemanticsRole.tab,
       controlsNodes: null,
     );
