@@ -1398,28 +1398,30 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
   auto window_binding_handler2 =
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
 
+  // The following mocks are required by
+  // FlutterWindowsView::CreateWindowMetricsEvent so that we create a valid
+  // view.
+  EXPECT_CALL(*window_binding_handler1, GetPhysicalWindowBounds)
+      .WillRepeatedly(testing::Return(PhysicalWindowBounds{100, 100}));
+  EXPECT_CALL(*window_binding_handler1, GetDpiScale)
+      .WillRepeatedly(testing::Return(96.0));
+  EXPECT_CALL(*window_binding_handler2, GetPhysicalWindowBounds)
+      .WillRepeatedly(testing::Return(PhysicalWindowBounds{200, 200}));
+  EXPECT_CALL(*window_binding_handler2, GetDpiScale)
+      .WillRepeatedly(testing::Return(96.0));
+
   auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
   EngineModifier modifier{windows_engine};
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
-  modifier.embedder_api().AddView =
-      MOCK_ENGINE_PROC(AddView, [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
-                                   const FlutterAddViewInfo* info) {
-        FlutterAddViewResult result;
-        result.struct_size = sizeof(FlutterAddViewResult);
-        result.added = true;
-        result.user_data = info->user_data;
-        info->add_view_callback(&result);
-        return kSuccess;
-      });
+
+  // We want to avoid adding an implicit view as the first view
+  modifier.SetNextViewId(kImplicitViewId + 1);
 
   auto view1 = windows_engine->CreateView(std::move(window_binding_handler1));
   auto view2 = windows_engine->CreateView(std::move(window_binding_handler2));
-  // modifier.SetViewById(&view1, first_view_id);
-  // modifier.SetViewById(&view2, second_view_id);
 
   // Act: UpdateSemanticsEnabled will trigger the semantics updates
   // to get sent.
-
   windows_engine->UpdateSemanticsEnabled(true);
 
   // Rely on timeout mechanism in CI.
