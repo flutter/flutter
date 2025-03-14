@@ -196,6 +196,11 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     }
   }
 
+  /// Get a label for the given [nativeTarget], for logging purposes.
+  String _getPbxNativeTargetLabel(ParsedNativeTarget nativeTarget) {
+    return nativeTarget.name == null ? 'PBXNativeTarget' : 'PBXNativeTarget "${nativeTarget.name}"';
+  }
+
   Future<SchemeInfo> _getSchemeFile() async {
     final XcodeProjectInfo? projectInfo = await _xcodeProject.projectInfo();
     if (projectInfo == null) {
@@ -576,12 +581,10 @@ $newContent
     required int startSectionIndex,
     required int endSectionIndex,
   }) {
-    final String targetName = nativeTarget.name ?? '';
-    final String pbxTargetName =
-        targetName.isNotEmpty ? 'PBXNativeTarget "$targetName"' : 'PBXNativeTarget';
+    final String pbxTargetLabel = _getPbxNativeTargetLabel(nativeTarget);
     final String subsectionLineStart =
-        targetName.isNotEmpty
-            ? '${nativeTarget.identifier} /* $targetName */ = {'
+        nativeTarget.name != null
+            ? '${nativeTarget.identifier} /* ${nativeTarget.name} */ = {'
             : nativeTarget.identifier;
     final int nativeTargetStartIndex = lines.indexWhere(
       (String line) => line.trim().startsWith(subsectionLineStart),
@@ -590,7 +593,7 @@ $newContent
 
     if (nativeTargetStartIndex == -1 || nativeTargetStartIndex > endSectionIndex) {
       throw Exception(
-        'Unable to find $pbxTargetName for ${_xcodeProject.hostAppProjectName} project.',
+        'Unable to find $pbxTargetLabel for ${_xcodeProject.hostAppProjectName} project.',
       );
     }
 
@@ -613,7 +616,7 @@ $newContent
     if (packageProductDependenciesIndex == -1 ||
         packageProductDependenciesIndex > endSectionIndex) {
       throw Exception(
-        'Unable to find packageProductDependencies for $pbxTargetName in ${_xcodeProject.hostAppProjectName} project.',
+        'Unable to find packageProductDependencies for $pbxTargetLabel in ${_xcodeProject.hostAppProjectName} project.',
       );
     }
     const String newContent =
