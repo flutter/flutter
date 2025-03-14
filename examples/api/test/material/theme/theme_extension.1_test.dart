@@ -40,9 +40,9 @@ void main() {
   testWidgets('Home uses MyColors extension correctly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(
-          extensions: <ThemeExtension<dynamic>>[
-            const example.MyColors(brandColor: Color(0xFF0000FF), danger: Color(0xFFFF0000)),
+        theme: ThemeData(
+          extensions: const <ThemeExtension<dynamic>>[
+            example.MyColors(brandColor: Color(0xFF0000FF), danger: Color(0xFFFF0000)),
           ],
         ),
         home: example.Home(isLightTheme: true, toggleTheme: () {}),

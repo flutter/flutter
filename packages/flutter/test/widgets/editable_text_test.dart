@@ -9960,7 +9960,7 @@ void main() {
       final _AccentColorTextEditingController controller = _AccentColorTextEditingController('a');
       addTearDown(controller.dispose);
       const Color color = Color.fromARGB(255, 1, 2, 3);
-      final ThemeData lightTheme = ThemeData.light();
+      final ThemeData lightTheme = ThemeData();
       await tester.pumpWidget(
         MaterialApp(
           theme: lightTheme.copyWith(

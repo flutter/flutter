@@ -62,7 +62,7 @@ void main() {
   });
 
   for (final ColorScheme colorScheme in <ColorScheme>[
-    ThemeData.light().colorScheme,
+    ThemeData().colorScheme,
     ThemeData.dark().colorScheme,
   ]) {
     testWidgets('foreground color by default', (WidgetTester tester) async {

@@ -886,7 +886,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
-          chipTheme: ThemeData.light().chipTheme.copyWith(
+          chipTheme: ThemeData().chipTheme.copyWith(
             side: MaterialStateBorderSide.resolveWith(getBorderSide),
           ),
         ),

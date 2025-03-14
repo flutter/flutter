@@ -1901,7 +1901,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light(),
+          data: ThemeData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Material(
@@ -1959,7 +1959,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light(),
+          data: ThemeData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Material(
@@ -2043,7 +2043,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light(),
+          data: ThemeData(),
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: Material(

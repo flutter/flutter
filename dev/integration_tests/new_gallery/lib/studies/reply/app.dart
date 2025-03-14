@@ -150,7 +150,7 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
 }
 
 ThemeData _buildReplyLightTheme(BuildContext context) {
-  final ThemeData base = ThemeData.light();
+  final ThemeData base = ThemeData();
   return base.copyWith(
     bottomAppBarTheme: const BottomAppBarTheme(color: ReplyColors.blue700),
     bottomSheetTheme: BottomSheetThemeData(
