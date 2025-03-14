@@ -105,6 +105,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, SendsAccessibilityCreateNotificationFlu
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
+  root.identifier = "";
   root.label = "root";
   root.hint = "";
   root.value = "";
@@ -165,6 +166,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
   node1.actions = static_cast<FlutterSemanticsAction>(0);
   node1.text_selection_base = -1;
   node1.text_selection_extent = -1;
+  node1.identifier = "";
   node1.label = "node1";
   node1.hint = "";
   node1.value = "";
@@ -182,6 +184,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
   node2.actions = static_cast<FlutterSemanticsAction>(0);
   node2.text_selection_base = -1;
   node2.text_selection_extent = -1;
+  node2.identifier = "";
   node2.label = "node2";
   node2.hint = "";
   node2.value = "";
@@ -228,6 +231,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
+  root.identifier = "";
   root.label = "root";
   root.hint = "";
   root.value = "";
@@ -275,6 +279,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
+  root.identifier = "";
   root.label = "root";
   root.hint = "";
   root.value = "";
