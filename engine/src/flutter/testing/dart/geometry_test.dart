@@ -595,7 +595,7 @@ void main() {
   });
 
   test('RSuperellipse.contains TinyCornerContains', () {
-    // RRect of bounds with even the tiniest corners does not contain corners
+    // RRect of bounds with even the tiniest corners does not contain corners.
     final RSuperellipse tiny_corners = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 0.01, 0.01);
 
     expect(tiny_corners.contains(Offset(-50, -50)), isFalse);
