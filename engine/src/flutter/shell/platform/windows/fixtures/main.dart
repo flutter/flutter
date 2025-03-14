@@ -426,6 +426,7 @@ Future<void> sendSemanticsTreeInfo() async {
     final Float64List transform = Float64List(16);
     final Int32List childrenInTraversalOrder = Int32List(0);
     final Int32List childrenInHitTestOrder = Int32List(0);
+    final Int32List additionalActions = Int32List(0);
     // Identity matrix 4x4.
     transform[0] = 1;
     transform[5] = 1;
@@ -463,6 +464,7 @@ Future<void> sendSemanticsTreeInfo() async {
       transform: transform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
+      additionalActions: additionalActions,
       linkUrl: '',
       role: ui.SemanticsRole.tab,
       controlsNodes: null,
