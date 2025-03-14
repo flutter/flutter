@@ -903,7 +903,7 @@ class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   }
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  _RenderSmartLayoutBuilder createRenderObject(BuildContext context) {
     return _RenderSmartLayoutBuilder(
       offsetPercentage: offsetPercentage,
       onChildWasPainted: onChildWasPainted,
