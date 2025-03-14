@@ -553,6 +553,21 @@ $newContent
     return lines;
   }
 
+  bool _isNativeApplicationTargetMigrated(ParsedNativeTarget target) {
+    assert(
+      target.productType == _kNativeTargetApplicationProductType,
+      'Only application targets are supported by the SPM migrator.',
+    );
+
+    if (target.packageProductDependencies == null) {
+      return false;
+    }
+
+    return target.packageProductDependencies!.contains(
+      _flutterPluginsSwiftPackageProductDependencyIdentifier,
+    );
+  }
+
   bool _areNativeApplicationTargetsMigrated(
     ParsedProjectInfo projectInfo, {
     bool logErrorIfNotMigrated = false,
@@ -562,12 +577,8 @@ $newContent
             .where(
               (ParsedNativeTarget target) =>
                   target.productType == _kNativeTargetApplicationProductType &&
-                  target.packageProductDependencies != null &&
-                  target.packageProductDependencies!.contains(
-                    _flutterPluginsSwiftPackageProductDependencyIdentifier,
-                  ),
+                  _isNativeApplicationTargetMigrated(target),
             )
-            .toList()
             .isNotEmpty;
     if (logErrorIfNotMigrated && !migrated) {
       logger.printError('Some PBXNativeTargets were not migrated or were migrated incorrectly.');
@@ -644,6 +655,13 @@ $newContent
     }
 
     for (final ParsedNativeTarget nativeTarget in applicationNativeTargets) {
+      if (_isNativeApplicationTargetMigrated(nativeTarget)) {
+        final String pbxTargetLabel = _getPbxNativeTargetLabel(nativeTarget);
+
+        logger.printTrace('$pbxTargetLabel already migrated. Skipping...');
+        continue;
+      }
+
       _migrateNativeApplicationTarget(
         lines,
         nativeTarget,
