@@ -377,7 +377,9 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           return pass.Draw().ok();
         };
     return renderer.MakeSubpass("Gaussian Blur Filter", pass_args.subpass_size,
-                                command_buffer, subpass_callback);
+                                command_buffer, subpass_callback,
+                                /*msaa_enabled=*/false,
+                                /*depth_stencil_enabled=*/false);
   } else {
     // This assumes we don't scale below 1/16.
     Scalar edge = 1.0;
@@ -446,7 +448,9 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           return pass.Draw().ok();
         };
     return renderer.MakeSubpass("Gaussian Blur Filter", pass_args.subpass_size,
-                                command_buffer, subpass_callback);
+                                command_buffer, subpass_callback,
+                                /*msaa_enabled=*/false,
+                                /*depth_stencil_enabled=*/false);
   }
 }
 
@@ -511,8 +515,9 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
                                 destination_target.value(), command_buffer,
                                 subpass_callback);
   } else {
-    return renderer.MakeSubpass("Gaussian Blur Filter", subpass_size,
-                                command_buffer, subpass_callback);
+    return renderer.MakeSubpass(
+        "Gaussian Blur Filter", subpass_size, command_buffer, subpass_callback,
+        /*msaa_enabled=*/false, /*depth_stencil_enabled=*/false);
   }
 }
 
