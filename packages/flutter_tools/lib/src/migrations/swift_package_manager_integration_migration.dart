@@ -407,13 +407,13 @@ $newContent
 
   void _migratePbxproj() {
     final String originalProjectContents = _xcodeProjectInfoFile.readAsStringSync();
+    List<String> lines = LineSplitter.split(originalProjectContents).toList();
 
-    _ensureNewIdentifiersNotUsed(originalProjectContents);
+    _ensureNewIdentifiersNotUsed(List<String>.unmodifiable(lines));
 
     // Parse project.pbxproj into JSON
     final ParsedProjectInfo parsedInfo = _parsePbxproj();
 
-    List<String> lines = LineSplitter.split(originalProjectContents).toList();
     lines = _migrateBuildFile(lines, parsedInfo);
     lines = _migrateFrameworksBuildPhase(lines, parsedInfo);
     lines = _migrateNativeApplicationTargets(lines, parsedInfo);
@@ -430,14 +430,39 @@ $newContent
     }
   }
 
-  void _ensureNewIdentifiersNotUsed(String originalProjectContents) {
-    if (originalProjectContents.contains(_flutterPluginsSwiftPackageBuildFileIdentifier)) {
+  /// Check if the reserved identifiers are used outside of the allowed sections in the pbxproj file.
+  ///
+  /// When the migrator is rerun, it should not fail
+  /// when encountering the reserved identifiers in existing, migrated sections of the file.
+  ///
+  /// For example:
+  /// - An unmigrated project is migrated on the first try
+  /// - A new application target is added to the project, through XCode
+  /// - The migrator is rerun through the flutter CLI upon executing `flutter run`
+  /// - The migrator should skip sections like 'PBXBuildFile' or 'XCSwiftPackageProductDependency',
+  ///   since they are already migrated
+  void _ensureNewIdentifiersNotUsed(List<String> lines) {
+    if (_isIdentifierOutsideAllowedSections(
+      _flutterPluginsSwiftPackageBuildFileIdentifier,
+      lines,
+      <String>{'PBXBuildFile', 'PBXFrameworksBuildPhase'},
+    )) {
       throw Exception('Duplicate id found for PBXBuildFile.');
     }
-    if (originalProjectContents.contains(_flutterPluginsSwiftPackageProductDependencyIdentifier)) {
+
+    if (_isIdentifierOutsideAllowedSections(
+      _flutterPluginsSwiftPackageProductDependencyIdentifier,
+      lines,
+      <String>{'PBXBuildFile', 'PBXNativeTarget', 'XCSwiftPackageProductDependency'},
+    )) {
       throw Exception('Duplicate id found for XCSwiftPackageProductDependency.');
     }
-    if (originalProjectContents.contains(_localFlutterPluginsSwiftPackageReferenceIdentifier)) {
+
+    if (_isIdentifierOutsideAllowedSections(
+      _localFlutterPluginsSwiftPackageReferenceIdentifier,
+      lines,
+      <String>{'PBXProject', 'XCLocalSwiftPackageReference'},
+    )) {
       throw Exception('Duplicate id found for XCLocalSwiftPackageReference.');
     }
   }
@@ -885,6 +910,49 @@ $newContent
       throw Exception('Found the end of $sectionName section before the beginning.');
     }
     return (startSectionIndex, endSectionIndex);
+  }
+
+  /// Check whether the given [identifier] occurs in any of the [lines],
+  /// and outside of the text ranges of the given [sectionNames].
+  ///
+  /// Returns false if the [identifier] does not occur in the given [lines].
+  /// Returns false if the [identifier] only occurs within the sections denoted by the [sectionNames].
+  /// Returns true otherwise.
+  bool _isIdentifierOutsideAllowedSections(
+    String identifier,
+    List<String> lines,
+    Set<String> sectionNames,
+  ) {
+    final List<(int, int)> sectionRanges = <(int, int)>[];
+
+    for (final String sectionName in sectionNames) {
+      final (int, int) range = _sectionRange(sectionName, lines, throwIfMissing: false);
+
+      if (range != (-1, -1)) {
+        sectionRanges.add(range);
+      }
+    }
+
+    sectionRanges.sort(((int, int) a, (int, int) b) => a.$1.compareTo(b.$1));
+
+    for (int i = 0; i < lines.length; i++) {
+      if (!lines[i].contains(identifier)) {
+        continue;
+      }
+
+      bool isInSection = false;
+
+      for (final (int start, int end) in sectionRanges) {
+        if (i >= start && i <= end) {
+          isInSection = true;
+          break;
+        }
+      }
+
+      return !isInSection;
+    }
+
+    return false;
   }
 }
 
