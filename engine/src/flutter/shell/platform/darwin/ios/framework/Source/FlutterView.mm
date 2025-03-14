@@ -78,16 +78,6 @@ FLUTTER_ASSERT_ARC
   return self;
 }
 
-static void PrintWideGamutWarningOnce() {
-  static BOOL did_print = NO;
-  if (did_print) {
-    return;
-  }
-  FML_DLOG(WARNING) << "Rendering wide gamut colors is turned on but isn't "
-                       "supported, downgrading the color gamut to sRGB.";
-  did_print = YES;
-}
-
 - (void)layoutSubviews {
   if ([self.layer isKindOfClass:[CAMetalLayer class]]) {
 // It is a known Apple bug that CAMetalLayer incorrectly reports its supported
@@ -96,6 +86,7 @@ static void PrintWideGamutWarningOnce() {
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
     CAMetalLayer* layer = (CAMetalLayer*)self.layer;
 #pragma clang diagnostic pop
+
     CGFloat screenScale = self.screen.scale;
     layer.allowsGroupOpacity = YES;
     layer.contentsScale = screenScale;
@@ -104,9 +95,7 @@ static void PrintWideGamutWarningOnce() {
     if (_isWideGamutEnabled && self.isWideGamutSupported) {
       fml::CFRef<CGColorSpaceRef> srgb(CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB));
       layer.colorspace = srgb;
-      layer.pixelFormat = MTLPixelFormatBGRA10_XR;
-    } else if (_isWideGamutEnabled && !self.isWideGamutSupported) {
-      PrintWideGamutWarningOnce();
+      layer.pixelFormat = MTLPixelFormatBGR10_XR;
     }
   }
 
