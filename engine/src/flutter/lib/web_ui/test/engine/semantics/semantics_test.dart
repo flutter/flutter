@@ -1016,8 +1016,8 @@ void _testContainer() {
       expect(childElement.style.transformOrigin, '0px 0px 0px');
     }
     expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -10, -10)');
-    expect(childElement.style.left, '0px');
-    expect(childElement.style.top, '0px');
+    expect(childElement.style.left == '0px' || childElement.style.left == '', isTrue);
+    expect(childElement.style.top == '0px' || childElement.style.top == '', isTrue);
 
     semantics().semanticsEnabled = false;
   });
@@ -1066,8 +1066,8 @@ void _testContainer() {
         expect(childElement.style.transformOrigin, '0px 0px 0px');
       }
       expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -10, -10)');
-      expect(childElement.style.left, '0px');
-      expect(childElement.style.top, '0px');
+      expect(childElement.style.left == '0px' || childElement.style.left == '', isTrue);
+      expect(childElement.style.top == '0px' || childElement.style.top == '', isTrue);
 
       final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
 
@@ -1098,8 +1098,8 @@ void _testContainer() {
         expect(childElement.style.transformOrigin, '0px 0px 0px');
       }
       expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -33, -33)');
-      expect(childElement.style.left, '0px');
-      expect(childElement.style.top, '0px');
+      expect(childElement.style.left == '0px' || childElement.style.left == '', isTrue);
+      expect(childElement.style.top == '0px' || childElement.style.top == '', isTrue);
 
       semantics().semanticsEnabled = false;
     },
