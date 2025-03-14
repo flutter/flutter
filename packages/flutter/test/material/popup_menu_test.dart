@@ -2446,11 +2446,16 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: PopupMenuItem<int>(
-                  key: key,
-                  mouseCursor: SystemMouseCursors.text,
-                  value: 1,
-                  child: Container(),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [PopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: PopupMenuItem<int>(
+                    key: key,
+                    mouseCursor: SystemMouseCursors.text,
+                    value: 1,
+                    child: Container(),
+                  ),
                 ),
               ),
             ),
@@ -2481,7 +2486,12 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: PopupMenuItem<int>(key: key, value: 1, child: Container()),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [PopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: PopupMenuItem<int>(key: key, value: 1, child: Container()),
+                ),
               ),
             ),
           ),
@@ -2503,7 +2513,12 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: PopupMenuItem<int>(key: key, value: 1, enabled: false, child: Container()),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [PopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: PopupMenuItem<int>(key: key, value: 1, enabled: false, child: Container()),
+                ),
               ),
             ),
           ),
@@ -2530,11 +2545,16 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: CheckedPopupMenuItem<int>(
-                  key: key,
-                  mouseCursor: SystemMouseCursors.text,
-                  value: 1,
-                  child: Container(),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [CheckedPopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: CheckedPopupMenuItem<int>(
+                    key: key,
+                    mouseCursor: SystemMouseCursors.text,
+                    value: 1,
+                    child: Container(),
+                  ),
                 ),
               ),
             ),
@@ -2566,7 +2586,12 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: CheckedPopupMenuItem<int>(key: key, value: 1, child: Container()),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [CheckedPopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: CheckedPopupMenuItem<int>(key: key, value: 1, child: Container()),
+                ),
               ),
             ),
           ),
@@ -2588,11 +2613,16 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: CheckedPopupMenuItem<int>(
-                  key: key,
-                  value: 1,
-                  enabled: false,
-                  child: Container(),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [CheckedPopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: CheckedPopupMenuItem<int>(
+                    key: key,
+                    value: 1,
+                    enabled: false,
+                    child: Container(),
+                  ),
                 ),
               ),
             ),

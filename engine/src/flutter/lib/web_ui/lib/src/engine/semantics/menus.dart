@@ -63,7 +63,7 @@ class SemanticMenu extends SemanticRole {
 
     String attributeValue = '';
     for (final int id in ids) {
-      attributeValue = attributeValue + ' flt-semantic-node-$id';
+      attributeValue = '$attributeValue flt-semantic-node-$id';
     }
     setAttribute('aria-owns', attributeValue.trim());
   }
@@ -127,7 +127,7 @@ class SemanticMenuBar extends SemanticRole {
 
     String attributeValue = '';
     for (final int id in ids) {
-      attributeValue = attributeValue + ' flt-semantic-node-$id';
+      attributeValue = '$attributeValue flt-semantic-node-$id';
     }
     setAttribute('aria-owns', attributeValue.trim());
   }
