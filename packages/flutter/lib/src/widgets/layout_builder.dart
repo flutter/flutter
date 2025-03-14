@@ -329,7 +329,7 @@ mixin RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType extends RenderO
     invokeLayoutCallback(_callback!);
   }
 
-  /// The (subset of) information to invoke the `builder` callback with.
+  /// The information to invoke the [AbstractLayoutBuilder.builder] callback with.
   ///
   /// This is typically the information that are only made available in
   /// [performLayout], which is inaccessible for regular [Builder] widget,
