@@ -117,6 +117,8 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.radioGroup => _semanticsRadioGroup,
     SemanticsRole.alert => _noLiveRegion,
     SemanticsRole.status => _noLiveRegion,
+    SemanticsRole.list => _noCheckRequired,
+    SemanticsRole.listItem => _semanticsListItem,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.searchBox => _unimplemented,
@@ -126,8 +128,6 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.menuBar => _unimplemented,
     SemanticsRole.menu => _unimplemented,
     SemanticsRole.menuItem => _unimplemented,
-    SemanticsRole.list => _unimplemented,
-    SemanticsRole.listItem => _unimplemented,
     SemanticsRole.form => _unimplemented,
     SemanticsRole.tooltip => _unimplemented,
     SemanticsRole.loadingSpinner => _unimplemented,
@@ -247,6 +247,25 @@ sealed class _DebugSemanticsRoleChecks {
         'Node ${node.id} has role ${data.role} but is also a live region. '
         'A node can not have ${data.role} and be live region at the same time. '
         'Either remove the role or the live region',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsListItem(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    final SemanticsNode? parent = node.parent;
+    if (parent == null) {
+      return FlutterError(
+        "Semantics node ${node.id} has role ${data.role} but doesn't have a parent",
+      );
+    }
+    final SemanticsData parentSemanticsData = parent.getSemanticsData();
+    if (parentSemanticsData.role != SemanticsRole.list) {
+      return FlutterError(
+        'Semantics node ${node.id} has role ${data.role}, but its '
+        "parent node ${parent.id} doesn't have the role ${SemanticsRole.list}. "
+        'Please assign the ${SemanticsRole.list} to node ${parent.id}',
       );
     }
     return null;
@@ -5520,6 +5539,22 @@ class SemanticsConfiguration {
 
   bool _hasFlag(SemanticsFlag flag) => (_flags & flag.index) != 0;
 
+  bool get _hasExplicitRole {
+    if (_role != SemanticsRole.none) {
+      return true;
+    }
+    if (_hasFlag(SemanticsFlag.isTextField) ||
+        _hasFlag(SemanticsFlag.isHeader) ||
+        _hasFlag(SemanticsFlag.isSlider) ||
+        _hasFlag(SemanticsFlag.isLink) ||
+        _hasFlag(SemanticsFlag.scopesRoute) ||
+        _hasFlag(SemanticsFlag.isImage) ||
+        _hasFlag(SemanticsFlag.isKeyboardKey)) {
+      return true;
+    }
+    return false;
+  }
+
   // CONFIGURATION COMBINATION LOGIC
 
   /// Whether this configuration is compatible with the provided `other`
@@ -5547,6 +5582,9 @@ class SemanticsConfiguration {
       return false;
     }
     if (_attributedValue.string.isNotEmpty && other._attributedValue.string.isNotEmpty) {
+      return false;
+    }
+    if (_hasExplicitRole && other._hasExplicitRole) {
       return false;
     }
     return true;
