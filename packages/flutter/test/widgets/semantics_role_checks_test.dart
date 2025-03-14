@@ -51,6 +51,38 @@ void main() {
     });
   });
 
+  group('list', () {
+    testWidgets('failure case, list item without list parent', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.listItem, child: const Text('some child')),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith('Semantics node 1 has role ${SemanticsRole.listItem}, but its parent'),
+      );
+    });
+
+    testWidgets('Success case', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.list,
+            explicitChildNodes: true,
+            child: Semantics(role: SemanticsRole.listItem, child: const Text('some child')),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('tabBar', () {
     testWidgets('failure case, empty child', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -210,6 +242,115 @@ void main() {
                   inMutuallyExclusiveGroup: true,
                   child: const SizedBox.square(dimension: 1),
                 ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('success case, radio buttons with labels', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.radioGroup,
+            explicitChildNodes: true,
+            child: Column(
+              children: <Widget>[
+                Semantics(
+                  label: 'Option A',
+                  child: Semantics(
+                    checked: false,
+                    inMutuallyExclusiveGroup: true,
+                    child: const SizedBox.square(dimension: 1),
+                  ),
+                ),
+                Semantics(
+                  label: 'Option B',
+                  child: Semantics(
+                    checked: true,
+                    inMutuallyExclusiveGroup: true,
+                    child: const SizedBox.square(dimension: 1),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('success case, radio group with no checkable children', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.radioGroup,
+            explicitChildNodes: true,
+            child: Semantics(toggled: true, child: const SizedBox.square(dimension: 1)),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('alert and status', () {
+    testWidgets('failure case, alert and live region', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.alert,
+            liveRegion: true,
+            child: const SizedBox.square(dimension: 1),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith('Node 1 has role SemanticsRole.alert but is also a live region.'),
+      );
+    });
+
+    testWidgets('failure case, status and live region', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.status,
+            liveRegion: true,
+            child: const SizedBox.square(dimension: 1),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith('Node 1 has role SemanticsRole.status but is also a live region.'),
+      );
+    });
+
+    testWidgets('success case', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            explicitChildNodes: true,
+            child: Column(
+              children: <Widget>[
+                Semantics(role: SemanticsRole.status, child: const SizedBox.square(dimension: 1)),
+                Semantics(role: SemanticsRole.alert, child: const SizedBox.square(dimension: 1)),
               ],
             ),
           ),
