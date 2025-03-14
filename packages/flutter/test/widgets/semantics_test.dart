@@ -555,6 +555,7 @@ void main() {
         image: true,
         liveRegion: true,
         expanded: true,
+        isRequired: true,
       ),
     );
     final List<SemanticsFlag> flags = SemanticsFlag.values.toList();
@@ -620,6 +621,7 @@ void main() {
         image: true,
         liveRegion: true,
         expanded: true,
+        isRequired: true,
       ),
     );
     flags

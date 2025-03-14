@@ -117,6 +117,7 @@ export 'engine/semantics/link.dart';
 export 'engine/semantics/list.dart';
 export 'engine/semantics/live_region.dart';
 export 'engine/semantics/platform_view.dart';
+export 'engine/semantics/requirable.dart';
 export 'engine/semantics/route.dart';
 export 'engine/semantics/scrollable.dart';
 export 'engine/semantics/semantics.dart';

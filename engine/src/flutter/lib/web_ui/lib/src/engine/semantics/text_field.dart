@@ -321,6 +321,12 @@ class SemanticTextField extends SemanticRole {
     } else {
       editableElement.removeAttribute('aria-label');
     }
+
+    if (semanticsObject.isRequirable) {
+      editableElement.setAttribute('aria-required', semanticsObject.isRequired);
+    } else {
+      editableElement.removeAttribute('aria-required');
+    }
   }
 
   void _updateEnabledState() {
