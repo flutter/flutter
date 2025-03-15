@@ -717,6 +717,8 @@ Matcher matchesSemantics({
   bool isExpanded = false,
   bool hasRequiredState = false,
   bool isRequired = false,
+  bool isProgressBar = false,
+  bool isLoadingSpinner = false,
   // Actions //
   bool hasTapAction = false,
   bool hasFocusAction = false,
@@ -799,6 +801,8 @@ Matcher matchesSemantics({
     isExpanded: isExpanded,
     hasRequiredState: hasRequiredState,
     isRequired: isRequired,
+    isProgressBar: isProgressBar,
+    isLoadingSpinner: isLoadingSpinner,
     // Actions
     hasTapAction: hasTapAction,
     hasFocusAction: hasFocusAction,
@@ -909,6 +913,8 @@ Matcher containsSemantics({
   bool? isExpanded,
   bool? hasRequiredState,
   bool? isRequired,
+  bool? isProgressBar,
+  bool? isLoadingSpinner,
   // Actions
   bool? hasTapAction,
   bool? hasFocusAction,
@@ -991,6 +997,8 @@ Matcher containsSemantics({
     isExpanded: isExpanded,
     hasRequiredState: hasRequiredState,
     isRequired: isRequired,
+    isProgressBar: isProgressBar,
+    isLoadingSpinner: isLoadingSpinner,
     // Actions
     hasTapAction: hasTapAction,
     hasFocusAction: hasFocusAction,
@@ -2426,6 +2434,8 @@ class _MatchesSemanticsData extends Matcher {
     required bool? isExpanded,
     required bool? hasRequiredState,
     required bool? isRequired,
+    required bool? isProgressBar,
+    required bool? isLoadingSpinner,
     // Actions
     required bool? hasTapAction,
     required bool? hasFocusAction,
@@ -2487,6 +2497,8 @@ class _MatchesSemanticsData extends Matcher {
          if (isExpanded != null) SemanticsFlag.isExpanded: isExpanded,
          if (hasRequiredState != null) SemanticsFlag.hasRequiredState: hasRequiredState,
          if (isRequired != null) SemanticsFlag.isRequired: isRequired,
+         if (isProgressBar != null) SemanticsFlag.isProgressBar: isProgressBar,
+         if (isLoadingSpinner != null) SemanticsFlag.isLoadingSpinner: isLoadingSpinner,
        },
        actions = <SemanticsAction, bool>{
          if (hasTapAction != null) SemanticsAction.tap: hasTapAction,

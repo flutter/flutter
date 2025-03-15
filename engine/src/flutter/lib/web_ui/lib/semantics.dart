@@ -162,6 +162,8 @@ class SemanticsFlag {
   static const int _kHasSelectedStateIndex = 1 << 28;
   static const int _kHasRequiredStateIndex = 1 << 29;
   static const int _kIsRequiredIndex = 1 << 30;
+  static const int _kIsProgressBarIndex = 1 << 31;
+  static const int _kIsLoadingSpinnerIndex = 1 << 32;
 
   static const SemanticsFlag hasCheckedState = SemanticsFlag._(
     _kHasCheckedStateIndex,
@@ -221,6 +223,11 @@ class SemanticsFlag {
     'hasRequiredState',
   );
   static const SemanticsFlag isRequired = SemanticsFlag._(_kIsRequiredIndex, 'isRequired');
+  static const SemanticsFlag isProgressBar = SemanticsFlag._(_kIsProgressBarIndex, 'isProgressBar');
+  static const SemanticsFlag isLoadingSpinner = SemanticsFlag._(
+    _kIsLoadingSpinnerIndex,
+    'isLoadingSpinner',
+  );
 
   static const Map<int, SemanticsFlag> _kFlagById = <int, SemanticsFlag>{
     _kHasCheckedStateIndex: hasCheckedState,
@@ -254,6 +261,8 @@ class SemanticsFlag {
     _kIsExpandedIndex: isExpanded,
     _kHasRequiredStateIndex: hasRequiredState,
     _kIsRequiredIndex: isRequired,
+    _kIsProgressBarIndex: isProgressBar,
+    _kIsLoadingSpinnerIndex: isLoadingSpinner,
   };
 
   static List<SemanticsFlag> get values => _kFlagById.values.toList(growable: false);

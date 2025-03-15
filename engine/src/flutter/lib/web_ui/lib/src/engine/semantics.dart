@@ -16,6 +16,7 @@ export 'semantics/link.dart';
 export 'semantics/list.dart';
 export 'semantics/live_region.dart';
 export 'semantics/platform_view.dart';
+export 'semantics/progress_bar.dart';
 export 'semantics/requirable.dart';
 export 'semantics/scrollable.dart';
 export 'semantics/semantics.dart';

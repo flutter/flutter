@@ -32,6 +32,7 @@ import 'link.dart';
 import 'list.dart';
 import 'live_region.dart';
 import 'platform_view.dart';
+import 'progress_bar.dart';
 import 'requirable.dart';
 import 'route.dart';
 import 'scrollable.dart';
@@ -458,6 +459,12 @@ enum EngineSemanticsRole {
 
   /// An item in a [list].
   listItem,
+
+  /// A graphic object that shows progress with a numeric number.
+  progressBar,
+
+  /// A graphic object that spins to indicate the application is busy.
+  loadingSpinner,
 
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
@@ -1876,6 +1883,10 @@ class SemanticsObject {
         return EngineSemanticsRole.list;
       case ui.SemanticsRole.listItem:
         return EngineSemanticsRole.listItem;
+      case ui.SemanticsRole.loadingSpinner:
+        return EngineSemanticsRole.loadingSpinner;
+      case ui.SemanticsRole.progressBar:
+        return EngineSemanticsRole.progressBar;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.searchBox:
@@ -1887,8 +1898,6 @@ class SemanticsObject {
       case ui.SemanticsRole.menuItem:
       case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
-      case ui.SemanticsRole.loadingSpinner:
-      case ui.SemanticsRole.progressBar:
       case ui.SemanticsRole.hotKey:
       case ui.SemanticsRole.none:
       // fallback to checking semantics properties.
@@ -1950,6 +1959,8 @@ class SemanticsObject {
       EngineSemanticsRole.columnHeader => SemanticColumnHeader(this),
       EngineSemanticsRole.alert => SemanticAlert(this),
       EngineSemanticsRole.status => SemanticStatus(this),
+      EngineSemanticsRole.progressBar => SementicsProgressBar(this),
+      EngineSemanticsRole.loadingSpinner => SementicsLoadingSpinner(this),
       EngineSemanticsRole.generic => GenericRole(this),
     };
   }

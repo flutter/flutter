@@ -530,6 +530,8 @@ class SemanticsFlag {
   static const int _kHasSelectedStateIndex = 1 << 28;
   static const int _kHasRequiredStateIndex = 1 << 29;
   static const int _kIsRequiredIndex = 1 << 30;
+  static const int _kIsProgressBarIndex = 1 << 31;
+  static const int _kIsLoadingSpinnerIndex = 1 << 32;
   // READ THIS: if you add a flag here, you MUST update the following:
   //
   // - Add an appropriately named and documented `static const SemanticsFlag`
@@ -864,6 +866,23 @@ class SemanticsFlag {
   ///   * [SemanticsFlag.hasRequiredState], which enables a required state state.
   static const SemanticsFlag isRequired = SemanticsFlag._(_kIsRequiredIndex, 'isRequired');
 
+  /// Whether the semantics node is a progress bar.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.isLoadingSpinner], which is used for a spinner.
+  static const SemanticsFlag isProgressBar = SemanticsFlag._(_kIsProgressBarIndex, 'isProgressBar');
+
+  /// Whether the semantics node is a spinner.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.isProgressBar], which is used for a progress bar.
+  static const SemanticsFlag isLoadingSpinner = SemanticsFlag._(
+    _kIsLoadingSpinnerIndex,
+    'isLoadingSpinner',
+  );
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -899,6 +918,8 @@ class SemanticsFlag {
     _kIsExpandedIndex: isExpanded,
     _kHasRequiredStateIndex: hasRequiredState,
     _kIsRequiredIndex: isRequired,
+    _kIsProgressBarIndex: isProgressBar,
+    _kIsLoadingSpinnerIndex: isLoadingSpinner,
   };
 
   // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.

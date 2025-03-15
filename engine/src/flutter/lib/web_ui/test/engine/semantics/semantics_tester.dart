@@ -60,6 +60,8 @@ class SemanticsTester {
     bool? isKeyboardKey,
     bool? hasRequiredState,
     bool? isRequired,
+    bool? isProgressBar,
+    bool? isLoadingSpinner,
 
     // Actions
     int actions = 0,
@@ -212,6 +214,14 @@ class SemanticsTester {
     }
     if (isRequired ?? false) {
       flags |= ui.SemanticsFlag.isRequired.index;
+    }
+
+    if (isProgressBar ?? false) {
+      flags |= ui.SemanticsFlag.isProgressBar.index;
+    }
+
+    if (isLoadingSpinner ?? false) {
+      flags |= ui.SemanticsFlag.isLoadingSpinner.index;
     }
 
     // Actions
