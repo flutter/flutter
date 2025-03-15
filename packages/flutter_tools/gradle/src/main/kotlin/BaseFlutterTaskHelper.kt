@@ -39,10 +39,7 @@ object BaseFlutterTaskHelper {
      */
     @VisibleForTesting
     internal fun checkPreConditions(baseFlutterTask: BaseFlutterTask) {
-        if (baseFlutterTask.sourceDir == null) {
-            throw GradleException(getGradleErrorMessage(baseFlutterTask))
-        }
-        if (!baseFlutterTask.sourceDir!!.isDirectory) {
+        if (baseFlutterTask.sourceDir == null || !baseFlutterTask.sourceDir!!.isDirectory) {
             throw GradleException(getGradleErrorMessage(baseFlutterTask))
         }
         baseFlutterTask.intermediateDir!!.mkdirs()
