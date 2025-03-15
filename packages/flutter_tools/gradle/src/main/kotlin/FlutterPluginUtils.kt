@@ -1,8 +1,12 @@
 package com.flutter.gradle
 
+import com.android.build.gradle.AppExtension
+import com.android.builder.model.BuildType
+import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.UnknownTaskException
 import java.io.File
 import java.util.Locale
 
@@ -69,7 +73,7 @@ object FlutterPluginUtils {
         return firstVersion.size.compareTo(secondVersion.size)
     }
 
-    // ----------------- Methods that interact only with the Gradle project. -----------------
+    // ----------------- Methods that interact primarily with the Gradle project. -----------------
 
     @JvmStatic
     fun shouldShrinkResources(project: Project): Boolean {
@@ -79,6 +83,16 @@ object FlutterPluginUtils {
             return propertyValue.toString().toBoolean()
         }
         return true
+    }
+
+    /**
+     * Returns `true` if the given project is a plugin project having an `android` directory
+     * containing a `build.gradle` or `build.gradle.kts` file.
+     */
+    @JvmStatic internal fun pluginSupportsAndroidPlatform(project: Project): Boolean {
+        val buildGradle = File(File(project.projectDir.parentFile, "android"), "build.gradle")
+        val buildGradleKts = File(File(project.projectDir.parentFile, "android"), "build.gradle.kts")
+        return buildGradle.exists() || buildGradleKts.exists()
     }
 
     /**
@@ -140,8 +154,21 @@ object FlutterPluginUtils {
     @JvmStatic
     internal fun isProjectVerbose(project: Project): Boolean = project.findProperty("verbose")?.toString()?.toBoolean() ?: false
 
+    /** Whether to build the debug app in "fast-start" mode. */
     @JvmStatic
     internal fun isProjectFastStart(project: Project): Boolean = project.findProperty("fast-start")?.toString()?.toBoolean() ?: false
+
+    /**
+     * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
+     * or string version.
+     */
+    @JvmStatic internal fun getCompileSdkFromProject(project: Project): String {
+        // TODO(gmackall): This is pretty crazy, we should fix asap after the conversion is done
+        return project.extensions
+            .findByType(AppExtension::class.java)!!
+            .compileSdkVersion!!
+            .substring(8)
+    }
 
     /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
@@ -173,7 +200,8 @@ object FlutterPluginUtils {
      * https://issuetracker.google.com/issues/158060799
      * https://issuetracker.google.com/issues/158753935
      */
-    @JvmStatic internal fun shouldConfigureFlutterTask(
+    @JvmStatic
+    internal fun shouldConfigureFlutterTask(
         project: Project,
         assembleTask: Task
     ): Boolean {
@@ -206,7 +234,8 @@ object FlutterPluginUtils {
      * Gets the directory that contains the Flutter source code.
      * This is the directory containing the `android/` directory.
      */
-    @JvmStatic internal fun getFlutterSourceDirectory(project: Project): File {
+    @JvmStatic
+    internal fun getFlutterSourceDirectory(project: Project): File {
         val flutterExtension = getFlutterExtensionOrNull(project)
         // TODO(gmackall): clean up this NPE that is still around from the Groovy conversion.
         if (flutterExtension!!.source == null) {
@@ -223,12 +252,90 @@ object FlutterPluginUtils {
      *  2. the target value set in the FlutterExtension, if it exists
      *  3. `lib/main.dart` otherwise
      */
-    @JvmStatic internal fun getFlutterTarget(project: Project): String {
+    @JvmStatic
+    internal fun getFlutterTarget(project: Project): String {
         val targetProperty: String = "target"
         if (project.hasProperty(targetProperty)) {
             return project.property(targetProperty).toString()
         }
         val target: String = getFlutterExtensionOrNull(project)!!.target ?: "lib/main.dart"
         return target
+    }
+
+    @JvmStatic
+    internal fun isBuiltAsApp(project: Project): Boolean {
+        // Projects are built as applications when the they use the `com.android.application`
+        // plugin.
+        return project.plugins.hasPlugin("com.android.application")
+    }
+
+    // Optional parameters don't work when Groovy makes calls into Kotlin, so provide an additional
+    // signature for the 3 argument version.
+    @JvmStatic
+    internal fun addApiDependencies(
+        project: Project,
+        variantName: String,
+        dependency: Any
+    ) {
+        addApiDependencies(project, variantName, dependency, null)
+    }
+
+    @JvmStatic
+    internal fun addApiDependencies(
+        project: Project,
+        variantName: String,
+        dependency: Any,
+        config: Closure<Any>?
+    ) {
+        var configuration: String
+        try {
+            project.configurations.named("api")
+            configuration = "${variantName}Api"
+        } catch (ignored: UnknownTaskException) {
+            // TODO(gmackall): The docs say the above should actually be an UnknownDomainObjectException.
+            configuration = "${variantName}Compile"
+        }
+
+        if (config == null) {
+            project.dependencies.add(
+                configuration,
+                dependency
+            )
+        } else {
+            project.dependencies.add(configuration, dependency, config)
+        }
+    }
+
+    /**
+     * Returns a Flutter build mode suitable for the specified Android buildType.
+     *
+     * @return "debug", "profile", or "release" (fall-back).
+     */
+    @JvmStatic internal fun buildModeFor(buildType: BuildType): String {
+        if (buildType.name == "profile") {
+            return "profile"
+        } else if (buildType.isDebuggable) {
+            return "debug"
+        }
+        return "release"
+    }
+
+    /**
+     * Returns true if the build mode is supported by the current call to Gradle.
+     * This only relevant when using a local engine. Because the engine
+     * is built for a specific mode, the call to Gradle must match that mode.
+     */
+    @JvmStatic internal fun supportsBuildMode(
+        project: Project,
+        flutterBuildMode: String
+    ): Boolean {
+        if (!shouldProjectUseLocalEngine(project)) {
+            return true
+        }
+        val propLocalEngineBuildMode = "local-engine-build-mode"
+        check(project.hasProperty(propLocalEngineBuildMode)) { "Project must have property '$propLocalEngineBuildMode'" }
+        // Don't configure dependencies for a build mode that the local engine
+        // doesn't support.
+        return project.property(propLocalEngineBuildMode) == flutterBuildMode
     }
 }
