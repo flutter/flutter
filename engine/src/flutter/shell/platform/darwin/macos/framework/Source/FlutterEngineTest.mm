@@ -318,6 +318,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
   root.label = "root";
+  root.identifier = "";
   root.hint = "";
   root.value = "";
   root.increased_value = "";
@@ -335,6 +336,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   child1.text_selection_base = -1;
   child1.text_selection_extent = -1;
   child1.label = "child 1";
+  child1.identifier = "";
   child1.hint = "";
   child1.value = "";
   child1.increased_value = "";
@@ -408,6 +410,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
   root.label = "root";
+  // root.identifier = "";
   root.hint = "";
   root.value = "";
   root.increased_value = "";
@@ -425,6 +428,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   child1.text_selection_base = -1;
   child1.text_selection_extent = -1;
   child1.label = "child 1";
+  // child1.identifier = "";
   child1.hint = "";
   child1.value = "";
   child1.increased_value = "";
