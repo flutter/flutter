@@ -4,15 +4,15 @@ import androidx.annotation.VisibleForTesting
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
+import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.OutputFiles
 import org.gradle.process.ExecSpec
 import java.nio.file.Paths
 
-class BaseFlutterTaskHelper(
-    private var baseFlutterTask: BaseFlutterTask
-) {
+object BaseFlutterTaskHelper {
     @VisibleForTesting
-    internal var gradleErrorMessage = "Invalid Flutter source directory: ${baseFlutterTask.sourceDir}"
+    internal fun getGradleErrorMessage(baseFlutterTask: BaseFlutterTask): String =
+        "Invalid Flutter source directory: ${baseFlutterTask.sourceDir}"
 
     /**
      * Gets the dependency file(s) that tracks the dependencies or input files used for a specific
@@ -22,7 +22,7 @@ class BaseFlutterTaskHelper(
      */
     @OutputFiles
     @VisibleForTesting
-    internal fun getDependenciesFiles(): FileCollection {
+    internal fun getDependenciesFiles(baseFlutterTask: BaseFlutterTask): FileCollection {
         var depfiles: FileCollection = baseFlutterTask.project.files()
 
         // TODO(jesswon): During cleanup determine if .../flutter_build.d is ever a directory and refactor accordingly
@@ -38,9 +38,9 @@ class BaseFlutterTaskHelper(
      * @throws GradleException if sourceDir is null or is not a directory
      */
     @VisibleForTesting
-    internal fun checkPreConditions() {
+    internal fun checkPreConditions(baseFlutterTask: BaseFlutterTask) {
         if (baseFlutterTask.sourceDir == null || !baseFlutterTask.sourceDir!!.isDirectory) {
-            throw GradleException(gradleErrorMessage)
+            throw GradleException(getGradleErrorMessage(baseFlutterTask))
         }
         baseFlutterTask.intermediateDir!!.mkdirs()
     }
@@ -77,8 +77,7 @@ class BaseFlutterTaskHelper(
      *
      * @return an Action<ExecSpec> of build processes and options to be executed.
      */
-    @VisibleForTesting
-    internal fun createExecSpecActionFromTask(): Action<ExecSpec> =
+    internal fun createExecSpecActionFromTask(baseFlutterTask: BaseFlutterTask): Action<ExecSpec> =
         Action<ExecSpec> {
             executable(baseFlutterTask.flutterExecutable!!.absolutePath)
             workingDir(baseFlutterTask.sourceDir)
@@ -146,4 +145,10 @@ class BaseFlutterTaskHelper(
             args("-dMinSdkVersion=${baseFlutterTask.minSdkVersion}")
             args(generateRuleNames(baseFlutterTask))
         }
+
+    fun buildBundle(baseFlutterTask: BaseFlutterTask) {
+        checkPreConditions(baseFlutterTask)
+        baseFlutterTask.logging.captureStandardError(LogLevel.ERROR)
+        baseFlutterTask.project.exec(createExecSpecActionFromTask(baseFlutterTask = baseFlutterTask))
+    }
 }

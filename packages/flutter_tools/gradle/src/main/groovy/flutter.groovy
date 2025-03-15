@@ -15,6 +15,7 @@ import com.flutter.gradle.BaseFlutterTask
 import com.flutter.gradle.Deeplink
 import com.flutter.gradle.DependencyVersionChecker
 import com.flutter.gradle.FlutterExtension
+import com.flutter.gradle.FlutterTask
 import com.flutter.gradle.IntentFilterCheck
 import com.flutter.gradle.VersionUtils
 import groovy.xml.QName
@@ -1452,78 +1453,6 @@ class FlutterPlugin implements Plugin<Project> {
 
         // If we got this far then all the common indices are identical, so whichever version is longer must be more recent
         return firstVersion.size() <=> secondVersion.size()
-    }
-
-}
-
-class FlutterTask extends BaseFlutterTask {
-
-    @OutputDirectory
-    File getOutputDirectory() {
-        return intermediateDir
-    }
-
-    @Internal
-    String getAssetsDirectory() {
-        return "${outputDirectory}/flutter_assets"
-    }
-
-    @Internal
-    CopySpec getAssets() {
-        return project.copySpec {
-            from("${intermediateDir}")
-            include("flutter_assets/**") // the working dir and its files
-        }
-    }
-
-    @Internal
-    CopySpec getSnapshots() {
-        return project.copySpec {
-            from("${intermediateDir}")
-
-            if (buildMode == "release" || buildMode == "profile") {
-                targetPlatformValues.each {
-                    include("${PLATFORM_ARCH_MAP[targetArch]}/app.so")
-                }
-            }
-        }
-    }
-
-    FileCollection readDependencies(File dependenciesFile, Boolean inputs) {
-        if (dependenciesFile.exists()) {
-            // Dependencies file has Makefile syntax:
-            //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
-            String depText = dependenciesFile.text
-            // So we split list of files by non-escaped(by backslash) space,
-            def matcher = depText.split(": ")[inputs ? 1 : 0] =~ /(\\ |\S)+/
-            // then we replace all escaped spaces with regular spaces
-            def depList = matcher.collect{ it[0].replaceAll("\\\\ ", " ") }
-            return project.files(depList)
-        }
-        return project.files()
-    }
-
-    @InputFiles
-    FileCollection getSourceFiles() {
-        FileCollection sources = project.files()
-        for (File depfile in getDependenciesFiles()) {
-            sources += readDependencies(depfile, true)
-        }
-        return sources + project.files("pubspec.yaml")
-    }
-
-    @OutputFiles
-    FileCollection getOutputFiles() {
-        FileCollection sources = project.files()
-        for (File depfile in getDependenciesFiles()) {
-            sources += readDependencies(depfile, false)
-        }
-        return sources
-    }
-
-    @TaskAction
-    void build() {
-        buildBundle()
     }
 
 }
