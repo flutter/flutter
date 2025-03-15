@@ -1,6 +1,5 @@
 package com.flutter.gradle
 
-import com.android.build.gradle.AppExtension
 import com.android.builder.model.BuildType
 import groovy.lang.Closure
 import org.gradle.api.GradleException
@@ -162,13 +161,14 @@ object FlutterPluginUtils {
      * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
      * or string version.
      */
-    @JvmStatic internal fun getCompileSdkFromProject(project: Project): String {
-        // TODO(gmackall): This is pretty crazy, we should fix asap after the conversion is done
-        return project.extensions
-            .findByType(AppExtension::class.java)!!
-            .compileSdkVersion!!
-            .substring(8)
-    }
+
+//    @JvmStatic internal fun getCompileSdkFromProject(project: Project): String {
+//        // TODO(gmackall): This is pretty crazy, we should fix asap after the conversion is done
+//        return project.extensions
+//            .findByType(AppExtension::class.java)!!
+//            .compileSdkVersion!!
+//            .substring(8)
+//    }
 
     /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560

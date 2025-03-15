@@ -638,7 +638,7 @@ class FlutterPlugin implements Plugin<Project> {
         pluginProject.afterEvaluate {
             // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
-                project.logger.quiet("Warning: The plugin ${pluginObject.name} requires Android SDK version ${FlutterPluginUtils.getCompileSdkFromProject$gradle(pluginProject)} or higher.")
+                project.logger.quiet("Warning: The plugin ${pluginObject.name} requires Android SDK version ${getCompileSdkFromProject(pluginProject)} or higher.")
                 project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
             }
 
@@ -682,8 +682,8 @@ class FlutterPlugin implements Plugin<Project> {
             // Default to int max if using a preview version to skip the sdk check.
             int projectCompileSdkVersion = Integer.MAX_VALUE
             // Stable versions use ints, legacy preview uses string.
-            if (FlutterPluginUtils.getCompileSdkFromProject$gradle(project).isInteger()) {
-                projectCompileSdkVersion = FlutterPluginUtils.getCompileSdkFromProject$gradle(project) as int
+            if (getCompileSdkFromProject(project).isInteger()) {
+                projectCompileSdkVersion = getCompileSdkFromProject(project) as int
             }
             int maxPluginCompileSdkVersion = projectCompileSdkVersion
             String ndkVersionIfUnspecified = "21.1.6352462" /* The default for AGP 4.1.0 used in old templates. */
@@ -703,8 +703,8 @@ class FlutterPlugin implements Plugin<Project> {
                     // Default to int min if using a preview version to skip the sdk check.
                     int pluginCompileSdkVersion = Integer.MIN_VALUE
                     // Stable versions use ints, legacy preview uses string.
-                    if (FlutterPluginUtils.getCompileSdkFromProject$gradle(pluginProject).isInteger()) {
-                        pluginCompileSdkVersion = FlutterPluginUtils.getCompileSdkFromProject$gradle(pluginProject) as int
+                    if (getCompileSdkFromProject(pluginProject).isInteger()) {
+                        pluginCompileSdkVersion = getCompileSdkFromProject(pluginProject) as int
                     }
 
                     maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
@@ -754,6 +754,14 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
+     * or string version.
+     */
+    private static String getCompileSdkFromProject(Project gradleProject) {
+        return gradleProject.android.compileSdkVersion.substring(8)
     }
 
     /**
