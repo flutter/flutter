@@ -298,6 +298,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   /// The resulting binary is used to speed up subsequent widget previewer launches
   /// by acting as a basic scaffold to load previews into using hot reload / restart.
   Future<void> initialBuild({required FlutterProject widgetPreviewScaffoldProject}) async {
+    // Generate initial package_config.json, otherwise the build will fail.
+    await pub.get(
+      context: PubContext.create,
+      project: widgetPreviewScaffoldProject,
+      offline: offline,
+      outputMode: PubOutputMode.summaryOnly,
+    );
+
     // TODO(bkonyi): handle error case where desktop device isn't enabled.
     await widgetPreviewScaffoldProject.ensureReadyForPlatformSpecificTooling(
       releaseMode: false,
@@ -305,14 +313,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       macOSPlatform: platform.isMacOS && !isWeb,
       windowsPlatform: platform.isWindows && !isWeb,
       webPlatform: isWeb,
-    );
-
-    // Generate initial package_config.json, otherwise the build will fail.
-    await pub.get(
-      context: PubContext.create,
-      project: widgetPreviewScaffoldProject,
-      offline: offline,
-      outputMode: PubOutputMode.summaryOnly,
     );
 
     if (isWeb) {
