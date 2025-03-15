@@ -994,7 +994,11 @@ std::optional<Entity> BlendFilterContents::RenderFilter(
   }
 
   if (blend_mode_ <= Entity::kLastAdvancedBlendMode) {
-    if (renderer.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+    // TODO(jonahwilliams): we should have a special filter case that avoids
+    // using the programmable shaders entirely and instead relies on the
+    // blend mode.
+    if (renderer.GetDeviceCapabilities().SupportsFramebufferFetch() &&
+        !renderer.GetDeviceCapabilities().SupportsAdvancedBlendOperations()) {
       return CreateFramebufferAdvancedBlend(inputs, renderer, entity, coverage,
                                             foreground_color_, blend_mode_,
                                             GetAlpha(), GetAbsorbOpacity());
