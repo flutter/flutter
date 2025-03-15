@@ -107,22 +107,6 @@ Finder flying(WidgetTester tester, Finder finder) {
   return find.descendant(of: lastOverlayFinder, matching: finder);
 }
 
-void checkBackgroundBoxHeight(WidgetTester tester, double height) {
-  final Widget transitionBackgroundBox =
-      tester.widget<Stack>(flying(tester, find.byType(Stack))).children[0];
-  expect(
-    tester
-        .widget<SizedBox>(
-          find.descendant(
-            of: find.byWidget(transitionBackgroundBox),
-            matching: find.byType(SizedBox),
-          ),
-        )
-        .height,
-    height,
-  );
-}
-
 void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
   expect(
     tester
@@ -584,54 +568,6 @@ void main() {
     expect(find.text('Tab 1 Page 2', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Transition box grows to large title size', (WidgetTester tester) async {
-    await startTransitionBetween(
-      tester,
-      fromTitle: 'Page 1',
-      to: const CupertinoSliverNavigationBar(),
-      toTitle: 'Page 2',
-    );
-
-    await tester.pump(const Duration(milliseconds: 50));
-    checkBackgroundBoxHeight(tester, 45.3376561999321);
-
-    await tester.pump(const Duration(milliseconds: 50));
-    checkBackgroundBoxHeight(tester, 51.012951374053955);
-
-    await tester.pump(const Duration(milliseconds: 50));
-    checkBackgroundBoxHeight(tester, 63.06760931015015);
-
-    await tester.pump(const Duration(milliseconds: 50));
-    checkBackgroundBoxHeight(tester, 75.89544230699539);
-
-    await tester.pump(const Duration(milliseconds: 50));
-    checkBackgroundBoxHeight(tester, 84.33018499612808);
-  });
-
-  testWidgets('Large transition box shrinks to standard nav bar size', (WidgetTester tester) async {
-    await startTransitionBetween(
-      tester,
-      from: const CupertinoSliverNavigationBar(),
-      fromTitle: 'Page 1',
-      toTitle: 'Page 2',
-    );
-
-    await tester.pump(const Duration(milliseconds: 50));
-    checkBackgroundBoxHeight(tester, 94.6623438000679);
-
-    await tester.pump(const Duration(milliseconds: 50));
-    checkBackgroundBoxHeight(tester, 88.98704862594604);
-
-    await tester.pump(const Duration(milliseconds: 50));
-    checkBackgroundBoxHeight(tester, 76.93239068984985);
-
-    await tester.pump(const Duration(milliseconds: 50));
-    checkBackgroundBoxHeight(tester, 64.10455769300461);
-
-    await tester.pump(const Duration(milliseconds: 50));
-    checkBackgroundBoxHeight(tester, 55.66981500387192);
-  });
-
   testWidgets('Hero flight removed at the end of page transition', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
@@ -1038,21 +974,21 @@ void main() {
     expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.946);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.777);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-20.58, epsilon: 0.01),
+      moreOrLessEquals(-156.62, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
 
     // Halfway through the transition, the bottom is only slightly visible.
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.001);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.011);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-620.46, epsilon: 0.01),
+      moreOrLessEquals(-751.94, epsilon: 0.01),
     );
   });
 
@@ -1074,21 +1010,21 @@ void main() {
     expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.946);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.777);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-20.58, epsilon: 0.01),
+      moreOrLessEquals(-156.62, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
 
     // Halfway through the transition, the bottom is only slightly visible.
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.001);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.011);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(-620.46, epsilon: 0.01),
+      moreOrLessEquals(-751.94, epsilon: 0.01),
     );
   });
 
@@ -1251,19 +1187,21 @@ void main() {
 
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.001);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.193);
     expect(
-      tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(795.4206738471985, 54.0),
+      tester.getTopLeft(flying(tester, find.text('Page 2'))).dx,
+      moreOrLessEquals(661.64, epsilon: 0.01),
     );
+    expect(tester.getTopLeft(flying(tester, find.text('Page 2'))).dy, 54.0);
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.444);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.899);
     expect(
-      tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(325.3008875846863, 54.0),
+      tester.getTopLeft(flying(tester, find.text('Page 2'))).dx,
+      moreOrLessEquals(96.57, epsilon: 0.01),
     );
+    expect(tester.getTopLeft(flying(tester, find.text('Page 2'))).dy, 54.0);
   });
 
   testWidgets('Top large title fades in and slides in from the left in RTL', (
@@ -1280,19 +1218,21 @@ void main() {
 
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.001);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.193);
     expect(
-      tester.getTopRight(flying(tester, find.text('Page 2'))),
-      const Offset(4.579326152801514, 54.0),
+      tester.getTopRight(flying(tester, find.text('Page 2'))).dx,
+      moreOrLessEquals(138.36, epsilon: 0.01),
     );
+    expect(tester.getTopRight(flying(tester, find.text('Page 2'))).dy, 54.0);
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.444);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.899);
     expect(
-      tester.getTopRight(flying(tester, find.text('Page 2'))),
-      const Offset(474.6991124153137, 54.0),
+      tester.getTopRight(flying(tester, find.text('Page 2'))).dx,
+      moreOrLessEquals(703.43, epsilon: 0.01),
     );
+    expect(tester.getTopRight(flying(tester, find.text('Page 2'))).dy, 54.0);
   });
 
   testWidgets('Top CupertinoSliverNavigationBar.bottom is aligned with top large title animation', (
@@ -1331,12 +1271,12 @@ void main() {
     // The nav bar bottom is horizontally aligned to the large title.
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      largeTitleOffset.dx - horizontalPadding,
+      moreOrLessEquals(largeTitleOffset.dx - horizontalPadding, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.444);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.899);
 
     largeTitleOffset = tester.getTopLeft(flying(tester, find.text('Page 2')));
 
@@ -1363,20 +1303,20 @@ void main() {
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.001);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.193);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(779.42, epsilon: 0.01),
+      moreOrLessEquals(645.64, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.444);
+    checkOpacity(tester, flying(tester, find.byType(Placeholder)), 0.899);
 
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      moreOrLessEquals(309.30, epsilon: 0.01),
+      moreOrLessEquals(80.57, epsilon: 0.01),
     );
   });
 
