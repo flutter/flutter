@@ -101,6 +101,15 @@ class DartProject {
   // Defaults to NoPreference.
   GpuPreference gpu_preference() const { return gpu_preference_; }
 
+  // Whether to enable the Impeller rendering engine.
+  //
+  // If not provided, defaults to false. In a future release, this setting will
+  // become a no-op when the Skia backend is fully removed.
+  void set_enable_impeller(bool value) { enable_impeller_ = value; }
+
+  // Whether the Impeller rendering engine is enabled.
+  bool enable_impeller() const { return enable_impeller_; }
+
   // Sets the thread policy for UI isolate.
   void set_ui_thread_policy(UIThreadPolicy policy) {
     ui_thread_policy_ = policy;
@@ -136,6 +145,8 @@ class DartProject {
   std::vector<std::string> dart_entrypoint_arguments_;
   // The preference for GPU to be used by flutter engine.
   GpuPreference gpu_preference_ = GpuPreference::NoPreference;
+  // Whether the Impeller rendering backend is enabled.
+  bool enable_impeller_ = false;
   // Thread policy for UI isolate.
   UIThreadPolicy ui_thread_policy_ = UIThreadPolicy::Default;
 };
