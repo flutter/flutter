@@ -39,7 +39,10 @@ object BaseFlutterTaskHelper {
      */
     @VisibleForTesting
     internal fun checkPreConditions(baseFlutterTask: BaseFlutterTask) {
-        if (baseFlutterTask.sourceDir == null || !baseFlutterTask.sourceDir!!.isDirectory) {
+        if (baseFlutterTask.sourceDir == null) {
+            throw GradleException(getGradleErrorMessage(baseFlutterTask))
+        }
+        if (!baseFlutterTask.sourceDir!!.isDirectory) {
             throw GradleException(getGradleErrorMessage(baseFlutterTask))
         }
         baseFlutterTask.intermediateDir!!.mkdirs()
@@ -77,7 +80,6 @@ object BaseFlutterTaskHelper {
      *
      * @return an Action<ExecSpec> of build processes and options to be executed.
      */
-    @VisibleForTesting
     internal fun createExecSpecActionFromTask(baseFlutterTask: BaseFlutterTask): Action<ExecSpec> =
         Action<ExecSpec> {
             executable(baseFlutterTask.flutterExecutable!!.absolutePath)

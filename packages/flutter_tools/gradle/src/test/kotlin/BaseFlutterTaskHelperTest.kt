@@ -1,9 +1,13 @@
 package com.flutter.gradle
 
+import com.flutter.gradle.BaseFlutterTaskHelper.checkPreConditions
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.gradle.api.Action
 import org.gradle.api.GradleException
+import org.gradle.api.Project
+import org.gradle.api.logging.LoggingManager
 import org.gradle.process.ExecSpec
 import org.gradle.process.ProcessForkOptions
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -528,5 +532,25 @@ class BaseFlutterTaskHelperTest {
         verify { mockExecSpec.args("-dAndroidArchs=${BaseFlutterTaskPropertiesTest.TARGET_PLATFORM_VALUES_JOINED_LIST}") }
         verify { mockExecSpec.args("-dMinSdkVersion=${BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST}") }
         verify { mockExecSpec.args(ruleNamesList) }
+    }
+
+    @Test
+    fun `buildBundle calls the correct methods`() {
+        val baseFlutterTask = mockk<BaseFlutterTask>()
+        val mockLoggingManager = mockk<LoggingManager>()
+        val mockFile = mockk<File>()
+        val mockProject = mockk<Project>()
+
+        // When baseFlutterTask.sourceDir is null, an exception is thrown. We mock its return value
+        // before creating a BaseFlutterTaskHelper object.
+        every { baseFlutterTask.sourceDir } returns mockFile
+        every { mockFile.isDirectory } returns true
+        every { baseFlutterTask.intermediateDir } returns BaseFlutterTaskPropertiesTest.intermediateDirFileTest
+        every { baseFlutterTask.logging } returns mockLoggingManager
+        every { mockLoggingManager.captureStandardError(any()) } returns mockLoggingManager
+        every { baseFlutterTask.project } returns mockProject
+        every { mockProject.exec(any<Action<ExecSpec>>()) } returns mockk()
+
+        BaseFlutterTaskHelper.buildBundle(baseFlutterTask)
     }
 }
