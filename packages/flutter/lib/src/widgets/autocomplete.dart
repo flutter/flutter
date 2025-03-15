@@ -518,36 +518,39 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
     final Size fieldSize = layoutInfo.childSize;
     final Matrix4 invertTransform = layoutInfo.childPaintTransform.clone()..invert();
-    final Rect overlaySizeInField = MatrixUtils.transformRect(
+    final Rect overlayRectInField = MatrixUtils.transformRect(
       invertTransform,
       Offset.zero & layoutInfo.overlaySize,
     );
 
-    final double maxHeight = switch (widget.optionsViewOpenDirection) {
-      OptionsViewOpenDirection.up => -overlaySizeInField.top,
-      OptionsViewOpenDirection.down => overlaySizeInField.bottom - fieldSize.height,
+    final double optionsViewMaxHeight = switch (widget.optionsViewOpenDirection) {
+      OptionsViewOpenDirection.up => -overlayRectInField.top,
+      OptionsViewOpenDirection.down => overlayRectInField.bottom - fieldSize.height,
     };
 
-    final BoxConstraints optionsConstraints = BoxConstraints.tightFor(
-      width: fieldSize.width,
-      height: math.max(maxHeight, _kMinUsableHeight),
+    final Size optionsViewBoundingBox = Size(
+      fieldSize.width,
+      math.max(optionsViewMaxHeight, _kMinUsableHeight),
     );
-    assert(optionsConstraints.isNormalized);
 
-    final Matrix4 translation = switch (widget.optionsViewOpenDirection) {
-      OptionsViewOpenDirection.up => Matrix4.translationValues(0, -overlaySizeInField.top, 0),
-      OptionsViewOpenDirection.down => Matrix4.translationValues(0, -fieldSize.height, 0),
+    final double originY = switch (widget.optionsViewOpenDirection) {
+      OptionsViewOpenDirection.up => overlayRectInField.top,
+      OptionsViewOpenDirection.down => overlayRectInField.bottom - optionsViewBoundingBox.height,
     };
+
     final Matrix4 transform =
-        translation
+        Matrix4.translationValues(0, -originY, 0)
           ..multiply(invertTransform)
           ..invert();
+    final Widget child = Builder(
+      builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
+    );
     return Transform(
       transform: transform,
       child: Align(
         alignment: Alignment.topLeft,
         child: ConstrainedBox(
-          constraints: optionsConstraints,
+          constraints: BoxConstraints.tight(optionsViewBoundingBox),
           child: Align(
             alignment: switch (widget.optionsViewOpenDirection) {
               OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
@@ -556,11 +559,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
                 highlightIndexNotifier: _highlightedOptionIndex,
-                child: Builder(
-                  builder: (BuildContext context) {
-                    return widget.optionsViewBuilder(context, _select, _options);
-                  },
-                ),
+                child: child,
               ),
             ),
           ),
