@@ -107,12 +107,6 @@ const Curve _kTopNavBarHeaderTransitionCurve = Cubic(0.0, 0.45, 0.45, 0.98);
 /// Eyeballed on an iPhone 15 Pro simulator running iOS 17.5.
 const Curve _kBottomNavBarHeaderTransitionCurve = Cubic(0.05, 0.90, 0.90, 0.95);
 
-/// The curve of the animation of the bottom nav bar in the hero transition
-/// between two nav bars when the top nav bar is dragged to swipe back.
-///
-/// Eyeballed on an iPhone 15 Pro simulator running iOS 17.5.
-const Curve _kHeaderDragTransitionCurve = Cubic(0.0, 0.3, 0.4, 0.15);
-
 // There's a single tag for all instances of navigation bars because they can
 // all transition between each other (per Navigator) via Hero transitions.
 const _HeroTag _defaultHeroTag = _HeroTag(null);
@@ -2449,6 +2443,10 @@ class _TransitionableNavigationBar extends StatelessWidget {
     return box;
   }
 
+  bool get userGestureInProgress {
+    return Navigator.of(componentsKeys.navBarBoxKey.currentContext!).userGestureInProgress;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(() {
@@ -2522,7 +2520,6 @@ class _NavigationBarTransition extends StatelessWidget {
         );
 
     final List<Widget> children = <Widget>[
-      // Draw all the components on top of the empty bar box.
       if (componentsTransition.bottomBackChevron != null) componentsTransition.bottomBackChevron!,
       if (componentsTransition.bottomBackLabel != null) componentsTransition.bottomBackLabel!,
       if (componentsTransition.bottomLeading != null) componentsTransition.bottomLeading!,
@@ -2597,6 +2594,8 @@ class _NavigationBarComponentsTransition {
        topHasUserMiddle = topNavBar.hasUserMiddle,
        bottomLargeExpanded = bottomNavBar.largeExpanded,
        topLargeExpanded = topNavBar.largeExpanded,
+       userGestureInProgress =
+           topNavBar.userGestureInProgress || bottomNavBar.userGestureInProgress,
        transitionBox =
        // paintBounds are based on offset zero so it's ok to expand the Rects.
        bottomNavBar.renderBox.paintBounds.expandToInclude(topNavBar.renderBox.paintBounds),
@@ -2626,6 +2625,7 @@ class _NavigationBarComponentsTransition {
   final bool topHasUserMiddle;
   final bool bottomLargeExpanded;
   final bool topLargeExpanded;
+  final bool userGestureInProgress;
 
   // This is the outer box in which all the components will be fitted. The
   // sizing component of RelativeRects will be based on this rect's size.
@@ -2932,11 +2932,10 @@ class _NavigationBarComponentsTransition {
     );
 
     Widget child = bottomNavBarBottom.child;
-    final Curve animationCurve = switch (animation.status) {
-      AnimationStatus.forward => _kBottomNavBarHeaderTransitionCurve,
-      AnimationStatus.reverse => _kBottomNavBarHeaderTransitionCurve.flipped,
-      AnimationStatus.completed || AnimationStatus.dismissed => _kHeaderDragTransitionCurve,
-    };
+    final Curve animationCurve =
+        animation.status == AnimationStatus.forward
+            ? _kBottomNavBarHeaderTransitionCurve
+            : _kBottomNavBarHeaderTransitionCurve.flipped;
 
     // Fade out only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
@@ -2947,7 +2946,15 @@ class _NavigationBarComponentsTransition {
     }
 
     return PositionedTransition(
-      rect: animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
+      rect:
+          // The bottom widget animates linearly during a backswipe by a user gesture.
+          userGestureInProgress
+              // The parent of the hero animation, which is the route animation.
+              ? (animation as CurvedAnimation).parent
+                  .drive(CurveTween(curve: Curves.linear))
+                  .drive(positionTween)
+              : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
+
       child: child,
     );
   }
@@ -3151,7 +3158,14 @@ class _NavigationBarComponentsTransition {
             : _kTopNavBarHeaderTransitionCurve.flipped;
 
     return PositionedTransition(
-      rect: animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
+      rect:
+          // The large title animates linearly during a backswipe by a user gesture.
+          userGestureInProgress
+              // The parent of the hero animation, which is the route animation.
+              ? (animation as CurvedAnimation).parent
+                  .drive(CurveTween(curve: Curves.linear))
+                  .drive(positionTween)
+              : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
       child: FadeTransition(
         opacity: fadeInFrom(0.0, curve: animationCurve),
         child: DefaultTextStyle(
@@ -3200,7 +3214,14 @@ class _NavigationBarComponentsTransition {
     }
 
     return PositionedTransition(
-      rect: animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
+      rect:
+          // The bottom widget animates linearly during a backswipe by a user gesture.
+          userGestureInProgress
+              // The parent of the hero animation, which is the route animation.
+              ? (animation as CurvedAnimation).parent
+                  .drive(CurveTween(curve: Curves.linear))
+                  .drive(positionTween)
+              : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
       child: child,
     );
   }
