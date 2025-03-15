@@ -7,7 +7,6 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import java.io.File
-import java.util.Locale
 
 /**
  * A collection of static utility functions used by the Flutter Gradle Plugin.
@@ -24,10 +23,11 @@ object FlutterPluginUtils {
             parts.drop(1).joinToString("") { FlutterPluginUtils.capitalize(it) }
     }
 
-    // Kotlin's capitalize function is deprecated. This is the suggested replacement.
+    // Kotlin's capitalize function is deprecated, but the suggested replacement uses syntax that
+    // our minimum version doesn't support yet. Centralize the use to one place, so that when our
+    // minimum version does support the replacement we can replace by changing a single line.
     @JvmStatic
-    internal fun capitalize(string: String): String =
-        string.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+    internal fun capitalize(string: String): String = string.capitalize()
 
     // compareTo implementation of version strings in the format of ints and periods
     // Will not crash on RC candidate strings but considers all RC candidates the same version.
