@@ -89,7 +89,7 @@ void main() {
           kBuildMode: buildMode.cliName,
           kMinSdkVersion: minSdkVersion,
         };
-        final DartBuildResult result = await runFlutterSpecificDartBuild(
+        final DartHookResult result = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
@@ -97,7 +97,7 @@ void main() {
           buildRunner: buildRunner,
         );
         await installCodeAssets(
-          dartBuildResult: result,
+          dartHookResult: result,
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
@@ -130,7 +130,7 @@ void main() {
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.create(recursive: true);
-      await runFlutterSpecificDartBuild(
+      await runFlutterSpecificHooks(
         environmentDefines: <String, String>{
           kBuildMode: BuildMode.debug.cliName,
           kMinSdkVersion: minSdkVersion,
@@ -155,7 +155,7 @@ void main() {
       await packageConfig.parent.create();
       await packageConfig.create();
       expect(
-        () => runFlutterSpecificDartBuild(
+        () => runFlutterSpecificHooks(
           environmentDefines: <String, String>{
             kBuildMode: BuildMode.debug.cliName,
             kMinSdkVersion: minSdkVersion,
