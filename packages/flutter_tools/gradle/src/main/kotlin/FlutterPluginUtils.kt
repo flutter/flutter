@@ -157,11 +157,10 @@ object FlutterPluginUtils {
     @JvmStatic
     internal fun isProjectFastStart(project: Project): Boolean = project.findProperty("fast-start")?.toString()?.toBoolean() ?: false
 
-    /**
-     * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
-     * or string version.
-     */
-
+//    /**
+//     * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
+//     * or string version.
+//     */
 //    @JvmStatic internal fun getCompileSdkFromProject(project: Project): String {
 //        // TODO(gmackall): This is pretty crazy, we should fix asap after the conversion is done
 //        return project.extensions
