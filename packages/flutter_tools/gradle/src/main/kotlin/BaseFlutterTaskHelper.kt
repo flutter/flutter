@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
+import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.OutputFiles
 import org.gradle.process.ExecSpec
 import java.nio.file.Paths
@@ -145,4 +146,10 @@ object BaseFlutterTaskHelper {
             args("-dMinSdkVersion=${baseFlutterTask.minSdkVersion}")
             args(generateRuleNames(baseFlutterTask))
         }
+
+    fun buildBundle(baseFlutterTask: BaseFlutterTask) {
+        checkPreConditions(baseFlutterTask)
+        baseFlutterTask.logging.captureStandardError(LogLevel.ERROR)
+        baseFlutterTask.project.exec(createExecSpecActionFromTask(baseFlutterTask = baseFlutterTask))
+    }
 }

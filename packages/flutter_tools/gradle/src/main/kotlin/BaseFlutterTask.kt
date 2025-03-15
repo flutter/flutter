@@ -5,14 +5,19 @@
 package com.flutter.gradle
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.FileCollection
-import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFiles
 import java.io.File
 
+/**
+ * Base implementation of a Gradle task. Gradle tasks can not be instantiated for testing,
+ * so this class delegates all logic to [BaseFlutterTaskHelper].
+ *
+ * IMPORTANT: Do not add logic to the methods in this class directly,
+ * instead add logic to [BaseFlutterTaskHelper].
+ */
 open class BaseFlutterTask : DefaultTask() {
     @Internal
     var flutterRoot: File? = null
@@ -132,19 +137,12 @@ open class BaseFlutterTask : DefaultTask() {
      * @return the dependency file(s) based on the current intermediate directory path.
      */
     @OutputFiles
-    fun getDependenciesFiles(): FileCollection {
-        val depFiles = BaseFlutterTaskHelper.getDependenciesFiles(baseFlutterTask = this)
-        return depFiles
-    }
+    fun getDependenciesFiles() = BaseFlutterTaskHelper.getDependenciesFiles(baseFlutterTask = this)
 
     /**
      * Builds a Flutter Android application bundle by verifying the Flutter source directory,
      * creating an intermediate build directory if necessary, and running flutter assemble by
      * configuring and executing with a set of build configurations.
      */
-    fun buildBundle() {
-        BaseFlutterTaskHelper.checkPreConditions(baseFlutterTask = this)
-        logging.captureStandardError(LogLevel.ERROR)
-        project.exec(BaseFlutterTaskHelper.createExecSpecActionFromTask(baseFlutterTask = this))
-    }
+    fun buildBundle() = BaseFlutterTaskHelper.buildBundle(baseFlutterTask = this)
 }
