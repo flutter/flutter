@@ -61,6 +61,10 @@ class SemanticScrollable extends SemanticRole {
   /// [element] that has zero offset relative to the [scrollPosition].
   int _effectiveNeutralScrollPosition = 0;
 
+  /// Whether this scrollable can scroll vertically or horizontally.
+  bool get _canScroll =>
+      semanticsObject.isVerticalScrollContainer || semanticsObject.isHorizontalScrollContainer;
+
   /// Responds to browser-detected "scroll" gestures.
   void _recomputeScrollPosition() {
     if (_domScrollPosition != _effectiveNeutralScrollPosition) {
@@ -133,6 +137,8 @@ class SemanticScrollable extends SemanticRole {
       semanticsObject.recomputePositionAndSize();
     });
 
+    _updateCssOverflow();
+
     if (_scrollListener == null) {
       // We need to set touch-action:none explicitly here, despite the fact
       // that we already have it on the <body> tag because overflow:scroll
@@ -144,17 +150,19 @@ class SemanticScrollable extends SemanticRole {
       // CSS property. In Safari the `PointerBinding` uses `preventDefault`
       // to prevent browser scrolling.
       element.style.touchAction = 'none';
-      _gestureModeDidChange();
 
       // Memoize the tear-off because Dart does not guarantee that two
       // tear-offs of a method on the same instance will produce the same
       // object.
       _gestureModeListener = (_) {
-        _gestureModeDidChange();
+        _updateCssOverflow();
       };
       EngineSemantics.instance.addGestureModeListener(_gestureModeListener!);
 
       _scrollListener = createDomEventListener((_) {
+        if (!_canScroll) {
+          return;
+        }
         _recomputeScrollPosition();
       });
       addEventListener('scroll', _scrollListener);
@@ -205,7 +213,7 @@ class SemanticScrollable extends SemanticRole {
       semanticsObject
         ..verticalContainerAdjustment = _effectiveNeutralScrollPosition.toDouble()
         ..horizontalContainerAdjustment = 0.0;
-    } else {
+    } else if (semanticsObject.isHorizontalScrollContainer) {
       // Place the _scrollOverflowElement at the end of the content and
       // make sure that when we neutralize the scrolling position,
       // it doesn't scroll into the visible area.
@@ -221,10 +229,21 @@ class SemanticScrollable extends SemanticRole {
       semanticsObject
         ..verticalContainerAdjustment = 0.0
         ..horizontalContainerAdjustment = _effectiveNeutralScrollPosition.toDouble();
+    } else {
+      _scrollOverflowElement.style
+        ..transform = 'translate(0px,0px)'
+        ..width = '0px'
+        ..height = '0px';
+      element.scrollLeft = 0.0;
+      element.scrollTop = 0.0;
+      _effectiveNeutralScrollPosition = 0;
+      semanticsObject
+        ..verticalContainerAdjustment = 0.0
+        ..horizontalContainerAdjustment = 0.0;
     }
   }
 
-  void _gestureModeDidChange() {
+  void _updateCssOverflow() {
     switch (EngineSemantics.instance.gestureMode) {
       case GestureMode.browserGestures:
         // overflow:scroll will cause the browser report "scroll" events when
