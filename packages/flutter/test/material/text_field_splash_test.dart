@@ -83,7 +83,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
+          data: ThemeData(splashFactory: const TestInkSplashFactory()),
           child: Material(
             child: Container(
               alignment: Alignment.topLeft,
@@ -129,7 +129,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
+          data: ThemeData(splashFactory: const TestInkSplashFactory()),
           child: Material(
             child: ListView(
               children: <Widget>[
