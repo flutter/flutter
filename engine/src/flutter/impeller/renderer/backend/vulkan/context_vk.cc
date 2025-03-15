@@ -148,8 +148,8 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
-  raster_message_loop_ =
-      fml::ConcurrentMessageLoop::Create(ChooseThreadCountForWorkers(2));
+  raster_message_loop_ = fml::ConcurrentMessageLoop::Create(
+      ChooseThreadCountForWorkers(std::thread::hardware_concurrency()));
 
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
   dispatcher.init(settings.proc_address_callback);

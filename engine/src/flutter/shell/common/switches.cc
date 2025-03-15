@@ -532,6 +532,16 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.merged_platform_ui_thread = !command_line.HasOption(
       FlagForSwitch(Switch::DisableMergedPlatformUIThread));
 
+  settings.impeller_enable_lazy_shader_mode = false;
+  if (command_line.HasOption(FlagForSwitch(Switch::ImpellerShaderMode))) {
+    std::string shader_mode;
+    command_line.GetOptionValue(FlagForSwitch(Switch::ImpellerShaderMode),
+                                &shader_mode);
+    if (shader_mode == "lazy") {
+      settings.impeller_enable_lazy_shader_mode = true;
+    }
+  }
+
   return settings;
 }
 

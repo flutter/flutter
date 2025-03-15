@@ -19,6 +19,7 @@ class GPUSurfaceGLImpeller final : public Surface {
  public:
   explicit GPUSurfaceGLImpeller(GPUSurfaceGLDelegate* delegate,
                                 std::shared_ptr<impeller::Context> context,
+                                const impeller::AiksContext::Settings& settings,
                                 bool render_to_surface);
 
   // |Surface|

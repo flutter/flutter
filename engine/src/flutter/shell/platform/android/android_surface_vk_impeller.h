@@ -7,6 +7,7 @@
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/macros.h"
+#include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
@@ -18,7 +19,8 @@ namespace flutter {
 class AndroidSurfaceVKImpeller : public AndroidSurface {
  public:
   explicit AndroidSurfaceVKImpeller(
-      const std::shared_ptr<AndroidContextVKImpeller>& android_context);
+      const std::shared_ptr<AndroidContextVKImpeller>& android_context,
+      const impeller::AiksContext::Settings& settings);
 
   ~AndroidSurfaceVKImpeller() override;
 
@@ -50,6 +52,7 @@ class AndroidSurfaceVKImpeller : public AndroidSurface {
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) override;
 
  private:
+  const impeller::AiksContext::Settings settings_;
   std::shared_ptr<impeller::SurfaceContextVK> surface_context_vk_;
   fml::RefPtr<AndroidNativeWindow> native_window_;
   // The first GPU Surface is initialized as soon as the

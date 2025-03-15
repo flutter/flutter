@@ -2734,6 +2734,17 @@ targets:
       task_name: flutter_gallery__start_up
 
   # linux mokey benchmark
+  - name: Linux_mokey flutter_gallery_lazy__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: flutter_gallery_lazy__start_up
+
+  # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__start_up_delayed
     recipe: devicelab/devicelab_drone
     presubmit: false

@@ -9,7 +9,7 @@
 namespace impeller::interop {
 
 Context::Context(std::shared_ptr<impeller::Context> context)
-    : context_(std::move(context), TypographerContextSkia::Make()) {}
+    : context_({}, std::move(context), TypographerContextSkia::Make()) {}
 
 Context::~Context() = default;
 

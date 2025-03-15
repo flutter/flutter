@@ -51,6 +51,8 @@ public class FlutterLoader {
       "io.flutter.embedding.android.DisableMergedPlatformUIThread";
   private static final String ENABLE_SURFACE_CONTROL =
       "io.flutter.embedding.android.EnableSurfaceControl";
+  private static final String IMPELLER_SHADER_MODE =
+      "io.flutter.embedding.android.ImpellerShaderMode";
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
@@ -376,6 +378,10 @@ public class FlutterLoader {
         String backend = metaData.getString(IMPELLER_BACKEND_META_DATA_KEY);
         if (backend != null) {
           shellArgs.add("--impeller-backend=" + backend);
+        }
+        String shaderMode = metaData.getString(IMPELLER_SHADER_MODE);
+        if (shaderMode != null) {
+          shellArgs.add("--impeller-shader-mode=" + shaderMode);
         }
       }
 

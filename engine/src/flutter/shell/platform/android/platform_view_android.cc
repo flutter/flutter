@@ -26,6 +26,7 @@
 #include "flutter/shell/platform/android/surface_texture_external_texture_gl_skia.h"
 #include "flutter/shell/platform/android/surface_texture_external_texture_vk_impeller.h"
 #include "fml/logging.h"
+#include "impeller/display_list/aiks_context.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
 #include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
@@ -51,14 +52,19 @@ AndroidContext::ContextSettings CreateContextSettings(
   settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
   settings.enable_validation = p_settings.enable_vulkan_validation;
   settings.enable_surface_control = p_settings.enable_surface_control;
+  settings.enable_lazy_shader_mode =
+      p_settings.impeller_enable_lazy_shader_mode;
   return settings;
 }
 }  // namespace
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
-    bool enable_impeller)
-    : android_context_(context), enable_impeller_(enable_impeller) {}
+    bool enable_impeller,
+    bool lazy_shader_mode)
+    : android_context_(context),
+      enable_impeller_(enable_impeller),
+      lazy_shader_mode_(lazy_shader_mode) {}
 
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
@@ -68,13 +74,17 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
       return std::make_unique<AndroidSurfaceSoftware>();
     case AndroidRenderingAPI::kImpellerOpenGLES:
       return std::make_unique<AndroidSurfaceGLImpeller>(
-          std::static_pointer_cast<AndroidContextGLImpeller>(android_context_));
+          std::static_pointer_cast<AndroidContextGLImpeller>(android_context_),
+          impeller::AiksContext::Settings{.lazy_shader_mode =
+                                              lazy_shader_mode_});
     case AndroidRenderingAPI::kSkiaOpenGLES:
       return std::make_unique<AndroidSurfaceGLSkia>(
           std::static_pointer_cast<AndroidContextGLSkia>(android_context_));
     case AndroidRenderingAPI::kImpellerVulkan:
       return std::make_unique<AndroidSurfaceVKImpeller>(
-          std::static_pointer_cast<AndroidContextVKImpeller>(android_context_));
+          std::static_pointer_cast<AndroidContextVKImpeller>(android_context_),
+          impeller::AiksContext::Settings{.lazy_shader_mode =
+                                              lazy_shader_mode_});
   }
   FML_UNREACHABLE();
 }
@@ -131,8 +141,10 @@ PlatformViewAndroid::PlatformViewAndroid(
     FML_CHECK(android_context_->IsValid())
         << "Could not create surface from invalid Android context.";
     surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
-        android_context_,                                     //
-        delegate.OnPlatformViewGetSettings().enable_impeller  //
+        android_context_,                                      //
+        delegate.OnPlatformViewGetSettings().enable_impeller,  //
+        delegate.OnPlatformViewGetSettings()
+            .impeller_enable_lazy_shader_mode  //
     );
     android_surface_ = surface_factory_->CreateSurface();
     android_use_new_platform_view_ =
