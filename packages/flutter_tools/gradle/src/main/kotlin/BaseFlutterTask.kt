@@ -133,8 +133,7 @@ open class BaseFlutterTask : DefaultTask() {
      */
     @OutputFiles
     fun getDependenciesFiles(): FileCollection {
-        val helper = BaseFlutterTaskHelper(baseFlutterTask = this)
-        val depFiles = helper.getDependenciesFiles()
+        val depFiles = BaseFlutterTaskHelper.getDependenciesFiles(baseFlutterTask = this)
         return depFiles
     }
 
@@ -144,9 +143,8 @@ open class BaseFlutterTask : DefaultTask() {
      * configuring and executing with a set of build configurations.
      */
     fun buildBundle() {
-        val helper = BaseFlutterTaskHelper(baseFlutterTask = this)
-        helper.checkPreConditions()
+        BaseFlutterTaskHelper.checkPreConditions(baseFlutterTask = this)
         logging.captureStandardError(LogLevel.ERROR)
-        project.exec(helper.createExecSpecActionFromTask())
+        project.exec(BaseFlutterTaskHelper.createExecSpecActionFromTask(baseFlutterTask = this))
     }
 }

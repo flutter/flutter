@@ -25,11 +25,11 @@ object FlutterTaskHelper {
         return project.files()
     }
 
-    fun getSourceFiles(project: Project): FileCollection {
-        var sources: FileCollection = project.files()
-        BaseFlutterTask.getDependenciesFiles().forEach { dependenciesFile ->
-            sources += readDependencies(dependenciesFile, true)
-        }
-        return sources + project.files("pubspec.yaml")
-    }
+//    fun getSourceFiles(project: Project): FileCollection {
+//        var sources: FileCollection = project.files()
+//        BaseFlutterTask.getDependenciesFiles().forEach { dependenciesFile ->
+//            sources += readDependencies(dependenciesFile, true)
+//        }
+//        return sources + project.files("pubspec.yaml")
+//    }
 }
