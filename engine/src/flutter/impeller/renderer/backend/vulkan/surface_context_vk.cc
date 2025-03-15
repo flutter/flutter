@@ -72,6 +72,10 @@ bool SurfaceContextVK::SetWindowSurface(vk::UniqueSurfaceKHR surface,
   return SetSwapchain(SwapchainVK::Create(parent_, std::move(surface), size));
 }
 
+void SurfaceContextVK::TeardownSwapchain() {
+  swapchain_.reset();
+}
+
 bool SurfaceContextVK::SetSwapchain(std::shared_ptr<SwapchainVK> swapchain) {
   if (!swapchain || !swapchain->IsValid()) {
     VALIDATION_LOG << "Invalid swapchain.";
