@@ -1,6 +1,5 @@
 package com.flutter.gradle
 
-import com.flutter.gradle.BaseFlutterTaskHelper.checkPreConditions
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

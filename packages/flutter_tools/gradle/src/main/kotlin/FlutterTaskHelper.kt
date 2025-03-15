@@ -6,6 +6,8 @@ import org.gradle.api.file.FileCollection
 import java.io.File
 
 object FlutterTaskHelper {
+    const val FLUTTER_ASSETS_INCLUDE_DIRECTORY = "flutter_assets/**"
+
     internal fun getOutputDirectory(flutterTask: FlutterTask): File? = flutterTask.intermediateDir
 
     internal fun getAssetsDirectory(flutterTask: FlutterTask): String = "${flutterTask.outputDirectory}/flutter_assets"
@@ -16,7 +18,7 @@ object FlutterTaskHelper {
     ): CopySpec =
         project.copySpec {
             from("${flutterTask.intermediateDir}")
-            include("flutter_assets/**") // the working dir and its files
+            include(FLUTTER_ASSETS_INCLUDE_DIRECTORY) // the working dir and its files
         }
 
     internal fun getSnapshots(
