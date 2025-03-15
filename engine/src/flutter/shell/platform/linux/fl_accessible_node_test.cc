@@ -12,10 +12,13 @@ TEST(FlAccessibleNodeTest, BuildTree) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) root = fl_accessible_node_new(engine, 0);
-  g_autoptr(FlAccessibleNode) child1 = fl_accessible_node_new(engine, 1);
+  int64_t view_id = 123;
+  g_autoptr(FlAccessibleNode) root = fl_accessible_node_new(engine, view_id, 0);
+  g_autoptr(FlAccessibleNode) child1 =
+      fl_accessible_node_new(engine, view_id, 1);
   fl_accessible_node_set_parent(child1, ATK_OBJECT(root), 0);
-  g_autoptr(FlAccessibleNode) child2 = fl_accessible_node_new(engine, 1);
+  g_autoptr(FlAccessibleNode) child2 =
+      fl_accessible_node_new(engine, view_id, 1);
   fl_accessible_node_set_parent(child2, ATK_OBJECT(root), 1);
   g_autoptr(GPtrArray) children =
       g_ptr_array_new_with_free_func(g_object_unref);
@@ -47,7 +50,7 @@ TEST(FlAccessibleNodeTest, SetName) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
   fl_accessible_node_set_name(node, "test");
   EXPECT_STREQ(atk_object_get_name(ATK_OBJECT(node)), "test");
 }
@@ -57,7 +60,7 @@ TEST(FlAccessibleNodeTest, SetExtents) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
   fl_accessible_node_set_extents(node, 1, 2, 3, 4);
   gint x, y, width, height;
   atk_component_get_extents(ATK_COMPONENT(node), &x, &y, &width, &height,
@@ -73,7 +76,7 @@ TEST(FlAccessibleNodeTest, SetFlags) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
   fl_accessible_node_set_flags(
       node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsEnabled |
                                               kFlutterSemanticsFlagIsFocusable |
@@ -93,7 +96,7 @@ TEST(FlAccessibleNodeTest, GetRole) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
   fl_accessible_node_set_flags(
       node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsButton));
@@ -127,7 +130,7 @@ TEST(FlAccessibleNodeTest, SetActions) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
   fl_accessible_node_set_actions(
       node, static_cast<FlutterSemanticsAction>(
                 kFlutterSemanticsActionTap | kFlutterSemanticsActionLongPress));

@@ -20,6 +20,7 @@ namespace flutter {
 namespace {
 
 constexpr int32_t kSemanticObjectIdInvalid = -1;
+constexpr int64_t kImplicitViewId = 0;
 
 class DefaultIosDelegate : public AccessibilityBridge::IosDelegate {
  public:
@@ -235,14 +236,19 @@ void AccessibilityBridge::UpdateSemantics(
   }
 }
 
-void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, flutter::SemanticsAction action) {
-  platform_view_->DispatchSemanticsAction(uid, action, {});
+void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
+                                                  flutter::SemanticsAction action) {
+  // TODO(team-ios): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
+  platform_view_->DispatchSemanticsAction(kImplicitViewId, node_uid, action, {});
 }
 
-void AccessibilityBridge::DispatchSemanticsAction(int32_t uid,
+void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
                                                   flutter::SemanticsAction action,
                                                   fml::MallocMapping args) {
-  platform_view_->DispatchSemanticsAction(uid, action, std::move(args));
+  // TODO(team-ios): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
+  platform_view_->DispatchSemanticsAction(kImplicitViewId, node_uid, action, std::move(args));
 }
 
 static void ReplaceSemanticsObject(SemanticsObject* oldObject,

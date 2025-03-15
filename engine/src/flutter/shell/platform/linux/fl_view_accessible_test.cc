@@ -12,7 +12,7 @@
 TEST(FlViewAccessibleTest, BuildTree) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine);
+  g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine, 456);
 
   int32_t children[] = {111, 222};
   FlutterSemanticsNode2 root_node = {
@@ -49,7 +49,7 @@ TEST(FlViewAccessibleTest, BuildTree) {
 TEST(FlViewAccessibleTest, AddRemoveChildren) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
-  g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine);
+  g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine, 456);
 
   FlutterSemanticsNode2 root_node = {
       .id = 0,

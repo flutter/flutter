@@ -20,6 +20,7 @@ G_DECLARE_FINAL_TYPE(FlAccessibleTextField,
 /**
  * fl_accessible_text_field_new:
  * @engine: the #FlEngine this node came from.
+ * @view_id: the ID of the view that contains this semantics node.
  * @id: the semantics node ID this object represents.
  *
  * Creates a new accessibility object that exposes an editable Flutter text
@@ -27,7 +28,9 @@ G_DECLARE_FINAL_TYPE(FlAccessibleTextField,
  *
  * Returns: a new #FlAccessibleNode.
  */
-FlAccessibleNode* fl_accessible_text_field_new(FlEngine* engine, int32_t id);
+FlAccessibleNode* fl_accessible_text_field_new(FlEngine* engine,
+                                               FlutterViewId view_id,
+                                               int32_t id);
 
 G_END_DECLS
 

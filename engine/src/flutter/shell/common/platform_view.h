@@ -195,6 +195,7 @@ class PlatformView {
     ///                     specified action.
     ///
     virtual void OnPlatformViewDispatchSemanticsAction(
+        int64_t view_id,
         int32_t node_id,
         SemanticsAction action,
         fml::MallocMapping args) = 0;
@@ -450,12 +451,14 @@ class PlatformView {
   /// @brief      Used by embedders to dispatch an accessibility action to a
   ///             running isolate hosted by the engine.
   ///
+  /// @param[in]  view_id The identifier of the view.
   /// @param[in]  node_id The identifier of the accessibility node on which to
   ///                     perform the action.
   /// @param[in]  action  The action
   /// @param[in]  args    The arguments
   ///
-  void DispatchSemanticsAction(int32_t node_id,
+  void DispatchSemanticsAction(int64_t view_id,
+                               int32_t node_id,
                                SemanticsAction action,
                                fml::MallocMapping args);
 
@@ -504,8 +507,10 @@ class PlatformView {
   ///                      key and the node properties as the value.
   /// @param[in]  actions  A map with the stable semantics node identifier as
   ///                      key and the custom node action as the value.
+  /// @param[in]  view_id  The ID of the view that this update is for
   ///
-  virtual void UpdateSemantics(SemanticsNodeUpdates updates,
+  virtual void UpdateSemantics(int64_t view_id,
+                               SemanticsNodeUpdates updates,
                                CustomAccessibilityActionUpdates actions);
 
   //----------------------------------------------------------------------------
