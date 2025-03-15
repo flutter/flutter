@@ -8,6 +8,7 @@
 /// @docImport 'sliver.dart';
 library;
 
+import 'dart:math';
 import 'dart:ui' as ui show Color, Gradient, Image, ImageFilter;
 
 import 'package:flutter/animation.dart';
@@ -234,7 +235,14 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedWidth && _additionalConstraints.hasTightWidth) {
       return _additionalConstraints.minWidth;
     }
-    final double width = super.computeMinIntrinsicWidth(height);
+
+    // [min] is used here instead of [_additionalConstraints.constrainHeight]
+    // as the parent will enforce constraints in the layout phase.
+    // In practice, this means that we should ignore the minHeight of the 
+    // additional constraints here, as it will be overridden by the parent.
+    final double width = super.computeMinIntrinsicWidth(
+      min(_additionalConstraints.maxHeight, height),
+    );
     assert(width.isFinite);
     if (!_additionalConstraints.hasInfiniteWidth) {
       return _additionalConstraints.constrainWidth(width);
@@ -247,7 +255,14 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedWidth && _additionalConstraints.hasTightWidth) {
       return _additionalConstraints.minWidth;
     }
-    final double width = super.computeMaxIntrinsicWidth(height);
+
+    // [min] is used here instead of [_additionalConstraints.constrainHeight]
+    // as the parent will enforce constraints in the layout phase.
+    // In practice, this means that we should ignore the minHeight of the 
+    // additional constraints here, as it will be overridden by the parent.
+    final double width = super.computeMaxIntrinsicWidth(
+      min(_additionalConstraints.maxHeight, height),
+    );
     assert(width.isFinite);
     if (!_additionalConstraints.hasInfiniteWidth) {
       return _additionalConstraints.constrainWidth(width);
@@ -260,7 +275,14 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedHeight && _additionalConstraints.hasTightHeight) {
       return _additionalConstraints.minHeight;
     }
-    final double height = super.computeMinIntrinsicHeight(width);
+
+    // [min] is used here instead of [_additionalConstraints.constrainWidth]
+    // as the parent will enforce constraints in the layout phase.
+    // In practice, this means that we should ignore the minWidth of the 
+    // additional constraints here, as it will be overridden by the parent.
+    final double height = super.computeMinIntrinsicHeight(
+      min(_additionalConstraints.maxWidth, width),
+    );
     assert(height.isFinite);
     if (!_additionalConstraints.hasInfiniteHeight) {
       return _additionalConstraints.constrainHeight(height);
@@ -273,7 +295,14 @@ class RenderConstrainedBox extends RenderProxyBox {
     if (_additionalConstraints.hasBoundedHeight && _additionalConstraints.hasTightHeight) {
       return _additionalConstraints.minHeight;
     }
-    final double height = super.computeMaxIntrinsicHeight(width);
+
+    // [min] is used here instead of [_additionalConstraints.constrainWidth]
+    // as the parent will enforce constraints in the layout phase.
+    // In practice, this means that we should ignore the minWidth of the 
+    // additional constraints here, as it will be overridden by the parent.
+    final double height = super.computeMaxIntrinsicHeight(
+      min(_additionalConstraints.maxWidth, width),
+    );
     assert(height.isFinite);
     if (!_additionalConstraints.hasInfiniteHeight) {
       return _additionalConstraints.constrainHeight(height);
