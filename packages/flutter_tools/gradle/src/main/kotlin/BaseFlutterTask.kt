@@ -13,7 +13,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFiles
 import java.io.File
 
-abstract class BaseFlutterTask : DefaultTask() {
+open class BaseFlutterTask : DefaultTask() {
     @Internal
     var flutterRoot: File? = null
 
