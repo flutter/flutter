@@ -28,7 +28,19 @@ import 'native_assets.dart';
 /// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
 class CopyFlutterBundle extends Target {
-  const CopyFlutterBundle();
+  const CopyFlutterBundle({
+    @Deprecated(
+      'Use the build environment `outputDir` instead. '
+      'This feature was deprecated after v3.31.0-1.0.pre.',
+    )
+    this.assetDir,
+  });
+
+  @Deprecated(
+    'Use the build environment `outputDir` instead. '
+    'This feature was deprecated after v3.31.0-1.0.pre.',
+  )
+  final Directory? assetDir;
 
   @override
   String get name => 'copy_flutter_bundle';
@@ -44,9 +56,9 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
-    Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
-    Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
+    Source.pattern('{OUTPUT_DIR}/flutter_assets/vm_snapshot_data'),
+    Source.pattern('{OUTPUT_DIR}/flutter_assets/isolate_snapshot_data'),
+    Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
   ];
 
   @override
@@ -61,7 +73,9 @@ class CopyFlutterBundle extends Target {
     final String? flavor = environment.defines[kFlavor];
 
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    environment.outputDir.createSync(recursive: true);
+    final Directory assetOutputDir =
+        assetDir ?? environment.outputDir.childDirectory('flutter_assets');
+    assetOutputDir.createSync(recursive: true);
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
@@ -75,17 +89,17 @@ class CopyFlutterBundle extends Target {
       );
       environment.buildDir
           .childFile('app.dill')
-          .copySync(environment.outputDir.childFile('kernel_blob.bin').path);
+          .copySync(assetOutputDir.childFile('kernel_blob.bin').path);
       environment.fileSystem
           .file(vmSnapshotData)
-          .copySync(environment.outputDir.childFile('vm_snapshot_data').path);
+          .copySync(assetOutputDir.childFile('vm_snapshot_data').path);
       environment.fileSystem
           .file(isolateSnapshotData)
-          .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
+          .copySync(assetOutputDir.childFile('isolate_snapshot_data').path);
     }
     final Depfile assetDepfile = await copyAssets(
       environment,
-      environment.outputDir,
+      assetOutputDir,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: flavor,
@@ -107,7 +121,13 @@ class CopyFlutterBundle extends Target {
 
 /// Copies the pre-built flutter bundle for release mode.
 class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
-  const ReleaseCopyFlutterBundle();
+  const ReleaseCopyFlutterBundle({
+    @Deprecated(
+      'Use the build environment `outputDir` instead. '
+      'This feature was deprecated after v3.31.0-1.0.pre.',
+    )
+    super.assetDir,
+  });
 
   @override
   String get name => 'release_flutter_bundle';

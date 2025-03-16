@@ -5,6 +5,7 @@
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/file_system.dart';
+import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../build_system/targets/common.dart';
@@ -15,12 +16,6 @@ import '../web/compiler_config.dart';
 
 class BuildTargetsImpl extends BuildTargets {
   const BuildTargetsImpl();
-
-  @override
-  Target get copyFlutterBundle => const CopyFlutterBundle();
-
-  @override
-  Target get releaseCopyFlutterBundle => const ReleaseCopyFlutterBundle();
 
   @override
   Target get generateLocalizationsTarget => const GenerateLocalizationsTarget();
@@ -34,4 +29,18 @@ class BuildTargetsImpl extends BuildTargets {
     List<WebCompilerConfig> compileConfigs,
     Analytics analytics,
   ) => WebServiceWorker(fileSystem, compileConfigs, analytics);
+
+  @override
+  Target buildFlutterBundle({
+    required BuildMode mode,
+    @Deprecated(
+      'Use the build environment `outputDir` instead. '
+      'This feature was deprecated after v3.31.0-1.0.pre.',
+    )
+    Directory? assetDir,
+  }) {
+    return mode == BuildMode.debug
+        ? CopyFlutterBundle(assetDir: assetDir)
+        : ReleaseCopyFlutterBundle(assetDir: assetDir);
+  }
 }

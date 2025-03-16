@@ -634,6 +634,7 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
+    String? outputDirPath,
     bool buildNativeAssets = true,
     @visibleForTesting BuildSystem? buildSystem,
   }) async {}

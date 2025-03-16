@@ -36,10 +36,11 @@ void main() {
         Target target,
         Environment environment,
       ) {
-        environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
-        environment.outputDir.childFile('isolate_snapshot_data').createSync();
-        environment.outputDir.childFile('vm_snapshot_data').createSync();
-        environment.outputDir.childFile('LICENSE').createSync(recursive: true);
+        final Directory assetsOutputDir = environment.outputDir.childDirectory('flutter_assets');
+        assetsOutputDir.childFile('kernel_blob.bin').createSync(recursive: true);
+        assetsOutputDir.childFile('isolate_snapshot_data').createSync();
+        assetsOutputDir.childFile('vm_snapshot_data').createSync();
+        assetsOutputDir.childFile('LICENSE').createSync(recursive: true);
       });
 
       await BundleBuilder().build(
@@ -47,15 +48,20 @@ void main() {
         buildInfo: BuildInfo.debug,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
         mainPath: globals.fs.path.join('lib', 'main.dart'),
-        assetDirPath: 'example',
+        outputDirPath: 'example',
         depfilePath: 'example.d',
         buildSystem: buildSystem,
       );
       expect(
-        globals.fs.file(globals.fs.path.join('example', 'kernel_blob.bin')).existsSync(),
+        globals.fs
+            .file(globals.fs.path.join('example', 'flutter_assets', 'kernel_blob.bin'))
+            .existsSync(),
         true,
       );
-      expect(globals.fs.file(globals.fs.path.join('example', 'LICENSE')).existsSync(), true);
+      expect(
+        globals.fs.file(globals.fs.path.join('example', 'flutter_assets', 'LICENSE')).existsSync(),
+        true,
+      );
       expect(globals.fs.file(globals.fs.path.join('example.d')).existsSync(), false);
     },
     overrides: <Type, Generator>{

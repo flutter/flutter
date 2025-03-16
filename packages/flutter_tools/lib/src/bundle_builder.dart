@@ -41,21 +41,26 @@ class BundleBuilder {
     String manifestPath = defaultManifestPath,
     String? applicationKernelFilePath,
     String? depfilePath,
+    @Deprecated(
+      'Use `outputDirPath` instead. '
+      'This feature was deprecated after v3.31.0-1.0.pre.',
+    )
     String? assetDirPath,
+    String? outputDirPath,
     bool buildNativeAssets = true,
     @visibleForTesting BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
-    assetDirPath ??= getAssetBuildDirectory();
+    outputDirPath ??= getBuildDirectory();
     buildSystem ??= globals.buildSystem;
 
     // If the precompiled flag was not passed, force us into debug mode.
     final environment = Environment(
       projectDir: project.directory,
       packageConfigPath: buildInfo.packageConfigPath,
-      outputDir: globals.fs.directory(assetDirPath),
+      outputDir: globals.fs.directory(outputDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
@@ -78,9 +83,11 @@ class BundleBuilder {
       platform: globals.platform,
       generateDartPluginRegistry: true,
     );
-    final Target target = buildInfo.mode == BuildMode.debug
-        ? globals.buildTargets.copyFlutterBundle
-        : globals.buildTargets.releaseCopyFlutterBundle;
+    final Directory? assetDir = assetDirPath != null ? globals.fs.directory(assetDirPath) : null;
+    final Target target = globals.buildTargets.buildFlutterBundle(
+      mode: buildInfo.mode,
+      assetDir: assetDir,
+    );
     final BuildResult result = await buildSystem.build(target, environment);
 
     if (!result.success) {
