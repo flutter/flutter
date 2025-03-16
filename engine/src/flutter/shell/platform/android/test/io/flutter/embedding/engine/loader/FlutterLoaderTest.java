@@ -320,7 +320,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.ImpellerShaderMode", "test");
+    metaData.putString("io.flutter.embedding.android.ImpellerShaderMode", "test");
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
