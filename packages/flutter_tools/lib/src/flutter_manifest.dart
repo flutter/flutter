@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'localizations/gen_l10n.dart' as gen_l10n;
+/// @docImport 'localizations/gen_l10n.dart';
 library;
 
 import 'package:meta/meta.dart';
@@ -433,7 +433,7 @@ class FlutterManifest {
   /// See also:
   ///
   ///   * [Deprecate and remove synthethic `package:flutter_gen`](https://github.com/flutter/flutter/issues/102983)
-  ///   * [gen_l10n.generateLocalizations]
+  ///   * [generateLocalizations]
   late final bool generateLocalizations = _flutterDescriptor['generate'] == true;
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;

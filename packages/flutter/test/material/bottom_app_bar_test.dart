@@ -20,9 +20,8 @@ void main() {
     const Color shadowColor = Colors.black;
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
-        home: const Scaffold(
+      const MaterialApp(
+        home: Scaffold(
           bottomNavigationBar: BottomAppBar(elevation: elevation, shadowColor: shadowColor),
         ),
       ),
@@ -40,9 +39,8 @@ void main() {
     const Color bottomAppBarColor = Colors.black45;
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
-        home: const Scaffold(
+      const MaterialApp(
+        home: Scaffold(
           bottomNavigationBar: BottomAppBar(
             color: bottomAppBarColor,
             // Avoid getting a surface tint color, to keep the color check below simple
@@ -140,7 +138,7 @@ void main() {
           child: RepaintBoundary(
             key: key,
             child: MaterialApp(
-              theme: ThemeData(useMaterial3: true),
+              theme: ThemeData(),
               home: Scaffold(
                 floatingActionButton: FloatingActionButton(onPressed: () {}),
                 floatingActionButtonLocation: location,
@@ -253,9 +251,7 @@ void main() {
   testWidgets('Material3 - Color overrides theme color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(
-          useMaterial3: true,
-        ).copyWith(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
+        theme: ThemeData(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
         home: Builder(
           builder: (BuildContext context) {
             return const Scaffold(
@@ -280,7 +276,7 @@ void main() {
   testWidgets('Material3 - Shadow color is transparent', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
+        theme: ThemeData(),
         home: const Scaffold(
           floatingActionButton: FloatingActionButton(onPressed: null),
           bottomNavigationBar: BottomAppBar(color: Color(0xff0000ff)),
@@ -317,7 +313,7 @@ void main() {
     const ColorScheme colorScheme = ColorScheme.dark();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(useMaterial3: true, colorScheme: colorScheme),
+        theme: ThemeData.from(colorScheme: colorScheme),
         home: Scaffold(bottomNavigationBar: BottomAppBar(color: colorScheme.surfaceContainer)),
       ),
     );
@@ -488,7 +484,7 @@ void main() {
     const double safeAreaPadding = 50.0;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
+        theme: ThemeData(),
         home: const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(safeAreaPadding)),
           child: Scaffold(bottomNavigationBar: BottomAppBar(child: Center(child: Text('safe')))),
@@ -583,7 +579,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/80878
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -712,7 +708,7 @@ void main() {
           viewPadding: EdgeInsets.only(bottom: bottomPadding),
         ),
         child: MaterialApp(
-          theme: ThemeData(useMaterial3: true),
+          theme: ThemeData(),
           home: Scaffold(
             floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
             floatingActionButton: FloatingActionButton(onPressed: () {}),

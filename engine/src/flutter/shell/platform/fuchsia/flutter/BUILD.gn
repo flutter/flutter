@@ -644,8 +644,7 @@ if (enable_unittests) {
     binary = "display_list_unittests"
     resources = [
       {
-        path = rebase_path(
-                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
         dest = "assets/Roboto-Regular.ttf"
       },
     ]
@@ -657,8 +656,7 @@ if (enable_unittests) {
     binary = "display_list_rendertests"
     resources = [
       {
-        path = rebase_path(
-                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
         dest = "assets/Roboto-Regular.ttf"
       },
     ]
@@ -685,8 +683,7 @@ if (enable_unittests) {
         dest = "flutter/testing/resources/performance_overlay_gold_120fps.png"
       },
       {
-        path = rebase_path(
-                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
         dest = "assets/Roboto-Regular.ttf"
       },
     ]
@@ -733,8 +730,7 @@ if (enable_unittests) {
         dest = "assets/shelltest_screenshot.png"
       },
       {
-        path = rebase_path(
-                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
         dest = "assets/Roboto-Regular.ttf"
       },
     ]
@@ -744,7 +740,7 @@ if (enable_unittests) {
   }
 
   fuchsia_test_archive("txt_tests") {
-    deps = [ "//flutter/third_party/txt:txt_unittests" ]
+    deps = [ "//flutter/txt:txt_unittests" ]
     gen_cml_file = true
     binary = "txt_unittests"
 
@@ -916,21 +912,84 @@ if (enable_unittests) {
   }
 
   fuchsia_test_archive("dart_plugin_registrant_unittests") {
-    deps = [ "//flutter/runtime:dart_plugin_registrant_unittests" ]
+    deps = [
+      "//flutter/runtime:dart_plugin_registrant_unittests",
+      "//flutter/runtime:plugin_registrant",
+    ]
     gen_cml_file = true
     binary = "dart_plugin_registrant_unittests"
+
+    # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+    # Right now we need to manually specify all the fixtures that are
+    # declared in the test_fixtures() call above.
+    resources = [
+      {
+        path = "$root_gen_dir/flutter/runtime/assets/plugin_registrant_kernel_blob.bin"
+        dest = "assets/plugin_registrant_kernel_blob.bin"
+      },
+    ]
+    if (is_aot_test) {
+      resources += [
+        {
+          path = "$root_gen_dir/flutter/runtime/assets/plugin_registrant_app_elf_snapshot.so"
+          dest = "assets/plugin_registrant_app_elf_snapshot.so"
+        },
+      ]
+    }
   }
 
   fuchsia_test_archive("no_dart_plugin_registrant_unittests") {
-    deps = [ "//flutter/runtime:no_dart_plugin_registrant_unittests" ]
+    deps = [
+      "//flutter/runtime:no_dart_plugin_registrant_unittests",
+      "//flutter/runtime:no_plugin_registrant",
+    ]
     gen_cml_file = true
     binary = "no_dart_plugin_registrant_unittests"
+
+    # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+    # Right now we need to manually specify all the fixtures that are
+    # declared in the test_fixtures() call above.
+    resources = [
+      {
+        path = "$root_gen_dir/flutter/runtime/assets/no_plugin_registrant_kernel_blob.bin"
+        dest = "assets/no_plugin_registrant_kernel_blob.bin"
+      },
+    ]
+    if (is_aot_test) {
+      resources += [
+        {
+          path = "$root_gen_dir/flutter/runtime/assets/no_plugin_registrant_app_elf_snapshot.so"
+          dest = "assets/no_plugin_registrant_app_elf_snapshot.so"
+        },
+      ]
+    }
   }
 
   fuchsia_test_archive("embedder_a11y_unittests") {
-    deps = [ "//flutter/shell/platform/embedder:embedder_a11y_unittests" ]
+    deps = [
+      "//flutter/shell/platform/embedder:embedder_a11y_unittests",
+      "//flutter/shell/platform/embedder:fixtures",
+    ]
     gen_cml_file = true
     binary = "embedder_a11y_unittests"
+
+    # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+    # Right now we need to manually specify all the fixtures that are
+    # declared in the test_fixtures() call above.
+    resources = [
+      {
+        path = "$root_gen_dir/flutter/shell/platform/embedder/assets/kernel_blob.bin"
+        dest = "assets/kernel_blob.bin"
+      },
+    ]
+    if (is_aot_test) {
+      resources += [
+        {
+          path = "$root_gen_dir/flutter/shell/platform/embedder/assets/app_elf_snapshot.so"
+          dest = "assets/app_elf_snapshot.so"
+        },
+      ]
+    }
   }
 
   fuchsia_test_archive("embedder_proctable_unittests") {
@@ -946,9 +1005,30 @@ if (enable_unittests) {
   }
 
   fuchsia_test_archive("tonic_unittests") {
-    deps = [ "//flutter/third_party/tonic/tests:tonic_unittests" ]
+    deps = [
+      "//flutter/third_party/tonic/tests:tonic_fixtures",
+      "//flutter/third_party/tonic/tests:tonic_unittests",
+    ]
     gen_cml_file = true
     binary = "tonic_unittests"
+
+    # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+    # Right now we need to manually specify all the fixtures that are
+    # declared in the test_fixtures() call above.
+    resources = [
+      {
+        path = "$root_gen_dir/flutter/third_party/tonic/tests/assets/kernel_blob.bin"
+        dest = "assets/kernel_blob.bin"
+      },
+    ]
+    if (is_aot_test) {
+      resources += [
+        {
+          path = "$root_gen_dir/flutter/third_party/tonic/tests/assets/app_elf_snapshot.so"
+          dest = "assets/app_elf_snapshot.so"
+        },
+      ]
+    }
   }
 
   # When adding a new dep here, please also ensure the dep is added to

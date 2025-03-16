@@ -278,7 +278,6 @@ class CustomDeviceAppSession {
     bool traceStartup,
     String? route,
   ) {
-    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     return <String>[
       if (traceStartup) 'trace-startup=true',
       if (route != null) 'route=$route',
@@ -301,7 +300,7 @@ class CustomDeviceAppSession {
         ],
         if (debuggingOptions.startPaused) 'start-paused=true',
         if (debuggingOptions.disableServiceAuthCodes) 'disable-service-auth-codes=true',
-        if (dartVmFlags.isNotEmpty) 'dart-flags=$dartVmFlags',
+        if (debuggingOptions.dartFlags.isNotEmpty) 'dart-flags=${debuggingOptions.dartFlags}',
         if (debuggingOptions.useTestFonts) 'use-test-fonts=true',
         if (debuggingOptions.verboseSystemLogs) 'verbose-logging=true',
       ],

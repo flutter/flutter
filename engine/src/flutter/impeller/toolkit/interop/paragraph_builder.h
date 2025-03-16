@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
+#include "flutter/txt/src/txt/paragraph_builder.h"
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/object.h"
 #include "impeller/toolkit/interop/paragraph.h"

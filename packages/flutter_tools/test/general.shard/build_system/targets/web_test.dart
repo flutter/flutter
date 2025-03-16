@@ -23,6 +23,7 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fake_pub_deps.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
 
 const List<String> _kDart2jsLinuxArgs = <String>[
@@ -61,21 +62,16 @@ void main() {
   setUp(() {
     testbed = Testbed(
       setup: () {
-        globals.fs.directory('.dart_tool').childFile('package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "foo",
-      "rootUri": "../foo/",
-      "packageUri": "lib/",
-      "languageVersion": "2.7"
-    }
-  ]
-}
+        globals.fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+name: foo
 ''');
+
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'foo': 'foo/'},
+          languageVersions: <String, String>{'foo': '2.7'},
+        );
         globals.fs.currentDirectory.childDirectory('bar').createSync();
         processManager = FakeProcessManager.empty();
         globals.fs
@@ -231,14 +227,18 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('A');
       environment.buildDir.childFile('main.dart.js').createSync();
+      environment.buildDir.childFile('main.dart.js.info.json').createSync();
       environment.buildDir.childFile('main.dart.js.map').createSync();
       environment.buildDir.childFile('main.dart.js_1.part.js').createSync();
       environment.buildDir.childFile('main.dart.js_1.part.js.map').createSync();
 
-      await WebReleaseBundle(<WebCompilerConfig>[const JsCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(dumpInfo: true),
+      ]).build(environment);
 
       expect(environment.outputDir.childFile('foo.txt').readAsStringSync(), 'A');
       expect(environment.outputDir.childFile('main.dart.js').existsSync(), true);
+      expect(environment.outputDir.childFile('main.dart.js.info.json').existsSync(), true);
       expect(environment.outputDir.childFile('main.dart.js.map').existsSync(), true);
       expect(environment.outputDir.childFile('main.dart.js_1.part.js').existsSync(), true);
       expect(environment.outputDir.childFile('main.dart.js_1.part.js.map').existsSync(), true);

@@ -496,7 +496,7 @@
 					../../../../third_party/skia,
 					../../../../third_party,
 					../../../../third_party/rapidjson/include,
-					../../../../flutter/third_party/txt/src,
+					../../../../flutter/txt/src,
 					../../../../third_party/harfbuzz/src,
 					../../../../third_party/icu/source/common,
 				);
@@ -540,7 +540,7 @@
 					../../../../third_party/skia,
 					../../../../third_party,
 					../../../../third_party/rapidjson/include,
-					../../../../flutter/third_party/txt/src,
+					../../../../flutter/txt/src,
 					../../../../third_party/harfbuzz/src,
 					../../../../third_party/icu/source/common,
 				);

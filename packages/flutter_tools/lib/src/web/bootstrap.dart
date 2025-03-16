@@ -253,14 +253,6 @@ $_simpleLoaderScript
     // reloaded into the page. This is then read when a hot restart is triggered
     // in DDC via the `\$dartReloadModifiedModules` callback.
     let restartScripts = _currentDirectory + 'restart_scripts.json';
-    // Flutter tools should write a file containing the scripts and libraries
-    // that need to be hot reloaded. This is read in DWDS when a hot reload is
-    // triggered.
-    // TODO(srujzs): Ideally, this should be passed to the
-    // `FrontendServerDdcLibraryBundleStrategyProvider` instead. See
-    // https://github.com/dart-lang/webdev/issues/2584 for more details.
-    let reloadScripts = _currentDirectory + 'reload_scripts.json';
-    window.\$reloadScriptsPath = reloadScripts;
 
     if (!window.\$dartReloadModifiedModules) {
       window.\$dartReloadModifiedModules = (function(appName, callback) {
@@ -471,45 +463,10 @@ document.addEventListener('dart-app-ready', function (e) {
 ''';
 }
 
-// TODO(srujzs): Delete this once it's no longer used internally.
-String generateDDCMainModule({
-  required String entrypoint,
-  required bool nullAssertions,
-  required bool nativeNullAssertions,
-  String? exportedMain,
-}) {
-  final String entrypointMainName = exportedMain ?? entrypoint.split('.')[0];
-  // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
-  return '''
-/* ENTRYPOINT_EXTENTION_MARKER */
-
-(function() {
-  // Flutter Web uses a generated main entrypoint, which shares app and module names.
-  let appName = "$entrypoint";
-  let moduleName = "$entrypoint";
-
-  // Use a dummy UUID since multi-apps are not supported on Flutter Web.
-  let uuid = "00000000-0000-0000-0000-000000000000";
-
-  let child = {};
-  child.main = function() {
-    let dart = self.dart_library.import('dart_sdk', appName).dart;
-    dart.nonNullAsserts($nullAssertions);
-    dart.nativeNonNullAsserts($nativeNullAssertions);
-    self.dart_library.start(appName, uuid, moduleName, "$entrypointMainName");
-  }
-
-  /* MAIN_EXTENSION_MARKER */
-  child.main();
-})();
-''';
-}
-
 const String _onLoadEndCallback = r'$onLoadEndCallback';
 
 String generateDDCLibraryBundleMainModule({
   required String entrypoint,
-  required bool nullAssertions,
   required bool nativeNullAssertions,
   required String onLoadEndBootstrap,
 }) {
@@ -536,7 +493,6 @@ String generateDDCLibraryBundleMainModule({
     let child = {};
     child.main = function() {
       let sdkOptions = {
-        nonNullAsserts: $nullAssertions,
         nativeNonNullAsserts: $nativeNullAssertions,
       };
       dartDevEmbedder.runMain(appName, sdkOptions);
@@ -566,7 +522,6 @@ String generateDDCLibraryBundleOnLoadEndBootstrap() {
 /// this object is the module.
 String generateMainModule({
   required String entrypoint,
-  required bool nullAssertions,
   required bool nativeNullAssertions,
   String bootstrapModule = 'main_module.bootstrap',
   String loaderRootDirectory = '',
@@ -582,7 +537,6 @@ require.config({
 define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._debugger.registerDevtoolsFormatter();
-  dart_sdk.dart.nonNullAsserts($nullAssertions);
   dart_sdk.dart.nativeNonNullAsserts($nativeNullAssertions);
 
   // See the generateMainModule doc comment.
