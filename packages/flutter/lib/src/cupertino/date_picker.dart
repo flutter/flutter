@@ -208,7 +208,7 @@ enum _PickerColumnType {
   // AM/PM column in time and dateAndTime mode.
   dayPeriod,
   // Time separator column in time and dateAndTime mode.
-  timeSeperator,
+  timeSeparator,
 }
 
 /// A date picker widget in iOS style.
@@ -305,7 +305,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.dateOrder,
     this.backgroundColor,
     this.showDayOfWeek = false,
-    this.showTimeSeperator = false,
+    this.showTimeSeparator = false,
     this.itemExtent = _kItemExtent,
     this.selectionOverlayBuilder,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
@@ -358,10 +358,10 @@ class CupertinoDatePicker extends StatefulWidget {
          'initial minute is not divisible by minute interval',
        ),
        assert(
-         !showTimeSeperator ||
+         !showTimeSeparator ||
              mode == CupertinoDatePickerMode.dateAndTime ||
              mode == CupertinoDatePickerMode.time,
-         'showTimeSeperator is only supported in time or dateAndTime modes',
+         'showTimeSeparator is only supported in time or dateAndTime modes',
        );
 
   /// The mode of the date picker as one of [CupertinoDatePickerMode]. Defaults
@@ -444,11 +444,15 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Defaults to false.
   final bool showDayOfWeek;
 
-  /// Whether to show the time separator between hour and minute in
-  /// [CupertinoDatePickerMode.time] and [CupertinoDatePickerMode.dateAndTime] mode.
-  /// Throws an error if set to true in [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.monthYear] mode.
+  /// Whether to show the time separator between hour and minute in the time
+  /// [CupertinoDatePickerMode.time] and datetime [CupertinoDatePickerMode.dateAndTime]
+  /// picker modes.
+  ///
+  /// Throws an error if set to true in [CupertinoDatePickerMode.date]
+  /// and [CupertinoDatePickerMode.monthYear] mode.
+  ///
   /// Defaults to false.
-  final bool showTimeSeperator;
+  final bool showTimeSeparator;
 
   /// {@macro flutter.cupertino.picker.itemExtent}
   ///
@@ -564,7 +568,7 @@ class CupertinoDatePicker extends StatefulWidget {
         }
       case _PickerColumnType.year:
         longTexts.add(localizations.datePickerYear(2018));
-      case _PickerColumnType.timeSeperator:
+      case _PickerColumnType.timeSeparator:
         longTexts.add(':');
     }
 
@@ -1062,8 +1066,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     );
   }
 
-  // Builds the time seperator column.
-  Widget _buildTimeSeperatorWidget(
+  // Builds the time separator column.
+  Widget _buildTimeSeparatorWidget(
     double offAxisFraction,
     TransitionBuilder itemPositioningBuilder,
     Widget? selectionOverlay,
@@ -1158,10 +1162,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             ? <_ColumnBuilder>[_buildMinutePicker, _buildHourPicker]
             : <_ColumnBuilder>[_buildHourPicker, _buildMinutePicker];
 
-    // Adds time seperator column if the picker is showing time seperator.
-    if (widget.showTimeSeperator) {
-      columnWidths.insert(1, _getEstimatedColumnWidth(_PickerColumnType.timeSeperator));
-      pickerBuilders.insert(1, _buildTimeSeperatorWidget);
+    // Adds time separator column if the picker is showing time separator.
+    if (widget.showTimeSeparator) {
+      columnWidths.insert(1, _getEstimatedColumnWidth(_PickerColumnType.timeSeparator));
+      pickerBuilders.insert(1, _buildTimeSeparatorWidget);
     }
     // Adds am/pm column if the picker is not using 24h format.
     if (!widget.use24hFormat) {

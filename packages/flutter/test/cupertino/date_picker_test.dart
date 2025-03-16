@@ -2488,20 +2488,20 @@ void main() {
     expect(widths.indexOf(largestWidth), equals(1));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
-  testWidgets('showTimeSeperator is only supported in time or dateAndTime mode', (
+  testWidgets('showTimeSeparator is only supported in time or dateAndTime mode', (
     WidgetTester tester,
   ) async {
     expect(
       () => CupertinoDatePicker(
         mode: CupertinoDatePickerMode.time,
         onDateTimeChanged: (DateTime _) {},
-        showTimeSeperator: true,
+        showTimeSeparator: true,
       ),
       returnsNormally,
     );
 
     expect(
-      () => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}, showTimeSeperator: true),
+      () => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}, showTimeSeparator: true),
       returnsNormally,
     );
 
@@ -2509,13 +2509,13 @@ void main() {
       () => CupertinoDatePicker(
         mode: CupertinoDatePickerMode.date,
         onDateTimeChanged: (DateTime _) {},
-        showTimeSeperator: true,
+        showTimeSeparator: true,
       ),
       throwsA(
         isA<AssertionError>().having(
           (AssertionError e) => e.message ?? 'Unknown error',
           'message',
-          contains('showTimeSeperator is only supported in time or dateAndTime modes'),
+          contains('showTimeSeparator is only supported in time or dateAndTime modes'),
         ),
       ),
     );
@@ -2524,18 +2524,33 @@ void main() {
       () => CupertinoDatePicker(
         mode: CupertinoDatePickerMode.monthYear,
         onDateTimeChanged: (DateTime _) {},
-        showTimeSeperator: true,
+        showTimeSeparator: true,
       ),
       throwsA(
         isA<AssertionError>().having(
           (AssertionError e) => e.message ?? 'Unknown error',
           'message',
-          contains('showTimeSeperator is only supported in time or dateAndTime modes'),
+          contains('showTimeSeparator is only supported in time or dateAndTime modes'),
         ),
       ),
     );
 
-    expect(() => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}), returnsNormally);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.time,
+            onDateTimeChanged: (DateTime _) {},
+            showTimeSeparator: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byWidgetPredicate((Widget widget) => widget is Text && widget.data == ':'),
+      findsOneWidget,
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/161773
