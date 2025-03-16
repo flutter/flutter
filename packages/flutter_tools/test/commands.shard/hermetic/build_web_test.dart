@@ -63,7 +63,11 @@ void main() {
 
       expect(
         () => runner.run(<String>['build', 'web', '--no-pub']),
-        throwsToolExit(message: 'Run flutter create . --platforms web'),
+        throwsToolExit(
+          message:
+              'This project is not configured for the web.\n'
+              'To configure this project for the web, run flutter create . --platforms web',
+        ),
       );
     },
     overrides: <Type, Generator>{
@@ -500,7 +504,11 @@ void main() {
 
       expect(
         () => runner.run(<String>['build', 'web', '--no-pub']),
-        throwsToolExit(message: 'Run flutter create . --platforms web'),
+        throwsToolExit(
+          message:
+              'This project is not configured for the web.\n'
+              'To configure this project for the web, run flutter create . --platforms web',
+        ),
       );
     },
     overrides: <Type, Generator>{
