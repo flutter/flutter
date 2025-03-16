@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../base/file_system.dart';
+import '../build_info.dart';
 import '../web/compiler_config.dart';
 import './build_system.dart';
 
@@ -10,22 +11,22 @@ import './build_system.dart';
 abstract class BuildTargets {
   const BuildTargets();
 
-  Target get copyFlutterBundle;
-  Target get releaseCopyFlutterBundle;
   Target get generateLocalizationsTarget;
   Target get dartPluginRegistrantTarget;
   Target webServiceWorker(FileSystem fileSystem, List<WebCompilerConfig> compileConfigs);
+  Target buildFlutterBundle({
+    required BuildMode mode,
+    @Deprecated(
+      'Use the build environment `outputDir` instead. '
+      'This feature was deprecated after v3.31.0-1.0.pre.',
+    )
+    Directory? assetDir,
+  });
 }
 
 /// BuildTargets that return NoOpTarget for every action.
 class NoOpBuildTargets extends BuildTargets {
   const NoOpBuildTargets();
-
-  @override
-  Target get copyFlutterBundle => const _NoOpTarget();
-
-  @override
-  Target get releaseCopyFlutterBundle => const _NoOpTarget();
 
   @override
   Target get generateLocalizationsTarget => const _NoOpTarget();
@@ -36,6 +37,16 @@ class NoOpBuildTargets extends BuildTargets {
   @override
   Target webServiceWorker(FileSystem fileSystem, List<WebCompilerConfig> compileConfigs) =>
       const _NoOpTarget();
+
+  @override
+  Target buildFlutterBundle({
+    required BuildMode mode,
+    @Deprecated(
+      'Use the build environment `outputDir` instead. '
+      'This feature was deprecated after v3.31.0-1.0.pre.',
+    )
+    Directory? assetDir,
+  }) => const _NoOpTarget();
 }
 
 /// A [Target] that does nothing.

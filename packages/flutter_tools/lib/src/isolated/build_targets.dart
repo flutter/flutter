@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../base/file_system.dart';
+import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../build_system/targets/common.dart';
@@ -15,12 +16,6 @@ class BuildTargetsImpl extends BuildTargets {
   const BuildTargetsImpl();
 
   @override
-  Target get copyFlutterBundle => const CopyFlutterBundle();
-
-  @override
-  Target get releaseCopyFlutterBundle => const ReleaseCopyFlutterBundle();
-
-  @override
   Target get generateLocalizationsTarget => const GenerateLocalizationsTarget();
 
   @override
@@ -29,4 +24,18 @@ class BuildTargetsImpl extends BuildTargets {
   @override
   Target webServiceWorker(FileSystem fileSystem, List<WebCompilerConfig> compileConfigs) =>
       WebServiceWorker(fileSystem, compileConfigs);
+
+  @override
+  Target buildFlutterBundle({
+    required BuildMode mode,
+    @Deprecated(
+      'Use the build environment `outputDir` instead. '
+      'This feature was deprecated after v3.31.0-1.0.pre.',
+    )
+    Directory? assetDir,
+  }) {
+    return mode == BuildMode.debug
+        ? CopyFlutterBundle(assetDir: assetDir)
+        : ReleaseCopyFlutterBundle(assetDir: assetDir);
+  }
 }
