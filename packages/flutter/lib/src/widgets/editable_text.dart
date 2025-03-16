@@ -5378,10 +5378,6 @@ class EditableTextState extends State<EditableText>
   }
 
   void _onTapOutside(BuildContext context, PointerDownEvent event) {
-    if (!_hasFocus) {
-      return;
-    }
-
     _hadFocusOnTapDown = true;
 
     if (widget.onTapOutside != null) {
@@ -5396,7 +5392,7 @@ class EditableTextState extends State<EditableText>
       return;
     }
 
-    // Reset to false so that subsequent events doesn't trigger the callback erroneously.
+    // Reset to false so that subsequent events doesn't trigger the callback based on old information.
     _hadFocusOnTapDown = false;
 
     if (widget.onTapUpOutside != null) {
@@ -5572,7 +5568,8 @@ class EditableTextState extends State<EditableText>
           builder: (BuildContext context) {
             return TextFieldTapRegion(
               groupId: widget.groupId,
-              onTapOutside: (PointerDownEvent event) => _onTapOutside(context, event),
+              onTapOutside:
+                  _hasFocus ? (PointerDownEvent event) => _onTapOutside(context, event) : null,
               onTapUpOutside: (PointerUpEvent event) => _onTapUpOutside(context, event),
               debugLabel: kReleaseMode ? null : 'EditableText',
               child: MouseRegion(
