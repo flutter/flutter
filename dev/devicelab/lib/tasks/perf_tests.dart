@@ -1051,7 +1051,10 @@ class StartupTest {
 
         return TaskResult.success(
           averageResults,
-          benchmarkScoreKeys: <String>['timeToFirstFrameMicros', 'timeToFirstFrameRasterizedMicros'],
+          benchmarkScoreKeys: <String>[
+            'timeToFirstFrameMicros',
+            'timeToFirstFrameRasterizedMicros',
+          ],
         );
       } finally {
         await _resetManifest(testDirectory);
