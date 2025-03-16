@@ -10,6 +10,7 @@
 #include "flutter/impeller/entity/vk/framebuffer_blend_shaders_vk.h"
 #include "flutter/impeller/entity/vk/modern_shaders_vk.h"
 #include "flutter/shell/gpu/gpu_surface_vulkan.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "include/gpu/ganesh/GrDirectContext.h"
 #include "shell/gpu/gpu_surface_vulkan_impeller.h"
@@ -112,7 +113,8 @@ bool EmbedderSurfaceVulkanImpeller::IsValid() const {
 
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceVulkanImpeller::CreateGPUSurface() {
-  return std::make_unique<GPUSurfaceVulkanImpeller>(this, context_);
+  return std::make_unique<GPUSurfaceVulkanImpeller>(
+      this, context_, impeller::AiksContext::Settings{});
 }
 
 // |EmbedderSurface|

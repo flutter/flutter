@@ -1210,7 +1210,7 @@ TEST_P(AiksTest, BlurredRectangleWithShader) {
     draw_line(DlPoint(dx + 100, dy + 150), DlPoint(dx + 150, dy + 200));
   };
 
-  AiksContext renderer(GetContext(), nullptr);
+  AiksContext renderer({}, GetContext(), nullptr);
   DisplayListBuilder recorder_builder;
   for (int x = 0; x < 5; ++x) {
     for (int y = 0; y < 5; ++y) {
@@ -1308,7 +1308,7 @@ TEST_P(AiksTest, GaussianBlurWithoutDecalSupport) {
 // the limits for the textures used for blurring.
 // See also: b/323402168
 TEST_P(AiksTest, GaussianBlurSolidColorTinyMipMap) {
-  AiksContext renderer(GetContext(), nullptr);
+  AiksContext renderer({}, GetContext(), nullptr);
 
   for (int32_t i = 1; i < 5; ++i) {
     DisplayListBuilder builder;
@@ -1333,7 +1333,7 @@ TEST_P(AiksTest, GaussianBlurSolidColorTinyMipMap) {
 // the limits for the textures used for blurring.
 // See also: b/323402168
 TEST_P(AiksTest, GaussianBlurBackdropTinyMipMap) {
-  AiksContext renderer(GetContext(), nullptr);
+  AiksContext renderer({}, GetContext(), nullptr);
   for (int32_t i = 1; i < 5; ++i) {
     DisplayListBuilder builder;
 

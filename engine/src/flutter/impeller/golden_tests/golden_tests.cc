@@ -94,7 +94,7 @@ TEST_F(GoldenTests, ConicalGradient) {
   builder.DrawRect(DlRect::MakeXYWH(10, 10, 250, 250), paint);
 
   auto aiks_context =
-      AiksContext(Screenshotter().GetPlayground().GetContext(), nullptr);
+      AiksContext({}, Screenshotter().GetPlayground().GetContext(), nullptr);
   auto screenshot = Screenshotter().MakeScreenshot(
       aiks_context,
       DisplayListToTexture(builder.Build(), {240, 240}, aiks_context));

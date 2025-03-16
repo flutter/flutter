@@ -64,8 +64,8 @@ std::unique_ptr<Surface> EmbedderSurfaceMetalImpeller::CreateGPUSurface()
     return nullptr;
   }
   if (!aiks_context_) {
-    aiks_context_ =
-        std::make_shared<impeller::AiksContext>(context_, impeller::TypographerContextSkia::Make());
+    aiks_context_ = std::make_shared<impeller::AiksContext>(
+        impeller::AiksContext::Settings{}, context_, impeller::TypographerContextSkia::Make());
   }
 
   const bool render_to_surface = !external_view_embedder_;

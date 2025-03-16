@@ -259,6 +259,15 @@ static std::unique_ptr<PipelineT> CreateDefaultPipeline(
 }
 
 ContentContext::ContentContext(
+    std::shared_ptr<Context> context,
+    std::shared_ptr<TypographerContext> typographer_context,
+    std::shared_ptr<RenderTargetAllocator> render_target_allocator)
+    : ContentContext({},
+                     std::move(context),
+                     std::move(typographer_context),
+                     std::move(render_target_allocator)) {}
+
+ContentContext::ContentContext(
     const Settings& settings,
     std::shared_ptr<Context> context,
     std::shared_ptr<TypographerContext> typographer_context,

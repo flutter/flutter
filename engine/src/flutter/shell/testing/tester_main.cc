@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "impeller/display_list/aiks_context.h"
 #define FML_USED_ON_EMBEDDER
 
 #include <cstdlib>
@@ -211,7 +212,10 @@ class TesterPlatformView : public PlatformView,
     if (delegate_.OnPlatformViewGetSettings().enable_impeller) {
       FML_DCHECK(impeller_context_holder_.context);
       auto surface = std::make_unique<GPUSurfaceVulkanImpeller>(
-          nullptr, impeller_context_holder_.surface_context);
+          nullptr, impeller_context_holder_.surface_context,
+          // Enable lazy shader mode for faster test execution as most tests
+          // will never render anything at all.
+          impeller::AiksContext::Settings{.lazy_shader_mode = true});
       FML_DCHECK(surface->IsValid());
       return surface;
     }

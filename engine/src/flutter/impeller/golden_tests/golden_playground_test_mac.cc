@@ -207,7 +207,7 @@ PlaygroundBackend GoldenPlaygroundTest::GetBackend() const {
 
 bool GoldenPlaygroundTest::OpenPlaygroundHere(
     const AiksDlPlaygroundCallback& callback) {
-  AiksContext renderer(GetContext(), typographer_context_);
+  AiksContext renderer({}, GetContext(), typographer_context_);
 
   std::unique_ptr<testing::Screenshot> screenshot;
   for (int i = 0; i < 2; ++i) {
@@ -307,7 +307,7 @@ fml::Status GoldenPlaygroundTest::SetCapabilities(
 
 std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
     const sk_sp<flutter::DisplayList>& list) {
-  AiksContext renderer(GetContext(), typographer_context_);
+  AiksContext renderer({}, GetContext(), typographer_context_);
 
   return pimpl_->screenshotter->MakeScreenshot(
       renderer, DisplayListToTexture(list, pimpl_->window_size, renderer));

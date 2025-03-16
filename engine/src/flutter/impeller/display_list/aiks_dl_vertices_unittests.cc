@@ -405,7 +405,7 @@ TEST_P(AiksTest, DrawVerticesWithInvalidIndices) {
   builder.DrawRect(DlRect::MakeLTRB(0, 0, 400, 400), paint);
   builder.DrawVertices(vertices, flutter::DlBlendMode::kSrc, paint);
 
-  AiksContext renderer(GetContext(), nullptr);
+  AiksContext renderer({}, GetContext(), nullptr);
   std::shared_ptr<Texture> image =
       DisplayListToTexture(builder.Build(), {1024, 768}, renderer);
   EXPECT_TRUE(image);
