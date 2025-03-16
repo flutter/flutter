@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/entity/gles/entity_shaders_gles.h"
 #include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
 #include "impeller/entity/gles/modern_shaders_gles.h"
@@ -176,9 +177,10 @@ std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
   GLContextMakeCurrent();
 
   return std::make_unique<GPUSurfaceGLImpeller>(
-      this,                     // GPU surface GL delegate
-      impeller_context_,        // Impeller context
-      !external_view_embedder_  // render to surface
+      this,                               // GPU surface GL delegate
+      impeller_context_,                  // Impeller context
+      impeller::AiksContext::Settings{},  // settings
+      !external_view_embedder_            // render to surface
   );
 }
 
