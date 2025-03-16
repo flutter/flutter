@@ -3093,6 +3093,50 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['obscureText'], isFalse);
   });
 
+  testWidgets('Sends "updateConfig" when keyboardType is changed', (WidgetTester tester) async {
+    TextInputType keyboardType = TextInputType.text;
+    late StateSetter setState;
+    controller.text = 'Lorem';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return EditableText(
+              keyboardType: keyboardType,
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            );
+          },
+        ),
+      ),
+    );
+
+    // Interact with the field to establish the input connection.
+    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+    await tester.pump();
+
+    expect(
+      (tester.testTextInput.setClientArgs!['inputType'] as Map<dynamic, dynamic>)['name'],
+      'TextInputType.text',
+    );
+
+    setState(() {
+      keyboardType = TextInputType.number;
+    });
+    await tester.pump();
+
+    expect(
+      (tester.testTextInput.setClientArgs!['inputType'] as Map<dynamic, dynamic>)['name'],
+      'TextInputType.number',
+    );
+  });
+
   testWidgets('Sends viewId and updates config when it changes', (WidgetTester tester) async {
     int viewId = 14;
     late StateSetter setState;
@@ -9916,7 +9960,7 @@ void main() {
       final _AccentColorTextEditingController controller = _AccentColorTextEditingController('a');
       addTearDown(controller.dispose);
       const Color color = Color.fromARGB(255, 1, 2, 3);
-      final ThemeData lightTheme = ThemeData.light();
+      final ThemeData lightTheme = ThemeData();
       await tester.pumpWidget(
         MaterialApp(
           theme: lightTheme.copyWith(

@@ -137,7 +137,7 @@ class SemanticDialog extends SemanticRouteBase {
 /// Setting this role will also set aria-modal to true, which helps screen
 /// reader better understand this section of screen.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 ///
 /// See also:
 ///
