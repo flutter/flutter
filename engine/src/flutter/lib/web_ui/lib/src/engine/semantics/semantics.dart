@@ -2053,7 +2053,7 @@ class SemanticsObject {
   double verticalAdjustmentFromParent = 0.0;
   double horizontalAdjustmentFromParent = 0.0;
 
-  ///If this element [hasChildren], computes the parent adjustment for each child.
+  /// If this element [hasChildren], computes the parent adjustment for each child.
   bool recomputeChildrenAdjustment() {
     if (!hasChildren) {
       return false;
