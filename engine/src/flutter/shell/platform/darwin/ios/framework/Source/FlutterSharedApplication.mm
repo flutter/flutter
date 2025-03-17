@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
-
 #include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+
+FLUTTER_ASSERT_ARC
 
 @interface FlutterSharedApplication ()
 
@@ -17,13 +19,8 @@
 // The application object (such as from `UIApplication.sharedApplication`) is unavailable
 // when the framework is being used in an app extension.
 + (BOOL)isAvailable {
-  static BOOL result = NO;
-  static dispatch_once_t once_token = 0;
-  dispatch_once(&once_token, ^{
-    NSDictionary* nsExtension = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSExtension"];
-    result = ![nsExtension isKindOfClass:[NSDictionary class]];
-  });
-  return result;
+  NSDictionary* nsExtension = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSExtension"];
+  return ![nsExtension isKindOfClass:[NSDictionary class]];
 }
 
 + (UIApplication*)uiApplication {
