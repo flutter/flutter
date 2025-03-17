@@ -125,13 +125,6 @@ class SemanticMenuBar extends SemanticRole {
     final String attributeValue = ids.map((id) => 'flt-semantic-node-$id').join(' ');
     setAttribute('aria-owns', attributeValue);
   }
-
-  @override
-  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
-}
-
-/// Indicates a menu item element.
-///
 /// Uses aria menuitem role to convey this semantic information to the element.
 ///
 /// Screen-readers takes advantage of "aria-label" to describe the visual.
