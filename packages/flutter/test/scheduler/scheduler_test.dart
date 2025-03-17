@@ -45,7 +45,13 @@ class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBi
     PlatformDispatcher.instance
       ..onBeginFrame = null
       ..onDrawFrame = null;
-    ensureFrameCallbacksRegistered();
+  }
+
+  @override
+  void ensureFrameCallbacksRegistered() {
+    // The override is needed because the super implementation is annotated with
+    // @protected.
+    super.ensureFrameCallbacksRegistered();
   }
 }
 
@@ -304,6 +310,7 @@ void main() {
 
     warmUpBeginFrame();
 
+    scheduler.ensureFrameCallbacksRegistered();
     // Simulate an animation frame firing between warm-up begin frame and warm-up draw frame.
     // Expect a timer that reschedules the frame.
     expect(scheduler.hasScheduledFrame, isFalse);
