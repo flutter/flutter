@@ -597,14 +597,12 @@ $newContent
     ParsedProjectInfo projectInfo, {
     bool logErrorIfNotMigrated = false,
   }) {
-    final bool migrated =
-        projectInfo.nativeTargets
-            .where(
-              (ParsedNativeTarget target) =>
-                  target.productType == _kNativeTargetApplicationProductType &&
-                  _isNativeApplicationTargetMigrated(target),
-            )
-            .isNotEmpty;
+    final bool migrated = projectInfo.nativeTargets
+        .where(
+          (ParsedNativeTarget target) => target.productType == _kNativeTargetApplicationProductType,
+        )
+        .every(_isNativeApplicationTargetMigrated);
+
     if (logErrorIfNotMigrated && !migrated) {
       logger.printError('Some PBXNativeTargets were not migrated or were migrated incorrectly.');
     }
@@ -661,7 +659,7 @@ $newContent
   }
 
   List<String> _migrateNativeApplicationTargets(List<String> lines, ParsedProjectInfo projectInfo) {
-    if (_areNativeApplicationTargetsMigrated(projectInfo)) {
+    if (projectInfo.nativeTargets.isNotEmpty && _areNativeApplicationTargetsMigrated(projectInfo)) {
       logger.printTrace('PBXNativeTargets already migrated. Skipping...');
       return lines;
     }
