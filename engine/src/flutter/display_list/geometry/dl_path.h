@@ -33,6 +33,7 @@ using DlPathBuilder = impeller::PathBuilder;
 /// original path does not contain such info.
 class DlPathReceiver {
  public:
+  virtual ~DlPathReceiver() = default;
   virtual void RecommendSizes(size_t verb_count, size_t point_count) {};
   virtual void RecommendBounds(const DlRect& bounds) {};
   virtual void SetPathInfo(DlPathFillType fill_type, bool is_convex) = 0;

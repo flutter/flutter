@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/geometry/dl_path.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "flutter/third_party/skia/include/core/SkRRect.h"
@@ -554,184 +556,33 @@ TEST(DisplayListPath, ConstructFromImpellerEqualsConstructFromSkia) {
 }
 
 namespace {
-class TestPathElement {
+class DlPathReceiverMock : public DlPathReceiver {
  public:
-  enum class Type {
-    kMoveTo,
-    kLineTo,
-    kQuadTo,
-    kConicTo,
-    kCubicTo,
-    kClose,
-  };
-
-  static TestPathElement MoveTo(const DlPoint& p) {
-    return {
-        .type = Type::kMoveTo,
-        .p1 = p,
-    };
-  }
-  static TestPathElement LineTo(const DlPoint& p) {
-    return {
-        .type = Type::kLineTo,
-        .p1 = p,
-    };
-  }
-  static TestPathElement QuadTo(const DlPoint& cp, const DlPoint& p2) {
-    return {
-        .type = Type::kQuadTo,
-        .p1 = cp,
-        .p2 = p2,
-    };
-  }
-  static TestPathElement ConicTo(const DlPoint& cp,
-                                 const DlPoint& p2,
-                                 DlScalar w) {
-    return {
-        .type = Type::kConicTo,
-        .p1 = cp,
-        .p2 = p2,
-        .weight = w,
-    };
-  }
-  static TestPathElement CubicTo(const DlPoint& cp1,
-                                 const DlPoint& cp2,
-                                 const DlPoint& p2) {
-    return {
-        .type = Type::kCubicTo,
-        .p1 = cp1,
-        .p2 = cp2,
-        .p3 = p2,
-    };
-  }
-  static TestPathElement Close() { return {.type = Type::kClose}; }
-
-  const Type type;
-  const DlPoint p1;
-  const DlPoint p2;
-  const DlPoint p3;
-  const DlScalar weight;
+  MOCK_METHOD(void,
+              RecommendSizes,
+              (size_t verb_count, size_t point_count),
+              (override));
+  MOCK_METHOD(void, RecommendBounds, (const DlRect& bounds), (override));
+  MOCK_METHOD(void,
+              SetPathInfo,
+              (DlPathFillType fill_type, bool is_convex),
+              (override));
+  MOCK_METHOD(void, MoveTo, (const DlPoint& p2), (override));
+  MOCK_METHOD(void, LineTo, (const DlPoint& p2), (override));
+  MOCK_METHOD(void, QuadTo, (const DlPoint& cp, const DlPoint& p2), (override));
+  MOCK_METHOD(bool,
+              ConicTo,
+              (const DlPoint& cp, const DlPoint& p2, DlScalar weight),
+              (override));
+  MOCK_METHOD(void,
+              CubicTo,
+              (const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2),
+              (override));
+  MOCK_METHOD(void, Close, (), (override));
 };
 
-class TestPathReceiver : public DlPathReceiver {
- public:
-  TestPathReceiver(DlPathFillType expected_fill_type,
-                   size_t expected_verb_count,
-                   size_t expected_point_count,
-                   std::optional<DlRect> expected_bounds,
-                   std::optional<bool> expected_is_convex,
-                   std::vector<TestPathElement> expected_path_elements)
-      : expected_bounds_(expected_bounds),
-        expected_verb_count_(expected_verb_count),
-        expected_point_count_(expected_point_count),
-        expected_fill_type_(expected_fill_type),
-        expected_is_convex_(expected_is_convex),
-        expected_path_elements_(std::move(expected_path_elements)) {}
-
-  void RecommendSizes(size_t verb_count, size_t point_count) override {
-    EXPECT_EQ(path_index_, 0u);
-    EXPECT_EQ(verb_count, expected_verb_count_);
-    EXPECT_EQ(point_count, expected_point_count_);
-  }
-  void RecommendBounds(const DlRect& bounds) override {
-    EXPECT_EQ(path_index_, 0u);
-    if (expected_bounds_.has_value()) {
-      EXPECT_NEAR(bounds.GetLeft(), expected_bounds_.value().GetLeft(),
-                  kEhCloseEnough);
-      EXPECT_NEAR(bounds.GetTop(), expected_bounds_.value().GetTop(),
-                  kEhCloseEnough);
-      EXPECT_NEAR(bounds.GetRight(), expected_bounds_.value().GetRight(),
-                  kEhCloseEnough);
-      EXPECT_NEAR(bounds.GetBottom(), expected_bounds_.value().GetBottom(),
-                  kEhCloseEnough);
-    }
-  }
-  void SetPathInfo(DlPathFillType type, bool is_convex) override {
-    EXPECT_EQ(path_index_, 0u);
-    EXPECT_FALSE(set_path_info_called_);
-    EXPECT_EQ(type, expected_fill_type_);
-    if (expected_is_convex_.has_value()) {
-      EXPECT_EQ(is_convex, expected_is_convex_.value());
-    }
-    set_path_info_called_ = true;
-  }
-  void MoveTo(const DlPoint& p) override {
-    if (const TestPathElement* element = GetElement()) {
-      EXPECT_EQ(element->type, TestPathElement::Type::kMoveTo) << label();
-      EXPECT_EQ(element->p1, p) << label();
-      path_index_++;
-    }
-  }
-  void LineTo(const DlPoint& p) override {
-    if (const TestPathElement* element = GetElement()) {
-      EXPECT_EQ(element->type, TestPathElement::Type::kLineTo) << label();
-      EXPECT_EQ(element->p1, p) << label();
-      path_index_++;
-    }
-  }
-  void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
-    if (const TestPathElement* element = GetElement()) {
-      EXPECT_EQ(element->type, TestPathElement::Type::kQuadTo) << label();
-      EXPECT_EQ(element->p1, cp) << label();
-      EXPECT_EQ(element->p2, p2) << label();
-      path_index_++;
-    }
-  }
-  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar w) override {
-    if (const TestPathElement* element = GetElement()) {
-      EXPECT_EQ(element->type, TestPathElement::Type::kConicTo) << label();
-      EXPECT_EQ(element->p1, cp) << label();
-      EXPECT_EQ(element->p2, p2) << label();
-      EXPECT_EQ(element->weight, w) << label();
-      path_index_++;
-    }
-    return true;
-  }
-  void CubicTo(const DlPoint& cp1,
-               const DlPoint& cp2,
-               const DlPoint& p2) override {
-    if (const TestPathElement* element = GetElement()) {
-      EXPECT_EQ(element->type, TestPathElement::Type::kCubicTo) << label();
-      EXPECT_EQ(element->p1, cp1) << label();
-      EXPECT_EQ(element->p2, cp2) << label();
-      EXPECT_EQ(element->p3, p2) << label();
-      path_index_++;
-    }
-  }
-  void Close() override {
-    if (const TestPathElement* element = GetElement()) {
-      EXPECT_EQ(element->type, TestPathElement::Type::kClose) << label();
-      path_index_++;
-    }
-  }
-
-  void CheckComplete() {
-    EXPECT_TRUE(set_path_info_called_);
-    EXPECT_EQ(path_index_, expected_path_elements_.size());
-  }
-
- private:
-  const std::optional<DlRect> expected_bounds_;
-  const size_t expected_verb_count_;
-  const size_t expected_point_count_;
-  const DlPathFillType expected_fill_type_;
-  const std::optional<bool> expected_is_convex_;
-  const std::vector<TestPathElement> expected_path_elements_;
-
-  size_t path_index_ = 0u;
-  bool set_path_info_called_ = false;
-
-  const TestPathElement* GetElement() {
-    if (path_index_ < expected_path_elements_.size()) {
-      return &expected_path_elements_[path_index_];
-    } else {
-      EXPECT_LT(path_index_, expected_path_elements_.size()) << label();
-      return nullptr;
-    }
-  }
-
-  std::string label() { return "at index " + std::to_string(path_index_); }
-};
+using ::testing::AtMost;
+using ::testing::Return;
 }  // namespace
 
 TEST(DisplayListPath, DispatchSkiaPathEvenOdd) {
@@ -745,26 +596,37 @@ TEST(DisplayListPath, DispatchSkiaPathEvenOdd) {
   path.cubicTo(300, 300, 350, 300, 300, 350);
   path.close();
 
-  TestPathReceiver receiver(
-      /* expected_fill_type   = */ DlPathFillType::kOdd,
-      /* expected_verb_count  = */ 6u,
-      /* expected_point_count = */ 9u,
-      /* expected_bounds      = */ DlRect::MakeLTRB(100, 140, 350, 350),
-      /* expected_is_convex   = */ false,
-      std::vector<TestPathElement>{
-          TestPathElement::MoveTo(DlPoint(100, 200)),
-          TestPathElement::LineTo(DlPoint(101, 201)),
-          TestPathElement::QuadTo(DlPoint(110, 202), DlPoint(102, 210)),
-          TestPathElement::ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f),
-          TestPathElement::CubicTo(DlPoint(300, 300), DlPoint(350, 300),
-                                   DlPoint(300, 350)),
-          // Closing LineTo added implicitly to return to first point
-          TestPathElement::LineTo(DlPoint(100, 200)),
-          TestPathElement::Close(),
-      });
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
 
-  DlPath(path).Dispatch(receiver);
-  receiver.CheckComplete();
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                  //
+      EXPECT_CALL(mock_receiver, RecommendSizes(6u, 9u))  //
+          .Times(AtMost(1));
+  all_recommendations +=
+      EXPECT_CALL(mock_receiver,
+                  RecommendBounds(DlRect::MakeLTRB(100, 140, 350, 350)))
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kOdd, false));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(101, 201)));
+    EXPECT_CALL(mock_receiver, QuadTo(DlPoint(110, 202), DlPoint(102, 210)));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, CubicTo(DlPoint(300, 300), DlPoint(350, 300),
+                                       DlPoint(300, 350)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  DlPath(path).Dispatch(mock_receiver);
 }
 
 TEST(DisplayListPath, DispatchSkiaPathNonZero) {
@@ -778,26 +640,37 @@ TEST(DisplayListPath, DispatchSkiaPathNonZero) {
   path.cubicTo(300, 300, 350, 300, 300, 350);
   path.close();
 
-  TestPathReceiver receiver(
-      /* expected_fill_type   = */ DlPathFillType::kNonZero,
-      /* expected_verb_count  = */ 6u,
-      /* expected_point_count = */ 9u,
-      /* expected_bounds      = */ DlRect::MakeLTRB(100, 140, 350, 350),
-      /* expected_is_convex   = */ false,
-      std::vector<TestPathElement>{
-          TestPathElement::MoveTo(DlPoint(100, 200)),
-          TestPathElement::LineTo(DlPoint(101, 201)),
-          TestPathElement::QuadTo(DlPoint(110, 202), DlPoint(102, 210)),
-          TestPathElement::ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f),
-          TestPathElement::CubicTo(DlPoint(300, 300), DlPoint(350, 300),
-                                   DlPoint(300, 350)),
-          // Closing LineTo added implicitly to return to first point
-          TestPathElement::LineTo(DlPoint(100, 200)),
-          TestPathElement::Close(),
-      });
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
 
-  DlPath(path).Dispatch(receiver);
-  receiver.CheckComplete();
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                  //
+      EXPECT_CALL(mock_receiver, RecommendSizes(6u, 9u))  //
+          .Times(AtMost(1));
+  all_recommendations +=  //
+      EXPECT_CALL(mock_receiver,
+                  RecommendBounds(DlRect::MakeLTRB(100, 140, 350, 350)))
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, false));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(101, 201)));
+    EXPECT_CALL(mock_receiver, QuadTo(DlPoint(110, 202), DlPoint(102, 210)));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, CubicTo(DlPoint(300, 300), DlPoint(350, 300),
+                                       DlPoint(300, 350)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  DlPath(path).Dispatch(mock_receiver);
 }
 
 TEST(DisplayListPath, DispatchSkiaPathConvex) {
@@ -810,23 +683,32 @@ TEST(DisplayListPath, DispatchSkiaPathConvex) {
   path.lineTo(100, 300);
   path.close();
 
-  TestPathReceiver receiver(
-      /* expected_fill_type   = */ DlPathFillType::kNonZero,
-      /* expected_verb_count  = */ 4u,
-      /* expected_point_count = */ 3u,
-      /* expected_bounds      = */ DlRect::MakeLTRB(100, 200, 200, 300),
-      /* expected_is_convex   = */ true,
-      std::vector<TestPathElement>{
-          TestPathElement::MoveTo(DlPoint(100, 200)),
-          TestPathElement::LineTo(DlPoint(200, 200)),
-          TestPathElement::LineTo(DlPoint(100, 300)),
-          // Closing LineTo added implicitly to return to first point
-          TestPathElement::LineTo(DlPoint(100, 200)),
-          TestPathElement::Close(),
-      });
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
 
-  DlPath(path).Dispatch(receiver);
-  receiver.CheckComplete();
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                  //
+      EXPECT_CALL(mock_receiver, RecommendSizes(4u, 3u))  //
+          .Times(AtMost(1));
+  all_recommendations +=  //
+      EXPECT_CALL(mock_receiver,
+                  RecommendBounds(DlRect::MakeLTRB(100, 200, 200, 300)))
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, true));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(200, 200)));
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 300)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  DlPath(path).Dispatch(mock_receiver);
 }
 
 TEST(DisplayListPath, DispatchImpellerPathEvenOdd) {
@@ -840,26 +722,41 @@ TEST(DisplayListPath, DispatchImpellerPathEvenOdd) {
                             DlPoint(300, 350));
   path_builder.Close();
 
-  TestPathReceiver receiver(
-      /* expected_fill_type   = */ DlPathFillType::kOdd,
-      /* expected_verb_count  = */ 7u,
-      /* expected_point_count = */ 19u,
-      /* expected_bounds      = */ DlRect::MakeLTRB(100, 140, 320.711, 350),
-      /* expected_is_convex   = */ false,
-      std::vector<TestPathElement>{
-          TestPathElement::MoveTo(DlPoint(100, 200)),
-          TestPathElement::LineTo(DlPoint(101, 201)),
-          TestPathElement::QuadTo(DlPoint(110, 202), DlPoint(102, 210)),
-          TestPathElement::ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f),
-          TestPathElement::CubicTo(DlPoint(300, 300), DlPoint(350, 300),
-                                   DlPoint(300, 350)),
-          // Closing LineTo added implicitly to return to first point
-          TestPathElement::LineTo(DlPoint(100, 200)),
-          TestPathElement::Close(),
-      });
+  DlPath path(path_builder, DlPathFillType::kOdd);
+  // Impeller computes tight bounds so it is difficult to hard-code the
+  // answer for the bounds of the above path...
+  auto bounds = path.GetBounds();
 
-  DlPath(path_builder, DlPathFillType::kOdd).Dispatch(receiver);
-  receiver.CheckComplete();
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendSizes(7u, 19u))  //
+          .Times(AtMost(1));
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendBounds(bounds))  //
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kOdd, false));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(101, 201)));
+    EXPECT_CALL(mock_receiver, QuadTo(DlPoint(110, 202), DlPoint(102, 210)));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, CubicTo(DlPoint(300, 300), DlPoint(350, 300),
+                                       DlPoint(300, 350)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  path.Dispatch(mock_receiver);
 }
 
 TEST(DisplayListPath, DispatchImpellerPathNonZero) {
@@ -873,26 +770,41 @@ TEST(DisplayListPath, DispatchImpellerPathNonZero) {
                             DlPoint(300, 350));
   path_builder.Close();
 
-  TestPathReceiver receiver(
-      /* expected_fill_type   = */ DlPathFillType::kNonZero,
-      /* expected_verb_count  = */ 7u,
-      /* expected_point_count = */ 19u,
-      /* expected_bounds      = */ DlRect::MakeLTRB(100, 140, 320.711, 350),
-      /* expected_is_convex   = */ false,
-      std::vector<TestPathElement>{
-          TestPathElement::MoveTo(DlPoint(100, 200)),
-          TestPathElement::LineTo(DlPoint(101, 201)),
-          TestPathElement::QuadTo(DlPoint(110, 202), DlPoint(102, 210)),
-          TestPathElement::ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f),
-          TestPathElement::CubicTo(DlPoint(300, 300), DlPoint(350, 300),
-                                   DlPoint(300, 350)),
-          // Closing LineTo added implicitly to return to first point
-          TestPathElement::LineTo(DlPoint(100, 200)),
-          TestPathElement::Close(),
-      });
+  DlPath path(path_builder, DlPathFillType::kNonZero);
+  // Impeller computes tight bounds so it is difficult to hard-code the
+  // answer for the bounds of the above path...
+  auto bounds = path.GetBounds();
 
-  DlPath(path_builder, DlPathFillType::kNonZero).Dispatch(receiver);
-  receiver.CheckComplete();
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendSizes(7u, 19u))  //
+          .Times(AtMost(1));
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendBounds(bounds))  //
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, false));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(101, 201)));
+    EXPECT_CALL(mock_receiver, QuadTo(DlPoint(110, 202), DlPoint(102, 210)));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, CubicTo(DlPoint(300, 300), DlPoint(350, 300),
+                                       DlPoint(300, 350)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  path.Dispatch(mock_receiver);
 }
 
 TEST(DisplayListPath, DispatchImpellerPathConvexUnspecified) {
@@ -904,23 +816,34 @@ TEST(DisplayListPath, DispatchImpellerPathConvexUnspecified) {
   path_builder.LineTo(DlPoint(100, 300));
   path_builder.Close();
 
-  TestPathReceiver receiver(
-      /* expected_fill_type   = */ DlPathFillType::kNonZero,
-      /* expected_verb_count  = */ 5u,
-      /* expected_point_count = */ 10u,
-      /* expected_bounds      = */ DlRect::MakeLTRB(100, 200, 200, 300),
-      /* expected_is_convex   = */ false,  // Conservatively false by default
-      std::vector<TestPathElement>{
-          TestPathElement::MoveTo(DlPoint(100, 200)),
-          TestPathElement::LineTo(DlPoint(200, 200)),
-          TestPathElement::LineTo(DlPoint(100, 300)),
-          // Closing LineTo added implicitly to return to first point
-          TestPathElement::LineTo(DlPoint(100, 200)),
-          TestPathElement::Close(),
-      });
+  DlPath path(path_builder, DlPathFillType::kNonZero);
 
-  DlPath(path_builder, DlPathFillType::kNonZero).Dispatch(receiver);
-  receiver.CheckComplete();
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendSizes(5u, 10u))  //
+          .Times(AtMost(1));
+  all_recommendations +=  //
+      EXPECT_CALL(mock_receiver,
+                  RecommendBounds(DlRect::MakeLTRB(100, 200, 200, 300)))
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, false));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(200, 200)));
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 300)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  path.Dispatch(mock_receiver);
 }
 
 TEST(DisplayListPath, DispatchImpellerPathConvexSpecified) {
@@ -933,23 +856,34 @@ TEST(DisplayListPath, DispatchImpellerPathConvexSpecified) {
   path_builder.Close();
   path_builder.SetConvexity(impeller::Convexity::kConvex);
 
-  TestPathReceiver receiver(
-      /* expected_fill_type   = */ DlPathFillType::kNonZero,
-      /* expected_verb_count  = */ 5u,
-      /* expected_point_count = */ 10u,
-      /* expected_bounds      = */ DlRect::MakeLTRB(100, 200, 200, 300),
-      /* expected_is_convex   = */ true,  // Set manually above
-      std::vector<TestPathElement>{
-          TestPathElement::MoveTo(DlPoint(100, 200)),
-          TestPathElement::LineTo(DlPoint(200, 200)),
-          TestPathElement::LineTo(DlPoint(100, 300)),
-          // Closing LineTo added implicitly to return to first point
-          TestPathElement::LineTo(DlPoint(100, 200)),
-          TestPathElement::Close(),
-      });
+  DlPath path(path_builder, DlPathFillType::kNonZero);
 
-  DlPath(path_builder, DlPathFillType::kNonZero).Dispatch(receiver);
-  receiver.CheckComplete();
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendSizes(5u, 10u))  //
+          .Times(AtMost(1));
+  all_recommendations +=  //
+      EXPECT_CALL(mock_receiver,
+                  RecommendBounds(DlRect::MakeLTRB(100, 200, 200, 300)))
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, true));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(200, 200)));
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 300)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  path.Dispatch(mock_receiver);
 }
 
 #ifndef NDEBUG
