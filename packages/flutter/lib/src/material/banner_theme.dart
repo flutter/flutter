@@ -171,7 +171,7 @@ class MaterialBannerThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [MaterialBanner] properties that are not
 /// given an explicit non-null value.
-class MaterialBannerTheme extends InheritedTheme {
+class MaterialBannerTheme extends InheritedTheme<MaterialBannerThemeData, Object?> {
   /// Creates a banner theme that controls the configurations for
   /// [MaterialBanner]s in its widget subtree.
   const MaterialBannerTheme({super.key, this.data, required super.child});
@@ -203,4 +203,19 @@ class MaterialBannerTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(MaterialBannerTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    MaterialBannerTheme oldWidget,
+    Set<ThemeSelector<MaterialBannerThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<MaterialBannerThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = oldWidget.data == null ? null : selector.select(oldWidget.data!);
+      final Object? newValue = data == null ? null : selector.select(data!);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

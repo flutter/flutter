@@ -134,7 +134,7 @@ class CupertinoTheme extends StatelessWidget {
 }
 
 /// Provides a [CupertinoTheme] to all descendents.
-class InheritedCupertinoTheme extends InheritedTheme {
+class InheritedCupertinoTheme extends InheritedTheme<CupertinoThemeData, Object?> {
   /// Creates an [InheritedTheme] that provides a [CupertinoTheme] to all
   /// descendents.
   const InheritedCupertinoTheme({super.key, required this.theme, required super.child});
@@ -149,6 +149,21 @@ class InheritedCupertinoTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(InheritedCupertinoTheme oldWidget) => theme.data != oldWidget.theme.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    InheritedCupertinoTheme oldWidget,
+    Set<ThemeSelector<CupertinoThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<CupertinoThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.theme.data);
+      final Object? newValue = selector.select(theme.data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 /// Styling specifications for a [CupertinoTheme].

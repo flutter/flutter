@@ -100,7 +100,7 @@ class SegmentedButtonThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [SegmentedButton] properties that are not
 /// given an explicit non-null value.
-class SegmentedButtonTheme extends InheritedTheme {
+class SegmentedButtonTheme extends InheritedTheme<SegmentedButtonThemeData, Object?> {
   /// Creates a [SegmentedButtonTheme] that controls visual parameters for
   /// descendent [SegmentedButton]s.
   const SegmentedButtonTheme({super.key, required this.data, required super.child});
@@ -164,4 +164,19 @@ class SegmentedButtonTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(SegmentedButtonTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    SegmentedButtonTheme oldWidget,
+    Set<ThemeSelector<SegmentedButtonThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<SegmentedButtonThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

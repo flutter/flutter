@@ -234,7 +234,7 @@ class NavigationDrawerThemeData with Diagnosticable {
 ///
 ///  * [ThemeData.navigationDrawerTheme], which describes the
 ///    [NavigationDrawerThemeData] in the overall theme for the application.
-class NavigationDrawerTheme extends InheritedTheme {
+class NavigationDrawerTheme extends InheritedTheme<NavigationDrawerThemeData, Object?> {
   /// Creates a navigation rail theme that controls the
   /// [NavigationDrawerThemeData] properties for a [NavigationDrawer].
   const NavigationDrawerTheme({super.key, required this.data, required super.child});
@@ -260,4 +260,19 @@ class NavigationDrawerTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(NavigationDrawerTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    NavigationDrawerTheme oldWidget,
+    Set<ThemeSelector<NavigationDrawerThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<NavigationDrawerThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

@@ -88,7 +88,7 @@ class IconButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [IconButton]'s defaults.
 ///  * [ThemeData.iconButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [IconButton]s below the overall [Theme].
-class IconButtonTheme extends InheritedTheme {
+class IconButtonTheme extends InheritedTheme<IconButtonThemeData, Object?> {
   /// Create a [IconButtonTheme].
   const IconButtonTheme({super.key, required this.data, required super.child});
 
@@ -118,4 +118,19 @@ class IconButtonTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(IconButtonTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    IconButtonTheme oldWidget,
+    Set<ThemeSelector<IconButtonThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<IconButtonThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

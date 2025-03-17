@@ -270,7 +270,7 @@ class NavigationBarThemeData with Diagnosticable {
 ///
 ///  * [ThemeData.navigationBarTheme], which describes the
 ///    [NavigationBarThemeData] in the overall theme for the application.
-class NavigationBarTheme extends InheritedTheme {
+class NavigationBarTheme extends InheritedTheme<NavigationBarThemeData, Object?> {
   /// Creates a navigation rail theme that controls the
   /// [NavigationBarThemeData] properties for a [NavigationBar].
   const NavigationBarTheme({super.key, required this.data, required super.child});
@@ -302,4 +302,19 @@ class NavigationBarTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(NavigationBarTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    NavigationBarTheme oldWidget,
+    Set<ThemeSelector<NavigationBarThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<NavigationBarThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

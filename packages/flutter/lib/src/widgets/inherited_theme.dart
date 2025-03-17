@@ -6,6 +6,18 @@
 library;
 
 import 'framework.dart';
+import 'inherited_model.dart';
+
+/// A generic selector interface for theme data.
+///
+/// This interface allows for selecting specific aspects of theme data without
+/// coupling to specific theme implementations like Material or Cupertino.
+abstract interface class ThemeSelector<T, V> {
+  /// Selects a value of type [T] from the theme data.
+  ///
+  /// The actual theme data type is determined by the implementation.
+  V select(T themeData);
+}
 
 // Examples can assume:
 // TooltipThemeData data = const TooltipThemeData();
@@ -33,7 +45,7 @@ import 'framework.dart';
 ///
 /// ** See code in examples/api/lib/widgets/inherited_theme/inherited_theme.0.dart **
 /// {@end-tool}
-abstract class InheritedTheme extends InheritedWidget {
+abstract class InheritedTheme<T, V> extends InheritedModel<ThemeSelector<T, V>> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
 
@@ -87,10 +99,10 @@ abstract class InheritedTheme extends InheritedWidget {
   static CapturedThemes capture({required BuildContext from, required BuildContext? to}) {
     if (from == to) {
       // Nothing to capture.
-      return CapturedThemes._(const <InheritedTheme>[]);
+      return CapturedThemes._(const <InheritedTheme<dynamic, dynamic>>[]);
     }
 
-    final List<InheritedTheme> themes = <InheritedTheme>[];
+    final List<InheritedTheme<dynamic, dynamic>> themes = <InheritedTheme<dynamic, dynamic>>[];
     final Set<Type> themeTypes = <Type>{};
     late bool debugDidFindAncestor;
     assert(() {
@@ -105,7 +117,7 @@ abstract class InheritedTheme extends InheritedWidget {
         }());
         return false;
       }
-      if (ancestor case InheritedElement(widget: final InheritedTheme theme)) {
+      if (ancestor case InheritedElement(widget: final InheritedTheme<dynamic, dynamic> theme)) {
         final Type themeType = theme.runtimeType;
         // Only remember the first theme of any type. This assumes
         // that inherited themes completely shadow ancestors of the
@@ -133,7 +145,7 @@ abstract class InheritedTheme extends InheritedWidget {
 class CapturedThemes {
   CapturedThemes._(this._themes);
 
-  final List<InheritedTheme> _themes;
+  final List<InheritedTheme<dynamic, dynamic>> _themes;
 
   /// Wraps a `child` [Widget] in the [InheritedTheme]s captured in this object.
   Widget wrap(Widget child) {
@@ -144,13 +156,13 @@ class CapturedThemes {
 class _CaptureAll extends StatelessWidget {
   const _CaptureAll({required this.themes, required this.child});
 
-  final List<InheritedTheme> themes;
+  final List<InheritedTheme<dynamic, dynamic>> themes;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     Widget wrappedChild = child;
-    for (final InheritedTheme theme in themes) {
+    for (final InheritedTheme<dynamic, dynamic> theme in themes) {
       wrappedChild = theme.wrap(context, wrappedChild);
     }
     return wrappedChild;

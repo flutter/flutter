@@ -110,7 +110,7 @@ class DropdownMenuThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [DropdownMenu] properties that are not
 /// given an explicit non-null value.
-class DropdownMenuTheme extends InheritedTheme {
+class DropdownMenuTheme extends InheritedTheme<DropdownMenuThemeData, Object?> {
   /// Creates a [DropdownMenuTheme] that controls visual parameters for
   /// descendant [DropdownMenu]s.
   const DropdownMenuTheme({super.key, required this.data, required super.child});
@@ -173,4 +173,19 @@ class DropdownMenuTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(DropdownMenuTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    DropdownMenuTheme oldWidget,
+    Set<ThemeSelector<DropdownMenuThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<DropdownMenuThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
