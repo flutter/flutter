@@ -993,27 +993,66 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 
   ThemeData _themeBuilder(BuildContext context) {
-    ThemeData? theme;
-    // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
     final bool useDarkTheme =
         mode == ThemeMode.dark ||
         (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
     final bool highContrast = MediaQuery.highContrastOf(context);
-    if (useDarkTheme && highContrast && widget.highContrastDarkTheme != null) {
-      theme = widget.highContrastDarkTheme;
-    } else if (useDarkTheme && widget.darkTheme != null) {
-      theme = widget.darkTheme;
-    } else if (highContrast && widget.highContrastTheme != null) {
-      theme = widget.highContrastTheme;
-    }
-    theme ??= widget.theme ?? ThemeData.light();
+
+    final ThemeData theme = _buildThemeForMode(
+      useDarkTheme: useDarkTheme,
+      highContrast: highContrast,
+    );
+
     SystemChrome.setSystemUIOverlayStyle(
       theme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
     );
 
     return theme;
+  }
+
+  ThemeData _buildThemeForMode({required bool useDarkTheme, required bool highContrast}) {
+    // First step is to pick the appropriate theme property based on this matrix:
+    //
+    // +-------------------+--------------------------+------------------------------+
+    // |                   | Light                    | Dark                         |
+    // +-------------------+--------------------------+------------------------------+
+    // | High contrast OFF | widget.theme             | widget.darkTheme             |
+    // |                   |                          |                              |
+    // | High contrast ON  | widget.highContrastTheme | widget.highContrastDarkTheme |
+    // +-------------------+--------------------------+------------------------------+
+    //
+    // When a high contrast theme is unavailable, the non-high-contrast theme for the same
+    // brightness is used. Example, if `highContrastDarkTheme` is null, `darkTheme` is used.
+
+    ThemeData? theme = switch ((useDarkTheme, highContrast)) {
+      ((false, false)) => widget.theme,
+      ((false, true)) => widget.highContrastTheme ?? widget.theme,
+      ((true, false)) => widget.darkTheme,
+      ((true, true)) => widget.highContrastDarkTheme ?? widget.darkTheme,
+    };
+    if (theme != null) {
+      return theme;
+    }
+
+    // If the user didn't provide a theme for the specific mode, it could be that the user didn't
+    // pay much attention to the various theme properties and just provided the `widget.theme`
+    // property.
+    theme = widget.theme;
+    if (theme != null) {
+      return theme;
+    }
+
+    // At this point, we know the user hasn't provided a theme for the current mode and didn't
+    // provide the general `widget.theme` property. Time to pick one of the default themes.
+
+    return switch ((useDarkTheme, highContrast)) {
+      ((false, false)) => ThemeData.light(),
+      ((false, true)) => ThemeData.highContrastLight(),
+      ((true, false)) => ThemeData.dark(),
+      ((true, true)) => ThemeData.highContrastDark(),
+    };
   }
 
   Widget _materialBuilder(BuildContext context, Widget? child) {

@@ -749,18 +749,18 @@ class ColorScheme with Diagnosticable {
   /// ),
   /// ```
   /// {@end-tool}
-  const ColorScheme.highContrastLight({
+  ColorScheme.highContrastLight({
     this.brightness = Brightness.light,
-    this.primary = const Color(0xff0000ba),
-    this.onPrimary = Colors.white,
+    Color? primary,
+    Color? onPrimary,
     Color? primaryContainer,
     Color? onPrimaryContainer,
     Color? primaryFixed,
     Color? primaryFixedDim,
     Color? onPrimaryFixed,
     Color? onPrimaryFixedVariant,
-    this.secondary = const Color(0xff66fff9),
-    this.onSecondary = Colors.black,
+    Color? secondary,
+    Color? onSecondary,
     Color? secondaryContainer,
     Color? onSecondaryContainer,
     Color? secondaryFixed,
@@ -779,8 +779,8 @@ class ColorScheme with Diagnosticable {
     this.onError = Colors.white,
     Color? errorContainer,
     Color? onErrorContainer,
-    this.surface = Colors.white,
-    this.onSurface = Colors.black,
+    Color? surface,
+    Color? onSurface,
     Color? surfaceDim,
     Color? surfaceBright,
     Color? surfaceContainerLowest,
@@ -812,12 +812,17 @@ class ColorScheme with Diagnosticable {
       'This feature was deprecated after v3.18.0-0.1.pre.',
     )
     Color? surfaceVariant,
-  }) : _primaryContainer = primaryContainer,
+  }) : primary = _lightSystemPalette?.canvasText.value ?? primary ?? const Color(0xff0000ba),
+       onPrimary = _lightSystemPalette?.canvas.value ?? onPrimary ?? Colors.white,
+       _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _primaryFixed = primaryFixed,
        _primaryFixedDim = primaryFixedDim,
        _onPrimaryFixed = onPrimaryFixed,
        _onPrimaryFixedVariant = onPrimaryFixedVariant,
+       secondary =
+           _lightSystemPalette?.accentColorText.value ?? secondary ?? const Color(0xff66fff9),
+       onSecondary = _lightSystemPalette?.accentColor.value ?? onSecondary ?? Colors.black,
        _secondaryContainer = secondaryContainer,
        _onSecondaryContainer = onSecondaryContainer,
        _secondaryFixed = secondaryFixed,
@@ -834,6 +839,8 @@ class ColorScheme with Diagnosticable {
        _onTertiaryFixedVariant = onTertiaryFixedVariant,
        _errorContainer = errorContainer,
        _onErrorContainer = onErrorContainer,
+       surface = _lightSystemPalette?.canvas.value ?? surface ?? Colors.white,
+       onSurface = _lightSystemPalette?.canvasText.value ?? onSurface ?? Colors.black,
        _surfaceDim = surfaceDim,
        _surfaceBright = surfaceBright,
        _surfaceContainerLowest = surfaceContainerLowest,
@@ -884,18 +891,18 @@ class ColorScheme with Diagnosticable {
   /// ),
   /// ```
   /// {@end-tool}
-  const ColorScheme.highContrastDark({
+  ColorScheme.highContrastDark({
     this.brightness = Brightness.dark,
-    this.primary = const Color(0xffefb7ff),
-    this.onPrimary = Colors.black,
+    Color? primary,
+    Color? onPrimary,
     Color? primaryContainer,
     Color? onPrimaryContainer,
     Color? primaryFixed,
     Color? primaryFixedDim,
     Color? onPrimaryFixed,
     Color? onPrimaryFixedVariant,
-    this.secondary = const Color(0xff66fff9),
-    this.onSecondary = Colors.black,
+    Color? secondary,
+    Color? onSecondary,
     Color? secondaryContainer,
     Color? onSecondaryContainer,
     Color? secondaryFixed,
@@ -914,8 +921,8 @@ class ColorScheme with Diagnosticable {
     this.onError = Colors.black,
     Color? errorContainer,
     Color? onErrorContainer,
-    this.surface = const Color(0xff121212),
-    this.onSurface = Colors.white,
+    Color? surface,
+    Color? onSurface,
     Color? surfaceDim,
     Color? surfaceBright,
     Color? surfaceContainerLowest,
@@ -947,12 +954,17 @@ class ColorScheme with Diagnosticable {
       'This feature was deprecated after v3.18.0-0.1.pre.',
     )
     Color? surfaceVariant,
-  }) : _primaryContainer = primaryContainer,
+  }) : primary = _darkSystemPalette?.canvasText.value ?? primary ?? const Color(0xffefb7ff),
+       onPrimary = _darkSystemPalette?.canvas.value ?? onPrimary ?? Colors.black,
+       _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _primaryFixed = primaryFixed,
        _primaryFixedDim = primaryFixedDim,
        _onPrimaryFixed = onPrimaryFixed,
        _onPrimaryFixedVariant = onPrimaryFixedVariant,
+       secondary =
+           _darkSystemPalette?.accentColorText.value ?? secondary ?? const Color(0xff66fff9),
+       onSecondary = _darkSystemPalette?.accentColor.value ?? onSecondary ?? Colors.black,
        _secondaryContainer = secondaryContainer,
        _onSecondaryContainer = onSecondaryContainer,
        _secondaryFixed = secondaryFixed,
@@ -969,6 +981,8 @@ class ColorScheme with Diagnosticable {
        _onTertiaryFixedVariant = onTertiaryFixedVariant,
        _errorContainer = errorContainer,
        _onErrorContainer = onErrorContainer,
+       surface = _darkSystemPalette?.canvas.value ?? surface ?? const Color(0xff121212),
+       onSurface = _darkSystemPalette?.canvasText.value ?? onSurface ?? Colors.white,
        _surfaceDim = surfaceDim,
        _surfaceBright = surfaceBright,
        _surfaceContainerLowest = surfaceContainerLowest,
@@ -989,93 +1003,6 @@ class ColorScheme with Diagnosticable {
        _background = background,
        _onBackground = onBackground,
        _surfaceVariant = surfaceVariant;
-
-  static ui.PlatformDispatcher get _platformDispatcher =>
-      WidgetsBinding.instance.platformDispatcher;
-
-  factory ColorScheme.systemColorsLight({
-    Color? primary,
-    Color? onPrimary,
-    Color? secondary,
-    Color? onSecondary,
-    Color? error,
-    Color? onError,
-    Color? surface,
-    Color? onSurface,
-  }) => ColorScheme._systemColors(
-    ui.SystemColor.light,
-    primary: primary,
-    onPrimary: onPrimary,
-    secondary: secondary,
-    onSecondary: onSecondary,
-    error: error,
-    onError: onError,
-    surface: surface,
-    onSurface: onSurface,
-  );
-
-  factory ColorScheme.systemColorsDark({
-    Color? primary,
-    Color? onPrimary,
-    Color? secondary,
-    Color? onSecondary,
-    Color? error,
-    Color? onError,
-    Color? surface,
-    Color? onSurface,
-  }) => ColorScheme._systemColors(
-    ui.SystemColor.dark,
-    primary: primary,
-    onPrimary: onPrimary,
-    secondary: secondary,
-    onSecondary: onSecondary,
-    error: error,
-    onError: onError,
-    surface: surface,
-    onSurface: onSurface,
-  );
-
-  factory ColorScheme._systemColors(
-    ui.SystemColorPalette systemColorPalette, {
-    Color? primary,
-    Color? onPrimary,
-    Color? secondary,
-    Color? onSecondary,
-    Color? error,
-    Color? onError,
-    Color? surface,
-    Color? onSurface,
-  }) {
-    final Color seedColor = systemColorPalette.canvasText.value!;
-
-    primary ??= systemColorPalette.canvasText.value!;
-    onPrimary ??= systemColorPalette.canvas.value!;
-    secondary ??= systemColorPalette.accentColorText.value ?? primary;
-    onSecondary ??= systemColorPalette.accentColor.value ?? onPrimary;
-    surface ??= systemColorPalette.canvas.value ?? primary;
-    onSurface ??= systemColorPalette.canvasText.value ?? onPrimary;
-
-    print('Seed color: $seedColor');
-    // print('ui.SystemColor.canvas: ${ui.SystemColor.canvas?.value}');
-    // print('ui.SystemColor.canvasText: ${ui.SystemColor.canvasText?.value}');
-    return ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: systemColorPalette.brightness,
-      dynamicSchemeVariant: DynamicSchemeVariant.content,
-      primary: primary,
-      onPrimary: onPrimary,
-      secondary: secondary,
-      onSecondary: onSecondary,
-      error:
-          error ??
-          (systemColorPalette.brightness == Brightness.dark
-              ? const Color(0xffcf6679)
-              : const Color(0xffb00020)),
-      onError: onError ?? onPrimary,
-      surface: surface,
-      onSurface: onSurface,
-    );
-  }
 
   /// Creates a color scheme from a [MaterialColor] swatch.
   ///
@@ -1115,6 +1042,12 @@ class ColorScheme with Diagnosticable {
       onBackground: primaryIsDark ? Colors.white : Colors.black,
     );
   }
+
+  static ui.SystemColorPalette? get _lightSystemPalette =>
+      ui.SystemColor.platformProvidesSystemColors ? ui.SystemColor.light : null;
+
+  static ui.SystemColorPalette? get _darkSystemPalette =>
+      ui.SystemColor.platformProvidesSystemColors ? ui.SystemColor.dark : null;
 
   static Brightness _brightnessFor(Color color) => ThemeData.estimateBrightnessForColor(color);
 

@@ -382,89 +382,100 @@ class Typography with Diagnosticable {
     );
   }
 
-  // static SystemColorPalette get _systemColorPalette => WidgetsBinding.instance.platformDispatcher.sys;
+  static TextTheme highContrastLight = _systemColors(ui.Brightness.light);
 
-  static TextTheme systemColorsLight = _systemColors(ui.SystemColor.light);
-  static TextTheme systemColorsDark = _systemColors(ui.SystemColor.dark);
+  static TextTheme highContrastDark = _systemColors(ui.Brightness.dark);
 
-  static TextTheme _systemColors(ui.SystemColorPalette systemColorPalette) => TextTheme(
-    final suffix = systemColorPalette.brightness == ui.Brightness.light ? 'light' : 'dark';
-    displayLarge: TextStyle(
-      debugLabel: 'systemColor.$suffix displayLarge',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    displayMedium: TextStyle(
-      debugLabel: 'systemColor.$suffix displayMedium',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    displaySmall: TextStyle(
-      debugLabel: 'systemColor.$suffix displaySmall',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    headlineLarge: TextStyle(
-      debugLabel: 'systemColor.$suffix headlineLarge',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    headlineMedium: TextStyle(
-      debugLabel: 'systemColor.$suffix headlineMedium',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    headlineSmall: TextStyle(
-      debugLabel: 'systemColor.$suffix headlineSmall',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    titleLarge: TextStyle(
-      debugLabel: 'systemColor.$suffix titleLarge',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    titleMedium: TextStyle(
-      debugLabel: 'systemColor.$suffix titleMedium',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    titleSmall: TextStyle(
-      debugLabel: 'systemColor.$suffix titleSmall',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    bodyLarge: TextStyle(
-      debugLabel: 'systemColor.$suffix bodyLarge',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    bodyMedium: TextStyle(
-      debugLabel: 'systemColor.$suffix bodyMedium',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    bodySmall: TextStyle(
-      debugLabel: 'systemColor.$suffix bodySmall',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    labelLarge: TextStyle(
-      debugLabel: 'systemColor.$suffix labelLarge',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    labelMedium: TextStyle(
-      debugLabel: 'systemColor.$suffix labelMedium',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-    labelSmall: TextStyle(
-      debugLabel: 'systemColor.$suffix labelSmall',
-      color: systemColorPalette.canvasText.value,
-      decoration: TextDecoration.none,
-    ),
-  );
+  static TextTheme _systemColors(ui.Brightness brightness) {
+    final String suffix = brightness.name;
+
+    final ui.SystemColorPalette? systemColorPalette =
+        ui.SystemColor.platformProvidesSystemColors
+            ? (brightness == ui.Brightness.light ? ui.SystemColor.light : ui.SystemColor.dark)
+            : null;
+
+    Color? textColor = systemColorPalette?.canvasText.value;
+    textColor ??=
+        brightness == ui.Brightness.light ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+
+    return TextTheme(
+      displayLarge: TextStyle(
+        debugLabel: 'systemColor.$suffix displayLarge',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      displayMedium: TextStyle(
+        debugLabel: 'systemColor.$suffix displayMedium',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      displaySmall: TextStyle(
+        debugLabel: 'systemColor.$suffix displaySmall',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      headlineLarge: TextStyle(
+        debugLabel: 'systemColor.$suffix headlineLarge',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      headlineMedium: TextStyle(
+        debugLabel: 'systemColor.$suffix headlineMedium',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      headlineSmall: TextStyle(
+        debugLabel: 'systemColor.$suffix headlineSmall',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      titleLarge: TextStyle(
+        debugLabel: 'systemColor.$suffix titleLarge',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      titleMedium: TextStyle(
+        debugLabel: 'systemColor.$suffix titleMedium',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      titleSmall: TextStyle(
+        debugLabel: 'systemColor.$suffix titleSmall',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      bodyLarge: TextStyle(
+        debugLabel: 'systemColor.$suffix bodyLarge',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      bodyMedium: TextStyle(
+        debugLabel: 'systemColor.$suffix bodyMedium',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      bodySmall: TextStyle(
+        debugLabel: 'systemColor.$suffix bodySmall',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      labelLarge: TextStyle(
+        debugLabel: 'systemColor.$suffix labelLarge',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      labelMedium: TextStyle(
+        debugLabel: 'systemColor.$suffix labelMedium',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+      labelSmall: TextStyle(
+        debugLabel: 'systemColor.$suffix labelSmall',
+        color: textColor,
+        decoration: TextDecoration.none,
+      ),
+    );
+  }
 
   /// A Material Design text theme with dark glyphs based on Roboto.
   ///

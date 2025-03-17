@@ -840,14 +840,14 @@ class ThemeData with Diagnosticable {
   factory ThemeData.dark({bool? useMaterial3}) =>
       ThemeData(brightness: Brightness.dark, useMaterial3: useMaterial3);
 
-  factory ThemeData.systemColorsLight() => ThemeData.from(
-    colorScheme: ColorScheme.systemColorsLight(),
-    textTheme: Typography.systemColorsLight,
+  factory ThemeData.highContrastLight() => ThemeData.from(
+    colorScheme: ColorScheme.highContrastLight(),
+    textTheme: Typography.highContrastLight,
   );
 
-  factory ThemeData.systemColorsDark() => ThemeData.from(
-    colorScheme: ColorScheme.systemColorsDark(),
-    textTheme: Typography.systemColorsDark,
+  factory ThemeData.highContrastDark() => ThemeData.from(
+    colorScheme: ColorScheme.highContrastDark(),
+    textTheme: Typography.highContrastDark,
   );
 
   /// The default color theme. Same as [ThemeData.light].
