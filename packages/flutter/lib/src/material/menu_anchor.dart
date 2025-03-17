@@ -11,6 +11,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -375,7 +376,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
         childFocusNode: widget.childFocusNode,
         overlayBuilder: _buildOverlay,
         builder: widget.builder,
-        child: widget.child,
+        child: Semantics(expanded: _menuController.isOpen, child: widget.child),
       ),
     );
 
@@ -940,7 +941,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       child = MouseRegion(onHover: _handlePointerHover, onExit: _handlePointerExit, child: child);
     }
 
-    return MergeSemantics(child: child);
+    return Semantics(role: SemanticsRole.menuItem, enabled: widget.enabled, child: child);
   }
 
   void _handleFocusChange() {
@@ -1154,44 +1155,54 @@ class CheckboxMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MenuItemButton(
-      key: key,
-      onPressed:
-          onChanged == null
-              ? null
-              : () {
-                switch (value) {
-                  case false:
-                    onChanged!(true);
-                  case true:
-                    onChanged!(tristate ? null : false);
-                  case null:
-                    onChanged!(false);
-                }
-              },
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      focusNode: focusNode,
-      style: style,
-      shortcut: shortcut,
-      statesController: statesController,
-      leadingIcon: ExcludeFocus(
-        child: IgnorePointer(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: Checkbox.width, maxWidth: Checkbox.width),
-            child: Checkbox(
-              tristate: tristate,
-              value: value,
-              onChanged: onChanged,
-              isError: isError,
+    return MergeSemantics(
+      child: Semantics(
+        role: SemanticsRole.menuItemCheckbox,
+        checked: value ?? false,
+        mixed: tristate ? value == null : null,
+        child: MenuItemButton(
+          key: key,
+          onPressed:
+              onChanged == null
+                  ? null
+                  : () {
+                    switch (value) {
+                      case false:
+                        onChanged!(true);
+                      case true:
+                        onChanged!(tristate ? null : false);
+                      case null:
+                        onChanged!(false);
+                    }
+                  },
+          onHover: onHover,
+          onFocusChange: onFocusChange,
+          focusNode: focusNode,
+          style: style,
+          shortcut: shortcut,
+          statesController: statesController,
+          leadingIcon: ExcludeFocus(
+            child: IgnorePointer(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: Checkbox.width,
+                  maxWidth: Checkbox.width,
+                ),
+                child: Checkbox(
+                  tristate: tristate,
+                  value: value,
+                  onChanged: onChanged,
+                  isError: isError,
+                ),
+              ),
             ),
           ),
+          clipBehavior: clipBehavior,
+          trailingIcon: trailingIcon,
+          closeOnActivate: closeOnActivate,
+          child: child,
         ),
       ),
-      clipBehavior: clipBehavior,
-      trailingIcon: trailingIcon,
-      closeOnActivate: closeOnActivate,
-      child: child,
     );
   }
 }
@@ -1353,40 +1364,49 @@ class RadioMenuButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MenuItemButton(
-      key: key,
-      onPressed:
-          onChanged == null
-              ? null
-              : () {
-                if (toggleable && groupValue == value) {
-                  return onChanged!(null);
-                }
-                onChanged!(value);
-              },
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      focusNode: focusNode,
-      style: style,
-      shortcut: shortcut,
-      statesController: statesController,
-      leadingIcon: ExcludeFocus(
-        child: IgnorePointer(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: Checkbox.width, maxWidth: Checkbox.width),
-            child: Radio<T>(
-              value: value,
-              groupValue: groupValue,
-              onChanged: onChanged,
-              toggleable: toggleable,
+    return MergeSemantics(
+      child: Semantics(
+        role: SemanticsRole.menuItemRadio,
+        checked: value == groupValue,
+        child: MenuItemButton(
+          key: key,
+          onPressed:
+              onChanged == null
+                  ? null
+                  : () {
+                    if (toggleable && groupValue == value) {
+                      return onChanged!(null);
+                    }
+                    onChanged!(value);
+                  },
+          onHover: onHover,
+          onFocusChange: onFocusChange,
+          focusNode: focusNode,
+          style: style,
+          shortcut: shortcut,
+          statesController: statesController,
+          leadingIcon: ExcludeFocus(
+            child: IgnorePointer(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: Checkbox.width,
+                  maxWidth: Checkbox.width,
+                ),
+                child: Radio<T>(
+                  value: value,
+                  groupValue: groupValue,
+                  onChanged: onChanged,
+                  toggleable: toggleable,
+                ),
+              ),
             ),
           ),
+          clipBehavior: clipBehavior,
+          trailingIcon: trailingIcon,
+          closeOnActivate: closeOnActivate,
+          child: child,
         ),
       ),
-      clipBehavior: clipBehavior,
-      trailingIcon: trailingIcon,
-      closeOnActivate: closeOnActivate,
-      child: child,
     );
   }
 }
@@ -1825,23 +1845,23 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             }
           }
 
-          child = MergeSemantics(
-            child: Semantics(
-              expanded: _enabled && controller.isOpen,
-              child: TextButton(
-                style: mergedStyle,
-                focusNode: _buttonFocusNode,
-                onFocusChange: _enabled ? widget.onFocusChange : null,
-                onPressed: _enabled ? toggleShowMenu : null,
-                isSemanticButton: null,
-                child: _MenuItemLabel(
-                  leadingIcon: widget.leadingIcon,
-                  trailingIcon: widget.trailingIcon,
-                  hasSubmenu: true,
-                  showDecoration: (_parent?._orientation ?? Axis.horizontal) == Axis.vertical,
-                  submenuIcon: submenuIcon,
-                  child: child,
-                ),
+          child = Semantics(
+            role: SemanticsRole.menuItem,
+            expanded: _enabled && controller.isOpen,
+            enabled: _enabled,
+            child: TextButton(
+              style: mergedStyle,
+              focusNode: _buttonFocusNode,
+              onFocusChange: _enabled ? widget.onFocusChange : null,
+              onPressed: _enabled ? toggleShowMenu : null,
+              isSemanticButton: null,
+              child: _MenuItemLabel(
+                leadingIcon: widget.leadingIcon,
+                trailingIcon: widget.trailingIcon,
+                hasSubmenu: true,
+                showDecoration: (_parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                submenuIcon: submenuIcon,
+                child: child,
               ),
             ),
           );
@@ -1872,9 +1892,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     // After closing the children of this submenu, this submenu button will
     // regain focus. Because submenu buttons open on focus, this submenu will
     // immediately reopen. To prevent this from happening, we prevent focus on
-    // SubmenuButtons that do not already have focus using the _openOnFocus
+    // SubmenuButtons that do not already have focus using the _isOpenOnFocusEnabled
     // flag. This flag is reset after one frame.
-    if (!_buttonFocusNode.hasFocus) {
+    if (!_buttonFocusNode.hasPrimaryFocus) {
       _isOpenOnFocusEnabled = false;
       SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
         FocusManager.instance.applyFocusChangesIfNeeded();
@@ -3261,7 +3281,10 @@ class _MenuPanelState extends State<_MenuPanel> {
       );
     }
 
-    return ConstrainedBox(constraints: effectiveConstraints, child: menuPanel);
+    return Semantics(
+      role: widget.orientation == Axis.vertical ? SemanticsRole.menu : SemanticsRole.menuBar,
+      child: ConstrainedBox(constraints: effectiveConstraints, child: menuPanel),
+    );
   }
 
   Widget _intrinsicCrossSize({required Widget child}) {
