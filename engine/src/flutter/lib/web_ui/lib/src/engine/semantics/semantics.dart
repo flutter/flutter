@@ -29,8 +29,10 @@ import 'image.dart';
 import 'incrementable.dart';
 import 'label_and_value.dart';
 import 'link.dart';
+import 'list.dart';
 import 'live_region.dart';
 import 'platform_view.dart';
+import 'requirable.dart';
 import 'route.dart';
 import 'scrollable.dart';
 import 'semantics_helper.dart';
@@ -451,6 +453,12 @@ enum EngineSemanticsRole {
   /// A component provide important and usually time-sensitive information.
   alert,
 
+  /// A container whose children are logically a list of items.
+  list,
+
+  /// An item in a [list].
+  listItem,
+
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
   ///
@@ -478,6 +486,7 @@ abstract class SemanticRole {
     addLabelAndValue(preferredRepresentation: preferredLabelRepresentation);
     addSelectableBehavior();
     addExpandableBehavior();
+    addRequirableBehavior();
   }
 
   /// Initializes a blank role for a [semanticsObject].
@@ -646,6 +655,10 @@ abstract class SemanticRole {
 
   void addExpandableBehavior() {
     addSemanticBehavior(Expandable(semanticsObject, this));
+  }
+
+  void addRequirableBehavior() {
+    addSemanticBehavior(Requirable(semanticsObject, this));
   }
 
   /// Adds a semantic behavior to this role.
@@ -1859,6 +1872,10 @@ class SemanticsObject {
         return EngineSemanticsRole.alert;
       case ui.SemanticsRole.status:
         return EngineSemanticsRole.status;
+      case ui.SemanticsRole.list:
+        return EngineSemanticsRole.list;
+      case ui.SemanticsRole.listItem:
+        return EngineSemanticsRole.listItem;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.searchBox:
@@ -1868,8 +1885,6 @@ class SemanticsObject {
       case ui.SemanticsRole.menuBar:
       case ui.SemanticsRole.menu:
       case ui.SemanticsRole.menuItem:
-      case ui.SemanticsRole.list:
-      case ui.SemanticsRole.listItem:
       case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
       case ui.SemanticsRole.loadingSpinner:
@@ -1920,6 +1935,8 @@ class SemanticsObject {
       EngineSemanticsRole.image => SemanticImage(this),
       EngineSemanticsRole.platformView => SemanticPlatformView(this),
       EngineSemanticsRole.link => SemanticLink(this),
+      EngineSemanticsRole.list => SemanticList(this),
+      EngineSemanticsRole.listItem => SemanticListItem(this),
       EngineSemanticsRole.heading => SemanticHeading(this),
       EngineSemanticsRole.header => SemanticHeader(this),
       EngineSemanticsRole.tab => SemanticTab(this),
@@ -2032,6 +2049,22 @@ class SemanticsObject {
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
   bool get isSelected => hasFlag(ui.SemanticsFlag.isSelected);
+
+  /// If true, this node represents something that currently requires user input
+  /// before a form can be submitted.
+  ///
+  /// Requirability is managed by `aria-required` and is compatible with
+  /// multiple ARIA roles (checkbox, combobox, gridcell, listbox, radiogroup,
+  /// spinbutton, textbox, tree, etc). It is therefore mapped onto the
+  /// [Requirable] behavior.
+  ///
+  /// See also:
+  ///
+  ///   * [isRequired], which indicates whether the is currently required.
+  bool get isRequirable => hasFlag(ui.SemanticsFlag.hasRequiredState);
+
+  /// If [isRequirable] is true, indicates whether the node is required.
+  bool get isRequired => hasFlag(ui.SemanticsFlag.isRequired);
 
   /// If true, this node represents something that can be annotated as
   /// "expanded", such as a expansion tile or drop down menu
