@@ -41,28 +41,8 @@ std::shared_ptr<impeller::Context> Context::GetDefaultContext(
     return override_context;
   }
 
-  auto dart_state = flutter::UIDartState::Current();
-  if (!dart_state->IsImpellerEnabled()) {
-    out_error =
-        "Flutter GPU requires the Impeller rendering backend to be enabled.";
-    return nullptr;
-  }
-  // Grab the Impeller context from the IO manager.
-  std::promise<std::shared_ptr<impeller::Context>> context_promise;
-  auto impeller_context_future = context_promise.get_future();
-  fml::TaskRunner::RunNowOrPostTask(
-      dart_state->GetTaskRunners().GetIOTaskRunner(),
-      fml::MakeCopyable([promise = std::move(context_promise),
-                         io_manager = dart_state->GetIOManager()]() mutable {
-        promise.set_value(io_manager ? io_manager->GetImpellerContext()
-                                     : nullptr);
-      }));
-  auto context = impeller_context_future.get();
-
-  if (!context) {
-    out_error = "Unable to retrieve the Impeller context.";
-  }
-  return context;
+  out_error = "Flutter GPU not currently available.";
+  return nullptr;
 }
 
 Context::Context(std::shared_ptr<impeller::Context> context)
