@@ -12,6 +12,15 @@ import java.io.File
  * A collection of static utility functions used by the Flutter Gradle Plugin.
  */
 object FlutterPluginUtils {
+    // Gradle properties.
+    internal const val PROP_SHOULD_SHRINK_RESOURCES = "shrink"
+    internal const val PROP_SPLIT_PER_ABI = "split-per-abi"
+    internal const val PROP_LOCAL_ENGINE_REPO = "localEngineRepo"
+    internal const val PROP_IS_VERBOSE = "verbose"
+    internal const val PROP_IS_FAST_START = "fast-start"
+    internal const val PROP_TARGET = "target"
+    internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
+
     // ----------------- Methods for string manipulation and comparison. -----------------
 
     @JvmStatic
@@ -31,6 +40,7 @@ object FlutterPluginUtils {
 
     // compareTo implementation of version strings in the format of ints and periods
     // Will not crash on RC candidate strings but considers all RC candidates the same version.
+    // Returns -1 if firstString < secondString, 0 if firstString == secondString, 1 if firstString > secondString
     @JvmStatic
     internal fun compareVersionStrings(
         firstString: String,
@@ -76,9 +86,8 @@ object FlutterPluginUtils {
 
     @JvmStatic
     fun shouldShrinkResources(project: Project): Boolean {
-        val propShrink = "shrink"
-        if (project.hasProperty(propShrink)) {
-            val propertyValue = project.property(propShrink)
+        if (project.hasProperty(PROP_SHOULD_SHRINK_RESOURCES)) {
+            val propertyValue = project.property(PROP_SHOULD_SHRINK_RESOURCES)
             return propertyValue.toString().toBoolean()
         }
         return true
@@ -88,9 +97,11 @@ object FlutterPluginUtils {
      * Returns `true` if the given project is a plugin project having an `android` directory
      * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    @JvmStatic internal fun pluginSupportsAndroidPlatform(project: Project): Boolean {
+    @JvmStatic
+    internal fun pluginSupportsAndroidPlatform(project: Project): Boolean {
         val buildGradle = File(File(project.projectDir.parentFile, "android"), "build.gradle")
-        val buildGradleKts = File(File(project.projectDir.parentFile, "android"), "build.gradle.kts")
+        val buildGradleKts =
+            File(File(project.projectDir.parentFile, "android"), "build.gradle.kts")
         return buildGradle.exists() || buildGradleKts.exists()
     }
 
@@ -140,22 +151,24 @@ object FlutterPluginUtils {
     internal fun shouldProjectSplitPerAbi(project: Project): Boolean =
         project
             .findProperty(
-                "split-per-abi"
+                PROP_SPLIT_PER_ABI
             )?.toString()
             ?.toBoolean() ?: false
 
     @JvmStatic
-    internal fun shouldProjectUseLocalEngine(project: Project): Boolean {
-        val propLocalEngineRepo = "localEngineRepo"
-        return project.hasProperty(propLocalEngineRepo)
-    }
+    internal fun shouldProjectUseLocalEngine(project: Project): Boolean = project.hasProperty(PROP_LOCAL_ENGINE_REPO)
 
     @JvmStatic
-    internal fun isProjectVerbose(project: Project): Boolean = project.findProperty("verbose")?.toString()?.toBoolean() ?: false
+    internal fun isProjectVerbose(project: Project): Boolean = project.findProperty(PROP_IS_VERBOSE)?.toString()?.toBoolean() ?: false
 
     /** Whether to build the debug app in "fast-start" mode. */
     @JvmStatic
-    internal fun isProjectFastStart(project: Project): Boolean = project.findProperty("fast-start")?.toString()?.toBoolean() ?: false
+    internal fun isProjectFastStart(project: Project): Boolean =
+        project
+            .findProperty(
+                PROP_IS_FAST_START
+            )?.toString()
+            ?.toBoolean() ?: false
 
 //    /**
 //     * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
@@ -253,9 +266,8 @@ object FlutterPluginUtils {
      */
     @JvmStatic
     internal fun getFlutterTarget(project: Project): String {
-        val targetProperty: String = "target"
-        if (project.hasProperty(targetProperty)) {
-            return project.property(targetProperty).toString()
+        if (project.hasProperty(PROP_TARGET)) {
+            return project.property(PROP_TARGET).toString()
         }
         val target: String = getFlutterExtensionOrNull(project)!!.target ?: "lib/main.dart"
         return target
@@ -310,7 +322,8 @@ object FlutterPluginUtils {
      *
      * @return "debug", "profile", or "release" (fall-back).
      */
-    @JvmStatic internal fun buildModeFor(buildType: BuildType): String {
+    @JvmStatic
+    internal fun buildModeFor(buildType: BuildType): String {
         if (buildType.name == "profile") {
             return "profile"
         } else if (buildType.isDebuggable) {
@@ -324,17 +337,17 @@ object FlutterPluginUtils {
      * This only relevant when using a local engine. Because the engine
      * is built for a specific mode, the call to Gradle must match that mode.
      */
-    @JvmStatic internal fun supportsBuildMode(
+    @JvmStatic
+    internal fun supportsBuildMode(
         project: Project,
         flutterBuildMode: String
     ): Boolean {
         if (!shouldProjectUseLocalEngine(project)) {
             return true
         }
-        val propLocalEngineBuildMode = "local-engine-build-mode"
-        check(project.hasProperty(propLocalEngineBuildMode)) { "Project must have property '$propLocalEngineBuildMode'" }
+        check(project.hasProperty(PROP_LOCAL_ENGINE_BUILD_MODE)) { "Project must have property '$PROP_LOCAL_ENGINE_BUILD_MODE'" }
         // Don't configure dependencies for a build mode that the local engine
         // doesn't support.
-        return project.property(propLocalEngineBuildMode) == flutterBuildMode
+        return project.property(PROP_LOCAL_ENGINE_BUILD_MODE) == flutterBuildMode
     }
 }
