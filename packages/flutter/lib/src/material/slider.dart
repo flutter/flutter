@@ -26,6 +26,7 @@ import 'debug.dart';
 import 'material.dart';
 import 'material_state.dart';
 import 'slider_theme.dart';
+import 'slider_value_indicator_shape.dart';
 import 'theme.dart';
 
 // Examples can assume:
