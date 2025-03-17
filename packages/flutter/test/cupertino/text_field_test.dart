@@ -25,8 +25,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
-import '../widgets/editable_text_utils.dart'
-    show OverflowWidgetTextEditingController, isContextMenuProvidedByPlatform, updateMediaQuery;
+import '../widgets/editable_text_utils.dart';
 import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
@@ -237,11 +236,6 @@ void main() {
     expect(endpoints.length, 1);
     return endpoints[0].point;
   }
-
-  // TODO(justinmc): Delete.
-  // Web has a less threshold for downstream/upstream text position.
-  Offset textOffsetToPosition(WidgetTester tester, int offset) =>
-      textOffsetToBottomLeftPosition(tester, offset) + const Offset(kIsWeb ? 1 : 0, -2);
 
   setUp(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
