@@ -850,8 +850,17 @@ class TextField extends StatefulWidget {
     EditableTextState editableTextState,
   ) {
     return switch (defaultTargetPlatform) {
-      TargetPlatform.iOS => SystemContextMenu.editableText(editableTextState: editableTextState),
-      TargetPlatform.android || TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows || TargetPlatform.fuchsia => AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState),
+      TargetPlatform.iOS =>
+        SystemContextMenu.isSupported(context)
+            ? SystemContextMenu.editableText(editableTextState: editableTextState)
+            : AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState),
+      TargetPlatform.android ||
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows ||
+      TargetPlatform.fuchsia => AdaptiveTextSelectionToolbar.editableText(
+        editableTextState: editableTextState,
+      ),
     };
   }
 
