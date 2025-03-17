@@ -18,7 +18,7 @@
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_target.h"
-#include "impeller/renderer/texture_mipmap.h"
+#include "impeller/renderer/texture_util.h"
 #include "impeller/tessellator/tessellator.h"
 #include "impeller/typographer/typographer_context.h"
 

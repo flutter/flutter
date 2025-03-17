@@ -6,6 +6,7 @@
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/geometry/rect_geometry.h"
+#include "impeller/renderer/texture_util.h"
 
 namespace impeller {
 
@@ -68,9 +69,6 @@ std::shared_ptr<Texture> CreateCurveTexture(
   texture_descriptor.format = PixelFormat::kR8UNormInt;
   texture_descriptor.size = {kCurveResolution, 1};
 
-  std::shared_ptr<Texture> texture =
-      context->GetResourceAllocator()->CreateTexture(texture_descriptor);
-
   std::vector<uint8_t> curve_data;
   curve_data.reserve(kCurveResolution);
   for (int i = 0; i < kCurveResolution; ++i) {
@@ -80,21 +78,7 @@ std::shared_ptr<Texture> CreateCurveTexture(
     curve_data.push_back(DoubleToUint8(loc / den));
   }
 
-  auto data_mapping = std::make_shared<fml::DataMapping>(curve_data);
-  std::shared_ptr<DeviceBuffer> buffer =
-      context->GetResourceAllocator()->CreateBufferWithCopy(*data_mapping);
-
-  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
-  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-  blit_pass->AddCopy(DeviceBuffer::AsBufferView(std::move(buffer)), texture);
-
-  if (!blit_pass->EncodeCommands() ||
-      !context->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok()) {
-    return nullptr;
-  }
-
-  texture->SetLabel("LineCurve");
-  return texture;
+  return CreateTexture(texture_descriptor, curve_data, context, "LineCurve");
 }
 
 GeometryResult CreateGeometry(const ContentContext& renderer,

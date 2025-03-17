@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_RENDERER_TEXTURE_MIPMAP_H_
-#define FLUTTER_IMPELLER_RENDERER_TEXTURE_MIPMAP_H_
+#ifndef FLUTTER_IMPELLER_RENDERER_TEXTURE_UTIL_H_
+#define FLUTTER_IMPELLER_RENDERER_TEXTURE_UTIL_H_
 
 #include "flutter/fml/status.h"
 #include "impeller/core/texture.h"
@@ -11,6 +11,12 @@
 #include "impeller/renderer/context.h"
 
 namespace impeller {
+
+std::shared_ptr<Texture> CreateTexture(
+    const TextureDescriptor& texture_descriptor,
+    const std::vector<uint8_t> data,
+    const std::shared_ptr<impeller::Context>& context,
+    std::string_view debug_label);
 
 /// Adds a blit command to the render pass.
 [[nodiscard]] fml::Status AddMipmapGeneration(
@@ -20,4 +26,4 @@ namespace impeller {
 
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_RENDERER_TEXTURE_MIPMAP_H_
+#endif  // FLUTTER_IMPELLER_RENDERER_TEXTURE_UTIL_H_
