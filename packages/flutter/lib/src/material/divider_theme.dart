@@ -128,7 +128,7 @@ class DividerThemeData with Diagnosticable {
 /// An inherited widget that defines the configuration for
 /// [Divider]s, [VerticalDivider]s, dividers between [ListTile]s, and dividers
 /// between rows in [DataTable]s in this widget's subtree.
-class DividerTheme extends InheritedTheme {
+class DividerTheme extends InheritedTheme<DividerThemeData, Object?> {
   /// Creates a divider theme that controls the configurations for
   /// [Divider]s, [VerticalDivider]s, dividers between [ListTile]s, and dividers
   /// between rows in [DataTable]s in its widget subtree.
@@ -161,4 +161,19 @@ class DividerTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(DividerTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    DividerTheme oldWidget,
+    Set<ThemeSelector<DividerThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<DividerThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

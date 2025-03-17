@@ -303,7 +303,7 @@ class TooltipThemeData with Diagnosticable {
 ///  * [TooltipThemeData], which describes the actual configuration of a
 ///    tooltip theme.
 ///  * [TooltipVisibility], which can be used to visually disable descendant [Tooltip]s.
-class TooltipTheme extends InheritedTheme {
+class TooltipTheme extends InheritedTheme<TooltipThemeData, Object?> {
   /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].
   const TooltipTheme({super.key, required this.data, required super.child});
@@ -336,6 +336,21 @@ class TooltipTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(TooltipTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    TooltipTheme oldWidget,
+    Set<ThemeSelector<TooltipThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<TooltipThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 /// The method of interaction that will trigger a tooltip.

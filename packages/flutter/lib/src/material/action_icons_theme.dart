@@ -151,7 +151,7 @@ class ActionIconThemeData with Diagnosticable {
 ///
 /// ** See code in examples/api/lib/material/action_buttons/action_icon_theme.0.dart **
 /// {@end-tool}
-class ActionIconTheme extends InheritedTheme {
+class ActionIconTheme extends InheritedTheme<ActionIconThemeData, Object?> {
   /// Creates a theme that overrides the default icon of [BackButtonIcon],
   /// [CloseButtonIcon], [DrawerButtonIcon], and [EndDrawerButtonIcon] in this
   /// widget's subtree.
@@ -184,4 +184,19 @@ class ActionIconTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ActionIconTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    ActionIconTheme oldWidget,
+    Set<ThemeSelector<ActionIconThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ActionIconThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

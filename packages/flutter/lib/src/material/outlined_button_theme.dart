@@ -94,7 +94,7 @@ class OutlinedButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [OutlinedButton]'s defaults.
 ///  * [ThemeData.outlinedButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [OutlinedButton]s below the overall [Theme].
-class OutlinedButtonTheme extends InheritedTheme {
+class OutlinedButtonTheme extends InheritedTheme<OutlinedButtonThemeData, Object?> {
   /// Create a [OutlinedButtonTheme].
   const OutlinedButtonTheme({super.key, required this.data, required super.child});
 
@@ -124,4 +124,19 @@ class OutlinedButtonTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(OutlinedButtonTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    OutlinedButtonTheme oldWidget,
+    Set<ThemeSelector<OutlinedButtonThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<OutlinedButtonThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

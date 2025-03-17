@@ -52,7 +52,7 @@ import 'theme.dart';
 ///    the [RangeSlider]'s track.
 ///  * [RangeSliderTickMarkShape], which can be used to create custom shapes for
 ///    the [RangeSlider]'s tick marks.
-class SliderTheme extends InheritedTheme {
+class SliderTheme extends InheritedTheme<SliderThemeData, Object?> {
   /// Applies the given theme [data] to [child].
   const SliderTheme({super.key, required this.data, required super.child});
 
@@ -108,6 +108,21 @@ class SliderTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(SliderTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    SliderTheme oldWidget,
+    Set<ThemeSelector<SliderThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<SliderThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 /// Describes the conditions under which the value indicator on a [Slider]
