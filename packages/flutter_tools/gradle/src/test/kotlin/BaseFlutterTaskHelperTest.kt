@@ -6,6 +6,7 @@ import io.mockk.verify
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.logging.LoggingManager
 import org.gradle.process.ExecSpec
 import org.gradle.process.ProcessForkOptions
@@ -551,5 +552,27 @@ class BaseFlutterTaskHelperTest {
         every { mockProject.exec(any<Action<ExecSpec>>()) } returns mockk()
 
         BaseFlutterTaskHelper.buildBundle(baseFlutterTask)
+    }
+
+    @Test
+    fun `getDependencyFiles returns a FileCollection of dependency file(s)`() {
+        val baseFlutterTask = mockk<BaseFlutterTask>()
+        val project = mockk<Project>()
+        val configFileCollection = mockk<ConfigurableFileCollection>()
+        every { baseFlutterTask.sourceDir } returns BaseFlutterTaskPropertiesTest.sourceDirTest
+
+        every { baseFlutterTask.project } returns project
+        every { baseFlutterTask.intermediateDir } returns BaseFlutterTaskPropertiesTest.intermediateDirFileTest
+
+        val projectIntermediary = baseFlutterTask.project
+        val interDirFile = baseFlutterTask.intermediateDir
+
+        every { projectIntermediary.files() } returns configFileCollection
+        every { projectIntermediary.files("$interDirFile/flutter_build.d") } returns configFileCollection
+        every { configFileCollection.plus(configFileCollection) } returns configFileCollection
+
+        BaseFlutterTaskHelper.getDependenciesFiles(baseFlutterTask)
+        verify { projectIntermediary.files() }
+        verify { projectIntermediary.files("${BaseFlutterTaskPropertiesTest.intermediateDirFileTest}/flutter_build.d") }
     }
 }

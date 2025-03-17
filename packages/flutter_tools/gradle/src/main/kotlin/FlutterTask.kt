@@ -33,11 +33,6 @@ abstract class FlutterTask : BaseFlutterTask() {
     val snapshots: CopySpec
         get() = FlutterTaskHelper.getSnapshots(project, flutterTask = this)
 
-    private fun readDependencies(
-        dependenciesFile: File,
-        inputs: Boolean
-    ): FileCollection = FlutterTaskHelper.readDependencies(project, dependenciesFile, inputs)
-
     @get:InputFiles
     val sourceFiles: FileCollection
         get() = FlutterTaskHelper.getSourceFiles(project, flutterTask = this)

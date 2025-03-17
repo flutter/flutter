@@ -28,13 +28,13 @@ object FlutterTaskHelper {
         project.copySpec {
             from("${flutterTask.intermediateDir}")
             if (flutterTask.buildMode == "release" || flutterTask.buildMode == "profile") {
-                flutterTask.targetPlatformValues!!.forEach { _ ->
-                    include("TODO/app.so")
+                flutterTask.targetPlatformValues!!.forEach { targetArch ->
+                    include("${FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]}/app.so")
                 }
             }
         }
 
-    internal fun readDependencies(
+    private fun readDependencies(
         project: Project,
         dependenciesFile: File,
         inputs: Boolean
