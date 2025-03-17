@@ -124,17 +124,16 @@ class SensitiveContentService {
     }
 
     final ContentSensitivity contentSensitivity = ContentSensitivity.values.firstWhere(
-      (ContentSensitivity cs) => cs.name == result,
+      (ContentSensitivity cs) => cs.name == result && cs != ContentSensitivity._unknown,
+      orElse:
+          () =>
+              throw UnsupportedError(
+                'Android Flutter View has a content sensitivity mode '
+                'that is not recognized by Flutter. If you see this error, it '
+                'is possible that the View uses a new mode that Flutter needs to '
+                'support; please file an issue.',
+              ),
     );
-
-    if (contentSensitivity == ContentSensitivity._unknown) {
-      throw UnsupportedError(
-        'Android Flutter View has a content sensitivity mode '
-        'that is not recognized by Flutter. If you see this error, '
-        'it is possible the View uses a new mode that Flutter needs to '
-        'support; please file an issue.',
-      );
-    }
 
     return contentSensitivity;
   }

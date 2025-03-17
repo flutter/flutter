@@ -7,27 +7,27 @@ import 'dart:math' show max;
 import 'package:flutter/services.dart' show ContentSensitivity, SensitiveContentService;
 
 import 'async.dart' show AsyncSnapshot, ConnectionState, FutureBuilder;
-import 'container.dart';
+import 'basic.dart' show SizedBox;
 import 'framework.dart';
 
 /// Data structure used to track the [SensitiveContent] widgets in the
 /// widget tree.
-class ContentSensitivitySetting {
-  /// Creates a [ContentSensitivitySetting].
-  ContentSensitivitySetting();
+class _ContentSensitivitySetting {
+  /// Creates a [_ContentSensitivitySetting].
+  _ContentSensitivitySetting();
 
-  /// The number of [SensitiveContent] widgets that have sensitivity level [ContentSensitivity.sensitive].
+  /// The number of [SensitiveContent] widgets that have sensitivity [ContentSensitivity.sensitive].
   int _sensitiveWidgetCount = 0;
 
-  /// The number of [SensitiveContent] widgets that have sensitivity level [ContentSensitivity.autoSensitive].
+  /// The number of [SensitiveContent] widgets that have sensitivity [ContentSensitivity.autoSensitive].
   int _autoSensitiveWidgetCount = 0;
 
-  /// The number of [SensitiveContent] widgets that have sensitivity level [ContentSensitivity.notSensitive].
+  /// The number of [SensitiveContent] widgets that have sensitivity [ContentSensitivity.notSensitive].
   int _notSensitiveWigetCount = 0;
 
-  /// Increases the count of [SensitiveContent] widgets with [sensitivityLevel] set.
-  void addWidgetWithContentSensitivity(ContentSensitivity sensitivityLevel) {
-    switch (sensitivityLevel) {
+  /// Increases the count of [SensitiveContent] widgets with [sensitivity] set.
+  void addWidgetWithContentSensitivity(ContentSensitivity sensitivity) {
+    switch (sensitivity) {
       case ContentSensitivity.sensitive:
         _sensitiveWidgetCount++;
       case ContentSensitivity.autoSensitive:
@@ -36,31 +36,47 @@ class ContentSensitivitySetting {
         _notSensitiveWigetCount++;
       // ignore is safe because it protects this setting from tracking SensitiveContent
       // widgets with an _unknown ContentSensitivity. _unknown is private to avoid
-      // developers using it as a SensitiveContent sensitivity level.
+      // developers using it as a SensitiveContent sensitivity.
       // ignore: no_default_cases
       default:
         throw FlutterError(
-          'Adding a SensitiveContent widget with ContentSensitivity $sensitivityLevel is unsupported by ContentSensitivitySetting',
+          'Adding a SensitiveContent widget with ContentSensitivity $sensitivity is unsupported by _ContentSensitivitySetting',
         );
     }
   }
 
-  /// Decreases the count of [SensitiveContent] widgets with [sensitivityLevel] set.
-  void removeWidgetWithContentSensitivity(ContentSensitivity sensitivityLevel) {
-    switch (sensitivityLevel) {
+  String _getNegativeWidgetCountErrorMessage(ContentSensitivity sensitivity, int count) {
+    return 'A negative amount ($count) of $sensitivity SensitiveContent widgets have been detected, which is not expected. Please file an issue.';
+  }
+
+  /// Decreases the count of [SensitiveContent] widgets with [sensitivity] set.
+  void removeWidgetWithContentSensitivity(ContentSensitivity sensitivity) {
+    switch (sensitivity) {
       case ContentSensitivity.sensitive:
         _sensitiveWidgetCount--;
+        assert(
+          _sensitiveWidgetCount >= 0,
+          _getNegativeWidgetCountErrorMessage(sensitivity, _sensitiveWidgetCount),
+        );
       case ContentSensitivity.autoSensitive:
         _autoSensitiveWidgetCount--;
+        assert(
+          _autoSensitiveWidgetCount >= 0,
+          _getNegativeWidgetCountErrorMessage(sensitivity, _autoSensitiveWidgetCount),
+        );
       case ContentSensitivity.notSensitive:
         _notSensitiveWigetCount--;
+        assert(
+          _notSensitiveWigetCount >= 0,
+          _getNegativeWidgetCountErrorMessage(sensitivity, _notSensitiveWigetCount),
+        );
       // ignore is safe because it protects this setting from tracking SensitiveContent
       // widgets with an _unknown ContentSensitivity. _unknown is private to avoid
-      // developers using it as a SensitiveContent sensitivity level.
+      // developers using it as a SensitiveContent sensitivity.
       // ignore: no_default_cases
       default:
         throw FlutterError(
-          'Removing a SensitiveContent widget with ContentSensitivity $sensitivityLevel is unsupported by ContentSensitivitySetting',
+          'Removing a SensitiveContent widget with ContentSensitivity $sensitivity is unsupported by _ContentSensitivitySetting',
         );
     }
   }
@@ -72,7 +88,7 @@ class ContentSensitivitySetting {
           max(0, _notSensitiveWigetCount) >
       0;
 
-  /// Returns the highest prioritized [ContentSensitivity] level of the [SensitiveContent] widgets
+  /// Returns the highest prioritized [ContentSensitivity] of the [SensitiveContent] widgets
   /// that this setting tracks.
   ContentSensitivity? get contentSensitivityBasedOnWidgetCounts {
     if (_sensitiveWidgetCount > 0) {
@@ -88,43 +104,34 @@ class ContentSensitivitySetting {
   }
 }
 
-/// Host of the current content sensitivity level for the widget tree that contains
+/// Host of the current content sensitivity for the widget tree that contains
 /// some number [SensitiveContent] widgets.
 @visibleForTesting
 class SensitiveContentHost {
   SensitiveContentHost._();
 
   bool? _contentSenstivityIsSupported;
-  late final ContentSensitivitySetting _contentSensitivitySetting = ContentSensitivitySetting();
+  late final _ContentSensitivitySetting _contentSensitivitySetting = _ContentSensitivitySetting();
   ContentSensitivity? _fallbackContentSensitivitySetting;
 
   final SensitiveContentService _sensitiveContentService = SensitiveContentService();
 
-  /// The [ContentSensitivity] level set for the entire widget tree calculated from
+  /// The [ContentSensitivity] set for the entire widget tree calculated from
   /// [_contentSensitivitySetting].
   @visibleForTesting
-  ContentSensitivity? calculatedContentSensitivityLevel;
+  ContentSensitivity? calculatedContentSensitivity;
 
   /// [SensitiveContentHost] instance for the widget tree.
   @visibleForTesting
   static final SensitiveContentHost instance = SensitiveContentHost._();
 
-  /// The state of content sensitivity in the widget tree.
-  ///
-  /// Contains the number of widgets with each [ContentSensitivity] level and
-  /// the current [ContentSensitivity] setting.
-  @visibleForTesting
-  ContentSensitivitySetting? getContentSenstivityState() {
-    return _contentSensitivitySetting;
-  }
-
   /// Registers a [SensitiveContent] widget that will help determine the
-  /// [ContentSensitivity] level for the widget tree.
-  static Future<void> register(ContentSensitivity desiredSensitivityLevel) {
-    return instance._register(desiredSensitivityLevel);
+  /// [ContentSensitivity] for the widget tree.
+  static Future<void> register(ContentSensitivity desiredSensitivity) {
+    return instance._register(desiredSensitivity);
   }
 
-  Future<void> _register(ContentSensitivity desiredSensitivityLevel) async {
+  Future<void> _register(ContentSensitivity desiredSensitivity) async {
     _contentSenstivityIsSupported ??= await _sensitiveContentService.isSupported();
     if (!_contentSenstivityIsSupported!) {
       // Setting content sensitivity is not supported on this device.
@@ -132,13 +139,11 @@ class SensitiveContentHost {
     }
 
     // When the first `SensitiveContent` widget is registered, determine the content sensitivity
-    // level we should fallback to if/when no `SensitiveContent` widgets remain in the tree.
+    // we should fallback to if/when no `SensitiveContent` widgets remain in the tree.
     // For Android API 35, this will be auto sensitive if it is otherwise unset by the developer.
     if (_fallbackContentSensitivitySetting == null) {
       try {
-        final ContentSensitivity potentialFallbackContentSensitivity =
-            await _sensitiveContentService.getContentSensitivity();
-        _fallbackContentSensitivitySetting = potentialFallbackContentSensitivity;
+        _fallbackContentSensitivitySetting = await _sensitiveContentService.getContentSensitivity();
       } on UnsupportedError {
         // Unknown ContentSensitivity detected; fallback to not sensitive mode since we
         // cannot determine the desired behavior of the current mode.
@@ -146,36 +151,36 @@ class SensitiveContentHost {
       }
     }
 
-    // Initialize  the calculated content sensitivity level if we have not yet registered the
+    // Initialize the calculated content sensitivity if we have not yet registered the
     // first `SensitiveContent` widget to ensure we update that setting appropriately.
-    calculatedContentSensitivityLevel ??= _fallbackContentSensitivitySetting;
+    calculatedContentSensitivity ??= _fallbackContentSensitivitySetting;
 
-    // Update SensitiveContent widget count for those with desiredSensitivityLevel.
-    _contentSensitivitySetting.addWidgetWithContentSensitivity(desiredSensitivityLevel);
+    // Update SensitiveContent widget count for those with desiredSensitivity.
+    _contentSensitivitySetting.addWidgetWithContentSensitivity(desiredSensitivity);
 
-    // Verify that desiredSensitivityLevel should be set in order for sensitive
+    // Verify that desiredSensitivity should be set in order for sensitive
     // content to remain obscured.
-    if (calculatedContentSensitivityLevel ==
+    if (calculatedContentSensitivity ==
         _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts) {
       return;
     }
 
-    // Set content sensitivity level as desiredSensitivityLevel. If the call to set content
+    // Set content sensitivity as desiredSensitivity. If the call to set content
     // sensitivity on the platform side fails, then we do not update the current content
-    // sensitivity level.
-    _sensitiveContentService.setContentSensitivity(desiredSensitivityLevel);
+    // sensitivity.
+    _sensitiveContentService.setContentSensitivity(desiredSensitivity);
 
-    // Update current content sensitivity level.
-    calculatedContentSensitivityLevel = desiredSensitivityLevel;
+    // Update current content sensitivity.
+    calculatedContentSensitivity = desiredSensitivity;
   }
 
   /// Unregisters a [SensitiveContent] widget from the [ContentSensitivitySetting] tracking
-  /// the content sensitivity level of the widget tree.
-  static void unregister(ContentSensitivity widgetSensitivityLevel) {
-    instance._unregister(widgetSensitivityLevel);
+  /// the content sensitivity of the widget tree.
+  static void unregister(ContentSensitivity widgetSensitivity) {
+    instance._unregister(widgetSensitivity);
   }
 
-  void _unregister(ContentSensitivity widgetSensitivityLevel) {
+  void _unregister(ContentSensitivity widgetSensitivity) {
     assert(
       _contentSenstivityIsSupported != null,
       'SensitiveContentHost.register must be called before SensitiveContentHost.unregister',
@@ -186,43 +191,43 @@ class SensitiveContentHost {
       return;
     }
 
-    // Update SensitiveContent widget count for those with desiredSensitivityLevel.
-    _contentSensitivitySetting.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
+    // Update SensitiveContent widget count for those with desiredSensitivity.
+    _contentSensitivitySetting.removeWidgetWithContentSensitivity(widgetSensitivity);
 
     if (!_contentSensitivitySetting.hasWidgets) {
       // Restore default content sensitivity setting if there are no more SensitiveContent
       // widgets in the tree. If the call to set content sensitivity on the platform side fails,
-      // then we do not update the current content sensitivity level. The null check is safe
+      // then we do not update the current content sensitivity. The null check is safe
       // because _fallbackContentSensitivitySetting cannot be null if `register` has been
       // called at least once, and it must be called before `unregister` is called.
       _sensitiveContentService.setContentSensitivity(_fallbackContentSensitivitySetting!);
 
-      // Update current content sensitivity level.
-      calculatedContentSensitivityLevel = _fallbackContentSensitivitySetting;
+      // Update current content sensitivity.
+      calculatedContentSensitivity = _fallbackContentSensitivitySetting;
       return;
     }
 
-    // Determine if another sensitivity level needs to be restored. The null check should be
+    // Determine if another sensitivity needs to be restored. The null check should be
     // safe because contentSensitivityBasedOnWidgetCounts should always be non-null as long
     // as there are still SensitiveContent widgets in the tree.
     final ContentSensitivity contentSensitivityToRestore =
         _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts!;
-    if (contentSensitivityToRestore != calculatedContentSensitivityLevel) {
-      // Set content sensitivity level as contentSensitivityToRestore. If the call to set content
+    if (contentSensitivityToRestore != calculatedContentSensitivity) {
+      // Set content sensitivity as contentSensitivityToRestore. If the call to set content
       // sensitivity on the platform side fails, then we do not update the current content
-      // sensitivity level.
+      // sensitivity.
       _sensitiveContentService.setContentSensitivity(contentSensitivityToRestore);
 
-      // Update current content sensitivity level.
-      calculatedContentSensitivityLevel = contentSensitivityToRestore;
+      // Update current content sensitivity.
+      calculatedContentSensitivity = contentSensitivityToRestore;
     }
   }
 }
 
-/// Widget to set the [ContentSensitivity] level of content in the widget
+/// Widget to set the [ContentSensitivity] of content in the widget
 /// tree.
 ///
-/// The [sensitivityLevel] of the widget in conjunction with the other
+/// The [sensitivity] of the widget in conjunction with the other
 /// [SensitiveContent] widgets in the tree will determine whether or not the
 /// screen will be obscured during media projection, e.g. screen sharing.
 ///
@@ -230,12 +235,12 @@ class SensitiveContentHost {
 ///
 /// Currently, this widget is only supported on Android API 35+. On all lower Android
 /// versions and non-Android platforms, this does nothing; the screen will never be
-/// obscured regardless of the [sensitivityLevel] set. To programmatically check if
+/// obscured regardless of the [sensitivity] set. To programmatically check if
 /// a device supports this widget, call [SensitiveContentService.isSupported].
 ///
 /// See also:
 ///
-///  * [ContentSensitivity], which are the different content sensitivity levels that a
+///  * [ContentSensitivity], which are the different content sensitivity that a
 ///    [SensitiveContent] widget can set.
 ///
 /// This widget is marked visible for testing because it is not ready for use. It
@@ -249,15 +254,15 @@ class SensitiveContentHost {
 @visibleForTesting
 class SensitiveContent extends StatefulWidget {
   /// Creates a [SensitiveContent] widget.
-  const SensitiveContent({super.key, required this.sensitivityLevel, required this.child});
+  const SensitiveContent({super.key, required this.sensitivity, required this.child});
 
-  /// The sensitivity level that the [SensitiveContent] widget should sets for the
+  /// The sensitivity that the [SensitiveContent] widget should sets for the
   /// Android native `View` hosting the widget tree.
-  final ContentSensitivity sensitivityLevel;
+  final ContentSensitivity sensitivity;
 
   /// The child widget of this [SensitiveContent].
   ///
-  /// If the [sensitivityLevel] is set to [ContentSensitivity.sensitive], then
+  /// If the [sensitivity] is set to [ContentSensitivity.sensitive], then
   /// the entire screen will be obscured when the screen is projected irrespective
   /// to the parent/child widgets.
   ///
@@ -274,12 +279,12 @@ class _SensitiveContentState extends State<SensitiveContent> {
   @override
   void initState() {
     super.initState();
-    _sensitiveContentRegistrationFuture = SensitiveContentHost.register(widget.sensitivityLevel);
+    _sensitiveContentRegistrationFuture = SensitiveContentHost.register(widget.sensitivity);
   }
 
   @override
   void dispose() {
-    SensitiveContentHost.unregister(widget.sensitivityLevel);
+    SensitiveContentHost.unregister(widget.sensitivity);
     super.dispose();
   }
 
@@ -287,13 +292,13 @@ class _SensitiveContentState extends State<SensitiveContent> {
   void didUpdateWidget(SensitiveContent oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.sensitivityLevel == oldWidget.sensitivityLevel) {
+    if (widget.sensitivity == oldWidget.sensitivity) {
       return;
     }
 
-    // Re-register SensitiveContent widget if the sensitivity level changes.
-    _sensitiveContentRegistrationFuture = SensitiveContentHost.register(widget.sensitivityLevel);
-    SensitiveContentHost.unregister(oldWidget.sensitivityLevel);
+    // Re-register SensitiveContent widget if the sensitivity changes.
+    _sensitiveContentRegistrationFuture = SensitiveContentHost.register(widget.sensitivity);
+    SensitiveContentHost.unregister(oldWidget.sensitivity);
   }
 
   @override
@@ -304,7 +309,7 @@ class _SensitiveContentState extends State<SensitiveContent> {
         if (snapshot.connectionState == ConnectionState.done) {
           return widget.child;
         }
-        return Container();
+        return const SizedBox.shrink();
       },
     );
   }

@@ -53,13 +53,10 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      SensitiveContent(sensitivityLevel: ContentSensitivity.sensitive, child: Container()),
+      SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container()),
     );
 
-    expect(
-      sensitiveContentHost.calculatedContentSensitivityLevel,
-      equals(ContentSensitivity.sensitive),
-    );
+    expect(sensitiveContentHost.calculatedContentSensitivity, equals(ContentSensitivity.sensitive));
     expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
   });
 
@@ -67,12 +64,12 @@ void main() {
     'disposing only SensitiveContent widget in the tree sets content sensitivity back to the default as expected',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        SensitiveContent(sensitivityLevel: ContentSensitivity.sensitive, child: Container()),
+        SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container()),
       );
       await tester.pumpWidget(Container());
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(defaultContentSensitivitySetting),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -90,14 +87,14 @@ void main() {
         await tester.pumpWidget(
           Column(
             children: <Widget>[
-              SensitiveContent(sensitivityLevel: ContentSensitivity.sensitive, child: Container()),
-              SensitiveContent(sensitivityLevel: ContentSensitivity.sensitive, child: Container()),
+              SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container()),
+              SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container()),
             ],
           ),
         );
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -110,12 +107,12 @@ void main() {
         final DisposeTester sc1 = DisposeTester(
           child: SensitiveContent(
             key: sc1Key,
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           ),
         );
         final SensitiveContent sc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
 
@@ -128,7 +125,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -136,22 +133,22 @@ void main() {
 
       testWidgets('with two other sensitive widgets', (WidgetTester tester) async {
         final SensitiveContent sc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
         final SensitiveContent sc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
         final SensitiveContent sc3 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, sc2, sc3]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -164,16 +161,16 @@ void main() {
         final DisposeTester sc1 = DisposeTester(
           child: SensitiveContent(
             key: sc1Key,
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           ),
         );
         final SensitiveContent sc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
         final SensitiveContent sc3 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
 
@@ -186,7 +183,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -195,18 +192,18 @@ void main() {
       // Tests with auto sensitive widget(s):
       testWidgets('with one auto sensitive widget', (WidgetTester tester) async {
         final SensitiveContent sc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
         final SensitiveContent asc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, asc1]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -219,12 +216,12 @@ void main() {
         final DisposeTester sc1 = DisposeTester(
           child: SensitiveContent(
             key: sc1Key,
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           ),
         );
         final SensitiveContent asc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
@@ -239,7 +236,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
 
@@ -251,14 +248,14 @@ void main() {
 
       testWidgets('with one auto sensitive widget that gets disposed', (WidgetTester tester) async {
         final SensitiveContent sc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
         const Key asc1Key = Key('asc1');
         final DisposeTester asc1 = DisposeTester(
           child: SensitiveContent(
             key: asc1Key,
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           ),
         );
@@ -272,7 +269,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
 
@@ -283,19 +280,19 @@ void main() {
         WidgetTester tester,
       ) async {
         final SensitiveContent sc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
         const Key asc1Key = Key('asc1');
         final DisposeTester asc1 = DisposeTester(
           child: SensitiveContent(
             key: asc1Key,
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           ),
         );
         final SensitiveContent asc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
@@ -308,7 +305,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
 
@@ -318,18 +315,18 @@ void main() {
       // Tests with not sensitive widget(s):
       testWidgets('with one not sensitive widget', (WidgetTester tester) async {
         final SensitiveContent sc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
         final SensitiveContent nsc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, nsc1]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -342,12 +339,12 @@ void main() {
         final DisposeTester sc1 = DisposeTester(
           child: SensitiveContent(
             key: sc1Key,
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           ),
         );
         final SensitiveContent nsc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
@@ -362,7 +359,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.notSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -373,14 +370,14 @@ void main() {
 
       testWidgets('with one not sensitive widget that gets disposed', (WidgetTester tester) async {
         final SensitiveContent sc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
         const Key nsc1Key = Key('nsc1');
         final DisposeTester nsc1 = DisposeTester(
           child: SensitiveContent(
             key: nsc1Key,
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           ),
         );
@@ -394,7 +391,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -404,19 +401,19 @@ void main() {
         WidgetTester tester,
       ) async {
         final SensitiveContent sc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
         const Key nsc1Key = Key('nsc1');
         final DisposeTester asc1 = DisposeTester(
           child: SensitiveContent(
             key: nsc1Key,
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           ),
         );
         final SensitiveContent nsc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
@@ -429,7 +426,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -440,22 +437,22 @@ void main() {
         WidgetTester tester,
       ) async {
         final SensitiveContent sc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
         final SensitiveContent asc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
         final SensitiveContent nsc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, asc1, nsc1]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -468,16 +465,16 @@ void main() {
           final DisposeTester sc1 = DisposeTester(
             child: SensitiveContent(
               key: sc1Key,
-              sensitivityLevel: ContentSensitivity.sensitive,
+              sensitivity: ContentSensitivity.sensitive,
               child: Container(),
             ),
           );
           final SensitiveContent asc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
           final SensitiveContent nsc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
 
@@ -492,7 +489,7 @@ void main() {
           await tester.pump();
 
           expect(
-            sensitiveContentHost.calculatedContentSensitivityLevel,
+            sensitiveContentHost.calculatedContentSensitivity,
             equals(ContentSensitivity.autoSensitive),
           );
           expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -506,19 +503,19 @@ void main() {
         'with one not sensitive widget and one auto sensitive widget and auto sensitive widget gets disposed',
         (WidgetTester tester) async {
           final SensitiveContent sc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
           const Key asc1Key = Key('asc1');
           final DisposeTester asc1 = DisposeTester(
             child: SensitiveContent(
               key: asc1Key,
-              sensitivityLevel: ContentSensitivity.autoSensitive,
+              sensitivity: ContentSensitivity.autoSensitive,
               child: Container(),
             ),
           );
           final SensitiveContent nsc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
 
@@ -531,7 +528,7 @@ void main() {
           await tester.pump();
 
           expect(
-            sensitiveContentHost.calculatedContentSensitivityLevel,
+            sensitiveContentHost.calculatedContentSensitivity,
             equals(ContentSensitivity.sensitive),
           );
           expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -542,18 +539,18 @@ void main() {
         'with one not sensitive widget and one auto sensitive widget and not sensitive widget gets disposed',
         (WidgetTester tester) async {
           final SensitiveContent sc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
           final SensitiveContent asc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
           const Key nsc1Key = Key('nsc1');
           final DisposeTester nsc1 = DisposeTester(
             child: SensitiveContent(
               key: nsc1Key,
-              sensitivityLevel: ContentSensitivity.notSensitive,
+              sensitivity: ContentSensitivity.notSensitive,
               child: Container(),
             ),
           );
@@ -567,7 +564,7 @@ void main() {
           await tester.pump();
 
           expect(
-            sensitiveContentHost.calculatedContentSensitivityLevel,
+            sensitiveContentHost.calculatedContentSensitivity,
             equals(ContentSensitivity.sensitive),
           );
           expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -579,26 +576,26 @@ void main() {
         'with another sensitive widget, one not sensitive widget, and one auto sensitive widget',
         (WidgetTester tester) async {
           final SensitiveContent sc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
           final SensitiveContent sc2 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
           final SensitiveContent asc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
           final SensitiveContent nsc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
 
           await tester.pumpWidget(Column(children: <Widget>[sc1, sc2, asc1, nsc1]));
 
           expect(
-            sensitiveContentHost.calculatedContentSensitivityLevel,
+            sensitiveContentHost.calculatedContentSensitivity,
             equals(ContentSensitivity.sensitive),
           );
           expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -612,20 +609,20 @@ void main() {
           final DisposeTester sc1 = DisposeTester(
             child: SensitiveContent(
               key: sc1Key,
-              sensitivityLevel: ContentSensitivity.sensitive,
+              sensitivity: ContentSensitivity.sensitive,
               child: Container(),
             ),
           );
           final SensitiveContent sc2 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
           final SensitiveContent asc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
           final SensitiveContent nsc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
 
@@ -638,7 +635,7 @@ void main() {
           await tester.pump();
 
           expect(
-            sensitiveContentHost.calculatedContentSensitivityLevel,
+            sensitiveContentHost.calculatedContentSensitivity,
             equals(ContentSensitivity.sensitive),
           );
           expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -649,23 +646,23 @@ void main() {
         'with another sensitive widget, one not sensitive widget, and one auto sensitive widget and the auto sensitive widget is disposed',
         (WidgetTester tester) async {
           final SensitiveContent sc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
           final SensitiveContent sc2 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
           const Key asc1Key = Key('asc1');
           final DisposeTester asc1 = DisposeTester(
             child: SensitiveContent(
               key: asc1Key,
-              sensitivityLevel: ContentSensitivity.autoSensitive,
+              sensitivity: ContentSensitivity.autoSensitive,
               child: Container(),
             ),
           );
           final SensitiveContent nsc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
 
@@ -678,7 +675,7 @@ void main() {
           await tester.pump();
 
           expect(
-            sensitiveContentHost.calculatedContentSensitivityLevel,
+            sensitiveContentHost.calculatedContentSensitivity,
             equals(ContentSensitivity.sensitive),
           );
           expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -689,22 +686,22 @@ void main() {
         'with another sensitive widget, one not sensitive widget, and one auto sensitive widget and the not sensitive widget is disposed',
         (WidgetTester tester) async {
           final SensitiveContent sc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
           final SensitiveContent sc2 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
           final SensitiveContent asc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
           const Key nsc1Key = Key('nsc1');
           final DisposeTester nsc1 = DisposeTester(
             child: SensitiveContent(
               key: nsc1Key,
-              sensitivityLevel: ContentSensitivity.notSensitive,
+              sensitivity: ContentSensitivity.notSensitive,
               child: Container(),
             ),
           );
@@ -718,7 +715,7 @@ void main() {
           await tester.pump();
 
           expect(
-            sensitiveContentHost.calculatedContentSensitivityLevel,
+            sensitiveContentHost.calculatedContentSensitivity,
             equals(ContentSensitivity.sensitive),
           );
           expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -730,24 +727,24 @@ void main() {
         'with two auto sensitive widgets and one not sensitive widget and one auto sensitive widget gets disposed',
         (WidgetTester tester) async {
           final SensitiveContent sc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
           const Key asc1Key = Key('asc1');
           final DisposeTester asc1 = DisposeTester(
             child: SensitiveContent(
               key: asc1Key,
-              sensitivityLevel: ContentSensitivity.autoSensitive,
+              sensitivity: ContentSensitivity.autoSensitive,
               child: Container(),
             ),
           );
 
           final SensitiveContent asc2 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
           final SensitiveContent nsc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
 
@@ -760,7 +757,7 @@ void main() {
           await tester.pump();
 
           expect(
-            sensitiveContentHost.calculatedContentSensitivityLevel,
+            sensitiveContentHost.calculatedContentSensitivity,
             equals(ContentSensitivity.sensitive),
           );
           expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -771,23 +768,23 @@ void main() {
         'with one auto sensitive widgets and two not sensitive widgets and one not sensitive widget gets disposed',
         (WidgetTester tester) async {
           final SensitiveContent sc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.sensitive,
+            sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
           final SensitiveContent asc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
           const Key nsc1Key = Key('nsc1');
           final DisposeTester nsc1 = DisposeTester(
             child: SensitiveContent(
               key: nsc1Key,
-              sensitivityLevel: ContentSensitivity.notSensitive,
+              sensitivity: ContentSensitivity.notSensitive,
               child: Container(),
             ),
           );
           final SensitiveContent nsc2 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
 
@@ -800,7 +797,7 @@ void main() {
           await tester.pump();
 
           expect(
-            sensitiveContentHost.calculatedContentSensitivityLevel,
+            sensitiveContentHost.calculatedContentSensitivity,
             equals(ContentSensitivity.sensitive),
           );
           expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -815,18 +812,18 @@ void main() {
       // Tests with other auto sensitive widget(s):
       testWidgets('with another auto sensitive widget', (WidgetTester tester) async {
         final SensitiveContent asc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
         final SensitiveContent asc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[asc1, asc2]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -839,12 +836,12 @@ void main() {
         final DisposeTester asc1 = DisposeTester(
           child: SensitiveContent(
             key: asc1Key,
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           ),
         );
         final SensitiveContent asc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
@@ -857,7 +854,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -866,18 +863,18 @@ void main() {
       // Tests with not sensitive widget(s):
       testWidgets('with one not sensitive widget', (WidgetTester tester) async {
         final SensitiveContent asc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
         final SensitiveContent nsc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[asc1, nsc1]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -890,12 +887,12 @@ void main() {
         final DisposeTester asc1 = DisposeTester(
           child: SensitiveContent(
             key: asc1Key,
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           ),
         );
         final SensitiveContent nsc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
@@ -908,7 +905,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.notSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
@@ -916,14 +913,14 @@ void main() {
 
       testWidgets('with one not sensitive widget that gets disposed', (WidgetTester tester) async {
         final SensitiveContent asc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
         const Key nsc1Key = Key('nsc1');
         final DisposeTester nsc1 = DisposeTester(
           child: SensitiveContent(
             key: nsc1Key,
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           ),
         );
@@ -937,7 +934,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -947,19 +944,19 @@ void main() {
         WidgetTester tester,
       ) async {
         final SensitiveContent asc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
         const Key nsc1Key = Key('nsc1');
         final DisposeTester nsc1 = DisposeTester(
           child: SensitiveContent(
             key: nsc1Key,
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           ),
         );
         final SensitiveContent nsc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
@@ -972,7 +969,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -983,22 +980,22 @@ void main() {
         WidgetTester tester,
       ) async {
         final SensitiveContent asc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
         final SensitiveContent asc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
         final SensitiveContent nsc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[asc1, asc2, nsc1]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -1011,16 +1008,16 @@ void main() {
           final DisposeTester asc1 = DisposeTester(
             child: SensitiveContent(
               key: asc1Key,
-              sensitivityLevel: ContentSensitivity.autoSensitive,
+              sensitivity: ContentSensitivity.autoSensitive,
               child: Container(),
             ),
           );
           final SensitiveContent asc2 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
           final SensitiveContent nsc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
 
@@ -1033,7 +1030,7 @@ void main() {
           await tester.pump();
 
           expect(
-            sensitiveContentHost.calculatedContentSensitivityLevel,
+            sensitiveContentHost.calculatedContentSensitivity,
             equals(ContentSensitivity.autoSensitive),
           );
           expect(setContentSensitivityArgs.length, 0);
@@ -1044,18 +1041,18 @@ void main() {
         'with another auto sensitive widget and one not sensitive widget and the not sensitive widget gets disposed',
         (WidgetTester tester) async {
           final SensitiveContent asc1 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
           final SensitiveContent asc2 = SensitiveContent(
-            sensitivityLevel: ContentSensitivity.autoSensitive,
+            sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
           const Key nsc1Key = Key('nsc1');
           final DisposeTester nsc1 = DisposeTester(
             child: SensitiveContent(
               key: nsc1Key,
-              sensitivityLevel: ContentSensitivity.notSensitive,
+              sensitivity: ContentSensitivity.notSensitive,
               child: Container(),
             ),
           );
@@ -1069,7 +1066,7 @@ void main() {
           await tester.pump();
 
           expect(
-            sensitiveContentHost.calculatedContentSensitivityLevel,
+            sensitiveContentHost.calculatedContentSensitivity,
             equals(ContentSensitivity.autoSensitive),
           );
           expect(setContentSensitivityArgs.length, 0);
@@ -1083,18 +1080,18 @@ void main() {
     () {
       testWidgets('with another not sensitive widget', (WidgetTester tester) async {
         final SensitiveContent nsc1 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
         final SensitiveContent nsc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[nsc1, nsc2]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.notSensitive),
         );
         expect(setContentSensitivityArgs.length, 1);
@@ -1107,12 +1104,12 @@ void main() {
         final DisposeTester nsc1 = DisposeTester(
           child: SensitiveContent(
             key: nsc1Key,
-            sensitivityLevel: ContentSensitivity.notSensitive,
+            sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           ),
         );
         final SensitiveContent nsc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
@@ -1125,7 +1122,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.notSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
@@ -1134,7 +1131,7 @@ void main() {
   );
 
   group('changing SensitiveContent sensitivityLevel updates sensitive content setting as expected', () {
-    // Tests for one SensitiveContent widget changing sensitivity level:
+    // Tests for one SensitiveContent widget changing sensitivity:
     testWidgets('when one sensitive SensitiveContent widget changes to sensitive', (
       WidgetTester tester,
     ) async {
@@ -1147,7 +1144,7 @@ void main() {
       await tester.pumpWidget(sc);
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.sensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1160,7 +1157,7 @@ void main() {
       await tester.pump();
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.sensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1178,7 +1175,7 @@ void main() {
       await tester.pumpWidget(sc);
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.sensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1191,7 +1188,7 @@ void main() {
       await tester.pump();
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.autoSensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1212,7 +1209,7 @@ void main() {
       await tester.pumpWidget(sc);
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.sensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1225,7 +1222,7 @@ void main() {
       await tester.pump();
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.notSensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1246,7 +1243,7 @@ void main() {
       await tester.pumpWidget(sc);
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.autoSensitive),
       );
       expect(setContentSensitivityArgs.length, 0);
@@ -1259,7 +1256,7 @@ void main() {
       await tester.pump();
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.sensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1277,7 +1274,7 @@ void main() {
       await tester.pumpWidget(sc);
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.autoSensitive),
       );
       expect(setContentSensitivityArgs.length, 0);
@@ -1290,7 +1287,7 @@ void main() {
       await tester.pump();
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.autoSensitive),
       );
       expect(setContentSensitivityArgs.length, 0);
@@ -1308,7 +1305,7 @@ void main() {
       await tester.pumpWidget(sc);
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.autoSensitive),
       );
       expect(setContentSensitivityArgs.length, 0);
@@ -1321,7 +1318,7 @@ void main() {
       await tester.pump();
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.notSensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
@@ -1339,7 +1336,7 @@ void main() {
       await tester.pumpWidget(sc);
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.notSensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
@@ -1352,7 +1349,7 @@ void main() {
       await tester.pump();
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.sensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1373,7 +1370,7 @@ void main() {
       await tester.pumpWidget(sc);
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.notSensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
@@ -1386,7 +1383,7 @@ void main() {
       await tester.pump();
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.autoSensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1407,7 +1404,7 @@ void main() {
       await tester.pumpWidget(sc);
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.notSensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
@@ -1420,7 +1417,7 @@ void main() {
       await tester.pump();
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.notSensitive),
       );
       expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
@@ -1436,14 +1433,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
         final SensitiveContent sc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, sc2]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1456,7 +1453,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1472,14 +1469,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
         final SensitiveContent sc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, sc2]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1492,7 +1489,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1508,14 +1505,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
         final SensitiveContent asc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[sc, asc]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1528,7 +1525,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1547,14 +1544,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
         final SensitiveContent asc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[sc, asc]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1567,7 +1564,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1586,14 +1583,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
         final SensitiveContent nsc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[sc, nsc]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1606,7 +1603,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1625,14 +1622,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
         final SensitiveContent nsc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[sc, nsc]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1645,7 +1642,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.notSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1664,14 +1661,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
         final SensitiveContent sc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[asc, sc]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1684,7 +1681,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1700,14 +1697,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
         final SensitiveContent sc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[asc, sc]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1720,7 +1717,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1736,14 +1733,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
         final SensitiveContent asc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[asc1, asc2]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -1756,7 +1753,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1772,14 +1769,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
         final SensitiveContent asc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[asc1, asc2]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -1792,7 +1789,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -1808,14 +1805,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
         final SensitiveContent nsc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[asc, nsc]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -1828,7 +1825,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -1844,14 +1841,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
         final SensitiveContent nsc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[asc, nsc]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -1864,7 +1861,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.notSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
@@ -1880,14 +1877,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
         final SensitiveContent sc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[nsc, sc]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1903,7 +1900,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1922,14 +1919,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
         final SensitiveContent sc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[nsc, sc]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1945,7 +1942,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1964,14 +1961,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
         final SensitiveContent asc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[nsc, asc2]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -1987,7 +1984,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -2007,14 +2004,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
         final SensitiveContent asc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[nsc, asc]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -2030,7 +2027,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -2049,14 +2046,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
         final SensitiveContent nsc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[nsc1, nsc2]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.notSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
@@ -2069,7 +2066,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -2088,14 +2085,14 @@ void main() {
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
         final SensitiveContent nsc2 = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
 
         await tester.pumpWidget(Column(children: <Widget>[nsc1, nsc2]));
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.notSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.notSensitive]);
@@ -2108,7 +2105,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -2131,18 +2128,18 @@ void main() {
           break;
         }
         final SensitiveContent scChild = SensitiveContent(
-          sensitivityLevel: contentSensitivity,
+          sensitivity: contentSensitivity,
           child: Container(),
         );
         final SensitiveContent sc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: scChild,
         );
 
         await tester.pumpWidget(sc);
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -2153,18 +2150,18 @@ void main() {
       'when an autoSensitive SensitiveContent widget has a sensitive SensitiveContent child',
       (WidgetTester tester) async {
         final SensitiveContent ascChild = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
         final SensitiveContent sc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: ascChild,
         );
 
         await tester.pumpWidget(sc);
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
@@ -2175,18 +2172,18 @@ void main() {
       'when an autoSensitive SensitiveContent widget has an autoSensitive SensitiveContent child',
       (WidgetTester tester) async {
         final SensitiveContent ascChild = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
         final SensitiveContent asc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: ascChild,
         );
 
         await tester.pumpWidget(asc);
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -2197,18 +2194,18 @@ void main() {
       'when an autoSensitive SensitiveContent widget has an notSensitive SensitiveContent child',
       (WidgetTester tester) async {
         final SensitiveContent nscChild = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
         final SensitiveContent asc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: nscChild,
         );
 
         await tester.pumpWidget(asc);
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs.length, 0);
@@ -2219,11 +2216,11 @@ void main() {
       'when an notSensitive SensitiveContent widget has a sensitive SensitiveContent child',
       (WidgetTester tester) async {
         final SensitiveContent scChild = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.sensitive,
+          sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
         final SensitiveContent nsc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: scChild,
         );
 
@@ -2231,7 +2228,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -2245,11 +2242,11 @@ void main() {
       'when an notSensitive SensitiveContent widget has an autoSensitive SensitiveContent child',
       (WidgetTester tester) async {
         final SensitiveContent ascChild = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.autoSensitive,
+          sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
         final SensitiveContent nsc = SensitiveContent(
-          sensitivityLevel: ContentSensitivity.notSensitive,
+          sensitivity: ContentSensitivity.notSensitive,
           child: ascChild,
         );
 
@@ -2257,7 +2254,7 @@ void main() {
         await tester.pump();
 
         expect(
-          sensitiveContentHost.calculatedContentSensitivityLevel,
+          sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.autoSensitive),
         );
         expect(setContentSensitivityArgs, <ContentSensitivity>[
@@ -2319,6 +2316,6 @@ class ChangeContentSensitivityTesterState extends State<ChangeContentSensitivity
 
   @override
   Widget build(BuildContext context) {
-    return SensitiveContent(sensitivityLevel: _contentSensitivity, child: Container());
+    return SensitiveContent(key: widget.key, sensitivity: _contentSensitivity, child: Container());
   }
 }
