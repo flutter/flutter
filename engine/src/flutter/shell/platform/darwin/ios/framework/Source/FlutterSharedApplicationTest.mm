@@ -47,8 +47,9 @@ FLUTTER_ASSERT_ARC
 
 - (void)testSharedApplicationNotCalledIfIsAvailableFalse {
   id mockBundle = OCMPartialMock([NSBundle mainBundle]);
-  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"])
-      .andReturn([[NSDictionary alloc] init]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
   id mockApplication = OCMClassMock([UIApplication class]);
   XCTAssertFalse([FlutterSharedApplication isAvailable]);
   OCMReject([mockApplication sharedApplication]);

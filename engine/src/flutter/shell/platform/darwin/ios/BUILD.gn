@@ -13,7 +13,6 @@ import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
 import("//flutter/testing/testing.gni")
 
-darwin_extension_safe = true
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
 
 shell_gpu_configuration("ios_gpu_configuration") {
@@ -44,14 +43,9 @@ source_set("flutter_framework_source") {
   visibility = [ ":*" ]
   cflags_objc = flutter_cflags_objc
   cflags_objcc = flutter_cflags_objcc
-  if (darwin_extension_safe) {
-    cflags_objcc += [ "-fapplication-extension" ]
-  }
+  cflags_objcc += [ "-fapplication-extension" ]
 
   defines = [ "FLUTTER_FRAMEWORK=1" ]
-  if (darwin_extension_safe) {
-    defines += [ "APPLICATION_EXTENSION_API_ONLY=1" ]
-  }
   public_configs = [
     ":ios_gpu_configuration_config",
     "//flutter:config",
@@ -205,6 +199,7 @@ shared_library("ios_test_flutter") {
     "-F$platform_frameworks_path",
     "-mios-simulator-version-min=$ios_testing_deployment_target",
   ]
+  cflags_objcc += [ "-fapplication-extension" ]
 
   ldflags = [
     "-F$platform_frameworks_path",
@@ -269,10 +264,6 @@ shared_library("ios_test_flutter") {
     ":ios_gpu_configuration_config",
     "//flutter:config",
   ]
-
-  if (darwin_extension_safe) {
-    defines = [ "APPLICATION_EXTENSION_API_ONLY=1" ]
-  }
 }
 
 shared_library("create_flutter_framework_dylib") {
@@ -280,12 +271,8 @@ shared_library("create_flutter_framework_dylib") {
 
   output_name = "Flutter"
 
-  ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
-
-  if (darwin_extension_safe) {
-    cflags = [ "-fapplication-extension" ]
-    ldflags += [ "-fapplication-extension" ]
-  }
+  cflags_objcc = [ "-fapplication-extension" ]
+  ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter", "-fapplication-extension" ]
 
   public = _flutter_framework_headers
 
@@ -387,6 +374,12 @@ shared_library("copy_and_verify_framework_module") {
     "-F$framework_search_path",
     "-fapplication-extension",
   ]
+  ldflags = [
+    "-F$framework_search_path",
+    "-fapplication-extension",
+    "-Xlinker",
+    "-fatal_warnings",
+  ]
 
   sources = [ "framework/Source/FlutterUmbrellaImport.m" ]
   deps = [
@@ -395,17 +388,6 @@ shared_library("copy_and_verify_framework_module") {
     ":copy_framework_module_map",
     ":copy_framework_privacy_manifest",
   ]
-
-  if (darwin_extension_safe) {
-    ldflags = [
-      "-F$framework_search_path",
-      "-fapplication-extension",
-      "-Xlinker",
-      "-fatal_warnings",
-    ]
-    deps += [ ":copy_dylib" ]
-    frameworks = [ "Flutter.framework" ]
-  }
 }
 
 group("universal_flutter_framework") {

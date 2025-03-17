@@ -20,12 +20,8 @@ class GNTestCase(unittest.TestCase):
     self._expect_build_dir(['--runtime-mode', 'debug'], os.path.join('out', 'host_debug'))
     self._expect_build_dir(['--runtime-mode', 'release'], os.path.join('out', 'host_release'))
     self._expect_build_dir(['--ios'], os.path.join('out', 'ios_debug'))
-    self._expect_build_dir(['--ios', '--darwin-extension-safe'],
-                           os.path.join('out', 'ios_debug_extension_safe'))
     self._expect_build_dir(['--ios', '--runtime-mode', 'release'],
                            os.path.join('out', 'ios_release'))
-    self._expect_build_dir(['--ios', '--darwin-extension-safe', '--runtime-mode', 'release'],
-                           os.path.join('out', 'ios_release_extension_safe'))
     self._expect_build_dir(['--android'], os.path.join('out', 'android_debug'))
     self._expect_build_dir(['--android', '--runtime-mode', 'release'],
                            os.path.join('out', 'android_release'))
