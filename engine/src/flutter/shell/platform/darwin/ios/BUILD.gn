@@ -199,7 +199,6 @@ shared_library("ios_test_flutter") {
     "-F$platform_frameworks_path",
     "-mios-simulator-version-min=$ios_testing_deployment_target",
   ]
-  cflags_objcc += [ "-fapplication-extension" ]
 
   ldflags = [
     "-F$platform_frameworks_path",
@@ -272,7 +271,10 @@ shared_library("create_flutter_framework_dylib") {
   output_name = "Flutter"
 
   cflags_objcc = [ "-fapplication-extension" ]
-  ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter", "-fapplication-extension" ]
+  ldflags = [
+    "-Wl,-install_name,@rpath/Flutter.framework/Flutter",
+    "-fapplication-extension",
+  ]
 
   public = _flutter_framework_headers
 
