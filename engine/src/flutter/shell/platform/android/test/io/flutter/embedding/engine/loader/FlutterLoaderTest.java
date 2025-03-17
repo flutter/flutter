@@ -329,7 +329,7 @@ public class FlutterLoaderTest {
     flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
-    final String shaderModeArg = "--impeller-shader-mode";
+    final String shaderModeArg = "--impeller-shader-mode=test";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
         .init(
