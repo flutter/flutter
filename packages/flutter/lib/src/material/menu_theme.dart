@@ -109,7 +109,7 @@ class MenuThemeData with Diagnosticable {
 /// * [MenuItemButton], a widget that is a selectable item in a menu bar menu.
 /// * [SubmenuButton], a widget that specifies an item with a cascading submenu
 ///   in a [MenuBar] menu.
-class MenuTheme extends InheritedTheme {
+class MenuTheme extends InheritedTheme<MenuThemeData, Object?> {
   /// Creates a const theme that controls the configurations for the menus
   /// created by the [SubmenuButton] or [MenuAnchor] widgets.
   const MenuTheme({super.key, required this.data, required super.child});
@@ -148,4 +148,19 @@ class MenuTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(MenuTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    MenuTheme oldWidget,
+    Set<ThemeSelector<MenuThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<MenuThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

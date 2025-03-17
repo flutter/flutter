@@ -301,7 +301,7 @@ class NavigationRailThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [NavigationRail] properties that are not
 /// given an explicit non-null value.
-class NavigationRailTheme extends InheritedTheme {
+class NavigationRailTheme extends InheritedTheme<NavigationRailThemeData, Object?> {
   /// Creates a navigation rail theme that controls the
   /// [NavigationRailThemeData] properties for a [NavigationRail].
   const NavigationRailTheme({super.key, required this.data, required super.child});
@@ -334,4 +334,19 @@ class NavigationRailTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(NavigationRailTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    NavigationRailTheme oldWidget,
+    Set<ThemeSelector<NavigationRailThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<NavigationRailThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

@@ -849,7 +849,7 @@ class DatePickerThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [DatePickerDialog] properties that are not
 /// given an explicit non-null value.
-class DatePickerTheme extends InheritedTheme {
+class DatePickerTheme extends InheritedTheme<DatePickerThemeData, Object?> {
   /// Creates a [DatePickerTheme] that controls visual parameters for
   /// descendent [DatePickerDialog]s.
   const DatePickerTheme({super.key, required this.data, required super.child});
@@ -934,6 +934,21 @@ class DatePickerTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(DatePickerTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    DatePickerTheme oldWidget,
+    Set<ThemeSelector<DatePickerThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<DatePickerThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 // Hand coded defaults based on Material Design 2.

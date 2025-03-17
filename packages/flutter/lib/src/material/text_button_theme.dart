@@ -90,7 +90,7 @@ class TextButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [TextButton]'s defaults.
 ///  * [ThemeData.textButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [TextButton]s below the overall [Theme].
-class TextButtonTheme extends InheritedTheme {
+class TextButtonTheme extends InheritedTheme<TextButtonThemeData, Object?> {
   /// Create a [TextButtonTheme].
   const TextButtonTheme({super.key, required this.data, required super.child});
 
@@ -120,4 +120,19 @@ class TextButtonTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(TextButtonTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    TextButtonTheme oldWidget,
+    Set<ThemeSelector<TextButtonThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<TextButtonThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
