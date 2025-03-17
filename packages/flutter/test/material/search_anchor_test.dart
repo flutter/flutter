@@ -4007,6 +4007,40 @@ void main() {
     await tester.pump();
     expect(searchViewState, 'Closed');
   });
+
+  testWidgets(
+    'The last element of the suggestion list should be visible when scrolling to the end of list',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SearchAnchor.bar(
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return List<Widget>.generate(30, (int index) {
+                return ListTile(
+                  titleAlignment: ListTileTitleAlignment.center,
+                  title: Text('Item $index'),
+                );
+              });
+            },
+          ),
+        ),
+      );
+
+      // Open search view.
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+
+      // Make sure the first item is visible.
+      expect(find.text('Item 0'), findsOne);
+
+      // Scroll down to the end of the list.
+      await tester.fling(find.byType(ListView), const Offset(0, -5000), 5000);
+      await tester.pumpAndSettle();
+
+      // Make sure the last item is visible.
+      expect(find.text('Item 29'), findsOne);
+    },
+  );
 }
 
 Future<void> checkSearchBarDefaults(

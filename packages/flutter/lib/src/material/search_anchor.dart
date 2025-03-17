@@ -1145,6 +1145,9 @@ class _ViewContentState extends State<_ViewContent> {
                                       context: context,
                                       removeTop: true,
                                       child: ListView(
+                                        padding: EdgeInsets.only(
+                                          bottom: MediaQuery.viewInsetsOf(context).bottom,
+                                        ),
                                         shrinkWrap: effectiveShrinkWrap,
                                         children: result.toList(),
                                       ),
