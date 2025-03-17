@@ -5580,7 +5580,8 @@ class SemanticsConfiguration {
       return true;
     }
     if (_hasFlag(SemanticsFlag.isTextField) ||
-        _hasFlag(SemanticsFlag.isHeader) ||
+        // In non web platforms, the header is a trait.
+        (_hasFlag(SemanticsFlag.isHeader) && kIsWeb) ||
         _hasFlag(SemanticsFlag.isSlider) ||
         _hasFlag(SemanticsFlag.isLink) ||
         _hasFlag(SemanticsFlag.scopesRoute) ||

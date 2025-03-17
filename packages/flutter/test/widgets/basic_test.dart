@@ -11,6 +11,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -473,7 +474,7 @@ void main() {
       expect(node2.hasFlag(SemanticsFlag.scopesRoute), isTrue);
     });
 
-    testWidgets('Semantics does not merge role - header', (WidgetTester tester) async {
+    testWidgets('Semantics does not merge role - header on web', (WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
       await tester.pumpWidget(
@@ -489,9 +490,13 @@ void main() {
       );
       final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
       final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
-      expect(node1 != node2, isTrue);
-      expect(node1.role, SemanticsRole.dialog);
-      expect(node2.hasFlag(SemanticsFlag.isHeader), isTrue);
+      if (kIsWeb) {
+        expect(node1 != node2, isTrue);
+        expect(node1.role, SemanticsRole.dialog);
+        expect(node2.hasFlag(SemanticsFlag.isHeader), isTrue);
+      } else {
+        expect(node1 == node2, isTrue);
+      }
     });
 
     testWidgets('Semantics does not merge role - image', (WidgetTester tester) async {
