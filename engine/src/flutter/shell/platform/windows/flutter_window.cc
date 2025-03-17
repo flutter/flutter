@@ -487,7 +487,6 @@ LRESULT CALLBACK FlutterWindow::WndProc(HWND const window,
     auto that = static_cast<FlutterWindow*>(cs->lpCreateParams);
     that->window_handle_ = window;
     that->text_input_manager_->SetWindowHandle(window);
-    EnableMouseInPointer(TRUE);
   } else if (FlutterWindow* that = GetThisFromHandle(window)) {
     return that->HandleMessage(message, wparam, lparam);
   }
@@ -549,7 +548,8 @@ FlutterWindow::HandleMessage(UINT const message,
         }
         if (message == WM_POINTERDOWN) {
           OnPointerDown(x, y, device_kind, touch_id, WM_LBUTTONDOWN);
-        } else if (message == WM_POINTERUPDATE) {
+        } else if (message == WM_POINTERUPDATE &&
+                   pointerInfo.pointerFlags & POINTER_FLAG_INCONTACT) {
           OnPointerMove(x, y, device_kind, touch_id, 0);
         } else if (message == WM_POINTERLEAVE) {
           OnPointerUp(x, y, device_kind, touch_id, WM_LBUTTONUP);
