@@ -2230,7 +2230,12 @@ void main() {
         FocusNode focusNode,
         VoidCallback onSubmitted,
       ) {
-        return TextField(key: fieldKey, focusNode: focusNode, controller: textEditingController);
+return StatefulBuilder(
+              builder: (BuildContext context, StateSetter localStateSetter) {
+                setState = localStateSetter;
+                return SizedBox(width: width, child: TextField(key: fieldKey, focusNode: focusNode, controller: textEditingController));
+              },
+            );
       },
     );
     await tester.pumpWidget(
@@ -2238,12 +2243,7 @@ void main() {
         home: Scaffold(
           body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter localStateSetter) {
-                setState = localStateSetter;
-                return SizedBox(width: width, child: autocomplete);
-              },
-            ),
+            child: autocomplete,
           ),
         ),
       ),
