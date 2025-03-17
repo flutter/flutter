@@ -1433,11 +1433,11 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
   // respective nodes.
   auto accessibility_bridge1 = view1->accessibility_bridge().lock();
   auto tree1 = accessibility_bridge1->GetTree();
-  EXPECT_NE(tree1->GetFromId(1), nullptr);
+  EXPECT_NE(tree1->GetFromId(view1->view_id() + 1), nullptr);
 
   auto accessibility_bridge2 = view2->accessibility_bridge().lock();
   auto tree2 = accessibility_bridge2->GetTree();
-  EXPECT_NE(tree2->GetFromId(2), nullptr);
+  EXPECT_NE(tree2->GetFromId(view2->view_id() + 1), nullptr);
 }
 
 }  // namespace testing

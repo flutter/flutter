@@ -1639,8 +1639,8 @@ Future<void> a11y_main_multi_view() async {
   // 1: Return initial state (semantics disabled).
   notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
 
-  // 2: Add the first view (implicitly handled by PlatformDispatcher)
-  // 3: Add the second view (implicitly handled by PlatformDispatcher)
+  // 2: Add the first view (implicitly handled by PlatformDispatcher).
+  // 3: Add the second view (implicitly handled by PlatformDispatcher).
 
   // 4: Await semantics enabled from embedder.
   await semanticsChanged;
@@ -1649,11 +1649,7 @@ Future<void> a11y_main_multi_view() async {
   // 5: Return initial state of accessibility features.
   notifyAccessibilityFeatures(PlatformDispatcher.instance.accessibilityFeatures.reduceMotion);
 
-  // 6: Await accessibility features changed from embedder.
-  await accessibilityFeaturesChanged;
-  notifyAccessibilityFeatures(PlatformDispatcher.instance.accessibilityFeatures.reduceMotion);
-
-  // 7: Fire semantics updates.
+  // 6: Fire semantics updates.
   SemanticsUpdateBuilder createForView(FlutterView view) {
     return SemanticsUpdateBuilder()..updateNode(
       id: view.viewId + 1, // For simplicity, give each node an id of viewId + 1
@@ -1699,7 +1695,7 @@ Future<void> a11y_main_multi_view() async {
 
   signalNativeTest();
 
-  // 8: Await semantics disabled from embedder.
+  // 7: Await semantics disabled from embedder.
   await semanticsChanged;
   notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
 }

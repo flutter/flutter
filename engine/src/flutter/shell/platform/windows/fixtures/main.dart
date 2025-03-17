@@ -471,7 +471,7 @@ Future<void> sendSemanticsTreeInfo() async {
     return builder.build();
   }
 
-  view1.updateSemantics(createSemanticsUpdate(1));
-  view2.updateSemantics(createSemanticsUpdate(2));
+  view1.updateSemantics(createSemanticsUpdate(view1.viewId + 1));
+  view2.updateSemantics(createSemanticsUpdate(view2.viewId + 1));
   signal();
 }

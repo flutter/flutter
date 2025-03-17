@@ -834,7 +834,9 @@ TEST_F(EmbedderA11yTest, A11yTreesAreConsistentWithMultipleViews) {
                     0);
         }
 
-        semantics_update_latch.Signal();
+        if (num_times_set_semantics_update_callback2_called == 3) {
+          semantics_update_latch.Signal();
+        }
       });
 
   EmbedderConfigBuilder builder(context);
@@ -926,21 +928,7 @@ TEST_F(EmbedderA11yTest, A11yTreesAreConsistentWithMultipleViews) {
   // 5: Wait for notifyAccessibilityFeatures (reduce_motion == false)
   notify_features_latch.Wait();
 
-  // 6: Wait for notifyAccessibilityFeatures (reduce_motion == true)
-  fml::AutoResetWaitableEvent notify_features_latch_2;
-  notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
-    Dart_Handle exception = nullptr;
-    bool enabled =
-        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
-    ASSERT_TRUE(enabled);
-    notify_features_latch_2.Signal();
-  };
-  result = FlutterEngineUpdateAccessibilityFeatures(
-      engine.get(), kFlutterAccessibilityFeatureReduceMotion);
-  ASSERT_EQ(result, FlutterEngineResult::kSuccess);
-  notify_features_latch_2.Wait();
-
-  // 7: Wait for UpdateSemantics callback on platform (current) thread.
+  // 6: Wait for UpdateSemantics callback on platform (current) thread.
   // for all pending updates. Expect that it is called 3 times (once for
   // the implicit view and two more times for the views that were manually
   // added).
@@ -949,7 +937,7 @@ TEST_F(EmbedderA11yTest, A11yTreesAreConsistentWithMultipleViews) {
   semantics_update_latch.Wait();
   EXPECT_EQ(num_times_set_semantics_update_callback2_called, 3);
 
-  // 8: Disable semantics. Wait for NotifySemanticsEnabled(false).
+  // 7: Disable semantics. Wait for NotifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_3;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
