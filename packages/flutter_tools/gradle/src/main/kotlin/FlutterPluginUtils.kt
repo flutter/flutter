@@ -29,13 +29,14 @@ object FlutterPluginUtils {
             return ""
         }
         return parts[0] +
-            parts.drop(1).joinToString("") { FlutterPluginUtils.capitalize(it) }
+            parts.drop(1).joinToString("") { capitalize(it) }
     }
 
     // Kotlin's capitalize function is deprecated, but the suggested replacement uses syntax that
     // our minimum version doesn't support yet. Centralize the use to one place, so that when our
     // minimum version does support the replacement we can replace by changing a single line.
     @JvmStatic
+    @Suppress("DEPRECATION")
     internal fun capitalize(string: String): String = string.capitalize()
 
     // compareTo implementation of version strings in the format of ints and periods
