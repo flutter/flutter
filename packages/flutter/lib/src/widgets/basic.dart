@@ -7342,6 +7342,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? image,
     bool? liveRegion,
     bool? expanded,
+    bool? isRequired,
     int? maxValueLength,
     int? currentValueLength,
     String? identifier,
@@ -7382,6 +7383,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback? onFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
     ui.SemanticsRole? role,
+    Set<String>? controlsNodes,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -7415,6 +7417,7 @@ class Semantics extends SingleChildRenderObjectWidget {
            hidden: hidden,
            image: image,
            liveRegion: liveRegion,
+           isRequired: isRequired,
            maxValueLength: maxValueLength,
            currentValueLength: currentValueLength,
            identifier: identifier,
@@ -7457,6 +7460,7 @@ class Semantics extends SingleChildRenderObjectWidget {
                    ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
                    : null,
            role: role,
+           controlsNodes: controlsNodes,
          ),
        );
 
