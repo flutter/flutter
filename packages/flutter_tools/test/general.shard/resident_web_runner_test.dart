@@ -1023,7 +1023,7 @@ name: my_app
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   }
