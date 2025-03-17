@@ -171,17 +171,7 @@ object FlutterPluginUtils {
             )?.toString()
             ?.toBoolean() ?: false
 
-//    /**
-//     * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
-//     * or string version.
-//     */
-//    @JvmStatic internal fun getCompileSdkFromProject(project: Project): String {
-//        // TODO(gmackall): This is pretty crazy, we should fix asap after the conversion is done
-//        return project.extensions
-//            .findByType(AppExtension::class.java)!!
-//            .compileSdkVersion!!
-//            .substring(8)
-//    }
+//   TODO(gmackall): @JvmStatic internal fun getCompileSdkFromProject(project: Project): String {}
 
     /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
