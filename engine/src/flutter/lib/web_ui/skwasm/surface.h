@@ -75,10 +75,12 @@ class Surface {
                               uint32_t callbackId);
 
  private:
+  void _runWorker();
   void _init();
   void _resizeCanvasToFit(int width, int height);
   void _recreateSurface();
 
+  std::string _canvasID;
   CallbackHandler* _callbackHandler = nullptr;
   uint32_t _currentCallbackId = 0;
 
@@ -93,8 +95,6 @@ class Surface {
   GrGLint _stencil;
 
   pthread_t _thread;
-
-  bool _isInitialized = false;
 };
 }  // namespace Skwasm
 
