@@ -3762,11 +3762,7 @@ void clearForms() {
 
 /// Waits until the text strategy closes and moves the focus accordingly.
 Future<void> waitForTextStrategyStopPropagation() async {
-  final Completer<void> animationFrameFired = Completer<void>();
-  domWindow.requestAnimationFrame((JSNumber _) {
-    animationFrameFired.complete();
-  });
-  return animationFrameFired.future;
+  await Future<void>.delayed(Duration.zero);
 }
 
 class GlobalTextEditingStrategySpy extends GloballyPositionedTextEditingStrategy {
