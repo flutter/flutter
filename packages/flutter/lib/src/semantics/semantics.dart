@@ -1175,6 +1175,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.namesRoute,
     this.image,
     this.liveRegion,
+    this.isRequired,
     this.maxValueLength,
     this.currentValueLength,
     this.identifier,
@@ -1444,6 +1445,22 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [SemanticsFlag.isLiveRegion], the semantics flag this setting controls.
   ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
   final bool? liveRegion;
+
+  /// If non-null, whether the node should be considered required.
+  ///
+  /// If true, user input is required on the semantics node before a form can
+  /// be submitted. If false, the node is optional before a form can be
+  /// submitted. If null, the node does not have a required semantics.
+  ///
+  /// For example, a login form requires its email text field to be non-empty.
+  ///
+  /// On web, this will set a `aria-required` attribute on the DOM element
+  /// that corresponds to the semantics node.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsFlag.isRequired], for the flag this setting controls.
+  final bool? isRequired;
 
   /// The maximum number of characters that can be entered into an editable
   /// text field.
@@ -2036,6 +2053,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('isRequired', isRequired, defaultValue: null));
     properties.add(StringProperty('identifier', identifier, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(
@@ -5347,7 +5365,7 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] is a keyboard key (true) or not
-  //(false).
+  /// (false).
   bool get isKeyboardKey => _hasFlag(SemanticsFlag.isKeyboardKey);
   set isKeyboardKey(bool value) {
     _setFlag(SemanticsFlag.isKeyboardKey, value);
@@ -5405,6 +5423,24 @@ class SemanticsConfiguration {
   bool get isMultiline => _hasFlag(SemanticsFlag.isMultiline);
   set isMultiline(bool value) {
     _setFlag(SemanticsFlag.isMultiline, value);
+  }
+
+  /// Whether the semantics node has a required state.
+  ///
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have a required state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have a
+  /// required state.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsFlag.isRequired], for a full description of required nodes.
+  bool? get isRequired =>
+      _hasFlag(SemanticsFlag.hasRequiredState) ? _hasFlag(SemanticsFlag.isRequired) : null;
+  set isRequired(bool? value) {
+    _setFlag(SemanticsFlag.hasRequiredState, true);
+    _setFlag(SemanticsFlag.isRequired, value!);
   }
 
   /// Whether the platform can scroll the semantics node when the user attempts
@@ -5539,22 +5575,6 @@ class SemanticsConfiguration {
 
   bool _hasFlag(SemanticsFlag flag) => (_flags & flag.index) != 0;
 
-  bool get _hasExplicitRole {
-    if (_role != SemanticsRole.none) {
-      return true;
-    }
-    if (_hasFlag(SemanticsFlag.isTextField) ||
-        _hasFlag(SemanticsFlag.isHeader) ||
-        _hasFlag(SemanticsFlag.isSlider) ||
-        _hasFlag(SemanticsFlag.isLink) ||
-        _hasFlag(SemanticsFlag.scopesRoute) ||
-        _hasFlag(SemanticsFlag.isImage) ||
-        _hasFlag(SemanticsFlag.isKeyboardKey)) {
-      return true;
-    }
-    return false;
-  }
-
   // CONFIGURATION COMBINATION LOGIC
 
   /// Whether this configuration is compatible with the provided `other`
@@ -5582,9 +5602,6 @@ class SemanticsConfiguration {
       return false;
     }
     if (_attributedValue.string.isNotEmpty && other._attributedValue.string.isNotEmpty) {
-      return false;
-    }
-    if (_hasExplicitRole && other._hasExplicitRole) {
       return false;
     }
     return true;
