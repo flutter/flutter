@@ -42,7 +42,7 @@ object FlutterTaskHelper {
         if (dependenciesFile.exists()) {
             // Dependencies file has Makefile syntax:
             //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
-            val depText = dependenciesFile.readText() // Kotlin way to read file text
+            val depText = dependenciesFile.readText()
             // So we split list of files by non-escaped(by backslash) space,
             val parts = depText.split(": ")
             val fileString = parts[if (inputs) 1 else 0]
