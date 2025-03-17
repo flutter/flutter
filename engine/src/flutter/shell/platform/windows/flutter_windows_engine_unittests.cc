@@ -1428,12 +1428,18 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
   while (!done) {
     windows_engine->task_runner()->ProcessTasks();
   }
+  done = false;
 
   // Expect: that the semantics trees are updated with their
   // respective nodes.
   auto accessibility_bridge1 = view1->accessibility_bridge().lock();
   auto tree1 = accessibility_bridge1->GetTree();
   EXPECT_NE(tree1->GetFromId(view1->view_id() + 1), nullptr);
+
+  while (!done) {
+    windows_engine->task_runner()->ProcessTasks();
+  }
+  done = false;
 
   auto accessibility_bridge2 = view2->accessibility_bridge().lock();
   auto tree2 = accessibility_bridge2->GetTree();
