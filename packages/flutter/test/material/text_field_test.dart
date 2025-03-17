@@ -16153,11 +16153,11 @@ void main() {
       (WidgetTester tester) async {
         TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
             true;
-        updateMediaQuery(tester);
+        updateMediaQueryFromView(tester);
         addTearDown(() {
           TestWidgetsFlutterBinding.instance.platformDispatcher
               .resetSupportsShowingSystemContextMenu();
-          updateMediaQuery(tester);
+          updateMediaQueryFromView(tester);
         });
 
         final TextEditingController controller = TextEditingController(text: 'one two three');

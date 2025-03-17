@@ -22,7 +22,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../impeller_test_helpers.dart';
 import '../widgets/clipboard_utils.dart';
-import '../widgets/editable_text_utils.dart' show textOffsetToPosition, updateMediaQuery;
+import '../widgets/editable_text_utils.dart' show textOffsetToPosition, updateMediaQueryFromView;
 import '../widgets/semantics_tester.dart';
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
@@ -5574,11 +5574,11 @@ void main() {
       (WidgetTester tester) async {
         TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
             true;
-        updateMediaQuery(tester);
+        updateMediaQueryFromView(tester);
         addTearDown(() {
           TestWidgetsFlutterBinding.instance.platformDispatcher
               .resetSupportsShowingSystemContextMenu();
-          updateMediaQuery(tester);
+          updateMediaQueryFromView(tester);
         });
 
         final TextEditingController controller = TextEditingController(text: 'one two three');
