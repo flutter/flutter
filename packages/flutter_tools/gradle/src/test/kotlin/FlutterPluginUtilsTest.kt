@@ -131,12 +131,7 @@ class FlutterPluginUtilsTest {
         val settingsGradle = File(projectDir.parent.toFile(), "settings.gradle")
         settingsGradle.createNewFile()
 
-        val mockProject =
-            mockk<Project> {
-                every { this@mockk.projectDir } returns projectDir.toFile()
-            }
-
-        val result = FlutterPluginUtils.settingsGradleFile(mockProject)
+        val result = FlutterPluginUtils.getSettingsGradleFileFromProjectDir(projectDir.toFile(), mockk())
         assertEquals(settingsGradle, result)
     }
 
@@ -154,13 +149,8 @@ class FlutterPluginUtilsTest {
 
         val mockLogger = mockk<Logger>()
         every { mockLogger.error(any()) } returns Unit
-        val mockProject =
-            mockk<Project> {
-                every { this@mockk.projectDir } returns projectDir.toFile()
-                every { this@mockk.logger } returns mockLogger
-            }
 
-        val result = FlutterPluginUtils.settingsGradleFile(mockProject)
+        val result = FlutterPluginUtils.getSettingsGradleFileFromProjectDir(projectDir.toFile(), mockLogger)
         assertEquals(groovySettingsGradle, result)
         verify { mockLogger.error(any()) }
     }
@@ -176,12 +166,7 @@ class FlutterPluginUtilsTest {
         val buildGradle = File(projectDir.parent.resolve("app").toFile(), "build.gradle")
         buildGradle.createNewFile()
 
-        val mockProject =
-            mockk<Project> {
-                every { this@mockk.projectDir } returns projectDir.toFile()
-            }
-
-        val result = FlutterPluginUtils.buildGradleFile(mockProject)
+        val result = FlutterPluginUtils.getBuildGradleFileFromProjectDir(projectDir.toFile(), mockk())
         assertEquals(buildGradle, result)
     }
 
@@ -199,13 +184,8 @@ class FlutterPluginUtilsTest {
 
         val mockLogger = mockk<Logger>()
         every { mockLogger.error(any()) } returns Unit
-        val mockProject =
-            mockk<Project> {
-                every { this@mockk.projectDir } returns projectDir.toFile()
-                every { this@mockk.logger } returns mockLogger
-            }
 
-        val result = FlutterPluginUtils.buildGradleFile(mockProject)
+        val result = FlutterPluginUtils.getBuildGradleFileFromProjectDir(projectDir.toFile(), mockLogger)
         assertEquals(groovyBuildGradle, result)
         verify { mockLogger.error(any()) }
     }

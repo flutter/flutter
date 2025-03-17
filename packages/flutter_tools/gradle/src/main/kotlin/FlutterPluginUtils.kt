@@ -6,6 +6,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
+import org.gradle.api.logging.Logger
 import java.io.File
 
 /**
@@ -117,12 +118,15 @@ object FlutterPluginUtils {
      * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
      */
     @JvmStatic
-    @JvmName("settingsGradleFile")
-    internal fun settingsGradleFile(project: Project): File {
-        val settingsGradle = File(project.projectDir.parentFile, "settings.gradle")
-        val settingsGradleKts = File(project.projectDir.parentFile, "settings.gradle.kts")
+    @JvmName("getSettingsGradleFileFromProjectDir")
+    internal fun getSettingsGradleFileFromProjectDir(
+        projectDirectory: File,
+        logger: Logger
+    ): File {
+        val settingsGradle = File(projectDirectory.parentFile, "settings.gradle")
+        val settingsGradleKts = File(projectDirectory.parentFile, "settings.gradle.kts")
         if (settingsGradle.exists() && settingsGradleKts.exists()) {
-            project.logger.error(
+            logger.error(
                 """
                 Both settings.gradle and settings.gradle.kts exist, so
                 settings.gradle.kts is ignored. This is likely a mistake.
@@ -139,12 +143,15 @@ object FlutterPluginUtils {
      * Kotlin (build.gradle.kts). This is the same behavior as Gradle 8.5.
      */
     @JvmStatic
-    @JvmName("buildGradleFile")
-    internal fun buildGradleFile(project: Project): File {
-        val buildGradle = File(File(project.projectDir.parentFile, "app"), "build.gradle")
-        val buildGradleKts = File(File(project.projectDir.parentFile, "app"), "build.gradle.kts")
+    @JvmName("getBuildGradleFileFromProjectDir")
+    internal fun getBuildGradleFileFromProjectDir(
+        projectDirectory: File,
+        logger: Logger
+    ): File {
+        val buildGradle = File(File(projectDirectory.parentFile, "app"), "build.gradle")
+        val buildGradleKts = File(File(projectDirectory.parentFile, "app"), "build.gradle.kts")
         if (buildGradle.exists() && buildGradleKts.exists()) {
-            project.logger.error(
+            logger.error(
                 """
                 Both build.gradle and build.gradle.kts exist, so 
                 build.gradle.kts is ignored. This is likely a mistake.

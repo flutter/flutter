@@ -540,14 +540,15 @@ class FlutterPlugin implements Plugin<Project> {
         try {
             // Read the contents of the settings.gradle file.
             // Remove block/line comments
-            String settingsText = FlutterPluginUtils.settingsGradleFile(project).text
+            String settingsText = FlutterPluginUtils.getSettingsGradleFileFromProjectDir(project.projectDir, project.logger).text
             settingsText = settingsText.replaceAll(/(?s)\/\*.*?\*\//, '').replaceAll(/(?m)\/\/.*$/, '')
 
             if (!settingsText.contains("'.flutter-plugins'")) {
                 return
             }
         } catch (FileNotFoundException ignored) {
-            throw new GradleException("settings.gradle/settings.gradle.kts does not exist: ${FlutterPluginUtils.settingsGradleFile(project).absolutePath}")
+            throw new GradleException("settings.gradle/settings.gradle.kts does not exist: " +
+                    "${FlutterPluginUtils.getSettingsGradleFileFromProjectDir(project.projectDir, project.logger).absolutePath}")
         }
         // TODO(matanlurey): https://github.com/flutter/flutter/issues/48918.
         project.logger.quiet("Warning: This project is still reading the deprecated '.flutter-plugins. file.")
@@ -712,9 +713,10 @@ class FlutterPlugin implements Plugin<Project> {
                             for (Tuple2<String, String> pluginToCompileSdkVersion : pluginsWithHigherSdkVersion) {
                                 project.logger.error("- ${pluginToCompileSdkVersion.v1} compiles against Android SDK ${pluginToCompileSdkVersion.v2}")
                             }
+                            File buildGradleFile = FlutterPluginUtils.getBuildGradleFileFromProjectDir(project.projectDir, project.logger)
                             project.logger.error("""\
                                 Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
-                                Add the following to ${FlutterPluginUtils.buildGradleFile(project).path}:
+                                Add the following to ${buildGradleFile.path}:
 
                                     android {
                                         compileSdk = ${maxPluginCompileSdkVersion}
@@ -727,9 +729,10 @@ class FlutterPlugin implements Plugin<Project> {
                             for (Tuple2<String, String> pluginToNdkVersion : pluginsWithDifferentNdkVersion) {
                                 project.logger.error("- ${pluginToNdkVersion.v1} requires Android NDK ${pluginToNdkVersion.v2}")
                             }
+                            File buildGradleFile = FlutterPluginUtils.getBuildGradleFileFromProjectDir(project.projectDir, project.logger)
                             project.logger.error("""\
                                 Fix this issue by using the highest Android NDK version (they are backward compatible).
-                                Add the following to ${FlutterPluginUtils.buildGradleFile(project).path}:
+                                Add the following to ${buildGradleFile.path}:
 
                                     android {
                                         ndkVersion = \"${maxPluginNdkVersion}\"
