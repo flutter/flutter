@@ -4505,11 +4505,9 @@ void _testRequirable() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
     <sem aria-required="false"></sem>
     <sem aria-required="true"></sem>
-  </sem-c>
 </sem>
 ''');
 
@@ -4534,11 +4532,9 @@ void _testRequirable() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
     <sem aria-required="true"></sem>
     <sem aria-required="false"></sem>
-  </sem-c>
 </sem>
 ''');
 
@@ -4549,11 +4545,9 @@ void _testRequirable() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
     <sem></sem>
     <sem></sem>
-  </sem-c>
 </sem>
 ''');
 
