@@ -18,7 +18,7 @@ import '../convert.dart' show utf8;
 import 'plist_parser.dart';
 
 const String _developmentTeamBuildSettingName = 'DEVELOPMENT_TEAM';
-const String _codeSignStyleBuildSettingNAme = 'CODE_SIGN_STYLE';
+const String _codeSignStyleBuildSettingName = 'CODE_SIGN_STYLE';
 const String _provisioningProfileSpecifierBuildSettingName = 'PROVISIONING_PROFILE_SPECIFIER';
 const String _provisioningProfileBuildSettingName = 'PROVISIONING_PROFILE';
 
@@ -91,7 +91,7 @@ const String fixWithDevelopmentTeamInstruction = '''
          - Let Xcode automatically provision a profile for your app
   4- Build or run your project again''';
 
-/// Pattern to identity from list of identities.
+/// Pattern to extract identity from list of identities.
 ///
 /// Example:
 ///
@@ -177,15 +177,15 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
   return settings._getCodeSigningBuildSettings();
 }
 
-/// Return the `DEVELOPMENT_TEAM` for automatic code-signing.
+/// Returns the `DEVELOPMENT_TEAM` for automatic code-signing.
 /// This function should not be used for manual code-signing.
 ///
-/// Find the `DEVELOPMENT_TEAM` from the saved `ios-signing-cert` or prompt the
+/// This finds the `DEVELOPMENT_TEAM` from the saved `ios-signing-cert` or prompt the
 /// user to select a code-signing identity for automatic code-signing if
 /// `ios-signing-cert` is not saved or invalid.
 ///
 /// If `ios-signing-profile` (manual code-signing with a provisioning profile)
-/// is saved instead, return null.
+/// is saved instead, returns null.
 Future<String?> getCodeSigningIdentityDevelopmentTeam({
   required ProcessManager processManager,
   required Platform platform,
@@ -296,10 +296,6 @@ class XcodeCodeSigningSettings {
     if (!toolsValidated) {
       return null;
     }
-    final String? savedCertChoice =
-        _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignCertificate) as String?;
-    final String? savedProfile =
-        _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignProvisioningProfile) as String?;
 
     final List<String> validCodeSigningIdentities = await _getSigningIdentities();
     if (validCodeSigningIdentities.isEmpty) {
@@ -315,6 +311,9 @@ class XcodeCodeSigningSettings {
         return null;
       }
     }
+
+    final String? savedProfile =
+        _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignProvisioningProfile) as String?;
 
     if (savedProfile != null) {
       // Provisioning profile should be used for manual signing.
@@ -332,18 +331,22 @@ class XcodeCodeSigningSettings {
         'Provisioning profile "${validatedProfile.name}" selected for iOS code signing',
       );
       return <String, String>{
-        _codeSignStyleBuildSettingNAme: _CodeSigningStyle.manual.label,
+        _codeSignStyleBuildSettingName: _CodeSigningStyle.manual.label,
         _developmentTeamBuildSettingName: validatedProfile.teamIdentifier,
         _provisioningProfileSpecifierBuildSettingName: validatedProfile.name,
       };
     }
+
+    final String? savedCertChoice =
+        _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignCertificate) as String?;
 
     String? identity;
     if (savedCertChoice != null) {
       identity = _validateSavedIdentity(savedCertChoice, validCodeSigningIdentities);
       if (identity == null) {
         _logger.printError(
-          'Saved signing certificate "$savedCertChoice" is not a valid development certificate. To clear, use "flutter config"',
+          'Saved signing certificate "$savedCertChoice" is not a valid development '
+          'certificate. To clear, use "flutter config --clear-ios-signing-settings"',
         );
       }
     }
@@ -354,9 +357,7 @@ class XcodeCodeSigningSettings {
         autoSelectSingle: true,
         throwOnCancel: true,
       );
-      if (identity != null) {
-        _saveCodeSignIdentity(identity);
-      } else {
+      if (identity == null) {
         return null;
       }
     }
@@ -386,9 +387,9 @@ class XcodeCodeSigningSettings {
     if (!await _processUtils.exitsHappy(const <String>['which', 'security']) ||
         !await _processUtils.exitsHappy(const <String>['which', 'openssl'])) {
       if (printError) {
-        _logger.printError('Unable to validate code-signing tools.');
+        _logger.printError('Unable to validate code-signing tools `security` and/or `openssl`.');
       } else {
-        _logger.printTrace('Unable to validate code-signing tools.');
+        _logger.printTrace('Unable to validate code-signing tools `security` and/or `openssl`.');
       }
       return false;
     }
@@ -412,19 +413,17 @@ class XcodeCodeSigningSettings {
       return <String>[];
     }
 
-    final List<String> validCodeSigningIdentities =
-        findIdentityStdout
-            .split('\n')
-            .map<String?>((String outputLine) {
-              return _securityFindIdentityDeveloperIdentityExtractionPattern
-                  .firstMatch(outputLine)
-                  ?.group(1);
-            })
-            .where(_isNotEmpty)
-            .whereType<String>()
-            .toSet() // Unique.
-            .toList();
-    return validCodeSigningIdentities;
+    return findIdentityStdout
+        .split('\n')
+        .map<String?>((String outputLine) {
+          return _securityFindIdentityDeveloperIdentityExtractionPattern
+              .firstMatch(outputLine)
+              ?.group(1);
+        })
+        .where(_isNotEmpty)
+        .whereType<String>()
+        .toSet() // Unique.
+        .toList();
   }
 
   /// Validates the saved provisioning profile still exists and that there is a
@@ -450,7 +449,9 @@ class XcodeCodeSigningSettings {
         return parsedProfile;
       }
     }
-    _logger.printError('Unable to find a valid certificate matching the provisioning profile.');
+    _logger.printError(
+      'Unable to find a valid certificate matching the provisioning profile $savedProfilePath',
+    );
     return null;
   }
 
@@ -535,7 +536,8 @@ class XcodeCodeSigningSettings {
   String? _validateSavedIdentity(String identity, List<String> validCodeSigningIdentities) {
     if (validCodeSigningIdentities.contains(identity)) {
       _logger.printStatus(
-        'Found saved certificate choice "$identity". To clear, use "flutter config".',
+        'Found saved certificate choice "$identity". To clear, use "flutter config '
+        '--clear-ios-signing-settings".',
       );
       return identity;
     }
@@ -657,7 +659,6 @@ class XcodeCodeSigningSettings {
         _logger.printWarning(_codeSignSelectionCanceled);
         return;
       }
-      _saveCodeSignIdentity(identity);
     } else if (style == _CodeSigningStyle.manual) {
       final List<_ProvisioningProfile> validProvisioningProfiles = await _getProvisioningProfiles();
       if (validProvisioningProfiles.isEmpty) {
@@ -693,23 +694,24 @@ class XcodeCodeSigningSettings {
     _logger.printStatus('[1]: ${_CodeSigningStyle.automatic.label} (recommended)');
     _logger.printStatus('[2]: ${_CodeSigningStyle.manual.label}');
     final String choice = await _terminal.promptForCharInput(
-      List<String>.generate(2, (int number) => '${number + 1}')..add('q'),
+      <String>['1', '2', 'q'],
       prompt: 'Select a signing style (or "q" to quit)',
       defaultChoiceIndex: 0, // Just pressing enter chooses the first one.
       logger: _logger,
       displayAcceptedCharacters: false,
     );
-    if (choice == '1') {
-      return _CodeSigningStyle.automatic;
-    } else if (choice == '2') {
-      return _CodeSigningStyle.manual;
-    }
-    return null;
+    return switch (choice) {
+      '1' => _CodeSigningStyle.automatic,
+      '2' => _CodeSigningStyle.manual,
+      _ => null,
+    };
   }
 
-  /// Prompt user to select a code-signing identity from a list of [validCodeSigningIdentities].
+  /// Prompts the user to select a code-signing identity from a list of [validCodeSigningIdentities].
   /// Selects the first one found without prompting if there is no stdin or if
   /// [autoSelectSingle] is true and only one identity was found.
+  ///
+  /// Saves the selected identity to the config. Does not save if auto-selected.
   ///
   /// Throw an error if [throwOnCancel] is true and the user quits while
   /// selecting an identity.
@@ -758,6 +760,9 @@ class XcodeCodeSigningSettings {
       }
     }
     final String selectedCert = validCodeSigningIdentities[int.parse(choice) - 1];
+
+    _saveCodeSignIdentity(selectedCert);
+
     return selectedCert;
   }
 

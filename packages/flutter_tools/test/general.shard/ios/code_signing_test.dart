@@ -145,7 +145,7 @@ void main() {
             );
         expect(signingConfigs, isNull);
         expect(processManager, hasNoRemainingExpectations);
-        expect(logger.traceText, contains('Unable to validate code-signing tools.'));
+        expect(logger.traceText, contains('Unable to validate code-signing tools'));
         expect(logger.errorText, isEmpty);
       });
 
@@ -743,7 +743,7 @@ void main() {
       );
 
       testWithoutContext(
-        'Test single identity and certificate organization development team',
+        'Test auto-select single identity and certificate organization development team',
         () async {
           final Completer<void> completer = Completer<void>();
           final StreamController<List<int>> controller = StreamController<List<int>>();
@@ -776,12 +776,13 @@ void main() {
             stdin = utf8.decode(chunk);
             completer.complete();
           });
+          final Config testConfig = Config.test();
           final BufferLogger logger = BufferLogger.test();
           final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
             processManager: processManager,
             platform: FakePlatform(operatingSystem: 'macos'),
             logger: logger,
-            config: Config.test(),
+            config: testConfig,
             terminal: FakeTerminal(),
             fileSystem: MemoryFileSystem.test(),
             fileSystemUtils: FakeFileSystemUtils(),
@@ -792,6 +793,7 @@ void main() {
           expect(logger.errorText, isEmpty);
           expect(stdin, 'This is a fake certificate');
           expect(developmentTeam, '3333CCCC33');
+          expect(testConfig.getValue('ios-signing-cert'), isNull);
           expect(processManager, hasNoRemainingExpectations);
         },
       );
@@ -909,7 +911,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('Test multiple identity in machine mode works', () async {
+      testWithoutContext('Test auto-select from multiple identity in machine mode works', () async {
         final Completer<void> completer = Completer<void>();
         final StreamController<List<int>> controller = StreamController<List<int>>();
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -962,6 +964,7 @@ void main() {
         expect(logger.errorText, isEmpty);
         expect(stdin, 'This is a fake certificate');
         expect(developmentTeam, '5555EEEE55');
+        expect(testConfig.getValue('ios-signing-cert'), isNull);
         expect(processManager, hasNoRemainingExpectations);
       });
 
@@ -1014,7 +1017,7 @@ void main() {
         expect(
           logger.statusText,
           contains(
-            'Found saved certificate choice "iPhone Developer: Profile 3 (3333CCCC33)". To clear, use "flutter config"',
+            'Found saved certificate choice "iPhone Developer: Profile 3 (3333CCCC33)". To clear, use "flutter config --clear-ios-signing-settings"',
           ),
         );
         expect(
@@ -1314,7 +1317,7 @@ void main() {
         expect(
           logger.statusText,
           contains(
-            'Found saved certificate choice "iPhone Developer: Profile 3 (3333CCCC33)". To clear, use "flutter config"',
+            'Found saved certificate choice "iPhone Developer: Profile 3 (3333CCCC33)". To clear, use "flutter config --clear-ios-signing-settings"',
           ),
         );
         expect(
@@ -1365,7 +1368,7 @@ void main() {
         plistParser: FakePlistParser(),
       );
       await settings.selectSettings();
-      expect(logger.errorText, contains('Unable to validate code-signing tools.'));
+      expect(logger.errorText, contains('Unable to validate code-signing tools'));
       expect(config.getValue('ios-signing-cert'), isNull);
       expect(config.getValue('ios-signing-profile'), isNull);
     });
