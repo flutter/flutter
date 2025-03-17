@@ -43,6 +43,7 @@ object FlutterPluginUtils {
     // Will not crash on RC candidate strings but considers all RC candidates the same version.
     // Returns -1 if firstString < secondString, 0 if firstString == secondString, 1 if firstString > secondString
     @JvmStatic
+    @JvmName("compareVersionStrings")
     internal fun compareVersionStrings(
         firstString: String,
         secondString: String
@@ -86,6 +87,7 @@ object FlutterPluginUtils {
     // ----------------- Methods that interact primarily with the Gradle project. -----------------
 
     @JvmStatic
+    @JvmName("shouldShrinkResources")
     fun shouldShrinkResources(project: Project): Boolean {
         if (project.hasProperty(PROP_SHOULD_SHRINK_RESOURCES)) {
             val propertyValue = project.property(PROP_SHOULD_SHRINK_RESOURCES)
@@ -101,6 +103,7 @@ object FlutterPluginUtils {
      * containing a `build.gradle` or `build.gradle.kts` file.
      */
     @JvmStatic
+    @JvmName("pluginSupportsAndroidPlatform")
     internal fun pluginSupportsAndroidPlatform(project: Project): Boolean {
         val buildGradle = File(File(project.projectDir.parentFile, "android"), "build.gradle")
         val buildGradleKts =
@@ -114,6 +117,7 @@ object FlutterPluginUtils {
      * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
      */
     @JvmStatic
+    @JvmName("settingsGradleFile")
     internal fun settingsGradleFile(project: Project): File {
         val settingsGradle = File(project.projectDir.parentFile, "settings.gradle")
         val settingsGradleKts = File(project.projectDir.parentFile, "settings.gradle.kts")
@@ -135,6 +139,7 @@ object FlutterPluginUtils {
      * Kotlin (build.gradle.kts). This is the same behavior as Gradle 8.5.
      */
     @JvmStatic
+    @JvmName("buildGradleFile")
     internal fun buildGradleFile(project: Project): File {
         val buildGradle = File(File(project.projectDir.parentFile, "app"), "build.gradle")
         val buildGradleKts = File(File(project.projectDir.parentFile, "app"), "build.gradle.kts")
@@ -151,6 +156,7 @@ object FlutterPluginUtils {
     }
 
     @JvmStatic
+    @JvmName("shouldProjectSplitPerAbi")
     internal fun shouldProjectSplitPerAbi(project: Project): Boolean =
         project
             .findProperty(
@@ -159,13 +165,16 @@ object FlutterPluginUtils {
             ?.toBoolean() ?: false
 
     @JvmStatic
+    @JvmName("shouldProjectUseLocalEngine")
     internal fun shouldProjectUseLocalEngine(project: Project): Boolean = project.hasProperty(PROP_LOCAL_ENGINE_REPO)
 
     @JvmStatic
+    @JvmName("isProjectVerbose")
     internal fun isProjectVerbose(project: Project): Boolean = project.findProperty(PROP_IS_VERBOSE)?.toString()?.toBoolean() ?: false
 
     /** Whether to build the debug app in "fast-start" mode. */
     @JvmStatic
+    @JvmName("isProjectFastStart")
     internal fun isProjectFastStart(project: Project): Boolean =
         project
             .findProperty(
@@ -206,6 +215,7 @@ object FlutterPluginUtils {
      * https://issuetracker.google.com/issues/158753935
      */
     @JvmStatic
+    @JvmName("shouldConfigureFlutterTask")
     internal fun shouldConfigureFlutterTask(
         project: Project,
         assembleTask: Task
@@ -240,6 +250,7 @@ object FlutterPluginUtils {
      * This is the directory containing the `android/` directory.
      */
     @JvmStatic
+    @JvmName("getFlutterSourceDirectory")
     internal fun getFlutterSourceDirectory(project: Project): File {
         val flutterExtension = getFlutterExtensionOrNull(project)
         // TODO(gmackall): clean up this NPE that is still around from the Groovy conversion.
@@ -258,6 +269,7 @@ object FlutterPluginUtils {
      *  3. `lib/main.dart` otherwise
      */
     @JvmStatic
+    @JvmName("getFlutterTarget")
     internal fun getFlutterTarget(project: Project): String {
         if (project.hasProperty(PROP_TARGET)) {
             return project.property(PROP_TARGET).toString()
@@ -267,6 +279,7 @@ object FlutterPluginUtils {
     }
 
     @JvmStatic
+    @JvmName("isBuiltAsApp")
     internal fun isBuiltAsApp(project: Project): Boolean {
         // Projects are built as applications when the they use the `com.android.application`
         // plugin.
@@ -276,6 +289,7 @@ object FlutterPluginUtils {
     // Optional parameters don't work when Groovy makes calls into Kotlin, so provide an additional
     // signature for the 3 argument version.
     @JvmStatic
+    @JvmName("addApiDependencies")
     internal fun addApiDependencies(
         project: Project,
         variantName: String,
@@ -285,6 +299,7 @@ object FlutterPluginUtils {
     }
 
     @JvmStatic
+    @JvmName("addApiDependencies")
     internal fun addApiDependencies(
         project: Project,
         variantName: String,
@@ -316,6 +331,7 @@ object FlutterPluginUtils {
      * @return "debug", "profile", or "release" (fall-back).
      */
     @JvmStatic
+    @JvmName("buildModeFor")
     internal fun buildModeFor(buildType: BuildType): String {
         if (buildType.name == "profile") {
             return "profile"
@@ -331,6 +347,7 @@ object FlutterPluginUtils {
      * is built for a specific mode, the call to Gradle must match that mode.
      */
     @JvmStatic
+    @JvmName("supportsBuildMode")
     internal fun supportsBuildMode(
         project: Project,
         flutterBuildMode: String
