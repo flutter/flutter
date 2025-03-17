@@ -188,7 +188,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       // This convention is for the internal IDE client.
       case r'$/hotReload':
         final bool isFullRestart = request.command == 'hotRestart';
-        await _performRestart(isFullRestart, args?.args['reason'] as String?);
+        await _performRestart(isFullRestart, args?.args['pause'] as bool? ?? true, args?.args['reason'] as String?);
         sendResponse(null);
 
       // Handle requests (from the client) that provide responses to reverse-requests
@@ -303,7 +303,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     RestartArguments? args,
     void Function() sendResponse,
   ) async {
-    await _performRestart(true);
+    await _performRestart(true, true);
 
     sendResponse();
   }
@@ -665,7 +665,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   }
 
   /// Performs a restart/reload by sending the `app.restart` message to the `flutter run --machine` process.
-  Future<void> _performRestart(bool fullRestart, [String? reason]) async {
+  Future<void> _performRestart(bool fullRestart, bool pause, [String? reason]) async {
     // Don't do anything if the app hasn't started yet, as restarts and reloads
     // can only operate on a running app.
     if (_appId == null) {
@@ -684,7 +684,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       await sendFlutterRequest('app.restart', <String, Object?>{
         'appId': _appId,
         'fullRestart': fullRestart,
-        'pause': enableDebugger,
+        'pause': enableDebugger && pause,
         'reason': reason,
         'debounce': true,
       });
