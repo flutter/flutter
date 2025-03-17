@@ -14,10 +14,30 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, RSuperellipse);
 
 namespace {}  // namespace
 
-RSuperellipse::RSuperellipse(const tonic::Float64List& values) {
-  for (size_t i = 0; i < kValueCount; i++) {
-    values_[i] = values[i];
-  }
+RSuperellipse::RSuperellipse(double left,
+                             double top,
+                             double right,
+                             double bottom,
+                             double tlRadiusX,
+                             double tlRadiusY,
+                             double trRadiusX,
+                             double trRadiusY,
+                             double brRadiusX,
+                             double brRadiusY,
+                             double blRadiusX,
+                             double blRadiusY) {
+  values_[kLeft] = left;
+  values_[kTop] = top;
+  values_[kRight] = right;
+  values_[kBottom] = bottom;
+  values_[kTopLeftX] = tlRadiusX;
+  values_[kTopLeftY] = tlRadiusY;
+  values_[kTopRightX] = trRadiusX;
+  values_[kTopRightY] = trRadiusY;
+  values_[kBottomRightX] = brRadiusX;
+  values_[kBottomRightY] = brRadiusY;
+  values_[kBottomLeftX] = blRadiusX;
+  values_[kBottomLeftY] = blRadiusY;
 }
 
 RSuperellipse::~RSuperellipse() = default;

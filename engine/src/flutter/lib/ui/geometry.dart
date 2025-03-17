@@ -2164,24 +2164,53 @@ class _ComputedRSuperellipse extends NativeFieldWrapperClass1
     required double blRadiusX,
     required double blRadiusY,
   }) {
-    final Float64List values = Float64List(_kValueSize);
-    values[_kLeft] = left;
-    values[_kTop] = top;
-    values[_kRight] = right;
-    values[_kBottom] = bottom;
-    values[_kTopLeftX] = tlRadiusX;
-    values[_kTopLeftY] = tlRadiusY;
-    values[_kTopRightX] = trRadiusX;
-    values[_kTopRightY] = trRadiusY;
-    values[_kBottomRightX] = brRadiusX;
-    values[_kBottomRightY] = brRadiusY;
-    values[_kBottomLeftX] = blRadiusX;
-    values[_kBottomLeftY] = blRadiusY;
-    _constructor(values);
+    _constructor(
+      left,
+      top,
+      right,
+      bottom,
+      tlRadiusX,
+      tlRadiusY,
+      trRadiusX,
+      trRadiusY,
+      brRadiusX,
+      brRadiusY,
+      blRadiusX,
+      blRadiusY,
+    );
   }
 
-  @Native<Void Function(Handle, Handle)>(symbol: 'RSuperellipse::Create')
-  external void _constructor(Float64List parameters);
+  @Native<
+    Void Function(
+      Handle,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+    )
+  >(symbol: 'RSuperellipse::Create')
+  external void _constructor(
+    double left,
+    double top,
+    double right,
+    double bottom,
+    double tlRadiusX,
+    double tlRadiusY,
+    double trRadiusX,
+    double trRadiusY,
+    double brRadiusX,
+    double brRadiusY,
+    double blRadiusX,
+    double blRadiusY,
+  );
 
   @Native<Double Function(Pointer<Void>, Int32)>(symbol: 'RSuperellipse::getValue')
   external double _getValue(int index);

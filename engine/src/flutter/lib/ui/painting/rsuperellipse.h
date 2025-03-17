@@ -18,9 +18,23 @@ class RSuperellipse : public RefCountedDartWrappable<RSuperellipse> {
   FML_FRIEND_MAKE_REF_COUNTED(RSuperellipse);
 
  public:
-  static void Create(Dart_Handle wrapper, const tonic::Float64List& values) {
+  static void Create(Dart_Handle wrapper,
+                     double left,
+                     double top,
+                     double right,
+                     double bottom,
+                     double tlRadiusX,
+                     double tlRadiusY,
+                     double trRadiusX,
+                     double trRadiusY,
+                     double brRadiusX,
+                     double brRadiusY,
+                     double blRadiusX,
+                     double blRadiusY) {
     UIDartState::ThrowIfUIOperationsProhibited();
-    auto res = fml::MakeRefCounted<RSuperellipse>(values);
+    auto res = fml::MakeRefCounted<RSuperellipse>(
+        left, top, right, bottom, tlRadiusX, tlRadiusY, trRadiusX, trRadiusY,
+        brRadiusX, brRadiusY, blRadiusX, blRadiusY);
     res->AssociateWithDartWrapper(wrapper);
   }
 
@@ -49,7 +63,18 @@ class RSuperellipse : public RefCountedDartWrappable<RSuperellipse> {
     kValueCount
   };
 
-  explicit RSuperellipse(const tonic::Float64List& values);
+  RSuperellipse(double left,
+                double top,
+                double right,
+                double bottom,
+                double tlRadiusX,
+                double tlRadiusY,
+                double trRadiusX,
+                double trRadiusY,
+                double brRadiusX,
+                double brRadiusY,
+                double blRadiusX,
+                double blRadiusY);
 
   flutter::DlScalar scalar_value(int index) const;
   flutter::DlRect bounds() const;
