@@ -38,6 +38,15 @@ class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBi
   List<Map<String, dynamic>> getEventsDispatched(String eventKind) {
     return eventsDispatched.putIfAbsent(eventKind, () => <Map<String, dynamic>>[]);
   }
+
+  void tearDown() {
+    additionalHandleBeginFrame = null;
+    additionalHandleDrawFrame = null;
+    PlatformDispatcher.instance
+      ..onBeginFrame = null
+      ..onDrawFrame = null;
+    ensureFrameCallbacksRegistered();
+  }
 }
 
 class TestStrategy {
@@ -55,13 +64,7 @@ void main() {
     scheduler = TestSchedulerBinding();
   });
 
-  tearDown(() {
-    scheduler.additionalHandleBeginFrame = null;
-    scheduler.additionalHandleDrawFrame = null;
-    PlatformDispatcher.instance
-      ..onBeginFrame = null
-      ..onDrawFrame = null;
-  });
+  tearDown(() => scheduler.tearDown());
 
   test('Tasks are executed in the right order', () {
     final TestStrategy strategy = TestStrategy();
