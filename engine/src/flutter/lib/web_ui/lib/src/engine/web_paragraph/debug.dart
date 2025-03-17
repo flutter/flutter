@@ -1,5 +1,5 @@
 class WebParagraphDebug {
-  static const bool logging = true;
+  static bool logging = true;
 
   static void log(String arg) {
     if (logging) {
@@ -8,6 +8,6 @@ class WebParagraphDebug {
   }
 
   static void error(String arg) {
-    print(arg);
+    print('ERROR: ${arg}');
   }
 }

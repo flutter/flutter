@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -24,37 +25,37 @@ class TextWrapper {
   int _startLine = 0;
 
   // Whitespaces always separates text from clusters even if it's empty
-  ClusterRange _whitespaces = ClusterRange(0, 0);
+  ClusterRange _whitespaces = ClusterRange.empty;
 
   double _widthText = 0.0; // English: contains all whole words on the line
   double _widthWhitespaces = 0.0;
   double _widthLetters =
       0.0; // English: contains all the letters that didn't make the whole word yet
 
-  bool isWhitespace(WebTextCluster cluster) {
+  bool isWhitespace(ExtendedTextCluster cluster) {
     return this._layout.hasFlag(
-      ClusterRange(cluster.begin, cluster.end),
+      ui.TextRange(start: cluster.start, end: cluster.end),
       CodeUnitFlags.kPartOfWhiteSpaceBreak,
     );
   }
 
-  bool isSoftLineBreak(WebTextCluster cluster) {
+  bool isSoftLineBreak(ExtendedTextCluster cluster) {
     return this._layout.hasFlag(
-      ClusterRange(cluster.begin, cluster.end),
+      ui.TextRange(start: cluster.start, end: cluster.end),
       CodeUnitFlags.kSoftLineBreakBefore,
     );
   }
 
-  bool isHardLineBreak(WebTextCluster cluster) {
+  bool isHardLineBreak(ExtendedTextCluster cluster) {
     return this._layout.hasFlag(
-      ClusterRange(cluster.begin, cluster.end),
+      ui.TextRange(start: cluster.start, end: cluster.end),
       CodeUnitFlags.kHardLineBreakBefore,
     );
   }
 
   void startNewLine(int start, double clusterWidth) {
     _startLine = start;
-    _whitespaces = ClusterRange(start, start);
+    _whitespaces = ClusterRange(start: start, end: start);
     _widthText = 0.0;
     _widthWhitespaces = 0.0;
     _widthLetters = clusterWidth;
@@ -67,7 +68,8 @@ class TextWrapper {
 
     bool hardLineBreak = false;
     for (int index = 0; index < _layout.textClusters.length; index++) {
-      final WebTextCluster cluster = this._layout.textClusters[index];
+      final ExtendedTextCluster cluster = this._layout.textClusters[index];
+      /*
       final DomRectReadOnly box = this._layout.textMetrics!.getActualBoundingBox(
         cluster.begin,
         cluster.end,
@@ -76,8 +78,9 @@ class TextWrapper {
         cluster.begin,
         cluster.end,
       );
+      */
       // TODO: This is a temporary simplification, needs to be addressed later
-      double widthCluster = rects[0].width;
+      double widthCluster = cluster.size.width;
       hardLineBreak = isHardLineBreak(cluster);
       final softLineBreak = isSoftLineBreak(cluster);
 
@@ -92,9 +95,9 @@ class TextWrapper {
         this._layout.lines.add(
           TextLine(
             _layout,
-            ClusterRange(_startLine, _whitespaces.start),
+            ClusterRange(start: _startLine, end: _whitespaces.start),
             _widthText,
-            ClusterRange(_whitespaces.start, _whitespaces.end),
+            ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
             _widthWhitespaces,
             hardLineBreak,
           ),
@@ -126,7 +129,7 @@ class TextWrapper {
           // Start a new (empty) whitespace sequence
           _widthText += (_widthWhitespaces + _widthLetters);
           _widthLetters = 0.0;
-          _whitespaces = ClusterRange(index, index);
+          _whitespaces = ClusterRange(start: index, end: index);
           _widthWhitespaces = 0.0;
         }
         // Add the cluster to the current whitespace sequence (empty or not)
@@ -171,9 +174,9 @@ class TextWrapper {
         this._layout.lines.add(
           TextLine(
             _layout,
-            ClusterRange(_startLine, _whitespaces.start),
+            ClusterRange(start: _startLine, end: _whitespaces.start),
             _widthText,
-            ClusterRange(_whitespaces.start, _whitespaces.end),
+            ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
             _widthWhitespaces,
             hardLineBreak,
           ),
@@ -191,7 +194,10 @@ class TextWrapper {
     if (_whitespaces.end != _layout.textClusters.length) {
       // We have letters at the end, make them into a word
       _widthText += _widthWhitespaces;
-      _whitespaces = ClusterRange(_layout.textClusters.length, _layout.textClusters.length);
+      _whitespaces = ClusterRange(
+        start: _layout.textClusters.length,
+        end: _layout.textClusters.length,
+      );
       _widthWhitespaces = 0.0;
       _widthText += _widthLetters;
     }
@@ -199,9 +205,9 @@ class TextWrapper {
     this._layout.lines.add(
       TextLine(
         _layout,
-        ClusterRange(_startLine, _whitespaces.start),
+        ClusterRange(start: _startLine, end: _whitespaces.start),
         _widthText,
-        ClusterRange(_whitespaces.start, _whitespaces.end),
+        ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
         _widthWhitespaces,
         hardLineBreak,
       ),
@@ -210,7 +216,10 @@ class TextWrapper {
     if (hardLineBreak) {
       // TODO: Discuss with Mouad
       // Flutter wants to have another (empty) line if \n is the last codepoint in the text
-      final emptyText = ClusterRange(_layout.textClusters.length, _layout.textClusters.length);
+      final emptyText = ClusterRange(
+        start: _layout.textClusters.length,
+        end: _layout.textClusters.length,
+      );
       this._layout.lines.add(TextLine(_layout, emptyText, 0.0, emptyText, 0.0, false));
     }
 
@@ -219,7 +228,7 @@ class TextWrapper {
         final TextLine line = this._layout.lines[i];
         final String text = _text.substring(line.clusterRange.start, line.clusterRange.end);
         final String whitespaces =
-            line.whitespacesRange.width() > 0 ? '${line.whitespacesRange.width()}' : 'no';
+            !line.whitespacesRange.isEmpty ? '${line.whitespacesRange.width}' : 'no';
         final String hardLineBreak = line.hardLineBreak ? 'hardlineBreak' : '';
         WebParagraphDebug.log(
           '${i}: "${text}" [${line.clusterRange.start}:${line.clusterRange.end}) ${width} ${hardLineBreak} (${whitespaces} trailing whitespaces)',

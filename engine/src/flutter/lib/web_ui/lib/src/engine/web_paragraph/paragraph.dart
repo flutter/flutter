@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../dom.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
@@ -109,8 +110,8 @@ class WebTextStyle implements ui.TextStyle {
       final double? fontSize = this.fontSize;
       result =
           'WebTextStyle('
-          'fontFamily: ${originalFontFamily ?? "unspecified"}, '
-          'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : "unspecified"} '
+          'fontFamily: ${originalFontFamily ?? ""} '
+          'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : ""}px '
           ')';
       return true;
     }());
@@ -118,11 +119,33 @@ class WebTextStyle implements ui.TextStyle {
   }
 }
 
+class ClusterRange {
+  ClusterRange({required this.start, required this.end}) : assert(start >= -1), assert(end >= -1);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is ClusterRange && other.start == start && other.end == end;
+  }
+
+  int get width => end - start;
+
+  bool get isEmpty => start == end;
+
+  static ClusterRange empty = ClusterRange(start: 0, end: 0);
+
+  int start;
+  int end;
+}
+
 class StyledTextRange {
   StyledTextRange(int start, int end, this.textStyle) {
-    this.textRange = ui.TextRange(start: start, end: end);
+    this.textRange = ClusterRange(start: start, end: end);
   }
-  ui.TextRange textRange = ui.TextRange(start: 0, end: 0);
+
+  ClusterRange textRange = ClusterRange(start: 0, end: 0);
   WebTextStyle textStyle;
 }
 
@@ -261,7 +284,7 @@ class WebParagraph implements ui.Paragraph {
     }
   }
 
-  void paintOnCanvasKit(CanvasKitCanvas canvas, ui.Offset offset) {
+  void paintOnCanvasKit(engine.CanvasKitCanvas canvas, ui.Offset offset) {
     for (final line in _layout.lines) {
       _paint.paintLineOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
     }
@@ -354,12 +377,12 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   WebParagraphBuilder(ui.ParagraphStyle paragraphStyle)
     : paragraphStyle = paragraphStyle as WebParagraphStyle {
     textStylesList.add(StyledTextRange(0, 0, paragraphStyle.getTextStyle()));
-    textStylesStack.add(0);
+    textStylesStack.add(paragraphStyle.getTextStyle());
   }
 
   final WebParagraphStyle paragraphStyle;
   List<StyledTextRange> textStylesList = <StyledTextRange>[];
-  List<int> textStylesStack = <int>[]; // Indexes inside the textStylesList
+  List<WebTextStyle> textStylesStack = <WebTextStyle>[];
   String text = '';
 
   @override
@@ -377,18 +400,26 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   @override
   void addText(String text) {
     this.text += text;
-    this.finishStyledTextRange(false);
+    this.finishStyledTextRange();
   }
 
   @override
   WebParagraph build() {
-    this.finishStyledTextRange(true);
+    // We only keep the default style if there is nothing else
+    if (this.textStylesList.length > 1) {
+      this.textStylesList.removeAt(0);
+    } else {
+      this.textStylesList.first.textRange.end = this.text.length;
+    }
+    this.finishStyledTextRange();
+
     final WebParagraph builtParagraph = WebParagraph(
       this.paragraphStyle,
       this.textStylesList,
       this.text,
     );
     WebParagraphDebug.log('WebParagraphBuilder.build(): "${this.text}" ${textStylesList.length}');
+    final int start = textStylesList.length == 1 ? 0 : 1;
     for (var i = 0; i < textStylesList.length; ++i) {
       WebParagraphDebug.log(
         '${i}: [${textStylesList[i].textRange.start}:${textStylesList[i].textRange.end})',
@@ -405,10 +436,9 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void pop() {
-    if (!textStylesStack.isEmpty) {
-      final isEmpty = this.textStylesList[this.textStylesStack.last].textRange.isCollapsed;
+    if (textStylesStack.length > 1) {
       this.textStylesStack.removeLast();
-      this.finishStyledTextRange(isEmpty);
+      this.startStyledTextRange();
     } else {
       // In this case we use paragraph style and skip Pop operation
       WebParagraphDebug.error('Cannot perform pop operation: empty style list');
@@ -417,36 +447,27 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void pushStyle(ui.TextStyle textStyle) {
-    if (!textStylesStack.isEmpty) {
-      final last = this.textStylesList[this.textStylesStack.last];
-      if (last.textRange.end == text.length && last.textStyle == (textStyle as WebTextStyle)) {
-        // Just continue with the same style
-        return;
-      }
+    textStylesStack.add(textStyle as WebTextStyle);
+    final last = this.textStylesList.last;
+    if (last.textRange.end == text.length && last.textStyle == (textStyle as WebTextStyle)) {
+      // Just continue with the same style
+      return;
     }
-    // Start a new text range
-    textStylesStack.add(textStylesList.length);
-    textStylesList.add(StyledTextRange(text.length, text.length, textStyle as WebTextStyle));
+    this.startStyledTextRange();
   }
 
-  void finishStyledTextRange(bool canReduce) {
-    // Remove all text styles without text and update all onces with text
-    for (var i = this.textStylesStack.length - 1; i >= 0; i--) {
-      final index = this.textStylesStack[i];
-      if (canReduce && this.textStylesList[index].textRange.start == text.length) {
-        // The last textStyle didn't have any text in it
-        // We can safely remove it from both list and stack
-        // without messing up all the indexes
-        this.textStylesStack.removeLast();
-        this.textStylesList.removeAt(index);
-      } else {
-        // We found a text style with non-empty text
-        this.textStylesList[index].textRange = ui.TextRange(
-          start: this.textStylesList[index].textRange.start,
-          end: text.length,
-        );
-        canReduce = false;
-      }
+  void startStyledTextRange() {
+    this.finishStyledTextRange();
+    textStylesList.add(StyledTextRange(text.length, text.length, this.textStylesStack.last));
+  }
+
+  void finishStyledTextRange() {
+    // Remove all text styles without text
+    while (this.textStylesList.length > 1 &&
+        this.textStylesList.last.textRange.start == text.length) {
+      this.textStylesList.removeLast();
     }
+    // Update the first one found with text
+    this.textStylesList.last.textRange.end = this.text.length;
   }
 }

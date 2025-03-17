@@ -6,13 +6,14 @@ import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
 import 'paragraph.dart';
 import 'layout.dart';
 
-final DomOffscreenCanvas textCanvas = createDomOffscreenCanvas(500, 500);
+final engine.DomOffscreenCanvas textCanvas = engine.createDomOffscreenCanvas(500, 500);
 final textContext = textCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
 
 /// Performs layout on a [CanvasParagraph].
@@ -23,55 +24,67 @@ class TextPaint {
 
   final WebParagraph paragraph;
 
-  void paintLineOnCanvas2D(DomCanvasElement canvas, TextLayout layout, TextLine line, double x, double y) {
-
+  void paintLineOnCanvas2D(
+    DomCanvasElement canvas,
+    TextLayout layout,
+    TextLine line,
+    double x,
+    double y,
+  ) {
     for (int i = line.clusterRange.start; i < line.clusterRange.end; i++) {
       final clusterText = layout.textClusters[i];
-      String text = this.paragraph.text.substring(clusterText.begin, clusterText.end);
+      String text = this.paragraph.text.substring(clusterText.start, clusterText.end);
       final DomCanvasRenderingContext2D context = canvas.context2D;
       context.font = '50px arial';
       context.fillStyle = 'black';
-      context.fillTextCluster(clusterText, x, y);
+      context.fillTextCluster(clusterText.cluster, x, y);
     }
   }
 
-  void paintLineOnCanvasKit(CanvasKitCanvas canvas, TextLayout layout, TextLine line, double x, double y) {
+  void paintLineOnCanvasKit(
+    engine.CanvasKitCanvas canvas,
+    TextLayout layout,
+    TextLine line,
+    double x,
+    double y,
+  ) {
     for (int i = line.clusterRange.start; i < line.clusterRange.end; i++) {
       final clusterText = layout.textClusters[i];
-      paintCluster(canvas, layout.textMetrics!, clusterText, x, y);
+      paintCluster(canvas, clusterText, x, y);
     }
   }
 
-  void paintCluster(CanvasKitCanvas canvas, DomTextMetrics textMetrics, WebTextCluster webTextCluster, double x, double y) {
-    String text = this.paragraph.text.substring(webTextCluster.begin, webTextCluster.end);
-    final DomRectReadOnly box = textMetrics.getActualBoundingBox(
-      webTextCluster.begin,
-      webTextCluster.end,
-    );
+  void paintCluster(
+    engine.CanvasKitCanvas canvas,
+    ExtendedTextCluster webTextCluster,
+    double x,
+    double y,
+  ) {
+    String text = this.paragraph.text.substring(webTextCluster.start, webTextCluster.end);
 
     textContext.font = '50px arial';
     textContext.fillStyle = 'black';
-    textContext.fillTextCluster(webTextCluster, x, y);
+    textContext.fillTextCluster(webTextCluster.cluster, x, y);
 
-    final DomImageBitmap bitmap = textCanvas.transferToImageBitmap();
+    final engine.DomImageBitmap bitmap = textCanvas.transferToImageBitmap();
 
-    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    final engine.SkImage? skImage = engine.canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
     if (skImage == null) {
       throw Exception('Failed to convert text image bitmap to an SkImage.');
     }
 
-    final CkImage ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    final engine.CkImage ckImage = engine.CkImage(
+      skImage,
+      imageSource: engine.ImageBitmapImageSource(bitmap),
+    );
     canvas.drawImage(ckImage, ui.Offset(x, y), ui.Paint()..filterQuality = ui.FilterQuality.none);
   }
 
-  void printTextCluster(DomTextMetrics textMetrics, WebTextCluster webTextCluster) {
-    String text = this.paragraph.text.substring(webTextCluster.begin, webTextCluster.end);
-    final DomRectReadOnly box = textMetrics.getActualBoundingBox(
-      webTextCluster.begin,
-      webTextCluster.end,
-    );
+  void printTextCluster(ExtendedTextCluster webTextCluster) {
+    String text = this.paragraph.text.substring(webTextCluster.start, webTextCluster.end);
+    final DomRectReadOnly box = webTextCluster.size;
     print(
-      '[${webTextCluster.begin}:${webTextCluster.end}) = "${text}", ${box.width}, ${box.height}\n',
+      '[${webTextCluster.start}:${webTextCluster.end}) = "${text}", ${box.width}, ${box.height}\n',
     );
   }
 }
