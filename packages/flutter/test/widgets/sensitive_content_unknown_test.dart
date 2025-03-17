@@ -39,12 +39,12 @@ void main() {
     'when SensitiveContentService.getContentSensitivity returns ContentSensitivity.unknown, the fallback ContentSensitivity is notSensitive',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        SensitiveContent(sensitivityLevel: ContentSensitivity.sensitive, child: Container()),
+        SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container()),
       );
       await tester.pumpWidget(Container());
 
       expect(
-        sensitiveContentHost.calculatedContentSensitivityLevel,
+        sensitiveContentHost.calculatedContentSensitivity,
         equals(ContentSensitivity.notSensitive),
       );
     },
