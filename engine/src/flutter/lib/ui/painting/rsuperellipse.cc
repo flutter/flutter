@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/painting/rsuperellipse.h"
 
 #include "flutter/fml/logging.h"
+#include "flutter/lib/ui/floating_point.h"
 #include "third_party/tonic/logging/dart_error.h"
 
 namespace flutter {
@@ -22,7 +23,7 @@ RSuperellipse::RSuperellipse(const tonic::Float64List& values) {
 RSuperellipse::~RSuperellipse() = default;
 
 flutter::DlRoundSuperellipse RSuperellipse::rsuperellipse() const {
-  return flutter::DlRoundSuperellipse::MakeRectRadii(GetBounds(), radii());
+  return flutter::DlRoundSuperellipse::MakeRectRadii(bounds(), radii());
 }
 
 double RSuperellipse::getValue(int index) const {
@@ -43,7 +44,7 @@ DlScalar RSuperellipse::scalar_value(int index) const {
   return SafeNarrow(getValue(index));
 }
 
-flutter::DlRect RSuperellipse::GetBounds() const {
+flutter::DlRect RSuperellipse::bounds() const {
   // The Flutter rect may be inverted (upside down, backward, or both)
   // Historically, Skia would normalize such rects but we will do that
   // manually below when we construct the Impeller RoundRect
@@ -71,7 +72,7 @@ impeller::RoundingRadii RSuperellipse::radii() const {
 const impeller::RoundSuperellipseParam& RSuperellipse::param() const {
   if (!cached_param_.has_value()) {
     cached_param_ =
-        impeller::RoundSuperellipseParam::MakeBoundsRadii(GetBounds(), radii());
+        impeller::RoundSuperellipseParam::MakeBoundsRadii(bounds(), radii());
   }
   return cached_param_.value();
 }
