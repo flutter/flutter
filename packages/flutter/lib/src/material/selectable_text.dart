@@ -447,16 +447,10 @@ class SelectableText extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    return switch (defaultTargetPlatform) {
-      TargetPlatform.iOS => SystemContextMenu.editableText(editableTextState: editableTextState),
-      TargetPlatform.android ||
-      TargetPlatform.linux ||
-      TargetPlatform.macOS ||
-      TargetPlatform.windows ||
-      TargetPlatform.fuchsia => AdaptiveTextSelectionToolbar.editableText(
-        editableTextState: editableTextState,
-      ),
-    };
+    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+      return SystemContextMenu.editableText(editableTextState: editableTextState);
+    }
+    return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 
   /// The configuration for the magnifier used when the text is selected.
