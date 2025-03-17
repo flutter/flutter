@@ -270,6 +270,8 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
                                                   jint action,
                                                   jobject args,
                                                   jint args_position) {
+  // TODO(team-android): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
   if (env->IsSameObject(args, NULL)) {
     PlatformView::DispatchSemanticsAction(
         kImplicitViewId, node_id, static_cast<flutter::SemanticsAction>(action),

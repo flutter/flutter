@@ -188,6 +188,7 @@ class PlatformView {
     ///             event must be forwarded to the running root isolate hosted
     ///             by the engine on the UI thread.
     ///
+    /// @param[in]  view_id The identifier of the view that contains this node.
     /// @param[in]  node_id The identifier of the accessibility node.
     /// @param[in]  action  The accessibility related action performed on the
     ///                     node of the specified ID.
@@ -503,11 +504,11 @@ class PlatformView {
   /// @see        SemanticsNode, SemticsNodeUpdates,
   ///             CustomAccessibilityActionUpdates
   ///
+  /// @param[in]  view_id  The ID of the view that this update is for
   /// @param[in]  updates  A map with the stable semantics node identifier as
   ///                      key and the node properties as the value.
   /// @param[in]  actions  A map with the stable semantics node identifier as
   ///                      key and the custom node action as the value.
-  /// @param[in]  view_id  The ID of the view that this update is for
   ///
   virtual void UpdateSemantics(int64_t view_id,
                                SemanticsNodeUpdates updates,

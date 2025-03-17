@@ -88,9 +88,9 @@ void EmbedderSemanticsUpdate::AddAction(
 EmbedderSemanticsUpdate::~EmbedderSemanticsUpdate() {}
 
 EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
+    int64_t view_id,
     const SemanticsNodeUpdates& nodes,
-    const CustomAccessibilityActionUpdates& actions,
-    int64_t view_id) {
+    const CustomAccessibilityActionUpdates& actions) {
   nodes_.reserve(nodes.size());
   node_pointers_.reserve(nodes.size());
   actions_.reserve(actions.size());

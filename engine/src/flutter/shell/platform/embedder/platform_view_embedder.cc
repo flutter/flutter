@@ -118,7 +118,7 @@ void PlatformViewEmbedder::UpdateSemantics(
     flutter::CustomAccessibilityActionUpdates actions) {
   if (platform_dispatch_table_.update_semantics_callback != nullptr) {
     platform_dispatch_table_.update_semantics_callback(
-        std::move(update), std::move(actions), view_id);
+        view_id, std::move(update), std::move(actions));
   }
 }
 

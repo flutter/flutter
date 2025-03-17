@@ -3610,7 +3610,6 @@ typedef struct {
   FlutterEngineUpdateSemanticsEnabledFnPtr UpdateSemanticsEnabled;
   FlutterEngineUpdateAccessibilityFeaturesFnPtr UpdateAccessibilityFeatures;
   FlutterEngineDispatchSemanticsActionFnPtr DispatchSemanticsAction;
-  FlutterEngineSendSemanticsActionFnPtr SendSemanticsAction;
   FlutterEngineOnVsyncFnPtr OnVsync;
   FlutterEngineReloadSystemFontsFnPtr ReloadSystemFonts;
   FlutterEngineTraceEventDurationBeginFnPtr TraceEventDurationBegin;
@@ -3631,6 +3630,7 @@ typedef struct {
   FlutterEngineAddViewFnPtr AddView;
   FlutterEngineRemoveViewFnPtr RemoveView;
   FlutterEngineSendViewFocusEventFnPtr SendViewFocusEvent;
+  FlutterEngineSendSemanticsActionFnPtr SendSemanticsAction;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

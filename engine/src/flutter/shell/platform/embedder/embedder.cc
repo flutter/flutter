@@ -1843,10 +1843,9 @@ CreateEmbedderSemanticsUpdateCallbackV1(
         update_semantics_custom_action_callback,
     void* user_data) {
   return [update_semantics_node_callback,
-          update_semantics_custom_action_callback,
-          user_data](const flutter::SemanticsNodeUpdates& nodes,
-                     const flutter::CustomAccessibilityActionUpdates& actions,
-                     int64_t view_id) {
+          update_semantics_custom_action_callback, user_data](
+             int64_t view_id, const flutter::SemanticsNodeUpdates& nodes,
+             const flutter::CustomAccessibilityActionUpdates& actions) {
     flutter::EmbedderSemanticsUpdate update{nodes, actions};
     FlutterSemanticsUpdate* update_ptr = update.get();
 
@@ -1891,9 +1890,8 @@ CreateEmbedderSemanticsUpdateCallbackV2(
     FlutterUpdateSemanticsCallback update_semantics_callback,
     void* user_data) {
   return [update_semantics_callback, user_data](
-             const flutter::SemanticsNodeUpdates& nodes,
-             const flutter::CustomAccessibilityActionUpdates& actions,
-             int64_t view_id) {
+             int64_t view_id, const flutter::SemanticsNodeUpdates& nodes,
+             const flutter::CustomAccessibilityActionUpdates& actions) {
     flutter::EmbedderSemanticsUpdate update{nodes, actions};
 
     update_semantics_callback(update.get(), user_data);
@@ -1907,10 +1905,9 @@ CreateEmbedderSemanticsUpdateCallbackV3(
     FlutterUpdateSemanticsCallback2 update_semantics_callback,
     void* user_data) {
   return [update_semantics_callback, user_data](
-             const flutter::SemanticsNodeUpdates& nodes,
-             const flutter::CustomAccessibilityActionUpdates& actions,
-             int64_t view_id) {
-    flutter::EmbedderSemanticsUpdate2 update{nodes, actions, view_id};
+             int64_t view_id, const flutter::SemanticsNodeUpdates& nodes,
+             const flutter::CustomAccessibilityActionUpdates& actions) {
+    flutter::EmbedderSemanticsUpdate2 update{view_id, nodes, actions};
 
     update_semantics_callback(update.get(), user_data);
   };
