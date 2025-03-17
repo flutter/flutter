@@ -808,7 +808,16 @@ class CupertinoTextField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    return CupertinoAdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => SystemContextMenu.editableText(editableTextState: editableTextState),
+      TargetPlatform.android ||
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows ||
+      TargetPlatform.fuchsia => CupertinoAdaptiveTextSelectionToolbar.editableText(
+        editableTextState: editableTextState,
+      ),
+    };
   }
 
   /// Configuration for the text field magnifier.

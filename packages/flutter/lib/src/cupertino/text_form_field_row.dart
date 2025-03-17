@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -271,7 +272,16 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    return CupertinoAdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => SystemContextMenu.editableText(editableTextState: editableTextState),
+      TargetPlatform.android ||
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows ||
+      TargetPlatform.fuchsia => CupertinoAdaptiveTextSelectionToolbar.editableText(
+        editableTextState: editableTextState,
+      ),
+    };
   }
 
   @override

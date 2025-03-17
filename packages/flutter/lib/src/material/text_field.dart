@@ -849,7 +849,10 @@ class TextField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => SystemContextMenu.editableText(editableTextState: editableTextState),
+      TargetPlatform.android || TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows || TargetPlatform.fuchsia => AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState),
+    };
   }
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}

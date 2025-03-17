@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -326,7 +327,16 @@ class TextFormField extends FormField<String> {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => SystemContextMenu.editableText(editableTextState: editableTextState),
+      TargetPlatform.android ||
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows ||
+      TargetPlatform.fuchsia => AdaptiveTextSelectionToolbar.editableText(
+        editableTextState: editableTextState,
+      ),
+    };
   }
 
   @override

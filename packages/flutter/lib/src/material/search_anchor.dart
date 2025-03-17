@@ -9,6 +9,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -1522,7 +1523,16 @@ class SearchBar extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => SystemContextMenu.editableText(editableTextState: editableTextState),
+      TargetPlatform.android ||
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows ||
+      TargetPlatform.fuchsia => AdaptiveTextSelectionToolbar.editableText(
+        editableTextState: editableTextState,
+      ),
+    };
   }
 
   @override
