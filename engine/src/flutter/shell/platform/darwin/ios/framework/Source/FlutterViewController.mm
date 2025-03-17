@@ -23,6 +23,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
@@ -319,15 +320,15 @@ typedef struct MouseState {
                  name:@(flutter::kOverlayStyleUpdateNotificationName)
                object:nil];
 
-#if APPLICATION_EXTENSION_API_ONLY
-  if (@available(iOS 13.0, *)) {
-    [self setUpSceneLifecycleNotifications:center];
-  } else {
+  if ([FlutterSharedApplication isAvailable]) {
     [self setUpApplicationLifecycleNotifications:center];
+  } else {
+    if (@available(iOS 13.0, *)) {
+      [self setUpSceneLifecycleNotifications:center];
+    } else {
+      [self setUpApplicationLifecycleNotifications:center];
+    }
   }
-#else
-  [self setUpApplicationLifecycleNotifications:center];
-#endif
 
   [center addObserver:self
              selector:@selector(keyboardWillChangeFrame:)
@@ -849,14 +850,16 @@ static void SendFakeTouchEvent(UIScreen* screen,
     [self onUserSettingsChanged:nil];
     [self onAccessibilityStatusChanged:nil];
     BOOL stateIsActive = YES;
-#if APPLICATION_EXTENSION_API_ONLY
-    if (@available(iOS 13.0, *)) {
-      stateIsActive = self.flutterWindowSceneIfViewLoaded.activationState ==
-                      UISceneActivationStateForegroundActive;
+
+    UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
+    if (flutterApplication != nil) {
+      stateIsActive = flutterApplication.applicationState == UIApplicationStateActive;
+    } else {
+      if (@available(iOS 13.0, *)) {
+        stateIsActive = self.flutterWindowSceneIfViewLoaded.activationState ==
+                        UISceneActivationStateForegroundActive;
+      }
     }
-#else
-    stateIsActive = UIApplication.sharedApplication.applicationState == UIApplicationStateActive;
-#endif
     if (stateIsActive) {
       [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.resumed"];
     }
@@ -1386,15 +1389,15 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   // Creating the surface when inactive will cause GPU accesses from the background. Only wait for
   // the first frame to render when the application/scene is actually active.
   bool applicationOrSceneIsActive = YES;
-#if APPLICATION_EXTENSION_API_ONLY
-  if (@available(iOS 13.0, *)) {
-    applicationOrSceneIsActive = self.flutterWindowSceneIfViewLoaded.activationState ==
-                                 UISceneActivationStateForegroundActive;
+  UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
+  if (flutterApplication != nil) {
+    applicationOrSceneIsActive = flutterApplication.applicationState == UIApplicationStateActive;
+  } else {
+    if (@available(iOS 13.0, *)) {
+      applicationOrSceneIsActive = self.flutterWindowSceneIfViewLoaded.activationState ==
+                                   UISceneActivationStateForegroundActive;
+    }
   }
-#else
-  applicationOrSceneIsActive =
-      [UIApplication sharedApplication].applicationState == UIApplicationStateActive;
-#endif
 
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
@@ -2003,18 +2006,19 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     self.orientationPreferences = new_preferences;
 
     if (@available(iOS 16.0, *)) {
-      NSSet<UIScene*>* scenes =
-#if APPLICATION_EXTENSION_API_ONLY
-          self.flutterWindowSceneIfViewLoaded
-              ? [NSSet setWithObject:self.flutterWindowSceneIfViewLoaded]
-              : [NSSet set];
-#else
-          [UIApplication.sharedApplication.connectedScenes
-              filteredSetUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(
-                                                         id scene, NSDictionary* bindings) {
-                return [scene isKindOfClass:[UIWindowScene class]];
-              }]];
-#endif
+      UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
+      NSSet<UIScene*>* scenes;
+      if (flutterApplication != nil) {
+        scenes = [flutterApplication.connectedScenes
+            filteredSetUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(
+                                                       id scene, NSDictionary* bindings) {
+              return [scene isKindOfClass:[UIWindowScene class]];
+            }]];
+      } else {
+        scenes = self.flutterWindowSceneIfViewLoaded
+                     ? [NSSet setWithObject:self.flutterWindowSceneIfViewLoaded]
+                     : [NSSet set];
+      }
       [self requestGeometryUpdateForWindowScenes:scenes];
     } else {
       UIInterfaceOrientationMask currentInterfaceOrientation = 0;
@@ -2027,13 +2031,14 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
         }
         currentInterfaceOrientation = 1 << windowScene.interfaceOrientation;
       } else {
-#if APPLICATION_EXTENSION_API_ONLY
-        FML_LOG(ERROR) << "Application based status bar orentiation update is not supported in "
-                          "app extension. Orientation: "
-                       << currentInterfaceOrientation;
-#else
-        currentInterfaceOrientation = 1 << [[UIApplication sharedApplication] statusBarOrientation];
-#endif
+        UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
+        if (flutterApplication != nil) {
+          currentInterfaceOrientation = 1 << [flutterApplication statusBarOrientation];
+        } else {
+          FML_LOG(ERROR) << "Application based status bar orentiation update is not supported in "
+                            "app extension. Orientation: "
+                         << currentInterfaceOrientation;
+        }
       }
       if (!(self.orientationPreferences & currentInterfaceOrientation)) {
         [UIViewController attemptRotationToDeviceOrientation];
@@ -2167,11 +2172,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (CGFloat)textScaleFactor {
-#if APPLICATION_EXTENSION_API_ONLY
-  FML_LOG(WARNING) << "Dynamic content size update is not supported in app extension.";
-  return 1.0;
-#else
-  UIContentSizeCategory category = [UIApplication sharedApplication].preferredContentSizeCategory;
+  UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
+  if (flutterApplication == nil) {
+    FML_LOG(WARNING) << "Dynamic content size update is not supported in app extension.";
+    return 1.0;
+  }
+
+  UIContentSizeCategory category = flutterApplication.preferredContentSizeCategory;
   // The delta is computed by approximating Apple's typography guidelines:
   // https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
   //
@@ -2221,7 +2228,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   } else {
     return 1.0;
   }
-#endif
 }
 
 - (BOOL)supportsShowingSystemContextMenu {

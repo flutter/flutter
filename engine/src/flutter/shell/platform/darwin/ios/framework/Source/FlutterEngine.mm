@@ -26,6 +26,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartVMServicePublisher.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSpellCheckPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextureRegistryRelay.h"
@@ -227,15 +228,15 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                  name:UIApplicationDidReceiveMemoryWarningNotification
                object:nil];
 
-#if APPLICATION_EXTENSION_API_ONLY
-  if (@available(iOS 13.0, *)) {
-    [self setUpSceneLifecycleNotifications:center];
-  } else {
+  if ([FlutterSharedApplication isAvailable]) {
     [self setUpApplicationLifecycleNotifications:center];
+  } else {
+    if (@available(iOS 13.0, *)) {
+      [self setUpSceneLifecycleNotifications:center];
+    } else {
+      [self setUpApplicationLifecycleNotifications:center];
+    }
   }
-#else
-  [self setUpApplicationLifecycleNotifications:center];
-#endif
 
   [center addObserver:self
              selector:@selector(onLocaleUpdated:)
@@ -855,19 +856,19 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                     _threadHost->io_thread->GetTaskRunner()          // io
   );
 
-#if APPLICATION_EXTENSION_API_ONLY
-  if (@available(iOS 13.0, *)) {
-    _isGpuDisabled = self.viewController.flutterWindowSceneIfViewLoaded.activationState ==
-                     UISceneActivationStateBackground;
+  UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
+  if (flutterApplication != nil) {
+    _isGpuDisabled = flutterApplication.applicationState == UIApplicationStateBackground;
   } else {
-    // [UIApplication sharedApplication API is not available for app extension.
-    // We intialize the shell assuming the GPU is required.
-    _isGpuDisabled = NO;
+    if (@available(iOS 13.0, *)) {
+      _isGpuDisabled = self.viewController.flutterWindowSceneIfViewLoaded.activationState ==
+                       UISceneActivationStateBackground;
+    } else {
+      // [UIApplication sharedApplication API is not available for app extension.
+      // We intialize the shell assuming the GPU is required.
+      _isGpuDisabled = NO;
+    }
   }
-#else
-  _isGpuDisabled =
-      [UIApplication sharedApplication].applicationState == UIApplicationStateBackground;
-#endif
 
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
@@ -1342,7 +1343,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 #pragma mark - Notifications
 
-#if APPLICATION_EXTENSION_API_ONLY
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
   [self flutterWillEnterForeground:notification];
 }
@@ -1350,7 +1350,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
   [self flutterDidEnterBackground:notification];
 }
-#else
+
 - (void)applicationWillEnterForeground:(NSNotification*)notification {
   [self flutterWillEnterForeground:notification];
 }
@@ -1358,7 +1358,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (void)applicationDidEnterBackground:(NSNotification*)notification {
   [self flutterDidEnterBackground:notification];
 }
-#endif
 
 - (void)flutterWillEnterForeground:(NSNotification*)notification {
   [self setIsGpuDisabled:NO];
