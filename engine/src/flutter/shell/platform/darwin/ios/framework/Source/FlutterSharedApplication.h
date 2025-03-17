@@ -5,13 +5,23 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERSHAREDAPPLICATION_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERSHAREDAPPLICATION_H_
 
-#import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
 @interface FlutterSharedApplication : NSObject
 
+/**
+ * Check whether the main bundle is an iOS App Extension.
+ */
++ (BOOL)isAppExtension;
+
+/**
+ * Check whether the UIApplication is available. UIApplication is not available for App Extensions.
+ */
 + (BOOL)isAvailable;
 
+/**
+ * Returns the `UIApplication.sharedApplication` is available. Otherwise returns nil.
+ */
 + (UIApplication*)uiApplication;
 
 @end

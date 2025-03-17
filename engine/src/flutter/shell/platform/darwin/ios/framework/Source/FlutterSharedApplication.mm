@@ -16,11 +16,15 @@ FLUTTER_ASSERT_ARC
 
 @implementation FlutterSharedApplication
 
-// The application object (such as from `UIApplication.sharedApplication`) is unavailable
-// when the framework is being used in an app extension.
-+ (BOOL)isAvailable {
++ (BOOL)isAppExtension {
   NSDictionary* nsExtension = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSExtension"];
-  return ![nsExtension isKindOfClass:[NSDictionary class]];
+  return [nsExtension isKindOfClass:[NSDictionary class]];
+}
+
++ (BOOL)isAvailable {
+  // If the bundle is an App Extension, the application is not available.
+  // Therefore access to `UIApplication.sharedApplication` is not allowed.
+  return ![FlutterSharedApplication isAppExtension];
 }
 
 + (UIApplication*)uiApplication {
