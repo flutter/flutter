@@ -2687,7 +2687,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
       [flutterApplication.delegate.window.rootViewController.view
           addSubview:_keyboardViewContainer];
     } else {
-      // TODO
+      [_viewController.viewIfLoaded.window.rootViewController.view
+          addSubview:_keyboardViewContainer];
     }
   }
   _keyboardViewContainer.layer.zPosition = NSIntegerMax;
