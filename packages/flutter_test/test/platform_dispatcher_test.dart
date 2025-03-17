@@ -83,6 +83,18 @@ void main() {
     );
   });
 
+  testWidgets('TestPlatformDispatcher can fake supportsShowingSystemContextMen', (WidgetTester tester) async {
+    verifyPropertyFaked<bool>(
+      tester: tester,
+      realValue: PlatformDispatcher.instance.supportsShowingSystemContextMenu,
+      fakeValue: !PlatformDispatcher.instance.supportsShowingSystemContextMenu,
+      propertyRetriever: () => WidgetsBinding.instance.platformDispatcher.supportsShowingSystemContextMenu,
+      propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
+        binding.platformDispatcher.supportsShowingSystemContextMenu = fakeValue;
+      },
+    );
+  });
+
   testWidgets('TestPlatformDispatcher can fake brieflyShowPassword', (WidgetTester tester) async {
     verifyPropertyFaked<bool>(
       tester: tester,
