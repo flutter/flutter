@@ -252,10 +252,7 @@ class TestSkDeletableMock {
   JsConstructor get constructor => TestJsConstructor(name: 'TestSkDeletable');
 }
 
-@JS()
-@anonymous
-@staticInterop
-class TestSkDeletable implements SkDeletable {
+extension type TestSkDeletable._primary(JSObject _) implements JSObject, SkDeletable {
   factory TestSkDeletable() {
     final TestSkDeletableMock mock = TestSkDeletableMock();
     return TestSkDeletable._(
@@ -278,10 +275,7 @@ class TestSkDeletable implements SkDeletable {
   });
 }
 
-@JS()
-@anonymous
-@staticInterop
-class TestJsConstructor implements JsConstructor {
+extension type TestJsConstructor._(JSObject _) implements JsConstructor {
   external factory TestJsConstructor({String name});
 }
 
