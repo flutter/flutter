@@ -28,13 +28,18 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) : _defaultTextStyle = WebTextStyle(fontFamily: fontFamily, fontSize: fontSize);
+  }) :
+    _defaultTextStyle = WebTextStyle(fontFamily: fontFamily, fontSize: fontSize),
+    _textDirection = textDirection == null ? ui.TextDirection.ltr : textDirection!;
 
   final WebTextStyle _defaultTextStyle;
+  final ui.TextDirection _textDirection;
 
   WebTextStyle getTextStyle() {
     return _defaultTextStyle;
   }
+
+  ui.TextDirection get textDirection => _textDirection;
 
   @override
   bool operator ==(Object other) {

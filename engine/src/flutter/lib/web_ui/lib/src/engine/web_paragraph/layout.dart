@@ -1,12 +1,14 @@
 // Copyright 2025 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
+import '../canvaskit/canvaskit_api.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'paragraph.dart';
@@ -106,6 +108,8 @@ class TextLayout {
 
   void extractRuns() {
     // TODO: Implement bidi (via SkUnicode.Bidi API in CanvasKit)
+    final Int32List regions = canvasKit.Bidi.getBidiRegions(paragraph.text, paragraph.paragraphStyle.textDirection);
+
     for (final styledTextRange in this.paragraph.styledTextRanges) {
       // TODO: Text range is not adjusted to Text Cluster range edges; we need to adjust it later
       ClusterRange clusterRange = ClusterRange(
