@@ -1424,25 +1424,29 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
   // to get sent.
   windows_engine->UpdateSemanticsEnabled(true);
 
-  // Rely on timeout mechanism in CI.
   while (!done) {
     windows_engine->task_runner()->ProcessTasks();
   }
-  done = false;
+
+  auto accessibility_bridge1 = view1->accessibility_bridge().lock();
+  auto accessibility_bridge2 = view2->accessibility_bridge().lock();
 
   // Expect: that the semantics trees are updated with their
   // respective nodes.
-  auto accessibility_bridge1 = view1->accessibility_bridge().lock();
-  auto tree1 = accessibility_bridge1->GetTree();
-  EXPECT_NE(tree1->GetFromId(view1->view_id() + 1), nullptr);
-
-  while (!done) {
+  while (
+      !accessibility_bridge1->GetPlatformNodeFromTree(view1->view_id() + 1)) {
     windows_engine->task_runner()->ProcessTasks();
   }
-  done = false;
 
-  auto accessibility_bridge2 = view2->accessibility_bridge().lock();
+  while (
+      !accessibility_bridge2->GetPlatformNodeFromTree(view2->view_id() + 1)) {
+    windows_engine->task_runner()->ProcessTasks();
+  }
+
+  // Rely on timeout mechanism in CI.
+  auto tree1 = accessibility_bridge1->GetTree();
   auto tree2 = accessibility_bridge2->GetTree();
+  EXPECT_NE(tree1->GetFromId(view1->view_id() + 1), nullptr);
   EXPECT_NE(tree2->GetFromId(view2->view_id() + 1), nullptr);
 }
 
