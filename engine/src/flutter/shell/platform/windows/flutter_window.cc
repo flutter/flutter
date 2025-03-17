@@ -487,6 +487,7 @@ LRESULT CALLBACK FlutterWindow::WndProc(HWND const window,
     auto that = static_cast<FlutterWindow*>(cs->lpCreateParams);
     that->window_handle_ = window;
     that->text_input_manager_->SetWindowHandle(window);
+    EnableMouseInPointer(TRUE);
   } else if (FlutterWindow* that = GetThisFromHandle(window)) {
     return that->HandleMessage(message, wparam, lparam);
   }
@@ -526,10 +527,10 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_POINTERDOWN:
     case WM_POINTERUPDATE:
     case WM_POINTERLEAVE: {
-      POINT pt = {GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
-      ScreenToClient(window_handle_, &pt);
-      auto x = static_cast<double>(pt.x);
-      auto y = static_cast<double>(pt.y);
+      xPos = GET_X_LPARAM(lparam);
+      yPos = GET_Y_LPARAM(lparam);
+      auto x = static_cast<double>(xPos);
+      auto y = static_cast<double>(yPos);
       auto pointerId = GET_POINTERID_WPARAM(wparam);
       POINTER_INFO pointerInfo;
       if (GetPointerInfo(pointerId, &pointerInfo)) {
@@ -547,10 +548,11 @@ FlutterWindow::HandleMessage(UINT const message,
             break;
         }
         if (message == WM_POINTERDOWN) {
-          OnPointerDown(x, y, device_kind, touch_id, 0);
+          OnPointerDown(x, y, device_kind, touch_id, WM_LBUTTONDOWN);
         } else if (message == WM_POINTERUPDATE) {
           OnPointerMove(x, y, device_kind, touch_id, 0);
         } else if (message == WM_POINTERLEAVE) {
+          OnPointerUp(x, y, device_kind, touch_id, WM_LBUTTONUP);
           OnPointerLeave(x, y, device_kind, touch_id);
           touch_id_generator_.ReleaseNumber(pointerId);
         }
