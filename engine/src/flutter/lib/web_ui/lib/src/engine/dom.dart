@@ -349,7 +349,10 @@ extension type DomEventTarget._(JSObject _) implements JSObject {
 
   external void removeEventListener(String type, DomEventListener? listener, [JSAny options]);
 
-  external bool dispatchEvent(DomEvent event);
+  @JS('dispatchEvent')
+  external bool _dispatchEvent(DomEvent event);
+  // We need the non-external member for tear-offs.
+  bool dispatchEvent(DomEvent event) => _dispatchEvent(event);
 }
 
 extension type DomEventListenerOptions._(JSObject _) implements JSObject {
