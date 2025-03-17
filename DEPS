@@ -247,10 +247,13 @@ deps = {
    Var('flutter_git') + '/third_party/harfbuzz' + '@' + 'ea8f97c615f0ba17dc25013ef67dbd6bfaaa76f2',
 
   'engine/src/flutter/third_party/libcxx':
-   Var('llvm_git') + '/llvm-project/libcxx' + '@' + '44079a4cc04cdeffb9cfe8067bfb3c276fb2bab0',
+   Var('llvm_git') + '/llvm-project/libcxx' + '@' + 'db4ce1872a10295f2e9ce7567d38257eddab995c',
 
   'engine/src/flutter/third_party/libcxxabi':
-   Var('llvm_git') + '/llvm-project/libcxxabi' + '@' + '2ce528fb5e0f92e57c97ec3ff53b75359d33af12',
+   Var('llvm_git') + '/llvm-project/libcxxabi' + '@' + '338aa8a5c7e9672e0e561883e4b5c08c4cb6ecf8',
+
+  'engine/src/flutter/third_party/llvm_libc':
+   Var('llvm_git') + '/llvm-project/libc' + '@' + 'd715f002ca68e96fa470f82d594942879be3d6e8',
 
   'engine/src/flutter/third_party/glfw':
    Var('flutter_git') + '/third_party/glfw' + '@' + 'dd8a678a66f1967372e5a5e3deac41ebf65ee127',
@@ -528,7 +531,7 @@ deps = {
   Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + 'c788c52156f3ef7bc7ab769cb03c110a53ac8fcb',
 
   'engine/src/flutter/third_party/abseil-cpp':
-  Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + 'ff6504dc527b25fef0f3c531e7dba0ed6b69c162',
+  Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + '9247243c5c3e80464ffb1b5ce74335ced4fd76ce',
 
    # Dart packages
   'engine/src/flutter/third_party/pkg/archive':

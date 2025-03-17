@@ -3,6 +3,7 @@
 #include "flutter/fml/logging.h"
 
 #include <algorithm>
+#include <mutex>
 #include <optional>
 #include <thread>
 #include <vector>
