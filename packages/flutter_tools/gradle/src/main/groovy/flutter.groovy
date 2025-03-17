@@ -572,19 +572,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // TODO(54566): Can remove this function and its call sites once resolved.
-    /**
-     * Returns `true` if the given project is a plugin project having an `android` directory
-     * containing a `build.gradle` or `build.gradle.kts` file.
-     */
-    private static Boolean pluginSupportsAndroidPlatform(Project project) {
-        File buildGradle = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle")
-        File buildGradleKts = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle.kts")
-        return buildGradle.exists() || buildGradleKts.exists()
-    }
-
-
-
     /** Adds the plugin project dependency to the app project. */
     private void configurePluginProject(Map<String, Object> pluginObject) {
         assert(pluginObject.name instanceof String)

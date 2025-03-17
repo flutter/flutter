@@ -94,6 +94,8 @@ object FlutterPluginUtils {
         return true
     }
 
+    // TODO(54566): Can remove this function and its call sites once resolved.
+
     /**
      * Returns `true` if the given project is a plugin project having an `android` directory
      * containing a `build.gradle` or `build.gradle.kts` file.
