@@ -138,6 +138,9 @@ void runSemanticsTests() {
   group('controlsNodes', () {
     _testControlsNodes();
   });
+  group('requirable', () {
+    _testRequirable();
+  });
 }
 
 void _testSemanticRole() {
@@ -4226,6 +4229,99 @@ void _testControlsNodes() {
   });
 
   semantics().semanticsEnabled = false;
+}
+
+void _testRequirable() {
+  test('renders and updates non-requirable, required, and unrequired nodes', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, isSelectable: false, rect: const ui.Rect.fromLTRB(0, 0, 100, 20)),
+        tester.updateNode(
+          id: 2,
+          hasRequiredState: true,
+          isRequired: false,
+          rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+        ),
+        tester.updateNode(
+          id: 3,
+          hasRequiredState: true,
+          isRequired: true,
+          rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+  <sem-c>
+    <sem></sem>
+    <sem aria-required="false"></sem>
+    <sem aria-required="true"></sem>
+  </sem-c>
+</sem>
+''');
+
+    // Missing attributes cannot be expressed using HTML patterns, so check directly.
+    final notRequirable1 = owner().debugSemanticsTree![1]!.element;
+    expect(notRequirable1.getAttribute('aria-required'), isNull);
+
+    // Flip the values and check that that ARIA attribute is updated.
+    tester.updateNode(
+      id: 2,
+      hasRequiredState: true,
+      isRequired: true,
+      rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+    );
+    tester.updateNode(
+      id: 3,
+      hasRequiredState: true,
+      isRequired: false,
+      rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+  <sem-c>
+    <sem></sem>
+    <sem aria-required="true"></sem>
+    <sem aria-required="false"></sem>
+  </sem-c>
+</sem>
+''');
+
+    // Remove the ARIA attribute
+    tester.updateNode(id: 2, hasRequiredState: false, rect: const ui.Rect.fromLTRB(0, 20, 100, 40));
+    tester.updateNode(id: 3, hasRequiredState: false, rect: const ui.Rect.fromLTRB(0, 40, 100, 60));
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+  <sem-c>
+    <sem></sem>
+    <sem></sem>
+    <sem></sem>
+  </sem-c>
+</sem>
+''');
+
+    // Missing attributes cannot be expressed using HTML patterns, so check directly.
+    final notRequirable2 = owner().debugSemanticsTree![2]!.element;
+    expect(notRequirable2.getAttribute('aria-required'), isNull);
+
+    final notRequirable3 = owner().debugSemanticsTree![3]!.element;
+    expect(notRequirable3.getAttribute('aria-required'), isNull);
+
+    semantics().semanticsEnabled = false;
+  });
 }
 
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that

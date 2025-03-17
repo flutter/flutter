@@ -14,7 +14,7 @@ void main() {
     expect(dark, equals(dark.copyWith()));
     expect(dark.hashCode, equals(dark.copyWith().hashCode));
 
-    final ThemeData light = ThemeData.light();
+    final ThemeData light = ThemeData();
     final ThemeData dawn = ThemeData.lerp(dark, light, 0.25);
 
     expect(dawn.brightness, Brightness.dark);
@@ -108,15 +108,15 @@ void main() {
   });
 
   test('light, dark and fallback constructors support useMaterial3', () {
-    final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
+    final ThemeData lightTheme = ThemeData();
     expect(lightTheme.useMaterial3, true);
     expect(lightTheme.typography, Typography.material2021(colorScheme: lightTheme.colorScheme));
 
-    final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
+    final ThemeData darkTheme = ThemeData.dark();
     expect(darkTheme.useMaterial3, true);
     expect(darkTheme.typography, Typography.material2021(colorScheme: darkTheme.colorScheme));
 
-    final ThemeData fallbackTheme = ThemeData.light(useMaterial3: true);
+    final ThemeData fallbackTheme = ThemeData();
     expect(fallbackTheme.useMaterial3, true);
     expect(
       fallbackTheme.typography,
@@ -316,7 +316,7 @@ void main() {
   });
 
   test('ThemeData can generate a default M3 light colorScheme when useMaterial3 is true', () {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     expect(theme.colorScheme.primary, const Color(0xff6750a4));
     expect(theme.colorScheme.onPrimary, const Color(0xffffffff));
@@ -380,7 +380,7 @@ void main() {
   test(
     'ThemeData.light() can generate a default M3 light colorScheme when useMaterial3 is true',
     () {
-      final ThemeData theme = ThemeData.light(useMaterial3: true);
+      final ThemeData theme = ThemeData.light();
 
       expect(theme.colorScheme.primary, const Color(0xff6750a4));
       expect(theme.colorScheme.onPrimary, const Color(0xffffffff));
@@ -443,7 +443,7 @@ void main() {
   );
 
   test('ThemeData.dark() can generate a default M3 dark colorScheme when useMaterial3 is true', () {
-    final ThemeData theme = ThemeData.dark(useMaterial3: true);
+    final ThemeData theme = ThemeData.dark();
     expect(theme.colorScheme.primary, const Color(0xffd0bcff));
     expect(theme.colorScheme.onPrimary, const Color(0xff381e72));
     expect(theme.colorScheme.primaryContainer, const Color(0xff4f378b));
@@ -537,7 +537,7 @@ void main() {
   testWidgets(
     'splashFactory is InkSparkle only for Android non-web when useMaterial3 is true',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
 
       // Basic check that this theme is in fact using material 3.
       expect(theme.useMaterial3, true);
@@ -1005,13 +1005,11 @@ void main() {
       // GENERAL CONFIGURATION
       adaptationMap: const <Type, Adaptation<Object>>{SwitchThemeData: SwitchThemeAdaptation()},
       applyElevationOverlayColor: true,
-      cupertinoOverrideTheme: ThemeData.light().cupertinoOverrideTheme,
+      cupertinoOverrideTheme: ThemeData().cupertinoOverrideTheme,
       extensions: const <Object, ThemeExtension<dynamic>>{
         MyThemeExtensionB: MyThemeExtensionB(textStyle: TextStyle()),
       },
-      inputDecorationTheme: ThemeData.light().inputDecorationTheme.copyWith(
-        border: InputBorder.none,
-      ),
+      inputDecorationTheme: ThemeData().inputDecorationTheme.copyWith(border: InputBorder.none),
       materialTapTargetSize: MaterialTapTargetSize.padded,
       pageTransitionsTheme: const PageTransitionsTheme(),
       platform: TargetPlatform.android,
@@ -1038,10 +1036,10 @@ void main() {
       splashColor: Colors.white,
       unselectedWidgetColor: Colors.white,
       // TYPOGRAPHY & ICONOGRAPHY
-      iconTheme: ThemeData.light().iconTheme,
-      primaryIconTheme: ThemeData.light().iconTheme,
-      primaryTextTheme: ThemeData.light().textTheme,
-      textTheme: ThemeData.light().textTheme,
+      iconTheme: ThemeData().iconTheme,
+      primaryIconTheme: ThemeData().iconTheme,
+      primaryTextTheme: ThemeData().textTheme,
+      textTheme: ThemeData().textTheme,
       typography: Typography.material2018(platform: TargetPlatform.iOS),
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
@@ -1438,7 +1436,7 @@ void main() {
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
-    ThemeData.light().debugFillProperties(properties);
+    ThemeData().debugFillProperties(properties);
     final List<String> propertyNameList =
         properties.properties
             .map((final DiagnosticsNode node) => node.name)

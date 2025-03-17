@@ -169,7 +169,6 @@ class SectorAppState extends State<SectorApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.light(),
       title: 'Sector Layout',
       home: Scaffold(
         appBar: AppBar(title: const Text('Sector Layout in a Widget Tree')),

@@ -1248,7 +1248,7 @@ void main() {
   });
 
   testWidgets('DataRow renders default selected row colors', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.light();
+    final ThemeData themeData = ThemeData();
     Widget buildTable({bool selected = false}) {
       return MaterialApp(
         theme: themeData,
