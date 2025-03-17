@@ -68,6 +68,9 @@ typedef struct {
   // True if we can use glBlitFramebuffer.
   bool has_gl_framebuffer_blit;
 
+  // True if we can use eglImage
+  bool has_egl_image;
+
   // Shader program.
   GLuint program;
 
@@ -309,6 +312,55 @@ static void render(FlRenderer* self,
   }
 }
 
+// Copy the contents of [framebuffer] and create a copy in the OpenGL
+// context of [renderable].
+static FlFramebuffer* create_framebuffer_copy(FlRenderer* self,
+                                              FlRenderable* renderable,
+                                              FlFramebuffer* framebuffer) {
+  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
+      fl_renderer_get_instance_private(self));
+
+  // Read back pixel values.
+  size_t width = fl_framebuffer_get_width(framebuffer);
+  size_t height = fl_framebuffer_get_height(framebuffer);
+  size_t data_length = width * height * 4;
+  g_autofree uint8_t* data = static_cast<uint8_t*>(malloc(data_length));
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(framebuffer));
+  glReadPixels(0, 0, width, height, priv->general_format, GL_UNSIGNED_BYTE,
+               data);
+
+  // Write into a texture in the renderables context.
+  fl_renderable_make_current(renderable);
+  FlFramebuffer* view_framebuffer =
+      fl_framebuffer_new(priv->general_format, width, height);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
+                    fl_framebuffer_get_id(view_framebuffer));
+  glBindTexture(GL_TEXTURE_2D, fl_framebuffer_get_texture_id(view_framebuffer));
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, data);
+
+  return view_framebuffer;
+}
+
+// Creates a framebuffer to use on [renderable] that shows the contents of
+// [framebuffer]. Will change the OpenGL context to [renderable].
+static FlFramebuffer* create_framebuffer_for_renderable(
+    FlRenderer* self,
+    FlRenderable* renderable,
+    FlFramebuffer* framebuffer) {
+  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
+      fl_renderer_get_instance_private(self));
+
+  // If we have EGLImage we can use the same backing texture on both
+  // framebuffers, otherwise we need to copy the texture contents via the CPU.
+  if (priv->has_egl_image) {
+    fl_renderable_make_current(renderable);
+    return fl_framebuffer_create_sibling(framebuffer);
+  } else {
+    return create_framebuffer_copy(self, renderable, framebuffer);
+  }
+}
+
 static gboolean present_layers(FlRenderer* self,
                                FlutterViewId view_id,
                                const FlutterLayer** layers,
@@ -389,28 +441,11 @@ static gboolean present_layers(FlRenderer* self,
       g_ptr_array_add(framebuffers, view_framebuffer);
     }
 
-    // Read back pixel values.
+    // Make this framebuffer available in the secondary view.
     FlFramebuffer* framebuffer =
         FL_FRAMEBUFFER(g_ptr_array_index(framebuffers, 0));
-    size_t width = fl_framebuffer_get_width(framebuffer);
-    size_t height = fl_framebuffer_get_height(framebuffer);
-    size_t data_length = width * height * 4;
-    g_autofree uint8_t* data = static_cast<uint8_t*>(malloc(data_length));
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(framebuffer));
-    glReadPixels(0, 0, width, height, priv->general_format, GL_UNSIGNED_BYTE,
-                 data);
-
-    // Write into a texture in the views context.
-    fl_renderable_make_current(renderable);
-    FlFramebuffer* view_framebuffer =
-        fl_framebuffer_new(priv->general_format, width, height);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
-                      fl_framebuffer_get_id(view_framebuffer));
-    glBindTexture(GL_TEXTURE_2D,
-                  fl_framebuffer_get_texture_id(view_framebuffer));
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, data);
-
+    g_autoptr(FlFramebuffer) view_framebuffer =
+        create_framebuffer_for_renderable(self, renderable, framebuffer);
     g_autoptr(GPtrArray) secondary_framebuffers =
         g_ptr_array_new_with_free_func(g_object_unref);
     g_ptr_array_add(secondary_framebuffers, g_object_ref(view_framebuffer));
@@ -656,6 +691,17 @@ void fl_renderer_setup(FlRenderer* self) {
       !is_nvidia() && !is_vivante() &&
       (epoxy_gl_version() >= 30 ||
        epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
+
+  EGLDisplay egl_display = eglGetCurrentDisplay();
+  if (egl_display != nullptr) {
+    gboolean has_egl_image =
+        epoxy_egl_version(egl_display) >= 15 ||
+        epoxy_has_egl_extension(egl_display, "EGL_KHR_image_base") ||
+        epoxy_has_egl_extension(egl_display, "EGL_KHR_image");
+    priv->has_egl_image =
+        has_egl_image && (epoxy_has_gl_extension("GL_OES_EGL_image") ||
+                          epoxy_has_gl_extension("GL_OES_EGL_image_external"));
+  }
 
   if (!priv->has_gl_framebuffer_blit) {
     setup_shader(self);

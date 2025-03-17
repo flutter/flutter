@@ -45,6 +45,9 @@ typedef struct {
 } MockContext;
 
 typedef struct {
+} MockImage;
+
+typedef struct {
 } MockSurface;
 
 static MockEpoxy* mock = nullptr;
@@ -52,6 +55,7 @@ static bool display_initialized = false;
 static MockDisplay mock_display;
 static MockConfig mock_config;
 static MockContext mock_context;
+static MockImage mock_image;
 static MockSurface mock_surface;
 
 static EGLint mock_error = EGL_SUCCESS;
@@ -146,6 +150,14 @@ EGLContext _eglCreateContext(EGLDisplay dpy,
 
   mock_error = EGL_SUCCESS;
   return &mock_context;
+}
+
+EGLImage _eglCreateImage(EGLDisplay dpy,
+                         EGLContext context,
+                         EGLenum target,
+                         EGLClientBuffer buffer,
+                         const EGLAttrib* attrib_list) {
+  return &mock_image;
 }
 
 EGLSurface _eglCreatePbufferSurface(EGLDisplay dpy,
@@ -265,6 +277,14 @@ EGLBoolean _eglGetConfigAttrib(EGLDisplay dpy,
     default:
       return bool_failure(EGL_BAD_ATTRIBUTE);
   }
+}
+
+EGLContext _eglGetCurrentContext(void) {
+  return &mock_context;
+}
+
+EGLDisplay _eglGetCurrentDisplay(void) {
+  return &mock_display;
 }
 
 EGLDisplay _eglGetDisplay(EGLNativeDisplayType display_id) {
@@ -407,6 +427,8 @@ void _glDeleteShader(GLuint shader) {}
 
 void _glDeleteTextures(GLsizei n, const GLuint* textures) {}
 
+void _glEGLImageTargetTexture2DOES(GLenum target, EGLImage image) {}
+
 static void _glFramebufferRenderbuffer(GLenum target,
                                        GLenum attachment,
                                        GLenum renderbuffertarget,
@@ -514,12 +536,20 @@ void _glShaderSource(GLuint shader,
                      const GLchar* const* string,
                      const GLint* length) {}
 
+bool epoxy_has_egl_extension(EGLDisplay display, const char* extension) {
+  return mock->epoxy_has_egl_extension(display, extension);
+}
+
 bool epoxy_has_gl_extension(const char* extension) {
   return mock->epoxy_has_gl_extension(extension);
 }
 
 bool epoxy_is_desktop_gl(void) {
   return mock->epoxy_is_desktop_gl();
+}
+
+int epoxy_egl_version(EGLDisplay display) {
+  return mock->epoxy_egl_version(display);
 }
 
 int epoxy_gl_version(void) {
@@ -638,9 +668,12 @@ static void library_init() {
   epoxy_eglBindAPI = _eglBindAPI;
   epoxy_eglChooseConfig = _eglChooseConfig;
   epoxy_eglCreateContext = _eglCreateContext;
+  epoxy_eglCreateImage = _eglCreateImage;
   epoxy_eglCreatePbufferSurface = _eglCreatePbufferSurface;
   epoxy_eglCreateWindowSurface = _eglCreateWindowSurface;
   epoxy_eglGetConfigAttrib = _eglGetConfigAttrib;
+  epoxy_eglGetCurrentContext = _eglGetCurrentContext;
+  epoxy_eglGetCurrentDisplay = _eglGetCurrentDisplay;
   epoxy_eglGetDisplay = _eglGetDisplay;
   epoxy_eglGetError = _eglGetError;
   epoxy_eglGetProcAddress = _eglGetProcAddress;
@@ -661,6 +694,7 @@ static void library_init() {
   epoxy_glDeleteFramebuffers = _glDeleteFramebuffers;
   epoxy_glDeleteShader = _glDeleteShader;
   epoxy_glDeleteTextures = _glDeleteTextures;
+  epoxy_glEGLImageTargetTexture2DOES = _glEGLImageTargetTexture2DOES;
   epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;
   epoxy_glFramebufferTexture2D = _glFramebufferTexture2D;
   epoxy_glGenFramebuffers = _glGenFramebuffers;

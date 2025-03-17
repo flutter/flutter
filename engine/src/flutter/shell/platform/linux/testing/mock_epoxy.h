@@ -18,8 +18,12 @@ class MockEpoxy {
   MockEpoxy();
   ~MockEpoxy();
 
+  MOCK_METHOD(bool,
+              epoxy_has_egl_extension,
+              (EGLDisplay display, const char* extension));
   MOCK_METHOD(bool, epoxy_has_gl_extension, (const char* extension));
   MOCK_METHOD(bool, epoxy_is_desktop_gl, ());
+  MOCK_METHOD(int, epoxy_egl_version, (EGLDisplay display));
   MOCK_METHOD(int, epoxy_gl_version, ());
   MOCK_METHOD(void, glClearColor, (GLfloat r, GLfloat g, GLfloat b, GLfloat a));
   MOCK_METHOD(void,
