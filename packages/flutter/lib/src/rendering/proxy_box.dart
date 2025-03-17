@@ -4518,6 +4518,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.image != null) {
       config.isImage = _properties.image!;
     }
+    if (_properties.isRequired != null) {
+      config.isRequired = _properties.isRequired;
+    }
     if (_properties.identifier != null) {
       config.identifier = _properties.identifier!;
     }
