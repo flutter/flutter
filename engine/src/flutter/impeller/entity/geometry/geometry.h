@@ -120,10 +120,10 @@ class Geometry {
   }
 
   static GeometryResult ComputePositionGeometry(
-    const ContentContext& renderer,
-    const Tessellator::VertexGenerator& generator,
-    const Entity& entity,
-    RenderPass& pass);
+      const ContentContext& renderer,
+      const Tessellator::VertexGenerator& generator,
+      const Entity& entity,
+      RenderPass& pass);
 };
 
 }  // namespace impeller

@@ -11,6 +11,8 @@ uniform FragInfo {
 }
 frag_info;
 
+uniform sampler2D curve;
+
 highp in vec2 v_position;
 highp flat in vec3 v_e0;
 highp flat in vec3 v_e1;
@@ -20,8 +22,7 @@ highp flat in vec3 v_e3;
 out vec4 frag_color;
 
 float lookup(float x) {
-  // TODO(gaaclarke): scale x by width.
-  return smoothstep(0.0, 1.0, x);
+  return texture(curve, vec2(x, 0)).r;
 }
 
 float CalculateLine() {

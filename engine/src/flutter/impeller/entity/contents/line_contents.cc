@@ -8,6 +8,9 @@
 
 namespace impeller {
 
+using VS = LinePipeline::VertexShader;
+using FS = LinePipeline::FragmentShader;
+
 namespace {
 using BindFragmentCallback = std::function<bool(RenderPass& pass)>;
 using PipelineBuilderCallback =
@@ -18,7 +21,8 @@ using CreateGeometryCallback =
                                  RenderPass& pass,
                                  const Geometry* geometry)>;
 
-const Scalar kSampleRadius = 1.f;
+const int32_t kCurveResolution = 32;
+const Scalar kSampleRadius = 0.5f;
 
 struct LineInfo {
   Vector3 e0;
@@ -47,6 +51,49 @@ LineInfo CalculateLineInfo(Point p0, Point p1, Scalar width, Scalar radius) {
           k * (p0.y - p1.y),  //
           1.0 + k * (p1.x * p1.x + p1.y * p1.y - p0.x * p1.x - p0.y * p1.y)),
   };
+}
+
+uint8_t DoubleToUint8(double x) {
+  return static_cast<uint8_t>(std::clamp(std::round(x * 255.0), 0.0, 255.0));
+}
+
+/// See also: CreateGradientTexture
+std::shared_ptr<Texture> CreateCurveTexture(
+    Scalar width,
+    const std::shared_ptr<impeller::Context>& context) {
+  //
+  impeller::TextureDescriptor texture_descriptor;
+  texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
+  texture_descriptor.format = PixelFormat::kR8UNormInt;
+  texture_descriptor.size = {kCurveResolution, 1};
+
+  std::shared_ptr<Texture> texture =
+      context->GetResourceAllocator()->CreateTexture(texture_descriptor);
+
+  std::vector<uint8_t> curve_data;
+  curve_data.reserve(kCurveResolution);
+  for (int i = 0; i < kCurveResolution; ++i) {
+    double norm = (double(i) + 1.0) / 32.0;
+    double loc = norm * (kSampleRadius + width / 2.0);
+    double den = kSampleRadius * 2.0 + 1.0;
+    curve_data.push_back(DoubleToUint8(loc / den));
+  }
+
+  auto data_mapping = std::make_shared<fml::DataMapping>(curve_data);
+  std::shared_ptr<DeviceBuffer> buffer =
+      context->GetResourceAllocator()->CreateBufferWithCopy(*data_mapping);
+
+  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
+  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+  blit_pass->AddCopy(DeviceBuffer::AsBufferView(std::move(buffer)), texture);
+
+  if (!blit_pass->EncodeCommands() ||
+      !context->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok()) {
+    return nullptr;
+  }
+
+  texture->SetLabel("LineCurve");
+  return texture;
 }
 
 GeometryResult CreateGeometry(const ContentContext& renderer,
@@ -88,6 +135,17 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
           };
         }
       });
+
+  std::shared_ptr<Texture> curve_texture =
+      CreateCurveTexture(line_geometry->GetWidth(), renderer.GetContext());
+
+  SamplerDescriptor sampler_desc;
+  sampler_desc.min_filter = MinMagFilter::kLinear;
+  sampler_desc.mag_filter = MinMagFilter::kLinear;
+
+  FS::BindCurve(
+      pass, curve_texture,
+      renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
 
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
@@ -261,9 +319,6 @@ LineContents::LineContents(std::unique_ptr<LineGeometry> geometry, Color color)
 bool LineContents::Render(const ContentContext& renderer,
                           const Entity& entity,
                           RenderPass& pass) const {
-  using VS = LinePipeline::VertexShader;
-  using FS = LinePipeline::FragmentShader;
-
   auto& host_buffer = renderer.GetTransientsBuffer();
 
   VS::FrameInfo frame_info;
