@@ -144,6 +144,7 @@ class OverflowWidgetTextEditingController extends TextEditingController {
 // recreated between tests. This is necessary when changing something on
 // TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
 void updateMediaQuery(WidgetTester tester) {
+  expect(find.byType(MediaQuery), findsOneWidget);
   final WidgetsBindingObserver widgetsBindingObserver =
       tester.state(
             find.ancestor(

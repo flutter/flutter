@@ -26,7 +26,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart'
-    show OverflowWidgetTextEditingController, isContextMenuProvidedByPlatform;
+    show OverflowWidgetTextEditingController, isContextMenuProvidedByPlatform, updateMediaQuery;
 import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
@@ -238,6 +238,7 @@ void main() {
     return endpoints[0].point;
   }
 
+  // TODO(justinmc): Delete.
   // Web has a less threshold for downstream/upstream text position.
   Offset textOffsetToPosition(WidgetTester tester, int offset) =>
       textOffsetToBottomLeftPosition(tester, offset) + const Offset(kIsWeb ? 1 : 0, -2);
@@ -8839,6 +8840,38 @@ void main() {
         expect(find.byKey(key), findsOneWidget);
       },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    );
+
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
+            true;
+        updateMediaQuery(tester);
+        addTearDown(() {
+          TestWidgetsFlutterBinding.instance.platformDispatcher
+              .resetSupportsShowingSystemContextMenu();
+          updateMediaQuery(tester);
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        await tester.pumpWidget(CupertinoApp(home: CupertinoTextField(controller: controller)));
+
+        // No context menu shown.
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
   });
 

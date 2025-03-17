@@ -16159,7 +16159,6 @@ void main() {
               .resetSupportsShowingSystemContextMenu();
           updateMediaQuery(tester);
         });
-        expect(find.byType(MediaQuery), findsOneWidget);
 
         final TextEditingController controller = TextEditingController(text: 'one two three');
         await tester.pumpWidget(

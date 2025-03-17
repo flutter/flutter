@@ -22,7 +22,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../impeller_test_helpers.dart';
 import '../widgets/clipboard_utils.dart';
-import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
+import '../widgets/editable_text_utils.dart' show textOffsetToPosition, updateMediaQuery;
 import '../widgets/semantics_tester.dart';
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
@@ -5566,5 +5566,41 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
+  });
+
+  group('context menu', () {
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
+            true;
+        updateMediaQuery(tester);
+        addTearDown(() {
+          TestWidgetsFlutterBinding.instance.platformDispatcher
+              .resetSupportsShowingSystemContextMenu();
+          updateMediaQuery(tester);
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        await tester.pumpWidget(
+          MaterialApp(home: Material(child: TextField(controller: controller))),
+        );
+
+        // No context menu shown.
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
   });
 }

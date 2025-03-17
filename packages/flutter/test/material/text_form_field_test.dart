@@ -1684,4 +1684,40 @@ void main() {
 
     expect(find.text('**validation error**'), findsOneWidget);
   });
+
+  group('context menu', () {
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
+            true;
+        updateMediaQuery(tester);
+        addTearDown(() {
+          TestWidgetsFlutterBinding.instance.platformDispatcher
+              .resetSupportsShowingSystemContextMenu();
+          updateMediaQuery(tester);
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        await tester.pumpWidget(
+          MaterialApp(home: Material(child: TextField(controller: controller))),
+        );
+
+        // No context menu shown.
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+  });
 }
