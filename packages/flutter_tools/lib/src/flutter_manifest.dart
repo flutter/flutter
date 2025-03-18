@@ -39,7 +39,7 @@ class FlutterManifest {
     required Logger logger,
   }) {
     if (!fileSystem.isFileSync(path)) {
-      return createFromYaml(null, logger);
+      return _createFromYaml(null, logger);
     }
     final String manifest = fileSystem.file(path).readAsStringSync();
     return FlutterManifest.createFromString(manifest, logger: logger);
@@ -48,22 +48,10 @@ class FlutterManifest {
   /// Returns null on missing or invalid manifest.
   @visibleForTesting
   static FlutterManifest? createFromString(String manifest, {required Logger logger}) {
-    try {
-      return createFromYaml(loadYaml(manifest), logger);
-    } on FormatException catch (e) {
-      logger.printStatus('Malformed pubspec.yaml:', emphasis: true);
-      logger.printError(e.message);
-      return null;
-    }
+    return _createFromYaml(loadYaml(manifest), logger);
   }
 
-  /// Parses pubspec.yaml from [yamlDocument].
-  ///
-  /// This would usually be the result of a call to `loadYaml()` on the text
-  /// from a pubspec.yaml file.
-  ///
-  /// Returns null on missing or invalid manifest.
-  static FlutterManifest? createFromYaml(Object? yamlDocument, Logger logger) {
+  static FlutterManifest? _createFromYaml(Object? yamlDocument, Logger logger) {
     if (yamlDocument != null && !_validate(yamlDocument, logger)) {
       return null;
     }
@@ -145,18 +133,11 @@ class FlutterManifest {
   /// The string value of the top-level `name` property in the `pubspec.yaml` file.
   String get appName => _descriptor['name'] as String? ?? '';
 
-  /// Contains the names of the dependencies.
-  /// These are the keys specified in the `dependencies` map.
+  /// Contains the name of the dependencies.
+  /// These are the keys specified in the `dependency` map.
   Set<String> get dependencies {
     final YamlMap? dependencies = _descriptor['dependencies'] as YamlMap?;
     return dependencies != null ? <String>{...dependencies.keys.cast<String>()} : <String>{};
-  }
-
-  /// Contains the names of the dev_dependencies.
-  /// These are the keys specified in the `dev_dependencies` map.
-  Set<String> get devDependencies {
-    final YamlMap? devDependencies = _descriptor['dev_dependencies'] as YamlMap?;
-    return <String>{...?devDependencies?.keys.cast<String>()};
   }
 
   // Flag to avoid printing multiple invalid version messages.

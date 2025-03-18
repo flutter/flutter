@@ -2585,8 +2585,6 @@ flutter:
       testUsingContext(
         'excludes dev dependencies from Android plugin registrant',
         () async {
-          flutterProject.manifest.devDependencies.add(testPluginName);
-
           final Directory pluginDir = createPlugin(
             name: testPluginName,
             platforms: const <String, _PluginPlatformInfo>{
@@ -2886,8 +2884,6 @@ flutter:
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
   late Set<String> dependencies = <String>{};
-  @override
-  late Set<String> devDependencies = <String>{};
   @override
   late String appName;
   @override

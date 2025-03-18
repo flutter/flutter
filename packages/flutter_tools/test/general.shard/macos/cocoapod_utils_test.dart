@@ -437,8 +437,6 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
   late Set<String> dependencies = <String>{};
   @override
-  late Set<String> devDependencies = <String>{};
-  @override
   String get appName => 'my_app';
   @override
   YamlMap toYaml() => YamlMap.wrap(<String, String>{});
