@@ -184,13 +184,12 @@ public class AccessibilityChannel {
   public interface AccessibilityMessageHandler extends FlutterJNI.AccessibilityDelegate {
     /**
      * The Dart application would like the given {@code message} to be announced.
-     * <p>
-     * Using AnnounceSemanticsEvent for accessibility is deprecated on Android.
-     * Migrate to using semantic properties for a more robust and accessible
-     * user experience.
-     * </p>
      *
-     * @see <a href="https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)">announceForAccessibility</a>"
+     * <p>Using AnnounceSemanticsEvent for accessibility is deprecated on Android. Migrate to using
+     * semantic properties for a more robust and accessible user experience.
+     *
+     * @see <a
+     *     href="https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)">announceForAccessibility</a>"
      */
     @Deprecated(since = "Android API level 36")
     void announce(@NonNull String message);
