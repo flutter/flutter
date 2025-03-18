@@ -435,6 +435,10 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/165294
   testWidgets('CircularProgressIndicator.adaptive stroke width', (WidgetTester tester) async {
+    await tester.pumpWidget(const CircularProgressIndicator.adaptive());
+
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 4.0));
+
     final ThemeData themeData = ThemeData(
       progressIndicatorTheme: const ProgressIndicatorThemeData(strokeWidth: 10.0),
     );
