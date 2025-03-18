@@ -518,6 +518,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
     final Size fieldSize = layoutInfo.childSize;
     final Matrix4 invertTransform = layoutInfo.childPaintTransform.clone()..invert();
+
+    // This may not work well if the paint transform has rotation in it.
+    // MatrixUtils.transformRect returns the bounding rect of the rotated overlay
+    // rect.
     final Rect overlayRectInField = MatrixUtils.transformRect(
       invertTransform,
       Offset.zero & layoutInfo.overlaySize,
@@ -538,8 +542,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       OptionsViewOpenDirection.down => overlayRectInField.bottom - optionsViewBoundingBox.height,
     };
 
-    final Matrix4 transform =
-        layoutInfo.childPaintTransform.clone()..translate(0, originY);
+    final Matrix4 transform = layoutInfo.childPaintTransform.clone()..translate(0, originY);
     final Widget child = Builder(
       builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
     );
