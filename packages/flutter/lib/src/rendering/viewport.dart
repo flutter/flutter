@@ -1191,7 +1191,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     Curve curve = Curves.ease,
   }) {
     if (!offset.allowImplicitScrolling) {
-      debugPrint('hello from 1');
       return super.showOnScreen(
         descendant: descendant,
         rect: rect,
@@ -1199,7 +1198,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         curve: curve,
       );
     }
-    debugPrint('hello from 2');
 
     final Rect? newRect = RenderViewportBase.showInViewport(
       descendant: descendant,
