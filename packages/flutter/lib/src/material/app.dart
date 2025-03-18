@@ -1032,14 +1032,11 @@ class _MaterialAppState extends State<MaterialApp> {
       ((true, false)) => widget.darkTheme,
       ((true, true)) => widget.highContrastDarkTheme ?? widget.darkTheme,
     };
-    if (theme != null) {
-      return theme;
-    }
 
     // If the user didn't provide a theme for the specific mode, it could be that the user didn't
     // pay much attention to the various theme properties and just provided the `widget.theme`
     // property.
-    theme = widget.theme;
+    theme ??= widget.theme;
     if (theme != null) {
       return theme;
     }
@@ -1048,10 +1045,8 @@ class _MaterialAppState extends State<MaterialApp> {
     // provide the general `widget.theme` property. Time to pick one of the default themes.
 
     return switch ((useDarkTheme, highContrast)) {
-      ((false, false)) => ThemeData.light(),
-      ((false, true)) => ThemeData.highContrastLight(),
-      ((true, false)) => ThemeData.dark(),
-      ((true, true)) => ThemeData.highContrastDark(),
+      ((_, false)) => ThemeData.light(),
+      ((_, true)) => ThemeData.highContrastLight(),
     };
   }
 
