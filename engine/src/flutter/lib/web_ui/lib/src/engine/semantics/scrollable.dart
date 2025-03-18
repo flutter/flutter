@@ -76,7 +76,6 @@ class SemanticScrollable extends SemanticRole {
       final bool doScrollForward = _domScrollPosition > _effectiveNeutralScrollPosition;
       _neutralizeDomScrollPosition();
       semanticsObject.recomputePositionAndSize();
-      semanticsObject.updateChildrenPositionAndSize();
 
       final int semanticsId = semanticsObject.id;
       if (doScrollForward) {
@@ -138,7 +137,6 @@ class SemanticScrollable extends SemanticRole {
     semanticsObject.owner.addOneTimePostUpdateCallback(() {
       _neutralizeDomScrollPosition();
       semanticsObject.recomputePositionAndSize();
-      semanticsObject.updateChildrenPositionAndSize();
     });
 
     _updateCssOverflow();
@@ -215,8 +213,8 @@ class SemanticScrollable extends SemanticRole {
       // Read back because the effective value depends on the amount of content.
       _effectiveNeutralScrollPosition = element.scrollTop.toInt();
       semanticsObject
-        ..verticalScrollAdjustment = _effectiveNeutralScrollPosition.toDouble()
-        ..horizontalScrollAdjustment = 0.0;
+        ..verticalContainerAdjustment = _effectiveNeutralScrollPosition.toDouble()
+        ..horizontalContainerAdjustment = 0.0;
     } else if (semanticsObject.isHorizontalScrollContainer) {
       // Place the _scrollOverflowElement at the end of the content and
       // make sure that when we neutralize the scrolling position,
@@ -231,8 +229,8 @@ class SemanticScrollable extends SemanticRole {
       // Read back because the effective value depends on the amount of content.
       _effectiveNeutralScrollPosition = element.scrollLeft.toInt();
       semanticsObject
-        ..verticalScrollAdjustment = 0.0
-        ..horizontalScrollAdjustment = _effectiveNeutralScrollPosition.toDouble();
+        ..verticalContainerAdjustment = 0.0
+        ..horizontalContainerAdjustment = _effectiveNeutralScrollPosition.toDouble();
     } else {
       _scrollOverflowElement.style
         ..transform = 'translate(0px,0px)'
@@ -242,8 +240,8 @@ class SemanticScrollable extends SemanticRole {
       element.scrollTop = 0.0;
       _effectiveNeutralScrollPosition = 0;
       semanticsObject
-        ..verticalScrollAdjustment = 0.0
-        ..horizontalScrollAdjustment = 0.0;
+        ..verticalContainerAdjustment = 0.0
+        ..horizontalContainerAdjustment = 0.0;
     }
   }
 
