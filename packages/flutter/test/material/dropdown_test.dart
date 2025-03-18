@@ -1347,6 +1347,7 @@ void main() {
       tester.getSemantics(find.text('test')),
       matchesSemantics(
         isButton: true,
+        hasExpandedState: true,
         label: 'test',
         hasTapAction: true,
         hasFocusAction: true,
@@ -1363,6 +1364,7 @@ void main() {
       tester.getSemantics(find.text('three')),
       matchesSemantics(
         isButton: true,
+        hasExpandedState: true,
         label: 'three',
         hasTapAction: true,
         hasFocusAction: true,

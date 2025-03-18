@@ -1305,6 +1305,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   late Map<Type, Action<Intent>> _actionMap;
   bool _isHovering = false;
   bool _hasPrimaryFocus = false;
+  bool _isPageExpanded = false;
 
   // Only used if needed to create _internalNode.
   FocusNode _createFocusNode() {
@@ -1348,6 +1349,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   void _removeDropdownRoute() {
     _dropdownRoute?._dismiss();
+    _isPageExpanded = false;
     _dropdownRoute = null;
     _lastOrientation = null;
   }
@@ -1445,6 +1447,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     });
 
     widget.onTap?.call();
+    _isPageExpanded = true;
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1673,6 +1676,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
     return Semantics(
       button: !childHasButtonSemantic,
+      expanded: _isPageExpanded,
       child: Actions(actions: _actionMap, child: result),
     );
   }

@@ -29,6 +29,13 @@ class SemanticButton extends SemanticRole {
     } else {
       removeAttribute('aria-disabled');
     }
+
+    // This is especially useful when the button is used to open a menu.
+    if (semanticsObject.hasExpandedState) {
+      setAttribute('aria-haspopup', 'true');
+    } else {
+      removeAttribute('aria-haspopup');
+    }
   }
 }
 
