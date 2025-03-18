@@ -338,6 +338,9 @@ extension type DomHTMLDocument._(JSObject _) implements JSObject, DomDocument {
 external DomHTMLDocument get domDocument;
 
 /// Creates a [DomEventListener] that runs in the current [Zone].
+// TODO(srujzs): It isn't clear whether we should use this all the time or only
+// sometimes. Using this as the wrapped handler in `keyboard_binding.dart` for
+// example leads to test failures.
 DomEventListener createDomEventListener(DartDomEventListener listener) {
   final ZoneUnaryCallback<void, DomEvent> zonedListener = Zone.current
       .bindUnaryCallback<void, DomEvent>(listener);
