@@ -39,7 +39,7 @@ open class FlutterExtension {
      * Specifies the relative directory to the Flutter project directory.
      * In an app project, this is ../.. since the app's Gradle build file is under android/app.
      */
-    var source: String = "../.."
+    var source: String? = "../.."
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     var target: String? = null

@@ -164,9 +164,9 @@ object DependencyVersionChecker {
         }
     }
 
-    private fun generateAssembleTaskName(it: Variant) = "$ASSEMBLE_PREFIX${it.name.capitalize()}"
+    private fun generateAssembleTaskName(it: Variant) = "$ASSEMBLE_PREFIX${FlutterPluginUtils.capitalize(it.name)}"
 
-    private fun generateMinSdkCheckTaskName(it: Variant) = "${it.name.capitalize()}$MIN_SDK_CHECK_TASK_POSTFIX"
+    private fun generateMinSdkCheckTaskName(it: Variant) = "${FlutterPluginUtils.capitalize(it.name)}$MIN_SDK_CHECK_TASK_POSTFIX"
 
     private fun getMinSdkVersion(
         project: Project,
