@@ -1026,27 +1026,18 @@ class _MaterialAppState extends State<MaterialApp> {
     // When a high contrast theme is unavailable, the non-high-contrast theme for the same
     // brightness is used. Example, if `highContrastDarkTheme` is null, `darkTheme` is used.
 
-    ThemeData? theme = switch ((useDarkTheme, highContrast)) {
-      ((false, false)) => widget.theme,
-      ((false, true)) => widget.highContrastTheme ?? widget.theme,
-      ((true, false)) => widget.darkTheme,
-      ((true, true)) => widget.highContrastDarkTheme ?? widget.darkTheme,
-    };
-
-    // If the user didn't provide a theme for the specific mode, it could be that the user didn't
-    // pay much attention to the various theme properties and just provided the `widget.theme`
-    // property.
-    theme ??= widget.theme;
-    if (theme != null) {
-      return theme;
-    }
-
-    // At this point, we know the user hasn't provided a theme for the current mode and didn't
-    // provide the general `widget.theme` property. Time to pick one of the default themes.
-
     return switch ((useDarkTheme, highContrast)) {
-      ((_, false)) => ThemeData(),
-      ((_, true)) => ThemeData.highContrastLight(),
+      ((false, false)) => widget.theme ?? ThemeData(),
+
+      ((false, true)) => widget.highContrastTheme ?? widget.theme ?? ThemeData.highContrastLight(),
+
+      ((true, false)) => widget.darkTheme ?? widget.theme ?? ThemeData(),
+
+      ((true, true)) =>
+        widget.highContrastDarkTheme ??
+            widget.darkTheme ??
+            widget.theme ??
+            ThemeData.highContrastLight(),
     };
   }
 
