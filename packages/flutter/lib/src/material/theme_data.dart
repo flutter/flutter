@@ -840,15 +840,64 @@ class ThemeData with Diagnosticable {
   factory ThemeData.dark({bool? useMaterial3}) =>
       ThemeData(brightness: Brightness.dark, useMaterial3: useMaterial3);
 
-  factory ThemeData.highContrastLight() => ThemeData.from(
-    colorScheme: ColorScheme.highContrastLight(),
-    textTheme: Typography.highContrastLight,
-  );
+  factory ThemeData.highContrastLight({bool useMaterial3 = true}) {
+    final ColorScheme highContrast = ColorScheme.highContrastLight();
 
-  factory ThemeData.highContrastDark() => ThemeData.from(
-    colorScheme: ColorScheme.highContrastDark(),
-    textTheme: Typography.highContrastDark,
-  );
+    if (useMaterial3) {
+      return ThemeData.from(
+        useMaterial3: useMaterial3,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6750A4),
+          contrastLevel: 1.0,
+        ).copyWith(
+          primary: highContrast.primary,
+          onPrimary: highContrast.onPrimary,
+          secondary: highContrast.secondary,
+          onSecondary: highContrast.onSecondary,
+          surface: highContrast.surface,
+          onSurface: highContrast.onSurface,
+          error: highContrast.error,
+          onError: highContrast.onError,
+        ),
+      );
+    }
+
+    return ThemeData.from(
+      useMaterial3: useMaterial3,
+      colorScheme: highContrast,
+      textTheme: Typography.highContrastDark,
+    );
+  }
+
+  factory ThemeData.highContrastDark({bool useMaterial3 = true}) {
+    final ColorScheme highContrast = ColorScheme.highContrastDark();
+
+    if (useMaterial3) {
+      return ThemeData.from(
+        useMaterial3: useMaterial3,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6750A4),
+          brightness: Brightness.dark,
+          contrastLevel: 1.0,
+        ).copyWith(
+          primary: highContrast.primary,
+          onPrimary: highContrast.onPrimary,
+          secondary: highContrast.secondary,
+          onSecondary: highContrast.onSecondary,
+          surface: highContrast.surface,
+          onSurface: highContrast.onSurface,
+          error: highContrast.error,
+          onError: highContrast.onError,
+        ),
+      );
+    }
+
+    return ThemeData.from(
+      useMaterial3: useMaterial3,
+      colorScheme: highContrast,
+      textTheme: Typography.highContrastDark,
+    );
+  }
 
   /// The default color theme. Same as [ThemeData.light].
   ///
