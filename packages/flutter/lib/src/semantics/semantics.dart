@@ -267,7 +267,7 @@ sealed class _DebugSemanticsRoleChecks {
       }
       currentNode = currentNode?.parent;
     }
-    return FlutterError('A menu item checkbox must be a child of a menu or a menu bar');
+    return FlutterError('A menu item must be a child of a menu or a menu bar');
   }
 
   static FlutterError? _semanticsMenuItemCheckbox(SemanticsNode node) {
@@ -301,7 +301,7 @@ sealed class _DebugSemanticsRoleChecks {
       }
       currentNode = currentNode?.parent;
     }
-    return FlutterError('A menu item checkbox must be a child of a menu or a menu bar');
+    return FlutterError('A menu item radio must be a child of a menu or a menu bar');
   }
 
   static FlutterError? _noLiveRegion(SemanticsNode node) {

@@ -470,8 +470,7 @@ enum EngineSemanticsRole {
   /// A visible list of items or a widget that can be made to open and close.
   menu,
 
-  /// A presentation of [menu] that usually remains visible and is usually
-  /// presented horizontally.
+  /// A horizontally displayed [menu] that remains visible.
   menuBar,
 
   /// An option in a set of choices contained by a [menu] or [menuBar].

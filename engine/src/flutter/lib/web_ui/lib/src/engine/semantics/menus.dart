@@ -61,11 +61,8 @@ class SemanticMenu extends SemanticRole {
       }
     }
 
-    String attributeValue = '';
-    for (final int id in ids) {
-      attributeValue = '$attributeValue flt-semantic-node-$id';
-    }
-    setAttribute('aria-owns', attributeValue.trim());
+    String attributeValue = ids.map((id) => 'flt-semantic-node-$id').join(' ');
+    setAttribute('aria-owns', attributeValue);
   }
 
   @override
@@ -125,11 +122,8 @@ class SemanticMenuBar extends SemanticRole {
       }
     }
 
-    String attributeValue = '';
-    for (final int id in ids) {
-      attributeValue = '$attributeValue flt-semantic-node-$id';
-    }
-    setAttribute('aria-owns', attributeValue.trim());
+    String attributeValue = ids.map((id) => 'flt-semantic-node-$id').join(' ');
+    setAttribute('aria-owns', attributeValue);
   }
 
   @override
