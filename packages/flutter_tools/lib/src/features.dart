@@ -159,9 +159,9 @@ const Feature nativeAssets = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
-/// Enable dart data assets building and bundling.
+/// Enable Dart data assets building and bundling.
 const Feature dartDataAssets = Feature(
-  name: 'dart data assets building and bundling',
+  name: 'Dart data assets building and bundling',
   configSetting: 'enable-dart-data-assets',
   environmentOverride: 'FLUTTER_DART_DATA_ASSETS',
   master: FeatureChannelSetting(available: true),

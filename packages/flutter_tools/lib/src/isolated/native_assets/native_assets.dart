@@ -36,13 +36,13 @@ export 'package:native_assets_cli/data_assets_builder.dart' show DataAsset;
 /// If any of the dependencies change, then the Dart build should be performed
 /// again.
 final class DartHookResult {
-  const DartHookResult(
-    this.buildStart,
-    this.buildEnd,
-    this.codeAssets,
-    this.dataAssets,
-    this.dependencies,
-  );
+  const DartHookResult({
+    required this.buildStart,
+    required this.buildEnd,
+    required this.codeAssets,
+    required this.dataAssets,
+    required this.dependencies,
+  });
 
   DartHookResult.empty()
     : buildStart = DateTime.now(),
@@ -52,36 +52,52 @@ final class DartHookResult {
       dependencies = const <Uri>[];
 
   factory DartHookResult.fromJson(Map<String, Object?> json) {
-    final DateTime buildStart = DateTime.parse((json['build_start'] as String?)!);
-    final DateTime buildEnd = DateTime.parse((json['build_end'] as String?)!);
+    final DateTime buildStart = DateTime.parse((json[_buildStartKey] as String?)!);
+    final DateTime buildEnd = DateTime.parse((json[_buildEndKey] as String?)!);
     final List<Uri> dependencies = <Uri>[
-      for (final Object? encodedUri in json['dependencies']! as List<Object?>)
+      for (final Object? encodedUri in json[_dependenciesKey] as List<Object?>? ?? <Object?>[])
         Uri.parse(encodedUri! as String),
     ];
     final List<CodeAsset> codeAssets = <CodeAsset>[
-      for (final Object? json in json['code_assets'] as List<Object?>? ?? const <Object?>[])
+      for (final Object? json in json[_codeAssetsKey] as List<Object?>? ?? const <Object?>[])
         CodeAsset.fromEncoded(EncodedAsset.fromJson(json! as Map<String, Object?>)),
     ];
     final List<DataAsset> dataAssets = <DataAsset>[
-      for (final Object? json in json['data_assets'] as List<Object?>? ?? const <Object?>[])
+      for (final Object? json in json[_dataAssetsKey] as List<Object?>? ?? const <Object?>[])
         DataAsset.fromEncoded(EncodedAsset.fromJson(json! as Map<String, Object?>)),
     ];
-    return DartHookResult(buildStart, buildEnd, codeAssets, dataAssets, dependencies);
+    return DartHookResult(
+      buildStart: buildStart,
+      buildEnd: buildEnd,
+      codeAssets: codeAssets,
+      dataAssets: dataAssets,
+      dependencies: dependencies,
+    );
   }
 
+  /// The timestamp at which we start a build - so the timestamp of the inputs.
   final DateTime buildStart;
+
+  /// The timestamp at which we finish a build - so the timestamp of the
+  /// outputs.
   final DateTime buildEnd;
   final List<CodeAsset> codeAssets;
   final List<DataAsset> dataAssets;
   final List<Uri> dependencies;
 
   Map<String, Object?> toJson() => <String, Object?>{
-    'build_start': buildStart.toIso8601String(),
-    'build_end': buildEnd.toIso8601String(),
-    'dependencies': <Object?>[for (final Uri dep in dependencies) dep.toString()],
-    'code_assets': <Object?>[for (final CodeAsset code in codeAssets) code.encode().toJson()],
-    'data_assets': <Object?>[for (final DataAsset asset in dataAssets) asset.encode().toJson()],
+    _buildStartKey: buildStart.toIso8601String(),
+    _buildEndKey: buildEnd.toIso8601String(),
+    _dependenciesKey: <Object?>[for (final Uri dep in dependencies) dep.toString()],
+    _codeAssetsKey: <Object?>[for (final CodeAsset code in codeAssets) code.encode().toJson()],
+    _dataAssetsKey: <Object?>[for (final DataAsset asset in dataAssets) asset.encode().toJson()],
   };
+
+  static const String _buildStartKey = 'build_start';
+  static const String _buildEndKey = 'build_end';
+  static const String _dependenciesKey = 'dependencies';
+  static const String _codeAssetsKey = 'code_assets';
+  static const String _dataAssetsKey = 'data_assets';
 
   /// The files that eventually should be bundled with the app.
   List<Uri> get filesToBeBundled => <Uri>[
@@ -121,12 +137,12 @@ final class DartHookResult {
 Future<DartHookResult> runFlutterSpecificHooks({
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
-  required TargetPlatform? targetPlatform,
+  required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
   final bool isWeb = targetPlatform == TargetPlatform.web_javascript;
-  final OS? targetOS = isWeb ? null : getNativeOSFromTargetPlatform(targetPlatform!);
+  final OS? targetOS = isWeb ? null : getNativeOSFromTargetPlatform(targetPlatform);
   final Uri buildUri = nativeAssetsBuildUri(projectUri, isWeb ? 'web' : targetOS!.name);
 
   // Sanity check.
@@ -149,7 +165,7 @@ Future<DartHookResult> runFlutterSpecificHooks({
 
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
   final List<Architecture>? architectures =
-      isWeb || targetPlatform == null
+      isWeb
           ? null
           : (flutterTester
               ? <Architecture>[Architecture.current]
@@ -180,7 +196,6 @@ Future<void> installCodeAssets({
   required Uri nativeAssetsFileUri,
 }) async {
   final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
-
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name);
   final bool flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
@@ -776,7 +791,13 @@ Future<DartHookResult> _runDartHooks({
   globals.logger.printTrace('Building native assets for $targetString done.');
 
   final DateTime buildEnd = DateTime.now();
-  return DartHookResult(buildStart, buildEnd, codeAssets, dataAssets, dependencies.toList());
+  return DartHookResult(
+    buildStart: buildStart,
+    buildEnd: buildEnd,
+    codeAssets: codeAssets,
+    dataAssets: dataAssets,
+    dependencies: dependencies.toList(),
+  );
 }
 
 List<Architecture> _architecturesForOS(
