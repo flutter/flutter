@@ -28,6 +28,7 @@ impeller_component("vulkan_unittests") {
     "test/mock_vulkan_unittests.cc",
     "test/sampler_library_vk_unittests.cc",
     "test/swapchain_unittests.cc",
+    "surface_context_vk_unittests.cc",
   ]
   deps = [
     ":vulkan",

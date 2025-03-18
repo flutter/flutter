@@ -73,6 +73,9 @@ bool SurfaceContextVK::SetWindowSurface(vk::UniqueSurfaceKHR surface,
 }
 
 void SurfaceContextVK::TeardownSwapchain() {
+  // When background the application, tear down the swapchain to release memory
+  // from the images. When returning to the foreground, SetWindowSurface will be
+  // called which will re-create the swapchain.
   swapchain_.reset();
 }
 
