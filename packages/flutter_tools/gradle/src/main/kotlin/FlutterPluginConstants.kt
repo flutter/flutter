@@ -1,7 +1,7 @@
 package com.flutter.gradle
 
-// TODO(gmackall): this can be collapsed into either FlutterPluginUtils or FlutterPlugin once either
-// of those Kotlin classes lands.
+// TODO(gmackall): this should be collapsed back into the core FlutterPlugin once the Groovy to
+//                 kotlin conversion is complete.
 object FlutterPluginConstants {
     /** The platforms that can be passed to the `--Ptarget-platform` flag. */
     private const val PLATFORM_ARM32 = "android-arm"
@@ -16,6 +16,7 @@ object FlutterPluginConstants {
     private const val ARCH_X86_64 = "x86_64"
 
     const val INTERMEDIATES_DIR = "intermediates"
+    const val FLUTTER_STORAGE_BASE_URL = "FLUTTER_STORAGE_BASE_URL"
     const val DEFAULT_MAVEN_HOST = "https://storage.googleapis.com"
 
     /** Maps platforms to ABI architectures. */

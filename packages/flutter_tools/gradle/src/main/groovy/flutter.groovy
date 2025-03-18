@@ -107,7 +107,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         // Configure the Maven repository.
-        String hostedRepository = System.getenv("FLUTTER_STORAGE_BASE_URL") ?: FlutterPluginConstants.DEFAULT_MAVEN_HOST
+        String hostedRepository = System.getenv(FlutterPluginConstants.FLUTTER_STORAGE_BASE_URL) ?: FlutterPluginConstants.DEFAULT_MAVEN_HOST
         String repository = FlutterPluginUtils.shouldProjectUseLocalEngine(project)
             ? project.property(propLocalEngineRepo)
             : "$hostedRepository/${engineRealm}download.flutter.io"
