@@ -72,6 +72,13 @@ bool SurfaceContextVK::SetWindowSurface(vk::UniqueSurfaceKHR surface,
   return SetSwapchain(SwapchainVK::Create(parent_, std::move(surface), size));
 }
 
+void SurfaceContextVK::TeardownSwapchain() {
+  // When background the application, tear down the swapchain to release memory
+  // from the images. When returning to the foreground, SetWindowSurface will be
+  // called which will re-create the swapchain.
+  swapchain_.reset();
+}
+
 bool SurfaceContextVK::SetSwapchain(std::shared_ptr<SwapchainVK> swapchain) {
   if (!swapchain || !swapchain->IsValid()) {
     VALIDATION_LOG << "Invalid swapchain.";
