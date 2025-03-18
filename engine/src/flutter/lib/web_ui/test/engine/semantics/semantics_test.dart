@@ -1357,6 +1357,83 @@ void _testContainer() {
 
     semantics().semanticsEnabled = false;
   });
+
+  test('reparented nodes have correct transform and position', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
+        rect: const ui.Rect.fromLTRB(11, 11, 111, 111),
+      );
+      updateNode(builder, id: 1, rect: const ui.Rect.fromLTRB(10, 10, 20, 20));
+      updateNode(
+        builder,
+        id: 2,
+        childrenInTraversalOrder: Int32List.fromList(<int>[3]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[3]),
+        rect: const ui.Rect.fromLTRB(22, 22, 222, 222),
+      );
+
+      updateNode(builder, id: 3);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-3')!;
+
+      expectSemanticsTree(owner(), '''
+  <sem>
+      <sem style="z-index: 2"></sem>
+      <sem style="z-index: 1">
+        <sem></sem>
+      </sem>
+  </sem>''');
+
+      expect(owner().debugSemanticsTree!.keys.toList(), unorderedEquals(<int>[0, 1, 2, 3]));
+
+      expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -22, -22)');
+      expect(childElement.style.left == '0px' || childElement.style.left == '', isTrue);
+      expect(childElement.style.top == '0px' || childElement.style.top == '', isTrue);
+    }
+
+    // Remove node #2 => expect nodes #2 to be removed and #3 reparented.
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(
+        builder,
+        id: 1,
+        childrenInTraversalOrder: Int32List.fromList(<int>[3]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[3]),
+        rect: const ui.Rect.fromLTRB(11, 11, 111, 111),
+      );
+      updateNode(builder, id: 3);
+      owner().updateSemantics(builder.build());
+
+      final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-3')!;
+      expectSemanticsTree(owner(), '''
+    <sem>
+        <sem style="z-index: 2">
+            <sem ></sem>
+        </sem>
+    </sem>''');
+
+      expect(owner().debugSemanticsTree!.keys.toList(), unorderedEquals(<int>[0, 1, 3]));
+      expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -11, -11)');
+      expect(childElement.style.left == '0px' || childElement.style.left == '', isTrue);
+      expect(childElement.style.top == '0px' || childElement.style.top == '', isTrue);
+    }
+
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testVerticalScrolling() {

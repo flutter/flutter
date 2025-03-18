@@ -2125,11 +2125,11 @@ class SemanticsObject {
 
   /// Computes the size and position of children.
   void updateChildrenPositionAndSize() {
-    Set<SemanticsObject> dirtyNodes = <SemanticsObject>{};
+    final Set<SemanticsObject> dirtyNodes = <SemanticsObject>{};
     recomputeChildrenAdjustment(dirtyNodes);
-    for (final child in dirtyNodes) {
-      child.recomputePositionAndSize();
-    }
+    dirtyNodes.forEach((node) {
+      node.recomputePositionAndSize();
+    });
   }
 
   /// Clears the transform on a semantic element as if an identity transform is
@@ -2790,7 +2790,7 @@ class EngineSemanticsOwner {
       final SemanticsObject object = getOrCreateObject(nodeUpdate.id);
       object.updateSelf(nodeUpdate);
     }
-    Set<SemanticsObject> _nodesWithDirtyPositionsAndSizes = <SemanticsObject>{};
+    final Set<SemanticsObject> nodesWithDirtyPositionsAndSizes = <SemanticsObject>{};
     // Second, fix the tree structure. This is moved out into its own loop,
     // because each object's own information must be updated first.
     for (final SemanticsNodeUpdate nodeUpdate in nodeUpdates) {
@@ -2801,17 +2801,15 @@ class EngineSemanticsOwner {
           object.isTransformDirty ||
           object.isScrollPositionDirty ||
           object.isChildrenInTraversalOrderDirty) {
-        _nodesWithDirtyPositionsAndSizes.add(object);
+        nodesWithDirtyPositionsAndSizes.add(object);
 
-        object.recomputeChildrenAdjustment(_nodesWithDirtyPositionsAndSizes);
+        object.recomputeChildrenAdjustment(nodesWithDirtyPositionsAndSizes);
       }
 
       object._dirtyFields = 0;
     }
 
-    for (final node in _nodesWithDirtyPositionsAndSizes) {
-      node.recomputePositionAndSize();
-    }
+    nodesWithDirtyPositionsAndSizes.forEach((node) => node.recomputePositionAndSize());
 
     final SemanticsObject root = _semanticsTree[0]!;
     if (_rootSemanticsElement == null) {
