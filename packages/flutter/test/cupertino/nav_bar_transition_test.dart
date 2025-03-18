@@ -691,14 +691,14 @@ void main() {
       findsOneWidget,
     );
     // Come in from the right and fade in.
-    checkOpacity(tester, backChevron, 0.0);
-    expect(tester.getTopLeft(backChevron).dx, moreOrLessEquals(93.18, epsilon: 0.01));
-    expect(tester.getTopLeft(backChevron).dy, moreOrLessEquals(20.5, epsilon: 0.01));
+    checkOpacity(tester, backChevron, 0.25);
+    expect(tester.getTopLeft(backChevron).dx, moreOrLessEquals(79.98, epsilon: 0.01));
+    expect(tester.getTopLeft(backChevron).dy, moreOrLessEquals(18.25, epsilon: 0.01));
 
     await tester.pump(const Duration(milliseconds: 200));
-    checkOpacity(tester, backChevron, 0.0);
-    expect(tester.getTopLeft(backChevron).dx, moreOrLessEquals(57.99, epsilon: 0.01));
-    expect(tester.getTopLeft(backChevron).dy, moreOrLessEquals(14.5, epsilon: 0.01));
+    checkOpacity(tester, backChevron, 1.0);
+    expect(tester.getTopLeft(backChevron).dx, moreOrLessEquals(14.0, epsilon: 0.01));
+    expect(tester.getTopLeft(backChevron).dy, moreOrLessEquals(7.0, epsilon: 0.01));
   });
 
   testWidgets('First appearance of back chevron fades in from the left in RTL', (
@@ -737,14 +737,14 @@ void main() {
     );
 
     // Come in from the right and fade in.
-    checkOpacity(tester, backChevron, 0.0);
-    expect(tester.getTopRight(backChevron).dx, moreOrLessEquals(704.26, epsilon: 0.01));
-    expect(tester.getTopRight(backChevron).dy, moreOrLessEquals(20.5, epsilon: 0.01));
+    checkOpacity(tester, backChevron, 0.25);
+    expect(tester.getTopRight(backChevron).dx, moreOrLessEquals(713.62, epsilon: 0.01));
+    expect(tester.getTopRight(backChevron).dy, moreOrLessEquals(18.25, epsilon: 0.01));
 
     await tester.pump(const Duration(milliseconds: 200));
-    checkOpacity(tester, backChevron, 0.0);
-    expect(tester.getTopRight(backChevron).dx, moreOrLessEquals(729.22, epsilon: 0.01));
-    expect(tester.getTopRight(backChevron).dy, moreOrLessEquals(14.5, epsilon: 0.01));
+    checkOpacity(tester, backChevron, 1.0);
+    expect(tester.getTopRight(backChevron).dx, moreOrLessEquals(760.41, epsilon: 0.01));
+    expect(tester.getTopRight(backChevron).dy, moreOrLessEquals(7.0, epsilon: 0.01));
   });
 
   testWidgets('Back chevron fades out and in when both pages have it', (WidgetTester tester) async {

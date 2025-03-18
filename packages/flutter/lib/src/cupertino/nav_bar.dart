@@ -2993,6 +2993,11 @@ class _NavigationBarComponentsTransition {
     RelativeRect from = to;
 
     Widget child = topBackChevron.child;
+    // Values eyeballed from an iPhone 15 simulator running iOS 17.5.
+    const Curve forwardCurve = Interval(0.0, 0.4);
+    const Curve backwardCurve = Interval(0.6, 1.0);
+    final Curve effectiveCurve =
+        animation.status == AnimationStatus.forward ? forwardCurve : backwardCurve;
 
     // If it's the first page with a back chevron, shrink and shift in slightly
     // from the right.
@@ -3000,16 +3005,30 @@ class _NavigationBarComponentsTransition {
       final RenderBox topBackChevronBox =
           topComponents.backChevronKey.currentContext!.findRenderObject()! as RenderBox;
       from = to.shift(Offset(forwardDirection * topBackChevronBox.size.width * 2.0, 0.0));
-      child = ScaleTransition(scale: routeAnimation, child: child);
+      child = ScaleTransition(
+        scale: routeAnimation.drive(CurveTween(curve: effectiveCurve)),
+        child: child,
+      );
     }
 
     final RelativeRectTween positionTween = RelativeRectTween(begin: from, end: to);
 
     return PositionedTransition(
-      rect: routeAnimation.drive(positionTween),
+      rect: routeAnimation.drive(CurveTween(curve: effectiveCurve)).drive(positionTween),
       child: FadeTransition(
         opacity: routeAnimation.drive(
-          fadeIn.chain(CurveTween(curve: Interval(bottomBackChevron == null ? 0.75 : 0.4, 1.0))),
+          CurveTween(
+            curve: switch ((
+              bottomBackChevron != null,
+              animation.status == AnimationStatus.forward,
+            )) {
+              (true, true) || (true, false) => const Interval(0.4, 1.0),
+              (false, true) => forwardCurve,
+              // Fades faster going from the first page with a back chevron to
+              // its previous page.
+              (false, false) => const Interval(0.9, 1.0),
+            },
+          ),
         ),
         child: DefaultTextStyle(style: topBackButtonTextStyle, child: child),
       ),
