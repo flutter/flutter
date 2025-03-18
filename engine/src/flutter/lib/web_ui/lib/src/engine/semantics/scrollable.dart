@@ -76,7 +76,9 @@ class SemanticScrollable extends SemanticRole {
       final double? scrollOffset = semanticsObject.scrollPosition;
       final double newScrollOffset = scrollOffset! + scrollDelta;
 
-      print('engine - 1. current scroll offset $scrollOffset, newOffset: $newScrollOffset, delta $scrollDelta, dom scroll position: $_domScrollPosition, effective scroll position: $_effectiveNeutralScrollPosition');
+      print(
+        'engine - 1. current scroll offset $scrollOffset, newOffset: $newScrollOffset, delta $scrollDelta, dom scroll position: $_domScrollPosition, effective scroll position: $_effectiveNeutralScrollPosition',
+      );
       _previousDomScrollPosition = _domScrollPosition;
       _neutralizeDomScrollPosition();
       semanticsObject.recomputePositionAndSize();
