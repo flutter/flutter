@@ -190,7 +190,7 @@ ByteBuffer readDomImageSourcePixelsUnmodified(
   int width,
   int height,
 ) {
-  final DomCanvasElement htmlCanvas = createDomCanvasElement(width: width, height: height);
+  final DomHTMLCanvasElement htmlCanvas = createDomCanvasElement(width: width, height: height);
   final DomCanvasRenderingContext2D ctx =
       htmlCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
   ctx.drawImage(imageSource, 0, 0);
@@ -207,7 +207,7 @@ Future<Uint8List> encodeDomImageSourceAsPng(
   int width,
   int height,
 ) async {
-  final DomCanvasElement canvas = createDomCanvasElement(width: width, height: height);
+  final DomHTMLCanvasElement canvas = createDomCanvasElement(width: width, height: height);
   final DomCanvasRenderingContext2D ctx = canvas.context2D;
   ctx.drawImage(imageSource, 0, 0);
   final String pngBase64 = canvas.toDataURL().substring('data:image/png;base64,'.length);

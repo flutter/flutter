@@ -252,7 +252,7 @@ class TestSkDeletableMock {
   JsConstructor get constructor => TestJsConstructor(name: 'TestSkDeletable');
 }
 
-extension type TestSkDeletable._primary(JSObject _) implements JSObject, SkDeletable {
+extension type TestSkDeletable._primary(JSObject _) implements SkDeletable {
   factory TestSkDeletable() {
     final TestSkDeletableMock mock = TestSkDeletableMock();
     return TestSkDeletable._(

@@ -102,18 +102,18 @@ abstract class BrowserImageDecoder implements ui.Codec {
     try {
       final ImageDecoder webDecoder = ImageDecoder(
         ImageDecoderOptions(
-          type: contentType.toJS,
+          type: contentType,
           data: dataSource,
 
           // Flutter always uses premultiplied alpha when decoding.
-          premultiplyAlpha: 'premultiply'.toJS,
+          premultiplyAlpha: 'premultiply',
           // "default" gives the browser the liberty to convert to display-appropriate
           // color space, typically SRGB, which is what we want.
-          colorSpaceConversion: 'default'.toJS,
+          colorSpaceConversion: 'default',
 
           // Flutter doesn't give the developer a way to customize this, so if this
           // is an animated image we should prefer the animated track.
-          preferAnimation: true.toJS,
+          preferAnimation: true,
         ),
       );
 
@@ -149,7 +149,7 @@ abstract class BrowserImageDecoder implements ui.Codec {
 
       return webDecoder;
     } catch (error) {
-      if (error is JSAny && domInstanceOfString(error, 'DOMException')) {
+      if (error is JSAny && error.isA<DomException>()) {
         if ((error as DomException).name == DomException.notSupported) {
           throw ImageCodecException(
             "Image file format ($contentType) is not supported by this browser's ImageDecoder API.\n"
@@ -170,7 +170,7 @@ abstract class BrowserImageDecoder implements ui.Codec {
     _debugCheckNotDisposed();
     final ImageDecoder webDecoder = await _getOrCreateWebDecoder();
     final DecodeResult result = await promiseToFuture<DecodeResult>(
-      webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex.toJS)),
+      webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex)),
     );
     final VideoFrame frame = result.image;
     _nextFrameIndex = (_nextFrameIndex + 1) % frameCount;

@@ -41,7 +41,7 @@ class HighContrastSupport {
     }
   }
 
-  JSVoid _onHighContrastChange(DomEvent event) {
+  void _onHighContrastChange(DomEvent event) {
     final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
     final bool isHighContrastEnabled = mqEvent.matches!;
     for (final HighContrastListener listener in _listeners) {

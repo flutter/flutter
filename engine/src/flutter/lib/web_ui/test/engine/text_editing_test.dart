@@ -3643,7 +3643,7 @@ void cleanTestFlags() {
 
 void checkInputEditingState(DomElement? element, String text, int start, int end) {
   expect(element, isNotNull);
-  expect(domInstanceOfString(element! as JSObject, 'HTMLInputElement'), true);
+  expect(element!.isA<DomHTMLInputElement>(), true);
   final DomHTMLInputElement input = element as DomHTMLInputElement;
   expect(defaultTextEditingRoot.ownerDocument?.activeElement, input);
   expect(input.value, text);

@@ -100,7 +100,7 @@ class BitmapTestCodec extends TestFileCodec {
 
     await imageElement.decode();
 
-    final DomImageBitmap bitmap = await createImageBitmap(imageElement as JSObject, (
+    final DomImageBitmap bitmap = await createImageBitmap(imageElement, (
       x: 0,
       y: 0,
       width: imageElement.naturalWidth.toInt(),

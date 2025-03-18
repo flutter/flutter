@@ -1008,7 +1008,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
         // See https://bugs.chromium.org/p/chromium/issues/detail?id=1012656
         createUint8ArrayFromBuffer(
           skwasmInstance.wasmMemory.buffer,
-        ).slice(utf8Data.address.toJS, (utf8Data.address + outSize.value).toJS),
+        ).slice(utf8Data.address, utf8Data.address + outSize.value),
       );
     }
 

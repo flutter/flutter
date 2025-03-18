@@ -84,7 +84,7 @@ void testMain() {
 
   test('_PointerEventContext generates expected events', () {
     DomPointerEvent expectCorrectType(DomEvent e) {
-      expect(domInstanceOfString(e as JSObject, 'PointerEvent'), isTrue);
+      expect(e.isA<DomPointerEvent>(), isTrue);
       return e as DomPointerEvent;
     }
 

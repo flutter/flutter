@@ -70,10 +70,10 @@ class TextCapitalizationConfig {
       case TextCapitalization.none:
         autocapitalize = 'off';
     }
-    if (domInstanceOfString(domElement as JSObject, 'HTMLInputElement')) {
+    if (domElement.isA<DomHTMLInputElement>()) {
       final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       element.setAttribute('autocapitalize', autocapitalize);
-    } else if (domInstanceOfString(domElement as JSObject, 'HTMLTextAreaElement')) {
+    } else if (domElement.isA<DomHTMLTextAreaElement>()) {
       final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       element.setAttribute('autocapitalize', autocapitalize);
     }

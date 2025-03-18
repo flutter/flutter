@@ -131,8 +131,8 @@ void vibrate(int durationMs) {
 /// The [DomCanvasElement] factory assumes that element allocation will
 /// succeed and will return a non-null element. This is not always true. For
 /// example, when Safari on iOS runs out of memory it returns null.
-DomCanvasElement? tryCreateCanvasElement(int width, int height) {
-  final DomCanvasElement? canvas = js_util.callMethod<DomCanvasElement?>(
+DomHTMLCanvasElement? tryCreateCanvasElement(int width, int height) {
+  final DomHTMLCanvasElement? canvas = js_util.callMethod<DomHTMLCanvasElement?>(
     domDocument,
     'createElement',
     <dynamic>['CANVAS'],
@@ -202,13 +202,9 @@ extension type ImageDecoder._(JSObject _) implements JSObject {
   external ImageDecoder(ImageDecoderOptions options);
 
   external ImageTrackList get tracks;
-
-  @JS('complete')
-  external JSBoolean get _complete;
-  bool get complete => _complete.toDart;
-
+  external bool get complete;
   external JSPromise<JSAny?> decode(DecodeOptions options);
-  external JSVoid close();
+  external void close();
 }
 
 /// Options passed to the `ImageDecoder` constructor.
@@ -218,13 +214,13 @@ extension type ImageDecoder._(JSObject _) implements JSObject {
 ///  * https://www.w3.org/TR/webcodecs/#imagedecoderinit-interface
 extension type ImageDecoderOptions._(JSObject _) implements JSObject {
   external ImageDecoderOptions({
-    required JSString type,
+    required String type,
     required JSAny data,
-    required JSString premultiplyAlpha,
-    JSNumber? desiredWidth,
-    JSNumber? desiredHeight,
-    required JSString colorSpaceConversion,
-    required JSBoolean preferAnimation,
+    required String premultiplyAlpha,
+    double? desiredWidth,
+    double? desiredHeight,
+    required String colorSpaceConversion,
+    required bool preferAnimation,
   });
 }
 
@@ -235,10 +231,7 @@ extension type ImageDecoderOptions._(JSObject _) implements JSObject {
 ///  * https://www.w3.org/TR/webcodecs/#imagedecoderesult-interface
 extension type DecodeResult(JSObject _) implements JSObject {
   external VideoFrame get image;
-
-  @JS('complete')
-  external JSBoolean get _complete;
-  bool get complete => _complete.toDart;
+  external bool get complete;
 }
 
 /// Options passed to [ImageDecoder.decode].
@@ -247,7 +240,7 @@ extension type DecodeResult(JSObject _) implements JSObject {
 ///
 ///  * https://www.w3.org/TR/webcodecs/#dictdef-imagedecodeoptions
 extension type DecodeOptions._(JSObject _) implements JSObject {
-  external DecodeOptions({required JSNumber frameIndex});
+  external DecodeOptions({required int frameIndex});
 }
 
 /// The only frame in a static image, or one of the frames in an animated one.
@@ -258,40 +251,20 @@ extension type DecodeOptions._(JSObject _) implements JSObject {
 ///
 ///  * https://www.w3.org/TR/webcodecs/#videoframe-interface
 extension type VideoFrame(JSObject _) implements JSObject, DomCanvasImageSource {
-  @JS('allocationSize')
-  external JSNumber _allocationSize();
-  double allocationSize() => _allocationSize().toDartDouble;
+  external double allocationSize();
 
   @JS('copyTo')
   external JSPromise<JSAny?> _copyTo(JSAny destination);
   JSPromise<JSAny?> copyTo(Object destination) => _copyTo(destination.toJSAnyShallow);
 
-  @JS('format')
-  external JSString? get _format;
-  String? get format => _format?.toDart;
-
-  @JS('codedWidth')
-  external JSNumber get _codedWidth;
-  double get codedWidth => _codedWidth.toDartDouble;
-
-  @JS('codedHeight')
-  external JSNumber get _codedHeight;
-  double get codedHeight => _codedHeight.toDartDouble;
-
-  @JS('displayWidth')
-  external JSNumber get _displayWidth;
-  double get displayWidth => _displayWidth.toDartDouble;
-
-  @JS('displayHeight')
-  external JSNumber get _displayHeight;
-  double get displayHeight => _displayHeight.toDartDouble;
-
-  @JS('duration')
-  external JSNumber? get _duration;
-  double? get duration => _duration?.toDartDouble;
-
+  external String? get format;
+  external double get codedWidth;
+  external double get codedHeight;
+  external double get displayWidth;
+  external double get displayHeight;
+  external double? get duration;
   external VideoFrame clone();
-  external JSVoid close();
+  external void close();
 }
 
 /// Corresponds to the browser's `ImageTrackList` type.
@@ -310,13 +283,8 @@ extension type ImageTrackList(JSObject _) implements JSObject {
 ///
 ///  * https://www.w3.org/TR/webcodecs/#imagetrack
 extension type ImageTrack(JSObject _) implements JSObject {
-  @JS('repetitionCount')
-  external JSNumber get _repetitionCount;
-  double get repetitionCount => _repetitionCount.toDartDouble;
-
-  @JS('frameCount')
-  external JSNumber get _frameCount;
-  double get frameCount => _frameCount.toDartDouble;
+  external double get repetitionCount;
+  external double get frameCount;
 }
 
 void scaleCanvas2D(Object context2d, num x, num y) {
@@ -370,7 +338,7 @@ class GlContext {
     _canvas = canvas;
   }
 
-  GlContext._fromCanvasElement(DomCanvasElement canvas, bool useWebGl1)
+  GlContext._fromCanvasElement(DomHTMLCanvasElement canvas, bool useWebGl1)
     : glContext =
           canvas.getContext(useWebGl1 ? 'webgl' : 'webgl2', <String, dynamic>{
             'premultipliedAlpha': false,
@@ -815,7 +783,7 @@ class GlContext {
       );
       return imageBitmap;
     } else {
-      final DomCanvasElement canvas = createDomCanvasElement(
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(
         width: _widthInPixels,
         height: _heightInPixels,
       );
@@ -827,7 +795,7 @@ class GlContext {
 
   /// Returns image data in data url format.
   String toImageUrl() {
-    final DomCanvasElement canvas = createDomCanvasElement(
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(
       width: _widthInPixels,
       height: _heightInPixels,
     );
@@ -941,12 +909,12 @@ class OffScreenCanvas {
   }
 
   DomOffscreenCanvas? offScreenCanvas;
-  DomCanvasElement? canvasElement;
+  DomHTMLCanvasElement? canvasElement;
   int width;
   int height;
   static bool? _supported;
 
-  void _updateCanvasCssSize(DomCanvasElement element) {
+  void _updateCanvasCssSize(DomHTMLCanvasElement element) {
     final double cssWidth = width / EngineFlutterDisplay.instance.browserDevicePixelRatio;
     final double cssHeight = height / EngineFlutterDisplay.instance.browserDevicePixelRatio;
     element.style
@@ -983,11 +951,11 @@ class OffScreenCanvas {
         : canvasElement!.getContext('2d');
   }
 
-  DomCanvasRenderingContextBitmapRenderer? getBitmapRendererContext() {
+  DomImageBitmapRenderingContext? getBitmapRendererContext() {
     return (offScreenCanvas != null
             ? offScreenCanvas!.getContext('bitmaprenderer')
             : canvasElement!.getContext('bitmaprenderer'))
-        as DomCanvasRenderingContextBitmapRenderer?;
+        as DomImageBitmapRenderingContext?;
   }
 
   /// Feature detection for transferToImageBitmap on OffscreenCanvas.

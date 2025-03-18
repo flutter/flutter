@@ -108,15 +108,15 @@ class SkwasmFontCollection implements FlutterFontCollection {
     int length = 0;
     final List<JSUint8Array> chunks = <JSUint8Array>[];
     await response.read((JSUint8Array chunk) {
-      length += chunk.length.toDartInt;
+      length += chunk.length;
       chunks.add(chunk);
     });
     final SkDataHandle fontData = skDataCreate(length);
     int dataAddress = skDataGetPointer(fontData).cast<Int8>().address;
     final JSUint8Array wasmMemory = createUint8ArrayFromBuffer(skwasmInstance.wasmMemory.buffer);
     for (final JSUint8Array chunk in chunks) {
-      wasmMemory.set(chunk, dataAddress.toJS);
-      dataAddress += chunk.length.toDartInt;
+      wasmMemory.set(chunk, dataAddress);
+      dataAddress += chunk.length;
     }
     final SkwasmTypeface typeface = SkwasmTypeface(fontData);
     skDataDispose(fontData);
@@ -136,15 +136,15 @@ class SkwasmFontCollection implements FlutterFontCollection {
     int length = 0;
     final List<JSUint8Array> chunks = <JSUint8Array>[];
     await response.read((JSUint8Array chunk) {
-      length += chunk.length.toDartInt;
+      length += chunk.length;
       chunks.add(chunk);
     });
     final SkDataHandle fontData = skDataCreate(length);
     int dataAddress = skDataGetPointer(fontData).cast<Int8>().address;
     final JSUint8Array wasmMemory = createUint8ArrayFromBuffer(skwasmInstance.wasmMemory.buffer);
     for (final JSUint8Array chunk in chunks) {
-      wasmMemory.set(chunk, dataAddress.toJS);
-      dataAddress += chunk.length.toDartInt;
+      wasmMemory.set(chunk, dataAddress);
+      dataAddress += chunk.length;
     }
 
     final SkwasmTypeface typeface = SkwasmTypeface(fontData);

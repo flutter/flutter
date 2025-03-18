@@ -84,7 +84,7 @@ class RawKeyboard {
   }
 
   void handleHtmlEvent(DomEvent domEvent) {
-    if (!domInstanceOfString(domEvent as JSObject, 'KeyboardEvent')) {
+    if (!domEvent.isA<DomKeyboardEvent>()) {
       return;
     }
 

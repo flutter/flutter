@@ -405,10 +405,10 @@ Future<Uint8List> readChunked(
   int position = 0;
   int cumulativeBytesLoaded = 0;
   await payload.read<JSUint8Array>((JSUint8Array chunk) {
-    cumulativeBytesLoaded += chunk.length.toDartInt;
+    cumulativeBytesLoaded += chunk.length;
     chunkCallback(cumulativeBytesLoaded, contentLength);
-    result.set(chunk, position.toJS);
-    position += chunk.length.toDartInt;
+    result.set(chunk, position);
+    position += chunk.length;
   });
   return result.toDart;
 }
@@ -533,8 +533,8 @@ class CkImage implements ui.Image, StackTraceDebugger {
         return readPixelsFromDomImageSource(
           imageBitmap,
           format,
-          imageBitmap.width.toDartInt,
-          imageBitmap.height.toDartInt,
+          imageBitmap.width,
+          imageBitmap.height,
         );
       case VideoFrameImageSource():
         final VideoFrame videoFrame = (imageSource! as VideoFrameImageSource).videoFrame;
@@ -725,10 +725,10 @@ class ImageBitmapImageSource extends ImageSource {
   }
 
   @override
-  int get height => imageBitmap.height.toDartInt;
+  int get height => imageBitmap.height;
 
   @override
-  int get width => imageBitmap.width.toDartInt;
+  int get width => imageBitmap.width;
 
   @override
   DomCanvasImageSource get canvasImageSource => imageBitmap;

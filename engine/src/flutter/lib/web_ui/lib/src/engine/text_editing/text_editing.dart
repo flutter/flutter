@@ -507,7 +507,7 @@ class AutofillInfo {
   void applyToDomElement(DomHTMLElement domElement, {bool focusedElement = false}) {
     final String? autofillHint = this.autofillHint;
     final String? placeholder = this.placeholder;
-    if (domInstanceOfString(domElement as JSObject, 'HTMLInputElement')) {
+    if (domElement.isA<DomHTMLInputElement>()) {
       final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       if (placeholder != null) {
         element.placeholder = placeholder;
@@ -522,7 +522,7 @@ class AutofillInfo {
         }
       }
       element.autocomplete = autofillHint ?? 'on';
-    } else if (domInstanceOfString(domElement as JSObject, 'HTMLTextAreaElement')) {
+    } else if (domElement.isA<DomHTMLTextAreaElement>()) {
       final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       if (placeholder != null) {
         element.placeholder = placeholder;
@@ -835,7 +835,7 @@ class EditingState {
   /// [domElement] can be a [InputElement] or a [TextAreaElement] depending on
   /// the [InputType] of the text field.
   factory EditingState.fromDomElement(DomHTMLElement? domElement) {
-    if (domElement != null && domInstanceOfString(domElement as JSObject, 'HTMLInputElement')) {
+    if (domElement != null && domElement.isA<DomHTMLInputElement>()) {
       final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       if (element.selectionDirection == 'backward') {
         return EditingState(
@@ -850,8 +850,7 @@ class EditingState {
           extentOffset: element.selectionEnd?.toInt(),
         );
       }
-    } else if (domElement != null &&
-        domInstanceOfString(domElement as JSObject, 'HTMLTextAreaElement')) {
+    } else if (domElement != null && domElement.isA<DomHTMLTextAreaElement>()) {
       final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       if (element.selectionDirection == 'backward') {
         return EditingState(
@@ -965,12 +964,11 @@ class EditingState {
   ///
   ///  * [applyTextToDomElement], which is used for non-focused elements.
   void applyToDomElement(DomHTMLElement? domElement) {
-    if (domElement != null && domInstanceOfString(domElement as JSObject, 'HTMLInputElement')) {
+    if (domElement != null && domElement.isA<DomHTMLInputElement>()) {
       final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       element.value = text;
       element.setSelectionRange(minOffset, maxOffset);
-    } else if (domElement != null &&
-        domInstanceOfString(domElement as JSObject, 'HTMLTextAreaElement')) {
+    } else if (domElement != null && domElement.isA<DomHTMLTextAreaElement>()) {
       final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       element.value = text;
       element.setSelectionRange(minOffset, maxOffset);
@@ -989,11 +987,10 @@ class EditingState {
   ///
   ///  * [applyToDomElement], which is used for focused elements.
   void applyTextToDomElement(DomHTMLElement? domElement) {
-    if (domElement != null && domInstanceOfString(domElement as JSObject, 'HTMLInputElement')) {
+    if (domElement != null && domElement.isA<DomHTMLInputElement>()) {
       final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       element.value = text;
-    } else if (domElement != null &&
-        domInstanceOfString(domElement as JSObject, 'HTMLTextAreaElement')) {
+    } else if (domElement != null && domElement.isA<DomHTMLTextAreaElement>()) {
       final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       element.value = text;
     } else {
@@ -1547,7 +1544,7 @@ abstract class DefaultTextEditingStrategy
   }
 
   void maybeSendAction(DomEvent e) {
-    if (domInstanceOfString(e as JSObject, 'KeyboardEvent')) {
+    if (e.isA<DomKeyboardEvent>()) {
       final DomKeyboardEvent event = e as DomKeyboardEvent;
       if (event.keyCode == _kReturnKeyCode) {
         onAction!(inputConfiguration.inputAction);

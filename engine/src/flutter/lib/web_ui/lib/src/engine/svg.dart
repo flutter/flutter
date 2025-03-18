@@ -58,22 +58,14 @@ extension type SVGAnimatedLength(JSObject _) implements JSObject {
 }
 
 extension type SVGLength(JSObject _) implements JSObject {
-  @JS('valueAsString')
-  external set _valueAsString(JSString? value);
-  set valueAsString(String? value) => _valueAsString = value?.toJS;
-
-  @JS('newValueSpecifiedUnits')
-  external JSVoid _newValueSpecifiedUnits(JSNumber unitType, JSNumber valueInSpecifiedUnits);
-  void newValueSpecifiedUnits(int unitType, num valueInSpecifiedUnits) =>
-      _newValueSpecifiedUnits(unitType.toJS, valueInSpecifiedUnits.toJS);
+  external set valueAsString(String? value);
+  external void newValueSpecifiedUnits(int unitType, num valueInSpecifiedUnits);
 }
 
 const int svgLengthTypeNumber = 1;
 
 extension type SVGAnimatedEnumeration(JSObject _) implements JSObject {
-  @JS('baseVal')
-  external set _baseVal(JSNumber? value);
-  set baseVal(int? value) => _baseVal = value?.toJS;
+  external set baseVal(int? value);
 }
 
 extension type SVGFEColorMatrixElement(JSObject _) implements JSObject, SVGElement {
@@ -130,14 +122,11 @@ SVGFECompositeElement createSVGFECompositeElement() =>
         as SVGFECompositeElement;
 
 extension type SVGAnimatedString(JSObject _) implements JSObject {
-  external set _baseVal(JSString? value);
-  set baseVal(String? value) => _baseVal = value?.toJS;
+  external set baseVal(String? value);
 }
 
 extension type SVGAnimatedNumber(JSObject _) implements JSObject {
-  @JS('baseVal')
-  external set _baseVal(JSNumber? value);
-  set baseVal(num? value) => _baseVal = value?.toJS;
+  external set baseVal(num? value);
 }
 
 extension type SVGAnimatedNumberList(JSObject _) implements JSObject {
@@ -149,7 +138,5 @@ extension type SVGNumberList(JSObject _) implements JSObject {
 }
 
 extension type SVGNumber(JSObject _) implements JSObject {
-  @JS('value')
-  external set _value(JSNumber? value);
-  set value(num? v) => _value = v?.toJS;
+  external set value(num? v);
 }

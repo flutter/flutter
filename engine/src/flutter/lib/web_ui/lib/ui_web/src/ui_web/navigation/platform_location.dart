@@ -117,7 +117,7 @@ class BrowserPlatformLocation implements PlatformLocation {
   String get search => _location.search!;
 
   @override
-  String get hash => _location.locationHash;
+  String get hash => _location.hash;
 
   @override
   Object? get state => _history.state;
