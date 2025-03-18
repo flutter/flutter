@@ -400,7 +400,6 @@ void main() {
             explicitChildNodes: true,
             child: Semantics(
               role: SemanticsRole.menuItem,
-              selected: false,
               onTap: () {},
               child: const Text('some child'),
             ),
@@ -419,7 +418,6 @@ void main() {
             explicitChildNodes: true,
             child: Semantics(
               role: SemanticsRole.menuItem,
-              selected: false,
               onTap: () {},
               child: const Text('some child'),
             ),
