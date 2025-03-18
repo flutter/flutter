@@ -5280,6 +5280,7 @@ base class FragmentShader extends Shader {
   /// results will be undefined.
   void setImageSampler(int index, Image image) {
     assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
+    assert(!image.debugDisposed, 'Image has been disposed');
     _setImageSampler(index, image._image);
   }
 
