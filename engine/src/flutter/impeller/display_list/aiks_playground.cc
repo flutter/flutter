@@ -42,7 +42,7 @@ bool AiksPlayground::OpenPlaygroundHere(
 
 bool AiksPlayground::OpenPlaygroundHere(
     const AiksDlPlaygroundCallback& callback) {
-  AiksContext renderer({}, GetContext(), typographer_context_);
+  AiksContext renderer(GetContext(), typographer_context_);
 
   if (!renderer.IsValid()) {
     return false;

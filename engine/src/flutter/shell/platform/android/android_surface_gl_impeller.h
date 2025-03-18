@@ -18,8 +18,7 @@ class AndroidSurfaceGLImpeller final : public GPUSurfaceGLDelegate,
                                        public AndroidSurface {
  public:
   explicit AndroidSurfaceGLImpeller(
-      const std::shared_ptr<AndroidContextGLImpeller>& android_context,
-      const impeller::AiksContext::Settings& settings);
+      const std::shared_ptr<AndroidContextGLImpeller>& android_context);
 
   // |AndroidSurface|
   ~AndroidSurfaceGLImpeller() override;
@@ -77,7 +76,6 @@ class AndroidSurfaceGLImpeller final : public GPUSurfaceGLDelegate,
 
  private:
   std::shared_ptr<AndroidContextGLImpeller> android_context_;
-  const impeller::AiksContext::Settings settings_;
   std::unique_ptr<impeller::egl::Surface> onscreen_surface_;
   std::unique_ptr<impeller::egl::Surface> offscreen_surface_;
   fml::RefPtr<AndroidNativeWindow> native_window_;

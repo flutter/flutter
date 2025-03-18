@@ -41,6 +41,7 @@ EmbedderSurfaceMetalImpeller::EmbedderSurfaceMetalImpeller(
                                              impeller_framebuffer_blend_shaders_length),
   };
   context_ = impeller::ContextMTL::Create(
+      impeller::Flags{},
       (__bridge id<MTLDevice>)device,               // device
       (__bridge id<MTLCommandQueue>)command_queue,  // command_queue
       shader_mappings,                              // shader_libraries_data
@@ -64,8 +65,8 @@ std::unique_ptr<Surface> EmbedderSurfaceMetalImpeller::CreateGPUSurface()
     return nullptr;
   }
   if (!aiks_context_) {
-    aiks_context_ = std::make_shared<impeller::AiksContext>(
-        impeller::AiksContext::Settings{}, context_, impeller::TypographerContextSkia::Make());
+    aiks_context_ =
+        std::make_shared<impeller::AiksContext>(context_, impeller::TypographerContextSkia::Make());
   }
 
   const bool render_to_surface = !external_view_embedder_;

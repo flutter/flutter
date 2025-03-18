@@ -102,8 +102,9 @@ static std::optional<QueueIndexVK> PickQueue(const vk::PhysicalDevice& device,
   return std::nullopt;
 }
 
-std::shared_ptr<ContextVK> ContextVK::Create(Settings settings) {
-  auto context = std::shared_ptr<ContextVK>(new ContextVK());
+std::shared_ptr<ContextVK> ContextVK::Create(const Flags& flags,
+                                             Settings settings) {
+  auto context = std::shared_ptr<ContextVK>(new ContextVK(flags));
   context->Setup(std::move(settings));
   if (!context->IsValid()) {
     return nullptr;
@@ -127,7 +128,8 @@ uint64_t CalculateHash(void* ptr) {
 }
 }  // namespace
 
-ContextVK::ContextVK() : hash_(CalculateHash(this)) {}
+ContextVK::ContextVK(const Flags& flags)
+    : Context(flags), hash_(CalculateHash(this)) {}
 
 ContextVK::~ContextVK() {
   if (device_holder_ && device_holder_->device) {
