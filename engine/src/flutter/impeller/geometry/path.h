@@ -183,6 +183,8 @@ class Path {
 
   size_t GetComponentCount(std::optional<ComponentType> type = {}) const;
 
+  size_t GetPointCount() const;
+
   FillType GetFillType() const;
 
   bool IsConvex() const;
