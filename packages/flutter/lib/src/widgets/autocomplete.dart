@@ -539,9 +539,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     };
 
     final Matrix4 transform =
-        Matrix4.translationValues(0, -originY, 0)
-          ..multiply(invertTransform)
-          ..invert();
+        layoutInfo.childPaintTransform.clone()..translate(0, originY);
     final Widget child = Builder(
       builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
     );
