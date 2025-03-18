@@ -433,6 +433,24 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/165294
+  testWidgets('CircularProgressIndicator.adaptive stroke width', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(
+      progressIndicatorTheme: const ProgressIndicatorThemeData(strokeWidth: 10.0),
+    );
+    await tester.pumpWidget(
+      Theme(data: themeData, child: const CircularProgressIndicator.adaptive()),
+    );
+
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 10.0));
+
+    await tester.pumpWidget(
+      Theme(data: themeData, child: const CircularProgressIndicator.adaptive(strokeWidth: 16.0)),
+    );
+
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
+  });
+
   testWidgets('CircularProgressIndicator strokeAlign', (WidgetTester tester) async {
     await tester.pumpWidget(Theme(data: theme, child: const CircularProgressIndicator()));
     expect(
