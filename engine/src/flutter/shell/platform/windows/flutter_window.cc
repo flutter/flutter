@@ -166,21 +166,26 @@ void FlutterWindow::OnPointerMove(double x,
                                   double y,
                                   FlutterPointerDeviceKind device_kind,
                                   int32_t device_id,
+                                  uint32_t rotation,
+                                  uint32_t pressure,
                                   int modifiers_state) {
   binding_handler_delegate_->OnPointerMove(x, y, device_kind, device_id,
-                                           modifiers_state);
+                                           rotation, pressure, modifiers_state);
 }
 
 void FlutterWindow::OnPointerDown(double x,
                                   double y,
                                   FlutterPointerDeviceKind device_kind,
                                   int32_t device_id,
-                                  UINT button) {
+                                  UINT button,
+                                  uint32_t pressure,
+                                  uint32_t rotation) {
   uint64_t flutter_button = ConvertWinButtonToFlutterButton(button);
   if (flutter_button != 0) {
     binding_handler_delegate_->OnPointerDown(
         x, y, device_kind, device_id,
-        static_cast<FlutterPointerMouseButtons>(flutter_button));
+        static_cast<FlutterPointerMouseButtons>(flutter_button), rotation,
+        pressure);
   }
 }
 
@@ -533,6 +538,15 @@ FlutterWindow::HandleMessage(UINT const message,
       auto pointerId = GET_POINTERID_WPARAM(wparam);
       POINTER_INFO pointerInfo;
       if (GetPointerInfo(pointerId, &pointerInfo)) {
+        UINT32 pressure = 0;
+        UINT32 rotation = 0;
+        if (pointerInfo.pointerType == PT_PEN) {
+          POINTER_PEN_INFO penInfo;
+          if (GetPointerPenInfo(pointerId, &penInfo)) {
+            pressure = penInfo.pressure;
+            rotation = penInfo.rotation;
+          }
+        }
         auto touch_id = touch_id_generator_.GetGeneratedId(pointerId);
         FlutterPointerDeviceKind device_kind = kFlutterPointerDeviceKindMouse;
         switch (pointerInfo.pointerType) {
@@ -547,10 +561,11 @@ FlutterWindow::HandleMessage(UINT const message,
             break;
         }
         if (message == WM_POINTERDOWN) {
-          OnPointerDown(x, y, device_kind, touch_id, WM_LBUTTONDOWN);
+          OnPointerDown(x, y, device_kind, touch_id, WM_LBUTTONDOWN, rotation,
+                        pressure);
         } else if (message == WM_POINTERUPDATE &&
                    pointerInfo.pointerFlags & POINTER_FLAG_INCONTACT) {
-          OnPointerMove(x, y, device_kind, touch_id, 0);
+          OnPointerMove(x, y, device_kind, touch_id, rotation, pressure, 0);
         } else if (message == WM_POINTERLEAVE) {
           OnPointerUp(x, y, device_kind, touch_id, WM_LBUTTONUP);
           OnPointerLeave(x, y, device_kind, touch_id);
@@ -577,7 +592,7 @@ FlutterWindow::HandleMessage(UINT const message,
           mods |= kShift;
         }
         OnPointerMove(mouse_x_, mouse_y_, device_kind, kDefaultPointerDeviceId,
-                      mods);
+                      0, 0, mods);
       }
       break;
     case WM_MOUSELEAVE:
@@ -633,7 +648,7 @@ FlutterWindow::HandleMessage(UINT const message,
       xPos = GET_X_LPARAM(lparam);
       yPos = GET_Y_LPARAM(lparam);
       OnPointerDown(static_cast<double>(xPos), static_cast<double>(yPos),
-                    device_kind, kDefaultPointerDeviceId, button_pressed);
+                    device_kind, kDefaultPointerDeviceId, button_pressed, 0, 0);
       break;
     case WM_LBUTTONUP:
     case WM_RBUTTONUP:
@@ -697,8 +712,8 @@ FlutterWindow::HandleMessage(UINT const message,
       break;
     case WM_IME_SETCONTEXT:
       OnImeSetContext(message, wparam, lparam);
-      // Strip the ISC_SHOWUICOMPOSITIONWINDOW bit from lparam before passing it
-      // to DefWindowProc() so that the composition window is hidden since
+      // Strip the ISC_SHOWUICOMPOSITIONWINDOW bit from lparam before passing
+      // it to DefWindowProc() so that the composition window is hidden since
       // Flutter renders the composing string itself.
       result_lparam &= ~ISC_SHOWUICOMPOSITIONWINDOW;
       break;
@@ -834,9 +849,9 @@ void FlutterWindow::OnImeComposition(UINT const message,
     OnComposeCommit();
   }
 
-  // Process GCS_RESULTSTR at fisrt, because Google Japanese Input and ATOK send
-  // both GCS_RESULTSTR and GCS_COMPSTR to commit composed text and send new
-  // composing text.
+  // Process GCS_RESULTSTR at fisrt, because Google Japanese Input and ATOK
+  // send both GCS_RESULTSTR and GCS_COMPSTR to commit composed text and send
+  // new composing text.
   if (lparam & GCS_RESULTSTR) {
     // Commit but don't end composing.
     // Read the committed composing string.
