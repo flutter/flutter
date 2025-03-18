@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -9,7 +11,7 @@ import 'package:ui/ui.dart' as ui;
 /// objects.
 ///
 /// Scrolling is implemented using a "joystick" method. The absolute value of
-/// "scrollTop" in HTML is not important. We only need to know in whether the
+/// "scrollTop" in HTML is not important. We only need to know whether the
 /// value changed in the positive or negative direction. If it changes in the
 /// positive direction we send a [ui.SemanticsAction.scrollUp]. Otherwise, we
 /// send [ui.SemanticsAction.scrollDown]. The actual scrolling is then handled
@@ -61,6 +63,8 @@ class SemanticScrollable extends SemanticRole {
   /// [element] that has zero offset relative to the [scrollPosition].
   int _effectiveNeutralScrollPosition = 0;
 
+  int _previousDomScrollPosition = 0;
+
   /// Responds to browser-detected "scroll" gestures.
   void _recomputeScrollPosition() {
     if (_domScrollPosition != _effectiveNeutralScrollPosition) {
@@ -68,18 +72,35 @@ class SemanticScrollable extends SemanticRole {
         return;
       }
       final bool doScrollForward = _domScrollPosition > _effectiveNeutralScrollPosition;
+      final double scrollDelta = (_domScrollPosition - _previousDomScrollPosition).toDouble();
+      final double? scrollOffset = semanticsObject.scrollPosition;
+      final double newScrollOffset = scrollOffset! + scrollDelta;
+
+      print('engine - 1. current scroll offset $scrollOffset, newOffset: $newScrollOffset, delta $scrollDelta, dom scroll position: $_domScrollPosition, effective scroll position: $_effectiveNeutralScrollPosition');
+      _previousDomScrollPosition = _domScrollPosition;
       _neutralizeDomScrollPosition();
       semanticsObject.recomputePositionAndSize();
 
       final int semanticsId = semanticsObject.id;
+      final Float64List offsets = Float64List(2);
+      offsets[0] = 0.0;
+      offsets[1] = newScrollOffset;
+      final ByteData? message = const StandardMessageCodec().encodeMessage(offsets);
       if (doScrollForward) {
         if (semanticsObject.isVerticalScrollContainer) {
+          print('engine - scroll up action will be invoked for semanticsID: $semanticsId');
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
             viewId,
             semanticsId,
-            ui.SemanticsAction.scrollUp,
-            null,
+            ui.SemanticsAction.scrollToOffset,
+            message,
           );
+          // EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+          //   viewId,
+          //   semanticsId,
+          //   ui.SemanticsAction.scrollUp,
+          //   null,
+          // );
         } else {
           assert(semanticsObject.isHorizontalScrollContainer);
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -91,12 +112,19 @@ class SemanticScrollable extends SemanticRole {
         }
       } else {
         if (semanticsObject.isVerticalScrollContainer) {
+          print('engine - scrolldown action will be invoked for semanticsID: $semanticsId');
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
             viewId,
             semanticsId,
-            ui.SemanticsAction.scrollDown,
-            null,
+            ui.SemanticsAction.scrollToOffset,
+            message,
           );
+          // EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+          //   viewId,
+          //   semanticsId,
+          //   ui.SemanticsAction.scrollDown,
+          //   message,
+          // );
         } else {
           assert(semanticsObject.isHorizontalScrollContainer);
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -192,16 +220,17 @@ class SemanticScrollable extends SemanticRole {
     if (semanticsObject.isVerticalScrollContainer) {
       // Place the _scrollOverflowElement at the end of the content and
       // make sure that when we neutralize the scrolling position,
-      // it doesn't scroll into the visible area.
+      // so it doesn't scroll into the visible area.
       final int verticalOffset = rect.height.ceil() + canonicalNeutralScrollPosition;
       _scrollOverflowElement.style
         ..transform = 'translate(0px,${verticalOffset}px)'
         ..width = '${rect.width.round()}px'
         ..height = '${canonicalNeutralScrollPosition}px';
 
-      element.scrollTop = canonicalNeutralScrollPosition.toDouble();
+      // element.scrollTop = canonicalNeutralScrollPosition.toDouble();
       // Read back because the effective value depends on the amount of content.
       _effectiveNeutralScrollPosition = element.scrollTop.toInt();
+      // print('_neutralizeDomScrollPosition: dom scroll position: ${_domScrollPosition}, effective scroll position: ${_effectiveNeutralScrollPosition}');
       semanticsObject
         ..verticalContainerAdjustment = _effectiveNeutralScrollPosition.toDouble()
         ..horizontalContainerAdjustment = 0.0;
