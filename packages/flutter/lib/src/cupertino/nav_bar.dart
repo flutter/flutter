@@ -2722,6 +2722,13 @@ class _NavigationBarComponentsTransition {
     return animation.drive(fadeOut.chain(CurveTween(curve: Interval(0.0, t, curve: curve))));
   }
 
+  // The parent of the hero animation, which is the route animation.
+  Animation<double> get routeAnimation {
+    // The hero animation is a CurvedAnimation.
+    assert(animation is CurvedAnimation);
+    return (animation as CurvedAnimation).parent;
+  }
+
   Widget? get bottomLeading {
     final KeyedSubtree? bottomLeading = bottomComponents.leadingKey.currentWidget as KeyedSubtree?;
 
@@ -2949,10 +2956,7 @@ class _NavigationBarComponentsTransition {
       rect:
           // The bottom widget animates linearly during a backswipe by a user gesture.
           userGestureInProgress
-              // The parent of the hero animation, which is the route animation.
-              ? (animation as CurvedAnimation).parent
-                  .drive(CurveTween(curve: Curves.linear))
-                  .drive(positionTween)
+              ? routeAnimation.drive(CurveTween(curve: Curves.linear)).drive(positionTween)
               : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
 
       child: child,
@@ -2988,21 +2992,26 @@ class _NavigationBarComponentsTransition {
     );
     RelativeRect from = to;
 
-    // If it's the first page with a back chevron, shift in slightly from the
-    // right.
+    Widget child = topBackChevron.child;
+
+    // If it's the first page with a back chevron, shrink and shift in slightly
+    // from the right.
     if (bottomBackChevron == null) {
       final RenderBox topBackChevronBox =
           topComponents.backChevronKey.currentContext!.findRenderObject()! as RenderBox;
       from = to.shift(Offset(forwardDirection * topBackChevronBox.size.width * 2.0, 0.0));
+      child = ScaleTransition(scale: routeAnimation, child: child);
     }
 
     final RelativeRectTween positionTween = RelativeRectTween(begin: from, end: to);
 
     return PositionedTransition(
-      rect: animation.drive(positionTween),
+      rect: routeAnimation.drive(positionTween),
       child: FadeTransition(
-        opacity: fadeInFrom(bottomBackChevron == null ? 0.7 : 0.4),
-        child: DefaultTextStyle(style: topBackButtonTextStyle, child: topBackChevron.child),
+        opacity: routeAnimation.drive(
+          fadeIn.chain(CurveTween(curve: Interval(bottomBackChevron == null ? 0.75 : 0.4, 1.0))),
+        ),
+        child: DefaultTextStyle(style: topBackButtonTextStyle, child: child),
       ),
     );
   }
@@ -3161,10 +3170,7 @@ class _NavigationBarComponentsTransition {
       rect:
           // The large title animates linearly during a backswipe by a user gesture.
           userGestureInProgress
-              // The parent of the hero animation, which is the route animation.
-              ? (animation as CurvedAnimation).parent
-                  .drive(CurveTween(curve: Curves.linear))
-                  .drive(positionTween)
+              ? routeAnimation.drive(CurveTween(curve: Curves.linear)).drive(positionTween)
               : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
       child: FadeTransition(
         opacity: fadeInFrom(0.0, curve: animationCurve),
@@ -3217,10 +3223,7 @@ class _NavigationBarComponentsTransition {
       rect:
           // The bottom widget animates linearly during a backswipe by a user gesture.
           userGestureInProgress
-              // The parent of the hero animation, which is the route animation.
-              ? (animation as CurvedAnimation).parent
-                  .drive(CurveTween(curve: Curves.linear))
-                  .drive(positionTween)
+              ? routeAnimation.drive(CurveTween(curve: Curves.linear)).drive(positionTween)
               : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
       child: child,
     );

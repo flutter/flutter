@@ -692,11 +692,13 @@ void main() {
     );
     // Come in from the right and fade in.
     checkOpacity(tester, backChevron, 0.0);
-    expect(tester.getTopLeft(backChevron), const Offset(87.2460581221158690823, 7.0));
+    expect(tester.getTopLeft(backChevron).dx, moreOrLessEquals(93.18, epsilon: 0.01));
+    expect(tester.getTopLeft(backChevron).dy, moreOrLessEquals(20.5, epsilon: 0.01));
 
     await tester.pump(const Duration(milliseconds: 200));
-    checkOpacity(tester, backChevron, 0.09497911669313908);
-    expect(tester.getTopLeft(backChevron), const Offset(30.8718595298545324113, 7.0));
+    checkOpacity(tester, backChevron, 0.0);
+    expect(tester.getTopLeft(backChevron).dx, moreOrLessEquals(57.99, epsilon: 0.01));
+    expect(tester.getTopLeft(backChevron).dy, moreOrLessEquals(14.5, epsilon: 0.01));
   });
 
   testWidgets('First appearance of back chevron fades in from the left in RTL', (
@@ -736,11 +738,13 @@ void main() {
 
     // Come in from the right and fade in.
     checkOpacity(tester, backChevron, 0.0);
-    expect(tester.getTopRight(backChevron), const Offset(687.163941725296126606, 7.0));
+    expect(tester.getTopRight(backChevron).dx, moreOrLessEquals(704.26, epsilon: 0.01));
+    expect(tester.getTopRight(backChevron).dy, moreOrLessEquals(20.5, epsilon: 0.01));
 
     await tester.pump(const Duration(milliseconds: 200));
-    checkOpacity(tester, backChevron, 0.09497911669313908);
-    expect(tester.getTopRight(backChevron), const Offset(743.538140317557690651, 7.0));
+    checkOpacity(tester, backChevron, 0.0);
+    expect(tester.getTopRight(backChevron).dx, moreOrLessEquals(729.22, epsilon: 0.01));
+    expect(tester.getTopRight(backChevron).dy, moreOrLessEquals(14.5, epsilon: 0.01));
   });
 
   testWidgets('Back chevron fades out and in when both pages have it', (WidgetTester tester) async {
@@ -763,7 +767,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
     checkOpacity(tester, backChevrons.first, 0.0);
-    checkOpacity(tester, backChevrons.last, 0.4604858811944723);
+    checkOpacity(tester, backChevrons.last, 0.167);
     // Still in the same place.
     expect(tester.getTopLeft(backChevrons.first), const Offset(14.0, 7.0));
     expect(tester.getTopLeft(backChevrons.last), const Offset(14.0, 7.0));
