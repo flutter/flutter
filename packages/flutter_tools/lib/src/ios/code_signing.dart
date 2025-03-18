@@ -485,12 +485,11 @@ class XcodeCodeSigningSettings {
     }
     final Map<String, Object> contents = _plistParser.parseFile(decodedProfile.path);
     try {
-      final _ProvisioningProfile parsedProfile = _ProvisioningProfile.fromPlist(
+      return _ProvisioningProfile.fromPlist(
         provisioningProfileFile.path,
         contents,
         fileSystem: _fileSystem,
       );
-      return parsedProfile;
     } on Exception catch (e) {
       _logger.printError('Failed to parse provisioning profile: $e');
       return null;
