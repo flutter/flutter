@@ -2054,29 +2054,25 @@ class SemanticsObject {
   double horizontalAdjustmentFromParent = 0.0;
 
   /// If this element [hasChildren], computes the parent adjustment for each child.
-  bool recomputeChildrenAdjustment() {
+  void recomputeChildrenAdjustment(Set<SemanticsObject> dirtyNodes) {
     if (!hasChildren) {
-      return false;
+      return;
     }
     // If this node has children, we need to compensate for the parent's rect and
     // pass down the scroll adjustments.
-
     final double translateX = -_rect!.left + horizontalScrollAdjustment;
     final double translateY = -_rect!.top + verticalScrollAdjustment;
 
-    if (translateX == 0.0 && translateY == 0.0) {
-      return false;
-    }
-
     for (final childIndex in _childrenInTraversalOrder!) {
-      final child = owner._semanticsTree[childIndex];
-      if (child == null) {
-        continue;
+      final child = owner._semanticsTree[childIndex]!;
+
+      if (child.horizontalAdjustmentFromParent != translateX ||
+          child.verticalAdjustmentFromParent != translateY) {
+        child.horizontalAdjustmentFromParent = translateX;
+        child.verticalAdjustmentFromParent = translateY;
+        dirtyNodes.add(child);
       }
-      child.horizontalAdjustmentFromParent = translateX;
-      child.verticalAdjustmentFromParent = translateY;
     }
-    return true;
   }
 
   /// Computes the size and position of [element]
@@ -2129,11 +2125,9 @@ class SemanticsObject {
 
   /// Computes the size and position of children.
   void updateChildrenPositionAndSize() {
-    for (final childIndex in _childrenInTraversalOrder!) {
-      final child = owner._semanticsTree[childIndex];
-      if (child == null) {
-        continue;
-      }
+    Set<SemanticsObject> dirtyNodes = <SemanticsObject>{};
+    recomputeChildrenAdjustment(dirtyNodes);
+    for (final child in dirtyNodes) {
       child.recomputePositionAndSize();
     }
   }
@@ -2803,15 +2797,13 @@ class EngineSemanticsOwner {
       final SemanticsObject object = _semanticsTree[nodeUpdate.id]!;
       object.updateChildren();
 
-      if (object.isRectDirty || object.isTransformDirty || object.isScrollPositionDirty) {
+      if (object.isRectDirty ||
+          object.isTransformDirty ||
+          object.isScrollPositionDirty ||
+          object.isChildrenInTraversalOrderDirty) {
         _nodesWithDirtyPositionsAndSizes.add(object);
 
-        final recomputeChildren = object.recomputeChildrenAdjustment();
-        if (recomputeChildren) {
-          for (final child in object._currentChildrenInRenderOrder!) {
-            _nodesWithDirtyPositionsAndSizes.add(child);
-          }
-        }
+        object.recomputeChildrenAdjustment(_nodesWithDirtyPositionsAndSizes);
       }
 
       object._dirtyFields = 0;
