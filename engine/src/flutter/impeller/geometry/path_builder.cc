@@ -17,16 +17,18 @@ namespace {
 // Utility functions used to build a rounded superellipse.
 class RoundSuperellipseBuilder {
  public:
-  typedef std::function<
-      void(const Point&, const Point&, const Point&, const Point&)>
-      CubicAdder;
+  using CubicAdder = std::function<
+      void(const Point&, const Point&, const Point&, const Point&)>;
+  using PointAdder = std::function<void(const Point&)>;
 
   // Create a builder.
   //
   // The resulting curves, which consists of cubic curves, are added by calling
   // `cubic_adder`.
-  explicit RoundSuperellipseBuilder(CubicAdder cubic_adder)
-      : cubic_adder_(std::move(cubic_adder)) {}
+  explicit RoundSuperellipseBuilder(CubicAdder cubic_adder,
+                                    PointAdder point_adder)
+      : cubic_adder_(std::move(cubic_adder)),
+        point_adder_(std::move(point_adder)) {}
 
   // Draws an arc representing 1/4 of a rounded superellipse.
   //
@@ -37,6 +39,11 @@ class RoundSuperellipseBuilder {
                    bool reverse) {
     auto transform =
         Matrix::MakeTranslateScale(param.signed_scale, param.offset);
+    if (param.top.se_n < 2 || param.right.se_n < 2) {
+      point_adder_(transform *
+                   (param.top.offset + Point(param.top.se_a, param.top.se_a)));
+      return;
+    }
     if (!reverse) {
       AddOctant(param.top, /*reverse=*/false, /*flip=*/false, transform);
       AddOctant(param.right, /*reverse=*/true, /*flip=*/true, transform);
@@ -49,7 +56,7 @@ class RoundSuperellipseBuilder {
  private:
   std::array<Point, 4> SuperellipseArcPoints(
       const RoundSuperellipseParam::Octant& param) {
-    Point start = {param.se_center.x, param.edge_mid.y};
+    Point start = {0, param.se_a};
     const Point& end = param.circle_start;
     constexpr Point start_tangent = {1, 0};
     Point circle_start_vector = param.circle_start - param.circle_center;
@@ -126,24 +133,33 @@ class RoundSuperellipseBuilder {
   // on a rounded superellipse and are not for general purpose superellipses.
   std::array<Scalar, 2> SuperellipseBezierFactors(Scalar n) {
     constexpr Scalar kPrecomputedVariables[][2] = {
-        /*n=2.000*/ {0.02927797, 0.05200645},
-        /*n=2.050*/ {0.02927797, 0.05200645},
-        /*n=2.100*/ {0.03288032, 0.06051731},
-        /*n=2.150*/ {0.03719241, 0.06818433},
-        /*n=2.200*/ {0.04009513, 0.07196947},
-        /*n=2.250*/ {0.04504750, 0.07860258},
-        /*n=2.300*/ {0.05038706, 0.08498836},
-        /*n=2.350*/ {0.05580771, 0.09071105},
-        /*n=2.400*/ {0.06002306, 0.09363976},
-        /*n=2.450*/ {0.06630048, 0.09946086},
-        /*n=2.500*/ {0.07200351, 0.10384857}};
-    constexpr Scalar kNStepInverse = 20;  // = 1 / 0.05
+        /*n=2.0*/ {0.01339448, 0.05994973},
+        /*n=3.0*/ {0.13664115, 0.13592082},
+        /*n=4.0*/ {0.24545546, 0.14099516},
+        /*n=5.0*/ {0.32353151, 0.12808021},
+        /*n=6.0*/ {0.39093068, 0.11726264},
+        /*n=7.0*/ {0.44847800, 0.10808278},
+        /*n=8.0*/ {0.49817452, 0.10026175},
+        /*n=9.0*/ {0.54105583, 0.09344429},
+        /*n=10.0*/ {0.57812578, 0.08748984},
+        /*n=11.0*/ {0.61050961, 0.08224722},
+        /*n=12.0*/ {0.63903989, 0.07759639},
+        /*n=13.0*/ {0.66416338, 0.07346530},
+        /*n=14.0*/ {0.68675338, 0.06974996},
+        /*n=15.0*/ {0.70678034, 0.06529512}};
     constexpr size_t kNumRecords =
         sizeof(kPrecomputedVariables) / sizeof(kPrecomputedVariables[0]);
+    constexpr Scalar kStep = 1.00f;
     constexpr Scalar kMinN = 2.00f;
+    constexpr Scalar kMaxN = kMinN + (kNumRecords - 1) * kStep;
 
-    Scalar steps =
-        std::clamp<Scalar>((n - kMinN) * kNStepInverse, 0, kNumRecords - 1);
+    if (n >= kMaxN) {
+      // Heuristic formula derived from fitting.
+      return {1.07f - expf(1.307649835) * powf(n, -0.8568516731),
+              -0.01f + expf(-0.9287690322) * powf(n, -0.6120901398)};
+    }
+
+    Scalar steps = std::clamp<Scalar>((n - kMinN) / kStep, 0, kNumRecords - 1);
     size_t left = std::clamp<size_t>(static_cast<size_t>(std::floor(steps)), 0,
                                      kNumRecords - 2);
     Scalar frac = steps - left;
@@ -155,6 +171,7 @@ class RoundSuperellipseBuilder {
   }
 
   CubicAdder cubic_adder_;
+  PointAdder point_adder_;
 
   // A matrix that swaps the coordinates of a point.
   // clang-format off
@@ -407,13 +424,15 @@ PathBuilder& PathBuilder::AddRoundSuperellipse(RoundSuperellipse rse) {
   RoundSuperellipseBuilder builder(
       [this](const Point& a, const Point& b, const Point& c, const Point& d) {
         AddCubicComponent(a, b, c, d);
-      });
+      },
+      [this](const Point& a) { LineTo(a); });
 
   auto param =
       RoundSuperellipseParam::MakeBoundsRadii(rse.GetBounds(), rse.GetRadii());
-  Point start = param.top_right.offset +
-                param.top_right.signed_scale *
-                    (param.top_right.top.offset + param.top_right.top.edge_mid);
+  Point start =
+      param.top_right.offset +
+      param.top_right.signed_scale *
+          (param.top_right.top.offset + Point(0, param.top_right.top.se_a));
   MoveTo(start);
 
   if (param.all_corners_same) {
