@@ -2245,10 +2245,10 @@ void main() {
         );
       },
     );
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-
           body: Padding(padding: const EdgeInsets.symmetric(horizontal: 32.0), child: autocomplete),
         ),
       ),
