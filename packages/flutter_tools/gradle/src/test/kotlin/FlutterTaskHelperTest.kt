@@ -6,8 +6,12 @@ import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.CopySpec
+import org.gradle.api.file.FileCollection
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Path
 import kotlin.test.Test
 
 class FlutterTaskHelperTest {
@@ -95,6 +99,76 @@ class FlutterTaskHelperTest {
     }
 
     @Test
-    fun `readDependencies returns files when dependenciesFile exists`() {
+    fun `getSourceFiles returns files when dependenciesFile exists`(
+        @TempDir tempDir: Path
+    ) {
+        val mockProjectFileCollection = mockk<ConfigurableFileCollection>(relaxed = true)
+        val mockDependenciesFileCollection = mockk<FileCollection>()
+        val project = mockk<Project>()
+        val mockFlutterTask = mockk<FlutterTask>()
+
+        every { project.files() } returns mockProjectFileCollection
+        every { project.files(any()) } returns mockProjectFileCollection
+
+        every { mockFlutterTask.intermediateDir } returns tempDir.toFile()
+        every { mockFlutterTask.getDependenciesFiles() } returns mockDependenciesFileCollection
+        val dependenciesFile =
+            tempDir
+                .resolve("${mockFlutterTask.intermediateDir}/flutter_build.d")
+                .toFile()
+        dependenciesFile.writeText(
+            " ${tempDir.toFile().path}/pre/delimiter/one ${tempDir.toFile().path}/pre/delimiter/two: ${tempDir.toFile().path}/post/delimiter/one ${tempDir.toFile().path}/post/delimiter/two"
+        )
+        every { mockDependenciesFileCollection.iterator() } returns (mutableListOf(dependenciesFile).iterator())
+
+        FlutterTaskHelper.getSourceFiles(project, mockFlutterTask)
+
+        verify {
+            project.files(
+                listOf(
+                    "${tempDir.toFile().path}/post/delimiter/one",
+                    "${tempDir.toFile().path}/post/delimiter/two"
+                )
+            )
+        }
+
+        verify { project.files("pubspec.yaml") }
+    }
+
+    @Test
+    fun `getOutputFiles returns files when dependenciesFile exists`(
+        @TempDir tempDir: Path
+    ) {
+        val mockProjectFileCollection = mockk<ConfigurableFileCollection>(relaxed = true)
+        val mockDependenciesFileCollection = mockk<FileCollection>()
+        val project = mockk<Project>()
+        val mockFlutterTask = mockk<FlutterTask>()
+
+        every { project.files() } returns mockProjectFileCollection
+        every { project.files(any()) } returns mockProjectFileCollection
+
+        every { mockFlutterTask.intermediateDir } returns tempDir.toFile()
+        every { mockFlutterTask.getDependenciesFiles() } returns mockDependenciesFileCollection
+        val dependenciesFile =
+            tempDir
+                .resolve("${mockFlutterTask.intermediateDir}/flutter_build.d")
+                .toFile()
+        dependenciesFile.writeText(
+            " ${tempDir.toFile().path}/pre/delimiter/one ${tempDir.toFile().path}/pre/delimiter/two: ${tempDir.toFile().path}/post/delimiter/one ${tempDir.toFile().path}/post/delimiter/two"
+        )
+        every { mockDependenciesFileCollection.iterator() } returns (mutableListOf(dependenciesFile).iterator())
+
+        FlutterTaskHelper.getOutputFiles(project, mockFlutterTask)
+
+        verify {
+            project.files(
+                listOf(
+                    "${tempDir.toFile().path}/pre/delimiter/one",
+                    "${tempDir.toFile().path}/pre/delimiter/two"
+                )
+            )
+        }
+
+        verify(exactly = 0) { project.files("pubspec.yaml") }
     }
 }

@@ -46,10 +46,10 @@ object FlutterTaskHelper {
             // So we split list of files by non-escaped(by backslash) space,
             val parts = depText.split(": ")
             val fileString = parts[if (inputs) 1 else 0]
-            val matcher = Regex("""(\\ |\S)+""").findAll(fileString) // Kotlin Regex
+            val matcher = Regex("""(\\ |\S)+""").findAll(fileString)
             // then we replace all escaped spaces with regular spaces
             val depList =
-                matcher.map { it.value.replace("\\\\ ", " ") }.toList() // Kotlin map and toList
+                matcher.map { it.value.replace("\\\\ ", " ") }.toList()
             return project.files(depList)
         }
         return project.files()
