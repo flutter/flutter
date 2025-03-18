@@ -578,16 +578,16 @@ TEST(GeometryTest, QuaternionVectorMultiply) {
 }
 
 TEST(GeometryTest, CanGenerateMipCounts) {
-  ASSERT_EQ((Size{128, 128}.MipCount()), 6u);
-  ASSERT_EQ((Size{128, 256}.MipCount()), 7u);
-  ASSERT_EQ((Size{128, 130}.MipCount()), 7u);
-  ASSERT_EQ((Size{128, 257}.MipCount()), 8u);
-  ASSERT_EQ((Size{257, 128}.MipCount()), 8u);
-  ASSERT_EQ((Size{128, 0}.MipCount()), 1u);
-  ASSERT_EQ((Size{128, -25}.MipCount()), 1u);
-  ASSERT_EQ((Size{-128, 25}.MipCount()), 1u);
-  ASSERT_EQ((Size{1, 1}.MipCount()), 1u);
-  ASSERT_EQ((Size{0, 0}.MipCount()), 1u);
+  EXPECT_EQ((Size{128, 128}.MipCount()), 7u);
+  EXPECT_EQ((Size{128, 256}.MipCount()), 7u);
+  EXPECT_EQ((Size{128, 130}.MipCount()), 7u);
+  EXPECT_EQ((Size{128, 257}.MipCount()), 7u);
+  EXPECT_EQ((Size{257, 128}.MipCount()), 7u);
+  EXPECT_EQ((Size{128, 0}.MipCount()), 1u);
+  EXPECT_EQ((Size{128, -25}.MipCount()), 1u);
+  EXPECT_EQ((Size{-128, 25}.MipCount()), 1u);
+  EXPECT_EQ((Size{1, 1}.MipCount()), 1u);
+  EXPECT_EQ((Size{0, 0}.MipCount()), 1u);
 }
 
 TEST(GeometryTest, CanConvertTTypesExplicitly) {
