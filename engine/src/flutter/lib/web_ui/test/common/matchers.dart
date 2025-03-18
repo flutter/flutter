@@ -274,6 +274,7 @@ class HtmlPatternMatcher extends Matcher {
   static bool _areTagsEqual(html.Element a, html.Element b) {
     const Map<String, String> synonyms = <String, String>{
       'sem': 'flt-semantics',
+      'sem-c': 'flt-semantics-container',
       'sem-img': 'flt-semantics-img',
       'sem-tf': 'flt-semantics-text-field',
     };
