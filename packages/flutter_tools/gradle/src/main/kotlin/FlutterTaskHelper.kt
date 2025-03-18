@@ -5,6 +5,10 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
 import java.io.File
 
+/**
+ * Stateless object to contain the logic used in [FlutterTask]. Any required state should be stored
+ * on [FlutterTask] instead, while any logic needed by [FlutterTask] should be added here.
+ */
 object FlutterTaskHelper {
     const val FLUTTER_ASSETS_INCLUDE_DIRECTORY = "flutter_assets/**"
 

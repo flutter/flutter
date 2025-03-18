@@ -9,6 +9,10 @@ import org.gradle.api.tasks.OutputFiles
 import org.gradle.process.ExecSpec
 import java.nio.file.Paths
 
+/**
+ * Stateless object to contain the logic used in [BaseFlutterTask]. Any required state should be stored
+ * on [BaseFlutterTask] instead, while any logic needed by [BaseFlutterTask] should be added here.
+ */
 object BaseFlutterTaskHelper {
     @VisibleForTesting
     internal fun getGradleErrorMessage(baseFlutterTask: BaseFlutterTask): String =
