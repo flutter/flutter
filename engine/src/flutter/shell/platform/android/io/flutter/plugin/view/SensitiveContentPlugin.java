@@ -111,8 +111,8 @@ public class SensitiveContentPlugin
    * <p>It is supported on devices running Android API >= 35.
    */
   @Override
-  @ChecksSdkIntAtLeast(api = API_LEVELS.API_35)
   public boolean isSupported() {
+    @ChecksSdkIntAtLeast(api = API_LEVELS.API_35)
     return Build.VERSION.SDK_INT >= API_LEVELS.API_35;
   }
 
