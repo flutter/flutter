@@ -16,12 +16,6 @@ FLUTTER_ASSERT_ARC
 
 @implementation FlutterSharedApplicationTest
 
-- (void)setUp {
-}
-
-- (void)tearDown {
-}
-
 - (void)testIsAvailableWhenNSExtensionInBundle {
   id mockBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{

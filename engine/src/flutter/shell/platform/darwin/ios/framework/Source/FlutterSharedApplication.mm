@@ -28,11 +28,10 @@ FLUTTER_ASSERT_ARC
 }
 
 + (UIApplication*)uiApplication {
-  if (![FlutterSharedApplication isAvailable]) {
-    FML_LOG(ERROR) << "Attempting to access the application is not allowed.";
-    return nil;
+  if ([FlutterSharedApplication isAvailable]) {
+    return [FlutterSharedApplication sharedApplication];
   }
-  return [FlutterSharedApplication sharedApplication];
+  return nil;
 }
 
 + (UIApplication*)
