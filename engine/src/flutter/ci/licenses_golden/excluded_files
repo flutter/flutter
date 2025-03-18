@@ -1134,6 +1134,7 @@
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_cmac_test.json
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_cmac_test.txt
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_eax_test.json
+../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_eax_test.txt
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_gcm_siv_test.json
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_gcm_siv_test.txt
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_gcm_test.json
