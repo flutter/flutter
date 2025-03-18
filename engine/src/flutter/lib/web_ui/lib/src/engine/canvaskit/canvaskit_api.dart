@@ -126,6 +126,7 @@ extension type CanvasKit(JSObject _) implements JSObject {
   external SkTypefaceFactory get Typeface;
 
   external double GetWebGLContext(DomHTMLCanvasElement canvas, SkWebGLContextOptions options);
+  @JS('GetWebGLContext')
   external double GetOffscreenWebGLContext(
     DomOffscreenCanvas canvas,
     SkWebGLContextOptions options,
