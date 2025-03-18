@@ -131,10 +131,12 @@ canvaskit_wasm_lib("canvaskit") {
     rebase_path("$_skia_root/modules/canvaskit/interface.js"),
   ]
 
-  ldflags += [
-    "--pre-js",
-    rebase_path("$_skia_root/modules/canvaskit/paragraph.js"),
-  ]
+  if (skia_canvaskit_enable_paragraph) {
+    ldflags += [
+      "--pre-js",
+      rebase_path("$_skia_root/modules/canvaskit/paragraph.js"),
+    ]
+  }
 
   if (skia_canvaskit_enable_bidi) {
     ldflags += [
@@ -213,7 +215,7 @@ canvaskit_wasm_lib("canvaskit") {
     defines += [ "CK_INCLUDE_PARAGRAPH" ]
   }
   if (skia_canvaskit_enable_bidi) {
-    defines += [ "c" ]
+    defines += [ "CK_ENABLE_BIDI" ]
   }
   if (skia_canvaskit_enable_skp_serialization) {
     defines += [ "CK_SERIALIZE_SKP" ]

@@ -8,8 +8,14 @@ import("//build/toolchain/wasm.gni")
 wasm_toolchain("canvaskit") {
   extra_toolchain_args = {
     # Include ICU data.
-    skia_use_icu = true
+    skia_use_icu = false
     skia_use_client_icu = false
+    skia_use_bidi = true
+    skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+
+    skia_enable_skparagraph = false
+    skia_enable_shaper = false
+    skia_enable_harfbuzz = false
 
     # Include image codecs.
     skia_use_libjpeg_turbo_decode = true
@@ -42,6 +48,10 @@ wasm_toolchain("canvaskit_chromium") {
     skia_use_client_icu = false
     skia_use_bidi = true
     skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+
+    skia_enable_skparagraph = false
+    skia_enable_shaper = false
+    skia_enable_harfbuzz = false
 
     # TODO(mdebbar): Set these to false once all image decoding can be done
     # using the browser's built-in codecs.
@@ -78,7 +88,13 @@ wasm_toolchain("skwasm") {
     # ICU data.
     skia_use_icu = false
     skia_use_client_icu = true
+    skia_use_bidi = false
     skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+
+    skia_enable_skparagraph = true
+    skia_enable_shaper = true
+    skia_enable_harfbuzz = true
+    skia_enable_skunicode = true
 
     skia_use_libjpeg_turbo_decode = false
     skia_use_libpng_decode = false
