@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'range_slider_parts.dart';
 import 'slider.dart';
 import 'slider_theme.dart';
 
