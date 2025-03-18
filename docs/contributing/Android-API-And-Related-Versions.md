@@ -24,14 +24,14 @@ If the versions chosen are not known by [gradle_utils.dart](https://github.com/f
 ```
 // OK
 android {
-  compileSdk flutter.compileSdkVersion
+  compileSdk = flutter.compileSdkVersion
 }
 ```
 
 ```
 // OK if flutter.compileSdkVersion is not available like in an add to app example.
 android {
-  compileSdk 35
+  compileSdk = 35
 }
 ```
 
@@ -53,14 +53,14 @@ android {
 ```
 // OK
 defaultConfig {
-  targetSdk flutter.targetSdkVersion
+  targetSdk = flutter.targetSdkVersion
 }
 ```
 
 ```
 // OK if flutter.compileSdkVersion is not available like in an add to app example.
 defaultConfig {
-  targetSdk 35
+  targetSdk = 35
 }
 ```
 
@@ -107,7 +107,7 @@ Gradle versions are the least likley to break across minor version updates.
 distributionUrl=https\://services.gradle.org/distributions/gradle-8.12.1-bin.zip
 ```
 
-### kotlin
+### Kotlin
 
 Changing kotlin versions is most likley to have an issue with another dependency and not the code under test.
 
@@ -119,4 +119,47 @@ Changing kotlin versions is most likley to have an issue with another dependency
 ext.kotlin_version = "1.7.10"
 ...
 classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+```
+
+### compileOptions and kotlinOptions
+
+- sourceCompatibility must use JavaVersion.*
+- targetCompatibility must use JavaVersion.*
+- kotlinOptions jvmTarget should match the versions used by compileOptions or there should be a comment explaining why.
+- jvmTarget should use JavaVersion.<SOMEVERSION>.toString() or there should be a comment explaining why.
+
+```
+// Ok
+compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+kotlinOptions {
+    jvmTarget = JavaVersion.VERSION_11.toString()
+}
+```
+
+```
+// Not ok
+compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlinOptions {
+    jvmTarget = "17"
+}
+```
+
+```
+// Not ok
+compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+kotlinOptions {
+    jvmTarget = JavaVersion.VERSION_17.toString()
+}
 ```
