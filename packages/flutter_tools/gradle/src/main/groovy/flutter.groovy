@@ -446,7 +446,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
         List<String> platforms = getTargetPlatforms().collect()
         platforms.each { platform ->
-            String arch = FlutterPluginConstants.PLATFORM_ARCH_MAP[platform].replace("-", "_")
+            String arch = FlutterPluginUtils.formatPlatformString(platform)
             // Add the `libflutter.so` dependency.
             FlutterPluginUtils.addApiDependencies(project, buildType.name,
                     "io.flutter:${arch}_$flutterBuildMode:$engineVersion")
