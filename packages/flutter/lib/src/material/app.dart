@@ -1045,7 +1045,7 @@ class _MaterialAppState extends State<MaterialApp> {
     // provide the general `widget.theme` property. Time to pick one of the default themes.
 
     return switch ((useDarkTheme, highContrast)) {
-      ((_, false)) => ThemeData.light(),
+      ((_, false)) => ThemeData(),
       ((_, true)) => ThemeData.highContrastLight(),
     };
   }
