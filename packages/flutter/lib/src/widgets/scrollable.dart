@@ -1701,6 +1701,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
   }
 
   void _onScrollToOffset(Offset targetOffset) {
+    debugPrint('framework - onScrollToOffset current position: ${_position.pixels}, scrolling to $targetOffset\n');
     final double offset = switch (axis) {
       Axis.horizontal => targetOffset.dx,
       Axis.vertical => targetOffset.dy,

@@ -1306,6 +1306,13 @@ List<DiagnosticsNode> _debugCompareFloats(
 /// than zero, then it should override [childCrossAxisPosition]. For example
 /// [RenderSliverGrid] overrides this method.
 abstract class RenderSliver extends RenderObject {
+  bool get forceIncludeSemantics => _forceIncludeSemantics;
+  bool _forceIncludeSemantics = false;
+  set forceIncludeSemantics(bool value) {
+    _forceIncludeSemantics = value;
+    markNeedsSemanticsUpdate();
+  }
+
   // layout input
   @override
   SliverConstraints get constraints => super.constraints as SliverConstraints;
@@ -2012,11 +2019,14 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
 
   @override
   void performLayout() {
+    debugPrint('hi from RenderSliverToBox perform layout force include semantics? $forceIncludeSemantics');
     if (child == null) {
+      debugPrint('no child');
       geometry = SliverGeometry.zero;
       return;
     }
     final SliverConstraints constraints = this.constraints;
+    debugPrint('sliver constraints $constraints');
     child!.layout(constraints.asBoxConstraints(), parentUsesSize: true);
     final double childExtent = switch (constraints.axis) {
       Axis.horizontal => child!.size.width,
@@ -2024,6 +2034,7 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
     };
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: childExtent);
     final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: childExtent);
+    debugPrint('paintedChildSize: $paintedChildSize, cacheExtent: $cacheExtent');
 
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
@@ -2036,6 +2047,9 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
       hasVisualOverflow:
           childExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
+    // paintBounds don't seem to be ready until geometry has been set because it uses the geometry + constraints.
+    debugPrint('sliver geometry $geometry');
     setChildParentData(child!, constraints, geometry!);
+    debugPrint('hi from RenderSliverToBox perform layout $paintBounds');
   }
 }

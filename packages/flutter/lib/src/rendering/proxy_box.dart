@@ -4198,6 +4198,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   }
 
   void _performSemanticScrollUp() {
+    debugPrint('semantics scroll up');
     if (onVerticalDragUpdate != null) {
       final double primaryDelta = size.height * -scrollFactor;
       onVerticalDragUpdate!(
@@ -4211,6 +4212,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   }
 
   void _performSemanticScrollDown() {
+    debugPrint('semantics scroll down');
     if (onVerticalDragUpdate != null) {
       final double primaryDelta = size.height * scrollFactor;
       onVerticalDragUpdate!(
