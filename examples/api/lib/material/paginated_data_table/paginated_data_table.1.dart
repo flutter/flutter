@@ -64,7 +64,7 @@ class DataTableExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       scrollBehavior: MyMaterialScrollBehavior(),
-      home: SingleChildScrollView(padding: EdgeInsets.all(12.0), child: DataTableExample()),
+      home: const SingleChildScrollView(padding: EdgeInsets.all(12.0), child: DataTableExample()),
     );
   }
 }
