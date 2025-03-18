@@ -2230,21 +2230,26 @@ void main() {
         FocusNode focusNode,
         VoidCallback onSubmitted,
       ) {
-return StatefulBuilder(
-              builder: (BuildContext context, StateSetter localStateSetter) {
-                setState = localStateSetter;
-                return SizedBox(width: width, child: TextField(key: fieldKey, focusNode: focusNode, controller: textEditingController));
-              },
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter localStateSetter) {
+            setState = localStateSetter;
+            return SizedBox(
+              width: width,
+              child: TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              ),
             );
+          },
+        );
       },
     );
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: autocomplete,
-          ),
+
+          body: Padding(padding: const EdgeInsets.symmetric(horizontal: 32.0), child: autocomplete),
         ),
       ),
     );
