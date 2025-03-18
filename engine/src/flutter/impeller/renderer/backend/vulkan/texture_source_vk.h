@@ -159,9 +159,7 @@ class TextureSourceVK {
  private:
   SharedHandleVK<vk::Framebuffer> framebuffer_;
   SharedHandleVK<vk::RenderPass> render_pass_;
-  mutable RWMutex layout_mutex_;
-  mutable vk::ImageLayout layout_ IPLR_GUARDED_BY(layout_mutex_) =
-      vk::ImageLayout::eUndefined;
+  mutable vk::ImageLayout layout_ = vk::ImageLayout::eUndefined;
 };
 
 }  // namespace impeller

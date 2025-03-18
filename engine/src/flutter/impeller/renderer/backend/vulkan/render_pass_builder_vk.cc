@@ -162,7 +162,7 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
 
   if (depth_stencil_.has_value()) {
     depth_stencil_ref.attachment = attachments_index;
-    depth_stencil_ref.layout = vk::ImageLayout::eGeneral;
+    depth_stencil_ref.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
     attachments.at(attachments_index++) = depth_stencil_.value();
   }
 

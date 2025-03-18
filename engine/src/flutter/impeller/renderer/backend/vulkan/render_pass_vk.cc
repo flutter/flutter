@@ -14,6 +14,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture.h"
 #include "impeller/core/vertex_buffer.h"
+#include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
@@ -180,8 +181,18 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   if (resolve_image_vk_) {
     TextureVK::Cast(*resolve_image_vk_).SetCachedFramebuffer(framebuffer);
     TextureVK::Cast(*resolve_image_vk_).SetCachedRenderPass(render_pass_);
-    TextureVK::Cast(*resolve_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+
+    BarrierVK barrier;
+    barrier.new_layout = vk::ImageLayout::eGeneral;
+    barrier.cmd_buffer = command_buffer_->GetCommandBuffer();
+    barrier.src_access = vk::AccessFlagBits::eShaderRead |
+                         vk::AccessFlagBits::eTransferRead |
+                         vk::AccessFlagBits::eColorAttachmentWrite;
+    barrier.src_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput |
+                        vk::PipelineStageFlagBits::eTransfer;
+    barrier.dst_access = vk::AccessFlagBits::eColorAttachmentWrite;
+    barrier.dst_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    TextureVK::Cast(*resolve_image_vk_).SetLayout(barrier);
   }
 
   std::array<vk::ClearValue, kMaxAttachments> clears;
