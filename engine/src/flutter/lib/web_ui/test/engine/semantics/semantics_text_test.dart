@@ -110,7 +110,9 @@ Future<void> testMain() async {
 
     expectSemanticsTree(owner(), '''
       <sem aria-label="I am a parent" role="group">
+        <sem-c>
           <sem><span>I am a child</span></sem>
+        </sem-c>
       </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -157,7 +159,9 @@ Future<void> testMain() async {
 
       expectSemanticsTree(owner(), '''
         <sem aria-label="I am a parent" role="group">
+          <sem-c>
             <sem><span>I am a child</span></sem>
+          </sem-c>
         </sem>''');
     }
 
