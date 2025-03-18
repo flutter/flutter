@@ -9,12 +9,12 @@ import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
+// IMPORTANT: Do not add logic to the methods in this class directly,
+// instead add logic to [FlutterTaskHelper].
+
 /**
  * Flutter's implementation of a Gradle task. Gradle tasks can not be instantiated for testing,
  * so this class delegates all logic to [FlutterTaskHelper].
- *
- * IMPORTANT: Do not add logic to the methods in this class directly,
- * instead add logic to [FlutterTaskHelper].
  */
 abstract class FlutterTask : BaseFlutterTask() {
     @get:OutputDirectory

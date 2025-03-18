@@ -11,12 +11,12 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFiles
 import java.io.File
 
+// IMPORTANT: Do not add logic to the methods in this class directly,
+// instead add logic to [BaseFlutterTaskHelper].
+
 /**
  * Base implementation of a Gradle task. Gradle tasks can not be instantiated for testing,
  * so this class delegates all logic to [BaseFlutterTaskHelper].
- *
- * IMPORTANT: Do not add logic to the methods in this class directly,
- * instead add logic to [BaseFlutterTaskHelper].
  */
 open class BaseFlutterTask : DefaultTask() {
     @Internal
