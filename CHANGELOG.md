@@ -26,6 +26,11 @@ INTERNAL NOTE
 -->
 ## Flutter 3.29 Changes
 
+### [3.29.3](https://github.com/flutter/flutter/releases/tag/3.29.3)
+- [flutter/163421](https://github.com/flutter/flutter/issues/163421) - Impeller,
+  Android, Fixes Android Emulator crash when navigating to routes with backdrop
+  blurs.
+
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
 - [dart 3.7.2 changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#372)
