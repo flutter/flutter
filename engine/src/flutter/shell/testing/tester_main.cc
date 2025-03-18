@@ -215,7 +215,7 @@ class TesterPlatformView : public PlatformView,
           nullptr, impeller_context_holder_.surface_context,
           // Enable lazy shader mode for faster test execution as most tests
           // will never render anything at all.
-          impeller::AiksContext::Settings{.lazy_shader_mode = true});
+          impeller::Flags{.lazy_shader_mode = true});
       FML_DCHECK(surface->IsValid());
       return surface;
     }

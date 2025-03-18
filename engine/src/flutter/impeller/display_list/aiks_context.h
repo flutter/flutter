@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "impeller/base/flags.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_target.h"
@@ -18,15 +19,9 @@ struct Picture;
 
 class AiksContext {
  public:
-  struct Settings {
-    /// Whether to defer PSO construction until first use. Usage Will introduce
-    /// raster jank.
-    bool lazy_shader_mode = false;
-  };
-
   /// Construct a new AiksContext.
   ///
-  /// @param settings             Additional configuration options for Impeller.
+  /// @param settings
   ///
   /// @param context              The Impeller context that Aiks should use for
   ///                             allocating resources and executing device
@@ -37,7 +32,7 @@ class AiksContext {
   ///                             errors.
   /// @param render_target_allocator Injects a render target allocator or
   ///                                allocates its own if none is supplied.
-  AiksContext(const Settings& settings,
+  AiksContext(const Flags& settings,
               std::shared_ptr<Context> context,
               std::shared_ptr<TypographerContext> typographer_context,
               std::optional<std::shared_ptr<RenderTargetAllocator>>

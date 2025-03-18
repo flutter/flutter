@@ -268,7 +268,7 @@ ContentContext::ContentContext(
                      std::move(render_target_allocator)) {}
 
 ContentContext::ContentContext(
-    const Settings& settings,
+    const Flags& settings,
     std::shared_ptr<Context> context,
     std::shared_ptr<TypographerContext> typographer_context,
     std::shared_ptr<RenderTargetAllocator> render_target_allocator)

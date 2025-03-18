@@ -67,8 +67,8 @@ TEST(GPUSurfaceMetalImpeller, InvalidImpellerContextCreatesCausesSurfaceToBeInva
 TEST(GPUSurfaceMetalImpeller, CanCreateValidSurface) {
   auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
   auto surface = std::make_shared<GPUSurfaceMetalImpeller>(
-      delegate.get(), std::make_shared<impeller::AiksContext>(impeller::AiksContext::Settings{},
-                                                              CreateImpellerContext(), nullptr));
+      delegate.get(),
+      std::make_shared<impeller::AiksContext>(impeller::Flags{}, CreateImpellerContext(), nullptr));
 
   ASSERT_TRUE(surface->IsValid());
 }
@@ -76,8 +76,8 @@ TEST(GPUSurfaceMetalImpeller, CanCreateValidSurface) {
 TEST(GPUSurfaceMetalImpeller, AcquireFrameFromCAMetalLayerNullChecksDrawable) {
   auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
   std::shared_ptr<Surface> surface = std::make_shared<GPUSurfaceMetalImpeller>(
-      delegate.get(), std::make_shared<impeller::AiksContext>(impeller::AiksContext::Settings{},
-                                                              CreateImpellerContext(), nullptr));
+      delegate.get(),
+      std::make_shared<impeller::AiksContext>(impeller::Flags{}, CreateImpellerContext(), nullptr));
 
   ASSERT_TRUE(surface->IsValid());
 
@@ -89,8 +89,8 @@ TEST(GPUSurfaceMetalImpeller, AcquireFrameFromCAMetalLayerDoesNotRetainThis) {
   auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
   delegate->SetDevice();
   std::unique_ptr<Surface> surface = std::make_unique<GPUSurfaceMetalImpeller>(
-      delegate.get(), std::make_shared<impeller::AiksContext>(impeller::AiksContext::Settings{},
-                                                              CreateImpellerContext(), nullptr));
+      delegate.get(),
+      std::make_shared<impeller::AiksContext>(impeller::Flags{}, CreateImpellerContext(), nullptr));
 
   ASSERT_TRUE(surface->IsValid());
 
@@ -109,8 +109,7 @@ TEST(GPUSurfaceMetalImpeller, ResetHostBufferBasedOnFrameBoundary) {
 
   auto context = CreateImpellerContext();
   std::unique_ptr<Surface> surface = std::make_unique<GPUSurfaceMetalImpeller>(
-      delegate.get(),
-      std::make_shared<impeller::AiksContext>(impeller::AiksContext::Settings{}, context, nullptr));
+      delegate.get(), std::make_shared<impeller::AiksContext>(impeller::Flags{}, context, nullptr));
 
   ASSERT_TRUE(surface->IsValid());
 
@@ -137,8 +136,7 @@ TEST(GPUSurfaceMetalImpeller, CreatesImpellerCaptureScope) {
   delegate->SetDevice();
 
   auto context = CreateImpellerContext();
-  auto aiks_context =
-      std::make_shared<impeller::AiksContext>(impeller::AiksContext::Settings{}, context, nullptr);
+  auto aiks_context = std::make_shared<impeller::AiksContext>(impeller::Flags{}, context, nullptr);
 
   EXPECT_FALSE(context->GetCaptureManager()->CaptureScopeActive());
 

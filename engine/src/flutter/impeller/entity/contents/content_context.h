@@ -13,6 +13,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/status_or.h"
+#include "impeller/base/flags.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
@@ -293,12 +294,8 @@ class RenderTargetCache;
 
 class ContentContext {
  public:
-  struct Settings {
-    bool lazy_shader_mode = false;
-  };
-
   explicit ContentContext(
-      const Settings& settings,
+      const Flags& settings,
       std::shared_ptr<Context> context,
       std::shared_ptr<TypographerContext> typographer_context,
       std::shared_ptr<RenderTargetAllocator> render_target_allocator = nullptr);
@@ -758,7 +755,7 @@ class ContentContext {
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   std::shared_ptr<HostBuffer> host_buffer_;
   std::shared_ptr<Texture> empty_texture_;
-  const Settings settings_;
+  const Flags settings_;
   bool wireframe_ = false;
 
   ContentContext(const ContentContext&) = delete;

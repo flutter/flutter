@@ -85,8 +85,7 @@ std::unique_ptr<Surface> ShellTestPlatformViewMetal::CreateRenderingSurface() {
   if (GetSettings().enable_impeller) {
     auto context = impeller_context_.context;
     return std::make_unique<GPUSurfaceMetalImpeller>(
-        this, std::make_shared<impeller::AiksContext>(impeller::AiksContext::Settings{}, context,
-                                                      nullptr));
+        this, std::make_shared<impeller::AiksContext>(impeller::Flags{}, context, nullptr));
   }
   return std::make_unique<GPUSurfaceMetalSkia>(this, skia_context_.mainContext);
 }

@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/aiks_context.h"
-
 #include "impeller/typographer/typographer_context.h"
 
 namespace impeller {
 
 AiksContext::AiksContext(
-    const Settings& settings,
+    const Flags& settings,
     std::shared_ptr<Context> context,
     std::shared_ptr<TypographerContext> typographer_context,
     std::optional<std::shared_ptr<RenderTargetAllocator>>
@@ -20,8 +19,7 @@ AiksContext::AiksContext(
   }
 
   content_context_ = std::make_unique<ContentContext>(
-      ContentContext::Settings{.lazy_shader_mode = settings.lazy_shader_mode},
-      context_, std::move(typographer_context),
+      settings, context_, std::move(typographer_context),
       render_target_allocator.has_value() ? render_target_allocator.value()
                                           : nullptr);
   if (!content_context_->IsValid()) {
