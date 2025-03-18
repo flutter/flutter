@@ -307,6 +307,12 @@ ContentContext::ContentContext(
       .primitive_type = PrimitiveType::kTriangleStrip,
       .color_attachment_pixel_format =
           context_->GetCapabilities()->GetDefaultColorFormat()};
+  auto options_no_msaa_no_depth_stencil = ContentContextOptions{
+      .sample_count = SampleCount::kCount1,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format =
+          context_->GetCapabilities()->GetDefaultColorFormat(),
+      .has_depth_stencil_attachments = false};
   const auto supports_decal = static_cast<Scalar>(
       context_->GetCapabilities()->SupportsDecalSamplerAddressMode());
 
@@ -380,14 +386,14 @@ ContentContext::ContentContext(
     clip_pipelines_.SetDefault(
         options,
         std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
-    texture_downsample_pipelines_.CreateDefault(*context_,
-                                                options_trianglestrip);
+    texture_downsample_pipelines_.CreateDefault(
+        *context_, options_no_msaa_no_depth_stencil);
     rrect_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
     texture_strict_src_pipelines_.CreateDefault(*context_, options);
     tiled_texture_pipelines_.CreateDefault(*context_, options,
                                            {supports_decal});
-    gaussian_blur_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                           {supports_decal});
+    gaussian_blur_pipelines_.CreateDefault(
+        *context_, options_no_msaa_no_depth_stencil, {supports_decal});
     border_mask_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
     color_matrix_color_filter_pipelines_.CreateDefault(*context_,
                                                        options_trianglestrip);

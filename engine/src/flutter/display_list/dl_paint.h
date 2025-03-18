@@ -76,8 +76,7 @@ class DlPaint {
   DlPaint& setAlpha(uint8_t alpha) { return setColor(color_.withAlpha(alpha)); }
   DlScalar getOpacity() const { return color_.getAlphaF(); }
   DlPaint& setOpacity(DlScalar opacity) {
-    setAlpha(SkScalarRoundToInt(opacity * 0xff));
-    return *this;
+    return setAlpha(DlColor::toAlpha(opacity));
   }
 
   DlBlendMode getBlendMode() const {
