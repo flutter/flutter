@@ -228,6 +228,15 @@ class SourceVisitor implements ResolvedFiles {
 abstract class Source {
   /// This source is a file URL which contains some references to magic
   /// environment variables.
+  ///
+  /// See also:
+  ///
+  /// * [Environment.kBuildDirectory]
+  /// * [Environment.kCacheDirectory]
+  /// * [Environment.kFlutterRootDirectory]
+  /// * [Environment.kOutputDirectory]
+  /// * [Environment.kProjectDirectory]
+  /// * [Environment.kWorkspaceDirectory]
   const factory Source.pattern(String pattern, {bool optional}) = _PatternSource;
 
   /// The source is provided by an [Artifact].

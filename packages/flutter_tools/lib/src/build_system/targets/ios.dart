@@ -24,6 +24,7 @@ import '../exceptions.dart';
 import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'common.dart';
+import 'darwin.dart';
 import 'icon_tree_shaker.dart';
 import 'native_assets.dart';
 
@@ -557,6 +558,35 @@ class DebugIosLLDBInit extends IosLLDBInit {
   BuildMode get buildMode => BuildMode.debug;
 }
 
+class CheckDevDependenciesIos extends CheckDevDependencies {
+  const CheckDevDependenciesIos();
+
+  @override
+  String get name => 'check_dev_dependencies_ios';
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+    ),
+
+    // The generated Xcode properties file contains
+    // the FLUTTER_DEV_DEPENDENCIES_ENABLED configuration.
+    // This target should re-run whenever that value changes.
+    if (FlutterProject.current().isModule)
+      const Source.pattern('{PROJECT_DIR}/.ios/Flutter/Generated.xcconfig')
+    else
+      const Source.pattern('{PROJECT_DIR}/ios/Flutter/Generated.xcconfig'),
+  ];
+
+  @override
+  String get debugBuildCommand => 'flutter build ios --config-only --debug';
+
+  @override
+  String get releaseBuildCommand => 'flutter build ios --config-only --release';
+}
+
 /// The base class for all iOS bundle targets.
 ///
 /// This is responsible for setting up the basic App.framework structure, including:
@@ -568,7 +598,11 @@ abstract class IosAssetBundle extends Target {
   const IosAssetBundle();
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    CheckDevDependenciesIos(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
@@ -740,7 +774,11 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'profile_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[AotAssemblyProfile(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    CheckDevDependenciesIos(),
+    AotAssemblyProfile(),
+    InstallCodeAssets(),
+  ];
 }
 
 /// Build a release iOS application bundle.
@@ -751,7 +789,11 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'release_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[AotAssemblyRelease(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    CheckDevDependenciesIos(),
+    AotAssemblyRelease(),
+    InstallCodeAssets(),
+  ];
 
   @override
   Future<void> build(Environment environment) async {

@@ -254,6 +254,27 @@ bool _writeFlutterPluginsList(
   return pluginsChanged;
 }
 
+/// Checks if the .flutter-plugins-dependencies file has any plugin
+/// dev dependencies with platform-specific implementations.
+bool flutterPluginsListHasDevDependencies(File pluginsFile) {
+  final String pluginsString = pluginsFile.readAsStringSync();
+  final Map<String, dynamic> pluginsJson = json.decode(pluginsString) as Map<String, dynamic>;
+  final Map<String, dynamic> plugins = pluginsJson['plugins'] as Map<String, dynamic>;
+
+  for (final MapEntry<String, dynamic> pluginEntries in plugins.entries) {
+    final List<dynamic> platformPlugins = pluginEntries.value as List<dynamic>;
+    final bool hasDevDependencies = platformPlugins.cast<Map<String, dynamic>>().any(
+      (Map<String, dynamic> plugin) => plugin['dev_dependency'] == true,
+    );
+
+    if (hasDevDependencies) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 /// Creates a map representation of the [plugins] for those supported by [platformKey].
 /// All given [plugins] must provide an implementation for the [platformKey].
 List<Map<String, Object>> _createPluginMapOfPlatform(List<Plugin> plugins, String platformKey) {

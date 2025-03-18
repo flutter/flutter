@@ -364,7 +364,10 @@ void main() {
             'Skipping target: $unpackTarget',
             'Skipping target: $bundleFlutterAssetsTarget',
           ],
-          unexpectedLines: <String>['Starting due to'],
+          unexpectedLines: <String>[
+            '$unpackTarget: Starting due to',
+            '$bundleFlutterAssetsTarget: Starting due to',
+          ],
         );
       },
       skip: !platform.isMacOS, // [intended] Swift Package Manager only works on macos.
