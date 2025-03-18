@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -55,7 +56,8 @@ class SemanticScrollable extends SemanticRole {
   ///
   /// This gesture is converted to [ui.SemanticsAction.scrollUp] or
   /// [ui.SemanticsAction.scrollDown], depending on the direction.
-  DomEventListener? _scrollListener;
+  @visibleForTesting
+  DomEventListener? scrollListener;
 
   /// The value of the "scrollTop" or "scrollLeft" property of this object's
   /// [element] that has zero offset relative to the [scrollPosition].
@@ -141,7 +143,7 @@ class SemanticScrollable extends SemanticRole {
 
     _updateCssOverflow();
 
-    if (_scrollListener == null) {
+    if (scrollListener == null) {
       // We need to set touch-action:none explicitly here, despite the fact
       // that we already have it on the <body> tag because overflow:scroll
       // still causes the browser to take over pointer events in order to
@@ -161,13 +163,13 @@ class SemanticScrollable extends SemanticRole {
       };
       EngineSemantics.instance.addGestureModeListener(_gestureModeListener!);
 
-      _scrollListener = createDomEventListener((_) {
+      scrollListener = createDomEventListener((_) {
         if (!_canScroll) {
           return;
         }
         _recomputeScrollPosition();
       });
-      addEventListener('scroll', _scrollListener);
+      addEventListener('scroll', scrollListener);
     }
   }
 
@@ -280,9 +282,9 @@ class SemanticScrollable extends SemanticRole {
     style.removeProperty('overflowY');
     style.removeProperty('overflowX');
     style.removeProperty('touch-action');
-    if (_scrollListener != null) {
-      removeEventListener('scroll', _scrollListener);
-      _scrollListener = null;
+    if (scrollListener != null) {
+      removeEventListener('scroll', scrollListener);
+      scrollListener = null;
     }
     if (_gestureModeListener != null) {
       EngineSemantics.instance.removeGestureModeListener(_gestureModeListener!);
