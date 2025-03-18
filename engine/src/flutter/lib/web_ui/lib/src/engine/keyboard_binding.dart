@@ -9,7 +9,7 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'package:web_locale_keymap/web_locale_keymap.dart' as locale_keymap;
 
-import '../engine.dart' show registerHotRestartListener;
+import '../engine.dart' show kDebugMode, registerHotRestartListener, renderer;
 import 'dom.dart';
 import 'key_map.g.dart';
 import 'platform_dispatcher.dart';
@@ -598,6 +598,14 @@ class KeyboardConverter {
     // Autofill on Chrome sends keyboard events whose key and code are null.
     if (event.key == null || event.code == null) {
       return;
+    }
+
+    if (kDebugMode &&
+        event.key == 'F10' &&
+        event.altKey &&
+        event.type == 'keydown' &&
+        !(event.repeat ?? false)) {
+      renderer.dumpDebugInfo();
     }
 
     assert(_dispatchKeyData == null);
