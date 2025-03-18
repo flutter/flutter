@@ -116,7 +116,9 @@ extension type DomWindow._(JSObject _) implements DomEventTarget, JSObject {
   external DomURL get URL;
 
   @JS('dispatchEvent')
+  @redeclare
   external JSBoolean _dispatchEvent(DomEvent event);
+  @redeclare
   bool dispatchEvent(DomEvent event) => _dispatchEvent(event).toDart;
 
   @JS('matchMedia')
@@ -319,6 +321,7 @@ extension type DomHTMLDocument._(JSObject _) implements JSObject, DomDocument {
   Iterable<DomElement> getElementsByTagName(String tag) =>
       createDomListWrapper<DomElement>(_getElementsByTagName(tag.toJS));
 
+  @redeclare
   external DomElement? get activeElement;
 
   @JS('getElementById')
@@ -545,6 +548,7 @@ extension type DomElement._(JSObject _) implements JSObject, DomNode {
   String get tagName => _tagName.toDart;
 
   external DomCSSStyleDeclaration get style;
+  @redeclare
   external void append(DomNode node);
 
   @JS('getAttribute')
@@ -571,6 +575,7 @@ extension type DomElement._(JSObject _) implements JSObject, DomNode {
   Iterable<DomElement> querySelectorAll(String selectors) =>
       createDomListWrapper<DomElement>(_querySelectorAll(selectors.toJS));
 
+  @redeclare
   external void remove();
 
   @JS('setAttribute')
@@ -658,7 +663,9 @@ extension type DomElement._(JSObject _) implements JSObject, DomNode {
   bool hasAttribute(String name) => _hasAttribute(name.toJS).toDart;
 
   @JS('childNodes')
+  @redeclare
   external _DomList get _childNodes;
+  @redeclare
   Iterable<DomNode> get childNodes => createDomListWrapper<DomElement>(_childNodes);
 
   @JS('attachShadow')
@@ -667,6 +674,7 @@ extension type DomElement._(JSObject _) implements JSObject, DomNode {
 
   external DomShadowRoot? get shadowRoot;
 
+  @redeclare
   void clearChildren() {
     while (firstChild != null) {
       removeChild(firstChild!);
@@ -828,7 +836,9 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
 
 extension type DomHTMLElement._(JSObject _) implements JSObject, DomElement {
   @JS('offsetWidth')
+  @redeclare
   external JSNumber get _offsetWidth;
+  @redeclare
   double get offsetWidth => _offsetWidth.toDartDouble;
 
   @JS('offsetLeft')
@@ -1028,7 +1038,9 @@ extension type DomCanvasElement._(JSObject _) implements JSObject, DomHTMLElemen
   set height(double? value) => _height = value?.toJS;
 
   @JS('isConnected')
+  @redeclare
   external JSBoolean? get _isConnected;
+  @redeclare
   bool? get isConnected => _isConnected?.toDart;
 
   @JS('toDataURL')
@@ -1693,9 +1705,7 @@ class HttpFetchPayloadImpl implements HttpFetchPayload {
 
   /// Returns the data as a [ByteBuffer].
   @override
-  Future<ByteBuffer> asByteBuffer() async {
-    return (await _domResponse.arrayBuffer())! as ByteBuffer;
-  }
+  Future<ByteBuffer> asByteBuffer() => _domResponse.arrayBuffer();
 
   /// Returns the data parsed as JSON.
   @override
@@ -1803,7 +1813,8 @@ extension type DomResponse._(JSObject _) implements JSObject {
 
   @JS('arrayBuffer')
   external JSPromise<JSAny?> _arrayBuffer();
-  Future<Object?> arrayBuffer() => _arrayBuffer().toDart;
+  Future<ByteBuffer> arrayBuffer() =>
+      _arrayBuffer().toDart.then((JSAny? value) => (value! as JSArrayBuffer).toDart);
 
   @JS('json')
   external JSPromise<JSAny?> _json();

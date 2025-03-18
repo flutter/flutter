@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_interop';
 
 import 'package:ui/src/engine/display.dart';
 import 'package:ui/src/engine/dom.dart';

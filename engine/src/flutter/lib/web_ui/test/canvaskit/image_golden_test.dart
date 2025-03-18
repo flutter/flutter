@@ -138,7 +138,8 @@ class BitmapSingleFrameCodec implements ui.Codec {
 
 Future<void> testMain() async {
   final HttpFetchResponse listingResponse = await httpFetch('/test_images/');
-  final List<String> testFiles = (await listingResponse.json() as List<dynamic>).cast<String>();
+  final List<String> testFiles =
+      ((await listingResponse.json() as JSAny?).dartify()! as List<Object?>).cast<String>();
 
   List<TestCodec> createTestCodecs({int testTargetWidth = 300, int testTargetHeight = 300}) {
     // Sanity-check the test file list. If suddenly test files are moved or
